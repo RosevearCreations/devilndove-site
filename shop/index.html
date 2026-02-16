@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shop — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+  <div class="brand">
+    <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+    <div>
+      <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+      <div class="small">Workshop • Art • Tools • Movies</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap">
+    <a href="/index.html">Home</a>
+    <a href="/about/index.html">About</a>
+    <a href="/gallery/index.html">Art</a>
+    <a href="/tools/index.html">Tools</a>
+    <a href="/shop/index.html">Shop</a>
+    <a href="/movies/index.html">Movies</a>
+    <a href="/contact/index.html">Contact</a>
+  </div>
+</div>
+
+    <div class="hero">
+      <span class="badge">Shop</span>
+      <h1>Handmade drops, small batches, real pieces.</h1>
+      <p>
+        We release items when they’re ready—no pressure, no factories, no pretending.
+        If it’s listed here, it’s made in our workshop and shipped with care.
+      </p>
+    </div>
+
+    <div class="grid" style="margin-bottom:14px">
+      <div class="card">
+        <h3>Shipping & delivery</h3>
+        <p class="small">We ship from Canada. Final shipping costs and timelines will be shown per item. (This graphic is a placeholder we can swap once our shipping policy is finalized.)</p>
+        <div class="hero-media" style="max-width:560px;margin-top:10px"><img src="/assets/free-shipping.png" alt="Shipping graphic placeholder" /></div>
+      </div>
+      <div class="card">
+      <div class="small">
+        This page reads <span class="kbd">/data/products.json</span>. Add Stripe or PayPal links per item when you’re ready.
+      </div>
+      <div id="products" class="grid" style="margin-top:12px"></div>
+    </div>
+    </div>
+
+    <div class="footer">
+      With ~500 products, we’ll want categories + search + pagination. We can add that once you have 30–50 items ready.
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const root = document.querySelector("#products");
+
+    function buyLink(p) {
+      return p.stripe_payment_link || p.paypal_link || "";
+    }
+
+    function button(label, href) {
+      if (!href) return "";
+      return `<a class="btn primary" href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`;
+    }
+
+    fetch("/data/products.json")
+      .then(r => r.json())
+      .then(items => {
+        root.innerHTML = items.map(p => `
+          <div class="card">
+            <h3>${escapeHtml(p.name)}</h3>
+            <div class="small">${escapeHtml(p.sku)} • ${escapeHtml(p.price)} ${escapeHtml(p.currency)} • ${escapeHtml(p.condition)}</div>
+            <p class="small" style="margin-top:10px">${escapeHtml(p.notes || "")}</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+              ${button("Buy now", buyLink(p))}
+              ${(!buyLink(p)) ? '<span class="small">Payment link coming soon</span>' : ''}
+            </div>
+          </div>
+        `).join("");
+      })
+      .catch(() => {
+        root.innerHTML = `<div class="small">Could not load products.json</div>`;
+      });
+  </script>
+</body>
+</html>

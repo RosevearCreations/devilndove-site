@@ -1,0 +1,62 @@
+/* Devil n Dove — starter styling (logo palette) */
+:root{
+  --bg:#0b0d10;
+  --card:#121722;
+  --text:#f6f7fb;
+  --muted:#aab3c2;
+  --border:#232a36;
+
+  /* Logo-inspired accents */
+  --blue:#2ea8ff;
+  --ice:#bfe8ff;
+  --orange:#ff7a18;
+  --red:#e3312d;
+  --gold:#ffb020;
+
+  --accent: var(--orange);
+  --shadow: 0 8px 30px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+a{color:var(--ice);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:1100px;margin:0 auto;padding:24px}
+.nav{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding:16px 0;margin-bottom:18px}
+.nav a{color:var(--text);opacity:.9}
+.nav a:hover{opacity:1;text-decoration:none}
+.brand{display:flex;gap:12px;align-items:center}
+.brand img{width:46px;height:46px;border-radius:14px;display:block;object-fit:contain;background:rgba(255,255,255,.03);border:1px solid var(--border);padding:6px}
+.badge{display:inline-block;background:rgba(255,122,24,.12);border:1px solid rgba(255,122,24,.35);color:var(--orange);padding:4px 10px;border-radius:999px;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px 0}
+.small{color:var(--muted);font-size:13px;line-height:1.5}
+.hero{padding:18px 0 10px}
+.hero h1{margin:0 0 10px 0;font-size:34px}
+.hero p{margin:0;color:var(--muted);max-width:78ch;line-height:1.6}
+.btn{display:inline-flex;align-items:center;gap:8px;background:rgba(46,168,255,.10);border:1px solid rgba(46,168,255,.35);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer}
+.btn:hover{background:rgba(46,168,255,.16);text-decoration:none}
+.btn.primary{background:rgba(255,122,24,.12);border:1px solid rgba(255,122,24,.40)}
+.btn.primary:hover{background:rgba(255,122,24,.18)}
+.input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f131a;color:var(--text)}
+.table{width:100%;border-collapse:collapse;margin-top:12px}
+.table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+.footer{margin-top:28px;padding-top:18px;border-top:1px solid var(--border);color:var(--muted);font-size:13px;line-height:1.6}
+.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;background:#0f131a;border:1px solid var(--border);padding:2px 6px;border-radius:8px}
+.hr{height:1px;background:var(--border);margin:14px 0}
+ul.clean{margin:0;padding-left:18px}
+.highlight{color:var(--ice)}
+
+/* Image helpers */
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;align-items:stretch}
+@media (max-width: 860px){.hero-grid{grid-template-columns:1fr}}
+.hero-media{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:#0f131a;box-shadow:var(--shadow)}
+.hero-media img{width:100%;height:100%;display:block;object-fit:cover}
+.banner{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:#0f131a;box-shadow:var(--shadow)}
+.banner img{width:100%;display:block;object-fit:cover}
+.masonry{columns:3;column-gap:14px}
+@media (max-width: 980px){.masonry{columns:2}}
+@media (max-width: 620px){.masonry{columns:1}}
+.masonry .mitem{break-inside:avoid;margin:0 0 14px 0}
+.masonry img{width:100%;border-radius:16px;border:1px solid var(--border);display:block;box-shadow:var(--shadow)}

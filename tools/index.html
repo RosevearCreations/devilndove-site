@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tools — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+  <div class="brand">
+    <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+    <div>
+      <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+      <div class="small">Workshop • Art • Tools • Movies</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap">
+    <a href="/index.html">Home</a>
+    <a href="/about/index.html">About</a>
+    <a href="/gallery/index.html">Art</a>
+    <a href="/tools/index.html">Tools</a>
+    <a href="/shop/index.html">Shop</a>
+    <a href="/movies/index.html">Movies</a>
+    <a href="/contact/index.html">Contact</a>
+  </div>
+</div>
+
+    <div class="hero">
+      <span class="badge">Tools & Supplies</span>
+      <div class="hero-grid" style="margin-top:12px">
+        <div class="card" style="padding:18px">
+          <h1>What we use (and what we’ve learned).</h1>
+          <p>
+        This is our running list of tools, consumables, and “can’t-live-without-it” supplies.
+        We’ll show real photos, honest notes, and the little things that make the work smoother.
+      </p>
+        </div>
+        <div class="hero-media">
+          <img src="/assets/hero-workshop.webp" alt="Illustrated workshop scene" />
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Sections we’ll build</h3>
+        <ul class="small clean">
+          <li>Laser & engraving</li>
+          <li>3D printing & design</li>
+          <li>CNC & machining</li>
+          <li>Casting & forging</li>
+          <li>Finishing, polishing, and safety</li>
+          <li>Consumables: blades, bits, papers, resins, adhesives, etc.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>How we’ll present each tool</h3>
+        <ul class="small clean">
+          <li>Our photo (not a stock image)</li>
+          <li>What we use it for</li>
+          <li>One tip we wish we knew earlier</li>
+          <li>Optional link for reference</li>
+        </ul>
+        <div class="hr"></div>
+        <p class="small">
+          Start with 20 tools. Once the layout feels right, we can scale up to hundreds quickly.
+        </p>
+      </div>
+    </div>
+
+<div class="card" style="margin-top:14px">
+      <div class="grid" style="grid-template-columns:1fr 220px;gap:10px;align-items:end">
+        <div>
+          <label class="small">Search</label>
+          <input id="toolSearch" class="input" placeholder="Type a tool name…" />
+        </div>
+        <div>
+          <label class="small">Category</label>
+          <select id="toolCat" class="input">
+            <option value="">All</option>
+          </select>
+        </div>
+      </div>
+      <div class="small" style="margin-top:10px">Showing <span id="toolShown">0</span> of <span id="toolTotal">0</span></div>
+      <div id="toolsGrid" class="grid" style="margin-top:12px"></div>
+      <div class="small" style="margin-top:12px">
+        Links go to an Amazon.ca search page (not affiliate links). We use our own photos whenever possible.
+      </div>
+    </div>
+
+    <div class="footer">
+      Upload for this page: 20 tool photos + 5 “in-progress” action shots (hands working, setups, jig shots).
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const grid = document.querySelector("#toolsGrid");
+    const search = document.querySelector("#toolSearch");
+    const cat = document.querySelector("#toolCat");
+    const totalEl = document.querySelector("#toolTotal");
+    const shownEl = document.querySelector("#toolShown");
+
+    let items = [];
+
+    function uniqueCategories(list){
+      const set = new Set(list.map(x => x.category).filter(Boolean));
+      return Array.from(set).sort((a,b) => a.localeCompare(b));
+    }
+
+    function render(){
+      const term = (search.value || "").trim().toLowerCase();
+      const catVal = cat.value || "";
+      let filtered = items;
+
+      if (catVal) filtered = filtered.filter(x => x.category === catVal);
+      if (term) filtered = filtered.filter(x => (x.name || "").toLowerCase().includes(term));
+
+      totalEl.textContent = items.length;
+      shownEl.textContent = filtered.length;
+
+      grid.innerHTML = filtered.map(t => `
+        <div class="card">
+          <div class="hero-media" style="height:180px">
+            <img src="${escapeHtml(t.image)}" alt="${escapeHtml(t.name)}" />
+          </div>
+          <h3 style="margin-top:12px">${escapeHtml(t.name)}</h3>
+          <div class="small">${escapeHtml(t.category || "Workshop")}</div>
+          <p class="small" style="margin-top:10px">${escapeHtml(t.how_we_use || "")}</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+            <a class="btn" href="${escapeHtml(t.amazon_search)}" target="_blank" rel="noreferrer">View on Amazon.ca</a>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    fetch("/data/tools.json")
+      .then(r => r.json())
+      .then(data => {
+        items = (data.items || []);
+        uniqueCategories(items).forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c;
+          opt.textContent = c;
+          cat.appendChild(opt);
+        });
+        render();
+      })
+      .catch(() => {
+        grid.innerHTML = `<div class="small">Could not load tools.json</div>`;
+      });
+
+    search.addEventListener("input", render);
+    cat.addEventListener("change", render);
+  </script>
+</body>
+</html>

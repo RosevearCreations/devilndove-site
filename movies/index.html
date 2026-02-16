@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Movies — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+  <div class="brand">
+    <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+    <div>
+      <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+      <div class="small">Workshop • Art • Tools • Movies</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap">
+    <a href="/index.html">Home</a>
+    <a href="/about/index.html">About</a>
+    <a href="/gallery/index.html">Art</a>
+    <a href="/tools/index.html">Tools</a>
+    <a href="/shop/index.html">Shop</a>
+    <a href="/movies/index.html">Movies</a>
+    <a href="/contact/index.html">Contact</a>
+  </div>
+</div>
+
+    <div class="banner" style="margin-bottom:14px">
+      <img src="/assets/banner-spicing-it-up.png" alt="Devil n Dove banner artwork" />
+    </div>
+
+    <div class="hero">
+      <span class="badge">Movies (for fun)</span>
+      <h1>The shelf that raised us.</h1>
+      <p>
+        This section is just a flex and a window into our tastes—no sales, no drama.
+        Browse our collection, search by UPC, and use it as a “what should we watch?” rabbit hole.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap:10px; align-items:end">
+        <div>
+          <label class="small">Search UPC</label>
+          <input id="q" class="input" placeholder="Type digits… (example: 043396056725)" />
+        </div>
+        <div style="text-align:right">
+          <div class="small">Showing <span id="shown">0</span> of <span id="total">0</span></div>
+        </div>
+      </div>
+
+      <table class="table" id="tbl" aria-label="UPC inventory list">
+        <thead>
+          <tr>
+            <th style="width:220px">UPC</th>
+            <th>Quick links</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="small" style="margin-top:10px">
+        Next upgrade: titles, cast, director, and trailer embeds (still “for show”). We’ll add that after the core site pages are finished.
+      </div>
+    </div>
+
+    <div class="footer">
+      This page uses <span class="kbd">/data/catalog.json</span> generated from your photo inventory.
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const tbody = document.querySelector("#tbl tbody");
+    const totalEl = document.querySelector("#total");
+    const shownEl = document.querySelector("#shown");
+    const q = document.querySelector("#q");
+
+    function imdbSearchUrl(upc) {
+      const query = encodeURIComponent("UPC " + upc + " IMDb");
+      return "https://www.google.com/search?q=" + query;
+    }
+
+    let items = [];
+    function render() {
+      const term = (q.value || "").replace(/\D/g,"");
+      let filtered = items;
+      if (term) filtered = items.filter(x => x.upc.includes(term));
+      totalEl.textContent = items.length;
+      shownEl.textContent = filtered.length;
+
+      const max = 200;
+      const slice = filtered.slice(0, max);
+      tbody.innerHTML = slice.map(x => `
+        <tr>
+          <td><span class="kbd">${escapeHtml(x.upc)}</span></td>
+          <td><a href="${imdbSearchUrl(x.upc)}" target="_blank" rel="noreferrer">Search IMDb</a></td>
+        </tr>
+      `).join("");
+
+      if (filtered.length > max) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="2" class="small">Showing first ${max} results. Refine the search to narrow.</td>`;
+        tbody.appendChild(tr);
+      }
+    }
+
+    fetch("/data/catalog.json")
+      .then(r => r.json())
+      .then(data => {
+        items = data.items || [];
+        render();
+      })
+      .catch(() => {
+        tbody.innerHTML = `<tr><td colspan="2">Could not load catalog.json</td></tr>`;
+      });
+
+    q.addEventListener("input", render);
+  </script>
+</body>
+</html>
