@@ -99,63 +99,151 @@
 
   <script src="/js/main.js"></script>
   <script>
-    const grid = document.querySelector("#toolsGrid");
-    const search = document.querySelector("#toolSearch");
-    const cat = document.querySelector("#toolCat");
-    const totalEl = document.querySelector("#toolTotal");
-    const shownEl = document.querySelector("#toolShown");
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-    let items = [];
+    const grid = $('#toolsGrid');
+    const search = $('#toolSearch');
+    const areaSel = $('#toolArea');
+    const catSel = $('#toolCat');
+    const shown = $('#toolShown');
+    const total = $('#toolTotal');
 
-    function uniqueCategories(list){
-      const set = new Set(list.map(x => x.category).filter(Boolean));
-      return Array.from(set).sort((a,b) => a.localeCompare(b));
+    const AREA_ORDER = [
+      "Security",
+      "Safety & PPE",
+      "Forge & Metalwork",
+      "Resin & UV",
+      "Clay",
+      "Laser & Engraving",
+      "3D & CNC",
+      "Sublimation",
+      "Craft & Cutting",
+      "Hand Tools",
+      "Measuring & Layout",
+      "Organization & Storage",
+      "Power & Tech",
+      "Filming & Streaming",
+      "Automotive",
+      "Reference",
+      "Pets",
+      "Health & Comfort",
+      "Workshop Basics"
+    ];
+    const areaRank = new Map(AREA_ORDER.map((a, i) => [a, i]));
+
+    const norm = (s) => (s || '').toString().toLowerCase().trim();
+    const getArea = (t) => t.area || 'Workshop Basics';
+
+    const byAreaThenName = (a, b) => {
+      const ra = areaRank.has(a) ? areaRank.get(a) : 999;
+      const rb = areaRank.has(b) ? areaRank.get(b) : 999;
+      if (ra !== rb) return ra - rb;
+      return a.localeCompare(b);
+    };
+
+    function buildCard(t){
+      const tags = `
+        <div class="tags">
+          <span class="tag">${escapeHtml(getArea(t))}</span>
+          <span class="tag">${escapeHtml(t.category || 'Uncategorized')}</span>
+        </div>`;
+      return `
+        <div class="tool card">
+          <div class="thumb">
+            <img src="${t.image}" alt="${escapeHtml(t.name)}" loading="lazy">
+          </div>
+          <div class="body">
+            <div class="tname">${escapeHtml(t.name)}</div>
+            <div class="meta">
+              ${tags}
+              ${t.how_we_use ? `<div class="use">${escapeHtml(t.how_we_use)}</div>` : ''}
+              ${t.amazon_search ? `<a class="amz" href="${t.amazon_search}" target="_blank" rel="noopener">Amazon.ca search</a>` : ''}
+            </div>
+          </div>
+        </div>`;
     }
 
-    function render(){
-      const term = (search.value || "").trim().toLowerCase();
-      const catVal = cat.value || "";
-      let filtered = items;
+    function render(list, totalCount){
+      shown.textContent = String(list.length);
+      total.textContent = String(totalCount);
 
-      if (catVal) filtered = filtered.filter(x => x.category === catVal);
-      if (term) filtered = filtered.filter(x => (x.name || "").toLowerCase().includes(term));
-
-      totalEl.textContent = items.length;
-      shownEl.textContent = filtered.length;
-
-      grid.innerHTML = filtered.map(t => `
-        <div class="card">
-          <div class="hero-media" style="height:180px">
-            <img src="${escapeHtml(t.image)}" alt="${escapeHtml(t.name)}" />
-          </div>
-          <h3 style="margin-top:12px">${escapeHtml(t.name)}</h3>
-          <div class="small">${escapeHtml(t.category || "Workshop")}</div>
-          <p class="small" style="margin-top:10px">${escapeHtml(t.how_we_use || "")}</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-            <a class="btn" href="${escapeHtml(t.amazon_search)}" target="_blank" rel="noreferrer">View on Amazon.ca</a>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    fetch("/data/tools.json")
-      .then(r => r.json())
-      .then(data => {
-        items = (data.items || []);
-        uniqueCategories(items).forEach(c => {
-          const opt = document.createElement("option");
-          opt.value = c;
-          opt.textContent = c;
-          cat.appendChild(opt);
-        });
-        render();
-      })
-      .catch(() => {
-        grid.innerHTML = `<div class="small">Could not load tools.json</div>`;
+      const groups = {};
+      list.forEach(t => {
+        const a = getArea(t);
+        (groups[a] ||= []).push(t);
       });
 
-    search.addEventListener("input", render);
-    cat.addEventListener("change", render);
+      Object.keys(groups).forEach(a => groups[a].sort((x,y) => (x.name||'').localeCompare(y.name||'')));
+
+      const areas = Object.keys(groups).sort(byAreaThenName);
+
+      grid.innerHTML = areas.map(a => `
+        <section class="area-block">
+          <div class="area-head">
+            <h2>${escapeHtml(a)}</h2>
+            <div class="muted">${groups[a].length} item${groups[a].length === 1 ? '' : 's'}</div>
+          </div>
+          <div class="subgrid">
+            ${groups[a].map(buildCard).join('')}
+          </div>
+        </section>
+      `).join('');
+    }
+
+    function applyFilters(tools, totalCount){
+      const term = norm(search.value);
+      const areaVal = areaSel.value;
+      const catVal = catSel.value;
+
+      let list = tools.slice();
+
+      if(areaVal !== 'all') list = list.filter(t => getArea(t) === areaVal);
+      if(catVal !== 'all') list = list.filter(t => (t.category || 'Uncategorized') === catVal);
+      if(term){
+        list = list.filter(t => {
+          const hay = norm(t.name) + ' ' + norm(t.category) + ' ' + norm(getArea(t)) + ' ' + norm(t.how_we_use);
+          return hay.includes(term);
+        });
+      }
+
+      render(list, totalCount);
+    }
+
+    async function init(){
+      const res = await fetch('/data/tools.json');
+      const data = await res.json();
+      const tools = (data.items || []).slice();
+      const totalCount = Number(data.count) || tools.length;
+
+      // Populate Area filter
+      const areas = Array.from(new Set(tools.map(getArea))).sort(byAreaThenName);
+      areas.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a;
+        opt.textContent = a;
+        areaSel.appendChild(opt);
+      });
+
+      // Populate Category filter
+      const cats = Array.from(new Set(tools.map(t => t.category || 'Uncategorized'))).sort((a,b)=>a.localeCompare(b));
+      cats.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        catSel.appendChild(opt);
+      });
+
+      const onChange = () => applyFilters(tools, totalCount);
+      search.addEventListener('input', onChange);
+      areaSel.addEventListener('change', onChange);
+      catSel.addEventListener('change', onChange);
+
+      // initial render
+      applyFilters(tools, totalCount);
+    }
+
+    init();
   </script>
 </body>
 </html>
