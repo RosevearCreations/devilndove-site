@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Toolshed • Devil n Dove</title>
+  <style>
+    :root{
+      --bg:#0b0b0f; --panel:#12121a; --panel2:#141421; --line:#2a2a3a; --text:#f2f2f2; --muted:rgba(242,242,242,.78);
+    }
+    body{font-family:system-ui,Arial;margin:0;padding:24px;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1160px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:34px}
+    .sub{color:var(--muted);margin-bottom:14px}
+    .controls{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+    input,select{padding:10px 12px;border-radius:12px;border:1px solid #333;background:var(--panel2);color:var(--text);min-width:220px}
+    .metaRow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 0}
+    .link{color:var(--text);opacity:.9;text-decoration:none;border-bottom:1px dotted rgba(242,242,242,.35)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:12px}
+    .card{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
+    .card img{width:100%;height:190px;object-fit:cover;background:#0b0b0f}
+    .p{padding:12px 12px 14px}
+    .title{font-weight:700;line-height:1.2}
+    .meta{color:var(--muted);font-size:13px;margin-top:6px}
+    .pill{display:inline-block;padding:4px 9px;border:1px solid #333;border-radius:999px;font-size:12px;margin-top:8px;color:var(--text);opacity:.95}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .btn{display:inline-block;text-decoration:none;color:var(--text);border:1px solid #333;padding:8px 10px;border-radius:12px;font-size:13px;background:transparent}
+    .btn:hover{border-color:#555}
+    .count{color:var(--muted)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Toolshed</h1>
+  <div class="sub">Tools and consumables we use across jewelry, casting, CNC, resin, clay, laser, filming, and shop safety.</div>
+
+  <div class="metaRow">
+    <div class="count" id="count"></div>
+    <div class="row">
+      <a class="link" href="/toolshed/duplicates/">View duplicates report</a>
+    </div>
+  </div>
+
+  <div class="controls">
+    <input id="q" placeholder="Search tools…" />
+    <select id="cat"><option value="">All categories</option></select>
+    <select id="sort">
+      <option value="name">Sort: Name (A→Z)</option>
+      <option value="qty">Sort: Quantity (high→low)</option>
+      <option value="cat">Sort: Category (A→Z)</option>
+    </select>
+  </div>
+
+  <div id="grid" class="grid"></div>
+</div>
+
+<script>
+  // IMPORTANT: This must match your R2 Custom Domain.
+  // You already created: assets.devilndove.com
+  const ASSET_BASE = "https://assets.devilndove.com";
+  // Optional: if you upload into a folder like "toolshed/", set this to "toolshed/".
+  const ASSET_PREFIX = "";
+
+  // Data file committed with this patch:
+  const DATA_URL = "/data/toolshed/toolshed_items_master.json";
+
+  const $q = document.getElementById("q");
+  const $cat = document.getElementById("cat");
+  const $sort = document.getElementById("sort");
+  const $grid = document.getElementById("grid");
+  const $count = document.getElementById("count");
+
+  let items = [];
+
+  function imgUrl(fileName){
+    return `${ASSET_BASE}/${ASSET_PREFIX}${encodeURIComponent(fileName)}`;
+  }
+
+  function amazonUrl(it){
+    if (it.amazon_url) return it.amazon_url;
+    const q = encodeURIComponent(it.item_name_suggested || it.example_image_file || "");
+    return `https://www.amazon.ca/s?k=${q}`;
+  }
+
+  function normalize(str){ return (str || "").toString().toLowerCase(); }
+
+  function render(){
+    const q = normalize($q.value).trim();
+    const cat = $cat.value;
+    const sort = $sort.value;
+
+    let filtered = items.filter(it => {
+      const okCat = !cat || (it.category === cat);
+      const hay = normalize(`${it.item_name_suggested} ${it.brand_guess} ${it.category}`);
+      const okQ = !q || hay.includes(q);
+      return okCat && okQ;
+    });
+
+    if (sort === "name"){
+      filtered.sort((a,b)=> (a.item_name_suggested||"").localeCompare(b.item_name_suggested||""));
+    } else if (sort === "qty"){
+      filtered.sort((a,b)=> (b.quantity_owned||0) - (a.quantity_owned||0));
+    } else if (sort === "cat"){
+      filtered.sort((a,b)=> (a.category||"").localeCompare(b.category||""));
+    }
+
+    $count.textContent = `${filtered.length} items shown (of ${items.length})`;
+
+    $grid.innerHTML = filtered.map(it => `
+      <div class="card">
+        <img loading="lazy" src="${imgUrl(it.example_image_file)}" alt="">
+        <div class="p">
+          <div class="title">${it.item_name_suggested || "Tool"}</div>
+          <div class="meta">${it.brand_guess || ""}</div>
+          <div class="pill">${it.category || "Misc"}</div>
+          <div class="meta">Qty: ${it.quantity_owned ?? "—"}</div>
+          <div class="meta">Location: ${[it.location_zone,it.location_shelf,it.location_bin].filter(Boolean).join(" / ") || "—"}</div>
+
+          <div class="row">
+            <a class="btn" href="${amazonUrl(it)}" target="_blank" rel="noreferrer">Amazon.ca</a>
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  async function init(){
+    const res = await fetch(DATA_URL);
+    items = await res.json();
+
+    // Build categories
+    const cats = Array.from(new Set(items.map(x => x.category).filter(Boolean))).sort();
+    cats.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c; opt.textContent = c;
+      $cat.appendChild(opt);
+    });
+
+    $q.addEventListener("input", render);
+    $cat.addEventListener("change", render);
+    $sort.addEventListener("change", render);
+    render();
+  }
+
+  init();
+</script>
+</body>
+</html>
