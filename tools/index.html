@@ -6,6 +6,121 @@
   <title>Tools — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
+
+  <!-- Toolshed-specific layout polish (keeps cards tidy even with mixed image sizes) -->
+  <style>
+    /* Keep the Toolshed grid tidy regardless of image dimensions */
+    .area-block { margin-top: 18px; }
+    .area-head {
+      display:flex; align-items:baseline; justify-content:space-between;
+      gap:12px; margin: 10px 0 10px;
+    }
+    .area-head h2 { margin:0; font-size: 18px; }
+    .area-head .muted { opacity:.75; font-size: 13px; }
+
+    /* Card grid */
+    .subgrid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    /* Compact card */
+    .tool.card{
+      padding: 0;
+      overflow: hidden;
+      display:flex;
+      flex-direction: column;
+      min-height: 320px;
+    }
+
+    /* Fixed image box */
+    .tool.card .thumb{
+      height: 160px;              /* <- consistent image height */
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .tool.card .thumb img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;        /* <- keeps full image visible, no cropping */
+      display:block;
+    }
+
+    /* Compact body */
+    .tool.card .body{
+      padding: 12px;
+      display:flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .tool.card .tname{
+      font-weight: 800;
+      line-height: 1.2;
+      font-size: 14px;
+      margin: 0;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;      /* <- prevent super tall titles */
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    .tool.card .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .tool.card .tag{
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      opacity: .9;
+      white-space: nowrap;
+    }
+
+    .tool.card .use{
+      font-size: 12px;
+      opacity: .85;
+      line-height: 1.35;
+      display:-webkit-box;
+      -webkit-line-clamp: 3;      /* <- keep notes tidy */
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    .tool.card .actions{
+      margin-top: auto;           /* <- pushes button to the bottom */
+      padding-top: 6px;
+    }
+    .tool.card .btnlink{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      width: 100%;
+      text-decoration:none;
+      font-size: 12px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+    }
+    .tool.card .btnlink:hover{
+      background: rgba(255,255,255,0.10);
+    }
+
+    /* Controls row spacing */
+    .tools-controls .input { width: 100%; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -72,7 +187,7 @@
       </div>
     </div>
 
-    <div class="card" style="margin-top:14px">
+    <div class="card tools-controls" style="margin-top:14px">
       <div class="grid" style="grid-template-columns:1fr 220px 220px;gap:10px;align-items:end">
         <div>
           <label class="small">Search</label>
@@ -124,8 +239,7 @@
 
     // ===== R2 IMAGE CONFIG (case-sensitive!) =====
     const ASSET_ORIGIN = "https://assets.devilndove.com";
-    // Your working URLs show the folder is "Toolshed" with a capital T
-    const ASSET_PREFIX = "/Toolshed";
+    const ASSET_PREFIX = "/Toolshed"; // folder in R2 (capital T)
 
     function toolImageUrl(fileName){
       if(!fileName) return "";
@@ -161,7 +275,7 @@
     };
 
     function buildCard(t){
-      // IMPORTANT: use the exporter field that preserves exact filename casing
+      // Use exporter field to preserve exact filename casing
       const fileName = t.example_image_file || t.image || "";
       const area = getArea(t);
       const cat  = t.category || 'Uncategorized';
@@ -170,6 +284,8 @@
       const img = toolImageUrl(fileName);
       const amz = t.amazon_search || t.amazon_url || amazonSearchUrl(name);
 
+      const use = t.how_we_use || t.notes || "";
+
       return `
         <div class="tool card">
           <div class="thumb">
@@ -177,13 +293,13 @@
           </div>
           <div class="body">
             <div class="tname">${escapeHtml(name)}</div>
-            <div class="meta">
-              <div class="tags">
-                <span class="tag">${escapeHtml(area)}</span>
-                <span class="tag">${escapeHtml(cat)}</span>
-              </div>
-              ${t.how_we_use ? `<div class="use">${escapeHtml(t.how_we_use)}</div>` : ''}
-              <a class="amz" href="${amz}" target="_blank" rel="noopener">Amazon.ca search</a>
+            <div class="tags">
+              <span class="tag">${escapeHtml(area)}</span>
+              <span class="tag">${escapeHtml(cat)}</span>
+            </div>
+            ${use ? `<div class="use">${escapeHtml(use)}</div>` : ``}
+            <div class="actions">
+              <a class="btnlink" href="${amz}" target="_blank" rel="noopener">Amazon.ca search</a>
             </div>
           </div>
         </div>`;
@@ -235,7 +351,8 @@
         list = list.filter(t=>{
           const name = t.name || t.item_name_suggested || '';
           const hay = [
-            norm(name), norm(t.category), norm(getArea(t)), norm(t.how_we_use), norm(t.notes)
+            norm(name), norm(t.category), norm(getArea(t)),
+            norm(t.how_we_use), norm(t.notes)
           ].join(' ');
           return hay.includes(term);
         });
@@ -255,7 +372,7 @@
     }
 
     function normalizeTools(payload){
-      // Prefer exporter array (toolshed_items_master.json)
+      // Prefer exporter array
       if(Array.isArray(payload)){
         const tools = payload.map(it=>({
           item_name_suggested: it.item_name_suggested,
@@ -268,7 +385,7 @@
         return { tools, totalCount: tools.length };
       }
 
-      // Legacy schema: {count, items:[...]}
+      // Legacy schema
       if(payload && Array.isArray(payload.items)){
         return { tools: payload.items.slice(), totalCount: Number(payload.count)||payload.items.length };
       }
@@ -277,7 +394,7 @@
     }
 
     async function init(){
-      // IMPORTANT: try Toolshed exporter FIRST (preserves exact image filename casing)
+      // Try Toolshed exporter FIRST (preserves exact image filename casing)
       const payload = await fetchFirst([
         "/data/toolshed/toolshed_items_master.json",
         "/data/toolshed_items_master.json",
