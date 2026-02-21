@@ -122,31 +122,26 @@
         .replaceAll("'", '&#39;');
     }
 
-    // ===== R2 IMAGE CONFIG =====
+    // ===== R2 IMAGE CONFIG (case-sensitive!) =====
     const ASSET_ORIGIN = "https://assets.devilndove.com";
-    // If your images are stored under a folder in R2 (e.g. "toolshed/"), set this to "/toolshed"
-    const ASSET_PREFIX = "/Toolshed"; // e.g. "/toolshed"
+    // Your working URLs show the folder is "Toolshed" with a capital T
+    const ASSET_PREFIX = "/Toolshed";
 
-    function toolImageUrl(pathOrFile){
-      if(!pathOrFile) return "";
-      const p = String(pathOrFile);
-      if(/^https?:\/\//i.test(p)) return p;
-
-      const fileName = p.includes("/") ? p.split("/").pop() : p;
-      const prefix = ASSET_PREFIX ? ASSET_PREFIX.replace(/\/+$/,'') : "";
-      return `${ASSET_ORIGIN}${prefix}/${encodeURIComponent(fileName)}`;
+    function toolImageUrl(fileName){
+      if(!fileName) return "";
+      return `${ASSET_ORIGIN}${ASSET_PREFIX}/${encodeURIComponent(String(fileName))}`;
     }
 
     function amazonSearchUrl(name){
       return `https://www.amazon.ca/s?k=${encodeURIComponent(name || "")}`;
     }
 
-    const grid   = document.querySelector('#toolsGrid');
-    const search = document.querySelector('#toolSearch');
-    const areaSel= document.querySelector('#toolArea');
-    const catSel = document.querySelector('#toolCat');
-    const shown  = document.querySelector('#toolShown');
-    const total  = document.querySelector('#toolTotal');
+    const grid    = document.querySelector('#toolsGrid');
+    const search  = document.querySelector('#toolSearch');
+    const areaSel = document.querySelector('#toolArea');
+    const catSel  = document.querySelector('#toolCat');
+    const shown   = document.querySelector('#toolShown');
+    const total   = document.querySelector('#toolTotal');
 
     const AREA_ORDER = [
       "Security","Safety & PPE","Forge & Metalwork","Resin & UV","Clay",
@@ -166,11 +161,14 @@
     };
 
     function buildCard(t){
+      // IMPORTANT: use the exporter field that preserves exact filename casing
+      const fileName = t.example_image_file || t.image || "";
       const area = getArea(t);
       const cat  = t.category || 'Uncategorized';
-      const name = t.name || t.item_name_suggested || t.example_image_file || 'Tool';
-      const img  = toolImageUrl(t.image || t.example_image_file);
-      const amz  = t.amazon_search || t.amazon_url || amazonSearchUrl(name);
+      const name = t.name || t.item_name_suggested || fileName || 'Tool';
+
+      const img = toolImageUrl(fileName);
+      const amz = t.amazon_search || t.amazon_url || amazonSearchUrl(name);
 
       return `
         <div class="tool card">
@@ -242,6 +240,7 @@
           return hay.includes(term);
         });
       }
+
       render(list,totalCount);
     }
 
@@ -256,14 +255,10 @@
     }
 
     function normalizeTools(payload){
-      // Schema A: {count, items:[...]}
-      if(payload && Array.isArray(payload.items)){
-        return { tools: payload.items.slice(), totalCount: Number(payload.count)||payload.items.length };
-      }
-      // Schema B: array (toolshed_items_master.json exporter)
+      // Prefer exporter array (toolshed_items_master.json)
       if(Array.isArray(payload)){
         const tools = payload.map(it=>({
-          name: it.item_name_suggested || it.example_image_file,
+          item_name_suggested: it.item_name_suggested,
           example_image_file: it.example_image_file,
           category: it.category || "Uncategorized",
           primary_area: it.primary_area || "Workshop Basics",
@@ -272,14 +267,21 @@
         }));
         return { tools, totalCount: tools.length };
       }
+
+      // Legacy schema: {count, items:[...]}
+      if(payload && Array.isArray(payload.items)){
+        return { tools: payload.items.slice(), totalCount: Number(payload.count)||payload.items.length };
+      }
+
       return { tools: [], totalCount: 0 };
     }
 
     async function init(){
+      // IMPORTANT: try Toolshed exporter FIRST (preserves exact image filename casing)
       const payload = await fetchFirst([
-        "/data/tools.json",
         "/data/toolshed/toolshed_items_master.json",
-        "/data/toolshed_items_master.json"
+        "/data/toolshed_items_master.json",
+        "/data/tools.json"
       ]);
 
       if(!payload){
@@ -289,7 +291,6 @@
 
       const { tools, totalCount } = normalizeTools(payload);
 
-      // areas
       const areas = Array.from(new Set(tools.map(getArea))).sort(byAreaThenName);
       areas.forEach(a=>{
         const opt=document.createElement('option');
@@ -297,7 +298,6 @@
         areaSel.appendChild(opt);
       });
 
-      // categories
       const cats = Array.from(new Set(tools.map(t=>t.category||'Uncategorized'))).sort((a,b)=>a.localeCompare(b));
       cats.forEach(c=>{
         const opt=document.createElement('option');
