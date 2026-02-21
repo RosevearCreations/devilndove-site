@@ -10,23 +10,23 @@
 <body>
   <div class="container">
     <div class="nav">
-  <div class="brand">
-    <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
-    <div>
-      <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-      <div class="small">Workshop • Art • Tools • Movies</div>
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Workshop • Art • Tools • Movies</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <a href="/index.html">Home</a>
+        <a href="/about/index.html">About</a>
+        <a href="/gallery/index.html">Art</a>
+        <a href="/tools/index.html">Tools</a>
+        <a href="/shop/index.html">Shop</a>
+        <a href="/movies/index.html">Movies</a>
+        <a href="/contact/index.html">Contact</a>
+      </div>
     </div>
-  </div>
-  <div style="display:flex;gap:14px;flex-wrap:wrap">
-    <a href="/index.html">Home</a>
-    <a href="/about/index.html">About</a>
-    <a href="/gallery/index.html">Art</a>
-    <a href="/tools/index.html">Tools</a>
-    <a href="/shop/index.html">Shop</a>
-    <a href="/movies/index.html">Movies</a>
-    <a href="/contact/index.html">Contact</a>
-  </div>
-</div>
 
     <div class="hero">
       <span class="badge">Tools & Supplies</span>
@@ -34,9 +34,9 @@
         <div class="card" style="padding:18px">
           <h1>What we use (and what we’ve learned).</h1>
           <p>
-        This is our running list of tools, consumables, and “can’t-live-without-it” supplies.
-        We’ll show real photos, honest notes, and the little things that make the work smoother.
-      </p>
+            This is our running list of tools, consumables, and “can’t-live-without-it” supplies.
+            We’ll show real photos, honest notes, and the little things that make the work smoother.
+          </p>
         </div>
         <div class="hero-media">
           <img src="/assets/hero-workshop.webp" alt="Illustrated workshop scene" />
@@ -72,21 +72,34 @@
       </div>
     </div>
 
-<div class="card" style="margin-top:14px">
-      <div class="grid" style="grid-template-columns:1fr 220px;gap:10px;align-items:end">
+    <div class="card" style="margin-top:14px">
+      <div class="grid" style="grid-template-columns:1fr 220px 220px;gap:10px;align-items:end">
         <div>
           <label class="small">Search</label>
           <input id="toolSearch" class="input" placeholder="Type a tool name…" />
         </div>
+
+        <div>
+          <label class="small">Area</label>
+          <select id="toolArea" class="input">
+            <option value="all">All</option>
+          </select>
+        </div>
+
         <div>
           <label class="small">Category</label>
           <select id="toolCat" class="input">
-            <option value="">All</option>
+            <option value="all">All</option>
           </select>
         </div>
       </div>
-      <div class="small" style="margin-top:10px">Showing <span id="toolShown">0</span> of <span id="toolTotal">0</span></div>
+
+      <div class="small" style="margin-top:10px">
+        Showing <span id="toolShown">0</span> of <span id="toolTotal">0</span>
+      </div>
+
       <div id="toolsGrid" class="grid" style="margin-top:12px"></div>
+
       <div class="small" style="margin-top:12px">
         Links go to an Amazon.ca search page (not affiliate links). We use our own photos whenever possible.
       </div>
@@ -100,7 +113,42 @@
   <script src="/js/main.js"></script>
   <script>
     const $ = (sel) => document.querySelector(sel);
-    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    // Fallback if main.js doesn't define it globally
+    const escapeHtml = window.escapeHtml || ((s) => String(s ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;')
+    );
+
+    // =========================
+    // R2 IMAGE CONFIG
+    // =========================
+    const ASSET_ORIGIN = "https://assets.devilndove.com";
+
+    // If your R2 objects live under a folder, set it like: "/toolshed"
+    // If your objects are at bucket root, leave "".
+    const ASSET_PREFIX = "/toolshed"; // e.g. "/toolshed"
+
+    function toolImageUrl(pathOrFile){
+      if (!pathOrFile) return "";
+      const p = String(pathOrFile);
+
+      // Already absolute URL
+      if (/^https?:\/\//i.test(p)) return p;
+
+      // Convert "/assets/tools/whatever.jpg" -> "whatever.jpg"
+      const fileName = p.includes("/") ? p.split("/").pop() : p;
+
+      const prefix = ASSET_PREFIX ? ASSET_PREFIX.replace(/\/+$/,'') : "";
+      return `${ASSET_ORIGIN}${prefix}/${encodeURIComponent(fileName)}`;
+    }
+
+    function amazonSearchUrl(name){
+      return `https://www.amazon.ca/s?k=${encodeURIComponent(name || "")}`;
+    }
 
     const grid = $('#toolsGrid');
     const search = $('#toolSearch');
@@ -148,17 +196,23 @@
           <span class="tag">${escapeHtml(getArea(t))}</span>
           <span class="tag">${escapeHtml(t.category || 'Uncategorized')}</span>
         </div>`;
+
+      const img = toolImageUrl(t.image || t.example_image_file);
+      const name = t.name || t.item_name_suggested || t.example_image_file || "Tool";
+
+      const amz = t.amazon_search || t.amazon_url || amazonSearchUrl(name);
+
       return `
         <div class="tool card">
           <div class="thumb">
-            <img src="${t.image}" alt="${escapeHtml(t.name)}" loading="lazy">
+            <img src="${img}" alt="${escapeHtml(name)}" loading="lazy">
           </div>
           <div class="body">
-            <div class="tname">${escapeHtml(t.name)}</div>
+            <div class="tname">${escapeHtml(name)}</div>
             <div class="meta">
               ${tags}
               ${t.how_we_use ? `<div class="use">${escapeHtml(t.how_we_use)}</div>` : ''}
-              ${t.amazon_search ? `<a class="amz" href="${t.amazon_search}" target="_blank" rel="noopener">Amazon.ca search</a>` : ''}
+              <a class="amz" href="${amz}" target="_blank" rel="noopener">Amazon.ca search</a>
             </div>
           </div>
         </div>`;
@@ -174,7 +228,7 @@
         (groups[a] ||= []).push(t);
       });
 
-      Object.keys(groups).forEach(a => groups[a].sort((x,y) => (x.name||'').localeCompare(y.name||'')));
+      Object.keys(groups).forEach(a => groups[a].sort((x,y) => (x.name||x.item_name_suggested||'').localeCompare(y.name||y.item_name_suggested||'')));
 
       const areas = Object.keys(groups).sort(byAreaThenName);
 
@@ -200,9 +254,11 @@
 
       if(areaVal !== 'all') list = list.filter(t => getArea(t) === areaVal);
       if(catVal !== 'all') list = list.filter(t => (t.category || 'Uncategorized') === catVal);
+
       if(term){
         list = list.filter(t => {
-          const hay = norm(t.name) + ' ' + norm(t.category) + ' ' + norm(getArea(t)) + ' ' + norm(t.how_we_use);
+          const name = t.name || t.item_name_suggested || '';
+          const hay = norm(name) + ' ' + norm(t.category) + ' ' + norm(getArea(t)) + ' ' + norm(t.how_we_use);
           return hay.includes(term);
         });
       }
@@ -210,11 +266,54 @@
       render(list, totalCount);
     }
 
+    async function fetchFirst(urls){
+      for (const u of urls){
+        try {
+          const res = await fetch(u, { cache: "no-store" });
+          if (res.ok) return { url: u, data: await res.json() };
+        } catch (e) {}
+      }
+      return null;
+    }
+
+    function normalizeTools(payload){
+      // Schema A: /data/tools.json
+      if (payload && Array.isArray(payload.items)) {
+        return {
+          tools: payload.items.slice(),
+          totalCount: Number(payload.count) || payload.items.length
+        };
+      }
+
+      // Schema B: toolshed_items_master.json (array)
+      if (Array.isArray(payload)) {
+        const tools = payload.map(it => ({
+          name: it.item_name_suggested || it.example_image_file,
+          image: it.example_image_file,   // filename
+          category: it.category || "Uncategorized",
+          area: it.primary_area || "Workshop Basics",
+          how_we_use: it.notes || "",
+          amazon_search: it.amazon_url || (it.amazon_asin ? `https://www.amazon.ca/dp/${it.amazon_asin}` : "")
+        }));
+        return { tools, totalCount: tools.length };
+      }
+
+      return { tools: [], totalCount: 0 };
+    }
+
     async function init(){
-      const res = await fetch('/data/tools.json');
-      const data = await res.json();
-      const tools = (data.items || []).slice();
-      const totalCount = Number(data.count) || tools.length;
+      const result = await fetchFirst([
+        "/data/tools.json",
+        "/data/toolshed/toolshed_items_master.json",
+        "/data/toolshed_items_master.json"
+      ]);
+
+      if (!result) {
+        grid.innerHTML = `<div class="small">Could not load tools data.</div>`;
+        return;
+      }
+
+      const { tools, totalCount } = normalizeTools(result.data);
 
       // Populate Area filter
       const areas = Array.from(new Set(tools.map(getArea))).sort(byAreaThenName);
@@ -239,7 +338,6 @@
       areaSel.addEventListener('change', onChange);
       catSel.addEventListener('change', onChange);
 
-      // initial render
       applyFilters(tools, totalCount);
     }
 
@@ -247,3 +345,4 @@
   </script>
 </body>
 </html>
+
