@@ -98,7 +98,7 @@
         Showing <span id="toolShown">0</span> of <span id="toolTotal">0</span>
       </div>
 
-      <div id="toolsGrid" class="grid" style="margin-top:12px"></div>
+      <div id="toolsGrid" style="margin-top:12px"></div>
 
       <div class="small" style="margin-top:12px">
         Links go to an Amazon.ca search page (not affiliate links). We use our own photos whenever possible.
@@ -106,15 +106,14 @@
     </div>
 
     <div class="footer">
-      Upload for this page: 20 tool photos + 5 “in-progress” action shots (hands working, setups, jig shots).
+      Toolshed images are served from our R2 bucket via <span class="small">assets.devilndove.com</span>.
     </div>
   </div>
 
   <script src="/js/main.js"></script>
   <script>
-    const $ = (sel) => document.querySelector(sel);
-
-    // Fallback if main.js doesn't define it globally
+    // Use helpers from /js/main.js if they exist; otherwise define minimal ones.
+    const $ = window.$ || ((sel) => document.querySelector(sel));
     const escapeHtml = window.escapeHtml || ((s) => String(s ?? '')
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
@@ -127,26 +126,24 @@
     // R2 IMAGE CONFIG
     // =========================
     const ASSET_ORIGIN = "https://assets.devilndove.com";
-
-    // If your R2 objects live under a folder, set it like: "/toolshed"
-    // If your objects are at bucket root, leave "".
+    // If your R2 objects are inside a folder like /toolshed, set this to "/toolshed"
     const ASSET_PREFIX = "/toolshed"; // e.g. "/toolshed"
 
-    function toolImageUrl(pathOrFile){
+    function toolImageUrl(pathOrFile) {
       if (!pathOrFile) return "";
       const p = String(pathOrFile);
 
-      // Already absolute URL
+      // Absolute URL already
       if (/^https?:\/\//i.test(p)) return p;
 
       // Convert "/assets/tools/whatever.jpg" -> "whatever.jpg"
       const fileName = p.includes("/") ? p.split("/").pop() : p;
 
-      const prefix = ASSET_PREFIX ? ASSET_PREFIX.replace(/\/+$/,'') : "";
+      const prefix = ASSET_PREFIX ? ASSET_PREFIX.replace(/\/+$/, "") : "";
       return `${ASSET_ORIGIN}${prefix}/${encodeURIComponent(fileName)}`;
     }
 
-    function amazonSearchUrl(name){
+    function amazonSearchUrl(name) {
       return `https://www.amazon.ca/s?k=${encodeURIComponent(name || "")}`;
     }
 
@@ -181,7 +178,7 @@
     const areaRank = new Map(AREA_ORDER.map((a, i) => [a, i]));
 
     const norm = (s) => (s || '').toString().toLowerCase().trim();
-    const getArea = (t) => t.area || 'Workshop Basics';
+    const getArea = (t) => t.area || t.primary_area || 'Workshop Basics';
 
     const byAreaThenName = (a, b) => {
       const ra = areaRank.has(a) ? areaRank.get(a) : 999;
@@ -190,17 +187,18 @@
       return a.localeCompare(b);
     };
 
-    function buildCard(t){
+    function buildCard(t) {
+      const area = getArea(t);
+      const cat = t.category || 'Uncategorized';
+      const name = t.name || t.item_name_suggested || t.example_image_file || 'Tool';
+      const img = toolImageUrl(t.image || t.example_image_file);
+      const amz = t.amazon_search || t.amazon_url || amazonSearchUrl(name);
+
       const tags = `
         <div class="tags">
-          <span class="tag">${escapeHtml(getArea(t))}</span>
-          <span class="tag">${escapeHtml(t.category || 'Uncategorized')}</span>
+          <span class="tag">${escapeHtml(area)}</span>
+          <span class="tag">${escapeHtml(cat)}</span>
         </div>`;
-
-      const img = toolImageUrl(t.image || t.example_image_file);
-      const name = t.name || t.item_name_suggested || t.example_image_file || "Tool";
-
-      const amz = t.amazon_search || t.amazon_url || amazonSearchUrl(name);
 
       return `
         <div class="tool card">
@@ -218,7 +216,7 @@
         </div>`;
     }
 
-    function render(list, totalCount){
+    function render(list, totalCount) {
       shown.textContent = String(list.length);
       total.textContent = String(totalCount);
 
@@ -228,7 +226,13 @@
         (groups[a] ||= []).push(t);
       });
 
-      Object.keys(groups).forEach(a => groups[a].sort((x,y) => (x.name||x.item_name_suggested||'').localeCompare(y.name||y.item_name_suggested||'')));
+      Object.keys(groups).forEach(a => {
+        groups[a].sort((x, y) => {
+          const nx = (x.name || x.item_name_suggested || '').toString();
+          const ny = (y.name || y.item_name_suggested || '').toString();
+          return nx.localeCompare(ny);
+        });
+      });
 
       const areas = Object.keys(groups).sort(byAreaThenName);
 
@@ -245,20 +249,26 @@
       `).join('');
     }
 
-    function applyFilters(tools, totalCount){
+    function applyFilters(tools, totalCount) {
       const term = norm(search.value);
       const areaVal = areaSel.value;
       const catVal = catSel.value;
 
       let list = tools.slice();
 
-      if(areaVal !== 'all') list = list.filter(t => getArea(t) === areaVal);
-      if(catVal !== 'all') list = list.filter(t => (t.category || 'Uncategorized') === catVal);
+      if (areaVal !== 'all') list = list.filter(t => getArea(t) === areaVal);
+      if (catVal !== 'all') list = list.filter(t => (t.category || 'Uncategorized') === catVal);
 
-      if(term){
+      if (term) {
         list = list.filter(t => {
           const name = t.name || t.item_name_suggested || '';
-          const hay = norm(name) + ' ' + norm(t.category) + ' ' + norm(getArea(t)) + ' ' + norm(t.how_we_use);
+          const hay = [
+            norm(name),
+            norm(t.category),
+            norm(getArea(t)),
+            norm(t.how_we_use),
+            norm(t.notes)
+          ].join(' ');
           return hay.includes(term);
         });
       }
@@ -266,18 +276,18 @@
       render(list, totalCount);
     }
 
-    async function fetchFirst(urls){
-      for (const u of urls){
+    async function fetchFirst(urls) {
+      for (const u of urls) {
         try {
           const res = await fetch(u, { cache: "no-store" });
-          if (res.ok) return { url: u, data: await res.json() };
+          if (res.ok) return await res.json();
         } catch (e) {}
       }
       return null;
     }
 
-    function normalizeTools(payload){
-      // Schema A: /data/tools.json
+    function normalizeTools(payload) {
+      // Schema A: { count, items: [...] }
       if (payload && Array.isArray(payload.items)) {
         return {
           tools: payload.items.slice(),
@@ -285,15 +295,15 @@
         };
       }
 
-      // Schema B: toolshed_items_master.json (array)
+      // Schema B: array of items master objects (your exporter)
       if (Array.isArray(payload)) {
         const tools = payload.map(it => ({
           name: it.item_name_suggested || it.example_image_file,
-          image: it.example_image_file,   // filename
+          example_image_file: it.example_image_file,
           category: it.category || "Uncategorized",
-          area: it.primary_area || "Workshop Basics",
-          how_we_use: it.notes || "",
-          amazon_search: it.amazon_url || (it.amazon_asin ? `https://www.amazon.ca/dp/${it.amazon_asin}` : "")
+          primary_area: it.primary_area || "Workshop Basics",
+          notes: it.notes || "",
+          amazon_url: it.amazon_url || (it.amazon_asin ? `https://www.amazon.ca/dp/${it.amazon_asin}` : "")
         }));
         return { tools, totalCount: tools.length };
       }
@@ -301,19 +311,19 @@
       return { tools: [], totalCount: 0 };
     }
 
-    async function init(){
-      const result = await fetchFirst([
+    async function init() {
+      const payload = await fetchFirst([
         "/data/tools.json",
         "/data/toolshed/toolshed_items_master.json",
         "/data/toolshed_items_master.json"
       ]);
 
-      if (!result) {
+      if (!payload) {
         grid.innerHTML = `<div class="small">Could not load tools data.</div>`;
         return;
       }
 
-      const { tools, totalCount } = normalizeTools(result.data);
+      const { tools, totalCount } = normalizeTools(payload);
 
       // Populate Area filter
       const areas = Array.from(new Set(tools.map(getArea))).sort(byAreaThenName);
@@ -325,7 +335,7 @@
       });
 
       // Populate Category filter
-      const cats = Array.from(new Set(tools.map(t => t.category || 'Uncategorized'))).sort((a,b)=>a.localeCompare(b));
+      const cats = Array.from(new Set(tools.map(t => t.category || 'Uncategorized'))).sort((a, b) => a.localeCompare(b));
       cats.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c;
@@ -345,4 +355,5 @@
   </script>
 </body>
 </html>
+
 
