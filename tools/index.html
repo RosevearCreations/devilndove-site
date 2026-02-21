@@ -112,93 +112,65 @@
 
   <script src="/js/main.js"></script>
   <script>
-    // Use helpers from /js/main.js if they exist; otherwise define minimal ones.
-    const $ = window.$ || ((sel) => document.querySelector(sel));
-    const escapeHtml = window.escapeHtml || ((s) => String(s ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;')
-    );
+    // Minimal escape (safe even if main.js defines its own)
+    function escapeHtml(s){
+      return String(s ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
 
-    // =========================
-    // R2 IMAGE CONFIG
-    // =========================
+    // ===== R2 IMAGE CONFIG =====
     const ASSET_ORIGIN = "https://assets.devilndove.com";
-    // If your R2 objects are inside a folder like /toolshed, set this to "/toolshed"
+    // If your images are stored under a folder in R2 (e.g. "toolshed/"), set this to "/toolshed"
     const ASSET_PREFIX = "/toolshed"; // e.g. "/toolshed"
 
-    function toolImageUrl(pathOrFile) {
-      if (!pathOrFile) return "";
+    function toolImageUrl(pathOrFile){
+      if(!pathOrFile) return "";
       const p = String(pathOrFile);
+      if(/^https?:\/\//i.test(p)) return p;
 
-      // Absolute URL already
-      if (/^https?:\/\//i.test(p)) return p;
-
-      // Convert "/assets/tools/whatever.jpg" -> "whatever.jpg"
       const fileName = p.includes("/") ? p.split("/").pop() : p;
-
-      const prefix = ASSET_PREFIX ? ASSET_PREFIX.replace(/\/+$/, "") : "";
+      const prefix = ASSET_PREFIX ? ASSET_PREFIX.replace(/\/+$/,'') : "";
       return `${ASSET_ORIGIN}${prefix}/${encodeURIComponent(fileName)}`;
     }
 
-    function amazonSearchUrl(name) {
+    function amazonSearchUrl(name){
       return `https://www.amazon.ca/s?k=${encodeURIComponent(name || "")}`;
     }
 
-    const grid = $('#toolsGrid');
-    const search = $('#toolSearch');
-    const areaSel = $('#toolArea');
-    const catSel = $('#toolCat');
-    const shown = $('#toolShown');
-    const total = $('#toolTotal');
+    const grid   = document.querySelector('#toolsGrid');
+    const search = document.querySelector('#toolSearch');
+    const areaSel= document.querySelector('#toolArea');
+    const catSel = document.querySelector('#toolCat');
+    const shown  = document.querySelector('#toolShown');
+    const total  = document.querySelector('#toolTotal');
 
     const AREA_ORDER = [
-      "Security",
-      "Safety & PPE",
-      "Forge & Metalwork",
-      "Resin & UV",
-      "Clay",
-      "Laser & Engraving",
-      "3D & CNC",
-      "Sublimation",
-      "Craft & Cutting",
-      "Hand Tools",
-      "Measuring & Layout",
-      "Organization & Storage",
-      "Power & Tech",
-      "Filming & Streaming",
-      "Automotive",
-      "Reference",
-      "Pets",
-      "Health & Comfort",
-      "Workshop Basics"
+      "Security","Safety & PPE","Forge & Metalwork","Resin & UV","Clay",
+      "Laser & Engraving","3D & CNC","Sublimation","Craft & Cutting",
+      "Hand Tools","Measuring & Layout","Organization & Storage","Power & Tech",
+      "Filming & Streaming","Automotive","Reference","Pets","Health & Comfort","Workshop Basics"
     ];
-    const areaRank = new Map(AREA_ORDER.map((a, i) => [a, i]));
+    const areaRank = new Map(AREA_ORDER.map((a,i)=>[a,i]));
+    const norm = (s)=> (s||'').toString().toLowerCase().trim();
+    const getArea = (t)=> t.area || t.primary_area || 'Workshop Basics';
 
-    const norm = (s) => (s || '').toString().toLowerCase().trim();
-    const getArea = (t) => t.area || t.primary_area || 'Workshop Basics';
-
-    const byAreaThenName = (a, b) => {
+    const byAreaThenName = (a,b)=>{
       const ra = areaRank.has(a) ? areaRank.get(a) : 999;
       const rb = areaRank.has(b) ? areaRank.get(b) : 999;
-      if (ra !== rb) return ra - rb;
+      if(ra!==rb) return ra-rb;
       return a.localeCompare(b);
     };
 
-    function buildCard(t) {
+    function buildCard(t){
       const area = getArea(t);
-      const cat = t.category || 'Uncategorized';
+      const cat  = t.category || 'Uncategorized';
       const name = t.name || t.item_name_suggested || t.example_image_file || 'Tool';
-      const img = toolImageUrl(t.image || t.example_image_file);
-      const amz = t.amazon_search || t.amazon_url || amazonSearchUrl(name);
-
-      const tags = `
-        <div class="tags">
-          <span class="tag">${escapeHtml(area)}</span>
-          <span class="tag">${escapeHtml(cat)}</span>
-        </div>`;
+      const img  = toolImageUrl(t.image || t.example_image_file);
+      const amz  = t.amazon_search || t.amazon_url || amazonSearchUrl(name);
 
       return `
         <div class="tool card">
@@ -208,7 +180,10 @@
           <div class="body">
             <div class="tname">${escapeHtml(name)}</div>
             <div class="meta">
-              ${tags}
+              <div class="tags">
+                <span class="tag">${escapeHtml(area)}</span>
+                <span class="tag">${escapeHtml(cat)}</span>
+              </div>
               ${t.how_we_use ? `<div class="use">${escapeHtml(t.how_we_use)}</div>` : ''}
               <a class="amz" href="${amz}" target="_blank" rel="noopener">Amazon.ca search</a>
             </div>
@@ -216,31 +191,31 @@
         </div>`;
     }
 
-    function render(list, totalCount) {
+    function render(list,totalCount){
       shown.textContent = String(list.length);
       total.textContent = String(totalCount);
 
       const groups = {};
-      list.forEach(t => {
+      list.forEach(t=>{
         const a = getArea(t);
         (groups[a] ||= []).push(t);
       });
 
-      Object.keys(groups).forEach(a => {
-        groups[a].sort((x, y) => {
-          const nx = (x.name || x.item_name_suggested || '').toString();
-          const ny = (y.name || y.item_name_suggested || '').toString();
+      Object.keys(groups).forEach(a=>{
+        groups[a].sort((x,y)=>{
+          const nx=(x.name||x.item_name_suggested||'').toString();
+          const ny=(y.name||y.item_name_suggested||'').toString();
           return nx.localeCompare(ny);
         });
       });
 
       const areas = Object.keys(groups).sort(byAreaThenName);
 
-      grid.innerHTML = areas.map(a => `
+      grid.innerHTML = areas.map(a=>`
         <section class="area-block">
           <div class="area-head">
             <h2>${escapeHtml(a)}</h2>
-            <div class="muted">${groups[a].length} item${groups[a].length === 1 ? '' : 's'}</div>
+            <div class="muted">${groups[a].length} item${groups[a].length===1?'':'s'}</div>
           </div>
           <div class="subgrid">
             ${groups[a].map(buildCard).join('')}
@@ -249,55 +224,45 @@
       `).join('');
     }
 
-    function applyFilters(tools, totalCount) {
+    function applyFilters(tools,totalCount){
       const term = norm(search.value);
       const areaVal = areaSel.value;
-      const catVal = catSel.value;
+      const catVal  = catSel.value;
 
       let list = tools.slice();
+      if(areaVal!=='all') list = list.filter(t=> getArea(t)===areaVal);
+      if(catVal!=='all')  list = list.filter(t=> (t.category||'Uncategorized')===catVal);
 
-      if (areaVal !== 'all') list = list.filter(t => getArea(t) === areaVal);
-      if (catVal !== 'all') list = list.filter(t => (t.category || 'Uncategorized') === catVal);
-
-      if (term) {
-        list = list.filter(t => {
+      if(term){
+        list = list.filter(t=>{
           const name = t.name || t.item_name_suggested || '';
           const hay = [
-            norm(name),
-            norm(t.category),
-            norm(getArea(t)),
-            norm(t.how_we_use),
-            norm(t.notes)
+            norm(name), norm(t.category), norm(getArea(t)), norm(t.how_we_use), norm(t.notes)
           ].join(' ');
           return hay.includes(term);
         });
       }
-
-      render(list, totalCount);
+      render(list,totalCount);
     }
 
-    async function fetchFirst(urls) {
-      for (const u of urls) {
-        try {
-          const res = await fetch(u, { cache: "no-store" });
-          if (res.ok) return await res.json();
-        } catch (e) {}
+    async function fetchFirst(urls){
+      for(const u of urls){
+        try{
+          const res = await fetch(u,{cache:"no-store"});
+          if(res.ok) return await res.json();
+        }catch(e){}
       }
       return null;
     }
 
-    function normalizeTools(payload) {
-      // Schema A: { count, items: [...] }
-      if (payload && Array.isArray(payload.items)) {
-        return {
-          tools: payload.items.slice(),
-          totalCount: Number(payload.count) || payload.items.length
-        };
+    function normalizeTools(payload){
+      // Schema A: {count, items:[...]}
+      if(payload && Array.isArray(payload.items)){
+        return { tools: payload.items.slice(), totalCount: Number(payload.count)||payload.items.length };
       }
-
-      // Schema B: array of items master objects (your exporter)
-      if (Array.isArray(payload)) {
-        const tools = payload.map(it => ({
+      // Schema B: array (toolshed_items_master.json exporter)
+      if(Array.isArray(payload)){
+        const tools = payload.map(it=>({
           name: it.item_name_suggested || it.example_image_file,
           example_image_file: it.example_image_file,
           category: it.category || "Uncategorized",
@@ -307,53 +272,48 @@
         }));
         return { tools, totalCount: tools.length };
       }
-
       return { tools: [], totalCount: 0 };
     }
 
-    async function init() {
+    async function init(){
       const payload = await fetchFirst([
         "/data/tools.json",
         "/data/toolshed/toolshed_items_master.json",
         "/data/toolshed_items_master.json"
       ]);
 
-      if (!payload) {
+      if(!payload){
         grid.innerHTML = `<div class="small">Could not load tools data.</div>`;
         return;
       }
 
       const { tools, totalCount } = normalizeTools(payload);
 
-      // Populate Area filter
+      // areas
       const areas = Array.from(new Set(tools.map(getArea))).sort(byAreaThenName);
-      areas.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a;
-        opt.textContent = a;
+      areas.forEach(a=>{
+        const opt=document.createElement('option');
+        opt.value=a; opt.textContent=a;
         areaSel.appendChild(opt);
       });
 
-      // Populate Category filter
-      const cats = Array.from(new Set(tools.map(t => t.category || 'Uncategorized'))).sort((a, b) => a.localeCompare(b));
-      cats.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c;
-        opt.textContent = c;
+      // categories
+      const cats = Array.from(new Set(tools.map(t=>t.category||'Uncategorized'))).sort((a,b)=>a.localeCompare(b));
+      cats.forEach(c=>{
+        const opt=document.createElement('option');
+        opt.value=c; opt.textContent=c;
         catSel.appendChild(opt);
       });
 
-      const onChange = () => applyFilters(tools, totalCount);
+      const onChange = ()=> applyFilters(tools,totalCount);
       search.addEventListener('input', onChange);
       areaSel.addEventListener('change', onChange);
       catSel.addEventListener('change', onChange);
 
-      applyFilters(tools, totalCount);
+      applyFilters(tools,totalCount);
     }
 
     init();
   </script>
 </body>
 </html>
-
-
