@@ -1,149 +1,370 @@
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Toolshed • Devil n Dove</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tools — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+
   <style>
-    :root{
-      --bg:#0b0b0f; --panel:#12121a; --panel2:#141421; --line:#2a2a3a; --text:#f2f2f2; --muted:rgba(242,242,242,.78);
+    .area-block { margin-top: 18px; }
+    .area-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin: 10px 0 10px; }
+    .area-head h2 { margin:0; font-size: 18px; }
+    .area-head .muted { opacity:.75; font-size: 13px; }
+
+    .subgrid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+
+    .tool.card{ padding: 0; overflow: hidden; display:flex; flex-direction: column; min-height: 320px; }
+
+    .tool.card .thumb{
+      height: 160px;
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
     }
-    body{font-family:system-ui,Arial;margin:0;padding:24px;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1160px;margin:0 auto}
-    h1{margin:0 0 6px;font-size:34px}
-    .sub{color:var(--muted);margin-bottom:14px}
-    .controls{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
-    input,select{padding:10px 12px;border-radius:12px;border:1px solid #333;background:var(--panel2);color:var(--text);min-width:220px}
-    .metaRow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 0}
-    .link{color:var(--text);opacity:.9;text-decoration:none;border-bottom:1px dotted rgba(242,242,242,.35)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:12px}
-    .card{border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
-    .card img{width:100%;height:190px;object-fit:cover;background:#0b0b0f}
-    .p{padding:12px 12px 14px}
-    .title{font-weight:700;line-height:1.2}
-    .meta{color:var(--muted);font-size:13px;margin-top:6px}
-    .pill{display:inline-block;padding:4px 9px;border:1px solid #333;border-radius:999px;font-size:12px;margin-top:8px;color:var(--text);opacity:.95}
-    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .btn{display:inline-block;text-decoration:none;color:var(--text);border:1px solid #333;padding:8px 10px;border-radius:12px;font-size:13px;background:transparent}
-    .btn:hover{border-color:#555}
-    .count{color:var(--muted)}
+    .tool.card .thumb img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display:block;
+    }
+    .tool.card .thumb .ph{
+      width:100%; height:100%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px; opacity:.75;
+    }
+
+    .tool.card .body{ padding: 12px; display:flex; flex-direction: column; gap: 8px; flex: 1; }
+
+    .tool.card .tname{
+      font-weight: 800; line-height: 1.2; font-size: 14px; margin: 0;
+      display:-webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow:hidden;
+    }
+
+    .tool.card .tags{ display:flex; flex-wrap:wrap; gap: 6px; margin-top: 2px; }
+    .tool.card .tag{ font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); opacity: .9; white-space: nowrap; }
+
+    .tool.card .use{
+      font-size: 12px; opacity: .85; line-height: 1.35;
+      display:-webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow:hidden;
+    }
+
+    .tool.card .actions{ margin-top: auto; padding-top: 6px; }
+    .tool.card .btnlink{
+      display:inline-flex; align-items:center; justify-content:center; gap: 8px;
+      width: 100%; text-decoration:none; font-size: 12px;
+      padding: 10px 10px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+    }
+    .tool.card .btnlink:hover{ background: rgba(255,255,255,0.10); }
+
+    .tools-controls .input { width: 100%; }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Toolshed</h1>
-  <div class="sub">Tools and consumables we use across jewelry, casting, CNC, resin, clay, laser, filming, and shop safety.</div>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Workshop • Art • Tools • Movies</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <a href="/index.html">Home</a>
+        <a href="/about/index.html">About</a>
+        <a href="/gallery/index.html">Art</a>
+        <a href="/tools/index.html">Tools</a>
+        <a href="/shop/index.html">Shop</a>
+        <a href="/movies/index.html">Movies</a>
+        <a href="/contact/index.html">Contact</a>
+      </div>
+    </div>
 
-  <div class="metaRow">
-    <div class="count" id="count"></div>
-    <div class="row">
-      <a class="link" href="/toolshed/duplicates/">View duplicates report</a>
+    <div class="hero">
+      <span class="badge">Tools & Supplies</span>
+      <div class="hero-grid" style="margin-top:12px">
+        <div class="card" style="padding:18px">
+          <h1>What we use (and what we’ve learned).</h1>
+          <p>
+            This is our running list of tools, consumables, and “can’t-live-without-it” supplies.
+            We’ll show real photos, honest notes, and the little things that make the work smoother.
+          </p>
+        </div>
+        <div class="hero-media">
+          <img src="/assets/hero-workshop.webp" alt="Illustrated workshop scene" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card tools-controls" style="margin-top:14px">
+      <div class="grid" style="grid-template-columns:1fr 220px 220px 220px;gap:10px;align-items:end">
+        <div>
+          <label class="small">Search</label>
+          <input id="toolSearch" class="input" placeholder="Type a tool name…" />
+        </div>
+
+        <div>
+          <label class="small">Primary Area</label>
+          <select id="toolArea" class="input">
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small">Category</label>
+          <select id="toolCat" class="input">
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small">Tag</label>
+          <select id="toolTag" class="input">
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top:10px">
+        Showing <span id="toolShown">0</span> of <span id="toolTotal">0</span>
+      </div>
+
+      <div id="toolsGrid" style="margin-top:12px"></div>
+
+      <div class="small" style="margin-top:12px">
+        Links go to an Amazon.ca search page (not affiliate links). We use our own photos whenever possible.
+      </div>
+    </div>
+
+    <div class="footer">
+      Toolshed images are served from our R2 bucket via <span class="small">assets.devilndove.com</span>.
     </div>
   </div>
 
-  <div class="controls">
-    <input id="q" placeholder="Search tools…" />
-    <select id="cat"><option value="">All categories</option></select>
-    <select id="sort">
-      <option value="name">Sort: Name (A→Z)</option>
-      <option value="qty">Sort: Quantity (high→low)</option>
-      <option value="cat">Sort: Category (A→Z)</option>
-    </select>
-  </div>
-
-  <div id="grid" class="grid"></div>
-</div>
-
-<script>
-  // IMPORTANT: This must match your R2 Custom Domain.
-  // You already created: assets.devilndove.com
-  const ASSET_BASE = "https://assets.devilndove.com";
-  // Optional: if you upload into a folder like "toolshed/", set this to "toolshed/".
-  const ASSET_PREFIX = "";
-
-  // Data file committed with this patch:
-  const DATA_URL = "/data/toolshed/toolshed_items_master.json";
-
-  const $q = document.getElementById("q");
-  const $cat = document.getElementById("cat");
-  const $sort = document.getElementById("sort");
-  const $grid = document.getElementById("grid");
-  const $count = document.getElementById("count");
-
-  let items = [];
-
-  function imgUrl(fileName){
-    return `${ASSET_BASE}/${ASSET_PREFIX}${encodeURIComponent(fileName)}`;
-  }
-
-  function amazonUrl(it){
-    if (it.amazon_url) return it.amazon_url;
-    const q = encodeURIComponent(it.item_name_suggested || it.example_image_file || "");
-    return `https://www.amazon.ca/s?k=${q}`;
-  }
-
-  function normalize(str){ return (str || "").toString().toLowerCase(); }
-
-  function render(){
-    const q = normalize($q.value).trim();
-    const cat = $cat.value;
-    const sort = $sort.value;
-
-    let filtered = items.filter(it => {
-      const okCat = !cat || (it.category === cat);
-      const hay = normalize(`${it.item_name_suggested} ${it.brand_guess} ${it.category}`);
-      const okQ = !q || hay.includes(q);
-      return okCat && okQ;
-    });
-
-    if (sort === "name"){
-      filtered.sort((a,b)=> (a.item_name_suggested||"").localeCompare(b.item_name_suggested||""));
-    } else if (sort === "qty"){
-      filtered.sort((a,b)=> (b.quantity_owned||0) - (a.quantity_owned||0));
-    } else if (sort === "cat"){
-      filtered.sort((a,b)=> (a.category||"").localeCompare(b.category||""));
+  <script src="/js/main.js"></script>
+  <script>
+    function escapeHtml(s){
+      return String(s ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
     }
 
-    $count.textContent = `${filtered.length} items shown (of ${items.length})`;
+    // R2 (case-sensitive)
+    const ASSET_ORIGIN = "https://assets.devilndove.com";
+    const ASSET_PREFIX = "/Toolshed";
 
-    $grid.innerHTML = filtered.map(it => `
-      <div class="card">
-        <img loading="lazy" src="${imgUrl(it.example_image_file)}" alt="">
-        <div class="p">
-          <div class="title">${it.item_name_suggested || "Tool"}</div>
-          <div class="meta">${it.brand_guess || ""}</div>
-          <div class="pill">${it.category || "Misc"}</div>
-          <div class="meta">Qty: ${it.quantity_owned ?? "—"}</div>
-          <div class="meta">Location: ${[it.location_zone,it.location_shelf,it.location_bin].filter(Boolean).join(" / ") || "—"}</div>
+    function toolImageUrl(fileName){
+      if(!fileName) return "";
+      return `${ASSET_ORIGIN}${ASSET_PREFIX}/${encodeURIComponent(String(fileName))}`;
+    }
 
-          <div class="row">
-            <a class="btn" href="${amazonUrl(it)}" target="_blank" rel="noreferrer">Amazon.ca</a>
+    function amazonSearchUrl(name){
+      return `https://www.amazon.ca/s?k=${encodeURIComponent(name || "")}`;
+    }
+
+    const grid    = document.querySelector('#toolsGrid');
+    const search  = document.querySelector('#toolSearch');
+    const areaSel = document.querySelector('#toolArea');
+    const catSel  = document.querySelector('#toolCat');
+    const tagSel  = document.querySelector('#toolTag');
+    const shown   = document.querySelector('#toolShown');
+    const total   = document.querySelector('#toolTotal');
+
+    const norm = (s)=> (s||'').toString().toLowerCase().trim();
+
+    // Prefer primary_area, fallback to area, then default
+    const getArea = (t)=> t.primary_area || t.area || 'Workshop Basics';
+    const getCat  = (t)=> t.category || 'Uncategorized';
+    const getTags = (t)=> Array.isArray(t.process_tags) ? t.process_tags : [];
+
+    function buildCard(t){
+      const fileName = t.example_image_file || t.image || "";
+      const area = getArea(t);
+      const cat  = getCat(t);
+      const name = t.name || t.item_name_suggested || fileName || 'Tool';
+      const img  = toolImageUrl(fileName);
+      const amz  = t.amazon_search || t.amazon_url || amazonSearchUrl(name);
+      const use  = t.how_we_use || t.notes || "";
+
+      return `
+        <div class="tool card">
+          <div class="thumb">
+            <img
+              src="${img}"
+              alt="${escapeHtml(name)}"
+              loading="lazy"
+              onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escapeHtml(fileName)}</span></div>'; console.warn('Missing image:', '${escapeHtml(fileName)}');"
+            >
           </div>
-        </div>
-      </div>
-    `).join("");
-  }
+          <div class="body">
+            <div class="tname">${escapeHtml(name)}</div>
+            <div class="tags">
+              <span class="tag">${escapeHtml(area)}</span>
+              <span class="tag">${escapeHtml(cat)}</span>
+            </div>
+            ${use ? `<div class="use">${escapeHtml(use)}</div>` : ``}
+            <div class="actions">
+              <a class="btnlink" href="${amz}" target="_blank" rel="noopener">Amazon.ca search</a>
+            </div>
+          </div>
+        </div>`;
+    }
 
-  async function init(){
-    const res = await fetch(DATA_URL);
-    items = await res.json();
+    function byName(a,b){
+      const na = (a.name || a.item_name_suggested || '').toString();
+      const nb = (b.name || b.item_name_suggested || '').toString();
+      return na.localeCompare(nb);
+    }
 
-    // Build categories
-    const cats = Array.from(new Set(items.map(x => x.category).filter(Boolean))).sort();
-    cats.forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c; opt.textContent = c;
-      $cat.appendChild(opt);
-    });
+    function render(list,totalCount){
+      shown.textContent = String(list.length);
+      total.textContent = String(totalCount);
 
-    $q.addEventListener("input", render);
-    $cat.addEventListener("change", render);
-    $sort.addEventListener("change", render);
-    render();
-  }
+      const groups = {};
+      list.forEach(t=>{
+        const a = getArea(t);
+        (groups[a] ||= []).push(t);
+      });
 
-  init();
-</script>
+      Object.keys(groups).forEach(a=>groups[a].sort(byName));
+
+      const areas = Object.keys(groups).sort((a,b)=>a.localeCompare(b));
+
+      grid.innerHTML = areas.map(a=>`
+        <section class="area-block">
+          <div class="area-head">
+            <h2>${escapeHtml(a)}</h2>
+            <div class="muted">${groups[a].length} item${groups[a].length===1?'':'s'}</div>
+          </div>
+          <div class="subgrid">
+            ${groups[a].map(buildCard).join('')}
+          </div>
+        </section>
+      `).join('');
+    }
+
+    function applyFilters(tools,totalCount){
+      const term = norm(search.value);
+      const areaVal = areaSel.value;
+      const catVal  = catSel.value;
+      const tagVal  = tagSel.value;
+
+      let list = tools.slice();
+
+      if(areaVal!=='all') list = list.filter(t=> getArea(t)===areaVal);
+      if(catVal!=='all')  list = list.filter(t=> getCat(t)===catVal);
+      if(tagVal!=='all')  list = list.filter(t=> getTags(t).includes(tagVal));
+
+      if(term){
+        list = list.filter(t=>{
+          const fileName = t.example_image_file || t.image || "";
+          const name = t.name || t.item_name_suggested || "";
+          const hay = [
+            norm(name),
+            norm(fileName),
+            norm(getCat(t)),
+            norm(getArea(t)),
+            norm(t.how_we_use),
+            norm(t.notes),
+            getTags(t).map(norm).join(' ')
+          ].join(' ');
+          return hay.includes(term);
+        });
+      }
+
+      render(list,totalCount);
+    }
+
+    async function fetchFirst(urls){
+      for(const u of urls){
+        try{
+          const res = await fetch(u,{cache:"no-store"});
+          if(res.ok) return await res.json();
+        }catch(e){}
+      }
+      return null;
+    }
+
+    function normalizeTools(payload){
+      // Exporter array schema
+      if(Array.isArray(payload)){
+        const tools = payload.map(it=>({
+          item_name_suggested: it.item_name_suggested,
+          example_image_file: it.example_image_file,
+          category: it.category || "Uncategorized",
+          primary_area: it.primary_area || "Workshop Basics",
+          process_tags: it.process_tags || [],
+          notes: it.notes || "",
+          amazon_url: it.amazon_url || (it.amazon_asin ? `https://www.amazon.ca/dp/${it.amazon_asin}` : "")
+        }));
+        return { tools, totalCount: tools.length };
+      }
+
+      // Legacy schema
+      if(payload && Array.isArray(payload.items)){
+        return { tools: payload.items.slice(), totalCount: Number(payload.count)||payload.items.length };
+      }
+
+      return { tools: [], totalCount: 0 };
+    }
+
+    async function init(){
+      const payload = await fetchFirst([
+        "/data/toolshed/toolshed_items_master.json",
+        "/data/toolshed_items_master.json",
+        "/data/tools.json"
+      ]);
+
+      if(!payload){
+        grid.innerHTML = `<div class="small">Could not load tools data.</div>`;
+        return;
+      }
+
+      const { tools, totalCount } = normalizeTools(payload);
+
+      // Areas
+      const areas = Array.from(new Set(tools.map(getArea))).sort((a,b)=>a.localeCompare(b));
+      areas.forEach(a=>{
+        const opt=document.createElement('option');
+        opt.value=a; opt.textContent=a;
+        areaSel.appendChild(opt);
+      });
+
+      // Categories
+      const cats = Array.from(new Set(tools.map(getCat))).sort((a,b)=>a.localeCompare(b));
+      cats.forEach(c=>{
+        const opt=document.createElement('option');
+        opt.value=c; opt.textContent=c;
+        catSel.appendChild(opt);
+      });
+
+      // Tags (optional; may be empty for now)
+      const tags = Array.from(new Set(tools.flatMap(getTags).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+      tags.forEach(t=>{
+        const opt=document.createElement('option');
+        opt.value=t; opt.textContent=t;
+        tagSel.appendChild(opt);
+      });
+
+      const onChange = ()=> applyFilters(tools,totalCount);
+      search.addEventListener('input', onChange);
+      areaSel.addEventListener('change', onChange);
+      catSel.addEventListener('change', onChange);
+      tagSel.addEventListener('change', onChange);
+
+      applyFilters(tools,totalCount);
+    }
+
+    init();
+  </script>
 </body>
 </html>
