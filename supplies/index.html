@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Supplies — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+
+  <style>
+    .area-block { margin-top: 18px; }
+    .area-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin: 10px 0 10px; }
+    .area-head h2 { margin:0; font-size: 18px; }
+    .area-head .muted { opacity:.75; font-size: 13px; }
+
+    .subgrid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .item.card{
+      padding: 0;
+      overflow: hidden;
+      display:flex;
+      flex-direction: column;
+      min-height: 320px;
+    }
+
+    .item.card .thumb{
+      height: 160px;
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .item.card .thumb img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display:block;
+    }
+    .item.card .thumb .ph{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:12px;
+      opacity:.75;
+      padding: 10px;
+    }
+
+    .item.card .body{
+      padding: 12px;
+      display:flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .item.card .tname{
+      font-weight: 800;
+      line-height: 1.2;
+      font-size: 14px;
+      margin: 0;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    .meta-line{ font-size:12px; opacity:.85; line-height:1.35; }
+    .meta-line strong{ opacity:.95; }
+
+    .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .tag{
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      opacity: .9;
+      white-space: nowrap;
+    }
+
+    .note{
+      font-size: 12px;
+      opacity: .85;
+      line-height: 1.35;
+      display:-webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    .actions{
+      margin-top: auto;
+      padding-top: 6px;
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btnlink{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      flex: 1 1 auto;
+      text-decoration:none;
+      font-size: 12px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      min-width: 120px;
+    }
+    .btnlink:hover{ background: rgba(255,255,255,0.10); }
+
+    .controls .input { width: 100%; }
+    .controls-row{
+      display:grid;
+      grid-template-columns: 1fr 220px 220px 220px;
+      gap: 10px;
+      align-items:end;
+    }
+    @media (max-width: 900px){
+      .controls-row{ grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Workshop • Art • Tools • Movies</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <a href="/index.html">Home</a>
+        <a href="/about/index.html">About</a>
+        <a href="/gallery/index.html">Art</a>
+        <a href="/tools/index.html">Tools</a>
+        <a href="/supplies/index.html">Supplies</a>
+        <a href="/shop/index.html">Shop</a>
+        <a href="/movies/index.html">Movies</a>
+        <a href="/contact/index.html">Contact</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <span class="badge">Supplies</span>
+      <div class="hero-grid" style="margin-top:12px">
+        <div class="card" style="padding:18px">
+          <h1>Consumables & refillables.</h1>
+          <p>
+            This is our running list of supplies — resins, abrasives, blades, tapes, pigments, packaging,
+            and all the “we always need more of that” stuff.
+          </p>
+        </div>
+        <div class="hero-media">
+          <img src="/assets/hero-workshop.webp" alt="Illustrated workshop scene" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card controls" style="margin-top:14px">
+      <div class="controls-row">
+        <div>
+          <label class="small">Search</label>
+          <input id="q" class="input" placeholder="Type a supply name…" />
+        </div>
+
+        <div>
+          <label class="small">Primary Area</label>
+          <select id="area" class="input">
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small">Type</label>
+          <select id="type" class="input">
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small">Hazard</label>
+          <select id="hazard" class="input">
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;align-items:center">
+        <label class="small" style="display:flex;gap:8px;align-items:center">
+          <input id="reorderOnly" type="checkbox" />
+          Show reorder-needed only (when qty fields are filled)
+        </label>
+      </div>
+
+      <div class="small" style="margin-top:10px">
+        Showing <span id="shown">0</span> of <span id="total">0</span>
+      </div>
+
+      <div id="grid" style="margin-top:12px"></div>
+
+      <div class="small" style="margin-top:12px">
+        Images are served from our R2 bucket via <span class="small">assets.devilndove.com</span>.
+      </div>
+    </div>
+
+    <div class="footer">
+      Tip: For supplies, you’ll get the most value by filling <strong>unit_type</strong>,
+      <strong>on_hand_qty</strong>, and <strong>reorder_point</strong> over time.
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    function escapeHtml(s){
+      return String(s ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    // R2 (case-sensitive)
+    const ASSET_ORIGIN = "https://assets.devilndove.com";
+
+    // Images are in your R2 "Supplies" folder (case-sensitive)
+    const ASSET_PREFIX = "Supplies";
+
+    // Data location in repo
+    const DATA_URL = "/data/supplies/supplies_items_master.json";
+
+    // Safely build URL for case-sensitive filenames (and keep spaces etc.)
+    function encodeKey(key){
+      // key may contain slashes -> encode each segment
+      return key.split('/').map(seg => encodeURIComponent(seg)).join('/');
+    }
+
+    function supplyImageUrl(item){
+      // Prefer r2_object_key if present (it already includes prefix + filename)
+      const key = item.r2_object_key
+        ? String(item.r2_object_key).replace(/^\/+/, '')
+        : `${ASSET_PREFIX}/${String(item.example_image_file || '')}`;
+
+      return `${ASSET_ORIGIN}/${encodeKey(key)}`;
+    }
+
+    function amazonUrl(item){
+      // Prefer exact URL; else use amazon_search_url; else build one
+      if (item.amazon_url) return item.amazon_url;
+      if (item.amazon_search_url) return item.amazon_search_url;
+      const q = encodeURIComponent(item.item_name_suggested || item.example_image_file || "");
+      return `https://www.amazon.ca/s?k=${q}`;
+    }
+
+    const $grid = document.querySelector('#grid');
+    const $q = document.querySelector('#q');
+    const $area = document.querySelector('#area');
+    const $type = document.querySelector('#type');
+    const $hazard = document.querySelector('#hazard');
+    const $reorderOnly = document.querySelector('#reorderOnly');
+    const $shown = document.querySelector('#shown');
+    const $total = document.querySelector('#total');
+
+    const norm = (s)=> (s||'').toString().toLowerCase().trim();
+
+    const getArea = (it)=> (it.primary_area || "Unassigned");
+    const getType = (it)=> (it.consumable_type || "misc");
+    const getHazards = (it)=> Array.isArray(it.hazard_tags) ? it.hazard_tags : (
+      typeof it.hazard_tags === "string" ? it.hazard_tags.split(',').map(x=>x.trim()).filter(Boolean) : []
+    );
+
+    const toNum = (v)=>{
+      if (v === null || v === undefined) return null;
+      const s = String(v).trim();
+      if (!s) return null;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    function needsReorder(it){
+      const onHand = toNum(it.on_hand_qty);
+      const rp = toNum(it.reorder_point);
+      if (onHand === null || rp === null) return false; // not filled yet
+      return onHand <= rp;
+    }
+
+    function buildCard(it){
+      const name = it.item_name_suggested || it.example_image_file || "Supply";
+      const brand = it.brand_guess || "";
+      const type = getType(it);
+      const area = getArea(it);
+      const hazards = getHazards(it);
+      const img = supplyImageUrl(it);
+      const link = amazonUrl(it);
+
+      const unit = (it.unit_type || "").toString().trim();
+      const onHand = (it.on_hand_qty || "").toString().trim();
+      const rp = (it.reorder_point || "").toString().trim();
+      const loc = (it.storage_location || "").toString().trim();
+
+      const note = (it.notes || "").toString().trim();
+
+      const tags = [];
+      tags.push(area);
+      tags.push(type);
+      hazards.slice(0,3).forEach(h => tags.push(h));
+
+      const qtyLine =
+        (onHand || rp || unit || loc)
+          ? `<div class="meta-line">
+               ${loc ? `<strong>Location:</strong> ${escapeHtml(loc)}<br>` : ``}
+               ${(onHand || rp || unit) ? `<strong>Qty:</strong> ${escapeHtml(onHand || "—")} ${escapeHtml(unit || "")} <span style="opacity:.75">| Reorder:</span> ${escapeHtml(rp || "—")}` : ``}
+             </div>`
+          : ``;
+
+      return `
+        <div class="item card">
+          <div class="thumb">
+            <img
+              src="${img}"
+              alt="${escapeHtml(name)}"
+              loading="lazy"
+              onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escapeHtml(it.example_image_file || '')}</span></div>';"
+            >
+          </div>
+          <div class="body">
+            <div class="tname">${escapeHtml(name)}</div>
+
+            ${brand ? `<div class="meta-line"><strong>Brand:</strong> ${escapeHtml(brand)}</div>` : ``}
+
+            <div class="tags">
+              ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
+              ${needsReorder(it) ? `<span class="tag" style="border-color:rgba(255,80,80,.6)">Reorder</span>` : ``}
+            </div>
+
+            ${qtyLine}
+
+            ${note ? `<div class="note">${escapeHtml(note)}</div>` : ``}
+
+            <div class="actions">
+              <a class="btnlink" href="${link}" target="_blank" rel="noopener">Amazon.ca search</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function render(items, totalCount){
+      $shown.textContent = String(items.length);
+      $total.textContent = String(totalCount);
+
+      // Group by Type (consumable_type)
+      const groups = {};
+      items.forEach(it => {
+        const t = getType(it);
+        (groups[t] ||= []).push(it);
+      });
+
+      // Sort items within each group
+      Object.keys(groups).forEach(t => {
+        groups[t].sort((a,b) => (a.item_name_suggested || "").localeCompare(b.item_name_suggested || ""));
+      });
+
+      const types = Object.keys(groups).sort((a,b)=>a.localeCompare(b));
+
+      $grid.innerHTML = types.map(t => `
+        <section class="area-block">
+          <div class="area-head">
+            <h2>${escapeHtml(t)}</h2>
+            <div class="muted">${groups[t].length} item${groups[t].length===1?'':'s'}</div>
+          </div>
+          <div class="subgrid">
+            ${groups[t].map(buildCard).join('')}
+          </div>
+        </section>
+      `).join('');
+    }
+
+    function applyFilters(all){
+      const term = norm($q.value);
+      const areaVal = $area.value;
+      const typeVal = $type.value;
+      const hzVal = $hazard.value;
+      const reorderOnly = $reorderOnly.checked;
+
+      let list = all.slice();
+
+      if (areaVal !== "all") list = list.filter(it => getArea(it) === areaVal);
+      if (typeVal !== "all") list = list.filter(it => getType(it) === typeVal);
+      if (hzVal !== "all") list = list.filter(it => getHazards(it).includes(hzVal));
+      if (reorderOnly) list = list.filter(it => needsReorder(it));
+
+      if (term){
+        list = list.filter(it => {
+          const hay = [
+            norm(it.item_name_suggested),
+            norm(it.brand_guess),
+            norm(getArea(it)),
+            norm(getType(it)),
+            norm((it.notes || "")),
+            getHazards(it).map(norm).join(" "),
+            norm(it.storage_location),
+            norm(it.unit_type),
+          ].join(" ");
+          return hay.includes(term);
+        });
+      }
+
+      render(list, all.length);
+    }
+
+    async function init(){
+      const res = await fetch(DATA_URL, { cache: "no-store" });
+      if (!res.ok){
+        $grid.innerHTML = `<div class="small">Could not load supplies data.</div>`;
+        return;
+      }
+      const all = await res.json();
+
+      // Populate dropdowns
+      const areas = Array.from(new Set(all.map(getArea))).sort((a,b)=>a.localeCompare(b));
+      areas.forEach(a => {
+        const opt = document.createElement("option");
+        opt.value = a; opt.textContent = a;
+        $area.appendChild(opt);
+      });
+
+      const types = Array.from(new Set(all.map(getType))).sort((a,b)=>a.localeCompare(b));
+      types.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t; opt.textContent = t;
+        $type.appendChild(opt);
+      });
+
+      const hazards = Array.from(new Set(all.flatMap(getHazards))).sort((a,b)=>a.localeCompare(b));
+      hazards.forEach(h => {
+        const opt = document.createElement("option");
+        opt.value = h; opt.textContent = h;
+        $hazard.appendChild(opt);
+      });
+
+      const onChange = ()=> applyFilters(all);
+      $q.addEventListener("input", onChange);
+      $area.addEventListener("change", onChange);
+      $type.addEventListener("change", onChange);
+      $hazard.addEventListener("change", onChange);
+      $reorderOnly.addEventListener("change", onChange);
+
+      applyFilters(all);
+    }
+
+    init();
+  </script>
+</body>
+</html>
