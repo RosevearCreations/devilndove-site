@@ -9,8 +9,11 @@
 
   <style>
     .area-block { margin-top: 18px; }
-    .area-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin: 10px 0 10px; }
-    .area-head h2 { margin:0; font-size: 18px; }
+    .area-head {
+      display:flex; align-items:baseline; justify-content:space-between;
+      gap:12px; margin: 10px 0 10px;
+    }
+    .area-head h2 { margin:0; font-size: 18px; text-transform: capitalize; }
     .area-head .muted { opacity:.75; font-size: 13px; }
 
     .subgrid{
@@ -24,7 +27,7 @@
       overflow: hidden;
       display:flex;
       flex-direction: column;
-      min-height: 320px;
+      min-height: 330px;
     }
 
     .item.card .thumb{
@@ -53,6 +56,7 @@
       font-size:12px;
       opacity:.75;
       padding: 10px;
+      line-height:1.3;
     }
 
     .item.card .body{
@@ -91,6 +95,10 @@
       opacity: .9;
       white-space: nowrap;
     }
+    .tag-reorder{
+      border-color: rgba(255,120,120,.6);
+      background: rgba(255,80,80,.08);
+    }
 
     .note{
       font-size: 12px;
@@ -114,7 +122,6 @@
       align-items:center;
       justify-content:center;
       gap: 8px;
-      flex: 1 1 auto;
       text-decoration:none;
       font-size: 12px;
       padding: 10px 10px;
@@ -122,8 +129,19 @@
       border: 1px solid rgba(255,255,255,0.14);
       background: rgba(255,255,255,0.06);
       min-width: 120px;
+      cursor: pointer;
+      color: inherit;
     }
     .btnlink:hover{ background: rgba(255,255,255,0.10); }
+
+    .btnlink.secondary{
+      background: rgba(255,255,255,0.03);
+    }
+
+    .btnlink.active{
+      border-color: rgba(140, 200, 255, .55);
+      background: rgba(90, 150, 255, .10);
+    }
 
     .controls .input { width: 100%; }
     .controls-row{
@@ -134,6 +152,76 @@
     }
     @media (max-width: 900px){
       .controls-row{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .toolbar-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top: 10px;
+    }
+    .toolbar-left, .toolbar-right{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    }
+
+    /* Reorder panel */
+    .reorder-panel{
+      margin-top: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,0.02);
+      display: none;
+    }
+    .reorder-panel.open{ display:block; }
+
+    .reorder-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .reorder-list{
+      display:grid;
+      gap:8px;
+      margin-top:8px;
+    }
+    .reorder-row{
+      display:grid;
+      grid-template-columns: 1fr auto auto;
+      gap:8px;
+      align-items:center;
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:10px;
+      padding:8px 10px;
+      background: rgba(255,255,255,0.02);
+    }
+    .reorder-row .name{
+      font-size:13px;
+      line-height:1.25;
+    }
+    .reorder-empty{
+      font-size:13px;
+      opacity:.8;
+      padding:8px 2px;
+    }
+
+    .small-note{
+      font-size: 12px;
+      opacity: .8;
+      margin-top: 8px;
+      line-height: 1.35;
+    }
+
+    .sr-only{
+      position:absolute !important;
+      width:1px;height:1px;
+      padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;
     }
   </style>
 </head>
@@ -166,7 +254,7 @@
           <h1>Consumables & refillables.</h1>
           <p>
             This is our running list of supplies — resins, abrasives, blades, tapes, pigments, packaging,
-            and all the “we always need more of that” stuff.
+            and all the little things that keep the workshop moving.
           </p>
         </div>
         <div class="hero-media">
@@ -178,297 +266,526 @@
     <div class="card controls" style="margin-top:14px">
       <div class="controls-row">
         <div>
-          <label class="small">Search</label>
-          <input id="q" class="input" placeholder="Type a supply name…" />
+          <label class="small" for="supQ">Search</label>
+          <input id="supQ" class="input" placeholder="Type a supply name…" />
         </div>
 
         <div>
-          <label class="small">Primary Area</label>
-          <select id="area" class="input">
+          <label class="small" for="supArea">Primary Area</label>
+          <select id="supArea" class="input">
             <option value="all">All</option>
           </select>
         </div>
 
         <div>
-          <label class="small">Type</label>
-          <select id="type" class="input">
+          <label class="small" for="supType">Type</label>
+          <select id="supType" class="input">
             <option value="all">All</option>
           </select>
         </div>
 
         <div>
-          <label class="small">Hazard</label>
-          <select id="hazard" class="input">
+          <label class="small" for="supHazard">Hazard</label>
+          <select id="supHazard" class="input">
             <option value="all">All</option>
           </select>
         </div>
       </div>
 
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;align-items:center">
-        <label class="small" style="display:flex;gap:8px;align-items:center">
-          <input id="reorderOnly" type="checkbox" />
-          Show reorder-needed only (when qty fields are filled)
-        </label>
+      <div class="toolbar-row">
+        <div class="toolbar-left">
+          <label class="small" style="display:flex;gap:8px;align-items:center">
+            <input id="supReorderOnly" type="checkbox" />
+            Show reorder-needed only
+          </label>
+        </div>
+
+        <div class="toolbar-right">
+          <button id="toggleReorderPanel" class="btnlink secondary" type="button">
+            Reorder List (<span id="reorderCountTop">0</span>)
+          </button>
+          <button id="copyReorderList" class="btnlink secondary" type="button">
+            Copy List
+          </button>
+          <button id="clearReorderList" class="btnlink secondary" type="button">
+            Clear List
+          </button>
+        </div>
+      </div>
+
+      <div id="reorderPanel" class="reorder-panel" aria-live="polite">
+        <div class="reorder-head">
+          <div>
+            <strong>Reorder List</strong>
+            <div class="small-note">Saved in this browser. Inventory counts remain hidden on the public page.</div>
+          </div>
+        </div>
+        <div id="reorderListWrap" class="reorder-list"></div>
       </div>
 
       <div class="small" style="margin-top:10px">
-        Showing <span id="shown">0</span> of <span id="total">0</span>
+        Showing <span id="supShown">0</span> of <span id="supTotal">0</span>
       </div>
 
-      <div id="grid" style="margin-top:12px"></div>
+      <div id="supGrid" style="margin-top:12px"></div>
 
       <div class="small" style="margin-top:12px">
-        Images are served from our R2 bucket via <span class="small">assets.devilndove.com</span>.
+        Links go to Amazon.ca (reference/search links only). Images are served from our R2 bucket.
       </div>
     </div>
 
     <div class="footer">
-      Tip: For supplies, you’ll get the most value by filling <strong>unit_type</strong>,
-      <strong>on_hand_qty</strong>, and <strong>reorder_point</strong> over time.
+      Public page hides inventory counts and storage details. Reorder logic can still work behind the scenes when qty fields are filled.
     </div>
   </div>
 
   <script src="/js/main.js"></script>
   <script>
-    function escapeHtml(s){
-      return String(s ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
+    (function () {
+      function escHtml(v){
+        return String(v ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+      }
 
-    // R2 (case-sensitive)
-    const ASSET_ORIGIN = "https://assets.devilndove.com";
+      function safeText(v){ return (v == null ? '' : String(v)).trim(); }
+      function norm(v){ return safeText(v).toLowerCase(); }
 
-    // Images are in your R2 "Supplies" folder (case-sensitive)
-    const ASSET_PREFIX = "Supplies";
+      const ASSET_ORIGIN = "https://assets.devilndove.com";
+      const ASSET_PREFIX = "Supplies"; // case-sensitive R2 folder
+      const DATA_URL = "/data/supplies/supplies_items_master.json";
+      const REORDER_STORAGE_KEY = "devilndove_supplies_reorder_list_v1";
 
-    // Data location in repo
-    const DATA_URL = "/data/supplies/supplies_items_master.json";
+      function encodeKeyPath(key){
+        return String(key).split('/').map(function (seg) {
+          return encodeURIComponent(seg);
+        }).join('/');
+      }
 
-    // Safely build URL for case-sensitive filenames (and keep spaces etc.)
-    function encodeKey(key){
-      // key may contain slashes -> encode each segment
-      return key.split('/').map(seg => encodeURIComponent(seg)).join('/');
-    }
+      function getR2ImageUrl(item){
+        const rawKey = safeText(item.r2_object_key);
+        const file = safeText(item.example_image_file);
 
-    function supplyImageUrl(item){
-      // Prefer r2_object_key if present (it already includes prefix + filename)
-      const key = item.r2_object_key
-        ? String(item.r2_object_key).replace(/^\/+/, '')
-        : `${ASSET_PREFIX}/${String(item.example_image_file || '')}`;
+        const finalKey = rawKey
+          ? rawKey.replace(/^\/+/, '')
+          : (ASSET_PREFIX + "/" + file);
 
-      return `${ASSET_ORIGIN}/${encodeKey(key)}`;
-    }
+        return ASSET_ORIGIN + "/" + encodeKeyPath(finalKey);
+      }
 
-    function amazonUrl(item){
-      // Prefer exact URL; else use amazon_search_url; else build one
-      if (item.amazon_url) return item.amazon_url;
-      if (item.amazon_search_url) return item.amazon_search_url;
-      const q = encodeURIComponent(item.item_name_suggested || item.example_image_file || "");
-      return `https://www.amazon.ca/s?k=${q}`;
-    }
+      function getAmazonUrl(item){
+        if (safeText(item.amazon_url)) return item.amazon_url;
+        if (safeText(item.amazon_search_url)) return item.amazon_search_url;
+        const q = encodeURIComponent(
+          safeText(item.item_name_suggested) || safeText(item.example_image_file) || "workshop supplies"
+        );
+        return "https://www.amazon.ca/s?k=" + q;
+      }
 
-    const $grid = document.querySelector('#grid');
-    const $q = document.querySelector('#q');
-    const $area = document.querySelector('#area');
-    const $type = document.querySelector('#type');
-    const $hazard = document.querySelector('#hazard');
-    const $reorderOnly = document.querySelector('#reorderOnly');
-    const $shown = document.querySelector('#shown');
-    const $total = document.querySelector('#total');
+      function getItemName(item){
+        return safeText(item.item_name_suggested) || safeText(item.example_image_file) || "Supply";
+      }
 
-    const norm = (s)=> (s||'').toString().toLowerCase().trim();
+      function getPrimaryArea(item){
+        return safeText(item.primary_area) || "Unassigned";
+      }
 
-    const getArea = (it)=> (it.primary_area || "Unassigned");
-    const getType = (it)=> (it.consumable_type || "misc");
-    const getHazards = (it)=> Array.isArray(it.hazard_tags) ? it.hazard_tags : (
-      typeof it.hazard_tags === "string" ? it.hazard_tags.split(',').map(x=>x.trim()).filter(Boolean) : []
-    );
+      function getType(item){
+        return safeText(item.consumable_type) || "misc";
+      }
 
-    const toNum = (v)=>{
-      if (v === null || v === undefined) return null;
-      const s = String(v).trim();
-      if (!s) return null;
-      const n = Number(s);
-      return Number.isFinite(n) ? n : null;
-    };
+      function getHazardTags(item){
+        if (Array.isArray(item.hazard_tags)) {
+          return item.hazard_tags.map(safeText).filter(Boolean);
+        }
+        if (typeof item.hazard_tags === "string") {
+          return item.hazard_tags.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+        }
+        return [];
+      }
 
-    function needsReorder(it){
-      const onHand = toNum(it.on_hand_qty);
-      const rp = toNum(it.reorder_point);
-      if (onHand === null || rp === null) return false; // not filled yet
-      return onHand <= rp;
-    }
+      function toNum(v){
+        const s = safeText(v);
+        if (!s) return null;
+        const n = Number(s);
+        return Number.isFinite(n) ? n : null;
+      }
 
-    function buildCard(it){
-      const name = it.item_name_suggested || it.example_image_file || "Supply";
-      const brand = it.brand_guess || "";
-      const type = getType(it);
-      const area = getArea(it);
-      const hazards = getHazards(it);
-      const img = supplyImageUrl(it);
-      const link = amazonUrl(it);
+      // Hidden from display, but used for logic
+      function needsReorder(item){
+        const onHand = toNum(item.on_hand_qty);
+        const rp = toNum(item.reorder_point);
+        if (onHand === null || rp === null) return false;
+        return onHand <= rp;
+      }
 
-      const unit = (it.unit_type || "").toString().trim();
-      const onHand = (it.on_hand_qty || "").toString().trim();
-      const rp = (it.reorder_point || "").toString().trim();
-      const loc = (it.storage_location || "").toString().trim();
+      function getItemKey(item){
+        // Prefer stable ID fields if present; fallback to r2 key/file/name combo
+        return safeText(item.id)
+          || safeText(item.r2_object_key)
+          || safeText(item.example_image_file)
+          || (getItemName(item) + "::" + getType(item));
+      }
 
-      const note = (it.notes || "").toString().trim();
+      // ---------- Reorder list (localStorage) ----------
+      function readReorderList(){
+        try {
+          const raw = localStorage.getItem(REORDER_STORAGE_KEY);
+          if (!raw) return [];
+          const arr = JSON.parse(raw);
+          return Array.isArray(arr) ? arr : [];
+        } catch (e) {
+          return [];
+        }
+      }
 
-      const tags = [];
-      tags.push(area);
-      tags.push(type);
-      hazards.slice(0,3).forEach(h => tags.push(h));
+      function writeReorderList(arr){
+        localStorage.setItem(REORDER_STORAGE_KEY, JSON.stringify(arr));
+      }
 
-      const qtyLine =
-        (onHand || rp || unit || loc)
-          ? `<div class="meta-line">
-               ${loc ? `<strong>Location:</strong> ${escapeHtml(loc)}<br>` : ``}
-               ${(onHand || rp || unit) ? `<strong>Qty:</strong> ${escapeHtml(onHand || "—")} ${escapeHtml(unit || "")} <span style="opacity:.75">| Reorder:</span> ${escapeHtml(rp || "—")}` : ``}
-             </div>`
-          : ``;
+      function addToReorderList(entry){
+        const current = readReorderList();
+        const exists = current.some(function (x) { return x.key === entry.key; });
+        if (!exists) {
+          current.push(entry);
+          writeReorderList(current);
+        }
+      }
 
-      return `
-        <div class="item card">
-          <div class="thumb">
-            <img
-              src="${img}"
-              alt="${escapeHtml(name)}"
-              loading="lazy"
-              onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escapeHtml(it.example_image_file || '')}</span></div>';"
-            >
-          </div>
-          <div class="body">
-            <div class="tname">${escapeHtml(name)}</div>
+      function removeFromReorderList(key){
+        const current = readReorderList().filter(function (x) { return x.key !== key; });
+        writeReorderList(current);
+      }
 
-            ${brand ? `<div class="meta-line"><strong>Brand:</strong> ${escapeHtml(brand)}</div>` : ``}
+      function clearReorderList(){
+        writeReorderList([]);
+      }
 
-            <div class="tags">
-              ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
-              ${needsReorder(it) ? `<span class="tag" style="border-color:rgba(255,80,80,.6)">Reorder</span>` : ``}
+      function inReorderList(key){
+        return readReorderList().some(function (x) { return x.key === key; });
+      }
+
+      // ---------- DOM ----------
+      const supGridEl = document.getElementById("supGrid");
+      const supQEl = document.getElementById("supQ");
+      const supAreaEl = document.getElementById("supArea");
+      const supTypeEl = document.getElementById("supType");
+      const supHazardEl = document.getElementById("supHazard");
+      const supReorderOnlyEl = document.getElementById("supReorderOnly");
+      const supShownEl = document.getElementById("supShown");
+      const supTotalEl = document.getElementById("supTotal");
+
+      const toggleReorderPanelBtn = document.getElementById("toggleReorderPanel");
+      const copyReorderListBtn = document.getElementById("copyReorderList");
+      const clearReorderListBtn = document.getElementById("clearReorderList");
+      const reorderCountTopEl = document.getElementById("reorderCountTop");
+      const reorderPanelEl = document.getElementById("reorderPanel");
+      const reorderListWrapEl = document.getElementById("reorderListWrap");
+
+      let allSupplies = [];
+      let reorderPanelOpen = false;
+
+      function updateReorderCountUI(){
+        const count = readReorderList().length;
+        reorderCountTopEl.textContent = String(count);
+      }
+
+      function renderReorderPanel(){
+        const list = readReorderList();
+        updateReorderCountUI();
+
+        if (!list.length) {
+          reorderListWrapEl.innerHTML = '<div class="reorder-empty">Your reorder list is empty.</div>';
+          return;
+        }
+
+        reorderListWrapEl.innerHTML = list.map(function (entry) {
+          return `
+            <div class="reorder-row">
+              <div class="name">${escHtml(entry.name)}</div>
+              <a class="btnlink secondary" href="${escHtml(entry.amazon)}" target="_blank" rel="noopener">Amazon.ca</a>
+              <button class="btnlink secondary" type="button" data-remove-key="${escHtml(entry.key)}">Remove</button>
             </div>
+          `;
+        }).join("");
 
-            ${qtyLine}
-
-            ${note ? `<div class="note">${escapeHtml(note)}</div>` : ``}
-
-            <div class="actions">
-              <a class="btnlink" href="${link}" target="_blank" rel="noopener">Amazon.ca search</a>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function render(items, totalCount){
-      $shown.textContent = String(items.length);
-      $total.textContent = String(totalCount);
-
-      // Group by Type (consumable_type)
-      const groups = {};
-      items.forEach(it => {
-        const t = getType(it);
-        (groups[t] ||= []).push(it);
-      });
-
-      // Sort items within each group
-      Object.keys(groups).forEach(t => {
-        groups[t].sort((a,b) => (a.item_name_suggested || "").localeCompare(b.item_name_suggested || ""));
-      });
-
-      const types = Object.keys(groups).sort((a,b)=>a.localeCompare(b));
-
-      $grid.innerHTML = types.map(t => `
-        <section class="area-block">
-          <div class="area-head">
-            <h2>${escapeHtml(t)}</h2>
-            <div class="muted">${groups[t].length} item${groups[t].length===1?'':'s'}</div>
-          </div>
-          <div class="subgrid">
-            ${groups[t].map(buildCard).join('')}
-          </div>
-        </section>
-      `).join('');
-    }
-
-    function applyFilters(all){
-      const term = norm($q.value);
-      const areaVal = $area.value;
-      const typeVal = $type.value;
-      const hzVal = $hazard.value;
-      const reorderOnly = $reorderOnly.checked;
-
-      let list = all.slice();
-
-      if (areaVal !== "all") list = list.filter(it => getArea(it) === areaVal);
-      if (typeVal !== "all") list = list.filter(it => getType(it) === typeVal);
-      if (hzVal !== "all") list = list.filter(it => getHazards(it).includes(hzVal));
-      if (reorderOnly) list = list.filter(it => needsReorder(it));
-
-      if (term){
-        list = list.filter(it => {
-          const hay = [
-            norm(it.item_name_suggested),
-            norm(it.brand_guess),
-            norm(getArea(it)),
-            norm(getType(it)),
-            norm((it.notes || "")),
-            getHazards(it).map(norm).join(" "),
-            norm(it.storage_location),
-            norm(it.unit_type),
-          ].join(" ");
-          return hay.includes(term);
+        Array.from(reorderListWrapEl.querySelectorAll("[data-remove-key]")).forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            const key = btn.getAttribute("data-remove-key");
+            removeFromReorderList(key);
+            renderReorderPanel();
+            renderFiltered();
+          });
         });
       }
 
-      render(list, all.length);
-    }
-
-    async function init(){
-      const res = await fetch(DATA_URL, { cache: "no-store" });
-      if (!res.ok){
-        $grid.innerHTML = `<div class="small">Could not load supplies data.</div>`;
-        return;
+      function toggleReorderPanel(){
+        reorderPanelOpen = !reorderPanelOpen;
+        reorderPanelEl.classList.toggle("open", reorderPanelOpen);
+        toggleReorderPanelBtn.classList.toggle("active", reorderPanelOpen);
+        if (reorderPanelOpen) renderReorderPanel();
       }
-      const all = await res.json();
 
-      // Populate dropdowns
-      const areas = Array.from(new Set(all.map(getArea))).sort((a,b)=>a.localeCompare(b));
-      areas.forEach(a => {
-        const opt = document.createElement("option");
-        opt.value = a; opt.textContent = a;
-        $area.appendChild(opt);
-      });
+      async function copyReorderListToClipboard(){
+        const list = readReorderList();
+        if (!list.length) {
+          alert("Reorder list is empty.");
+          return;
+        }
 
-      const types = Array.from(new Set(all.map(getType))).sort((a,b)=>a.localeCompare(b));
-      types.forEach(t => {
-        const opt = document.createElement("option");
-        opt.value = t; opt.textContent = t;
-        $type.appendChild(opt);
-      });
+        const lines = [];
+        lines.push("Devil n Dove Supplies Reorder List");
+        lines.push("");
+        list.forEach(function (entry, idx) {
+          lines.push((idx + 1) + ". " + entry.name);
+          lines.push("   " + entry.amazon);
+        });
 
-      const hazards = Array.from(new Set(all.flatMap(getHazards))).sort((a,b)=>a.localeCompare(b));
-      hazards.forEach(h => {
-        const opt = document.createElement("option");
-        opt.value = h; opt.textContent = h;
-        $hazard.appendChild(opt);
-      });
+        const text = lines.join("\n");
+        try {
+          await navigator.clipboard.writeText(text);
+          copyReorderListBtn.textContent = "Copied!";
+          setTimeout(function(){ copyReorderListBtn.textContent = "Copy List"; }, 1200);
+        } catch (e) {
+          alert("Copy failed. You can open the reorder panel and copy manually.");
+        }
+      }
 
-      const onChange = ()=> applyFilters(all);
-      $q.addEventListener("input", onChange);
-      $area.addEventListener("change", onChange);
-      $type.addEventListener("change", onChange);
-      $hazard.addEventListener("change", onChange);
-      $reorderOnly.addEventListener("change", onChange);
+      // ---------- Cards / Render ----------
+      function buildSupplyCard(item){
+        const name = getItemName(item);
+        const brand = safeText(item.brand_guess);
+        const type = getType(item);
+        const area = getPrimaryArea(item);
+        const hazards = getHazardTags(item);
+        const note = safeText(item.notes);
+        const imgUrl = getR2ImageUrl(item);
+        const amazon = getAmazonUrl(item);
+        const itemKey = getItemKey(item);
+        const isReorder = needsReorder(item);
+        const alreadyAdded = inReorderList(itemKey);
 
-      applyFilters(all);
-    }
+        const tagList = [area, type].concat(hazards.slice(0, 3));
 
-    init();
+        return `
+          <div class="item card">
+            <div class="thumb">
+              <img
+                src="${imgUrl}"
+                alt="${escHtml(name)}"
+                loading="lazy"
+                onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escHtml(safeText(item.example_image_file) || 'Unknown file')}</span></div>';"
+              />
+            </div>
+            <div class="body">
+              <div class="tname">${escHtml(name)}</div>
+
+              ${brand ? `<div class="meta-line"><strong>Brand:</strong> ${escHtml(brand)}</div>` : ""}
+
+              <div class="tags">
+                ${tagList.map(function (t) { return `<span class="tag">${escHtml(t)}</span>`; }).join("")}
+                ${isReorder ? `<span class="tag tag-reorder">Reorder</span>` : ""}
+              </div>
+
+              ${note ? `<div class="note">${escHtml(note)}</div>` : ""}
+
+              <div class="actions">
+                <a class="btnlink" href="${amazon}" target="_blank" rel="noopener">Amazon.ca search</a>
+                <button
+                  class="btnlink secondary ${alreadyAdded ? 'active' : ''}"
+                  type="button"
+                  data-add-reorder="${escHtml(itemKey)}"
+                >
+                  ${alreadyAdded ? "In Reorder List" : "Add to Reorder List"}
+                </button>
+              </div>
+
+              <span class="sr-only">Inventory fields are hidden on this public page.</span>
+            </div>
+          </div>
+        `;
+      }
+
+      function groupAndRender(items, totalCount){
+        supShownEl.textContent = String(items.length);
+        supTotalEl.textContent = String(totalCount);
+
+        const groups = {};
+        items.forEach(function (it) {
+          const t = getType(it);
+          if (!groups[t]) groups[t] = [];
+          groups[t].push(it);
+        });
+
+        Object.keys(groups).forEach(function (key) {
+          groups[key].sort(function (a, b) {
+            return getItemName(a).localeCompare(getItemName(b));
+          });
+        });
+
+        const typeNames = Object.keys(groups).sort(function (a, b) { return a.localeCompare(b); });
+
+        if (!typeNames.length) {
+          supGridEl.innerHTML = `<div class="small">No supplies match the current filters.</div>`;
+          return;
+        }
+
+        supGridEl.innerHTML = typeNames.map(function (typeName) {
+          const itemsInGroup = groups[typeName];
+          return `
+            <section class="area-block">
+              <div class="area-head">
+                <h2>${escHtml(typeName)}</h2>
+                <div class="muted">${itemsInGroup.length} item${itemsInGroup.length === 1 ? "" : "s"}</div>
+              </div>
+              <div class="subgrid">
+                ${itemsInGroup.map(buildSupplyCard).join("")}
+              </div>
+            </section>
+          `;
+        }).join("");
+
+        // Wire add-to-list buttons after render
+        Array.from(supGridEl.querySelectorAll("[data-add-reorder]")).forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            const key = btn.getAttribute("data-add-reorder");
+            const item = allSupplies.find(function (x) { return getItemKey(x) === key; });
+            if (!item) return;
+
+            addToReorderList({
+              key: key,
+              name: getItemName(item),
+              amazon: getAmazonUrl(item)
+            });
+
+            updateReorderCountUI();
+            if (reorderPanelOpen) renderReorderPanel();
+            renderFiltered();
+          });
+        });
+      }
+
+      function renderFiltered(){
+        const term = norm(supQEl.value);
+        const areaVal = supAreaEl.value;
+        const typeVal = supTypeEl.value;
+        const hazardVal = supHazardEl.value;
+        const reorderOnly = !!supReorderOnlyEl.checked;
+
+        let list = allSupplies.slice();
+
+        if (areaVal !== "all") {
+          list = list.filter(function (it) { return getPrimaryArea(it) === areaVal; });
+        }
+        if (typeVal !== "all") {
+          list = list.filter(function (it) { return getType(it) === typeVal; });
+        }
+        if (hazardVal !== "all") {
+          list = list.filter(function (it) { return getHazardTags(it).includes(hazardVal); });
+        }
+        if (reorderOnly) {
+          list = list.filter(needsReorder);
+        }
+
+        if (term) {
+          list = list.filter(function (it) {
+            const hay = [
+              norm(getItemName(it)),
+              norm(it.brand_guess),
+              norm(getPrimaryArea(it)),
+              norm(getType(it)),
+              norm(it.notes),
+              norm(it.example_image_file),
+              getHazardTags(it).map(norm).join(" ")
+            ].join(" ");
+            return hay.includes(term);
+          });
+        }
+
+        groupAndRender(list, allSupplies.length);
+      }
+
+      function populateFilters(items){
+        const areaSet = new Set();
+        const typeSet = new Set();
+        const hazardSet = new Set();
+
+        items.forEach(function (it) {
+          areaSet.add(getPrimaryArea(it));
+          typeSet.add(getType(it));
+          getHazardTags(it).forEach(function (h) { hazardSet.add(h); });
+        });
+
+        Array.from(areaSet).sort().forEach(function (v) {
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = v;
+          supAreaEl.appendChild(opt);
+        });
+
+        Array.from(typeSet).sort().forEach(function (v) {
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = v;
+          supTypeEl.appendChild(opt);
+        });
+
+        Array.from(hazardSet).sort().forEach(function (v) {
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = v;
+          supHazardEl.appendChild(opt);
+        });
+      }
+
+      async function initSuppliesPage(){
+        try {
+          const resp = await fetch(DATA_URL, { cache: "no-store" });
+          if (!resp.ok) throw new Error("Failed to load supplies JSON: " + resp.status);
+
+          const data = await resp.json();
+
+          // Support either array root or object with items
+          allSupplies = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
+
+          if (!allSupplies.length) {
+            supGridEl.innerHTML = `<div class="small">No supplies found in ${escHtml(DATA_URL)}</div>`;
+            supShownEl.textContent = "0";
+            supTotalEl.textContent = "0";
+            return;
+          }
+
+          populateFilters(allSupplies);
+
+          supQEl.addEventListener("input", renderFiltered);
+          supAreaEl.addEventListener("change", renderFiltered);
+          supTypeEl.addEventListener("change", renderFiltered);
+          supHazardEl.addEventListener("change", renderFiltered);
+          supReorderOnlyEl.addEventListener("change", renderFiltered);
+
+          toggleReorderPanelBtn.addEventListener("click", toggleReorderPanel);
+          copyReorderListBtn.addEventListener("click", copyReorderListToClipboard);
+          clearReorderListBtn.addEventListener("click", function () {
+            if (!readReorderList().length) return;
+            if (!confirm("Clear the reorder list for this browser?")) return;
+            clearReorderList();
+            renderReorderPanel();
+            renderFiltered();
+          });
+
+          updateReorderCountUI();
+          renderFiltered();
+        } catch (err) {
+          console.error(err);
+          supGridEl.innerHTML = `<div class="small">Could not load supplies data. Please check <code>${escHtml(DATA_URL)}</code>.</div>`;
+        }
+      }
+
+      initSuppliesPage();
+    })();
   </script>
 </body>
 </html>
