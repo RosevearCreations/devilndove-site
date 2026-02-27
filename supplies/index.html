@@ -10,11 +10,17 @@
   <style>
     .area-block { margin-top: 18px; }
     .area-head {
-      display:flex; align-items:baseline; justify-content:space-between;
-      gap:12px; margin: 10px 0 10px;
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:12px;
+      margin: 10px 0 10px;
     }
-    .area-head h2 { margin:0; font-size: 18px; text-transform: capitalize; }
-    .area-head .muted { opacity:.75; font-size: 13px; }
+    .area-head h2 {
+      margin:0;
+      font-size: 18px;
+      text-transform: capitalize;
+    }
 
     .subgrid{
       display:grid;
@@ -27,11 +33,12 @@
       overflow: hidden;
       display:flex;
       flex-direction: column;
-      min-height: 330px;
+      min-height: 355px;
+      height: 100%;
     }
 
     .item.card .thumb{
-      height: 160px;
+      height: 180px;
       width: 100%;
       background: rgba(255,255,255,0.03);
       border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -39,6 +46,8 @@
       align-items:center;
       justify-content:center;
       overflow:hidden;
+      padding: 10px;
+      box-sizing: border-box;
     }
     .item.card .thumb img{
       width: 100%;
@@ -76,9 +85,14 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow:hidden;
+      min-height: 34px;
     }
 
-    .meta-line{ font-size:12px; opacity:.85; line-height:1.35; }
+    .meta-line{
+      font-size:12px;
+      opacity:.85;
+      line-height:1.35;
+    }
     .meta-line strong{ opacity:.95; }
 
     .tags{
@@ -108,6 +122,7 @@
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow:hidden;
+      min-height: 48px;
     }
 
     .actions{
@@ -163,10 +178,12 @@
       margin-top: 10px;
     }
     .toolbar-left, .toolbar-right{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
     }
 
-    /* Reorder panel */
     .reorder-panel{
       margin-top: 12px;
       border: 1px solid rgba(255,255,255,0.10);
@@ -220,8 +237,13 @@
 
     .sr-only{
       position:absolute !important;
-      width:1px;height:1px;
-      padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      border:0;
     }
   </style>
 </head>
@@ -301,15 +323,9 @@
         </div>
 
         <div class="toolbar-right">
-          <button id="toggleReorderPanel" class="btnlink secondary" type="button">
-            Reorder List (<span id="reorderCountTop">0</span>)
-          </button>
-          <button id="copyReorderList" class="btnlink secondary" type="button">
-            Copy List
-          </button>
-          <button id="clearReorderList" class="btnlink secondary" type="button">
-            Clear List
-          </button>
+          <button id="toggleReorderPanel" class="btnlink secondary" type="button">Reorder List</button>
+          <button id="copyReorderList" class="btnlink secondary" type="button">Copy List</button>
+          <button id="clearReorderList" class="btnlink secondary" type="button">Clear List</button>
         </div>
       </div>
 
@@ -323,10 +339,6 @@
         <div id="reorderListWrap" class="reorder-list"></div>
       </div>
 
-      <div class="small" style="margin-top:10px">
-        Showing <span id="supShown">0</span> of <span id="supTotal">0</span>
-      </div>
-
       <div id="supGrid" style="margin-top:12px"></div>
 
       <div class="small" style="margin-top:12px">
@@ -335,7 +347,7 @@
     </div>
 
     <div class="footer">
-      Public page hides inventory counts and storage details. Reorder logic can still work behind the scenes when qty fields are filled.
+      Public page hides inventory counts and storage details. Reorder logic still works behind the scenes when qty fields are filled.
     </div>
   </div>
 
@@ -355,9 +367,39 @@
       function norm(v){ return safeText(v).toLowerCase(); }
 
       const ASSET_ORIGIN = "https://assets.devilndove.com";
-      const ASSET_PREFIX = "Supplies"; // case-sensitive R2 folder
       const DATA_URL = "/data/supplies/supplies_items_master.json";
       const REORDER_STORAGE_KEY = "devilndove_supplies_reorder_list_v1";
+
+      const AREA_ORDER = [
+        "Security",
+        "Safety & PPE",
+        "Forge & Metalwork",
+        "Resin & UV",
+        "Clay",
+        "Laser & Engraving",
+        "3D & CNC",
+        "Sublimation",
+        "Craft & Cutting",
+        "Hand Tools",
+        "Measuring & Layout",
+        "Organization & Storage",
+        "Power & Tech",
+        "Filming & Streaming",
+        "Automotive",
+        "Reference",
+        "Pets",
+        "Health & Comfort",
+        "Workshop Basics",
+        "Unassigned"
+      ];
+      const areaRank = new Map(AREA_ORDER.map(function (a, i) { return [a, i]; }));
+
+      function areaSort(a, b){
+        const ra = areaRank.has(a) ? areaRank.get(a) : 999;
+        const rb = areaRank.has(b) ? areaRank.get(b) : 999;
+        if (ra !== rb) return ra - rb;
+        return a.localeCompare(b);
+      }
 
       function encodeKeyPath(key){
         return String(key).split('/').map(function (seg) {
@@ -369,18 +411,22 @@
         const rawKey = safeText(item.r2_object_key);
         const file = safeText(item.example_image_file);
 
-        const finalKey = rawKey
-          ? rawKey.replace(/^\/+/, '')
-          : (ASSET_PREFIX + "/" + file);
+        let finalKey = rawKey.replace(/^\/+/, '');
+        if (!finalKey && file) {
+          finalKey = "Supplies/" + file;
+        }
 
-        return ASSET_ORIGIN + "/" + encodeKeyPath(finalKey);
+        return finalKey ? (ASSET_ORIGIN + "/" + encodeKeyPath(finalKey)) : "";
       }
 
       function getAmazonUrl(item){
         if (safeText(item.amazon_url)) return item.amazon_url;
         if (safeText(item.amazon_search_url)) return item.amazon_search_url;
+
         const q = encodeURIComponent(
-          safeText(item.item_name_suggested) || safeText(item.example_image_file) || "workshop supplies"
+          safeText(item.item_name_suggested) ||
+          safeText(item.example_image_file) ||
+          "workshop supplies"
         );
         return "https://www.amazon.ca/s?k=" + q;
       }
@@ -402,7 +448,7 @@
           return item.hazard_tags.map(safeText).filter(Boolean);
         }
         if (typeof item.hazard_tags === "string") {
-          return item.hazard_tags.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+          return item.hazard_tags.split(",").map(function (x) { return x.trim(); }).filter(Boolean);
         }
         return [];
       }
@@ -414,29 +460,26 @@
         return Number.isFinite(n) ? n : null;
       }
 
-      // Hidden from display, but used for logic
       function needsReorder(item){
         const onHand = toNum(item.on_hand_qty);
-        const rp = toNum(item.reorder_point);
-        if (onHand === null || rp === null) return false;
-        return onHand <= rp;
+        const reorderPoint = toNum(item.reorder_point);
+        if (onHand === null || reorderPoint === null) return false;
+        return onHand <= reorderPoint;
       }
 
       function getItemKey(item){
-        // Prefer stable ID fields if present; fallback to r2 key/file/name combo
         return safeText(item.id)
           || safeText(item.r2_object_key)
           || safeText(item.example_image_file)
           || (getItemName(item) + "::" + getType(item));
       }
 
-      // ---------- Reorder list (localStorage) ----------
       function readReorderList(){
         try {
           const raw = localStorage.getItem(REORDER_STORAGE_KEY);
           if (!raw) return [];
-          const arr = JSON.parse(raw);
-          return Array.isArray(arr) ? arr : [];
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
         } catch (e) {
           return [];
         }
@@ -468,34 +511,24 @@
         return readReorderList().some(function (x) { return x.key === key; });
       }
 
-      // ---------- DOM ----------
       const supGridEl = document.getElementById("supGrid");
       const supQEl = document.getElementById("supQ");
       const supAreaEl = document.getElementById("supArea");
       const supTypeEl = document.getElementById("supType");
       const supHazardEl = document.getElementById("supHazard");
       const supReorderOnlyEl = document.getElementById("supReorderOnly");
-      const supShownEl = document.getElementById("supShown");
-      const supTotalEl = document.getElementById("supTotal");
 
       const toggleReorderPanelBtn = document.getElementById("toggleReorderPanel");
       const copyReorderListBtn = document.getElementById("copyReorderList");
       const clearReorderListBtn = document.getElementById("clearReorderList");
-      const reorderCountTopEl = document.getElementById("reorderCountTop");
       const reorderPanelEl = document.getElementById("reorderPanel");
       const reorderListWrapEl = document.getElementById("reorderListWrap");
 
       let allSupplies = [];
       let reorderPanelOpen = false;
 
-      function updateReorderCountUI(){
-        const count = readReorderList().length;
-        reorderCountTopEl.textContent = String(count);
-      }
-
       function renderReorderPanel(){
         const list = readReorderList();
-        updateReorderCountUI();
 
         if (!list.length) {
           reorderListWrapEl.innerHTML = '<div class="reorder-empty">Your reorder list is empty.</div>';
@@ -539,22 +572,25 @@
         const lines = [];
         lines.push("Devil n Dove Supplies Reorder List");
         lines.push("");
+
         list.forEach(function (entry, idx) {
           lines.push((idx + 1) + ". " + entry.name);
           lines.push("   " + entry.amazon);
         });
 
         const text = lines.join("\n");
+
         try {
           await navigator.clipboard.writeText(text);
           copyReorderListBtn.textContent = "Copied!";
-          setTimeout(function(){ copyReorderListBtn.textContent = "Copy List"; }, 1200);
+          setTimeout(function () {
+            copyReorderListBtn.textContent = "Copy List";
+          }, 1200);
         } catch (e) {
-          alert("Copy failed. You can open the reorder panel and copy manually.");
+          alert("Copy failed. Open the reorder panel and copy manually.");
         }
       }
 
-      // ---------- Cards / Render ----------
       function buildSupplyCard(item){
         const name = getItemName(item);
         const brand = safeText(item.brand_guess);
@@ -573,12 +609,16 @@
         return `
           <div class="item card">
             <div class="thumb">
-              <img
-                src="${imgUrl}"
-                alt="${escHtml(name)}"
-                loading="lazy"
-                onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escHtml(safeText(item.example_image_file) || 'Unknown file')}</span></div>';"
-              />
+              ${
+                imgUrl
+                  ? `<img
+                      src="${imgUrl}"
+                      alt="${escHtml(name)}"
+                      loading="lazy"
+                      onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escHtml(safeText(item.example_image_file) || "Unknown file")}</span></div>';"
+                    />`
+                  : `<div class="ph">Missing image<br><span style="opacity:.7">${escHtml(safeText(item.example_image_file) || "Unknown file")}</span></div>`
+              }
             </div>
             <div class="body">
               <div class="tname">${escHtml(name)}</div>
@@ -590,12 +630,12 @@
                 ${isReorder ? `<span class="tag tag-reorder">Reorder</span>` : ""}
               </div>
 
-              ${note ? `<div class="note">${escHtml(note)}</div>` : ""}
+              ${note ? `<div class="note">${escHtml(note)}</div>` : `<div class="note"></div>`}
 
               <div class="actions">
                 <a class="btnlink" href="${amazon}" target="_blank" rel="noopener">Amazon.ca search</a>
                 <button
-                  class="btnlink secondary ${alreadyAdded ? 'active' : ''}"
+                  class="btnlink secondary ${alreadyAdded ? "active" : ""}"
                   type="button"
                   data-add-reorder="${escHtml(itemKey)}"
                 >
@@ -609,46 +649,40 @@
         `;
       }
 
-      function groupAndRender(items, totalCount){
-        supShownEl.textContent = String(items.length);
-        supTotalEl.textContent = String(totalCount);
-
+      function renderGrouped(items){
         const groups = {};
         items.forEach(function (it) {
-          const t = getType(it);
-          if (!groups[t]) groups[t] = [];
-          groups[t].push(it);
+          const area = getPrimaryArea(it);
+          if (!groups[area]) groups[area] = [];
+          groups[area].push(it);
         });
 
-        Object.keys(groups).forEach(function (key) {
-          groups[key].sort(function (a, b) {
+        Object.keys(groups).forEach(function (area) {
+          groups[area].sort(function (a, b) {
             return getItemName(a).localeCompare(getItemName(b));
           });
         });
 
-        const typeNames = Object.keys(groups).sort(function (a, b) { return a.localeCompare(b); });
+        const areas = Object.keys(groups).sort(areaSort);
 
-        if (!typeNames.length) {
+        if (!areas.length) {
           supGridEl.innerHTML = `<div class="small">No supplies match the current filters.</div>`;
           return;
         }
 
-        supGridEl.innerHTML = typeNames.map(function (typeName) {
-          const itemsInGroup = groups[typeName];
+        supGridEl.innerHTML = areas.map(function (area) {
           return `
             <section class="area-block">
               <div class="area-head">
-                <h2>${escHtml(typeName)}</h2>
-                <div class="muted">${itemsInGroup.length} item${itemsInGroup.length === 1 ? "" : "s"}</div>
+                <h2>${escHtml(area)}</h2>
               </div>
               <div class="subgrid">
-                ${itemsInGroup.map(buildSupplyCard).join("")}
+                ${groups[area].map(buildSupplyCard).join("")}
               </div>
             </section>
           `;
         }).join("");
 
-        // Wire add-to-list buttons after render
         Array.from(supGridEl.querySelectorAll("[data-add-reorder]")).forEach(function (btn) {
           btn.addEventListener("click", function () {
             const key = btn.getAttribute("data-add-reorder");
@@ -661,7 +695,6 @@
               amazon: getAmazonUrl(item)
             });
 
-            updateReorderCountUI();
             if (reorderPanelOpen) renderReorderPanel();
             renderFiltered();
           });
@@ -705,7 +738,7 @@
           });
         }
 
-        groupAndRender(list, allSupplies.length);
+        renderGrouped(list);
       }
 
       function populateFilters(items){
@@ -719,21 +752,21 @@
           getHazardTags(it).forEach(function (h) { hazardSet.add(h); });
         });
 
-        Array.from(areaSet).sort().forEach(function (v) {
+        Array.from(areaSet).sort(areaSort).forEach(function (v) {
           const opt = document.createElement("option");
           opt.value = v;
           opt.textContent = v;
           supAreaEl.appendChild(opt);
         });
 
-        Array.from(typeSet).sort().forEach(function (v) {
+        Array.from(typeSet).sort(function (a, b) { return a.localeCompare(b); }).forEach(function (v) {
           const opt = document.createElement("option");
           opt.value = v;
           opt.textContent = v;
           supTypeEl.appendChild(opt);
         });
 
-        Array.from(hazardSet).sort().forEach(function (v) {
+        Array.from(hazardSet).sort(function (a, b) { return a.localeCompare(b); }).forEach(function (v) {
           const opt = document.createElement("option");
           opt.value = v;
           opt.textContent = v;
@@ -747,14 +780,10 @@
           if (!resp.ok) throw new Error("Failed to load supplies JSON: " + resp.status);
 
           const data = await resp.json();
-
-          // Support either array root or object with items
           allSupplies = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
 
           if (!allSupplies.length) {
             supGridEl.innerHTML = `<div class="small">No supplies found in ${escHtml(DATA_URL)}</div>`;
-            supShownEl.textContent = "0";
-            supTotalEl.textContent = "0";
             return;
           }
 
@@ -776,7 +805,6 @@
             renderFiltered();
           });
 
-          updateReorderCountUI();
           renderFiltered();
         } catch (err) {
           console.error(err);
