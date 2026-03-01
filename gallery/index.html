@@ -6,75 +6,306 @@
   <title>Art — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
+
+  <style>
+    .subgrid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .item.card{
+      padding: 0;
+      overflow: hidden;
+      display:flex;
+      flex-direction: column;
+      min-height: 320px;
+    }
+    .item.card .thumb{
+      height: 160px;
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .item.card .thumb img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display:block;
+    }
+    .item.card .thumb .ph{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:12px;
+      opacity:.75;
+      padding: 10px;
+      line-height:1.3;
+    }
+    .item.card .body{
+      padding: 12px;
+      display:flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+    .item.card .tname{
+      font-weight: 800;
+      line-height: 1.2;
+      font-size: 14px;
+      margin: 0;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+    .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .tag{
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      opacity: .9;
+      white-space: nowrap;
+    }
+    .actions{
+      margin-top: auto;
+      padding-top: 6px;
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btnlink{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      text-decoration:none;
+      font-size: 12px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      min-width: 120px;
+      cursor: pointer;
+      color: inherit;
+    }
+    .btnlink:hover{ background: rgba(255,255,255,0.10); }
+
+    .controls-row{
+      display:grid;
+      grid-template-columns: 1fr 260px;
+      gap: 10px;
+      align-items:end;
+    }
+    @media (max-width: 900px){
+      .controls-row{ grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <div class="nav">
-  <div class="brand">
-    <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
-    <div>
-      <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-      <div class="small">Workshop • Art • Tools • Movies</div>
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Workshop • Art • Tools • Movies</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <a href="/index.html">Home</a>
+        <a href="/about/index.html">About</a>
+        <a href="/gallery/index.html">Art</a>
+        <a href="/tools/index.html">Tools</a>
+        <a href="/supplies/index.html">Supplies</a>
+        <a href="/shop/index.html">Shop</a>
+        <a href="/movies/index.html">Movies</a>
+        <a href="/contact/index.html">Contact</a>
+      </div>
     </div>
-  </div>
-  <div style="display:flex;gap:14px;flex-wrap:wrap">
-    <a href="/index.html">Home</a>
-    <a href="/about/index.html">About</a>
-    <a href="/gallery/index.html">Art</a>
-    <a href="/tools/index.html">Tools</a
-    <a href="/supplies/index.html">Supplies</a>                                  
-    <a href="/shop/index.html">Shop</a>
-    <a href="/movies/index.html">Movies</a>
-    <a href="/contact/index.html">Contact</a>
-  </div>
-</div>
 
     <div class="hero">
-      <span class="badge">Art</span>
-      <h1>Finished pieces, experiments, and happy accidents.</h1>
+      <span class="badge">Art & Builds</span>
+      <h1>Recent pieces + experiments.</h1>
       <p>
-        We post the polished work—and the “we tried something weird” work—because both are real.
-        This gallery will grow into collections you can browse by theme, material, or technique.
+        A living portfolio of what we’ve made — jewelry, mixed media, prototypes, and the occasional happy accident.
       </p>
     </div>
 
-    <div class="banner" style="margin-top:10px"><img src="/assets/banner-spicing-it-up.png" alt="Devil n Dove banner artwork" /></div>
-
-    <div class="grid">
-      <div class="card">
-        <h3>Quick start</h3>
-        <p class="small">
-          Send 12–30 photos and we’ll turn this into a clean gallery grid with categories.
-        </p>
-        <ul class="small clean">
-          <li>Close-ups of finished items</li>
-          <li>One “scale” photo (in hand / beside ruler)</li>
-          <li>One “process” photo per collection</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>Our vibe</h3>
-        <p class="small">
-          Fire + calm. Bold + soft. The Devil n Dove balance.
-          If it makes you smile, feel something, or spark an idea—then it belongs here.
-        </p>
-      </div>
-    </div>
-
     <div class="card" style="margin-top:14px">
-      <h3>Featured visuals (placeholders for now)</h3>
-      <p class="small">We dropped your sample images in here so the site feels alive immediately. As you upload real photos, we’ll swap these out.</p>
-      <div class="masonry" style="margin-top:12px">
-        <div class="mitem"><img src="/assets/hero-workshop.webp" alt="Illustrated workshop scene" /></div>
-        <div class="mitem"><img src="/assets/mainpage-collage.jpeg" alt="Workshop collage" /></div>
-        <div class="mitem"><img src="/assets/mark.png" alt="Devil n Dove icon mark" /></div>
+      <div class="controls-row">
+        <div>
+          <label class="small" for="artQ">Search</label>
+          <input id="artQ" class="input" placeholder="Type: ring, pendant, purple, spoon…" />
+        </div>
+        <div>
+          <label class="small" for="artType">Group</label>
+          <select id="artType" class="input">
+            <option value="all">All</option>
+            <option value="rings">Rings</option>
+            <option value="sets">Sets</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top:10px">
+        Showing <span id="shown">0</span> of <span id="total">0</span>
+      </div>
+
+      <div id="grid" class="subgrid" style="margin-top:12px"></div>
+
+      <div class="small" style="margin-top:12px; opacity:.85">
+        Images are served from R2: <code>itemsforsale/</code> (case-sensitive filenames).
       </div>
     </div>
 
     <div class="footer">
-      Upload for this page: 12–30 product photos + 5 workshop process photos.
+      Next: we can add a “story” field per item (what we learned, what we’d do differently).
     </div>
   </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    (function () {
+      const DATA_URL = "/data/itemsforsale/itemsforsale_items_master.json";
+
+      function safeText(v){ return (v == null ? "" : String(v)).trim(); }
+      function norm(v){ return safeText(v).toLowerCase(); }
+
+      function escHtml(v){
+        return String(v ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function encodeKeyPath(key){
+        return String(key).split("/").map(encodeURIComponent).join("/");
+      }
+
+      function itemImageUrl(meta, it){
+        const origin = safeText(meta.asset_origin) || "https://assets.devilndove.com";
+        const key = safeText(it.r2_object_key) || ("itemsforsale/" + safeText(it.image_file));
+        return origin + "/" + encodeKeyPath(key.replace(/^\/+/, ""));
+      }
+
+      function getItemName(it){
+        return safeText(it.title) || safeText(it.image_file) || "Item";
+      }
+
+      function getGroup(it){
+        const sub = norm(it.subcategory);
+        const title = norm(it.title);
+        if (sub.includes("ring") || title.includes("ring")) return "rings";
+        if (sub.includes("set") || title.includes("set")) return "sets";
+        return "other";
+      }
+
+      function getTags(it){
+        const out = [];
+        if (safeText(it.subcategory)) out.push(it.subcategory);
+        if (Array.isArray(it.materials)) out.push(...it.materials.slice(0, 2));
+        if (Array.isArray(it.tags)) out.push(...it.tags.slice(0, 2));
+        return out.filter(Boolean).slice(0, 5);
+      }
+
+      function buildCard(meta, it){
+        const name = getItemName(it);
+        const url = itemImageUrl(meta, it);
+        const tags = getTags(it);
+        const shopUrl = safeText(it.shop_url) || "/contact/index.html";
+
+        return `
+          <div class="item card">
+            <div class="thumb">
+              <img
+                src="${url}"
+                alt="${escHtml(safeText(it.alt) || name)}"
+                loading="lazy"
+                onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escHtml(safeText(it.image_file) || "Unknown file")}</span></div>';"
+              />
+            </div>
+            <div class="body">
+              <div class="tname">${escHtml(name)}</div>
+              <div class="tags">
+                ${tags.map(t => `<span class="tag">${escHtml(t)}</span>`).join("")}
+              </div>
+              <div class="actions">
+                <a class="btnlink" href="${shopUrl}" ${shopUrl.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>View / Inquire</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      const qEl = document.getElementById("artQ");
+      const typeEl = document.getElementById("artType");
+      const gridEl = document.getElementById("grid");
+      const shownEl = document.getElementById("shown");
+      const totalEl = document.getElementById("total");
+
+      let meta = null;
+      let items = [];
+
+      function render(){
+        const term = norm(qEl.value);
+        const groupVal = typeEl.value;
+
+        let list = items.slice();
+
+        if (groupVal !== "all") list = list.filter(it => getGroup(it) === groupVal);
+
+        if (term){
+          list = list.filter(it => {
+            const hay = [
+              norm(it.title),
+              norm(it.subcategory),
+              norm((it.materials||[]).join(" ")),
+              norm((it.tags||[]).join(" ")),
+              norm(it.image_file)
+            ].join(" ");
+            return hay.includes(term);
+          });
+        }
+
+        shownEl.textContent = String(list.length);
+        totalEl.textContent = String(items.length);
+
+        gridEl.innerHTML = list.map(it => buildCard(meta, it)).join("");
+      }
+
+      async function init(){
+        try{
+          const r = await fetch(DATA_URL, { cache: "no-store" });
+          if (!r.ok) throw new Error("JSON load failed: " + r.status);
+          meta = await r.json();
+          items = Array.isArray(meta.items) ? meta.items.slice() : [];
+          render();
+          qEl.addEventListener("input", render);
+          typeEl.addEventListener("change", render);
+        } catch (e){
+          console.error(e);
+          gridEl.innerHTML = `<div class="small">Could not load <code>${escHtml(DATA_URL)}</code></div>`;
+        }
+      }
+
+      init();
+    })();
+  </script>
 </body>
 </html>
