@@ -33,7 +33,7 @@
             Quick checks for: broken image links, missing categories/areas, and exact duplicate photos.
           </p>
           <p class="small">
-            Data source: <span class="mono">/data/tools/toolshed_items_master.json</span>
+            Data source: <span class="mono">/data/toolshed/toolshed_items_master.json</span>
           </p>
         </div>
         <div class="hero-media">
@@ -80,7 +80,7 @@
       <h3>Exact Duplicate Photos</h3>
       <div class="small">Loads the first duplicate report it can find:</div>
       <ul class="small">
-        <li class="mono">/data/tools/exact_duplicate_report.json</li>
+        <li class="mono">/data/toolshed/exact_duplicate_report.json</li>
         <li class="mono">/data/exact_duplicate_report.json</li>
         <li class="mono">/exact_duplicate_report.json</li>
       </ul>
@@ -107,7 +107,7 @@
   <script src="/js/main.js"></script>
   <script>
     const escapeHtml = (window.DD && window.DD.escapeHtml) ? window.DD.escapeHtml : (s)=>String(s??"");
-    const TOOLS_JSON = "/data/tools/toolshed_items_master.json";
+    const TOOLS_JSON = "/data/toolshed/toolshed_items_master.json";
 
     const ASSETS_BASE = "https://assets.devilndove.com";
     const TOOLS_PREFIX = "Toolshed"; // must match R2 folder capitalization
@@ -188,7 +188,7 @@
 
     async function loadDupReport(){
       const candidates = [
-        "/data/tools/exact_duplicate_report.json",
+        "/data/toolshed/exact_duplicate_report.json",
         "/data/exact_duplicate_report.json",
         "/exact_duplicate_report.json"
       ];
