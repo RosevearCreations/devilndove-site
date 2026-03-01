@@ -33,7 +33,7 @@
             Quick checks for: broken image links, missing categories/areas, and exact duplicate photos.
           </p>
           <p class="small">
-            Data source: <span class="mono">/data/supplies/toolshed_items_master.json</span>
+            Data source: <span class="mono">/data/supplies/supplies_items_master.json</span>
           </p>
         </div>
         <div class="hero-media">
@@ -80,9 +80,9 @@
       <h3>Exact Duplicate Photos</h3>
       <div class="small">Loads the first duplicate report it can find:</div>
       <ul class="small">
-        <li class="mono">/data/supplies/exact_duplicate_report.json</li>
-        <li class="mono">/data/supplies/exact_duplicate_report.json</li>
-        <li class="mono">/data/supplies/exact_duplicate_report.json</li>
+        <li class="mono">/data/supplies/supplies_exact_duplicate_report.json</li>
+        <li class="mono">/data/supplies/supplies_exact_duplicate_report.json</li>
+        <li class="mono">/data/supplies/supplies_exact_duplicate_report.json</li>
       </ul>
       <div id="dupMsg" class="small"></div>
       <div style="overflow:auto;margin-top:10px">
@@ -188,7 +188,7 @@
 
     async function loadDupReport(){
       const candidates = [
-        "/data/tools/exact_duplicate_report.json",
+        "/data/supplies/supplies_exact_duplicate_report.json",
         "/data/exact_duplicate_report.json",
         "/exact_duplicate_report.json"
       ];
