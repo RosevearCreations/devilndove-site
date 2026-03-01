@@ -2,7 +2,7 @@
   "count": 7,
   "generated_at": "2026-02-28",
   "asset_origin": "https://assets.devilndove.com",
-  "asset_prefix": "itemsforsale",
+  "asset_prefix": "Itemsforsale",
   "video": {
     "title": "Workshop clip",
     "src": "itemsforsale/MVI_1966.MP4",
@@ -17,7 +17,7 @@
       "materials": ["polymer clay", "metal findings"],
       "tags": ["pink", "hearts", "handmade", "gift"],
       "image_file": "DD215-216B.jpeg",
-      "r2_object_key": "itemsforsale/DD215-216B.jpeg",
+      "r2_object_key": "Itemsforsale/DD215-216B.jpeg",
       "alt": "Pink heart jewelry set with matching earrings and pendant.",
       "status": "unknown",
       "shop_url": ""
@@ -30,7 +30,7 @@
       "materials": ["polymer clay", "metal findings"],
       "tags": ["black", "white", "handmade", "styled"],
       "image_file": "DDM04.jpeg",
-      "r2_object_key": "itemsforsale/DDM04.jpeg",
+      "r2_object_key": "Itemsforsale/DDM04.jpeg",
       "alt": "Styled photo of black and white jewelry pieces on a display surface.",
       "status": "unknown",
       "shop_url": ""
@@ -43,7 +43,7 @@
       "materials": ["polymer clay", "metal findings"],
       "tags": ["purple", "handmade", "polymer", "set"],
       "image_file": "DDM06.jpeg",
-      "r2_object_key": "itemsforsale/DDM06.jpeg",
+      "r2_object_key": "Itemsforsale/DDM06.jpeg",
       "alt": "Purple polymer jewelry set including bracelet, ring, and earrings.",
       "status": "unknown",
       "shop_url": ""
@@ -56,7 +56,7 @@
       "materials": ["mixed"],
       "tags": ["packaged", "assorted", "display"],
       "image_file": "DDPR02.jpeg",
-      "r2_object_key": "itemsforsale/DDPR02.jpeg",
+      "r2_object_key": "Itemsforsale/DDPR02.jpeg",
       "alt": "Assorted jewelry pieces packaged and ready for sale.",
       "status": "unknown",
       "shop_url": ""
@@ -69,7 +69,7 @@
       "materials": ["metal (silverware)"],
       "tags": ["spoon ring", "upcycled", "metalwork"],
       "image_file": "DDPR09.jpeg",
-      "r2_object_key": "itemsforsale/DDPR09.jpeg",
+      "r2_object_key": "Itemsforsale/DDPR09.jpeg",
       "alt": "Spoon rings displayed on a red velvet tray.",
       "status": "unknown",
       "shop_url": ""
@@ -82,7 +82,7 @@
       "materials": ["metal (silverware)"],
       "tags": ["spoon ring", "upcycled", "metalwork"],
       "image_file": "DDPR14.jpeg",
-      "r2_object_key": "itemsforsale/DDPR14.jpeg",
+      "r2_object_key": "Itemsforsale/DDPR14.jpeg",
       "alt": "A pile of handmade spoon rings.",
       "status": "unknown",
       "shop_url": ""
@@ -95,7 +95,7 @@
       "materials": ["polymer clay", "mixed media"],
       "tags": ["colorful", "handmade", "pendants"],
       "image_file": "LampLight.jpeg",
-      "r2_object_key": "itemsforsale/LampLight.jpeg",
+      "r2_object_key": "Itemsforsale/LampLight.jpeg",
       "alt": "Colorful handmade pendants photographed under studio lighting.",
       "status": "unknown",
       "shop_url": ""
