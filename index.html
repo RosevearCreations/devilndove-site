@@ -250,7 +250,7 @@
 
       function itemImageUrl(meta, it){
         const origin = safeText(meta.asset_origin) || "https://assets.devilndove.com";
-        const key = safeText(it.r2_object_key) || ("itemsforsale/" + safeText(it.image_file));
+        const key = safeText(it.r2_object_key) || ("Itemsforsale/" + safeText(it.image_file));
         return origin + "/" + encodeKeyPath(key.replace(/^\/+/, ""));
       }
 
