@@ -4,7 +4,7 @@ Upload this folder to Cloudflare Pages (Direct Upload) OR push it to Git and use
 
 Key files:
 - /assets/ logo images
-- /data/catalog.json  (movies UPC list)
+- /data/catalog.json  (movies UPC list)tools
 - /data/products.json (shop items)
 
 
@@ -12,7 +12,7 @@ Key files:
 - /assets/tools/ (tool photos)
 
 
-## Toolshed
+## Toolshed 
 
 The tools page lives at `/tools/index.html` and is driven by `/data/tools.json`.
 
