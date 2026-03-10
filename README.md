@@ -1,4 +1,4 @@
-# Devil n Dove site v2 (logo +  copy)
+# Devil n Dove site v2 (logo + copy)
 
 Upload this folder to Cloudflare Pages (Direct Upload) OR push it to Git and use Git integration.
 
