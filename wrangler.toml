@@ -6,6 +6,6 @@ compatibility_date = "2026-03-10"
 # After you create the DB, paste the IDs below.
 [[d1_databases]]
 binding = "DD_DB"
-database_name = "devilndove"
-database_id = "REPLACE_WITH_PROD_DATABASE_ID"
-preview_database_id = "REPLACE_WITH_PREVIEW_DATABASE_ID"
+database_name = "devilndove-prod"
+database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"
+
