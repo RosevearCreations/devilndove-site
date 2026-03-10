@@ -1,0 +1,11 @@
+# wrangler.toml
+name = "devilndove-site"
+compatibility_date = "2026-03-10"
+
+# Cloudflare D1 (SQLite-style) database binding for Pages Functions.
+# After you create the DB, paste the IDs below.
+[[d1_databases]]
+binding = "DD_DB"
+database_name = "devilndove"
+database_id = "REPLACE_WITH_PROD_DATABASE_ID"
+preview_database_id = "REPLACE_WITH_PREVIEW_DATABASE_ID"
