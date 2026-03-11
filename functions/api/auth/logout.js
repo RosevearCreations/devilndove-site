@@ -1,7 +1,7 @@
 // File: /functions/api/auth/logout.js
 //
 // POST /api/auth/logout
-// Clears cookie + deletes session row (if present).
+// Clears dd_session cookie and deletes the session row (if present).
 
 function json(status, data, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -29,16 +29,9 @@ function getCookie(request, name) {
 }
 
 function clearSessionCookie() {
-  // Secure is fine for production (HTTPS). Browsers may ignore Secure on http://localhost.
-  return [
-    "dd_session=;",
-    "Path=/;",
-    "HttpOnly;",
-    "SameSite=Lax;",
-    "Secure;",
-    "Max-Age=0;",
-    "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
-  ].join(" ");
+  // No Domain= attribute so it works on both preview + custom domain.
+  // Secure is fine on Pages (HTTPS). SameSite=Lax helps reduce CSRF risk.
+  return "dd_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
 }
 
 export async function onRequest(context) {
@@ -55,14 +48,11 @@ export async function onRequest(context) {
   }
 
   const token = getCookie(request, "dd_session");
-
-  // Best effort: delete session row if we have a token
   if (token) {
+    // Best-effort delete; even if it fails, still clear cookie.
     try {
       await env.DD_DB.prepare(`DELETE FROM sessions WHERE token = ?`).bind(token).run();
-    } catch {
-      // ignore (we still clear cookie)
-    }
+    } catch (_) {}
   }
 
   return json(
