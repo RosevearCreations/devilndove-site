@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const emptyEl = document.getElementById("usersEmpty");
   const errorEl = document.getElementById("usersError");
   const loadingEl = document.getElementById("usersLoading");
+  const refreshButtons = document.querySelectorAll("[data-refresh-users]");
 
   function show(el) {
     if (el) el.style.display = "";
@@ -26,27 +27,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const d = new Date(value.replace(" ", "T") + "Z");
     if (Number.isNaN(d.getTime())) return value;
     return d.toLocaleString();
-  }
-
-  function renderRows(users) {
-    if (!tableBody) return;
-
-    tableBody.innerHTML = users.map(user => {
-      const name = user.display_name || "";
-      const role = user.role || "member";
-      const active = Number(user.is_active) === 1 ? "Yes" : "No";
-
-      return `
-        <tr>
-          <td>${escapeHtml(user.user_id)}</td>
-          <td>${escapeHtml(user.email)}</td>
-          <td>${escapeHtml(name)}</td>
-          <td>${escapeHtml(role)}</td>
-          <td>${escapeHtml(active)}</td>
-          <td>${escapeHtml(formatDate(user.created_at))}</td>
-        </tr>
-      `;
-    }).join("");
   }
 
   async function loadUsers() {
@@ -83,6 +63,103 @@ document.addEventListener("DOMContentLoaded", async () => {
       hide(loadingEl);
     }
   }
+
+  async function updateUser(userId, payload, triggerButton) {
+    const originalText = triggerButton ? triggerButton.textContent : "";
+
+    try {
+      if (triggerButton) {
+        triggerButton.disabled = true;
+        triggerButton.textContent = "Saving...";
+      }
+
+      const response = await window.DDAuth.apiFetch("/api/admin/user-update", {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: userId,
+          ...payload
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Update failed.");
+      }
+
+      await loadUsers();
+    } catch (error) {
+      alert(error.message || "Update failed.");
+      if (triggerButton) {
+        triggerButton.disabled = false;
+        triggerButton.textContent = originalText;
+      }
+    }
+  }
+
+  function renderRows(users) {
+    if (!tableBody) return;
+
+    tableBody.innerHTML = users.map(user => {
+      const userId = Number(user.user_id);
+      const email = escapeHtml(user.email);
+      const displayName = escapeHtml(user.display_name || "");
+      const role = user.role || "member";
+      const isActive = Number(user.is_active) === 1 ? 1 : 0;
+      const created = escapeHtml(formatDate(user.created_at));
+
+      return `
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${userId}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${email}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${displayName}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            <select data-role-select data-user-id="${userId}">
+              <option value="member" ${role === "member" ? "selected" : ""}>member</option>
+              <option value="admin" ${role === "admin" ? "selected" : ""}>admin</option>
+            </select>
+          </td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            <select data-active-select data-user-id="${userId}">
+              <option value="1" ${isActive === 1 ? "selected" : ""}>active</option>
+              <option value="0" ${isActive === 0 ? "selected" : ""}>inactive</option>
+            </select>
+          </td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${created}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            <button class="btn" type="button" data-save-user data-user-id="${userId}">
+              Save
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    bindRowActions();
+  }
+
+  function bindRowActions() {
+    const saveButtons = tableBody.querySelectorAll("[data-save-user]");
+
+    saveButtons.forEach(button => {
+      button.addEventListener("click", async () => {
+        const userId = Number(button.getAttribute("data-user-id"));
+        const roleSelect = tableBody.querySelector(`[data-role-select][data-user-id="${userId}"]`);
+        const activeSelect = tableBody.querySelector(`[data-active-select][data-user-id="${userId}"]`);
+
+        const role = roleSelect ? roleSelect.value : "member";
+        const is_active = activeSelect ? Number(activeSelect.value) : 1;
+
+        await updateUser(userId, { role, is_active }, button);
+      });
+    });
+  }
+
+  refreshButtons.forEach(button => {
+    button.addEventListener("click", async () => {
+      await loadUsers();
+    });
+  });
 
   if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
     return;
