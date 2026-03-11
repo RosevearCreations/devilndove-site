@@ -1,0 +1,139 @@
+<!-- FILE: /members/index.html
+     PURPOSE: Private members landing page (requires login; redirects to /login).
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Members — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Private Members Area</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+        <a href="/index.html">Home</a>
+        <a href="/gallery/index.html">Art</a>
+        <a href="/tools/index.html">Tools</a>
+        <a href="/supplies/index.html">Supplies</a>
+        <a href="/shop/index.html">Shop</a>
+        <a href="/contact/index.html">Contact</a>
+        <button id="logoutBtn"
+          style="padding:8px 12px;border-radius:12px;border:1px solid var(--border);background:#121826;color:var(--text);cursor:pointer;">
+          Log out
+        </button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <span class="badge">Members</span>
+      <h1 id="welcomeTitle">Loading…</h1>
+      <p class="small" id="welcomeSub">Checking your access…</p>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1.15fr .85fr;">
+      <div class="card">
+        <h2 style="margin-top:0">Work in progress</h2>
+        <p class="small" style="opacity:.9">
+          This is where we’ll show project updates, clips, and build notes (private for members).
+        </p>
+
+        <div class="hr"></div>
+
+        <div id="feed" class="small" style="display:grid;gap:10px;">
+          <div style="opacity:.8">No updates yet. (Next file will add the Updates feed.)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">Quick links</h3>
+
+        <div style="display:grid;gap:10px;margin-top:10px;">
+          <a href="/members/updates/index.html">Project Updates</a>
+          <a href="/members/clips/index.html">Clips</a>
+          <a href="/members/comments/index.html">Comments</a>
+          <a href="/members/profile/index.html">My Profile</a>
+
+          <div class="hr"></div>
+
+          <div id="adminBox" style="display:none;">
+            <h3 style="margin:0 0 8px 0;">Admin</h3>
+            <a href="/admin/index.html">Admin Dashboard</a>
+            <a href="/admin/inventory/index.html">Inventory (link parts to projects)</a>
+            <a href="/admin/members/index.html">Members</a>
+          </div>
+
+          <div class="hr"></div>
+
+          <a href="/support/index.html">Support an Artist (PayPal / Buy-a-Coffee)</a>
+        </div>
+
+        <div class="hr"></div>
+        <p class="small" id="roleLine" style="opacity:.85;margin:0;"></p>
+      </div>
+    </div>
+
+    <footer class="footer"></footer>
+  </div>
+
+  <script src="/js/main.js" defer></script>
+
+  <script>
+    (function () {
+      const welcomeTitle = document.getElementById('welcomeTitle');
+      const welcomeSub = document.getElementById('welcomeSub');
+      const roleLine = document.getElementById('roleLine');
+      const adminBox = document.getElementById('adminBox');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      function goLogin() {
+        const next = encodeURIComponent(location.pathname);
+        location.href = `/login/index.html?next=${next}`;
+      }
+
+      async function loadMe() {
+        try {
+          const r = await fetch('/api/auth/me', { credentials: 'include' });
+          const j = await r.json().catch(() => null);
+
+          if (!r.ok || !j || !j.ok) {
+            goLogin();
+            return;
+          }
+
+          const name = j.user?.display_name || j.user?.email || 'Member';
+          const role = j.user?.role || 'member';
+
+          welcomeTitle.textContent = `Welcome, ${name}`;
+          welcomeSub.textContent = `You’re signed in.`;
+          roleLine.textContent = `Role: ${role}`;
+
+          if (role === 'admin') adminBox.style.display = 'block';
+
+        } catch (e) {
+          goLogin();
+        }
+      }
+
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        } catch (_) {}
+        location.href = '/index.html';
+      });
+
+      loadMe();
+    })();
+  </script>
+</body>
+</html>
