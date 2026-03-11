@@ -1,0 +1,62 @@
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" }
+  });
+}
+
+export async function onRequestGet(context) {
+  const { request, env } = context;
+
+  const auth = request.headers.get("Authorization") || "";
+  if (!auth.startsWith("Bearer ")) {
+    return json({ ok: false, error: "Unauthorized." }, 401);
+  }
+
+  const token = auth.slice(7).trim();
+  if (!token) {
+    return json({ ok: false, error: "Missing session token." }, 401);
+  }
+
+  const sessionUser = await env.DB.prepare(`
+    SELECT
+      users.user_id,
+      users.email,
+      users.display_name,
+      users.role,
+      users.is_active
+    FROM sessions
+    JOIN users ON sessions.user_id = users.user_id
+    WHERE sessions.session_token = ?
+      AND sessions.expires_at > datetime('now')
+    LIMIT 1
+  `)
+    .bind(token)
+    .first();
+
+  if (!sessionUser) {
+    return json({ ok: false, error: "Invalid session." }, 401);
+  }
+
+  if (sessionUser.role !== "admin") {
+    return json({ ok: false, error: "Forbidden." }, 403);
+  }
+
+  const users = await env.DB.prepare(`
+    SELECT
+      user_id,
+      email,
+      display_name,
+      role,
+      is_active,
+      created_at
+    FROM users
+    ORDER BY created_at DESC, user_id DESC
+  `)
+    .all();
+
+  return json({
+    ok: true,
+    users: users.results || []
+  });
+}
