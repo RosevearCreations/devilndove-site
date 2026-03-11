@@ -43,40 +43,57 @@
     <div id="adminStatus" class="small" style="display:none;margin-bottom:12px"></div>
 
     <div class="card" data-admin-only style="display:none">
-      <h2 style="margin-top:0">Admin Dashboard</h2>
-      <p class="small">
-        This area is reserved for admin tools, member management, and protected controls.
-      </p>
+  <h2 style="margin-top:0">Admin Dashboard</h2>
+  <p class="small">
+    This area is reserved for admin tools, member management, and protected controls.
+  </p>
 
-      <div class="grid" style="gap:12px;margin-top:18px">
-        <div class="card">
-          <h3 style="margin-top:0">Admin Actions</h3>
-          <p class="small">Use this section later for:</p>
-          <ul class="small">
-            <li>member account setup</li>
-            <li>content approvals</li>
-            <li>private downloads</li>
-            <li>site management tools</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3 style="margin-top:0">Status</h3>
-          <p class="small">Your admin role has been verified.</p>
-        </div>
-      </div>
+  <div class="grid" style="gap:12px;margin-top:18px">
+    <div class="card">
+      <h3 style="margin-top:0">Admin Actions</h3>
+      <p class="small">Use this section later for:</p>
+      <ul class="small">
+        <li>member account setup</li>
+        <li>content approvals</li>
+        <li>private downloads</li>
+        <li>site management tools</li>
+      </ul>
     </div>
 
-    <div class="card" data-not-admin>
-      <h2 style="margin-top:0">Restricted</h2>
-      <p class="small">
-        This page is only available to admin accounts.
-      </p>
+    <div class="card">
+      <h3 style="margin-top:0">Status</h3>
+      <p class="small">Your admin role has been verified.</p>
     </div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <h3 style="margin-top:0">Users</h3>
+
+    <div id="usersLoading" class="small">Loading users...</div>
+    <div id="usersError" class="small" style="display:none;color:#b00020"></div>
+    <div id="usersEmpty" class="small" style="display:none">No users found.</div>
+
+    <div style="overflow:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">ID</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Email</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Display Name</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Role</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Active</th>
+            <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
     <div class="footer card" style="margin-top:18px"></div>
   </div>
-
+<script src="/public/js/admin-users.js"></script>
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/admin.js"></script>
