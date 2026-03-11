@@ -1,0 +1,160 @@
+<!-- FILE: /login/index.html
+     PURPOSE: Sign-in page for your member/admin area (works with your /api/auth/login endpoint).
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Workshop • Art • Tools • Movies</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <a href="/index.html">Home</a>
+        <a href="/about/index.html">About</a>
+        <a href="/gallery/index.html">Art</a>
+        <a href="/tools/index.html">Tools</a>
+        <a href="/supplies/index.html">Supplies</a>
+        <a href="/shop/index.html">Shop</a>
+        <a href="/movies/index.html">Movies</a>
+        <a href="/contact/index.html">Contact</a>
+      </div>
+    </div>
+
+    <div class="banner" style="margin-bottom:14px">
+      <img src="/assets/banner-spicing-it-up.png" alt="Devil n Dove banner artwork" />
+    </div>
+
+    <div class="hero">
+      <span class="badge">Members</span>
+      <h1>Sign in</h1>
+      <p class="small">Access your private work-in-progress area and admin tools.</p>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1fr; max-width: 720px; margin: 0 auto;">
+      <div class="card">
+        <form id="loginForm" autocomplete="on">
+          <div style="display:grid; gap:10px;">
+            <label class="small" for="email">Email</label>
+            <input id="email" name="email" type="email" required
+                   placeholder="you@domain.com"
+                   style="padding:12px 12px;border-radius:12px;border:1px solid var(--border);background:#0f131a;color:var(--text);" />
+
+            <label class="small" for="password" style="margin-top:6px;">Password</label>
+            <input id="password" name="password" type="password" required
+                   placeholder="••••••••"
+                   style="padding:12px 12px;border-radius:12px;border:1px solid var(--border);background:#0f131a;color:var(--text);" />
+
+            <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+              <input id="showPw" type="checkbox" />
+              <label for="showPw" class="small" style="cursor:pointer;">Show password</label>
+            </div>
+
+            <div class="hr"></div>
+
+            <button id="submitBtn" type="submit"
+                    style="padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#121826;color:var(--text);font-weight:700;cursor:pointer;">
+              Sign in
+            </button>
+
+            <div id="msg" class="small" style="min-height:18px;"></div>
+
+            <p class="small" style="opacity:.85;margin-top:6px;">
+              Tip: if you just bootstrapped the admin, sign in using that email + password.
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <footer class="footer"></footer>
+  </div>
+
+  <script src="/js/main.js" defer></script>
+
+  <script>
+    (function () {
+      const form = document.getElementById('loginForm');
+      const emailEl = document.getElementById('email');
+      const pwEl = document.getElementById('password');
+      const msgEl = document.getElementById('msg');
+      const btnEl = document.getElementById('submitBtn');
+      const showPw = document.getElementById('showPw');
+
+      const params = new URLSearchParams(location.search);
+      const next = params.get('next') || '/members/index.html';
+
+      function setMsg(text, isError = false) {
+        msgEl.textContent = text || '';
+        msgEl.style.color = isError ? 'var(--danger, #ff6b6b)' : 'var(--muted, #9aa4b2)';
+      }
+
+      showPw.addEventListener('change', () => {
+        pwEl.type = showPw.checked ? 'text' : 'password';
+      });
+
+      // If your backend provides /api/auth/me, this will auto-redirect when already signed in.
+      (async () => {
+        try {
+          const r = await fetch('/api/auth/me', { credentials: 'include' });
+          const j = await r.json().catch(() => null);
+          if (r.ok && j && j.ok) location.href = next;
+        } catch (_) { /* ignore */ }
+      })();
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        setMsg('');
+
+        const email = (emailEl.value || '').trim().toLowerCase();
+        const password = pwEl.value || '';
+
+        if (!email || !password) {
+          setMsg('Please enter email + password.', true);
+          return;
+        }
+
+        btnEl.disabled = true;
+        btnEl.textContent = 'Signing in…';
+
+        try {
+          const r = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password })
+          });
+
+          const j = await r.json().catch(() => ({}));
+
+          if (!r.ok || !j.ok) {
+            setMsg(j.error || 'Sign-in failed. Check your email/password.', true);
+            btnEl.disabled = false;
+            btnEl.textContent = 'Sign in';
+            return;
+          }
+
+          setMsg('Signed in. Redirecting…');
+          location.href = next;
+
+        } catch (err) {
+          setMsg('Network error signing in. Try again.', true);
+          btnEl.disabled = false;
+          btnEl.textContent = 'Sign in';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
