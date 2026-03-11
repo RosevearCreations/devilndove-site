@@ -2,265 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Members — Devil n Dove</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Members Area — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
-
-  <style>
-    .split { display:grid; grid-template-columns: 1.1fr .9fr; gap:14px; align-items:start; }
-    @media (max-width: 860px){ .split{ grid-template-columns:1fr; } }
-    .row { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    @media (max-width: 620px){ .row{ grid-template-columns:1fr; } }
-    .hidden { display:none !important; }
-    .status { padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,.03); }
-    .status.ok { border-color: rgba(46,168,255,.35); background: rgba(46,168,255,.10); }
-    .status.bad { border-color: rgba(227,49,45,.35); background: rgba(227,49,45,.10); }
-    .actions { display:flex; flex-wrap:wrap; gap:10px; }
-    .mini { font-size:12px; color:var(--muted); line-height:1.5; }
-    .pill { display:inline-block; padding:3px 10px; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,.03); font-size:12px; color:var(--muted); }
-    .kv { display:grid; grid-template-columns: 160px 1fr; gap:8px; }
-    @media (max-width: 620px){ .kv{ grid-template-columns: 1fr; } }
-    .kv b { color: var(--text); }
-  </style>
+  <meta name="robots" content="noindex,nofollow" />
 </head>
-
 <body>
   <div class="container">
-    <div class="nav"></div>
+    <div class="nav">
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Workshop • Art • Tools • Movies</div>
+        </div>
+      </div>
+
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/gallery/">Gallery</a>
+        <a href="/creations/">Creations</a>
+        <a href="/tools/">Tools</a>
+        <a href="/supplies/">Supplies</a>
+        <a href="/contact/">Contact</a>
+        <a href="/members/">Members</a>
+      </div>
+    </div>
 
     <div class="hero">
-      <h1>Members Area <span class="badge">Private</span></h1>
-      <p>Log in to see work-in-progress updates, leave comments on projects, and (later) manage shop items through a simple admin interface.</p>
+      <div>
+        <h1>Members Area</h1>
+        <p class="small">
+          Private member space for Devil n Dove account access.
+        </p>
+      </div>
     </div>
 
-    <div id="pageStatus" class="status hidden"></div>
+    <div id="memberStatus" class="small" style="display:none;margin-bottom:12px"></div>
 
-    <div class="split">
-      <!-- Left: Auth -->
-      <div class="card" id="authCard">
-        <h3>Log In</h3>
-        <p class="small">Use your email + password. If you’re already logged in, this page will switch to your member dashboard automatically.</p>
+    <div class="card" data-auth-only style="display:none">
+      <h2 style="margin-top:0">Welcome, <span data-user-name>Member</span></h2>
+      <p class="small" style="margin-top:6px">
+        You are signed in to the private area.
+      </p>
 
-        <form id="loginForm">
-          <div class="row">
-            <div class="form-row">
-              <label class="small" for="email">Email</label>
-              <input id="email" class="input" type="email" autocomplete="email" required />
-            </div>
-            <div class="form-row">
-              <label class="small" for="password">Password</label>
-              <input id="password" class="input" type="password" autocomplete="current-password" required />
-            </div>
-          </div>
-
-          <div style="margin-top:12px" class="actions">
-            <button class="btn primary" type="submit">Log In</button>
-            <a class="btn" href="/contact/">Need help?</a>
-          </div>
-
-          <div class="hr"></div>
-          <p class="mini">
-            Admin accounts are created via our bootstrap step (already done). Next we’ll add self-serve “request access” and email-based invites.
-          </p>
-        </form>
-      </div>
-
-      <!-- Right: Member panel -->
-      <div class="card hidden" id="memberCard">
-        <h3>Welcome back</h3>
-
-        <div class="kv" style="margin-top:10px">
-          <div class="small"><b>Display name</b></div>
-          <div class="small" id="m_display">(loading…)</div>
-
-          <div class="small"><b>Email</b></div>
-          <div class="small" id="m_email"></div>
-
-          <div class="small"><b>Role</b></div>
-          <div class="small"><span id="m_role" class="pill"></span></div>
-
-          <div class="small"><b>Last login</b></div>
-          <div class="small" id="m_last"></div>
+      <div class="grid" style="gap:12px;margin-top:18px">
+        <div class="card">
+          <h3 style="margin-top:0">Account Details</h3>
+          <p><strong>Name:</strong> <span data-user-name>Member</span></p>
+          <p><strong>Email:</strong> <span data-user-email></span></p>
+          <p><strong>Role:</strong> <span data-user-role>member</span></p>
         </div>
 
-        <div class="hr"></div>
-
-        <div class="actions">
-          <a class="btn" href="/blog/">Blog</a>
-          <a class="btn" href="/creations/">Creations</a>
-          <a class="btn" href="/tools/">Tools</a>
-          <a class="btn" href="/supplies/">Supplies</a>
-          <a class="btn hidden" id="adminLink" href="/members/admin/">Admin</a>
-          <button class="btn primary" id="logoutBtn" type="button">Log Out</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <h3 style="margin-top:0">Private Work Progress</h3>
-        <p class="small">This panel will soon show members-only project updates and comments. If the API isn’t wired yet, you’ll see a “coming soon” message.</p>
-        <div id="progressBox" class="status">
-          <div class="small">Loading…</div>
+        <div class="card">
+          <h3 style="margin-top:0">Member Actions</h3>
+          <p class="small">Use this area for member-only tools, downloads, updates, or protected content.</p>
+          <button class="btn" type="button" data-logout>Logout</button>
         </div>
       </div>
     </div>
 
-    <footer class="footer"></footer>
+    <div class="card" data-guest-only>
+      <h2 style="margin-top:0">Checking login…</h2>
+      <p class="small">
+        Please wait while we verify your session.
+      </p>
+    </div>
+
+    <div class="footer card" style="margin-top:18px"></div>
   </div>
 
   <script src="/js/main.js"></script>
-  <script>
-    const $ = (sel) => document.querySelector(sel);
-
-    const pageStatus = $("#pageStatus");
-    const authCard   = $("#authCard");
-    const memberCard = $("#memberCard");
-
-    function setStatus(message, ok=true){
-      pageStatus.classList.remove("hidden","ok","bad");
-      pageStatus.classList.add(ok ? "ok" : "bad");
-      pageStatus.textContent = message;
-    }
-
-    function clearStatus(){
-      pageStatus.classList.add("hidden");
-      pageStatus.textContent = "";
-      pageStatus.classList.remove("ok","bad");
-    }
-
-    async function api(path, options = {}){
-      const res = await fetch(path, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          ...(options.headers || {})
-        },
-        cache: "no-store",
-        credentials: "include"
-      });
-
-      const ct = res.headers.get("content-type") || "";
-      const data = ct.includes("application/json") ? await res.json() : { ok:false, error:`Non-JSON response (${res.status})` };
-
-      if (!res.ok || data?.ok === false){
-        const msg = data?.error || data?.message || `Request failed (${res.status})`;
-        throw new Error(msg);
-      }
-      return data;
-    }
-
-    function showLoggedOut(){
-      memberCard.classList.add("hidden");
-      authCard.classList.remove("hidden");
-      $("#password").value = "";
-    }
-
-    function showLoggedIn(member){
-      authCard.classList.add("hidden");
-      memberCard.classList.remove("hidden");
-
-      $("#m_display").textContent = member.display_name || "(no display name set)";
-      $("#m_email").textContent   = member.email || "";
-      $("#m_role").textContent    = member.role || "member";
-      $("#m_last").textContent    = member.last_login_at || "(unknown)";
-
-      const isAdmin = (member.role || "").toLowerCase() === "admin";
-      $("#adminLink").classList.toggle("hidden", !isAdmin);
-    }
-
-    async function refreshMe(){
-      clearStatus();
-      try{
-        const me = await api("/api/auth/me", { method: "GET" });
-        if (me?.member){
-          showLoggedIn(me.member);
-          await loadProgressSafe();
-          return true;
-        }
-      }catch(e){
-        // not logged in is a normal state
-      }
-      showLoggedOut();
-      return false;
-    }
-
-    async function loadProgressSafe(){
-      const box = $("#progressBox");
-      box.classList.remove("ok","bad");
-      box.innerHTML = `<div class="small">Loading…</div>`;
-
-      try{
-        // This endpoint is planned next. If it doesn’t exist yet, we’ll show “coming soon”.
-        const data = await api("/api/progress/list", { method: "GET" });
-
-        const items = Array.isArray(data.items) ? data.items : [];
-        if (!items.length){
-          box.innerHTML = `<div class="small">No progress posts yet.</div>`;
-          return;
-        }
-
-        const html = items.slice(0, 5).map(p => {
-          const title = (p.title || "Untitled").replaceAll("<","&lt;").replaceAll(">","&gt;");
-          const when  = (p.created_at || "").replaceAll("<","&lt;").replaceAll(">","&gt;");
-          const blurb = (p.excerpt || "").replaceAll("<","&lt;").replaceAll(">","&gt;");
-          return `
-            <div style="margin-bottom:10px">
-              <div><b>${title}</b> <span class="pill">${when || "date unknown"}</span></div>
-              <div class="small">${blurb || ""}</div>
-            </div>
-          `;
-        }).join("");
-
-        box.classList.add("ok");
-        box.innerHTML = html + `<div class="mini">More: <a href="/members/progress/">Open progress feed</a></div>`;
-      }catch(e){
-        box.classList.add("bad");
-        box.innerHTML = `
-          <div class="small"><b>Coming soon.</b></div>
-          <div class="mini">Progress posts API isn’t connected yet (or you’re not authorized).</div>
-        `;
-      }
-    }
-
-    $("#loginForm").addEventListener("submit", async (ev) => {
-      ev.preventDefault();
-      clearStatus();
-
-      const email = $("#email").value.trim();
-      const password = $("#password").value;
-
-      if (!email || !password){
-        setStatus("Please enter email + password.", false);
-        return;
-      }
-
-      try{
-        setStatus("Logging in…", true);
-        await api("/api/auth/login", {
-          method: "POST",
-          body: JSON.stringify({ email, password })
-        });
-
-        setStatus("Logged in.", true);
-        await refreshMe();
-      }catch(e){
-        setStatus(e.message || "Login failed.", false);
-      }
-    });
-
-    $("#logoutBtn").addEventListener("click", async () => {
-      clearStatus();
-      try{
-        await api("/api/auth/logout", { method: "POST", body: JSON.stringify({}) });
-      }catch(e){
-        // even if logout fails, we can still flip UI
-      }
-      showLoggedOut();
-      setStatus("Logged out.", true);
-    });
-
-    // boot
-    refreshMe();
-  </script>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/members.js"></script>
 </body>
 </html>
