@@ -1,14 +1,33 @@
-<!-- FILE: /login/index.html
-     PURPOSE: Sign-in page for your member/admin area (works with your /api/auth/login endpoint).
--->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sign in — Devil n Dove</title>
+  <title>Login — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
+
+  <style>
+    .auth-wrap{ max-width: 520px; margin: 0 auto; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+    .muted{ opacity:.85; }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      text-decoration:none; font-size: 13px; font-weight: 700;
+      padding: 10px 12px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      color: inherit; cursor: pointer;
+    }
+    .btn:hover{ background: rgba(255,255,255,0.12); }
+    .btn.primary{ background: rgba(255,255,255,0.16); }
+    .btn.primary:hover{ background: rgba(255,255,255,0.20); }
+    .err{ display:none; margin-top:10px; padding:10px 12px; border-radius: 12px; border: 1px solid rgba(255,80,80,0.35); background: rgba(255,80,80,0.10); }
+    .ok{ display:none; margin-top:10px; padding:10px 12px; border-radius: 12px; border: 1px solid rgba(120,255,160,0.25); background: rgba(120,255,160,0.08); }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .tiny{ font-size: 12px; opacity:.85; }
+    .link{ color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -32,129 +51,134 @@
       </div>
     </div>
 
-    <div class="banner" style="margin-bottom:14px">
-      <img src="/assets/banner-spicing-it-up.png" alt="Devil n Dove banner artwork" />
-    </div>
-
-    <div class="hero">
+    <div class="hero auth-wrap">
       <span class="badge">Members</span>
-      <h1>Sign in</h1>
-      <p class="small">Access your private work-in-progress area and admin tools.</p>
+      <h1>Login</h1>
+      <p class="muted">Sign in to access the private work-in-progress area.</p>
     </div>
 
-    <div class="grid" style="grid-template-columns: 1fr; max-width: 720px; margin: 0 auto;">
-      <div class="card">
-        <form id="loginForm" autocomplete="on">
-          <div style="display:grid; gap:10px;">
-            <label class="small" for="email">Email</label>
-            <input id="email" name="email" type="email" required
-                   placeholder="you@domain.com"
-                   style="padding:12px 12px;border-radius:12px;border:1px solid var(--border);background:#0f131a;color:var(--text);" />
+    <div class="card auth-wrap" style="margin-top:14px">
+      <form id="loginForm">
+        <label class="small" for="email">Email</label>
+        <input id="email" class="input" type="email" autocomplete="email" required placeholder="devilndove@gmail.com" />
 
-            <label class="small" for="password" style="margin-top:6px;">Password</label>
-            <input id="password" name="password" type="password" required
-                   placeholder="••••••••"
-                   style="padding:12px 12px;border-radius:12px;border:1px solid var(--border);background:#0f131a;color:var(--text);" />
+        <div style="height:10px"></div>
 
-            <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
-              <input id="showPw" type="checkbox" />
-              <label for="showPw" class="small" style="cursor:pointer;">Show password</label>
-            </div>
+        <label class="small" for="password">Password</label>
+        <input id="password" class="input" type="password" autocomplete="current-password" required placeholder="••••••••" />
 
-            <div class="hr"></div>
+        <div class="actions">
+          <button class="btn primary" type="submit" id="btnLogin">Login</button>
+          <a class="btn" href="/members/index.html">Back to Members</a>
+        </div>
 
-            <button id="submitBtn" type="submit"
-                    style="padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#121826;color:var(--text);font-weight:700;cursor:pointer;">
-              Sign in
-            </button>
+        <div id="ok" class="ok tiny"></div>
+        <div id="err" class="err tiny"></div>
 
-            <div id="msg" class="small" style="min-height:18px;"></div>
-
-            <p class="small" style="opacity:.85;margin-top:6px;">
-              Tip: if you just bootstrapped the admin, sign in using that email + password.
-            </p>
-          </div>
-        </form>
-      </div>
+        <div class="tiny" style="margin-top:12px">
+          Need access or forgot your password? Use
+          <a class="link" href="/contact/index.html">Contact</a>
+          and we’ll sort it out.
+        </div>
+      </form>
     </div>
 
-    <footer class="footer"></footer>
+    <div class="footer">
+      Devil n Dove • Built with ❤️ and way too many tools.
+    </div>
   </div>
 
-  <script src="/js/main.js" defer></script>
-
   <script>
-    (function () {
-      const form = document.getElementById('loginForm');
-      const emailEl = document.getElementById('email');
-      const pwEl = document.getElementById('password');
-      const msgEl = document.getElementById('msg');
-      const btnEl = document.getElementById('submitBtn');
-      const showPw = document.getElementById('showPw');
+    const $ = (id) => document.getElementById(id);
 
+    function getNextPath() {
       const params = new URLSearchParams(location.search);
-      const next = params.get('next') || '/members/index.html';
+      const next = params.get("next");
+      // Basic safety: only allow internal redirects
+      if (!next) return "/members/index.html";
+      if (next.startsWith("/") && !next.startsWith("//")) return next;
+      return "/members/index.html";
+    }
 
-      function setMsg(text, isError = false) {
-        msgEl.textContent = text || '';
-        msgEl.style.color = isError ? 'var(--danger, #ff6b6b)' : 'var(--muted, #9aa4b2)';
+    function showErr(msg) {
+      const el = $("err");
+      el.style.display = "block";
+      el.textContent = msg;
+    }
+    function clearErr() {
+      const el = $("err");
+      el.style.display = "none";
+      el.textContent = "";
+    }
+    function showOk(msg) {
+      const el = $("ok");
+      el.style.display = "block";
+      el.textContent = msg;
+    }
+    function clearOk() {
+      const el = $("ok");
+      el.style.display = "none";
+      el.textContent = "";
+    }
+
+    async function checkAlreadyLoggedIn() {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.ok && data.member) {
+            location.href = getNextPath();
+          }
+        }
+      } catch (_) {
+        // ignore
+      }
+    }
+
+    $("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearErr();
+      clearOk();
+
+      const email = $("email").value.trim();
+      const password = $("password").value;
+
+      if (!email || !password) {
+        showErr("Please enter both email and password.");
+        return;
       }
 
-      showPw.addEventListener('change', () => {
-        pwEl.type = showPw.checked ? 'text' : 'password';
-      });
+      $("btnLogin").disabled = true;
+      $("btnLogin").textContent = "Logging in…";
 
-      // If your backend provides /api/auth/me, this will auto-redirect when already signed in.
-      (async () => {
-        try {
-          const r = await fetch('/api/auth/me', { credentials: 'include' });
-          const j = await r.json().catch(() => null);
-          if (r.ok && j && j.ok) location.href = next;
-        } catch (_) { /* ignore */ }
-      })();
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password })
+        });
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        setMsg('');
+        const data = await res.json().catch(() => ({}));
 
-        const email = (emailEl.value || '').trim().toLowerCase();
-        const password = pwEl.value || '';
-
-        if (!email || !password) {
-          setMsg('Please enter email + password.', true);
+        if (!res.ok || !data.ok) {
+          showErr(data.error || "Login failed. Check your email/password.");
           return;
         }
 
-        btnEl.disabled = true;
-        btnEl.textContent = 'Signing in…';
+        showOk("Success. Redirecting…");
+        setTimeout(() => { location.href = getNextPath(); }, 350);
 
-        try {
-          const r = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ email, password })
-          });
+      } catch (err) {
+        showErr("Network error. Please try again.");
+      } finally {
+        $("btnLogin").disabled = false;
+        $("btnLogin").textContent = "Login";
+      }
+    });
 
-          const j = await r.json().catch(() => ({}));
-
-          if (!r.ok || !j.ok) {
-            setMsg(j.error || 'Sign-in failed. Check your email/password.', true);
-            btnEl.disabled = false;
-            btnEl.textContent = 'Sign in';
-            return;
-          }
-
-          setMsg('Signed in. Redirecting…');
-          location.href = next;
-
-        } catch (err) {
-          setMsg('Network error signing in. Try again.', true);
-          btnEl.disabled = false;
-          btnEl.textContent = 'Sign in';
-        }
-      });
-    })();
+    // If already logged in, skip this page
+    checkAlreadyLoggedIn();
   </script>
 </body>
 </html>
