@@ -1,25 +1,21 @@
 // File: /functions/api/auth/me.js
 //
 // GET /api/auth/me
-// Returns { ok: true, member: {...} } if session is valid, else { ok: false }.
-//
-// Requires D1 tables:
-// - sessions(token TEXT PRIMARY KEY, member_id INTEGER, expires_at TEXT, created_at TEXT ...)
-// - members(member_id, email, display_name, role, is_active ...)
+// Returns the currently logged-in member (if dd_session cookie is valid).
 
-function json(status, data) {
+function json(status, data, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
+      ...extraHeaders,
     },
   });
 }
 
 function getCookie(request, name) {
   const cookie = request.headers.get("Cookie") || "";
-  // Simple cookie parse
   const parts = cookie.split(";").map((p) => p.trim());
   for (const part of parts) {
     if (!part) continue;
@@ -47,49 +43,40 @@ export async function onRequest(context) {
 
   const token = getCookie(request, "dd_session");
   if (!token) {
-    return json(200, { ok: false });
+    return json(200, { ok: true, loggedIn: false });
   }
 
-  const row = await env.DD_DB.prepare(
-    `SELECT
-       m.member_id,
-       m.email,
-       m.display_name,
-       m.role,
-       m.is_active,
-       s.expires_at
-     FROM sessions s
-     JOIN members m ON m.member_id = s.member_id
-     WHERE s.token = ?
-     LIMIT 1`
-  )
+  // Valid session = token exists AND not expired AND member active
+  const row = await env.DD_DB
+    .prepare(
+      `
+      SELECT
+        m.member_id   AS member_id,
+        m.email       AS email,
+        m.display_name AS display_name,
+        m.role        AS role
+      FROM sessions s
+      JOIN members m ON m.member_id = s.member_id
+      WHERE s.token = ?
+        AND s.expires_at > datetime('now')
+        AND m.is_active = 1
+      LIMIT 1
+    `
+    )
     .bind(token)
     .first();
 
   if (!row) {
-    return json(200, { ok: false });
-  }
-
-  // Ensure active + not expired
-  const expired = await env.DD_DB.prepare(
-    `SELECT CASE WHEN datetime(?) <= datetime('now') THEN 1 ELSE 0 END AS is_expired`
-  )
-    .bind(row.expires_at)
-    .first();
-
-  if (row.is_active !== 1 || expired?.is_expired === 1) {
-    // Optional cleanup of expired session
-    try {
-      await env.DD_DB.prepare(`DELETE FROM sessions WHERE token = ?`).bind(token).run();
-    } catch {}
-    return json(200, { ok: false });
+    return json(200, { ok: true, loggedIn: false });
   }
 
   return json(200, {
     ok: true,
+    loggedIn: true,
     member: {
+      member_id: row.member_id,
       email: row.email,
-      display_name: row.display_name || null,
+      display_name: row.display_name,
       role: row.role,
     },
   });
