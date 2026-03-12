@@ -32,18 +32,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const submitButton = form.querySelector('button[type="submit"]');
-    if (submitButton) submitButton.disabled = true;
 
     try {
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Logging in...";
+      }
+
       await window.DDAuth.login(email, password);
       showMessage("Login successful. Redirecting...");
 
       const next = new URLSearchParams(window.location.search).get("next");
-      window.location.href = next || "/account/";
+      window.location.href = next || "/members/";
     } catch (error) {
       showMessage(error.message || "Login failed.", true);
     } finally {
-      if (submitButton) submitButton.disabled = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Login";
+      }
     }
   });
 });
