@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bootstrap Admin — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+  <meta name="robots" content="noindex,nofollow" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Workshop • Art • Tools • Movies</div>
+        </div>
+      </div>
+
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/login/">Login</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <h1>Bootstrap First Admin</h1>
+        <p class="small">
+          Use this page one time only to create the first admin account for the site.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:680px">
+      <h2 style="margin-top:0">Create Initial Admin</h2>
+      <p class="small">
+        This requires the server bootstrap token. Once an admin exists, this page should no longer be needed.
+      </p>
+
+      <form id="bootstrapAdminForm" class="grid" style="gap:12px;margin-top:12px">
+        <div>
+          <label class="small" for="bootstrap_token">Bootstrap Token</label>
+          <input id="bootstrap_token" name="bootstrap_token" type="password" required />
+        </div>
+
+        <div>
+          <label class="small" for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required />
+        </div>
+
+        <div>
+          <label class="small" for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="new-password" required />
+        </div>
+
+        <div>
+          <label class="small" for="display_name">Display Name</label>
+          <input id="display_name" name="display_name" type="text" />
+        </div>
+
+        <div>
+          <button id="bootstrapSubmit" class="btn" type="submit">Create First Admin</button>
+        </div>
+
+        <div id="bootstrapMessage" class="small" style="display:none"></div>
+      </form>
+    </div>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("bootstrapAdminForm");
+      const messageEl = document.getElementById("bootstrapMessage");
+      const submitButton = document.getElementById("bootstrapSubmit");
+
+      function setMessage(message, isError = false) {
+        if (!messageEl) return;
+        messageEl.textContent = message;
+        messageEl.style.display = "block";
+        messageEl.style.color = isError ? "#b00020" : "#0a7a2f";
+      }
+
+      function clearMessage() {
+        if (!messageEl) return;
+        messageEl.textContent = "";
+        messageEl.style.display = "none";
+      }
+
+      if (!form) return;
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage();
+
+        const formData = new FormData(form);
+        const payload = {
+          bootstrap_token: String(formData.get("bootstrap_token") || "").trim(),
+          email: String(formData.get("email") || "").trim(),
+          password: String(formData.get("password") || ""),
+          display_name: String(formData.get("display_name") || "").trim()
+        };
+
+        if (!payload.bootstrap_token || !payload.email || !payload.password) {
+          setMessage("Bootstrap token, email, and password are required.", true);
+          return;
+        }
+
+        if (payload.password.length < 6) {
+          setMessage("Password must be at least 6 characters.", true);
+          return;
+        }
+
+        try {
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = "Creating...";
+          }
+
+          const response = await fetch("/api/auth/bootstrap-admin", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.ok) {
+            throw new Error(data.error || "Failed to create admin.");
+          }
+
+          setMessage("Initial admin created successfully. You can now log in.");
+          form.reset();
+
+          setTimeout(() => {
+            window.location.href = "/login/";
+          }, 1500);
+        } catch (error) {
+          setMessage(error.message || "Failed to create admin.", true);
+        } finally {
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = "Create First Admin";
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
