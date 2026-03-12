@@ -14,8 +14,7 @@ async function sha256(text) {
 }
 
 function makeToken(length = 48) {
-  const chars =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const bytes = new Uint8Array(length);
   crypto.getRandomValues(bytes);
   return [...bytes].map(b => chars[b % chars.length]).join("");
@@ -75,6 +74,7 @@ export async function onRequestPost(context) {
       email: user.email,
       display_name: user.display_name,
       role: user.role
-    }
+    },
+    redirect_to: user.role === "admin" ? "/admin/" : "/members/"
   });
 }
