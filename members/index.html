@@ -27,6 +27,7 @@
         <a href="/supplies/">Supplies</a>
         <a href="/contact/">Contact</a>
         <a href="/members/">Members</a>
+        <a href="/admin/">Admin</a>
       </div>
     </div>
 
@@ -61,6 +62,34 @@
           <button class="btn" type="button" data-logout>Logout</button>
         </div>
       </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3 style="margin-top:0">Change Password</h3>
+        <p class="small">Update your account password here.</p>
+
+        <form id="changePasswordForm" class="grid" style="gap:12px;margin-top:12px;max-width:640px">
+          <div>
+            <label class="small" for="current_password">Current Password</label>
+            <input id="current_password" name="current_password" type="password" autocomplete="current-password" required />
+          </div>
+
+          <div>
+            <label class="small" for="new_password">New Password</label>
+            <input id="new_password" name="new_password" type="password" autocomplete="new-password" required />
+          </div>
+
+          <div>
+            <label class="small" for="confirm_password">Confirm New Password</label>
+            <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required />
+          </div>
+
+          <div>
+            <button class="btn" type="submit">Change Password</button>
+          </div>
+
+          <div id="changePasswordMessage" class="small" style="display:none"></div>
+        </form>
+      </div>
     </div>
 
     <div class="card" data-guest-only>
@@ -76,5 +105,6 @@
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/members.js"></script>
+  <script src="/public/js/change-password.js"></script>
 </body>
 </html>
