@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       renderRows(users);
     } catch (error) {
+      if (tableBody) tableBody.innerHTML = "";
       if (errorEl) {
         errorEl.textContent = error.message || "Failed to load users.";
       }
@@ -159,6 +160,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     button.addEventListener("click", async () => {
       await loadUsers();
     });
+  });
+
+  document.addEventListener("dd:user-created", async () => {
+    await loadUsers();
   });
 
   if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
