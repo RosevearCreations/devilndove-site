@@ -43,6 +43,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (new_password === current_password) {
+      setMessage("New password must be different from the current password.", true);
+      return;
+    }
+
     try {
       if (submitButton) {
         submitButton.disabled = true;
@@ -63,8 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(data.error || "Failed to change password.");
       }
 
-      setMessage("Password changed successfully.");
       form.reset();
+      setMessage("Password changed successfully.");
     } catch (error) {
       setMessage(error.message || "Failed to change password.", true);
     } finally {
