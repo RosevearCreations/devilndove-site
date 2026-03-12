@@ -70,6 +70,50 @@
       </div>
 
       <div class="card" style="margin-top:18px">
+        <h3 style="margin-top:0">Create User</h3>
+        <p class="small">Create member or admin accounts directly from the admin area.</p>
+
+        <form id="createUserForm" class="grid" style="gap:12px;margin-top:12px">
+          <div>
+            <label class="small" for="create_email">Email</label>
+            <input id="create_email" name="email" type="email" required />
+          </div>
+
+          <div>
+            <label class="small" for="create_password">Password</label>
+            <input id="create_password" name="password" type="password" required />
+          </div>
+
+          <div>
+            <label class="small" for="create_display_name">Display Name</label>
+            <input id="create_display_name" name="display_name" type="text" />
+          </div>
+
+          <div>
+            <label class="small" for="create_role">Role</label>
+            <select id="create_role" name="role">
+              <option value="member" selected>member</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="small" for="create_is_active">Status</label>
+            <select id="create_is_active" name="is_active">
+              <option value="1" selected>active</option>
+              <option value="0">inactive</option>
+            </select>
+          </div>
+
+          <div>
+            <button class="btn" type="submit">Create User</button>
+          </div>
+
+          <div id="createUserMessage" class="small" style="display:none"></div>
+        </form>
+      </div>
+
+      <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Users</h3>
 
         <div id="usersLoading" class="small">Loading users...</div>
@@ -109,5 +153,6 @@
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/admin.js"></script>
   <script src="/public/js/admin-users.js"></script>
+  <script src="/public/js/admin-create-user.js"></script>
 </body>
 </html>
