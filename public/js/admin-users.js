@@ -128,9 +128,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           </td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${created}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">
-            <button class="btn" type="button" data-save-user data-user-id="${userId}">
-              Save
-            </button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn" type="button" data-save-user data-user-id="${userId}">
+                Save
+              </button>
+              <button class="btn" type="button" data-reset-password-user-id="${userId}">
+                Reset Password
+              </button>
+            </div>
           </td>
         </tr>
       `;
