@@ -6,122 +6,9 @@
   <title>Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
-
-  <style>
-    .subgrid{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 12px;
-    }
-    .item.card{
-      padding: 0;
-      overflow: hidden;
-      display:flex;
-      flex-direction: column;
-      min-height: 320px;
-    }
-    .item.card .thumb{
-      height: 160px;
-      width: 100%;
-      background: rgba(255,255,255,0.03);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-    }
-    .item.card .thumb img{
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display:block;
-    }
-    .item.card .thumb .ph{
-      width:100%;
-      height:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      font-size:12px;
-      opacity:.75;
-      padding: 10px;
-      line-height:1.3;
-    }
-    .item.card .body{
-      padding: 12px;
-      display:flex;
-      flex-direction: column;
-      gap: 8px;
-      flex: 1;
-    }
-    .item.card .tname{
-      font-weight: 800;
-      line-height: 1.2;
-      font-size: 14px;
-      margin: 0;
-      display:-webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow:hidden;
-    }
-    .tags{
-      display:flex;
-      flex-wrap:wrap;
-      gap: 6px;
-      margin-top: 2px;
-    }
-    .tag{
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      opacity: .9;
-      white-space: nowrap;
-    }
-    .actions{
-      margin-top: auto;
-      padding-top: 6px;
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .btnlink{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap: 8px;
-      text-decoration:none;
-      font-size: 12px;
-      padding: 10px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.06);
-      min-width: 120px;
-      cursor: pointer;
-      color: inherit;
-    }
-    .btnlink:hover{ background: rgba(255,255,255,0.10); }
-
-    .video-wrap{
-      border-radius: 16px;
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.25);
-    }
-    video.hero-video{
-      width: 100%;
-      height: auto;
-      display:block;
-      max-height: 420px;
-      object-fit: cover;
-    }
-  </style>
 </head>
-
 <body>
   <div class="container">
-
     <div class="nav">
       <div class="brand">
         <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
@@ -130,196 +17,92 @@
           <div class="small">Workshop • Art • Tools • Movies</div>
         </div>
       </div>
-      <div style="display:flex;gap:14px;flex-wrap:wrap">
-        <a href="/index.html">Home</a>
-        <a href="/about/index.html">About</a>
-        <a href="/gallery/index.html">Art</a>
-        <a href="/creations/index.html">Creations</a>
-        <a href="/tools/index.html">Tools</a>
-        <a href="/supplies/index.html">Supplies</a>
-        <a href="/shop/index.html">Shop</a>
-        <a href="/movies/index.html">Movies</a>
-        <a href="/contact/index.html">Contact</a>
+
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/gallery/">Gallery</a>
+        <a href="/creations/">Creations</a>
+        <a href="/tools/">Tools</a>
+        <a href="/supplies/">Supplies</a>
+        <a href="/contact/">Contact</a>
+
+        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
+
+        <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
+        <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
+
+        <span class="small" data-show-when-logged-in style="display:none">
+          Hi, <span data-nav-user-name>Member</span>
+        </span>
+
+        <button
+          class="btn"
+          type="button"
+          data-nav-logout
+          data-show-when-logged-in
+          style="display:none"
+        >
+          Logout
+        </button>
       </div>
     </div>
 
     <div class="hero">
-      <span class="badge">Handmade. Experiment-driven. Therapy-powered.</span>
-      <h1>Welcome to our workshop.</h1>
-      <p>
-        We make jewelry, props, art, and odd little tools — mostly for the joy of making.
-        This site is where we document what we use, what we learn, and what we create.
-      </p>
-    </div>
-
-    <!-- VIDEO BLOCK -->
-    <div class="card" style="margin-top:14px">
-      <div class="grid" style="grid-template-columns:1fr; gap:12px">
-        <div>
-          <h3 style="margin:0 0 6px">Workshop clip</h3>
-          <div class="small" style="opacity:.85">
-            This video is served from our R2 bucket (itemsforsale). If it doesn’t play, double-check the exact filename/case.
-          </div>
-        </div>
-
-        <div class="video-wrap">
-          <video id="homeVideo" class="hero-video" controls playsinline preload="metadata">
-            <!-- src set by JS -->
-          </video>
-        </div>
-      </div>
-    </div>
-
-    <!-- FEATURED ITEMS -->
-    <div class="card" style="margin-top:14px">
-      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap">
-        <div>
-          <h3 style="margin:0 0 6px">Fresh from the bench</h3>
-          <div class="small" style="opacity:.85">A few recent pieces from our <b>Items For Sale</b> folder.</div>
-        </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap">
-          <a class="btnlink" href="/shop/index.html">View Shop</a>
-          <a class="btnlink" href="/gallery/index.html">View Gallery</a>
-        </div>
-      </div>
-
-      <div id="featuredGrid" class="subgrid" style="margin-top:12px"></div>
-    </div>
-
-    <div class="grid" style="margin-top:14px">
-      <div class="card">
-        <h3>Toolshed</h3>
-        <p class="small">
-          Our growing list of tools, machines, safety gear, and setup notes.
+      <div>
+        <h1>Welcome to Devil n Dove</h1>
+        <p>
+          A place for our workshop, creations, tools, supplies, projects, and the things we enjoy sharing.
         </p>
-        <a class="btn" href="/tools/index.html">Go to Tools</a>
       </div>
+    </div>
 
-      <div class="card">
+    <div class="grid cols-3">
+      <a class="card" href="/gallery/">
+        <h3>Gallery</h3>
+        <p class="small">A look at some of the things we make and collect.</p>
+      </a>
+
+      <a class="card" href="/creations/">
+        <h3>Creations</h3>
+        <p class="small">Featured work, experiments, and handmade items.</p>
+      </a>
+
+      <a class="card" href="/tools/">
+        <h3>Tools</h3>
+        <p class="small">Workshop tools, equipment, and setup details.</p>
+      </a>
+
+      <a class="card" href="/supplies/">
         <h3>Supplies</h3>
-        <p class="small">
-          Consumables and refillables — with a reorder list built into the page.
-        </p>
-        <a class="btn" href="/supplies/index.html">Go to Supplies</a>
-      </div>
+        <p class="small">Materials, consumables, and supporting shop items.</p>
+      </a>
 
-      <div class="card">
-        <h3>What we make</h3>
-        <p class="small">
-          Real photos, imperfect results, and honest notes — because that’s the point.
-        </p>
-        <a class="btn" href="/gallery/index.html">Go to Art</a>
-      </div>
+      <a class="card" href="/members/" data-show-when-logged-in style="display:none">
+        <h3>Members Area</h3>
+        <p class="small">Private member-only content and account access.</p>
+      </a>
+
+      <a class="card" href="/admin/" data-show-when-admin style="display:none">
+        <h3>Admin Area</h3>
+        <p class="small">Protected admin tools and member management.</p>
+      </a>
+
+      <a class="card" href="/login/" data-show-when-logged-out style="display:none">
+        <h3>Member Login</h3>
+        <p class="small">Sign in to access private pages.</p>
+      </a>
+
+      <a class="card" href="/contact/">
+        <h3>Contact</h3>
+        <p class="small">Get in touch with us.</p>
+      </a>
     </div>
 
-    <div class="footer">
-      Tip: If an image/video loads on one link but not another, it’s almost always filename case in R2.
-    </div>
+    <div class="footer card" style="margin-top:18px"></div>
   </div>
 
   <script src="/js/main.js"></script>
-  <script>
-    (function () {
-      const DATA_URL = "/data/itemsforsale/itemsforsale_items_master.json";
-
-      function safeText(v){ return (v == null ? "" : String(v)).trim(); }
-
-      function escHtml(v){
-        return String(v ?? "")
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#39;");
-      }
-
-      function encodeKeyPath(key){
-        return String(key).split("/").map(encodeURIComponent).join("/");
-      }
-
-      function getItemName(it){
-        return safeText(it.title) || safeText(it.image_file) || "Item";
-      }
-
-      function getTags(it){
-        const base = [];
-        if (safeText(it.subcategory)) base.push(it.subcategory);
-        if (Array.isArray(it.materials)) base.push(...it.materials.slice(0, 2));
-        if (Array.isArray(it.tags)) base.push(...it.tags.slice(0, 2));
-        return base.filter(Boolean).slice(0, 5);
-      }
-
-      function itemImageUrl(meta, it){
-        const origin = safeText(meta.asset_origin) || "https://assets.devilndove.com";
-        const key = safeText(it.r2_object_key) || ("Itemsforsale/" + safeText(it.image_file));
-        return origin + "/" + encodeKeyPath(key.replace(/^\/+/, ""));
-      }
-
-      function videoUrl(meta){
-        const origin = safeText(meta.asset_origin) || "https://assets.devilndove.com";
-        const src = safeText(meta.video && meta.video.src);
-        if (!src) return "";
-        return origin + "/" + encodeKeyPath(src.replace(/^\/+/, ""));
-      }
-
-      function buildCard(meta, it){
-        const name = getItemName(it);
-        const url = itemImageUrl(meta, it);
-        const tags = getTags(it);
-
-        const shopUrl = safeText(it.shop_url) || "/contact/index.html";
-
-        return `
-          <div class="item card">
-            <div class="thumb">
-              <img
-                src="${url}"
-                alt="${escHtml(safeText(it.alt) || name)}"
-                loading="lazy"
-                onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escHtml(safeText(it.image_file) || "Unknown file")}</span></div>';"
-              />
-            </div>
-            <div class="body">
-              <div class="tname">${escHtml(name)}</div>
-              <div class="tags">
-                ${tags.map(t => `<span class="tag">${escHtml(t)}</span>`).join("")}
-              </div>
-              <div class="actions">
-                <a class="btnlink" href="${shopUrl}" ${shopUrl.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>View / Inquire</a>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-
-      async function init(){
-        try{
-          const r = await fetch(DATA_URL, { cache: "no-store" });
-          if (!r.ok) throw new Error("JSON load failed: " + r.status);
-          const meta = await r.json();
-          const items = Array.isArray(meta.items) ? meta.items.slice() : [];
-
-          // Video
-          const v = document.getElementById("homeVideo");
-          const vurl = videoUrl(meta);
-          if (v && vurl) v.src = vurl;
-
-          // Featured grid (first 6)
-          const featuredGrid = document.getElementById("featuredGrid");
-          if (featuredGrid){
-            featuredGrid.innerHTML = items.slice(0, 6).map(it => buildCard(meta, it)).join("");
-          }
-        } catch (e){
-          console.error(e);
-          const featuredGrid = document.getElementById("featuredGrid");
-          if (featuredGrid){
-            featuredGrid.innerHTML = `<div class="small">Could not load Items For Sale JSON at <code>${escHtml(DATA_URL)}</code></div>`;
-          }
-        }
-      }
-
-      init();
-    })();
-  </script>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
 </body>
 </html>
