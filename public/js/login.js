@@ -39,11 +39,12 @@ document.addEventListener("DOMContentLoaded", () => {
         submitButton.textContent = "Logging in...";
       }
 
-      await window.DDAuth.login(email, password);
+      const result = await window.DDAuth.login(email, password);
       showMessage("Login successful. Redirecting...");
 
       const next = new URLSearchParams(window.location.search).get("next");
-      window.location.href = next || "/members/";
+      const fallback = result?.redirect_to || "/members/";
+      window.location.href = next || fallback;
     } catch (error) {
       showMessage(error.message || "Login failed.", true);
     } finally {
