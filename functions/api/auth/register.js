@@ -16,6 +16,16 @@ async function sha256(text) {
 export async function onRequestPost(context) {
   const { request, env } = context;
 
+  const allowPublicRegistration =
+    String(env.ALLOW_PUBLIC_REGISTRATION || "").trim() === "1";
+
+  if (!allowPublicRegistration) {
+    return json({
+      ok: false,
+      error: "Public registration is disabled. Please contact an administrator for an account."
+    }, 403);
+  }
+
   let body;
   try {
     body = await request.json();
