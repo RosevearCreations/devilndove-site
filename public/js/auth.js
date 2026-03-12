@@ -3,8 +3,17 @@
   const USER_KEY = "dd_auth_user";
 
   function saveAuth(token, user) {
-    localStorage.setItem(TOKEN_KEY, token || "");
-    localStorage.setItem(USER_KEY, JSON.stringify(user || null));
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+
+    if (user) {
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(USER_KEY);
+    }
   }
 
   function clearAuth() {
@@ -28,11 +37,22 @@
     return !!getToken();
   }
 
+  async function readJsonSafe(response) {
+    const text = await response.text();
+    if (!text) return {};
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { ok: false, error: "Invalid server response." };
+    }
+  }
+
   async function apiFetch(url, options = {}) {
     const token = getToken();
     const headers = new Headers(options.headers || {});
+    const hasBody = options.body != null;
 
-    if (!headers.has("Content-Type") && options.body) {
+    if (hasBody && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }
 
@@ -61,7 +81,7 @@
       body: JSON.stringify({ email, password })
     });
 
-    const data = await response.json();
+    const data = await readJsonSafe(response);
 
     if (!response.ok || !data.ok) {
       throw new Error(data.error || "Login failed.");
@@ -80,7 +100,7 @@
       body: JSON.stringify({ email, password, display_name })
     });
 
-    const data = await response.json();
+    const data = await readJsonSafe(response);
 
     if (!response.ok || !data.ok) {
       throw new Error(data.error || "Registration failed.");
@@ -94,13 +114,11 @@
       method: "POST"
     });
 
+    const data = await readJsonSafe(response);
     clearAuth();
 
-    let data = null;
-    try {
-      data = await response.json();
-    } catch {
-      data = { ok: true };
+    if (!response.ok && data?.error) {
+      throw new Error(data.error);
     }
 
     return data;
@@ -111,7 +129,7 @@
       method: "GET"
     });
 
-    const data = await response.json();
+    const data = await readJsonSafe(response);
 
     if (!response.ok || !data.ok) {
       throw new Error(data.error || "Unable to fetch user.");
