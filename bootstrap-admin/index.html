@@ -34,7 +34,14 @@
       </div>
     </div>
 
-    <div class="card" style="max-width:680px">
+    <div id="bootstrapStatusCard" class="card" style="max-width:680px">
+      <h2 style="margin-top:0">Checking Bootstrap Status</h2>
+      <p id="bootstrapStatusText" class="small">
+        Please wait while we check whether an admin account already exists.
+      </p>
+    </div>
+
+    <div id="bootstrapFormCard" class="card" style="max-width:680px;display:none">
       <h2 style="margin-top:0">Create Initial Admin</h2>
       <p class="small">
         This requires the server bootstrap token. Once an admin exists, this page should no longer be needed.
@@ -73,10 +80,19 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+      const statusCard = document.getElementById("bootstrapStatusCard");
+      const statusText = document.getElementById("bootstrapStatusText");
+      const formCard = document.getElementById("bootstrapFormCard");
       const form = document.getElementById("bootstrapAdminForm");
       const messageEl = document.getElementById("bootstrapMessage");
       const submitButton = document.getElementById("bootstrapSubmit");
+
+      function setStatus(message, isError = false) {
+        if (!statusText) return;
+        statusText.textContent = message;
+        statusText.style.color = isError ? "#b00020" : "";
+      }
 
       function setMessage(message, isError = false) {
         if (!messageEl) return;
@@ -89,6 +105,36 @@
         if (!messageEl) return;
         messageEl.textContent = "";
         messageEl.style.display = "none";
+      }
+
+      try {
+        const response = await fetch("/api/auth/bootstrap-status", {
+          method: "GET"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || "Failed to check bootstrap status.");
+        }
+
+        if (data.bootstrap_needed) {
+          if (statusCard) {
+            statusCard.style.display = "none";
+          }
+          if (formCard) {
+            formCard.style.display = "";
+          }
+        } else {
+          const adminLabel =
+            data.admin?.display_name?.trim() ||
+            data.admin?.email ||
+            "an admin account";
+
+          setStatus(`Bootstrap is no longer needed. ${adminLabel} already exists. You can log in using the normal login page.`);
+        }
+      } catch (error) {
+        setStatus(error.message || "Failed to check bootstrap status.", true);
       }
 
       if (!form) return;
