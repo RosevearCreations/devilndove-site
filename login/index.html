@@ -26,6 +26,25 @@
         <a href="/tools/">Tools</a>
         <a href="/supplies/">Supplies</a>
         <a href="/contact/">Contact</a>
+
+        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
+
+        <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
+        <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
+
+        <span class="small" data-show-when-logged-in style="display:none">
+          Hi, <span data-nav-user-name>Member</span>
+        </span>
+
+        <button
+          class="btn"
+          type="button"
+          data-nav-logout
+          data-show-when-logged-in
+          style="display:none"
+        >
+          Logout
+        </button>
       </div>
     </div>
 
@@ -71,17 +90,20 @@
 
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
   <script src="/public/js/login.js"></script>
 
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       try {
         if (window.DDAuth && window.DDAuth.isLoggedIn()) {
-          await window.DDAuth.fetchMe();
-          window.location.href = "/members/";
+          const user = await window.DDAuth.fetchMe();
+          window.location.href = user?.role === "admin" ? "/admin/" : "/members/";
         }
-      } catch (err) {
-        window.DDAuth.clearAuth();
+      } catch (error) {
+        if (window.DDAuth) {
+          window.DDAuth.clearAuth();
+        }
       }
     });
   </script>
