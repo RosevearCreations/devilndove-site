@@ -74,6 +74,7 @@
             <li>role changes</li>
             <li>account activation and deactivation</li>
             <li>password resets</li>
+            <li>session cleanup</li>
             <li>future site management tools</li>
           </ul>
         </div>
@@ -85,6 +86,17 @@
             Refresh Users
           </button>
         </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3 style="margin-top:0">Maintenance</h3>
+        <p class="small">Use this section for admin maintenance tasks.</p>
+
+        <button class="btn" type="button" data-cleanup-sessions>
+          Clean Expired Sessions
+        </button>
+
+        <div id="sessionCleanupMessage" class="small" style="display:none;margin-top:10px"></div>
       </div>
 
       <div class="card" style="margin-top:18px">
@@ -174,5 +186,6 @@
   <script src="/public/js/admin-users.js"></script>
   <script src="/public/js/admin-create-user.js"></script>
   <script src="/public/js/admin-reset-password.js"></script>
+  <script src="/public/js/admin-cleanup-sessions.js"></script>
 </body>
 </html>
