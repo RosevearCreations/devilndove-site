@@ -14,7 +14,8 @@ async function getSessionUser(env, token) {
       users.email,
       users.display_name,
       users.role,
-      users.is_active
+      users.is_active,
+      users.created_at
     FROM sessions
     JOIN users ON sessions.user_id = users.user_id
     WHERE sessions.session_token = ?
@@ -36,10 +37,18 @@ export async function onRequestPost(context) {
   }
 
   const token = auth.slice(7).trim();
+  if (!token) {
+    return json({ ok: false, error: "Missing session token." }, 401);
+  }
+
   const sessionUser = await getSessionUser(env, token);
 
   if (!sessionUser) {
     return json({ ok: false, error: "Invalid session." }, 401);
+  }
+
+  if (!sessionUser.is_active) {
+    return json({ ok: false, error: "Account is inactive." }, 403);
   }
 
   if (sessionUser.role !== "admin") {
@@ -54,7 +63,7 @@ export async function onRequestPost(context) {
   }
 
   const user_id = Number(body.user_id);
-  const role = body.role == null ? null : String(body.role).trim();
+  const role = body.role == null ? null : String(body.role).trim().toLowerCase();
   const is_active =
     body.is_active == null ? null : (Number(body.is_active) === 1 ? 1 : 0);
 
@@ -71,7 +80,13 @@ export async function onRequestPost(context) {
   }
 
   const existingUser = await env.DB.prepare(`
-    SELECT user_id, email, display_name, role, is_active, created_at
+    SELECT
+      user_id,
+      email,
+      display_name,
+      role,
+      is_active,
+      created_at
     FROM users
     WHERE user_id = ?
     LIMIT 1
@@ -103,7 +118,13 @@ export async function onRequestPost(context) {
     .run();
 
   const updatedUser = await env.DB.prepare(`
-    SELECT user_id, email, display_name, role, is_active, created_at
+    SELECT
+      user_id,
+      email,
+      display_name,
+      role,
+      is_active,
+      created_at
     FROM users
     WHERE user_id = ?
     LIMIT 1
