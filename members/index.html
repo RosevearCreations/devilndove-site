@@ -26,8 +26,25 @@
         <a href="/tools/">Tools</a>
         <a href="/supplies/">Supplies</a>
         <a href="/contact/">Contact</a>
-        <a href="/members/">Members</a>
-        <a href="/admin/">Admin</a>
+
+        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
+
+        <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
+        <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
+
+        <span class="small" data-show-when-logged-in style="display:none">
+          Hi, <span data-nav-user-name>Member</span>
+        </span>
+
+        <button
+          class="btn"
+          type="button"
+          data-nav-logout
+          data-show-when-logged-in
+          style="display:none"
+        >
+          Logout
+        </button>
       </div>
     </div>
 
@@ -104,6 +121,7 @@
 
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
   <script src="/public/js/members.js"></script>
   <script src="/public/js/change-password.js"></script>
 </body>
