@@ -5,6 +5,29 @@ function json(data, status = 200) {
   });
 }
 
+async function getSessionUser(env, token) {
+  if (!token) return null;
+
+  const sessionUser = await env.DB.prepare(`
+    SELECT
+      users.user_id,
+      users.email,
+      users.display_name,
+      users.role,
+      users.is_active,
+      users.created_at
+    FROM sessions
+    JOIN users ON sessions.user_id = users.user_id
+    WHERE sessions.session_token = ?
+      AND sessions.expires_at > datetime('now')
+    LIMIT 1
+  `)
+    .bind(token)
+    .first();
+
+  return sessionUser || null;
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
 
@@ -18,31 +41,21 @@ export async function onRequestGet(context) {
     return json({ ok: false, error: "Missing session token." }, 401);
   }
 
-  const sessionUser = await env.DB.prepare(`
-    SELECT
-      users.user_id,
-      users.email,
-      users.display_name,
-      users.role,
-      users.is_active
-    FROM sessions
-    JOIN users ON sessions.user_id = users.user_id
-    WHERE sessions.session_token = ?
-      AND sessions.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token)
-    .first();
+  const sessionUser = await getSessionUser(env, token);
 
   if (!sessionUser) {
     return json({ ok: false, error: "Invalid session." }, 401);
+  }
+
+  if (!sessionUser.is_active) {
+    return json({ ok: false, error: "Account is inactive." }, 403);
   }
 
   if (sessionUser.role !== "admin") {
     return json({ ok: false, error: "Forbidden." }, 403);
   }
 
-  const users = await env.DB.prepare(`
+  const usersResult = await env.DB.prepare(`
     SELECT
       user_id,
       email,
@@ -52,11 +65,10 @@ export async function onRequestGet(context) {
       created_at
     FROM users
     ORDER BY created_at DESC, user_id DESC
-  `)
-    .all();
+  `).all();
 
   return json({
     ok: true,
-    users: users.results || []
+    users: usersResult.results || []
   });
 }
