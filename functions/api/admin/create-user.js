@@ -22,7 +22,8 @@ async function getSessionUser(env, token) {
       users.email,
       users.display_name,
       users.role,
-      users.is_active
+      users.is_active,
+      users.created_at
     FROM sessions
     JOIN users ON sessions.user_id = users.user_id
     WHERE sessions.session_token = ?
@@ -44,10 +45,18 @@ export async function onRequestPost(context) {
   }
 
   const token = auth.slice(7).trim();
+  if (!token) {
+    return json({ ok: false, error: "Missing session token." }, 401);
+  }
+
   const sessionUser = await getSessionUser(env, token);
 
   if (!sessionUser) {
     return json({ ok: false, error: "Invalid session." }, 401);
+  }
+
+  if (!sessionUser.is_active) {
+    return json({ ok: false, error: "Account is inactive." }, 403);
   }
 
   if (sessionUser.role !== "admin") {
@@ -94,7 +103,7 @@ export async function onRequestPost(context) {
 
   const password_hash = await sha256(password);
 
-  const result = await env.DB.prepare(`
+  const insertResult = await env.DB.prepare(`
     INSERT INTO users (
       email,
       password_hash,
@@ -108,10 +117,7 @@ export async function onRequestPost(context) {
     .bind(email, password_hash, display_name || null, role, is_active)
     .run();
 
-  const userId =
-    result?.meta?.last_row_id ??
-    result?.meta?.last_row_id?.toString?.() ??
-    null;
+  const newUserId = insertResult?.meta?.last_row_id;
 
   const createdUser = await env.DB.prepare(`
     SELECT
@@ -125,7 +131,7 @@ export async function onRequestPost(context) {
     WHERE user_id = ?
     LIMIT 1
   `)
-    .bind(userId)
+    .bind(newUserId)
     .first();
 
   return json({
