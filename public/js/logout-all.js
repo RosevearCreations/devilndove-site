@@ -35,6 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const removed = Number(data.removed_sessions || 0);
       setMessage(`Other sessions signed out successfully. Removed ${removed} session${removed === 1 ? "" : "s"}.`);
+
+      document.dispatchEvent(new CustomEvent("dd:session-changed", {
+        detail: {
+          type: "logout-all",
+          removed_sessions: removed
+        }
+      }));
     } catch (error) {
       setMessage(error.message || "Failed to log out other sessions.", true);
     } finally {
