@@ -91,6 +91,23 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "User not found." }, 404);
   }
 
+  if (existingUser.role === "admin") {
+    const adminCountResult = await env.DB.prepare(`
+      SELECT COUNT(*) AS count
+      FROM users
+      WHERE role = 'admin'
+    `).first();
+
+    const adminCount = Number(adminCountResult?.count || 0);
+
+    if (adminCount <= 1) {
+      return json({
+        ok: false,
+        error: "You cannot delete the last remaining admin account."
+      }, 400);
+    }
+  }
+
   await env.DB.prepare(`
     DELETE FROM sessions
     WHERE user_id = ?
