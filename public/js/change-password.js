@@ -70,6 +70,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       form.reset();
       setMessage("Password changed successfully.");
+
+      document.dispatchEvent(new CustomEvent("dd:session-changed", {
+        detail: {
+          type: "password-changed"
+        }
+      }));
     } catch (error) {
       setMessage(error.message || "Failed to change password.", true);
     } finally {
