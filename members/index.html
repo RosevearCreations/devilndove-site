@@ -76,7 +76,11 @@
         <div class="card">
           <h3 style="margin-top:0">Member Actions</h3>
           <p class="small">Use this area for member-only tools, downloads, updates, or protected content.</p>
-          <button class="btn" type="button" data-logout>Logout</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn" type="button" data-logout>Logout</button>
+            <button class="btn" type="button" data-logout-all>Logout Other Sessions</button>
+          </div>
+          <div id="logoutAllMessage" class="small" style="display:none;margin-top:10px"></div>
         </div>
       </div>
 
@@ -124,5 +128,6 @@
   <script src="/public/js/site-auth-ui.js"></script>
   <script src="/public/js/members.js"></script>
   <script src="/public/js/change-password.js"></script>
+  <script src="/public/js/logout-all.js"></script>
 </body>
 </html>
