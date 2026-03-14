@@ -28,7 +28,14 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(data.error || "Password reset failed.");
       }
 
-      alert("Password reset successfully.");
+      alert(data.message || "Password reset successfully.");
+
+      document.dispatchEvent(new CustomEvent("dd:admin-data-changed", {
+        detail: {
+          type: "password-reset",
+          user_id: userId
+        }
+      }));
     } catch (error) {
       alert(error.message || "Password reset failed.");
     } finally {
