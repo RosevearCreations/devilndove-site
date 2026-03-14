@@ -29,10 +29,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     return d.toLocaleString();
   }
 
-  async function loadUsers() {
+  function notifyDashboardChanged(detail = {}) {
+    document.dispatchEvent(new CustomEvent("dd:admin-data-changed", {
+      detail
+    }));
+  }
+
+  async function loadUsers(options = {}) {
+    const { silent = false } = options;
+
     hide(emptyEl);
     hide(errorEl);
-    show(loadingEl);
+
+    if (!silent) {
+      show(loadingEl);
+    }
 
     try {
       const response = await window.DDAuth.apiFetch("/api/admin/users", {
@@ -88,7 +99,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error(data.error || "Update failed.");
       }
 
-      await loadUsers();
+      await loadUsers({ silent: true });
+      notifyDashboardChanged({
+        type: "user-updated",
+        user_id: userId
+      });
     } catch (error) {
       alert(error.message || "Update failed.");
       if (triggerButton) {
@@ -164,11 +179,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   refreshButtons.forEach(button => {
     button.addEventListener("click", async () => {
       await loadUsers();
+      notifyDashboardChanged({
+        type: "users-refreshed"
+      });
     });
   });
 
   document.addEventListener("dd:user-created", async () => {
-    await loadUsers();
+    await loadUsers({ silent: true });
+    notifyDashboardChanged({
+      type: "user-created"
+    });
   });
 
   if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
