@@ -34,7 +34,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const deletedCount = Number(data.deleted_sessions || 0);
-      setMessage(`Expired sessions cleaned up successfully. Removed ${deletedCount} expired session${deletedCount === 1 ? "" : "s"}.`);
+      setMessage(
+        `Expired sessions cleaned up successfully. Removed ${deletedCount} expired session${deletedCount === 1 ? "" : "s"}.`
+      );
+
+      document.dispatchEvent(new CustomEvent("dd:admin-data-changed", {
+        detail: {
+          type: "sessions-cleaned",
+          deleted_sessions: deletedCount
+        }
+      }));
     } catch (error) {
       setMessage(error.message || "Failed to clean expired sessions.", true);
     } finally {
