@@ -150,6 +150,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               <button class="btn" type="button" data-reset-password-user-id="${userId}">
                 Reset Password
               </button>
+              <button class="btn" type="button" data-delete-user-id="${userId}">
+                Delete User
+              </button>
             </div>
           </td>
         </tr>
@@ -189,6 +192,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadUsers({ silent: true });
     notifyDashboardChanged({
       type: "user-created"
+    });
+  });
+
+  document.addEventListener("dd:user-deleted", async () => {
+    await loadUsers({ silent: true });
+    notifyDashboardChanged({
+      type: "user-deleted"
     });
   });
 
