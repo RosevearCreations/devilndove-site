@@ -84,6 +84,13 @@
         </div>
       </div>
 
+      <div id="sessionInfoCard" class="card" style="margin-top:18px;display:none">
+        <h3 style="margin-top:0">Session Info</h3>
+        <p><strong>Current session expires:</strong> <span id="sessionExpiresAt"></span></p>
+        <p><strong>Active sessions:</strong> <span id="sessionActiveCount">0</span></p>
+        <div id="sessionInfoError" class="small" style="display:none;color:#b00020"></div>
+      </div>
+
       <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Change Password</h3>
         <p class="small">Update your account password here.</p>
@@ -129,5 +136,6 @@
   <script src="/public/js/members.js"></script>
   <script src="/public/js/change-password.js"></script>
   <script src="/public/js/logout-all.js"></script>
+  <script src="/public/js/session-info.js"></script>
 </body>
 </html>
