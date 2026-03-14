@@ -62,6 +62,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadSummary();
   });
 
+  document.addEventListener("dd:admin-data-changed", async () => {
+    await loadSummary();
+  });
+
   if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
     return;
   }
