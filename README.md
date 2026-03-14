@@ -1,22 +1,116 @@
-# Devil n Dove site v2 (logo + copy)
+# Devil n Dove Website
 
-Upload this folder to Cloudflare Pages (Direct Upload) OR push it to Git and use Git integration.
+Official website for **Devil n Dove**.
 
-Key files:
-- /assets/ logo images
-- /data/catalog.json  (movies UPC list)tools
-- /data/products.json (shop items)
+This site supports:
+
+- public website
+- members area
+- admin management
+- workshop inventory
+- featured creations
+- future online store
+
+---
+
+# Tech Stack
+
+Frontend
+
+- HTML
+- CSS
+- Vanilla JavaScript
+
+Backend
+
+- Cloudflare Pages Functions
+
+Database
+
+- Cloudflare D1 (SQLite)
+
+Storage
+
+- Cloudflare R2
+
+---
+
+# Features
+
+Public site:
+
+- Gallery
+- Creations
+- Tools
+- Supplies
+
+Members:
+
+- login/logout
+- password change
+- session management
+
+Admin:
+
+- dashboard summary
+- user management
+- session cleanup
+- password reset
+- user deletion
+
+---
+
+# Development
+
+Clone repo:
 
 
-- /data/tools.json (tools & supplies list)
-- /assets/tools/ (tool photos)
+git clone https://github.com/RosevearCreations/devilndove-site
 
 
-## Toolshed 
+Run locally:
 
-The tools page lives at `/tools/index.html` and is driven by `/data/tools.json`.
 
-- Add a new tool: drop an image into `/assets/tools/` and add a new entry in `/data/tools.json`.
-- The page automatically builds categories and search/filter UI.
+wrangler pages dev
 
-If you’re using Shopify, you can also paste the content from `/tools/index.html` into a Page (Online Store → Pages) and upload the images to your theme files, but hosting the site as-is is the simplest.
+
+---
+
+# Database
+
+Database: Cloudflare D1
+
+Schema stored in:
+
+
+docs/database_schema.sql
+
+
+---
+
+# Deployment
+
+Push to GitHub.
+
+Cloudflare Pages automatically deploys.
+
+---
+
+# Future Features
+
+Planned:
+
+- inventory manager
+- item editor
+- video gallery
+- admin content editor
+- workshop tracking
+- product catalog
+
+---
+
+# Maintainers
+
+Devil n Dove Workshop
+
+Ontario, Canada
