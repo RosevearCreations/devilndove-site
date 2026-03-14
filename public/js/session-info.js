@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       show(sessionCard);
     } catch (error) {
+      hide(sessionCard);
       if (errorEl) {
         errorEl.textContent = error.message || "Failed to load session info.";
       }
@@ -55,6 +56,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
     return;
   }
+
+  document.addEventListener("dd:session-changed", async () => {
+    await loadSessionInfo();
+  });
 
   await loadSessionInfo();
 });
