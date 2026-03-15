@@ -67,6 +67,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${shipping}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${taxClass}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            <button class="btn" type="button" data-edit-product-id="${productId}">
+              Edit
+            </button>
+          </td>
         </tr>
       `;
     }).join("");
@@ -115,6 +120,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   document.addEventListener("dd:product-created", async () => {
+    await loadProducts();
+  });
+
+  document.addEventListener("dd:product-updated", async () => {
     await loadProducts();
   });
 
