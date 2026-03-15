@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const inventory = escapeHtml(String(Number(product.inventory_quantity || 0)));
       const shipping = escapeHtml(yesNo(product.requires_shipping));
       const taxClass = escapeHtml(product.tax_class_name || product.tax_class_code || "");
+      const isArchived = String(product.status || "").toLowerCase() === "archived";
 
       return `
         <tr>
@@ -71,6 +72,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn" type="button" data-edit-product-id="${productId}">
                 Edit
+              </button>
+              <button
+                class="btn"
+                type="button"
+                data-archive-product-id="${productId}"
+                ${isArchived ? "disabled" : ""}
+              >
+                Archive
               </button>
               <button class="btn" type="button" data-delete-product-id="${productId}">
                 Delete
@@ -138,6 +147,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   document.addEventListener("dd:product-deleted", async () => {
+    await loadProducts({ silent: true });
+  });
+
+  document.addEventListener("dd:product-archived", async () => {
     await loadProducts({ silent: true });
   });
 
