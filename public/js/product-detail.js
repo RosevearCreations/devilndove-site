@@ -17,12 +17,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productMainImageWrapEl = document.getElementById("productMainImageWrap");
   const productGalleryEl = document.getElementById("productGallery");
 
+  const productQuantityEl = document.getElementById("productQuantity");
+  const addToCartButton = document.getElementById("addToCartButton");
+  const addToCartMessageEl = document.getElementById("addToCartMessage");
+
+  let currentProduct = null;
+
   function show(el) {
     if (el) el.style.display = "";
   }
 
   function hide(el) {
     if (el) el.style.display = "none";
+  }
+
+  function setCartMessage(message, isError = false) {
+    if (!addToCartMessageEl) return;
+    addToCartMessageEl.textContent = message;
+    addToCartMessageEl.style.display = "block";
+    addToCartMessageEl.style.color = isError ? "#b00020" : "#0a7a2f";
+  }
+
+  function clearCartMessage() {
+    if (!addToCartMessageEl) return;
+    addToCartMessageEl.textContent = "";
+    addToCartMessageEl.style.display = "none";
   }
 
   function escapeHtml(value) {
@@ -99,6 +118,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderProduct(product, images) {
+    currentProduct = product || null;
+
     if (productTypeEl) productTypeEl.textContent = product.product_type || "";
     if (productNameEl) productNameEl.textContent = product.name || "";
     if (productPriceEl) productPriceEl.textContent = formatMoney(product.price_cents, product.currency);
@@ -163,6 +184,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     } finally {
       hide(loadingEl);
     }
+  }
+
+  if (addToCartButton) {
+    addToCartButton.addEventListener("click", () => {
+      clearCartMessage();
+
+      if (!window.DDCart) {
+        setCartMessage("Cart is not available right now.", true);
+        return;
+      }
+
+      if (!currentProduct || !currentProduct.product_id) {
+        setCartMessage("Product is not ready to add to cart.", true);
+        return;
+      }
+
+      const quantity = Number(productQuantityEl?.value || 1);
+
+      if (!Number.isInteger(quantity) || quantity <= 0) {
+        setCartMessage("Please enter a valid quantity.", true);
+        return;
+      }
+
+      try {
+        window.DDCart.addToCart(currentProduct, quantity);
+        setCartMessage("Added to cart successfully.");
+
+        if (productQuantityEl) {
+          productQuantityEl.value = "1";
+        }
+      } catch (error) {
+        setCartMessage(error.message || "Failed to add item to cart.", true);
+      }
+    });
   }
 
   await loadProduct();
