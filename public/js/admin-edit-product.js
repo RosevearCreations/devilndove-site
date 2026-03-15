@@ -51,14 +51,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function setFormModeCreate() {
+  function resetFormState() {
+    form.reset();
+    resetImageUrlFields();
     editingProductId = null;
     form.dataset.mode = "create";
+
     if (submitButton) {
       submitButton.textContent = "Create Product";
+      submitButton.disabled = false;
     }
 
-    let cancelButton = document.getElementById("cancelProductEdit");
+    const cancelButton = document.getElementById("cancelProductEdit");
     if (cancelButton) {
       cancelButton.style.display = "none";
     }
@@ -80,10 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     cancelButton.addEventListener("click", () => {
-      form.reset();
-      resetImageUrlFields();
       clearMessage();
-      setFormModeCreate();
+      resetFormState();
     });
 
     return cancelButton;
@@ -91,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setFormModeEdit() {
     form.dataset.mode = "edit";
+
     if (submitButton) {
       submitButton.textContent = "Update Product";
     }
@@ -109,7 +112,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("status", product.status || "draft");
     setField("currency", product.currency || "CAD");
     setField("price", centsToDollars(product.price_cents));
-    setField("compare_at_price", product.compare_at_price_cents == null ? "" : centsToDollars(product.compare_at_price_cents));
+    setField(
+      "compare_at_price",
+      product.compare_at_price_cents == null ? "" : centsToDollars(product.compare_at_price_cents)
+    );
     setField("taxable", Number(product.taxable) === 0 ? "0" : "1");
     setField("tax_class_id", product.tax_class_id == null ? "" : product.tax_class_id);
     setField("requires_shipping", Number(product.requires_shipping) === 1 ? "1" : "0");
@@ -131,9 +137,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadProduct(productId) {
-    const response = await window.DDAuth.apiFetch(`/api/admin/product-detail?product_id=${encodeURIComponent(productId)}`, {
-      method: "GET"
-    });
+    const response = await window.DDAuth.apiFetch(
+      `/api/admin/product-detail?product_id=${encodeURIComponent(productId)}`,
+      { method: "GET" }
+    );
 
     const data = await response.json();
 
@@ -258,8 +265,6 @@ document.addEventListener("DOMContentLoaded", () => {
       image_urls
     };
 
-    const originalButtonText = submitButton ? submitButton.textContent : "";
-
     try {
       if (submitButton) {
         submitButton.disabled = true;
@@ -269,9 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await updateProduct(payload);
 
       setMessage(data.message || "Product updated successfully.");
-      form.reset();
-      resetImageUrlFields();
-      setFormModeCreate();
+      resetFormState();
 
       document.dispatchEvent(new CustomEvent("dd:product-updated", {
         detail: {
@@ -280,18 +283,21 @@ document.addEventListener("DOMContentLoaded", () => {
       }));
     } catch (error) {
       setMessage(error.message || "Failed to update product.", true);
-    } finally {
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = form.dataset.mode === "edit" ? "Update Product" : "Create Product";
-      }
-      if (form.dataset.mode !== "edit" && submitButton) {
-        submitButton.textContent = "Create Product";
-      } else if (submitButton && originalButtonText && form.dataset.mode === "edit") {
         submitButton.textContent = "Update Product";
       }
     }
   });
 
-  setFormModeCreate();
+  document.addEventListener("dd:product-deleted", (event) => {
+    const deletedProductId = Number(event?.detail?.product_id || 0);
+    if (editingProductId && deletedProductId === editingProductId) {
+      clearMessage();
+      resetFormState();
+      setMessage("The product being edited was deleted.");
+    }
+  });
+
+  resetFormState();
 });
