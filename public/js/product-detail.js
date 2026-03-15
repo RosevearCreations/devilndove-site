@@ -1,0 +1,169 @@
+// File: /public/js/product-detail.js
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const loadingEl = document.getElementById("productLoading");
+  const errorEl = document.getElementById("productError");
+  const detailEl = document.getElementById("productDetail");
+
+  const productTypeEl = document.getElementById("productType");
+  const productNameEl = document.getElementById("productName");
+  const productPriceEl = document.getElementById("productPrice");
+  const productShortDescriptionEl = document.getElementById("productShortDescription");
+  const productSkuEl = document.getElementById("productSku");
+  const productShippingEl = document.getElementById("productShipping");
+  const productTaxClassEl = document.getElementById("productTaxClass");
+  const productInventoryEl = document.getElementById("productInventory");
+  const productDescriptionEl = document.getElementById("productDescription");
+  const productMainImageWrapEl = document.getElementById("productMainImageWrap");
+  const productGalleryEl = document.getElementById("productGallery");
+
+  function show(el) {
+    if (el) el.style.display = "";
+  }
+
+  function hide(el) {
+    if (el) el.style.display = "none";
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatMoney(cents, currency = "CAD") {
+    const amount = Number(cents || 0) / 100;
+
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: currency || "CAD"
+      }).format(amount);
+    } catch {
+      return `${amount.toFixed(2)} ${currency || "CAD"}`;
+    }
+  }
+
+  function yesNo(value) {
+    return Number(value) === 1 ? "Yes" : "No";
+  }
+
+  function renderMainImage(product, images) {
+    if (!productMainImageWrapEl) return;
+
+    const featured = String(product.featured_image_url || "").trim();
+    const firstGallery = Array.isArray(images) && images.length ? String(images[0].image_url || "").trim() : "";
+    const mainImageUrl = featured || firstGallery;
+
+    if (!mainImageUrl) {
+      productMainImageWrapEl.innerHTML = `
+        <div
+          class="card"
+          style="width:100%;aspect-ratio:1 / 1;display:flex;align-items:center;justify-content:center"
+        >
+          <span class="small">No Image</span>
+        </div>
+      `;
+      return;
+    }
+
+    productMainImageWrapEl.innerHTML = `
+      <img
+        src="${escapeHtml(mainImageUrl)}"
+        alt="${escapeHtml(product.name || "Product image")}"
+        style="width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:12px"
+      />
+    `;
+  }
+
+  function renderGallery(images, productName) {
+    if (!productGalleryEl) return;
+
+    const safeImages = Array.isArray(images) ? images : [];
+
+    if (!safeImages.length) {
+      productGalleryEl.innerHTML = "";
+      return;
+    }
+
+    productGalleryEl.innerHTML = safeImages.map((image, index) => `
+      <img
+        src="${escapeHtml(image.image_url || "")}"
+        alt="${escapeHtml(image.alt_text || `${productName} image ${index + 1}`)}"
+        style="width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:10px"
+      />
+    `).join("");
+  }
+
+  function renderProduct(product, images) {
+    if (productTypeEl) productTypeEl.textContent = product.product_type || "";
+    if (productNameEl) productNameEl.textContent = product.name || "";
+    if (productPriceEl) productPriceEl.textContent = formatMoney(product.price_cents, product.currency);
+    if (productShortDescriptionEl) {
+      productShortDescriptionEl.textContent = product.short_description || "No short description available.";
+    }
+    if (productSkuEl) productSkuEl.textContent = product.sku || "—";
+    if (productShippingEl) productShippingEl.textContent = yesNo(product.requires_shipping);
+    if (productTaxClassEl) {
+      productTaxClassEl.textContent = product.tax_class_name || product.tax_class_code || "—";
+    }
+
+    if (productInventoryEl) {
+      const tracking = Number(product.inventory_tracking) === 1;
+      const quantity = Number(product.inventory_quantity || 0);
+      productInventoryEl.textContent = tracking ? String(quantity) : "Not tracked";
+    }
+
+    if (productDescriptionEl) {
+      const description = String(product.description || "").trim();
+      productDescriptionEl.innerHTML = description
+        ? `<p>${escapeHtml(description).replaceAll("\n", "<br>")}</p>`
+        : `<p class="small">No full description available.</p>`;
+    }
+
+    renderMainImage(product, images);
+    renderGallery(images, product.name || "Product");
+  }
+
+  async function loadProduct() {
+    hide(errorEl);
+    hide(detailEl);
+    show(loadingEl);
+
+    try {
+      const url = new URL(window.location.href);
+      const slug = String(url.searchParams.get("slug") || "").trim();
+
+      if (!slug) {
+        throw new Error("No product slug was provided.");
+      }
+
+      const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, {
+        method: "GET"
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Failed to load product.");
+      }
+
+      renderProduct(data.product || {}, data.images || []);
+      document.title = `${data.product?.name || "Product"} — Devil n Dove`;
+
+      show(detailEl);
+    } catch (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message || "Failed to load product.";
+      }
+      show(errorEl);
+    } finally {
+      hide(loadingEl);
+    }
+  }
+
+  await loadProduct();
+});
