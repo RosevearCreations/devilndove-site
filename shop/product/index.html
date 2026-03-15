@@ -27,6 +27,7 @@
         <a href="/tools/">Tools</a>
         <a href="/supplies/">Supplies</a>
         <a href="/shop/">Shop</a>
+        <a href="/cart/">Cart</a>
         <a href="/contact/">Contact</a>
 
         <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
@@ -91,11 +92,29 @@
           <div class="card" style="margin-top:14px">
             <h3 style="margin-top:0">Purchase</h3>
             <p class="small">
-              Cart and checkout are being added next. This page is now ready for that step.
+              Add this item to your cart. Checkout and payment options will be connected next.
             </p>
-            <button class="btn" type="button" disabled>
-              Add to Cart Coming Soon
-            </button>
+
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px">
+              <label class="small" for="productQuantity">Quantity</label>
+              <input
+                id="productQuantity"
+                type="number"
+                min="1"
+                value="1"
+                style="max-width:90px"
+              />
+
+              <button class="btn" type="button" id="addToCartButton">
+                Add to Cart
+              </button>
+
+              <a class="btn" href="/cart/" id="viewCartButton">
+                View Cart
+              </a>
+            </div>
+
+            <div id="addToCartMessage" class="small" style="display:none;margin-top:12px"></div>
           </div>
         </div>
       </div>
@@ -107,6 +126,7 @@
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/cart.js"></script>
   <script src="/public/js/product-detail.js"></script>
 </body>
 </html>
