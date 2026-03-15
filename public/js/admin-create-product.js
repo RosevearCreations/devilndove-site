@@ -27,8 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadTaxClasses() {
-    if (!taxClassSelect) return;
+    if (!taxClassSelect || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
 
+    const currentValue = String(taxClassSelect.value || "").trim();
     taxClassSelect.innerHTML = `<option value="">Loading tax classes...</option>`;
 
     try {
@@ -52,6 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
           </option>
         `).join("")}
       `;
+
+      if (currentValue) {
+        taxClassSelect.value = currentValue;
+      }
     } catch (error) {
       taxClassSelect.innerHTML = `<option value="">Unable to load tax classes</option>`;
       setMessage(error.message || "Failed to load tax classes.", true);
@@ -63,9 +68,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  if (!form.dataset.mode) {
+    form.dataset.mode = "create";
+  }
+
   loadTaxClasses();
 
   form.addEventListener("submit", async (event) => {
+    if (form.dataset.mode === "edit") {
+      return;
+    }
+
     event.preventDefault();
     clearMessage();
 
@@ -127,6 +140,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const originalButtonText = submitButton ? submitButton.textContent : "";
+
     try {
       if (submitButton) {
         submitButton.disabled = true;
@@ -146,6 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setMessage("Product created successfully.");
       form.reset();
+      form.dataset.mode = "create";
+      await loadTaxClasses();
 
       document.dispatchEvent(new CustomEvent("dd:product-created", {
         detail: {
@@ -157,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = "Create Product";
+        submitButton.textContent = originalButtonText || "Create Product";
       }
     }
   });
