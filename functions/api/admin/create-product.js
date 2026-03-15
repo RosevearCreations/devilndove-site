@@ -66,6 +66,15 @@ function normalizeSlug(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+function normalizeImageUrls(imageUrls) {
+  if (!Array.isArray(imageUrls)) return [];
+
+  return imageUrls
+    .map(url => String(url || "").trim())
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -113,6 +122,7 @@ export async function onRequestPost(context) {
     body.sort_order == null || body.sort_order === ""
       ? 0
       : Number(body.sort_order);
+  const image_urls = normalizeImageUrls(body.image_urls);
 
   if (!name) {
     return json({ ok: false, error: "Product name is required." }, 400);
@@ -252,6 +262,26 @@ export async function onRequestPost(context) {
 
   const newProductId = insertResult?.meta?.last_row_id;
 
+  for (let i = 0; i < image_urls.length; i += 1) {
+    await env.DB.prepare(`
+      INSERT INTO product_images (
+        product_id,
+        image_url,
+        alt_text,
+        sort_order,
+        created_at
+      )
+      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `)
+      .bind(
+        newProductId,
+        image_urls[i],
+        name,
+        i
+      )
+      .run();
+  }
+
   const createdProduct = await env.DB.prepare(`
     SELECT
       product_id,
@@ -283,9 +313,25 @@ export async function onRequestPost(context) {
     .bind(newProductId)
     .first();
 
+  const createdImagesResult = await env.DB.prepare(`
+    SELECT
+      product_image_id,
+      product_id,
+      image_url,
+      alt_text,
+      sort_order,
+      created_at
+    FROM product_images
+    WHERE product_id = ?
+    ORDER BY sort_order ASC, product_image_id ASC
+  `)
+    .bind(newProductId)
+    .all();
+
   return json({
     ok: true,
     message: "Product created successfully.",
-    product: createdProduct
+    product: createdProduct,
+    images: createdImagesResult.results || []
   }, 201);
 }
