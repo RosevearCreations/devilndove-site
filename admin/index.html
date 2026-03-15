@@ -1,3 +1,4 @@
+<!-- File: /admin/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -62,7 +63,7 @@
     <div class="card" data-admin-only style="display:none">
       <h2 style="margin-top:0">Admin Dashboard</h2>
       <p class="small">
-        This area is reserved for admin tools, member management, and protected controls.
+        This area is reserved for admin tools, member management, protected controls, and store management.
       </p>
 
       <div class="card" style="margin-top:18px">
@@ -128,6 +129,7 @@
             <li>password resets</li>
             <li>session cleanup</li>
             <li>user deletion</li>
+            <li>product management</li>
             <li>future site management tools</li>
           </ul>
         </div>
@@ -135,9 +137,14 @@
         <div class="card">
           <h3 style="margin-top:0">Status</h3>
           <p class="small">Your admin role has been verified.</p>
-          <button class="btn" type="button" data-refresh-users style="margin-top:10px">
-            Refresh Users
-          </button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+            <button class="btn" type="button" data-refresh-users>
+              Refresh Users
+            </button>
+            <button class="btn" type="button" data-refresh-products>
+              Refresh Products
+            </button>
+          </div>
         </div>
       </div>
 
@@ -197,6 +204,189 @@
       </div>
 
       <div class="card" style="margin-top:18px">
+        <h3 style="margin-top:0">Create Product</h3>
+        <p class="small">Add physical or digital products for sale, including up to 5 image URLs.</p>
+
+        <form id="createProductForm" class="grid" style="gap:12px;margin-top:12px">
+          <div>
+            <label class="small" for="create_product_name">Product Name</label>
+            <input id="create_product_name" name="name" type="text" required />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_slug">Slug</label>
+            <input id="create_product_slug" name="slug" type="text" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_sku">SKU</label>
+            <input id="create_product_sku" name="sku" type="text" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_type">Product Type</label>
+            <select id="create_product_type" name="product_type">
+              <option value="physical" selected>physical</option>
+              <option value="digital">digital</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="small" for="create_product_status">Status</label>
+            <select id="create_product_status" name="status">
+              <option value="draft" selected>draft</option>
+              <option value="active">active</option>
+              <option value="archived">archived</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="small" for="create_product_currency">Currency</label>
+            <input id="create_product_currency" name="currency" type="text" value="CAD" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_price">Price</label>
+            <input id="create_product_price" name="price" type="text" placeholder="0.00" required />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_compare_at_price">Compare At Price</label>
+            <input id="create_product_compare_at_price" name="compare_at_price" type="text" placeholder="0.00" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_taxable">Taxable</label>
+            <select id="create_product_taxable" name="taxable">
+              <option value="1" selected>Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="small" for="create_product_tax_class_id">Tax Class</label>
+            <select id="create_product_tax_class_id" name="tax_class_id">
+              <option value="">Loading tax classes...</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="small" for="create_product_requires_shipping">Requires Shipping</label>
+            <select id="create_product_requires_shipping" name="requires_shipping">
+              <option value="1" selected>Yes</option>
+              <option value="0">No</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="small" for="create_product_weight_grams">Weight (grams)</label>
+            <input id="create_product_weight_grams" name="weight_grams" type="number" min="0" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_inventory_tracking">Track Inventory</label>
+            <select id="create_product_inventory_tracking" name="inventory_tracking">
+              <option value="0" selected>No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="small" for="create_product_inventory_quantity">Inventory Quantity</label>
+            <input id="create_product_inventory_quantity" name="inventory_quantity" type="number" min="0" value="0" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_sort_order">Sort Order</label>
+            <input id="create_product_sort_order" name="sort_order" type="number" value="0" />
+          </div>
+
+          <div style="grid-column:1 / -1">
+            <label class="small" for="create_product_short_description">Short Description</label>
+            <textarea id="create_product_short_description" name="short_description" rows="3"></textarea>
+          </div>
+
+          <div style="grid-column:1 / -1">
+            <label class="small" for="create_product_description">Full Description</label>
+            <textarea id="create_product_description" name="description" rows="6"></textarea>
+          </div>
+
+          <div style="grid-column:1 / -1">
+            <label class="small" for="create_product_digital_file_url">Digital File URL</label>
+            <input id="create_product_digital_file_url" name="digital_file_url" type="text" />
+          </div>
+
+          <div style="grid-column:1 / -1">
+            <label class="small" for="create_product_featured_image_url">Featured Image URL</label>
+            <input id="create_product_featured_image_url" name="featured_image_url" type="text" />
+          </div>
+
+          <div style="grid-column:1 / -1">
+            <h4 style="margin:8px 0">Product Image URLs (up to 5)</h4>
+          </div>
+
+          <div>
+            <label class="small" for="create_product_image_url_1">Image URL 1</label>
+            <input id="create_product_image_url_1" name="image_url_1" type="text" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_image_url_2">Image URL 2</label>
+            <input id="create_product_image_url_2" name="image_url_2" type="text" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_image_url_3">Image URL 3</label>
+            <input id="create_product_image_url_3" name="image_url_3" type="text" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_image_url_4">Image URL 4</label>
+            <input id="create_product_image_url_4" name="image_url_4" type="text" />
+          </div>
+
+          <div>
+            <label class="small" for="create_product_image_url_5">Image URL 5</label>
+            <input id="create_product_image_url_5" name="image_url_5" type="text" />
+          </div>
+
+          <div style="grid-column:1 / -1">
+            <button class="btn" type="submit">Create Product</button>
+          </div>
+
+          <div id="createProductMessage" class="small" style="display:none;grid-column:1 / -1"></div>
+        </form>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3 style="margin-top:0">Products</h3>
+
+        <div id="productsLoading" class="small">Loading products...</div>
+        <div id="productsError" class="small" style="display:none;color:#b00020"></div>
+        <div id="productsEmpty" class="small" style="display:none">No products found.</div>
+
+        <div style="overflow:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">ID</th>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Name</th>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Slug</th>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">SKU</th>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Type</th>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Price</th>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Inventory</th>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Shipping</th>
+                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Tax Class</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Users</h3>
 
         <div id="usersLoading" class="small">Loading users...</div>
@@ -243,5 +433,7 @@
   <script src="/public/js/admin-delete-user.js"></script>
   <script src="/public/js/admin-cleanup-sessions.js"></script>
   <script src="/public/js/admin-self-protect.js"></script>
+  <script src="/public/js/admin-create-product.js"></script>
+  <script src="/public/js/admin-products.js"></script>
 </body>
 </html>
