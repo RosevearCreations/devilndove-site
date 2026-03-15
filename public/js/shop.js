@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!productsEl) return;
 
     productsEl.innerHTML = products.map(product => {
+      const productId = Number(product.product_id);
       const name = escapeHtml(product.name || "");
       const slug = encodeURIComponent(product.slug || "");
       const shortDescription = escapeHtml(product.short_description || "");
@@ -72,8 +73,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             ${shortDescription || "No description available yet."}
           </p>
 
-          <div style="margin-top:12px">
+          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
             <a class="btn" href="/shop/product/?slug=${slug}">View</a>
+            <button
+              class="btn"
+              type="button"
+              data-add-shop-cart-id="${productId}"
+            >
+              Add to Cart
+            </button>
           </div>
         </article>
       `;
@@ -106,6 +114,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       renderProducts(products);
       show(productsEl);
+
+      productsEl.querySelectorAll("[data-add-shop-cart-id]").forEach(button => {
+        button.addEventListener("click", () => {
+          if (!window.DDCart) {
+            alert("Cart is not available right now.");
+            return;
+          }
+
+          const productId = Number(button.getAttribute("data-add-shop-cart-id"));
+          const product = products.find(item => Number(item.product_id) === productId);
+
+          if (!product) {
+            alert("Product could not be added.");
+            return;
+          }
+
+          try {
+            window.DDCart.addToCart(product, 1);
+            alert("Added to cart.");
+          } catch (error) {
+            alert(error.message || "Failed to add item to cart.");
+          }
+        });
+      });
     } catch (error) {
       if (errorEl) {
         errorEl.textContent = error.message || "Failed to load products.";
