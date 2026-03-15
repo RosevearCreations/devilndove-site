@@ -82,10 +82,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).join("");
   }
 
-  async function loadProducts() {
+  async function loadProducts(options = {}) {
+    const { silent = false } = options;
+
     hide(emptyEl);
     hide(errorEl);
-    show(loadingEl);
+
+    if (!silent) {
+      show(loadingEl);
+    }
 
     try {
       const response = await window.DDAuth.apiFetch("/api/admin/products", {
@@ -125,15 +130,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   document.addEventListener("dd:product-created", async () => {
-    await loadProducts();
+    await loadProducts({ silent: true });
   });
 
   document.addEventListener("dd:product-updated", async () => {
-    await loadProducts();
+    await loadProducts({ silent: true });
   });
 
   document.addEventListener("dd:product-deleted", async () => {
-    await loadProducts();
+    await loadProducts({ silent: true });
   });
 
   if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
