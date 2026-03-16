@@ -1,0 +1,134 @@
+<!-- File: /checkout/confirmation/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Confirmation — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+  <meta name="description" content="Order confirmation for Devil n Dove checkout." />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Workshop • Art • Tools • Movies</div>
+        </div>
+      </div>
+
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/gallery/">Gallery</a>
+        <a href="/creations/">Creations</a>
+        <a href="/tools/">Tools</a>
+        <a href="/supplies/">Supplies</a>
+        <a href="/shop/">Shop</a>
+        <a href="/cart/">Cart</a>
+        <a href="/contact/">Contact</a>
+
+        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
+        <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
+        <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
+
+        <span class="small" data-show-when-logged-in style="display:none">
+          Hi, <span data-nav-user-name>Member</span>
+        </span>
+
+        <button
+          class="btn"
+          type="button"
+          data-nav-logout
+          data-show-when-logged-in
+          style="display:none"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <h1>Order Confirmation</h1>
+        <p>
+          Your order has been created and is ready for payment connection.
+        </p>
+      </div>
+    </div>
+
+    <div id="orderConfirmationEmpty" class="card" style="display:none">
+      <h2 style="margin-top:0">No order found</h2>
+      <p class="small">
+        We could not find a recent order in this browser session.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn" href="/shop/">Go to Shop</a>
+        <a class="btn" href="/checkout/">Back to Checkout</a>
+      </div>
+    </div>
+
+    <div id="orderConfirmationContent" style="display:none">
+      <div class="grid cols-2" style="gap:18px">
+        <div class="card">
+          <h2 style="margin-top:0">Order Details</h2>
+          <p><strong>Order Number:</strong> <span id="confirmOrderNumber"></span></p>
+          <p><strong>Status:</strong> <span id="confirmOrderStatus"></span></p>
+          <p><strong>Customer:</strong> <span id="confirmCustomerName"></span></p>
+          <p><strong>Email:</strong> <span id="confirmCustomerEmail"></span></p>
+          <p><strong>Fulfillment:</strong> <span id="confirmFulfillmentType"></span></p>
+          <p><strong>Payment Method:</strong> <span id="confirmPaymentMethod"></span></p>
+          <p><strong>Created:</strong> <span id="confirmCreatedAt"></span></p>
+        </div>
+
+        <div class="card">
+          <h2 style="margin-top:0">Totals</h2>
+          <p><strong>Subtotal:</strong> <span id="confirmSubtotal"></span></p>
+          <p><strong>Shipping:</strong> <span id="confirmShipping"></span></p>
+          <p><strong>Tax:</strong> <span id="confirmTax"></span></p>
+          <p style="font-size:1.1rem;font-weight:700">
+            <strong>Total:</strong> <span id="confirmTotal"></span>
+          </p>
+
+          <div class="card" style="margin-top:14px">
+            <h3 style="margin-top:0">Next Step</h3>
+            <p class="small" id="confirmNextStepText">
+              Payment connection is the next step. PayPal and card processing will connect here.
+            </p>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+              <button class="btn" type="button" id="confirmPayPalButton" disabled>
+                Pay with PayPal Coming Soon
+              </button>
+              <button class="btn" type="button" id="confirmCardButton" disabled>
+                Pay by Card Coming Soon
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2 style="margin-top:0">Items</h2>
+        <div id="confirmItems"></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2 style="margin-top:0">Shipping Address</h2>
+        <div id="confirmShippingAddress"></div>
+      </div>
+    </div>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/cart.js"></script>
+  <script src="/public/js/cart-badge.js"></script>
+  <script src="/public/js/order-confirmation.js"></script>
+</body>
+</html>
