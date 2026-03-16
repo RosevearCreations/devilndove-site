@@ -2,6 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const STORAGE_KEY = "dd_checkout_form";
+  const LAST_ORDER_KEY = "dd_last_order";
 
   const checkoutEmptyEl = document.getElementById("checkoutEmpty");
   const checkoutContentEl = document.getElementById("checkoutContent");
@@ -13,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const checkoutTotalEl = document.getElementById("checkoutTotal");
   const checkoutForm = document.getElementById("checkoutForm");
   const checkoutMessageEl = document.getElementById("checkoutMessage");
+  const checkoutSubmitButton = document.getElementById("checkoutSubmitButton");
 
   function show(el) {
     if (el) el.style.display = "";
@@ -98,6 +100,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function saveLastOrder(data) {
+    try {
+      localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(data));
+    } catch {
+      // ignore storage failures
+    }
+  }
+
   function renderCheckout() {
     const items = getCartItemsSafe();
 
@@ -111,6 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (checkoutTotalEl) checkoutTotalEl.textContent = formatMoney(0, "CAD");
       if (checkoutShippingEl) checkoutShippingEl.textContent = "Calculated later";
       if (checkoutTaxEl) checkoutTaxEl.textContent = "Calculated later";
+      if (checkoutSubmitButton) checkoutSubmitButton.disabled = true;
       return;
     }
 
@@ -164,6 +175,98 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
       }).join("");
     }
+
+    if (checkoutSubmitButton) {
+      checkoutSubmitButton.disabled = false;
+      checkoutSubmitButton.textContent = "Create Order";
+    }
+  }
+
+  async function createOrder() {
+    if (!checkoutForm) return;
+
+    const cartItems = getCartItemsSafe();
+
+    if (!cartItems.length) {
+      setMessage("Your cart is empty.", true);
+      renderCheckout();
+      return;
+    }
+
+    const formData = new FormData(checkoutForm);
+    const payload = {
+      email: String(formData.get("email") || "").trim(),
+      customer_name: String(formData.get("customer_name") || "").trim(),
+      shipping_address1: String(formData.get("shipping_address1") || "").trim(),
+      shipping_address2: String(formData.get("shipping_address2") || "").trim(),
+      shipping_city: String(formData.get("shipping_city") || "").trim(),
+      shipping_province: String(formData.get("shipping_province") || "").trim(),
+      shipping_postal_code: String(formData.get("shipping_postal_code") || "").trim(),
+      shipping_country: String(formData.get("shipping_country") || "").trim(),
+      payment_method: String(formData.get("payment_method") || "paypal").trim().toLowerCase(),
+      cart_items: cartItems
+    };
+
+    if (!payload.email) {
+      setMessage("Email is required.", true);
+      return;
+    }
+
+    if (!payload.customer_name) {
+      setMessage("Full name is required.", true);
+      return;
+    }
+
+    const originalText = checkoutSubmitButton ? checkoutSubmitButton.textContent : "";
+
+    try {
+      clearMessage();
+
+      if (checkoutSubmitButton) {
+        checkoutSubmitButton.disabled = true;
+        checkoutSubmitButton.textContent = "Creating Order...";
+      }
+
+      const response = await fetch("/api/checkout-create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Failed to create order.");
+      }
+
+      saveFormData();
+      saveLastOrder(data);
+
+      if (checkoutTaxEl) {
+        checkoutTaxEl.textContent = formatMoney(data.order?.tax_cents || 0, data.order?.currency || "CAD");
+      }
+
+      if (checkoutShippingEl) {
+        checkoutShippingEl.textContent = formatMoney(data.order?.shipping_cents || 0, data.order?.currency || "CAD");
+      }
+
+      if (checkoutTotalEl) {
+        checkoutTotalEl.textContent = formatMoney(data.order?.total_cents || 0, data.order?.currency || "CAD");
+      }
+
+      setMessage(
+        `Order ${data.order?.order_number || ""} created successfully. Payment connection is the next step.`
+      );
+    } catch (error) {
+      setMessage(error.message || "Failed to create order.", true);
+    } finally {
+      if (checkoutSubmitButton) {
+        checkoutSubmitButton.disabled = false;
+        checkoutSubmitButton.textContent = originalText || "Create Order";
+      }
+    }
   }
 
   if (checkoutForm) {
@@ -177,11 +280,9 @@ document.addEventListener("DOMContentLoaded", () => {
       saveFormData();
     });
 
-    checkoutForm.addEventListener("submit", (event) => {
+    checkoutForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      clearMessage();
-      setMessage("Checkout submission will be connected when PayPal and card processing are added.");
-      saveFormData();
+      await createOrder();
     });
   }
 
