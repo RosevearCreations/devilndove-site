@@ -77,16 +77,16 @@
           <p><strong>Items:</strong> <span id="cartItemCount">0</span></p>
           <p><strong>Subtotal:</strong> <span id="cartSubtotal">$0.00</span></p>
           <p class="small">
-            Taxes, shipping, and payment options will be calculated during checkout once that step is added.
+            Taxes, shipping, and payment options will be calculated during checkout.
           </p>
 
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
             <button class="btn" type="button" id="clearCartButton">
               Clear Cart
             </button>
-            <button class="btn" type="button" id="checkoutButton" disabled>
-              Checkout Coming Soon
-            </button>
+            <a class="btn" href="/checkout/" id="checkoutButton">
+              Continue to Checkout
+            </a>
           </div>
         </div>
       </div>
