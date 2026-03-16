@@ -244,21 +244,11 @@ document.addEventListener("DOMContentLoaded", () => {
       saveFormData();
       saveLastOrder(data);
 
-      if (checkoutTaxEl) {
-        checkoutTaxEl.textContent = formatMoney(data.order?.tax_cents || 0, data.order?.currency || "CAD");
+      if (window.DDCart) {
+        window.DDCart.clearCart();
       }
 
-      if (checkoutShippingEl) {
-        checkoutShippingEl.textContent = formatMoney(data.order?.shipping_cents || 0, data.order?.currency || "CAD");
-      }
-
-      if (checkoutTotalEl) {
-        checkoutTotalEl.textContent = formatMoney(data.order?.total_cents || 0, data.order?.currency || "CAD");
-      }
-
-      setMessage(
-        `Order ${data.order?.order_number || ""} created successfully. Payment connection is the next step.`
-      );
+      window.location.href = "/checkout/confirmation/";
     } catch (error) {
       setMessage(error.message || "Failed to create order.", true);
     } finally {
