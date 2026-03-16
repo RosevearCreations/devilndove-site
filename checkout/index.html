@@ -1,0 +1,160 @@
+<!-- File: /checkout/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" type="image/png" href="/assets/mark.png" />
+  <meta name="description" content="Checkout for Devil n Dove products." />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Workshop • Art • Tools • Movies</div>
+        </div>
+      </div>
+
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/gallery/">Gallery</a>
+        <a href="/creations/">Creations</a>
+        <a href="/tools/">Tools</a>
+        <a href="/supplies/">Supplies</a>
+        <a href="/shop/">Shop</a>
+        <a href="/cart/">Cart</a>
+        <a href="/checkout/">Checkout</a>
+        <a href="/contact/">Contact</a>
+
+        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
+        <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
+        <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
+
+        <span class="small" data-show-when-logged-in style="display:none">
+          Hi, <span data-nav-user-name>Member</span>
+        </span>
+
+        <button
+          class="btn"
+          type="button"
+          data-nav-logout
+          data-show-when-logged-in
+          style="display:none"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <h1>Checkout</h1>
+        <p>
+          Review your order and enter your contact and shipping details.
+        </p>
+      </div>
+    </div>
+
+    <div id="checkoutEmpty" class="card" style="display:none">
+      <h2 style="margin-top:0">Your cart is empty</h2>
+      <p class="small">Add products to your cart before checkout.</p>
+      <a class="btn" href="/shop/">Go to Shop</a>
+    </div>
+
+    <div id="checkoutContent" style="display:none">
+      <div class="grid cols-2" style="gap:18px">
+        <div class="card">
+          <h2 style="margin-top:0">Customer Details</h2>
+
+          <form id="checkoutForm" class="grid" style="gap:12px;margin-top:12px">
+            <div>
+              <label class="small" for="checkout_email">Email</label>
+              <input id="checkout_email" name="email" type="email" required />
+            </div>
+
+            <div>
+              <label class="small" for="checkout_name">Full Name</label>
+              <input id="checkout_name" name="name" type="text" required />
+            </div>
+
+            <div>
+              <label class="small" for="checkout_address1">Address Line 1</label>
+              <input id="checkout_address1" name="address1" type="text" />
+            </div>
+
+            <div>
+              <label class="small" for="checkout_address2">Address Line 2</label>
+              <input id="checkout_address2" name="address2" type="text" />
+            </div>
+
+            <div>
+              <label class="small" for="checkout_city">City</label>
+              <input id="checkout_city" name="city" type="text" />
+            </div>
+
+            <div>
+              <label class="small" for="checkout_province">Province / State</label>
+              <input id="checkout_province" name="province" type="text" />
+            </div>
+
+            <div>
+              <label class="small" for="checkout_postal_code">Postal / ZIP Code</label>
+              <input id="checkout_postal_code" name="postal_code" type="text" />
+            </div>
+
+            <div>
+              <label class="small" for="checkout_country">Country</label>
+              <input id="checkout_country" name="country" type="text" value="Canada" />
+            </div>
+
+            <div style="grid-column:1 / -1">
+              <label class="small" for="checkout_notes">Order Notes</label>
+              <textarea id="checkout_notes" name="notes" rows="4"></textarea>
+            </div>
+
+            <div id="checkoutMessage" class="small" style="display:none;grid-column:1 / -1"></div>
+
+            <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn" type="submit" id="checkoutSubmitButton" disabled>
+                Payment Setup Coming Soon
+              </button>
+              <a class="btn" href="/cart/">Back to Cart</a>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2 style="margin-top:0">Order Summary</h2>
+
+          <div id="checkoutItems"></div>
+
+          <hr style="margin:16px 0" />
+
+          <p><strong>Items:</strong> <span id="checkoutItemCount">0</span></p>
+          <p><strong>Subtotal:</strong> <span id="checkoutSubtotal">$0.00</span></p>
+          <p><strong>Estimated Tax:</strong> <span id="checkoutTax">To be calculated</span></p>
+          <p><strong>Shipping:</strong> <span id="checkoutShipping">To be calculated</span></p>
+
+          <p class="small" style="margin-top:14px">
+            PayPal and credit card processing will be connected after the checkout/order foundation is completed.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/cart.js"></script>
+  <script src="/public/js/cart-badge.js"></script>
+  <script src="/public/js/checkout.js"></script>
+</body>
+</html>
