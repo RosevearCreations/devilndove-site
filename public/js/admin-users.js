@@ -1,3 +1,5 @@
+// File: /public/js/admin-users.js
+
 document.addEventListener("DOMContentLoaded", async () => {
   const tableBody = document.getElementById("usersTableBody");
   const emptyEl = document.getElementById("usersEmpty");
@@ -149,6 +151,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               </button>
               <button class="btn" type="button" data-reset-password-user-id="${userId}">
                 Reset Password
+              </button>
+              <button class="btn" type="button" data-manage-access-tiers-user-id="${userId}">
+                Manage Access
               </button>
               <button class="btn" type="button" data-delete-user-id="${userId}">
                 Delete User
