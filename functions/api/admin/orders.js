@@ -70,39 +70,73 @@ export async function onRequestGet(context) {
 
   let sql = `
     SELECT
-      order_id,
-      order_number,
-      customer_email,
-      customer_name,
-      order_status,
-      fulfillment_type,
-      currency,
-      subtotal_cents,
-      discount_cents,
-      shipping_cents,
-      tax_cents,
-      total_cents,
-      shipping_city,
-      shipping_province,
-      shipping_country,
-      created_at,
-      updated_at
-    FROM orders
+      o.order_id,
+      o.order_number,
+      o.customer_email,
+      o.customer_name,
+      o.order_status,
+      o.fulfillment_type,
+      o.currency,
+      o.subtotal_cents,
+      o.discount_cents,
+      o.shipping_cents,
+      o.tax_cents,
+      o.total_cents,
+      o.shipping_city,
+      o.shipping_province,
+      o.shipping_country,
+      o.created_at,
+      o.updated_at,
+
+      COALESCE((
+        SELECT COUNT(*)
+        FROM payments p
+        WHERE p.order_id = o.order_id
+      ), 0) AS payment_count,
+
+      COALESCE((
+        SELECT SUM(
+          CASE
+            WHEN p.payment_status IN ('paid', 'partially_refunded', 'refunded')
+            THEN p.amount_cents
+            ELSE 0
+          END
+        )
+        FROM payments p
+        WHERE p.order_id = o.order_id
+      ), 0) AS paid_amount_cents,
+
+      (
+        SELECT p.payment_status
+        FROM payments p
+        WHERE p.order_id = o.order_id
+        ORDER BY p.created_at DESC, p.payment_id DESC
+        LIMIT 1
+      ) AS latest_payment_status,
+
+      (
+        SELECT p.provider
+        FROM payments p
+        WHERE p.order_id = o.order_id
+        ORDER BY p.created_at DESC, p.payment_id DESC
+        LIMIT 1
+      ) AS latest_payment_provider
+
+    FROM orders o
   `;
 
   const validStatuses = ["draft", "pending", "paid", "fulfilled", "cancelled", "refunded"];
   let result;
 
   if (statusFilter && validStatuses.includes(statusFilter)) {
-    sql += ` WHERE order_status = ? `;
-    sql += ` ORDER BY created_at DESC, order_id DESC `;
+    sql += ` WHERE o.order_status = ? `;
+    sql += ` ORDER BY o.created_at DESC, o.order_id DESC `;
 
     result = await env.DB.prepare(sql)
       .bind(statusFilter)
       .all();
   } else {
-    sql += ` ORDER BY created_at DESC, order_id DESC `;
-
+    sql += ` ORDER BY o.created_at DESC, o.order_id DESC `;
     result = await env.DB.prepare(sql).all();
   }
 
