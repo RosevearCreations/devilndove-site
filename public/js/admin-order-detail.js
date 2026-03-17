@@ -42,6 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/\b\w/g, ch => ch.toUpperCase());
   }
 
+  function dollarsToCents(value) {
+    const normalized = String(value || "").trim();
+    if (!normalized) return 0;
+    const amount = Number(normalized);
+    if (!Number.isFinite(amount) || amount < 0) return NaN;
+    return Math.round(amount * 100);
+  }
+
   function ensureModal() {
     if (modalEl) return modalEl;
 
@@ -115,6 +123,79 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
                 <div id="detailUpdateOrderStatusMessage" class="small" style="display:none"></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:18px">
+              <h3 style="margin-top:0">Record Payment</h3>
+
+              <div class="grid" style="gap:12px">
+                <div>
+                  <label class="small" for="detailPaymentProvider">Provider</label>
+                  <select id="detailPaymentProvider">
+                    <option value="manual" selected>manual</option>
+                    <option value="paypal">paypal</option>
+                    <option value="stripe">stripe</option>
+                    <option value="square">square</option>
+                    <option value="other">other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="small" for="detailPaymentStatus">Payment Status</label>
+                  <select id="detailPaymentStatus">
+                    <option value="paid" selected>paid</option>
+                    <option value="pending">pending</option>
+                    <option value="authorized">authorized</option>
+                    <option value="failed">failed</option>
+                    <option value="cancelled">cancelled</option>
+                    <option value="refunded">refunded</option>
+                    <option value="partially_refunded">partially_refunded</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="small" for="detailPaymentAmount">Amount</label>
+                  <input id="detailPaymentAmount" type="text" placeholder="0.00" />
+                </div>
+
+                <div>
+                  <label class="small" for="detailPaymentCurrency">Currency</label>
+                  <input id="detailPaymentCurrency" type="text" value="CAD" />
+                </div>
+
+                <div>
+                  <label class="small" for="detailPaymentMethodLabel">Method Label</label>
+                  <input id="detailPaymentMethodLabel" type="text" placeholder="Cash, E-transfer, PayPal, Visa..." />
+                </div>
+
+                <div>
+                  <label class="small" for="detailPaymentReference">Transaction Reference</label>
+                  <input id="detailPaymentReference" type="text" />
+                </div>
+
+                <div>
+                  <label class="small" for="detailProviderPaymentId">Provider Payment ID</label>
+                  <input id="detailProviderPaymentId" type="text" />
+                </div>
+
+                <div>
+                  <label class="small" for="detailProviderOrderId">Provider Order ID</label>
+                  <input id="detailProviderOrderId" type="text" />
+                </div>
+
+                <div style="grid-column:1 / -1">
+                  <label class="small" for="detailPaymentNotes">Notes</label>
+                  <input id="detailPaymentNotes" type="text" />
+                </div>
+
+                <div>
+                  <button class="btn" type="button" id="detailRecordPaymentButton">
+                    Record Payment
+                  </button>
+                </div>
+
+                <div id="detailRecordPaymentMessage" class="small" style="display:none"></div>
               </div>
             </div>
 
@@ -206,6 +287,10 @@ document.addEventListener("DOMContentLoaded", () => {
       await updateOrderStatus();
     });
 
+    modalEl.querySelector("#detailRecordPaymentButton").addEventListener("click", async () => {
+      await recordPayment();
+    });
+
     return modalEl;
   }
 
@@ -229,6 +314,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function clearUpdateMessage() {
     const el = document.getElementById("detailUpdateOrderStatusMessage");
+    if (!el) return;
+    el.textContent = "";
+    el.style.display = "none";
+  }
+
+  function setPaymentMessage(message, isError = false) {
+    const el = document.getElementById("detailRecordPaymentMessage");
+    if (!el) return;
+    el.textContent = message;
+    el.style.display = "block";
+    el.style.color = isError ? "#b00020" : "#0a7a2f";
+  }
+
+  function clearPaymentMessage() {
+    const el = document.getElementById("detailRecordPaymentMessage");
     if (!el) return;
     el.textContent = "";
     el.style.display = "none";
@@ -289,6 +389,31 @@ document.addEventListener("DOMContentLoaded", () => {
     if (statusNote) {
       statusNote.value = "";
     }
+
+    const paymentAmount = document.getElementById("detailPaymentAmount");
+    if (paymentAmount) {
+      paymentAmount.value = ((Number(order.total_cents || 0)) / 100).toFixed(2);
+    }
+
+    const paymentCurrency = document.getElementById("detailPaymentCurrency");
+    if (paymentCurrency) {
+      paymentCurrency.value = currency;
+    }
+
+    const paymentMethodLabel = document.getElementById("detailPaymentMethodLabel");
+    if (paymentMethodLabel) paymentMethodLabel.value = "";
+
+    const paymentReference = document.getElementById("detailPaymentReference");
+    if (paymentReference) paymentReference.value = "";
+
+    const providerPaymentId = document.getElementById("detailProviderPaymentId");
+    if (providerPaymentId) providerPaymentId.value = "";
+
+    const providerOrderId = document.getElementById("detailProviderOrderId");
+    if (providerOrderId) providerOrderId.value = "";
+
+    const paymentNotes = document.getElementById("detailPaymentNotes");
+    if (paymentNotes) paymentNotes.value = "";
 
     const shippingAddressEl = document.getElementById("detailShippingAddress");
     if (shippingAddressEl) {
@@ -384,6 +509,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return data;
   }
 
+  async function sendRecordPayment(payload) {
+    const response = await window.DDAuth.apiFetch("/api/admin/record-payment", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Failed to record payment.");
+    }
+
+    return data;
+  }
+
   async function refreshCurrentOrderDetail() {
     if (!currentOrderId) return;
 
@@ -452,6 +592,71 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function recordPayment() {
+    if (!currentOrderId) {
+      setPaymentMessage("No order selected.", true);
+      return;
+    }
+
+    const provider = document.getElementById("detailPaymentProvider");
+    const paymentStatus = document.getElementById("detailPaymentStatus");
+    const amount = document.getElementById("detailPaymentAmount");
+    const currency = document.getElementById("detailPaymentCurrency");
+    const methodLabel = document.getElementById("detailPaymentMethodLabel");
+    const reference = document.getElementById("detailPaymentReference");
+    const providerPaymentId = document.getElementById("detailProviderPaymentId");
+    const providerOrderId = document.getElementById("detailProviderOrderId");
+    const notes = document.getElementById("detailPaymentNotes");
+    const button = document.getElementById("detailRecordPaymentButton");
+
+    const amount_cents = dollarsToCents(amount?.value || "");
+
+    if (Number.isNaN(amount_cents)) {
+      setPaymentMessage("Amount must be a valid number.", true);
+      return;
+    }
+
+    const payload = {
+      order_id: currentOrderId,
+      provider: String(provider?.value || "manual").trim().toLowerCase(),
+      payment_status: String(paymentStatus?.value || "paid").trim().toLowerCase(),
+      amount_cents,
+      currency: String(currency?.value || "CAD").trim().toUpperCase(),
+      payment_method_label: String(methodLabel?.value || "").trim(),
+      transaction_reference: String(reference?.value || "").trim(),
+      provider_payment_id: String(providerPaymentId?.value || "").trim(),
+      provider_order_id: String(providerOrderId?.value || "").trim(),
+      notes: String(notes?.value || "").trim()
+    };
+
+    const originalText = button ? button.textContent : "";
+
+    try {
+      clearPaymentMessage();
+
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Recording...";
+      }
+
+      await sendRecordPayment(payload);
+      setPaymentMessage("Payment recorded successfully.");
+
+      document.dispatchEvent(new CustomEvent("dd:order-updated", {
+        detail: { order_id: currentOrderId }
+      }));
+
+      await refreshCurrentOrderDetail();
+    } catch (error) {
+      setPaymentMessage(error.message || "Failed to record payment.", true);
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = originalText || "Record Payment";
+      }
+    }
+  }
+
   tableBody.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-view-order-id]");
     if (!button) return;
@@ -464,6 +669,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const modal = ensureModal();
     showModal();
     clearUpdateMessage();
+    clearPaymentMessage();
 
     const loadingEl = modal.querySelector("#orderDetailLoading");
     const errorEl = modal.querySelector("#orderDetailError");
