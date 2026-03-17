@@ -160,10 +160,34 @@ export async function onRequestGet(context) {
     .bind(orderId)
     .all();
 
+  const paymentsResult = await env.DB.prepare(`
+    SELECT
+      payment_id,
+      order_id,
+      provider,
+      provider_payment_id,
+      provider_order_id,
+      payment_status,
+      amount_cents,
+      currency,
+      payment_method_label,
+      transaction_reference,
+      paid_at,
+      created_at,
+      updated_at,
+      notes
+    FROM payments
+    WHERE order_id = ?
+    ORDER BY created_at DESC, payment_id DESC
+  `)
+    .bind(orderId)
+    .all();
+
   return json({
     ok: true,
     order,
     items: itemsResult.results || [],
-    history: historyResult.results || []
+    history: historyResult.results || [],
+    payments: paymentsResult.results || []
   });
 }
