@@ -83,6 +83,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">${total}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${location}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${created}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            <button class="btn" type="button" data-view-order-id="${orderId}">
+              View
+            </button>
+          </td>
         </tr>
       `;
     }).join("");
