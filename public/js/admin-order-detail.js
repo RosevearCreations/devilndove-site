@@ -131,6 +131,25 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
             <div class="card" style="margin-top:18px">
+              <h3 style="margin-top:0">Payments</h3>
+              <div style="overflow:auto">
+                <table style="width:100%;border-collapse:collapse">
+                  <thead>
+                    <tr>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Provider</th>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Amount</th>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Reference</th>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Paid At</th>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody id="detailPaymentsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:18px">
               <h3 style="margin-top:0">Items</h3>
               <div style="overflow:auto">
                 <table style="width:100%;border-collapse:collapse">
@@ -239,6 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const order = data.order || {};
     const items = Array.isArray(data.items) ? data.items : [];
     const history = Array.isArray(data.history) ? data.history : [];
+    const payments = Array.isArray(data.payments) ? data.payments : [];
     const currency = order.currency || "CAD";
 
     const setText = (id, value) => {
@@ -278,6 +298,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const billingAddressEl = document.getElementById("detailBillingAddress");
     if (billingAddressEl) {
       billingAddressEl.innerHTML = setAddressHtml(order, "billing");
+    }
+
+    const paymentsBody = document.getElementById("detailPaymentsBody");
+    if (paymentsBody) {
+      paymentsBody.innerHTML = payments.length
+        ? payments.map(payment => `
+            <tr>
+              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(payment.provider || "")}</td>
+              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(payment.payment_status || ""))}</td>
+              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(payment.amount_cents || 0, payment.currency || currency))}</td>
+              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(payment.transaction_reference || payment.provider_payment_id || payment.provider_order_id || "—")}</td>
+              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(payment.paid_at))}</td>
+              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(payment.created_at))}</td>
+            </tr>
+          `).join("")
+        : `<tr><td colspan="6" style="padding:8px">No payments found.</td></tr>`;
     }
 
     const itemsBody = document.getElementById("detailItemsBody");
