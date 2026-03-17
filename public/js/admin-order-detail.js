@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!tableBody || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
 
   let modalEl = null;
+  let currentOrderId = null;
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -86,6 +87,37 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             </div>
 
+            <div class="card" style="margin-top:18px">
+              <h3 style="margin-top:0">Update Status</h3>
+
+              <div class="grid" style="gap:12px">
+                <div>
+                  <label class="small" for="detailNewOrderStatus">New Status</label>
+                  <select id="detailNewOrderStatus">
+                    <option value="draft">draft</option>
+                    <option value="pending">pending</option>
+                    <option value="paid">paid</option>
+                    <option value="fulfilled">fulfilled</option>
+                    <option value="cancelled">cancelled</option>
+                    <option value="refunded">refunded</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="small" for="detailOrderStatusNote">Note (optional)</label>
+                  <input id="detailOrderStatusNote" type="text" />
+                </div>
+
+                <div>
+                  <button class="btn" type="button" id="detailUpdateOrderStatusButton">
+                    Update Status
+                  </button>
+                </div>
+
+                <div id="detailUpdateOrderStatusMessage" class="small" style="display:none"></div>
+              </div>
+            </div>
+
             <div class="grid cols-2" style="gap:18px;margin-top:18px">
               <div class="card">
                 <h3 style="margin-top:0">Shipping Address</h3>
@@ -151,6 +183,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    modalEl.querySelector("#detailUpdateOrderStatusButton").addEventListener("click", async () => {
+      await updateOrderStatus();
+    });
+
     return modalEl;
   }
 
@@ -162,6 +198,21 @@ document.addEventListener("DOMContentLoaded", () => {
   function hideModal() {
     if (!modalEl) return;
     modalEl.style.display = "none";
+  }
+
+  function setUpdateMessage(message, isError = false) {
+    const el = document.getElementById("detailUpdateOrderStatusMessage");
+    if (!el) return;
+    el.textContent = message;
+    el.style.display = "block";
+    el.style.color = isError ? "#b00020" : "#0a7a2f";
+  }
+
+  function clearUpdateMessage() {
+    const el = document.getElementById("detailUpdateOrderStatusMessage");
+    if (!el) return;
+    el.textContent = "";
+    el.style.display = "none";
   }
 
   function setAddressHtml(order, prefix) {
@@ -208,6 +259,16 @@ document.addEventListener("DOMContentLoaded", () => {
     setText("detailShipping", formatMoney(order.shipping_cents || 0, currency));
     setText("detailTax", formatMoney(order.tax_cents || 0, currency));
     setText("detailTotal", formatMoney(order.total_cents || 0, currency));
+
+    const statusSelect = document.getElementById("detailNewOrderStatus");
+    if (statusSelect) {
+      statusSelect.value = String(order.order_status || "pending").toLowerCase();
+    }
+
+    const statusNote = document.getElementById("detailOrderStatusNote");
+    if (statusNote) {
+      statusNote.value = "";
+    }
 
     const shippingAddressEl = document.getElementById("detailShippingAddress");
     if (shippingAddressEl) {
@@ -268,6 +329,93 @@ document.addEventListener("DOMContentLoaded", () => {
     return data;
   }
 
+  async function sendOrderStatusUpdate(orderId, newStatus, note) {
+    const response = await window.DDAuth.apiFetch("/api/admin/update-order-status", {
+      method: "POST",
+      body: JSON.stringify({
+        order_id: orderId,
+        new_status: newStatus,
+        note
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Failed to update order status.");
+    }
+
+    return data;
+  }
+
+  async function refreshCurrentOrderDetail() {
+    if (!currentOrderId) return;
+
+    const modal = ensureModal();
+    const loadingEl = modal.querySelector("#orderDetailLoading");
+    const errorEl = modal.querySelector("#orderDetailError");
+    const contentEl = modal.querySelector("#orderDetailContent");
+
+    if (loadingEl) loadingEl.style.display = "";
+    if (errorEl) {
+      errorEl.style.display = "none";
+      errorEl.textContent = "";
+    }
+
+    try {
+      const data = await loadOrderDetail(currentOrderId);
+      renderOrderDetail(data);
+      if (contentEl) contentEl.style.display = "";
+    } catch (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message || "Failed to reload order.";
+        errorEl.style.display = "";
+      }
+    } finally {
+      if (loadingEl) loadingEl.style.display = "none";
+    }
+  }
+
+  async function updateOrderStatus() {
+    if (!currentOrderId) {
+      setUpdateMessage("No order selected.", true);
+      return;
+    }
+
+    const statusSelect = document.getElementById("detailNewOrderStatus");
+    const noteInput = document.getElementById("detailOrderStatusNote");
+    const button = document.getElementById("detailUpdateOrderStatusButton");
+
+    const newStatus = String(statusSelect?.value || "").trim().toLowerCase();
+    const note = String(noteInput?.value || "").trim();
+    const originalText = button ? button.textContent : "";
+
+    try {
+      clearUpdateMessage();
+
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Updating...";
+      }
+
+      await sendOrderStatusUpdate(currentOrderId, newStatus, note);
+      setUpdateMessage("Order status updated successfully.");
+
+      document.dispatchEvent(new CustomEvent("dd:order-updated", {
+        detail: { order_id: currentOrderId }
+      }));
+
+      await refreshCurrentOrderDetail();
+    } catch (error) {
+      setUpdateMessage(error.message || "Failed to update order status.", true);
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = originalText || "Update Status";
+      }
+    }
+  }
+
   tableBody.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-view-order-id]");
     if (!button) return;
@@ -275,8 +423,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const orderId = Number(button.getAttribute("data-view-order-id"));
     if (!orderId) return;
 
+    currentOrderId = orderId;
+
     const modal = ensureModal();
     showModal();
+    clearUpdateMessage();
 
     const loadingEl = modal.querySelector("#orderDetailLoading");
     const errorEl = modal.querySelector("#orderDetailError");
