@@ -149,6 +149,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  document.addEventListener("dd:order-updated", async () => {
+    await loadOrders({ silent: true });
+  });
+
   if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
     return;
   }
