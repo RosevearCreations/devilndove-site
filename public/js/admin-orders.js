@@ -44,6 +44,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     return d.toLocaleString();
   }
 
+  function titleCase(value) {
+    return String(value || "")
+      .replaceAll("_", " ")
+      .replace(/\b\w/g, ch => ch.toUpperCase());
+  }
+
   function buildLocation(order) {
     const parts = [
       order.shipping_city,
@@ -54,6 +60,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       .filter(Boolean);
 
     return parts.join(", ") || "—";
+  }
+
+  function buildPaymentSummary(order) {
+    const paymentCount = Number(order.payment_count || 0);
+    const paidAmount = formatMoney(order.paid_amount_cents || 0, order.currency || "CAD");
+    const latestStatus = titleCase(order.latest_payment_status || "none");
+    const latestProvider = order.latest_payment_provider
+      ? titleCase(order.latest_payment_provider)
+      : "—";
+
+    if (paymentCount <= 0) {
+      return `
+        <div>No payments</div>
+        <div class="small">Paid: ${escapeHtml(formatMoney(0, order.currency || "CAD"))}</div>
+      `;
+    }
+
+    return `
+      <div>${escapeHtml(latestStatus)}</div>
+      <div class="small">Paid: ${escapeHtml(paidAmount)}</div>
+      <div class="small">Provider: ${escapeHtml(latestProvider)}</div>
+    `;
   }
 
   function renderRows(orders) {
@@ -69,6 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const total = escapeHtml(formatMoney(order.total_cents, order.currency));
       const location = escapeHtml(buildLocation(order));
       const created = escapeHtml(formatDate(order.created_at));
+      const paymentSummary = buildPaymentSummary(order);
 
       return `
         <tr>
@@ -81,6 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">${status}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${fulfillment}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${total}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${paymentSummary}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${location}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${created}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">
