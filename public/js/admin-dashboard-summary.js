@@ -1,74 +1,92 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const totalUsersEl = document.getElementById("summaryTotalUsers");
-  const activeUsersEl = document.getElementById("summaryActiveUsers");
-  const inactiveUsersEl = document.getElementById("summaryInactiveUsers");
-  const adminUsersEl = document.getElementById("summaryAdminUsers");
-  const activeSessionsEl = document.getElementById("summaryActiveSessions");
-  const errorEl = document.getElementById("dashboardSummaryError");
-  const refreshButtons = document.querySelectorAll("[data-refresh-dashboard]");
+// File: /public/js/admin-dashboard-summary.js
 
-  function show(el) {
-    if (el) el.style.display = "";
+document.addEventListener("DOMContentLoaded", () => {
+  const refreshButton = document.getElementById("refreshDashboardSummaryButton");
+  const messageEl = document.getElementById("dashboardSummaryMessage");
+
+  const usersCountEl = document.getElementById("summaryUsersCount");
+  const productsCountEl = document.getElementById("summaryProductsCount");
+  const ordersCountEl = document.getElementById("summaryOrdersCount");
+  const paymentsCountEl = document.getElementById("summaryPaymentsCount");
+
+  if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+
+  let isLoading = false;
+
+  function setMessage(message, isError = false) {
+    if (!messageEl) return;
+    messageEl.textContent = message;
+    messageEl.style.display = message ? "block" : "none";
+    messageEl.style.color = isError ? "#b00020" : "";
   }
 
-  function hide(el) {
-    if (el) el.style.display = "none";
+  function setValue(el, value) {
+    if (!el) return;
+    el.textContent = value;
   }
 
-  function setText(el, value) {
-    if (el) el.textContent = String(value);
+  function formatCount(value) {
+    const count = Number(value || 0);
+    return Number.isFinite(count) ? count.toLocaleString() : "0";
+  }
+
+  async function fetchSummary() {
+    const response = await window.DDAuth.apiFetch("/api/admin/dashboard-summary", {
+      method: "GET"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Failed to load dashboard summary.");
+    }
+
+    return data.summary || {};
+  }
+
+  function renderSummary(summary) {
+    setValue(usersCountEl, formatCount(summary.users_count));
+    setValue(productsCountEl, formatCount(summary.products_count));
+    setValue(ordersCountEl, formatCount(summary.orders_count));
+    setValue(paymentsCountEl, formatCount(summary.payments_count));
   }
 
   async function loadSummary() {
-    hide(errorEl);
+    if (isLoading) return;
+
+    isLoading = true;
+    const originalText = refreshButton?.textContent || "Refresh Summary";
 
     try {
-      const response = await window.DDAuth.apiFetch("/api/admin/dashboard-summary", {
-        method: "GET"
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Failed to load dashboard summary.");
+      setMessage("Loading dashboard summary...");
+      if (refreshButton) {
+        refreshButton.disabled = true;
+        refreshButton.textContent = "Loading...";
       }
 
-      const summary = data.summary || {};
-
-      setText(totalUsersEl, Number(summary.total_users || 0));
-      setText(activeUsersEl, Number(summary.active_users || 0));
-      setText(inactiveUsersEl, Number(summary.inactive_users || 0));
-      setText(adminUsersEl, Number(summary.admin_users || 0));
-      setText(activeSessionsEl, Number(summary.active_sessions || 0));
+      const summary = await fetchSummary();
+      renderSummary(summary);
+      setMessage("Dashboard summary loaded.");
     } catch (error) {
-      if (errorEl) {
-        errorEl.textContent = error.message || "Failed to load dashboard summary.";
+      setMessage(error.message || "Failed to load dashboard summary.", true);
+    } finally {
+      isLoading = false;
+      if (refreshButton) {
+        refreshButton.disabled = false;
+        refreshButton.textContent = originalText;
       }
-      show(errorEl);
     }
   }
 
-  refreshButtons.forEach(button => {
-    button.addEventListener("click", async () => {
+  if (refreshButton) {
+    refreshButton.addEventListener("click", async () => {
       await loadSummary();
     });
-  });
-
-  document.addEventListener("dd:user-created", async () => {
-    await loadSummary();
-  });
-
-  document.addEventListener("dd:session-changed", async () => {
-    await loadSummary();
-  });
-
-  document.addEventListener("dd:admin-data-changed", async () => {
-    await loadSummary();
-  });
-
-  if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
-    return;
   }
 
-  await loadSummary();
+  document.addEventListener("dd:order-updated", async () => {
+    await loadSummary();
+  });
+
+  loadSummary();
 });
