@@ -3,11 +3,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Area — Devil n Dove</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
-  <meta name="robots" content="noindex,nofollow" />
+  <meta
+    name="description"
+    content="Devil n Dove admin dashboard for users, products, orders, payments, access tiers, and site operations."
+  />
 </head>
 <body>
   <div class="container">
@@ -16,462 +19,195 @@
         <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
         <div>
           <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Workshop • Art • Tools • Movies</div>
+          <div class="small">Admin Dashboard</div>
         </div>
       </div>
 
       <div class="links">
         <a href="/">Home</a>
-        <a href="/gallery/">Gallery</a>
-        <a href="/creations/">Creations</a>
-        <a href="/tools/">Tools</a>
-        <a href="/supplies/">Supplies</a>
-        <a href="/contact/">Contact</a>
-
-        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
-
-        <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
-        <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
-
-        <span class="small" data-show-when-logged-in style="display:none">
-          Hi, <span data-nav-user-name>Member</span>
-        </span>
-
-        <button
-          class="btn"
-          type="button"
-          data-nav-logout
-          data-show-when-logged-in
-          style="display:none"
-        >
-          Logout
-        </button>
+        <a href="/shop/">Shop</a>
+        <a href="/members/">Members</a>
+        <a href="/admin/">Admin</a>
+        <button class="btn" type="button" data-nav-logout>Logout</button>
       </div>
     </div>
 
     <div class="hero">
       <div>
-        <h1>Admin Area</h1>
-        <p class="small">
-          Restricted access for admin users only.
+        <h1>Admin Dashboard</h1>
+        <p>
+          Manage users, access tiers, products, orders, payments, and core site operations.
         </p>
       </div>
     </div>
 
-    <div id="adminStatus" class="small" style="display:none;margin-bottom:12px"></div>
+    <div id="adminAccessMessage" class="card" style="display:none;margin-bottom:18px"></div>
 
-    <div class="card" data-admin-only style="display:none">
-      <h2 style="margin-top:0">Admin Dashboard</h2>
-      <p class="small">
-        This area is reserved for admin tools, member management, protected controls, store management, and order review.
-      </p>
-
-      <div class="card" style="margin-top:18px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-          <div>
-            <h3 style="margin:0">Dashboard Summary</h3>
-            <p class="small" style="margin:6px 0 0 0">Quick overview of accounts and sessions.</p>
-          </div>
-
-          <button class="btn" type="button" data-refresh-dashboard">
-            Refresh Summary
-          </button>
-        </div>
-
-        <div id="dashboardSummaryError" class="small" style="display:none;color:#b00020;margin-top:10px"></div>
-
-        <div class="grid" style="gap:12px;margin-top:18px">
-          <div class="card">
-            <h3 style="margin-top:0">Total Users</h3>
-            <p style="font-size:1.5rem;font-weight:700;margin:0">
-              <span id="summaryTotalUsers">0</span>
-            </p>
-          </div>
-
-          <div class="card">
-            <h3 style="margin-top:0">Active Users</h3>
-            <p style="font-size:1.5rem;font-weight:700;margin:0">
-              <span id="summaryActiveUsers">0</span>
-            </p>
-          </div>
-
-          <div class="card">
-            <h3 style="margin-top:0">Inactive Users</h3>
-            <p style="font-size:1.5rem;font-weight:700;margin:0">
-              <span id="summaryInactiveUsers">0</span>
-            </p>
-          </div>
-
-          <div class="card">
-            <h3 style="margin-top:0">Admin Users</h3>
-            <p style="font-size:1.5rem;font-weight:700;margin:0">
-              <span id="summaryAdminUsers">0</span>
-            </p>
-          </div>
-
-          <div class="card">
-            <h3 style="margin-top:0">Active Sessions</h3>
-            <p style="font-size:1.5rem;font-weight:700;margin:0">
-              <span id="summaryActiveSessions">0</span>
-            </p>
-          </div>
+    <div class="grid cols-3" style="gap:18px">
+      <div class="card">
+        <h2 style="margin-top:0">Quick Actions</h2>
+        <div style="display:grid;gap:10px">
+          <a class="btn" href="#usersSection">Manage Users</a>
+          <a class="btn" href="#accessTiersSection">Access Tiers</a>
+          <a class="btn" href="#productsSection">Products</a>
+          <a class="btn" href="#ordersSection">Orders</a>
+          <button class="btn" type="button" id="refreshDashboardSummaryButton">Refresh Summary</button>
         </div>
       </div>
 
-      <div class="grid" style="gap:12px;margin-top:18px">
-        <div class="card">
-          <h3 style="margin-top:0">Admin Actions</h3>
-          <p class="small">Use this section for:</p>
-          <ul class="small">
-            <li>member account setup</li>
-            <li>role changes</li>
-            <li>account activation and deactivation</li>
-            <li>password resets</li>
-            <li>session cleanup</li>
-            <li>user deletion</li>
-            <li>product management</li>
-            <li>artist/customer/donor access tiers</li>
-            <li>order review</li>
-            <li>future site management tools</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3 style="margin-top:0">Status</h3>
-          <p class="small">Your admin role has been verified.</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-            <button class="btn" type="button" data-refresh-users">
-              Refresh Users
-            </button>
-            <button class="btn" type="button" data-refresh-products">
-              Refresh Products
-            </button>
-            <button class="btn" type="button" data-refresh-orders">
-              Refresh Orders
-            </button>
-          </div>
+      <div class="card">
+        <h2 style="margin-top:0">Security</h2>
+        <div class="small" style="display:grid;gap:8px">
+          <div>Admin endpoints require a valid active admin session.</div>
+          <div>Roles and business access tiers remain separate systems.</div>
+          <div>Order and payment records are available through protected admin routes.</div>
         </div>
       </div>
 
-      <div class="card" style="margin-top:18px">
-        <h3 style="margin-top:0">Maintenance</h3>
-        <p class="small">Use this section for admin maintenance tasks.</p>
-
-        <button class="btn" type="button" data-cleanup-sessions>
-          Clean Expired Sessions
-        </button>
-
-        <div id="sessionCleanupMessage" class="small" style="display:none;margin-top:10px"></div>
-      </div>
-
-      <div class="card" style="margin-top:18px">
-        <h3 style="margin-top:0">Create User</h3>
-        <p class="small">Create member or admin accounts directly from the admin area.</p>
-
-        <form id="createUserForm" class="grid" style="gap:12px;margin-top:12px">
-          <div>
-            <label class="small" for="create_email">Email</label>
-            <input id="create_email" name="email" type="email" required />
-          </div>
-
-          <div>
-            <label class="small" for="create_password">Password</label>
-            <input id="create_password" name="password" type="password" required />
-          </div>
-
-          <div>
-            <label class="small" for="create_display_name">Display Name</label>
-            <input id="create_display_name" name="display_name" type="text" />
-          </div>
-
-          <div>
-            <label class="small" for="create_role">Role</label>
-            <select id="create_role" name="role">
-              <option value="member" selected>member</option>
-              <option value="admin">admin</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="small" for="create_is_active">Status</label>
-            <select id="create_is_active" name="is_active">
-              <option value="1" selected>active</option>
-              <option value="0">inactive</option>
-            </select>
-          </div>
-
-          <div>
-            <button class="btn" type="submit">Create User</button>
-          </div>
-
-          <div id="createUserMessage" class="small" style="display:none"></div>
-        </form>
-      </div>
-
-      <div class="card" style="margin-top:18px">
-        <h3 style="margin-top:0">Create Product</h3>
-        <p class="small">Add physical or digital products for sale, including up to 5 image URLs.</p>
-
-        <form id="createProductForm" class="grid" style="gap:12px;margin-top:12px">
-          <div>
-            <label class="small" for="create_product_name">Product Name</label>
-            <input id="create_product_name" name="name" type="text" required />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_slug">Slug</label>
-            <input id="create_product_slug" name="slug" type="text" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_sku">SKU</label>
-            <input id="create_product_sku" name="sku" type="text" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_type">Product Type</label>
-            <select id="create_product_type" name="product_type">
-              <option value="physical" selected>physical</option>
-              <option value="digital">digital</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="small" for="create_product_status">Status</label>
-            <select id="create_product_status" name="status">
-              <option value="draft" selected>draft</option>
-              <option value="active">active</option>
-              <option value="archived">archived</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="small" for="create_product_currency">Currency</label>
-            <input id="create_product_currency" name="currency" type="text" value="CAD" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_price">Price</label>
-            <input id="create_product_price" name="price" type="text" placeholder="0.00" required />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_compare_at_price">Compare At Price</label>
-            <input id="create_product_compare_at_price" name="compare_at_price" type="text" placeholder="0.00" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_taxable">Taxable</label>
-            <select id="create_product_taxable" name="taxable">
-              <option value="1" selected>Yes</option>
-              <option value="0">No</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="small" for="create_product_tax_class_id">Tax Class</label>
-            <select id="create_product_tax_class_id" name="tax_class_id">
-              <option value="">Loading tax classes...</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="small" for="create_product_requires_shipping">Requires Shipping</label>
-            <select id="create_product_requires_shipping" name="requires_shipping">
-              <option value="1" selected>Yes</option>
-              <option value="0">No</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="small" for="create_product_weight_grams">Weight (grams)</label>
-            <input id="create_product_weight_grams" name="weight_grams" type="number" min="0" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_inventory_tracking">Track Inventory</label>
-            <select id="create_product_inventory_tracking" name="inventory_tracking">
-              <option value="0" selected>No</option>
-              <option value="1">Yes</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="small" for="create_product_inventory_quantity">Inventory Quantity</label>
-            <input id="create_product_inventory_quantity" name="inventory_quantity" type="number" min="0" value="0" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_sort_order">Sort Order</label>
-            <input id="create_product_sort_order" name="sort_order" type="number" value="0" />
-          </div>
-
-          <div style="grid-column:1 / -1">
-            <label class="small" for="create_product_short_description">Short Description</label>
-            <textarea id="create_product_short_description" name="short_description" rows="3"></textarea>
-          </div>
-
-          <div style="grid-column:1 / -1">
-            <label class="small" for="create_product_description">Full Description</label>
-            <textarea id="create_product_description" name="description" rows="6"></textarea>
-          </div>
-
-          <div style="grid-column:1 / -1">
-            <label class="small" for="create_product_digital_file_url">Digital File URL</label>
-            <input id="create_product_digital_file_url" name="digital_file_url" type="text" />
-          </div>
-
-          <div style="grid-column:1 / -1">
-            <label class="small" for="create_product_featured_image_url">Featured Image URL</label>
-            <input id="create_product_featured_image_url" name="featured_image_url" type="text" />
-          </div>
-
-          <div style="grid-column:1 / -1">
-            <h4 style="margin:8px 0">Product Image URLs (up to 5)</h4>
-          </div>
-
-          <div>
-            <label class="small" for="create_product_image_url_1">Image URL 1</label>
-            <input id="create_product_image_url_1" name="image_url_1" type="text" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_image_url_2">Image URL 2</label>
-            <input id="create_product_image_url_2" name="image_url_2" type="text" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_image_url_3">Image URL 3</label>
-            <input id="create_product_image_url_3" name="image_url_3" type="text" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_image_url_4">Image URL 4</label>
-            <input id="create_product_image_url_4" name="image_url_4" type="text" />
-          </div>
-
-          <div>
-            <label class="small" for="create_product_image_url_5">Image URL 5</label>
-            <input id="create_product_image_url_5" name="image_url_5" type="text" />
-          </div>
-
-          <div style="grid-column:1 / -1">
-            <button class="btn" type="submit">Create Product</button>
-          </div>
-
-          <div id="createProductMessage" class="small" style="display:none;grid-column:1 / -1"></div>
-        </form>
-      </div>
-
-      <div class="card" style="margin-top:18px">
-        <h3 style="margin-top:0">Orders</h3>
-
-        <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:12px">
-          <div>
-            <label class="small" for="ordersStatusFilter">Filter by Status</label>
-            <select id="ordersStatusFilter">
-              <option value="">All</option>
-              <option value="draft">draft</option>
-              <option value="pending">pending</option>
-              <option value="paid">paid</option>
-              <option value="fulfilled">fulfilled</option>
-              <option value="cancelled">cancelled</option>
-              <option value="refunded">refunded</option>
-            </select>
-          </div>
-
-          <div>
-            <button class="btn" type="button" data-refresh-orders">
-              Refresh Orders
-            </button>
-          </div>
-        </div>
-
-        <div id="ordersLoading" class="small">Loading orders...</div>
-        <div id="ordersError" class="small" style="display:none;color:#b00020"></div>
-        <div id="ordersEmpty" class="small" style="display:none">No orders found.</div>
-
-        <div style="overflow:auto">
-          <table style="width:100%;border-collapse:collapse">
-            <thead>
-              <tr>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">ID</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Order Number</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Customer</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Fulfillment</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Total</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payment</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Location</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="ordersTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:18px">
-        <h3 style="margin-top:0">Products</h3>
-
-        <div id="productsLoading" class="small">Loading products...</div>
-        <div id="productsError" class="small" style="display:none;color:#b00020"></div>
-        <div id="productsEmpty" class="small" style="display:none">No products found.</div>
-
-        <div style="overflow:auto">
-          <table style="width:100%;border-collapse:collapse">
-            <thead>
-              <tr>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">ID</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Name</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Slug</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">SKU</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Type</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Price</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Inventory</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Shipping</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Tax Class</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="productsTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:18px">
-        <h3 style="margin-top:0">Users</h3>
-
-        <div id="usersLoading" class="small">Loading users...</div>
-        <div id="usersError" class="small" style="display:none;color:#b00020"></div>
-        <div id="usersEmpty" class="small" style="display:none">No users found.</div>
-
-        <div style="overflow:auto">
-          <table style="width:100%;border-collapse:collapse">
-            <thead>
-              <tr>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">ID</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Email</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Display Name</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Role</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Action</th>
-              </tr>
-            </thead>
-            <tbody id="usersTableBody"></tbody>
-          </table>
+      <div class="card">
+        <h2 style="margin-top:0">Project State</h2>
+        <div class="small" style="display:grid;gap:8px">
+          <div>Checkout foundation is active.</div>
+          <div>Payment preparation exists for future provider handoff.</div>
+          <div>Manual/admin payment recording is enabled.</div>
         </div>
       </div>
     </div>
 
-    <div class="card" data-not-admin>
-      <h2 style="margin-top:0">Restricted</h2>
+    <div class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Dashboard Summary</h2>
+      <div id="dashboardSummaryMessage" class="small" style="display:none;margin-bottom:10px"></div>
+      <div class="grid cols-4" style="gap:14px">
+        <div class="card">
+          <div class="small">Users</div>
+          <div id="summaryUsersCount" style="font-size:1.5rem;font-weight:800">—</div>
+        </div>
+        <div class="card">
+          <div class="small">Products</div>
+          <div id="summaryProductsCount" style="font-size:1.5rem;font-weight:800">—</div>
+        </div>
+        <div class="card">
+          <div class="small">Orders</div>
+          <div id="summaryOrdersCount" style="font-size:1.5rem;font-weight:800">—</div>
+        </div>
+        <div class="card">
+          <div class="small">Payments</div>
+          <div id="summaryPaymentsCount" style="font-size:1.5rem;font-weight:800">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="usersSection" class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Users</h2>
+      <p class="small">User management tools remain in place through the existing admin modules.</p>
+      <div id="usersAdminMount"></div>
+    </div>
+
+    <div id="accessTiersSection" class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Access Tiers</h2>
       <p class="small">
-        This page is only available to admin accounts.
+        Business/content access tiers stay separate from system roles like member and admin.
       </p>
+      <div id="accessTiersAdminMount"></div>
+    </div>
+
+    <div id="productsSection" class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Products</h2>
+      <p class="small">Product management remains handled by the existing modular admin scripts.</p>
+      <div id="productsAdminMount"></div>
+    </div>
+
+    <div id="ordersSection" class="card" style="margin-top:18px">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+        <div>
+          <h2 style="margin:0">Orders</h2>
+          <p class="small" style="margin:8px 0 0 0">
+            Review orders, payment states, fulfillment type, and open the full admin order detail view.
+          </p>
+        </div>
+
+        <button class="btn" type="button" id="refreshOrdersButton">Refresh Orders</button>
+      </div>
+
+      <div class="grid cols-4" style="gap:12px;margin-top:16px">
+        <div>
+          <label class="small" for="orderStatusFilter">Order Status</label>
+          <select id="orderStatusFilter">
+            <option value="">All</option>
+            <option value="draft">Draft</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="fulfilled">Fulfilled</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small" for="orderPaymentStatusFilter">Payment Status</label>
+          <select id="orderPaymentStatusFilter">
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="authorized">Authorized</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
+            <option value="partially_refunded">Partially Refunded</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small" for="orderFulfillmentFilter">Fulfillment</label>
+          <select id="orderFulfillmentFilter">
+            <option value="">All</option>
+            <option value="shipping">Shipping</option>
+            <option value="digital">Digital</option>
+            <option value="mixed">Mixed</option>
+            <option value="pickup">Pickup</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small" for="orderSearchInput">Search</label>
+          <input
+            id="orderSearchInput"
+            type="text"
+            placeholder="Order #, name, email, method..."
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div id="ordersMessage" class="small" style="display:none;margin-top:14px"></div>
+      <div id="ordersSummary" class="small" style="margin-top:10px"></div>
+      <div id="ordersEmpty" class="small" style="display:none;margin-top:10px">
+        No orders are available yet.
+      </div>
+
+      <div style="overflow:auto;margin-top:14px">
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Order</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Customer</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Fulfillment</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payment</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Total</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Outstanding</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payments</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Action</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr>
+              <td colspan="10" style="padding:12px">Loading orders...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="footer card" style="margin-top:18px"></div>
@@ -480,6 +216,7 @@
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/admin-self-protect.js"></script>
   <script src="/public/js/admin.js"></script>
   <script src="/public/js/admin-dashboard-summary.js"></script>
   <script src="/public/js/admin-users.js"></script>
@@ -487,13 +224,12 @@
   <script src="/public/js/admin-reset-password.js"></script>
   <script src="/public/js/admin-delete-user.js"></script>
   <script src="/public/js/admin-cleanup-sessions.js"></script>
-  <script src="/public/js/admin-self-protect.js"></script>
-  <script src="/public/js/admin-create-product.js"></script>
+  <script src="/public/js/admin-access-tiers.js"></script>
   <script src="/public/js/admin-products.js"></script>
+  <script src="/public/js/admin-create-product.js"></script>
   <script src="/public/js/admin-edit-product.js"></script>
   <script src="/public/js/admin-delete-product.js"></script>
   <script src="/public/js/admin-archive-product.js"></script>
-  <script src="/public/js/admin-access-tiers.js"></script>
   <script src="/public/js/admin-orders.js"></script>
   <script src="/public/js/admin-order-detail.js"></script>
 </body>
