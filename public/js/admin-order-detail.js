@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let modalEl = null;
   let currentOrderId = null;
+  let currentOrderData = null;
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -19,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatMoney(cents, currency = "CAD") {
     const amount = Number(cents || 0) / 100;
+
     try {
       return new Intl.NumberFormat(undefined, {
         style: "currency",
@@ -31,23 +33,91 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatDate(value) {
     if (!value) return "—";
-    const d = new Date(String(value).replace(" ", "T") + "Z");
-    if (Number.isNaN(d.getTime())) return String(value);
-    return d.toLocaleString();
+
+    const raw = String(value).trim();
+    const parsed = new Date(raw);
+
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleString();
+    }
+
+    const fallback = new Date(raw.replace(" ", "T") + "Z");
+    if (!Number.isNaN(fallback.getTime())) {
+      return fallback.toLocaleString();
+    }
+
+    return raw;
   }
 
   function titleCase(value) {
-    return String(value || "")
+    const text = String(value || "").trim();
+    if (!text) return "—";
+
+    return text
       .replaceAll("_", " ")
+      .replaceAll("-", " ")
       .replace(/\b\w/g, ch => ch.toUpperCase());
   }
 
   function dollarsToCents(value) {
     const normalized = String(value || "").trim();
     if (!normalized) return 0;
+
     const amount = Number(normalized);
     if (!Number.isFinite(amount) || amount < 0) return NaN;
+
     return Math.round(amount * 100);
+  }
+
+  function getPaymentReference(payment) {
+    return (
+      payment.transaction_reference ||
+      payment.provider_payment_id ||
+      payment.provider_order_id ||
+      "—"
+    );
+  }
+
+  function getOutstandingBalanceCents(order, payments) {
+    const totalCents = Number(order?.total_cents || 0);
+
+    const paidLikeStatuses = new Set([
+      "paid",
+      "completed",
+      "captured",
+      "partially_refunded"
+    ]);
+
+    const paidCents = (Array.isArray(payments) ? payments : []).reduce((sum, payment) => {
+      const status = String(payment?.payment_status || "").toLowerCase();
+      if (!paidLikeStatuses.has(status)) return sum;
+      return sum + Number(payment?.amount_cents || 0);
+    }, 0);
+
+    return Math.max(totalCents - paidCents, 0);
+  }
+
+  function getPreparedPayment(payments) {
+    const safePayments = Array.isArray(payments) ? payments : [];
+    return safePayments.find(payment => {
+      const status = String(payment?.payment_status || "").toLowerCase();
+      return status === "pending" || status === "authorized";
+    }) || null;
+  }
+
+  function getLatestCompletedPayment(payments) {
+    const safePayments = Array.isArray(payments) ? payments : [];
+    return safePayments.find(payment => {
+      const status = String(payment?.payment_status || "").toLowerCase();
+      return ["paid", "completed", "captured"].includes(status);
+    }) || null;
+  }
+
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = value;
+    }
   }
 
   function ensureModal() {
@@ -62,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modalEl.style.zIndex = "9999";
 
     modalEl.innerHTML = `
-      <div style="max-width:1000px;margin:30px auto;padding:0 16px;">
+      <div style="max-width:1100px;margin:30px auto;padding:0 16px;">
         <div class="card" style="max-height:88vh;overflow:auto">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
             <h2 style="margin:0">Order Details</h2>
@@ -92,6 +162,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p><strong>Shipping:</strong> <span id="detailShipping"></span></p>
                 <p><strong>Tax:</strong> <span id="detailTax"></span></p>
                 <p style="font-size:1.05rem;font-weight:700"><strong>Total:</strong> <span id="detailTotal"></span></p>
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:18px;margin-top:18px">
+              <div class="card">
+                <h3 style="margin-top:0">Payment Summary</h3>
+                <p><strong>Outstanding:</strong> <span id="detailOutstanding"></span></p>
+                <p><strong>Prepared / Pending:</strong> <span id="detailPreparedPayment"></span></p>
+                <p><strong>Latest Completed:</strong> <span id="detailCompletedPayment"></span></p>
+                <p><strong>Latest Reference:</strong> <span id="detailLatestReference"></span></p>
+              </div>
+
+              <div class="card">
+                <h3 style="margin-top:0">Internal Notes</h3>
+                <div id="detailOrderNotes" class="small">No order notes saved.</div>
+                <div id="detailPaymentHint" class="small" style="margin-top:10px"></div>
               </div>
             </div>
 
@@ -219,6 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <tr>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Provider</th>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Method</th>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Amount</th>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Reference</th>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Paid At</th>
@@ -307,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function setUpdateMessage(message, isError = false) {
     const el = document.getElementById("detailUpdateOrderStatusMessage");
     if (!el) return;
+
     el.textContent = message;
     el.style.display = "block";
     el.style.color = isError ? "#b00020" : "#0a7a2f";
@@ -315,6 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function clearUpdateMessage() {
     const el = document.getElementById("detailUpdateOrderStatusMessage");
     if (!el) return;
+
     el.textContent = "";
     el.style.display = "none";
   }
@@ -322,6 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function setPaymentMessage(message, isError = false) {
     const el = document.getElementById("detailRecordPaymentMessage");
     if (!el) return;
+
     el.textContent = message;
     el.style.display = "block";
     el.style.color = isError ? "#b00020" : "#0a7a2f";
@@ -330,6 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function clearPaymentMessage() {
     const el = document.getElementById("detailRecordPaymentMessage");
     if (!el) return;
+
     el.textContent = "";
     el.style.display = "none";
   }
@@ -344,7 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
       order[`${prefix}_postal_code`],
       order[`${prefix}_country`]
     ]
-      .map(v => String(v || "").trim())
+      .map(value => String(value || "").trim())
       .filter(Boolean);
 
     if (!lines.length) {
@@ -354,17 +445,77 @@ document.addEventListener("DOMContentLoaded", () => {
     return `<p>${lines.map(line => escapeHtml(line)).join("<br>")}</p>`;
   }
 
+  function populatePaymentForm(order, payments) {
+    const preparedPayment = getPreparedPayment(payments);
+    const completedPayment = getLatestCompletedPayment(payments);
+    const outstandingCents = getOutstandingBalanceCents(order, payments);
+    const currency = order.currency || "CAD";
+
+    const provider = document.getElementById("detailPaymentProvider");
+    const paymentStatus = document.getElementById("detailPaymentStatus");
+    const amount = document.getElementById("detailPaymentAmount");
+    const paymentCurrency = document.getElementById("detailPaymentCurrency");
+    const methodLabel = document.getElementById("detailPaymentMethodLabel");
+    const reference = document.getElementById("detailPaymentReference");
+    const providerPaymentId = document.getElementById("detailProviderPaymentId");
+    const providerOrderId = document.getElementById("detailProviderOrderId");
+    const notes = document.getElementById("detailPaymentNotes");
+
+    if (provider) {
+      provider.value = preparedPayment?.provider || completedPayment?.provider || "manual";
+    }
+
+    if (paymentStatus) {
+      paymentStatus.value = outstandingCents > 0 ? "paid" : "pending";
+    }
+
+    if (amount) {
+      const defaultCents = outstandingCents > 0 ? outstandingCents : Number(order.total_cents || 0);
+      amount.value = (defaultCents / 100).toFixed(2);
+    }
+
+    if (paymentCurrency) {
+      paymentCurrency.value = currency;
+    }
+
+    if (methodLabel) {
+      methodLabel.value =
+        preparedPayment?.payment_method_label ||
+        completedPayment?.payment_method_label ||
+        "";
+    }
+
+    if (reference) {
+      reference.value = "";
+    }
+
+    if (providerPaymentId) {
+      providerPaymentId.value = "";
+    }
+
+    if (providerOrderId) {
+      providerOrderId.value = preparedPayment?.provider_order_id || "";
+    }
+
+    if (notes) {
+      notes.value = preparedPayment
+        ? "Completing or correcting an existing prepared payment record."
+        : "";
+    }
+  }
+
   function renderOrderDetail(data) {
+    currentOrderData = data;
+
     const order = data.order || {};
     const items = Array.isArray(data.items) ? data.items : [];
     const history = Array.isArray(data.history) ? data.history : [];
     const payments = Array.isArray(data.payments) ? data.payments : [];
     const currency = order.currency || "CAD";
 
-    const setText = (id, value) => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = value;
-    };
+    const outstandingCents = getOutstandingBalanceCents(order, payments);
+    const preparedPayment = getPreparedPayment(payments);
+    const completedPayment = getLatestCompletedPayment(payments);
 
     setText("detailOrderNumber", order.order_number || "—");
     setText("detailOrderStatus", titleCase(order.order_status || ""));
@@ -380,6 +531,44 @@ document.addEventListener("DOMContentLoaded", () => {
     setText("detailTax", formatMoney(order.tax_cents || 0, currency));
     setText("detailTotal", formatMoney(order.total_cents || 0, currency));
 
+    setText("detailOutstanding", formatMoney(outstandingCents, currency));
+    setText(
+      "detailPreparedPayment",
+      preparedPayment
+        ? `${titleCase(preparedPayment.provider)} / ${titleCase(preparedPayment.payment_status)} / ${formatMoney(preparedPayment.amount_cents || 0, preparedPayment.currency || currency)}`
+        : "None"
+    );
+    setText(
+      "detailCompletedPayment",
+      completedPayment
+        ? `${titleCase(completedPayment.provider)} / ${titleCase(completedPayment.payment_status)} / ${formatMoney(completedPayment.amount_cents || 0, completedPayment.currency || currency)}`
+        : "None"
+    );
+    setText(
+      "detailLatestReference",
+      completedPayment
+        ? getPaymentReference(completedPayment)
+        : (preparedPayment ? getPaymentReference(preparedPayment) : "—")
+    );
+
+    const notesEl = document.getElementById("detailOrderNotes");
+    if (notesEl) {
+      notesEl.innerHTML = order.notes
+        ? escapeHtml(order.notes).replace(/\n/g, "<br>")
+        : "No order notes saved.";
+    }
+
+    const hintEl = document.getElementById("detailPaymentHint");
+    if (hintEl) {
+      if (preparedPayment) {
+        hintEl.textContent = "This order already has a prepared payment record. Record a manual completion carefully to avoid duplicates.";
+      } else if (outstandingCents === 0 && Number(order.total_cents || 0) > 0) {
+        hintEl.textContent = "This order appears fully covered by completed payments.";
+      } else {
+        hintEl.textContent = "Use Record Payment for manual settlement, correction, or offline payment capture.";
+      }
+    }
+
     const statusSelect = document.getElementById("detailNewOrderStatus");
     if (statusSelect) {
       statusSelect.value = String(order.order_status || "pending").toLowerCase();
@@ -390,30 +579,7 @@ document.addEventListener("DOMContentLoaded", () => {
       statusNote.value = "";
     }
 
-    const paymentAmount = document.getElementById("detailPaymentAmount");
-    if (paymentAmount) {
-      paymentAmount.value = ((Number(order.total_cents || 0)) / 100).toFixed(2);
-    }
-
-    const paymentCurrency = document.getElementById("detailPaymentCurrency");
-    if (paymentCurrency) {
-      paymentCurrency.value = currency;
-    }
-
-    const paymentMethodLabel = document.getElementById("detailPaymentMethodLabel");
-    if (paymentMethodLabel) paymentMethodLabel.value = "";
-
-    const paymentReference = document.getElementById("detailPaymentReference");
-    if (paymentReference) paymentReference.value = "";
-
-    const providerPaymentId = document.getElementById("detailProviderPaymentId");
-    if (providerPaymentId) providerPaymentId.value = "";
-
-    const providerOrderId = document.getElementById("detailProviderOrderId");
-    if (providerOrderId) providerOrderId.value = "";
-
-    const paymentNotes = document.getElementById("detailPaymentNotes");
-    if (paymentNotes) paymentNotes.value = "";
+    populatePaymentForm(order, payments);
 
     const shippingAddressEl = document.getElementById("detailShippingAddress");
     if (shippingAddressEl) {
@@ -430,15 +596,16 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentsBody.innerHTML = payments.length
         ? payments.map(payment => `
             <tr>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(payment.provider || "")}</td>
+              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(payment.provider || ""))}</td>
               <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(payment.payment_status || ""))}</td>
+              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(payment.payment_method_label || "—")}</td>
               <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(payment.amount_cents || 0, payment.currency || currency))}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(payment.transaction_reference || payment.provider_payment_id || payment.provider_order_id || "—")}</td>
+              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(getPaymentReference(payment))}</td>
               <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(payment.paid_at))}</td>
               <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(payment.created_at))}</td>
             </tr>
           `).join("")
-        : `<tr><td colspan="6" style="padding:8px">No payments found.</td></tr>`;
+        : `<tr><td colspan="7" style="padding:8px">No payments found.</td></tr>`;
     }
 
     const itemsBody = document.getElementById("detailItemsBody");
@@ -462,6 +629,7 @@ document.addEventListener("DOMContentLoaded", () => {
       historyBody.innerHTML = history.length
         ? history.map(row => {
             const changedBy = row.changed_by_display_name || row.changed_by_email || "System";
+
             return `
               <tr>
                 <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(row.created_at))}</td>
@@ -541,7 +709,10 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const data = await loadOrderDetail(currentOrderId);
       renderOrderDetail(data);
-      if (contentEl) contentEl.style.display = "";
+
+      if (contentEl) {
+        contentEl.style.display = "";
+      }
     } catch (error) {
       if (errorEl) {
         errorEl.textContent = error.message || "Failed to reload order.";
@@ -665,6 +836,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!orderId) return;
 
     currentOrderId = orderId;
+    currentOrderData = null;
 
     const modal = ensureModal();
     showModal();
@@ -680,7 +852,9 @@ document.addEventListener("DOMContentLoaded", () => {
       errorEl.style.display = "none";
       errorEl.textContent = "";
     }
-    if (contentEl) contentEl.style.display = "none";
+    if (contentEl) {
+      contentEl.style.display = "none";
+    }
 
     const originalText = button.textContent;
 
@@ -691,7 +865,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await loadOrderDetail(orderId);
       renderOrderDetail(data);
 
-      if (contentEl) contentEl.style.display = "";
+      if (contentEl) {
+        contentEl.style.display = "";
+      }
     } catch (error) {
       if (errorEl) {
         errorEl.textContent = error.message || "Failed to load order.";
