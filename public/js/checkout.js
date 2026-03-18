@@ -108,6 +108,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function getFieldValue(formData, names) {
+    for (const name of names) {
+      const value = formData.get(name);
+      if (value != null) {
+        return String(value || "").trim();
+      }
+    }
+    return "";
+  }
+
+  function hasPhysicalItems(items) {
+    return items.some(item => {
+      if (Number(item.requires_shipping) === 1) return true;
+      return String(item.product_type || "").toLowerCase() === "physical";
+    });
+  }
+
   function renderCheckout() {
     const items = getCartItemsSafe();
 
@@ -118,9 +135,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (checkoutItemsEl) checkoutItemsEl.innerHTML = "";
       if (checkoutItemCountEl) checkoutItemCountEl.textContent = "0";
       if (checkoutSubtotalEl) checkoutSubtotalEl.textContent = formatMoney(0, "CAD");
+      if (checkoutShippingEl) checkoutShippingEl.textContent = "Calculated at order step";
+      if (checkoutTaxEl) checkoutTaxEl.textContent = "Calculated at order step";
       if (checkoutTotalEl) checkoutTotalEl.textContent = formatMoney(0, "CAD");
-      if (checkoutShippingEl) checkoutShippingEl.textContent = "Calculated later";
-      if (checkoutTaxEl) checkoutTaxEl.textContent = "Calculated later";
       if (checkoutSubmitButton) checkoutSubmitButton.disabled = true;
       return;
     }
@@ -137,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 0);
 
     const currency = items[0]?.currency || "CAD";
+    const shippingRequired = hasPhysicalItems(items);
 
     if (checkoutItemCountEl) {
       checkoutItemCountEl.textContent = String(totalItems);
@@ -146,8 +164,18 @@ document.addEventListener("DOMContentLoaded", () => {
       checkoutSubtotalEl.textContent = formatMoney(subtotalCents, currency);
     }
 
+    if (checkoutShippingEl) {
+      checkoutShippingEl.textContent = shippingRequired
+        ? "Calculated after address review"
+        : formatMoney(0, currency);
+    }
+
+    if (checkoutTaxEl) {
+      checkoutTaxEl.textContent = "Calculated when order is created";
+    }
+
     if (checkoutTotalEl) {
-      checkoutTotalEl.textContent = formatMoney(subtotalCents, currency);
+      checkoutTotalEl.textContent = "Calculated when order is created";
     }
 
     if (checkoutItemsEl) {
@@ -182,6 +210,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function prefillFromLoggedInUser() {
+    if (!window.DDAuth || !window.DDAuth.isLoggedIn() || !checkoutForm) {
+      return;
+    }
+
+    try {
+      const me = await window.DDAuth.fetchMe();
+
+      const emailField = checkoutForm.elements.namedItem("email");
+      const nameField = checkoutForm.elements.namedItem("name");
+
+      if (emailField && !String(emailField.value || "").trim()) {
+        emailField.value = String(me?.email || "").trim();
+      }
+
+      if (nameField && !String(nameField.value || "").trim()) {
+        nameField.value = String(me?.display_name || "").trim();
+      }
+
+      saveFormData();
+    } catch {
+      // ignore autofill failures
+    }
+  }
+
+  function validateCheckoutPayload(payload, shippingRequired) {
+    if (!payload.email) {
+      return "Email is required.";
+    }
+
+    if (!payload.customer_name) {
+      return "Full name is required.";
+    }
+
+    if (!payload.payment_method) {
+      return "Payment method is required.";
+    }
+
+    if (shippingRequired) {
+      if (!payload.shipping_address1) return "Address Line 1 is required for shippable items.";
+      if (!payload.shipping_city) return "City is required for shippable items.";
+      if (!payload.shipping_province) return "Province / State is required for shippable items.";
+      if (!payload.shipping_postal_code) return "Postal / ZIP Code is required for shippable items.";
+      if (!payload.shipping_country) return "Country is required for shippable items.";
+    }
+
+    return "";
+  }
+
   async function createOrder() {
     if (!checkoutForm) return;
 
@@ -194,26 +271,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const formData = new FormData(checkoutForm);
+    const shippingRequired = hasPhysicalItems(cartItems);
+
     const payload = {
-      email: String(formData.get("email") || "").trim(),
-      customer_name: String(formData.get("customer_name") || "").trim(),
-      shipping_address1: String(formData.get("shipping_address1") || "").trim(),
-      shipping_address2: String(formData.get("shipping_address2") || "").trim(),
-      shipping_city: String(formData.get("shipping_city") || "").trim(),
-      shipping_province: String(formData.get("shipping_province") || "").trim(),
-      shipping_postal_code: String(formData.get("shipping_postal_code") || "").trim(),
-      shipping_country: String(formData.get("shipping_country") || "").trim(),
-      payment_method: String(formData.get("payment_method") || "paypal").trim().toLowerCase(),
+      email: getFieldValue(formData, ["email"]),
+      customer_name: getFieldValue(formData, ["customer_name", "name"]),
+      shipping_address1: getFieldValue(formData, ["shipping_address1", "address1"]),
+      shipping_address2: getFieldValue(formData, ["shipping_address2", "address2"]),
+      shipping_city: getFieldValue(formData, ["shipping_city", "city"]),
+      shipping_province: getFieldValue(formData, ["shipping_province", "province"]),
+      shipping_postal_code: getFieldValue(formData, ["shipping_postal_code", "postal_code"]),
+      shipping_country: getFieldValue(formData, ["shipping_country", "country"]) || "Canada",
+      notes: getFieldValue(formData, ["notes", "order_notes", "checkout_notes"]),
+      payment_method: getFieldValue(formData, ["payment_method"]) || "paypal",
       cart_items: cartItems
     };
 
-    if (!payload.email) {
-      setMessage("Email is required.", true);
-      return;
-    }
+    const validationError = validateCheckoutPayload(payload, shippingRequired);
 
-    if (!payload.customer_name) {
-      setMessage("Full name is required.", true);
+    if (validationError) {
+      setMessage(validationError, true);
       return;
     }
 
@@ -227,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
         checkoutSubmitButton.textContent = "Creating Order...";
       }
 
-      const response = await fetch("/api/checkout-create-order", {
+      const createOrderResponse = await fetch("/api/checkout-create-order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -235,14 +312,53 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify(payload)
       });
 
-      const data = await response.json();
+      const createOrderData = await createOrderResponse.json();
 
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Failed to create order.");
+      if (!createOrderResponse.ok || !createOrderData.ok) {
+        throw new Error(createOrderData.error || "Failed to create order.");
+      }
+
+      let finalOrderData = {
+        ...createOrderData,
+        checkout_warning: ""
+      };
+
+      try {
+        if (checkoutSubmitButton) {
+          checkoutSubmitButton.textContent = "Preparing Payment...";
+        }
+
+        const preparePaymentResponse = await fetch("/api/checkout-prepare-payment", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            order_id: createOrderData.order?.order_id,
+            payment_method: payload.payment_method
+          })
+        });
+
+        const preparePaymentData = await preparePaymentResponse.json();
+
+        if (preparePaymentResponse.ok && preparePaymentData.ok) {
+          finalOrderData = {
+            ...createOrderData,
+            payment: preparePaymentData.payment || createOrderData.payment || null,
+            next_step: preparePaymentData.next_step || null,
+            checkout_warning: ""
+          };
+        } else {
+          finalOrderData.checkout_warning =
+            preparePaymentData.error || "Order created, but payment setup was not prepared yet.";
+        }
+      } catch {
+        finalOrderData.checkout_warning =
+          "Order created, but payment setup could not be prepared yet.";
       }
 
       saveFormData();
-      saveLastOrder(data);
+      saveLastOrder(finalOrderData);
 
       if (window.DDCart) {
         window.DDCart.clearCart();
@@ -281,4 +397,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   renderCheckout();
+  prefillFromLoggedInUser();
 });
