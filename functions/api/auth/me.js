@@ -1,83 +1,82 @@
 // File: /functions/api/auth/me.js
-//
-// GET /api/auth/me
-// Returns the currently logged-in member (if dd_session cookie is valid).
 
-function json(status, data, extraHeaders = {}) {
+function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store",
-      ...extraHeaders,
-    },
+      "Content-Type": "application/json"
+    }
   });
 }
 
-function getCookie(request, name) {
-  const cookie = request.headers.get("Cookie") || "";
-  const parts = cookie.split(";").map((p) => p.trim());
-  for (const part of parts) {
-    if (!part) continue;
-    const eq = part.indexOf("=");
-    if (eq === -1) continue;
-    const k = part.slice(0, eq).trim();
-    const v = part.slice(eq + 1);
-    if (k === name) return v;
-  }
-  return null;
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
 }
 
-export async function onRequest(context) {
+export async function onRequestGet(context) {
   const { request, env } = context;
 
-  if (request.method === "OPTIONS") return new Response(null, { status: 204 });
+  const token = getBearerToken(request);
 
-  if (request.method !== "GET") {
-    return json(405, { ok: false, error: "Method not allowed" });
-  }
-
-  if (!env.DD_DB) {
-    return json(500, { ok: false, error: "Database binding DD_DB not configured" });
-  }
-
-  const token = getCookie(request, "dd_session");
   if (!token) {
-    return json(200, { ok: true, loggedIn: false });
+    return json({ ok: false, error: "Unauthorized." }, 401);
   }
 
-  // Valid session = token exists AND not expired AND member active
-  const row = await env.DD_DB
-    .prepare(
-      `
-      SELECT
-        m.member_id   AS member_id,
-        m.email       AS email,
-        m.display_name AS display_name,
-        m.role        AS role
-      FROM sessions s
-      JOIN members m ON m.member_id = s.member_id
-      WHERE s.token = ?
-        AND s.expires_at > datetime('now')
-        AND m.is_active = 1
-      LIMIT 1
-    `
+  const session = await env.DB.prepare(`
+    SELECT
+      s.session_id,
+      s.user_id,
+      s.session_token,
+      s.token,
+      s.expires_at,
+      s.created_at AS session_created_at,
+      u.user_id AS resolved_user_id,
+      u.email,
+      u.display_name,
+      u.role,
+      u.is_active,
+      u.created_at AS user_created_at,
+      u.updated_at AS user_updated_at
+    FROM sessions s
+    INNER JOIN users u
+      ON u.user_id = s.user_id
+    WHERE (
+      s.session_token = ?
+      OR s.token = ?
     )
-    .bind(token)
+      AND s.expires_at > datetime('now')
+    LIMIT 1
+  `)
+    .bind(token, token)
     .first();
 
-  if (!row) {
-    return json(200, { ok: true, loggedIn: false });
+  if (!session) {
+    return json({ ok: false, error: "Invalid or expired session." }, 401);
   }
 
-  return json(200, {
+  const isActive = Number(session.is_active || 0) === 1;
+
+  if (!isActive) {
+    return json({ ok: false, error: "Account is inactive." }, 403);
+  }
+
+  return json({
     ok: true,
-    loggedIn: true,
-    member: {
-      member_id: row.member_id,
-      email: row.email,
-      display_name: row.display_name,
-      role: row.role,
+    user: {
+      user_id: Number(session.resolved_user_id || session.user_id || 0),
+      email: session.email || "",
+      display_name: session.display_name || "",
+      role: session.role || "member",
+      is_active: isActive ? 1 : 0,
+      created_at: session.user_created_at || null,
+      updated_at: session.user_updated_at || null
     },
+    session: {
+      session_id: Number(session.session_id || 0),
+      expires_at: session.expires_at || null,
+      created_at: session.session_created_at || null
+    }
   });
 }
