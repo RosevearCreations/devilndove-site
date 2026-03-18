@@ -7,6 +7,10 @@ function json(data, status = 200) {
   });
 }
 
+function normalizeResults(result) {
+  return Array.isArray(result?.results) ? result.results : [];
+}
+
 async function getSessionUser(env, token) {
   if (!token) return null;
 
@@ -59,6 +63,84 @@ async function requireAdmin(request, env) {
   return { sessionUser };
 }
 
+function summarizePayments(order, payments) {
+  const safePayments = Array.isArray(payments) ? payments : [];
+  const orderTotalCents = Number(order?.total_cents || 0);
+
+  const paidStatuses = new Set(["paid", "completed", "captured"]);
+  const refundableStatuses = new Set(["partially_refunded", "refunded"]);
+  const pendingStatuses = new Set(["pending", "authorized"]);
+
+  let paidTotalCents = 0;
+  let refundedTotalCents = 0;
+  let pendingTotalCents = 0;
+
+  for (const payment of safePayments) {
+    const status = String(payment?.payment_status || "").toLowerCase();
+    const amount = Number(payment?.amount_cents || 0);
+
+    if (paidStatuses.has(status)) {
+      paidTotalCents += amount;
+    }
+
+    if (refundableStatuses.has(status)) {
+      refundedTotalCents += amount;
+    }
+
+    if (pendingStatuses.has(status)) {
+      pendingTotalCents += amount;
+    }
+  }
+
+  const preparedPayment =
+    safePayments.find((payment) => {
+      const status = String(payment?.payment_status || "").toLowerCase();
+      return status === "pending" || status === "authorized";
+    }) || null;
+
+  const latestCompletedPayment =
+    safePayments.find((payment) => {
+      const status = String(payment?.payment_status || "").toLowerCase();
+      return status === "paid" || status === "completed" || status === "captured";
+    }) || null;
+
+  const outstandingCents = Math.max(orderTotalCents - paidTotalCents, 0);
+
+  let derivedPaymentStatus = "pending";
+
+  if (safePayments.length === 0) {
+    derivedPaymentStatus = "pending";
+  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "refunded")) {
+    derivedPaymentStatus = "refunded";
+  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "partially_refunded")) {
+    derivedPaymentStatus = "partially_refunded";
+  } else if (paidTotalCents >= orderTotalCents && orderTotalCents > 0) {
+    derivedPaymentStatus = "paid";
+  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "authorized")) {
+    derivedPaymentStatus = "authorized";
+  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "pending")) {
+    derivedPaymentStatus = "pending";
+  } else if (
+    safePayments.every((payment) => {
+      const status = String(payment?.payment_status || "").toLowerCase();
+      return status === "failed" || status === "cancelled";
+    })
+  ) {
+    derivedPaymentStatus = "failed";
+  }
+
+  return {
+    payment_count: safePayments.length,
+    paid_total_cents: paidTotalCents,
+    refunded_total_cents: refundedTotalCents,
+    pending_total_cents: pendingTotalCents,
+    outstanding_cents: outstandingCents,
+    derived_payment_status: derivedPaymentStatus,
+    prepared_payment: preparedPayment,
+    latest_completed_payment: latestCompletedPayment
+  };
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
 
@@ -80,6 +162,8 @@ export async function onRequestGet(context) {
       customer_email,
       customer_name,
       order_status,
+      payment_status,
+      payment_method,
       fulfillment_type,
       currency,
       subtotal_cents,
@@ -183,11 +267,24 @@ export async function onRequestGet(context) {
     .bind(orderId)
     .all();
 
+  const items = normalizeResults(itemsResult);
+  const history = normalizeResults(historyResult);
+  const payments = normalizeResults(paymentsResult);
+
+  const payment_summary = summarizePayments(order, payments);
+
   return json({
     ok: true,
+    admin_user: {
+      user_id: authCheck.sessionUser.user_id,
+      email: authCheck.sessionUser.email,
+      display_name: authCheck.sessionUser.display_name,
+      role: authCheck.sessionUser.role
+    },
     order,
-    items: itemsResult.results || [],
-    history: historyResult.results || [],
-    payments: paymentsResult.results || []
+    items,
+    history,
+    payments,
+    payment_summary
   });
 }
