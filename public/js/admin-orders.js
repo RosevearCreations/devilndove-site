@@ -1,20 +1,20 @@
 // File: /public/js/admin-orders.js
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   const tableBody = document.getElementById("ordersTableBody");
+  const refreshButton = document.getElementById("refreshOrdersButton");
+  const statusFilter = document.getElementById("orderStatusFilter");
+  const paymentFilter = document.getElementById("orderPaymentStatusFilter");
+  const fulfillmentFilter = document.getElementById("orderFulfillmentFilter");
+  const searchInput = document.getElementById("orderSearchInput");
+  const messageEl = document.getElementById("ordersMessage");
+  const summaryEl = document.getElementById("ordersSummary");
   const emptyEl = document.getElementById("ordersEmpty");
-  const errorEl = document.getElementById("ordersError");
-  const loadingEl = document.getElementById("ordersLoading");
-  const refreshButtons = document.querySelectorAll("[data-refresh-orders]");
-  const statusFilterEl = document.getElementById("ordersStatusFilter");
 
-  function show(el) {
-    if (el) el.style.display = "";
-  }
+  if (!tableBody || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
 
-  function hide(el) {
-    if (el) el.style.display = "none";
-  }
+  let allOrders = [];
+  let isLoading = false;
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function formatMoney(cents, currency = "CAD") {
     const amount = Number(cents || 0) / 100;
+
     try {
       return new Intl.NumberFormat(undefined, {
         style: "currency",
@@ -38,83 +39,223 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function formatDate(value) {
-    if (!value) return "";
-    const d = new Date(String(value).replace(" ", "T") + "Z");
-    if (Number.isNaN(d.getTime())) return String(value);
-    return d.toLocaleString();
+    if (!value) return "—";
+
+    const raw = String(value).trim();
+    const parsed = new Date(raw);
+
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleString();
+    }
+
+    const fallback = new Date(raw.replace(" ", "T") + "Z");
+    if (!Number.isNaN(fallback.getTime())) {
+      return fallback.toLocaleString();
+    }
+
+    return raw;
   }
 
   function titleCase(value) {
-    return String(value || "")
+    const text = String(value || "").trim();
+    if (!text) return "—";
+
+    return text
       .replaceAll("_", " ")
-      .replace(/\b\w/g, ch => ch.toUpperCase());
+      .replaceAll("-", " ")
+      .replace(/\b\w/g, (ch) => ch.toUpperCase());
   }
 
-  function buildLocation(order) {
-    const parts = [
-      order.shipping_city,
-      order.shipping_province,
-      order.shipping_country
-    ]
-      .map(value => String(value || "").trim())
-      .filter(Boolean);
+  function setMessage(message, isError = false) {
+    if (!messageEl) return;
 
-    return parts.join(", ") || "—";
+    messageEl.textContent = message;
+    messageEl.style.display = message ? "block" : "none";
+    messageEl.style.color = isError ? "#b00020" : "";
   }
 
-  function buildPaymentSummary(order) {
-    const paymentCount = Number(order.payment_count || 0);
-    const paidAmount = formatMoney(order.paid_amount_cents || 0, order.currency || "CAD");
-    const latestStatus = titleCase(order.latest_payment_status || "none");
-    const latestProvider = order.latest_payment_provider
-      ? titleCase(order.latest_payment_provider)
-      : "—";
+  function getPaymentBadgeText(order) {
+    const status =
+      order.derived_payment_status ||
+      order.payment_status ||
+      "pending";
 
-    if (paymentCount <= 0) {
-      return `
-        <div>No payments</div>
-        <div class="small">Paid: ${escapeHtml(formatMoney(0, order.currency || "CAD"))}</div>
-      `;
+    const outstandingCents = Number(order.outstanding_cents || 0);
+    const paidTotalCents = Number(order.paid_total_cents || 0);
+    const totalCents = Number(order.total_cents || 0);
+
+    if (status === "paid" && outstandingCents <= 0 && totalCents > 0) {
+      return "Paid in Full";
     }
 
-    return `
-      <div>${escapeHtml(latestStatus)}</div>
-      <div class="small">Paid: ${escapeHtml(paidAmount)}</div>
-      <div class="small">Provider: ${escapeHtml(latestProvider)}</div>
-    `;
+    if (status === "partially_refunded") {
+      return "Partially Refunded";
+    }
+
+    if (status === "refunded") {
+      return "Refunded";
+    }
+
+    if (status === "authorized") {
+      return "Authorized";
+    }
+
+    if (status === "failed") {
+      return "Failed";
+    }
+
+    if (status === "pending" && paidTotalCents > 0 && outstandingCents > 0) {
+      return "Partially Paid";
+    }
+
+    return titleCase(status);
   }
 
-  function renderRows(orders) {
-    if (!tableBody) return;
+  function getSearchText(order) {
+    return [
+      order.order_number,
+      order.customer_name,
+      order.customer_email,
+      order.payment_method,
+      order.fulfillment_type,
+      order.order_status,
+      order.payment_status,
+      order.derived_payment_status
+    ]
+      .map((value) => String(value || "").toLowerCase())
+      .join(" ");
+  }
 
-    tableBody.innerHTML = orders.map(order => {
-      const orderId = Number(order.order_id);
-      const orderNumber = escapeHtml(order.order_number || "");
-      const customerName = escapeHtml(order.customer_name || "");
-      const customerEmail = escapeHtml(order.customer_email || "");
-      const status = escapeHtml(order.order_status || "");
-      const fulfillment = escapeHtml(order.fulfillment_type || "");
-      const total = escapeHtml(formatMoney(order.total_cents, order.currency));
-      const location = escapeHtml(buildLocation(order));
-      const created = escapeHtml(formatDate(order.created_at));
-      const paymentSummary = buildPaymentSummary(order);
+  function getFilterValue(el) {
+    return String(el?.value || "").trim().toLowerCase();
+  }
+
+  function matchesFilters(order) {
+    const statusValue = getFilterValue(statusFilter);
+    const paymentValue = getFilterValue(paymentFilter);
+    const fulfillmentValue = getFilterValue(fulfillmentFilter);
+    const searchValue = String(searchInput?.value || "").trim().toLowerCase();
+
+    if (statusValue && String(order.order_status || "").toLowerCase() !== statusValue) {
+      return false;
+    }
+
+    if (paymentValue) {
+      const orderPayment = String(order.payment_status || "").toLowerCase();
+      const derivedPayment = String(order.derived_payment_status || "").toLowerCase();
+
+      if (orderPayment !== paymentValue && derivedPayment !== paymentValue) {
+        return false;
+      }
+    }
+
+    if (fulfillmentValue && String(order.fulfillment_type || "").toLowerCase() !== fulfillmentValue) {
+      return false;
+    }
+
+    if (searchValue && !getSearchText(order).includes(searchValue)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function updateSummary(filteredOrders) {
+    if (!summaryEl) return;
+
+    const safeOrders = Array.isArray(filteredOrders) ? filteredOrders : [];
+
+    if (!safeOrders.length) {
+      summaryEl.textContent = "0 orders shown.";
+      return;
+    }
+
+    const totalOrderValueCents = safeOrders.reduce((sum, order) => {
+      return sum + Number(order.total_cents || 0);
+    }, 0);
+
+    const outstandingValueCents = safeOrders.reduce((sum, order) => {
+      return sum + Number(order.outstanding_cents || 0);
+    }, 0);
+
+    summaryEl.textContent =
+      `${safeOrders.length} order${safeOrders.length === 1 ? "" : "s"} shown • ` +
+      `Total ${formatMoney(totalOrderValueCents, safeOrders[0]?.currency || "CAD")} • ` +
+      `Outstanding ${formatMoney(outstandingValueCents, safeOrders[0]?.currency || "CAD")}`;
+  }
+
+  function renderOrders() {
+    const filteredOrders = allOrders.filter(matchesFilters);
+
+    if (emptyEl) {
+      emptyEl.style.display = filteredOrders.length ? "none" : "block";
+    }
+
+    updateSummary(filteredOrders);
+
+    if (!filteredOrders.length) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="10" style="padding:12px">No matching orders found.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    tableBody.innerHTML = filteredOrders.map((order) => {
+      const currency = order.currency || "CAD";
+      const orderTotal = formatMoney(order.total_cents || 0, currency);
+      const outstanding = formatMoney(order.outstanding_cents || 0, currency);
+      const paidTotal = formatMoney(order.paid_total_cents || 0, currency);
+      const paymentSummaryText =
+        `${getPaymentBadgeText(order)} • Paid ${paidTotal} • Outstanding ${outstanding}`;
 
       return `
         <tr>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${orderId}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${orderNumber}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">
-            <div>${customerName || "—"}</div>
-            <div class="small">${customerEmail || ""}</div>
+            <strong>${escapeHtml(order.order_number || "—")}</strong>
           </td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${status}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${fulfillment}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${total}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${paymentSummary}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${location}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${created}</td>
+
           <td style="padding:8px;border-bottom:1px solid #ddd">
-            <button class="btn" type="button" data-view-order-id="${orderId}">
+            <div>${escapeHtml(order.customer_name || "—")}</div>
+            <div class="small">${escapeHtml(order.customer_email || "—")}</div>
+          </td>
+
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            ${escapeHtml(titleCase(order.order_status || "pending"))}
+          </td>
+
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            ${escapeHtml(titleCase(order.fulfillment_type || "shipping"))}
+          </td>
+
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            <div>${escapeHtml(paymentSummaryText)}</div>
+            <div class="small">${escapeHtml(titleCase(order.payment_method || "—"))}</div>
+          </td>
+
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            ${escapeHtml(orderTotal)}
+          </td>
+
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            ${escapeHtml(outstanding)}
+          </td>
+
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            ${escapeHtml(String(order.payment_count || 0))}
+          </td>
+
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            ${escapeHtml(formatDate(order.created_at))}
+          </td>
+
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            <button
+              class="btn"
+              type="button"
+              data-view-order-id="${escapeHtml(String(order.order_id || ""))}"
+            >
               View
             </button>
           </td>
@@ -123,69 +264,100 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).join("");
   }
 
-  async function loadOrders(options = {}) {
-    const { silent = false } = options;
+  async function fetchOrders() {
+    const response = await window.DDAuth.apiFetch("/api/admin/orders", {
+      method: "GET"
+    });
 
-    hide(emptyEl);
-    hide(errorEl);
+    const data = await response.json();
 
-    if (!silent) {
-      show(loadingEl);
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Failed to load orders.");
     }
 
+    return Array.isArray(data.orders) ? data.orders : [];
+  }
+
+  function normalizeOrders(orders) {
+    return (Array.isArray(orders) ? orders : []).map((order) => {
+      const totalCents = Number(order.total_cents || 0);
+      const paidTotalCents = Number(order.paid_total_cents || 0);
+      const outstandingCents =
+        order.outstanding_cents != null
+          ? Number(order.outstanding_cents || 0)
+          : Math.max(totalCents - paidTotalCents, 0);
+
+      return {
+        ...order,
+        total_cents: totalCents,
+        paid_total_cents: paidTotalCents,
+        refunded_total_cents: Number(order.refunded_total_cents || 0),
+        pending_total_cents: Number(order.pending_total_cents || 0),
+        outstanding_cents: outstandingCents,
+        payment_count: Number(order.payment_count || 0)
+      };
+    });
+  }
+
+  async function loadOrders() {
+    if (isLoading) return;
+
+    const originalRefreshText = refreshButton?.textContent || "Refresh";
+    isLoading = true;
+
     try {
-      const status = String(statusFilterEl?.value || "").trim();
-      const query = status ? `?status=${encodeURIComponent(status)}` : "";
-
-      const response = await window.DDAuth.apiFetch(`/api/admin/orders${query}`, {
-        method: "GET"
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Failed to load orders.");
+      setMessage("Loading orders...");
+      if (refreshButton) {
+        refreshButton.disabled = true;
+        refreshButton.textContent = "Loading...";
       }
 
-      const orders = Array.isArray(data.orders) ? data.orders : [];
+      const orders = await fetchOrders();
+      allOrders = normalizeOrders(orders);
+      renderOrders();
 
-      if (!orders.length) {
-        if (tableBody) tableBody.innerHTML = "";
-        show(emptyEl);
-        return;
-      }
-
-      renderRows(orders);
+      setMessage(`Loaded ${allOrders.length} order${allOrders.length === 1 ? "" : "s"}.`);
     } catch (error) {
-      if (tableBody) tableBody.innerHTML = "";
-      if (errorEl) {
-        errorEl.textContent = error.message || "Failed to load orders.";
-      }
-      show(errorEl);
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="10" style="padding:12px;color:#b00020">
+            ${escapeHtml(error.message || "Failed to load orders.")}
+          </td>
+        </tr>
+      `;
+      updateSummary([]);
+      setMessage(error.message || "Failed to load orders.", true);
     } finally {
-      hide(loadingEl);
+      isLoading = false;
+      if (refreshButton) {
+        refreshButton.disabled = false;
+        refreshButton.textContent = originalRefreshText;
+      }
     }
   }
 
-  refreshButtons.forEach(button => {
-    button.addEventListener("click", async () => {
+  if (refreshButton) {
+    refreshButton.addEventListener("click", async () => {
       await loadOrders();
+    });
+  }
+
+  [statusFilter, paymentFilter, fulfillmentFilter].forEach((el) => {
+    if (!el) return;
+    el.addEventListener("change", () => {
+      renderOrders();
     });
   });
 
-  if (statusFilterEl) {
-    statusFilterEl.addEventListener("change", async () => {
-      await loadOrders();
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      renderOrders();
     });
   }
 
   document.addEventListener("dd:order-updated", async () => {
-    await loadOrders({ silent: true });
+    await loadOrders();
   });
 
-  if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
-    return;
-  }
-
-  await loadOrders();
+  loadOrders();
 });
