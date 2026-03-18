@@ -1,3 +1,5 @@
+// File: /functions/api/admin/dashboard-summary.js
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -14,8 +16,7 @@ async function getSessionUser(env, token) {
       users.email,
       users.display_name,
       users.role,
-      users.is_active,
-      users.created_at
+      users.is_active
     FROM sessions
     JOIN users ON sessions.user_id = users.user_id
     WHERE sessions.session_token = ?
@@ -28,70 +29,78 @@ async function getSessionUser(env, token) {
   return sessionUser || null;
 }
 
-export async function onRequestGet(context) {
-  const { request, env } = context;
-
+async function requireAdmin(request, env) {
   const auth = request.headers.get("Authorization") || "";
+
   if (!auth.startsWith("Bearer ")) {
-    return json({ ok: false, error: "Unauthorized." }, 401);
+    return { error: json({ ok: false, error: "Unauthorized." }, 401) };
   }
 
   const token = auth.slice(7).trim();
+
   if (!token) {
-    return json({ ok: false, error: "Missing session token." }, 401);
+    return { error: json({ ok: false, error: "Missing session token." }, 401) };
   }
 
   const sessionUser = await getSessionUser(env, token);
 
   if (!sessionUser) {
-    return json({ ok: false, error: "Invalid session." }, 401);
+    return { error: json({ ok: false, error: "Invalid session." }, 401) };
   }
 
   if (!sessionUser.is_active) {
-    return json({ ok: false, error: "Account is inactive." }, 403);
+    return { error: json({ ok: false, error: "Account is inactive." }, 403) };
   }
 
-  if (sessionUser.role !== "admin") {
-    return json({ ok: false, error: "Forbidden." }, 403);
+  if (String(sessionUser.role || "").toLowerCase() !== "admin") {
+    return { error: json({ ok: false, error: "Forbidden." }, 403) };
   }
 
-  const totalUsersResult = await env.DB.prepare(`
-    SELECT COUNT(*) AS count
-    FROM users
-  `).first();
+  return { sessionUser };
+}
 
-  const activeUsersResult = await env.DB.prepare(`
-    SELECT COUNT(*) AS count
-    FROM users
-    WHERE is_active = 1
-  `).first();
+async function getSingleCount(env, sql) {
+  const row = await env.DB.prepare(sql).first();
+  return Number(row?.count || 0);
+}
 
-  const adminUsersResult = await env.DB.prepare(`
-    SELECT COUNT(*) AS count
-    FROM users
-    WHERE role = 'admin'
-  `).first();
+export async function onRequestGet(context) {
+  const { request, env } = context;
 
-  const activeSessionsResult = await env.DB.prepare(`
-    SELECT COUNT(*) AS count
-    FROM sessions
-    WHERE expires_at > datetime('now')
-  `).first();
+  const authCheck = await requireAdmin(request, env);
+  if (authCheck.error) return authCheck.error;
 
-  const inactiveUsersResult = await env.DB.prepare(`
-    SELECT COUNT(*) AS count
-    FROM users
-    WHERE is_active = 0
-  `).first();
+  const [
+    users_count,
+    products_count,
+    orders_count,
+    payments_count
+  ] = await Promise.all([
+    getSingleCount(env, `
+      SELECT COUNT(*) AS count
+      FROM users
+    `),
+    getSingleCount(env, `
+      SELECT COUNT(*) AS count
+      FROM products
+    `),
+    getSingleCount(env, `
+      SELECT COUNT(*) AS count
+      FROM orders
+    `),
+    getSingleCount(env, `
+      SELECT COUNT(*) AS count
+      FROM payments
+    `)
+  ]);
 
   return json({
     ok: true,
     summary: {
-      total_users: Number(totalUsersResult?.count || 0),
-      active_users: Number(activeUsersResult?.count || 0),
-      inactive_users: Number(inactiveUsersResult?.count || 0),
-      admin_users: Number(adminUsersResult?.count || 0),
-      active_sessions: Number(activeSessionsResult?.count || 0)
+      users_count,
+      products_count,
+      orders_count,
+      payments_count
     }
   });
 }
