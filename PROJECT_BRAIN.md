@@ -1,393 +1,328 @@
-/docs/PROJECT_BRAIN.md
 # Devil n Dove – Project Brain
 
-This document summarizes the **architecture, purpose, and current status** of the Devil n Dove website and application.  
-It is designed so a new developer or AI assistant can **instantly understand the project**.
+This file is the fast, practical snapshot of the **current repo state**.
+It should let a new developer or AI assistant understand the live architecture without guessing.
 
 ---
 
-# Project Overview
+# Project Purpose
 
-Devil n Dove is the official website and internal system for the **Devil n Dove Workshop**.
+Devil n Dove is both:
 
-The platform supports:
+1. the public website for the workshop and brand
+2. the internal management system for members, admin tools, products, orders, payments, and layered access
 
-• Public website  
-• Members login area  
-• Admin management system  
-• Workshop tools & supplies catalog  
-• Featured creations gallery  
-• Future product catalog and content management
-
-The site is built as a **Cloudflare-native application**.
+The project is no longer just a public site plus login. It now has a real commerce foundation.
 
 ---
 
-# Technology Stack
+# Current Architecture
 
-Frontend
+## Frontend
 
-HTML  
-CSS  
-Vanilla JavaScript
+- static HTML pages
+- shared CSS in `/css/styles.css`
+- modular vanilla JS in `/public/js/`
 
-Backend
+## Backend
 
-Cloudflare Pages Functions
+- Cloudflare Pages Functions in `/functions/api/`
 
-Database
+## Database
 
-Cloudflare **D1 (SQLite)**
+- Cloudflare D1 / SQLite
+- binding name: `env.DB`
 
-Storage
+## Storage
 
-Cloudflare **R2**
-
-Deployment
-
-GitHub → Cloudflare Pages
+- Cloudflare R2 for site assets and media
 
 ---
 
-# Core Features
+# Live Functional Areas
 
-## Public Website
+## 1. Public website
 
-Pages:
+Pages include:
 
+- home
+- about
+- gallery
+- creations
+- tools
+- supplies
+- movies
+- contact
 
-/
-/gallery
-/creations
-/tools
-/supplies
-/contact
+JSON-driven site content still exists for tools, supplies, featured items, and related catalog data.
 
+## 2. Authentication and member system
 
-Content is mostly **JSON-driven**.
+Implemented:
 
-Example:
+- register support in backend
+- login
+- logout
+- logout all
+- change password
+- session info
+- member page
+- bootstrap admin flow
 
+Security model:
 
-/data/tools/toolshed_items_master.json
-/data/site/featured-items.json
+- session tokens stored in DB
+- API authentication via bearer token
+- session expiration checked against `datetime('now')`
 
+## 3. Admin user management
 
-Images and media are stored in **Cloudflare R2**.
+Implemented:
+
+- create user
+- update role and active state
+- reset password
+- delete user
+- dashboard summary
+- cleanup expired sessions
+
+Admin self-protection exists:
+
+- cannot delete self
+- cannot deactivate self
+- cannot demote self from admin
+- last admin protection remains important
+
+## 4. Product management
+
+Implemented:
+
+- tax classes
+- products table for physical and digital items
+- product images table
+- product tags table
+- admin create product form
+- edit existing product
+- delete product
+- archive product
+- storefront only shows active products
+
+Product states:
+
+- `draft`
+- `active`
+- `archived`
+
+## 5. Storefront
+
+Implemented:
+
+- `/shop/` product grid
+- `/shop/product/` detail page
+- add to cart from shop or detail page
+- cart badge in nav
+- `/cart/` review page
+
+Cart model:
+
+- browser localStorage
+- no server cart yet
+
+## 6. Checkout and orders
+
+Implemented:
+
+- `/checkout/`
+- browser-saved checkout form
+- order creation endpoint
+- order confirmation page
+- order status history
+- payment preparation bridge endpoint
+
+Order states supported:
+
+- `draft`
+- `pending`
+- `paid`
+- `fulfilled`
+- `cancelled`
+- `refunded`
+
+Fulfillment types supported:
+
+- `shipping`
+- `digital`
+- `mixed`
+
+## 7. Payments foundation
+
+Implemented:
+
+- `payments` table
+- admin order payment visibility
+- manual/admin payment recording
+- payment summary in orders list
+- payment preparation endpoint for future provider handoff
+
+Providers currently modeled:
+
+- `paypal`
+- `stripe`
+- `square`
+- `manual`
+- `other`
+
+Real provider integration is **not connected yet**.
+
+## 8. Multi-tier access model
+
+The repo now uses **two levels of access logic**.
+
+### Core system role
+
+Stored in `users.role`:
+
+- `member`
+- `admin`
+
+### Business / content access tiers
+
+Stored separately in `access_tiers` and `user_access_tiers`:
+
+- artist
+- customer
+- donor
+- vip_donor
+- subscriber
+
+This is the correct long-term design because admin authority should not be overloaded with donor/customer/artist permissions.
 
 ---
 
-# Members System
+# Database Files
 
-Members can:
+## Core auth schema
 
-• login  
-• logout  
-• change password  
-• view active sessions  
-• log out other sessions
+- `/database_schema.sql`
 
-Session tokens stored in database.
+## Store / commerce schema
 
-Session expiration enforced.
+- `/database_store_schema.sql`
 
----
+Adds:
 
-# Admin System
+- `tax_classes`
+- `products`
+- `product_images`
+- `product_tags`
+- `orders`
+- `order_items`
+- `order_status_history`
 
-Admin dashboard allows:
+## Access tiers schema
 
-• create users  
-• update roles  
-• activate / deactivate users  
-• reset passwords  
-• delete users  
-• clean expired sessions
+- `/database_access_tiers.sql`
 
-Admin dashboard also displays:
+Adds:
 
+- `access_tiers`
+- `user_access_tiers`
 
-Total Users
-Active Users
-Inactive Users
-Admin Users
-Active Sessions
+## Payments extension
 
+- `/database_payments_extension.sql`
 
----
+Adds:
 
-# Safety Rules
-
-Admin protections:
-
-• cannot delete own account  
-• cannot deactivate own account  
-• cannot demote own admin role  
-• cannot delete last remaining admin
+- `payments`
 
 ---
 
-# Database Schema
+# Important Frontend Scripts
 
-## users
+## Auth / member scripts
 
+- `auth.js`
+- `site-auth-ui.js`
+- `login.js`
+- `members.js`
+- `change-password.js`
+- `logout-all.js`
+- `session-info.js`
 
-user_id
-email
-password_hash
-display_name
-role
-is_active
-created_at
+## Admin scripts
 
+- `admin.js`
+- `admin-dashboard-summary.js`
+- `admin-users.js`
+- `admin-create-user.js`
+- `admin-reset-password.js`
+- `admin-delete-user.js`
+- `admin-cleanup-sessions.js`
+- `admin-self-protect.js`
+- `admin-access-tiers.js`
+- `admin-products.js`
+- `admin-create-product.js`
+- `admin-edit-product.js`
+- `admin-delete-product.js`
+- `admin-archive-product.js`
+- `admin-orders.js`
+- `admin-order-detail.js`
 
-## sessions
+## Storefront scripts
 
-
-session_id
-user_id
-session_token
-created_at
-expires_at
-ip_address
-user_agent
-
-
-## admin_logs (future)
-
-Tracks administrative actions.
-
----
-
-# API Endpoints
-
-## Authentication
-
-
-/api/auth/login
-/api/auth/logout
-/api/auth/logout-all
-/api/auth/me
-/api/auth/change-password
-/api/auth/session-info
-
-
-## Admin
-
-
-/api/admin/users
-/api/admin/create-user
-/api/admin/user-update
-/api/admin/reset-password
-/api/admin/delete-user
-/api/admin/dashboard-summary
-/api/admin/cleanup-sessions
-
+- `shop.js`
+- `product-detail.js`
+- `cart.js`
+- `cart-page.js`
+- `cart-badge.js`
+- `checkout.js`
+- `order-confirmation.js`
 
 ---
 
-# Repository Structure
+# What Is Still Missing
 
+## Payments
 
-admin/
-members/
-functions/
-public/
-data/
-assets/
-css/
-docs/
+Not done yet:
 
+- real PayPal order/session creation
+- PayPal return / cancel handling
+- card processor selection and integration
+- webhook handling
+- payment reconciliation automation
 
-### admin
+## Product workflow
 
-Admin dashboard UI.
+Not done yet:
 
-### members
+- bulk product import
+- bulk product editing
+- image upload tool to R2 from admin
+- product search / pagination in admin
 
-Authenticated member pages.
+## Security and operations
 
-### functions
+Not done yet:
 
-Cloudflare backend functions.
-
-Structure:
-
-
-functions/api/auth
-functions/api/admin
-
-
-### public/js
-
-Frontend scripts.
-
-Examples:
-
-
-auth.js
-admin-users.js
-admin-delete-user.js
-session-info.js
-change-password.js
-
-
-### data
-
-Static JSON data used by site pages.
-
-### assets
-
-Images and icons used by the website.
+- admin audit logs fully implemented
+- login rate limiting
+- richer password policy enforcement
+- donor/customer/artist gated frontend experiences
+- shipping automation
+- tax expansion beyond current Ontario estimate foundation
 
 ---
 
-# Deployment Flow
+# Current Best Understanding of Project Phase
 
+This repo has moved from:
 
-Developer pushes to GitHub
-↓
-Cloudflare Pages build
-↓
-Functions deploy
-↓
-Site updates
+**site + auth prototype**
 
+to:
 
----
+**internal alpha commerce/admin platform with layered access and payment foundation**
 
-# Known Issues
-
-Current repo contains a few technical inconsistencies.
-
-### Database Binding Name
-
-Some code uses:
-
-
-env.DB
-
-
-While configuration may use:
-
-
-DD_DB
-
-
-Must be standardized.
-
----
-
-### Duplicate Data Paths
-
-Both exist:
-
-
-/data
-/data/data
-
-
-Should be consolidated.
-
----
-
-### Duplicate Endpoints
-
-Some endpoints were duplicated during development.
-
-Should standardize around:
-
-
-/api/auth/me
-
-
----
-
-# Security Improvements Needed
-
-Before production launch:
-
-• password complexity enforcement  
-• login rate limiting  
-• admin action audit logging  
-• session rotation after password change  
-• improved error handling
-
----
-
-# Future Features
-
-Planned improvements include:
-
-## Admin Content Management
-
-Admin UI to manage:
-
-• featured creations  
-• tools list  
-• supplies list  
-• gallery images  
-• videos
-
-This would eliminate manual JSON editing.
-
----
-
-## Inventory Manager
-
-Admin panel for tracking:
-
-• workshop tools  
-• supplies  
-• consumables  
-• equipment locations
-
----
-
-## Media Manager
-
-Upload images and videos directly to R2.
-
----
-
-## Blog / Updates
-
-Internal blog system for Devil n Dove.
-
----
-
-# Development Workflow
-
-When working with this project:
-
-• always provide complete file updates  
-• one document per response  
-• use code blocks  
-• prioritize architecture correctness  
-• avoid duplicating endpoints or schemas
-
----
-
-# Maintainers
-
-Devil n Dove Workshop  
-Ontario, Canada
-
-Creators:
-
-Laurie Rosevear  
-Jack Rosevear
-
----
-
-# Status
-
-Current stage:
-
-**Internal Alpha**
-
-Authentication and admin management are functional.
-
-Next milestone:
-
-**Repository cleanup and admin content management system.**
+That is the right mental model for all future work.

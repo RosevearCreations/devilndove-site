@@ -1,161 +1,201 @@
-/docs/REPO_BASE_GUIDE.md
 # Devil n Dove Repo Base Guide
 
-This document explains the structure of the repository.
+This document explains the current repository structure based on the **latest project state**.
 
 ---
 
 # Top Level
 
+Important paths:
 
-/
-admin/
-members/
-public/
-functions/
-data/
-assets/
-css/
-docs/
-wrangler.toml
-
+- `/admin/`
+- `/about/`
+- `/bootstrap-admin/`
+- `/cart/`
+- `/checkout/`
+- `/checkout/confirmation/`
+- `/contact/`
+- `/creations/`
+- `/gallery/`
+- `/members/`
+- `/movies/`
+- `/shop/`
+- `/shop/product/`
+- `/functions/`
+- `/public/`
+- `/data/`
+- `/assets/`
+- `/css/`
+- `/database_schema.sql`
+- `/database_store_schema.sql`
+- `/database_access_tiers.sql`
+- `/database_payments_extension.sql`
+- `/wrangler.toml`
 
 ---
 
 # Admin
 
-
-/admin
-
+`/admin`
 
 Admin interface.
 
-Functions:
+Current responsibilities:
 
+- dashboard summary
 - user management
-- session maintenance
-- dashboard metrics
+- access tier management
+- product management
+- order review
+- order status updates
+- payment review and manual payment recording
+- maintenance tools
+
+---
+
+# Bootstrap Admin
+
+`/bootstrap-admin`
+
+Used for initial admin account bootstrap flow.
 
 ---
 
 # Members
 
-
-/members
-
+`/members`
 
 Authenticated member area.
 
-Contains:
+Contains or supports:
 
-- password management
-- session management
+- profile/session awareness
+- password change
+- logout all sessions
+
+---
+
+# Shop / Cart / Checkout
+
+`/shop`
+`/shop/product`
+`/cart`
+`/checkout`
+`/checkout/confirmation`
+
+These now form the public commerce flow.
+
+Implemented:
+
+- product list
+- product detail
+- browser cart
+- checkout form
+- order confirmation
 
 ---
 
 # Public JS
 
+`/public/js`
 
-/public/js
+Client-side scripts are modular.
 
+Important scripts include:
 
-Client side scripts.
-
-Examples:
-
-
-auth.js
-admin-users.js
-admin-delete-user.js
-session-info.js
-change-password.js
-
+- auth and session UI
+- admin user scripts
+- admin product scripts
+- admin access tier scripts
+- admin order scripts
+- cart scripts
+- checkout scripts
+- storefront scripts
 
 ---
 
 # Functions
 
-
-/functions
-
+`/functions`
 
 Cloudflare Pages Functions.
 
-Structure:
+Key groups:
 
-
-functions/api/auth/*
-functions/api/admin/*
-
+- `functions/api/auth/*`
+- `functions/api/admin/*`
+- `functions/api/products.js`
+- `functions/api/product-detail.js`
+- `functions/api/checkout-create-order.js`
+- `functions/api/checkout-prepare-payment.js`
 
 ---
 
 # Data
 
+`/data`
 
-/data
-
-
-Static JSON data.
+Static JSON and related supporting files.
 
 Examples:
 
+- products JSON snapshots
+- featured items JSON
+- tools and supplies JSON
+- workshop catalog source files
 
-data/tools/toolshed_items_master.json
-data/site/featured-items.json
+Note:
 
+There is still duplicate-style legacy content in places like `/data/data/` inside this snapshot. Cleanup remains a roadmap task.
 
 ---
 
 # Assets
 
+`/assets`
 
-/assets
+Site images, logo files, banners, and other static visual assets.
 
-
-Site images.
+Large media is intended to live in Cloudflare R2.
 
 ---
 
 # CSS
 
+`/css/styles.css`
 
-/css/styles.css
-
-
-Main site stylesheet.
+Main global stylesheet for site and admin pages.
 
 ---
 
-# Docs
+# SQL Schema Files
 
+These are now important root-level schema files:
 
-/docs
-
-
-Repository documentation.
+- `database_schema.sql` → auth / users / sessions
+- `database_store_schema.sql` → products, tax classes, orders, order items
+- `database_access_tiers.sql` → layered access system
+- `database_payments_extension.sql` → payments table
 
 ---
 
 # Wrangler
 
-
-wrangler.toml
-
+`/wrangler.toml`
 
 Cloudflare configuration.
 
-Defines:
+Should define:
 
-- D1 database
-- R2 buckets
-- environment bindings
+- D1 database binding as `DB`
+- any R2 bindings used by project
+- Pages / Functions behavior
 
 ---
 
 # Deployment Flow
 
-
+```text
 GitHub push
 ↓
 Cloudflare Pages build
@@ -163,7 +203,7 @@ Cloudflare Pages build
 Functions deploy
 ↓
 Site live
-
+```
 
 ---
 
@@ -171,17 +211,18 @@ Site live
 
 Recommended:
 
-
-npm install
+```bash
 wrangler pages dev
-
+```
 
 ---
 
-# Environment
+# Repo Direction
 
-Cloudflare resources used:
+This repository is now headed toward:
 
-- Pages
-- D1
-- R2
+- stronger security layers
+- real payment integrations
+- better product workflow tooling
+- richer admin operations
+- gated features/content by access tier

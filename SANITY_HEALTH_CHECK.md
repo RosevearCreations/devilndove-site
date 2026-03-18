@@ -1,232 +1,270 @@
-/docs/SANITY_HEALTH_CHECK.md
 # Devil n Dove Site – Sanity / Health Check
 
 ## Current Status
-The application is now a **working internal alpha** with the following systems functioning:
 
-### Public Website
-- Static site deployed on **Cloudflare Pages**
-- Pages include:
-  - Home
-  - Gallery
-  - Creations
-  - Tools
-  - Supplies
-  - Contact
-- Data-driven pages using JSON:
-  - `/data/tools/toolshed_items_master.json`
-  - `/data/site/featured-items.json`
-
-### Assets
-Assets served from **Cloudflare R2**.
-
-Examples:
-- tool images
-- product images
-- workshop images
-- site branding
+The application is now a **working internal alpha with commerce foundations in place**.
 
 ---
 
-# Authentication System
+# What Is Working
+
+## Public website
+
+Working public pages include:
+
+- Home
+- About
+- Gallery
+- Creations
+- Tools
+- Supplies
+- Movies
+- Contact
+- Shop
+- Product detail
+- Cart
+- Checkout
+- Order confirmation
+
+## Assets
+
+Assets are served from repo assets and intended R2-backed media workflows.
+
+## Authentication system
 
 Implemented:
 
-- Login
-- Logout
-- Session tokens
-- Password change
-- Logout other sessions
-- Session expiry tracking
-
-Session model:
-
-
-users
-sessions
-
-
-Sessions expire using:
-
-
-expires_at > datetime('now')
-
-
----
-
-# Members Area
-
-Members area includes:
-
-- profile display
+- login
+- logout
+- logout all sessions
 - password change
-- session info
-- logout other sessions
+- session expiry checking
+- bootstrap admin support
 
-Files:
+## Members area
 
+Implemented:
 
-/members/index.html
-/public/js/change-password.js
-/public/js/logout-all.js
-/public/js/session-info.js
+- member page
+- password change
+- session/account tools
 
+## Admin area
 
----
+Implemented:
 
-# Admin Area
-
-Admin dashboard exists with:
-
-### Summary panel
-Shows:
-
-- total users
-- active users
-- inactive users
-- admin users
-- active sessions
-
-### User management
-Admin can:
+### User tools
 
 - create users
-- update role
-- activate/deactivate accounts
+- update user role
+- activate / deactivate users
 - reset passwords
 - delete users
+- cleanup expired sessions
+- dashboard summary
 
 ### Safety protections
 
-Implemented protections:
+Still important and expected:
 
 - cannot delete yourself
-- cannot delete last admin
-- cannot demote yourself from admin
 - cannot deactivate yourself
+- cannot demote your own admin role
+- last admin must remain protected
+
+### Access tier tools
+
+Implemented:
+
+- load available access tiers
+- view user access tiers
+- assign access tier
+- remove access tier
+
+### Product tools
+
+Implemented:
+
+- create product
+- edit product
+- archive product
+- delete product
+- list products in admin
+
+### Orders and payment tools
+
+Implemented:
+
+- list orders
+- view order detail
+- update order status
+- view payment records
+- manually record payment
+
+## Storefront and checkout
+
+Implemented:
+
+- public active products API
+- product detail API
+- product list page
+- product detail page
+- add to cart
+- browser cart
+- cart badge
+- checkout page
+- order creation endpoint
+- order confirmation page
+- payment preparation endpoint
 
 ---
 
-# Admin Maintenance
+# Database State
 
-Admin tools include:
+## Core auth
 
-- clean expired sessions
-- refresh users
-- dashboard summary refresh
+Exists via:
 
----
+- `database_schema.sql`
 
-# Working API Endpoints
+## Store / orders
 
-Auth:
+Exists via:
 
+- `database_store_schema.sql`
 
-/api/auth/login
-/api/auth/logout
-/api/auth/logout-all
-/api/auth/me
-/api/auth/change-password
-/api/auth/session-info
+Includes:
 
+- tax classes
+- products
+- product images
+- product tags
+- orders
+- order items
+- order status history
 
-Admin:
+## Access tiers
 
+Exists via:
 
-/api/admin/users
-/api/admin/user-update
-/api/admin/create-user
-/api/admin/reset-password
-/api/admin/delete-user
-/api/admin/dashboard-summary
-/api/admin/cleanup-sessions
+- `database_access_tiers.sql`
 
+Includes:
 
----
+- access tiers
+- user access tiers
 
-# Major Issues Found
+## Payments
 
-## Database binding mismatch
+Exists via:
 
-Some code uses:
+- `database_payments_extension.sql`
 
+Includes:
 
-env.DB
-
-
-but wrangler.toml uses:
-
-
-DD_DB
-
-
-This must be standardized.
+- payments
 
 ---
 
-## Duplicate folder trees
+# Major Improvements Since Earlier Project State
 
-Both exist:
+The repo is no longer only “site + auth + future store.”
 
+It now has real:
 
-/data/
-/data/data/
+- products
+- storefront
+- cart
+- checkout
+- orders
+- payment records
+- layered user access controls
 
-
-Only one should remain.
+That is a major maturity step.
 
 ---
 
-## Duplicate "me" endpoint
+# Known Gaps / Risks
 
-Two versions exist in repo.
+## Security hardening still needed
 
-Should standardize:
+Still needed:
 
+- login rate limiting
+- stronger password policy
+- full admin audit logs
+- broader abuse protection
 
-/api/auth/me
+## Payment integrations not live yet
 
+Foundation exists, but real external provider integration is still missing:
+
+- PayPal API flow
+- credit card processor flow
+- webhook/callback reconciliation
+
+## Shipping and tax are still early-stage
+
+Current order/tax logic is enough for internal alpha, but not the final production logic.
+
+## Bulk product workflow missing
+
+Requested and still needed:
+
+- bulk product upload
+- bulk product editing
+
+## Repo cleanup still needed
+
+Watch for:
+
+- duplicate-style data folder usage
+- stale docs/path references
+- legacy assumptions in older files
 
 ---
 
 # Must Fix Before Production
 
-1. Standardize D1 binding
-2. Remove duplicate data folders
-3. Remove legacy bootstrap code
-4. Confirm schema migration path
-5. Harden password validation
-6. Add rate limiting
-
----
-
-# Nice-to-Have Improvements
-
-- Admin user search
-- Admin pagination
-- Admin audit logs
-- Asset manager
-- Featured creations manager
-- Video manager
-- R2 upload tool
+1. real payment integration
+2. audit logging
+3. login hardening
+4. shipping logic
+5. improved tax handling
+6. bulk product workflow
+7. tier-aware protected content behavior
 
 ---
 
 # Overall Health
 
 | Area | Status |
-|-----|------|
-Public Site | Good
-Auth System | Good
-Admin Tools | Good
-Database Design | Needs consolidation
-Security Hardening | Needs improvement
-Documentation | Needs improvement
+|---|---|
+| Public Site | Good |
+| Auth System | Good |
+| Admin User Management | Good |
+| Access Tier Foundation | Good |
+| Product Management | Good |
+| Storefront | Good |
+| Cart | Good |
+| Checkout Foundation | Good |
+| Orders | Good |
+| Payment Foundation | Good |
+| Live Payment Integration | Not Done |
+| Security Hardening | Partial |
+| Bulk Product Workflow | Not Done |
 
 ---
 
-# Overall Assessment
+# Practical Summary
 
-The application is a **stable internal alpha**.
+The project is in a much better state than the earlier health check suggested.
 
-With database consolidation and security hardening it will be ready for production.
+It now behaves like a real internal-alpha commerce platform with:
+
+- layered security direction
+- admin operations
+- order tracking
+- payment foundations
+
+The main remaining jump is from **foundation complete** to **production-ready integrations and hardening**.

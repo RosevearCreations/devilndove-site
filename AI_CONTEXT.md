@@ -1,37 +1,66 @@
-/docs/AI_CONTEXT.md
 # AI_CONTEXT.md
+
 Devil n Dove Website – AI Operational Context
 
-This document is designed specifically for **AI assistants** (ChatGPT, Claude, Copilot, etc.) to understand how to safely work with this repository.
-
-It explains:
-
-• how the system works  
-• how files are structured  
-• how changes must be delivered  
-• what rules must always be followed
-
-The goal is to prevent **AI confusion, duplication, and architecture drift**.
+This document is for AI assistants working inside this repository.
+Its job is to stop confusion, duplicated work, stale assumptions, and architecture drift.
 
 ---
 
-# Project Identity
+# What This Repo Is Now
 
-Project Name:
+Do **not** treat this as only:
 
-Devil n Dove Website
+- a static site
+- a members login demo
+- a future store concept
 
-Purpose:
+It is now all of the following:
 
-Official website and management system for the Devil n Dove Workshop.
+- public website
+- members auth system
+- admin management dashboard
+- product management system
+- storefront
+- cart and checkout foundation
+- order management system
+- payment-record foundation
+- multi-tier access control foundation
 
-System includes:
+---
 
-• public website  
-• members login system  
-• admin management dashboard  
-• workshop catalog  
-• future product catalog
+# Working Mental Model
+
+There are **three major layers** in this project.
+
+## 1. Public site layer
+
+HTML pages for visitors, products, cart, checkout, and general brand content.
+
+## 2. Auth / admin authority layer
+
+Who is allowed into protected pages and admin APIs.
+
+Core roles are still simple:
+
+- `member`
+- `admin`
+
+## 3. Business access tier layer
+
+Who gets extra content or capabilities as an artist, donor, customer, subscriber, etc.
+
+These are **not the same thing as admin roles**.
+
+Current access tier codes:
+
+- `artist`
+- `customer`
+- `donor`
+- `vip_donor`
+- `subscriber`
+
+When working on permissions, AI must preserve this separation.
 
 ---
 
@@ -39,436 +68,262 @@ System includes:
 
 Frontend
 
-HTML  
-CSS  
-Vanilla JavaScript
+- HTML
+- CSS
+- Vanilla JavaScript
 
 Backend
 
-Cloudflare Pages Functions
+- Cloudflare Pages Functions
 
 Database
 
-Cloudflare D1 (SQLite)
+- Cloudflare D1 (SQLite)
+- binding name must be `env.DB`
 
 Storage
 
-Cloudflare R2
+- Cloudflare R2
 
 Deployment
 
-GitHub → Cloudflare Pages
+- GitHub → Cloudflare Pages
 
 ---
 
 # Repository Structure
 
+Important top-level files and folders:
 
-admin/
-members/
-functions/
-public/
-data/
-assets/
-css/
-docs/
+- `/admin/`
+- `/bootstrap-admin/`
+- `/cart/`
+- `/checkout/`
+- `/functions/`
+- `/members/`
+- `/public/js/`
+- `/shop/`
+- `/data/`
+- `/assets/`
+- `/css/`
+- `/database_schema.sql`
+- `/database_store_schema.sql`
+- `/database_access_tiers.sql`
+- `/database_payments_extension.sql`
 
+Note:
 
-## Important directories
-
-### admin/
-
-Admin dashboard interface.
-
-Handles:
-
-• user management  
-• system maintenance  
-• site administration
-
----
-
-### members/
-
-Authenticated member pages.
-
-Contains:
-
-• password change  
-• session management
+Some older docs mention `/docs/` or older schema locations. In this repo snapshot, the Markdown docs and SQL files are in the **repo root**.
 
 ---
 
-### functions/
+# Backend Routing Conventions
 
-Cloudflare backend endpoints.
+## Auth endpoints
 
-Structure:
+Use or update existing routes such as:
 
+- `/api/auth/login`
+- `/api/auth/logout`
+- `/api/auth/logout-all`
+- `/api/auth/me`
+- `/api/auth/change-password`
+- `/api/auth/session-info`
+- `/api/auth/bootstrap-admin`
+- `/api/auth/bootstrap-status`
 
-functions/api/auth
-functions/api/admin
+## Admin user and security endpoints
 
+- `/api/admin/users`
+- `/api/admin/create-user`
+- `/api/admin/user-update`
+- `/api/admin/reset-password`
+- `/api/admin/delete-user`
+- `/api/admin/dashboard-summary`
+- `/api/admin/cleanup-sessions`
+- `/api/admin/access-tiers`
+- `/api/admin/user-access-tiers`
+- `/api/admin/assign-user-access-tier`
+- `/api/admin/remove-user-access-tier`
 
-AI must always follow this routing convention.
+## Admin product endpoints
+
+- `/api/admin/tax-classes`
+- `/api/admin/products`
+- `/api/admin/product-detail`
+- `/api/admin/create-product`
+- `/api/admin/update-product`
+- `/api/admin/archive-product`
+- `/api/admin/delete-product`
+
+## Storefront / checkout endpoints
+
+- `/api/products`
+- `/api/product-detail`
+- `/api/checkout-create-order`
+- `/api/checkout-prepare-payment`
+
+## Admin order / payment endpoints
+
+- `/api/admin/orders`
+- `/api/admin/order-detail`
+- `/api/admin/order-payments`
+- `/api/admin/update-order-status`
+- `/api/admin/record-payment`
+
+Before creating a new endpoint, AI should first check whether the existing endpoint should be extended instead.
 
 ---
 
-### public/js/
+# Frontend Script Rules
 
-Client-side scripts.
+Scripts in `/public/js/` are modular and mostly single-purpose.
+
+AI should preserve that pattern.
 
 Examples:
 
+- `admin-products.js` = product listing behavior
+- `admin-edit-product.js` = edit behavior for shared product form
+- `cart.js` = cart storage helper
+- `checkout.js` = checkout page behavior
+- `admin-order-detail.js` = modal logic for one order
 
-auth.js
-admin-users.js
-admin-delete-user.js
-session-info.js
-change-password.js
-
-
-Scripts should remain **modular and single-purpose**.
-
----
-
-### data/
-
-Static JSON content used by site pages.
-
-Examples:
-
-
-data/tools/toolshed_items_master.json
-data/site/featured-items.json
-
-
-This will eventually be replaced by **admin content management**.
-
----
-
-### assets/
-
-Images and icons used by the website.
-
-Large media stored in **Cloudflare R2**.
+Do not collapse many working modules into one giant file unless explicitly asked.
 
 ---
 
 # Database Architecture
 
-Database type:
+## Core auth tables
 
-Cloudflare **D1**
+From `/database_schema.sql`:
 
-Tables:
+- `users`
+- `sessions`
 
-### users
+## Store tables
 
+From `/database_store_schema.sql`:
 
-user_id
-email
-password_hash
-display_name
-role
-is_active
-created_at
+- `tax_classes`
+- `products`
+- `product_images`
+- `product_tags`
+- `orders`
+- `order_items`
+- `order_status_history`
 
+## Access tier tables
 
-### sessions
+From `/database_access_tiers.sql`:
 
+- `access_tiers`
+- `user_access_tiers`
 
-session_id
-user_id
-session_token
-created_at
-expires_at
-ip_address
-user_agent
+## Payment table
 
+From `/database_payments_extension.sql`:
 
-### admin_logs (future)
+- `payments`
 
-Tracks administrative actions.
-
----
-
-# Authentication Model
-
-Authentication uses **session tokens**.
-
-Process:
-
-1. User logs in
-2. Session token generated
-3. Token stored in database
-4. Token stored in browser
-5. API calls authenticated via token
-
-Session validity:
-
-
-expires_at > datetime('now')
-
+When AI changes architecture, it must keep docs and schema references synchronized.
 
 ---
 
-# Admin Permissions
+# Security Model
 
-Users have roles:
+## Authentication
 
+- session token stored in DB
+- browser sends bearer token for protected API calls
+- valid session must satisfy `expires_at > datetime('now')`
 
-member
-admin
+## Admin protection
 
+Every admin endpoint must check:
 
-Admin-only actions include:
+- bearer token exists
+- session is valid
+- user is active
+- user role is `admin`
 
-• create users  
-• update roles  
-• deactivate users  
-• reset passwords  
-• delete users  
-• clean expired sessions
+## Important design principle
 
----
+Admin authority and customer/donor/artist access are separate systems.
 
-# Safety Rules
-
-AI must **never generate code that breaks these protections**.
-
-Required protections:
-
-• admin cannot delete themselves  
-• admin cannot deactivate themselves  
-• admin cannot demote their own role  
-• last admin account cannot be deleted
+Do not solve donor/customer/artist access by stuffing everything into `users.role`.
 
 ---
 
-# API Endpoint Structure
+# Commerce Model
 
-Auth endpoints:
+## Product states
 
+- `draft`
+- `active`
+- `archived`
 
-/api/auth/login
-/api/auth/logout
-/api/auth/logout-all
-/api/auth/me
-/api/auth/change-password
-/api/auth/session-info
+## Order states
 
+- `draft`
+- `pending`
+- `paid`
+- `fulfilled`
+- `cancelled`
+- `refunded`
 
-Admin endpoints:
+## Fulfillment types
 
+- `shipping`
+- `digital`
+- `mixed`
 
-/api/admin/users
-/api/admin/create-user
-/api/admin/user-update
-/api/admin/reset-password
-/api/admin/delete-user
-/api/admin/dashboard-summary
-/api/admin/cleanup-sessions
+## Payment statuses
 
-
-AI should **reuse existing endpoints** instead of creating duplicates.
-
----
-
-# Development Rules for AI
-
-When modifying this repository, AI must follow these rules.
-
-## Always provide full files
-
-Never provide partial snippets unless explicitly requested.
-
-Always output:
-
-
-complete document
-
+- `pending`
+- `authorized`
+- `paid`
+- `failed`
+- `cancelled`
+- `refunded`
+- `partially_refunded`
 
 ---
 
-## One file per response
+# Current Gaps AI Should Respect
 
-Responses should contain **one file at a time**.
+The following are **foundations**, not completed provider integrations:
 
-Example:
+- checkout is real, but PayPal is not live yet
+- payment prep exists, but redirect/session creation is not live yet
+- manual payment recording exists, but automated provider confirmation is not live yet
+- order admin exists, but shipping fulfillment tooling is still basic
 
-
-File:
-/public/js/admin-users.js
-
-
----
-
-## Always use code blocks
-
-All code must be in proper fenced blocks.
-
-Example:
-
-code here
+Do not document these as complete third-party integrations.
 
 ---
 
-## Avoid architectural duplication
+# Required Output Behavior for AI Sessions
 
-AI must not create:
+When making code changes in this repo, default to:
 
-• duplicate endpoints  
-• duplicate schemas  
-• duplicate data directories
-
----
-
-## Preserve working features
-
-AI should assume existing systems are **working unless stated otherwise**.
-
-Do not rewrite working systems unnecessarily.
+- one file at a time
+- full file output, not patches unless asked
+- keep working architecture intact
+- extend existing systems instead of rebuilding them
+- update Markdown docs when architecture meaningfully changes
 
 ---
 
-# Known Technical Issues
+# High-Priority Upcoming Work
 
-These must eventually be corrected.
+AI should assume these are near-term priorities:
 
-### Database binding inconsistency
-
-Some code references:
-
-
-env.DB
-
-
-While configuration may use:
-
-
-DD_DB
-
-
-Must standardize.
-
----
-
-### Duplicate data folders
-
-Both exist:
-
-
-/data
-/data/data
-
-
-Only one should remain.
-
----
-
-### Duplicate endpoint definitions
-
-Some endpoints were created multiple times during development.
-
-AI must standardize them.
-
----
-
-# Security Goals
-
-Future improvements should include:
-
-• password complexity rules  
-• login rate limiting  
-• admin audit logging  
-• session rotation after password change  
-• improved validation
-
----
-
-# Future Architecture Goals
-
-Major improvements planned.
-
-## Admin Content Manager
-
-Replace JSON editing with admin UI.
-
-Manage:
-
-• featured creations  
-• tools catalog  
-• supplies catalog  
-• gallery images  
-• videos
-
----
-
-## Workshop Inventory System
-
-Admin panel for:
-
-• tools  
-• consumables  
-• equipment
-
----
-
-## Media Manager
-
-Upload images directly to **Cloudflare R2**.
-
----
-
-# AI Behavior Expectations
-
-AI assistants must:
-
-• respect existing architecture  
-• avoid duplication  
-• prefer incremental improvements  
-• maintain security rules  
-• output production-ready code
-
----
-
-# When Starting a New AI Session
-
-Paste the following files:
-
-
-PROJECT_BRAIN.md
-AI_CONTEXT.md
-
-
-This gives the AI full understanding of:
-
-• architecture
-• database
-• repo structure
-• development rules
-
----
-
-# Maintainers
-
-Devil n Dove Workshop  
-Ontario, Canada
-
-Laurie Rosevear  
-Jack Rosevear
-
----
-
-# Status
-
-Current stage:
-
-Internal Alpha
-
-Authentication and admin systems are operational.
-
-Next milestone:
-
-Repository cleanup and admin content management system.
+- PayPal integration
+- card processor integration
+- payment callback / webhook handling
+- bulk product upload and bulk product editing
+- audit logging
+- stronger security hardening
+- gated content/features using access tiers

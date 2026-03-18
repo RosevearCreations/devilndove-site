@@ -1,406 +1,281 @@
 # DEVELOPMENT_ROADMAP.md
+
 Devil n Dove Website – Development Roadmap
 
-This document defines the **planned evolution of the Devil n Dove website and application**.
-
-It provides a prioritized roadmap so developers and AI assistants know:
-
-• what to build next  
-• what order changes should occur in  
-• which improvements are critical vs optional
+This file reflects the project **after** the recent store, checkout, orders, payments, and layered-security work.
 
 ---
 
 # Current Stage
 
-Project status:
+Project status: **internal alpha with commerce/admin foundation in place**
 
-**Internal Alpha**
+Working systems now include:
 
-Working systems:
+- public website
+- members authentication
+- session management
+- admin dashboard
+- user management
+- access tier management
+- product management
+- storefront
+- cart
+- checkout form
+- order creation
+- order confirmation
+- admin order review
+- order status updates
+- payment record foundation
 
-✔ Public website  
-✔ Members authentication  
-✔ Session management  
-✔ Admin dashboard  
-✔ User management  
-✔ Session cleanup  
-✔ Password reset  
-✔ Admin protections  
-
-Core architecture is stable but the repository needs **cleanup and consolidation** before major new features.
+The next work is no longer “start the store.”
+The next work is **finish and harden the store + security systems**.
 
 ---
 
-# Phase 1 — Repository Stabilization (High Priority)
+# Phase 1 — Repository Stabilization
 
 Goal:
 
-Make the repository **clean, predictable, and maintainable**.
+Make the repo predictable and clean enough for long-term work.
 
-### 1. Standardize Database Binding
+## 1. Standardize data directory usage
 
-Some code uses:
+Current snapshot still suggests duplicate-style data trees in places.
 
+Target:
 
-env.DB
+- one canonical `/data/` structure
+- remove `/data/data/` duplication once references are confirmed
 
+## 2. Confirm wrangler / D1 consistency
 
-Other areas use:
+Verify:
 
+- `env.DB` used consistently
+- D1 binding in `wrangler.toml` matches
+- R2 bindings are documented
 
-DD_DB
+## 3. Review legacy docs and old path references
 
+Some docs still mention `/docs/` and older “future store” wording.
 
-This must be standardized.
-
-Recommended:
-
-
-env.DB
-
-
-Update:
-
-• wrangler.toml  
-• all functions  
-• documentation
+Keep root-level docs and SQL references accurate.
 
 ---
 
-### 2. Remove Duplicate Data Directories
-
-Both exist:
-
-
-/data
-/data/data
-
-
-Consolidate into:
-
-
-/data
-
-
-Update all references.
-
----
-
-### 3. Consolidate API Endpoints
-
-During development some endpoints were duplicated.
-
-Standardize endpoints:
-
-
-/api/auth/login
-/api/auth/logout
-/api/auth/logout-all
-/api/auth/me
-/api/auth/change-password
-/api/auth/session-info
-
-/api/admin/users
-/api/admin/create-user
-/api/admin/user-update
-/api/admin/reset-password
-/api/admin/delete-user
-/api/admin/dashboard-summary
-/api/admin/cleanup-sessions
-
-
-Remove legacy duplicates.
-
----
-
-### 4. Confirm Final Database Schema
-
-Verify tables:
-
-
-users
-sessions
-admin_logs
-
-
-Remove any legacy tables.
-
-Add migration documentation.
-
----
-
-# Phase 2 — Security Hardening (High Priority)
-
-Before production launch.
-
-### 5. Password Security
-
-Add rules:
-
-Minimum length  
-Complexity requirements
-
-Example:
-
-
-minimum 8 characters
-uppercase
-lowercase
-number
-
-
----
-
-### 6. Login Rate Limiting
-
-Prevent brute force attacks.
-
-Recommended:
-
-
-5 attempts / minute
-
-
-Add tracking table or memory store.
-
----
-
-### 7. Admin Audit Logging
-
-Create `admin_logs` table.
-
-Log:
-
-
-user creation
-user deletion
-role change
-password reset
-account activation/deactivation
-
-
----
-
-### 8. Session Rotation
-
-When password changes:
-
-
-invalidate all existing sessions
-
-
-Except current session.
-
----
-
-# Phase 3 — Admin Content Manager (Major Feature)
+# Phase 2 — Security Hardening
 
 Goal:
 
-Replace manual JSON editing with **admin interface tools**.
+Move from internal alpha safety to stronger real-world protection.
 
-### 9. Featured Creations Manager
+## 4. Stronger password policy
 
-Admin UI to manage:
+Add/enforce:
 
+- minimum length
+- better complexity rules
+- friendly validation messages
 
-featured-items.json
+## 5. Login rate limiting
 
+Protect against brute-force login attempts.
 
-Capabilities:
+## 6. Admin audit logging
 
-• add item  
-• remove item  
-• edit item  
-• reorder items
+High priority.
 
----
+Log actions such as:
 
-### 10. Tools Catalog Manager
+- create user
+- delete user
+- role changes
+- status changes
+- password resets
+- tier assignments/removals
+- product changes
+- order status changes
+- payment recording
 
-Admin UI for:
+## 7. Tier-aware protected content rules
 
+Use the new access tier system for:
 
-toolshed_items_master.json
-
-
-Capabilities:
-
-• add tools  
-• edit tools  
-• update images  
-• categorize tools
-
----
-
-### 11. Supplies Manager
-
-Admin UI for supplies.
-
-Similar to tools system.
+- artist-only areas
+- donor/supporter areas
+- subscriber-only content
+- special customer/VIP content
 
 ---
 
-### 12. Gallery Manager
+# Phase 3 — Payments Completion
 
-Upload and manage images.
+Goal:
 
-Features:
+Turn the current payment foundation into real checkout flows.
 
-• upload to R2  
-• delete images  
-• reorder gallery
+## 8. PayPal integration
 
----
+Implement:
 
-### 13. Video Manager
+- provider order/session creation
+- redirect or hosted payment flow
+- return/cancel handling
+- payment completion update in DB
 
-Embed and manage:
+## 9. Card processor integration
 
-• YouTube videos  
-• workshop videos
+Choose provider and implement:
 
----
+- hosted checkout or tokenized payment flow
+- success/failure handling
+- payment record update
 
-# Phase 4 — Workshop Systems (Medium Priority)
+## 10. Payment callbacks / webhooks
 
-Internal workshop tracking tools.
-
-### 14. Inventory Manager
-
-Track:
-
-• tools  
-• consumables  
-• materials  
-• equipment
+Add provider verification endpoints and reconcile order/payment status safely.
 
 ---
 
-### 15. Tool Location System
+# Phase 4 — Order Operations
 
-Track where tools are located.
+Goal:
 
-Example:
+Improve fulfillment and admin operations.
 
+## 11. Fulfillment workflow tools
 
-bench
-lathe station
-casting station
-laser station
+Add admin tools for:
 
+- mark fulfilled
+- shipping reference / tracking fields
+- fulfillment notes
+- digital delivery handling
 
----
+## 12. Customer order visibility
 
-### 16. Consumables Tracker
+Later phase, but planned:
 
-Track materials:
-
-
-resin
-polymer clay
-wax
-casting metal
-
+- customer order history page
+- order status display for logged-in users
 
 ---
 
-# Phase 5 — Public Website Enhancements
+# Phase 5 — Product Workflow Expansion
 
-### 17. Search
+Goal:
 
-Add site search.
+Make product management practical for real use.
 
-Search:
+## 13. Bulk product upload
 
-• tools  
-• creations  
-• blog posts
+Requested and important.
 
----
+Add:
 
-### 18. Blog System
+- CSV or JSON import
+- validation report
+- preview before insert
 
-Add blog for:
+## 14. Bulk product editing
 
-• workshop updates  
-• tutorials  
-• project logs
+Add:
 
----
+- status updates in bulk
+- price updates in bulk
+- inventory updates in bulk
+- archive/unarchive in bulk
 
-### 19. Creations Catalog
+## 15. Image upload workflow
 
-Display all creations.
+Move from raw URL-only management toward:
 
-Include:
-
-• images  
-• description  
-• tags
-
----
-
-# Phase 6 — Optional Future Systems
-
-These are **long-term improvements**.
-
-### Online Store
-
-Sell items created in the workshop.
-
-### Member Community
-
-Allow members to:
-
-• comment
-• interact
-• follow projects
-
-### Project Tracker
-
-Track workshop projects.
+- R2 upload support
+- image assignment UI
+- better gallery handling
 
 ---
 
-# AI Development Rules
+# Phase 6 — Store Logic Improvements
 
-When implementing roadmap tasks:
+Goal:
 
-AI must:
+Improve checkout accuracy.
 
-• follow PROJECT_BRAIN.md  
-• follow AI_CONTEXT.md  
-• update documentation  
-• avoid duplicating endpoints or schemas  
-• maintain security protections
+## 16. Shipping logic
 
----
+Implement:
 
-# Recommended Development Order
+- shipping rules
+- physical vs digital handling
+- order-based shipping calculations
 
+## 17. Tax logic expansion
 
-Phase 1 – Repository cleanup
-Phase 2 – Security hardening
-Phase 3 – Admin content manager
-Phase 4 – Workshop systems
-Phase 5 – Public site improvements
-Phase 6 – Future expansions
+Current order creation uses a workable Ontario estimate foundation.
 
+Expand to:
 
----
-
-# Maintainers
-
-Devil n Dove Workshop  
-Ontario, Canada
-
-Laurie Rosevear  
-Jack Rosevear
+- more explicit tax-class handling
+- province/country-aware rules where needed
+- exemptions and special cases if business requires them
 
 ---
 
-# Roadmap Status
+# Phase 7 — Admin UX Improvements
 
-This roadmap will evolve as the project grows.
+Goal:
+
+Make the dashboard easier to use daily.
+
+## 18. Search, filters, pagination
+
+Needed for:
+
+- users
+- products
+- orders
+
+## 19. Better order detail tools
+
+Potential additions:
+
+- inline payment actions
+- printable invoice / packing slip
+- resend confirmation later if email is added
+
+## 20. Dashboard metrics expansion
+
+Potential additions:
+
+- total orders
+- pending orders
+- paid orders
+- unpaid totals
+- product counts
+
+---
+
+# Must-Have Priorities
+
+These should stay near the top:
+
+1. login hardening
+2. audit logs
+3. real PayPal integration
+4. card processor integration
+5. bulk product upload and bulk editing
+6. shipping/tax improvements
+7. tier-aware protected content
+
+---
+
+# Nice-to-Have Later
+
+- customer account order history
+- coupons/discount system
+- inventory alerts
+- digital delivery automation
+- better media manager
+- email notifications

@@ -1,320 +1,194 @@
 # REPO_RULES.md
+
 Devil n Dove Repository Rules
 
-This document defines the **non-negotiable architectural rules** for this repository.
-
-Its purpose is to prevent:
-
-• broken architecture  
-• duplicated systems  
-• security regressions  
-• inconsistent code
-
-All developers and AI assistants must follow these rules.
+These are the operating rules for this repo. They exist to prevent broken architecture, duplicate systems, security regressions, and stale documentation.
 
 ---
 
-# Rule 1 — Do Not Duplicate Endpoints
+# Rule 1 — Extend Existing Systems First
 
-Existing endpoints must always be reused.
+Before adding a new endpoint, script, or table, check whether the existing one should be extended.
 
-Auth endpoints:
+Examples of existing backend groups:
 
+- auth endpoints
+- admin user endpoints
+- admin product endpoints
+- admin order endpoints
+- checkout endpoints
 
-/api/auth/login
-/api/auth/logout
-/api/auth/logout-all
-/api/auth/me
-/api/auth/change-password
-/api/auth/session-info
-
-
-Admin endpoints:
-
-
-/api/admin/users
-/api/admin/create-user
-/api/admin/user-update
-/api/admin/reset-password
-/api/admin/delete-user
-/api/admin/dashboard-summary
-/api/admin/cleanup-sessions
-
-
-If functionality already exists, **modify the existing endpoint instead of creating a new one**.
+Do not create duplicates because an existing file feels inconvenient.
 
 ---
 
-# Rule 2 — One Database Schema Only
+# Rule 2 — Use `env.DB`
 
-The database schema is defined in:
+The D1 binding name must be:
 
-
-/docs/database_schema.sql
-
-
-Primary tables:
-
-
-users
-sessions
-admin_logs
-
-
-New tables must be documented in the schema file.
-
-Never create undocumented tables.
-
----
-
-# Rule 3 — Database Binding Name
-
-The database binding name must always be:
-
-
+```js
 env.DB
-
-
-Wrangler configuration must match this.
-
-Example:
-
-
-[[d1_databases]]
-binding = "DB"
-
+```
 
 Do not introduce alternate binding names.
 
 ---
 
-# Rule 4 — Do Not Break Admin Safety Protections
+# Rule 3 — Keep Core Roles Separate from Access Tiers
 
-Admin protections must always remain in place.
+This repo now has two permission layers.
 
-Required protections:
+## Core role
 
-• admin cannot delete themselves  
-• admin cannot deactivate themselves  
-• admin cannot demote their own role  
-• last admin account cannot be deleted
+Stored on `users.role`:
 
-These protections are critical for system safety.
+- `member`
+- `admin`
+
+## Business/content access tier
+
+Stored in `access_tiers` and `user_access_tiers`:
+
+- artist
+- customer
+- donor
+- vip_donor
+- subscriber
+
+Never collapse these into one system unless explicitly redesigning the security model.
 
 ---
 
-# Rule 5 — Frontend JavaScript Must Stay Modular
+# Rule 4 — Do Not Break Admin Safety Protections
 
-Client scripts must remain **single responsibility modules**.
+Admin safety protections must remain intact.
+
+Critical protections include:
+
+- admin cannot delete themselves
+- admin cannot deactivate themselves
+- admin cannot demote themselves from admin
+- last admin cannot be removed
+
+---
+
+# Rule 5 — Frontend Scripts Stay Modular
+
+Client scripts should remain focused and single-purpose whenever practical.
 
 Examples:
 
+- `admin-products.js`
+- `admin-edit-product.js`
+- `admin-order-detail.js`
+- `cart.js`
+- `checkout.js`
 
-auth.js
-admin-users.js
-admin-delete-user.js
-session-info.js
-change-password.js
-
-
-Each script should do **one job only**.
-
-Avoid large monolithic scripts.
+Do not merge working specialized scripts into large monoliths without a strong reason.
 
 ---
 
-# Rule 6 — Always Output Complete Files
+# Rule 6 — Full File Output by Default
 
-When modifying code:
+When changing code for this repo, default to returning:
 
-Always provide the **entire file**.
+- the file path
+- the full updated file
 
-Never provide partial snippets unless explicitly requested.
-
-Correct format:
-
-
-File:
-/public/js/admin-users.js
-
-
-Followed by a full code block.
+Avoid partial snippets unless the user asked for a patch or explanation only.
 
 ---
 
-# Rule 7 — One File Per Change
+# Rule 7 — One File Per Change by Default
 
-Each response or change should modify **one file at a time** unless explicitly instructed otherwise.
+Default workflow is still:
 
-This prevents:
+- one file at a time
+- brief description
+- one full code block per document
 
-• merge conflicts  
-• broken builds  
-• lost code
-
----
-
-# Rule 8 — Do Not Rewrite Working Systems
-
-If a system is already functioning, do not replace it unnecessarily.
-
-AI should:
-
-• improve  
-• extend  
-• refactor safely
-
-Not rebuild working features.
+This reduces merge confusion and broken state.
 
 ---
 
-# Rule 9 — Respect Repository Structure
+# Rule 8 — Document Architecture Changes
 
-Directory structure must remain consistent.
+Whenever architecture meaningfully changes, update the Markdown docs.
 
+At minimum, keep these synchronized:
 
-admin/
-members/
-functions/
-public/
-data/
-assets/
-css/
-docs/
+- `README.md`
+- `PROJECT_BRAIN.md`
+- `AI_CONTEXT.md`
+- `DEVELOPMENT_ROADMAP.md`
+- `SANITY_HEALTH_CHECK.md`
 
-
-New directories should only be added if absolutely necessary.
+If schema changed, also update the relevant SQL documentation files.
 
 ---
 
-# Rule 10 — Documentation Must Be Updated
+# Rule 9 — Respect Current Commerce Architecture
 
-Whenever architecture changes:
+This repo already has:
 
-Update documentation in:
+- products
+- storefront
+- cart
+- checkout
+- orders
+- payments foundation
 
+Do not describe or treat commerce as purely “future” anymore.
 
-PROJECT_BRAIN.md
-AI_CONTEXT.md
-DEVELOPMENT_ROADMAP.md
-database_schema.sql
-
-
-Documentation must stay synchronized with code.
-
----
-
-# Rule 11 — Security First
-
-Security must always be prioritized.
-
-Required protections:
-
-• input validation
-• authentication checks
-• role verification
-• session expiration
-• SQL injection prevention
-
-Never bypass security for convenience.
+At the same time, do not falsely document live PayPal or live card processing as complete. Those are still pending integration work.
 
 ---
 
-# Rule 12 — Follow Cloudflare Architecture
+# Rule 10 — Protected APIs Must Validate Everything
 
-This project is built for Cloudflare.
+Protected endpoints must enforce:
 
-Do not introduce frameworks that break compatibility.
+- auth token presence
+- valid session lookup
+- active account check
+- admin role check where required
+- input validation
+- safe SQL parameter binding
 
-Backend:
-
-
-Cloudflare Pages Functions
-
-
-Database:
-
-
-Cloudflare D1
-
-
-Storage:
-
-
-Cloudflare R2
-
-
-Keep architecture **Cloudflare-native**.
+Never bypass these for convenience.
 
 ---
 
-# Rule 13 — Prefer Incremental Improvements
+# Rule 11 — Preserve Order and Payment History
 
-Large rewrites should be avoided.
+Orders, payments, and status history are records.
 
-Preferred workflow:
+When extending order/payment systems:
 
-
-small improvements
-tested changes
-stable evolution
-
+- prefer status/history logging over destructive replacement
+- avoid deleting records that should remain auditable
+- archive where appropriate
 
 ---
 
-# Rule 14 — JSON Content Must Be Structured
+# Rule 12 — Products Used in Orders Should Not Be Hard-Deleted Recklessly
 
-JSON files used by the site must remain predictable.
+If a product is tied to historical orders, prefer archive behavior rather than destructive deletion.
 
-Example:
-
-
-/data/tools/toolshed_items_master.json
-/data/site/featured-items.json
-
-
-When editing JSON:
-
-• maintain consistent structure  
-• do not break existing fields
+Preserve order history integrity.
 
 ---
 
-# Rule 15 — Future Systems Must Integrate With Admin
+# Rule 13 — Upcoming Bulk Product Tools Must Follow Existing Store Model
 
-Any future content systems must integrate with the **admin dashboard**.
+Bulk product upload / bulk editing is on the roadmap.
 
-Example:
+When added, it must work with the existing tables and model:
 
+- `products`
+- `product_images`
+- `tax_classes`
+- current status workflow
+- existing storefront APIs
 
-featured creations manager
-tools manager
-supplies manager
-gallery manager
-video manager
-
-
-Manual JSON editing should eventually be eliminated.
-
----
-
-# Final Rule — Protect Project Stability
-
-All changes should improve:
-
-• maintainability  
-• security  
-• clarity  
-• stability
-
-Never introduce complexity without clear benefit.
-
----
-
-# Maintainers
-
-Devil n Dove Workshop  
-Ontario, Canada
-
-Laurie Rosevear  
-Jack Rosevear
+Do not create a disconnected import-only product system.
