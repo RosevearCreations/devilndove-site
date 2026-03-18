@@ -1,71 +1,109 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const tableBody = document.getElementById("usersTableBody");
+// File: /public/js/admin-self-protect.js
 
-  if (!tableBody || !window.DDAuth || !window.DDAuth.isLoggedIn()) {
-    return;
+document.addEventListener("DOMContentLoaded", () => {
+  const accessMessageEl = document.getElementById("adminAccessMessage");
+  const adminSectionIds = [
+    "usersSection",
+    "accessTiersSection",
+    "productsSection",
+    "ordersSection"
+  ];
+
+  function setAccessMessage(message, isError = false) {
+    if (!accessMessageEl) return;
+
+    accessMessageEl.textContent = message;
+    accessMessageEl.style.display = message ? "block" : "none";
+    accessMessageEl.style.color = isError ? "#b00020" : "";
   }
 
-  function getRowUserId(row) {
-    const saveButton = row.querySelector("[data-save-user]");
-    if (!saveButton) return null;
-    return Number(saveButton.getAttribute("data-user-id"));
-  }
-
-  function protectOwnRow(currentUserId) {
-    const rows = tableBody.querySelectorAll("tr");
-
-    rows.forEach(row => {
-      const rowUserId = getRowUserId(row);
-      if (!rowUserId || rowUserId !== currentUserId) return;
-
-      const roleSelect = row.querySelector("[data-role-select]");
-      const activeSelect = row.querySelector("[data-active-select]");
-      const deleteButton = row.querySelector("[data-delete-user-id]");
-
-      if (roleSelect) {
-        const memberOption = roleSelect.querySelector('option[value="member"]');
-        if (memberOption) {
-          memberOption.disabled = true;
-        }
-      }
-
-      if (activeSelect) {
-        const inactiveOption = activeSelect.querySelector('option[value="0"]');
-        if (inactiveOption) {
-          inactiveOption.disabled = true;
-        }
-      }
-
-      if (deleteButton) {
-        deleteButton.disabled = true;
-        deleteButton.title = "You cannot delete your own account.";
+  function hideAdminSections() {
+    adminSectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.display = "none";
       }
     });
   }
 
-  async function applyProtection() {
+  function showAdminSections() {
+    adminSectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.display = "";
+      }
+    });
+  }
+
+  function safeRedirect(path) {
+    window.location.href = path;
+  }
+
+  async function protectAdminPage() {
+    hideAdminSections();
+
+    if (!window.DDAuth) {
+      setAccessMessage("Authentication tools are not available.", true);
+      return;
+    }
+
+    if (!window.DDAuth.isLoggedIn()) {
+      setAccessMessage("You must be logged in as an admin to access this page.", true);
+
+      setTimeout(() => {
+        safeRedirect("/login/");
+      }, 900);
+
+      return;
+    }
+
+    setAccessMessage("Checking admin access...");
+
     try {
-      const user = await window.DDAuth.fetchMe();
-      const currentUserId = Number(user?.user_id || 0);
-      if (!currentUserId) return;
-      protectOwnRow(currentUserId);
-    } catch {
-      // ignore
+      const me = await window.DDAuth.fetchMe();
+      const role = String(me?.role || "").trim().toLowerCase();
+      const isActive =
+        me?.is_active === true ||
+        Number(me?.is_active || 0) === 1;
+
+      if (!isActive) {
+        setAccessMessage("This account is inactive.", true);
+
+        setTimeout(() => {
+          safeRedirect("/");
+        }, 1200);
+
+        return;
+      }
+
+      if (role !== "admin") {
+        setAccessMessage("Admin access is required for this page.", true);
+
+        setTimeout(() => {
+          safeRedirect("/members/");
+        }, 1200);
+
+        return;
+      }
+
+      showAdminSections();
+      setAccessMessage("");
+    } catch (error) {
+      setAccessMessage("Your session could not be verified. Please log in again.", true);
+
+      if (window.DDAuth.logout) {
+        try {
+          await window.DDAuth.logout();
+        } catch {
+          // ignore logout cleanup failure
+        }
+      }
+
+      setTimeout(() => {
+        safeRedirect("/login/");
+      }, 1200);
     }
   }
 
-  document.addEventListener("dd:user-created", applyProtection);
-  document.addEventListener("dd:user-deleted", applyProtection);
-  document.addEventListener("dd:admin-data-changed", applyProtection);
-
-  const observer = new MutationObserver(() => {
-    applyProtection();
-  });
-
-  observer.observe(tableBody, {
-    childList: true,
-    subtree: true
-  });
-
-  await applyProtection();
+  protectAdminPage();
 });
