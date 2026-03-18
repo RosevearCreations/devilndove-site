@@ -52,11 +52,42 @@ async function requireAdmin(request, env) {
     return { error: json({ ok: false, error: "Account is inactive." }, 403) };
   }
 
-  if (sessionUser.role !== "admin") {
+  if (String(sessionUser.role || "").toLowerCase() !== "admin") {
     return { error: json({ ok: false, error: "Forbidden." }, 403) };
   }
 
   return { sessionUser };
+}
+
+function normalizeStatus(value) {
+  const status = String(value || "").trim().toLowerCase();
+  return ["draft", "pending", "paid", "fulfilled", "cancelled", "refunded"].includes(status)
+    ? status
+    : "";
+}
+
+function normalizePaymentStatus(value) {
+  const status = String(value || "").trim().toLowerCase();
+  return [
+    "pending",
+    "authorized",
+    "paid",
+    "completed",
+    "captured",
+    "failed",
+    "cancelled",
+    "refunded",
+    "partially_refunded"
+  ].includes(status)
+    ? status
+    : "";
+}
+
+function normalizeFulfillment(value) {
+  const fulfillment = String(value || "").trim().toLowerCase();
+  return ["shipping", "digital", "mixed", "pickup"].includes(fulfillment)
+    ? fulfillment
+    : "";
 }
 
 export async function onRequestGet(context) {
@@ -66,19 +97,115 @@ export async function onRequestGet(context) {
   if (authCheck.error) return authCheck.error;
 
   const url = new URL(request.url);
-  const statusFilter = String(url.searchParams.get("status") || "").trim().toLowerCase();
+  const statusFilter = normalizeStatus(url.searchParams.get("status"));
+  const paymentFilter = normalizePaymentStatus(url.searchParams.get("payment_status"));
+  const fulfillmentFilter = normalizeFulfillment(url.searchParams.get("fulfillment_type"));
 
-  let sql = `
+  const conditions = [];
+  const bindings = [];
+
+  if (statusFilter) {
+    conditions.push("o.order_status = ?");
+    bindings.push(statusFilter);
+  }
+
+  if (fulfillmentFilter) {
+    conditions.push("o.fulfillment_type = ?");
+    bindings.push(fulfillmentFilter);
+  }
+
+  if (paymentFilter) {
+    conditions.push(`
+      (
+        LOWER(COALESCE(o.payment_status, '')) = ?
+        OR LOWER(COALESCE(ps.derived_payment_status, '')) = ?
+      )
+    `);
+    bindings.push(paymentFilter, paymentFilter);
+  }
+
+  const whereClause = conditions.length
+    ? `WHERE ${conditions.join(" AND ")}`
+    : "";
+
+  const sql = `
+    WITH payment_summary AS (
+      SELECT
+        p.order_id,
+
+        COUNT(*) AS payment_count,
+
+        COALESCE(SUM(
+          CASE
+            WHEN LOWER(COALESCE(p.payment_status, '')) IN ('paid', 'completed', 'captured')
+              THEN COALESCE(p.amount_cents, 0)
+            ELSE 0
+          END
+        ), 0) AS paid_total_cents,
+
+        COALESCE(SUM(
+          CASE
+            WHEN LOWER(COALESCE(p.payment_status, '')) = 'partially_refunded'
+              THEN COALESCE(p.amount_cents, 0)
+            WHEN LOWER(COALESCE(p.payment_status, '')) = 'refunded'
+              THEN COALESCE(p.amount_cents, 0)
+            ELSE 0
+          END
+        ), 0) AS refunded_total_cents,
+
+        COALESCE(SUM(
+          CASE
+            WHEN LOWER(COALESCE(p.payment_status, '')) IN ('pending', 'authorized')
+              THEN COALESCE(p.amount_cents, 0)
+            ELSE 0
+          END
+        ), 0) AS pending_total_cents,
+
+        MAX(CASE
+          WHEN LOWER(COALESCE(p.payment_status, '')) = 'refunded' THEN 1
+          ELSE 0
+        END) AS has_refunded,
+
+        MAX(CASE
+          WHEN LOWER(COALESCE(p.payment_status, '')) = 'partially_refunded' THEN 1
+          ELSE 0
+        END) AS has_partially_refunded,
+
+        MAX(CASE
+          WHEN LOWER(COALESCE(p.payment_status, '')) IN ('paid', 'completed', 'captured') THEN 1
+          ELSE 0
+        END) AS has_paid_like,
+
+        MAX(CASE
+          WHEN LOWER(COALESCE(p.payment_status, '')) = 'authorized' THEN 1
+          ELSE 0
+        END) AS has_authorized,
+
+        MAX(CASE
+          WHEN LOWER(COALESCE(p.payment_status, '')) = 'pending' THEN 1
+          ELSE 0
+        END) AS has_pending,
+
+        MIN(CASE
+          WHEN LOWER(COALESCE(p.payment_status, '')) IN ('failed', 'cancelled') THEN 1
+          ELSE 0
+        END) AS all_failed_or_cancelled
+      FROM payments p
+      GROUP BY p.order_id
+    )
+
     SELECT
       o.order_id,
       o.order_number,
       o.customer_email,
       o.customer_name,
       o.order_status,
+      o.payment_status,
+      o.payment_method,
       o.fulfillment_type,
       o.currency,
       o.subtotal_cents,
-      o.discount_cents,
+      COALESCE(o.discount_cents, 0) AS discount_cents,
       o.shipping_cents,
       o.tax_cents,
       o.total_cents,
@@ -88,60 +215,40 @@ export async function onRequestGet(context) {
       o.created_at,
       o.updated_at,
 
-      COALESCE((
-        SELECT COUNT(*)
-        FROM payments p
-        WHERE p.order_id = o.order_id
-      ), 0) AS payment_count,
+      COALESCE(ps.payment_count, 0) AS payment_count,
+      COALESCE(ps.paid_total_cents, 0) AS paid_total_cents,
+      COALESCE(ps.refunded_total_cents, 0) AS refunded_total_cents,
+      COALESCE(ps.pending_total_cents, 0) AS pending_total_cents,
 
-      COALESCE((
-        SELECT SUM(
-          CASE
-            WHEN p.payment_status IN ('paid', 'partially_refunded', 'refunded')
-            THEN p.amount_cents
-            ELSE 0
-          END
-        )
-        FROM payments p
-        WHERE p.order_id = o.order_id
-      ), 0) AS paid_amount_cents,
+      CASE
+        WHEN ps.order_id IS NULL THEN 'pending'
+        WHEN COALESCE(ps.has_refunded, 0) = 1 THEN 'refunded'
+        WHEN COALESCE(ps.has_partially_refunded, 0) = 1 THEN 'partially_refunded'
+        WHEN COALESCE(ps.paid_total_cents, 0) >= COALESCE(o.total_cents, 0)
+             AND COALESCE(o.total_cents, 0) > 0 THEN 'paid'
+        WHEN COALESCE(ps.has_authorized, 0) = 1 THEN 'authorized'
+        WHEN COALESCE(ps.has_pending, 0) = 1 THEN 'pending'
+        WHEN COALESCE(ps.all_failed_or_cancelled, 0) = 1 THEN 'failed'
+        ELSE COALESCE(o.payment_status, 'pending')
+      END AS derived_payment_status,
 
-      (
-        SELECT p.payment_status
-        FROM payments p
-        WHERE p.order_id = o.order_id
-        ORDER BY p.created_at DESC, p.payment_id DESC
-        LIMIT 1
-      ) AS latest_payment_status,
-
-      (
-        SELECT p.provider
-        FROM payments p
-        WHERE p.order_id = o.order_id
-        ORDER BY p.created_at DESC, p.payment_id DESC
-        LIMIT 1
-      ) AS latest_payment_provider
+      MAX(COALESCE(o.total_cents, 0) - COALESCE(ps.paid_total_cents, 0), 0) AS outstanding_cents
 
     FROM orders o
+    LEFT JOIN payment_summary ps
+      ON ps.order_id = o.order_id
+
+    ${whereClause}
+
+    ORDER BY o.created_at DESC, o.order_id DESC
   `;
 
-  const validStatuses = ["draft", "pending", "paid", "fulfilled", "cancelled", "refunded"];
-  let result;
-
-  if (statusFilter && validStatuses.includes(statusFilter)) {
-    sql += ` WHERE o.order_status = ? `;
-    sql += ` ORDER BY o.created_at DESC, o.order_id DESC `;
-
-    result = await env.DB.prepare(sql)
-      .bind(statusFilter)
-      .all();
-  } else {
-    sql += ` ORDER BY o.created_at DESC, o.order_id DESC `;
-    result = await env.DB.prepare(sql).all();
-  }
+  const result = bindings.length
+    ? await env.DB.prepare(sql).bind(...bindings).all()
+    : await env.DB.prepare(sql).all();
 
   return json({
     ok: true,
-    orders: result.results || []
+    orders: Array.isArray(result?.results) ? result.results : []
   });
 }
