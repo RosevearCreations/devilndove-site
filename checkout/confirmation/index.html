@@ -7,7 +7,10 @@
   <title>Order Confirmation — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
-  <meta name="description" content="Order confirmation for Devil n Dove checkout." />
+  <meta
+    name="description"
+    content="Order confirmation for Devil n Dove checkout. Review order details, totals, payment status, and next steps."
+  />
 </head>
 <body>
   <div class="container">
@@ -28,6 +31,7 @@
         <a href="/supplies/">Supplies</a>
         <a href="/shop/">Shop</a>
         <a href="/cart/">Cart</a>
+        <a href="/checkout/">Checkout</a>
         <a href="/contact/">Contact</a>
 
         <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
@@ -54,18 +58,18 @@
       <div>
         <h1>Order Confirmation</h1>
         <p>
-          Your order has been created and is ready for payment connection.
+          Your order has been created. Review the saved details, payment status, and next steps below.
         </p>
       </div>
     </div>
 
     <div id="orderConfirmationEmpty" class="card" style="display:none">
-      <h2 style="margin-top:0">No order found</h2>
+      <h2 style="margin-top:0">No recent order found</h2>
       <p class="small">
-        We could not find a recent order in this browser session.
+        We could not find a recently created order in this browser session.
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <a class="btn" href="/shop/">Go to Shop</a>
+        <a class="btn" href="/shop/">Return to Shop</a>
         <a class="btn" href="/checkout/">Back to Checkout</a>
       </div>
     </div>
@@ -74,29 +78,50 @@
       <div class="grid cols-2" style="gap:18px">
         <div class="card">
           <h2 style="margin-top:0">Order Details</h2>
-          <p><strong>Order Number:</strong> <span id="confirmOrderNumber"></span></p>
-          <p><strong>Status:</strong> <span id="confirmOrderStatus"></span></p>
-          <p><strong>Customer:</strong> <span id="confirmCustomerName"></span></p>
-          <p><strong>Email:</strong> <span id="confirmCustomerEmail"></span></p>
-          <p><strong>Fulfillment:</strong> <span id="confirmFulfillmentType"></span></p>
-          <p><strong>Payment Method:</strong> <span id="confirmPaymentMethod"></span></p>
-          <p><strong>Created:</strong> <span id="confirmCreatedAt"></span></p>
+
+          <p><strong>Order Number:</strong> <span id="confirmOrderNumber">—</span></p>
+          <p><strong>Order Status:</strong> <span id="confirmOrderStatus">—</span></p>
+          <p><strong>Payment Status:</strong> <span id="confirmPaymentStatus">—</span></p>
+          <p><strong>Customer:</strong> <span id="confirmCustomerName">—</span></p>
+          <p><strong>Email:</strong> <span id="confirmCustomerEmail">—</span></p>
+          <p><strong>Fulfillment Type:</strong> <span id="confirmFulfillmentType">—</span></p>
+          <p><strong>Payment Method:</strong> <span id="confirmPaymentMethod">—</span></p>
+          <p><strong>Created:</strong> <span id="confirmCreatedAt">—</span></p>
+
+          <div
+            id="confirmOrderWarningWrap"
+            class="card"
+            style="margin-top:14px;padding:14px;display:none"
+          >
+            <h3 style="margin-top:0;margin-bottom:8px">Checkout Notice</h3>
+            <p id="confirmOrderWarning" class="small" style="margin:0">
+              —
+            </p>
+          </div>
         </div>
 
         <div class="card">
           <h2 style="margin-top:0">Totals</h2>
-          <p><strong>Subtotal:</strong> <span id="confirmSubtotal"></span></p>
-          <p><strong>Shipping:</strong> <span id="confirmShipping"></span></p>
-          <p><strong>Tax:</strong> <span id="confirmTax"></span></p>
-          <p style="font-size:1.1rem;font-weight:700">
-            <strong>Total:</strong> <span id="confirmTotal"></span>
+
+          <p><strong>Subtotal:</strong> <span id="confirmSubtotal">—</span></p>
+          <p><strong>Shipping:</strong> <span id="confirmShipping">—</span></p>
+          <p><strong>Tax:</strong> <span id="confirmTax">—</span></p>
+          <p style="font-size:1.08rem;font-weight:700">
+            <strong>Total:</strong> <span id="confirmTotal">—</span>
           </p>
 
-          <div class="card" style="margin-top:14px">
-            <h3 style="margin-top:0">Next Step</h3>
-            <p class="small" id="confirmNextStepText">
-              Payment connection is the next step. PayPal and card processing will connect here.
+          <div class="card" style="margin-top:14px;padding:14px">
+            <h3 style="margin-top:0;margin-bottom:8px">Payment Progress</h3>
+
+            <p class="small" id="confirmNextStepText" style="margin:0 0 10px 0">
+              Payment preparation is being reviewed.
             </p>
+
+            <div class="small" style="display:grid;gap:6px">
+              <div><strong>Provider:</strong> <span id="confirmPaymentProvider">—</span></div>
+              <div><strong>Intent / Reference:</strong> <span id="confirmPaymentReference">—</span></div>
+              <div><strong>Next Action:</strong> <span id="confirmNextAction">—</span></div>
+            </div>
 
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
               <button class="btn" type="button" id="confirmPayPalButton" disabled>
@@ -115,9 +140,37 @@
         <div id="confirmItems"></div>
       </div>
 
+      <div class="grid cols-2" style="gap:18px;margin-top:18px">
+        <div class="card">
+          <h2 style="margin-top:0">Shipping Address</h2>
+          <div id="confirmShippingAddress"></div>
+        </div>
+
+        <div class="card">
+          <h2 style="margin-top:0">What Happens Next</h2>
+          <ul class="small" style="margin:0;padding-left:18px;display:grid;gap:8px">
+            <li>Your order record has been created and saved.</li>
+            <li>Your selected payment method has been prepared as far as the current checkout integration allows.</li>
+            <li>Live payment redirect and capture are still being connected.</li>
+            <li>If shipping applies, final shipping review may affect the confirmed amount.</li>
+            <li>Keep your order number for support or manual follow-up.</li>
+          </ul>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+            <a class="btn" href="/shop/">Continue Shopping</a>
+            <a class="btn" href="/contact/">Contact Us</a>
+          </div>
+        </div>
+      </div>
+
       <div class="card" style="margin-top:18px">
-        <h2 style="margin-top:0">Shipping Address</h2>
-        <div id="confirmShippingAddress"></div>
+        <h2 style="margin-top:0">Privacy & Security</h2>
+        <p class="small" style="margin:0 0 8px 0">
+          Your checkout details are stored only for order processing, customer contact, order review, and fulfillment.
+        </p>
+        <p class="small" style="margin:0">
+          No live payment charge is completed on this page until the payment gateway redirect and capture steps are fully connected.
+        </p>
       </div>
     </div>
 
