@@ -7,7 +7,10 @@
   <title>Checkout — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
-  <meta name="description" content="Checkout for Devil n Dove products." />
+  <meta
+    name="description"
+    content="Checkout for Devil n Dove products. Review your cart, enter contact and shipping details, and choose your payment method."
+  />
 </head>
 <body>
   <div class="container">
@@ -55,7 +58,7 @@
       <div>
         <h1>Checkout</h1>
         <p>
-          Review your order and enter your contact and shipping details.
+          Review your order, enter your details, and create your order for payment setup.
         </p>
       </div>
     </div>
@@ -70,46 +73,63 @@
       <div class="grid cols-2" style="gap:18px">
         <div class="card">
           <h2 style="margin-top:0">Customer Details</h2>
+          <p class="small" style="margin-top:0">
+            For physical items, shipping details are required. For digital-only orders, only contact details are required.
+          </p>
 
           <form id="checkoutForm" class="grid" style="gap:12px;margin-top:12px">
             <div>
               <label class="small" for="checkout_email">Email</label>
-              <input id="checkout_email" name="email" type="email" required />
+              <input id="checkout_email" name="email" type="email" autocomplete="email" required />
             </div>
 
             <div>
               <label class="small" for="checkout_name">Full Name</label>
-              <input id="checkout_name" name="name" type="text" required />
+              <input id="checkout_name" name="name" type="text" autocomplete="name" required />
+            </div>
+
+            <div style="grid-column:1 / -1">
+              <label class="small" for="checkout_payment_method">Payment Method</label>
+              <select id="checkout_payment_method" name="payment_method" required>
+                <option value="paypal" selected>PayPal</option>
+                <option value="stripe">Credit / Debit Card</option>
+                <option value="square">Square</option>
+                <option value="manual">Manual / Offline Payment</option>
+                <option value="other">Other</option>
+              </select>
+              <div class="small" style="margin-top:6px">
+                Payment provider handoff is still being connected. This step currently creates the order and prepares the payment record.
+              </div>
             </div>
 
             <div>
               <label class="small" for="checkout_address1">Address Line 1</label>
-              <input id="checkout_address1" name="address1" type="text" />
+              <input id="checkout_address1" name="address1" type="text" autocomplete="address-line1" />
             </div>
 
             <div>
               <label class="small" for="checkout_address2">Address Line 2</label>
-              <input id="checkout_address2" name="address2" type="text" />
+              <input id="checkout_address2" name="address2" type="text" autocomplete="address-line2" />
             </div>
 
             <div>
               <label class="small" for="checkout_city">City</label>
-              <input id="checkout_city" name="city" type="text" />
+              <input id="checkout_city" name="city" type="text" autocomplete="address-level2" />
             </div>
 
             <div>
               <label class="small" for="checkout_province">Province / State</label>
-              <input id="checkout_province" name="province" type="text" />
+              <input id="checkout_province" name="province" type="text" autocomplete="address-level1" />
             </div>
 
             <div>
               <label class="small" for="checkout_postal_code">Postal / ZIP Code</label>
-              <input id="checkout_postal_code" name="postal_code" type="text" />
+              <input id="checkout_postal_code" name="postal_code" type="text" autocomplete="postal-code" />
             </div>
 
             <div>
               <label class="small" for="checkout_country">Country</label>
-              <input id="checkout_country" name="country" type="text" value="Canada" />
+              <input id="checkout_country" name="country" type="text" value="Canada" autocomplete="country-name" />
             </div>
 
             <div style="grid-column:1 / -1">
@@ -117,11 +137,27 @@
               <textarea id="checkout_notes" name="notes" rows="4"></textarea>
             </div>
 
+            <div class="card" style="grid-column:1 / -1;padding:14px">
+              <h3 style="margin-top:0;margin-bottom:8px">Privacy & Security</h3>
+              <p class="small" style="margin:0 0 8px 0">
+                We only collect the details needed to create, review, and fulfill your order.
+              </p>
+              <p class="small" style="margin:0 0 8px 0">
+                Payment provider automation is still being connected, so submitted checkout details currently create an order and payment-ready record rather than charging immediately.
+              </p>
+              <label class="small" style="display:flex;gap:8px;align-items:flex-start">
+                <input type="checkbox" id="checkout_consent" name="checkout_consent" required />
+                <span>
+                  I understand my order details will be stored for processing, status tracking, and customer contact.
+                </span>
+              </label>
+            </div>
+
             <div id="checkoutMessage" class="small" style="display:none;grid-column:1 / -1"></div>
 
             <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap">
               <button class="btn" type="submit" id="checkoutSubmitButton" disabled>
-                Payment Setup Coming Soon
+                Create Order
               </button>
               <a class="btn" href="/cart/">Back to Cart</a>
             </div>
@@ -137,12 +173,28 @@
 
           <p><strong>Items:</strong> <span id="checkoutItemCount">0</span></p>
           <p><strong>Subtotal:</strong> <span id="checkoutSubtotal">$0.00</span></p>
-          <p><strong>Estimated Tax:</strong> <span id="checkoutTax">To be calculated</span></p>
-          <p><strong>Shipping:</strong> <span id="checkoutShipping">To be calculated</span></p>
+          <p><strong>Estimated Tax:</strong> <span id="checkoutTax">Calculated when order is created</span></p>
+          <p><strong>Shipping:</strong> <span id="checkoutShipping">Calculated after address review</span></p>
 
-          <p class="small" style="margin-top:14px">
-            PayPal and credit card processing will be connected after the checkout/order foundation is completed.
+          <hr style="margin:16px 0" />
+
+          <p style="font-size:1.05rem;margin-bottom:8px">
+            <strong>Estimated Total:</strong>
+            <span id="checkoutTotal">Calculated when order is created</span>
           </p>
+
+          <div class="card" style="padding:14px;margin-top:14px">
+            <h3 style="margin-top:0;margin-bottom:8px">Checkout Notes</h3>
+            <p class="small" style="margin:0 0 8px 0">
+              Physical orders may require shipping review before the final amount is confirmed.
+            </p>
+            <p class="small" style="margin:0 0 8px 0">
+              Digital-only orders should not require shipping details.
+            </p>
+            <p class="small" style="margin:0">
+              Live PayPal and card processing are planned next. This page is currently the secure order-creation and payment-preparation step.
+            </p>
+          </div>
         </div>
       </div>
     </div>
