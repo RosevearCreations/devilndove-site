@@ -1,35 +1,40 @@
-(function () {
-  const TOKEN_KEY = "dd_auth_token";
-  const USER_KEY = "dd_auth_user";
+// File: /public/js/auth.js
 
-  function saveAuth(token, user) {
-    if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
-    } else {
-      localStorage.removeItem(TOKEN_KEY);
-    }
+(() => {
+  const STORAGE_KEY = "dd_session_token";
 
-    if (user) {
-      localStorage.setItem(USER_KEY, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(USER_KEY);
-    }
-  }
-
-  function clearAuth() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+  function normalizeText(value) {
+    return String(value || "").trim();
   }
 
   function getToken() {
-    return localStorage.getItem(TOKEN_KEY) || "";
+    try {
+      return normalizeText(localStorage.getItem(STORAGE_KEY));
+    } catch {
+      return "";
+    }
   }
 
-  function getUser() {
+  function setToken(token) {
     try {
-      return JSON.parse(localStorage.getItem(USER_KEY) || "null");
+      const safeToken = normalizeText(token);
+
+      if (!safeToken) {
+        localStorage.removeItem(STORAGE_KEY);
+        return;
+      }
+
+      localStorage.setItem(STORAGE_KEY, safeToken);
     } catch {
-      return null;
+      // ignore storage failures
+    }
+  }
+
+  function clearToken() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // ignore storage failures
     }
   }
 
@@ -37,22 +42,19 @@
     return !!getToken();
   }
 
-  async function readJsonSafe(response) {
-    const text = await response.text();
-    if (!text) return {};
+  async function parseJsonSafe(response) {
     try {
-      return JSON.parse(text);
+      return await response.json();
     } catch {
-      return { ok: false, error: "Invalid server response." };
+      return null;
     }
   }
 
   async function apiFetch(url, options = {}) {
     const token = getToken();
     const headers = new Headers(options.headers || {});
-    const hasBody = options.body != null;
 
-    if (hasBody && !headers.has("Content-Type")) {
+    if (!headers.has("Content-Type") && options.body && !(options.body instanceof FormData)) {
       headers.set("Content-Type", "application/json");
     }
 
@@ -66,7 +68,7 @@
     });
 
     if (response.status === 401) {
-      clearAuth();
+      clearToken();
     }
 
     return response;
@@ -78,80 +80,157 @@
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({
+        email: normalizeText(email).toLowerCase(),
+        password: String(password || "")
+      })
     });
 
-    const data = await readJsonSafe(response);
+    const data = await parseJsonSafe(response);
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Login failed.");
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Login failed.");
     }
 
-    saveAuth(data.token, data.user);
-    return data;
-  }
+    const token =
+      normalizeText(data.session_token) ||
+      normalizeText(data.token) ||
+      normalizeText(data.session?.session_token) ||
+      normalizeText(data.session?.token);
 
-  async function register(email, password, display_name) {
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password, display_name })
-    });
-
-    const data = await readJsonSafe(response);
-
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Registration failed.");
+    if (!token) {
+      throw new Error("Login succeeded but no session token was returned.");
     }
+
+    setToken(token);
 
     return data;
   }
 
   async function logout() {
-    const response = await apiFetch("/api/auth/logout", {
+    const token = getToken();
+
+    try {
+      await apiFetch("/api/auth/logout", {
+        method: "POST"
+      });
+    } catch {
+      // ignore network/logout endpoint failure
+    } finally {
+      clearToken();
+    }
+
+    return { ok: true, had_token: !!token };
+  }
+
+  async function logoutAll() {
+    const response = await apiFetch("/api/auth/logout-all", {
       method: "POST"
     });
 
-    const data = await readJsonSafe(response);
-    clearAuth();
+    const data = await parseJsonSafe(response);
 
-    if (!response.ok && data?.error) {
-      throw new Error(data.error);
+    clearToken();
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Logout-all failed.");
     }
 
     return data;
   }
 
   async function fetchMe() {
-    const response = await apiFetch("/api/me", {
+    const response = await apiFetch("/api/auth/me", {
       method: "GET"
     });
 
-    const data = await readJsonSafe(response);
+    const data = await parseJsonSafe(response);
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Unable to fetch user.");
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Unable to verify session.");
     }
 
-    if (data.user) {
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    return data.user || null;
+  }
+
+  async function changePassword(current_password, new_password) {
+    const response = await apiFetch("/api/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify({
+        current_password: String(current_password || ""),
+        new_password: String(new_password || "")
+      })
+    });
+
+    const data = await parseJsonSafe(response);
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Password change failed.");
     }
 
-    return data.user;
+    return data;
+  }
+
+  async function fetchSessionInfo() {
+    const response = await apiFetch("/api/auth/session-info", {
+      method: "GET"
+    });
+
+    const data = await parseJsonSafe(response);
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Unable to load session info.");
+    }
+
+    return data;
+  }
+
+  async function bootstrapAdmin(payload = {}) {
+    const response = await fetch("/api/auth/bootstrap-admin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload || {})
+    });
+
+    const data = await parseJsonSafe(response);
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Bootstrap admin failed.");
+    }
+
+    return data;
+  }
+
+  async function fetchBootstrapStatus() {
+    const response = await fetch("/api/auth/bootstrap-status", {
+      method: "GET"
+    });
+
+    const data = await parseJsonSafe(response);
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Unable to load bootstrap status.");
+    }
+
+    return data;
   }
 
   window.DDAuth = {
-    saveAuth,
-    clearAuth,
+    STORAGE_KEY,
     getToken,
-    getUser,
+    setToken,
+    clearToken,
     isLoggedIn,
     apiFetch,
     login,
-    register,
     logout,
-    fetchMe
+    logoutAll,
+    fetchMe,
+    changePassword,
+    fetchSessionInfo,
+    bootstrapAdmin,
+    fetchBootstrapStatus
   };
 })();
