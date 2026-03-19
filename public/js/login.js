@@ -1,57 +1,96 @@
+// File: /public/js/login.js
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const messageBox = document.getElementById("loginMessage");
+  const emailEl = document.getElementById("loginEmail");
+  const passwordEl = document.getElementById("loginPassword");
+  const messageEl = document.getElementById("loginMessage");
+  const submitButton = document.getElementById("loginSubmitButton");
 
-  function showMessage(message, isError = false) {
-    if (!messageBox) return;
-    messageBox.textContent = message;
-    messageBox.style.display = "block";
-    messageBox.style.color = isError ? "#b00020" : "#0a7a2f";
+  function setMessage(message, isError = false) {
+    if (!messageEl) return;
+    messageEl.textContent = message;
+    messageEl.style.display = message ? "block" : "none";
+    messageEl.style.color = isError ? "#b00020" : "";
   }
 
-  function clearMessage() {
-    if (!messageBox) return;
-    messageBox.textContent = "";
-    messageBox.style.display = "none";
+  function getRedirectTarget(user) {
+    const role = String(user?.role || "").trim().toLowerCase();
+
+    if (role === "admin") {
+      return "/admin/";
+    }
+
+    return "/members/";
   }
 
-  if (!form) return;
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    clearMessage();
-
-    const email = (emailInput?.value || "").trim();
-    const password = passwordInput?.value || "";
-
-    if (!email || !password) {
-      showMessage("Please enter both email and password.", true);
+  async function redirectIfAlreadyLoggedIn() {
+    if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
       return;
     }
 
-    const submitButton = form.querySelector('button[type="submit"]');
+    try {
+      setMessage("Checking your session...");
+      const user = await window.DDAuth.fetchMe();
+      window.location.href = getRedirectTarget(user);
+    } catch {
+      window.DDAuth.clearToken();
+      setMessage("");
+    }
+  }
+
+  async function handleLogin(event) {
+    event.preventDefault();
+
+    if (!window.DDAuth) {
+      setMessage("Authentication tools are not available.", true);
+      return;
+    }
+
+    const email = String(emailEl?.value || "").trim();
+    const password = String(passwordEl?.value || "");
+
+    if (!email) {
+      setMessage("Email is required.", true);
+      return;
+    }
+
+    if (!password) {
+      setMessage("Password is required.", true);
+      return;
+    }
+
+    const originalText = submitButton?.textContent || "Login";
 
     try {
+      setMessage("Logging in...");
       if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = "Logging in...";
       }
 
       const result = await window.DDAuth.login(email, password);
-      showMessage("Login successful. Redirecting...");
+      const user = result?.user || null;
 
-      const next = new URLSearchParams(window.location.search).get("next");
-      const fallback = result?.redirect_to || "/members/";
-      window.location.href = next || fallback;
+      setMessage("Login successful.");
+      document.dispatchEvent(new CustomEvent("dd:auth-changed", {
+        detail: { ok: true, logged_in: true, user }
+      }));
+
+      window.location.href = getRedirectTarget(user);
     } catch (error) {
-      showMessage(error.message || "Login failed.", true);
+      setMessage(error.message || "Login failed.", true);
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = "Login";
+        submitButton.textContent = originalText;
       }
     }
-  });
+  }
+
+  if (form) {
+    form.addEventListener("submit", handleLogin);
+  }
+
+  redirectIfAlreadyLoggedIn();
 });
