@@ -1,74 +1,183 @@
+// File: /functions/api/admin/users.js
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      "Content-Type": "application/json"
+    }
   });
 }
 
-async function getSessionUser(env, token) {
-  if (!token) return null;
+function normalizeText(value) {
+  return String(value || "").trim();
+}
 
-  const sessionUser = await env.DB.prepare(`
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
+}
+
+async function getAdminUserFromRequest(request, env) {
+  const token = getBearerToken(request);
+
+  if (!token) {
+    return null;
+  }
+
+  const session = await env.DB.prepare(`
     SELECT
-      users.user_id,
-      users.email,
-      users.display_name,
-      users.role,
-      users.is_active,
-      users.created_at
-    FROM sessions
-    JOIN users ON sessions.user_id = users.user_id
-    WHERE sessions.session_token = ?
-      AND sessions.expires_at > datetime('now')
+      s.session_id,
+      s.user_id,
+      s.session_token,
+      s.token,
+      s.expires_at,
+      u.user_id AS resolved_user_id,
+      u.email,
+      u.display_name,
+      u.role,
+      u.is_active
+    FROM sessions s
+    INNER JOIN users u
+      ON u.user_id = s.user_id
+    WHERE (
+      s.session_token = ?
+      OR s.token = ?
+    )
+      AND s.expires_at > datetime('now')
     LIMIT 1
   `)
-    .bind(token)
+    .bind(token, token)
     .first();
 
-  return sessionUser || null;
+  if (!session) return null;
+  if (Number(session.is_active || 0) !== 1) return null;
+  if (String(session.role || "").toLowerCase() !== "admin") return null;
+
+  return {
+    session_id: Number(session.session_id || 0),
+    user_id: Number(session.resolved_user_id || session.user_id || 0),
+    email: session.email || "",
+    display_name: session.display_name || "",
+    role: session.role || "admin"
+  };
+}
+
+function normalizeRole(value) {
+  const role = normalizeText(value).toLowerCase();
+  return ["member", "admin"].includes(role) ? role : "";
+}
+
+function normalizeActive(value) {
+  const normalized = normalizeText(value).toLowerCase();
+
+  if (["1", "true", "active", "yes"].includes(normalized)) return 1;
+  if (["0", "false", "inactive", "no"].includes(normalized)) return 0;
+
+  return null;
+}
+
+function normalizeResults(result) {
+  return Array.isArray(result?.results) ? result.results : [];
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const auth = request.headers.get("Authorization") || "";
-  if (!auth.startsWith("Bearer ")) {
+  const adminUser = await getAdminUserFromRequest(request, env);
+
+  if (!adminUser) {
     return json({ ok: false, error: "Unauthorized." }, 401);
   }
 
-  const token = auth.slice(7).trim();
-  if (!token) {
-    return json({ ok: false, error: "Missing session token." }, 401);
+  const url = new URL(request.url);
+  const roleFilter = normalizeRole(url.searchParams.get("role"));
+  const activeFilter = normalizeActive(url.searchParams.get("is_active"));
+  const search = normalizeText(url.searchParams.get("search")).toLowerCase();
+
+  const conditions = [];
+  const bindings = [];
+
+  if (roleFilter) {
+    conditions.push(`LOWER(COALESCE(u.role, '')) = ?`);
+    bindings.push(roleFilter);
   }
 
-  const sessionUser = await getSessionUser(env, token);
-
-  if (!sessionUser) {
-    return json({ ok: false, error: "Invalid session." }, 401);
+  if (activeFilter !== null) {
+    conditions.push(`COALESCE(u.is_active, 0) = ?`);
+    bindings.push(activeFilter);
   }
 
-  if (!sessionUser.is_active) {
-    return json({ ok: false, error: "Account is inactive." }, 403);
+  if (search) {
+    conditions.push(`
+      (
+        LOWER(COALESCE(u.email, '')) LIKE ?
+        OR LOWER(COALESCE(u.display_name, '')) LIKE ?
+        OR CAST(u.user_id AS TEXT) LIKE ?
+      )
+    `);
+    bindings.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
 
-  if (sessionUser.role !== "admin") {
-    return json({ ok: false, error: "Forbidden." }, 403);
-  }
+  const whereClause = conditions.length
+    ? `WHERE ${conditions.join(" AND ")}`
+    : "";
 
-  const usersResult = await env.DB.prepare(`
+  const sql = `
+    WITH session_counts AS (
+      SELECT
+        s.user_id,
+        COUNT(*) AS total_sessions,
+        SUM(CASE WHEN s.expires_at > datetime('now') THEN 1 ELSE 0 END) AS active_sessions,
+        SUM(CASE WHEN s.expires_at <= datetime('now') THEN 1 ELSE 0 END) AS expired_sessions
+      FROM sessions s
+      GROUP BY s.user_id
+    )
+
     SELECT
-      user_id,
-      email,
-      display_name,
-      role,
-      is_active,
-      created_at
-    FROM users
-    ORDER BY created_at DESC, user_id DESC
-  `).all();
+      u.user_id,
+      u.email,
+      u.display_name,
+      u.role,
+      u.is_active,
+      u.created_at,
+      u.updated_at,
+      COALESCE(sc.total_sessions, 0) AS total_sessions,
+      COALESCE(sc.active_sessions, 0) AS active_sessions,
+      COALESCE(sc.expired_sessions, 0) AS expired_sessions
+    FROM users u
+    LEFT JOIN session_counts sc
+      ON sc.user_id = u.user_id
+    ${whereClause}
+    ORDER BY
+      CASE WHEN LOWER(COALESCE(u.role, '')) = 'admin' THEN 0 ELSE 1 END,
+      u.created_at DESC,
+      u.user_id DESC
+  `;
+
+  const result = bindings.length
+    ? await env.DB.prepare(sql).bind(...bindings).all()
+    : await env.DB.prepare(sql).all();
 
   return json({
     ok: true,
-    users: usersResult.results || []
+    requested_by: {
+      user_id: adminUser.user_id,
+      email: adminUser.email,
+      display_name: adminUser.display_name
+    },
+    users: normalizeResults(result).map((row) => ({
+      user_id: Number(row.user_id || 0),
+      email: row.email || "",
+      display_name: row.display_name || "",
+      role: row.role || "member",
+      is_active: Number(row.is_active || 0),
+      created_at: row.created_at || null,
+      updated_at: row.updated_at || null,
+      total_sessions: Number(row.total_sessions || 0),
+      active_sessions: Number(row.active_sessions || 0),
+      expired_sessions: Number(row.expired_sessions || 0)
+    }))
   });
 }
