@@ -1,12 +1,16 @@
+<!-- File: /bootstrap-admin/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Bootstrap Admin — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
-  <meta name="robots" content="noindex,nofollow" />
+  <meta
+    name="description"
+    content="Initial Devil n Dove admin bootstrap page for creating the first active admin account."
+  />
 </head>
 <body>
   <div class="container">
@@ -15,188 +19,130 @@
         <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
         <div>
           <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Workshop • Art • Tools • Movies</div>
+          <div class="small">Bootstrap Admin</div>
         </div>
       </div>
 
       <div class="links">
         <a href="/">Home</a>
+        <a href="/shop/">Shop</a>
         <a href="/login/">Login</a>
+        <a href="/register/">Register</a>
       </div>
     </div>
 
     <div class="hero">
       <div>
         <h1>Bootstrap First Admin</h1>
-        <p class="small">
-          Use this page one time only to create the first admin account for the site.
+        <p>
+          Use this page only for the initial setup of the first active admin account.
         </p>
       </div>
     </div>
 
-    <div id="bootstrapStatusCard" class="card" style="max-width:680px">
-      <h2 style="margin-top:0">Checking Bootstrap Status</h2>
-      <p id="bootstrapStatusText" class="small">
-        Please wait while we check whether an admin account already exists.
-      </p>
-    </div>
+    <div class="grid cols-2" style="gap:18px">
+      <div class="card">
+        <h2 style="margin-top:0">First Admin Setup</h2>
+        <p class="small" style="margin-top:0">
+          This page only works when no active admin exists yet.
+        </p>
 
-    <div id="bootstrapFormCard" class="card" style="max-width:680px;display:none">
-      <h2 style="margin-top:0">Create Initial Admin</h2>
-      <p class="small">
-        This requires the server bootstrap token. Once an admin exists, this page should no longer be needed.
-      </p>
-
-      <form id="bootstrapAdminForm" class="grid" style="gap:12px;margin-top:12px">
-        <div>
-          <label class="small" for="bootstrap_token">Bootstrap Token</label>
-          <input id="bootstrap_token" name="bootstrap_token" type="password" required />
+        <div id="bootstrapStatusWrap" class="card" style="margin-bottom:14px">
+          <div class="small">Checking bootstrap status...</div>
         </div>
 
-        <div>
-          <label class="small" for="email">Email</label>
-          <input id="email" name="email" type="email" autocomplete="email" required />
+        <div id="bootstrapFormWrap" style="display:none">
+          <form id="bootstrapAdminForm" class="grid" style="gap:12px">
+            <div>
+              <label class="small" for="bootstrapEmail">Admin Email</label>
+              <input
+                id="bootstrapEmail"
+                name="email"
+                type="email"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="small" for="bootstrapDisplayName">Display Name</label>
+              <input
+                id="bootstrapDisplayName"
+                name="display_name"
+                type="text"
+                autocomplete="name"
+              />
+            </div>
+
+            <div>
+              <label class="small" for="bootstrapPassword">Password</label>
+              <input
+                id="bootstrapPassword"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="small" for="bootstrapConfirmPassword">Confirm Password</label>
+              <input
+                id="bootstrapConfirmPassword"
+                name="password_confirm"
+                type="password"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="small" for="bootstrapToken">Bootstrap Token (if required)</label>
+              <input
+                id="bootstrapToken"
+                name="bootstrap_token"
+                type="text"
+                autocomplete="off"
+              />
+            </div>
+
+            <div id="bootstrapMessage" class="small" style="display:none"></div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn" type="submit" id="bootstrapSubmitButton">
+                Create First Admin
+              </button>
+              <a class="btn" href="/login/">Back to Login</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">Security Notes</h2>
+        <div class="small" style="display:grid;gap:10px">
+          <div>Only use this page during the initial secure setup.</div>
+          <div>Once an active admin exists, bootstrap is locked and this page should no longer be used.</div>
+          <div>If a bootstrap token is configured in the environment, it must match to complete setup.</div>
+          <div>After the first admin is created, sign in through the regular login flow and manage the site from Admin.</div>
         </div>
 
-        <div>
-          <label class="small" for="password">Password</label>
-          <input id="password" name="password" type="password" autocomplete="new-password" required />
+        <div class="card" style="margin-top:14px">
+          <h3 style="margin-top:0">After Setup</h3>
+          <p class="small" style="margin:0 0 10px 0">
+            Once the first admin is created, continue in the protected admin dashboard for users, products, orders, payments, and security.
+          </p>
+          <a class="btn" href="/admin/">Go to Admin</a>
         </div>
-
-        <div>
-          <label class="small" for="display_name">Display Name</label>
-          <input id="display_name" name="display_name" type="text" />
-        </div>
-
-        <div>
-          <button id="bootstrapSubmit" class="btn" type="submit">Create First Admin</button>
-        </div>
-
-        <div id="bootstrapMessage" class="small" style="display:none"></div>
-      </form>
+      </div>
     </div>
 
     <div class="footer card" style="margin-top:18px"></div>
   </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const statusCard = document.getElementById("bootstrapStatusCard");
-      const statusText = document.getElementById("bootstrapStatusText");
-      const formCard = document.getElementById("bootstrapFormCard");
-      const form = document.getElementById("bootstrapAdminForm");
-      const messageEl = document.getElementById("bootstrapMessage");
-      const submitButton = document.getElementById("bootstrapSubmit");
-
-      function setStatus(message, isError = false) {
-        if (!statusText) return;
-        statusText.textContent = message;
-        statusText.style.color = isError ? "#b00020" : "";
-      }
-
-      function setMessage(message, isError = false) {
-        if (!messageEl) return;
-        messageEl.textContent = message;
-        messageEl.style.display = "block";
-        messageEl.style.color = isError ? "#b00020" : "#0a7a2f";
-      }
-
-      function clearMessage() {
-        if (!messageEl) return;
-        messageEl.textContent = "";
-        messageEl.style.display = "none";
-      }
-
-      try {
-        const response = await fetch("/api/auth/bootstrap-status", {
-          method: "GET"
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.ok) {
-          throw new Error(data.error || "Failed to check bootstrap status.");
-        }
-
-        if (data.bootstrap_needed) {
-          if (statusCard) {
-            statusCard.style.display = "none";
-          }
-          if (formCard) {
-            formCard.style.display = "";
-          }
-        } else {
-          const adminLabel =
-            data.admin?.display_name?.trim() ||
-            data.admin?.email ||
-            "an admin account";
-
-          setStatus(`Bootstrap is no longer needed. ${adminLabel} already exists. You can log in using the normal login page.`);
-        }
-      } catch (error) {
-        setStatus(error.message || "Failed to check bootstrap status.", true);
-      }
-
-      if (!form) return;
-
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        clearMessage();
-
-        const formData = new FormData(form);
-        const payload = {
-          bootstrap_token: String(formData.get("bootstrap_token") || "").trim(),
-          email: String(formData.get("email") || "").trim(),
-          password: String(formData.get("password") || ""),
-          display_name: String(formData.get("display_name") || "").trim()
-        };
-
-        if (!payload.bootstrap_token || !payload.email || !payload.password) {
-          setMessage("Bootstrap token, email, and password are required.", true);
-          return;
-        }
-
-        if (payload.password.length < 6) {
-          setMessage("Password must be at least 6 characters.", true);
-          return;
-        }
-
-        try {
-          if (submitButton) {
-            submitButton.disabled = true;
-            submitButton.textContent = "Creating...";
-          }
-
-          const response = await fetch("/api/auth/bootstrap-admin", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-          });
-
-          const data = await response.json();
-
-          if (!response.ok || !data.ok) {
-            throw new Error(data.error || "Failed to create admin.");
-          }
-
-          setMessage("Initial admin created successfully. You can now log in.");
-          form.reset();
-
-          setTimeout(() => {
-            window.location.href = "/login/";
-          }, 1500);
-        } catch (error) {
-          setMessage(error.message || "Failed to create admin.", true);
-        } finally {
-          if (submitButton) {
-            submitButton.disabled = false;
-            submitButton.textContent = "Create First Admin";
-          }
-        }
-      });
-    });
-  </script>
+  <script src="/js/main.js"></script>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/bootstrap-admin.js"></script>
 </body>
 </html>
