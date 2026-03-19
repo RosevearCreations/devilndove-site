@@ -1,12 +1,16 @@
+<!-- File: /login/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Login — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
-  <meta name="robots" content="noindex,nofollow" />
+  <meta
+    name="description"
+    content="Login to your Devil n Dove account to access member features, orders, downloads, and account tools."
+  />
 </head>
 <body>
   <div class="container">
@@ -15,7 +19,7 @@
         <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
         <div>
           <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Workshop • Art • Tools • Movies</div>
+          <div class="small">Login</div>
         </div>
       </div>
 
@@ -25,12 +29,11 @@
         <a href="/creations/">Creations</a>
         <a href="/tools/">Tools</a>
         <a href="/supplies/">Supplies</a>
-        <a href="/contact/">Contact</a>
-
-        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
-
+        <a href="/shop/">Shop</a>
+        <a href="/cart/">Cart</a>
         <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
         <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
+        <a href="/register/" data-show-when-logged-out style="display:none">Register</a>
 
         <span class="small" data-show-when-logged-in style="display:none">
           Hi, <span data-nav-user-name>Member</span>
@@ -50,39 +53,78 @@
 
     <div class="hero">
       <div>
-        <h1>Member Login</h1>
-        <p class="small">
-          Sign in to access the private members area.
+        <h1>Login</h1>
+        <p>
+          Sign in to access your member account, orders, downloads, and account tools.
         </p>
       </div>
     </div>
 
-    <div class="card" style="max-width:560px">
-      <h2 style="margin-top:0">Sign in</h2>
+    <div class="grid cols-2" style="gap:18px">
+      <div class="card">
+        <h2 style="margin-top:0">Sign In</h2>
+        <p class="small" style="margin-top:0">
+          Use your Devil n Dove account email and password.
+        </p>
 
-      <form id="loginForm" class="grid" style="gap:12px">
-        <div>
-          <label class="small" for="email">Email</label>
-          <input id="email" name="email" type="email" autocomplete="email" required />
-        </div>
-
-        <div>
-          <label class="small" for="password">Password</label>
-          <input id="password" name="password" type="password" autocomplete="current-password" required />
-        </div>
-
-        <button id="btnLogin" class="btn" type="submit">Login</button>
-
-        <div id="loginMessage" class="small" style="display:none;min-height:18px"></div>
-
-        <div class="small" style="opacity:.9">
-          <div><strong>Note:</strong> accounts are currently created by admin setup.</div>
-          <div style="margin-top:6px">
-            Need help? Use the contact page:
-            <a href="/contact/">/contact/</a>
+        <form id="loginForm" class="grid" style="gap:12px">
+          <div>
+            <label class="small" for="loginEmail">Email</label>
+            <input
+              id="loginEmail"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+            />
           </div>
+
+          <div>
+            <label class="small" for="loginPassword">Password</label>
+            <input
+              id="loginPassword"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <div id="loginMessage" class="small" style="display:none"></div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn" type="submit" id="loginSubmitButton">
+              Login
+            </button>
+            <a class="btn" href="/register/">Create Account</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">Account Access</h2>
+        <div class="small" style="display:grid;gap:10px">
+          <div>Members can view their orders, downloads, and account details.</div>
+          <div>Admins can access the protected store, orders, payments, and security dashboard.</div>
+          <div>Your session is checked before protected pages are shown.</div>
         </div>
-      </form>
+
+        <div class="card" style="margin-top:14px">
+          <h3 style="margin-top:0">Need an account?</h3>
+          <p class="small" style="margin:0 0 10px 0">
+            Create an account to save access to your orders and future digital downloads.
+          </p>
+          <a class="btn" href="/register/">Go to Registration</a>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <h3 style="margin-top:0">Continue Shopping</h3>
+          <p class="small" style="margin:0 0 10px 0">
+            You can still browse the store and build a cart before signing in.
+          </p>
+          <a class="btn" href="/shop/">Back to Shop</a>
+        </div>
+      </div>
     </div>
 
     <div class="footer card" style="margin-top:18px"></div>
@@ -92,20 +134,5 @@
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/site-auth-ui.js"></script>
   <script src="/public/js/login.js"></script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      try {
-        if (window.DDAuth && window.DDAuth.isLoggedIn()) {
-          const user = await window.DDAuth.fetchMe();
-          window.location.href = user?.role === "admin" ? "/admin/" : "/members/";
-        }
-      } catch (error) {
-        if (window.DDAuth) {
-          window.DDAuth.clearAuth();
-        }
-      }
-    });
-  </script>
 </body>
 </html>
