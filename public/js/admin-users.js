@@ -1,19 +1,13 @@
 // File: /public/js/admin-users.js
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const tableBody = document.getElementById("usersTableBody");
-  const emptyEl = document.getElementById("usersEmpty");
-  const errorEl = document.getElementById("usersError");
-  const loadingEl = document.getElementById("usersLoading");
-  const refreshButtons = document.querySelectorAll("[data-refresh-users]");
+document.addEventListener("DOMContentLoaded", () => {
+  const mountEl = document.getElementById("usersAdminMount");
 
-  function show(el) {
-    if (el) el.style.display = "";
-  }
+  if (!mountEl || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
 
-  function hide(el) {
-    if (el) el.style.display = "none";
-  }
+  let hasRendered = false;
+  let isLoading = false;
+  let allUsers = [];
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -25,191 +19,293 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function formatDate(value) {
-    if (!value) return "";
-    const d = new Date(value.replace(" ", "T") + "Z");
-    if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleString();
-  }
+    if (!value) return "—";
 
-  function notifyDashboardChanged(detail = {}) {
-    document.dispatchEvent(new CustomEvent("dd:admin-data-changed", {
-      detail
-    }));
-  }
+    const raw = String(value).trim();
+    const parsed = new Date(raw);
 
-  async function loadUsers(options = {}) {
-    const { silent = false } = options;
-
-    hide(emptyEl);
-    hide(errorEl);
-
-    if (!silent) {
-      show(loadingEl);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleString();
     }
 
-    try {
-      const response = await window.DDAuth.apiFetch("/api/admin/users", {
-        method: "GET"
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Failed to load users.");
-      }
-
-      const users = Array.isArray(data.users) ? data.users : [];
-
-      if (!users.length) {
-        if (tableBody) tableBody.innerHTML = "";
-        show(emptyEl);
-        return;
-      }
-
-      renderRows(users);
-    } catch (error) {
-      if (tableBody) tableBody.innerHTML = "";
-      if (errorEl) {
-        errorEl.textContent = error.message || "Failed to load users.";
-      }
-      show(errorEl);
-    } finally {
-      hide(loadingEl);
+    const fallback = new Date(raw.replace(" ", "T") + "Z");
+    if (!Number.isNaN(fallback.getTime())) {
+      return fallback.toLocaleString();
     }
+
+    return raw;
   }
 
-  async function updateUser(userId, payload, triggerButton) {
-    const originalText = triggerButton ? triggerButton.textContent : "";
+  function titleCase(value) {
+    const text = String(value || "").trim();
+    if (!text) return "—";
 
-    try {
-      if (triggerButton) {
-        triggerButton.disabled = true;
-        triggerButton.textContent = "Saving...";
-      }
-
-      const response = await window.DDAuth.apiFetch("/api/admin/user-update", {
-        method: "POST",
-        body: JSON.stringify({
-          user_id: userId,
-          ...payload
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Update failed.");
-      }
-
-      await loadUsers({ silent: true });
-      notifyDashboardChanged({
-        type: "user-updated",
-        user_id: userId
-      });
-    } catch (error) {
-      alert(error.message || "Update failed.");
-      if (triggerButton) {
-        triggerButton.disabled = false;
-        triggerButton.textContent = originalText;
-      }
-    }
+    return text
+      .replaceAll("_", " ")
+      .replaceAll("-", " ")
+      .replace(/\b\w/g, (ch) => ch.toUpperCase());
   }
 
-  function renderRows(users) {
+  function setMessage(message, isError = false) {
+    const el = document.getElementById("adminUsersMessage");
+    if (!el) return;
+
+    el.textContent = message;
+    el.style.display = message ? "block" : "none";
+    el.style.color = isError ? "#b00020" : "";
+  }
+
+  function getRoleFilter() {
+    return String(document.getElementById("adminUsersRoleFilter")?.value || "").trim().toLowerCase();
+  }
+
+  function getActiveFilter() {
+    return String(document.getElementById("adminUsersActiveFilter")?.value || "").trim().toLowerCase();
+  }
+
+  function getSearchValue() {
+    return String(document.getElementById("adminUsersSearchInput")?.value || "").trim().toLowerCase();
+  }
+
+  function matchesFilters(user) {
+    const roleFilter = getRoleFilter();
+    const activeFilter = getActiveFilter();
+    const search = getSearchValue();
+
+    if (roleFilter && String(user.role || "").toLowerCase() !== roleFilter) {
+      return false;
+    }
+
+    if (activeFilter) {
+      const isActive = Number(user.is_active || 0) === 1;
+      if (activeFilter === "active" && !isActive) return false;
+      if (activeFilter === "inactive" && isActive) return false;
+    }
+
+    if (search) {
+      const haystack = [
+        user.user_id,
+        user.email,
+        user.display_name,
+        user.role
+      ]
+        .map((value) => String(value || "").toLowerCase())
+        .join(" ");
+
+      if (!haystack.includes(search)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function updateSummary(users) {
+    const el = document.getElementById("adminUsersSummary");
+    if (!el) return;
+
+    const safeUsers = Array.isArray(users) ? users : [];
+    const activeCount = safeUsers.filter((user) => Number(user.is_active || 0) === 1).length;
+    const adminCount = safeUsers.filter((user) => String(user.role || "").toLowerCase() === "admin").length;
+
+    el.textContent =
+      `${safeUsers.length} user${safeUsers.length === 1 ? "" : "s"} shown • ` +
+      `${activeCount} active • ${adminCount} admin`;
+  }
+
+  function renderTable(users) {
+    const tableBody = document.getElementById("adminUsersTableBody");
+    const emptyEl = document.getElementById("adminUsersEmpty");
+
     if (!tableBody) return;
 
-    tableBody.innerHTML = users.map(user => {
-      const userId = Number(user.user_id);
-      const email = escapeHtml(user.email);
-      const displayName = escapeHtml(user.display_name || "");
-      const role = user.role || "member";
-      const isActive = Number(user.is_active) === 1 ? 1 : 0;
-      const created = escapeHtml(formatDate(user.created_at));
+    const safeUsers = Array.isArray(users) ? users : [];
 
-      return `
+    if (emptyEl) {
+      emptyEl.style.display = safeUsers.length ? "none" : "block";
+    }
+
+    updateSummary(safeUsers);
+
+    if (!safeUsers.length) {
+      tableBody.innerHTML = `
         <tr>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${userId}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${email}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${displayName}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            <select data-role-select data-user-id="${userId}">
-              <option value="member" ${role === "member" ? "selected" : ""}>member</option>
-              <option value="admin" ${role === "admin" ? "selected" : ""}>admin</option>
-            </select>
-          </td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            <select data-active-select data-user-id="${userId}">
-              <option value="1" ${isActive === 1 ? "selected" : ""}>active</option>
-              <option value="0" ${isActive === 0 ? "selected" : ""}>inactive</option>
-            </select>
-          </td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${created}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn" type="button" data-save-user data-user-id="${userId}">
-                Save
-              </button>
-              <button class="btn" type="button" data-reset-password-user-id="${userId}">
-                Reset Password
-              </button>
-              <button class="btn" type="button" data-manage-access-tiers-user-id="${userId}">
-                Manage Access
-              </button>
-              <button class="btn" type="button" data-delete-user-id="${userId}">
-                Delete User
-              </button>
-            </div>
-          </td>
+          <td colspan="8" style="padding:12px">No users found.</td>
         </tr>
       `;
-    }).join("");
+      return;
+    }
 
-    bindRowActions();
+    tableBody.innerHTML = safeUsers.map((user) => `
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(String(user.user_id || "—"))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">
+          <div>${escapeHtml(user.email || "—")}</div>
+          <div class="small">${escapeHtml(user.display_name || "—")}</div>
+        </td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(user.role || "member"))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${Number(user.is_active || 0) === 1 ? "Active" : "Inactive"}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(String(user.total_sessions || 0))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(String(user.active_sessions || 0))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(String(user.expired_sessions || 0))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(user.created_at))}</td>
+      </tr>
+    `).join("");
   }
 
-  function bindRowActions() {
-    const saveButtons = tableBody.querySelectorAll("[data-save-user]");
+  function renderUi() {
+    if (hasRendered) return;
+    hasRendered = true;
 
-    saveButtons.forEach(button => {
-      button.addEventListener("click", async () => {
-        const userId = Number(button.getAttribute("data-user-id"));
-        const roleSelect = tableBody.querySelector(`[data-role-select][data-user-id="${userId}"]`);
-        const activeSelect = tableBody.querySelector(`[data-active-select][data-user-id="${userId}"]`);
+    mountEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+        <div>
+          <h3 style="margin:0">User Directory</h3>
+          <p class="small" style="margin:8px 0 0 0">
+            Review users, roles, active state, and basic session counts.
+          </p>
+        </div>
 
-        const role = roleSelect ? roleSelect.value : "member";
-        const is_active = activeSelect ? Number(activeSelect.value) : 1;
+        <button class="btn" type="button" id="refreshAdminUsersButton">Refresh Users</button>
+      </div>
 
-        await updateUser(userId, { role, is_active }, button);
+      <div class="grid cols-3" style="gap:12px;margin-top:14px">
+        <div>
+          <label class="small" for="adminUsersRoleFilter">Role</label>
+          <select id="adminUsersRoleFilter">
+            <option value="">All</option>
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small" for="adminUsersActiveFilter">Status</label>
+          <select id="adminUsersActiveFilter">
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small" for="adminUsersSearchInput">Search</label>
+          <input
+            id="adminUsersSearchInput"
+            type="text"
+            placeholder="User ID, email, display name..."
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div id="adminUsersMessage" class="small" style="display:none;margin-top:12px"></div>
+      <div id="adminUsersSummary" class="small" style="margin-top:10px"></div>
+      <div id="adminUsersEmpty" class="small" style="display:none;margin-top:10px">
+        No users available.
+      </div>
+
+      <div style="overflow:auto;margin-top:14px">
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">User ID</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">User</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Role</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Sessions</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Active</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Expired</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
+            </tr>
+          </thead>
+          <tbody id="adminUsersTableBody">
+            <tr>
+              <td colspan="8" style="padding:12px">Loading users...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    const refreshButton = document.getElementById("refreshAdminUsersButton");
+    const roleFilter = document.getElementById("adminUsersRoleFilter");
+    const activeFilter = document.getElementById("adminUsersActiveFilter");
+    const searchInput = document.getElementById("adminUsersSearchInput");
+
+    if (refreshButton) {
+      refreshButton.addEventListener("click", async () => {
+        await loadUsers();
+      });
+    }
+
+    [roleFilter, activeFilter].forEach((el) => {
+      if (!el) return;
+      el.addEventListener("change", () => {
+        renderTable(allUsers.filter(matchesFilters));
       });
     });
-  }
 
-  refreshButtons.forEach(button => {
-    button.addEventListener("click", async () => {
-      await loadUsers();
-      notifyDashboardChanged({
-        type: "users-refreshed"
+    if (searchInput) {
+      searchInput.addEventListener("input", () => {
+        renderTable(allUsers.filter(matchesFilters));
       });
-    });
-  });
-
-  document.addEventListener("dd:user-created", async () => {
-    await loadUsers({ silent: true });
-    notifyDashboardChanged({
-      type: "user-created"
-    });
-  });
-
-  document.addEventListener("dd:user-deleted", async () => {
-    await loadUsers({ silent: true });
-    notifyDashboardChanged({
-      type: "user-deleted"
-    });
-  });
-
-  if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
-    return;
+    }
   }
 
-  await loadUsers();
+  async function fetchUsers() {
+    const response = await window.DDAuth.apiFetch("/api/admin/users", {
+      method: "GET"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Failed to load users.");
+    }
+
+    return Array.isArray(data.users) ? data.users : [];
+  }
+
+  async function loadUsers() {
+    if (isLoading) return;
+
+    const refreshButton = document.getElementById("refreshAdminUsersButton");
+    const originalText = refreshButton?.textContent || "Refresh Users";
+
+    isLoading = true;
+
+    try {
+      setMessage("Loading users...");
+
+      if (refreshButton) {
+        refreshButton.disabled = true;
+        refreshButton.textContent = "Loading...";
+      }
+
+      allUsers = await fetchUsers();
+      renderTable(allUsers.filter(matchesFilters));
+      setMessage(`Loaded ${allUsers.length} user${allUsers.length === 1 ? "" : "s"}.`);
+    } catch (error) {
+      allUsers = [];
+      renderTable([]);
+      setMessage(error.message || "Failed to load users.", true);
+    } finally {
+      isLoading = false;
+
+      if (refreshButton) {
+        refreshButton.disabled = false;
+        refreshButton.textContent = originalText;
+      }
+    }
+  }
+
+  document.addEventListener("dd:admin-ready", async (event) => {
+    if (!event?.detail?.ok) return;
+    renderUi();
+    await loadUsers();
+  });
+
+  renderUi();
+  loadUsers();
 });
