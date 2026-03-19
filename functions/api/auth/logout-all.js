@@ -1,77 +1,123 @@
+// File: /functions/api/auth/logout-all.js
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      "Content-Type": "application/json"
+    }
   });
 }
 
-async function getSessionUser(env, token) {
-  if (!token) return null;
-
-  const sessionUser = await env.DB.prepare(`
-    SELECT
-      users.user_id,
-      users.email,
-      users.display_name,
-      users.role,
-      users.is_active,
-      users.created_at,
-      sessions.session_token
-    FROM sessions
-    JOIN users ON sessions.user_id = users.user_id
-    WHERE sessions.session_token = ?
-      AND sessions.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token)
-    .first();
-
-  return sessionUser || null;
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  const auth = request.headers.get("Authorization") || "";
-  if (!auth.startsWith("Bearer ")) {
-    return json({ ok: false, error: "Unauthorized." }, 401);
-  }
+  const token = getBearerToken(request);
 
-  const token = auth.slice(7).trim();
   if (!token) {
-    return json({ ok: false, error: "Missing session token." }, 401);
+    return json({
+      ok: false,
+      error: "Unauthorized."
+    }, 401);
   }
 
-  const sessionUser = await getSessionUser(env, token);
+  const currentSession = await env.DB.prepare(`
+    SELECT
+      s.session_id,
+      s.user_id,
+      s.session_token,
+      s.token,
+      s.expires_at,
+      u.user_id AS resolved_user_id,
+      u.email,
+      u.display_name,
+      u.is_active
+    FROM sessions s
+    INNER JOIN users u
+      ON u.user_id = s.user_id
+    WHERE (
+      s.session_token = ?
+      OR s.token = ?
+    )
+      AND s.expires_at > datetime('now')
+    LIMIT 1
+  `)
+    .bind(token, token)
+    .first();
 
-  if (!sessionUser) {
-    return json({ ok: false, error: "Invalid session." }, 401);
+  if (!currentSession) {
+    return json({
+      ok: false,
+      error: "Invalid or expired session."
+    }, 401);
   }
 
-  if (!sessionUser.is_active) {
-    return json({ ok: false, error: "Account is inactive." }, 403);
+  if (Number(currentSession.is_active || 0) !== 1) {
+    return json({
+      ok: false,
+      error: "Account is inactive."
+    }, 403);
   }
 
-  const countResult = await env.DB.prepare(`
-    SELECT COUNT(*) AS count
+  const userId = Number(currentSession.resolved_user_id || currentSession.user_id || 0);
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return json({
+      ok: false,
+      error: "Unable to resolve session user."
+    }, 401);
+  }
+
+  const allSessionsResult = await env.DB.prepare(`
+    SELECT
+      session_id
     FROM sessions
     WHERE user_id = ?
-      AND session_token != ?
   `)
-    .bind(sessionUser.user_id, token)
-    .first();
+    .bind(userId)
+    .all();
+
+  const sessionRows = Array.isArray(allSessionsResult?.results)
+    ? allSessionsResult.results
+    : [];
+
+  const sessionIds = sessionRows
+    .map((row) => Number(row.session_id))
+    .filter((id) => Number.isInteger(id) && id > 0);
+
+  if (!sessionIds.length) {
+    return json({
+      ok: true,
+      message: "No active sessions found for this user.",
+      logged_out: true,
+      deleted_sessions: 0
+    });
+  }
+
+  const placeholders = sessionIds.map(() => "?").join(", ");
 
   await env.DB.prepare(`
     DELETE FROM sessions
-    WHERE user_id = ?
-      AND session_token != ?
+    WHERE session_id IN (${placeholders})
   `)
-    .bind(sessionUser.user_id, token)
+    .bind(...sessionIds)
     .run();
 
   return json({
     ok: true,
-    message: "Other sessions were logged out successfully.",
-    removed_sessions: Number(countResult?.count || 0)
+    message: "All sessions logged out successfully.",
+    logged_out: true,
+    deleted_sessions: sessionIds.length,
+    user: {
+      user_id: userId,
+      email: currentSession.email || "",
+      display_name: currentSession.display_name || ""
+    }
   });
 }
