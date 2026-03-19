@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!safeOrders.length) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="6" style="padding:12px">No orders found.</td>
+          <td colspan="7" style="padding:12px">No orders found.</td>
         </tr>
       `;
       return;
@@ -156,6 +156,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
           <td style="padding:8px;border-bottom:1px solid #ddd">
             ${escapeHtml(formatDate(order.created_at))}
+          </td>
+
+          <td style="padding:8px;border-bottom:1px solid #ddd">
+            <button
+              class="btn"
+              type="button"
+              data-member-view-order-id="${escapeHtml(String(order.order_id || ""))}"
+            >
+              View
+            </button>
           </td>
         </tr>
       `;
