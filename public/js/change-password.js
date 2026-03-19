@@ -1,35 +1,36 @@
+// File: /public/js/change-password.js
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("changePasswordForm");
+  const currentPasswordEl = document.getElementById("currentPassword");
+  const newPasswordEl = document.getElementById("newPassword");
+  const confirmPasswordEl = document.getElementById("confirmNewPassword");
   const messageEl = document.getElementById("changePasswordMessage");
+  const submitButton = document.getElementById("changePasswordSubmitButton");
+
+  if (!form || !window.DDAuth) return;
 
   function setMessage(message, isError = false) {
     if (!messageEl) return;
     messageEl.textContent = message;
-    messageEl.style.display = "block";
-    messageEl.style.color = isError ? "#b00020" : "#0a7a2f";
+    messageEl.style.display = message ? "block" : "none";
+    messageEl.style.color = isError ? "#b00020" : "";
   }
 
-  function clearMessage() {
-    if (!messageEl) return;
-    messageEl.textContent = "";
-    messageEl.style.display = "none";
-  }
-
-  if (!form) return;
-
-  form.addEventListener("submit", async (event) => {
+  async function handleSubmit(event) {
     event.preventDefault();
-    clearMessage();
 
-    const submitButton = form.querySelector('button[type="submit"]');
-    const formData = new FormData(form);
+    const current_password = String(currentPasswordEl?.value || "");
+    const new_password = String(newPasswordEl?.value || "");
+    const confirm_password = String(confirmPasswordEl?.value || "");
 
-    const current_password = String(formData.get("current_password") || "");
-    const new_password = String(formData.get("new_password") || "");
-    const confirm_password = String(formData.get("confirm_password") || "");
+    if (!current_password) {
+      setMessage("Current password is required.", true);
+      return;
+    }
 
-    if (!current_password || !new_password || !confirm_password) {
-      setMessage("All password fields are required.", true);
+    if (!new_password) {
+      setMessage("New password is required.", true);
       return;
     }
 
@@ -39,50 +40,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (new_password !== confirm_password) {
-      setMessage("New password and confirm password do not match.", true);
+      setMessage("New passwords do not match.", true);
       return;
     }
 
-    if (new_password === current_password) {
+    if (current_password === new_password) {
       setMessage("New password must be different from the current password.", true);
       return;
     }
 
+    const originalText = submitButton?.textContent || "Change Password";
+
     try {
+      setMessage("Updating password...");
+
       if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = "Saving...";
       }
 
-      const response = await window.DDAuth.apiFetch("/api/auth/change-password", {
-        method: "POST",
-        body: JSON.stringify({
-          current_password,
-          new_password
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Failed to change password.");
-      }
+      await window.DDAuth.changePassword(current_password, new_password);
 
       form.reset();
       setMessage("Password changed successfully.");
 
-      document.dispatchEvent(new CustomEvent("dd:session-changed", {
-        detail: {
-          type: "password-changed"
-        }
+      document.dispatchEvent(new CustomEvent("dd:member-password-changed", {
+        detail: { ok: true }
       }));
     } catch (error) {
-      setMessage(error.message || "Failed to change password.", true);
+      setMessage(error.message || "Password change failed.", true);
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = "Change Password";
+        submitButton.textContent = originalText;
       }
     }
-  });
+  }
+
+  form.addEventListener("submit", handleSubmit);
 });
