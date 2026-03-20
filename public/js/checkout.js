@@ -1,40 +1,27 @@
 // File: /public/js/checkout.js
+// Brief description: Handles the checkout page flow. It loads cart items from browser storage,
+// calculates totals, validates customer/shipping fields, creates the order through
+// /api/checkout-create-order, then prepares payment through /api/checkout-prepare-payment
+// and redirects to the confirmation flow.
 
 document.addEventListener("DOMContentLoaded", () => {
-  const STORAGE_KEY = "dd_checkout_form";
-  const LAST_ORDER_KEY = "dd_last_order";
+  const form = document.getElementById("checkoutForm");
+  const messageEl = document.getElementById("checkoutMessage");
+  const submitButton = document.getElementById("checkoutSubmitButton");
+  const summaryItemsEl = document.getElementById("checkoutSummaryItems");
+  const summarySubtotalEl = document.getElementById("checkoutSummarySubtotal");
+  const summaryShippingEl = document.getElementById("checkoutSummaryShipping");
+  const summaryTaxEl = document.getElementById("checkoutSummaryTax");
+  const summaryTotalEl = document.getElementById("checkoutSummaryTotal");
 
-  const checkoutEmptyEl = document.getElementById("checkoutEmpty");
-  const checkoutContentEl = document.getElementById("checkoutContent");
-  const checkoutItemsEl = document.getElementById("checkoutItems");
-  const checkoutItemCountEl = document.getElementById("checkoutItemCount");
-  const checkoutSubtotalEl = document.getElementById("checkoutSubtotal");
-  const checkoutShippingEl = document.getElementById("checkoutShipping");
-  const checkoutTaxEl = document.getElementById("checkoutTax");
-  const checkoutTotalEl = document.getElementById("checkoutTotal");
-  const checkoutForm = document.getElementById("checkoutForm");
-  const checkoutMessageEl = document.getElementById("checkoutMessage");
-  const checkoutSubmitButton = document.getElementById("checkoutSubmitButton");
-
-  function show(el) {
-    if (el) el.style.display = "";
-  }
-
-  function hide(el) {
-    if (el) el.style.display = "none";
-  }
+  const CART_KEY = "dd_cart";
+  const CHECKOUT_FORM_KEY = "dd_checkout_form";
 
   function setMessage(message, isError = false) {
-    if (!checkoutMessageEl) return;
-    checkoutMessageEl.textContent = message;
-    checkoutMessageEl.style.display = "block";
-    checkoutMessageEl.style.color = isError ? "#b00020" : "#0a7a2f";
-  }
-
-  function clearMessage() {
-    if (!checkoutMessageEl) return;
-    checkoutMessageEl.textContent = "";
-    checkoutMessageEl.style.display = "none";
+    if (!messageEl) return;
+    messageEl.textContent = message;
+    messageEl.style.display = message ? "block" : "none";
+    messageEl.style.color = isError ? "#b00020" : "";
   }
 
   function escapeHtml(value) {
@@ -48,7 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatMoney(cents, currency = "CAD") {
     const amount = Number(cents || 0) / 100;
-
     try {
       return new Intl.NumberFormat(undefined, {
         style: "currency",
@@ -59,343 +45,317 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function getCartItemsSafe() {
-    if (!window.DDCart) return [];
-    return window.DDCart.getCartItems();
+  function getCartItems() {
+    try {
+      const raw = localStorage.getItem(CART_KEY);
+      const parsed = JSON.parse(raw || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 
-  function getStoredFormData() {
+  function saveCheckoutForm(data) {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return {};
-      const parsed = JSON.parse(raw);
+      localStorage.setItem(CHECKOUT_FORM_KEY, JSON.stringify(data || {}));
+    } catch {
+      // ignore storage failure
+    }
+  }
+
+  function loadCheckoutForm() {
+    try {
+      const raw = localStorage.getItem(CHECKOUT_FORM_KEY);
+      const parsed = JSON.parse(raw || "{}");
       return parsed && typeof parsed === "object" ? parsed : {};
     } catch {
       return {};
     }
   }
 
-  function saveFormData() {
-    if (!checkoutForm) return;
+  function fillFormFromSavedData() {
+    const saved = loadCheckoutForm();
+    const fieldIds = [
+      "customer_name",
+      "customer_email",
+      "shipping_name",
+      "shipping_company",
+      "shipping_address1",
+      "shipping_address2",
+      "shipping_city",
+      "shipping_province",
+      "shipping_postal_code",
+      "shipping_country",
+      "billing_name",
+      "billing_company",
+      "billing_address1",
+      "billing_address2",
+      "billing_city",
+      "billing_province",
+      "billing_postal_code",
+      "billing_country",
+      "notes",
+      "payment_method"
+    ];
 
-    const formData = new FormData(checkoutForm);
-    const payload = {};
-
-    for (const [key, value] of formData.entries()) {
-      payload[key] = String(value || "");
-    }
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  }
-
-  function restoreFormData() {
-    if (!checkoutForm) return;
-
-    const stored = getStoredFormData();
-
-    Object.entries(stored).forEach(([key, value]) => {
-      const field = checkoutForm.elements.namedItem(key);
-      if (!field) return;
-      field.value = value == null ? "" : String(value);
-    });
-  }
-
-  function saveLastOrder(data) {
-    try {
-      localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(data));
-    } catch {
-      // ignore storage failures
-    }
-  }
-
-  function getFieldValue(formData, names) {
-    for (const name of names) {
-      const value = formData.get(name);
-      if (value != null) {
-        return String(value || "").trim();
+    fieldIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (saved[id] !== undefined && saved[id] !== null && saved[id] !== "") {
+        el.value = saved[id];
       }
-    }
-    return "";
-  }
-
-  function hasPhysicalItems(items) {
-    return items.some(item => {
-      if (Number(item.requires_shipping) === 1) return true;
-      return String(item.product_type || "").toLowerCase() === "physical";
     });
   }
 
-  function renderCheckout() {
-    const items = getCartItemsSafe();
+  function readFormData() {
+    const ids = [
+      "customer_name",
+      "customer_email",
+      "shipping_name",
+      "shipping_company",
+      "shipping_address1",
+      "shipping_address2",
+      "shipping_city",
+      "shipping_province",
+      "shipping_postal_code",
+      "shipping_country",
+      "billing_name",
+      "billing_company",
+      "billing_address1",
+      "billing_address2",
+      "billing_city",
+      "billing_province",
+      "billing_postal_code",
+      "billing_country",
+      "notes",
+      "payment_method"
+    ];
 
-    if (!items.length) {
-      hide(checkoutContentEl);
-      show(checkoutEmptyEl);
+    const data = {};
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      data[id] = String(el?.value || "").trim();
+    });
 
-      if (checkoutItemsEl) checkoutItemsEl.innerHTML = "";
-      if (checkoutItemCountEl) checkoutItemCountEl.textContent = "0";
-      if (checkoutSubtotalEl) checkoutSubtotalEl.textContent = formatMoney(0, "CAD");
-      if (checkoutShippingEl) checkoutShippingEl.textContent = "Calculated at order step";
-      if (checkoutTaxEl) checkoutTaxEl.textContent = "Calculated at order step";
-      if (checkoutTotalEl) checkoutTotalEl.textContent = formatMoney(0, "CAD");
-      if (checkoutSubmitButton) checkoutSubmitButton.disabled = true;
-      return;
-    }
+    return data;
+  }
 
-    hide(checkoutEmptyEl);
-    show(checkoutContentEl);
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+  }
 
-    const subtotalCents = items.reduce((sum, item) => {
+  function calculateCartSummary(cartItems) {
+    const safeItems = Array.isArray(cartItems) ? cartItems : [];
+    const subtotal_cents = safeItems.reduce((sum, item) => {
       return sum + (Number(item.price_cents || 0) * Number(item.quantity || 0));
     }, 0);
 
-    const totalItems = items.reduce((sum, item) => {
-      return sum + Number(item.quantity || 0);
-    }, 0);
+    const requiresShipping = safeItems.some((item) => Number(item.requires_shipping || 0) === 1);
+    const shipping_cents = requiresShipping ? 1500 : 0;
+    const tax_cents = Math.round((subtotal_cents + shipping_cents) * 0.13);
+    const total_cents = subtotal_cents + shipping_cents + tax_cents;
 
-    const currency = items[0]?.currency || "CAD";
-    const shippingRequired = hasPhysicalItems(items);
+    return {
+      subtotal_cents,
+      shipping_cents,
+      tax_cents,
+      total_cents
+    };
+  }
 
-    if (checkoutItemCountEl) {
-      checkoutItemCountEl.textContent = String(totalItems);
-    }
+  function renderSummary() {
+    const cartItems = getCartItems();
+    const summary = calculateCartSummary(cartItems);
 
-    if (checkoutSubtotalEl) {
-      checkoutSubtotalEl.textContent = formatMoney(subtotalCents, currency);
-    }
+    if (summaryItemsEl) {
+      if (!cartItems.length) {
+        summaryItemsEl.innerHTML = `<div class="small">Your cart is empty.</div>`;
+      } else {
+        summaryItemsEl.innerHTML = cartItems.map((item) => {
+          const qty = Number(item.quantity || 0);
+          const unit = Number(item.price_cents || 0);
+          const line = qty * unit;
 
-    if (checkoutShippingEl) {
-      checkoutShippingEl.textContent = shippingRequired
-        ? "Calculated after address review"
-        : formatMoney(0, currency);
-    }
-
-    if (checkoutTaxEl) {
-      checkoutTaxEl.textContent = "Calculated when order is created";
-    }
-
-    if (checkoutTotalEl) {
-      checkoutTotalEl.textContent = "Calculated when order is created";
-    }
-
-    if (checkoutItemsEl) {
-      checkoutItemsEl.innerHTML = items.map(item => {
-        const lineTotal = Number(item.price_cents || 0) * Number(item.quantity || 0);
-
-        return `
-          <div class="card" style="margin-bottom:10px">
-            <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+          return `
+            <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px">
               <div>
-                <div style="font-weight:700">${escapeHtml(item.name || "")}</div>
-                <div class="small" style="text-transform:capitalize;opacity:.8">
-                  ${escapeHtml(item.product_type || "")}
-                </div>
-                <div class="small">
-                  Qty: ${escapeHtml(String(item.quantity || 0))}
-                </div>
+                <div>${escapeHtml(item.name || "Item")}</div>
+                <div class="small">Qty: ${escapeHtml(String(qty))}</div>
               </div>
-
-              <div style="font-weight:700">
-                ${escapeHtml(formatMoney(lineTotal, item.currency || currency))}
-              </div>
+              <div>${escapeHtml(formatMoney(line, item.currency || "CAD"))}</div>
             </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    if (checkoutSubmitButton) {
-      checkoutSubmitButton.disabled = false;
-      checkoutSubmitButton.textContent = "Create Order";
-    }
-  }
-
-  async function prefillFromLoggedInUser() {
-    if (!window.DDAuth || !window.DDAuth.isLoggedIn() || !checkoutForm) {
-      return;
-    }
-
-    try {
-      const me = await window.DDAuth.fetchMe();
-
-      const emailField = checkoutForm.elements.namedItem("email");
-      const nameField = checkoutForm.elements.namedItem("name");
-
-      if (emailField && !String(emailField.value || "").trim()) {
-        emailField.value = String(me?.email || "").trim();
+          `;
+        }).join("");
       }
-
-      if (nameField && !String(nameField.value || "").trim()) {
-        nameField.value = String(me?.display_name || "").trim();
-      }
-
-      saveFormData();
-    } catch {
-      // ignore autofill failures
     }
+
+    if (summarySubtotalEl) {
+      summarySubtotalEl.textContent = formatMoney(summary.subtotal_cents, "CAD");
+    }
+    if (summaryShippingEl) {
+      summaryShippingEl.textContent = formatMoney(summary.shipping_cents, "CAD");
+    }
+    if (summaryTaxEl) {
+      summaryTaxEl.textContent = formatMoney(summary.tax_cents, "CAD");
+    }
+    if (summaryTotalEl) {
+      summaryTotalEl.textContent = formatMoney(summary.total_cents, "CAD");
+    }
+
+    return summary;
   }
 
-  function validateCheckoutPayload(payload, shippingRequired) {
-    if (!payload.email) {
-      return "Email is required.";
-    }
-
-    if (!payload.customer_name) {
-      return "Full name is required.";
-    }
-
-    if (!payload.payment_method) {
-      return "Payment method is required.";
-    }
-
-    if (shippingRequired) {
-      if (!payload.shipping_address1) return "Address Line 1 is required for shippable items.";
-      if (!payload.shipping_city) return "City is required for shippable items.";
-      if (!payload.shipping_province) return "Province / State is required for shippable items.";
-      if (!payload.shipping_postal_code) return "Postal / ZIP Code is required for shippable items.";
-      if (!payload.shipping_country) return "Country is required for shippable items.";
-    }
-
-    return "";
+  function normalizeCartForApi(cartItems) {
+    return (Array.isArray(cartItems) ? cartItems : []).map((item) => ({
+      product_id: Number(item.product_id || 0),
+      quantity: Number(item.quantity || 0)
+    }));
   }
 
-  async function createOrder() {
-    if (!checkoutForm) return;
-
-    const cartItems = getCartItemsSafe();
-
-    if (!cartItems.length) {
-      setMessage("Your cart is empty.", true);
-      renderCheckout();
-      return;
-    }
-
-    const formData = new FormData(checkoutForm);
-    const shippingRequired = hasPhysicalItems(cartItems);
-
-    const payload = {
-      email: getFieldValue(formData, ["email"]),
-      customer_name: getFieldValue(formData, ["customer_name", "name"]),
-      shipping_address1: getFieldValue(formData, ["shipping_address1", "address1"]),
-      shipping_address2: getFieldValue(formData, ["shipping_address2", "address2"]),
-      shipping_city: getFieldValue(formData, ["shipping_city", "city"]),
-      shipping_province: getFieldValue(formData, ["shipping_province", "province"]),
-      shipping_postal_code: getFieldValue(formData, ["shipping_postal_code", "postal_code"]),
-      shipping_country: getFieldValue(formData, ["shipping_country", "country"]) || "Canada",
-      notes: getFieldValue(formData, ["notes", "order_notes", "checkout_notes"]),
-      payment_method: getFieldValue(formData, ["payment_method"]) || "paypal",
-      cart_items: cartItems
+  async function createOrder(payload) {
+    const headers = {
+      "Content-Type": "application/json"
     };
 
-    const validationError = validateCheckoutPayload(payload, shippingRequired);
+    if (window.DDAuth?.isLoggedIn?.()) {
+      const token = window.DDAuth.getToken?.();
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+    }
 
-    if (validationError) {
-      setMessage(validationError, true);
+    const response = await fetch("/api/checkout-create-order", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Failed to create order.");
+    }
+
+    return data;
+  }
+
+  async function preparePayment(order_id, provider) {
+    const headers = {
+      "Content-Type": "application/json"
+    };
+
+    if (window.DDAuth?.isLoggedIn?.()) {
+      const token = window.DDAuth.getToken?.();
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
+    const response = await fetch("/api/checkout-prepare-payment", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        order_id,
+        provider
+      })
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Failed to prepare payment.");
+    }
+
+    return data;
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    const cartItems = getCartItems();
+    if (!cartItems.length) {
+      setMessage("Your cart is empty.", true);
       return;
     }
 
-    const originalText = checkoutSubmitButton ? checkoutSubmitButton.textContent : "";
+    const formData = readFormData();
+    saveCheckoutForm(formData);
+
+    if (!formData.customer_name) {
+      setMessage("Customer name is required.", true);
+      return;
+    }
+
+    if (!formData.customer_email || !isValidEmail(formData.customer_email)) {
+      setMessage("A valid email is required.", true);
+      return;
+    }
+
+    const summary = calculateCartSummary(cartItems);
+    const paymentProvider = formData.payment_method || "paypal";
+    const originalText = submitButton?.textContent || "Place Order";
 
     try {
-      clearMessage();
+      setMessage("Creating your order...");
 
-      if (checkoutSubmitButton) {
-        checkoutSubmitButton.disabled = true;
-        checkoutSubmitButton.textContent = "Creating Order...";
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Processing...";
       }
 
-      const createOrderResponse = await fetch("/api/checkout-create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const createOrderData = await createOrderResponse.json();
-
-      if (!createOrderResponse.ok || !createOrderData.ok) {
-        throw new Error(createOrderData.error || "Failed to create order.");
-      }
-
-      let finalOrderData = {
-        ...createOrderData,
-        checkout_warning: ""
+      const orderPayload = {
+        ...formData,
+        currency: "CAD",
+        shipping_cents: summary.shipping_cents,
+        items: normalizeCartForApi(cartItems)
       };
 
+      const orderResult = await createOrder(orderPayload);
+      const order = orderResult.order;
+
+      setMessage("Preparing payment...");
+
+      const paymentResult = await preparePayment(order.order_id, paymentProvider);
+
       try {
-        if (checkoutSubmitButton) {
-          checkoutSubmitButton.textContent = "Preparing Payment...";
-        }
-
-        const preparePaymentResponse = await fetch("/api/checkout-prepare-payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            order_id: createOrderData.order?.order_id,
-            payment_method: payload.payment_method
-          })
-        });
-
-        const preparePaymentData = await preparePaymentResponse.json();
-
-        if (preparePaymentResponse.ok && preparePaymentData.ok) {
-          finalOrderData = {
-            ...createOrderData,
-            payment: preparePaymentData.payment || createOrderData.payment || null,
-            next_step: preparePaymentData.next_step || null,
-            checkout_warning: ""
-          };
-        } else {
-          finalOrderData.checkout_warning =
-            preparePaymentData.error || "Order created, but payment setup was not prepared yet.";
-        }
+        localStorage.removeItem(CART_KEY);
       } catch {
-        finalOrderData.checkout_warning =
-          "Order created, but payment setup could not be prepared yet.";
+        // ignore storage failure
       }
 
-      saveFormData();
-      saveLastOrder(finalOrderData);
+      const confirmationUrl = new URL("/checkout/confirmation/", window.location.origin);
+      confirmationUrl.searchParams.set("order_id", String(order.order_id));
+      confirmationUrl.searchParams.set("order_number", String(order.order_number || ""));
+      confirmationUrl.searchParams.set("payment_provider", String(paymentProvider || ""));
+      confirmationUrl.searchParams.set(
+        "payment_status",
+        String(paymentResult?.payment_preparation?.payment_stub?.payment_status || "pending")
+      );
 
-      if (window.DDCart) {
-        window.DDCart.clearCart();
-      }
-
-      window.location.href = "/checkout/confirmation/";
+      window.location.href = confirmationUrl.toString();
     } catch (error) {
-      setMessage(error.message || "Failed to create order.", true);
+      setMessage(error.message || "Checkout failed.", true);
     } finally {
-      if (checkoutSubmitButton) {
-        checkoutSubmitButton.disabled = false;
-        checkoutSubmitButton.textContent = originalText || "Create Order";
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
       }
     }
   }
 
-  if (checkoutForm) {
-    restoreFormData();
+  function bindAutoSave() {
+    if (!form) return;
 
-    checkoutForm.addEventListener("input", () => {
-      saveFormData();
-    });
-
-    checkoutForm.addEventListener("change", () => {
-      saveFormData();
-    });
-
-    checkoutForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      await createOrder();
+    form.addEventListener("input", () => {
+      saveCheckoutForm(readFormData());
     });
   }
 
-  document.addEventListener("dd:cart-changed", () => {
-    renderCheckout();
-  });
+  fillFormFromSavedData();
+  renderSummary();
+  bindAutoSave();
 
-  renderCheckout();
-  prefillFromLoggedInUser();
+  if (form) {
+    form.addEventListener("submit", handleSubmit);
+  }
 });
