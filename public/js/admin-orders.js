@@ -3,18 +3,14 @@
 document.addEventListener("DOMContentLoaded", () => {
   const tableBody = document.getElementById("ordersTableBody");
   const refreshButton = document.getElementById("refreshOrdersButton");
-  const statusFilter = document.getElementById("orderStatusFilter");
-  const paymentFilter = document.getElementById("orderPaymentStatusFilter");
-  const fulfillmentFilter = document.getElementById("orderFulfillmentFilter");
-  const searchInput = document.getElementById("orderSearchInput");
   const messageEl = document.getElementById("ordersMessage");
   const summaryEl = document.getElementById("ordersSummary");
   const emptyEl = document.getElementById("ordersEmpty");
 
-  if (!tableBody || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  if (!tableBody || !window.DDAuth) return;
 
-  let allOrders = [];
   let isLoading = false;
+  let allOrders = [];
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -27,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatMoney(cents, currency = "CAD") {
     const amount = Number(cents || 0) / 100;
-
     try {
       return new Intl.NumberFormat(undefined, {
         style: "currency",
@@ -59,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function titleCase(value) {
     const text = String(value || "").trim();
     if (!text) return "—";
-
     return text
       .replaceAll("_", " ")
       .replaceAll("-", " ")
@@ -68,194 +62,117 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setMessage(message, isError = false) {
     if (!messageEl) return;
-
     messageEl.textContent = message;
     messageEl.style.display = message ? "block" : "none";
     messageEl.style.color = isError ? "#b00020" : "";
   }
 
-  function getPaymentBadgeText(order) {
-    const status =
-      order.derived_payment_status ||
-      order.payment_status ||
-      "pending";
-
-    const outstandingCents = Number(order.outstanding_cents || 0);
-    const paidTotalCents = Number(order.paid_total_cents || 0);
-    const totalCents = Number(order.total_cents || 0);
-
-    if (status === "paid" && outstandingCents <= 0 && totalCents > 0) {
-      return "Paid in Full";
-    }
-
-    if (status === "partially_refunded") {
-      return "Partially Refunded";
-    }
-
-    if (status === "refunded") {
-      return "Refunded";
-    }
-
-    if (status === "authorized") {
-      return "Authorized";
-    }
-
-    if (status === "failed") {
-      return "Failed";
-    }
-
-    if (status === "pending" && paidTotalCents > 0 && outstandingCents > 0) {
-      return "Partially Paid";
-    }
-
-    return titleCase(status);
-  }
-
-  function getSearchText(order) {
-    return [
-      order.order_number,
-      order.customer_name,
-      order.customer_email,
-      order.payment_method,
-      order.fulfillment_type,
-      order.order_status,
-      order.payment_status,
-      order.derived_payment_status
-    ]
-      .map((value) => String(value || "").toLowerCase())
-      .join(" ");
-  }
-
-  function getFilterValue(el) {
-    return String(el?.value || "").trim().toLowerCase();
+  function getFilterValues() {
+    return {
+      orderStatus: String(document.getElementById("orderStatusFilter")?.value || "").trim().toLowerCase(),
+      paymentStatus: String(document.getElementById("orderPaymentStatusFilter")?.value || "").trim().toLowerCase(),
+      fulfillment: String(document.getElementById("orderFulfillmentFilter")?.value || "").trim().toLowerCase(),
+      search: String(document.getElementById("orderSearchInput")?.value || "").trim().toLowerCase()
+    };
   }
 
   function matchesFilters(order) {
-    const statusValue = getFilterValue(statusFilter);
-    const paymentValue = getFilterValue(paymentFilter);
-    const fulfillmentValue = getFilterValue(fulfillmentFilter);
-    const searchValue = String(searchInput?.value || "").trim().toLowerCase();
+    const filters = getFilterValues();
 
-    if (statusValue && String(order.order_status || "").toLowerCase() !== statusValue) {
+    if (filters.orderStatus && String(order.order_status || "").toLowerCase() !== filters.orderStatus) {
       return false;
     }
 
-    if (paymentValue) {
-      const orderPayment = String(order.payment_status || "").toLowerCase();
-      const derivedPayment = String(order.derived_payment_status || "").toLowerCase();
+    const derivedPayment = String(
+      order.derived_payment_status || order.payment_status || ""
+    ).toLowerCase();
 
-      if (orderPayment !== paymentValue && derivedPayment !== paymentValue) {
+    if (filters.paymentStatus && derivedPayment !== filters.paymentStatus) {
+      return false;
+    }
+
+    if (filters.fulfillment && String(order.fulfillment_type || "").toLowerCase() !== filters.fulfillment) {
+      return false;
+    }
+
+    if (filters.search) {
+      const haystack = [
+        order.order_number,
+        order.customer_name,
+        order.customer_email,
+        order.payment_method,
+        order.fulfillment_type,
+        order.order_status,
+        order.payment_status
+      ]
+        .map((v) => String(v || "").toLowerCase())
+        .join(" ");
+
+      if (!haystack.includes(filters.search)) {
         return false;
       }
-    }
-
-    if (fulfillmentValue && String(order.fulfillment_type || "").toLowerCase() !== fulfillmentValue) {
-      return false;
-    }
-
-    if (searchValue && !getSearchText(order).includes(searchValue)) {
-      return false;
     }
 
     return true;
   }
 
-  function updateSummary(filteredOrders) {
+  function updateSummary(orders) {
     if (!summaryEl) return;
 
-    const safeOrders = Array.isArray(filteredOrders) ? filteredOrders : [];
-
-    if (!safeOrders.length) {
-      summaryEl.textContent = "0 orders shown.";
-      return;
-    }
-
-    const totalOrderValueCents = safeOrders.reduce((sum, order) => {
-      return sum + Number(order.total_cents || 0);
-    }, 0);
-
-    const outstandingValueCents = safeOrders.reduce((sum, order) => {
-      return sum + Number(order.outstanding_cents || 0);
-    }, 0);
+    const safeOrders = Array.isArray(orders) ? orders : [];
+    const totalValue = safeOrders.reduce((sum, order) => sum + Number(order.total_cents || 0), 0);
+    const outstandingValue = safeOrders.reduce((sum, order) => sum + Number(order.outstanding_cents || 0), 0);
+    const pendingCount = safeOrders.filter((order) => String(order.order_status || "").toLowerCase() === "pending").length;
 
     summaryEl.textContent =
       `${safeOrders.length} order${safeOrders.length === 1 ? "" : "s"} shown • ` +
-      `Total ${formatMoney(totalOrderValueCents, safeOrders[0]?.currency || "CAD")} • ` +
-      `Outstanding ${formatMoney(outstandingValueCents, safeOrders[0]?.currency || "CAD")}`;
+      `Total ${formatMoney(totalValue, safeOrders[0]?.currency || "CAD")} • ` +
+      `Outstanding ${formatMoney(outstandingValue, safeOrders[0]?.currency || "CAD")} • ` +
+      `${pendingCount} pending`;
   }
 
-  function renderOrders() {
-    const filteredOrders = allOrders.filter(matchesFilters);
+  function paymentLabel(order) {
+    return titleCase(order.derived_payment_status || order.payment_status || "pending");
+  }
+
+  function renderOrders(orders) {
+    const safeOrders = Array.isArray(orders) ? orders : [];
 
     if (emptyEl) {
-      emptyEl.style.display = filteredOrders.length ? "none" : "block";
+      emptyEl.style.display = safeOrders.length ? "none" : "block";
     }
 
-    updateSummary(filteredOrders);
+    updateSummary(safeOrders);
 
-    if (!filteredOrders.length) {
+    if (!safeOrders.length) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="10" style="padding:12px">No matching orders found.</td>
+          <td colspan="10" style="padding:12px">No orders found.</td>
         </tr>
       `;
       return;
     }
 
-    tableBody.innerHTML = filteredOrders.map((order) => {
+    tableBody.innerHTML = safeOrders.map((order) => {
       const currency = order.currency || "CAD";
-      const orderTotal = formatMoney(order.total_cents || 0, currency);
-      const outstanding = formatMoney(order.outstanding_cents || 0, currency);
-      const paidTotal = formatMoney(order.paid_total_cents || 0, currency);
-      const paymentSummaryText =
-        `${getPaymentBadgeText(order)} • Paid ${paidTotal} • Outstanding ${outstanding}`;
-
       return `
         <tr>
           <td style="padding:8px;border-bottom:1px solid #ddd">
-            <strong>${escapeHtml(order.order_number || "—")}</strong>
+            <div><strong>${escapeHtml(order.order_number || "—")}</strong></div>
           </td>
-
           <td style="padding:8px;border-bottom:1px solid #ddd">
             <div>${escapeHtml(order.customer_name || "—")}</div>
             <div class="small">${escapeHtml(order.customer_email || "—")}</div>
           </td>
-
+          <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(order.order_status || "pending"))}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(order.fulfillment_type || "shipping"))}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(paymentLabel(order))}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(order.total_cents || 0, currency))}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(order.outstanding_cents || 0, currency))}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(String(order.payment_count || 0))}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(order.created_at))}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">
-            ${escapeHtml(titleCase(order.order_status || "pending"))}
-          </td>
-
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            ${escapeHtml(titleCase(order.fulfillment_type || "shipping"))}
-          </td>
-
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            <div>${escapeHtml(paymentSummaryText)}</div>
-            <div class="small">${escapeHtml(titleCase(order.payment_method || "—"))}</div>
-          </td>
-
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            ${escapeHtml(orderTotal)}
-          </td>
-
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            ${escapeHtml(outstanding)}
-          </td>
-
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            ${escapeHtml(String(order.payment_count || 0))}
-          </td>
-
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            ${escapeHtml(formatDate(order.created_at))}
-          </td>
-
-          <td style="padding:8px;border-bottom:1px solid #ddd">
-            <button
-              class="btn"
-              type="button"
-              data-view-order-id="${escapeHtml(String(order.order_id || ""))}"
-            >
+            <button class="btn" type="button" data-view-order-id="${escapeHtml(String(order.order_id || ""))}">
               View
             </button>
           </td>
@@ -271,68 +188,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const data = await response.json();
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Failed to load orders.");
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Failed to load orders.");
     }
 
     return Array.isArray(data.orders) ? data.orders : [];
   }
 
-  function normalizeOrders(orders) {
-    return (Array.isArray(orders) ? orders : []).map((order) => {
-      const totalCents = Number(order.total_cents || 0);
-      const paidTotalCents = Number(order.paid_total_cents || 0);
-      const outstandingCents =
-        order.outstanding_cents != null
-          ? Number(order.outstanding_cents || 0)
-          : Math.max(totalCents - paidTotalCents, 0);
-
-      return {
-        ...order,
-        total_cents: totalCents,
-        paid_total_cents: paidTotalCents,
-        refunded_total_cents: Number(order.refunded_total_cents || 0),
-        pending_total_cents: Number(order.pending_total_cents || 0),
-        outstanding_cents: outstandingCents,
-        payment_count: Number(order.payment_count || 0)
-      };
-    });
-  }
-
   async function loadOrders() {
     if (isLoading) return;
 
-    const originalRefreshText = refreshButton?.textContent || "Refresh";
+    const originalText = refreshButton?.textContent || "Refresh Orders";
     isLoading = true;
 
     try {
       setMessage("Loading orders...");
+
       if (refreshButton) {
         refreshButton.disabled = true;
         refreshButton.textContent = "Loading...";
       }
 
-      const orders = await fetchOrders();
-      allOrders = normalizeOrders(orders);
-      renderOrders();
-
+      allOrders = await fetchOrders();
+      renderOrders(allOrders.filter(matchesFilters));
       setMessage(`Loaded ${allOrders.length} order${allOrders.length === 1 ? "" : "s"}.`);
     } catch (error) {
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="10" style="padding:12px;color:#b00020">
-            ${escapeHtml(error.message || "Failed to load orders.")}
-          </td>
-        </tr>
-      `;
-      updateSummary([]);
+      allOrders = [];
+      renderOrders([]);
       setMessage(error.message || "Failed to load orders.", true);
     } finally {
       isLoading = false;
+
       if (refreshButton) {
         refreshButton.disabled = false;
-        refreshButton.textContent = originalRefreshText;
+        refreshButton.textContent = originalText;
       }
+    }
+  }
+
+  function bindFilterEvents() {
+    [
+      document.getElementById("orderStatusFilter"),
+      document.getElementById("orderPaymentStatusFilter"),
+      document.getElementById("orderFulfillmentFilter")
+    ].forEach((el) => {
+      if (!el) return;
+      el.addEventListener("change", () => {
+        renderOrders(allOrders.filter(matchesFilters));
+      });
+    });
+
+    const searchEl = document.getElementById("orderSearchInput");
+    if (searchEl) {
+      searchEl.addEventListener("input", () => {
+        renderOrders(allOrders.filter(matchesFilters));
+      });
     }
   }
 
@@ -342,22 +252,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  [statusFilter, paymentFilter, fulfillmentFilter].forEach((el) => {
-    if (!el) return;
-    el.addEventListener("change", () => {
-      renderOrders();
-    });
+  document.addEventListener("dd:admin-ready", async (event) => {
+    if (!event?.detail?.ok) return;
+    bindFilterEvents();
+    await loadOrders();
   });
-
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      renderOrders();
-    });
-  }
 
   document.addEventListener("dd:order-updated", async () => {
     await loadOrders();
   });
 
-  loadOrders();
+  renderOrders([]);
 });
