@@ -13,29 +13,28 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
-function normalizeOptionalText(value) {
-  const text = String(value || "").trim();
-  return text || null;
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
 }
 
 function normalizeOrderStatus(value) {
   const status = normalizeText(value).toLowerCase();
-
-  if (["draft", "pending", "paid", "fulfilled", "cancelled", "refunded"].includes(status)) {
-    return status;
-  }
-
-  return "";
-}
-
-function sanitizeNote(value) {
-  return String(value || "").replace(/\s+/g, " ").trim();
+  return [
+    "draft",
+    "pending",
+    "paid",
+    "fulfilled",
+    "cancelled",
+    "refunded"
+  ].includes(status)
+    ? status
+    : "";
 }
 
 async function getAdminUserFromRequest(request, env) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  const token = match ? match[1].trim() : "";
+  const token = getBearerToken(request);
 
   if (!token) {
     return null;
@@ -45,6 +44,7 @@ async function getAdminUserFromRequest(request, env) {
     SELECT
       s.session_id,
       s.user_id,
+      s.session_token,
       s.token,
       s.expires_at,
       u.user_id AS resolved_user_id,
@@ -55,11 +55,14 @@ async function getAdminUserFromRequest(request, env) {
     FROM sessions s
     INNER JOIN users u
       ON u.user_id = s.user_id
-    WHERE s.token = ?
+    WHERE (
+      s.session_token = ?
+      OR s.token = ?
+    )
       AND s.expires_at > datetime('now')
     LIMIT 1
   `)
-    .bind(token)
+    .bind(token, token)
     .first();
 
   if (!session) return null;
@@ -67,126 +70,19 @@ async function getAdminUserFromRequest(request, env) {
   if (String(session.role || "").toLowerCase() !== "admin") return null;
 
   return {
-    user_id: Number(session.resolved_user_id),
-    email: session.email,
-    display_name: session.display_name,
-    role: session.role
+    session_id: Number(session.session_id || 0),
+    user_id: Number(session.resolved_user_id || session.user_id || 0),
+    email: session.email || "",
+    display_name: session.display_name || "",
+    role: session.role || "admin"
   };
-}
-
-function getOrderPaymentSummary(payments, orderTotalCents) {
-  const safePayments = Array.isArray(payments) ? payments : [];
-
-  let paidTotalCents = 0;
-  let hasAuthorized = false;
-  let hasPending = false;
-  let hasRefunded = false;
-  let hasPartiallyRefunded = false;
-  let allFailedOrCancelled = safePayments.length > 0;
-
-  for (const payment of safePayments) {
-    const status = String(payment?.payment_status || "").toLowerCase();
-    const amount = Number(payment?.amount_cents || 0);
-
-    if (["paid", "completed", "captured"].includes(status)) {
-      paidTotalCents += amount;
-    }
-
-    if (status === "authorized") hasAuthorized = true;
-    if (status === "pending") hasPending = true;
-    if (status === "refunded") hasRefunded = true;
-    if (status === "partially_refunded") hasPartiallyRefunded = true;
-
-    if (!["failed", "cancelled"].includes(status)) {
-      allFailedOrCancelled = false;
-    }
-  }
-
-  let derivedPaymentStatus = "pending";
-
-  if (!safePayments.length) {
-    derivedPaymentStatus = "pending";
-  } else if (hasRefunded) {
-    derivedPaymentStatus = "refunded";
-  } else if (hasPartiallyRefunded) {
-    derivedPaymentStatus = "partially_refunded";
-  } else if (paidTotalCents >= Number(orderTotalCents || 0) && Number(orderTotalCents || 0) > 0) {
-    derivedPaymentStatus = "paid";
-  } else if (hasAuthorized) {
-    derivedPaymentStatus = "authorized";
-  } else if (hasPending) {
-    derivedPaymentStatus = "pending";
-  } else if (allFailedOrCancelled) {
-    derivedPaymentStatus = "failed";
-  }
-
-  return {
-    paid_total_cents: paidTotalCents,
-    derived_payment_status: derivedPaymentStatus
-  };
-}
-
-function validateTransition(currentStatus, newStatus, derivedPaymentStatus) {
-  if (!currentStatus) {
-    return "Current order status is missing.";
-  }
-
-  if (currentStatus === newStatus) {
-    return "";
-  }
-
-  if (currentStatus === "refunded") {
-    return "Refunded orders should not be moved to another status.";
-  }
-
-  if (currentStatus === "cancelled" && !["cancelled", "refunded"].includes(newStatus)) {
-    return "Cancelled orders can only remain cancelled or move to refunded.";
-  }
-
-  if (newStatus === "draft" && currentStatus !== "draft") {
-    return "Orders cannot be moved back to draft.";
-  }
-
-  if (newStatus === "paid") {
-    if (!["paid", "partially_refunded", "refunded"].includes(derivedPaymentStatus)) {
-      return "This order does not yet have payment status that supports marking it paid.";
-    }
-  }
-
-  if (newStatus === "fulfilled") {
-    if (!["paid", "partially_refunded"].includes(derivedPaymentStatus)) {
-      return "Only paid orders should be fulfilled.";
-    }
-  }
-
-  if (newStatus === "refunded") {
-    if (!["paid", "partially_refunded", "refunded"].includes(derivedPaymentStatus)) {
-      return "Only orders with payment activity should be marked refunded.";
-    }
-  }
-
-  return "";
-}
-
-function deriveStoredPaymentStatus(existingOrderPaymentStatus, derivedPaymentStatus, newOrderStatus) {
-  if (newOrderStatus === "refunded") {
-    return "refunded";
-  }
-
-  if (newOrderStatus === "paid" || newOrderStatus === "fulfilled") {
-    if (["paid", "partially_refunded", "refunded"].includes(derivedPaymentStatus)) {
-      return derivedPaymentStatus === "refunded" ? "refunded" : "paid";
-    }
-    return existingOrderPaymentStatus || "pending";
-  }
-
-  return derivedPaymentStatus || existingOrderPaymentStatus || "pending";
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   const adminUser = await getAdminUserFromRequest(request, env);
+
   if (!adminUser) {
     return json({ ok: false, error: "Unauthorized." }, 401);
   }
@@ -200,7 +96,7 @@ export async function onRequestPost(context) {
 
   const order_id = Number(body.order_id);
   const new_status = normalizeOrderStatus(body.new_status);
-  const note = normalizeOptionalText(body.note);
+  const note = normalizeText(body.note || "");
 
   if (!Number.isInteger(order_id) || order_id <= 0) {
     return json({ ok: false, error: "A valid order_id is required." }, 400);
@@ -231,49 +127,33 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "Order not found." }, 404);
   }
 
-  const currentStatus = String(order.order_status || "").toLowerCase();
-  const currentPaymentStatus = String(order.payment_status || "pending").toLowerCase();
+  const old_status = String(order.order_status || "").toLowerCase();
 
-  const paymentsResult = await env.DB.prepare(`
-    SELECT
-      payment_id,
-      payment_status,
-      amount_cents
-    FROM payments
-    WHERE order_id = ?
-    ORDER BY payment_id DESC
-  `)
-    .bind(order_id)
-    .all();
-
-  const payments = Array.isArray(paymentsResult?.results) ? paymentsResult.results : [];
-  const paymentSummary = getOrderPaymentSummary(payments, Number(order.total_cents || 0));
-
-  const transitionError = validateTransition(
-    currentStatus,
-    new_status,
-    paymentSummary.derived_payment_status
-  );
-
-  if (transitionError) {
-    return json({ ok: false, error: transitionError }, 400);
+  if (old_status === new_status) {
+    return json({
+      ok: true,
+      message: "Order status is already set to that value.",
+      order: {
+        order_id: Number(order.order_id || 0),
+        order_number: order.order_number || "",
+        order_status: old_status,
+        payment_status: order.payment_status || "pending",
+        total_cents: Number(order.total_cents || 0),
+        currency: order.currency || "CAD",
+        created_at: order.created_at || null,
+        updated_at: order.updated_at || null
+      }
+    });
   }
-
-  const storedPaymentStatus = deriveStoredPaymentStatus(
-    currentPaymentStatus,
-    paymentSummary.derived_payment_status,
-    new_status
-  );
 
   await env.DB.prepare(`
     UPDATE orders
     SET
       order_status = ?,
-      payment_status = ?,
       updated_at = CURRENT_TIMESTAMP
     WHERE order_id = ?
   `)
-    .bind(new_status, storedPaymentStatus, order_id)
+    .bind(new_status, order_id)
     .run();
 
   const actorLabel =
@@ -281,17 +161,9 @@ export async function onRequestPost(context) {
     adminUser.email ||
     `Admin #${adminUser.user_id}`;
 
-  const historyNoteParts = [
-    `${actorLabel} changed status from ${currentStatus} to ${new_status}.`
-  ];
-
-  if (note) {
-    historyNoteParts.push(`Note: ${sanitizeNote(note)}`);
-  }
-
-  if (paymentSummary.derived_payment_status) {
-    historyNoteParts.push(`Derived payment status at change time: ${paymentSummary.derived_payment_status}.`);
-  }
+  const historyNote = note
+    ? `${actorLabel} updated order status. ${note}`
+    : `${actorLabel} updated order status.`;
 
   await env.DB.prepare(`
     INSERT INTO order_status_history (
@@ -306,10 +178,10 @@ export async function onRequestPost(context) {
   `)
     .bind(
       order_id,
-      currentStatus,
+      old_status,
       new_status,
       adminUser.user_id,
-      sanitizeNote(historyNoteParts.join(" "))
+      historyNote
     )
     .run();
 
@@ -333,6 +205,20 @@ export async function onRequestPost(context) {
   return json({
     ok: true,
     message: "Order status updated successfully.",
-    order: updatedOrder
+    updated_by: {
+      user_id: adminUser.user_id,
+      email: adminUser.email,
+      display_name: adminUser.display_name
+    },
+    order: {
+      order_id: Number(updatedOrder?.order_id || order_id || 0),
+      order_number: updatedOrder?.order_number || order.order_number || "",
+      order_status: updatedOrder?.order_status || new_status,
+      payment_status: updatedOrder?.payment_status || order.payment_status || "pending",
+      total_cents: Number(updatedOrder?.total_cents || order.total_cents || 0),
+      currency: updatedOrder?.currency || order.currency || "CAD",
+      created_at: updatedOrder?.created_at || order.created_at || null,
+      updated_at: updatedOrder?.updated_at || null
+    }
   });
 }
