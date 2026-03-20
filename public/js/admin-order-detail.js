@@ -1,13 +1,14 @@
 // File: /public/js/admin-order-detail.js
 
 document.addEventListener("DOMContentLoaded", () => {
-  const tableBody = document.getElementById("ordersTableBody");
+  const ordersTableBody = document.getElementById("ordersTableBody");
 
-  if (!tableBody || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  if (!ordersTableBody || !window.DDAuth) return;
 
   let modalEl = null;
   let currentOrderId = null;
-  let currentOrderData = null;
+  let isLoadingOrder = false;
+  let isRecordingPayment = false;
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -56,75 +57,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return text
       .replaceAll("_", " ")
       .replaceAll("-", " ")
-      .replace(/\b\w/g, ch => ch.toUpperCase());
-  }
-
-  function dollarsToCents(value) {
-    const normalized = String(value || "").trim();
-    if (!normalized) return 0;
-
-    const amount = Number(normalized);
-    if (!Number.isFinite(amount) || amount < 0) return NaN;
-
-    return Math.round(amount * 100);
-  }
-
-  function getPaymentReference(payment) {
-    return (
-      payment.transaction_reference ||
-      payment.provider_payment_id ||
-      payment.provider_order_id ||
-      "—"
-    );
-  }
-
-  function getOutstandingBalanceCents(order, payments) {
-    const totalCents = Number(order?.total_cents || 0);
-
-    const paidLikeStatuses = new Set([
-      "paid",
-      "completed",
-      "captured",
-      "partially_refunded"
-    ]);
-
-    const paidCents = (Array.isArray(payments) ? payments : []).reduce((sum, payment) => {
-      const status = String(payment?.payment_status || "").toLowerCase();
-      if (!paidLikeStatuses.has(status)) return sum;
-      return sum + Number(payment?.amount_cents || 0);
-    }, 0);
-
-    return Math.max(totalCents - paidCents, 0);
-  }
-
-  function getPreparedPayment(payments) {
-    const safePayments = Array.isArray(payments) ? payments : [];
-    return safePayments.find(payment => {
-      const status = String(payment?.payment_status || "").toLowerCase();
-      return status === "pending" || status === "authorized";
-    }) || null;
-  }
-
-  function getLatestCompletedPayment(payments) {
-    const safePayments = Array.isArray(payments) ? payments : [];
-    return safePayments.find(payment => {
-      const status = String(payment?.payment_status || "").toLowerCase();
-      return ["paid", "completed", "captured"].includes(status);
-    }) || null;
-  }
-
-  function setText(id, value) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.textContent = value;
-    }
+      .replace(/\b\w/g, (ch) => ch.toUpperCase());
   }
 
   function ensureModal() {
     if (modalEl) return modalEl;
 
     modalEl = document.createElement("div");
-    modalEl.id = "orderDetailModal";
+    modalEl.id = "adminOrderDetailModal";
     modalEl.style.display = "none";
     modalEl.style.position = "fixed";
     modalEl.style.inset = "0";
@@ -132,188 +72,78 @@ document.addEventListener("DOMContentLoaded", () => {
     modalEl.style.zIndex = "9999";
 
     modalEl.innerHTML = `
-      <div style="max-width:1100px;margin:30px auto;padding:0 16px;">
-        <div class="card" style="max-height:88vh;overflow:auto">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-            <h2 style="margin:0">Order Details</h2>
-            <button class="btn" type="button" id="closeOrderDetailModal">Close</button>
+      <div style="max-width:1200px;margin:24px auto;padding:0 16px;">
+        <div class="card" style="max-height:90vh;overflow:auto">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+            <h2 style="margin:0">Order Detail</h2>
+            <button class="btn" type="button" id="closeAdminOrderDetailModal">Close</button>
           </div>
 
-          <div id="orderDetailLoading" class="small" style="margin-top:12px">Loading order...</div>
-          <div id="orderDetailError" class="small" style="display:none;color:#b00020;margin-top:12px"></div>
+          <div id="adminOrderDetailMessage" class="small" style="display:none;margin-top:12px"></div>
+          <div id="adminOrderDetailLoading" class="small" style="margin-top:12px">Loading order...</div>
 
-          <div id="orderDetailContent" style="display:none;margin-top:14px">
+          <div id="adminOrderDetailContent" style="display:none;margin-top:14px">
             <div class="grid cols-2" style="gap:18px">
               <div class="card">
                 <h3 style="margin-top:0">Order</h3>
-                <p><strong>Order Number:</strong> <span id="detailOrderNumber"></span></p>
-                <p><strong>Status:</strong> <span id="detailOrderStatus"></span></p>
-                <p><strong>Fulfillment:</strong> <span id="detailFulfillmentType"></span></p>
-                <p><strong>Customer:</strong> <span id="detailCustomerName"></span></p>
-                <p><strong>Email:</strong> <span id="detailCustomerEmail"></span></p>
-                <p><strong>Created:</strong> <span id="detailCreatedAt"></span></p>
-                <p><strong>Updated:</strong> <span id="detailUpdatedAt"></span></p>
+                <div class="small" style="display:grid;gap:8px">
+                  <div><strong>Order #:</strong> <span id="adminDetailOrderNumber">—</span></div>
+                  <div><strong>Customer:</strong> <span id="adminDetailCustomer">—</span></div>
+                  <div><strong>Email:</strong> <span id="adminDetailCustomerEmail">—</span></div>
+                  <div><strong>Status:</strong> <span id="adminDetailOrderStatus">—</span></div>
+                  <div><strong>Payment Status:</strong> <span id="adminDetailOrderPaymentStatus">—</span></div>
+                  <div><strong>Fulfillment:</strong> <span id="adminDetailFulfillmentType">—</span></div>
+                  <div><strong>Created:</strong> <span id="adminDetailCreatedAt">—</span></div>
+                  <div><strong>Updated:</strong> <span id="adminDetailUpdatedAt">—</span></div>
+                </div>
               </div>
 
               <div class="card">
                 <h3 style="margin-top:0">Totals</h3>
-                <p><strong>Subtotal:</strong> <span id="detailSubtotal"></span></p>
-                <p><strong>Discount:</strong> <span id="detailDiscount"></span></p>
-                <p><strong>Shipping:</strong> <span id="detailShipping"></span></p>
-                <p><strong>Tax:</strong> <span id="detailTax"></span></p>
-                <p style="font-size:1.05rem;font-weight:700"><strong>Total:</strong> <span id="detailTotal"></span></p>
+                <div class="small" style="display:grid;gap:8px">
+                  <div><strong>Subtotal:</strong> <span id="adminDetailSubtotal">—</span></div>
+                  <div><strong>Discount:</strong> <span id="adminDetailDiscount">—</span></div>
+                  <div><strong>Shipping:</strong> <span id="adminDetailShipping">—</span></div>
+                  <div><strong>Tax:</strong> <span id="adminDetailTax">—</span></div>
+                  <div><strong>Total:</strong> <span id="adminDetailTotal">—</span></div>
+                  <div><strong>Paid:</strong> <span id="adminDetailPaidTotal">—</span></div>
+                  <div><strong>Outstanding:</strong> <span id="adminDetailOutstanding">—</span></div>
+                  <div><strong>Derived Payment:</strong> <span id="adminDetailDerivedPaymentStatus">—</span></div>
+                </div>
               </div>
             </div>
 
             <div class="grid cols-2" style="gap:18px;margin-top:18px">
               <div class="card">
-                <h3 style="margin-top:0">Payment Summary</h3>
-                <p><strong>Outstanding:</strong> <span id="detailOutstanding"></span></p>
-                <p><strong>Prepared / Pending:</strong> <span id="detailPreparedPayment"></span></p>
-                <p><strong>Latest Completed:</strong> <span id="detailCompletedPayment"></span></p>
-                <p><strong>Latest Reference:</strong> <span id="detailLatestReference"></span></p>
+                <h3 style="margin-top:0">Shipping</h3>
+                <div id="adminDetailShippingBlock" class="small">—</div>
               </div>
 
               <div class="card">
-                <h3 style="margin-top:0">Internal Notes</h3>
-                <div id="detailOrderNotes" class="small">No order notes saved.</div>
-                <div id="detailPaymentHint" class="small" style="margin-top:10px"></div>
-              </div>
-            </div>
+                <h3 style="margin-top:0">Update Order Status</h3>
+                <form id="adminUpdateOrderStatusForm" class="grid" style="gap:12px">
+                  <div>
+                    <label class="small" for="adminUpdateOrderStatusSelect">New Status</label>
+                    <select id="adminUpdateOrderStatusSelect">
+                      <option value="pending">Pending</option>
+                      <option value="paid">Paid</option>
+                      <option value="fulfilled">Fulfilled</option>
+                      <option value="cancelled">Cancelled</option>
+                      <option value="refunded">Refunded</option>
+                    </select>
+                  </div>
 
-            <div class="card" style="margin-top:18px">
-              <h3 style="margin-top:0">Update Status</h3>
+                  <div>
+                    <label class="small" for="adminUpdateOrderStatusNote">Note</label>
+                    <input id="adminUpdateOrderStatusNote" type="text" placeholder="Optional note" />
+                  </div>
 
-              <div class="grid" style="gap:12px">
-                <div>
-                  <label class="small" for="detailNewOrderStatus">New Status</label>
-                  <select id="detailNewOrderStatus">
-                    <option value="draft">draft</option>
-                    <option value="pending">pending</option>
-                    <option value="paid">paid</option>
-                    <option value="fulfilled">fulfilled</option>
-                    <option value="cancelled">cancelled</option>
-                    <option value="refunded">refunded</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="small" for="detailOrderStatusNote">Note (optional)</label>
-                  <input id="detailOrderStatusNote" type="text" />
-                </div>
-
-                <div>
-                  <button class="btn" type="button" id="detailUpdateOrderStatusButton">
-                    Update Status
-                  </button>
-                </div>
-
-                <div id="detailUpdateOrderStatusMessage" class="small" style="display:none"></div>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:18px">
-              <h3 style="margin-top:0">Record Payment</h3>
-
-              <div class="grid" style="gap:12px">
-                <div>
-                  <label class="small" for="detailPaymentProvider">Provider</label>
-                  <select id="detailPaymentProvider">
-                    <option value="manual" selected>manual</option>
-                    <option value="paypal">paypal</option>
-                    <option value="stripe">stripe</option>
-                    <option value="square">square</option>
-                    <option value="other">other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="small" for="detailPaymentStatus">Payment Status</label>
-                  <select id="detailPaymentStatus">
-                    <option value="paid" selected>paid</option>
-                    <option value="pending">pending</option>
-                    <option value="authorized">authorized</option>
-                    <option value="failed">failed</option>
-                    <option value="cancelled">cancelled</option>
-                    <option value="refunded">refunded</option>
-                    <option value="partially_refunded">partially_refunded</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="small" for="detailPaymentAmount">Amount</label>
-                  <input id="detailPaymentAmount" type="text" placeholder="0.00" />
-                </div>
-
-                <div>
-                  <label class="small" for="detailPaymentCurrency">Currency</label>
-                  <input id="detailPaymentCurrency" type="text" value="CAD" />
-                </div>
-
-                <div>
-                  <label class="small" for="detailPaymentMethodLabel">Method Label</label>
-                  <input id="detailPaymentMethodLabel" type="text" placeholder="Cash, E-transfer, PayPal, Visa..." />
-                </div>
-
-                <div>
-                  <label class="small" for="detailPaymentReference">Transaction Reference</label>
-                  <input id="detailPaymentReference" type="text" />
-                </div>
-
-                <div>
-                  <label class="small" for="detailProviderPaymentId">Provider Payment ID</label>
-                  <input id="detailProviderPaymentId" type="text" />
-                </div>
-
-                <div>
-                  <label class="small" for="detailProviderOrderId">Provider Order ID</label>
-                  <input id="detailProviderOrderId" type="text" />
-                </div>
-
-                <div style="grid-column:1 / -1">
-                  <label class="small" for="detailPaymentNotes">Notes</label>
-                  <input id="detailPaymentNotes" type="text" />
-                </div>
-
-                <div>
-                  <button class="btn" type="button" id="detailRecordPaymentButton">
-                    Record Payment
-                  </button>
-                </div>
-
-                <div id="detailRecordPaymentMessage" class="small" style="display:none"></div>
-              </div>
-            </div>
-
-            <div class="grid cols-2" style="gap:18px;margin-top:18px">
-              <div class="card">
-                <h3 style="margin-top:0">Shipping Address</h3>
-                <div id="detailShippingAddress"></div>
-              </div>
-
-              <div class="card">
-                <h3 style="margin-top:0">Billing Address</h3>
-                <div id="detailBillingAddress"></div>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:18px">
-              <h3 style="margin-top:0">Payments</h3>
-              <div style="overflow:auto">
-                <table style="width:100%;border-collapse:collapse">
-                  <thead>
-                    <tr>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Provider</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Method</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Amount</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Reference</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Paid At</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
-                    </tr>
-                  </thead>
-                  <tbody id="detailPaymentsBody"></tbody>
-                </table>
+                  <div>
+                    <button class="btn" type="submit" id="adminUpdateOrderStatusButton">
+                      Update Status
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
 
@@ -327,12 +157,104 @@ document.addEventListener("DOMContentLoaded", () => {
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Type</th>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">SKU</th>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Qty</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Unit Price</th>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Unit</th>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Line Total</th>
                     </tr>
                   </thead>
-                  <tbody id="detailItemsBody"></tbody>
+                  <tbody id="adminOrderItemsBody">
+                    <tr><td colspan="6" style="padding:8px">No items found.</td></tr>
+                  </tbody>
                 </table>
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:18px;margin-top:18px">
+              <div class="card">
+                <h3 style="margin-top:0">Payments</h3>
+                <div id="adminOrderPaymentsSummary" class="small" style="margin-bottom:10px">—</div>
+                <div style="overflow:auto">
+                  <table style="width:100%;border-collapse:collapse">
+                    <thead>
+                      <tr>
+                        <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Provider</th>
+                        <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
+                        <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Method</th>
+                        <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Amount</th>
+                        <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Reference</th>
+                        <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Paid At</th>
+                      </tr>
+                    </thead>
+                    <tbody id="adminOrderPaymentsBody">
+                      <tr><td colspan="6" style="padding:8px">No payments found.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 style="margin-top:0">Record Payment</h3>
+                <form id="adminRecordPaymentForm" class="grid" style="gap:12px">
+                  <div class="grid cols-2" style="gap:12px">
+                    <div>
+                      <label class="small" for="adminRecordPaymentProvider">Provider</label>
+                      <select id="adminRecordPaymentProvider">
+                        <option value="manual" selected>Manual</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="stripe">Stripe</option>
+                        <option value="square">Square</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="small" for="adminRecordPaymentStatus">Payment Status</label>
+                      <select id="adminRecordPaymentStatus">
+                        <option value="paid" selected>Paid</option>
+                        <option value="authorized">Authorized</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="refunded">Refunded</option>
+                        <option value="partially_refunded">Partially Refunded</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="grid cols-2" style="gap:12px">
+                    <div>
+                      <label class="small" for="adminRecordPaymentAmount">Amount (cents)</label>
+                      <input id="adminRecordPaymentAmount" type="number" min="0" step="1" />
+                    </div>
+
+                    <div>
+                      <label class="small" for="adminRecordPaymentCurrency">Currency</label>
+                      <input id="adminRecordPaymentCurrency" type="text" maxlength="8" />
+                    </div>
+                  </div>
+
+                  <div class="grid cols-2" style="gap:12px">
+                    <div>
+                      <label class="small" for="adminRecordPaymentMethod">Method Label</label>
+                      <input id="adminRecordPaymentMethod" type="text" placeholder="Cash, e-transfer, PayPal..." />
+                    </div>
+
+                    <div>
+                      <label class="small" for="adminRecordPaymentReference">Reference</label>
+                      <input id="adminRecordPaymentReference" type="text" placeholder="Transaction reference" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="small" for="adminRecordPaymentNote">Note</label>
+                    <input id="adminRecordPaymentNote" type="text" placeholder="Optional note" />
+                  </div>
+
+                  <div>
+                    <button class="btn" type="submit" id="adminRecordPaymentButton">
+                      Record Payment
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
 
@@ -343,13 +265,14 @@ document.addEventListener("DOMContentLoaded", () => {
                   <thead>
                     <tr>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">When</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">From</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">To</th>
-                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">By</th>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Old</th>
+                      <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">New</th>
                       <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Note</th>
                     </tr>
                   </thead>
-                  <tbody id="detailHistoryBody"></tbody>
+                  <tbody id="adminOrderHistoryBody">
+                    <tr><td colspan="4" style="padding:8px">No history found.</td></tr>
+                  </tbody>
                 </table>
               </div>
             </div>
@@ -360,9 +283,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.body.appendChild(modalEl);
 
-    modalEl.querySelector("#closeOrderDetailModal").addEventListener("click", () => {
-      hideModal();
-    });
+    const closeButton = modalEl.querySelector("#closeAdminOrderDetailModal");
+    if (closeButton) {
+      closeButton.addEventListener("click", hideModal);
+    }
 
     modalEl.addEventListener("click", (event) => {
       if (event.target === modalEl) {
@@ -370,13 +294,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    modalEl.querySelector("#detailUpdateOrderStatusButton").addEventListener("click", async () => {
-      await updateOrderStatus();
-    });
+    const updateStatusForm = modalEl.querySelector("#adminUpdateOrderStatusForm");
+    if (updateStatusForm) {
+      updateStatusForm.addEventListener("submit", onSubmitOrderStatusUpdate);
+    }
 
-    modalEl.querySelector("#detailRecordPaymentButton").addEventListener("click", async () => {
-      await recordPayment();
-    });
+    const recordPaymentForm = modalEl.querySelector("#adminRecordPaymentForm");
+    if (recordPaymentForm) {
+      recordPaymentForm.addEventListener("submit", onSubmitRecordPayment);
+    }
 
     return modalEl;
   }
@@ -391,490 +317,381 @@ document.addEventListener("DOMContentLoaded", () => {
     modalEl.style.display = "none";
   }
 
-  function setUpdateMessage(message, isError = false) {
-    const el = document.getElementById("detailUpdateOrderStatusMessage");
+  function setMessage(message, isError = false) {
+    ensureModal();
+
+    const el = document.getElementById("adminOrderDetailMessage");
     if (!el) return;
 
     el.textContent = message;
-    el.style.display = "block";
-    el.style.color = isError ? "#b00020" : "#0a7a2f";
+    el.style.display = message ? "block" : "none";
+    el.style.color = isError ? "#b00020" : "";
   }
 
-  function clearUpdateMessage() {
-    const el = document.getElementById("detailUpdateOrderStatusMessage");
+  function setLoadingState(isLoading) {
+    const loadingEl = document.getElementById("adminOrderDetailLoading");
+    const contentEl = document.getElementById("adminOrderDetailContent");
+
+    if (loadingEl) {
+      loadingEl.style.display = isLoading ? "" : "none";
+    }
+
+    if (contentEl) {
+      contentEl.style.display = isLoading ? "none" : "";
+    }
+  }
+
+  function setText(id, value) {
+    const el = document.getElementById(id);
     if (!el) return;
-
-    el.textContent = "";
-    el.style.display = "none";
+    el.textContent = value;
   }
 
-  function setPaymentMessage(message, isError = false) {
-    const el = document.getElementById("detailRecordPaymentMessage");
+  function setHtml(id, html) {
+    const el = document.getElementById(id);
     if (!el) return;
-
-    el.textContent = message;
-    el.style.display = "block";
-    el.style.color = isError ? "#b00020" : "#0a7a2f";
+    el.innerHTML = html;
   }
 
-  function clearPaymentMessage() {
-    const el = document.getElementById("detailRecordPaymentMessage");
-    if (!el) return;
-
-    el.textContent = "";
-    el.style.display = "none";
-  }
-
-  function setAddressHtml(order, prefix) {
+  function renderShippingBlock(order) {
     const lines = [
-      order[`${prefix}_name`],
-      order[`${prefix}_company`],
-      order[`${prefix}_address1`],
-      order[`${prefix}_address2`],
-      [order[`${prefix}_city`], order[`${prefix}_province`]].filter(Boolean).join(", "),
-      order[`${prefix}_postal_code`],
-      order[`${prefix}_country`]
+      order.shipping_name || order.customer_name,
+      order.shipping_address1,
+      order.shipping_address2,
+      [order.shipping_city, order.shipping_province].filter(Boolean).join(", "),
+      order.shipping_postal_code,
+      order.shipping_country
     ]
-      .map(value => String(value || "").trim())
+      .map((value) => String(value || "").trim())
       .filter(Boolean);
 
-    if (!lines.length) {
-      return `<p class="small">No ${prefix} address saved.</p>`;
-    }
-
-    return `<p>${lines.map(line => escapeHtml(line)).join("<br>")}</p>`;
+    setHtml(
+      "adminDetailShippingBlock",
+      lines.length
+        ? lines.map((line) => escapeHtml(line)).join("<br>")
+        : "No shipping details saved."
+    );
   }
 
-  function populatePaymentForm(order, payments) {
-    const preparedPayment = getPreparedPayment(payments);
-    const completedPayment = getLatestCompletedPayment(payments);
-    const outstandingCents = getOutstandingBalanceCents(order, payments);
-    const currency = order.currency || "CAD";
+  function renderItems(items, currency) {
+    const body = document.getElementById("adminOrderItemsBody");
+    if (!body) return;
 
-    const provider = document.getElementById("detailPaymentProvider");
-    const paymentStatus = document.getElementById("detailPaymentStatus");
-    const amount = document.getElementById("detailPaymentAmount");
-    const paymentCurrency = document.getElementById("detailPaymentCurrency");
-    const methodLabel = document.getElementById("detailPaymentMethodLabel");
-    const reference = document.getElementById("detailPaymentReference");
-    const providerPaymentId = document.getElementById("detailProviderPaymentId");
-    const providerOrderId = document.getElementById("detailProviderOrderId");
-    const notes = document.getElementById("detailPaymentNotes");
+    const safeItems = Array.isArray(items) ? items : [];
 
-    if (provider) {
-      provider.value = preparedPayment?.provider || completedPayment?.provider || "manual";
+    if (!safeItems.length) {
+      body.innerHTML = `<tr><td colspan="6" style="padding:8px">No items found.</td></tr>`;
+      return;
     }
 
-    if (paymentStatus) {
-      paymentStatus.value = outstandingCents > 0 ? "paid" : "pending";
-    }
-
-    if (amount) {
-      const defaultCents = outstandingCents > 0 ? outstandingCents : Number(order.total_cents || 0);
-      amount.value = (defaultCents / 100).toFixed(2);
-    }
-
-    if (paymentCurrency) {
-      paymentCurrency.value = currency;
-    }
-
-    if (methodLabel) {
-      methodLabel.value =
-        preparedPayment?.payment_method_label ||
-        completedPayment?.payment_method_label ||
-        "";
-    }
-
-    if (reference) {
-      reference.value = "";
-    }
-
-    if (providerPaymentId) {
-      providerPaymentId.value = "";
-    }
-
-    if (providerOrderId) {
-      providerOrderId.value = preparedPayment?.provider_order_id || "";
-    }
-
-    if (notes) {
-      notes.value = preparedPayment
-        ? "Completing or correcting an existing prepared payment record."
-        : "";
-    }
+    body.innerHTML = safeItems.map((item) => `
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.product_name || "—")}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.product_type || "—")}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.sku || "—")}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(String(item.quantity || 0))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(item.unit_price_cents || 0, item.currency || currency))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(item.line_subtotal_cents || 0, item.currency || currency))}</td>
+      </tr>
+    `).join("");
   }
 
-  function renderOrderDetail(data) {
-    currentOrderData = data;
+  function renderHistory(history) {
+    const body = document.getElementById("adminOrderHistoryBody");
+    if (!body) return;
 
-    const order = data.order || {};
-    const items = Array.isArray(data.items) ? data.items : [];
-    const history = Array.isArray(data.history) ? data.history : [];
-    const payments = Array.isArray(data.payments) ? data.payments : [];
+    const safeHistory = Array.isArray(history) ? history : [];
+
+    if (!safeHistory.length) {
+      body.innerHTML = `<tr><td colspan="4" style="padding:8px">No history found.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = safeHistory.map((row) => `
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(row.created_at))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(row.old_status || "—"))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(row.new_status || "—"))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.note || "—")}</td>
+      </tr>
+    `).join("");
+  }
+
+  function renderPayments(paymentsPayload, fallbackCurrency = "CAD") {
+    const body = document.getElementById("adminOrderPaymentsBody");
+    const summaryEl = document.getElementById("adminOrderPaymentsSummary");
+
+    if (!body || !summaryEl) return;
+
+    const payments = Array.isArray(paymentsPayload?.payments) ? paymentsPayload.payments : [];
+    const summary = paymentsPayload?.summary || {};
+    const currency = paymentsPayload?.order?.currency || fallbackCurrency;
+
+    summaryEl.textContent =
+      `${Number(summary.payment_count || 0)} payment(s) • ` +
+      `Paid ${formatMoney(summary.paid_total_cents || 0, currency)} • ` +
+      `Outstanding ${formatMoney(summary.outstanding_cents || 0, currency)} • ` +
+      `${titleCase(summary.derived_payment_status || "pending")}`;
+
+    if (!payments.length) {
+      body.innerHTML = `<tr><td colspan="6" style="padding:8px">No payments found.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = payments.map((payment) => `
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(payment.provider || "—"))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(payment.payment_status || "—"))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(payment.payment_method_label || "—")}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(payment.amount_cents || 0, payment.currency || currency))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(payment.transaction_reference || "—")}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(payment.paid_at || payment.created_at))}</td>
+      </tr>
+    `).join("");
+  }
+
+  function fillPaymentForm(order) {
+    const amountEl = document.getElementById("adminRecordPaymentAmount");
+    const currencyEl = document.getElementById("adminRecordPaymentCurrency");
+    const methodEl = document.getElementById("adminRecordPaymentMethod");
+    const refEl = document.getElementById("adminRecordPaymentReference");
+    const noteEl = document.getElementById("adminRecordPaymentNote");
+
+    if (amountEl) {
+      amountEl.value = String(order.total_cents || 0);
+    }
+
+    if (currencyEl) {
+      currencyEl.value = String(order.currency || "CAD");
+    }
+
+    if (methodEl) methodEl.value = "";
+    if (refEl) refEl.value = "";
+    if (noteEl) noteEl.value = "";
+  }
+
+  function renderOrderDetail(detailPayload, paymentsPayload) {
+    const order = detailPayload?.order || {};
+    const items = Array.isArray(detailPayload?.items) ? detailPayload.items : [];
+    const history = Array.isArray(detailPayload?.status_history) ? detailPayload.status_history : [];
+    const paymentSummary = paymentsPayload?.summary || {};
     const currency = order.currency || "CAD";
 
-    const outstandingCents = getOutstandingBalanceCents(order, payments);
-    const preparedPayment = getPreparedPayment(payments);
-    const completedPayment = getLatestCompletedPayment(payments);
+    setText("adminDetailOrderNumber", order.order_number || "—");
+    setText("adminDetailCustomer", order.customer_name || "—");
+    setText("adminDetailCustomerEmail", order.customer_email || "—");
+    setText("adminDetailOrderStatus", titleCase(order.order_status || "pending"));
+    setText("adminDetailOrderPaymentStatus", titleCase(order.payment_status || "pending"));
+    setText("adminDetailFulfillmentType", titleCase(order.fulfillment_type || "shipping"));
+    setText("adminDetailCreatedAt", formatDate(order.created_at));
+    setText("adminDetailUpdatedAt", formatDate(order.updated_at));
 
-    setText("detailOrderNumber", order.order_number || "—");
-    setText("detailOrderStatus", titleCase(order.order_status || ""));
-    setText("detailFulfillmentType", titleCase(order.fulfillment_type || ""));
-    setText("detailCustomerName", order.customer_name || "—");
-    setText("detailCustomerEmail", order.customer_email || "—");
-    setText("detailCreatedAt", formatDate(order.created_at));
-    setText("detailUpdatedAt", formatDate(order.updated_at));
+    setText("adminDetailSubtotal", formatMoney(order.subtotal_cents || 0, currency));
+    setText("adminDetailDiscount", formatMoney(order.discount_cents || 0, currency));
+    setText("adminDetailShipping", formatMoney(order.shipping_cents || 0, currency));
+    setText("adminDetailTax", formatMoney(order.tax_cents || 0, currency));
+    setText("adminDetailTotal", formatMoney(order.total_cents || 0, currency));
+    setText("adminDetailPaidTotal", formatMoney(paymentSummary.paid_total_cents || 0, currency));
+    setText("adminDetailOutstanding", formatMoney(paymentSummary.outstanding_cents || 0, currency));
+    setText("adminDetailDerivedPaymentStatus", titleCase(paymentSummary.derived_payment_status || order.payment_status || "pending"));
 
-    setText("detailSubtotal", formatMoney(order.subtotal_cents || 0, currency));
-    setText("detailDiscount", formatMoney(order.discount_cents || 0, currency));
-    setText("detailShipping", formatMoney(order.shipping_cents || 0, currency));
-    setText("detailTax", formatMoney(order.tax_cents || 0, currency));
-    setText("detailTotal", formatMoney(order.total_cents || 0, currency));
-
-    setText("detailOutstanding", formatMoney(outstandingCents, currency));
-    setText(
-      "detailPreparedPayment",
-      preparedPayment
-        ? `${titleCase(preparedPayment.provider)} / ${titleCase(preparedPayment.payment_status)} / ${formatMoney(preparedPayment.amount_cents || 0, preparedPayment.currency || currency)}`
-        : "None"
-    );
-    setText(
-      "detailCompletedPayment",
-      completedPayment
-        ? `${titleCase(completedPayment.provider)} / ${titleCase(completedPayment.payment_status)} / ${formatMoney(completedPayment.amount_cents || 0, completedPayment.currency || currency)}`
-        : "None"
-    );
-    setText(
-      "detailLatestReference",
-      completedPayment
-        ? getPaymentReference(completedPayment)
-        : (preparedPayment ? getPaymentReference(preparedPayment) : "—")
-    );
-
-    const notesEl = document.getElementById("detailOrderNotes");
-    if (notesEl) {
-      notesEl.innerHTML = order.notes
-        ? escapeHtml(order.notes).replace(/\n/g, "<br>")
-        : "No order notes saved.";
-    }
-
-    const hintEl = document.getElementById("detailPaymentHint");
-    if (hintEl) {
-      if (preparedPayment) {
-        hintEl.textContent = "This order already has a prepared payment record. Record a manual completion carefully to avoid duplicates.";
-      } else if (outstandingCents === 0 && Number(order.total_cents || 0) > 0) {
-        hintEl.textContent = "This order appears fully covered by completed payments.";
-      } else {
-        hintEl.textContent = "Use Record Payment for manual settlement, correction, or offline payment capture.";
-      }
-    }
-
-    const statusSelect = document.getElementById("detailNewOrderStatus");
+    const statusSelect = document.getElementById("adminUpdateOrderStatusSelect");
     if (statusSelect) {
       statusSelect.value = String(order.order_status || "pending").toLowerCase();
     }
 
-    const statusNote = document.getElementById("detailOrderStatusNote");
-    if (statusNote) {
-      statusNote.value = "";
-    }
-
-    populatePaymentForm(order, payments);
-
-    const shippingAddressEl = document.getElementById("detailShippingAddress");
-    if (shippingAddressEl) {
-      shippingAddressEl.innerHTML = setAddressHtml(order, "shipping");
-    }
-
-    const billingAddressEl = document.getElementById("detailBillingAddress");
-    if (billingAddressEl) {
-      billingAddressEl.innerHTML = setAddressHtml(order, "billing");
-    }
-
-    const paymentsBody = document.getElementById("detailPaymentsBody");
-    if (paymentsBody) {
-      paymentsBody.innerHTML = payments.length
-        ? payments.map(payment => `
-            <tr>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(payment.provider || ""))}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(payment.payment_status || ""))}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(payment.payment_method_label || "—")}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(payment.amount_cents || 0, payment.currency || currency))}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(getPaymentReference(payment))}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(payment.paid_at))}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(payment.created_at))}</td>
-            </tr>
-          `).join("")
-        : `<tr><td colspan="7" style="padding:8px">No payments found.</td></tr>`;
-    }
-
-    const itemsBody = document.getElementById("detailItemsBody");
-    if (itemsBody) {
-      itemsBody.innerHTML = items.length
-        ? items.map(item => `
-            <tr>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.product_name || "")}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.product_type || "")}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(item.sku || "—")}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(String(item.quantity || 0))}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(item.unit_price_cents || 0, currency))}</td>
-              <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatMoney(item.line_subtotal_cents || 0, currency))}</td>
-            </tr>
-          `).join("")
-        : `<tr><td colspan="6" style="padding:8px">No items found.</td></tr>`;
-    }
-
-    const historyBody = document.getElementById("detailHistoryBody");
-    if (historyBody) {
-      historyBody.innerHTML = history.length
-        ? history.map(row => {
-            const changedBy = row.changed_by_display_name || row.changed_by_email || "System";
-
-            return `
-              <tr>
-                <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatDate(row.created_at))}</td>
-                <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(row.old_status || "—"))}</td>
-                <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(row.new_status || ""))}</td>
-                <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(changedBy)}</td>
-                <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.note || "")}</td>
-              </tr>
-            `;
-          }).join("")
-        : `<tr><td colspan="5" style="padding:8px">No status history found.</td></tr>`;
-    }
+    renderShippingBlock(order);
+    renderItems(items, currency);
+    renderHistory(history);
+    renderPayments(paymentsPayload, currency);
+    fillPaymentForm(order);
   }
 
-  async function loadOrderDetail(orderId) {
+  async function fetchOrderDetail(orderId) {
     const response = await window.DDAuth.apiFetch(`/api/admin/order-detail?order_id=${encodeURIComponent(orderId)}`, {
       method: "GET"
     });
 
     const data = await response.json();
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Failed to load order.");
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Failed to load order detail.");
     }
 
     return data;
   }
 
-  async function sendOrderStatusUpdate(orderId, newStatus, note) {
-    const response = await window.DDAuth.apiFetch("/api/admin/update-order-status", {
-      method: "POST",
-      body: JSON.stringify({
-        order_id: orderId,
-        new_status: newStatus,
-        note
-      })
+  async function fetchOrderPayments(orderId) {
+    const response = await window.DDAuth.apiFetch(`/api/admin/order-payments?order_id=${encodeURIComponent(orderId)}`, {
+      method: "GET"
     });
 
     const data = await response.json();
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Failed to update order status.");
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Failed to load order payments.");
     }
 
     return data;
   }
 
-  async function sendRecordPayment(payload) {
-    const response = await window.DDAuth.apiFetch("/api/admin/record-payment", {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
+  async function loadOrder(orderId) {
+    if (isLoadingOrder) return;
 
-    const data = await response.json();
+    currentOrderId = orderId;
+    isLoadingOrder = true;
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Failed to record payment.");
+    try {
+      showModal();
+      setMessage("");
+      setLoadingState(true);
+
+      const [detailPayload, paymentsPayload] = await Promise.all([
+        fetchOrderDetail(orderId),
+        fetchOrderPayments(orderId)
+      ]);
+
+      renderOrderDetail(detailPayload, paymentsPayload);
+      setLoadingState(false);
+    } catch (error) {
+      setLoadingState(false);
+      setMessage(error.message || "Failed to load order.", true);
+    } finally {
+      isLoadingOrder = false;
     }
-
-    return data;
   }
 
-  async function refreshCurrentOrderDetail() {
+  async function onSubmitOrderStatusUpdate(event) {
+    event.preventDefault();
     if (!currentOrderId) return;
 
-    const modal = ensureModal();
-    const loadingEl = modal.querySelector("#orderDetailLoading");
-    const errorEl = modal.querySelector("#orderDetailError");
-    const contentEl = modal.querySelector("#orderDetailContent");
+    const statusEl = document.getElementById("adminUpdateOrderStatusSelect");
+    const noteEl = document.getElementById("adminUpdateOrderStatusNote");
+    const button = document.getElementById("adminUpdateOrderStatusButton");
 
-    if (loadingEl) loadingEl.style.display = "";
-    if (errorEl) {
-      errorEl.style.display = "none";
-      errorEl.textContent = "";
-    }
+    const new_status = String(statusEl?.value || "").trim().toLowerCase();
+    const note = String(noteEl?.value || "").trim();
+    const originalText = button?.textContent || "Update Status";
 
     try {
-      const data = await loadOrderDetail(currentOrderId);
-      renderOrderDetail(data);
-
-      if (contentEl) {
-        contentEl.style.display = "";
-      }
-    } catch (error) {
-      if (errorEl) {
-        errorEl.textContent = error.message || "Failed to reload order.";
-        errorEl.style.display = "";
-      }
-    } finally {
-      if (loadingEl) loadingEl.style.display = "none";
-    }
-  }
-
-  async function updateOrderStatus() {
-    if (!currentOrderId) {
-      setUpdateMessage("No order selected.", true);
-      return;
-    }
-
-    const statusSelect = document.getElementById("detailNewOrderStatus");
-    const noteInput = document.getElementById("detailOrderStatusNote");
-    const button = document.getElementById("detailUpdateOrderStatusButton");
-
-    const newStatus = String(statusSelect?.value || "").trim().toLowerCase();
-    const note = String(noteInput?.value || "").trim();
-    const originalText = button ? button.textContent : "";
-
-    try {
-      clearUpdateMessage();
+      setMessage("Updating order status...");
 
       if (button) {
         button.disabled = true;
         button.textContent = "Updating...";
       }
 
-      await sendOrderStatusUpdate(currentOrderId, newStatus, note);
-      setUpdateMessage("Order status updated successfully.");
+      const response = await window.DDAuth.apiFetch("/api/admin/update-order-status", {
+        method: "POST",
+        body: JSON.stringify({
+          order_id: currentOrderId,
+          new_status,
+          note
+        })
+      });
 
+      const data = await response.json();
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || "Failed to update order status.");
+      }
+
+      if (noteEl) {
+        noteEl.value = "";
+      }
+
+      setMessage("Order status updated.");
+      await loadOrder(currentOrderId);
       document.dispatchEvent(new CustomEvent("dd:order-updated", {
-        detail: { order_id: currentOrderId }
+        detail: { order: data.order || null }
       }));
-
-      await refreshCurrentOrderDetail();
     } catch (error) {
-      setUpdateMessage(error.message || "Failed to update order status.", true);
+      setMessage(error.message || "Failed to update order status.", true);
     } finally {
       if (button) {
         button.disabled = false;
-        button.textContent = originalText || "Update Status";
+        button.textContent = originalText;
       }
     }
   }
 
-  async function recordPayment() {
-    if (!currentOrderId) {
-      setPaymentMessage("No order selected.", true);
-      return;
-    }
+  async function onSubmitRecordPayment(event) {
+    event.preventDefault();
+    if (!currentOrderId || isRecordingPayment) return;
 
-    const provider = document.getElementById("detailPaymentProvider");
-    const paymentStatus = document.getElementById("detailPaymentStatus");
-    const amount = document.getElementById("detailPaymentAmount");
-    const currency = document.getElementById("detailPaymentCurrency");
-    const methodLabel = document.getElementById("detailPaymentMethodLabel");
-    const reference = document.getElementById("detailPaymentReference");
-    const providerPaymentId = document.getElementById("detailProviderPaymentId");
-    const providerOrderId = document.getElementById("detailProviderOrderId");
-    const notes = document.getElementById("detailPaymentNotes");
-    const button = document.getElementById("detailRecordPaymentButton");
-
-    const amount_cents = dollarsToCents(amount?.value || "");
-
-    if (Number.isNaN(amount_cents)) {
-      setPaymentMessage("Amount must be a valid number.", true);
-      return;
-    }
+    const providerEl = document.getElementById("adminRecordPaymentProvider");
+    const statusEl = document.getElementById("adminRecordPaymentStatus");
+    const amountEl = document.getElementById("adminRecordPaymentAmount");
+    const currencyEl = document.getElementById("adminRecordPaymentCurrency");
+    const methodEl = document.getElementById("adminRecordPaymentMethod");
+    const refEl = document.getElementById("adminRecordPaymentReference");
+    const noteEl = document.getElementById("adminRecordPaymentNote");
+    const button = document.getElementById("adminRecordPaymentButton");
 
     const payload = {
       order_id: currentOrderId,
-      provider: String(provider?.value || "manual").trim().toLowerCase(),
-      payment_status: String(paymentStatus?.value || "paid").trim().toLowerCase(),
-      amount_cents,
-      currency: String(currency?.value || "CAD").trim().toUpperCase(),
-      payment_method_label: String(methodLabel?.value || "").trim(),
-      transaction_reference: String(reference?.value || "").trim(),
-      provider_payment_id: String(providerPaymentId?.value || "").trim(),
-      provider_order_id: String(providerOrderId?.value || "").trim(),
-      notes: String(notes?.value || "").trim()
+      provider: String(providerEl?.value || "manual").trim().toLowerCase(),
+      payment_status: String(statusEl?.value || "paid").trim().toLowerCase(),
+      amount_cents: Number(amountEl?.value || 0),
+      currency: String(currencyEl?.value || "CAD").trim().toUpperCase(),
+      payment_method_label: String(methodEl?.value || "").trim(),
+      transaction_reference: String(refEl?.value || "").trim(),
+      notes: String(noteEl?.value || "").trim()
     };
 
-    const originalText = button ? button.textContent : "";
+    const originalText = button?.textContent || "Record Payment";
+    isRecordingPayment = true;
 
     try {
-      clearPaymentMessage();
+      setMessage("Recording payment...");
 
       if (button) {
         button.disabled = true;
         button.textContent = "Recording...";
       }
 
-      await sendRecordPayment(payload);
-      setPaymentMessage("Payment recorded successfully.");
+      const response = await window.DDAuth.apiFetch("/api/admin/record-payment", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
 
+      const data = await response.json();
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || "Failed to record payment.");
+      }
+
+      setMessage("Payment recorded.");
+      await loadOrder(currentOrderId);
       document.dispatchEvent(new CustomEvent("dd:order-updated", {
-        detail: { order_id: currentOrderId }
+        detail: { order: data.order || null }
       }));
-
-      await refreshCurrentOrderDetail();
     } catch (error) {
-      setPaymentMessage(error.message || "Failed to record payment.", true);
+      setMessage(error.message || "Failed to record payment.", true);
     } finally {
+      isRecordingPayment = false;
+
       if (button) {
         button.disabled = false;
-        button.textContent = originalText || "Record Payment";
+        button.textContent = originalText;
       }
     }
   }
 
-  tableBody.addEventListener("click", async (event) => {
+  ordersTableBody.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-view-order-id]");
     if (!button) return;
 
     const orderId = Number(button.getAttribute("data-view-order-id"));
-    if (!orderId) return;
-
-    currentOrderId = orderId;
-    currentOrderData = null;
-
-    const modal = ensureModal();
-    showModal();
-    clearUpdateMessage();
-    clearPaymentMessage();
-
-    const loadingEl = modal.querySelector("#orderDetailLoading");
-    const errorEl = modal.querySelector("#orderDetailError");
-    const contentEl = modal.querySelector("#orderDetailContent");
-
-    if (loadingEl) loadingEl.style.display = "";
-    if (errorEl) {
-      errorEl.style.display = "none";
-      errorEl.textContent = "";
-    }
-    if (contentEl) {
-      contentEl.style.display = "none";
-    }
+    if (!Number.isInteger(orderId) || orderId <= 0) return;
 
     const originalText = button.textContent;
 
     try {
       button.disabled = true;
       button.textContent = "Loading...";
-
-      const data = await loadOrderDetail(orderId);
-      renderOrderDetail(data);
-
-      if (contentEl) {
-        contentEl.style.display = "";
-      }
-    } catch (error) {
-      if (errorEl) {
-        errorEl.textContent = error.message || "Failed to load order.";
-        errorEl.style.display = "";
-      }
+      await loadOrder(orderId);
     } finally {
-      if (loadingEl) loadingEl.style.display = "none";
       button.disabled = false;
       button.textContent = originalText;
     }
