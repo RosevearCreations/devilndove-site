@@ -3,136 +3,80 @@
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      "Content-Type": "application/json"
+    }
   });
 }
 
-async function getSessionUser(env, token) {
-  if (!token) return null;
-
-  const sessionUser = await env.DB.prepare(`
-    SELECT
-      users.user_id,
-      users.email,
-      users.display_name,
-      users.role,
-      users.is_active
-    FROM sessions
-    JOIN users ON sessions.user_id = users.user_id
-    WHERE sessions.session_token = ?
-      AND sessions.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token)
-    .first();
-
-  return sessionUser || null;
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
 }
 
-async function requireAdmin(request, env) {
-  const auth = request.headers.get("Authorization") || "";
-
-  if (!auth.startsWith("Bearer ")) {
-    return { error: json({ ok: false, error: "Unauthorized." }, 401) };
-  }
-
-  const token = auth.slice(7).trim();
+async function getAdminUserFromRequest(request, env) {
+  const token = getBearerToken(request);
 
   if (!token) {
-    return { error: json({ ok: false, error: "Missing session token." }, 401) };
+    return null;
   }
 
-  const sessionUser = await getSessionUser(env, token);
+  const session = await env.DB.prepare(`
+    SELECT
+      s.session_id,
+      s.user_id,
+      s.session_token,
+      s.token,
+      s.expires_at,
+      u.user_id AS resolved_user_id,
+      u.email,
+      u.display_name,
+      u.role,
+      u.is_active
+    FROM sessions s
+    INNER JOIN users u
+      ON u.user_id = s.user_id
+    WHERE (
+      s.session_token = ?
+      OR s.token = ?
+    )
+      AND s.expires_at > datetime('now')
+    LIMIT 1
+  `)
+    .bind(token, token)
+    .first();
 
-  if (!sessionUser) {
-    return { error: json({ ok: false, error: "Invalid session." }, 401) };
-  }
+  if (!session) return null;
+  if (Number(session.is_active || 0) !== 1) return null;
+  if (String(session.role || "").toLowerCase() !== "admin") return null;
 
-  if (!sessionUser.is_active) {
-    return { error: json({ ok: false, error: "Account is inactive." }, 403) };
-  }
-
-  if (String(sessionUser.role || "").toLowerCase() !== "admin") {
-    return { error: json({ ok: false, error: "Forbidden." }, 403) };
-  }
-
-  return { sessionUser };
+  return {
+    session_id: Number(session.session_id || 0),
+    user_id: Number(session.resolved_user_id || session.user_id || 0),
+    email: session.email || "",
+    display_name: session.display_name || "",
+    role: session.role || "admin"
+  };
 }
 
-function normalizeStatus(value) {
-  const status = String(value || "").trim().toLowerCase();
-  return ["draft", "pending", "paid", "fulfilled", "cancelled", "refunded"].includes(status)
-    ? status
-    : "";
-}
-
-function normalizePaymentStatus(value) {
-  const status = String(value || "").trim().toLowerCase();
-  return [
-    "pending",
-    "authorized",
-    "paid",
-    "completed",
-    "captured",
-    "failed",
-    "cancelled",
-    "refunded",
-    "partially_refunded"
-  ].includes(status)
-    ? status
-    : "";
-}
-
-function normalizeFulfillment(value) {
-  const fulfillment = String(value || "").trim().toLowerCase();
-  return ["shipping", "digital", "mixed", "pickup"].includes(fulfillment)
-    ? fulfillment
-    : "";
+function normalizeResults(result) {
+  return Array.isArray(result?.results) ? result.results : [];
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const authCheck = await requireAdmin(request, env);
-  if (authCheck.error) return authCheck.error;
+  const adminUser = await getAdminUserFromRequest(request, env);
 
-  const url = new URL(request.url);
-  const statusFilter = normalizeStatus(url.searchParams.get("status"));
-  const paymentFilter = normalizePaymentStatus(url.searchParams.get("payment_status"));
-  const fulfillmentFilter = normalizeFulfillment(url.searchParams.get("fulfillment_type"));
-
-  const conditions = [];
-  const bindings = [];
-
-  if (statusFilter) {
-    conditions.push("o.order_status = ?");
-    bindings.push(statusFilter);
+  if (!adminUser) {
+    return json({ ok: false, error: "Unauthorized." }, 401);
   }
-
-  if (fulfillmentFilter) {
-    conditions.push("o.fulfillment_type = ?");
-    bindings.push(fulfillmentFilter);
-  }
-
-  if (paymentFilter) {
-    conditions.push(`
-      (
-        LOWER(COALESCE(o.payment_status, '')) = ?
-        OR LOWER(COALESCE(ps.derived_payment_status, '')) = ?
-      )
-    `);
-    bindings.push(paymentFilter, paymentFilter);
-  }
-
-  const whereClause = conditions.length
-    ? `WHERE ${conditions.join(" AND ")}`
-    : "";
 
   const sql = `
     WITH payment_summary AS (
       SELECT
         p.order_id,
-
         COUNT(*) AS payment_count,
 
         COALESCE(SUM(
@@ -145,21 +89,19 @@ export async function onRequestGet(context) {
 
         COALESCE(SUM(
           CASE
-            WHEN LOWER(COALESCE(p.payment_status, '')) = 'partially_refunded'
-              THEN COALESCE(p.amount_cents, 0)
-            WHEN LOWER(COALESCE(p.payment_status, '')) = 'refunded'
-              THEN COALESCE(p.amount_cents, 0)
-            ELSE 0
-          END
-        ), 0) AS refunded_total_cents,
-
-        COALESCE(SUM(
-          CASE
             WHEN LOWER(COALESCE(p.payment_status, '')) IN ('pending', 'authorized')
               THEN COALESCE(p.amount_cents, 0)
             ELSE 0
           END
         ), 0) AS pending_total_cents,
+
+        COALESCE(SUM(
+          CASE
+            WHEN LOWER(COALESCE(p.payment_status, '')) IN ('refunded', 'partially_refunded')
+              THEN COALESCE(p.amount_cents, 0)
+            ELSE 0
+          END
+        ), 0) AS refunded_total_cents,
 
         MAX(CASE
           WHEN LOWER(COALESCE(p.payment_status, '')) = 'refunded' THEN 1
@@ -170,11 +112,6 @@ export async function onRequestGet(context) {
           WHEN LOWER(COALESCE(p.payment_status, '')) = 'partially_refunded' THEN 1
           ELSE 0
         END) AS has_partially_refunded,
-
-        MAX(CASE
-          WHEN LOWER(COALESCE(p.payment_status, '')) IN ('paid', 'completed', 'captured') THEN 1
-          ELSE 0
-        END) AS has_paid_like,
 
         MAX(CASE
           WHEN LOWER(COALESCE(p.payment_status, '')) = 'authorized' THEN 1
@@ -197,6 +134,7 @@ export async function onRequestGet(context) {
     SELECT
       o.order_id,
       o.order_number,
+      o.user_id,
       o.customer_email,
       o.customer_name,
       o.order_status,
@@ -209,19 +147,16 @@ export async function onRequestGet(context) {
       o.shipping_cents,
       o.tax_cents,
       o.total_cents,
-      o.shipping_city,
-      o.shipping_province,
-      o.shipping_country,
       o.created_at,
       o.updated_at,
 
       COALESCE(ps.payment_count, 0) AS payment_count,
       COALESCE(ps.paid_total_cents, 0) AS paid_total_cents,
-      COALESCE(ps.refunded_total_cents, 0) AS refunded_total_cents,
       COALESCE(ps.pending_total_cents, 0) AS pending_total_cents,
+      COALESCE(ps.refunded_total_cents, 0) AS refunded_total_cents,
 
       CASE
-        WHEN ps.order_id IS NULL THEN 'pending'
+        WHEN ps.order_id IS NULL THEN COALESCE(o.payment_status, 'pending')
         WHEN COALESCE(ps.has_refunded, 0) = 1 THEN 'refunded'
         WHEN COALESCE(ps.has_partially_refunded, 0) = 1 THEN 'partially_refunded'
         WHEN COALESCE(ps.paid_total_cents, 0) >= COALESCE(o.total_cents, 0)
@@ -230,25 +165,54 @@ export async function onRequestGet(context) {
         WHEN COALESCE(ps.has_pending, 0) = 1 THEN 'pending'
         WHEN COALESCE(ps.all_failed_or_cancelled, 0) = 1 THEN 'failed'
         ELSE COALESCE(o.payment_status, 'pending')
-      END AS derived_payment_status,
-
-      MAX(COALESCE(o.total_cents, 0) - COALESCE(ps.paid_total_cents, 0), 0) AS outstanding_cents
+      END AS derived_payment_status
 
     FROM orders o
     LEFT JOIN payment_summary ps
       ON ps.order_id = o.order_id
 
-    ${whereClause}
-
     ORDER BY o.created_at DESC, o.order_id DESC
   `;
 
-  const result = bindings.length
-    ? await env.DB.prepare(sql).bind(...bindings).all()
-    : await env.DB.prepare(sql).all();
+  const result = await env.DB.prepare(sql).all();
+  const orders = normalizeResults(result).map((row) => {
+    const total = Number(row.total_cents || 0);
+    const paid = Number(row.paid_total_cents || 0);
+
+    return {
+      order_id: Number(row.order_id || 0),
+      order_number: row.order_number || "",
+      user_id: Number(row.user_id || 0),
+      customer_email: row.customer_email || "",
+      customer_name: row.customer_name || "",
+      order_status: row.order_status || "pending",
+      payment_status: row.payment_status || "pending",
+      derived_payment_status: row.derived_payment_status || row.payment_status || "pending",
+      payment_method: row.payment_method || "",
+      fulfillment_type: row.fulfillment_type || "shipping",
+      currency: row.currency || "CAD",
+      subtotal_cents: Number(row.subtotal_cents || 0),
+      discount_cents: Number(row.discount_cents || 0),
+      shipping_cents: Number(row.shipping_cents || 0),
+      tax_cents: Number(row.tax_cents || 0),
+      total_cents: total,
+      payment_count: Number(row.payment_count || 0),
+      paid_total_cents: paid,
+      pending_total_cents: Number(row.pending_total_cents || 0),
+      refunded_total_cents: Number(row.refunded_total_cents || 0),
+      outstanding_cents: Math.max(total - paid, 0),
+      created_at: row.created_at || null,
+      updated_at: row.updated_at || null
+    };
+  });
 
   return json({
     ok: true,
-    orders: Array.isArray(result?.results) ? result.results : []
+    requested_by: {
+      user_id: adminUser.user_id,
+      email: adminUser.email,
+      display_name: adminUser.display_name
+    },
+    orders
   });
 }
