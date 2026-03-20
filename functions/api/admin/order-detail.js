@@ -3,154 +3,80 @@
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      "Content-Type": "application/json"
+    }
   });
+}
+
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
 }
 
 function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
-async function getSessionUser(env, token) {
-  if (!token) return null;
-
-  const sessionUser = await env.DB.prepare(`
-    SELECT
-      users.user_id,
-      users.email,
-      users.display_name,
-      users.role,
-      users.is_active
-    FROM sessions
-    JOIN users ON sessions.user_id = users.user_id
-    WHERE sessions.session_token = ?
-      AND sessions.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token)
-    .first();
-
-  return sessionUser || null;
-}
-
-async function requireAdmin(request, env) {
-  const auth = request.headers.get("Authorization") || "";
-
-  if (!auth.startsWith("Bearer ")) {
-    return { error: json({ ok: false, error: "Unauthorized." }, 401) };
-  }
-
-  const token = auth.slice(7).trim();
+async function getAdminUserFromRequest(request, env) {
+  const token = getBearerToken(request);
 
   if (!token) {
-    return { error: json({ ok: false, error: "Missing session token." }, 401) };
+    return null;
   }
 
-  const sessionUser = await getSessionUser(env, token);
+  const session = await env.DB.prepare(`
+    SELECT
+      s.session_id,
+      s.user_id,
+      s.session_token,
+      s.token,
+      s.expires_at,
+      u.user_id AS resolved_user_id,
+      u.email,
+      u.display_name,
+      u.role,
+      u.is_active
+    FROM sessions s
+    INNER JOIN users u
+      ON u.user_id = s.user_id
+    WHERE (
+      s.session_token = ?
+      OR s.token = ?
+    )
+      AND s.expires_at > datetime('now')
+    LIMIT 1
+  `)
+    .bind(token, token)
+    .first();
 
-  if (!sessionUser) {
-    return { error: json({ ok: false, error: "Invalid session." }, 401) };
-  }
-
-  if (!sessionUser.is_active) {
-    return { error: json({ ok: false, error: "Account is inactive." }, 403) };
-  }
-
-  if (sessionUser.role !== "admin") {
-    return { error: json({ ok: false, error: "Forbidden." }, 403) };
-  }
-
-  return { sessionUser };
-}
-
-function summarizePayments(order, payments) {
-  const safePayments = Array.isArray(payments) ? payments : [];
-  const orderTotalCents = Number(order?.total_cents || 0);
-
-  const paidStatuses = new Set(["paid", "completed", "captured"]);
-  const refundableStatuses = new Set(["partially_refunded", "refunded"]);
-  const pendingStatuses = new Set(["pending", "authorized"]);
-
-  let paidTotalCents = 0;
-  let refundedTotalCents = 0;
-  let pendingTotalCents = 0;
-
-  for (const payment of safePayments) {
-    const status = String(payment?.payment_status || "").toLowerCase();
-    const amount = Number(payment?.amount_cents || 0);
-
-    if (paidStatuses.has(status)) {
-      paidTotalCents += amount;
-    }
-
-    if (refundableStatuses.has(status)) {
-      refundedTotalCents += amount;
-    }
-
-    if (pendingStatuses.has(status)) {
-      pendingTotalCents += amount;
-    }
-  }
-
-  const preparedPayment =
-    safePayments.find((payment) => {
-      const status = String(payment?.payment_status || "").toLowerCase();
-      return status === "pending" || status === "authorized";
-    }) || null;
-
-  const latestCompletedPayment =
-    safePayments.find((payment) => {
-      const status = String(payment?.payment_status || "").toLowerCase();
-      return status === "paid" || status === "completed" || status === "captured";
-    }) || null;
-
-  const outstandingCents = Math.max(orderTotalCents - paidTotalCents, 0);
-
-  let derivedPaymentStatus = "pending";
-
-  if (safePayments.length === 0) {
-    derivedPaymentStatus = "pending";
-  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "refunded")) {
-    derivedPaymentStatus = "refunded";
-  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "partially_refunded")) {
-    derivedPaymentStatus = "partially_refunded";
-  } else if (paidTotalCents >= orderTotalCents && orderTotalCents > 0) {
-    derivedPaymentStatus = "paid";
-  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "authorized")) {
-    derivedPaymentStatus = "authorized";
-  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "pending")) {
-    derivedPaymentStatus = "pending";
-  } else if (
-    safePayments.every((payment) => {
-      const status = String(payment?.payment_status || "").toLowerCase();
-      return status === "failed" || status === "cancelled";
-    })
-  ) {
-    derivedPaymentStatus = "failed";
-  }
+  if (!session) return null;
+  if (Number(session.is_active || 0) !== 1) return null;
+  if (String(session.role || "").toLowerCase() !== "admin") return null;
 
   return {
-    payment_count: safePayments.length,
-    paid_total_cents: paidTotalCents,
-    refunded_total_cents: refundedTotalCents,
-    pending_total_cents: pendingTotalCents,
-    outstanding_cents: outstandingCents,
-    derived_payment_status: derivedPaymentStatus,
-    prepared_payment: preparedPayment,
-    latest_completed_payment: latestCompletedPayment
+    session_id: Number(session.session_id || 0),
+    user_id: Number(session.resolved_user_id || session.user_id || 0),
+    email: session.email || "",
+    display_name: session.display_name || "",
+    role: session.role || "admin"
   };
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const authCheck = await requireAdmin(request, env);
-  if (authCheck.error) return authCheck.error;
+  const adminUser = await getAdminUserFromRequest(request, env);
+
+  if (!adminUser) {
+    return json({ ok: false, error: "Unauthorized." }, 401);
+  }
 
   const url = new URL(request.url);
-  const orderId = Number(url.searchParams.get("order_id"));
+  const order_id = Number(url.searchParams.get("order_id"));
 
-  if (!Number.isInteger(orderId) || orderId <= 0) {
+  if (!Number.isInteger(order_id) || order_id <= 0) {
     return json({ ok: false, error: "A valid order_id is required." }, 400);
   }
 
@@ -167,7 +93,7 @@ export async function onRequestGet(context) {
       fulfillment_type,
       currency,
       subtotal_cents,
-      discount_cents,
+      COALESCE(discount_cents, 0) AS discount_cents,
       shipping_cents,
       tax_cents,
       total_cents,
@@ -194,7 +120,7 @@ export async function onRequestGet(context) {
     WHERE order_id = ?
     LIMIT 1
   `)
-    .bind(orderId)
+    .bind(order_id)
     .first();
 
   if (!order) {
@@ -221,7 +147,7 @@ export async function onRequestGet(context) {
     WHERE order_id = ?
     ORDER BY order_item_id ASC
   `)
-    .bind(orderId)
+    .bind(order_id)
     .all();
 
   const historyResult = await env.DB.prepare(`
@@ -241,50 +167,103 @@ export async function onRequestGet(context) {
     WHERE osh.order_id = ?
     ORDER BY osh.created_at ASC, osh.order_status_history_id ASC
   `)
-    .bind(orderId)
+    .bind(order_id)
     .all();
 
-  const paymentsResult = await env.DB.prepare(`
+  const paymentCountsRow = await env.DB.prepare(`
     SELECT
-      payment_id,
-      order_id,
-      provider,
-      provider_payment_id,
-      provider_order_id,
-      payment_status,
-      amount_cents,
-      currency,
-      payment_method_label,
-      transaction_reference,
-      paid_at,
-      created_at,
-      updated_at,
-      notes
+      COUNT(*) AS payment_count,
+      COALESCE(SUM(
+        CASE
+          WHEN LOWER(COALESCE(payment_status, '')) IN ('paid', 'completed', 'captured')
+            THEN COALESCE(amount_cents, 0)
+          ELSE 0
+        END
+      ), 0) AS paid_total_cents
     FROM payments
     WHERE order_id = ?
-    ORDER BY created_at DESC, payment_id DESC
   `)
-    .bind(orderId)
-    .all();
-
-  const items = normalizeResults(itemsResult);
-  const history = normalizeResults(historyResult);
-  const payments = normalizeResults(paymentsResult);
-
-  const payment_summary = summarizePayments(order, payments);
+    .bind(order_id)
+    .first();
 
   return json({
     ok: true,
-    admin_user: {
-      user_id: authCheck.sessionUser.user_id,
-      email: authCheck.sessionUser.email,
-      display_name: authCheck.sessionUser.display_name,
-      role: authCheck.sessionUser.role
+    requested_by: {
+      user_id: adminUser.user_id,
+      email: adminUser.email,
+      display_name: adminUser.display_name,
+      role: adminUser.role
     },
-    order,
-    items,
-    history,
-    payments,
-    payment_summary
+    order: {
+      order_id: Number(order.order_id || 0),
+      order_number: order.order_number || "",
+      user_id: Number(order.user_id || 0),
+      customer_email: order.customer_email || "",
+      customer_name: order.customer_name || "",
+      order_status: order.order_status || "pending",
+      payment_status: order.payment_status || "pending",
+      payment_method: order.payment_method || "",
+      fulfillment_type: order.fulfillment_type || "shipping",
+      currency: order.currency || "CAD",
+      subtotal_cents: Number(order.subtotal_cents || 0),
+      discount_cents: Number(order.discount_cents || 0),
+      shipping_cents: Number(order.shipping_cents || 0),
+      tax_cents: Number(order.tax_cents || 0),
+      total_cents: Number(order.total_cents || 0),
+      shipping_name: order.shipping_name || "",
+      shipping_company: order.shipping_company || "",
+      shipping_address1: order.shipping_address1 || "",
+      shipping_address2: order.shipping_address2 || "",
+      shipping_city: order.shipping_city || "",
+      shipping_province: order.shipping_province || "",
+      shipping_postal_code: order.shipping_postal_code || "",
+      shipping_country: order.shipping_country || "",
+      billing_name: order.billing_name || "",
+      billing_company: order.billing_company || "",
+      billing_address1: order.billing_address1 || "",
+      billing_address2: order.billing_address2 || "",
+      billing_city: order.billing_city || "",
+      billing_province: order.billing_province || "",
+      billing_postal_code: order.billing_postal_code || "",
+      billing_country: order.billing_country || "",
+      notes: order.notes || "",
+      created_at: order.created_at || null,
+      updated_at: order.updated_at || null
+    },
+    items: normalizeResults(itemsResult).map((item) => ({
+      order_item_id: Number(item.order_item_id || 0),
+      order_id: Number(item.order_id || 0),
+      product_id: Number(item.product_id || 0),
+      sku: item.sku || "",
+      product_name: item.product_name || "",
+      product_type: item.product_type || "",
+      unit_price_cents: Number(item.unit_price_cents || 0),
+      quantity: Number(item.quantity || 0),
+      line_subtotal_cents: Number(item.line_subtotal_cents || 0),
+      taxable: Number(item.taxable || 0),
+      tax_class_code: item.tax_class_code || "",
+      requires_shipping: Number(item.requires_shipping || 0),
+      digital_file_url: item.digital_file_url || "",
+      created_at: item.created_at || null
+    })),
+    status_history: normalizeResults(historyResult).map((row) => ({
+      order_status_history_id: Number(row.order_status_history_id || 0),
+      order_id: Number(row.order_id || 0),
+      old_status: row.old_status || "",
+      new_status: row.new_status || "",
+      changed_by_user_id: Number(row.changed_by_user_id || 0),
+      changed_by_email: row.changed_by_email || "",
+      changed_by_display_name: row.changed_by_display_name || "",
+      note: row.note || "",
+      created_at: row.created_at || null
+    })),
+    payment_snapshot: {
+      payment_count: Number(paymentCountsRow?.payment_count || 0),
+      paid_total_cents: Number(paymentCountsRow?.paid_total_cents || 0),
+      outstanding_cents: Math.max(
+        Number(order.total_cents || 0) - Number(paymentCountsRow?.paid_total_cents || 0),
+        0
+      )
+    }
   });
 }
