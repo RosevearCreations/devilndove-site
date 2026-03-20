@@ -13,59 +13,88 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
-function normalizeOptionalText(value) {
-  const text = String(value || "").trim();
-  return text || null;
+function normalizeEmail(value) {
+  return normalizeText(value).toLowerCase();
 }
 
-function normalizePaymentMethod(value) {
-  const method = normalizeText(value).toLowerCase();
-
-  if (["paypal", "stripe", "square", "manual", "other"].includes(method)) {
-    return method;
-  }
-
-  if (method === "card") {
-    return "stripe";
-  }
-
-  return "";
+function normalizeResults(result) {
+  return Array.isArray(result?.results) ? result.results : [];
 }
 
-function determineFulfillmentType(items) {
-  let hasPhysical = false;
-  let hasDigital = false;
+function toInteger(value, fallback = 0) {
+  const num = Number(value);
+  return Number.isInteger(num) ? num : fallback;
+}
 
-  for (const item of items) {
-    const type = String(item.product_type || "").toLowerCase();
-    const requiresShipping =
-      Number(item.requires_shipping || 0) === 1 ||
-      type === "physical";
+function generateOrderNumber() {
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(now.getUTCDate()).padStart(2, "0");
+  const rand = Math.floor(Math.random() * 900000) + 100000;
+  return `DD-${y}${m}${d}-${rand}`;
+}
 
-    if (requiresShipping) {
-      hasPhysical = true;
-    } else {
-      hasDigital = true;
-    }
-  }
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
+}
 
-  if (hasPhysical && hasDigital) return "mixed";
-  if (hasPhysical) return "shipping";
+async function getSessionUser(env, token) {
+  if (!token) return null;
+
+  const row = await env.DB.prepare(`
+    SELECT
+      s.session_id,
+      s.user_id,
+      s.expires_at,
+      u.user_id AS resolved_user_id,
+      u.email,
+      u.display_name,
+      u.role,
+      u.is_active
+    FROM sessions s
+    INNER JOIN users u
+      ON u.user_id = s.user_id
+    WHERE (
+      s.session_token = ?
+      OR s.token = ?
+    )
+      AND s.expires_at > datetime('now')
+    LIMIT 1
+  `)
+    .bind(token, token)
+    .first();
+
+  if (!row) return null;
+  if (Number(row.is_active || 0) !== 1) return null;
+
+  return {
+    session_id: Number(row.session_id || 0),
+    user_id: Number(row.resolved_user_id || row.user_id || 0),
+    email: row.email || "",
+    display_name: row.display_name || "",
+    role: row.role || "member"
+  };
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+function normalizeFulfillmentType(items) {
+  const requiresShipping = items.some((item) => Number(item.requires_shipping || 0) === 1);
+  const hasDigital = items.some((item) => Number(item.requires_shipping || 0) === 0);
+
+  if (requiresShipping && hasDigital) return "mixed";
+  if (requiresShipping) return "shipping";
   return "digital";
 }
 
-function needsShippingAddress(fulfillmentType) {
-  return fulfillmentType === "shipping" || fulfillmentType === "mixed";
-}
-
-function calculateTaxCents(subtotalCents, shippingCents = 0) {
-  const taxRate = 0.13;
+function calculateTaxCents(subtotalCents, shippingCents, taxRate = 0.13) {
   const taxableBase = Number(subtotalCents || 0) + Number(shippingCents || 0);
   return Math.round(taxableBase * taxRate);
-}
-
-function escapeHistoryNoteValue(value) {
-  return String(value || "").replace(/\s+/g, " ").trim();
 }
 
 export async function onRequestPost(context) {
@@ -78,319 +107,252 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "Invalid JSON body." }, 400);
   }
 
-  const customer_email = normalizeText(body.email).toLowerCase();
+  const token = getBearerToken(request);
+  const sessionUser = await getSessionUser(env, token);
+
   const customer_name = normalizeText(body.customer_name);
-  const shipping_name = normalizeOptionalText(body.shipping_name || body.customer_name);
+  const customer_email = normalizeEmail(body.customer_email || sessionUser?.email || "");
+  const notes = normalizeText(body.notes);
+  const payment_method = normalizeText(body.payment_method || "pending").toLowerCase() || "pending";
+  const currency = normalizeText(body.currency || "CAD").toUpperCase() || "CAD";
 
-  const shipping_address1 = normalizeOptionalText(body.shipping_address1);
-  const shipping_address2 = normalizeOptionalText(body.shipping_address2);
-  const shipping_city = normalizeOptionalText(body.shipping_city);
-  const shipping_province = normalizeOptionalText(body.shipping_province);
-  const shipping_postal_code = normalizeOptionalText(body.shipping_postal_code);
-  const shipping_country = normalizeOptionalText(body.shipping_country || "Canada");
-  const notes = normalizeOptionalText(body.notes);
-  const payment_method = normalizePaymentMethod(body.payment_method);
-  const rawCartItems = Array.isArray(body.cart_items) ? body.cart_items : [];
+  const shipping_name = normalizeText(body.shipping_name || customer_name);
+  const shipping_company = normalizeText(body.shipping_company);
+  const shipping_address1 = normalizeText(body.shipping_address1);
+  const shipping_address2 = normalizeText(body.shipping_address2);
+  const shipping_city = normalizeText(body.shipping_city);
+  const shipping_province = normalizeText(body.shipping_province);
+  const shipping_postal_code = normalizeText(body.shipping_postal_code);
+  const shipping_country = normalizeText(body.shipping_country || "Canada");
 
-  if (!customer_email) {
-    return json({ ok: false, error: "Email is required." }, 400);
-  }
+  const billing_name = normalizeText(body.billing_name || shipping_name || customer_name);
+  const billing_company = normalizeText(body.billing_company);
+  const billing_address1 = normalizeText(body.billing_address1 || shipping_address1);
+  const billing_address2 = normalizeText(body.billing_address2 || shipping_address2);
+  const billing_city = normalizeText(body.billing_city || shipping_city);
+  const billing_province = normalizeText(body.billing_province || shipping_province);
+  const billing_postal_code = normalizeText(body.billing_postal_code || shipping_postal_code);
+  const billing_country = normalizeText(body.billing_country || shipping_country || "Canada");
+
+  const shipping_cents = Math.max(0, toInteger(body.shipping_cents, 0));
+  const cartItems = Array.isArray(body.items) ? body.items : [];
 
   if (!customer_name) {
     return json({ ok: false, error: "Customer name is required." }, 400);
   }
 
-  if (!payment_method) {
-    return json({ ok: false, error: "A valid payment_method is required." }, 400);
+  if (!customer_email || !isValidEmail(customer_email)) {
+    return json({ ok: false, error: "A valid customer email is required." }, 400);
   }
 
-  if (!rawCartItems.length) {
-    return json({ ok: false, error: "Cart is empty." }, 400);
+  if (!cartItems.length) {
+    return json({ ok: false, error: "At least one cart item is required." }, 400);
   }
 
-  const normalizedCartItems = rawCartItems.map((item) => {
-    const product_id = Number(item.product_id || 0);
-    const quantity = Number(item.quantity || 0);
+  const productIds = cartItems
+    .map((item) => Number(item.product_id))
+    .filter((id) => Number.isInteger(id) && id > 0);
 
-    return {
-      product_id,
-      quantity,
-      name: normalizeText(item.name),
-      product_type: normalizeText(item.product_type).toLowerCase(),
-      requires_shipping: Number(item.requires_shipping || 0),
-      price_cents: Number(item.price_cents || 0),
-      currency: normalizeText(item.currency || "CAD").toUpperCase(),
-      image_url: normalizeOptionalText(item.image_url),
-      sku: normalizeOptionalText(item.sku)
-    };
-  });
-
-  for (const item of normalizedCartItems) {
-    if (!Number.isInteger(item.product_id) || item.product_id <= 0) {
-      return json({ ok: false, error: "Each cart item must include a valid product_id." }, 400);
-    }
-
-    if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
-      return json({ ok: false, error: "Each cart item must include a valid quantity." }, 400);
-    }
+  if (!productIds.length) {
+    return json({ ok: false, error: "Cart items must include valid product IDs." }, 400);
   }
 
-  const productIds = normalizedCartItems.map((item) => item.product_id);
   const placeholders = productIds.map(() => "?").join(", ");
-
-  const productQuery = `
+  const productsResult = await env.DB.prepare(`
     SELECT
       product_id,
-      name,
-      slug,
       sku,
+      name,
       product_type,
+      status,
       price_cents,
-      compare_at_price_cents,
       currency,
-      product_state,
-      is_active,
-      track_inventory,
-      inventory_qty,
-      allow_backorders,
-      requires_shipping
+      taxable,
+      tax_class_code,
+      requires_shipping,
+      digital_file_url
     FROM products
     WHERE product_id IN (${placeholders})
-  `;
-
-  const productResult = await env.DB.prepare(productQuery)
+  `)
     .bind(...productIds)
     .all();
 
-  const dbProducts = Array.isArray(productResult?.results) ? productResult.results : [];
-  const productsById = new Map(dbProducts.map((product) => [Number(product.product_id), product]));
+  const productRows = normalizeResults(productsResult);
+  const productMap = new Map(
+    productRows.map((row) => [Number(row.product_id), row])
+  );
 
-  if (dbProducts.length !== productIds.length) {
-    return json({
-      ok: false,
-      error: "One or more cart products could not be found."
-    }, 400);
-  }
-
+  const orderItems = [];
   let subtotal_cents = 0;
-  let shipping_cents = 0;
-  const validatedItems = [];
 
-  for (const cartItem of normalizedCartItems) {
-    const product = productsById.get(cartItem.product_id);
+  for (const rawItem of cartItems) {
+    const product_id = Number(rawItem.product_id);
+    const quantity = Number(rawItem.quantity);
+
+    if (!Number.isInteger(product_id) || product_id <= 0) {
+      return json({ ok: false, error: "Every cart item must have a valid product_id." }, 400);
+    }
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      return json({ ok: false, error: "Every cart item must have a quantity of at least 1." }, 400);
+    }
+
+    const product = productMap.get(product_id);
 
     if (!product) {
-      return json({
-        ok: false,
-        error: `Product not found for item ${cartItem.product_id}.`
-      }, 400);
+      return json({ ok: false, error: `Product ${product_id} was not found.` }, 404);
     }
 
-    const isActive = Number(product.is_active || 0) === 1;
-    const productState = String(product.product_state || "").toLowerCase();
-
-    if (!isActive || productState !== "active") {
-      return json({
-        ok: false,
-        error: `Product "${product.name}" is not currently available.`
-      }, 400);
+    if (String(product.status || "").toLowerCase() !== "active") {
+      return json({ ok: false, error: `Product ${product.name || product_id} is not available.` }, 400);
     }
 
-    const inventoryTracked = Number(product.track_inventory || 0) === 1;
-    const allowBackorders = Number(product.allow_backorders || 0) === 1;
-    const inventoryQty = Number(product.inventory_qty || 0);
-
-    if (inventoryTracked && !allowBackorders && cartItem.quantity > inventoryQty) {
-      return json({
-        ok: false,
-        error: `Not enough inventory for "${product.name}".`
-      }, 400);
-    }
-
-    const price_cents = Number(product.price_cents || 0);
-    const currency = normalizeText(product.currency || "CAD").toUpperCase();
-    const product_type = normalizeText(product.product_type).toLowerCase();
-    const requires_shipping = Number(product.requires_shipping || 0);
-
-    const line_subtotal_cents = price_cents * cartItem.quantity;
+    const unit_price_cents = Number(product.price_cents || 0);
+    const line_subtotal_cents = unit_price_cents * quantity;
 
     subtotal_cents += line_subtotal_cents;
 
-    validatedItems.push({
-      product_id: Number(product.product_id),
-      product_name: normalizeText(product.name),
-      sku: normalizeOptionalText(product.sku),
-      product_type,
-      requires_shipping,
-      quantity: cartItem.quantity,
-      price_cents,
+    orderItems.push({
+      product_id,
+      sku: product.sku || "",
+      product_name: product.name || "",
+      product_type: product.product_type || "physical",
+      unit_price_cents,
+      quantity,
       line_subtotal_cents,
-      currency
+      taxable: Number(product.taxable || 0),
+      tax_class_code: product.tax_class_code || "",
+      requires_shipping: Number(product.requires_shipping || 0),
+      digital_file_url: product.digital_file_url || "",
+      currency: product.currency || currency || "CAD"
     });
   }
 
-  const fulfillment_type = determineFulfillmentType(validatedItems);
+  const fulfillment_type = normalizeFulfillmentType(orderItems);
+  const tax_cents = calculateTaxCents(subtotal_cents, shipping_cents, 0.13);
+  const discount_cents = 0;
+  const total_cents = subtotal_cents - discount_cents + shipping_cents + tax_cents;
+  const order_number = generateOrderNumber();
+  const user_id = sessionUser?.user_id || null;
 
-  if (needsShippingAddress(fulfillment_type)) {
-    if (!shipping_address1) {
-      return json({ ok: false, error: "Shipping address line 1 is required." }, 400);
-    }
-    if (!shipping_city) {
-      return json({ ok: false, error: "Shipping city is required." }, 400);
-    }
-    if (!shipping_province) {
-      return json({ ok: false, error: "Shipping province/state is required." }, 400);
-    }
-    if (!shipping_postal_code) {
-      return json({ ok: false, error: "Shipping postal/ZIP code is required." }, 400);
-    }
-    if (!shipping_country) {
-      return json({ ok: false, error: "Shipping country is required." }, 400);
-    }
-  }
-
-  if (fulfillment_type === "shipping" || fulfillment_type === "mixed") {
-    shipping_cents = 0;
-  }
-
-  const tax_cents = calculateTaxCents(subtotal_cents, shipping_cents);
-  const total_cents = subtotal_cents + shipping_cents + tax_cents;
-  const currency = validatedItems[0]?.currency || "CAD";
-
-  const orderInsert = await env.DB.prepare(`
+  const insertOrder = await env.DB.prepare(`
     INSERT INTO orders (
       order_number,
-      order_status,
-      fulfillment_type,
+      user_id,
       customer_email,
       customer_name,
+      order_status,
+      payment_status,
+      payment_method,
+      fulfillment_type,
+      currency,
+      subtotal_cents,
+      discount_cents,
+      shipping_cents,
+      tax_cents,
+      total_cents,
       shipping_name,
+      shipping_company,
       shipping_address1,
       shipping_address2,
       shipping_city,
       shipping_province,
       shipping_postal_code,
       shipping_country,
-      subtotal_cents,
-      shipping_cents,
-      tax_cents,
-      total_cents,
-      currency,
-      payment_status,
-      payment_method,
+      billing_name,
+      billing_company,
+      billing_address1,
+      billing_address2,
+      billing_city,
+      billing_province,
+      billing_postal_code,
+      billing_country,
       notes,
       created_at,
       updated_at
     )
     VALUES (
-      NULL,
-      'pending',
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      'pending',
-      ?,
-      ?,
-      CURRENT_TIMESTAMP,
-      CURRENT_TIMESTAMP
+      ?, ?, ?, ?, 'pending', 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     )
   `)
     .bind(
-      fulfillment_type,
+      order_number,
+      user_id,
       customer_email,
       customer_name,
-      shipping_name,
-      shipping_address1,
-      shipping_address2,
-      shipping_city,
-      shipping_province,
-      shipping_postal_code,
-      shipping_country,
+      payment_method,
+      fulfillment_type,
+      currency,
       subtotal_cents,
+      discount_cents,
       shipping_cents,
       tax_cents,
       total_cents,
-      currency,
-      payment_method,
-      notes
+      shipping_name || null,
+      shipping_company || null,
+      shipping_address1 || null,
+      shipping_address2 || null,
+      shipping_city || null,
+      shipping_province || null,
+      shipping_postal_code || null,
+      shipping_country || null,
+      billing_name || null,
+      billing_company || null,
+      billing_address1 || null,
+      billing_address2 || null,
+      billing_city || null,
+      billing_province || null,
+      billing_postal_code || null,
+      billing_country || null,
+      notes || null
     )
     .run();
 
-  const order_id = orderInsert?.meta?.last_row_id;
+  const order_id = Number(insertOrder?.meta?.last_row_id || 0);
 
   if (!order_id) {
     return json({ ok: false, error: "Order could not be created." }, 500);
   }
 
-  const order_number = `DD-${String(order_id).padStart(6, "0")}`;
-
-  await env.DB.prepare(`
-    UPDATE orders
-    SET order_number = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE order_id = ?
-  `)
-    .bind(order_number, order_id)
-    .run();
-
-  for (const item of validatedItems) {
+  for (const item of orderItems) {
     await env.DB.prepare(`
       INSERT INTO order_items (
         order_id,
         product_id,
-        product_name,
         sku,
+        product_name,
         product_type,
-        quantity,
         unit_price_cents,
+        quantity,
         line_subtotal_cents,
-        currency,
+        taxable,
+        tax_class_code,
+        requires_shipping,
+        digital_file_url,
         created_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `)
       .bind(
         order_id,
         item.product_id,
+        item.sku || null,
         item.product_name,
-        item.sku,
         item.product_type,
+        item.unit_price_cents,
         item.quantity,
-        item.price_cents,
         item.line_subtotal_cents,
-        item.currency
+        item.taxable,
+        item.tax_class_code || null,
+        item.requires_shipping,
+        item.digital_file_url || null
       )
       .run();
-
-    const product = productsById.get(item.product_id);
-    const inventoryTracked = Number(product?.track_inventory || 0) === 1;
-
-    if (inventoryTracked) {
-      await env.DB.prepare(`
-        UPDATE products
-        SET
-          inventory_qty = CASE
-            WHEN inventory_qty IS NULL THEN NULL
-            ELSE MAX(inventory_qty - ?, 0)
-          END,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE product_id = ?
-      `)
-        .bind(item.quantity, item.product_id)
-        .run();
-    }
   }
+
+  const historyNote = sessionUser
+    ? `Order created by ${sessionUser.display_name || sessionUser.email || `user #${sessionUser.user_id}`}.`
+    : "Order created from checkout.";
 
   await env.DB.prepare(`
     INSERT INTO order_status_history (
@@ -401,39 +363,34 @@ export async function onRequestPost(context) {
       note,
       created_at
     )
-    VALUES (?, NULL, 'pending', NULL, ?, CURRENT_TIMESTAMP)
+    VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
   `)
     .bind(
       order_id,
-      escapeHistoryNoteValue(
-        `Order created via checkout. Fulfillment: ${fulfillment_type}. Payment method: ${payment_method}.`
-      )
+      "draft",
+      "pending",
+      sessionUser?.user_id || null,
+      historyNote
     )
     .run();
 
-  const order = await env.DB.prepare(`
+  const createdOrder = await env.DB.prepare(`
     SELECT
       order_id,
       order_number,
-      order_status,
-      fulfillment_type,
+      user_id,
       customer_email,
       customer_name,
-      shipping_name,
-      shipping_address1,
-      shipping_address2,
-      shipping_city,
-      shipping_province,
-      shipping_postal_code,
-      shipping_country,
+      order_status,
+      payment_status,
+      payment_method,
+      fulfillment_type,
+      currency,
       subtotal_cents,
+      discount_cents,
       shipping_cents,
       tax_cents,
       total_cents,
-      currency,
-      payment_status,
-      payment_method,
-      notes,
       created_at,
       updated_at
     FROM orders
@@ -443,30 +400,28 @@ export async function onRequestPost(context) {
     .bind(order_id)
     .first();
 
-  const items = await env.DB.prepare(`
-    SELECT
-      order_item_id,
-      order_id,
-      product_id,
-      product_name,
-      sku,
-      product_type,
-      quantity,
-      unit_price_cents AS price_cents,
-      line_subtotal_cents,
-      currency,
-      created_at
-    FROM order_items
-    WHERE order_id = ?
-    ORDER BY order_item_id ASC
-  `)
-    .bind(order_id)
-    .all();
-
   return json({
     ok: true,
     message: "Order created successfully.",
-    order,
-    items: Array.isArray(items?.results) ? items.results : []
+    order: {
+      order_id: Number(createdOrder?.order_id || order_id),
+      order_number: createdOrder?.order_number || order_number,
+      user_id: createdOrder?.user_id ? Number(createdOrder.user_id) : null,
+      customer_email: createdOrder?.customer_email || customer_email,
+      customer_name: createdOrder?.customer_name || customer_name,
+      order_status: createdOrder?.order_status || "pending",
+      payment_status: createdOrder?.payment_status || "pending",
+      payment_method: createdOrder?.payment_method || payment_method,
+      fulfillment_type: createdOrder?.fulfillment_type || fulfillment_type,
+      currency: createdOrder?.currency || currency,
+      subtotal_cents: Number(createdOrder?.subtotal_cents || subtotal_cents),
+      discount_cents: Number(createdOrder?.discount_cents || discount_cents),
+      shipping_cents: Number(createdOrder?.shipping_cents || shipping_cents),
+      tax_cents: Number(createdOrder?.tax_cents || tax_cents),
+      total_cents: Number(createdOrder?.total_cents || total_cents),
+      created_at: createdOrder?.created_at || null,
+      updated_at: createdOrder?.updated_at || null
+    },
+    items: orderItems
   }, 201);
 }
