@@ -1,6 +1,6 @@
 # Devil n Dove – Project Brain
 
-This file is the fast, practical snapshot of the **current repo state**.
+This file is the fast practical snapshot of the **current repo state**.
 It should let a new developer or AI assistant understand the live architecture without guessing.
 
 ---
@@ -12,7 +12,7 @@ Devil n Dove is both:
 1. the public website for the workshop and brand
 2. the internal management system for members, admin tools, products, orders, payments, and layered access
 
-The project is no longer just a public site plus login. It now has a real commerce foundation.
+The project is no longer just a public site plus login. It now has a real commerce and security foundation.
 
 ---
 
@@ -43,24 +43,13 @@ The project is no longer just a public site plus login. It now has a real commer
 
 ## 1. Public website
 
-Pages include:
-
-- home
-- about
-- gallery
-- creations
-- tools
-- supplies
-- movies
-- contact
-
-JSON-driven site content still exists for tools, supplies, featured items, and related catalog data.
+Pages include public brand and catalog pages, including shop, cart, checkout, and confirmation.
 
 ## 2. Authentication and member system
 
 Implemented:
 
-- register support in backend
+- register
 - login
 - logout
 - logout all
@@ -75,36 +64,46 @@ Security model:
 - API authentication via bearer token
 - session expiration checked against `datetime('now')`
 
-## 3. Admin user management
+## 3. Members area
 
 Implemented:
 
+- protected members page
+- session/profile display
+- password change tool
+- logout-all tool
+- member orders list
+- member order detail modal
+- member downloads foundation
+
+## 4. Admin user and security management
+
+Implemented:
+
+- users list with session counts
 - create user
-- update role and active state
 - reset password
-- delete user
+- deactivate/delete user foundation
 - dashboard summary
+- security summary
 - cleanup expired sessions
 
-Admin self-protection exists:
+Admin self-protection remains important:
 
-- cannot delete self
-- cannot deactivate self
-- cannot demote self from admin
-- last admin protection remains important
+- cannot casually break your own access
+- last-admin protection still matters in future refinements
 
-## 4. Product management
+## 5. Product management
 
-Implemented:
+Implemented foundation:
 
 - tax classes
 - products table for physical and digital items
-- product images table
-- product tags table
-- admin create product form
-- edit existing product
-- delete product
+- product images / tags
+- create product
+- edit product
 - archive product
+- delete product
 - storefront only shows active products
 
 Product states:
@@ -113,7 +112,7 @@ Product states:
 - `active`
 - `archived`
 
-## 5. Storefront
+## 6. Storefront
 
 Implemented:
 
@@ -128,7 +127,7 @@ Cart model:
 - browser localStorage
 - no server cart yet
 
-## 6. Checkout and orders
+## 7. Checkout and orders
 
 Implemented:
 
@@ -154,7 +153,7 @@ Fulfillment types supported:
 - `digital`
 - `mixed`
 
-## 7. Payments foundation
+## 8. Payments foundation
 
 Implemented:
 
@@ -174,9 +173,9 @@ Providers currently modeled:
 
 Real provider integration is **not connected yet**.
 
-## 8. Multi-tier access model
+## 9. Multi-tier access model
 
-The repo now uses **two levels of access logic**.
+There are **two levels of access logic**.
 
 ### Core system role
 
@@ -195,46 +194,16 @@ Stored separately in `access_tiers` and `user_access_tiers`:
 - vip_donor
 - subscriber
 
-This is the correct long-term design because admin authority should not be overloaded with donor/customer/artist permissions.
+This separation is the correct long-term design because admin authority should not be overloaded with donor/customer/artist permissions.
 
 ---
 
 # Database Files
 
-## Core auth schema
-
 - `/database_schema.sql`
-
-## Store / commerce schema
-
 - `/database_store_schema.sql`
-
-Adds:
-
-- `tax_classes`
-- `products`
-- `product_images`
-- `product_tags`
-- `orders`
-- `order_items`
-- `order_status_history`
-
-## Access tiers schema
-
 - `/database_access_tiers.sql`
-
-Adds:
-
-- `access_tiers`
-- `user_access_tiers`
-
-## Payments extension
-
 - `/database_payments_extension.sql`
-
-Adds:
-
-- `payments`
 
 ---
 
@@ -245,15 +214,21 @@ Adds:
 - `auth.js`
 - `site-auth-ui.js`
 - `login.js`
+- `register.js`
+- `members-self-protect.js`
 - `members.js`
+- `member-account-tools.js`
 - `change-password.js`
-- `logout-all.js`
-- `session-info.js`
+- `member-orders.js`
+- `member-order-detail.js`
+- `member-downloads.js`
+- `bootstrap-admin.js`
 
 ## Admin scripts
 
 - `admin.js`
 - `admin-dashboard-summary.js`
+- `admin-security-summary.js`
 - `admin-users.js`
 - `admin-create-user.js`
 - `admin-reset-password.js`
@@ -300,7 +275,6 @@ Not done yet:
 - bulk product import
 - bulk product editing
 - image upload tool to R2 from admin
-- product search / pagination in admin
 
 ## Security and operations
 
@@ -311,11 +285,11 @@ Not done yet:
 - richer password policy enforcement
 - donor/customer/artist gated frontend experiences
 - shipping automation
-- tax expansion beyond current Ontario estimate foundation
+- expanded tax logic
 
 ---
 
-# Current Best Understanding of Project Phase
+# Current Phase
 
 This repo has moved from:
 
@@ -323,6 +297,6 @@ This repo has moved from:
 
 to:
 
-**internal alpha commerce/admin platform with layered access and payment foundation**
+**internal alpha commerce/admin/member platform with layered access and payment foundation**
 
-That is the right mental model for all future work.
+That is the right mental model for future work.

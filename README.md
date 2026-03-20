@@ -2,79 +2,74 @@
 
 Official website and management system for **Devil n Dove**.
 
-The project now includes:
+## What this repo is now
+
+This is no longer just a public site with a login page. It is now a working internal-alpha web app with:
 
 - public website pages
-- member authentication and session tools
-- admin dashboard
-- product management
-- storefront, cart, checkout, and order confirmation flow
-- order management and payment tracking foundations
-- multi-tier access controls for artists, customers, donors, and VIP/support tiers
+- DB-backed auth and session handling
+- member area with account tools, orders, and downloads foundation
+- admin dashboard with user, product, order, payment, and security tooling
+- storefront, cart, checkout, and confirmation flow
+- layered access foundations for business/content tiers
 
----
+## Current status
 
-# Current Status
-
-Project stage: **internal alpha / commerce foundation in place**
+Project stage: **internal alpha / commerce and security foundation in place**
 
 Working now:
 
 - public site pages
-- login / logout / session-based auth
+- register / login / logout / logout-all
+- session info and password change
+- bootstrap-first-admin flow
 - member account area
-- admin user management
-- admin product create / edit / archive / delete
+- member orders list and order detail modal
+- member downloads foundation
+- admin dashboard
+- admin user listing, create, reset password, deactivate/delete foundation, session cleanup, and security summary
+- admin product management foundation
 - shop catalog from active products
 - product detail pages
 - browser cart with cart badge
 - checkout form and order creation
 - order confirmation page
 - admin order review, status updates, and manual payment recording
+- payment preparation bridge for future providers
 - access tier assignment and removal in admin
 
 Not connected yet:
 
-- live PayPal API checkout
-- live credit card processor
-- shipping rate automation
-- tax rules beyond current Ontario estimate foundation
+- live PayPal checkout
+- live card processor checkout
+- payment callbacks / webhooks
+- shipping automation
+- tax rules beyond the current estimate foundation
 - bulk product import / bulk editing UI
+- full admin audit logging
 
----
-
-# Tech Stack
+## Stack
 
 Frontend
-
 - HTML
 - CSS
 - Vanilla JavaScript
 
 Backend
-
 - Cloudflare Pages Functions
 
 Database
-
 - Cloudflare D1 (SQLite)
 
 Storage
-
 - Cloudflare R2
 
 Deployment
-
 - GitHub → Cloudflare Pages
 
----
+## Main areas
 
-# Main Areas
-
-## Public site
-
-Examples:
-
+Public pages include:
 - `/`
 - `/gallery/`
 - `/creations/`
@@ -88,94 +83,77 @@ Examples:
 - `/checkout/`
 - `/checkout/confirmation/`
 
-## Members area
-
-Examples:
-
+Member pages include:
 - `/login/`
+- `/register/`
 - `/members/`
 
-## Admin area
-
+Admin pages include:
 - `/admin/`
 - `/bootstrap-admin/`
 
----
+## Core systems
 
-# Important Features
-
-## Authentication
-
+### Authentication
+- register
 - login
 - logout
 - logout all sessions
-- password change
+- change password
 - session info
 - bootstrap admin support
-- self-protection rules for admin accounts
+- bearer-token auth backed by DB sessions
 
-## Product and storefront system
-
-- tax classes
-- product records for physical and digital items
-- up to 5 product image URLs per product
-- active / draft / archived product states
-- public products API
-- public product detail API
-- admin product management
-
-## Cart and checkout
-
-- browser cart storage
+### Storefront and checkout
+- product catalog
+- product detail
+- browser cart
 - cart badge
-- checkout form persistence in browser
+- checkout form persistence
 - order creation in D1
 - order confirmation page
-- payment preparation bridge endpoint
+- payment preparation bridge
 
-## Orders and payments
-
+### Orders and payments
 - admin orders table
-- order detail modal
+- admin order detail modal
 - order status history
 - payment records table
 - manual payment recording
 - payment summaries in admin orders list
+- member order visibility foundation
 
-## Access tiers / security layers
+### Members
+- protected member page
+- profile/session display
+- password change tool
+- logout-all tool
+- order history list
+- member order detail modal
+- downloads foundation for digital items
 
-Core role system still exists:
-
+### Access tiers
+Core role system:
 - `member`
 - `admin`
 
-Separate access tier system now exists for business/content permissions:
-
+Separate business/content access tiers:
 - `artist`
 - `customer`
 - `donor`
 - `vip_donor`
 - `subscriber`
 
-This separation is intentional so site authority and customer/supporter access do not get mixed together.
-
----
-
-# Database Files
-
-Schema files now in repo root:
-
+## Database files
 - `/database_schema.sql`
 - `/database_store_schema.sql`
 - `/database_access_tiers.sql`
 - `/database_payments_extension.sql`
 
----
+## Key API groups
 
-# Key API Groups
-
-## Auth
-
+Auth
+- `/api/auth/register`
 - `/api/auth/login`
 - `/api/auth/logout`
 - `/api/auth/logout-all`
@@ -185,22 +163,21 @@ Schema files now in repo root:
 - `/api/auth/bootstrap-admin`
 - `/api/auth/bootstrap-status`
 
-## Admin users and security
-
+Admin users and security
 - `/api/admin/users`
 - `/api/admin/create-user`
 - `/api/admin/user-update`
 - `/api/admin/reset-password`
 - `/api/admin/delete-user`
 - `/api/admin/dashboard-summary`
+- `/api/admin/security-summary`
 - `/api/admin/cleanup-sessions`
 - `/api/admin/access-tiers`
 - `/api/admin/user-access-tiers`
 - `/api/admin/assign-user-access-tier`
 - `/api/admin/remove-user-access-tier`
 
-## Admin products
-
+Admin products
 - `/api/admin/tax-classes`
 - `/api/admin/products`
 - `/api/admin/product-detail`
@@ -209,48 +186,30 @@ Schema files now in repo root:
 - `/api/admin/archive-product`
 - `/api/admin/delete-product`
 
-## Storefront / checkout
-
+Storefront / checkout
 - `/api/products`
 - `/api/product-detail`
 - `/api/checkout-create-order`
 - `/api/checkout-prepare-payment`
 
-## Admin orders / payments
-
+Admin orders / payments
 - `/api/admin/orders`
 - `/api/admin/order-detail`
 - `/api/admin/order-payments`
 - `/api/admin/update-order-status`
 - `/api/admin/record-payment`
 
----
+Member account / commerce
+- `/api/member/orders`
+- `/api/member/order-detail`
+- `/api/member/downloads`
 
-# Development Notes
-
-Recommended local workflow:
-
-```bash
-wrangler pages dev
-```
-
-Apply schema updates as needed to D1 using your normal SQL prompt / D1 workflow.
-
----
-
-# Immediate Next Priorities
-
+## Immediate next priorities
 - connect real PayPal checkout
 - choose and connect a card processor
-- add order payment completion callbacks / webhooks
-- add bulk product upload and bulk product editing
-- add stronger audit logging for admin actions
+- add provider callbacks / webhooks
+- add audit logging for admin actions
+- harden security further
 - add shipping logic and refined tax logic
-
----
-
-# Maintainers
-
-Devil n Dove Workshop
-
-Ontario, Canada
+- add bulk product upload and bulk product editing
+- expand gated content using access tiers

@@ -19,6 +19,7 @@ It is now all of the following:
 
 - public website
 - members auth system
+- members account/order/download foundation
 - admin management dashboard
 - product management system
 - storefront
@@ -26,6 +27,7 @@ It is now all of the following:
 - order management system
 - payment-record foundation
 - multi-tier access control foundation
+- security hardening foundation
 
 ---
 
@@ -93,13 +95,15 @@ Deployment
 
 # Repository Structure
 
-Important top-level files and folders:
+Important top-level files and folders include:
 
 - `/admin/`
 - `/bootstrap-admin/`
 - `/cart/`
 - `/checkout/`
 - `/functions/`
+- `/login/`
+- `/register/`
 - `/members/`
 - `/public/js/`
 - `/shop/`
@@ -111,9 +115,7 @@ Important top-level files and folders:
 - `/database_access_tiers.sql`
 - `/database_payments_extension.sql`
 
-Note:
-
-Some older docs mention `/docs/` or older schema locations. In this repo snapshot, the Markdown docs and SQL files are in the **repo root**.
+Root markdown docs are the main repo-level documentation set.
 
 ---
 
@@ -121,8 +123,7 @@ Some older docs mention `/docs/` or older schema locations. In this repo snapsho
 
 ## Auth endpoints
 
-Use or update existing routes such as:
-
+- `/api/auth/register`
 - `/api/auth/login`
 - `/api/auth/logout`
 - `/api/auth/logout-all`
@@ -140,6 +141,7 @@ Use or update existing routes such as:
 - `/api/admin/reset-password`
 - `/api/admin/delete-user`
 - `/api/admin/dashboard-summary`
+- `/api/admin/security-summary`
 - `/api/admin/cleanup-sessions`
 - `/api/admin/access-tiers`
 - `/api/admin/user-access-tiers`
@@ -171,7 +173,13 @@ Use or update existing routes such as:
 - `/api/admin/update-order-status`
 - `/api/admin/record-payment`
 
-Before creating a new endpoint, AI should first check whether the existing endpoint should be extended instead.
+## Member account / commerce endpoints
+
+- `/api/member/orders`
+- `/api/member/order-detail`
+- `/api/member/downloads`
+
+Before creating a new endpoint, AI should first check whether an existing endpoint should be extended instead.
 
 ---
 
@@ -188,6 +196,7 @@ Examples:
 - `cart.js` = cart storage helper
 - `checkout.js` = checkout page behavior
 - `admin-order-detail.js` = modal logic for one order
+- `member-order-detail.js` = member modal logic for one order
 
 Do not collapse many working modules into one giant file unless explicitly asked.
 
@@ -248,10 +257,18 @@ Every admin endpoint must check:
 - user is active
 - user role is `admin`
 
+## Member protection
+
+Member endpoints/pages must check:
+
+- bearer token exists
+- session is valid
+- user is active
+- user role is `member` or `admin`
+
 ## Important design principle
 
 Admin authority and customer/donor/artist access are separate systems.
-
 Do not solve donor/customer/artist access by stuffing everything into `users.role`.
 
 ---
@@ -291,13 +308,14 @@ Do not solve donor/customer/artist access by stuffing everything into `users.rol
 
 ---
 
-# Current Gaps AI Should Respect
+# Current Gaps AI Must Respect
 
-The following are **foundations**, not completed provider integrations:
+These are **foundations**, not completed provider integrations:
 
 - checkout is real, but PayPal is not live yet
 - payment prep exists, but redirect/session creation is not live yet
 - manual payment recording exists, but automated provider confirmation is not live yet
+- member downloads exist as a foundation, but not as a full secure delivery platform
 - order admin exists, but shipping fulfillment tooling is still basic
 
 Do not document these as complete third-party integrations.
@@ -312,7 +330,7 @@ When making code changes in this repo, default to:
 - full file output, not patches unless asked
 - keep working architecture intact
 - extend existing systems instead of rebuilding them
-- update Markdown docs when architecture meaningfully changes
+- update markdown docs when architecture meaningfully changes
 
 ---
 

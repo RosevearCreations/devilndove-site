@@ -2,23 +2,26 @@
 
 Devil n Dove Website – Development Roadmap
 
-This file reflects the project **after** the recent store, checkout, orders, payments, and layered-security work.
+This file reflects the project **after** the recent auth, member, checkout, orders, payments, and layered-security work.
 
 ---
 
 # Current Stage
 
-Project status: **internal alpha with commerce/admin foundation in place**
+Project status: **internal alpha with commerce, member, and security foundation in place**
 
 Working systems now include:
 
 - public website
-- members authentication
+- member authentication
 - session management
+- member account tools
+- member orders and downloads foundation
 - admin dashboard
 - user management
+- security summary and session cleanup tools
 - access tier management
-- product management
+- product management foundation
 - storefront
 - cart
 - checkout form
@@ -29,24 +32,24 @@ Working systems now include:
 - payment record foundation
 
 The next work is no longer “start the store.”
-The next work is **finish and harden the store + security systems**.
+The next work is **finish and harden the store + member + security systems**.
 
 ---
 
-# Phase 1 — Repository Stabilization
+# Phase 1 — Repository and Documentation Stability
 
 Goal:
 
-Make the repo predictable and clean enough for long-term work.
+Keep the repo predictable and aligned with the real build state.
 
-## 1. Standardize data directory usage
+## 1. Keep root docs synchronized
 
-Current snapshot still suggests duplicate-style data trees in places.
+Maintain these as source-of-truth support files:
 
-Target:
-
-- one canonical `/data/` structure
-- remove `/data/data/` duplication once references are confirmed
+- `README.md`
+- `PROJECT_BRAIN.md`
+- `AI_CONTEXT.md`
+- `DEVELOPMENT_ROADMAP.md`
 
 ## 2. Confirm wrangler / D1 consistency
 
@@ -56,11 +59,9 @@ Verify:
 - D1 binding in `wrangler.toml` matches
 - R2 bindings are documented
 
-## 3. Review legacy docs and old path references
+## 3. Review older references
 
-Some docs still mention `/docs/` and older “future store” wording.
-
-Keep root-level docs and SQL references accurate.
+Remove or update any stale wording that still implies the store or member systems are only future concepts.
 
 ---
 
@@ -74,8 +75,8 @@ Move from internal alpha safety to stronger real-world protection.
 
 Add/enforce:
 
-- minimum length
-- better complexity rules
+- minimum length rules
+- improved complexity guidance
 - friendly validation messages
 
 ## 5. Login rate limiting
@@ -89,18 +90,26 @@ High priority.
 Log actions such as:
 
 - create user
-- delete user
+- delete/deactivate user
 - role changes
-- status changes
 - password resets
+- session cleanup
 - tier assignments/removals
 - product changes
 - order status changes
 - payment recording
 
-## 7. Tier-aware protected content rules
+## 7. Member/download security hardening
 
-Use the new access tier system for:
+Add:
+
+- stronger download entitlement checks
+- optional signed/expiring delivery links
+- tighter controls around digital-file exposure
+
+## 8. Tier-aware protected content rules
+
+Use the access tier system for:
 
 - artist-only areas
 - donor/supporter areas
@@ -113,9 +122,9 @@ Use the new access tier system for:
 
 Goal:
 
-Turn the current payment foundation into real checkout flows.
+Turn the payment foundation into real checkout flows.
 
-## 8. PayPal integration
+## 9. PayPal integration
 
 Implement:
 
@@ -124,7 +133,7 @@ Implement:
 - return/cancel handling
 - payment completion update in DB
 
-## 9. Card processor integration
+## 10. Card processor integration
 
 Choose provider and implement:
 
@@ -132,19 +141,19 @@ Choose provider and implement:
 - success/failure handling
 - payment record update
 
-## 10. Payment callbacks / webhooks
+## 11. Payment callbacks / webhooks
 
 Add provider verification endpoints and reconcile order/payment status safely.
 
 ---
 
-# Phase 4 — Order Operations
+# Phase 4 — Order and Fulfillment Operations
 
 Goal:
 
-Improve fulfillment and admin operations.
+Improve fulfillment and customer visibility.
 
-## 11. Fulfillment workflow tools
+## 12. Fulfillment workflow tools
 
 Add admin tools for:
 
@@ -153,12 +162,21 @@ Add admin tools for:
 - fulfillment notes
 - digital delivery handling
 
-## 12. Customer order visibility
+## 13. Stronger member order history
 
-Later phase, but planned:
+Expand member account features with:
 
-- customer order history page
-- order status display for logged-in users
+- richer order detail
+- payment progress messaging
+- fulfillment/tracking visibility
+
+## 14. Member downloads expansion
+
+Add:
+
+- secure delivery rules
+- downloadable asset metadata
+- expiry / access control options
 
 ---
 
@@ -168,9 +186,7 @@ Goal:
 
 Make product management practical for real use.
 
-## 13. Bulk product upload
-
-Requested and important.
+## 15. Bulk product upload
 
 Add:
 
@@ -178,7 +194,7 @@ Add:
 - validation report
 - preview before insert
 
-## 14. Bulk product editing
+## 16. Bulk product editing
 
 Add:
 
@@ -187,7 +203,7 @@ Add:
 - inventory updates in bulk
 - archive/unarchive in bulk
 
-## 15. Image upload workflow
+## 17. Image upload workflow
 
 Move from raw URL-only management toward:
 
@@ -203,7 +219,7 @@ Goal:
 
 Improve checkout accuracy.
 
-## 16. Shipping logic
+## 18. Shipping logic
 
 Implement:
 
@@ -211,9 +227,9 @@ Implement:
 - physical vs digital handling
 - order-based shipping calculations
 
-## 17. Tax logic expansion
+## 19. Tax logic expansion
 
-Current order creation uses a workable Ontario estimate foundation.
+Current order creation uses a workable estimate foundation.
 
 Expand to:
 
@@ -229,7 +245,7 @@ Goal:
 
 Make the dashboard easier to use daily.
 
-## 18. Search, filters, pagination
+## 20. Search, filters, pagination
 
 Needed for:
 
@@ -237,7 +253,7 @@ Needed for:
 - products
 - orders
 
-## 19. Better order detail tools
+## 21. Better order detail tools
 
 Potential additions:
 
@@ -245,7 +261,7 @@ Potential additions:
 - printable invoice / packing slip
 - resend confirmation later if email is added
 
-## 20. Dashboard metrics expansion
+## 22. Dashboard metrics expansion
 
 Potential additions:
 
@@ -254,6 +270,7 @@ Potential additions:
 - paid orders
 - unpaid totals
 - product counts
+- active sessions / security alerts
 
 ---
 
@@ -265,15 +282,16 @@ These should stay near the top:
 2. audit logs
 3. real PayPal integration
 4. card processor integration
-5. bulk product upload and bulk editing
-6. shipping/tax improvements
-7. tier-aware protected content
+5. member download security
+6. bulk product upload and bulk editing
+7. shipping/tax improvements
+8. tier-aware protected content
 
 ---
 
 # Nice-to-Have Later
 
-- customer account order history
+- customer account enhancements
 - coupons/discount system
 - inventory alerts
 - digital delivery automation
