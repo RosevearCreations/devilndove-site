@@ -1,15 +1,19 @@
 <!-- File: /checkout/index.html -->
+<!-- Brief description: Checkout page for the store flow. It provides the form IDs and
+summary placeholders required by public/js/checkout.js, so cart items, customer/shipping
+details, totals, and order submission all work against the current checkout/order foundation. -->
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Checkout — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="icon" type="image/png" href="/assets/mark.png" />
   <meta
     name="description"
-    content="Checkout for Devil n Dove products. Review your cart, enter contact and shipping details, and choose your payment method."
+    content="Checkout for Devil n Dove orders, including customer details, shipping information, and payment preparation."
   />
 </head>
 <body>
@@ -19,7 +23,7 @@
         <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
         <div>
           <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Workshop • Art • Tools • Movies</div>
+          <div class="small">Checkout</div>
         </div>
       </div>
 
@@ -31,10 +35,6 @@
         <a href="/supplies/">Supplies</a>
         <a href="/shop/">Shop</a>
         <a href="/cart/">Cart</a>
-        <a href="/checkout/">Checkout</a>
-        <a href="/contact/">Contact</a>
-
-        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
         <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
         <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
 
@@ -58,142 +58,192 @@
       <div>
         <h1>Checkout</h1>
         <p>
-          Review your order, enter your details, and create your order for payment setup.
+          Complete your order details below. Your cart summary and totals will be shown on the right.
         </p>
       </div>
     </div>
 
-    <div id="checkoutEmpty" class="card" style="display:none">
-      <h2 style="margin-top:0">Your cart is empty</h2>
-      <p class="small">Add products to your cart before checkout.</p>
-      <a class="btn" href="/shop/">Go to Shop</a>
-    </div>
+    <div id="checkoutMessage" class="card" style="display:none;margin-bottom:18px"></div>
 
-    <div id="checkoutContent" style="display:none">
-      <div class="grid cols-2" style="gap:18px">
-        <div class="card">
-          <h2 style="margin-top:0">Customer Details</h2>
-          <p class="small" style="margin-top:0">
-            For physical items, shipping details are required. For digital-only orders, only contact details are required.
-          </p>
+    <div class="grid cols-2" style="gap:18px">
+      <div class="card">
+        <h2 style="margin-top:0">Customer Details</h2>
 
-          <form id="checkoutForm" class="grid" style="gap:12px;margin-top:12px">
+        <form id="checkoutForm" class="grid" style="gap:18px">
+          <div class="grid cols-2" style="gap:12px">
             <div>
-              <label class="small" for="checkout_email">Email</label>
-              <input id="checkout_email" name="email" type="email" autocomplete="email" required />
+              <label class="small" for="customer_name">Customer Name</label>
+              <input id="customer_name" name="customer_name" type="text" autocomplete="name" required />
             </div>
 
             <div>
-              <label class="small" for="checkout_name">Full Name</label>
-              <input id="checkout_name" name="name" type="text" autocomplete="name" required />
+              <label class="small" for="customer_email">Email</label>
+              <input id="customer_email" name="customer_email" type="email" autocomplete="email" required />
             </div>
+          </div>
 
-            <div style="grid-column:1 / -1">
-              <label class="small" for="checkout_payment_method">Payment Method</label>
-              <select id="checkout_payment_method" name="payment_method" required>
-                <option value="paypal" selected>PayPal</option>
-                <option value="stripe">Credit / Debit Card</option>
-                <option value="square">Square</option>
-                <option value="manual">Manual / Offline Payment</option>
-                <option value="other">Other</option>
-              </select>
-              <div class="small" style="margin-top:6px">
-                Payment provider handoff is still being connected. This step currently creates the order and prepares the payment record.
+          <div class="card">
+            <h3 style="margin-top:0">Shipping Information</h3>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="shipping_name">Shipping Name</label>
+                <input id="shipping_name" name="shipping_name" type="text" autocomplete="shipping name" />
+              </div>
+
+              <div>
+                <label class="small" for="shipping_company">Shipping Company</label>
+                <input id="shipping_company" name="shipping_company" type="text" autocomplete="organization" />
               </div>
             </div>
 
-            <div>
-              <label class="small" for="checkout_address1">Address Line 1</label>
-              <input id="checkout_address1" name="address1" type="text" autocomplete="address-line1" />
+            <div style="margin-top:12px">
+              <label class="small" for="shipping_address1">Address Line 1</label>
+              <input id="shipping_address1" name="shipping_address1" type="text" autocomplete="shipping address-line1" />
             </div>
+
+            <div style="margin-top:12px">
+              <label class="small" for="shipping_address2">Address Line 2</label>
+              <input id="shipping_address2" name="shipping_address2" type="text" autocomplete="shipping address-line2" />
+            </div>
+
+            <div class="grid cols-2" style="gap:12px;margin-top:12px">
+              <div>
+                <label class="small" for="shipping_city">City</label>
+                <input id="shipping_city" name="shipping_city" type="text" autocomplete="shipping address-level2" />
+              </div>
+
+              <div>
+                <label class="small" for="shipping_province">Province / State</label>
+                <input id="shipping_province" name="shipping_province" type="text" autocomplete="shipping address-level1" />
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px;margin-top:12px">
+              <div>
+                <label class="small" for="shipping_postal_code">Postal / ZIP Code</label>
+                <input id="shipping_postal_code" name="shipping_postal_code" type="text" autocomplete="shipping postal-code" />
+              </div>
+
+              <div>
+                <label class="small" for="shipping_country">Country</label>
+                <input id="shipping_country" name="shipping_country" type="text" autocomplete="shipping country-name" value="Canada" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Billing Information</h3>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="billing_name">Billing Name</label>
+                <input id="billing_name" name="billing_name" type="text" autocomplete="billing name" />
+              </div>
+
+              <div>
+                <label class="small" for="billing_company">Billing Company</label>
+                <input id="billing_company" name="billing_company" type="text" autocomplete="organization" />
+              </div>
+            </div>
+
+            <div style="margin-top:12px">
+              <label class="small" for="billing_address1">Address Line 1</label>
+              <input id="billing_address1" name="billing_address1" type="text" autocomplete="billing address-line1" />
+            </div>
+
+            <div style="margin-top:12px">
+              <label class="small" for="billing_address2">Address Line 2</label>
+              <input id="billing_address2" name="billing_address2" type="text" autocomplete="billing address-line2" />
+            </div>
+
+            <div class="grid cols-2" style="gap:12px;margin-top:12px">
+              <div>
+                <label class="small" for="billing_city">City</label>
+                <input id="billing_city" name="billing_city" type="text" autocomplete="billing address-level2" />
+              </div>
+
+              <div>
+                <label class="small" for="billing_province">Province / State</label>
+                <input id="billing_province" name="billing_province" type="text" autocomplete="billing address-level1" />
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px;margin-top:12px">
+              <div>
+                <label class="small" for="billing_postal_code">Postal / ZIP Code</label>
+                <input id="billing_postal_code" name="billing_postal_code" type="text" autocomplete="billing postal-code" />
+              </div>
+
+              <div>
+                <label class="small" for="billing_country">Country</label>
+                <input id="billing_country" name="billing_country" type="text" autocomplete="billing country-name" value="Canada" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Payment and Notes</h3>
 
             <div>
-              <label class="small" for="checkout_address2">Address Line 2</label>
-              <input id="checkout_address2" name="address2" type="text" autocomplete="address-line2" />
+              <label class="small" for="payment_method">Payment Method</label>
+              <select id="payment_method" name="payment_method">
+                <option value="paypal" selected>PayPal</option>
+                <option value="stripe">Card / Stripe</option>
+                <option value="square">Square</option>
+                <option value="manual">Manual / Invoice</option>
+                <option value="other">Other</option>
+              </select>
             </div>
 
-            <div>
-              <label class="small" for="checkout_city">City</label>
-              <input id="checkout_city" name="city" type="text" autocomplete="address-level2" />
+            <div style="margin-top:12px">
+              <label class="small" for="notes">Order Notes</label>
+              <input id="notes" name="notes" type="text" placeholder="Optional notes for this order" />
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn" type="submit" id="checkoutSubmitButton">Place Order</button>
+            <a class="btn" href="/cart/">Back to Cart</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">Order Summary</h2>
+
+        <div id="checkoutSummaryItems" style="margin-top:12px"></div>
+
+        <div class="card" style="margin-top:18px">
+          <div style="display:grid;gap:10px" class="small">
+            <div style="display:flex;justify-content:space-between;gap:12px">
+              <span>Subtotal</span>
+              <strong id="checkoutSummarySubtotal">$0.00</strong>
             </div>
 
-            <div>
-              <label class="small" for="checkout_province">Province / State</label>
-              <input id="checkout_province" name="province" type="text" autocomplete="address-level1" />
+            <div style="display:flex;justify-content:space-between;gap:12px">
+              <span>Shipping</span>
+              <strong id="checkoutSummaryShipping">$0.00</strong>
             </div>
 
-            <div>
-              <label class="small" for="checkout_postal_code">Postal / ZIP Code</label>
-              <input id="checkout_postal_code" name="postal_code" type="text" autocomplete="postal-code" />
+            <div style="display:flex;justify-content:space-between;gap:12px">
+              <span>Tax</span>
+              <strong id="checkoutSummaryTax">$0.00</strong>
             </div>
 
-            <div>
-              <label class="small" for="checkout_country">Country</label>
-              <input id="checkout_country" name="country" type="text" value="Canada" autocomplete="country-name" />
+            <div style="display:flex;justify-content:space-between;gap:12px;font-size:1.05rem">
+              <span><strong>Total</strong></span>
+              <strong id="checkoutSummaryTotal">$0.00</strong>
             </div>
-
-            <div style="grid-column:1 / -1">
-              <label class="small" for="checkout_notes">Order Notes</label>
-              <textarea id="checkout_notes" name="notes" rows="4"></textarea>
-            </div>
-
-            <div class="card" style="grid-column:1 / -1;padding:14px">
-              <h3 style="margin-top:0;margin-bottom:8px">Privacy & Security</h3>
-              <p class="small" style="margin:0 0 8px 0">
-                We only collect the details needed to create, review, and fulfill your order.
-              </p>
-              <p class="small" style="margin:0 0 8px 0">
-                Payment provider automation is still being connected, so submitted checkout details currently create an order and payment-ready record rather than charging immediately.
-              </p>
-              <label class="small" style="display:flex;gap:8px;align-items:flex-start">
-                <input type="checkbox" id="checkout_consent" name="checkout_consent" required />
-                <span>
-                  I understand my order details will be stored for processing, status tracking, and customer contact.
-                </span>
-              </label>
-            </div>
-
-            <div id="checkoutMessage" class="small" style="display:none;grid-column:1 / -1"></div>
-
-            <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap">
-              <button class="btn" type="submit" id="checkoutSubmitButton" disabled>
-                Create Order
-              </button>
-              <a class="btn" href="/cart/">Back to Cart</a>
-            </div>
-          </form>
+          </div>
         </div>
 
-        <div class="card">
-          <h2 style="margin-top:0">Order Summary</h2>
-
-          <div id="checkoutItems"></div>
-
-          <hr style="margin:16px 0" />
-
-          <p><strong>Items:</strong> <span id="checkoutItemCount">0</span></p>
-          <p><strong>Subtotal:</strong> <span id="checkoutSubtotal">$0.00</span></p>
-          <p><strong>Estimated Tax:</strong> <span id="checkoutTax">Calculated when order is created</span></p>
-          <p><strong>Shipping:</strong> <span id="checkoutShipping">Calculated after address review</span></p>
-
-          <hr style="margin:16px 0" />
-
-          <p style="font-size:1.05rem;margin-bottom:8px">
-            <strong>Estimated Total:</strong>
-            <span id="checkoutTotal">Calculated when order is created</span>
-          </p>
-
-          <div class="card" style="padding:14px;margin-top:14px">
-            <h3 style="margin-top:0;margin-bottom:8px">Checkout Notes</h3>
-            <p class="small" style="margin:0 0 8px 0">
-              Physical orders may require shipping review before the final amount is confirmed.
-            </p>
-            <p class="small" style="margin:0 0 8px 0">
-              Digital-only orders should not require shipping details.
-            </p>
-            <p class="small" style="margin:0">
-              Live PayPal and card processing are planned next. This page is currently the secure order-creation and payment-preparation step.
-            </p>
+        <div class="card" style="margin-top:18px">
+          <h3 style="margin-top:0">Checkout Notes</h3>
+          <div class="small" style="display:grid;gap:8px">
+            <div>Your order is created first, then payment preparation is created for the selected provider.</div>
+            <div>Digital-only carts default to no shipping charge in the current foundation.</div>
+            <div>Taxes currently use the existing estimate logic from the current build.</div>
           </div>
         </div>
       </div>
@@ -205,8 +255,6 @@
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/site-auth-ui.js"></script>
-  <script src="/public/js/cart.js"></script>
-  <script src="/public/js/cart-badge.js"></script>
   <script src="/public/js/checkout.js"></script>
 </body>
 </html>
