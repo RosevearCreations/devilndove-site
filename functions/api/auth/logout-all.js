@@ -1,4 +1,7 @@
 // File: /functions/api/auth/logout-all.js
+// Brief description: Logs out all sessions for the currently authenticated user.
+// It deletes every session tied to that user, including the current one, so the
+// shared auth helper can fully clear access everywhere.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -21,22 +24,18 @@ export async function onRequestPost(context) {
   const token = getBearerToken(request);
 
   if (!token) {
-    return json({
-      ok: false,
-      error: "Unauthorized."
-    }, 401);
+    return json({ ok: false, error: "Unauthorized." }, 401);
   }
 
-  const currentSession = await env.DB.prepare(`
+  const sessionUser = await env.DB.prepare(`
     SELECT
       s.session_id,
       s.user_id,
-      s.session_token,
-      s.token,
       s.expires_at,
       u.user_id AS resolved_user_id,
       u.email,
       u.display_name,
+      u.role,
       u.is_active
     FROM sessions s
     INNER JOIN users u
@@ -51,73 +50,47 @@ export async function onRequestPost(context) {
     .bind(token, token)
     .first();
 
-  if (!currentSession) {
-    return json({
-      ok: false,
-      error: "Invalid or expired session."
-    }, 401);
+  if (!sessionUser) {
+    return json({ ok: false, error: "Invalid or expired session." }, 401);
   }
 
-  if (Number(currentSession.is_active || 0) !== 1) {
-    return json({
-      ok: false,
-      error: "Account is inactive."
-    }, 403);
+  if (Number(sessionUser.is_active || 0) !== 1) {
+    return json({ ok: false, error: "Account is inactive." }, 403);
   }
 
-  const userId = Number(currentSession.resolved_user_id || currentSession.user_id || 0);
+  const user_id = Number(sessionUser.resolved_user_id || sessionUser.user_id || 0);
 
-  if (!Number.isInteger(userId) || userId <= 0) {
-    return json({
-      ok: false,
-      error: "Unable to resolve session user."
-    }, 401);
-  }
-
-  const allSessionsResult = await env.DB.prepare(`
+  const sessionsResult = await env.DB.prepare(`
     SELECT
       session_id
     FROM sessions
     WHERE user_id = ?
   `)
-    .bind(userId)
+    .bind(user_id)
     .all();
 
-  const sessionRows = Array.isArray(allSessionsResult?.results)
-    ? allSessionsResult.results
-    : [];
-
-  const sessionIds = sessionRows
-    .map((row) => Number(row.session_id))
+  const sessionIds = (Array.isArray(sessionsResult?.results) ? sessionsResult.results : [])
+    .map((row) => Number(row.session_id || 0))
     .filter((id) => Number.isInteger(id) && id > 0);
 
-  if (!sessionIds.length) {
-    return json({
-      ok: true,
-      message: "No active sessions found for this user.",
-      logged_out: true,
-      deleted_sessions: 0
-    });
+  let deleted_sessions = 0;
+
+  if (sessionIds.length) {
+    const placeholders = sessionIds.map(() => "?").join(", ");
+
+    await env.DB.prepare(`
+      DELETE FROM sessions
+      WHERE session_id IN (${placeholders})
+    `)
+      .bind(...sessionIds)
+      .run();
+
+    deleted_sessions = sessionIds.length;
   }
-
-  const placeholders = sessionIds.map(() => "?").join(", ");
-
-  await env.DB.prepare(`
-    DELETE FROM sessions
-    WHERE session_id IN (${placeholders})
-  `)
-    .bind(...sessionIds)
-    .run();
 
   return json({
     ok: true,
-    message: "All sessions logged out successfully.",
-    logged_out: true,
-    deleted_sessions: sessionIds.length,
-    user: {
-      user_id: userId,
-      email: currentSession.email || "",
-      display_name: currentSession.display_name || ""
-    }
+    message: "All sessions were logged out successfully.",
+    deleted_sessions
   });
 }
