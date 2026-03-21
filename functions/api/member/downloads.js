@@ -1,4 +1,7 @@
 // File: /functions/api/member/downloads.js
+// Brief description: Returns the logged-in member’s available digital downloads.
+// It validates the active bearer-token session, looks for the member’s paid/completed
+// digital order items, and returns a clean downloads list for the members downloads panel.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -15,10 +18,18 @@ function getBearerToken(request) {
   return match ? String(match[1] || "").trim() : "";
 }
 
-async function getSessionUser(env, token) {
-  if (!token) return null;
+function normalizeResults(result) {
+  return Array.isArray(result?.results) ? result.results : [];
+}
 
-  const sessionUser = await env.DB.prepare(`
+async function getMemberUserFromRequest(request, env) {
+  const token = getBearerToken(request);
+
+  if (!token) {
+    return null;
+  }
+
+  const session = await env.DB.prepare(`
     SELECT
       s.session_id,
       s.user_id,
@@ -43,110 +54,91 @@ async function getSessionUser(env, token) {
     .bind(token, token)
     .first();
 
-  return sessionUser || null;
-}
+  if (!session) return null;
+  if (Number(session.is_active || 0) !== 1) return null;
 
-async function requireMember(request, env) {
-  const token = getBearerToken(request);
-
-  if (!token) {
-    return { error: json({ ok: false, error: "Unauthorized." }, 401) };
-  }
-
-  const sessionUser = await getSessionUser(env, token);
-
-  if (!sessionUser) {
-    return { error: json({ ok: false, error: "Invalid or expired session." }, 401) };
-  }
-
-  if (Number(sessionUser.is_active || 0) !== 1) {
-    return { error: json({ ok: false, error: "Account is inactive." }, 403) };
-  }
-
-  const role = String(sessionUser.role || "").trim().toLowerCase();
-
-  if (!["member", "admin"].includes(role)) {
-    return { error: json({ ok: false, error: "Forbidden." }, 403) };
-  }
+  const role = String(session.role || "").toLowerCase();
+  if (!["member", "admin"].includes(role)) return null;
 
   return {
-    sessionUser: {
-      user_id: Number(sessionUser.resolved_user_id || sessionUser.user_id || 0),
-      email: sessionUser.email || "",
-      display_name: sessionUser.display_name || "",
-      role
-    }
+    session_id: Number(session.session_id || 0),
+    user_id: Number(session.resolved_user_id || session.user_id || 0),
+    email: session.email || "",
+    display_name: session.display_name || "",
+    role
   };
-}
-
-function normalizeResults(result) {
-  return Array.isArray(result?.results) ? result.results : [];
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const authCheck = await requireMember(request, env);
-  if (authCheck.error) return authCheck.error;
+  const memberUser = await getMemberUserFromRequest(request, env);
 
-  const sessionUser = authCheck.sessionUser;
+  if (!memberUser) {
+    return json({ ok: false, error: "Unauthorized." }, 401);
+  }
 
-  const sql = `
+  const result = await env.DB.prepare(`
     SELECT
-      o.order_id,
-      o.order_number,
       oi.order_item_id,
+      oi.order_id,
       oi.product_id,
       oi.product_name,
       oi.product_type,
-      oi.digital_file_url AS file_url,
-      oi.created_at,
-      'available' AS access_status,
-      NULL AS expires_at
-    FROM orders o
-    INNER JOIN order_items oi
-      ON oi.order_id = o.order_id
+      oi.digital_file_url,
+      oi.created_at AS order_item_created_at,
+
+      o.order_number,
+      o.order_status,
+      o.payment_status,
+      o.currency,
+      o.created_at AS order_created_at,
+      o.updated_at AS order_updated_at,
+
+      p.sku
+    FROM order_items oi
+    INNER JOIN orders o
+      ON o.order_id = oi.order_id
+    LEFT JOIN products p
+      ON p.product_id = oi.product_id
     WHERE (
       o.user_id = ?
       OR LOWER(COALESCE(o.customer_email, '')) = LOWER(?)
     )
-      AND LOWER(COALESCE(oi.product_type, '')) IN ('digital', 'download', 'file')
+      AND LOWER(COALESCE(oi.product_type, '')) = 'digital'
       AND COALESCE(oi.digital_file_url, '') <> ''
-      AND LOWER(COALESCE(o.order_status, '')) NOT IN ('cancelled')
-      AND LOWER(COALESCE(o.payment_status, 'pending')) IN (
-        'paid',
-        'completed',
-        'captured',
-        'authorized',
-        'pending'
-      )
+      AND LOWER(COALESCE(o.order_status, '')) IN ('paid', 'fulfilled')
+      AND LOWER(COALESCE(o.payment_status, '')) IN ('paid', 'completed', 'captured')
     ORDER BY o.created_at DESC, oi.order_item_id DESC
-  `;
-
-  const result = await env.DB.prepare(sql)
-    .bind(sessionUser.user_id, sessionUser.email)
+  `)
+    .bind(memberUser.user_id, memberUser.email)
     .all();
+
+  const downloads = normalizeResults(result).map((row) => ({
+    order_item_id: Number(row.order_item_id || 0),
+    order_id: Number(row.order_id || 0),
+    product_id: Number(row.product_id || 0),
+    product_name: row.product_name || "",
+    product_type: row.product_type || "digital",
+    sku: row.sku || "",
+    digital_file_url: row.digital_file_url || "",
+    order_number: row.order_number || "",
+    order_status: row.order_status || "paid",
+    payment_status: row.payment_status || "paid",
+    currency: row.currency || "CAD",
+    order_created_at: row.order_created_at || null,
+    order_updated_at: row.order_updated_at || null,
+    order_item_created_at: row.order_item_created_at || null
+  }));
 
   return json({
     ok: true,
-    user: {
-      user_id: sessionUser.user_id,
-      email: sessionUser.email,
-      display_name: sessionUser.display_name,
-      role: sessionUser.role
+    requested_by: {
+      user_id: memberUser.user_id,
+      email: memberUser.email,
+      display_name: memberUser.display_name,
+      role: memberUser.role
     },
-    downloads: normalizeResults(result).map((row) => ({
-      order_id: Number(row.order_id || 0),
-      order_number: row.order_number || "",
-      order_item_id: Number(row.order_item_id || 0),
-      product_id: Number(row.product_id || 0),
-      product_name: row.product_name || "",
-      product_type: row.product_type || "",
-      title: row.product_name || "Download",
-      file_url: row.file_url || "",
-      access_status: row.access_status || "available",
-      expires_at: row.expires_at || null,
-      created_at: row.created_at || null
-    }))
+    downloads
   });
 }
