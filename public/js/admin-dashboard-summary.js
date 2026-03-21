@@ -1,33 +1,48 @@
 // File: /public/js/admin-dashboard-summary.js
+// Brief description: Loads the top dashboard summary cards on the admin page.
+// It fetches the protected dashboard summary endpoint, fills the
+// user/product/order/payment totals, and refreshes automatically
+// after admin changes that affect the summary.
 
 document.addEventListener("DOMContentLoaded", () => {
-  const refreshButton = document.getElementById("refreshDashboardSummaryButton");
+  if (!window.DDAuth) return;
+
   const messageEl = document.getElementById("dashboardSummaryMessage");
-
-  const usersCountEl = document.getElementById("summaryUsersCount");
-  const productsCountEl = document.getElementById("summaryProductsCount");
-  const ordersCountEl = document.getElementById("summaryOrdersCount");
-  const paymentsCountEl = document.getElementById("summaryPaymentsCount");
-
-  if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  const refreshButton = document.getElementById("refreshDashboardSummaryButton");
 
   let isLoading = false;
 
   function setMessage(message, isError = false) {
     if (!messageEl) return;
+
     messageEl.textContent = message;
     messageEl.style.display = message ? "block" : "none";
     messageEl.style.color = isError ? "#b00020" : "";
   }
 
-  function setValue(el, value) {
+  function setValue(id, value) {
+    const el = document.getElementById(id);
     if (!el) return;
     el.textContent = value;
   }
 
   function formatCount(value) {
-    const count = Number(value || 0);
-    return Number.isFinite(count) ? count.toLocaleString() : "0";
+    const num = Number(value || 0);
+    return Number.isFinite(num) ? num.toLocaleString() : "0";
+  }
+
+  function renderEmpty() {
+    setValue("summaryUsersCount", "—");
+    setValue("summaryProductsCount", "—");
+    setValue("summaryOrdersCount", "—");
+    setValue("summaryPaymentsCount", "—");
+  }
+
+  function renderSummary(summary) {
+    setValue("summaryUsersCount", formatCount(summary?.users_count));
+    setValue("summaryProductsCount", formatCount(summary?.products_count));
+    setValue("summaryOrdersCount", formatCount(summary?.orders_count));
+    setValue("summaryPaymentsCount", formatCount(summary?.payments_count));
   }
 
   async function fetchSummary() {
@@ -37,28 +52,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const data = await response.json();
 
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Failed to load dashboard summary.");
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Failed to load dashboard summary.");
     }
 
     return data.summary || {};
   }
 
-  function renderSummary(summary) {
-    setValue(usersCountEl, formatCount(summary.users_count));
-    setValue(productsCountEl, formatCount(summary.products_count));
-    setValue(ordersCountEl, formatCount(summary.orders_count));
-    setValue(paymentsCountEl, formatCount(summary.payments_count));
-  }
-
   async function loadSummary() {
     if (isLoading) return;
 
-    isLoading = true;
     const originalText = refreshButton?.textContent || "Refresh Summary";
+    isLoading = true;
 
     try {
       setMessage("Loading dashboard summary...");
+
       if (refreshButton) {
         refreshButton.disabled = true;
         refreshButton.textContent = "Loading...";
@@ -66,11 +75,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const summary = await fetchSummary();
       renderSummary(summary);
-      setMessage("Dashboard summary loaded.");
+      setMessage("");
     } catch (error) {
+      renderEmpty();
       setMessage(error.message || "Failed to load dashboard summary.", true);
     } finally {
       isLoading = false;
+
       if (refreshButton) {
         refreshButton.disabled = false;
         refreshButton.textContent = originalText;
@@ -84,9 +95,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  document.addEventListener("dd:admin-ready", async (event) => {
+    if (!event?.detail?.ok) {
+      renderEmpty();
+      return;
+    }
+
+    await loadSummary();
+  });
+
+  document.addEventListener("dd:user-updated", async () => {
+    await loadSummary();
+  });
+
   document.addEventListener("dd:order-updated", async () => {
     await loadSummary();
   });
 
-  loadSummary();
+  document.addEventListener("dd:product-updated", async () => {
+    await loadSummary();
+  });
+
+  renderEmpty();
 });
