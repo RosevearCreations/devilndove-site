@@ -1,4 +1,7 @@
 // File: /functions/api/auth/me.js
+// Brief description: Returns the currently logged-in user from the active bearer-token session.
+// This is the shared “who am I” endpoint used by the site auth UI, member pages,
+// and admin protection checks.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -24,21 +27,20 @@ export async function onRequestGet(context) {
     return json({ ok: false, error: "Unauthorized." }, 401);
   }
 
-  const session = await env.DB.prepare(`
+  const sessionUser = await env.DB.prepare(`
     SELECT
       s.session_id,
       s.user_id,
       s.session_token,
       s.token,
       s.expires_at,
-      s.created_at AS session_created_at,
       u.user_id AS resolved_user_id,
       u.email,
       u.display_name,
       u.role,
       u.is_active,
-      u.created_at AS user_created_at,
-      u.updated_at AS user_updated_at
+      u.created_at,
+      u.updated_at
     FROM sessions s
     INNER JOIN users u
       ON u.user_id = s.user_id
@@ -52,31 +54,28 @@ export async function onRequestGet(context) {
     .bind(token, token)
     .first();
 
-  if (!session) {
+  if (!sessionUser) {
     return json({ ok: false, error: "Invalid or expired session." }, 401);
   }
 
-  const isActive = Number(session.is_active || 0) === 1;
-
-  if (!isActive) {
+  if (Number(sessionUser.is_active || 0) !== 1) {
     return json({ ok: false, error: "Account is inactive." }, 403);
   }
 
   return json({
     ok: true,
     user: {
-      user_id: Number(session.resolved_user_id || session.user_id || 0),
-      email: session.email || "",
-      display_name: session.display_name || "",
-      role: session.role || "member",
-      is_active: isActive ? 1 : 0,
-      created_at: session.user_created_at || null,
-      updated_at: session.user_updated_at || null
+      user_id: Number(sessionUser.resolved_user_id || sessionUser.user_id || 0),
+      email: sessionUser.email || "",
+      display_name: sessionUser.display_name || "",
+      role: sessionUser.role || "member",
+      is_active: Number(sessionUser.is_active || 0),
+      created_at: sessionUser.created_at || null,
+      updated_at: sessionUser.updated_at || null
     },
     session: {
-      session_id: Number(session.session_id || 0),
-      expires_at: session.expires_at || null,
-      created_at: session.session_created_at || null
+      session_id: Number(sessionUser.session_id || 0),
+      expires_at: sessionUser.expires_at || null
     }
   });
 }
