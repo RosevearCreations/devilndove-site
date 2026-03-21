@@ -1,14 +1,16 @@
 // File: /functions/api/auth/change-password.js
+// Brief description: Changes the password for the currently authenticated user.
+// It verifies the current password, writes the new normalized password hash,
+// and updates the user record while keeping the active session model consistent
+// with the rest of auth.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      "Content-Type": "application/json"
+    }
   });
-}
-
-function normalizeText(value) {
-  return String(value || "").trim();
 }
 
 function getBearerToken(request) {
@@ -29,36 +31,35 @@ async function sha256Hex(input) {
   return toHex(digest);
 }
 
-function formatStoredPasswordHashFromPlaintext(password) {
-  return sha256Hex(password).then((hex) => `sha256$${hex}`);
-}
+async function verifyStoredPasswordHash(password, storedHash) {
+  const normalizedStoredHash = String(storedHash || "").trim();
 
-async function verifyPassword(inputPassword, storedPasswordHash) {
-  const incoming = String(inputPassword || "");
-  const stored = String(storedPasswordHash || "").trim();
+  if (!normalizedStoredHash) {
+    return false;
+  }
 
-  if (!stored) return false;
-
-  if (stored.startsWith("sha256$")) {
-    const expected = stored.slice("sha256$".length).trim().toLowerCase();
-    const actual = await sha256Hex(incoming);
+  if (normalizedStoredHash.startsWith("sha256$")) {
+    const expected = normalizedStoredHash.slice("sha256$".length);
+    const actual = await sha256Hex(password);
     return actual === expected;
   }
 
-  if (stored.startsWith("plain$")) {
-    return incoming === stored.slice("plain$".length);
-  }
-
-  if (/^[a-f0-9]{64}$/i.test(stored)) {
-    const actual = await sha256Hex(incoming);
-    return actual === stored.toLowerCase();
-  }
-
-  return incoming === stored;
+  return false;
 }
 
-async function getSessionUser(env, token) {
-  if (!token) return null;
+async function formatStoredPasswordHashFromPlaintext(password) {
+  const hex = await sha256Hex(password);
+  return `sha256$${hex}`;
+}
+
+export async function onRequestPost(context) {
+  const { request, env } = context;
+
+  const token = getBearerToken(request);
+
+  if (!token) {
+    return json({ ok: false, error: "Unauthorized." }, 401);
+  }
 
   const sessionUser = await env.DB.prepare(`
     SELECT
@@ -69,12 +70,12 @@ async function getSessionUser(env, token) {
       s.expires_at,
       u.user_id AS resolved_user_id,
       u.email,
+      u.password_hash,
       u.display_name,
       u.role,
       u.is_active,
-      u.password_hash,
-      u.created_at AS user_created_at,
-      u.updated_at AS user_updated_at
+      u.created_at,
+      u.updated_at
     FROM sessions s
     INNER JOIN users u
       ON u.user_id = s.user_id
@@ -87,20 +88,6 @@ async function getSessionUser(env, token) {
   `)
     .bind(token, token)
     .first();
-
-  return sessionUser || null;
-}
-
-export async function onRequestPost(context) {
-  const { request, env } = context;
-
-  const token = getBearerToken(request);
-
-  if (!token) {
-    return json({ ok: false, error: "Unauthorized." }, 401);
-  }
-
-  const sessionUser = await getSessionUser(env, token);
 
   if (!sessionUser) {
     return json({ ok: false, error: "Invalid or expired session." }, 401);
@@ -120,38 +107,33 @@ export async function onRequestPost(context) {
   const current_password = String(body.current_password || "");
   const new_password = String(body.new_password || "");
 
-  if (!current_password || !new_password) {
-    return json({
-      ok: false,
-      error: "Current password and new password are required."
-    }, 400);
+  if (!current_password) {
+    return json({ ok: false, error: "Current password is required." }, 400);
   }
 
-  if (new_password.length < 6) {
-    return json({
-      ok: false,
-      error: "New password must be at least 6 characters."
-    }, 400);
+  if (!new_password) {
+    return json({ ok: false, error: "New password is required." }, 400);
   }
 
-  const currentPasswordOk = await verifyPassword(
+  if (new_password.length < 8) {
+    return json({ ok: false, error: "New password must be at least 8 characters." }, 400);
+  }
+
+  const currentMatches = await verifyStoredPasswordHash(
     current_password,
     sessionUser.password_hash
   );
 
-  if (!currentPasswordOk) {
-    return json({
-      ok: false,
-      error: "Current password is incorrect."
-    }, 403);
+  if (!currentMatches) {
+    return json({ ok: false, error: "Current password is incorrect." }, 401);
   }
 
-  const newPasswordMatchesCurrent = await verifyPassword(
+  const newMatchesCurrent = await verifyStoredPasswordHash(
     new_password,
     sessionUser.password_hash
   );
 
-  if (newPasswordMatchesCurrent) {
+  if (newMatchesCurrent) {
     return json({
       ok: false,
       error: "New password must be different from the current password."
@@ -159,7 +141,6 @@ export async function onRequestPost(context) {
   }
 
   const new_password_hash = await formatStoredPasswordHashFromPlaintext(new_password);
-  const userId = Number(sessionUser.resolved_user_id || sessionUser.user_id || 0);
 
   await env.DB.prepare(`
     UPDATE users
@@ -168,34 +149,39 @@ export async function onRequestPost(context) {
       updated_at = CURRENT_TIMESTAMP
     WHERE user_id = ?
   `)
-    .bind(new_password_hash, userId)
+    .bind(
+      new_password_hash,
+      Number(sessionUser.resolved_user_id || sessionUser.user_id || 0)
+    )
     .run();
 
-  await env.DB.prepare(`
-    DELETE FROM sessions
+  const updatedUser = await env.DB.prepare(`
+    SELECT
+      user_id,
+      email,
+      display_name,
+      role,
+      is_active,
+      created_at,
+      updated_at
+    FROM users
     WHERE user_id = ?
-      AND session_id != ?
+    LIMIT 1
   `)
-    .bind(userId, Number(sessionUser.session_id || 0))
-    .run();
+    .bind(Number(sessionUser.resolved_user_id || sessionUser.user_id || 0))
+    .first();
 
   return json({
     ok: true,
     message: "Password changed successfully.",
     user: {
-      user_id: userId,
-      email: sessionUser.email || "",
-      display_name: sessionUser.display_name || "",
-      role: sessionUser.role || "member",
-      is_active: Number(sessionUser.is_active || 0),
-      created_at: sessionUser.user_created_at || null,
-      updated_at: new Date().toISOString()
-    },
-    session: {
-      session_id: Number(sessionUser.session_id || 0),
-      session_token: sessionUser.session_token || sessionUser.token || token,
-      token: sessionUser.token || sessionUser.session_token || token,
-      expires_at: sessionUser.expires_at || null
+      user_id: Number(updatedUser?.user_id || sessionUser.resolved_user_id || sessionUser.user_id || 0),
+      email: updatedUser?.email || sessionUser.email || "",
+      display_name: updatedUser?.display_name || sessionUser.display_name || "",
+      role: updatedUser?.role || sessionUser.role || "member",
+      is_active: Number(updatedUser?.is_active || sessionUser.is_active || 0),
+      created_at: updatedUser?.created_at || null,
+      updated_at: updatedUser?.updated_at || null
     }
   });
 }
