@@ -1,4 +1,6 @@
 // File: /functions/api/auth/register.js
+// Brief description: Registers a new member account, creates an initial session,
+// and returns the user plus session token expected by the shared public/js/auth.js helper.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -11,6 +13,14 @@ function json(data, status = 200) {
 
 function normalizeText(value) {
   return String(value || "").trim();
+}
+
+function normalizeEmail(value) {
+  return normalizeText(value).toLowerCase();
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
 }
 
 function toHex(buffer) {
@@ -34,11 +44,6 @@ function makeSessionToken() {
   return `${crypto.randomUUID()}${crypto.randomUUID().replace(/-/g, "")}`;
 }
 
-function isValidEmail(email) {
-  const value = String(email || "").trim();
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
-
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -49,7 +54,7 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "Invalid JSON body." }, 400);
   }
 
-  const email = normalizeText(body.email).toLowerCase();
+  const email = normalizeEmail(body.email);
   const display_name = normalizeText(body.display_name || body.name);
   const password = String(body.password || "");
   const password_confirm = String(body.password_confirm || body.confirm_password || "");
@@ -66,11 +71,11 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "Password is required." }, 400);
   }
 
-  if (password.length < 6) {
-    return json({ ok: false, error: "Password must be at least 6 characters." }, 400);
+  if (password.length < 8) {
+    return json({ ok: false, error: "Password must be at least 8 characters." }, 400);
   }
 
-  if (password_confirm && password !== password_confirm) {
+  if (password !== password_confirm) {
     return json({ ok: false, error: "Passwords do not match." }, 400);
   }
 
@@ -118,7 +123,7 @@ export async function onRequestPost(context) {
     )
     .run();
 
-  const user_id = insertResult?.meta?.last_row_id;
+  const user_id = Number(insertResult?.meta?.last_row_id || 0);
 
   if (!user_id) {
     return json({ ok: false, error: "Account could not be created." }, 500);
@@ -143,7 +148,7 @@ export async function onRequestPost(context) {
     )
   `)
     .bind(
-      Number(user_id),
+      user_id,
       sessionToken,
       sessionToken
     )
@@ -162,7 +167,7 @@ export async function onRequestPost(context) {
     WHERE user_id = ?
     LIMIT 1
   `)
-    .bind(Number(user_id))
+    .bind(user_id)
     .first();
 
   const session = await env.DB.prepare(`
@@ -174,33 +179,25 @@ export async function onRequestPost(context) {
       expires_at,
       created_at
     FROM sessions
-    WHERE (session_token = ? OR token = ?)
+    WHERE user_id = ?
     ORDER BY session_id DESC
     LIMIT 1
   `)
-    .bind(sessionToken, sessionToken)
+    .bind(user_id)
     .first();
 
   return json({
     ok: true,
     message: "Account created successfully.",
-    session_token: sessionToken,
-    token: sessionToken,
-    session: session
-      ? {
-          session_id: Number(session.session_id || 0),
-          session_token: session.session_token || sessionToken,
-          token: session.token || sessionToken,
-          expires_at: session.expires_at || null,
-          created_at: session.created_at || null
-        }
-      : {
-          session_id: null,
-          session_token: sessionToken,
-          token: sessionToken,
-          expires_at: null,
-          created_at: null
-        },
+    session_token: session?.session_token || sessionToken,
+    token: session?.token || sessionToken,
+    session: {
+      session_id: Number(session?.session_id || 0),
+      session_token: session?.session_token || sessionToken,
+      token: session?.token || sessionToken,
+      expires_at: session?.expires_at || null,
+      created_at: session?.created_at || null
+    },
     user: {
       user_id: Number(user?.user_id || user_id || 0),
       email: user?.email || email,
