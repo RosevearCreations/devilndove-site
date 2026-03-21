@@ -1,7 +1,11 @@
 // File: /public/js/auth.js
+// Brief description: Shared client-side auth helper for the site. It stores the session token,
+// exposes login/register/logout/account methods, and provides the authenticated apiFetch wrapper
+// used by the member, admin, and checkout flows.
 
-(() => {
-  const STORAGE_KEY = "dd_session_token";
+(function () {
+  const TOKEN_KEY = "dd_auth_token";
+  const USER_KEY = "dd_auth_user";
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -9,45 +13,59 @@
 
   function getToken() {
     try {
-      return normalizeText(localStorage.getItem(STORAGE_KEY));
+      return normalizeText(localStorage.getItem(TOKEN_KEY));
     } catch {
       return "";
     }
   }
 
   function setToken(token) {
+    const safeToken = normalizeText(token);
+
     try {
-      const safeToken = normalizeText(token);
-
-      if (!safeToken) {
-        localStorage.removeItem(STORAGE_KEY);
-        return;
+      if (safeToken) {
+        localStorage.setItem(TOKEN_KEY, safeToken);
+      } else {
+        localStorage.removeItem(TOKEN_KEY);
       }
-
-      localStorage.setItem(STORAGE_KEY, safeToken);
     } catch {
       // ignore storage failures
+    }
+
+    return safeToken;
+  }
+
+  function getStoredUser() {
+    try {
+      const raw = localStorage.getItem(USER_KEY);
+      const parsed = JSON.parse(raw || "null");
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch {
+      return null;
     }
   }
 
-  function clearToken() {
+  function setStoredUser(user) {
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      if (user && typeof user === "object") {
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+      } else {
+        localStorage.removeItem(USER_KEY);
+      }
     } catch {
       // ignore storage failures
     }
+
+    return user || null;
+  }
+
+  function clearAuth() {
+    setToken("");
+    setStoredUser(null);
   }
 
   function isLoggedIn() {
     return !!getToken();
-  }
-
-  async function parseJsonSafe(response) {
-    try {
-      return await response.json();
-    } catch {
-      return null;
-    }
   }
 
   async function apiFetch(url, options = {}) {
@@ -68,10 +86,27 @@
     });
 
     if (response.status === 401) {
-      clearToken();
+      clearAuth();
+      document.dispatchEvent(new CustomEvent("dd:auth-changed", {
+        detail: {
+          ok: false,
+          logged_in: false,
+          user: null
+        }
+      }));
     }
 
     return response;
+  }
+
+  async function parseJson(response) {
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "Request failed.");
+    }
+
+    return data;
   }
 
   async function login(email, password) {
@@ -86,41 +121,73 @@
       })
     });
 
-    const data = await parseJsonSafe(response);
-
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || "Login failed.");
-    }
-
+    const data = await parseJson(response);
     const token =
-      normalizeText(data.session_token) ||
-      normalizeText(data.token) ||
-      normalizeText(data.session?.session_token) ||
-      normalizeText(data.session?.token);
+      normalizeText(data?.session_token) ||
+      normalizeText(data?.token) ||
+      normalizeText(data?.session?.session_token) ||
+      normalizeText(data?.session?.token);
 
     if (!token) {
       throw new Error("Login succeeded but no session token was returned.");
     }
 
     setToken(token);
+    setStoredUser(data?.user || null);
+
+    return data;
+  }
+
+  async function register(payload) {
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: normalizeText(payload?.email).toLowerCase(),
+        display_name: normalizeText(payload?.display_name),
+        password: String(payload?.password || ""),
+        password_confirm: String(payload?.password_confirm || "")
+      })
+    });
+
+    const data = await parseJson(response);
+    const token =
+      normalizeText(data?.session_token) ||
+      normalizeText(data?.token) ||
+      normalizeText(data?.session?.session_token) ||
+      normalizeText(data?.session?.token);
+
+    if (!token) {
+      throw new Error("Registration succeeded but no session token was returned.");
+    }
+
+    setToken(token);
+    setStoredUser(data?.user || null);
 
     return data;
   }
 
   async function logout() {
-    const token = getToken();
-
     try {
-      await apiFetch("/api/auth/logout", {
+      const response = await apiFetch("/api/auth/logout", {
         method: "POST"
       });
-    } catch {
-      // ignore network/logout endpoint failure
+
+      await response.json().catch(() => null);
     } finally {
-      clearToken();
+      clearAuth();
+      document.dispatchEvent(new CustomEvent("dd:auth-changed", {
+        detail: {
+          ok: true,
+          logged_in: false,
+          user: null
+        }
+      }));
     }
 
-    return { ok: true, had_token: !!token };
+    return { ok: true };
   }
 
   async function logoutAll() {
@@ -128,29 +195,28 @@
       method: "POST"
     });
 
-    const data = await parseJsonSafe(response);
+    const data = await parseJson(response);
 
-    clearToken();
-
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || "Logout-all failed.");
-    }
+    clearAuth();
+    document.dispatchEvent(new CustomEvent("dd:auth-changed", {
+      detail: {
+        ok: true,
+        logged_in: false,
+        user: null
+      }
+    }));
 
     return data;
   }
 
-  async function fetchMe() {
+  async function me() {
     const response = await apiFetch("/api/auth/me", {
       method: "GET"
     });
 
-    const data = await parseJsonSafe(response);
-
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || "Unable to verify session.");
-    }
-
-    return data.user || null;
+    const data = await parseJson(response);
+    setStoredUser(data?.user || null);
+    return data;
   }
 
   async function changePassword(current_password, new_password) {
@@ -162,13 +228,7 @@
       })
     });
 
-    const data = await parseJsonSafe(response);
-
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || "Password change failed.");
-    }
-
-    return data;
+    return parseJson(response);
   }
 
   async function fetchSessionInfo() {
@@ -176,31 +236,7 @@
       method: "GET"
     });
 
-    const data = await parseJsonSafe(response);
-
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || "Unable to load session info.");
-    }
-
-    return data;
-  }
-
-  async function bootstrapAdmin(payload = {}) {
-    const response = await fetch("/api/auth/bootstrap-admin", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload || {})
-    });
-
-    const data = await parseJsonSafe(response);
-
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || "Bootstrap admin failed.");
-    }
-
-    return data;
+    return parseJson(response);
   }
 
   async function fetchBootstrapStatus() {
@@ -208,29 +244,55 @@
       method: "GET"
     });
 
-    const data = await parseJsonSafe(response);
+    return parseJson(response);
+  }
 
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || "Unable to load bootstrap status.");
+  async function bootstrapAdmin(payload) {
+    const response = await fetch("/api/auth/bootstrap-admin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: normalizeText(payload?.email).toLowerCase(),
+        display_name: normalizeText(payload?.display_name),
+        password: String(payload?.password || ""),
+        password_confirm: String(payload?.password_confirm || ""),
+        bootstrap_token: normalizeText(payload?.bootstrap_token)
+      })
+    });
+
+    const data = await parseJson(response);
+    const token =
+      normalizeText(data?.session_token) ||
+      normalizeText(data?.token) ||
+      normalizeText(data?.session?.session_token) ||
+      normalizeText(data?.session?.token);
+
+    if (token) {
+      setToken(token);
+      setStoredUser(data?.user || null);
     }
 
     return data;
   }
 
   window.DDAuth = {
-    STORAGE_KEY,
     getToken,
     setToken,
-    clearToken,
+    getStoredUser,
+    setStoredUser,
+    clearAuth,
     isLoggedIn,
     apiFetch,
     login,
+    register,
     logout,
     logoutAll,
-    fetchMe,
+    me,
     changePassword,
     fetchSessionInfo,
-    bootstrapAdmin,
-    fetchBootstrapStatus
+    fetchBootstrapStatus,
+    bootstrapAdmin
   };
 })();
