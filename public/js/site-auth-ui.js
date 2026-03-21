@@ -1,174 +1,136 @@
 // File: /public/js/site-auth-ui.js
+// Brief description: Shared site-wide auth UI helper. It reads the current session,
+// updates nav visibility for logged-in/member/admin states, wires logout buttons,
+// and emits the page-level auth events used by the member and admin pages.
 
 document.addEventListener("DOMContentLoaded", () => {
+  if (!window.DDAuth) return;
+
   const loggedInEls = Array.from(document.querySelectorAll("[data-show-when-logged-in]"));
   const loggedOutEls = Array.from(document.querySelectorAll("[data-show-when-logged-out]"));
   const adminEls = Array.from(document.querySelectorAll("[data-show-when-admin]"));
-  const userNameEls = Array.from(document.querySelectorAll("[data-nav-user-name]"));
+  const navUserNameEls = Array.from(document.querySelectorAll("[data-nav-user-name]"));
   const logoutButtons = Array.from(document.querySelectorAll("[data-nav-logout]"));
 
-  let currentUser = null;
-  let isRefreshing = false;
-
-  function show(el) {
+  function show(el, shouldShow) {
     if (!el) return;
-    el.style.display = "";
+    el.style.display = shouldShow ? "" : "none";
   }
 
-  function hide(el) {
-    if (!el) return;
-    el.style.display = "none";
+  function getSafeUserName(user) {
+    const displayName = String(user?.display_name || "").trim();
+    const email = String(user?.email || "").trim();
+
+    if (displayName) return displayName;
+    if (email) return email;
+    return "Member";
   }
 
-  function normalizeRole(value) {
-    return String(value || "").trim().toLowerCase();
-  }
+  function applyUi(user) {
+    const loggedIn = !!user;
+    const role = String(user?.role || "").trim().toLowerCase();
+    const isAdmin = loggedIn && role === "admin";
+    const name = getSafeUserName(user);
 
-  function isActiveUser(user) {
-    return user?.is_active === true || Number(user?.is_active || 0) === 1;
-  }
+    loggedInEls.forEach((el) => show(el, loggedIn));
+    loggedOutEls.forEach((el) => show(el, !loggedIn));
+    adminEls.forEach((el) => show(el, isAdmin));
 
-  function isAdminUser(user) {
-    return normalizeRole(user?.role) === "admin";
-  }
-
-  function getDisplayName(user) {
-    return (
-      String(user?.display_name || "").trim() ||
-      String(user?.email || "").trim() ||
-      "Member"
-    );
-  }
-
-  function updateUserName(user) {
-    const name = getDisplayName(user);
-    userNameEls.forEach((el) => {
+    navUserNameEls.forEach((el) => {
       el.textContent = name;
     });
   }
 
-  function applyLoggedOutUi() {
-    loggedInEls.forEach(hide);
-    adminEls.forEach(hide);
-    loggedOutEls.forEach(show);
+  function emitAuthEvents(user, session = null) {
+    const loggedIn = !!user;
+    const role = String(user?.role || "").trim().toLowerCase();
+    const isAdmin = loggedIn && role === "admin";
 
-    userNameEls.forEach((el) => {
-      el.textContent = "Member";
-    });
+    document.dispatchEvent(new CustomEvent("dd:auth-ready", {
+      detail: {
+        ok: true,
+        logged_in: loggedIn,
+        user,
+        session
+      }
+    }));
+
+    document.dispatchEvent(new CustomEvent("dd:member-access-ready", {
+      detail: {
+        ok: loggedIn,
+        logged_in: loggedIn,
+        user,
+        session
+      }
+    }));
+
+    document.dispatchEvent(new CustomEvent("dd:members-ready", {
+      detail: {
+        ok: loggedIn,
+        logged_in: loggedIn,
+        user,
+        session
+      }
+    }));
+
+    document.dispatchEvent(new CustomEvent("dd:admin-ready", {
+      detail: {
+        ok: isAdmin,
+        logged_in: loggedIn,
+        user,
+        session
+      }
+    }));
   }
 
-  function applyLoggedInUi(user) {
-    loggedOutEls.forEach(hide);
-    loggedInEls.forEach(show);
-
-    if (isAdminUser(user)) {
-      adminEls.forEach(show);
-    } else {
-      adminEls.forEach(hide);
-    }
-
-    updateUserName(user);
-  }
-
-  function applyUiForCurrentUser() {
-    if (!currentUser || !isActiveUser(currentUser)) {
-      applyLoggedOutUi();
+  async function refreshAuthState() {
+    if (!window.DDAuth.isLoggedIn()) {
+      window.DDAuth.setStoredUser(null);
+      applyUi(null);
+      emitAuthEvents(null, null);
       return;
     }
 
-    applyLoggedInUi(currentUser);
-  }
-
-  function dispatchAuthChanged(detail = {}) {
-    document.dispatchEvent(new CustomEvent("dd:auth-changed", { detail }));
-  }
-
-  async function refreshAuthUi() {
-    if (isRefreshing) return currentUser;
-
-    isRefreshing = true;
-
     try {
-      if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
-        currentUser = null;
-        applyLoggedOutUi();
-        dispatchAuthChanged({ ok: true, logged_in: false, user: null });
-        return null;
-      }
+      const data = await window.DDAuth.me();
+      const user = data?.user || null;
+      const session = data?.session || null;
 
-      const me = await window.DDAuth.fetchMe();
-
-      if (!me || !isActiveUser(me)) {
-        currentUser = null;
-        applyLoggedOutUi();
-        dispatchAuthChanged({ ok: true, logged_in: false, user: null });
-        return null;
-      }
-
-      currentUser = me;
-      applyUiForCurrentUser();
-      dispatchAuthChanged({ ok: true, logged_in: true, user: currentUser });
-
-      return currentUser;
-    } catch (error) {
-      currentUser = null;
-      applyLoggedOutUi();
-      dispatchAuthChanged({
-        ok: false,
-        logged_in: false,
-        user: null,
-        error: error?.message || "Session could not be verified."
-      });
-
-      return null;
-    } finally {
-      isRefreshing = false;
-    }
-  }
-
-  async function handleLogoutClick(button) {
-    if (!window.DDAuth || !window.DDAuth.logout) {
-      applyLoggedOutUi();
-      return;
-    }
-
-    const originalText = button?.textContent || "Logout";
-
-    try {
-      if (button) {
-        button.disabled = true;
-        button.textContent = "Logging out...";
-      }
-
-      await window.DDAuth.logout();
+      applyUi(user);
+      emitAuthEvents(user, session);
     } catch {
-      // ignore logout cleanup failure and still reset UI
-    } finally {
-      currentUser = null;
-      applyLoggedOutUi();
-      dispatchAuthChanged({ ok: true, logged_in: false, user: null });
-
-      if (button) {
-        button.disabled = false;
-        button.textContent = originalText;
-      }
-    }
-
-    const isProtectedPage =
-      window.location.pathname.startsWith("/admin/") ||
-      window.location.pathname.startsWith("/members/");
-
-    if (isProtectedPage) {
-      window.location.href = "/login/";
+      window.DDAuth.clearAuth();
+      applyUi(null);
+      emitAuthEvents(null, null);
     }
   }
 
   logoutButtons.forEach((button) => {
     button.addEventListener("click", async () => {
-      await handleLogoutClick(button);
+      const originalText = button.textContent;
+
+      try {
+        button.disabled = true;
+        button.textContent = "Logging Out...";
+        await window.DDAuth.logout();
+      } catch {
+        window.DDAuth.clearAuth();
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+        applyUi(null);
+        emitAuthEvents(null, null);
+        window.location.href = "/";
+      }
     });
   });
 
-  applyLoggedOutUi();
-  refreshAuthUi();
+  document.addEventListener("dd:auth-changed", (event) => {
+    const user = event?.detail?.logged_in ? (event?.detail?.user || window.DDAuth.getStoredUser()) : null;
+    applyUi(user);
+    emitAuthEvents(user, null);
+  });
+
+  applyUi(window.DDAuth.getStoredUser());
+  refreshAuthState();
 });
