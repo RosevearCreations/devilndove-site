@@ -1,4 +1,7 @@
 // File: /functions/api/auth/session-info.js
+// Brief description: Returns the current authenticated session details and a small
+// session summary for the logged-in user. It is used by the member/account tools
+// so users can see their current session state and account/session metadata cleanly.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -15,23 +18,16 @@ function getBearerToken(request) {
   return match ? String(match[1] || "").trim() : "";
 }
 
-function safeIso(value) {
-  return value || null;
-}
-
 export async function onRequestGet(context) {
   const { request, env } = context;
 
   const token = getBearerToken(request);
 
   if (!token) {
-    return json({
-      ok: false,
-      error: "Unauthorized."
-    }, 401);
+    return json({ ok: false, error: "Unauthorized." }, 401);
   }
 
-  const session = await env.DB.prepare(`
+  const sessionUser = await env.DB.prepare(`
     SELECT
       s.session_id,
       s.user_id,
@@ -44,8 +40,8 @@ export async function onRequestGet(context) {
       u.display_name,
       u.role,
       u.is_active,
-      u.created_at AS user_created_at,
-      u.updated_at AS user_updated_at
+      u.created_at,
+      u.updated_at
     FROM sessions s
     INNER JOIN users u
       ON u.user_id = s.user_id
@@ -59,41 +55,51 @@ export async function onRequestGet(context) {
     .bind(token, token)
     .first();
 
-  if (!session) {
-    return json({
-      ok: false,
-      error: "Invalid or expired session."
-    }, 401);
+  if (!sessionUser) {
+    return json({ ok: false, error: "Invalid or expired session." }, 401);
   }
 
-  const isActive = Number(session.is_active || 0) === 1;
-
-  if (!isActive) {
-    return json({
-      ok: false,
-      error: "Account is inactive."
-    }, 403);
+  if (Number(sessionUser.is_active || 0) !== 1) {
+    return json({ ok: false, error: "Account is inactive." }, 403);
   }
+
+  const allSessionsResult = await env.DB.prepare(`
+    SELECT
+      session_id,
+      expires_at
+    FROM sessions
+    WHERE user_id = ?
+  `)
+    .bind(Number(sessionUser.resolved_user_id || sessionUser.user_id || 0))
+    .all();
+
+  const sessions = Array.isArray(allSessionsResult?.results) ? allSessionsResult.results : [];
+
+  const total_sessions = sessions.length;
+  const active_sessions = sessions.filter((row) => {
+    return typeof row?.expires_at === "string";
+  }).length;
 
   return json({
     ok: true,
-    session: {
-      session_id: Number(session.session_id || 0),
-      session_token: session.session_token || session.token || null,
-      token: session.token || session.session_token || null,
-      user_id: Number(session.resolved_user_id || session.user_id || 0),
-      expires_at: safeIso(session.expires_at),
-      created_at: safeIso(session.session_created_at),
-      is_expired: false
-    },
     user: {
-      user_id: Number(session.resolved_user_id || session.user_id || 0),
-      email: session.email || "",
-      display_name: session.display_name || "",
-      role: session.role || "member",
-      is_active: 1,
-      created_at: safeIso(session.user_created_at),
-      updated_at: safeIso(session.user_updated_at)
+      user_id: Number(sessionUser.resolved_user_id || sessionUser.user_id || 0),
+      email: sessionUser.email || "",
+      display_name: sessionUser.display_name || "",
+      role: sessionUser.role || "member",
+      is_active: Number(sessionUser.is_active || 0),
+      created_at: sessionUser.created_at || null,
+      updated_at: sessionUser.updated_at || null
+    },
+    session: {
+      session_id: Number(sessionUser.session_id || 0),
+      expires_at: sessionUser.expires_at || null,
+      created_at: sessionUser.session_created_at || null,
+      is_current: true
+    },
+    session_summary: {
+      total_sessions,
+      active_sessions
     }
   });
 }
