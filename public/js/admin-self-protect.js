@@ -1,109 +1,88 @@
 // File: /public/js/admin-self-protect.js
+// Brief description: Protects the admin dashboard on the client side. It checks auth state,
+// redirects non-admin or signed-out users to login with a next return path, and prevents
+// the admin area from flashing before the shared auth UI finishes resolving the current session.
 
 document.addEventListener("DOMContentLoaded", () => {
   const accessMessageEl = document.getElementById("adminAccessMessage");
-  const adminSectionIds = [
-    "usersSection",
-    "accessTiersSection",
-    "productsSection",
-    "ordersSection"
-  ];
+
+  if (!window.DDAuth) return;
+
+  let resolved = false;
 
   function setAccessMessage(message, isError = false) {
     if (!accessMessageEl) return;
-
     accessMessageEl.textContent = message;
     accessMessageEl.style.display = message ? "block" : "none";
     accessMessageEl.style.color = isError ? "#b00020" : "";
   }
 
-  function hideAdminSections() {
-    adminSectionIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.style.display = "none";
+  function redirectToLogin() {
+    const next = `${window.location.pathname}${window.location.search || ""}${window.location.hash || ""}`;
+    const url = new URL("/login/", window.location.origin);
+    url.searchParams.set("next", next);
+    window.location.href = url.toString();
+  }
+
+  function handleAllowed(user) {
+    resolved = true;
+    setAccessMessage("");
+
+    document.dispatchEvent(new CustomEvent("dd:admin-access-granted", {
+      detail: {
+        ok: true,
+        user: user || null
       }
-    });
+    }));
   }
 
-  function showAdminSections() {
-    adminSectionIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.style.display = "";
-      }
-    });
+  function handleDenied(message = "Please log in with an admin account to access this page.") {
+    if (resolved) return;
+    resolved = true;
+    setAccessMessage(message, true);
+    redirectToLogin();
   }
 
-  function safeRedirect(path) {
-    window.location.href = path;
+  if (!window.DDAuth.isLoggedIn()) {
+    handleDenied();
+    return;
   }
 
-  async function protectAdminPage() {
-    hideAdminSections();
+  document.addEventListener("dd:admin-ready", (event) => {
+    const ok = !!event?.detail?.ok;
+    const user = event?.detail?.user || null;
 
-    if (!window.DDAuth) {
-      setAccessMessage("Authentication tools are not available.", true);
+    if (!ok || !user) {
+      handleDenied();
       return;
     }
+
+    const role = String(user.role || "").trim().toLowerCase();
+
+    if (role !== "admin") {
+      handleDenied("Your account does not have access to the admin dashboard.");
+      return;
+    }
+
+    handleAllowed(user);
+  });
+
+  document.addEventListener("dd:auth-ready", (event) => {
+    if (resolved) return;
+
+    const loggedIn = !!event?.detail?.logged_in;
+    const user = event?.detail?.user || null;
+
+    if (!loggedIn || !user) {
+      handleDenied();
+    }
+  });
+
+  setTimeout(() => {
+    if (resolved) return;
 
     if (!window.DDAuth.isLoggedIn()) {
-      setAccessMessage("You must be logged in as an admin to access this page.", true);
-
-      setTimeout(() => {
-        safeRedirect("/login/");
-      }, 900);
-
-      return;
+      handleDenied();
     }
-
-    setAccessMessage("Checking admin access...");
-
-    try {
-      const me = await window.DDAuth.fetchMe();
-      const role = String(me?.role || "").trim().toLowerCase();
-      const isActive =
-        me?.is_active === true ||
-        Number(me?.is_active || 0) === 1;
-
-      if (!isActive) {
-        setAccessMessage("This account is inactive.", true);
-
-        setTimeout(() => {
-          safeRedirect("/");
-        }, 1200);
-
-        return;
-      }
-
-      if (role !== "admin") {
-        setAccessMessage("Admin access is required for this page.", true);
-
-        setTimeout(() => {
-          safeRedirect("/members/");
-        }, 1200);
-
-        return;
-      }
-
-      showAdminSections();
-      setAccessMessage("");
-    } catch (error) {
-      setAccessMessage("Your session could not be verified. Please log in again.", true);
-
-      if (window.DDAuth.logout) {
-        try {
-          await window.DDAuth.logout();
-        } catch {
-          // ignore logout cleanup failure
-        }
-      }
-
-      setTimeout(() => {
-        safeRedirect("/login/");
-      }, 1200);
-    }
-  }
-
-  protectAdminPage();
+  }, 1200);
 });
