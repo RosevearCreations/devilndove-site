@@ -1,18 +1,11 @@
 // File: /public/js/members.js
+// Brief description: Handles the members page shell. It fills the visible profile/status
+// fields from the authenticated session, shows access messaging when the user is not signed in,
+// and keeps the member dashboard synchronized with the shared auth UI events.
 
 document.addEventListener("DOMContentLoaded", () => {
   const accessMessageEl = document.getElementById("membersAccessMessage");
-  const memberNameEls = Array.from(document.querySelectorAll("[data-member-name]"));
-  const memberEmailEls = Array.from(document.querySelectorAll("[data-member-email]"));
-  const memberRoleEls = Array.from(document.querySelectorAll("[data-member-role]"));
-  const memberStatusEls = Array.from(document.querySelectorAll("[data-member-status]"));
-  const memberCreatedEls = Array.from(document.querySelectorAll("[data-member-created-at]"));
-  const memberUpdatedEls = Array.from(document.querySelectorAll("[data-member-updated-at]"));
-  const memberSessionExpiresEls = Array.from(document.querySelectorAll("[data-member-session-expires]"));
-
-  let currentMember = null;
-  let currentSession = null;
-  let hasBooted = false;
+  const membersSectionEl = document.getElementById("membersSection");
 
   function setAccessMessage(message, isError = false) {
     if (!accessMessageEl) return;
@@ -22,12 +15,15 @@ document.addEventListener("DOMContentLoaded", () => {
     accessMessageEl.style.color = isError ? "#b00020" : "";
   }
 
-  function normalizeRole(value) {
-    return String(value || "").trim().toLowerCase();
+  function showMembersSection(show) {
+    if (!membersSectionEl) return;
+    membersSectionEl.style.display = show ? "" : "none";
   }
 
-  function isActiveUser(user) {
-    return user?.is_active === true || Number(user?.is_active || 0) === 1;
+  function setAll(selector, value) {
+    document.querySelectorAll(selector).forEach((el) => {
+      el.textContent = value;
+    });
   }
 
   function titleCase(value) {
@@ -58,120 +54,69 @@ document.addEventListener("DOMContentLoaded", () => {
     return raw;
   }
 
-  function setTextMany(elements, value) {
-    elements.forEach((el) => {
-      el.textContent = value;
-    });
+  function getSafeName(user) {
+    const displayName = String(user?.display_name || "").trim();
+    const email = String(user?.email || "").trim();
+
+    if (displayName) return displayName;
+    if (email) return email;
+    return "Member";
   }
 
-  function clearMemberUi() {
-    setTextMany(memberNameEls, "Member");
-    setTextMany(memberEmailEls, "—");
-    setTextMany(memberRoleEls, "—");
-    setTextMany(memberStatusEls, "—");
-    setTextMany(memberCreatedEls, "—");
-    setTextMany(memberUpdatedEls, "—");
-    setTextMany(memberSessionExpiresEls, "—");
+  function renderSignedOut() {
+    setAll("[data-member-name]", "Member");
+    setAll("[data-member-email]", "—");
+    setAll("[data-member-role]", "—");
+    setAll("[data-member-status]", "Signed Out");
+    setAll("[data-member-created-at]", "—");
+    setAll("[data-member-updated-at]", "—");
+    setAll("[data-member-session-expires]", "—");
+
+    setAccessMessage("Please log in to access your member area.", true);
+    showMembersSection(false);
   }
 
-  function renderMemberUi(user, session) {
-    const displayName =
-      String(user?.display_name || "").trim() ||
-      String(user?.email || "").trim() ||
-      "Member";
+  function renderSignedIn(user, session = null) {
+    const role = String(user?.role || "").trim().toLowerCase();
+    const status = Number(user?.is_active || 0) === 1 ? "Active" : "Inactive";
 
-    setTextMany(memberNameEls, displayName);
-    setTextMany(memberEmailEls, user?.email || "—");
-    setTextMany(memberRoleEls, titleCase(user?.role || "member"));
-    setTextMany(memberStatusEls, isActiveUser(user) ? "Active" : "Inactive");
-    setTextMany(memberCreatedEls, formatDate(user?.created_at));
-    setTextMany(memberUpdatedEls, formatDate(user?.updated_at));
-    setTextMany(memberSessionExpiresEls, formatDate(session?.expires_at));
+    setAll("[data-member-name]", getSafeName(user));
+    setAll("[data-member-email]", user?.email || "—");
+    setAll("[data-member-role]", titleCase(role || "member"));
+    setAll("[data-member-status]", status);
+    setAll("[data-member-created-at]", formatDate(user?.created_at));
+    setAll("[data-member-updated-at]", formatDate(user?.updated_at));
+    setAll("[data-member-session-expires]", formatDate(session?.expires_at));
+
+    setAccessMessage("");
+    showMembersSection(true);
   }
 
-  function dispatchMembersReady(detail = {}) {
-    document.dispatchEvent(new CustomEvent("dd:members-ready", { detail }));
-  }
-
-  async function fetchMemberSessionInfo() {
-    if (!window.DDAuth) {
-      throw new Error("Authentication tools are not available.");
-    }
-
-    const sessionInfo = await window.DDAuth.fetchSessionInfo();
-    const user = sessionInfo?.user || null;
-    const session = sessionInfo?.session || null;
-
-    if (!user || !isActiveUser(user)) {
-      throw new Error("A valid active member session is required.");
-    }
-
-    const role = normalizeRole(user.role);
-
-    if (!["member", "admin"].includes(role)) {
-      throw new Error("A valid member account is required.");
-    }
-
-    return { user, session };
-  }
-
-  async function bootMembersPage() {
-    if (hasBooted) return;
-    hasBooted = true;
-
-    clearMemberUi();
-
-    try {
-      const result = await fetchMemberSessionInfo();
-
-      currentMember = result.user;
-      currentSession = result.session;
-
-      renderMemberUi(currentMember, currentSession);
-      setAccessMessage("");
-
-      dispatchMembersReady({
-        ok: true,
-        user: currentMember,
-        session: currentSession
-      });
-    } catch (error) {
-      currentMember = null;
-      currentSession = null;
-      clearMemberUi();
-      setAccessMessage(error.message || "Unable to load member account.", true);
-
-      dispatchMembersReady({
-        ok: false,
-        error: error.message || "Unable to load member account."
-      });
-    }
-  }
-
-  document.addEventListener("dd:member-access-ready", async (event) => {
+  document.addEventListener("dd:members-ready", (event) => {
     const ok = !!event?.detail?.ok;
+    const user = event?.detail?.user || null;
+    const session = event?.detail?.session || null;
 
-    hasBooted = false;
-
-    if (!ok) {
-      currentMember = null;
-      currentSession = null;
-      clearMemberUi();
-
-      dispatchMembersReady({
-        ok: false,
-        error: event?.detail?.error || "Member access was not granted."
-      });
+    if (!ok || !user) {
+      renderSignedOut();
       return;
     }
 
-    await bootMembersPage();
+    renderSignedIn(user, session);
   });
 
-  document.addEventListener("dd:auth-changed", async () => {
-    hasBooted = false;
-    await bootMembersPage();
+  document.addEventListener("dd:member-access-ready", (event) => {
+    const ok = !!event?.detail?.ok;
+    const user = event?.detail?.user || null;
+    const session = event?.detail?.session || null;
+
+    if (!ok || !user) {
+      renderSignedOut();
+      return;
+    }
+
+    renderSignedIn(user, session);
   });
 
-  bootMembersPage();
+  renderSignedOut();
 });
