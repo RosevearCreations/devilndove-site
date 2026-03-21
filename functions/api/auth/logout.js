@@ -1,4 +1,6 @@
 // File: /functions/api/auth/logout.js
+// Brief description: Logs out the current session tied to the bearer token.
+// It deletes only the active session token being used, leaving any other sessions intact.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -21,60 +23,39 @@ export async function onRequestPost(context) {
   const token = getBearerToken(request);
 
   if (!token) {
-    return json({
-      ok: true,
-      message: "No active session token was provided.",
-      logged_out: true,
-      deleted_sessions: 0
-    });
+    return json({ ok: false, error: "Unauthorized." }, 401);
   }
 
-  const matchingSessions = await env.DB.prepare(`
+  const session = await env.DB.prepare(`
     SELECT
-      session_id
+      session_id,
+      user_id
     FROM sessions
-    WHERE session_token = ?
-       OR token = ?
+    WHERE (
+      session_token = ?
+      OR token = ?
+    )
+    LIMIT 1
   `)
     .bind(token, token)
-    .all();
+    .first();
 
-  const sessions = Array.isArray(matchingSessions?.results)
-    ? matchingSessions.results
-    : [];
-
-  if (!sessions.length) {
+  if (!session) {
     return json({
       ok: true,
-      message: "Session already cleared.",
-      logged_out: true,
-      deleted_sessions: 0
-    });
-  }
-
-  const placeholders = sessions.map(() => "?").join(", ");
-  const sessionIds = sessions.map((row) => Number(row.session_id)).filter((id) => Number.isInteger(id) && id > 0);
-
-  if (!sessionIds.length) {
-    return json({
-      ok: true,
-      message: "Session already cleared.",
-      logged_out: true,
-      deleted_sessions: 0
+      message: "Session was already logged out."
     });
   }
 
   await env.DB.prepare(`
     DELETE FROM sessions
-    WHERE session_id IN (${placeholders})
+    WHERE session_id = ?
   `)
-    .bind(...sessionIds)
+    .bind(Number(session.session_id || 0))
     .run();
 
   return json({
     ok: true,
-    message: "Logged out successfully.",
-    logged_out: true,
-    deleted_sessions: sessionIds.length
+    message: "Logged out successfully."
   });
 }
