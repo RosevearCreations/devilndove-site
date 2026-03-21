@@ -1,4 +1,8 @@
 <!-- File: /members/index.html -->
+<!-- Brief description: Members dashboard page for the account area. It provides the profile
+placeholders and mount points required by the member scripts for session info, account tools,
+orders, downloads, and protected member access. -->
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,7 +13,7 @@
   <link rel="icon" type="image/png" href="/assets/mark.png" />
   <meta
     name="description"
-    content="Devil n Dove members area for account details, orders, downloads, and member-only access."
+    content="Devil n Dove members area for account tools, order history, downloads, and session management."
   />
 </head>
 <body>
@@ -31,8 +35,10 @@
         <a href="/supplies/">Supplies</a>
         <a href="/shop/">Shop</a>
         <a href="/cart/">Cart</a>
-        <a href="/members/">Members</a>
+        <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
         <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
+        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
+        <a href="/register/" data-show-when-logged-out style="display:none">Register</a>
 
         <span class="small" data-show-when-logged-in style="display:none">
           Hi, <span data-nav-user-name>Member</span>
@@ -54,130 +60,33 @@
       <div>
         <h1>Members Area</h1>
         <p>
-          Access your account details, orders, downloads, and future member-only content.
+          View your account details, manage your session, review orders, and access digital downloads.
         </p>
       </div>
     </div>
 
     <div id="membersAccessMessage" class="card" style="display:none;margin-bottom:18px"></div>
 
-    <div id="membersSection">
-      <div class="grid cols-3" style="gap:18px">
+    <div id="membersSection" style="display:none">
+      <div class="grid cols-2" style="gap:18px">
         <div class="card">
-          <h2 style="margin-top:0">Welcome</h2>
-          <p style="margin-bottom:8px">
-            Hello, <strong data-member-name>Member</strong>
-          </p>
-          <p class="small" style="margin:0">
-            This area is for your account details, purchases, and member access.
-          </p>
-        </div>
-
-        <div class="card">
-          <h2 style="margin-top:0">Quick Links</h2>
-          <div style="display:grid;gap:10px">
-            <a class="btn" href="#memberAccountSection">Account</a>
-            <a class="btn" href="#memberOrdersSection">Orders</a>
-            <a class="btn" href="#memberDownloadsSection">Downloads</a>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2 style="margin-top:0">Member Status</h2>
-          <div class="small" style="display:grid;gap:8px">
-            <div><strong>Status:</strong> <span data-member-status>—</span></div>
+          <h2 style="margin-top:0">Profile</h2>
+          <div class="small" style="display:grid;gap:10px">
+            <div><strong>Name:</strong> <span data-member-name>Member</span></div>
+            <div><strong>Email:</strong> <span data-member-email>—</span></div>
             <div><strong>Role:</strong> <span data-member-role>—</span></div>
+            <div><strong>Status:</strong> <span data-member-status>Signed Out</span></div>
+            <div><strong>Account Created:</strong> <span data-member-created-at>—</span></div>
+            <div><strong>Last Updated:</strong> <span data-member-updated-at>—</span></div>
             <div><strong>Session Expires:</strong> <span data-member-session-expires>—</span></div>
           </div>
         </div>
+
+        <div id="memberAccountToolsMount"></div>
       </div>
 
-      <div id="memberAccountSection" class="card" style="margin-top:18px">
-        <h2 style="margin-top:0">Account Details</h2>
-
-        <div class="grid cols-2" style="gap:18px">
-          <div class="card">
-            <h3 style="margin-top:0">Profile</h3>
-            <div class="small" style="display:grid;gap:10px">
-              <div><strong>Name:</strong> <span data-member-name>Member</span></div>
-              <div><strong>Email:</strong> <span data-member-email>—</span></div>
-              <div><strong>Role:</strong> <span data-member-role>—</span></div>
-              <div><strong>Status:</strong> <span data-member-status>—</span></div>
-              <div><strong>Created:</strong> <span data-member-created-at>—</span></div>
-              <div><strong>Updated:</strong> <span data-member-updated-at>—</span></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3 style="margin-top:0">Account Tools</h3>
-            <p class="small" style="margin-top:0">
-              Password, session, and member account tools connect here.
-            </p>
-
-            <div id="memberAccountToolsMount"></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="memberOrdersSection" class="card" style="margin-top:18px">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-          <div>
-            <h2 style="margin:0">My Orders</h2>
-            <p class="small" style="margin:8px 0 0 0">
-              Review your recent orders and payment/fulfillment progress.
-            </p>
-          </div>
-
-          <button class="btn" type="button" id="refreshMemberOrdersButton">Refresh Orders</button>
-        </div>
-
-        <div id="memberOrdersMessage" class="small" style="display:none;margin-top:14px"></div>
-        <div id="memberOrdersSummary" class="small" style="margin-top:10px"></div>
-        <div id="memberOrdersEmpty" class="small" style="display:none;margin-top:10px">
-          No orders are available yet.
-        </div>
-
-        <div style="overflow:auto;margin-top:14px">
-          <table style="width:100%;border-collapse:collapse">
-            <thead>
-              <tr>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Order</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payment</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Fulfillment</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Total</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Action</th>
-              </tr>
-            </thead>
-            <tbody id="memberOrdersTableBody">
-              <tr>
-                <td colspan="7" style="padding:12px">Loading orders...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="memberDownloadsSection" class="card" style="margin-top:18px">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-          <div>
-            <h2 style="margin:0">Downloads</h2>
-            <p class="small" style="margin:8px 0 0 0">
-              Digital files and future member-only downloads will appear here.
-            </p>
-          </div>
-
-          <button class="btn" type="button" id="refreshMemberDownloadsButton">Refresh Downloads</button>
-        </div>
-
-        <div id="memberDownloadsMessage" class="small" style="display:none;margin-top:14px"></div>
-        <div id="memberDownloadsEmpty" class="small" style="margin-top:10px">
-          No downloads are available yet.
-        </div>
-
-        <div id="memberDownloadsList" style="margin-top:14px"></div>
-      </div>
+      <div id="memberOrdersMount" style="margin-top:18px"></div>
+      <div id="memberDownloadsMount" style="margin-top:18px"></div>
     </div>
 
     <div class="footer card" style="margin-top:18px"></div>
