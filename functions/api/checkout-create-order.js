@@ -1,4 +1,8 @@
 // File: /functions/api/checkout-create-order.js
+// Brief description: Creates a checkout order from the browser cart and customer form data.
+// It validates the incoming cart, enforces shipping details for physical orders, calculates
+// order totals, writes the order, order items, and initial status history into D1,
+// and returns the new order for the confirmation and payment flow.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -95,6 +99,21 @@ function normalizeFulfillmentType(items) {
 function calculateTaxCents(subtotalCents, shippingCents, taxRate = 0.13) {
   const taxableBase = Number(subtotalCents || 0) + Number(shippingCents || 0);
   return Math.round(taxableBase * taxRate);
+}
+
+function validateShippingFields(fulfillmentType, shipping) {
+  if (!["shipping", "mixed"].includes(String(fulfillmentType || "").toLowerCase())) {
+    return "";
+  }
+
+  if (!shipping.shipping_name) return "Shipping name is required for physical orders.";
+  if (!shipping.shipping_address1) return "Shipping address line 1 is required for physical orders.";
+  if (!shipping.shipping_city) return "Shipping city is required for physical orders.";
+  if (!shipping.shipping_province) return "Shipping province or state is required for physical orders.";
+  if (!shipping.shipping_postal_code) return "Shipping postal or ZIP code is required for physical orders.";
+  if (!shipping.shipping_country) return "Shipping country is required for physical orders.";
+
+  return "";
 }
 
 export async function onRequestPost(context) {
@@ -229,6 +248,19 @@ export async function onRequestPost(context) {
   }
 
   const fulfillment_type = normalizeFulfillmentType(orderItems);
+  const shippingError = validateShippingFields(fulfillment_type, {
+    shipping_name,
+    shipping_address1,
+    shipping_city,
+    shipping_province,
+    shipping_postal_code,
+    shipping_country
+  });
+
+  if (shippingError) {
+    return json({ ok: false, error: shippingError }, 400);
+  }
+
   const tax_cents = calculateTaxCents(subtotal_cents, shipping_cents, 0.13);
   const discount_cents = 0;
   const total_cents = subtotal_cents - discount_cents + shipping_cents + tax_cents;
