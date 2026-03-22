@@ -297,3 +297,13 @@ These should stay near the top:
 - digital delivery automation
 - better media manager
 - email notifications
+
+## Recent Progress Update
+
+Completed in the latest pass:
+
+- stronger checkout validation for physical and mixed carts
+- backend shipping-field enforcement during order creation
+- guest-friendly confirmation rendering through saved checkout confirmation data
+
+This moves the project slightly farther along the **checkout/security pass** phase from the roadmap.

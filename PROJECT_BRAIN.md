@@ -300,3 +300,13 @@ to:
 **internal alpha commerce/admin/member platform with layered access and payment foundation**
 
 That is the right mental model for future work.
+
+## 10. Latest checkout hardening update
+
+Most recent practical improvements:
+
+- checkout now enforces shipping details for physical or mixed orders
+- checkout saves a local confirmation snapshot after order creation/payment preparation
+- confirmation page can render meaningful order details for guest checkout without requiring authenticated member access
+
+This keeps the current checkout foundation usable before full PayPal/card integrations are connected.

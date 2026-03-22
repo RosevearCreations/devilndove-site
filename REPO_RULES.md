@@ -192,3 +192,14 @@ When added, it must work with the existing tables and model:
 - existing storefront APIs
 
 Do not create a disconnected import-only product system.
+
+# Rule 9 — Keep Guest Checkout Usable
+
+Do not assume every order-confirmation view comes from an authenticated member session.
+
+Current project behavior supports:
+
+- guest checkout confirmation via saved client-side confirmation state
+- member confirmation enrichment when logged in
+
+Any future checkout/payment changes should preserve both paths.

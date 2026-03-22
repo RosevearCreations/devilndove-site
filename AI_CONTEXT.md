@@ -345,3 +345,13 @@ AI should assume these are near-term priorities:
 - audit logging
 - stronger security hardening
 - gated content/features using access tiers
+
+# Latest Checkout Note
+
+AI should now treat guest confirmation as partially supported through a client-side confirmation snapshot.
+
+Implications:
+
+- confirmation pages should not assume member auth is always available
+- physical or mixed checkout flows must enforce shipping fields before order creation
+- checkout hardening should preserve both guest and member purchase paths

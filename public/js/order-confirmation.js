@@ -1,7 +1,8 @@
 // File: /public/js/order-confirmation.js
 // Brief description: Handles the checkout confirmation page. It reads the new order details
-// from the URL, optionally fetches fresh order data when available, fills the confirmation
-// summary, and gives the user a clean handoff after checkout/order creation.
+// from the URL, uses a saved confirmation snapshot for guest checkout when available,
+// optionally fetches fresh member order data when authenticated, and fills the confirmation
+// summary with the best available order information.
 
 document.addEventListener("DOMContentLoaded", () => {
   const messageEl = document.getElementById("orderConfirmationMessage");
@@ -15,6 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalEl = document.getElementById("confirmationTotal");
   const createdAtEl = document.getElementById("confirmationCreatedAt");
   const nextStepEl = document.getElementById("confirmationNextStep");
+
+  const CONFIRMATION_KEY = "dd_last_order_confirmation";
 
   function setMessage(message, isError = false) {
     if (!messageEl) return;
@@ -35,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return text
       .replaceAll("_", " ")
       .replaceAll("-", " ")
-      .replace(/\b\w/g, (ch) => ch.toUpperCase());
+      .replace(/\w/g, (ch) => ch.toUpperCase());
   }
 
   function formatDate(value) {
@@ -80,8 +83,35 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  function loadSavedConfirmation() {
+    try {
+      const raw = sessionStorage.getItem(CONFIRMATION_KEY) || localStorage.getItem(CONFIRMATION_KEY);
+      const parsed = JSON.parse(raw || "null");
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function confirmationMatchesState(saved, state) {
+    if (!saved?.order || !state) return false;
+
+    const savedOrderId = Number(saved.order.order_id || 0);
+    const savedOrderNumber = String(saved.order.order_number || "").trim();
+
+    if (state.order_id && savedOrderId && state.order_id === savedOrderId) {
+      return true;
+    }
+
+    if (state.order_number && savedOrderNumber && state.order_number === savedOrderNumber) {
+      return true;
+    }
+
+    return false;
+  }
+
   async function fetchOrderDetail(orderId) {
-    if (!orderId || !window.DDAuth?.apiFetch) return null;
+    if (!orderId || !window.DDAuth?.apiFetch || !window.DDAuth?.isLoggedIn?.()) return null;
 
     try {
       const response = await window.DDAuth.apiFetch(`/api/member/order-detail?order_id=${encodeURIComponent(orderId)}`, {
@@ -117,9 +147,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function renderFromSavedConfirmation(saved, fallbackState) {
+    const order = saved?.order || {};
+    const paymentPreparation = saved?.payment_preparation || {};
+    const paymentStub = paymentPreparation?.payment_stub || {};
+    const customer = saved?.customer || {};
+
+    setText(orderNumberEl, order.order_number || fallbackState.order_number || "—");
+    setText(orderIdEl, order.order_id ? String(order.order_id) : (fallbackState.order_id ? String(fallbackState.order_id) : "—"));
+    setText(orderStatusEl, titleCase(order.order_status || "pending"));
+    setText(paymentStatusEl, titleCase(paymentStub.payment_status || fallbackState.payment_status || order.payment_status || "pending"));
+    setText(paymentProviderEl, titleCase(paymentPreparation.provider || fallbackState.payment_provider || "pending"));
+    setText(customerNameEl, customer.customer_name || order.customer_name || "—");
+    setText(customerEmailEl, customer.customer_email || order.customer_email || "—");
+    setText(totalEl, formatMoney(order.total_cents || paymentStub.amount_cents || 0, order.currency || paymentStub.currency || "CAD"));
+    setText(createdAtEl, formatDate(order.created_at || saved?.saved_at));
+
+    if (nextStepEl) {
+      nextStepEl.textContent =
+        "Your order has been created and saved locally for confirmation. Payment is still pending until the payment flow is completed or a manual payment is recorded.";
+    }
+  }
+
   function renderFromOrderPayload(payload, fallbackState) {
     const order = payload?.order || {};
-    const paymentSummary = payload?.payment_summary || {};
+    const paymentSummary = payload?.payment_summary || payload?.payment_snapshot || {};
 
     setText(orderNumberEl, order.order_number || fallbackState.order_number || "—");
     setText(orderIdEl, order.order_id ? String(order.order_id) : (fallbackState.order_id ? String(fallbackState.order_id) : "—"));
@@ -147,6 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function init() {
     const state = getUrlState();
+    const saved = loadSavedConfirmation();
 
     if (!state.order_id && !state.order_number) {
       setMessage("No order information was found for this confirmation page.", true);
@@ -157,10 +210,19 @@ document.addEventListener("DOMContentLoaded", () => {
     setMessage("Loading your order confirmation...");
     renderFromUrlState(state);
 
+    if (saved && confirmationMatchesState(saved, state)) {
+      renderFromSavedConfirmation(saved, state);
+    }
+
     const payload = state.order_id ? await fetchOrderDetail(state.order_id) : null;
 
     if (payload?.order) {
       renderFromOrderPayload(payload, state);
+      setMessage("");
+      return;
+    }
+
+    if (saved && confirmationMatchesState(saved, state)) {
       setMessage("");
       return;
     }

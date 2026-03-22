@@ -268,3 +268,11 @@ It now behaves like a real internal-alpha commerce platform with:
 - payment foundations
 
 The main remaining jump is from **foundation complete** to **production-ready integrations and hardening**.
+
+## Latest Validation Pass
+
+Most recent improvements:
+
+- physical checkout now requires shipping details before order creation
+- server-side order creation now rejects incomplete physical shipping data
+- guest confirmation pages can still show useful order details after checkout using locally saved confirmation state

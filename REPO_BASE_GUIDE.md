@@ -226,3 +226,11 @@ This repository is now headed toward:
 - better product workflow tooling
 - richer admin operations
 - gated features/content by access tier
+
+## Latest Repo Update
+
+The checkout flow now includes:
+
+- stronger frontend validation for physical shipping fields
+- matching backend validation in `/functions/api/checkout-create-order.js`
+- guest-friendly confirmation support in `/public/js/order-confirmation.js`

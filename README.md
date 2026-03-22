@@ -213,3 +213,12 @@ Member account / commerce
 - add shipping logic and refined tax logic
 - add bulk product upload and bulk product editing
 - expand gated content using access tiers
+
+### Latest checkout hardening update
+
+The latest project pass added:
+
+- stricter checkout validation for physical and mixed carts
+- required shipping-address enforcement for physical orders at both frontend and API levels
+- guest-friendly order confirmation using a saved confirmation snapshot
+- improved checkout-to-confirmation handoff without requiring member login

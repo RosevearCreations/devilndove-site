@@ -1,8 +1,8 @@
 // File: /public/js/checkout.js
 // Brief description: Handles the checkout page flow. It loads cart items from browser storage,
-// calculates totals, validates customer/shipping fields, creates the order through
-// /api/checkout-create-order, then prepares payment through /api/checkout-prepare-payment
-// and redirects to the confirmation flow.
+// calculates totals, validates customer and shipping fields, creates the order through
+// /api/checkout-create-order, prepares payment through /api/checkout-prepare-payment,
+// and stores a confirmation snapshot so guest checkout can render the confirmation page cleanly.
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("checkoutForm");
@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const CART_KEY = "dd_cart";
   const CHECKOUT_FORM_KEY = "dd_checkout_form";
+  const CONFIRMATION_KEY = "dd_last_order_confirmation";
 
   function setMessage(message, isError = false) {
     if (!messageEl) return;
@@ -70,6 +71,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return parsed && typeof parsed === "object" ? parsed : {};
     } catch {
       return {};
+    }
+  }
+
+  function saveConfirmationSnapshot(data) {
+    try {
+      sessionStorage.setItem(CONFIRMATION_KEY, JSON.stringify(data || {}));
+    } catch {
+      try {
+        localStorage.setItem(CONFIRMATION_KEY, JSON.stringify(data || {}));
+      } catch {
+        // ignore storage failure
+      }
     }
   }
 
@@ -159,8 +172,23 @@ document.addEventListener("DOMContentLoaded", () => {
       subtotal_cents,
       shipping_cents,
       tax_cents,
-      total_cents
+      total_cents,
+      requires_shipping: requiresShipping
     };
+  }
+
+  function validateRequiredShippingFields(formData, summary) {
+    if (!summary?.requires_shipping) {
+      return "";
+    }
+
+    if (!formData.shipping_address1) return "Shipping address line 1 is required for physical orders.";
+    if (!formData.shipping_city) return "Shipping city is required for physical orders.";
+    if (!formData.shipping_province) return "Shipping province or state is required for physical orders.";
+    if (!formData.shipping_postal_code) return "Shipping postal or ZIP code is required for physical orders.";
+    if (!formData.shipping_country) return "Shipping country is required for physical orders.";
+
+    return "";
   }
 
   function renderSummary() {
@@ -292,6 +320,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const summary = calculateCartSummary(cartItems);
+    const shippingError = validateRequiredShippingFields(formData, summary);
+    if (shippingError) {
+      setMessage(shippingError, true);
+      return;
+    }
+
     const paymentProvider = formData.payment_method || "paypal";
     const originalText = submitButton?.textContent || "Place Order";
 
@@ -316,6 +350,17 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage("Preparing payment...");
 
       const paymentResult = await preparePayment(order.order_id, paymentProvider);
+
+      saveConfirmationSnapshot({
+        saved_at: new Date().toISOString(),
+        order,
+        items: Array.isArray(orderResult?.items) ? orderResult.items : [],
+        payment_preparation: paymentResult?.payment_preparation || null,
+        customer: {
+          customer_name: formData.customer_name,
+          customer_email: formData.customer_email
+        }
+      });
 
       try {
         localStorage.removeItem(CART_KEY);
