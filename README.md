@@ -222,3 +222,24 @@ The latest project pass added:
 - required shipping-address enforcement for physical orders at both frontend and API levels
 - guest-friendly order confirmation using a saved confirmation snapshot
 - improved checkout-to-confirmation handoff without requiring member login
+
+
+## Profile and tier expansion
+
+The repo now includes a dedicated `user_profiles` extension for richer customer and employee records.
+
+Current additions in this pass:
+- contact profile storage for address, phone, company, and preferences
+- email/phone verification flags
+- customer/employee/both profile typing
+- employee fields for department, job title, employee code, and emergency contact
+- member self-service profile editor
+- admin profile manager for users
+- expanded access-tier seeds for customer discount tiers and employee tiers
+
+Schema / API additions:
+- `/database_profiles_extension.sql`
+- `/api/admin/user-profile`
+- `/api/member/profile`
+
+This prepares the project for future discount logic, loyalty handling, internal employee records, and deeper CRM-style customer management.

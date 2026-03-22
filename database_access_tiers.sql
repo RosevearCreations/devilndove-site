@@ -38,3 +38,14 @@ VALUES
   ('donor', 'Donor', 'Supporter/donor access tier', 1),
   ('vip_donor', 'VIP Donor', 'Higher donor/supporter tier', 1),
   ('subscriber', 'Subscriber', 'Subscriber/member content access', 1);
+
+
+INSERT OR IGNORE INTO access_tiers (code, name, description, is_active)
+VALUES
+  ('customer_bronze', 'Customer Bronze', 'Entry customer tier for future discount and loyalty features', 1),
+  ('customer_silver', 'Customer Silver', 'Mid customer tier for future discount and loyalty features', 1),
+  ('customer_gold', 'Customer Gold', 'Higher customer tier for future discount and loyalty features', 1),
+  ('customer_platinum', 'Customer Platinum', 'Top customer tier for future discount and loyalty features', 1),
+  ('employee', 'Employee', 'Standard employee/internal access tier', 1),
+  ('employee_senior', 'Senior Employee', 'Senior employee/internal access tier', 1),
+  ('employee_manager', 'Employee Manager', 'Manager/internal leadership tier', 1);

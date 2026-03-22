@@ -203,3 +203,24 @@ Current project behavior supports:
 - member confirmation enrichment when logged in
 
 Any future checkout/payment changes should preserve both paths.
+
+
+## Profile and tier expansion
+
+The repo now includes a dedicated `user_profiles` extension for richer customer and employee records.
+
+Current additions in this pass:
+- contact profile storage for address, phone, company, and preferences
+- email/phone verification flags
+- customer/employee/both profile typing
+- employee fields for department, job title, employee code, and emergency contact
+- member self-service profile editor
+- admin profile manager for users
+- expanded access-tier seeds for customer discount tiers and employee tiers
+
+Schema / API additions:
+- `/database_profiles_extension.sql`
+- `/api/admin/user-profile`
+- `/api/member/profile`
+
+This prepares the project for future discount logic, loyalty handling, internal employee records, and deeper CRM-style customer management.
