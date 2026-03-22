@@ -1,7 +1,7 @@
 // File: /public/js/admin-access-tiers.js
 
 document.addEventListener("DOMContentLoaded", () => {
-  const tableBody = document.getElementById("usersTableBody");
+  const tableBody = document.getElementById("adminUsersTableBody");
 
   if (!tableBody || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
 
