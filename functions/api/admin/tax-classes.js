@@ -1,84 +1,114 @@
 // File: /functions/api/admin/tax-classes.js
+// Brief description: Returns the available tax classes for the admin product tools.
+// It validates the active admin bearer-token session and provides the tax-class
+// list used by the product create/edit flows.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      "Content-Type": "application/json"
+    }
   });
 }
 
-async function getSessionUser(env, token) {
-  if (!token) return null;
-
-  const sessionUser = await env.DB.prepare(`
-    SELECT
-      users.user_id,
-      users.email,
-      users.display_name,
-      users.role,
-      users.is_active
-    FROM sessions
-    JOIN users ON sessions.user_id = users.user_id
-    WHERE sessions.session_token = ?
-      AND sessions.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token)
-    .first();
-
-  return sessionUser || null;
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
 }
 
-async function requireAdmin(request, env) {
-  const auth = request.headers.get("Authorization") || "";
-  if (!auth.startsWith("Bearer ")) {
-    return { error: json({ ok: false, error: "Unauthorized." }, 401) };
-  }
+function normalizeResults(result) {
+  return Array.isArray(result?.results) ? result.results : [];
+}
 
-  const token = auth.slice(7).trim();
+async function getAdminUserFromRequest(request, env) {
+  const token = getBearerToken(request);
+
   if (!token) {
-    return { error: json({ ok: false, error: "Missing session token." }, 401) };
+    return null;
   }
 
-  const sessionUser = await getSessionUser(env, token);
+  const session = await env.DB.prepare(`
+    SELECT
+      s.session_id,
+      s.user_id,
+      s.session_token,
+      s.token,
+      s.expires_at,
+      u.user_id AS resolved_user_id,
+      u.email,
+      u.display_name,
+      u.role,
+      u.is_active
+    FROM sessions s
+    INNER JOIN users u
+      ON u.user_id = s.user_id
+    WHERE (
+      s.session_token = ?
+      OR s.token = ?
+    )
+      AND s.expires_at > datetime('now')
+    LIMIT 1
+  `)
+    .bind(token, token)
+    .first();
 
-  if (!sessionUser) {
-    return { error: json({ ok: false, error: "Invalid session." }, 401) };
-  }
+  if (!session) return null;
+  if (Number(session.is_active || 0) !== 1) return null;
+  if (String(session.role || "").toLowerCase() !== "admin") return null;
 
-  if (!sessionUser.is_active) {
-    return { error: json({ ok: false, error: "Account is inactive." }, 403) };
-  }
-
-  if (sessionUser.role !== "admin") {
-    return { error: json({ ok: false, error: "Forbidden." }, 403) };
-  }
-
-  return { sessionUser };
+  return {
+    session_id: Number(session.session_id || 0),
+    user_id: Number(session.resolved_user_id || session.user_id || 0),
+    email: session.email || "",
+    display_name: session.display_name || "",
+    role: session.role || "admin"
+  };
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const authCheck = await requireAdmin(request, env);
-  if (authCheck.error) return authCheck.error;
+  const adminUser = await getAdminUserFromRequest(request, env);
+
+  if (!adminUser) {
+    return json({ ok: false, error: "Unauthorized." }, 401);
+  }
 
   const result = await env.DB.prepare(`
     SELECT
       tax_class_id,
       code,
       name,
-      description,
-      tax_rate,
+      rate_percent,
       is_active,
-      created_at
+      created_at,
+      updated_at
     FROM tax_classes
-    WHERE is_active = 1
-    ORDER BY name ASC, tax_class_id ASC
+    ORDER BY
+      CASE WHEN COALESCE(is_active, 0) = 1 THEN 0 ELSE 1 END,
+      name ASC,
+      tax_class_id ASC
   `).all();
+
+  const tax_classes = normalizeResults(result).map((row) => ({
+    tax_class_id: Number(row.tax_class_id || 0),
+    code: row.code || "",
+    name: row.name || "",
+    rate_percent: Number(row.rate_percent || 0),
+    is_active: Number(row.is_active || 0),
+    created_at: row.created_at || null,
+    updated_at: row.updated_at || null
+  }));
 
   return json({
     ok: true,
-    tax_classes: result.results || []
+    requested_by: {
+      user_id: adminUser.user_id,
+      email: adminUser.email,
+      display_name: adminUser.display_name
+    },
+    tax_classes
   });
 }
