@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const summaryShippingEl = document.getElementById("checkoutSummaryShipping");
   const summaryTaxEl = document.getElementById("checkoutSummaryTax");
   const summaryTotalEl = document.getElementById("checkoutSummaryTotal");
+  const paymentProviderStatusEl = document.getElementById("paymentProviderStatus");
 
   const CART_KEY = "dd_cart";
   const CHECKOUT_FORM_KEY = "dd_checkout_form";
@@ -376,6 +377,13 @@ document.addEventListener("DOMContentLoaded", () => {
         "payment_status",
         String(paymentResult?.payment_preparation?.payment_stub?.payment_status || "pending")
       );
+
+      const redirectUrl = String(paymentResult?.payment_preparation?.redirect_url || "").trim();
+
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
 
       window.location.href = confirmationUrl.toString();
     } catch (error) {

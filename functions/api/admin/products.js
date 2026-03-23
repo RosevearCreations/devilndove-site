@@ -1,3 +1,7 @@
+// File: /functions/api/admin/products.js
+// Brief description: Returns the admin product list using the normalized admin bearer-session
+// pattern so the dashboard product tools can load products consistently with the newer auth model.
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -5,61 +9,44 @@ function json(data, status = 200) {
   });
 }
 
-async function getSessionUser(env, token) {
-  if (!token) return null;
-
-  const sessionUser = await env.DB.prepare(`
-    SELECT
-      users.user_id,
-      users.email,
-      users.display_name,
-      users.role,
-      users.is_active
-    FROM sessions
-    JOIN users ON sessions.user_id = users.user_id
-    WHERE sessions.session_token = ?
-      AND sessions.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token)
-    .first();
-
-  return sessionUser || null;
+function getBearerToken(request) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || '').trim() : '';
 }
 
-async function requireAdmin(request, env) {
-  const auth = request.headers.get("Authorization") || "";
-  if (!auth.startsWith("Bearer ")) {
-    return { error: json({ ok: false, error: "Unauthorized." }, 401) };
-  }
+function normalizeResults(result) {
+  return Array.isArray(result?.results) ? result.results : [];
+}
 
-  const token = auth.slice(7).trim();
-  if (!token) {
-    return { error: json({ ok: false, error: "Missing session token." }, 401) };
-  }
+async function getAdminUserFromRequest(request, env) {
+  const token = getBearerToken(request);
+  if (!token) return null;
 
-  const sessionUser = await getSessionUser(env, token);
+  const session = await env.DB.prepare(`
+    SELECT s.session_id, s.user_id, u.user_id AS resolved_user_id, u.email, u.display_name, u.role, u.is_active
+    FROM sessions s
+    INNER JOIN users u ON u.user_id = s.user_id
+    WHERE (s.session_token = ? OR s.token = ?)
+      AND s.expires_at > datetime('now')
+    LIMIT 1
+  `).bind(token, token).first();
 
-  if (!sessionUser) {
-    return { error: json({ ok: false, error: "Invalid session." }, 401) };
-  }
+  if (!session) return null;
+  if (Number(session.is_active || 0) !== 1) return null;
+  if (String(session.role || '').toLowerCase() !== 'admin') return null;
 
-  if (!sessionUser.is_active) {
-    return { error: json({ ok: false, error: "Account is inactive." }, 403) };
-  }
-
-  if (sessionUser.role !== "admin") {
-    return { error: json({ ok: false, error: "Forbidden." }, 403) };
-  }
-
-  return { sessionUser };
+  return {
+    user_id: Number(session.resolved_user_id || session.user_id || 0),
+    email: session.email || '',
+    display_name: session.display_name || ''
+  };
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
-
-  const authCheck = await requireAdmin(request, env);
-  if (authCheck.error) return authCheck.error;
+  const adminUser = await getAdminUserFromRequest(request, env);
+  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
   const result = await env.DB.prepare(`
     SELECT
@@ -85,15 +72,16 @@ export async function onRequestGet(context) {
       p.created_at,
       p.updated_at,
       tc.code AS tax_class_code,
-      tc.name AS tax_class_name
+      tc.name AS tax_class_name,
+      tc.tax_rate AS tax_class_rate
     FROM products p
-    LEFT JOIN tax_classes tc
-      ON p.tax_class_id = tc.tax_class_id
+    LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id
     ORDER BY p.sort_order ASC, p.created_at DESC, p.product_id DESC
   `).all();
 
   return json({
     ok: true,
-    products: result.results || []
+    requested_by: adminUser,
+    products: normalizeResults(result)
   });
 }
