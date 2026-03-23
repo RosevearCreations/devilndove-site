@@ -126,12 +126,16 @@ Turn the payment foundation into real checkout flows.
 
 ## 9. PayPal integration
 
-Implement:
+Implemented foundation:
 
-- provider order/session creation
-- redirect or hosted payment flow
-- return/cancel handling
-- payment completion update in DB
+- provider readiness endpoint
+- live order handoff path when credentials are configured
+
+Still needed:
+
+- return/cancel completion handling
+- capture completion update in DB
+- webhook reconciliation
 
 ## 10. Card processor integration
 
@@ -188,20 +192,29 @@ Make product management practical for real use.
 
 ## 15. Bulk product upload
 
-Add:
+Implemented foundation:
 
-- CSV or JSON import
-- validation report
-- preview before insert
+- JSON import preview
+
+Still needed:
+
+- CSV or JSON import commit step
+- validation report improvements
+- preview before insert confirmation
 
 ## 16. Bulk product editing
 
-Add:
+Implemented foundation:
 
 - status updates in bulk
-- price updates in bulk
 - inventory updates in bulk
-- archive/unarchive in bulk
+- shipping/tax flag cleanup in bulk
+
+Still needed:
+
+- price updates in bulk
+- archive/unarchive presets
+- richer selection/filter workflow
 
 ## 17. Image upload workflow
 

@@ -17,6 +17,7 @@ Examples of existing backend groups:
 - admin product endpoints
 - admin order endpoints
 - checkout endpoints
+- payment readiness endpoints
 
 Do not create duplicates because an existing file feels inconvenient.
 
@@ -85,6 +86,8 @@ Examples:
 - `checkout.js`
 
 Do not merge working specialized scripts into large monoliths without a strong reason.
+
+For product workflow specifically, prefer extending the existing product admin modules and bulk tools rather than creating a second product admin system.
 
 ---
 

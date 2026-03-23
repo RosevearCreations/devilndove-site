@@ -90,6 +90,8 @@ Implemented:
 - archive product
 - delete product
 - list products in admin
+- bulk product update tool
+- import preview tool
 
 ### Orders and payment tools
 
@@ -116,6 +118,8 @@ Implemented:
 - order creation endpoint
 - order confirmation page
 - payment preparation endpoint
+- payment provider readiness endpoint
+- PayPal live handoff path when credentials are configured
 
 ---
 

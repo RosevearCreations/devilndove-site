@@ -36,16 +36,19 @@ Working now:
 - order confirmation page
 - admin order review, status updates, and manual payment recording
 - payment preparation bridge for future providers
+- public payment-provider readiness endpoint
+- live PayPal handoff path when environment credentials are configured
+- bulk product update and import-preview admin tools
 - access tier assignment and removal in admin
 
 Not connected yet:
 
-- live PayPal checkout
+- fully completed PayPal capture/return/webhook loop
 - live card processor checkout
 - payment callbacks / webhooks
 - shipping automation
 - tax rules beyond the current estimate foundation
-- bulk product import / bulk editing UI
+- full bulk product import commit step and richer image/media workflow
 - full admin audit logging
 
 ## Stack

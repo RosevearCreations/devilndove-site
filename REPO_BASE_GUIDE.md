@@ -91,6 +91,7 @@ Implemented:
 - product detail
 - browser cart
 - checkout form
+- payment provider readiness display
 - order confirmation
 
 ---

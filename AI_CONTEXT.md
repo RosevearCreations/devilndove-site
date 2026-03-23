@@ -157,6 +157,8 @@ Root markdown docs are the main repo-level documentation set.
 - `/api/admin/update-product`
 - `/api/admin/archive-product`
 - `/api/admin/delete-product`
+- `/api/admin/bulk-update-products`
+- `/api/admin/import-products-preview`
 
 ## Storefront / checkout endpoints
 
@@ -164,6 +166,7 @@ Root markdown docs are the main repo-level documentation set.
 - `/api/product-detail`
 - `/api/checkout-create-order`
 - `/api/checkout-prepare-payment`
+- `/api/payment-providers`
 
 ## Admin order / payment endpoints
 
@@ -312,8 +315,9 @@ Do not solve donor/customer/artist access by stuffing everything into `users.rol
 
 These are **foundations**, not completed provider integrations:
 
-- checkout is real, but PayPal is not live yet
-- payment prep exists, but redirect/session creation is not live yet
+- checkout is real
+- PayPal live handoff can be attempted when credentials are configured
+- capture completion and webhook reconciliation are still not finished
 - manual payment recording exists, but automated provider confirmation is not live yet
 - member downloads exist as a foundation, but not as a full secure delivery platform
 - order admin exists, but shipping fulfillment tooling is still basic

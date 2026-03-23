@@ -104,6 +104,8 @@ Implemented foundation:
 - edit product
 - archive product
 - delete product
+- bulk product update tool
+- import preview tool
 - storefront only shows active products
 
 Product states:
@@ -162,6 +164,8 @@ Implemented:
 - manual/admin payment recording
 - payment summary in orders list
 - payment preparation endpoint for future provider handoff
+- public provider readiness endpoint
+- PayPal live handoff path when credentials are configured
 
 Providers currently modeled:
 
@@ -262,8 +266,8 @@ This separation is the correct long-term design because admin authority should n
 
 Not done yet:
 
-- real PayPal order/session creation
-- PayPal return / cancel handling
+- PayPal capture completion and webhook reconciliation
+- PayPal return / cancel completion handling
 - card processor selection and integration
 - webhook handling
 - payment reconciliation automation
