@@ -124,6 +124,14 @@ export async function onRequestPost(context) {
       ? 0
       : Number(body.sort_order);
   const image_urls = normalizeImageUrls(body.image_urls);
+  const meta_title = String(body.meta_title || '').trim() || null;
+  const meta_description = String(body.meta_description || '').trim() || null;
+  const keywords = String(body.keywords || '').trim() || null;
+  const h1_override = String(body.h1_override || '').trim() || null;
+  const canonical_url = String(body.canonical_url || '').trim() || null;
+  const og_title = String(body.og_title || '').trim() || null;
+  const og_description = String(body.og_description || '').trim() || null;
+  const og_image_url = String(body.og_image_url || '').trim() || null;
 
   if (!Number.isInteger(product_id) || product_id <= 0) {
     return json({ ok: false, error: "A valid product_id is required." }, 400);
@@ -306,6 +314,27 @@ export async function onRequestPost(context) {
       )
       .run();
   }
+
+
+  await env.DB.prepare(`
+    INSERT INTO product_seo (
+      product_id, meta_title, meta_description, keywords, h1_override, canonical_url, schema_type, og_title, og_description, og_image_url, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, 'Product', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(product_id) DO UPDATE SET
+      meta_title = excluded.meta_title,
+      meta_description = excluded.meta_description,
+      keywords = excluded.keywords,
+      h1_override = excluded.h1_override,
+      canonical_url = excluded.canonical_url,
+      schema_type = excluded.schema_type,
+      og_title = excluded.og_title,
+      og_description = excluded.og_description,
+      og_image_url = excluded.og_image_url,
+      updated_at = CURRENT_TIMESTAMP
+  `).bind(
+    Number(product_id || 0),
+    meta_title, meta_description, keywords, h1_override, canonical_url, og_title, og_description, og_image_url
+  ).run();
 
   const updatedProduct = await env.DB.prepare(`
     SELECT

@@ -1,53 +1,62 @@
 // File: /functions/api/products.js
+// Brief description: Returns active storefront products with advanced filtering and product SEO fields.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json"
-    }
+    headers: { "Content-Type": "application/json" }
   });
 }
 
+function normalizeText(value) {
+  return String(value || "").trim();
+}
+
 export async function onRequestGet(context) {
-  const { env } = context;
+  const { request, env } = context;
+  const url = new URL(request.url);
+  const q = normalizeText(url.searchParams.get('q')).toLowerCase();
+  const product_type = normalizeText(url.searchParams.get('product_type')).toLowerCase();
+  const min_price_cents = Number.isInteger(Number(url.searchParams.get('min_price_cents'))) ? Number(url.searchParams.get('min_price_cents')) : null;
+  const max_price_cents = Number.isInteger(Number(url.searchParams.get('max_price_cents'))) ? Number(url.searchParams.get('max_price_cents')) : null;
+  const requires_shipping = normalizeText(url.searchParams.get('requires_shipping'));
 
-  const result = await env.DB.prepare(`
+  const clauses = [`p.status = 'active'`];
+  const bindings = [];
+  if (q) {
+    clauses.push(`(
+      LOWER(COALESCE(p.name, '')) LIKE ? OR
+      LOWER(COALESCE(p.short_description, '')) LIKE ? OR
+      LOWER(COALESCE(p.description, '')) LIKE ? OR
+      LOWER(COALESCE(p.sku, '')) LIKE ? OR
+      LOWER(COALESCE(ps.keywords, '')) LIKE ?
+    )`);
+    const like = `%${q}%`;
+    bindings.push(like, like, like, like, like);
+  }
+  if (['physical', 'digital'].includes(product_type)) {
+    clauses.push(`p.product_type = ?`);
+    bindings.push(product_type);
+  }
+  if (min_price_cents != null) { clauses.push(`p.price_cents >= ?`); bindings.push(min_price_cents); }
+  if (max_price_cents != null) { clauses.push(`p.price_cents <= ?`); bindings.push(max_price_cents); }
+  if (requires_shipping === '1' || requires_shipping === '0') { clauses.push(`p.requires_shipping = ?`); bindings.push(Number(requires_shipping)); }
+
+  const sql = `
     SELECT
-      p.product_id,
-      p.slug,
-      p.sku,
-      p.name,
-      p.short_description,
-      p.description,
-      p.product_type,
-      p.status,
-      p.price_cents,
-      p.compare_at_price_cents,
-      p.currency,
-      p.taxable,
-      p.tax_class_id,
-      p.requires_shipping,
-      p.weight_grams,
-      p.inventory_tracking,
-      p.inventory_quantity,
-      p.digital_file_url,
-      p.featured_image_url,
-      p.sort_order,
-      p.created_at,
-      p.updated_at,
-      tc.code AS tax_class_code,
-      tc.name AS tax_class_name,
-      tc.tax_rate AS tax_rate
+      p.product_id, p.slug, p.sku, p.name, p.short_description, p.description, p.product_type, p.status,
+      p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
+      p.weight_grams, p.inventory_tracking, p.inventory_quantity, p.digital_file_url, p.featured_image_url,
+      p.sort_order, p.created_at, p.updated_at,
+      tc.code AS tax_class_code, tc.name AS tax_class_name, tc.tax_rate AS tax_rate,
+      ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override, ps.canonical_url, ps.og_title,
+      ps.og_description, ps.og_image_url
     FROM products p
-    LEFT JOIN tax_classes tc
-      ON p.tax_class_id = tc.tax_class_id
-    WHERE p.status = 'active'
+    LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id
+    LEFT JOIN product_seo ps ON ps.product_id = p.product_id
+    WHERE ${clauses.join(' AND ')}
     ORDER BY p.sort_order ASC, p.created_at DESC, p.product_id DESC
-  `).all();
-
-  return json({
-    ok: true,
-    products: result.results || []
-  });
+  `;
+  const result = bindings.length ? await env.DB.prepare(sql).bind(...bindings).all() : await env.DB.prepare(sql).all();
+  return json({ ok: true, products: result.results || [] });
 }

@@ -1,0 +1,118 @@
+// File: /functions/api/admin/site-item-inventory.js
+// Brief description: Manages reorder and on-hand inventory for site-linked tools, supplies, and Amazon-linked items.
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" }
+  });
+}
+
+function normalizeText(value) {
+  return String(value || "").trim();
+}
+
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
+}
+
+async function getAdminUserFromRequest(request, env) {
+  const token = getBearerToken(request);
+  if (!token) return null;
+
+  const session = await env.DB.prepare(`
+    SELECT
+      s.session_id,
+      s.user_id,
+      u.user_id AS resolved_user_id,
+      u.email,
+      u.display_name,
+      u.role,
+      u.is_active
+    FROM sessions s
+    INNER JOIN users u ON u.user_id = s.user_id
+    WHERE (s.session_token = ? OR s.token = ?)
+      AND s.expires_at > datetime('now')
+    LIMIT 1
+  `).bind(token, token).first();
+
+  if (!session) return null;
+  if (Number(session.is_active || 0) !== 1) return null;
+  if (String(session.role || '').toLowerCase() !== 'admin') return null;
+
+  return {
+    user_id: Number(session.resolved_user_id || session.user_id || 0),
+    email: session.email || '',
+    display_name: session.display_name || '',
+    role: 'admin'
+  };
+}
+
+function normalizeResults(result) {
+  return Array.isArray(result?.results) ? result.results : [];
+}
+
+
+export async function onRequestGet(context) {
+  const { request, env } = context;
+  const adminUser = await getAdminUserFromRequest(request, env);
+  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  const url = new URL(request.url);
+  const source_type = normalizeText(url.searchParams.get('source_type'));
+  const rows = normalizeResults(await env.DB.prepare(`
+    SELECT site_item_inventory_id, source_type, external_key, item_name, category, source_url, amazon_url,
+           on_hand_quantity, reorder_level, reorder_notes, is_active, last_seen_at, updated_at
+    FROM site_item_inventory
+    WHERE (? = '' OR source_type = ?)
+    ORDER BY source_type ASC, category ASC, item_name ASC
+  `).bind(source_type, source_type).all());
+  return json({ ok: true, items: rows.map((row) => ({
+    site_item_inventory_id: Number(row.site_item_inventory_id || 0), source_type: row.source_type || '',
+    external_key: row.external_key || '', item_name: row.item_name || '', category: row.category || '',
+    source_url: row.source_url || '', amazon_url: row.amazon_url || '', on_hand_quantity: Number(row.on_hand_quantity || 0),
+    reorder_level: Number(row.reorder_level || 0), reorder_notes: row.reorder_notes || '', is_active: Number(row.is_active || 0),
+    last_seen_at: row.last_seen_at || null, updated_at: row.updated_at || null,
+    needs_reorder: Number(row.on_hand_quantity || 0) <= Number(row.reorder_level || 0)
+  })) });
+}
+
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  const adminUser = await getAdminUserFromRequest(request, env);
+  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  let body = {};
+  try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
+  const source_type = normalizeText(body.source_type) || 'supply';
+  const external_key = normalizeText(body.external_key) || crypto.randomUUID();
+  const item_name = normalizeText(body.item_name);
+  if (!item_name) return json({ ok: false, error: 'item_name is required.' }, 400);
+  await env.DB.prepare(`
+    INSERT INTO site_item_inventory (
+      source_type, external_key, item_name, category, source_url, amazon_url,
+      on_hand_quantity, reorder_level, reorder_notes, is_active, last_seen_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(source_type, external_key) DO UPDATE SET
+      item_name = excluded.item_name,
+      category = excluded.category,
+      source_url = excluded.source_url,
+      amazon_url = excluded.amazon_url,
+      on_hand_quantity = excluded.on_hand_quantity,
+      reorder_level = excluded.reorder_level,
+      reorder_notes = excluded.reorder_notes,
+      is_active = excluded.is_active,
+      last_seen_at = CURRENT_TIMESTAMP,
+      updated_at = CURRENT_TIMESTAMP
+  `).bind(
+    source_type, external_key, item_name,
+    normalizeText(body.category) || null,
+    normalizeText(body.source_url) || null,
+    normalizeText(body.amazon_url) || null,
+    Number(body.on_hand_quantity || 0),
+    Number(body.reorder_level || 0),
+    normalizeText(body.reorder_notes) || null,
+    Number(body.is_active) === 0 ? 0 : 1
+  ).run();
+  return json({ ok: true, message: 'Site inventory item saved.', source_type, external_key });
+}

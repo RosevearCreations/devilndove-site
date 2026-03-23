@@ -89,6 +89,11 @@ export async function onRequestPost(context) {
     bindings.push(inventory);
   }
 
+  if (updates.inventory_tracking !== undefined) {
+    setParts.push('inventory_tracking = ?');
+    bindings.push(Number(updates.inventory_tracking) === 1 ? 1 : 0);
+  }
+
   if (updates.requires_shipping !== undefined) {
     setParts.push('requires_shipping = ?');
     bindings.push(Number(updates.requires_shipping) === 1 ? 1 : 0);
