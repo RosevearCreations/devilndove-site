@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productNameEl = document.getElementById("productName");
   const productPriceEl = document.getElementById("productPrice");
   const productShortDescriptionEl = document.getElementById("productShortDescription");
+  const productKeywordTagsEl = document.getElementById("productKeywordTags");
+  const pageH1El = document.getElementById("pageH1");
+  const pageIntroEl = document.getElementById("pageIntro");
   const productSkuEl = document.getElementById("productSku");
   const productShippingEl = document.getElementById("productShipping");
   const productTaxClassEl = document.getElementById("productTaxClass");
@@ -122,9 +125,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (productTypeEl) productTypeEl.textContent = product.product_type || "";
     if (productNameEl) productNameEl.textContent = product.name || "";
+    if (pageH1El) pageH1El.textContent = product.h1_override || product.name || 'Product Details';
+    if (pageIntroEl) pageIntroEl.textContent = product.meta_description || product.short_description || 'View the full details for this Devil n Dove item.';
     if (productPriceEl) productPriceEl.textContent = formatMoney(product.price_cents, product.currency);
     if (productShortDescriptionEl) {
-      productShortDescriptionEl.textContent = product.short_description || "No short description available.";
+      productShortDescriptionEl.textContent = product.short_description || product.meta_description || "No short description available.";
+    }
+    if (productKeywordTagsEl) {
+      productKeywordTagsEl.textContent = product.keywords ? `Keywords: ${product.keywords}` : '';
     }
     if (productSkuEl) productSkuEl.textContent = product.sku || "—";
     if (productShippingEl) productShippingEl.textContent = yesNo(product.requires_shipping);
@@ -173,7 +181,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       renderProduct(data.product || {}, data.images || []);
-      document.title = `${data.product?.name || "Product"} — Devil n Dove`;
+      document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
+      const desc = document.querySelector('meta[name="description"]'); if (desc) desc.setAttribute('content', data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.');
+      const canon = document.querySelector('link[rel="canonical"]'); if (canon) canon.setAttribute('href', data.product?.canonical_url || window.location.href);
+      if (data.product) {
+        const schema = {
+          '@context': 'https://schema.org',
+          '@type': data.product.schema_type || 'Product',
+          name: data.product.name,
+          description: data.product.meta_description || data.product.short_description || data.product.description || '',
+          sku: data.product.sku || undefined,
+          image: [data.product.featured_image_url].filter(Boolean),
+          offers: { '@type': 'Offer', priceCurrency: data.product.currency || 'CAD', price: (Number(data.product.price_cents || 0) / 100).toFixed(2), availability: Number(data.product.inventory_quantity || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: window.location.href }
+        };
+        let script = document.getElementById('productStructuredData');
+        if (!script) { script = document.createElement('script'); script.type = 'application/ld+json'; script.id = 'productStructuredData'; document.head.appendChild(script); }
+        script.textContent = JSON.stringify(schema);
+      }
 
       show(detailEl);
     } catch (error) {

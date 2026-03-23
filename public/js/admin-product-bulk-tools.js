@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <label class="small" for="bulkProductInventory">Inventory Quantity</label>
             <input id="bulkProductInventory" type="number" min="0" step="1" placeholder="Optional" />
           </div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="grid cols-2" style="gap:12px"><div><label class="small" for="bulkTaxClassId">Tax Class ID</label><input id="bulkTaxClassId" type="number" min="1" step="1" placeholder="Optional" /></div><div><label class="small" for="bulkInventoryTracking">Inventory Tracking</label><select id="bulkInventoryTracking"><option value="">No Change</option><option value="1">Track Inventory</option><option value="0">Do Not Track</option></select></div></div><div style="display:flex;gap:12px;flex-wrap:wrap">
             <label class="small"><input id="bulkRequiresShipping" type="checkbox" /> Require shipping</label>
             <label class="small"><input id="bulkTaxable" type="checkbox" checked /> Taxable</label>
           </div>
@@ -94,6 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (status) payload.updates.status = status;
     if (inventoryRaw !== '') payload.updates.inventory_quantity = Number(inventoryRaw);
+    const taxClassRaw = String(document.getElementById('bulkTaxClassId')?.value || '').trim();
+    const inventoryTrackingRaw = String(document.getElementById('bulkInventoryTracking')?.value || '').trim();
+    if (taxClassRaw !== '') payload.updates.tax_class_id = Number(taxClassRaw);
+    if (inventoryTrackingRaw !== '') payload.updates.inventory_tracking = Number(inventoryTrackingRaw);
     payload.updates.requires_shipping = document.getElementById('bulkRequiresShipping')?.checked ? 1 : 0;
     payload.updates.taxable = document.getElementById('bulkTaxable')?.checked ? 1 : 0;
 

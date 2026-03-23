@@ -1,0 +1,12 @@
+// File: /public/js/admin-import-products.js
+// Brief description: Adds a real import action for bulk finished-product seeding after preview validation.
+
+document.addEventListener('DOMContentLoaded', () => {
+  const mountEl = document.getElementById('productsAdminMount');
+  if (!mountEl || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  let rendered=false;
+  function setMessage(msg, err=false){ const el=document.getElementById('adminImportProductsMessage'); if(!el) return; el.textContent=msg; el.style.display=msg?'block':'none'; el.style.color=err?'#b00020':'#0a7a2f'; }
+  function render(){ if(rendered) return; rendered=true; const card=document.createElement('div'); card.className='card'; card.style.marginTop='18px'; card.innerHTML=`<h3 style="margin-top:0">Finished Product Import</h3><p class="small" style="margin-top:0">Import finished products in JSON after preview validation so you can begin seeding inventory faster.</p><div id="adminImportProductsMessage" class="small" style="display:none;margin-bottom:12px"></div><div><label class="small" for="adminImportProductsJson">Products JSON</label><textarea id="adminImportProductsJson" rows="10" placeholder='[{"name":"Example Ring","slug":"example-ring","product_type":"physical","status":"active","price_cents":4500,"inventory_tracking":1,"inventory_quantity":3}]'></textarea></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn" type="button" id="adminRunProductImportButton">Run Import</button></div>`; mountEl.appendChild(card); document.getElementById('adminRunProductImportButton')?.addEventListener('click', runImport); }
+  async function runImport(){ let rows=[]; try{ rows=JSON.parse(document.getElementById('adminImportProductsJson')?.value||'[]'); if(!Array.isArray(rows)) throw new Error('Products JSON must be an array.'); }catch(e){ return setMessage(e.message||'Invalid products JSON.', true); } try{ setMessage('Importing products...'); const r=await window.DDAuth.apiFetch('/api/admin/import-products',{method:'POST',body:JSON.stringify({rows})}); const d=await r.json(); if(!r.ok||!d?.ok) throw new Error(d?.error||'Import failed.'); setMessage(`Import finished. Inserted ${Number(d.inserted_count||0)} row(s). Error rows: ${Number(d.error_count||0)}.`); document.dispatchEvent(new CustomEvent('dd:product-updated',{detail:{imported:true}})); }catch(e){ setMessage(e.message||'Import failed.', true);} }
+  document.addEventListener('dd:admin-ready', (event)=>{ if(!event?.detail?.ok) return; render(); }); render();
+});

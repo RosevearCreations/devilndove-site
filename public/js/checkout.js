@@ -345,12 +345,14 @@ document.addEventListener("DOMContentLoaded", () => {
         items: normalizeCartForApi(cartItems)
       };
 
+      window.DDAnalytics?.trackCart('checkout_started', { meta: { payment_method: paymentProvider } });
       const orderResult = await createOrder(orderPayload);
       const order = orderResult.order;
 
       setMessage("Preparing payment...");
 
       const paymentResult = await preparePayment(order.order_id, paymentProvider);
+      window.DDAnalytics?.trackCart('order_created', { order_id: Number(order.order_id || 0), meta: { payment_provider: paymentProvider } });
 
       saveConfirmationSnapshot({
         saved_at: new Date().toISOString(),

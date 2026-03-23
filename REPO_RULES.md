@@ -227,3 +227,27 @@ Schema / API additions:
 - `/api/member/profile`
 
 This prepares the project for future discount logic, loyalty handling, internal employee records, and deeper CRM-style customer management.
+
+
+## Latest Growth / Security / SEO Pass
+
+Included in this pass:
+
+- analytics/security tracking tables and endpoints for visitors, page views, and cart abandonment
+- admin analytics UI for visitor paths, countries, abandonment, and recent visitors
+- product SEO and image annotation foundations
+- advanced storefront search filters
+- saved app settings and notification queue foundations
+- site item reorder inventory for tools, supplies, and Amazon-linked items
+- bulk finished-product import endpoint and admin UI
+- top-right logged-in user account menu
+
+New SQL file to run:
+
+- `/database_growth_analytics_seo_extension.sql`
+
+
+Also added in this pass:
+
+- `/robots.txt`
+- `/functions/sitemap.xml.js`

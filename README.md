@@ -246,3 +246,26 @@ Schema / API additions:
 - `/api/member/profile`
 
 This prepares the project for future discount logic, loyalty handling, internal employee records, and deeper CRM-style customer management.
+
+
+## Latest Growth Pass
+
+This pass adds:
+
+- site visitor analytics and cart abandonment tracking foundations
+- admin analytics dashboard for visitors, countries, paths, and abandoned carts
+- saved app settings foundation for wider enforcement later
+- notification queue / retry foundation
+- product SEO fields and admin SEO editor
+- product image annotation tools for alt text, captions, titles, and focal points
+- advanced storefront product search and SEO-aware product detail behavior
+- top-right account menu with profile/settings and logout access
+- site item reorder inventory tracking for tools, supplies, and Amazon-linked items
+- bulk finished-product import endpoint for seeding sellable inventory faster
+- additional SQL extension file: `/database_growth_analytics_seo_extension.sql`
+
+
+Also added in this pass:
+
+- `/robots.txt`
+- `/functions/sitemap.xml.js`
