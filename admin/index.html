@@ -50,6 +50,7 @@
           <a class="btn" href="#usersSection">Manage Users</a>
           <a class="btn" href="#accessTiersSection">Access Tiers</a>
           <a class="btn" href="#productsSection">Products</a>
+          <a class="btn" href="#analyticsSection">Analytics</a>
           <a class="btn" href="#ordersSection">Orders</a>
           <button class="btn" type="button" id="refreshDashboardSummaryButton">Refresh Summary</button>
         </div>
@@ -112,10 +113,17 @@
     </div>
 
     <div id="productsSection" class="card" style="margin-top:18px">
+      <div id="productSeoAdminMount"></div>
+      <div id="productImageAnnotationAdminMount"></div>
+      <div id="siteInventoryAdminMount"></div>
+      <div id="notificationAdminMount"></div>
+      <div id="appSettingsAdminMount"></div>
       <h2 style="margin-top:0">Products</h2>
       <p class="small">Product management remains handled by the existing modular admin scripts.</p>
       <div id="productsAdminMount"></div>
     </div>
+
+    <div id="analyticsSection" class="card" style="margin-top:18px"><h2 style="margin-top:0">Analytics, Visitors & Security</h2><p class="small">Monitor visitors, page flows, abandoned carts, reorder inventory, and queued notifications.</p><div id="analyticsAdminMount"></div></div>
 
     <div id="ordersSection" class="card" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
@@ -216,6 +224,7 @@
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/site-analytics.js"></script>
   <script src="/public/js/admin-self-protect.js"></script>
   <script src="/public/js/admin.js"></script>
   <script src="/public/js/admin-dashboard-summary.js"></script>
@@ -235,5 +244,13 @@
   <script src="/public/js/admin-archive-product.js"></script>
   <script src="/public/js/admin-orders.js"></script>
   <script src="/public/js/admin-order-detail.js"></script>
+  <script src="/public/js/admin-product-bulk-tools.js"></script>
+  <script src="/public/js/admin-import-products.js"></script>
+  <script src="/public/js/admin-visitor-analytics.js"></script>
+  <script src="/public/js/admin-product-seo.js"></script>
+  <script src="/public/js/admin-product-image-annotations.js"></script>
+  <script src="/public/js/admin-site-item-inventory.js"></script>
+  <script src="/public/js/admin-notifications.js"></script>
+  <script src="/public/js/admin-app-settings.js"></script>
 </body>
 </html>
