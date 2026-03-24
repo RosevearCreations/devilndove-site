@@ -22,6 +22,7 @@ export async function onRequestGet(context) {
   const paypalConfigured = isConfigured(env.PAYPAL_CLIENT_ID) && isConfigured(env.PAYPAL_SECRET);
   const paypalWebhookConfigured = isConfigured(env.PAYPAL_WEBHOOK_ID);
   const stripeConfigured = isConfigured(env.STRIPE_PUBLISHABLE_KEY) && isConfigured(env.STRIPE_SECRET_KEY);
+  const stripeWebhookConfigured = isConfigured(env.STRIPE_WEBHOOK_SECRET);
   const squareConfigured = isConfigured(env.SQUARE_APPLICATION_ID) && isConfigured(env.SQUARE_ACCESS_TOKEN);
 
   return json({
@@ -39,29 +40,33 @@ export async function onRequestGet(context) {
         code: "stripe",
         label: "Card / Stripe",
         ready: stripeConfigured,
-        mode: stripeConfigured ? "live_bridge" : "stub",
-        checkout_kind: "hosted_or_elements"
+        mode: stripeConfigured ? "hosted_checkout" : "stub",
+        checkout_kind: "hosted_checkout",
+        webhook_ready: stripeWebhookConfigured
       },
       {
         code: "square",
         label: "Square",
         ready: squareConfigured,
         mode: squareConfigured ? "live_bridge" : "stub",
-        checkout_kind: "hosted_or_sdk"
+        checkout_kind: "hosted_or_sdk",
+        webhook_ready: false
       },
       {
         code: "manual",
         label: "Manual / Invoice",
         ready: true,
         mode: "manual",
-        checkout_kind: "offline"
+        checkout_kind: "offline",
+        webhook_ready: false
       },
       {
         code: "other",
         label: "Other",
         ready: true,
         mode: "manual",
-        checkout_kind: "offline"
+        checkout_kind: "offline",
+        webhook_ready: false
       }
     ]
   });
