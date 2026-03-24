@@ -68,6 +68,23 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: 'rows must contain at least one product row.' }, 400);
   }
 
+  const previewSlugs = new Map();
+  rows.forEach((row) => {
+    const previewSlug = normalizeText(row?.slug) || slugify(normalizeText(row?.name));
+    if (!previewSlug) return;
+    previewSlugs.set(previewSlug, (previewSlugs.get(previewSlug) || 0) + 1);
+  });
+
+  const slugCandidates = Array.from(previewSlugs.keys()).slice(0, 200);
+  const existingSlugMap = new Map();
+  if (slugCandidates.length) {
+    const placeholders = slugCandidates.map(() => '?').join(',');
+    const existingRows = await env.DB.prepare(`SELECT slug FROM products WHERE slug IN (${placeholders})`).bind(...slugCandidates).all().catch(() => ({ results: [] }));
+    for (const existingRow of Array.isArray(existingRows?.results) ? existingRows.results : []) {
+      existingSlugMap.set(String(existingRow.slug || '').trim(), true);
+    }
+  }
+
   const preview = rows.map((row, index) => {
     const name = normalizeText(row?.name);
     const slug = normalizeText(row?.slug) || slugify(name);
@@ -85,6 +102,10 @@ export async function onRequestPost(context) {
     if (!slug) issues.push('Missing slug.');
     if (!product_type) issues.push('product_type must be physical or digital.');
     if (!Number.isInteger(price) || price < 0) issues.push('price_cents must be a whole number.');
+    if (slug && (previewSlugs.get(slug) || 0) > 1) issues.push('Slug is duplicated in this import batch.');
+    if (slug && existingSlugMap.has(slug)) issues.push('Slug already exists in the database.');
+    if (normalizeText(row?.featured_image_url) && !/^https?:\/\//i.test(normalizeText(row?.featured_image_url))) issues.push('featured_image_url must start with http or https.');
+    if (row?.inventory_tracking != null && ![0,1,'0','1',true,false].includes(row.inventory_tracking)) issues.push('inventory_tracking should be 0 or 1.');
 
     return {
       row_number: index + 1,
