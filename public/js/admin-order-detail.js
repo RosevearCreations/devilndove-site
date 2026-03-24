@@ -147,6 +147,30 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             </div>
 
+            <div class="grid cols-2" style="gap:18px;margin-top:18px">
+              <div class="card">
+                <h3 style="margin-top:0">Refund / Dispute Workflow</h3>
+                <form id="adminPaymentActionForm" class="grid" style="gap:12px">
+                  <div class="grid cols-2" style="gap:12px">
+                    <div><label class="small" for="adminPaymentActionPaymentId">Payment ID</label><input id="adminPaymentActionPaymentId" type="number" min="1" step="1" /></div>
+                    <div><label class="small" for="adminPaymentActionType">Action</label><select id="adminPaymentActionType"><option value="refund">Refund</option><option value="dispute">Dispute</option></select></div>
+                  </div>
+                  <div class="grid cols-2" style="gap:12px">
+                    <div><label class="small" for="adminPaymentActionAmount">Amount (cents)</label><input id="adminPaymentActionAmount" type="number" min="0" step="1" /></div>
+                    <div><label class="small" for="adminPaymentActionReason">Reason</label><input id="adminPaymentActionReason" type="text" placeholder="customer request, duplicate, chargeback..." /></div>
+                  </div>
+                  <div><label class="small" for="adminPaymentActionNote">Note</label><input id="adminPaymentActionNote" type="text" placeholder="Optional admin note" /></div>
+                  <div><button class="btn" type="submit" id="adminPaymentActionButton">Record Action</button></div>
+                </form>
+              </div>
+
+              <div class="card">
+                <h3 style="margin-top:0">Refunds & Disputes</h3>
+                <div id="adminOrderPaymentActionsSummary" class="small" style="margin-bottom:10px">—</div>
+                <div id="adminOrderPaymentActionsList" class="small">No payment actions logged yet.</div>
+              </div>
+            </div>
+
             <div class="card" style="margin-top:18px">
               <h3 style="margin-top:0">Items</h3>
               <div style="overflow:auto">
@@ -304,6 +328,11 @@ document.addEventListener("DOMContentLoaded", () => {
       recordPaymentForm.addEventListener("submit", onSubmitRecordPayment);
     }
 
+    const paymentActionForm = modalEl.querySelector("#adminPaymentActionForm");
+    if (paymentActionForm) {
+      paymentActionForm.addEventListener("submit", onSubmitPaymentAction);
+    }
+
     return modalEl;
   }
 
@@ -450,6 +479,23 @@ document.addEventListener("DOMContentLoaded", () => {
     `).join("");
   }
 
+  function renderPaymentActions(paymentsPayload, fallbackCurrency = "CAD") {
+    const summaryEl = document.getElementById("adminOrderPaymentActionsSummary");
+    const listEl = document.getElementById("adminOrderPaymentActionsList");
+    if (!summaryEl || !listEl) return;
+    const refunds = Array.isArray(paymentsPayload?.refunds) ? paymentsPayload.refunds : [];
+    const disputes = Array.isArray(paymentsPayload?.disputes) ? paymentsPayload.disputes : [];
+    summaryEl.textContent = `${refunds.length} refund(s) • ${disputes.length} dispute(s)`;
+    const items = [];
+    refunds.forEach((refund) => {
+      items.push(`Refund • payment ${refund.payment_id} • ${formatMoney(refund.amount_cents || 0, refund.currency || fallbackCurrency)} • ${titleCase(refund.refund_status || 'recorded')} • ${escapeHtml(refund.reason || refund.note || '—')}`);
+    });
+    disputes.forEach((dispute) => {
+      items.push(`Dispute • payment ${dispute.payment_id} • ${formatMoney(dispute.amount_cents || 0, dispute.currency || fallbackCurrency)} • ${titleCase(dispute.dispute_status || 'open')} • ${escapeHtml(dispute.reason || dispute.note || '—')}`);
+    });
+    listEl.innerHTML = items.length ? items.join('<br>') : 'No payment actions logged yet.';
+  }
+
   function fillPaymentForm(order) {
     const amountEl = document.getElementById("adminRecordPaymentAmount");
     const currencyEl = document.getElementById("adminRecordPaymentCurrency");
@@ -468,6 +514,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (methodEl) methodEl.value = "";
     if (refEl) refEl.value = "";
     if (noteEl) noteEl.value = "";
+
+    const paymentIdEl = document.getElementById("adminPaymentActionPaymentId");
+    const actionAmountEl = document.getElementById("adminPaymentActionAmount");
+    if (paymentIdEl) paymentIdEl.value = "";
+    if (actionAmountEl) actionAmountEl.value = String(order.total_cents || 0);
   }
 
   function renderOrderDetail(detailPayload, paymentsPayload) {
@@ -504,7 +555,11 @@ document.addEventListener("DOMContentLoaded", () => {
     renderItems(items, currency);
     renderHistory(history);
     renderPayments(paymentsPayload, currency);
+    renderPaymentActions(paymentsPayload, currency);
     fillPaymentForm(order);
+    const firstPayment = Array.isArray(paymentsPayload?.payments) ? paymentsPayload.payments[0] : null;
+    const paymentIdEl = document.getElementById("adminPaymentActionPaymentId");
+    if (paymentIdEl && firstPayment?.payment_id) paymentIdEl.value = String(firstPayment.payment_id);
   }
 
   async function fetchOrderDetail(orderId) {
@@ -675,6 +730,43 @@ document.addEventListener("DOMContentLoaded", () => {
         button.disabled = false;
         button.textContent = originalText;
       }
+    }
+  }
+
+  async function onSubmitPaymentAction(event) {
+    event.preventDefault();
+    if (!currentOrderId) return;
+    const paymentIdEl = document.getElementById("adminPaymentActionPaymentId");
+    const actionEl = document.getElementById("adminPaymentActionType");
+    const amountEl = document.getElementById("adminPaymentActionAmount");
+    const reasonEl = document.getElementById("adminPaymentActionReason");
+    const noteEl = document.getElementById("adminPaymentActionNote");
+    const button = document.getElementById("adminPaymentActionButton");
+    const originalText = button?.textContent || "Record Action";
+    try {
+      setMessage("Recording payment action...");
+      if (button) { button.disabled = true; button.textContent = "Saving..."; }
+      const response = await window.DDAuth.apiFetch("/api/admin/payment-actions", {
+        method: "POST",
+        body: JSON.stringify({
+          payment_id: Number(paymentIdEl?.value || 0),
+          action: String(actionEl?.value || 'refund').trim().toLowerCase(),
+          amount_cents: Number(amountEl?.value || 0),
+          reason: String(reasonEl?.value || '').trim(),
+          note: String(noteEl?.value || '').trim()
+        })
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to record payment action.");
+      if (noteEl) noteEl.value = "";
+      if (reasonEl) reasonEl.value = "";
+      setMessage(data.message || "Payment action recorded.");
+      await loadOrder(currentOrderId);
+      document.dispatchEvent(new CustomEvent("dd:order-updated", { detail: { order_id: currentOrderId } }));
+    } catch (error) {
+      setMessage(error.message || "Failed to record payment action.", true);
+    } finally {
+      if (button) { button.disabled = false; button.textContent = originalText; }
     }
   }
 

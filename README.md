@@ -13,10 +13,13 @@ The current build includes:
 - PayPal handoff, PayPal return capture, and PayPal webhook reconciliation
 - Stripe hosted checkout preparation and Stripe webhook reconciliation
 - webhook event logging for provider idempotency / audit trail
+- admin webhook review and safe replay queue controls
 - live visitor/session analytics and historical website data by path and country
 - product SEO fields, product image annotations, and product media workflow tools
 - direct image upload endpoint for R2-backed product media
+- uploaded asset browsing and delete actions in admin
 - site inventory/reorder tracking for tools, supplies, and sellable products
+- local refund/dispute workflow logging for orders and payments
 
 ## Main payment status
 
@@ -31,13 +34,15 @@ Implemented now:
 - Stripe webhook reconciliation endpoint
 - webhook event storage for duplicate-event safety
 - admin manual payment recording
+- admin webhook review/requeue controls
+- refund/dispute local tracking tables and admin actions
 
 Still to deepen later:
 
-- webhook retry workers / scheduled dispatch
-- refund automation
-- provider dispute handling
-- admin replay/retry tooling on webhook events
+- actual provider-side refund execution + sync back confirmation
+- provider dispute evidence upload/response workflow
+- webhook worker retry scheduling beyond manual replay queueing
+- optional Stripe customer portal / saved customer records later
 
 ## Main product/media status
 
@@ -45,11 +50,12 @@ Implemented now:
 
 - create, edit, archive, delete products
 - bulk update products
-- import preview and import tools
+- import preview and import tools with duplicate slug checks
 - product SEO editor
 - product image annotation editor
 - product image workflow editor for ordered images, alt text, captions, focal points, and featured image sync
 - direct admin upload endpoint for product images to R2
+- uploaded asset library browsing and delete actions in admin
 - inventory tracking on products and site inventory records
 
 ## Database files
@@ -80,58 +86,15 @@ Auth:
 Storefront and checkout:
 - `/api/products`
 - `/api/product-detail`
-- `/api/payment-providers`
 - `/api/checkout-create-order`
 - `/api/checkout-prepare-payment`
 - `/api/paypal-return`
 - `/api/paypal-webhook`
 - `/api/stripe-webhook`
 
-Admin products/media:
-- `/api/admin/products`
-- `/api/admin/product-detail`
-- `/api/admin/create-product`
-- `/api/admin/update-product`
-- `/api/admin/delete-product`
-- `/api/admin/archive-product`
-- `/api/admin/product-seo`
-- `/api/admin/product-image-annotations`
-- `/api/admin/product-images`
-- `/api/admin/media-upload`
-- `/api/admin/bulk-update-products`
-- `/api/admin/import-products-preview`
-- `/api/admin/import-products`
+Admin operations added in this pass:
+- `/api/admin/webhook-events`
+- `/api/admin/payment-actions`
+- `/api/admin/media-assets`
 - `/api/admin/site-item-inventory`
-
-Analytics:
-- `/api/track/visit`
-- `/api/track/cart`
-- `/api/admin/visitor-analytics`
-
-## Notes for deployment
-
-Keep secrets in Cloudflare Variables and Secrets.
-
-Important payment variables include:
-
-- `PUBLIC_SITE_URL`
-- `PAYPAL_CLIENT_ID`
-- `PAYPAL_SECRET`
-- `PAYPAL_ENV`
-- `PAYPAL_WEBHOOK_ID`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_PUBLISHABLE_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-
-Important media variables/bindings include:
-
-- R2 binding: `PRODUCT_MEDIA_BUCKET`
-- `PRODUCT_MEDIA_PUBLIC_BASE_URL`
-- optional `PRODUCT_MEDIA_BUCKET_NAME`
-
-## Admin/media note
-
-Images can now be added to products in two ways:
-
-- paste image URLs directly into the product media workflow
-- upload image files through admin to R2, then save the generated URL into the product media list
+- `/api/admin/import-products-preview`

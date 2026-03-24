@@ -30,7 +30,7 @@ Session-based user login and account controls.
 Order creation, payment preparation, PayPal return, and provider webhooks.
 
 ### Admin
-Products, users, orders, SEO, inventory, notifications, analytics, media upload, and product image workflow.
+Products, users, orders, SEO, inventory, notifications, analytics, media upload, media library browsing, webhook review, and refund/dispute logging.
 
 ### Tracking
 Visitor, cart, and search behavior logging.

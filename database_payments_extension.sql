@@ -34,6 +34,12 @@ CREATE TABLE IF NOT EXISTS webhook_events (
   related_payment_id INTEGER,
   payload_json TEXT,
   error_text TEXT,
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at TEXT,
+  next_retry_at TEXT,
+  replay_requested_at TEXT,
+  replay_requested_by_user_id INTEGER,
+  dispatch_notes TEXT,
   received_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   processed_at TEXT,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -55,6 +61,9 @@ CREATE TABLE IF NOT EXISTS media_assets (
   created_by_user_id INTEGER,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  variant_role TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  annotation_notes TEXT,
   deleted_at TEXT,
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE SET NULL,
   FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
@@ -69,3 +78,40 @@ CREATE INDEX IF NOT EXISTS idx_webhook_events_provider_status ON webhook_events(
 CREATE INDEX IF NOT EXISTS idx_webhook_events_received_at ON webhook_events(received_at);
 CREATE INDEX IF NOT EXISTS idx_media_assets_product_id ON media_assets(product_id);
 CREATE INDEX IF NOT EXISTS idx_media_assets_created_at ON media_assets(created_at);
+CREATE INDEX IF NOT EXISTS idx_media_assets_sort_order ON media_assets(product_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS payment_refunds (
+  refund_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  payment_id INTEGER NOT NULL,
+  order_id INTEGER NOT NULL,
+  provider TEXT NOT NULL,
+  provider_refund_id TEXT,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  refund_status TEXT NOT NULL DEFAULT 'recorded' CHECK (refund_status IN ('recorded','requested','submitted','succeeded','failed','cancelled')),
+  reason TEXT,
+  note TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payment_disputes (
+  dispute_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  payment_id INTEGER NOT NULL,
+  order_id INTEGER NOT NULL,
+  provider TEXT NOT NULL,
+  provider_dispute_id TEXT,
+  dispute_status TEXT NOT NULL DEFAULT 'open' CHECK (dispute_status IN ('open','under_review','won','lost','closed')),
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  reason TEXT,
+  evidence_due_at TEXT,
+  note TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_payment_refunds_order_id ON payment_refunds(order_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_payment_disputes_order_id ON payment_disputes(order_id, dispute_status);

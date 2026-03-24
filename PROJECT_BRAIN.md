@@ -42,18 +42,17 @@ Uses:
 Uses:
 
 - `webhook_events`
+- `payment_refunds`
+- `payment_disputes`
 - `media_assets`
 
 ## Key newer additions
 
-- PayPal return capture endpoint
-- PayPal webhook reconciliation endpoint with webhook event logging
-- Stripe hosted checkout session creation
-- Stripe webhook reconciliation endpoint with idempotent event logging
-- admin product media workflow endpoint
-- direct admin image upload endpoint to R2
-- storefront product detail now uses merged image + annotation data
-- admin dashboard now includes product media workflow tooling
+- admin webhook review/requeue endpoint and dashboard tooling
+- admin refund/dispute endpoint and order-detail UI
+- admin media asset browser/delete tooling
+- inventory model now includes reserved/incoming/supplier/cost fields
+- import preview now validates duplicate slugs and media URL format
 
 ## Where we are now
 
@@ -61,7 +60,8 @@ The platform is still in an integration/hardening phase.
 
 Most important next layers after this pass are:
 
-- webhook retry and replay tooling
-- refund/dispute workflow handling
+- webhook worker retry and replay execution
+- provider-confirmed refund/dispute status sync
 - richer media library management around uploaded R2 assets
-- deeper inventory operations and reorder automation
+- deeper inventory operations and movement history
+- funnel dashboards and analytics polish

@@ -47,6 +47,10 @@ Includes `payment_status` and `payment_method` in the current schema.
 ### order_items
 ### order_status_history
 ### payments
+### payment_refunds
+Local refund audit table for admin/provider reconciliation.
+### payment_disputes
+Local dispute audit table for chargeback/admin follow-up.
 
 ## Growth / analytics / SEO / media
 
@@ -78,21 +82,11 @@ Meta title, description, keywords, H1, canonical, OG fields.
 ### product_image_annotations
 Alt text, title, caption, focal points, notes.
 
-### site_item_inventory
-Tools, supplies, and sellable-product reorder tracking.
-
 ### media_assets
-Uploaded R2-backed product media records.
-
-## Payment/webhook operational note
+Uploaded R2-backed assets with product linkage, object key, sort order, optional variant role, and soft delete support.
 
 ### webhook_events
-Provider webhook event storage for idempotency, audit trail, and later replay tooling.
+Provider event log with idempotency, status, replay request metadata, and retry attempt fields.
 
-PayPal completion now uses both:
-- `/api/paypal-return`
-- `/api/paypal-webhook`
-
-Stripe completion now uses:
-- `/api/checkout-prepare-payment` for hosted session creation
-- `/api/stripe-webhook` for provider-confirmed final reconciliation
+### site_item_inventory
+Operational inventory table for tools, supplies, and sellable items with on-hand, reserved, incoming, supplier, and cost fields.

@@ -7,29 +7,32 @@
 - checkout creates orders and order items correctly
 - PayPal can hand off, return, and reconcile through webhook flow
 - Stripe can now create hosted checkout sessions and reconcile through webhook flow
-- webhook events now have a stored audit trail for duplicate-event protection
+- webhook events now have a stored audit trail plus admin review/requeue tooling
 - admin can manage products, SEO, annotations, inventory, and product image ordering
-- admin can now upload product images directly to R2 instead of relying only on pasted URLs
+- admin can upload product images directly to R2 and browse/delete uploaded assets
+- admin can log local refund/dispute actions against payments and orders
+- inventory records can now track reserved, incoming, supplier, and cost fields
 - analytics and notification foundations are present for future dashboards and workflows
 
 ## What remains the strongest next work
 
-- webhook retry/replay admin workflow and worker execution
-- refund/dispute handling end to end
-- richer R2 media browsing/delete/replace workflow
-- deeper inventory and reorder automation
+- webhook worker execution and scheduled retry logic
+- provider-confirmed refund/dispute sync back into local state
+- richer R2 media replace/variant/thumbnail workflow
+- deeper inventory movement history and reorder automation
 - import validation polish and analytics dashboards
 
 ## Must-haves now in place from this pass
 
-- Stripe completion pass
-- webhook event logging foundation
-- direct image upload endpoint for product media
+- webhook admin review/requeue foundation
+- refund/dispute local workflow foundation
+- uploaded asset browser/delete foundation
+- deeper site inventory fields and admin UI
 - updated full schema and upgrade SQL files
 
 ## Known caution areas
 
-- existing databases may need the upgrade SQL before new code paths work cleanly
-- Stripe hosted checkout still depends on correct live secrets + webhook setup in Cloudflare/Stripe
+- existing databases need the upgrade SQL before new webhook/refund/media/inventory code paths work cleanly
+- provider-side refunds/disputes are not automatically executed yet
 - R2 direct upload depends on the bucket binding and public base URL being configured
-- webhook replay tooling exists only as stored event groundwork, not full admin controls yet
+- webhook replay tooling currently queues/relabels events but does not yet run a background worker
