@@ -404,3 +404,12 @@ Also added in this pass:
 
 - `/robots.txt`
 - `/functions/sitemap.xml.js`
+
+
+## Latest pass additions
+
+- richer live monitoring and historical website analytics by visitor token, browser session, country, path, and search events
+- PayPal return/capture completion endpoint for confirmation flow
+- improved site inventory/reorder admin workflow for tools, supplies, and sellable products
+- corrected core `database_schema.sql` for the current `users` / `sessions` app model
+- added `database_admin_seed_template.sql` for creating a starter admin account safely

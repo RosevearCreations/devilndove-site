@@ -1,46 +1,50 @@
-/docs/database_schema.sql
--- USERS
+-- File: /database_schema.sql
+-- Brief description: Core application auth and admin schema for the current Devil n Dove build.
 
-CREATE TABLE users (
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   display_name TEXT,
   role TEXT NOT NULL DEFAULT 'member',
   is_active INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_login_at TEXT
 );
 
--- SESSIONS
-
-CREATE TABLE sessions (
+CREATE TABLE IF NOT EXISTS sessions (
   session_id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
   session_token TEXT NOT NULL UNIQUE,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  token TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   expires_at TEXT NOT NULL,
   ip_address TEXT,
   user_agent TEXT,
-  FOREIGN KEY(user_id) REFERENCES users(user_id)
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- INDEXES
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_session_token ON sessions(session_token);
+CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
 
-CREATE INDEX idx_sessions_user_id
-ON sessions(user_id);
-
-CREATE INDEX idx_sessions_token
-ON sessions(session_token);
-
-CREATE INDEX idx_sessions_expiry
-ON sessions(expires_at);
-
--- ADMIN LOGS (future)
-
-CREATE TABLE admin_logs (
+CREATE TABLE IF NOT EXISTS admin_logs (
   log_id INTEGER PRIMARY KEY AUTOINCREMENT,
   admin_user_id INTEGER,
   action TEXT,
   target_user_id INTEGER,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  target_type TEXT,
+  meta_json TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (admin_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+  FOREIGN KEY (target_user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_admin_logs_created_at ON admin_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_admin_logs_admin_user_id ON admin_logs(admin_user_id);

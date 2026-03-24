@@ -1,6 +1,8 @@
 -- File: /database_growth_analytics_seo_extension.sql
--- Brief description: Adds analytics/security, SEO, image annotation, site inventory,
--- notification dispatch, and app settings foundations for the Devil n Dove growth pass.
+-- Brief description: Adds analytics/security, SEO, media, inventory, app settings,
+-- search logging, and notification foundations for the current Devil n Dove build.
+
+PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS site_visitors (
   site_visitor_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,25 +19,62 @@ CREATE TABLE IF NOT EXISTS site_visitors (
   is_bot INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS site_visitor_sessions (
+  site_visitor_session_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_visitor_id INTEGER NOT NULL,
+  session_token TEXT NOT NULL,
+  user_id INTEGER,
+  entry_path TEXT,
+  last_path TEXT,
+  country TEXT,
+  started_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  page_view_count INTEGER NOT NULL DEFAULT 0,
+  event_count INTEGER NOT NULL DEFAULT 0,
+  is_checkout_started INTEGER NOT NULL DEFAULT 0,
+  is_abandoned_cart INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (site_visitor_id) REFERENCES site_visitors(site_visitor_id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+  UNIQUE(site_visitor_id, session_token)
+);
+
 CREATE TABLE IF NOT EXISTS site_page_views (
   site_page_view_id INTEGER PRIMARY KEY AUTOINCREMENT,
   site_visitor_id INTEGER,
+  site_visitor_session_id INTEGER,
   user_id INTEGER,
   path TEXT NOT NULL,
   query_string TEXT,
   referrer TEXT,
   page_title TEXT,
+  page_h1 TEXT,
   event_type TEXT NOT NULL DEFAULT 'page_view',
   duration_ms INTEGER,
   meta_json TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (site_visitor_id) REFERENCES site_visitors(site_visitor_id) ON DELETE SET NULL,
+  FOREIGN KEY (site_visitor_session_id) REFERENCES site_visitor_sessions(site_visitor_session_id) ON DELETE SET NULL,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS site_search_events (
+  site_search_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_visitor_id INTEGER,
+  site_visitor_session_id INTEGER,
+  user_id INTEGER,
+  search_term TEXT NOT NULL,
+  result_count INTEGER NOT NULL DEFAULT 0,
+  path TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (site_visitor_id) REFERENCES site_visitors(site_visitor_id) ON DELETE SET NULL,
+  FOREIGN KEY (site_visitor_session_id) REFERENCES site_visitor_sessions(site_visitor_session_id) ON DELETE SET NULL,
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS cart_activity (
   cart_activity_id INTEGER PRIMARY KEY AUTOINCREMENT,
   visitor_token TEXT,
+  session_token TEXT,
   user_id INTEGER,
   order_id INTEGER,
   event_type TEXT NOT NULL,
@@ -72,6 +111,15 @@ CREATE TABLE IF NOT EXISTS notification_jobs (
   last_error TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS notification_dispatch_logs (
+  notification_dispatch_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notification_job_id INTEGER,
+  status TEXT NOT NULL,
+  error_text TEXT,
+  attempted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (notification_job_id) REFERENCES notification_jobs(notification_job_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS product_seo (
@@ -125,8 +173,12 @@ CREATE TABLE IF NOT EXISTS site_item_inventory (
 );
 
 CREATE INDEX IF NOT EXISTS idx_site_visitors_token ON site_visitors(visitor_token);
+CREATE INDEX IF NOT EXISTS idx_site_visitors_country ON site_visitors(country);
+CREATE INDEX IF NOT EXISTS idx_site_visitor_sessions_site_visitor_id ON site_visitor_sessions(site_visitor_id);
+CREATE INDEX IF NOT EXISTS idx_site_visitor_sessions_last_seen_at ON site_visitor_sessions(last_seen_at);
 CREATE INDEX IF NOT EXISTS idx_site_page_views_path ON site_page_views(path);
 CREATE INDEX IF NOT EXISTS idx_site_page_views_created_at ON site_page_views(created_at);
+CREATE INDEX IF NOT EXISTS idx_site_search_events_search_term ON site_search_events(search_term);
 CREATE INDEX IF NOT EXISTS idx_cart_activity_event_type ON cart_activity(event_type);
 CREATE INDEX IF NOT EXISTS idx_cart_activity_created_at ON cart_activity(created_at);
 CREATE INDEX IF NOT EXISTS idx_notification_jobs_status ON notification_jobs(status);
@@ -136,6 +188,10 @@ INSERT OR IGNORE INTO app_settings (setting_key, setting_value, is_public)
 VALUES
   ('site.seo.business_name', 'Devil n Dove', 1),
   ('site.seo.default_title_suffix', 'Devil n Dove', 1),
-  ('site.seo.default_description', 'Devil n Dove is a Southern Ontario workshop and online store focused on handcrafted jewelry, mixed media art, workshop tools, creative supplies, and maker projects.', 1),
-  ('site.seo.default_keywords', 'Devil n Dove, handmade jewelry Ontario, artisan workshop, polymer clay jewelry, forged jewelry, lost wax casting, creative supplies, workshop tools', 1),
-  ('site.notifications.retry_minutes', '15', 0);
+  ('site.seo.default_description', 'Devil n Dove is a Southern Ontario creative workshop and online store focused on handcrafted jewelry, custom artisan goods, tools, supplies, and maker projects.', 1),
+  ('site.seo.default_keywords', 'Devil n Dove, handmade jewelry Ontario, artisan workshop, creative supplies, workshop tools, polymer clay jewelry, maker shop Southern Ontario', 1),
+  ('site.seo.primary_h1_pattern', 'Devil n Dove | Handmade Jewelry, Creative Supplies, and Workshop Tools in Southern Ontario', 1),
+  ('site.business.primary_location', 'Tillsonburg, Ontario, Canada', 1),
+  ('site.notifications.retry_minutes', '15', 0),
+  ('payments.paypal.enabled', 'true', 1),
+  ('payments.stripe.enabled', 'true', 1);
