@@ -1,44 +1,67 @@
 # Repo Base Guide
 
-## Important directories
+## Purpose
 
-- `functions/api/` — backend API routes
-- `public/js/` — frontend modules
-- `admin/` — admin pages
-- `members/` — member pages
-- `shop/` — storefront pages
+This repo runs the Devil n Dove website as:
+
+- brand/public site
+- storefront
+- member area
+- admin dashboard
+- payment/webhook layer
+- analytics and operations layer
+
+## Important folders
+
+- `functions/api/` — Cloudflare API endpoints
+- `public/js/` — browser-side logic for auth, admin, checkout, and analytics
+- `admin/` — admin dashboard page
 - `checkout/` — checkout and confirmation pages
+- `shop/` — storefront pages
+- `data/` — catalog/site JSON content
+- `assets/` and `css/` — static design assets and styling
 
-## Important backend groups
+## Key current API groups
 
-### Payments
-- `checkout-create-order.js`
-- `checkout-prepare-payment.js`
-- `paypal-return.js`
-- `paypal-webhook.js`
-- `payment-providers.js`
+### Auth
+Session-based user login and account controls.
 
-### Product/media/admin
-- `admin/products.js`
-- `admin/product-detail.js`
-- `admin/create-product.js`
-- `admin/update-product.js`
-- `admin/product-seo.js`
-- `admin/product-image-annotations.js`
-- `admin/product-images.js`
-- `admin/site-item-inventory.js`
+### Storefront / checkout
+Order creation, payment preparation, PayPal return, and provider webhooks.
 
-### Analytics
-- `track/visit.js`
-- `track/cart.js`
-- `admin/visitor-analytics.js`
+### Admin
+Products, users, orders, SEO, inventory, notifications, analytics, media upload, and product image workflow.
 
-## Important frontend modules
+### Tracking
+Visitor, cart, and search behavior logging.
 
-- `site-analytics.js`
-- `checkout.js`
-- `order-confirmation.js`
-- `admin-product-images.js`
-- `admin-product-image-annotations.js`
-- `admin-product-seo.js`
-- `admin-site-item-inventory.js`
+## Database files to keep aligned
+
+- `database_schema.sql`
+- `database_store_schema.sql`
+- `database_access_tiers.sql`
+- `database_profiles_extension.sql`
+- `database_payments_extension.sql`
+- `database_growth_analytics_seo_extension.sql`
+- `database_full_schema.sql`
+- `database_upgrade_current_pass.sql`
+
+## Cloudflare bindings/secrets expected now
+
+### D1
+- `DB`
+
+### R2
+- `PRODUCT_MEDIA_BUCKET`
+
+### Variables / secrets
+- `PUBLIC_SITE_URL`
+- `PAYPAL_CLIENT_ID`
+- `PAYPAL_SECRET`
+- `PAYPAL_ENV`
+- `PAYPAL_WEBHOOK_ID`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `PRODUCT_MEDIA_PUBLIC_BASE_URL`
+- optional `PRODUCT_MEDIA_BUCKET_NAME`

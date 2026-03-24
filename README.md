@@ -8,11 +8,14 @@ The current build includes:
 
 - public storefront and product detail pages
 - member login, registration, account tools, orders, and downloads
-- admin dashboard for users, products, orders, analytics, inventory, SEO, and notifications
+- admin dashboard for users, products, orders, analytics, inventory, SEO, notifications, and media
 - checkout and order creation
-- PayPal handoff, PayPal return capture, and PayPal webhook reconciliation foundation
+- PayPal handoff, PayPal return capture, and PayPal webhook reconciliation
+- Stripe hosted checkout preparation and Stripe webhook reconciliation
+- webhook event logging for provider idempotency / audit trail
 - live visitor/session analytics and historical website data by path and country
-- product SEO fields, product image annotations, and product media workflow foundation
+- product SEO fields, product image annotations, and product media workflow tools
+- direct image upload endpoint for R2-backed product media
 - site inventory/reorder tracking for tools, supplies, and sellable products
 
 ## Main payment status
@@ -24,14 +27,17 @@ Implemented now:
 - PayPal redirect handoff
 - PayPal return capture
 - PayPal webhook reconciliation endpoint
+- Stripe Checkout session creation
+- Stripe webhook reconciliation endpoint
+- webhook event storage for duplicate-event safety
 - admin manual payment recording
 
 Still to deepen later:
 
-- Stripe hosted checkout or payment intent completion
 - webhook retry workers / scheduled dispatch
 - refund automation
 - provider dispute handling
+- admin replay/retry tooling on webhook events
 
 ## Main product/media status
 
@@ -43,6 +49,7 @@ Implemented now:
 - product SEO editor
 - product image annotation editor
 - product image workflow editor for ordered images, alt text, captions, focal points, and featured image sync
+- direct admin upload endpoint for product images to R2
 - inventory tracking on products and site inventory records
 
 ## Database files
@@ -53,6 +60,8 @@ Implemented now:
 - `database_payments_extension.sql`
 - `database_profiles_extension.sql`
 - `database_growth_analytics_seo_extension.sql`
+- `database_full_schema.sql`
+- `database_upgrade_current_pass.sql`
 - `database_admin_seed_template.sql`
 
 ## Important endpoints
@@ -76,6 +85,7 @@ Storefront and checkout:
 - `/api/checkout-prepare-payment`
 - `/api/paypal-return`
 - `/api/paypal-webhook`
+- `/api/stripe-webhook`
 
 Admin products/media:
 - `/api/admin/products`
@@ -87,6 +97,7 @@ Admin products/media:
 - `/api/admin/product-seo`
 - `/api/admin/product-image-annotations`
 - `/api/admin/product-images`
+- `/api/admin/media-upload`
 - `/api/admin/bulk-update-products`
 - `/api/admin/import-products-preview`
 - `/api/admin/import-products`
@@ -112,6 +123,15 @@ Important payment variables include:
 - `STRIPE_PUBLISHABLE_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 
+Important media variables/bindings include:
+
+- R2 binding: `PRODUCT_MEDIA_BUCKET`
+- `PRODUCT_MEDIA_PUBLIC_BASE_URL`
+- optional `PRODUCT_MEDIA_BUCKET_NAME`
+
 ## Admin/media note
 
-Images can be added to products now through the product media workflow using image URLs. The next deeper step later is direct upload handling to R2 from admin.
+Images can now be added to products in two ways:
+
+- paste image URLs directly into the product media workflow
+- upload image files through admin to R2, then save the generated URL into the product media list

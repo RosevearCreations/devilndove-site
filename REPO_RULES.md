@@ -1,9 +1,11 @@
 # Repo Rules
 
-- Keep auth based on `users` and `sessions`.
-- Keep admin authority separate from business/customer tiers.
-- Keep storefront H1 usage to one meaningful H1 per page.
-- Keep product SEO and product media changes synchronized when product presentation changes.
-- When payment flow changes, update both docs and admin tools.
-- Do not expose secrets in frontend code.
-- Prefer one file at a time for large edits, but keep docs synchronized after architecture passes.
+- Keep all schema files and Markdown docs in sync with the current build state.
+- When payment flow changes, update both code and the database/payment documentation together.
+- When media workflow changes, update both admin UI notes and deployment binding notes together.
+- Prefer additive changes that preserve working storefront/admin behavior.
+- Keep checkout order creation separate from provider-specific payment preparation.
+- Treat webhook processing as idempotent and loggable.
+- Do not remove working PayPal paths when improving Stripe paths.
+- Keep product media compatible with both pasted URLs and uploaded R2 assets.
+- Use full-file updates for schema/docs when making major pass changes.

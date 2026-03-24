@@ -1,66 +1,35 @@
 # AI Context
 
-## Current truth
+## Current phase
 
-Do not treat this repo as only a static website.
-It is a real multi-area application with:
+This repo is in the payment/media hardening phase after the main storefront, auth, and admin foundations were already built.
 
-- storefront
-- checkout
-- member area
-- admin area
-- analytics layer
-- SEO layer
-- product media workflow layer
-- inventory/reorder layer
+## Important truths right now
 
-## Payment truth
+- orders are created before payment handoff
+- PayPal is a redirect + return + webhook flow
+- Stripe is now a hosted checkout + webhook flow
+- webhook events are stored in `webhook_events` for idempotency and later replay tooling
+- product media is managed through ordered `product_images` plus `product_image_annotations`
+- direct uploads now go into R2 and can be saved into product image rows from admin
+- inventory, SEO, analytics, and notifications are foundational but not fully matured
 
-Current payment flow includes:
+## Best next priorities after this pass
 
-- order creation
-- provider readiness
-- PayPal handoff
-- PayPal return capture
-- PayPal webhook reconciliation
-- manual admin recording
+1. webhook replay/retry tooling
+2. refund/dispute handling
+3. richer media library management
+4. deeper inventory automation
+5. dashboard/reporting polish
 
-Do not describe Stripe as complete.
-Stripe is still in preparation mode unless newer code explicitly adds full completion.
+## Files that matter most for the new pass
 
-## Product media truth
-
-Products can now be managed with:
-
-- ordered image URLs
-- alt text
-- captions
-- focal points
-- image notes
-- SEO metadata
-
-The current workflow is URL-driven, not full direct upload yet.
-
-## Analytics truth
-
-The site now tracks:
-
-- visitors
-- sessions
-- page views
-- search events
-- cart activity
-- checkout starts
-- abandonment signals
-- country/path breakdowns
-
-## Documentation rule
-
-When architecture changes, keep these files aligned:
-
-- `README.md`
-- `PROJECT_BRAIN.md`
-- `AI_CONTEXT.md`
-- `DEVELOPMENT_ROADMAP.md`
-- `DATABASE_SCHEMA_REFERENCE.md`
-- `SANITY_HEALTH_CHECK.md`
+- `functions/api/checkout-prepare-payment.js`
+- `functions/api/paypal-webhook.js`
+- `functions/api/stripe-webhook.js`
+- `functions/api/admin/media-upload.js`
+- `public/js/admin-product-images.js`
+- `database_payments_extension.sql`
+- `database_store_schema.sql`
+- `database_full_schema.sql`
+- `database_upgrade_current_pass.sql`

@@ -4,13 +4,10 @@
 -- Works alongside the main users / sessions schema
 -- =========================================================
 
+PRAGMA foreign_keys = ON;
+
 -- ---------------------------------------------------------
 -- TAX CLASSES
--- Used so products can be taxed differently later if needed
--- Example:
--- standard = normal HST taxable item
--- digital  = digital item
--- exempt   = non-taxable item
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS tax_classes (
   tax_class_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,10 +21,6 @@ CREATE TABLE IF NOT EXISTS tax_classes (
 
 -- ---------------------------------------------------------
 -- PRODUCTS
--- Holds both physical and digital products
--- product_type:
---   physical
---   digital
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS products (
   product_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,6 +36,7 @@ CREATE TABLE IF NOT EXISTS products (
   currency TEXT NOT NULL DEFAULT 'CAD',
   taxable INTEGER NOT NULL DEFAULT 1,
   tax_class_id INTEGER,
+  tax_class_code TEXT,
   requires_shipping INTEGER NOT NULL DEFAULT 0,
   weight_grams INTEGER,
   inventory_tracking INTEGER NOT NULL DEFAULT 0,
@@ -57,7 +51,6 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- ---------------------------------------------------------
 -- PRODUCT IMAGES
--- Multiple images per product
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS product_images (
   product_image_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,7 +64,6 @@ CREATE TABLE IF NOT EXISTS product_images (
 
 -- ---------------------------------------------------------
 -- PRODUCT TAGS
--- Simple tags for filtering / grouping
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS product_tags (
   product_tag_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,21 +75,12 @@ CREATE TABLE IF NOT EXISTS product_tags (
 
 -- ---------------------------------------------------------
 -- ORDERS
--- No payment gateway integration yet
--- This stores order state so payments can be attached later
---
 -- order_status:
---   draft
---   pending
---   paid
---   fulfilled
---   cancelled
---   refunded
---
+--   draft | pending | paid | fulfilled | cancelled | refunded
+-- payment_status:
+--   pending | authorized | paid | failed | cancelled | refunded | partially_refunded
 -- fulfillment_type:
---   shipping
---   digital
---   mixed
+--   shipping | digital | mixed
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS orders (
   order_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -107,6 +90,10 @@ CREATE TABLE IF NOT EXISTS orders (
   customer_name TEXT,
   order_status TEXT NOT NULL DEFAULT 'pending'
     CHECK (order_status IN ('draft','pending','paid','fulfilled','cancelled','refunded')),
+  payment_status TEXT NOT NULL DEFAULT 'pending'
+    CHECK (payment_status IN ('pending','authorized','paid','failed','cancelled','refunded','partially_refunded')),
+  payment_method TEXT NOT NULL DEFAULT 'manual'
+    CHECK (payment_method IN ('paypal','stripe','square','manual','other','pending')),
   fulfillment_type TEXT NOT NULL DEFAULT 'shipping'
     CHECK (fulfillment_type IN ('shipping','digital','mixed')),
   currency TEXT NOT NULL DEFAULT 'CAD',
@@ -144,8 +131,6 @@ CREATE TABLE IF NOT EXISTS orders (
 
 -- ---------------------------------------------------------
 -- ORDER ITEMS
--- Snapshot pricing is stored here
--- so future product price changes do not alter old orders
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS order_items (
   order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -168,7 +153,6 @@ CREATE TABLE IF NOT EXISTS order_items (
 
 -- ---------------------------------------------------------
 -- ORDER STATUS HISTORY
--- Useful for tracking workflow later
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS order_status_history (
   order_status_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -182,44 +166,19 @@ CREATE TABLE IF NOT EXISTS order_status_history (
   FOREIGN KEY (changed_by_user_id) REFERENCES users(user_id)
 );
 
--- ---------------------------------------------------------
--- INDEXES
--- ---------------------------------------------------------
-CREATE INDEX IF NOT EXISTS idx_products_status
-ON products(status);
+CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
+CREATE INDEX IF NOT EXISTS idx_products_type ON products(product_type);
+CREATE INDEX IF NOT EXISTS idx_products_sort ON products(sort_order);
+CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_tags_product_id ON product_tags(product_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_email ON orders(customer_email);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(order_status);
+CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status);
+CREATE INDEX IF NOT EXISTS idx_orders_payment_method ON orders(payment_method);
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_status_history_order_id ON order_status_history(order_id);
 
-CREATE INDEX IF NOT EXISTS idx_products_type
-ON products(product_type);
-
-CREATE INDEX IF NOT EXISTS idx_products_sort
-ON products(sort_order);
-
-CREATE INDEX IF NOT EXISTS idx_product_images_product_id
-ON product_images(product_id);
-
-CREATE INDEX IF NOT EXISTS idx_product_tags_product_id
-ON product_tags(product_id);
-
-CREATE INDEX IF NOT EXISTS idx_orders_user_id
-ON orders(user_id);
-
-CREATE INDEX IF NOT EXISTS idx_orders_email
-ON orders(customer_email);
-
-CREATE INDEX IF NOT EXISTS idx_orders_status
-ON orders(order_status);
-
-CREATE INDEX IF NOT EXISTS idx_order_items_order_id
-ON order_items(order_id);
-
-CREATE INDEX IF NOT EXISTS idx_order_status_history_order_id
-ON order_status_history(order_id);
-
--- ---------------------------------------------------------
--- SEED TAX CLASSES
--- Ontario default HST = 13%
--- You can adjust later if needed
--- ---------------------------------------------------------
 INSERT OR IGNORE INTO tax_classes (code, name, description, tax_rate, is_active)
 VALUES
   ('standard', 'Standard Taxable Item', 'Default taxable item for Ontario sales', 0.13, 1),

@@ -9,6 +9,8 @@ This repo is now a combined:
 - member account system
 - admin operations panel
 - analytics and growth data layer
+- payment/webhook processing layer
+- product media upload/asset layer
 
 ## Important current architecture
 
@@ -36,21 +38,30 @@ Uses:
 - `product_image_annotations`
 - `site_item_inventory`
 
+### Payments / webhook / media additions
+Uses:
+
+- `webhook_events`
+- `media_assets`
+
 ## Key newer additions
 
 - PayPal return capture endpoint
-- PayPal webhook reconciliation endpoint
+- PayPal webhook reconciliation endpoint with webhook event logging
+- Stripe hosted checkout session creation
+- Stripe webhook reconciliation endpoint with idempotent event logging
 - admin product media workflow endpoint
+- direct admin image upload endpoint to R2
 - storefront product detail now uses merged image + annotation data
 - admin dashboard now includes product media workflow tooling
 
 ## Where we are now
 
-The platform is in an integration/hardening phase.
+The platform is still in an integration/hardening phase.
 
 Most important next layers after this pass are:
 
 - webhook retry and replay tooling
-- Stripe payment completion
-- direct media upload pipeline to R2
+- refund/dispute workflow handling
+- richer media library management around uploaded R2 assets
 - deeper inventory operations and reorder automation

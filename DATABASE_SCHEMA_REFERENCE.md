@@ -23,6 +23,9 @@
 - ip_address
 - user_agent
 
+### admin_logs
+Admin security and action logging.
+
 ## Profiles and tiers
 
 ### user_profiles
@@ -39,6 +42,8 @@ Business/customer/supporter/employee tier assignments.
 ### product_images
 ### product_tags
 ### orders
+Includes `payment_status` and `payment_method` in the current schema.
+
 ### order_items
 ### order_status_history
 ### payments
@@ -76,11 +81,18 @@ Alt text, title, caption, focal points, notes.
 ### site_item_inventory
 Tools, supplies, and sellable-product reorder tracking.
 
+### media_assets
+Uploaded R2-backed product media records.
+
 ## Payment/webhook operational note
+
+### webhook_events
+Provider webhook event storage for idempotency, audit trail, and later replay tooling.
 
 PayPal completion now uses both:
 - `/api/paypal-return`
 - `/api/paypal-webhook`
 
-Return capture helps immediate checkout completion.
-Webhook reconciliation helps provider-confirmed historical consistency.
+Stripe completion now uses:
+- `/api/checkout-prepare-payment` for hosted session creation
+- `/api/stripe-webhook` for provider-confirmed final reconciliation
