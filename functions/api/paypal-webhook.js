@@ -1,0 +1,209 @@
+// File: /functions/api/paypal-webhook.js
+// Brief description: Receives PayPal webhook events, reconciles local payment/order state,
+// and logs payment completion/refund transitions into order history for later admin review.
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+function normalizeText(value) {
+  return String(value || '').trim();
+}
+
+async function getPaypalAccessToken(env) {
+  const clientId = normalizeText(env.PAYPAL_CLIENT_ID);
+  const secret = normalizeText(env.PAYPAL_SECRET);
+  const mode = normalizeText(env.PAYPAL_ENV || 'sandbox').toLowerCase() || 'sandbox';
+  if (!clientId || !secret) return null;
+
+  const base = mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  const basic = btoa(`${clientId}:${secret}`);
+
+  const response = await fetch(`${base}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${basic}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: 'grant_type=client_credentials'
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data?.access_token) {
+    throw new Error(data?.error_description || data?.error || 'Failed to obtain PayPal access token.');
+  }
+
+  return { access_token: data.access_token, base, mode };
+}
+
+async function verifyWebhook(request, env, bodyText) {
+  const webhookId = normalizeText(env.PAYPAL_WEBHOOK_ID);
+  const auth = await getPaypalAccessToken(env);
+  if (!auth || !webhookId) {
+    return { verified: false, verification_mode: 'skipped' };
+  }
+
+  const verificationPayload = {
+    auth_algo: request.headers.get('paypal-auth-algo') || '',
+    cert_url: request.headers.get('paypal-cert-url') || '',
+    transmission_id: request.headers.get('paypal-transmission-id') || '',
+    transmission_sig: request.headers.get('paypal-transmission-sig') || '',
+    transmission_time: request.headers.get('paypal-transmission-time') || '',
+    webhook_id: webhookId,
+    webhook_event: JSON.parse(bodyText)
+  };
+
+  const response = await fetch(`${auth.base}/v1/notifications/verify-webhook-signature`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${auth.access_token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(verificationPayload)
+  });
+  const data = await response.json().catch(() => null);
+  const status = String(data?.verification_status || '').toUpperCase();
+  return {
+    verified: response.ok && status === 'SUCCESS',
+    verification_mode: 'paypal',
+    raw_status: status || 'UNKNOWN'
+  };
+}
+
+async function addHistory(env, orderId, oldStatus, newStatus, note) {
+  await env.DB.prepare(`
+    INSERT INTO order_status_history (
+      order_id, old_status, new_status, changed_by_user_id, note, created_at
+    ) VALUES (?, ?, ?, NULL, ?, CURRENT_TIMESTAMP)
+  `).bind(orderId, oldStatus || null, newStatus, note || null).run();
+}
+
+function mapPaymentStatus(eventType, resourceStatus) {
+  const type = normalizeText(eventType).toUpperCase();
+  const status = normalizeText(resourceStatus).toUpperCase();
+
+  if (type.includes('CAPTURE.COMPLETED') || status === 'COMPLETED') return 'paid';
+  if (type.includes('CAPTURE.PENDING') || status === 'PENDING') return 'pending';
+  if (type.includes('CAPTURE.DENIED') || type.includes('CAPTURE.DECLINED') || status === 'DECLINED' || status === 'DENIED') return 'failed';
+  if (type.includes('CAPTURE.REFUNDED') || type.includes('SALE.REFUNDED') || status === 'REFUNDED') return 'refunded';
+  if (type.includes('CAPTURE.REVERSED') || status === 'REVERSED') return 'refunded';
+  return 'pending';
+}
+
+function deriveOrderStatus(existingOrderStatus, localPaymentStatus) {
+  const current = normalizeText(existingOrderStatus).toLowerCase() || 'pending';
+  if (localPaymentStatus === 'paid' && ['pending', 'draft'].includes(current)) return 'paid';
+  if (localPaymentStatus === 'refunded' && ['paid', 'fulfilled'].includes(current)) return 'refunded';
+  return current;
+}
+
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  const bodyText = await request.text();
+  let body;
+  try {
+    body = JSON.parse(bodyText || '{}');
+  } catch {
+    return json({ ok: false, error: 'Invalid JSON body.' }, 400);
+  }
+
+  const verification = await verifyWebhook(request, env, bodyText);
+  if (verification.verification_mode === 'paypal' && !verification.verified) {
+    return json({ ok: false, error: 'PayPal webhook verification failed.', verification }, 401);
+  }
+
+  const eventType = normalizeText(body.event_type).toUpperCase();
+  const resource = body.resource || {};
+  const providerOrderId = normalizeText(resource.supplementary_data?.related_ids?.order_id || resource.id || '');
+  const providerPaymentId = normalizeText(resource.id || '');
+  const resourceStatus = normalizeText(resource.status || '');
+  const amountValue = Number(resource.amount?.value || resource.seller_receivable_breakdown?.gross_amount?.value || 0);
+  const amountCents = Number.isFinite(amountValue) ? Math.round(amountValue * 100) : 0;
+  const paidAt = resource.create_time || resource.update_time || new Date().toISOString();
+  const localPaymentStatus = mapPaymentStatus(eventType, resourceStatus);
+
+  if (!providerOrderId) {
+    return json({ ok: true, ignored: true, reason: 'No provider order id present.', verification });
+  }
+
+  const payment = await env.DB.prepare(`
+    SELECT payment_id, order_id, provider_order_id, provider_payment_id, payment_status, amount_cents
+    FROM payments
+    WHERE LOWER(COALESCE(provider, '')) = 'paypal'
+      AND provider_order_id = ?
+    ORDER BY payment_id DESC
+    LIMIT 1
+  `).bind(providerOrderId).first();
+
+  if (!payment) {
+    return json({ ok: true, ignored: true, reason: 'No local PayPal payment matched this webhook.', provider_order_id: providerOrderId, verification });
+  }
+
+  const order = await env.DB.prepare(`
+    SELECT order_id, order_number, order_status, payment_status, total_cents, currency
+    FROM orders
+    WHERE order_id = ?
+    LIMIT 1
+  `).bind(Number(payment.order_id || 0)).first();
+
+  if (!order) {
+    return json({ ok: true, ignored: true, reason: 'Local order was not found for matched payment.', verification });
+  }
+
+  await env.DB.prepare(`
+    UPDATE payments
+    SET provider_payment_id = ?,
+        payment_status = ?,
+        amount_cents = CASE WHEN ? > 0 THEN ? ELSE amount_cents END,
+        transaction_reference = ?,
+        paid_at = ?,
+        updated_at = CURRENT_TIMESTAMP,
+        notes = COALESCE(notes, '') || ?
+    WHERE payment_id = ?
+  `).bind(
+    providerPaymentId || null,
+    localPaymentStatus,
+    amountCents,
+    amountCents,
+    providerPaymentId || providerOrderId || null,
+    paidAt,
+    ` PayPal webhook processed: ${eventType || 'UNKNOWN'}.`,
+    Number(payment.payment_id || 0)
+  ).run();
+
+  const nextOrderStatus = deriveOrderStatus(order.order_status, localPaymentStatus);
+  const nextPaymentStatus = localPaymentStatus === 'paid' ? 'paid' : localPaymentStatus;
+
+  await env.DB.prepare(`
+    UPDATE orders
+    SET payment_status = ?,
+        order_status = ?,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE order_id = ?
+  `).bind(nextPaymentStatus, nextOrderStatus, Number(order.order_id || 0)).run();
+
+  await addHistory(
+    env,
+    Number(order.order_id || 0),
+    normalizeText(order.order_status).toLowerCase() || 'pending',
+    nextOrderStatus,
+    `PayPal webhook reconciled event ${eventType || 'UNKNOWN'} for provider order ${providerOrderId}.`
+  );
+
+  return json({
+    ok: true,
+    verification,
+    event_type: eventType || null,
+    provider_order_id: providerOrderId,
+    provider_payment_id: providerPaymentId || null,
+    payment_status: localPaymentStatus,
+    order: {
+      order_id: Number(order.order_id || 0),
+      order_number: order.order_number || '',
+      order_status: nextOrderStatus,
+      payment_status: nextPaymentStatus
+    }
+  });
+}

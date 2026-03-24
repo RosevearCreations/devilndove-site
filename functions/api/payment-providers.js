@@ -20,6 +20,7 @@ export async function onRequestGet(context) {
   const { env } = context;
 
   const paypalConfigured = isConfigured(env.PAYPAL_CLIENT_ID) && isConfigured(env.PAYPAL_SECRET);
+  const paypalWebhookConfigured = isConfigured(env.PAYPAL_WEBHOOK_ID);
   const stripeConfigured = isConfigured(env.STRIPE_PUBLISHABLE_KEY) && isConfigured(env.STRIPE_SECRET_KEY);
   const squareConfigured = isConfigured(env.SQUARE_APPLICATION_ID) && isConfigured(env.SQUARE_ACCESS_TOKEN);
 
@@ -31,7 +32,8 @@ export async function onRequestGet(context) {
         label: "PayPal",
         ready: paypalConfigured,
         mode: paypalConfigured ? (String(env.PAYPAL_ENV || "sandbox").trim().toLowerCase() || "sandbox") : "stub",
-        checkout_kind: "redirect"
+        checkout_kind: "redirect",
+        webhook_ready: paypalWebhookConfigured
       },
       {
         code: "stripe",
