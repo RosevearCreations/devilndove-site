@@ -46,9 +46,9 @@ export async function onRequestGet(context) {
     SELECT
       p.product_id, p.slug, p.sku, p.name, p.short_description, p.description, p.product_type, p.status,
       p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
-      p.weight_grams, p.inventory_tracking, p.inventory_quantity, p.digital_file_url, p.featured_image_url,
+      p.weight_grams, p.inventory_tracking, COALESCE(p.inventory_quantity, p.on_hand_quantity, 0) AS inventory_quantity, p.digital_file_url, p.featured_image_url,
       p.sort_order, p.created_at, p.updated_at,
-      tc.code AS tax_class_code, tc.name AS tax_class_name, tc.tax_rate AS tax_rate,
+      tc.code AS tax_class_code, tc.name AS tax_class_name, COALESCE(tc.rate_percent, tc.tax_rate, 0) AS tax_rate,
       ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override, ps.canonical_url, ps.og_title,
       ps.og_description, ps.og_image_url
     FROM products p
@@ -58,5 +58,5 @@ export async function onRequestGet(context) {
     ORDER BY p.sort_order ASC, p.created_at DESC, p.product_id DESC
   `;
   const result = bindings.length ? await env.DB.prepare(sql).bind(...bindings).all() : await env.DB.prepare(sql).all();
-  return json({ ok: true, products: result.results || [] });
+  return json({ ok: true, products: (result.results || []).map((row) => ({ ...row, seo_h1: row.h1_override || row.name || "" })) });
 }
