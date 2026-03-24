@@ -1,6 +1,6 @@
 // File: /public/js/admin-product-images.js
 // Brief description: Adds a product media editor to the admin area so ordered image URLs,
-// alt text, captions, and focal-point metadata can be managed together.
+// direct uploads, alt text, captions, and focal-point metadata can be managed together.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountEl = document.getElementById('productMediaAdminMount');
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mountEl.innerHTML = `
       <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Product Media Workflow</h3>
-        <p class="small" style="margin-top:0">Manage ordered image URLs, alt text, captions, focal points, and featured image behavior together.</p>
+        <p class="small" style="margin-top:0">Manage ordered image URLs, direct uploads, alt text, captions, focal points, and featured image behavior together.</p>
         <div id="adminProductImagesMessage" class="small" style="display:none;margin-bottom:12px"></div>
         <form id="adminProductImagesForm" class="grid" style="gap:12px">
           <div class="grid cols-2" style="gap:12px">
@@ -106,6 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
               <button class="btn" type="submit" id="saveProductImagesButton">Save Images</button>
             </div>
           </div>
+
+          <div class="card" style="margin-top:4px">
+            <h4 style="margin-top:0">Direct Upload to R2</h4>
+            <p class="small" style="margin-top:0">Upload an image here to get a product-ready URL automatically added into a new row.</p>
+            <div class="grid cols-2" style="gap:12px;align-items:end">
+              <div>
+                <label class="small" for="productImageUploadInput">Image File</label>
+                <input id="productImageUploadInput" type="file" accept="image/*" />
+              </div>
+              <div>
+                <button class="btn" type="button" id="uploadProductImageButton">Upload Image</button>
+              </div>
+            </div>
+          </div>
+
           <div id="productImagesRows"></div>
         </form>
       </div>
@@ -113,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('loadProductImagesButton')?.addEventListener('click', loadImages);
     document.getElementById('addProductImageRowButton')?.addEventListener('click', () => addRow());
+    document.getElementById('uploadProductImageButton')?.addEventListener('click', uploadImage);
     document.getElementById('adminProductImagesForm')?.addEventListener('submit', saveImages);
     addRow();
   }
@@ -142,6 +158,49 @@ document.addEventListener('DOMContentLoaded', () => {
       setMessage('Product images loaded.');
     } catch (error) {
       setMessage(error.message || 'Failed to load product images.', true);
+    }
+  }
+
+  async function uploadImage() {
+    const productId = Number(document.getElementById('productImagesProductId')?.value || 0);
+    if (!productId) {
+      setMessage('Enter a product ID before uploading.', true);
+      return;
+    }
+
+    const fileInput = document.getElementById('productImageUploadInput');
+    const file = fileInput?.files?.[0];
+    if (!file) {
+      setMessage('Choose an image file first.', true);
+      return;
+    }
+
+    try {
+      setMessage('Uploading image...');
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('product_id', String(productId));
+
+      const response = await window.DDAuth.apiFetch('/api/admin/media-upload', {
+        method: 'POST',
+        body: formData,
+        headers: {}
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok || !data?.asset?.public_url) {
+        throw new Error(data?.error || 'Failed to upload image.');
+      }
+
+      addRow({
+        image_url: data.asset.public_url,
+        alt_text: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
+        sort_order: document.querySelectorAll('[data-product-image-row]').length
+      });
+
+      if (fileInput) fileInput.value = '';
+      setMessage('Image uploaded and added to the list. Save images to attach it to the product.');
+    } catch (error) {
+      setMessage(error.message || 'Failed to upload image.', true);
     }
   }
 
