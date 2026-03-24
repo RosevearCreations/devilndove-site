@@ -1,161 +1,63 @@
 # Devil n Dove Website
 
-Official website and management system for **Devil n Dove**.
+Devil n Dove is a public website, storefront, member area, and admin management system for the workshop.
 
-## What this repo is now
+## Current state
 
-This is no longer just a public site with a login page. It is now a working internal-alpha web app with:
+The current build includes:
 
-- public website pages
-- DB-backed auth and session handling
-- member area with account tools, orders, and downloads foundation
-- admin dashboard with user, product, order, payment, and security tooling
-- storefront, cart, checkout, and confirmation flow
-- layered access foundations for business/content tiers
+- public storefront and product detail pages
+- member login, registration, account tools, orders, and downloads
+- admin dashboard for users, products, orders, analytics, inventory, SEO, and notifications
+- checkout and order creation
+- PayPal handoff, PayPal return capture, and PayPal webhook reconciliation foundation
+- live visitor/session analytics and historical website data by path and country
+- product SEO fields, product image annotations, and product media workflow foundation
+- site inventory/reorder tracking for tools, supplies, and sellable products
 
-## Current status
+## Main payment status
 
-Project stage: **internal alpha / commerce and security foundation in place**
+Implemented now:
 
-Working now:
+- order creation
+- payment preparation
+- PayPal redirect handoff
+- PayPal return capture
+- PayPal webhook reconciliation endpoint
+- admin manual payment recording
 
-- public site pages
-- register / login / logout / logout-all
-- session info and password change
-- bootstrap-first-admin flow
-- member account area
-- member orders list and order detail modal
-- member downloads foundation
-- admin dashboard
-- admin user listing, create, reset password, deactivate/delete foundation, session cleanup, and security summary
-- admin product management foundation
-- shop catalog from active products
-- product detail pages
-- browser cart with cart badge
-- checkout form and order creation
-- order confirmation page
-- admin order review, status updates, and manual payment recording
-- payment preparation bridge for future providers
-- public payment-provider readiness endpoint
-- live PayPal handoff path when environment credentials are configured
-- bulk product update and import-preview admin tools
-- access tier assignment and removal in admin
+Still to deepen later:
 
-Not connected yet:
+- Stripe hosted checkout or payment intent completion
+- webhook retry workers / scheduled dispatch
+- refund automation
+- provider dispute handling
 
-- fully completed PayPal capture/return/webhook loop
-- live card processor checkout
-- payment callbacks / webhooks
-- shipping automation
-- tax rules beyond the current estimate foundation
-- full bulk product import commit step and richer image/media workflow
-- full admin audit logging
+## Main product/media status
 
-## Stack
+Implemented now:
 
-Frontend
-- HTML
-- CSS
-- Vanilla JavaScript
-
-Backend
-- Cloudflare Pages Functions
-
-Database
-- Cloudflare D1 (SQLite)
-
-Storage
-- Cloudflare R2
-
-Deployment
-- GitHub → Cloudflare Pages
-
-## Main areas
-
-Public pages include:
-- `/`
-- `/gallery/`
-- `/creations/`
-- `/tools/`
-- `/supplies/`
-- `/movies/`
-- `/contact/`
-- `/shop/`
-- `/shop/product/`
-- `/cart/`
-- `/checkout/`
-- `/checkout/confirmation/`
-
-Member pages include:
-- `/login/`
-- `/register/`
-- `/members/`
-
-Admin pages include:
-- `/admin/`
-- `/bootstrap-admin/`
-
-## Core systems
-
-### Authentication
-- register
-- login
-- logout
-- logout all sessions
-- change password
-- session info
-- bootstrap admin support
-- bearer-token auth backed by DB sessions
-
-### Storefront and checkout
-- product catalog
-- product detail
-- browser cart
-- cart badge
-- checkout form persistence
-- order creation in D1
-- order confirmation page
-- payment preparation bridge
-
-### Orders and payments
-- admin orders table
-- admin order detail modal
-- order status history
-- payment records table
-- manual payment recording
-- payment summaries in admin orders list
-- member order visibility foundation
-
-### Members
-- protected member page
-- profile/session display
-- password change tool
-- logout-all tool
-- order history list
-- member order detail modal
-- downloads foundation for digital items
-
-### Access tiers
-Core role system:
-- `member`
-- `admin`
-
-Separate business/content access tiers:
-- `artist`
-- `customer`
-- `donor`
-- `vip_donor`
-- `subscriber`
+- create, edit, archive, delete products
+- bulk update products
+- import preview and import tools
+- product SEO editor
+- product image annotation editor
+- product image workflow editor for ordered images, alt text, captions, focal points, and featured image sync
+- inventory tracking on products and site inventory records
 
 ## Database files
-- `/database_schema.sql`
-- `/database_store_schema.sql`
-- `/database_access_tiers.sql`
-- `/database_payments_extension.sql`
 
-## Key API groups
+- `database_schema.sql`
+- `database_store_schema.sql`
+- `database_access_tiers.sql`
+- `database_payments_extension.sql`
+- `database_profiles_extension.sql`
+- `database_growth_analytics_seo_extension.sql`
+- `database_admin_seed_template.sql`
 
-Auth
+## Important endpoints
+
+Auth:
 - `/api/auth/register`
 - `/api/auth/login`
 - `/api/auth/logout`
@@ -166,115 +68,50 @@ Auth
 - `/api/auth/bootstrap-admin`
 - `/api/auth/bootstrap-status`
 
-Admin users and security
-- `/api/admin/users`
-- `/api/admin/create-user`
-- `/api/admin/user-update`
-- `/api/admin/reset-password`
-- `/api/admin/delete-user`
-- `/api/admin/dashboard-summary`
-- `/api/admin/security-summary`
-- `/api/admin/cleanup-sessions`
-- `/api/admin/access-tiers`
-- `/api/admin/user-access-tiers`
-- `/api/admin/assign-user-access-tier`
-- `/api/admin/remove-user-access-tier`
+Storefront and checkout:
+- `/api/products`
+- `/api/product-detail`
+- `/api/payment-providers`
+- `/api/checkout-create-order`
+- `/api/checkout-prepare-payment`
+- `/api/paypal-return`
+- `/api/paypal-webhook`
 
-Admin products
-- `/api/admin/tax-classes`
+Admin products/media:
 - `/api/admin/products`
 - `/api/admin/product-detail`
 - `/api/admin/create-product`
 - `/api/admin/update-product`
-- `/api/admin/archive-product`
 - `/api/admin/delete-product`
+- `/api/admin/archive-product`
+- `/api/admin/product-seo`
+- `/api/admin/product-image-annotations`
+- `/api/admin/product-images`
+- `/api/admin/bulk-update-products`
+- `/api/admin/import-products-preview`
+- `/api/admin/import-products`
+- `/api/admin/site-item-inventory`
 
-Storefront / checkout
-- `/api/products`
-- `/api/product-detail`
-- `/api/checkout-create-order`
-- `/api/checkout-prepare-payment`
+Analytics:
+- `/api/track/visit`
+- `/api/track/cart`
+- `/api/admin/visitor-analytics`
 
-Admin orders / payments
-- `/api/admin/orders`
-- `/api/admin/order-detail`
-- `/api/admin/order-payments`
-- `/api/admin/update-order-status`
-- `/api/admin/record-payment`
+## Notes for deployment
 
-Member account / commerce
-- `/api/member/orders`
-- `/api/member/order-detail`
-- `/api/member/downloads`
+Keep secrets in Cloudflare Variables and Secrets.
 
-## Immediate next priorities
-- connect real PayPal checkout
-- choose and connect a card processor
-- add provider callbacks / webhooks
-- add audit logging for admin actions
-- harden security further
-- add shipping logic and refined tax logic
-- add bulk product upload and bulk product editing
-- expand gated content using access tiers
+Important payment variables include:
 
-### Latest checkout hardening update
+- `PUBLIC_SITE_URL`
+- `PAYPAL_CLIENT_ID`
+- `PAYPAL_SECRET`
+- `PAYPAL_ENV`
+- `PAYPAL_WEBHOOK_ID`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_WEBHOOK_SECRET`
 
-The latest project pass added:
+## Admin/media note
 
-- stricter checkout validation for physical and mixed carts
-- required shipping-address enforcement for physical orders at both frontend and API levels
-- guest-friendly order confirmation using a saved confirmation snapshot
-- improved checkout-to-confirmation handoff without requiring member login
-
-
-## Profile and tier expansion
-
-The repo now includes a dedicated `user_profiles` extension for richer customer and employee records.
-
-Current additions in this pass:
-- contact profile storage for address, phone, company, and preferences
-- email/phone verification flags
-- customer/employee/both profile typing
-- employee fields for department, job title, employee code, and emergency contact
-- member self-service profile editor
-- admin profile manager for users
-- expanded access-tier seeds for customer discount tiers and employee tiers
-
-Schema / API additions:
-- `/database_profiles_extension.sql`
-- `/api/admin/user-profile`
-- `/api/member/profile`
-
-This prepares the project for future discount logic, loyalty handling, internal employee records, and deeper CRM-style customer management.
-
-
-## Latest Growth Pass
-
-This pass adds:
-
-- site visitor analytics and cart abandonment tracking foundations
-- admin analytics dashboard for visitors, countries, paths, and abandoned carts
-- saved app settings foundation for wider enforcement later
-- notification queue / retry foundation
-- product SEO fields and admin SEO editor
-- product image annotation tools for alt text, captions, titles, and focal points
-- advanced storefront product search and SEO-aware product detail behavior
-- top-right account menu with profile/settings and logout access
-- site item reorder inventory tracking for tools, supplies, and Amazon-linked items
-- bulk finished-product import endpoint for seeding sellable inventory faster
-- additional SQL extension file: `/database_growth_analytics_seo_extension.sql`
-
-
-Also added in this pass:
-
-- `/robots.txt`
-- `/functions/sitemap.xml.js`
-
-
-## Latest pass additions
-
-- richer live monitoring and historical website analytics by visitor token, browser session, country, path, and search events
-- PayPal return/capture completion endpoint for confirmation flow
-- improved site inventory/reorder admin workflow for tools, supplies, and sellable products
-- corrected core `database_schema.sql` for the current `users` / `sessions` app model
-- added `database_admin_seed_template.sql` for creating a starter admin account safely
+Images can be added to products now through the product media workflow using image URLs. The next deeper step later is direct upload handling to R2 from admin.
