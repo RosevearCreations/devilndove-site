@@ -1,6 +1,6 @@
 // File: /public/js/admin-site-item-inventory.js
 // Brief description: Adds deeper inventory operations for products, tools, and supplies,
-// including low-stock visibility, editable rows, and reserved/incoming quantity tracking.
+// including movement history, low-stock visibility, and editable admin actions.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountEl = document.getElementById('siteInventoryAdminMount');
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mountEl.innerHTML = `
       <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Site Inventory Operations</h3>
-        <p class="small" style="margin-top:0">Track sellable products, tools, and supplies with on-hand, reserved, incoming, reorder, and supplier details.</p>
+        <p class="small" style="margin-top:0">Track sellable products, tools, and supplies with on-hand, reserved, incoming, reorder, supplier details, and movement history.</p>
         <div id="siteInventoryMessage" class="small" style="display:none;margin-bottom:12px"></div>
         <div class="grid cols-5" style="gap:12px;margin-bottom:12px">
           <div class="card"><div class="small">Items</div><div id="siteInventoryTotalItems" style="font-size:1.15rem;font-weight:800">—</div></div>
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="grid cols-4" style="gap:12px">
             <div><label class="small" for="siteInventoryOnHand">On Hand</label><input id="siteInventoryOnHand" type="number" min="0" step="1" value="0" /></div>
-            <div><label class="small" for="siteInventoryReserved">Reserved</label><input id="siteInventoryReservedInput" type="number" min="0" step="1" value="0" /></div>
+            <div><label class="small" for="siteInventoryReservedInput">Reserved</label><input id="siteInventoryReservedInput" type="number" min="0" step="1" value="0" /></div>
             <div><label class="small" for="siteInventoryIncomingInput">Incoming</label><input id="siteInventoryIncomingInput" type="number" min="0" step="1" value="0" /></div>
             <div><label class="small" for="siteInventoryReorder">Reorder At</label><input id="siteInventoryReorder" type="number" min="0" step="1" value="0" /></div>
           </div>
@@ -62,7 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <div><label class="small" for="siteInventorySourceUrl">Source URL</label><input id="siteInventorySourceUrl" type="url" placeholder="https://..." /></div>
             <div><label class="small" for="siteInventoryAmazonUrl">Amazon URL</label><input id="siteInventoryAmazonUrl" type="url" placeholder="https://..." /></div>
           </div>
-          <div><label class="small" for="siteInventoryNotes">Notes</label><input id="siteInventoryNotes" type="text" /></div>
+          <div class="grid cols-2" style="gap:12px">
+            <div><label class="small" for="siteInventoryNotes">Notes</label><input id="siteInventoryNotes" type="text" /></div>
+            <div><label class="small" for="siteInventoryMovementNote">Movement Note</label><input id="siteInventoryMovementNote" type="text" placeholder="restock, count correction, incoming order..." /></div>
+          </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="submit">Save Inventory Item</button><button class="btn" type="button" id="siteInventoryResetButton">Reset Form</button></div>
         </form>
         <div class="grid cols-2" style="gap:12px;margin-top:16px">
@@ -70,6 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="align-self:end"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh List</button></div>
         </div>
         <div style="overflow:auto;margin-top:12px"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Item</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Stock</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Supplier</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Cost</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="5" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
+        <div class="card" style="margin-top:16px">
+          <h4 style="margin-top:0">Recent Inventory Movements</h4>
+          <div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">When</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Item</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Type</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">On Hand</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Loading movement history...</td></tr></tbody></table></div>
+        </div>
       </div>`;
 
     document.getElementById('siteInventoryForm')?.addEventListener('submit', saveItem);
@@ -81,7 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function debounce(fn, wait) {
     let timer = null;
-    return function debounced() { clearTimeout(timer); timer = setTimeout(() => fn(), wait); };
+    return function debounced() {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(), wait);
+    };
   }
 
   function setValue(id, value) {
@@ -105,12 +115,30 @@ document.addEventListener('DOMContentLoaded', () => {
       amazon_url: document.getElementById('siteInventoryAmazonUrl')?.value || '',
       source_url: document.getElementById('siteInventorySourceUrl')?.value || '',
       reorder_notes: document.getElementById('siteInventoryNotes')?.value || '',
+      movement_note: document.getElementById('siteInventoryMovementNote')?.value || '',
       is_active: Number(document.getElementById('siteInventoryIsActive')?.value || 1)
     };
   }
 
-  async function saveItem(e) {
-    e.preventDefault();
+  function renderMovements(movements) {
+    const body = document.getElementById('siteInventoryMovementList');
+    if (!body) return;
+    if (!Array.isArray(movements) || !movements.length) {
+      body.innerHTML = '<tr><td colspan="5" style="padding:8px">No movement history recorded yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = movements.map((row) => `
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.created_at || '—')}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd"><strong>${escapeHtml(row.item_name || '—')}</strong><div class="small">${escapeHtml(row.source_type || '')}</div></td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.movement_type || 'adjustment')}<div class="small">Δ ${row.quantity_delta || 0}</div></td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${row.previous_on_hand_quantity || 0} → ${row.new_on_hand_quantity || 0}<div class="small">Res ${row.previous_reserved_quantity || 0} → ${row.new_reserved_quantity || 0} • In ${row.previous_incoming_quantity || 0} → ${row.new_incoming_quantity || 0}</div></td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.note || '—')}</td>
+      </tr>`).join('');
+  }
+
+  async function saveItem(event) {
+    event.preventDefault();
     try {
       setMessage('Saving inventory item...');
       const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'POST', body: JSON.stringify(readForm()) });
@@ -128,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       setMessage('Loading inventory list...');
       const q = document.getElementById('siteInventorySearch')?.value || '';
-      const response = await window.DDAuth.apiFetch(`/api/admin/site-item-inventory?q=${encodeURIComponent(q)}`);
+      const response = await window.DDAuth.apiFetch(`/api/admin/site-item-inventory?q=${encodeURIComponent(q)}&include_history=1`);
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load inventory list.');
       const summary = data.summary || {};
@@ -152,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item-name="${escapeHtml(x.item_name)}">Quick Update</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td>
           </tr>`).join('');
       }
+      renderMovements(data.movements || []);
       setMessage('');
     } catch (err) {
       setMessage(err.message || 'Failed to load inventory list.', true);
@@ -165,14 +194,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = Number(editBtn.getAttribute('data-edit-id') || 0);
       const itemName = String(editBtn.getAttribute('data-item-name') || '').trim();
       const onHand = Number(window.prompt('New on-hand quantity?', '0'));
+      const movementNote = String(window.prompt('Movement note?', 'Manual stock count correction') || '').trim();
       if (!id || !itemName || Number.isNaN(onHand)) return;
       try {
         setMessage('Updating inventory item...');
-        const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'PATCH', body: JSON.stringify({ site_item_inventory_id: id, item_name: itemName, on_hand_quantity: onHand }) });
+        const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', {
+          method: 'PATCH',
+          body: JSON.stringify({ site_item_inventory_id: id, item_name: itemName, on_hand_quantity: onHand, movement_note: movementNote || 'Inventory quantity updated.' })
+        });
         const data = await response.json();
         if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to update inventory item.');
         await loadList();
-      } catch (error) { setMessage(error.message || 'Failed to update inventory item.', true); }
+      } catch (error) {
+        setMessage(error.message || 'Failed to update inventory item.', true);
+      }
       return;
     }
     if (deleteBtn) {
@@ -184,7 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
         if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to delete inventory item.');
         await loadList();
-      } catch (error) { setMessage(error.message || 'Failed to delete inventory item.', true); }
+      } catch (error) {
+        setMessage(error.message || 'Failed to delete inventory item.', true);
+      }
     }
   }
 

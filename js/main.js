@@ -36,6 +36,7 @@
         <a href="/tools/index.html" data-nav="/tools/">Tools</a>
         <a href="/supplies/index.html" data-nav="/supplies/">Supplies</a>
         <a href="/shop/index.html" data-nav="/shop/">Shop</a>
+        <a href="/search/index.html" data-nav="/search/">Search</a>
         <a href="/movies/index.html" data-nav="/movies/">Movies</a>
         <a href="/contact/index.html" data-nav="/contact/">Contact</a>
       </div>

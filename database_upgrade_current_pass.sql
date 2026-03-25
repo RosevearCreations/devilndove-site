@@ -1,6 +1,6 @@
 -- File: /database_upgrade_current_pass.sql
 -- Brief description: One-time upgrade SQL for existing Devil n Dove databases that were created
--- before the Stripe completion + direct media upload pass.
+-- before the latest payment, media, SEO/search, and inventory-movement pass.
 --
 -- Run carefully on an existing database that is missing these newer objects/columns.
 -- If a column already exists, the related ALTER statement will fail and can be skipped.
@@ -108,3 +108,25 @@ CREATE TABLE IF NOT EXISTS payment_disputes (
 );
 CREATE INDEX IF NOT EXISTS idx_payment_refunds_order_id ON payment_refunds(order_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_payment_disputes_order_id ON payment_disputes(order_id, dispute_status);
+
+
+CREATE TABLE IF NOT EXISTS site_inventory_movements (
+  site_inventory_movement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_item_inventory_id INTEGER,
+  source_type TEXT,
+  external_key TEXT,
+  item_name TEXT,
+  movement_type TEXT NOT NULL DEFAULT 'adjustment' CHECK (movement_type IN ('create','adjustment','reserve','release','incoming','delete','correction')),
+  quantity_delta INTEGER NOT NULL DEFAULT 0,
+  previous_on_hand_quantity INTEGER NOT NULL DEFAULT 0,
+  new_on_hand_quantity INTEGER NOT NULL DEFAULT 0,
+  previous_reserved_quantity INTEGER NOT NULL DEFAULT 0,
+  new_reserved_quantity INTEGER NOT NULL DEFAULT 0,
+  previous_incoming_quantity INTEGER NOT NULL DEFAULT 0,
+  new_incoming_quantity INTEGER NOT NULL DEFAULT 0,
+  note TEXT,
+  actor_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_site_inventory_movements_item_id ON site_inventory_movements(site_item_inventory_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_site_inventory_movements_created_at ON site_inventory_movements(created_at DESC);

@@ -1,5 +1,5 @@
 -- File: /database_growth_analytics_seo_extension.sql
--- Brief description: Adds analytics/security, SEO, media, inventory, app settings,
+-- Brief description: Adds analytics/security, SEO, media, inventory, movement history,
 -- search logging, and notification foundations for the current Devil n Dove build.
 
 PRAGMA foreign_keys = ON;
@@ -172,6 +172,28 @@ CREATE TABLE IF NOT EXISTS site_item_inventory (
   UNIQUE(source_type, external_key)
 );
 
+
+CREATE TABLE IF NOT EXISTS site_inventory_movements (
+  site_inventory_movement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_item_inventory_id INTEGER,
+  source_type TEXT,
+  external_key TEXT,
+  item_name TEXT,
+  movement_type TEXT NOT NULL DEFAULT 'adjustment' CHECK (movement_type IN ('create','adjustment','reserve','release','incoming','delete','correction')),
+  quantity_delta INTEGER NOT NULL DEFAULT 0,
+  previous_on_hand_quantity INTEGER NOT NULL DEFAULT 0,
+  new_on_hand_quantity INTEGER NOT NULL DEFAULT 0,
+  previous_reserved_quantity INTEGER NOT NULL DEFAULT 0,
+  new_reserved_quantity INTEGER NOT NULL DEFAULT 0,
+  previous_incoming_quantity INTEGER NOT NULL DEFAULT 0,
+  new_incoming_quantity INTEGER NOT NULL DEFAULT 0,
+  note TEXT,
+  actor_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE SET NULL,
+  FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_site_visitors_token ON site_visitors(visitor_token);
 CREATE INDEX IF NOT EXISTS idx_site_visitors_country ON site_visitors(country);
 CREATE INDEX IF NOT EXISTS idx_site_visitor_sessions_site_visitor_id ON site_visitor_sessions(site_visitor_id);
@@ -183,6 +205,9 @@ CREATE INDEX IF NOT EXISTS idx_cart_activity_event_type ON cart_activity(event_t
 CREATE INDEX IF NOT EXISTS idx_cart_activity_created_at ON cart_activity(created_at);
 CREATE INDEX IF NOT EXISTS idx_notification_jobs_status ON notification_jobs(status);
 CREATE INDEX IF NOT EXISTS idx_site_item_inventory_source ON site_item_inventory(source_type, category);
+CREATE INDEX IF NOT EXISTS idx_site_inventory_movements_item_id ON site_inventory_movements(site_item_inventory_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_site_inventory_movements_created_at ON site_inventory_movements(created_at DESC);
+
 
 INSERT OR IGNORE INTO app_settings (setting_key, setting_value, is_public)
 VALUES

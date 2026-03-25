@@ -105,8 +105,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!response.ok || !data.ok) throw new Error(data.error || "Failed to load product.");
       renderProduct(data.product || {}, data.images || []);
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
-      const desc = document.querySelector('meta[name="description"]'); if (desc) desc.setAttribute('content', data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.');
-      const canon = document.querySelector('link[rel="canonical"]'); if (canon) canon.setAttribute('href', data.product?.canonical_url || window.location.href);
+      const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
+      const resolvedCanonical = data.product?.canonical_url || window.location.href;
+      const resolvedImage = (data.images || []).map((row) => row.image_url).find(Boolean) || data.product?.featured_image_url || 'https://devilndove.com/assets/logo-clear.png';
+      const desc = document.querySelector('meta[name="description"]'); if (desc) desc.setAttribute('content', resolvedDescription);
+      const canon = document.querySelector('link[rel="canonical"]'); if (canon) canon.setAttribute('href', resolvedCanonical);
+      [['meta[property="og:title"]', document.title], ['meta[property="og:description"]', resolvedDescription], ['meta[property="og:url"]', resolvedCanonical], ['meta[property="og:image"]', resolvedImage], ['meta[name="twitter:title"]', document.title], ['meta[name="twitter:description"]', resolvedDescription], ['meta[name="twitter:image"]', resolvedImage]].forEach(([selector, value]) => {
+        const el = document.querySelector(selector);
+        if (el && value) el.setAttribute('content', value);
+      });
       if (data.product) {
         const schema = {
           '@context': 'https://schema.org',
@@ -115,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           description: data.product.meta_description || data.product.short_description || data.product.description || '',
           sku: data.product.sku || undefined,
           image: (data.images || []).map((row) => row.image_url).filter(Boolean),
-          offers: { '@type': 'Offer', priceCurrency: data.product.currency || 'CAD', price: (Number(data.product.price_cents || 0) / 100).toFixed(2), availability: Number(data.product.inventory_quantity || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: window.location.href }
+          offers: { '@type': 'Offer', priceCurrency: data.product.currency || 'CAD', price: (Number(data.product.price_cents || 0) / 100).toFixed(2), availability: Number(data.product.inventory_quantity || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: resolvedCanonical }
         };
         let script = document.getElementById('productStructuredData');
         if (!script) { script = document.createElement('script'); script.type = 'application/ld+json'; script.id = 'productStructuredData'; document.head.appendChild(script); }

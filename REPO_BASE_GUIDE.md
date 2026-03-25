@@ -4,21 +4,24 @@
 
 This repo runs the Devil n Dove website as:
 
-- brand/public site
+- brand and public site
 - storefront
 - member area
 - admin dashboard
-- payment/webhook layer
+- payment and webhook layer
 - analytics and operations layer
+- SEO and crawl-awareness layer
 
 ## Important folders
 
 - `functions/api/` — Cloudflare API endpoints
-- `public/js/` — browser-side logic for auth, admin, checkout, and analytics
+- `functions/` — Cloudflare Pages Functions such as the sitemap
+- `public/js/` — browser-side logic for auth, admin, checkout, analytics, and search
 - `admin/` — admin dashboard page
 - `checkout/` — checkout and confirmation pages
 - `shop/` — storefront pages
-- `data/` — catalog/site JSON content
+- `search/` — public site search page
+- `data/` — catalog and site JSON content
 - `assets/` and `css/` — static design assets and styling
 
 ## Key current API groups
@@ -26,11 +29,11 @@ This repo runs the Devil n Dove website as:
 ### Auth
 Session-based user login and account controls.
 
-### Storefront / checkout
+### Storefront and checkout
 Order creation, payment preparation, PayPal return, and provider webhooks.
 
 ### Admin
-Products, users, orders, SEO, inventory, notifications, analytics, media upload, media library browsing, webhook review, and refund/dispute logging.
+Products, users, orders, SEO, inventory, notifications, analytics, media upload, media library browsing, webhook review, and refund and dispute logging.
 
 ### Tracking
 Visitor, cart, and search behavior logging.
@@ -46,7 +49,7 @@ Visitor, cart, and search behavior logging.
 - `database_full_schema.sql`
 - `database_upgrade_current_pass.sql`
 
-## Cloudflare bindings/secrets expected now
+## Cloudflare bindings and secrets expected now
 
 ### D1
 - `DB`
@@ -54,7 +57,7 @@ Visitor, cart, and search behavior logging.
 ### R2
 - `PRODUCT_MEDIA_BUCKET`
 
-### Variables / secrets
+### Variables and secrets
 - `PUBLIC_SITE_URL`
 - `PAYPAL_CLIENT_ID`
 - `PAYPAL_SECRET`
@@ -65,3 +68,15 @@ Visitor, cart, and search behavior logging.
 - `STRIPE_WEBHOOK_SECRET`
 - `PRODUCT_MEDIA_PUBLIC_BASE_URL`
 - optional `PRODUCT_MEDIA_BUCKET_NAME`
+
+## Public SEO rule of thumb
+
+When a public page is touched, review:
+
+- exactly one H1
+- title and meta description
+- canonical URL
+- Open Graph and Twitter tags
+- robots intent
+- sitemap impact
+- whether the page should contribute to public search awareness

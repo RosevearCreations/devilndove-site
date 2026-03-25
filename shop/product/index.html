@@ -1,31 +1,32 @@
 <!-- File: /shop/product/index.html -->
 <!-- Brief description: SEO-ready product detail page with richer product headings and metadata placeholders. -->
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Product — Devil n Dove</title>
-  <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="icon" type="image/png" href="/assets/mark.png" />
-  <meta name="description" content="View product details from Devil n Dove." />
-  <link rel="canonical" href="/shop/product/" />
-</head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Product Details | Devil n Dove Shop</title>
+<link href="/css/styles.css" rel="stylesheet"/>
+<link href="/assets/mark.png" rel="icon" type="image/png"/>
+
+
+<link href="https://devilndove.com/shop/product/" rel="canonical"/><meta content="View product details, images, pricing, shipping, and availability for Devil n Dove handmade goods and digital creations." name="description"/><meta content="index,follow" name="robots"/><meta content="Devil n Dove" property="og:site_name"/><meta content="product" property="og:type"/><meta content="Product Details | Devil n Dove Shop" property="og:title"/><meta content="View product details, images, pricing, shipping, and availability for Devil n Dove handmade goods and digital creations." property="og:description"/><meta content="https://devilndove.com/shop/product/" property="og:url"/><meta content="https://devilndove.com/assets/logo-clear.png" property="og:image"/><meta content="summary_large_image" name="twitter:card"/><meta content="Product Details | Devil n Dove Shop" name="twitter:title"/><meta content="View product details, images, pricing, shipping, and availability for Devil n Dove handmade goods and digital creations." name="twitter:description"/><meta content="https://devilndove.com/assets/logo-clear.png" name="twitter:image"/></head>
 <body>
-  <div class="container">
-    <div class="nav"><div class="brand"><img src="/assets/logo-clear.png" alt="Devil n Dove logo" /><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Workshop • Art • Tools • Movies</div></div></div><div class="links"><a href="/">Home</a><a href="/gallery/">Gallery</a><a href="/creations/">Creations</a><a href="/tools/">Tools</a><a href="/supplies/">Supplies</a><a href="/shop/">Shop</a><a href="/cart/">Cart</a><a href="/contact/">Contact</a><a href="/login/" data-show-when-logged-out style="display:none">Login</a><a href="/members/" data-show-when-logged-in style="display:none">Members</a><a href="/admin/" data-show-when-admin style="display:none">Admin</a><span class="small" data-show-when-logged-in style="display:none">Hi, <span data-nav-user-name>Member</span></span><button class="btn" type="button" data-nav-logout data-show-when-logged-in style="display:none">Logout</button></div></div>
-    <div class="hero"><div><h1 id="pageH1">Product Details</h1><p id="pageIntro">View the full details for this Devil n Dove item.</p></div></div>
-    <div id="productLoading" class="small">Loading product...</div>
-    <div id="productError" class="small" style="display:none;color:#b00020"></div>
-    <div id="productDetail" class="card" style="display:none"><div class="grid cols-2" style="gap:18px"><div><div id="productMainImageWrap"></div><div id="productGallery" class="grid" style="gap:10px;margin-top:12px"></div></div><div><div class="small" id="productType" style="text-transform:capitalize;opacity:.8"></div><h2 id="productName" style="margin-top:8px"></h2><div id="productPrice" style="font-size:1.4rem;font-weight:700;margin:10px 0 14px 0"></div><p id="productShortDescription" class="small"></p><div id="productKeywordTags" class="small" style="margin-bottom:10px"></div><div class="card" style="margin-top:14px"><h3 style="margin-top:0">Details</h3><p><strong>SKU:</strong> <span id="productSku"></span></p><p><strong>Shipping Required:</strong> <span id="productShipping"></span></p><p><strong>Tax Class:</strong> <span id="productTaxClass"></span></p><p><strong>Inventory:</strong> <span id="productInventory"></span></p></div><div class="card" style="margin-top:14px"><h3 style="margin-top:0">Description</h3><div id="productDescription"></div></div><div class="card" style="margin-top:14px"><h3 style="margin-top:0">Purchase</h3><p class="small">Add this item to your cart. Checkout and payment options will be connected next.</p><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px"><label class="small" for="productQuantity">Quantity</label><input id="productQuantity" type="number" min="1" value="1" style="max-width:90px" /><button class="btn" type="button" id="addToCartButton">Add to Cart</button><a class="btn" href="/cart/" id="viewCartButton">View Cart</a></div><div id="addToCartMessage" class="small" style="display:none;margin-top:12px"></div></div></div></div></div>
-    <div class="footer card" style="margin-top:18px"></div>
-  </div>
-  <script src="/js/main.js"></script>
-  <script src="/public/js/auth.js"></script>
-  <script src="/public/js/site-auth-ui.js"></script>
-  <script src="/public/js/site-analytics.js"></script>
-  <script src="/public/js/cart.js"></script>
-  <script src="/public/js/cart-badge.js"></script>
-  <script src="/public/js/product-detail.js"></script>
+<div class="container">
+<div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear.png"/><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Workshop • Art • Tools • Movies</div></div></div><div class="links"><a href="/">Home</a><a href="/gallery/">Gallery</a><a href="/creations/">Creations</a><a href="/tools/">Tools</a><a href="/supplies/">Supplies</a><a href="/shop/">Shop</a><a href="/cart/">Cart</a><a href="/contact/">Contact</a><a data-show-when-logged-out="" href="/login/" style="display:none">Login</a><a data-show-when-logged-in="" href="/members/" style="display:none">Members</a><a data-show-when-admin="" href="/admin/" style="display:none">Admin</a><span class="small" data-show-when-logged-in="" style="display:none">Hi, <span data-nav-user-name="">Member</span></span><button class="btn" data-nav-logout="" data-show-when-logged-in="" style="display:none" type="button">Logout</button></div></div>
+<div class="hero"><div><h1 id="pageH1">Product Details</h1><p id="pageIntro">View the full details for this Devil n Dove item.</p></div></div>
+<div class="small" id="productLoading">Loading product...</div>
+<div class="small" id="productError" style="display:none;color:#b00020"></div>
+<div class="card" id="productDetail" style="display:none"><div class="grid cols-2" style="gap:18px"><div><div id="productMainImageWrap"></div><div class="grid" id="productGallery" style="gap:10px;margin-top:12px"></div></div><div><div class="small" id="productType" style="text-transform:capitalize;opacity:.8"></div><h2 id="productName" style="margin-top:8px"></h2><div id="productPrice" style="font-size:1.4rem;font-weight:700;margin:10px 0 14px 0"></div><p class="small" id="productShortDescription"></p><div class="small" id="productKeywordTags" style="margin-bottom:10px"></div><div class="card" style="margin-top:14px"><h3 style="margin-top:0">Details</h3><p><strong>SKU:</strong> <span id="productSku"></span></p><p><strong>Shipping Required:</strong> <span id="productShipping"></span></p><p><strong>Tax Class:</strong> <span id="productTaxClass"></span></p><p><strong>Inventory:</strong> <span id="productInventory"></span></p></div><div class="card" style="margin-top:14px"><h3 style="margin-top:0">Description</h3><div id="productDescription"></div></div><div class="card" style="margin-top:14px"><h3 style="margin-top:0">Purchase</h3><p class="small">Add this item to your cart. Checkout and payment options will be connected next.</p><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px"><label class="small" for="productQuantity">Quantity</label><input id="productQuantity" min="1" style="max-width:90px" type="number" value="1"/><button class="btn" id="addToCartButton" type="button">Add to Cart</button><a class="btn" href="/cart/" id="viewCartButton">View Cart</a></div><div class="small" id="addToCartMessage" style="display:none;margin-top:12px"></div></div></div></div></div>
+<div class="footer card" style="margin-top:18px"></div>
+</div>
+<script src="/js/main.js"></script>
+<script src="/public/js/auth.js"></script>
+<script src="/public/js/site-auth-ui.js"></script>
+<script src="/public/js/site-analytics.js"></script>
+<script src="/public/js/cart.js"></script>
+<script src="/public/js/cart-badge.js"></script>
+<script src="/public/js/product-detail.js"></script>
 </body>
 </html>

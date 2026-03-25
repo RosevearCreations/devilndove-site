@@ -12,14 +12,16 @@ The current build includes:
 - checkout and order creation
 - PayPal handoff, PayPal return capture, and PayPal webhook reconciliation
 - Stripe hosted checkout preparation and Stripe webhook reconciliation
-- webhook event logging for provider idempotency / audit trail
+- webhook event logging for provider idempotency and audit trail
 - admin webhook review and safe replay queue controls
 - live visitor/session analytics and historical website data by path and country
 - product SEO fields, product image annotations, and product media workflow tools
 - direct image upload endpoint for R2-backed product media
 - uploaded asset browsing and delete actions in admin
-- site inventory/reorder tracking for tools, supplies, and sellable products
-- local refund/dispute workflow logging for orders and payments
+- public site search page with structured data support and search-event logging
+- site inventory and reorder tracking for tools, supplies, and sellable products
+- inventory movement history logging for stock changes
+- local refund and dispute workflow logging for orders and payments
 
 ## Main payment status
 
@@ -34,21 +36,21 @@ Implemented now:
 - Stripe webhook reconciliation endpoint
 - webhook event storage for duplicate-event safety
 - admin manual payment recording
-- admin webhook review/requeue controls
-- refund/dispute local tracking tables and admin actions
+- admin webhook review and requeue controls
+- refund and dispute local tracking tables and admin actions
 
 Still to deepen later:
 
-- actual provider-side refund execution + sync back confirmation
-- provider dispute evidence upload/response workflow
+- actual provider-side refund execution and sync-back confirmation
+- provider dispute evidence upload and response workflow
 - webhook worker retry scheduling beyond manual replay queueing
-- optional Stripe customer portal / saved customer records later
+- optional Stripe customer portal and saved customer records later
 
-## Main product/media status
+## Main product and media status
 
 Implemented now:
 
-- create, edit, archive, delete products
+- create, edit, archive, and delete products
 - bulk update products
 - import preview and import tools with duplicate slug checks
 - product SEO editor
@@ -56,7 +58,21 @@ Implemented now:
 - product image workflow editor for ordered images, alt text, captions, focal points, and featured image sync
 - direct admin upload endpoint for product images to R2
 - uploaded asset library browsing and delete actions in admin
+- storefront search page spanning products, tools, supplies, creations, and key pages
 - inventory tracking on products and site inventory records
+- inventory movement history foundation
+
+## Public SEO and search policy now in force
+
+For every future public-facing update:
+
+- every outward-facing page must have exactly one H1
+- no outward-facing page may ship without a title, meta description, canonical URL, and index/follow or noindex/follow decision
+- social tags should exist for outward-facing pages: Open Graph and Twitter card tags
+- public pages should use structured data where practical
+- private utility pages such as login, register, cart, checkout, members, bootstrap, and health pages should stay `noindex`
+- sitemap and robots.txt must be reviewed whenever public pages are added or removed
+- search visibility and crawl awareness should be improved a little every pass, not treated as a one-time task
 
 ## Database files
 
@@ -91,8 +107,9 @@ Storefront and checkout:
 - `/api/paypal-return`
 - `/api/paypal-webhook`
 - `/api/stripe-webhook`
+- `/api/site-search-event`
 
-Admin operations added in this pass:
+Admin operations added or deepened in the recent passes:
 - `/api/admin/webhook-events`
 - `/api/admin/payment-actions`
 - `/api/admin/media-assets`

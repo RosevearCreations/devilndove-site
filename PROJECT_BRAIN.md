@@ -9,8 +9,9 @@ This repo is now a combined:
 - member account system
 - admin operations panel
 - analytics and growth data layer
-- payment/webhook processing layer
-- product media upload/asset layer
+- payment and webhook processing layer
+- product media upload and asset layer
+- public SEO and search-awareness layer
 
 ## Important current architecture
 
@@ -23,7 +24,7 @@ Uses `products`, `product_images`, `product_tags`, `orders`, `order_items`, `ord
 ### Profiles and tiers
 Uses `user_profiles`, `access_tiers`, and `user_access_tiers`.
 
-### Growth / SEO / monitoring
+### Growth, SEO, monitoring, and search
 Uses:
 
 - `site_visitors`
@@ -37,8 +38,9 @@ Uses:
 - `product_seo`
 - `product_image_annotations`
 - `site_item_inventory`
+- `site_inventory_movements`
 
-### Payments / webhook / media additions
+### Payments, webhook, and media additions
 Uses:
 
 - `webhook_events`
@@ -48,20 +50,25 @@ Uses:
 
 ## Key newer additions
 
-- admin webhook review/requeue endpoint and dashboard tooling
-- admin refund/dispute endpoint and order-detail UI
-- admin media asset browser/delete tooling
-- inventory model now includes reserved/incoming/supplier/cost fields
+- admin webhook review and requeue endpoint and dashboard tooling
+- admin refund and dispute endpoint and order-detail UI foundation
+- admin media asset browser and delete tooling
+- public search page for products, tools, supplies, creations, and key pages
+- sitewide public SEO refresh with one-H1-per-page enforcement target
+- inventory model now includes reserved, incoming, supplier, and cost fields
+- inventory movement history foundation for stock changes
 - import preview now validates duplicate slugs and media URL format
 
 ## Where we are now
 
-The platform is still in an integration/hardening phase.
+The platform is still in an integration and hardening phase.
 
 Most important next layers after this pass are:
 
 - webhook worker retry and replay execution
-- provider-confirmed refund/dispute status sync
+- provider-confirmed refund and dispute status sync
 - richer media library management around uploaded R2 assets
-- deeper inventory operations and movement history
+- direct media replace, thumbnail, and featured-image suggestion flow
+- deeper inventory operations and movement history UX
 - funnel dashboards and analytics polish
+- ongoing crawl, metadata, and public search-awareness improvements each pass

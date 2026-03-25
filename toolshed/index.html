@@ -1,13 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tools — Devil n Dove</title>
-  <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="icon" type="image/png" href="/assets/mark.png" />
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Devil n Dove Toolshed | Workshop Gear, Notes &amp; Learnings</title>
+<link href="/css/styles.css" rel="stylesheet"/>
+<link href="/assets/mark.png" rel="icon" type="image/png"/>
+<style>
     .area-block { margin-top: 18px; }
     .area-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin: 10px 0 10px; }
     .area-head h2 { margin:0; font-size: 18px; }
@@ -64,93 +64,83 @@
 
     .tools-controls .input { width: 100%; }
   </style>
-</head>
+<link href="https://devilndove.com/toolshed/" rel="canonical"/><meta content="See the Devil n Dove toolshed with workshop gear, duplicate tools, practical notes, and links to what we use in the studio." name="description"/><meta content="index,follow" name="robots"/><meta content="Devil n Dove" property="og:site_name"/><meta content="website" property="og:type"/><meta content="Devil n Dove Toolshed | Workshop Gear, Notes &amp; Learnings" property="og:title"/><meta content="See the Devil n Dove toolshed with workshop gear, duplicate tools, practical notes, and links to what we use in the studio." property="og:description"/><meta content="https://devilndove.com/toolshed/" property="og:url"/><meta content="https://devilndove.com/assets/logo-clear.png" property="og:image"/><meta content="summary_large_image" name="twitter:card"/><meta content="Devil n Dove Toolshed | Workshop Gear, Notes &amp; Learnings" name="twitter:title"/><meta content="See the Devil n Dove toolshed with workshop gear, duplicate tools, practical notes, and links to what we use in the studio." name="twitter:description"/><meta content="https://devilndove.com/assets/logo-clear.png" name="twitter:image"/><script id="pageStructuredData" type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Devil n Dove toolshed and workshop notes","url":"https://devilndove.com/toolshed/","description":"See the Devil n Dove toolshed with workshop gear, duplicate tools, practical notes, and links to what we use in the studio.","isPartOf":{"@type":"WebSite","name":"Devil n Dove","url":"https://devilndove.com/"}}</script></head>
 <body>
-  <div class="container">
-    <div class="nav">
-      <div class="brand">
-        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
-        <div>
-          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Workshop • Art • Tools • Movies</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:14px;flex-wrap:wrap">
-        <a href="/index.html">Home</a>
-        <a href="/about/index.html">About</a>
-        <a href="/gallery/index.html">Art</a>
-        <a href="/creations/index.html">Creations</a>
-        <a href="/tools/index.html">Tools</a>
-        <a href="/supplies/index.html">Supplies</a>
-        <a href="/shop/index.html">Shop</a>
-        <a href="/movies/index.html">Movies</a>
-        <a href="/contact/index.html">Contact</a>
-      </div>
-    </div>
-
-    <div class="hero">
-      <span class="badge">Tools & Supplies</span>
-      <div class="hero-grid" style="margin-top:12px">
-        <div class="card" style="padding:18px">
-          <h1>What we use (and what we’ve learned).</h1>
-          <p>
+<div class="container">
+<div class="nav">
+<div class="brand">
+<img alt="Devil n Dove logo" src="/assets/logo-clear.png"/>
+<div>
+<div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+<div class="small">Workshop • Art • Tools • Movies</div>
+</div>
+</div>
+<div style="display:flex;gap:14px;flex-wrap:wrap">
+<a href="/index.html">Home</a>
+<a href="/about/index.html">About</a>
+<a href="/gallery/index.html">Art</a>
+<a href="/creations/index.html">Creations</a>
+<a href="/tools/index.html">Tools</a>
+<a href="/supplies/index.html">Supplies</a>
+<a href="/shop/index.html">Shop</a>
+<a href="/movies/index.html">Movies</a>
+<a href="/contact/index.html">Contact</a>
+</div>
+</div>
+<div class="hero">
+<span class="badge">Tools &amp; Supplies</span>
+<div class="hero-grid" style="margin-top:12px">
+<div class="card" style="padding:18px">
+<h1>Devil n Dove toolshed and workshop notes</h1>
+<p>
             This is our running list of tools, consumables, and “can’t-live-without-it” supplies.
             We’ll show real photos, honest notes, and the little things that make the work smoother.
           </p>
-        </div>
-        <div class="hero-media">
-          <img src="/assets/hero-workshop.webp" alt="Illustrated workshop scene" />
-        </div>
-      </div>
-    </div>
-
-    <div class="card tools-controls" style="margin-top:14px">
-      <div class="grid" style="grid-template-columns:1fr 220px 220px 220px;gap:10px;align-items:end">
-        <div>
-          <label class="small">Search</label>
-          <input id="toolSearch" class="input" placeholder="Type a tool name…" />
-        </div>
-
-        <div>
-          <label class="small">Primary Area</label>
-          <select id="toolArea" class="input">
-            <option value="all">All</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="small">Category</label>
-          <select id="toolCat" class="input">
-            <option value="all">All</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="small">Tag</label>
-          <select id="toolTag" class="input">
-            <option value="all">All</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="small" style="margin-top:10px">
+</div>
+<div class="hero-media">
+<img alt="Illustrated workshop scene" src="/assets/hero-workshop.webp"/>
+</div>
+</div>
+</div>
+<div class="card tools-controls" style="margin-top:14px">
+<div class="grid" style="grid-template-columns:1fr 220px 220px 220px;gap:10px;align-items:end">
+<div>
+<label class="small">Search</label>
+<input class="input" id="toolSearch" placeholder="Type a tool name…"/>
+</div>
+<div>
+<label class="small">Primary Area</label>
+<select class="input" id="toolArea">
+<option value="all">All</option>
+</select>
+</div>
+<div>
+<label class="small">Category</label>
+<select class="input" id="toolCat">
+<option value="all">All</option>
+</select>
+</div>
+<div>
+<label class="small">Tag</label>
+<select class="input" id="toolTag">
+<option value="all">All</option>
+</select>
+</div>
+</div>
+<div class="small" style="margin-top:10px">
         Showing <span id="toolShown">0</span> of <span id="toolTotal">0</span>
-      </div>
-
-      <div id="toolsGrid" style="margin-top:12px"></div>
-
-      <div class="small" style="margin-top:12px">
+</div>
+<div id="toolsGrid" style="margin-top:12px"></div>
+<div class="small" style="margin-top:12px">
         Links go to an Amazon.ca search page (not affiliate links). We use our own photos whenever possible.
       </div>
-    </div>
-
-    <div class="footer">
+</div>
+<div class="footer">
       Toolshed images are served from our R2 bucket via <span class="small">assets.devilndove.com</span>.
     </div>
-  </div>
-
-  <script src="/js/main.js"></script>
-  <script>
+</div>
+<script src="/js/main.js"></script>
+<script>
     function escapeHtml(s){
       return String(s ?? '')
         .replaceAll('&', '&amp;')

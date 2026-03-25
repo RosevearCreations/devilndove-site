@@ -1,68 +1,66 @@
 <!-- File: /shop/index.html -->
 <!-- Brief description: Shop page with advanced storefront search filters and improved SEO markup. -->
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Shop Handmade Jewelry, Art, Digital Downloads & Workshop Creations — Devil n Dove</title>
-  <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="icon" type="image/png" href="/assets/mark.png" />
-  <meta name="description" content="Shop Devil n Dove handmade jewelry, artisan creations, digital downloads, and workshop-made gifts from Southern Ontario, Canada." />
-  <meta name="keywords" content="Devil n Dove shop, handmade jewelry Ontario, artisan gifts Canada, digital downloads, workshop creations, polymer clay jewelry, forged jewelry" />
-  <link rel="canonical" href="/shop/" />
-</head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Shop Devil n Dove | Handmade Jewelry, Art &amp; Digital Creations</title>
+<link href="/css/styles.css" rel="stylesheet"/>
+<link href="/assets/mark.png" rel="icon" type="image/png"/>
+
+
+
+<link href="https://devilndove.com/shop/" rel="canonical"/><meta content="Shop Devil n Dove handmade jewelry, artisan goods, digital creations, and workshop-made gifts from Southern Ontario, Canada." name="description"/><meta content="index,follow" name="robots"/><meta content="Devil n Dove" property="og:site_name"/><meta content="website" property="og:type"/><meta content="Shop Devil n Dove | Handmade Jewelry, Art &amp; Digital Creations" property="og:title"/><meta content="Shop Devil n Dove handmade jewelry, artisan goods, digital creations, and workshop-made gifts from Southern Ontario, Canada." property="og:description"/><meta content="https://devilndove.com/shop/" property="og:url"/><meta content="https://devilndove.com/assets/logo-clear.png" property="og:image"/><meta content="summary_large_image" name="twitter:card"/><meta content="Shop Devil n Dove | Handmade Jewelry, Art &amp; Digital Creations" name="twitter:title"/><meta content="Shop Devil n Dove handmade jewelry, artisan goods, digital creations, and workshop-made gifts from Southern Ontario, Canada." name="twitter:description"/><meta content="https://devilndove.com/assets/logo-clear.png" name="twitter:image"/><script id="pageStructuredData" type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Shop handmade jewelry, art and digital creations","url":"https://devilndove.com/shop/","description":"Shop Devil n Dove handmade jewelry, artisan goods, digital creations, and workshop-made gifts from Southern Ontario, Canada.","isPartOf":{"@type":"WebSite","name":"Devil n Dove","url":"https://devilndove.com/"}}</script></head>
 <body>
-  <div class="container">
-    <div class="nav">
-      <div class="brand">
-        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
-        <div>
-          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Workshop • Art • Tools • Movies</div>
-        </div>
-      </div>
-      <div class="links">
-        <a href="/">Home</a><a href="/gallery/">Gallery</a><a href="/creations/">Creations</a><a href="/tools/">Tools</a><a href="/supplies/">Supplies</a><a href="/shop/">Shop</a><a href="/cart/">Cart</a><a href="/contact/">Contact</a>
-        <a href="/login/" data-show-when-logged-out style="display:none">Login</a>
-        <a href="/members/" data-show-when-logged-in style="display:none">Members</a>
-        <a href="/admin/" data-show-when-admin style="display:none">Admin</a>
-        <span class="small" data-show-when-logged-in style="display:none">Hi, <span data-nav-user-name>Member</span></span>
-        <button class="btn" type="button" data-nav-logout data-show-when-logged-in style="display:none">Logout</button>
-      </div>
-    </div>
-
-    <div class="hero"><div><h1>Shop Handmade Jewelry, Artisan Products & Digital Creations</h1><p>Browse active products from Devil n Dove with advanced search filters, pricing filters, and product type breakdowns.</p></div></div>
-
-    <div class="card" style="margin-bottom:18px">
-      <h2 style="margin-top:0">Advanced Product Search</h2>
-      <div class="grid cols-4" style="gap:12px">
-        <div><label class="small" for="shopSearchInput">Search</label><input id="shopSearchInput" type="text" placeholder="Jewelry, digital, clay, ring..." /></div>
-        <div><label class="small" for="shopTypeFilter">Type</label><select id="shopTypeFilter"><option value="">All</option><option value="physical">Physical</option><option value="digital">Digital</option></select></div>
-        <div><label class="small" for="shopMinPrice">Min Price (CAD cents)</label><input id="shopMinPrice" type="number" min="0" step="1" /></div>
-        <div><label class="small" for="shopMaxPrice">Max Price (CAD cents)</label><input id="shopMaxPrice" type="number" min="0" step="1" /></div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-        <label class="small"><input id="shopShippingOnly" type="checkbox" /> Shipping required only</label>
-        <button class="btn" type="button" id="shopSearchButton">Search</button>
-        <button class="btn" type="button" id="shopResetButton">Reset</button>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:18px"><h2 style="margin-top:0">Available Products</h2><p class="small" style="margin-bottom:0">This storefront is connected to the active product system and now supports richer search and SEO-ready product data.</p></div>
-    <div id="shopLoading" class="small">Loading products...</div>
-    <div id="shopError" class="small" style="display:none;color:#b00020"></div>
-    <div id="shopEmpty" class="small" style="display:none">No products are available right now.</div>
-    <div id="shopSummary" class="small" style="margin-bottom:12px"></div>
-    <div id="shopProducts" class="grid cols-3" style="gap:16px"></div>
-    <div class="footer card" style="margin-top:18px"></div>
-  </div>
-  <script src="/js/main.js"></script>
-  <script src="/public/js/auth.js"></script>
-  <script src="/public/js/site-auth-ui.js"></script>
-  <script src="/public/js/site-analytics.js"></script>
-  <script src="/public/js/cart.js"></script>
-  <script src="/public/js/cart-badge.js"></script>
-  <script src="/public/js/shop.js"></script>
+<div class="container">
+<div class="nav">
+<div class="brand">
+<img alt="Devil n Dove logo" src="/assets/logo-clear.png"/>
+<div>
+<div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+<div class="small">Workshop • Art • Tools • Movies</div>
+</div>
+</div>
+<div class="links">
+<a href="/">Home</a><a href="/gallery/">Gallery</a><a href="/creations/">Creations</a><a href="/tools/">Tools</a><a href="/supplies/">Supplies</a><a href="/shop/">Shop</a><a href="/cart/">Cart</a><a href="/contact/">Contact</a>
+<a data-show-when-logged-out="" href="/login/" style="display:none">Login</a>
+<a data-show-when-logged-in="" href="/members/" style="display:none">Members</a>
+<a data-show-when-admin="" href="/admin/" style="display:none">Admin</a>
+<span class="small" data-show-when-logged-in="" style="display:none">Hi, <span data-nav-user-name="">Member</span></span>
+<button class="btn" data-nav-logout="" data-show-when-logged-in="" style="display:none" type="button">Logout</button>
+</div>
+</div>
+<div class="hero"><div><h1>Shop handmade jewelry, art and digital creations</h1><p>Browse active products from Devil n Dove with advanced search filters, pricing filters, and product type breakdowns.</p></div></div>
+<div class="card" style="margin-bottom:18px">
+<h2 style="margin-top:0">Advanced Product Search</h2>
+<div class="grid cols-4" style="gap:12px">
+<div><label class="small" for="shopSearchInput">Search</label><input id="shopSearchInput" placeholder="Jewelry, digital, clay, ring..." type="text"/></div>
+<div><label class="small" for="shopTypeFilter">Type</label><select id="shopTypeFilter"><option value="">All</option><option value="physical">Physical</option><option value="digital">Digital</option></select></div>
+<div><label class="small" for="shopMinPrice">Min Price (CAD cents)</label><input id="shopMinPrice" min="0" step="1" type="number"/></div>
+<div><label class="small" for="shopMaxPrice">Max Price (CAD cents)</label><input id="shopMaxPrice" min="0" step="1" type="number"/></div>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+<label class="small"><input id="shopShippingOnly" type="checkbox"/> Shipping required only</label>
+<button class="btn" id="shopSearchButton" type="button">Search</button>
+<button class="btn" id="shopResetButton" type="button">Reset</button>
+</div>
+</div>
+<div class="card" style="margin-bottom:18px"><h2 style="margin-top:0">Available Products</h2><p class="small" style="margin-bottom:0">This storefront is connected to the active product system and now supports richer search and SEO-ready product data.</p></div>
+<div class="small" id="shopLoading">Loading products...</div>
+<div class="small" id="shopError" style="display:none;color:#b00020"></div>
+<div class="small" id="shopEmpty" style="display:none">No products are available right now.</div>
+<div class="small" id="shopSummary" style="margin-bottom:12px"></div>
+<div class="grid cols-3" id="shopProducts" style="gap:16px"></div>
+<div class="footer card" style="margin-top:18px"></div>
+</div>
+<script src="/js/main.js"></script>
+<script src="/public/js/auth.js"></script>
+<script src="/public/js/site-auth-ui.js"></script>
+<script src="/public/js/site-analytics.js"></script>
+<script src="/public/js/cart.js"></script>
+<script src="/public/js/cart-badge.js"></script>
+<script src="/public/js/shop.js"></script>
 </body>
 </html>
