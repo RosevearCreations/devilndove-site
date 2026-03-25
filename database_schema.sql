@@ -62,3 +62,31 @@ CREATE TABLE IF NOT EXISTS auth_recovery_requests (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_auth_recovery_requests_status_created_at ON auth_recovery_requests(status, created_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS movie_catalog (
+  movie_catalog_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  upc TEXT NOT NULL UNIQUE,
+  slug TEXT,
+  title TEXT,
+  sort_title TEXT,
+  summary TEXT,
+  release_year INTEGER,
+  media_format TEXT,
+  genre TEXT,
+  director_names TEXT,
+  actor_names TEXT,
+  front_image_url TEXT,
+  back_image_url TEXT,
+  runtime_minutes INTEGER,
+  studio_name TEXT,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','draft','archived')),
+  featured_rank INTEGER,
+  source_record_json TEXT,
+  source_json_path TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);

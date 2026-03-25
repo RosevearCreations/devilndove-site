@@ -31,3 +31,14 @@
 - Outward-facing collection pages should prefer live database-backed catalog data when available, with JSON fallback only as a safety net during migration.
 - Keep structured data aligned with visible page content and avoid marking up hidden or misleading content.
 - Keep canonical intent, robots intent, favicon support, and public search discoverability aligned with current Google Search guidance on every outward-facing SEO pass.
+
+
+## Current pass additions
+- Session/auth now uses a stronger same-site continuity path: auth endpoints set a first-party `dd_auth_token` cookie in addition to returning the bearer token. Public pages can resolve the signed-in member/admin state more reliably.
+- Added `movie_catalog` for staged migration of the legacy UPC-only movie JSON into D1. The public movies page now reads from `/api/movies`, which prefers D1 and falls back to `/data/catalog.json`.
+- Catalog sync now supports movies in addition to tools, supplies, and featured creations.
+- Public movie search UI now supports title, UPC, year, actor, and director fields when that data exists, while still working with legacy UPC-only data.
+- Product CSV preview now renders as a structured validation table instead of loose JSON/text lines.
+
+- Footer must render on every outward-facing and member/admin page through the shared layout unless a page explicitly documents why it is excluded.
+- Continue improving search awareness every pass: strengthen crawl paths, keep one visible H1 on outward-facing pages, and prefer database-backed shared datasets over duplicated JSON whenever scope allows.

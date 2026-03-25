@@ -63,3 +63,11 @@
 - Product import now supports CSV-first mass upload with a downloadable template and explicit required/optional field guidance.
 - Tools, supplies, and featured creations now have a staged D1 migration path through `catalog_items`; public search and collection pages can prefer live catalog data after sync.
 - Featured images remain optional during import and can be enforced later during store-readiness review.
+
+
+## Current pass additions
+- Session/auth now uses a stronger same-site continuity path: auth endpoints set a first-party `dd_auth_token` cookie in addition to returning the bearer token. Public pages can resolve the signed-in member/admin state more reliably.
+- Added `movie_catalog` for staged migration of the legacy UPC-only movie JSON into D1. The public movies page now reads from `/api/movies`, which prefers D1 and falls back to `/data/catalog.json`.
+- Catalog sync now supports movies in addition to tools, supplies, and featured creations.
+- Public movie search UI now supports title, UPC, year, actor, and director fields when that data exists, while still working with legacy UPC-only data.
+- Product CSV preview now renders as a structured validation table instead of loose JSON/text lines.

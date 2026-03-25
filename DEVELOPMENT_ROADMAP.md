@@ -73,3 +73,11 @@
 
 - the search page still blends live database products with JSON-driven tools, supplies, and creations
 - if the long-term plan is unified search, richer analytics, and inventory automation, migrating high-value JSON collections into D1 is now the right time to start while scope is still manageable
+
+
+## Current pass additions
+- Session/auth now uses a stronger same-site continuity path: auth endpoints set a first-party `dd_auth_token` cookie in addition to returning the bearer token. Public pages can resolve the signed-in member/admin state more reliably.
+- Added `movie_catalog` for staged migration of the legacy UPC-only movie JSON into D1. The public movies page now reads from `/api/movies`, which prefers D1 and falls back to `/data/catalog.json`.
+- Catalog sync now supports movies in addition to tools, supplies, and featured creations.
+- Public movie search UI now supports title, UPC, year, actor, and director fields when that data exists, while still working with legacy UPC-only data.
+- Product CSV preview now renders as a structured validation table instead of loose JSON/text lines.
