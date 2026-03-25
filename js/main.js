@@ -1,6 +1,4 @@
-/* /js/main.js — Devil n Dove shared helpers + shared navigation
-   Drop-in replacement. No global "$" to avoid collisions.
-*/
+/* /js/main.js — Devil n Dove shared helpers + shared navigation/footer */
 (() => {
   "use strict";
 
@@ -9,7 +7,7 @@
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
+      .replace(/\"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
 
@@ -29,28 +27,73 @@
         </div>
       </div>
 
-      <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <div class="links" aria-label="Primary navigation">
         <a href="/index.html" data-nav="/">Home</a>
         <a href="/about/index.html" data-nav="/about/">About</a>
         <a href="/gallery/index.html" data-nav="/gallery/">Art</a>
+        <a href="/creations/index.html" data-nav="/creations/">Creations</a>
         <a href="/tools/index.html" data-nav="/tools/">Tools</a>
         <a href="/supplies/index.html" data-nav="/supplies/">Supplies</a>
         <a href="/shop/index.html" data-nav="/shop/">Shop</a>
         <a href="/search/index.html" data-nav="/search/">Search</a>
         <a href="/movies/index.html" data-nav="/movies/">Movies</a>
         <a href="/contact/index.html" data-nav="/contact/">Contact</a>
+        <a href="/cart/index.html" data-nav="/cart/">Cart</a>
+        <a href="/login/index.html" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
+        <a href="/register/index.html" data-nav="/register/" data-show-when-logged-out style="display:none">Register</a>
+        <a href="/members/index.html" data-nav="/members/" data-show-when-logged-in style="display:none">Members</a>
+        <a href="/admin/index.html" data-nav="/admin/" data-show-when-admin style="display:none">Admin</a>
       </div>
+    `;
+  }
+
+  function buildSharedFooter() {
+    const year = new Date().getFullYear();
+    return `
+      <div class="site-footer-grid">
+        <div>
+          <h2 class="site-footer-title">Devil n Dove</h2>
+          <p class="small">Handmade jewelry, workshop creations, tools, supplies, and maker-life updates from Southern Ontario.</p>
+        </div>
+        <div>
+          <div class="site-footer-heading">Explore</div>
+          <div class="site-footer-links">
+            <a href="/shop/index.html">Shop</a>
+            <a href="/gallery/index.html">Gallery</a>
+            <a href="/creations/index.html">Creations</a>
+            <a href="/tools/index.html">Tools</a>
+            <a href="/supplies/index.html">Supplies</a>
+            <a href="/movies/index.html">Movies</a>
+          </div>
+        </div>
+        <div>
+          <div class="site-footer-heading">Member account</div>
+          <div class="site-footer-links">
+            <a href="/login/index.html">Login</a>
+            <a href="/register/index.html">Register</a>
+            <a href="/members/index.html">Settings</a>
+            <a href="/account-help/index.html?mode=password">Forgot password</a>
+            <a href="/account-help/index.html?mode=email">Forgot email</a>
+          </div>
+        </div>
+        <div>
+          <div class="site-footer-heading">Search the site</div>
+          <form action="/search/index.html" class="site-footer-search" method="get" role="search">
+            <input aria-label="Search Devil n Dove" name="q" placeholder="Search products, tools, supplies, art..." type="search" />
+            <button class="btn" type="submit">Search</button>
+          </form>
+          <p class="small">Search stays visible in the footer on every page to improve discovery and crawling paths.</p>
+        </div>
+      </div>
+      <div class="site-footer-bottom small">© ${year} Devil n Dove. Built for storefront discovery, workshop sharing, and member access.</div>
     `;
   }
 
   function setActiveLink(navEl) {
     const path = (location.pathname || "/").toLowerCase();
     const links = Array.from(navEl.querySelectorAll("a[data-nav]"));
-
-    // Pick the longest matching prefix.
     let best = null;
     let bestLen = -1;
-
     for (const a of links) {
       const prefix = String(a.getAttribute("data-nav") || "").toLowerCase();
       if (!prefix) continue;
@@ -61,27 +104,36 @@
         }
       }
     }
-
     if (best) best.classList.add("active");
   }
 
   function injectSharedNav() {
     const nav = document.querySelector(".nav");
     if (!nav) return;
-
-    // Allow opt-out on any page: <div class="nav" data-no-shared-nav></div>
     if (nav.hasAttribute("data-no-shared-nav")) return;
-
     nav.innerHTML = buildSharedNav();
     setActiveLink(nav);
   }
 
-  // Expose a tiny shared namespace (optional use in pages)
+  function injectSharedFooter() {
+    const container = document.querySelector('.container') || document.body;
+    let footer = document.querySelector('.footer');
+    if (!footer) {
+      footer = document.createElement('div');
+      footer.className = 'footer card';
+      container.appendChild(footer);
+    } else if (!footer.classList.contains('card')) {
+      footer.classList.add('card');
+    }
+    footer.innerHTML = buildSharedFooter();
+  }
+
   window.DD = window.DD || {};
   window.DD.escapeHtml = escapeHtml;
   window.DD.amazonSearchUrl = amazonSearchUrl;
 
   document.addEventListener("DOMContentLoaded", () => {
     injectSharedNav();
+    injectSharedFooter();
   });
 })();
