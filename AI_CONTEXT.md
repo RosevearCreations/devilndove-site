@@ -56,3 +56,7 @@ This repo is in the payment, media, inventory, and public SEO hardening phase af
 - Shared auth/session fixes should preserve sign-in visibility across admin and outward-facing pages.
 - Keep the one-H1 rule intact on outward-facing pages while continuing incremental SEO/crawl improvements each pass.
 - Shared footer and account widget are baseline layout requirements now.
+
+
+- Current migration strategy: keep public pages operational with JSON fallback, but prefer D1 `catalog_items` for tools, supplies, and featured creations once admin sync has been run.
+- Current product import strategy: CSV-first mass upload with image fields optional during import.

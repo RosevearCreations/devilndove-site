@@ -86,3 +86,9 @@ Most important next layers after this pass are:
 - Fixed shared session visibility between admin and the outward-facing site by adding cookie-backed client token fallback.
 - Hardened shared nav/footer behavior so the footer stays visible on standard pages.
 - Refreshed admin dashboard presentation and added a live activity feed driven by recent analytics/order/webhook data.
+
+
+## Latest architectural note
+
+- High-duplication workshop collections are beginning to move into D1 through `catalog_items`. This is the first stage toward unified search, analytics, inventory automation, and fewer JSON-only failure points.
+- Product import now supports CSV-first mass upload with optional images at import time.

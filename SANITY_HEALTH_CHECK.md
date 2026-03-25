@@ -56,3 +56,10 @@
 - Admin login visibility issue on the regular site was addressed by using a cookie fallback for the shared auth token in addition to localStorage.
 - Shared footer injection was hardened and styling normalized across forms, tables, and dashboard cards.
 - Admin dashboard now includes a recent live activity feed to improve at-a-glance monitoring.
+
+
+## Latest pass notes
+
+- Product import now supports CSV-first mass upload with a downloadable template and explicit required/optional field guidance.
+- Tools, supplies, and featured creations now have a staged D1 migration path through `catalog_items`; public search and collection pages can prefer live catalog data after sync.
+- Featured images remain optional during import and can be enforced later during store-readiness review.

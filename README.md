@@ -131,3 +131,16 @@ Admin operations added or deepened in the recent passes:
 ## Current caution
 
 JSON-backed collections still exist for some public sections such as tools, supplies, and creations. The site search works across them today, but a staged move of those collections into D1 would make future search, inventory, analytics, and admin tooling much stronger.
+
+
+## Latest pass additions
+
+- CSV-first mass upload workflow for products with a downloadable template. Required fields are `name`, `product_type`, and `price_cents`; `slug` is optional and auto-generated when omitted.
+- Featured images remain optional during import and can be added later during product review before store-ready status is applied.
+- Began staged D1 migration for tools, supplies, and featured creations through the new `catalog_items` table and admin sync tooling.
+- Public search, tools, and supplies pages now prefer database-backed catalog items when available and fall back to JSON when a sync has not been run yet.
+
+
+## SEO operating note
+
+Public SEO passes should stay aligned with current Google Search guidance: strong title links, useful meta descriptions, one clear H1 per outward-facing page, crawlable canonicals/robots intent, and structured data that matches visible content.

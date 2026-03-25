@@ -25,3 +25,9 @@
 - Shared auth should not depend on one storage mechanism alone; keep a reliable session fallback for standard pages.
 - Footer injection is part of baseline shared layout and should remain visible after every pass.
 - Keep outward-facing pages visually consistent with uniform input, table, and card styling.
+
+- Keep product mass upload template, field rules, and import validation aligned whenever import fields change.
+- Continue staged migration of duplicated JSON collections into D1 when it reduces search, inventory, or analytics failure points.
+- Outward-facing collection pages should prefer live database-backed catalog data when available, with JSON fallback only as a safety net during migration.
+- Keep structured data aligned with visible page content and avoid marking up hidden or misleading content.
+- Keep canonical intent, robots intent, favicon support, and public search discoverability aligned with current Google Search guidance on every outward-facing SEO pass.

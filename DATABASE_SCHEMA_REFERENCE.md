@@ -102,3 +102,31 @@ Fields include previous and new on-hand, reserved, and incoming quantities plus 
 ## auth_recovery_requests
 
 Stores logged-out forgot-password and forgot-email requests for later admin review without revealing whether a matching account exists.
+
+
+## catalog_items
+
+Purpose: staged unified catalog storage for tools, supplies, and featured creations that were previously JSON-only. This supports cleaner public search, future analytics, and inventory automation.
+
+Key columns:
+- `item_kind` (`tool`, `supply`, `creation`, `other`)
+- `source_key` (stable unique source identifier per kind)
+- `slug`, `name`, `brand`, `category`, `subcategory`, `item_type`
+- `short_description`, `notes`, `image_url`, `r2_object_key`, `amazon_url`
+- `quantity_on_hand`, `reorder_point`, `storage_location`
+- `source_record_json`, `source_json_path`
+
+## Product CSV mass upload fields
+
+Required fields:
+- `name`
+- `product_type` (`physical` or `digital`)
+- `price_cents`
+
+Optional fields:
+- `slug` (auto-generated if omitted)
+- `status`, `currency`, `sku`, `short_description`, `description`
+- `compare_at_price_cents`, `taxable`, `tax_class_id`, `requires_shipping`, `weight_grams`
+- `inventory_tracking`, `inventory_quantity`, `digital_file_url`, `featured_image_url`, `sort_order`
+
+Images are optional during import and can be added during later review before activation.

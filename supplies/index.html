@@ -513,6 +513,18 @@
       const reorderPanelEl = document.getElementById("reorderPanel");
       const reorderListWrapEl = document.getElementById("reorderListWrap");
 
+
+      async function fetchCatalogItems(){
+        try {
+          const response = await fetch('/api/catalog-items?item_kind=supply&limit=500');
+          const data = await response.json();
+          if (!response.ok || !data?.ok) return [];
+          return Array.isArray(data.items) ? data.items : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
       let allSupplies = [];
       let reorderPanelOpen = false;
 
@@ -765,11 +777,29 @@
 
       async function initSuppliesPage(){
         try {
-          const resp = await fetch(DATA_URL, { cache: "no-store" });
-          if (!resp.ok) throw new Error("Failed to load supplies JSON: " + resp.status);
-
-          const data = await resp.json();
-          allSupplies = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
+          const migrated = await fetchCatalogItems();
+          if (Array.isArray(migrated) && migrated.length) {
+            allSupplies = migrated.map(function (row) {
+              const source = row.source_record && typeof row.source_record === "object" ? row.source_record : {};
+              return Object.assign({}, source, {
+                item_name_suggested: row.name || source.item_name_suggested,
+                brand_guess: row.brand || source.brand_guess,
+                consumable_type: row.category || source.consumable_type,
+                primary_area: row.subcategory || source.primary_area,
+                notes: row.notes || source.notes,
+                amazon_url: row.amazon_url || source.amazon_url,
+                r2_object_key: row.r2_object_key || source.r2_object_key,
+                example_image_file: source.example_image_file || "",
+                on_hand_qty: row.quantity_on_hand || source.on_hand_qty || '',
+                reorder_point: row.reorder_point || source.reorder_point || ''
+              });
+            });
+          } else {
+            const resp = await fetch(DATA_URL, { cache: "no-store" });
+            if (!resp.ok) throw new Error("Failed to load supplies JSON: " + resp.status);
+            const data = await resp.json();
+            allSupplies = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
+          }
 
           if (!allSupplies.length) {
             supGridEl.innerHTML = `<div class="small">No supplies found in ${escHtml(DATA_URL)}</div>`;

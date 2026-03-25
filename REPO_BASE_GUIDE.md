@@ -95,3 +95,10 @@ When a public page is touched, review:
 - `/public/js/auth.js` is the shared client auth layer and now persists the session token with both localStorage and a sitewide cookie fallback.
 - `/public/js/site-auth-ui.js` remains the shared account widget/nav visibility layer used by both the public site and protected areas.
 - `/functions/api/admin/live-activity.js` provides the admin dashboard live feed using recent analytics, cart, order, and webhook data.
+
+
+## New admin/data routes
+
+- `/api/admin/catalog-sync` seeds tools, supplies, and featured creations from existing JSON into `catalog_items`.
+- `/api/catalog-items` serves public unified catalog reads for tools, supplies, and featured creations.
+- `/public/products-import-template.csv` is the mass-upload starter template for products.

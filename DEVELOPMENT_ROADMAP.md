@@ -2,6 +2,9 @@
 
 ## Current completed foundations
 
+- CSV-first product mass upload foundation with downloadable template and required/optional field guidance
+- staged D1 migration foundation for tools, supplies, and featured creations through `catalog_items` and admin sync tooling
+
 - auth and session model
 - member orders and downloads
 - admin users and security tools
@@ -38,6 +41,7 @@
 5. product import seeding refinement and richer row-by-row validation UX
 6. richer analytics dashboards and funnel reporting
 7. continue public search-engine awareness improvements on every outward-facing pass
+8. continue staged migration of high-value JSON collections into D1 for unified search, analytics, and inventory automation
 
 ## Media-specific roadmap
 
