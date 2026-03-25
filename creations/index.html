@@ -1,13 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Creations — Devil n Dove</title>
-  <meta name="description" content="Browse Devil n Dove finished creations with search, filters, materials, and direct paths to learn more about each piece." />
-  <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="icon" type="image/png" href="/assets/mark.png" />
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Devil n Dove Creations | Browse Handmade Projects &amp; Pieces</title>
+
+<link href="/css/styles.css" rel="stylesheet"/>
+<link href="/assets/mark.png" rel="icon" type="image/png"/>
+<style>
     .hero-cta{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
     .stats-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-top:16px; }
     .stat-card{ background:#fff; border:1px solid #e7e7e7; border-radius:18px; padding:14px; }
@@ -42,102 +43,94 @@
       .stats-grid, .controls-grid, .catalog-grid, .video-grid{ grid-template-columns: 1fr; }
     }
   </style>
-</head>
+<link href="https://devilndove.com/creations/" rel="canonical"/><meta content="Browse Devil n Dove creations including handmade jewelry, resin, mixed media, workshop builds, and featured finished pieces." name="description"/><meta content="index,follow" name="robots"/><meta content="Devil n Dove" property="og:site_name"/><meta content="website" property="og:type"/><meta content="Devil n Dove Creations | Browse Handmade Projects &amp; Pieces" property="og:title"/><meta content="Browse Devil n Dove creations including handmade jewelry, resin, mixed media, workshop builds, and featured finished pieces." property="og:description"/><meta content="https://devilndove.com/creations/" property="og:url"/><meta content="https://devilndove.com/assets/logo-clear.png" property="og:image"/><meta content="summary_large_image" name="twitter:card"/><meta content="Devil n Dove Creations | Browse Handmade Projects &amp; Pieces" name="twitter:title"/><meta content="Browse Devil n Dove creations including handmade jewelry, resin, mixed media, workshop builds, and featured finished pieces." name="twitter:description"/><meta content="https://devilndove.com/assets/logo-clear.png" name="twitter:image"/><script id="pageStructuredData" type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Browse Devil n Dove creations","url":"https://devilndove.com/creations/","description":"Browse Devil n Dove creations including handmade jewelry, resin, mixed media, workshop builds, and featured finished pieces.","isPartOf":{"@type":"WebSite","name":"Devil n Dove","url":"https://devilndove.com/"}}</script></head>
 <body>
-  <div class="container">
-    <div class="nav">
-      <div class="brand">
-        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
-        <div>
-          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Workshop • Art • Tools • Movies</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:14px;flex-wrap:wrap">
-        <a href="/index.html">Home</a>
-        <a href="/about/index.html">About</a>
-        <a href="/gallery/index.html">Art</a>
-        <a href="/creations/index.html">Creations</a>
-        <a href="/tools/index.html">Tools</a>
-        <a href="/supplies/index.html">Supplies</a>
-        <a href="/shop/index.html">Shop</a>
-        <a href="/movies/index.html">Movies</a>
-        <a href="/contact/index.html">Contact</a>
-      </div>
-    </div>
-
-    <section class="hero">
-      <span class="badge">Finished Work</span>
-      <h1>Browse our creations in one place.</h1>
-      <p>
+<div class="container">
+<div class="nav">
+<div class="brand">
+<img alt="Devil n Dove logo" src="/assets/logo-clear.png"/>
+<div>
+<div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+<div class="small">Workshop • Art • Tools • Movies</div>
+</div>
+</div>
+<div style="display:flex;gap:14px;flex-wrap:wrap">
+<a href="/index.html">Home</a>
+<a href="/about/index.html">About</a>
+<a href="/gallery/index.html">Art</a>
+<a href="/creations/index.html">Creations</a>
+<a href="/tools/index.html">Tools</a>
+<a href="/supplies/index.html">Supplies</a>
+<a href="/shop/index.html">Shop</a>
+<a href="/movies/index.html">Movies</a>
+<a href="/contact/index.html">Contact</a>
+</div>
+</div>
+<section class="hero">
+<span class="badge">Finished Work</span>
+<h1>Browse Devil n Dove creations</h1>
+<p>
         This page is built to scale. Right now it shows the finished pieces already in your JSON, and later it can grow into the main home for hundreds of rings, pendants, sets, experiments, and one-off builds.
       </p>
-      <div class="hero-cta">
-        <a class="btn" href="/shop/index.html">Visit the shop page</a>
-        <a class="btn secondary" href="/gallery/index.html">See the broader art gallery</a>
-      </div>
-    </section>
-
-    <section class="stats-grid" aria-label="Creations summary">
-      <div class="stat-card"><span class="small">Pieces listed</span><div class="stat-value" id="statTotal">0</div></div>
-      <div class="stat-card"><span class="small">Subcategories</span><div class="stat-value" id="statSubs">0</div></div>
-      <div class="stat-card"><span class="small">Materials tagged</span><div class="stat-value" id="statMaterials">0</div></div>
-      <div class="stat-card"><span class="small">Visible right now</span><div class="stat-value" id="statVisible">0</div></div>
-    </section>
-
-    <section class="panel" id="videoPanel" hidden>
-      <div class="video-grid">
-        <div class="video-wrap"><video id="creationVideo" controls playsinline preload="metadata"></video></div>
-        <div>
-          <span class="badge">Workshop video</span>
-          <h2 style="margin:.5rem 0">A closer look at what we make.</h2>
-          <p id="videoCopy" class="small" style="font-size:1rem;color:#555">
+<div class="hero-cta">
+<a class="btn" href="/shop/index.html">Visit the shop page</a>
+<a class="btn secondary" href="/gallery/index.html">See the broader art gallery</a>
+</div>
+</section>
+<section aria-label="Creations summary" class="stats-grid">
+<div class="stat-card"><span class="small">Pieces listed</span><div class="stat-value" id="statTotal">0</div></div>
+<div class="stat-card"><span class="small">Subcategories</span><div class="stat-value" id="statSubs">0</div></div>
+<div class="stat-card"><span class="small">Materials tagged</span><div class="stat-value" id="statMaterials">0</div></div>
+<div class="stat-card"><span class="small">Visible right now</span><div class="stat-value" id="statVisible">0</div></div>
+</section>
+<section class="panel" hidden="" id="videoPanel">
+<div class="video-grid">
+<div class="video-wrap"><video controls="" id="creationVideo" playsinline="" preload="metadata"></video></div>
+<div>
+<span class="badge">Workshop video</span>
+<h2 style="margin:.5rem 0">A closer look at what we make.</h2>
+<p class="small" id="videoCopy" style="font-size:1rem;color:#555">
             Watch one of the pieces of workshop footage connected to this collection.
           </p>
-          <div class="chip-row" id="videoChips"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="controls-grid">
-        <div>
-          <label class="small" for="q">Search</label>
-          <input id="q" class="input" type="search" placeholder="Search title, notes, tags, material, style..." />
-        </div>
-        <div>
-          <label class="small" for="typeFilter">Type</label>
-          <select id="typeFilter" class="input"><option value="all">All types</option></select>
-        </div>
-        <div>
-          <label class="small" for="subFilter">Subcategory</label>
-          <select id="subFilter" class="input"><option value="all">All subcategories</option></select>
-        </div>
-        <div>
-          <label class="small" for="materialFilter">Material</label>
-          <select id="materialFilter" class="input"><option value="all">All materials</option></select>
-        </div>
-      </div>
-
-      <div class="results-bar">
-        <div>
-          <strong id="resultsCount">0</strong> pieces showing
+<div class="chip-row" id="videoChips"></div>
+</div>
+</div>
+</section>
+<section class="panel">
+<div class="controls-grid">
+<div>
+<label class="small" for="q">Search</label>
+<input class="input" id="q" placeholder="Search title, notes, tags, material, style..." type="search"/>
+</div>
+<div>
+<label class="small" for="typeFilter">Type</label>
+<select class="input" id="typeFilter"><option value="all">All types</option></select>
+</div>
+<div>
+<label class="small" for="subFilter">Subcategory</label>
+<select class="input" id="subFilter"><option value="all">All subcategories</option></select>
+</div>
+<div>
+<label class="small" for="materialFilter">Material</label>
+<select class="input" id="materialFilter"><option value="all">All materials</option></select>
+</div>
+</div>
+<div class="results-bar">
+<div>
+<strong id="resultsCount">0</strong> pieces showing
           <div class="small">Use the filters to narrow the collection as this library grows.</div>
-        </div>
-        <button id="resetBtn" class="btn secondary" type="button">Reset filters</button>
-      </div>
-    </section>
-
-    <section id="activeChips" class="chip-row" aria-label="Active filters"></section>
-    <section id="catalog" class="catalog-grid" aria-live="polite"></section>
-
-    <footer class="footer">
+</div>
+<button class="btn secondary" id="resetBtn" type="button">Reset filters</button>
+</div>
+</section>
+<section aria-label="Active filters" class="chip-row" id="activeChips"></section>
+<section aria-live="polite" class="catalog-grid" id="catalog"></section>
+<footer class="footer">
       © <span id="year"></span> Devil n Dove — handcrafted experiments, builds, and stories from our workshop.
     </footer>
-  </div>
-
-  <script src="/js/main.js"></script>
-  <script>
+</div>
+<script src="/js/main.js"></script>
+<script>
     const DATA_URL = '/data/itemsforsale/itemsforsale_items_master.json';
     const FALLBACK_ASSET_ORIGIN = 'https://assets.devilndove.com';
 
