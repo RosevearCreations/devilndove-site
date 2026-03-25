@@ -71,7 +71,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  async function fetchCatalogItems(itemKind, typeLabel, urlPath, query) {
+    try {
+      const response = await fetch(`/api/catalog-items?item_kind=${encodeURIComponent(itemKind)}&q=${encodeURIComponent(query)}&limit=250`);
+      const data = await response.json();
+      if (!response.ok || !data?.ok) return [];
+      const rows = Array.isArray(data.items) ? data.items : [];
+      return rows.map((row) => ({
+        type: typeLabel,
+        name: row.name || `${typeLabel} item`,
+        summary: [row.category, row.subcategory, row.short_description, row.notes].filter(Boolean).join(' • '),
+        url: urlPath,
+        image: row.image_url || '',
+        score: scoreText(query, row.name, row.brand, row.category, row.subcategory, row.item_type, row.short_description, row.notes)
+      })).filter((row) => row.score > 0 || !query);
+    } catch {
+      return [];
+    }
+  }
+
   async function fetchTools(query) {
+    const migrated = await fetchCatalogItems('tool', 'Tool', '/tools/', query);
+    if (migrated.length) return migrated;
     const rows = await fetchJson('/data/toolshed/toolshed_items_master.json');
     if (!Array.isArray(rows)) return [];
     return rows.map((row) => ({
@@ -84,6 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function fetchSupplies(query) {
+    const migrated = await fetchCatalogItems('supply', 'Supply', '/supplies/', query);
+    if (migrated.length) return migrated;
     const rows = await fetchJson('/data/supplies/supplies_items_master.json');
     if (!Array.isArray(rows)) return [];
     return rows.map((row) => ({
@@ -96,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function fetchCreations(query) {
+    const migrated = await fetchCatalogItems('creation', 'Creation', '/creations/', query);
+    if (migrated.length) return migrated;
     const data = await fetchJson('/data/site/featured-items.json');
     const rows = Array.isArray(data?.items) ? data.items : [];
     return rows.map((row) => ({

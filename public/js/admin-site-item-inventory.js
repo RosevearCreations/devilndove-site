@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mountEl.innerHTML = `
       <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Site Inventory Operations</h3>
-        <p class="small" style="margin-top:0">Track sellable products, tools, and supplies with on-hand, reserved, incoming, reorder, supplier details, and movement history.</p>
+        <p class="small" style="margin-top:0">Track sellable products, tools, and supplies with on-hand, reserved, incoming, reorder, supplier details, movement history, and a staged path toward unified D1-backed catalog data.</p>
         <div id="siteInventoryMessage" class="small" style="display:none;margin-bottom:12px"></div>
         <div class="grid cols-5" style="gap:12px;margin-bottom:12px">
           <div class="card"><div class="small">Items</div><div id="siteInventoryTotalItems" style="font-size:1.15rem;font-weight:800">—</div></div>
