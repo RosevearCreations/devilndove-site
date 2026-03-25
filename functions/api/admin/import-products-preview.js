@@ -1,7 +1,7 @@
 // File: /functions/api/admin/import-products-preview.js
 // Brief description: Previews bulk product import rows for admin workflow cleanup. It accepts
-// simple JSON row data, normalizes important fields, and reports validation problems so admins
-// can clean data before a future full import/insert step is run.
+// CSV or JSON row data, normalizes important fields, and reports validation problems so admins
+// can clean data before a full import/insert step is run.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -104,7 +104,7 @@ export async function onRequestPost(context) {
     if (!Number.isInteger(price) || price < 0) issues.push('price_cents must be a whole number.');
     if (slug && (previewSlugs.get(slug) || 0) > 1) issues.push('Slug is duplicated in this import batch.');
     if (slug && existingSlugMap.has(slug)) issues.push('Slug already exists in the database.');
-    if (normalizeText(row?.featured_image_url) && !/^https?:\/\//i.test(normalizeText(row?.featured_image_url))) issues.push('featured_image_url must start with http or https.');
+    if (normalizeText(row?.featured_image_url) && !/^https?:\/\//i.test(normalizeText(row?.featured_image_url))) issues.push('featured_image_url must start with http or https when provided.');
     if (row?.inventory_tracking != null && ![0,1,'0','1',true,false].includes(row.inventory_tracking)) issues.push('inventory_tracking should be 0 or 1.');
 
     return {

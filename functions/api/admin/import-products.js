@@ -1,5 +1,5 @@
 // File: /functions/api/admin/import-products.js
-// Brief description: Imports validated product rows in bulk so finished products can be seeded faster.
+// Brief description: Imports validated product rows in bulk so finished products can be seeded faster. Featured images remain optional at import time and can be reviewed later before store-ready status is applied.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
