@@ -132,6 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       window.DDAuth.setToken(token);
+      window.DDAuth.setStoredUser(result?.user || null);
 
       setMessage("First admin created successfully.");
       document.dispatchEvent(new CustomEvent("dd:auth-changed", {

@@ -6,17 +6,57 @@
 (function () {
   const TOKEN_KEY = "dd_auth_token";
   const USER_KEY = "dd_auth_user";
+  const TOKEN_COOKIE = "dd_auth_token";
+  const TOKEN_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
   function normalizeText(value) {
     return String(value || "").trim();
   }
 
-  function getToken() {
+
+  function getCookie(name) {
     try {
-      return normalizeText(localStorage.getItem(TOKEN_KEY));
+      const safeName = String(name || "").trim();
+      if (!safeName) return "";
+      const parts = String(document.cookie || "").split(/;\s*/);
+      for (const part of parts) {
+        const eq = part.indexOf("=");
+        if (eq === -1) continue;
+        const key = part.slice(0, eq).trim();
+        if (key !== safeName) continue;
+        return decodeURIComponent(part.slice(eq + 1));
+      }
+    } catch {}
+    return "";
+  }
+
+  function setCookie(name, value, maxAgeSeconds = TOKEN_COOKIE_MAX_AGE) {
+    try {
+      const safeName = String(name || "").trim();
+      if (!safeName) return;
+      const safeValue = encodeURIComponent(String(value || ""));
+      if (!safeValue) {
+        document.cookie = `${safeName}=; path=/; max-age=0; SameSite=Lax`;
+        return;
+      }
+      document.cookie = `${safeName}=${safeValue}; path=/; max-age=${Number(maxAgeSeconds || 0)}; SameSite=Lax`;
+    } catch {}
+  }
+
+  function getToken() {
+    let token = "";
+
+    try {
+      token = normalizeText(localStorage.getItem(TOKEN_KEY));
     } catch {
-      return "";
+      token = "";
     }
+
+    if (token) {
+      return token;
+    }
+
+    return normalizeText(getCookie(TOKEN_COOKIE));
   }
 
   function setToken(token) {
@@ -31,6 +71,8 @@
     } catch {
       // ignore storage failures
     }
+
+    setCookie(TOKEN_COOKIE, safeToken, safeToken ? TOKEN_COOKIE_MAX_AGE : 0);
 
     return safeToken;
   }

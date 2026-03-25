@@ -119,13 +119,30 @@
     const container = document.querySelector('.container') || document.body;
     let footer = document.querySelector('.footer');
     if (!footer) {
-      footer = document.createElement('div');
+      footer = document.createElement('footer');
       footer.className = 'footer card';
       container.appendChild(footer);
-    } else if (!footer.classList.contains('card')) {
-      footer.classList.add('card');
+    } else {
+      if (footer.tagName.toLowerCase() !== "footer") {
+        const replacement = document.createElement('footer');
+        replacement.className = footer.className || 'footer card';
+        footer.replaceWith(replacement);
+        footer = replacement;
+      }
+      if (!footer.classList.contains('card')) {
+        footer.classList.add('card');
+      }
     }
+    footer.setAttribute('role', 'contentinfo');
     footer.innerHTML = buildSharedFooter();
+  }
+
+  function ensureGlobalScript(src) {
+    if (!src || document.querySelector(`script[src="${src}"]`)) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    document.body.appendChild(script);
   }
 
   window.DD = window.DD || {};
@@ -135,5 +152,8 @@
   document.addEventListener("DOMContentLoaded", () => {
     injectSharedNav();
     injectSharedFooter();
+    ensureGlobalScript('/public/js/auth.js');
+    ensureGlobalScript('/public/js/site-auth-ui.js');
+    ensureGlobalScript('/public/js/site-analytics.js');
   });
 })();
