@@ -41,3 +41,11 @@
 - R2 direct upload depends on the bucket binding and public base URL being configured
 - webhook replay tooling still queues and relabels events rather than running a background worker
 - search page currently blends API products with static JSON content; it is useful now but still a first-pass discovery layer
+
+
+## Latest pass checks
+
+- shared footer is now injected sitewide
+- account widget is now available sitewide when auth scripts are loaded
+- logged-out state now exposes login, forgot-password, and forgot-email paths
+- D1 duplicate-column warnings in upgrade SQL are now documented as harmless when the column already exists

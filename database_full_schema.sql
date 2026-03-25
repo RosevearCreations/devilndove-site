@@ -625,3 +625,17 @@ VALUES
   ('site.notifications.retry_minutes', '15', 0),
   ('payments.paypal.enabled', 'true', 1),
   ('payments.stripe.enabled', 'true', 1);
+
+
+CREATE TABLE IF NOT EXISTS auth_recovery_requests (
+  auth_recovery_request_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  request_type TEXT NOT NULL CHECK (request_type IN ('forgot_password','forgot_email')),
+  contact_email TEXT NOT NULL,
+  possible_email TEXT,
+  display_name TEXT,
+  note TEXT,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','reviewed','resolved','closed')),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_auth_recovery_requests_status_created_at ON auth_recovery_requests(status, created_at DESC);

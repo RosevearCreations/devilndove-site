@@ -60,3 +60,9 @@
 - sitemap coverage for public collections and search page ✅ refreshed
 - structured data on home and major public pages ✅ baseline refreshed
 - continue improving crawl, discovery, and query-awareness each pass
+
+
+## Data model caution now worth planning
+
+- the search page still blends live database products with JSON-driven tools, supplies, and creations
+- if the long-term plan is unified search, richer analytics, and inventory automation, migrating high-value JSON collections into D1 is now the right time to start while scope is still manageable

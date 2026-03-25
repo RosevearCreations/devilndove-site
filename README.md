@@ -19,6 +19,9 @@ The current build includes:
 - direct image upload endpoint for R2-backed product media
 - uploaded asset browsing and delete actions in admin
 - public site search page with structured data support and search-event logging
+- shared footer-driven site search and crawl-discovery links on every page
+- floating logged-in account widget available sitewide
+- account-help page for forgot-password and forgot-email request logging
 - site inventory and reorder tracking for tools, supplies, and sellable products
 - inventory movement history logging for stock changes
 - local refund and dispute workflow logging for orders and payments
@@ -73,6 +76,7 @@ For every future public-facing update:
 - private utility pages such as login, register, cart, checkout, members, bootstrap, and health pages should stay `noindex`
 - sitemap and robots.txt must be reviewed whenever public pages are added or removed
 - search visibility and crawl awareness should be improved a little every pass, not treated as a one-time task
+- every shared-layout pass should preserve the shared footer, shared account widget, and search-discovery links sitewide
 
 ## Database files
 
@@ -115,3 +119,8 @@ Admin operations added or deepened in the recent passes:
 - `/api/admin/media-assets`
 - `/api/admin/site-item-inventory`
 - `/api/admin/import-products-preview`
+
+
+## Current caution
+
+JSON-backed collections still exist for some public sections such as tools, supplies, and creations. The site search works across them today, but a staged move of those collections into D1 would make future search, inventory, analytics, and admin tooling much stronger.

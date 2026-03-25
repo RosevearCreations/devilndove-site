@@ -80,3 +80,10 @@ When a public page is touched, review:
 - robots intent
 - sitemap impact
 - whether the page should contribute to public search awareness
+
+
+## Shared layout expectations
+
+- `/js/main.js` owns shared nav and footer injection
+- `/public/js/site-auth-ui.js` owns the floating account widget
+- `/account-help/` provides logged-out recovery request entry points

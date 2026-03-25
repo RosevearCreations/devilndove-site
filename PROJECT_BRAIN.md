@@ -72,3 +72,10 @@ Most important next layers after this pass are:
 - deeper inventory operations and movement history UX
 - funnel dashboards and analytics polish
 - ongoing crawl, metadata, and public search-awareness improvements each pass
+
+
+## Latest UX additions
+
+- shared floating account widget across the site
+- shared footer with search/discovery links on every page
+- account-help page and request logging for forgot-password and forgot-email flows

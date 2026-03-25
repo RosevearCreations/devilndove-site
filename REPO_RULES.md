@@ -17,3 +17,6 @@
 - Private utility pages should normally remain `noindex`.
 - Review sitemap, robots.txt, and public search visibility on every pass that touches public pages.
 - Treat public search awareness as an ongoing improvement requirement for future updates.
+- Keep a visible shared footer on every page unless a page is intentionally standalone.
+- Keep the shared logged-in account widget available on every page.
+- Logged-out account UI should continue to expose login, forgot-password, and forgot-email paths.

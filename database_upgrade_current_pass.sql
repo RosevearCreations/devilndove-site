@@ -3,7 +3,9 @@
 -- before the latest payment, media, SEO/search, and inventory-movement pass.
 --
 -- Run carefully on an existing database that is missing these newer objects/columns.
--- If a column already exists, the related ALTER statement will fail and can be skipped.
+-- D1 / SQLite does not support ADD COLUMN IF NOT EXISTS, so duplicate-column errors such as
+-- "duplicate column name: payment_status" mean that specific column is already present and can be skipped.
+-- Continue running the remaining statements that apply.
 
 PRAGMA foreign_keys = ON;
 
@@ -130,3 +132,17 @@ CREATE TABLE IF NOT EXISTS site_inventory_movements (
 );
 CREATE INDEX IF NOT EXISTS idx_site_inventory_movements_item_id ON site_inventory_movements(site_item_inventory_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_site_inventory_movements_created_at ON site_inventory_movements(created_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS auth_recovery_requests (
+  auth_recovery_request_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  request_type TEXT NOT NULL CHECK (request_type IN ('forgot_password','forgot_email')),
+  contact_email TEXT NOT NULL,
+  possible_email TEXT,
+  display_name TEXT,
+  note TEXT,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','reviewed','resolved','closed')),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_auth_recovery_requests_status_created_at ON auth_recovery_requests(status, created_at DESC);

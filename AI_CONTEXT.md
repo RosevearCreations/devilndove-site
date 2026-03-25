@@ -47,3 +47,7 @@ This repo is in the payment, media, inventory, and public SEO hardening phase af
 - `database_growth_analytics_seo_extension.sql`
 - `database_full_schema.sql`
 - `database_upgrade_current_pass.sql`
+
+
+- Shared layout currently depends on `main.js` for nav/footer and `site-auth-ui.js` for the floating account widget.
+- Logged-out recovery links point to `/account-help/`, which records requests in `auth_recovery_requests`.

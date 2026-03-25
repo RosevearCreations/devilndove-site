@@ -95,3 +95,8 @@ Operational inventory table for tools, supplies, and sellable items with on-hand
 ### site_inventory_movements
 Movement log for inventory creates, adjustments, reserves, releases, incoming changes, corrections, and deletes.
 Fields include previous and new on-hand, reserved, and incoming quantities plus note and actor.
+
+
+## auth_recovery_requests
+
+Stores logged-out forgot-password and forgot-email requests for later admin review without revealing whether a matching account exists.
