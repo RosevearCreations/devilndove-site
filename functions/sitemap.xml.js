@@ -35,11 +35,15 @@ export async function onRequestGet(context) {
   const staticUrls = [
     { loc: "/", priority: "1.0", changefreq: "weekly" },
     { loc: "/about/", priority: "0.8", changefreq: "monthly" },
+    { loc: "/contact/", priority: "0.7", changefreq: "monthly" },
     { loc: "/gallery/", priority: "0.8", changefreq: "weekly" },
+    { loc: "/creations/", priority: "0.8", changefreq: "weekly" },
     { loc: "/shop/", priority: "0.9", changefreq: "daily" },
     { loc: "/tools/", priority: "0.7", changefreq: "weekly" },
     { loc: "/supplies/", priority: "0.7", changefreq: "weekly" },
-    { loc: "/contact/", priority: "0.6", changefreq: "monthly" }
+    { loc: "/toolshed/", priority: "0.6", changefreq: "weekly" },
+    { loc: "/movies/", priority: "0.5", changefreq: "monthly" },
+    { loc: "/search/", priority: "0.5", changefreq: "weekly" }
   ];
 
   let productRows = [];
