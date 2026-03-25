@@ -13,14 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const linksWrap = document.querySelector('.nav .links');
   let floatingWidgetEl = null;
 
-  function show(el, shouldShow) {
-    if (!el) return;
-    el.style.display = shouldShow ? "" : "none";
-  }
-
-  function getSafeUserName(user) {
-    return String(user?.display_name || user?.email || 'Member').trim() || 'Member';
-  }
+  function show(el, shouldShow) { if (el) el.style.display = shouldShow ? "" : "none"; }
+  function getSafeUserName(user) { return String(user?.display_name || user?.email || 'Member').trim() || 'Member'; }
 
   function ensureFloatingWidget() {
     if (floatingWidgetEl) return floatingWidgetEl;
@@ -54,15 +48,15 @@ document.addEventListener("DOMContentLoaded", () => {
             <a href="/account-help/index.html?mode=email">Forgot email</a>
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
     document.body.appendChild(floatingWidgetEl);
     const toggle = floatingWidgetEl.querySelector('#ddAuthWidgetToggle');
     const body = floatingWidgetEl.querySelector('#ddAuthWidgetBody');
     const logout = floatingWidgetEl.querySelector('#ddAuthWidgetLogout');
     toggle?.addEventListener('click', () => {
-      body.style.display = body.style.display === 'none' ? 'block' : 'none';
-      toggle.textContent = body.style.display === 'none' ? 'Open' : 'Close';
+      body.style.display = body.style.display === 'none' ? 'block' : 'block';
+      if (body.style.display === 'block' && toggle.textContent === 'Open') toggle.textContent = 'Close';
+      else if (toggle.textContent === 'Close') { body.style.display = 'none'; toggle.textContent = 'Open'; }
     });
     logout?.addEventListener('click', async () => {
       try { await window.DDAuth.logout(); } finally { window.location.href = '/'; }
@@ -73,14 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
   function applyUi(user) {
     const loggedIn = !!user;
     const role = String(user?.role || "").trim().toLowerCase();
-    const isAdmin = loggedIn && role === "admin";
+    const isAdmin = loggedIn && role === 'admin';
     const name = getSafeUserName(user);
-
     loggedInEls.forEach((el) => show(el, loggedIn));
     loggedOutEls.forEach((el) => show(el, !loggedIn));
     adminEls.forEach((el) => show(el, isAdmin));
     navUserNameEls.forEach((el) => { el.textContent = name; });
-
     const widget = ensureFloatingWidget();
     if (widget) {
       const state = widget.querySelector('#ddAuthWidgetState');
@@ -94,17 +86,15 @@ document.addEventListener("DOMContentLoaded", () => {
       show(loggedInWrap, loggedIn);
       show(loggedOutWrap, !loggedIn);
     }
-
     if (linksWrap) {
-      const existing = linksWrap.querySelector('.dd-nav-status');
-      if (!existing) {
-        const status = document.createElement('span');
-        status.className = 'small dd-nav-status';
-        status.innerHTML = 'Signed in as <span data-nav-user-name>Member</span>';
-        status.style.display = 'none';
-        linksWrap.appendChild(status);
+      let statusEl = linksWrap.querySelector('.dd-nav-status');
+      if (!statusEl) {
+        statusEl = document.createElement('span');
+        statusEl.className = 'small dd-nav-status';
+        statusEl.innerHTML = 'Signed in as <span data-nav-user-name>Member</span>';
+        statusEl.style.display = 'none';
+        linksWrap.appendChild(statusEl);
       }
-      const statusEl = linksWrap.querySelector('.dd-nav-status');
       show(statusEl, loggedIn);
       const nameEl = statusEl?.querySelector('[data-nav-user-name]');
       if (nameEl) nameEl.textContent = name;
@@ -114,18 +104,24 @@ document.addEventListener("DOMContentLoaded", () => {
   function emitAuthEvents(user, session = null) {
     const loggedIn = !!user;
     const role = String(user?.role || "").trim().toLowerCase();
-    const isAdmin = loggedIn && role === "admin";
-    document.dispatchEvent(new CustomEvent("dd:auth-ready", { detail: { ok: true, logged_in: loggedIn, user, session } }));
-    document.dispatchEvent(new CustomEvent("dd:member-access-ready", { detail: { ok: loggedIn, logged_in: loggedIn, user, session } }));
-    document.dispatchEvent(new CustomEvent("dd:members-ready", { detail: { ok: loggedIn, logged_in: loggedIn, user, session } }));
-    document.dispatchEvent(new CustomEvent("dd:admin-ready", { detail: { ok: isAdmin, logged_in: loggedIn, user, session } }));
+    const isAdmin = loggedIn && role === 'admin';
+    document.dispatchEvent(new CustomEvent('dd:auth-ready', { detail: { ok: true, logged_in: loggedIn, user, session } }));
+    document.dispatchEvent(new CustomEvent('dd:member-access-ready', { detail: { ok: loggedIn, logged_in: loggedIn, user, session } }));
+    document.dispatchEvent(new CustomEvent('dd:members-ready', { detail: { ok: loggedIn, logged_in: loggedIn, user, session } }));
+    document.dispatchEvent(new CustomEvent('dd:admin-ready', { detail: { ok: isAdmin, logged_in: loggedIn, user, session } }));
   }
 
   async function refreshAuthState() {
+    const cachedUser = window.DDAuth.getStoredUser();
+    if (cachedUser) {
+      applyUi(cachedUser);
+      emitAuthEvents(cachedUser, null);
+    }
     if (!window.DDAuth.isLoggedIn()) {
-      window.DDAuth.setStoredUser(null);
-      applyUi(null);
-      emitAuthEvents(null, null);
+      if (!cachedUser) {
+        applyUi(null);
+        emitAuthEvents(null, null);
+      }
       return;
     }
     try {
@@ -139,13 +135,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  logoutButtons.forEach((button) => {
-    button.addEventListener("click", async () => {
-      try { await window.DDAuth.logout(); } finally { window.location.href = "/"; }
-    });
-  });
+  logoutButtons.forEach((button) => button.addEventListener('click', async () => {
+    try { await window.DDAuth.logout(); } finally { window.location.href = '/'; }
+  }));
 
-  document.addEventListener("dd:auth-changed", (event) => {
+  document.addEventListener('dd:auth-changed', (event) => {
     const user = event?.detail?.logged_in ? (event?.detail?.user || window.DDAuth.getStoredUser()) : null;
     applyUi(user);
     emitAuthEvents(user, null);

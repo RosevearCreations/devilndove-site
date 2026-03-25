@@ -133,6 +133,25 @@ document.addEventListener('DOMContentLoaded', () => {
     })).filter((row) => row.score > 0);
   }
 
+
+  async function fetchMovies(query) {
+    try {
+      const response = await fetch(`/api/movies?q=${encodeURIComponent(query)}&limit=120`);
+      const data = await response.json();
+      if (!response.ok || !data?.ok) return [];
+      return (Array.isArray(data.items) ? data.items : []).map((row) => ({
+        type: 'Movie',
+        name: row.title || row.upc || 'Movie',
+        summary: [row.release_year, row.genre, row.director_names, row.actor_names, row.summary].filter(Boolean).join(' • '),
+        url: '/movies/',
+        image: row.front_image_url || '',
+        score: scoreText(query, row.title, row.upc, row.release_year, row.genre, row.director_names, row.actor_names, row.summary)
+      })).filter((row) => row.score > 0 || !query);
+    } catch {
+      return [];
+    }
+  }
+
   function fetchPages(query) {
     return staticPages.map((row) => ({ ...row, score: scoreText(query, row.name, row.summary) }))
       .filter((row) => row.score > 0 || (!query && row.url === '/shop/'));
@@ -176,14 +195,15 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     summaryEl.textContent = 'Searching...';
-    const [products, tools, supplies, creations] = await Promise.all([
+    const [products, tools, supplies, creations, movies] = await Promise.all([
       fetchProducts(query),
       fetchTools(query),
       fetchSupplies(query),
-      fetchCreations(query)
+      fetchCreations(query),
+      fetchMovies(query)
     ]);
     const pages = fetchPages(query);
-    const results = [...products, ...tools, ...supplies, ...creations, ...pages]
+    const results = [...products, ...tools, ...supplies, ...creations, ...movies, ...pages]
       .sort((a, b) => Number(b.score || 0) - Number(a.score || 0) || String(a.name || '').localeCompare(String(b.name || '')))
       .slice(0, 36);
     render(results, query);

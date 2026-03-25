@@ -145,7 +145,23 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to preview import.');
       const previewEl = document.getElementById('adminImportProductsPreview');
       const previewRows = Array.isArray(data.preview) ? data.preview : [];
-      previewEl.innerHTML = `<strong>${data.summary?.valid_rows || 0}</strong> valid row(s) • <strong>${data.summary?.invalid_rows || 0}</strong> invalid row(s)<br><br>` + (previewRows.map((row) => `${row.row_number}. ${row.normalized?.name || 'Unnamed'} — ${row.valid ? 'valid' : 'invalid'}${row.issues?.length ? ` — ${row.issues.join(' | ')}` : ''}`).join('<br>') || 'No rows to preview.');
+      previewEl.innerHTML = `
+        <div><strong>${data.summary?.valid_rows || 0}</strong> valid row(s) • <strong>${data.summary?.invalid_rows || 0}</strong> invalid row(s)</div>
+        <div class="admin-table-wrap" style="margin-top:12px">
+          <table>
+            <thead><tr><th>Row</th><th>Name</th><th>Slug</th><th>Status</th><th>Price</th><th>Image</th><th>Issues</th></tr></thead>
+            <tbody>${previewRows.map((row) => `
+              <tr>
+                <td>${row.row_number}</td>
+                <td>${row.normalized?.name || 'Unnamed'}</td>
+                <td>${row.normalized?.slug || '—'}</td>
+                <td><span class="status-chip">${row.valid ? 'Valid' : 'Needs review'}</span></td>
+                <td>${row.normalized?.price_cents ?? '—'}</td>
+                <td>${row.normalized?.featured_image_url ? 'Provided' : 'Optional / blank'}</td>
+                <td>${row.issues?.length ? row.issues.join(' | ') : 'None'}</td>
+              </tr>`).join('') || '<tr><td colspan="7">No rows to preview.</td></tr>'}</tbody>
+          </table>
+        </div>`;
       setMessage('Preview complete.');
     } catch (error) {
       setMessage(error.message || 'Failed to preview import.', true);

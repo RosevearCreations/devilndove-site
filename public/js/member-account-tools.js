@@ -63,6 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <div><strong>Active Sessions:</strong> <span id="memberToolsActiveSessions">—</span></div>
         </div>
 
+        <div class="small" style="margin-top:12px">Need help? <a href="/account-help/index.html?mode=password">Forgot password</a> • <a href="/account-help/index.html?mode=email">Forgot email</a></div>
+
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
           <button class="btn" type="button" id="refreshMemberSessionInfoButton">
             Refresh Session Info

@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="small" style="display:grid;gap:8px;margin-bottom:12px">
           <label><input type="checkbox" id="catalogSyncTools" checked /> Tools</label>
           <label><input type="checkbox" id="catalogSyncSupplies" checked /> Supplies</label>
+          <label><input type="checkbox" id="catalogSyncMovies" checked /> Movies</label>
           <label><input type="checkbox" id="catalogSyncCreations" checked /> Featured creations</label>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const kinds = [];
     if (document.getElementById('catalogSyncTools')?.checked) kinds.push('tool');
     if (document.getElementById('catalogSyncSupplies')?.checked) kinds.push('supply');
+    if (document.getElementById('catalogSyncMovies')?.checked) kinds.push('movie');
     if (document.getElementById('catalogSyncCreations')?.checked) kinds.push('creation');
     return kinds;
   }

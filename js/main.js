@@ -26,7 +26,6 @@
           <div class="small">Workshop • Art • Tools • Movies</div>
         </div>
       </div>
-
       <div class="links" aria-label="Primary navigation">
         <a href="/index.html" data-nav="/">Home</a>
         <a href="/about/index.html" data-nav="/about/">About</a>
@@ -43,8 +42,7 @@
         <a href="/register/index.html" data-nav="/register/" data-show-when-logged-out style="display:none">Register</a>
         <a href="/members/index.html" data-nav="/members/" data-show-when-logged-in style="display:none">Members</a>
         <a href="/admin/index.html" data-nav="/admin/" data-show-when-admin style="display:none">Admin</a>
-      </div>
-    `;
+      </div>`;
   }
 
   function buildSharedFooter() {
@@ -53,7 +51,7 @@
       <div class="site-footer-grid">
         <div>
           <h2 class="site-footer-title">Devil n Dove</h2>
-          <p class="small">Handmade jewelry, workshop creations, tools, supplies, and maker-life updates from Southern Ontario.</p>
+          <p class="small">Handmade jewelry, workshop creations, tools, supplies, movies, and maker-life updates from Southern Ontario.</p>
         </div>
         <div>
           <div class="site-footer-heading">Explore</div>
@@ -82,11 +80,10 @@
             <input aria-label="Search Devil n Dove" name="q" placeholder="Search products, tools, supplies, art..." type="search" />
             <button class="btn" type="submit">Search</button>
           </form>
-          <p class="small">Search stays visible in the footer on every page to improve discovery and crawling paths.</p>
+          <p class="small">Search stays visible in the footer on every public page to improve discovery and crawl paths.</p>
         </div>
       </div>
-      <div class="site-footer-bottom small">© ${year} Devil n Dove. Built for storefront discovery, workshop sharing, and member access.</div>
-    `;
+      <div class="site-footer-bottom small">© ${year} Devil n Dove. Built for storefront discovery, workshop sharing, and member access.</div>`;
   }
 
   function setActiveLink(navEl) {
@@ -98,41 +95,33 @@
       const prefix = String(a.getAttribute("data-nav") || "").toLowerCase();
       if (!prefix) continue;
       if (path === prefix || path.startsWith(prefix)) {
-        if (prefix.length > bestLen) {
-          best = a;
-          bestLen = prefix.length;
-        }
+        if (prefix.length > bestLen) { best = a; bestLen = prefix.length; }
       }
     }
     if (best) best.classList.add("active");
   }
 
   function injectSharedNav() {
-    const nav = document.querySelector(".nav");
-    if (!nav) return;
-    if (nav.hasAttribute("data-no-shared-nav")) return;
+    const nav = document.querySelector('.nav');
+    if (!nav || nav.hasAttribute('data-no-shared-nav')) return;
     nav.innerHTML = buildSharedNav();
     setActiveLink(nav);
   }
 
   function injectSharedFooter() {
     const container = document.querySelector('.container') || document.body;
-    let footer = document.querySelector('.footer');
+    let footer = document.querySelector('footer.footer, .footer');
     if (!footer) {
       footer = document.createElement('footer');
       footer.className = 'footer card';
       container.appendChild(footer);
-    } else {
-      if (footer.tagName.toLowerCase() !== "footer") {
-        const replacement = document.createElement('footer');
-        replacement.className = footer.className || 'footer card';
-        footer.replaceWith(replacement);
-        footer = replacement;
-      }
-      if (!footer.classList.contains('card')) {
-        footer.classList.add('card');
-      }
+    } else if (footer.tagName.toLowerCase() !== 'footer') {
+      const replacement = document.createElement('footer');
+      replacement.className = footer.className || 'footer card';
+      footer.replaceWith(replacement);
+      footer = replacement;
     }
+    if (!footer.classList.contains('card')) footer.classList.add('card');
     footer.setAttribute('role', 'contentinfo');
     footer.innerHTML = buildSharedFooter();
   }
@@ -141,7 +130,7 @@
     if (!src || document.querySelector(`script[src="${src}"]`)) return;
     const script = document.createElement('script');
     script.src = src;
-    script.defer = true;
+    script.async = false;
     document.body.appendChild(script);
   }
 
@@ -149,7 +138,7 @@
   window.DD.escapeHtml = escapeHtml;
   window.DD.amazonSearchUrl = amazonSearchUrl;
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener('DOMContentLoaded', () => {
     injectSharedNav();
     injectSharedFooter();
     ensureGlobalScript('/public/js/auth.js');
