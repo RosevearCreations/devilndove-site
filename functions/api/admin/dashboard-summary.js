@@ -84,7 +84,10 @@ export async function onRequestGet(context) {
     payments_count,
     low_stock_count,
     failed_webhooks_count,
-    open_disputes_count
+    open_disputes_count,
+    open_recovery_requests_count,
+    recent_searches_count,
+    active_visitor_sessions_count
   ] = await Promise.all([
     getCount(env, `SELECT COUNT(*) AS count FROM users`),
     getCount(env, `SELECT COUNT(*) AS count FROM products`),
@@ -92,7 +95,10 @@ export async function onRequestGet(context) {
     getCount(env, `SELECT COUNT(*) AS count FROM payments`),
     getCount(env, `SELECT COUNT(*) AS count FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND (COALESCE(on_hand_quantity,0) + COALESCE(incoming_quantity,0)) <= COALESCE(reorder_level,0)`),
     getCount(env, `SELECT COUNT(*) AS count FROM webhook_events WHERE process_status = 'failed'`),
-    getCount(env, `SELECT COUNT(*) AS count FROM payment_disputes WHERE dispute_status IN ('open','under_review')`)
+    getCount(env, `SELECT COUNT(*) AS count FROM payment_disputes WHERE dispute_status IN ('open','under_review')`),
+    getCount(env, `SELECT COUNT(*) AS count FROM auth_recovery_requests WHERE status IN ('open','reviewed')`).catch(() => 0),
+    getCount(env, `SELECT COUNT(*) AS count FROM site_search_events WHERE created_at >= datetime('now', '-1 day')`).catch(() => 0),
+    getCount(env, `SELECT COUNT(*) AS count FROM site_visitor_sessions WHERE last_seen_at >= datetime('now', '-30 minutes')`).catch(() => 0)
   ]);
 
   return json({
@@ -109,7 +115,10 @@ export async function onRequestGet(context) {
       payments_count,
       low_stock_count,
       failed_webhooks_count,
-      open_disputes_count
+      open_disputes_count,
+      open_recovery_requests_count,
+      recent_searches_count,
+      active_visitor_sessions_count
     }
   });
 }
