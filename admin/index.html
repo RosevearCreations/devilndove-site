@@ -11,7 +11,7 @@
 <meta content="Devil n Dove admin dashboard for users, products, orders, payments, access tiers, and site operations." name="description"/>
 </head>
 <body>
-<div class="container">
+<div class="container admin-shell">
 <div class="nav">
 <div class="brand">
 <img alt="Devil n Dove logo" src="/assets/logo-clear.png"/>
@@ -69,23 +69,16 @@
 <div class="card" style="margin-top:18px">
 <h2 style="margin-top:0">Dashboard Summary</h2>
 <div class="small" id="dashboardSummaryMessage" style="display:none;margin-bottom:10px"></div>
-<div class="grid cols-4" style="gap:14px">
-<div class="card">
-<div class="small">Users</div>
-<div id="summaryUsersCount" style="font-size:1.5rem;font-weight:800">—</div>
-</div>
-<div class="card">
-<div class="small">Products</div>
-<div id="summaryProductsCount" style="font-size:1.5rem;font-weight:800">—</div>
-</div>
-<div class="card">
-<div class="small">Orders</div>
-<div id="summaryOrdersCount" style="font-size:1.5rem;font-weight:800">—</div>
-</div>
-<div class="card">
-<div class="small">Payments</div>
-<div id="summaryPaymentsCount" style="font-size:1.5rem;font-weight:800">—</div>
-</div>
+<div class="admin-summary-grid">
+<div class="admin-stat"><div class="admin-stat-label">Users</div><div class="admin-stat-value" id="summaryUsersCount">—</div></div>
+<div class="admin-stat"><div class="admin-stat-label">Products</div><div class="admin-stat-value" id="summaryProductsCount">—</div></div>
+<div class="admin-stat"><div class="admin-stat-label">Orders</div><div class="admin-stat-value" id="summaryOrdersCount">—</div></div>
+<div class="admin-stat"><div class="admin-stat-label">Payments</div><div class="admin-stat-value" id="summaryPaymentsCount">—</div></div>
+<div class="admin-stat"><div class="admin-stat-label">Low Stock</div><div class="admin-stat-value" id="summaryLowStockCount">—</div></div>
+<div class="admin-stat"><div class="admin-stat-label">Failed Webhooks</div><div class="admin-stat-value" id="summaryFailedWebhooksCount">—</div></div>
+<div class="admin-stat"><div class="admin-stat-label">Open Disputes</div><div class="admin-stat-value" id="summaryOpenDisputesCount">—</div></div>
+<div class="admin-stat"><div class="admin-stat-label">Live Visitors</div><div class="admin-stat-value" id="summaryLiveVisitorsCount">—</div></div>
+<div class="admin-stat"><div class="admin-stat-label">Searches (24h)</div><div class="admin-stat-value" id="summaryRecentSearchesCount">—</div></div>
 </div>
 </div>
 <div class="card" id="usersSection" style="margin-top:18px">
@@ -112,7 +105,7 @@
 <div id="productMediaAdminMount"></div>
 <div id="mediaLibraryAdminMount"></div>
 </div>
-<div class="card" id="analyticsSection" style="margin-top:18px"><h2 style="margin-top:0">Analytics, Visitors, Security &amp; Webhooks</h2><p class="small">Monitor visitors, page flows, abandoned carts, low-stock items, and webhook replay/review status.</p><div id="analyticsAdminMount"></div><div id="webhookEventsAdminMount"></div></div>
+<div class="card" id="analyticsSection" style="margin-top:18px"><h2 style="margin-top:0">Analytics, Visitors, Security &amp; Webhooks</h2><p class="small">Monitor visitors, page flows, abandoned carts, low-stock items, and webhook replay/review status.</p><div id="adminLiveActivityMount"></div><div id="analyticsAdminMount"></div><div id="webhookEventsAdminMount"></div></div>
 <div class="card" id="ordersSection" style="margin-top:18px">
 <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
 <div>
@@ -169,8 +162,8 @@
 <div class="small" id="ordersEmpty" style="display:none;margin-top:10px">
         No orders are available yet.
       </div>
-<div style="overflow:auto;margin-top:14px">
-<table style="width:100%;border-collapse:collapse">
+<div class="admin-table-wrap" style="margin-top:14px">
+<table>
 <thead>
 <tr>
 <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Order</th>
@@ -228,5 +221,6 @@
 <script src="/public/js/admin-notifications.js"></script>
 <script src="/public/js/admin-app-settings.js"></script>
 <script src="/public/js/admin-webhook-events.js"></script>
+<script src="/public/js/admin-live-activity.js"></script>
 </body>
 </html>
