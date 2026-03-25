@@ -1,6 +1,6 @@
 // File: /public/js/site-auth-ui.js
 // Brief description: Shared site-wide auth UI helper. It updates nav visibility,
-// renders a top-right logged-in user menu, and emits page-level auth events.
+// renders a floating account widget on every page, and emits page-level auth events.
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!window.DDAuth) return;
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const navUserNameEls = Array.from(document.querySelectorAll("[data-nav-user-name]"));
   const logoutButtons = Array.from(document.querySelectorAll("[data-nav-logout]"));
   const linksWrap = document.querySelector('.nav .links');
-  let userMenuEl = null;
+  let floatingWidgetEl = null;
 
   function show(el, shouldShow) {
     if (!el) return;
@@ -22,40 +22,52 @@ document.addEventListener("DOMContentLoaded", () => {
     return String(user?.display_name || user?.email || 'Member').trim() || 'Member';
   }
 
-  function ensureUserMenu() {
-    if (!linksWrap) return null;
-    if (userMenuEl) return userMenuEl;
-    userMenuEl = document.createElement('div');
-    userMenuEl.id = 'siteUserMenu';
-    userMenuEl.style.display = 'none';
-    userMenuEl.style.position = 'relative';
-    userMenuEl.innerHTML = `
-      <button class="btn" type="button" id="siteUserMenuButton">Account ▾</button>
-      <div id="siteUserMenuPanel" class="card" style="display:none;position:absolute;right:0;top:100%;min-width:220px;z-index:50;margin-top:8px">
-        <div class="small" id="siteUserMenuLabel" style="margin-bottom:10px"></div>
-        <div style="display:grid;gap:8px">
-          <a href="/members/" id="siteUserMenuMembers">Profile & Settings</a>
-          <a href="/admin/" id="siteUserMenuAdmin" style="display:none">Admin Dashboard</a>
-          <button class="btn" type="button" id="siteUserMenuLogout">Logout</button>
+  function ensureFloatingWidget() {
+    if (floatingWidgetEl) return floatingWidgetEl;
+    floatingWidgetEl = document.createElement('aside');
+    floatingWidgetEl.id = 'ddAuthWidget';
+    floatingWidgetEl.className = 'dd-auth-widget card';
+    floatingWidgetEl.innerHTML = `
+      <div class="dd-auth-widget-head">
+        <div>
+          <div class="dd-auth-widget-title">Account</div>
+          <div class="small" id="ddAuthWidgetState">Checking session…</div>
+        </div>
+        <button class="btn" type="button" id="ddAuthWidgetToggle">Open</button>
+      </div>
+      <div class="dd-auth-widget-body" id="ddAuthWidgetBody" style="display:none">
+        <div id="ddAuthWidgetLoggedIn" style="display:none">
+          <div class="small" id="ddAuthWidgetUserLabel" style="margin-bottom:10px"></div>
+          <div class="dd-auth-widget-links">
+            <a href="/members/index.html">Settings</a>
+            <a href="/members/index.html#orders">Orders</a>
+            <a href="/admin/index.html" id="ddAuthWidgetAdminLink" style="display:none">Admin Dashboard</a>
+            <button class="btn" type="button" id="ddAuthWidgetLogout">Logout</button>
+          </div>
+        </div>
+        <div id="ddAuthWidgetLoggedOut" style="display:none">
+          <div class="small" style="margin-bottom:10px">You are currently logged out.</div>
+          <div class="dd-auth-widget-links">
+            <a href="/login/index.html">Login</a>
+            <a href="/register/index.html">Create account</a>
+            <a href="/account-help/index.html?mode=password">Forgot password</a>
+            <a href="/account-help/index.html?mode=email">Forgot email</a>
+          </div>
         </div>
       </div>
     `;
-    linksWrap.appendChild(userMenuEl);
-    const button = userMenuEl.querySelector('#siteUserMenuButton');
-    const panel = userMenuEl.querySelector('#siteUserMenuPanel');
-    const logout = userMenuEl.querySelector('#siteUserMenuLogout');
-    button?.addEventListener('click', () => {
-      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    document.body.appendChild(floatingWidgetEl);
+    const toggle = floatingWidgetEl.querySelector('#ddAuthWidgetToggle');
+    const body = floatingWidgetEl.querySelector('#ddAuthWidgetBody');
+    const logout = floatingWidgetEl.querySelector('#ddAuthWidgetLogout');
+    toggle?.addEventListener('click', () => {
+      body.style.display = body.style.display === 'none' ? 'block' : 'none';
+      toggle.textContent = body.style.display === 'none' ? 'Open' : 'Close';
     });
     logout?.addEventListener('click', async () => {
       try { await window.DDAuth.logout(); } finally { window.location.href = '/'; }
     });
-    document.addEventListener('click', (event) => {
-      if (!userMenuEl?.contains(event.target)) {
-        panel.style.display = 'none';
-      }
-    });
-    return userMenuEl;
+    return floatingWidgetEl;
   }
 
   function applyUi(user) {
@@ -69,13 +81,33 @@ document.addEventListener("DOMContentLoaded", () => {
     adminEls.forEach((el) => show(el, isAdmin));
     navUserNameEls.forEach((el) => { el.textContent = name; });
 
-    const menu = ensureUserMenu();
-    if (menu) {
-      menu.style.display = loggedIn ? '' : 'none';
-      const label = menu.querySelector('#siteUserMenuLabel');
-      const adminLink = menu.querySelector('#siteUserMenuAdmin');
-      if (label) label.textContent = `${name} • ${role || 'member'}`;
+    const widget = ensureFloatingWidget();
+    if (widget) {
+      const state = widget.querySelector('#ddAuthWidgetState');
+      const loggedInWrap = widget.querySelector('#ddAuthWidgetLoggedIn');
+      const loggedOutWrap = widget.querySelector('#ddAuthWidgetLoggedOut');
+      const label = widget.querySelector('#ddAuthWidgetUserLabel');
+      const adminLink = widget.querySelector('#ddAuthWidgetAdminLink');
+      if (state) state.textContent = loggedIn ? `${name} • ${role || 'member'}` : 'Not logged in';
+      if (label) label.textContent = loggedIn ? `Signed in as ${name} (${user?.email || 'no email'})` : '';
       if (adminLink) adminLink.style.display = isAdmin ? '' : 'none';
+      show(loggedInWrap, loggedIn);
+      show(loggedOutWrap, !loggedIn);
+    }
+
+    if (linksWrap) {
+      const existing = linksWrap.querySelector('.dd-nav-status');
+      if (!existing) {
+        const status = document.createElement('span');
+        status.className = 'small dd-nav-status';
+        status.innerHTML = 'Signed in as <span data-nav-user-name>Member</span>';
+        status.style.display = 'none';
+        linksWrap.appendChild(status);
+      }
+      const statusEl = linksWrap.querySelector('.dd-nav-status');
+      show(statusEl, loggedIn);
+      const nameEl = statusEl?.querySelector('[data-nav-user-name]');
+      if (nameEl) nameEl.textContent = name;
     }
   }
 
