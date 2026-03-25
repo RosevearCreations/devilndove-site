@@ -1,6 +1,6 @@
 // File: /functions/api/admin/catalog-sync.js
 // Brief description: Seeds D1 catalog_items records from existing JSON collections for tools,
-// supplies, and featured creations. This begins the staged migration away from duplicated static
+// supplies, and featured creations, and movies. This begins the staged migration away from duplicated static
 // JSON-only search and inventory sources.
 
 function json(data, status = 200) {
@@ -123,6 +123,34 @@ function mapSupplyRow(row, index) {
   };
 }
 
+
+function mapMovieRow(row, index) {
+  const upc = normalizeText(row.upc || row.UPC || row.barcode || row.code);
+  const title = normalizeText(row.title || row.name || (upc ? `Movie ${upc}` : `Movie ${index + 1}`));
+  const sourceKey = upc || normalizeText(row.slug || `${slugify(title)}-${index + 1}`);
+  return {
+    item_kind: 'movie',
+    source_key: sourceKey,
+    slug: slugify(title || upc),
+    name: title || upc || `Movie ${index + 1}`,
+    brand: normalizeText(row.studio_name || row.studio),
+    category: normalizeText(row.genre || 'Movie'),
+    subcategory: normalizeText(row.media_format || row.format || ''),
+    item_type: 'movie',
+    short_description: normalizeText(row.summary || row.description || (upc ? `UPC ${upc}` : 'Movie catalog item')),
+    notes: normalizeText(row.director_names || row.actor_names || row.notes),
+    image_url: normalizeText(row.front_image_url || row.image_front || row.image || row.cover_front),
+    r2_object_key: normalizeText(row.front_r2_object_key || row.r2_object_key),
+    amazon_url: normalizeText(row.amazon_url),
+    storage_location: normalizeText(row.storage_location),
+    quantity_on_hand: Number(row.quantity_on_hand || 1) || 1,
+    reorder_point: 0,
+    sort_order: index,
+    source_record_json: JSON.stringify(row || {}),
+    source_json_path: '/data/catalog.json'
+  };
+}
+
 function mapCreationRow(row, index) {
   const name = normalizeText(row.name || row.title) || `Creation ${index + 1}`;
   const image = normalizeText(row.image || row.image_url || row.src);
@@ -214,7 +242,7 @@ export async function onRequestPost(context) {
   try { body = await request.json(); } catch {}
   const selectedKinds = Array.isArray(body.item_kinds) && body.item_kinds.length
     ? body.item_kinds.map((value) => normalizeText(value).toLowerCase()).filter(Boolean)
-    : ['tool', 'supply', 'creation'];
+    : ['tool', 'supply', 'creation', 'movie'];
 
   const summary = [];
   let totalUpserted = 0;
@@ -233,6 +261,61 @@ export async function onRequestPost(context) {
     const upserted = await upsertCatalogRows(env, mapped);
     totalUpserted += upserted;
     summary.push({ item_kind: 'supply', fetched: mapped.length, upserted });
+  }
+
+
+  if (selectedKinds.includes('movie')) {
+    const rows = await fetchJsonFromSite(request, '/data/catalog.json');
+    const mapped = (Array.isArray(rows?.items) ? rows.items : []).map(mapMovieRow);
+    const upserted = await upsertCatalogRows(env, mapped);
+    totalUpserted += upserted;
+    summary.push({ item_kind: 'movie', fetched: mapped.length, upserted });
+
+    for (const [index, row] of mapped.entries()) {
+      const source = JSON.parse(row.source_record_json || '{}');
+      await env.DB.prepare(`
+        INSERT INTO movie_catalog (
+          upc, slug, title, sort_title, summary, media_format, genre, director_names, actor_names,
+          front_image_url, back_image_url, release_year, runtime_minutes, studio_name, status,
+          featured_rank, source_record_json, source_json_path, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT(upc) DO UPDATE SET
+          slug = excluded.slug,
+          title = excluded.title,
+          sort_title = excluded.sort_title,
+          summary = excluded.summary,
+          media_format = excluded.media_format,
+          genre = excluded.genre,
+          director_names = excluded.director_names,
+          actor_names = excluded.actor_names,
+          front_image_url = excluded.front_image_url,
+          back_image_url = excluded.back_image_url,
+          release_year = excluded.release_year,
+          runtime_minutes = excluded.runtime_minutes,
+          studio_name = excluded.studio_name,
+          source_record_json = excluded.source_record_json,
+          source_json_path = excluded.source_json_path,
+          updated_at = CURRENT_TIMESTAMP
+      `).bind(
+        normalizeText(source.upc || row.source_key),
+        row.slug || null,
+        row.name,
+        row.name,
+        row.short_description || null,
+        row.subcategory || null,
+        row.category || null,
+        normalizeText(source.director_names || source.director),
+        normalizeText(source.actor_names || source.actors),
+        row.image_url || null,
+        normalizeText(source.back_image_url || source.image_back || source.cover_back),
+        Number(source.release_year || 0) || null,
+        Number(source.runtime_minutes || 0) || null,
+        row.brand || null,
+        index,
+        row.source_record_json || null,
+        row.source_json_path || null
+      ).run();
+    }
   }
 
   if (selectedKinds.includes('creation')) {
