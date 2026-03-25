@@ -77,3 +77,41 @@ ul.clean{margin:0;padding-left:18px}
 .dd-auth-widget-links{display:grid;gap:8px}
 .dd-auth-widget-links a,.dd-auth-widget-links button{width:100%;justify-content:center}
 @media (max-width:700px){.container{padding:18px}.nav{align-items:flex-start}.dd-auth-widget{right:10px;left:10px;bottom:10px;width:auto}}
+
+
+html,body{min-height:100%}
+body{display:flex;flex-direction:column}
+body>.container{flex:1 0 auto;width:100%}
+footer.footer{margin-top:28px}
+
+input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f131a;color:var(--text);font:inherit}
+textarea{min-height:120px;resize:vertical}
+label.small{display:block;margin:0 0 6px 0}
+button.btn,input.btn{width:auto}
+
+.table-wrap, .admin-table-wrap{overflow:auto;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.02)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+thead th{position:sticky;top:0;background:#111723;z-index:1}
+
+.admin-shell{display:grid;gap:18px}
+.admin-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.admin-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.admin-stat{background:linear-gradient(180deg,rgba(46,168,255,.09),rgba(255,255,255,.02));border:1px solid var(--border);border-radius:14px;padding:14px}
+.admin-stat-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.admin-stat-value{font-size:1.7rem;font-weight:800;margin-top:6px}
+.admin-toolbar{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.admin-toolbar .grid{flex:1 1 620px}
+.admin-live-feed{display:grid;gap:10px}
+.admin-live-item{padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.02)}
+.admin-live-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
+.status-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04);font-size:12px}
+.stack-sm{display:grid;gap:10px}
+.json-inline{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+#ddAuthWidget{box-shadow:0 14px 44px rgba(0,0,0,.35)}
+#ddAuthWidget .dd-auth-widget-links{grid-template-columns:1fr}
+
+@media (max-width:860px){
+  .admin-toolbar{align-items:stretch}
+  .admin-toolbar .grid{flex-basis:100%}
+}
