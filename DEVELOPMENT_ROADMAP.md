@@ -25,6 +25,9 @@
 - inventory movement history foundation
 - refund and dispute workflow logging foundation in admin
 - import preview validation improvements for duplicate slugs and malformed media URLs
+- shared auth token fallback so the outward-facing site and admin area resolve the same active login more reliably
+- shared footer/widget layout hardening across standard pages
+- admin dashboard formatting refresh with cleaner summary cards and a live activity feed
 
 ## Strongest next steps after this pass
 

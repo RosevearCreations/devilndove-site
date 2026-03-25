@@ -20,3 +20,8 @@
 - Keep a visible shared footer on every page unless a page is intentionally standalone.
 - Keep the shared logged-in account widget available on every page.
 - Logged-out account UI should continue to expose login, forgot-password, and forgot-email paths.
+
+- A valid admin/member session should remain visible across both the admin area and the outward-facing site.
+- Shared auth should not depend on one storage mechanism alone; keep a reliable session fallback for standard pages.
+- Footer injection is part of baseline shared layout and should remain visible after every pass.
+- Keep outward-facing pages visually consistent with uniform input, table, and card styling.

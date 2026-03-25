@@ -49,3 +49,10 @@
 - account widget is now available sitewide when auth scripts are loaded
 - logged-out state now exposes login, forgot-password, and forgot-email paths
 - D1 duplicate-column warnings in upgrade SQL are now documented as harmless when the column already exists
+
+
+## Latest pass notes
+
+- Admin login visibility issue on the regular site was addressed by using a cookie fallback for the shared auth token in addition to localStorage.
+- Shared footer injection was hardened and styling normalized across forms, tables, and dashboard cards.
+- Admin dashboard now includes a recent live activity feed to improve at-a-glance monitoring.

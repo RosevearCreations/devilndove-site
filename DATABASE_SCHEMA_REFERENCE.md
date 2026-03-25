@@ -23,6 +23,8 @@
 - ip_address
 - user_agent
 
+Client auth now uses the existing sessions table with a browser cookie fallback for the token so regular pages can resolve the same active session more reliably.
+
 ### admin_logs
 Admin security and action logging.
 

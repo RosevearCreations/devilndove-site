@@ -87,3 +87,11 @@ When a public page is touched, review:
 - `/js/main.js` owns shared nav and footer injection
 - `/public/js/site-auth-ui.js` owns the floating account widget
 - `/account-help/` provides logged-out recovery request entry points
+
+
+## Shared layout and auth notes
+
+- `/js/main.js` owns the shared nav and footer injection and now also ensures the standard auth/site scripts are present on normal pages.
+- `/public/js/auth.js` is the shared client auth layer and now persists the session token with both localStorage and a sitewide cookie fallback.
+- `/public/js/site-auth-ui.js` remains the shared account widget/nav visibility layer used by both the public site and protected areas.
+- `/functions/api/admin/live-activity.js` provides the admin dashboard live feed using recent analytics, cart, order, and webhook data.

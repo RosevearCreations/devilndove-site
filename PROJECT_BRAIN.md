@@ -79,3 +79,10 @@ Most important next layers after this pass are:
 - shared floating account widget across the site
 - shared footer with search/discovery links on every page
 - account-help page and request logging for forgot-password and forgot-email flows
+
+
+## Latest pass focus
+
+- Fixed shared session visibility between admin and the outward-facing site by adding cookie-backed client token fallback.
+- Hardened shared nav/footer behavior so the footer stays visible on standard pages.
+- Refreshed admin dashboard presentation and added a live activity feed driven by recent analytics/order/webhook data.

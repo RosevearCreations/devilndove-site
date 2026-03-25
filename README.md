@@ -21,10 +21,14 @@ The current build includes:
 - public site search page with structured data support and search-event logging
 - shared footer-driven site search and crawl-discovery links on every page
 - floating logged-in account widget available sitewide
+- shared auth token persistence now uses localStorage plus a sitewide cookie fallback so public pages can detect active sign-in more reliably
+- shared footer injection hardened so the footer remains visible across standard site pages
+- admin dashboard layout pass with cleaner summary cards, more uniform inputs/tables, and a live activity feed
 - account-help page for forgot-password and forgot-email request logging
 - site inventory and reorder tracking for tools, supplies, and sellable products
 - inventory movement history logging for stock changes
 - local refund and dispute workflow logging for orders and payments
+- live admin activity feed for recent searches, visitor sessions, cart events, orders, and webhook activity
 
 ## Main payment status
 
@@ -77,6 +81,8 @@ For every future public-facing update:
 - sitemap and robots.txt must be reviewed whenever public pages are added or removed
 - search visibility and crawl awareness should be improved a little every pass, not treated as a one-time task
 - every shared-layout pass should preserve the shared footer, shared account widget, and search-discovery links sitewide
+- shared auth/session UI must remain consistent between admin and outward-facing pages so an active admin session is visible across the regular site too
+- formatting passes should keep forms, tables, widgets, and dashboard cards visually consistent rather than page-specific
 
 ## Database files
 
@@ -114,6 +120,7 @@ Storefront and checkout:
 - `/api/site-search-event`
 
 Admin operations added or deepened in the recent passes:
+- `/api/admin/live-activity`
 - `/api/admin/webhook-events`
 - `/api/admin/payment-actions`
 - `/api/admin/media-assets`

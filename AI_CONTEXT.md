@@ -51,3 +51,8 @@ This repo is in the payment, media, inventory, and public SEO hardening phase af
 
 - Shared layout currently depends on `main.js` for nav/footer and `site-auth-ui.js` for the floating account widget.
 - Logged-out recovery links point to `/account-help/`, which records requests in `auth_recovery_requests`.
+
+
+- Shared auth/session fixes should preserve sign-in visibility across admin and outward-facing pages.
+- Keep the one-H1 rule intact on outward-facing pages while continuing incremental SEO/crawl improvements each pass.
+- Shared footer and account widget are baseline layout requirements now.
