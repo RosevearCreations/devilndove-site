@@ -1,260 +1,232 @@
 <!-- File: /admin/index.html -->
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Dashboard — Devil n Dove</title>
-  <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="icon" type="image/png" href="/assets/mark.png" />
-  <meta
-    name="description"
-    content="Devil n Dove admin dashboard for users, products, orders, payments, access tiers, and site operations."
-  />
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Admin Dashboard — Devil n Dove</title>
+<link href="/css/styles.css" rel="stylesheet"/>
+<link href="/assets/mark.png" rel="icon" type="image/png"/>
+<meta content="Devil n Dove admin dashboard for users, products, orders, payments, access tiers, and site operations." name="description"/>
 </head>
 <body>
-  <div class="container">
-    <div class="nav">
-      <div class="brand">
-        <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
-        <div>
-          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Admin Dashboard</div>
-        </div>
-      </div>
-
-      <div class="links">
-        <a href="/">Home</a>
-        <a href="/shop/">Shop</a>
-        <a href="/members/">Members</a>
-        <a href="/admin/">Admin</a>
-        <button class="btn" type="button" data-nav-logout>Logout</button>
-      </div>
-    </div>
-
-    <div class="hero">
-      <div>
-        <h1>Admin Dashboard</h1>
-        <p>
+<div class="container">
+<div class="nav">
+<div class="brand">
+<img alt="Devil n Dove logo" src="/assets/logo-clear.png"/>
+<div>
+<div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+<div class="small">Admin Dashboard</div>
+</div>
+</div>
+<div class="links">
+<a href="/">Home</a>
+<a href="/shop/">Shop</a>
+<a href="/members/">Members</a>
+<a href="/admin/">Admin</a>
+<button class="btn" data-nav-logout="" type="button">Logout</button>
+</div>
+</div>
+<div class="hero">
+<div>
+<h1>Admin Dashboard</h1>
+<p>
           Manage users, access tiers, products, orders, payments, and core site operations.
         </p>
-      </div>
-    </div>
-
-    <div id="adminAccessMessage" class="card" style="display:none;margin-bottom:18px"></div>
-
-    <div class="grid cols-3" style="gap:18px">
-      <div class="card">
-        <h2 style="margin-top:0">Quick Actions</h2>
-        <div style="display:grid;gap:10px">
-          <a class="btn" href="#usersSection">Manage Users</a>
-          <a class="btn" href="#accessTiersSection">Access Tiers</a>
-          <a class="btn" href="#productsSection">Products</a>
-          <a class="btn" href="#analyticsSection">Analytics</a>
-          <a class="btn" href="#ordersSection">Orders</a>
-          <button class="btn" type="button" id="refreshDashboardSummaryButton">Refresh Summary</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 style="margin-top:0">Security</h2>
-        <div class="small" style="display:grid;gap:8px">
-          <div>Admin endpoints require a valid active admin session.</div>
-          <div>Roles and business access tiers remain separate systems.</div>
-          <div>Order and payment records are available through protected admin routes.</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 style="margin-top:0">Project State</h2>
-        <div class="small" style="display:grid;gap:8px">
-          <div>Checkout foundation is active.</div>
-          <div>Payment preparation exists for future provider handoff.</div>
-          <div>Manual/admin payment recording is enabled.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Dashboard Summary</h2>
-      <div id="dashboardSummaryMessage" class="small" style="display:none;margin-bottom:10px"></div>
-      <div class="grid cols-4" style="gap:14px">
-        <div class="card">
-          <div class="small">Users</div>
-          <div id="summaryUsersCount" style="font-size:1.5rem;font-weight:800">—</div>
-        </div>
-        <div class="card">
-          <div class="small">Products</div>
-          <div id="summaryProductsCount" style="font-size:1.5rem;font-weight:800">—</div>
-        </div>
-        <div class="card">
-          <div class="small">Orders</div>
-          <div id="summaryOrdersCount" style="font-size:1.5rem;font-weight:800">—</div>
-        </div>
-        <div class="card">
-          <div class="small">Payments</div>
-          <div id="summaryPaymentsCount" style="font-size:1.5rem;font-weight:800">—</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="usersSection" class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Users</h2>
-      <p class="small">User management tools remain in place through the existing admin modules.</p>
-      <div id="usersAdminMount"></div>
-    </div>
-
-    <div id="accessTiersSection" class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Access Tiers</h2>
-      <p class="small">
+</div>
+</div>
+<div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
+<div class="grid cols-3" style="gap:18px">
+<div class="card">
+<h2 style="margin-top:0">Quick Actions</h2>
+<div style="display:grid;gap:10px">
+<a class="btn" href="#usersSection">Manage Users</a>
+<a class="btn" href="#accessTiersSection">Access Tiers</a>
+<a class="btn" href="#productsSection">Products</a>
+<a class="btn" href="#analyticsSection">Analytics</a>
+<a class="btn" href="#ordersSection">Orders</a>
+<button class="btn" id="refreshDashboardSummaryButton" type="button">Refresh Summary</button>
+</div>
+</div>
+<div class="card">
+<h2 style="margin-top:0">Security</h2>
+<div class="small" style="display:grid;gap:8px">
+<div>Admin endpoints require a valid active admin session.</div>
+<div>Roles and business access tiers remain separate systems.</div>
+<div>Order and payment records are available through protected admin routes.</div>
+</div>
+</div>
+<div class="card">
+<h2 style="margin-top:0">Project State</h2>
+<div class="small" style="display:grid;gap:8px">
+<div>Checkout foundation is active.</div>
+<div>Payment preparation exists for future provider handoff.</div>
+<div>Manual/admin payment recording is enabled.</div>
+</div>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<h2 style="margin-top:0">Dashboard Summary</h2>
+<div class="small" id="dashboardSummaryMessage" style="display:none;margin-bottom:10px"></div>
+<div class="grid cols-4" style="gap:14px">
+<div class="card">
+<div class="small">Users</div>
+<div id="summaryUsersCount" style="font-size:1.5rem;font-weight:800">—</div>
+</div>
+<div class="card">
+<div class="small">Products</div>
+<div id="summaryProductsCount" style="font-size:1.5rem;font-weight:800">—</div>
+</div>
+<div class="card">
+<div class="small">Orders</div>
+<div id="summaryOrdersCount" style="font-size:1.5rem;font-weight:800">—</div>
+</div>
+<div class="card">
+<div class="small">Payments</div>
+<div id="summaryPaymentsCount" style="font-size:1.5rem;font-weight:800">—</div>
+</div>
+</div>
+</div>
+<div class="card" id="usersSection" style="margin-top:18px">
+<h2 style="margin-top:0">Users</h2>
+<p class="small">User management tools remain in place through the existing admin modules.</p>
+<div id="usersAdminMount"></div>
+</div>
+<div class="card" id="accessTiersSection" style="margin-top:18px">
+<h2 style="margin-top:0">Access Tiers</h2>
+<p class="small">
         Business/content access tiers stay separate from system roles like member and admin.
       </p>
-      <div id="accessTiersAdminMount"></div>
-    </div>
-
-    <div id="productsSection" class="card" style="margin-top:18px">
-      <div id="productSeoAdminMount"></div>
-      <div id="productImageAnnotationAdminMount"></div>
-      <div id="siteInventoryAdminMount"></div>
-      <div id="notificationAdminMount"></div>
-      <div id="appSettingsAdminMount"></div>
-      <h2 style="margin-top:0">Products</h2>
-      <p class="small">Product management remains handled by the existing modular admin scripts.</p>
-      <div id="productsAdminMount"></div>
-      <div id="productMediaAdminMount"></div>
-      <div id="mediaLibraryAdminMount"></div>
-    </div>
-
-    <div id="analyticsSection" class="card" style="margin-top:18px"><h2 style="margin-top:0">Analytics, Visitors, Security & Webhooks</h2><p class="small">Monitor visitors, page flows, abandoned carts, low-stock items, and webhook replay/review status.</p><div id="analyticsAdminMount"></div><div id="webhookEventsAdminMount"></div></div>
-
-    <div id="ordersSection" class="card" style="margin-top:18px">
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div>
-          <h2 style="margin:0">Orders</h2>
-          <p class="small" style="margin:8px 0 0 0">
+<div id="accessTiersAdminMount"></div>
+</div>
+<div class="card" id="productsSection" style="margin-top:18px">
+<div id="productSeoAdminMount"></div>
+<div id="productImageAnnotationAdminMount"></div>
+<div id="siteInventoryAdminMount"></div>
+<div id="notificationAdminMount"></div>
+<div id="appSettingsAdminMount"></div>
+<h2 style="margin-top:0">Products</h2>
+<p class="small">Product management remains handled by the existing modular admin scripts.</p>
+<div id="productsAdminMount"></div>
+<div id="productMediaAdminMount"></div>
+<div id="mediaLibraryAdminMount"></div>
+</div>
+<div class="card" id="analyticsSection" style="margin-top:18px"><h2 style="margin-top:0">Analytics, Visitors, Security &amp; Webhooks</h2><p class="small">Monitor visitors, page flows, abandoned carts, low-stock items, and webhook replay/review status.</p><div id="analyticsAdminMount"></div><div id="webhookEventsAdminMount"></div></div>
+<div class="card" id="ordersSection" style="margin-top:18px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+<div>
+<h2 style="margin:0">Orders</h2>
+<p class="small" style="margin:8px 0 0 0">
             Review orders, payment states, fulfillment type, and open the full admin order detail view.
           </p>
-        </div>
-
-        <button class="btn" type="button" id="refreshOrdersButton">Refresh Orders</button>
-      </div>
-
-      <div class="grid cols-4" style="gap:12px;margin-top:16px">
-        <div>
-          <label class="small" for="orderStatusFilter">Order Status</label>
-          <select id="orderStatusFilter">
-            <option value="">All</option>
-            <option value="draft">Draft</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="fulfilled">Fulfilled</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="refunded">Refunded</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="small" for="orderPaymentStatusFilter">Payment Status</label>
-          <select id="orderPaymentStatusFilter">
-            <option value="">All</option>
-            <option value="pending">Pending</option>
-            <option value="authorized">Authorized</option>
-            <option value="paid">Paid</option>
-            <option value="failed">Failed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="refunded">Refunded</option>
-            <option value="partially_refunded">Partially Refunded</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="small" for="orderFulfillmentFilter">Fulfillment</label>
-          <select id="orderFulfillmentFilter">
-            <option value="">All</option>
-            <option value="shipping">Shipping</option>
-            <option value="digital">Digital</option>
-            <option value="mixed">Mixed</option>
-            <option value="pickup">Pickup</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="small" for="orderSearchInput">Search</label>
-          <input
-            id="orderSearchInput"
-            type="text"
-            placeholder="Order #, name, email, method..."
-            autocomplete="off"
-          />
-        </div>
-      </div>
-
-      <div id="ordersMessage" class="small" style="display:none;margin-top:14px"></div>
-      <div id="ordersSummary" class="small" style="margin-top:10px"></div>
-      <div id="ordersEmpty" class="small" style="display:none;margin-top:10px">
+</div>
+<button class="btn" id="refreshOrdersButton" type="button">Refresh Orders</button>
+</div>
+<div class="grid cols-4" style="gap:12px;margin-top:16px">
+<div>
+<label class="small" for="orderStatusFilter">Order Status</label>
+<select id="orderStatusFilter">
+<option value="">All</option>
+<option value="draft">Draft</option>
+<option value="pending">Pending</option>
+<option value="paid">Paid</option>
+<option value="fulfilled">Fulfilled</option>
+<option value="cancelled">Cancelled</option>
+<option value="refunded">Refunded</option>
+</select>
+</div>
+<div>
+<label class="small" for="orderPaymentStatusFilter">Payment Status</label>
+<select id="orderPaymentStatusFilter">
+<option value="">All</option>
+<option value="pending">Pending</option>
+<option value="authorized">Authorized</option>
+<option value="paid">Paid</option>
+<option value="failed">Failed</option>
+<option value="cancelled">Cancelled</option>
+<option value="refunded">Refunded</option>
+<option value="partially_refunded">Partially Refunded</option>
+</select>
+</div>
+<div>
+<label class="small" for="orderFulfillmentFilter">Fulfillment</label>
+<select id="orderFulfillmentFilter">
+<option value="">All</option>
+<option value="shipping">Shipping</option>
+<option value="digital">Digital</option>
+<option value="mixed">Mixed</option>
+<option value="pickup">Pickup</option>
+</select>
+</div>
+<div>
+<label class="small" for="orderSearchInput">Search</label>
+<input autocomplete="off" id="orderSearchInput" placeholder="Order #, name, email, method..." type="text"/>
+</div>
+</div>
+<div class="small" id="ordersMessage" style="display:none;margin-top:14px"></div>
+<div class="small" id="ordersSummary" style="margin-top:10px"></div>
+<div class="small" id="ordersEmpty" style="display:none;margin-top:10px">
         No orders are available yet.
       </div>
-
-      <div style="overflow:auto;margin-top:14px">
-        <table style="width:100%;border-collapse:collapse">
-          <thead>
-            <tr>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Order</th>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Customer</th>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Fulfillment</th>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payment</th>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Total</th>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Outstanding</th>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payments</th>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Action</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody">
-            <tr>
-              <td colspan="10" style="padding:12px">Loading orders...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="footer card" style="margin-top:18px"></div>
-  </div>
-
-  <script src="/js/main.js"></script>
-  <script src="/public/js/auth.js"></script>
-  <script src="/public/js/site-auth-ui.js"></script>
-  <script src="/public/js/site-analytics.js"></script>
-  <script src="/public/js/admin-self-protect.js"></script>
-  <script src="/public/js/admin.js"></script>
-  <script src="/public/js/admin-dashboard-summary.js"></script>
-  <script src="/public/js/admin-users.js"></script>
-  <script src="/public/js/admin-create-user.js"></script>
-  <script src="/public/js/admin-user-profiles.js"></script>
-  <script src="/public/js/admin-user-update.js"></script>
-  <script src="/public/js/admin-reset-password.js"></script>
-  <script src="/public/js/admin-delete-user.js"></script>
-  <script src="/public/js/admin-cleanup-sessions.js"></script>
-  <script src="/public/js/admin-security-summary.js"></script>
-  <script src="/public/js/admin-access-tiers.js"></script>
-  <script src="/public/js/admin-products.js"></script>
-  <script src="/public/js/admin-create-product.js"></script>
-  <script src="/public/js/admin-edit-product.js"></script>
-  <script src="/public/js/admin-delete-product.js"></script>
-  <script src="/public/js/admin-archive-product.js"></script>
-  <script src="/public/js/admin-orders.js"></script>
-  <script src="/public/js/admin-order-detail.js"></script>
-  <script src="/public/js/admin-product-bulk-tools.js"></script>
-  <script src="/public/js/admin-import-products.js"></script>
-  <script src="/public/js/admin-visitor-analytics.js"></script>
-  <script src="/public/js/admin-product-seo.js"></script>
-  <script src="/public/js/admin-product-images.js"></script>
-  <script src="/public/js/admin-product-image-annotations.js"></script>
-  <script src="/public/js/admin-site-item-inventory.js"></script>
-  <script src="/public/js/admin-notifications.js"></script>
-  <script src="/public/js/admin-app-settings.js"></script>
-  <script src="/public/js/admin-webhook-events.js"></script>
+<div style="overflow:auto;margin-top:14px">
+<table style="width:100%;border-collapse:collapse">
+<thead>
+<tr>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Order</th>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Customer</th>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Fulfillment</th>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payment</th>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Total</th>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Outstanding</th>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payments</th>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
+<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Action</th>
+</tr>
+</thead>
+<tbody id="ordersTableBody">
+<tr>
+<td colspan="10" style="padding:12px">Loading orders...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="footer card" style="margin-top:18px"></div>
+</div>
+<script src="/js/main.js"></script>
+<script src="/public/js/auth.js"></script>
+<script src="/public/js/site-auth-ui.js"></script>
+<script src="/public/js/site-analytics.js"></script>
+<script src="/public/js/admin-self-protect.js"></script>
+<script src="/public/js/admin.js"></script>
+<script src="/public/js/admin-dashboard-summary.js"></script>
+<script src="/public/js/admin-users.js"></script>
+<script src="/public/js/admin-create-user.js"></script>
+<script src="/public/js/admin-user-profiles.js"></script>
+<script src="/public/js/admin-user-update.js"></script>
+<script src="/public/js/admin-reset-password.js"></script>
+<script src="/public/js/admin-delete-user.js"></script>
+<script src="/public/js/admin-cleanup-sessions.js"></script>
+<script src="/public/js/admin-security-summary.js"></script>
+<script src="/public/js/admin-access-tiers.js"></script>
+<script src="/public/js/admin-products.js"></script>
+<script src="/public/js/admin-create-product.js"></script>
+<script src="/public/js/admin-edit-product.js"></script>
+<script src="/public/js/admin-delete-product.js"></script>
+<script src="/public/js/admin-archive-product.js"></script>
+<script src="/public/js/admin-orders.js"></script>
+<script src="/public/js/admin-order-detail.js"></script>
+<script src="/public/js/admin-product-bulk-tools.js"></script>
+<script src="/public/js/admin-import-products.js"></script>
+<script src="/public/js/admin-visitor-analytics.js"></script>
+<script src="/public/js/admin-product-seo.js"></script>
+<script src="/public/js/admin-product-images.js"></script>
+<script src="/public/js/admin-product-image-annotations.js"></script>
+<script src="/public/js/admin-site-item-inventory.js"></script>
+<script src="/public/js/admin-notifications.js"></script>
+<script src="/public/js/admin-app-settings.js"></script>
+<script src="/public/js/admin-webhook-events.js"></script>
 </body>
 </html>
