@@ -252,3 +252,9 @@ CREATE TABLE IF NOT EXISTS product_resource_links (
   UNIQUE(product_id, resource_kind, source_key)
 );
 CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resource_links(product_id, sort_order);
+
+
+-- Movie enrichment additions for trailer support
+ALTER TABLE movie_catalog ADD COLUMN trailer_url TEXT;
+
+-- Product resource story linkage already exists in base schema; keep using product_resource_links.

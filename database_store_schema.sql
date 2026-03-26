@@ -249,6 +249,7 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   back_image_url TEXT,
   runtime_minutes INTEGER,
   studio_name TEXT,
+  trailer_url TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','draft','archived')),
   featured_rank INTEGER,
   source_record_json TEXT,

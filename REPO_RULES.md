@@ -51,3 +51,13 @@
 ## Outward-facing SEO rule
 - Every outward-facing page must continue to have exactly one H1.
 - Each outward-facing pass should also improve crawl/discovery/search clarity where practical.
+
+
+## Current pass update
+- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.json`, and the R2-hosted cover images more safely.
+- Movie search now supports title, UPC, year, actor, director, genre, studio, format, and optional trailer-link filtering.
+- `trailer_url` is now part of the movie enrichment path so trailer support can be stored directly when available.
+- Storefront product detail now includes linked tools and supplies from `product_resource_links` so each finished product can tell a clearer “made with these materials and tools” story.
+- Admin product-resource linking now supports usage notes for story-building and social-post context.
+- Admin inventory can now sync tool and supply records from `catalog_items` into `site_item_inventory`, reducing duplicate maintenance between JSON, catalog, and inventory records.
+- Continue the one-H1-per-exposed-page rule and continue improving page titles, descriptions, canonical tags, crawl paths, structured data relevance, and visible on-page content alignment on every outward-facing pass.
