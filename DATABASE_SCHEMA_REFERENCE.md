@@ -162,3 +162,8 @@ Images are optional during import and can be added during later review before ac
 - `movie_catalog` remains the long-term home for enriched movie metadata, while `data/movies/movie_catalog_enriched.json` currently provides the live R2-backed image bridge for front/back covers.
 - `site_item_inventory` continues to be the operational inventory table for tools and supplies, including reorder, do-not-reorder, and do-not-reuse controls.
 - `product_resource_links` remains the relationship table connecting finished products to the tools and supplies used during the build process.
+
+
+## Current pass schema note
+
+No brand-new core tables were required for this pass. The largest work was defensive compatibility around existing `products`, `catalog_items`, `site_item_inventory`, `movie_catalog`, analytics, and webhook tables so partially migrated databases do not break the admin/dashboard JSON endpoints.

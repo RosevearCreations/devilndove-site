@@ -173,3 +173,12 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Added a new admin product stock report for finished products so the dashboard can show what is on hand, what is running low, and which linked tools/supplies are causing build-risk or reorder pressure.
 - Tightened admin site inventory controls with filter views (`low`, `reorder`, `do_not_reuse`) and one-click sync buttons for tools and supplies from the D1-backed catalog sync layer.
 - Continued the D1 relationship model for “how this was made” storytelling by keeping finished products linked to tools and supplies with usage notes for future social/story output.
+
+
+## Current pass update
+
+- Replaced the placeholder movie enrichment file with the uploaded R2-backed `movie_catalog_enriched.json` so the public movie page reads real cover URLs.
+- Hardened `/api/products`, `/api/admin/dashboard-summary`, `/api/admin/site-item-inventory`, `/api/admin/product-stock-report`, `/api/admin/visitor-analytics`, `/api/admin/live-activity`, `/api/admin/webhook-events`, and `/api/admin/catalog-sync` so incomplete seed data or partially-migrated tables return safe JSON instead of HTML error pages.
+- Updated the movie page to render cover images from `/api/movies` and show richer metadata when it exists, while showing a clear enrichment-pending message when titles and credits are still blank in the source JSON.
+- Product image annotations now default to a clean empty array UI instead of example JSON pasted into the textarea itself.
+- SEO/search guidance remains aligned with Google Search Central guidance around clear title links, useful meta descriptions, JSON-LD structured data, and visible-content alignment. 

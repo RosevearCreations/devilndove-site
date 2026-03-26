@@ -97,3 +97,11 @@
 - Movie cover URLs now point at the uploaded public R2 objects instead of the old placeholder local asset paths.
 - The public movie page is aligned with `/api/movies` and is expected to show covers whenever `front_image_url` or `back_image_url` exists in the enrichment file or D1 record.
 - Finished-product inventory visibility is stronger in admin through the new product stock report and the existing site inventory movement/reorder tooling.
+
+
+## Current pass sanity update
+
+- Movie covers now resolve from the uploaded R2-backed JSON file.
+- The remaining movie-data gap is metadata enrichment, not image delivery.
+- Admin dashboard widgets that previously failed with `Unexpected token '<'` were hardened so they return safe JSON even if a table has not been populated yet.
+- Catalog sync now fails collection-by-collection instead of taking down the whole tool when one JSON source is incomplete.

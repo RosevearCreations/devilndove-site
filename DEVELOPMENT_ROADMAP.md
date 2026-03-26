@@ -46,3 +46,12 @@
 - Extended admin tools/supplies inventory operations with filtered views and direct sync buttons for catalog-backed tools or supplies.
 - Continued the D1-backed relationship model between finished products and the tools/supplies used to create them so future social/story outputs can explain how a piece was made.
 - Provider-confirmed refund/dispute sync, worker-driven webhook retry/replay, and invoice/refund receipt delivery remain next-phase work after this pass.
+
+
+## Current pass completion update
+
+- Fixed the movie-page regression by replacing the sample movie enrichment file with the uploaded R2-backed JSON and wiring the page back to `/api/movies`.
+- Hardened the admin and storefront JSON endpoints that were failing into HTML error pages so empty or partially migrated datasets now return safe JSON responses instead of breaking the dashboard.
+- Continued the staged JSON → D1 migration path with more defensive catalog-sync behavior so missing or incomplete JSON collections no longer abort the whole sync run.
+- Strengthened the inventory operations foundation so product stock, linked tools/supplies, reorder pressure, and build readiness can still be reviewed while the catalog data keeps being migrated.
+- Movie metadata enrichment beyond UPC/cover data is still a next-phase data task because the uploaded movie JSON currently contains cover URLs but blank title/cast/director/runtime fields.

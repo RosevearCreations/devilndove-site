@@ -1,3 +1,4 @@
+-- Current pass note: no brand-new required tables were added in this pass; the main work was endpoint hardening against partially migrated or lightly seeded D1 data so admin and storefront JSON routes fail gracefully instead of returning HTML errors.
 -- File: /database_full_schema.sql
 -- Brief description: Full current database schema for the Devil n Dove platform.
 -- Apply on a fresh database to create the complete current auth, commerce, payment,
