@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderLinks() {
     const el = document.getElementById('productResourcesLinked'); if (!el) return;
     if (!state.links.length) { el.innerHTML = '<div class="small">No tools or supplies linked yet.</div>'; return; }
-    el.innerHTML = state.links.map((link, idx)=>`<div class="resource-linked-card"><div class="resource-linked-summary"><strong>${escapeHtml(link.name || link.source_key)}</strong><div class="small">${escapeHtml(link.resource_kind)} • ${escapeHtml(link.usage_notes || '')}</div></div><div class="resource-linked-actions"><input type="number" min="1" step="1" value="${Number(link.quantity_used || 1)}" data-link-qty="${idx}" /><button class="btn" type="button" data-remove-link="${idx}">Remove</button></div></div>`).join('');
+    el.innerHTML = state.links.map((link, idx)=>`<div class="resource-linked-card"><div class="resource-linked-summary"><strong>${escapeHtml(link.name || link.source_key)}</strong><div class="small">${escapeHtml(link.resource_kind)}</div><textarea class="input" data-link-note="${idx}" rows="2" placeholder="How was this item used for the story of this product?">${escapeHtml(link.usage_notes || '')}</textarea></div><div class="resource-linked-actions"><input type="number" min="1" step="1" value="${Number(link.quantity_used || 1)}" data-link-qty="${idx}" /><button class="btn" type="button" data-remove-link="${idx}">Remove</button></div></div>`).join('');
   }
   async function loadData() {
     try {
@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function saveLinks() {
     if (!state.selectedProductId) { setMessage('Choose a product first.', true); return; }
     document.querySelectorAll('[data-link-qty]').forEach((input) => { const idx = Number(input.getAttribute('data-link-qty') || -1); if (idx >= 0 && state.links[idx]) state.links[idx].quantity_used = Math.max(1, Number(input.value || 1) || 1); });
+    document.querySelectorAll('[data-link-note]').forEach((input) => { const idx = Number(input.getAttribute('data-link-note') || -1); if (idx >= 0 && state.links[idx]) state.links[idx].usage_notes = String(input.value || '').trim(); });
     try { setMessage('Saving product links...'); const response = await window.DDAuth.apiFetch('/api/admin/product-resources', { method:'POST', body: JSON.stringify({ product_id: state.selectedProductId, links: state.links.map((x,i)=>({ resource_kind:x.resource_kind, source_key:x.source_key, quantity_used:x.quantity_used, usage_notes:x.usage_notes || '', sort_order:i })) }) }); const data = await response.json(); if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save product links.'); setMessage(`Saved ${Number(data.saved_links || 0)} linked items.`); await loadData(); } catch (err) { setMessage(err.message || 'Failed to save product links.', true); }
   }
   document.addEventListener('dd:admin-ready', (event) => { if (!event?.detail?.ok) return; render(); loadData(); });

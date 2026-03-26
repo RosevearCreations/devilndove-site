@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productTaxClassEl = document.getElementById("productTaxClass");
   const productInventoryEl = document.getElementById("productInventory");
   const productDescriptionEl = document.getElementById("productDescription");
+  const productStoryCardEl = document.getElementById("productStoryCard");
+  const productStorySummaryEl = document.getElementById("productStorySummary");
+  const productResourcesStoryEl = document.getElementById("productResourcesStory");
   const productMainImageWrapEl = document.getElementById("productMainImageWrap");
   const productGalleryEl = document.getElementById("productGallery");
   const productQuantityEl = document.getElementById("productQuantity");
@@ -67,7 +70,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       </figure>`).join("");
   }
 
-  function renderProduct(product, images) {
+
+  function renderResourceStory(resourceLinks, resourceSummary) {
+    if (!productStoryCardEl || !productResourcesStoryEl || !productStorySummaryEl) return;
+    const links = Array.isArray(resourceLinks) ? resourceLinks : [];
+    if (!links.length) {
+      hide(productStoryCardEl);
+      productResourcesStoryEl.innerHTML = '';
+      productStorySummaryEl.textContent = '';
+      return;
+    }
+    show(productStoryCardEl);
+    const summary = resourceSummary || {};
+    productStorySummaryEl.textContent = `${Number(summary.linked_tools || 0)} tools • ${Number(summary.linked_supplies || 0)} supplies${Number(summary.low_stock_items || 0) ? ` • ${Number(summary.low_stock_items)} linked items are low in stock` : ''}`;
+    productResourcesStoryEl.innerHTML = links.map((link) => {
+      const inv = link.inventory || null;
+      const lowStock = !!(inv && ((Number(inv.on_hand_quantity || 0) - Number(inv.reserved_quantity || 0) + Number(inv.incoming_quantity || 0)) <= Number(inv.reorder_level || 0)));
+      return `
+        <article class="resource-story-card">
+          <div class="resource-story-media">${link.resource_image_url ? `<img src="${escapeHtml(link.resource_image_url)}" alt="${escapeHtml(link.resource_name || link.source_key)}" loading="lazy"/>` : `<div class="resource-story-placeholder">${escapeHtml(link.resource_kind || 'item')}</div>`}</div>
+          <div class="resource-story-body">
+            <div class="small resource-kind-pill">${escapeHtml(link.resource_kind || 'resource')}</div>
+            <h4>${escapeHtml(link.resource_name || link.source_key || 'Workshop item')}</h4>
+            <div class="small">Used quantity: ${Number(link.quantity_used || 0) || 1}</div>
+            ${link.resource_category ? `<div class="small">${escapeHtml(link.resource_category)}${link.resource_subcategory ? ` • ${escapeHtml(link.resource_subcategory)}` : ''}</div>` : ''}
+            ${link.usage_notes ? `<div class="small">${escapeHtml(link.usage_notes)}</div>` : ''}
+            ${inv ? `<div class="small">Inventory: on hand ${Number(inv.on_hand_quantity || 0)}, reserved ${Number(inv.reserved_quantity || 0)}, incoming ${Number(inv.incoming_quantity || 0)}${lowStock ? ' • low stock' : ''}</div>` : ''}
+          </div>
+        </article>`;
+    }).join('');
+  }
+
+  function renderProduct(product, images, resourceLinks, resourceSummary) {
     currentProduct = product || null;
     if (productTypeEl) productTypeEl.textContent = product.product_type || "";
     if (productNameEl) productNameEl.textContent = product.name || "";
@@ -90,6 +124,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     renderMainImage(product, images);
     renderGallery(images, product.name || "Product");
+    renderResourceStory(resourceLinks, resourceSummary);
   }
 
   async function loadProduct() {
@@ -103,7 +138,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET" });
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.images || []);
+      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {});
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;

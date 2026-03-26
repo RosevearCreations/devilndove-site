@@ -2,45 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Devil n Dove Movies | Favourite Films, Nostalgia &amp; Picks</title>
-<link href="/css/styles.css" rel="stylesheet"/>
-<link href="/assets/mark.png" rel="icon" type="image/png"/>
-<link href="https://devilndove.com/movies/" rel="canonical"/>
-<meta content="Browse the Devil n Dove movie shelf with searchable films, UPC lookups, nostalgia picks, and room to expand into actors, directors, and year filters." name="description"/>
-<meta content="index,follow" name="robots"/>
-<meta content="Devil n Dove" property="og:site_name"/>
-<meta content="website" property="og:type"/>
-<meta content="Devil n Dove Movies | Favourite Films, Nostalgia &amp; Picks" property="og:title"/>
-<meta content="Browse the Devil n Dove movie shelf with searchable films, UPC lookups, nostalgia picks, and room to expand into actors, directors, and year filters." property="og:description"/>
-<meta content="https://devilndove.com/movies/" property="og:url"/>
-<meta content="https://devilndove.com/assets/logo-clear.png" property="og:image"/>
-<meta content="summary_large_image" name="twitter:card"/>
-<meta content="Devil n Dove Movies | Favourite Films, Nostalgia &amp; Picks" name="twitter:title"/>
-<meta content="Browse the Devil n Dove movie shelf with searchable films, UPC lookups, nostalgia picks, and room to expand into actors, directors, and year filters." name="twitter:description"/>
-<meta content="https://devilndove.com/assets/logo-clear.png" name="twitter:image"/>
-<script id="pageStructuredData" type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Movies, nostalgia and favourite picks","url":"https://devilndove.com/movies/","description":"Browse the Devil n Dove movie shelf with searchable films, UPC lookups, nostalgia picks, and room to expand into actors, directors, and year filters.","isPartOf":{"@type":"WebSite","name":"Devil n Dove","url":"https://devilndove.com/"}}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Devil n Dove Movies | Covers, search filters & shelf stories</title>
+<link rel="stylesheet" href="/css/styles.css"/>
+<link rel="icon" type="image/png" href="/assets/mark.png"/>
+<link rel="canonical" href="https://devilndove.com/movies/"/>
+<meta name="description" content="Browse the Devil n Dove movie shelf with searchable titles, UPCs, actors, directors, genres, years, studios, cover art, and room for trailer links as the catalog grows."/>
+<meta name="robots" content="index,follow"/>
+<meta property="og:site_name" content="Devil n Dove"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Devil n Dove Movies | Covers, search filters & shelf stories"/>
+<meta property="og:description" content="Browse the Devil n Dove movie shelf with searchable titles, UPCs, actors, directors, genres, years, studios, cover art, and room for trailer links as the catalog grows."/>
+<meta property="og:url" content="https://devilndove.com/movies/"/>
+<meta property="og:image" content="https://devilndove.com/assets/logo-clear.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Devil n Dove Movies | Covers, search filters & shelf stories"/>
+<meta name="twitter:description" content="Browse the Devil n Dove movie shelf with searchable titles, UPCs, actors, directors, genres, years, studios, cover art, and room for trailer links as the catalog grows."/>
+<meta name="twitter:image" content="https://devilndove.com/assets/logo-clear.png"/>
+<script type="application/ld+json" id="pageStructuredData">{"@context":"https://schema.org","@type":"CollectionPage","name":"Movies, shelf stories and cover art","url":"https://devilndove.com/movies/","description":"Browse the Devil n Dove movie shelf with searchable titles, UPCs, actors, directors, genres, years, studios, cover art, and room for trailer links as the catalog grows.","isPartOf":{"@type":"WebSite","name":"Devil n Dove","url":"https://devilndove.com/"}}</script>
 </head>
 <body>
 <div class="container">
   <div class="nav"></div>
-  <div class="banner" style="margin-bottom:14px"><img alt="Devil n Dove banner artwork" src="/assets/banner-spicing-it-up.png"/></div>
+  <div class="banner" style="margin-bottom:14px"><img src="/assets/banner-spicing-it-up.png" alt="Devil n Dove banner artwork"/></div>
   <div class="hero">
-    <span class="badge">Movies (for fun)</span>
-    <h1>Movies, nostalgia and favourite picks</h1>
-    <p>This shelf is for fun and discovery. Search by title, UPC, year, actor, or director as the catalog gets enriched over time.</p>
+    <span class="badge">Movie shelf</span>
+    <h1>Movies, cover art and search-friendly shelf stories</h1>
+    <p>Search by title, UPC, year, actor, director, genre, studio, or format. The page now blends D1 movie records with the enriched movie JSON and your R2 cover library.</p>
   </div>
   <div class="card">
     <div class="grid cols-4" style="gap:12px;align-items:end">
-      <div><label class="small" for="movieSearchInput">Search everything</label><input class="input" id="movieSearchInput" placeholder="Title, UPC, actor, director, year" type="search"/></div>
-      <div><label class="small" for="movieYearInput">Year</label><input class="input" id="movieYearInput" placeholder="1999" type="text"/></div>
-      <div><label class="small" for="movieActorInput">Actor</label><input class="input" id="movieActorInput" placeholder="Actor name" type="text"/></div>
-      <div><label class="small" for="movieDirectorInput">Director</label><input class="input" id="movieDirectorInput" placeholder="Director name" type="text"/></div>
+      <div><label class="small" for="movieSearchInput">Search everything</label><input class="input" id="movieSearchInput" type="search" placeholder="Title, UPC, actor, director, studio"/></div>
+      <div><label class="small" for="movieYearInput">Year</label><input class="input" id="movieYearInput" type="text" placeholder="1999"/></div>
+      <div><label class="small" for="movieActorInput">Actor</label><input class="input" id="movieActorInput" type="text" placeholder="Actor name"/></div>
+      <div><label class="small" for="movieDirectorInput">Director</label><input class="input" id="movieDirectorInput" type="text" placeholder="Director name"/></div>
+      <div><label class="small" for="movieGenreInput">Genre</label><input class="input" id="movieGenreInput" type="text" placeholder="Drama, comedy, action"/></div>
+      <div><label class="small" for="movieStudioInput">Studio</label><input class="input" id="movieStudioInput" type="text" placeholder="Studio"/></div>
+      <div><label class="small" for="movieFormatInput">Format</label><input class="input" id="movieFormatInput" type="text" placeholder="DVD, Blu-ray"/></div>
+      <div><label class="small" for="movieTrailerInput">Trailer</label><select class="input" id="movieTrailerInput"><option value="">Any</option><option value="true">Has trailer link</option><option value="false">No trailer link yet</option></select></div>
     </div>
-    <div class="small" style="margin-top:10px">Showing <span id="movieShownCount">0</span> of <span id="movieTotalCount">0</span> movies.</div><div class="small" style="margin-top:6px">To enrich movies beyond UPC-only rows, add cover URLs and details to <code>/data/movies/movie_catalog_enriched.json</code>.</div>
+    <div class="small" style="margin-top:10px">Showing <span id="movieShownCount">0</span> of <span id="movieTotalCount">0</span> movies.</div>
+    <div class="small" style="margin-top:6px">Trailer support is ready now with an optional <code>trailer_url</code> field in the enriched JSON or D1 table. If no trailer is saved yet, the page builds a safe YouTube search link from the title and year.</div>
   </div>
   <div class="card" style="margin-top:14px">
     <div id="movieMessage" class="small" style="display:none;margin-bottom:10px"></div>
+    <div id="movieFiltersSummary" class="small" style="margin-bottom:12px"></div>
     <div class="movie-grid" id="movieGrid"></div>
   </div>
   <div class="footer card" style="margin-top:18px"></div>
@@ -54,33 +60,46 @@
   const shownEl = document.getElementById('movieShownCount');
   const totalEl = document.getElementById('movieTotalCount');
   const messageEl = document.getElementById('movieMessage');
+  const filtersSummaryEl = document.getElementById('movieFiltersSummary');
   const inputs = {
     q: document.getElementById('movieSearchInput'),
     year: document.getElementById('movieYearInput'),
     actor: document.getElementById('movieActorInput'),
-    director: document.getElementById('movieDirectorInput')
+    director: document.getElementById('movieDirectorInput'),
+    genre: document.getElementById('movieGenreInput'),
+    studio: document.getElementById('movieStudioInput'),
+    format: document.getElementById('movieFormatInput'),
+    has_trailer: document.getElementById('movieTrailerInput')
   };
   let items = [];
-
   function escapeHtml(value) { return window.DD?.escapeHtml ? window.DD.escapeHtml(value) : String(value || ''); }
   function setMessage(msg, isError=false) { messageEl.textContent = msg || ''; messageEl.style.display = msg ? 'block' : 'none'; messageEl.style.color = isError ? '#ff8a8a' : ''; }
-
-  function imdbSearchUrl(item) {
-    const query = encodeURIComponent([item.title, item.release_year, item.upc, 'IMDb'].filter(Boolean).join(' '));
-    return `https://www.google.com/search?q=${query}`;
+  function trailerSearchUrl(item) {
+    const saved = String(item.trailer_url || '').trim();
+    if (saved) return saved;
+    const query = encodeURIComponent([item.title, item.release_year, 'official trailer'].filter(Boolean).join(' '));
+    return `https://www.youtube.com/results?search_query=${query}`;
   }
-
   function render() {
     const q = String(inputs.q.value || '').trim().toLowerCase();
     const year = String(inputs.year.value || '').trim().toLowerCase();
     const actor = String(inputs.actor.value || '').trim().toLowerCase();
     const director = String(inputs.director.value || '').trim().toLowerCase();
+    const genre = String(inputs.genre.value || '').trim().toLowerCase();
+    const studio = String(inputs.studio.value || '').trim().toLowerCase();
+    const format = String(inputs.format.value || '').trim().toLowerCase();
+    const hasTrailer = String(inputs.has_trailer.value || '').trim().toLowerCase();
     const filtered = items.filter((item) => {
-      const hay = [item.upc, item.title, item.summary, item.actor_names, item.director_names, item.genre, item.media_format, String(item.release_year || '')].join(' ').toLowerCase();
+      const hay = [item.upc, item.title, item.summary, item.actor_names, item.director_names, item.genre, item.media_format, item.studio_name, String(item.release_year || ''), item.trailer_url].join(' ').toLowerCase();
       if (q && !hay.includes(q)) return false;
       if (year && !String(item.release_year || '').toLowerCase().includes(year)) return false;
       if (actor && !String(item.actor_names || '').toLowerCase().includes(actor)) return false;
       if (director && !String(item.director_names || '').toLowerCase().includes(director)) return false;
+      if (genre && !String(item.genre || '').toLowerCase().includes(genre)) return false;
+      if (studio && !String(item.studio_name || '').toLowerCase().includes(studio)) return false;
+      if (format && !String(item.media_format || '').toLowerCase().includes(format)) return false;
+      if (hasTrailer === 'true' && !String(item.trailer_url || '').trim()) return false;
+      if (hasTrailer === 'false' && String(item.trailer_url || '').trim()) return false;
       return true;
     });
     totalEl.textContent = items.length;
@@ -90,38 +109,41 @@
       return;
     }
     grid.innerHTML = filtered.map((item) => `
-      <article class="movie-card">
+      <article class="movie-card movie-card-rich">
         <div class="movie-card-media">
-          ${item.front_image_url ? `<img src="${escapeHtml(item.front_image_url)}" alt="${escapeHtml(item.title || item.upc)} front cover" loading="lazy"/>` : `<div class="movie-placeholder">${escapeHtml(item.title || item.upc || 'Movie')}</div>`}${item.back_image_url ? `<img src="${escapeHtml(item.back_image_url)}" alt="${escapeHtml(item.title || item.upc)} back cover" loading="lazy"/>` : ``}
+          ${item.front_image_url ? `<img src="${escapeHtml(item.front_image_url)}" alt="${escapeHtml(item.title || item.upc)} front cover" loading="lazy"/>` : `<div class="movie-placeholder">${escapeHtml(item.title || item.upc || 'Movie')}</div>`}
+          ${item.back_image_url ? `<img src="${escapeHtml(item.back_image_url)}" alt="${escapeHtml(item.title || item.upc)} back cover" loading="lazy"/>` : `<div class="movie-placeholder">Back cover coming soon</div>`}
         </div>
         <div class="stack-sm">
           <div>
             <h2 class="movie-card-title">${escapeHtml(item.title || item.upc || 'Untitled movie')}</h2>
             <div class="small">UPC: <span class="kbd">${escapeHtml(item.upc || '—')}</span></div>
           </div>
-          <div class="small">${escapeHtml(item.summary || 'This record is ready for richer summary, actors, directors, year, and image enrichment.')}</div>
+          <div class="small">${escapeHtml(item.summary || 'This record is ready for richer summary, cast, director, year, and trailer enrichment.')}</div>
           <div class="movie-meta small">
             <span>${escapeHtml(item.media_format || 'Movie')}</span>
             ${item.release_year ? `<span>${escapeHtml(item.release_year)}</span>` : ''}
             ${item.genre ? `<span>${escapeHtml(item.genre)}</span>` : ''}
+            ${item.studio_name ? `<span>${escapeHtml(item.studio_name)}</span>` : ''}
           </div>
           ${item.director_names ? `<div class="small"><strong>Director:</strong> ${escapeHtml(item.director_names)}</div>` : ''}
           ${item.actor_names ? `<div class="small"><strong>Actors:</strong> ${escapeHtml(item.actor_names)}</div>` : ''}
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <a class="btn" href="${imdbSearchUrl(item)}" rel="noreferrer" target="_blank">Search IMDb</a>
+            <a class="btn" href="${trailerSearchUrl(item)}" rel="noreferrer" target="_blank">${item.trailer_url ? 'Watch trailer' : 'Find trailer'}</a>
             ${item.back_image_url ? `<a class="btn" href="${escapeHtml(item.back_image_url)}" rel="noreferrer" target="_blank">Back cover</a>` : ''}
           </div>
         </div>
       </article>`).join('');
   }
-
   async function load() {
     try {
       setMessage('Loading movie catalog...');
-      const response = await fetch('/api/movies?limit=250');
+      const response = await fetch('/api/movies?limit=300');
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load movies.');
       items = Array.isArray(data.items) ? data.items : [];
+      const filters = data.filters || {};
+      filtersSummaryEl.textContent = `Genres: ${(filters.genres || []).slice(0, 8).join(', ') || '—'} • Formats: ${(filters.formats || []).slice(0, 6).join(', ') || '—'} • Studios: ${(filters.studios || []).slice(0, 6).join(', ') || '—'}`;
       setMessage(items.length ? '' : 'Movie catalog is currently empty.');
       render();
     } catch (error) {
