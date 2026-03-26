@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mountEl.innerHTML = `
       <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Product Tools & Supplies Used</h3>
-        <p class="small" style="margin-top:0">Link the tools and supplies used to create a finished product. This is stored in D1 so the relationship is no longer scattered across notes or JSON.</p>
+        <p class="small" style="margin-top:0">Visually link the tools and supplies used to create a finished product. This stores a reusable making-story in D1 so each finished piece can explain what materials and tools shaped it.</p>
         <div id="productResourcesMessage" class="small" style="display:none;margin-bottom:12px"></div>
         <div class="grid cols-2" style="gap:12px;margin-bottom:12px">
           <div><label class="small" for="productResourcesProduct">Product</label><select id="productResourcesProduct"></select></div>

@@ -51,10 +51,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const type = escapeHtml(product.product_type || "");
       const status = escapeHtml(product.status || "");
       const price = escapeHtml(formatMoney(product.price_cents, product.currency));
-      const inventory = escapeHtml(String(Number(product.inventory_quantity || 0)));
+      const inventoryQty = Number(product.inventory_quantity || 0);
+      const inventory = escapeHtml(String(inventoryQty));
       const shipping = escapeHtml(yesNo(product.requires_shipping));
       const taxClass = escapeHtml(product.tax_class_name || product.tax_class_code || "");
       const isArchived = String(product.status || "").toLowerCase() === "archived";
+      const lowStock = Number(product.low_stock_flag || 0) === 1;
 
       return `
         <tr>
@@ -65,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${status}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${price}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? '⚠️ low stock' : 'healthy'}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${shipping}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${taxClass}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">

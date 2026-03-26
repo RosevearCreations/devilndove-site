@@ -4,22 +4,20 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <title>Devil n Dove Movies | Favourite Films, Nostalgia & Picks</title>
-  <meta name="description" content="Explore the Devil n Dove movie shelf with favourite films, nostalgic picks, cover art, and searchable movie details."/>
+  <meta name="description" content="Explore the Devil n Dove movie shelf with favourite films, nostalgic picks, searchable movie details, and R2-hosted cover art."/>
   <meta name="robots" content="index,follow"/>
   <link rel="canonical" href="https://devilndove.com/movies/"/>
   <link href="/css/styles.css" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
-
   <meta property="og:site_name" content="Devil n Dove"/>
   <meta property="og:type" content="website"/>
   <meta property="og:title" content="Devil n Dove Movies | Favourite Films, Nostalgia & Picks"/>
-  <meta property="og:description" content="Explore the Devil n Dove movie shelf with favourite films, nostalgic picks, cover art, and searchable movie details."/>
+  <meta property="og:description" content="Explore the Devil n Dove movie shelf with favourite films, searchable details, and cover art."/>
   <meta property="og:url" content="https://devilndove.com/movies/"/>
   <meta property="og:image" content="https://devilndove.com/assets/logo-clear.png"/>
-
   <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="Devil n Dove Movies | Favourite Films, Nostalgia & Picks"/>
-  <meta name="twitter:description" content="Explore the Devil n Dove movie shelf with favourite films, nostalgic picks, cover art, and searchable movie details."/>
+  <meta name="twitter:description" content="Explore the Devil n Dove movie shelf with favourite films, searchable details, and cover art."/>
   <meta name="twitter:image" content="https://devilndove.com/assets/logo-clear.png"/>
 </head>
 <body>
@@ -45,129 +43,143 @@
       </div>
     </div>
 
-    <div class="banner" style="margin-bottom:14px">
-      <img alt="Devil n Dove banner artwork" src="/assets/banner-spicing-it-up.png"/>
-    </div>
+    <div class="banner" style="margin-bottom:14px"><img alt="Devil n Dove banner artwork" src="/assets/banner-spicing-it-up.png"/></div>
 
-    <div class="hero">
-      <span class="badge">Movies (for fun)</span>
+    <section class="hero">
+      <span class="badge">Movies</span>
       <h1>Movies, nostalgia and favourite picks</h1>
-      <p>
-        Browse our collection with cover art, UPC search, and room for richer movie details as the catalog grows.
-      </p>
-    </div>
+      <p>Browse the shelf with cover art, UPC lookups, search filters, trailer-ready links, and room to enrich each title over time.</p>
+    </section>
 
-    <div class="card">
-      <div class="grid" style="grid-template-columns: 1fr 1fr; gap:10px; align-items:end">
+    <section class="card movie-search-panel">
+      <div class="grid cols-4" style="gap:12px;align-items:end">
         <div>
-          <label class="small" for="q">Search movies</label>
-          <input class="input" id="q" placeholder="Search by title, UPC, year, actor, director, genre..."/>
+          <label class="small" for="movieQuery">Search</label>
+          <input class="input" id="movieQuery" placeholder="title, UPC, actor, director, genre..." type="search"/>
         </div>
-        <div style="text-align:right">
-          <div class="small">Showing <span id="shown">0</span> of <span id="total">0</span></div>
+        <div>
+          <label class="small" for="movieYear">Year</label>
+          <input class="input" id="movieYear" placeholder="1990" type="search"/>
+        </div>
+        <div>
+          <label class="small" for="movieGenre">Genre</label>
+          <input class="input" id="movieGenre" placeholder="Sci‑Fi" type="search"/>
+        </div>
+        <div>
+          <label class="small" for="movieHasTrailer">Trailer</label>
+          <select id="movieHasTrailer"><option value="">Any</option><option value="1">Has trailer</option><option value="0">No trailer yet</option></select>
         </div>
       </div>
-    </div>
+      <div class="grid cols-4" style="gap:12px;align-items:end;margin-top:10px">
+        <div>
+          <label class="small" for="movieActor">Actor</label>
+          <input class="input" id="movieActor" placeholder="Arnold" type="search"/>
+        </div>
+        <div>
+          <label class="small" for="movieDirector">Director</label>
+          <input class="input" id="movieDirector" placeholder="Verhoeven" type="search"/>
+        </div>
+        <div>
+          <label class="small" for="movieFormat">Format</label>
+          <input class="input" id="movieFormat" placeholder="DVD / Blu-ray" type="search"/>
+        </div>
+        <div class="movie-summary-chip-row">
+          <div class="movie-summary-chip"><span>Showing</span><strong id="shown">0</strong></div>
+          <div class="movie-summary-chip"><span>Total</span><strong id="total">0</strong></div>
+          <div class="movie-summary-chip"><span>With covers</span><strong id="withCovers">0</strong></div>
+        </div>
+      </div>
+    </section>
 
-    <div id="movieGrid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:16px"></div>
-
-    <div class="footer">
-      Movie listings are loaded from the enriched movie catalog and image URLs stored in R2.
-    </div>
+    <section id="movieGrid" class="movie-grid" aria-live="polite"></section>
+    <div class="footer card" style="margin-top:18px">Movie listings now read from the enriched movie catalog and D1-ready API layer so covers and metadata can keep improving without fragile UPC-only pages.</div>
   </div>
 
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/site-auth-ui.js"></script>
-
   <script>
-    const grid = document.getElementById("movieGrid");
-    const totalEl = document.getElementById("total");
-    const shownEl = document.getElementById("shown");
-    const q = document.getElementById("q");
+    const els = {
+      grid: document.getElementById('movieGrid'),
+      q: document.getElementById('movieQuery'),
+      year: document.getElementById('movieYear'),
+      genre: document.getElementById('movieGenre'),
+      actor: document.getElementById('movieActor'),
+      director: document.getElementById('movieDirector'),
+      format: document.getElementById('movieFormat'),
+      hasTrailer: document.getElementById('movieHasTrailer'),
+      shown: document.getElementById('shown'),
+      total: document.getElementById('total'),
+      withCovers: document.getElementById('withCovers')
+    };
 
     let items = [];
-
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+    function esc(v){return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+    function qs(){
+      const url = new URL('/api/movies', window.location.origin);
+      if (els.q.value.trim()) url.searchParams.set('q', els.q.value.trim());
+      if (els.year.value.trim()) url.searchParams.set('year', els.year.value.trim());
+      if (els.genre.value.trim()) url.searchParams.set('genre', els.genre.value.trim());
+      if (els.actor.value.trim()) url.searchParams.set('actor', els.actor.value.trim());
+      if (els.director.value.trim()) url.searchParams.set('director', els.director.value.trim());
+      if (els.format.value.trim()) url.searchParams.set('format', els.format.value.trim());
+      if (els.hasTrailer.value.trim()) url.searchParams.set('has_trailer', els.hasTrailer.value.trim());
+      url.searchParams.set('limit','300');
+      return url.toString();
     }
-
-    function imdbSearchUrl(title, upc) {
-      const query = encodeURIComponent((title || upc || "") + " IMDb");
-      return "https://www.google.com/search?q=" + query;
+    function imdbUrl(item){
+      const query = encodeURIComponent([item.title || item.upc || '', 'IMDb'].join(' '));
+      return `https://www.google.com/search?q=${query}`;
     }
-
-    function matches(item, term) {
-      if (!term) return true;
-      const haystack = [
-        item.title,
-        item.upc,
-        item.summary,
-        item.release_year,
-        item.genre,
-        item.director_names,
-        item.actor_names,
-        item.studio_name,
-        item.media_format
-      ].join(" ").toLowerCase();
-      return haystack.includes(term);
-    }
-
-    function render() {
-      const term = (q.value || "").trim().toLowerCase();
-      const filtered = items.filter(item => matches(item, term));
-
-      totalEl.textContent = items.length;
-      shownEl.textContent = filtered.length;
-
-      grid.innerHTML = filtered.map(item => {
-        const title = item.title || item.upc || "Untitled";
-        const image = item.front_image_url || item.front_image || "";
-        const year = item.release_year ? `<div class="small"><strong>Year:</strong> ${escapeHtml(item.release_year)}</div>` : "";
-        const genre = item.genre ? `<div class="small"><strong>Genre:</strong> ${escapeHtml(item.genre)}</div>` : "";
-        const director = item.director_names ? `<div class="small"><strong>Director:</strong> ${escapeHtml(item.director_names)}</div>` : "";
-        const actors = item.actor_names ? `<div class="small"><strong>Cast:</strong> ${escapeHtml(item.actor_names)}</div>` : "";
-        const summary = item.summary ? `<p class="small" style="margin-top:8px">${escapeHtml(item.summary)}</p>` : "";
-        const upc = item.upc ? `<div class="small"><strong>UPC:</strong> ${escapeHtml(item.upc)}</div>` : "";
-
+    function render(){
+      els.total.textContent = items.length;
+      els.shown.textContent = items.length;
+      els.withCovers.textContent = items.filter(x => x.front_image_url).length;
+      if (!items.length) {
+        els.grid.innerHTML = '<article class="card">No movies matched your search yet.</article>';
+        return;
+      }
+      els.grid.innerHTML = items.map((item) => {
+        const title = item.title || item.upc || 'Untitled movie';
+        const image = item.front_image_url || item.back_image_url || '';
+        const backLink = item.back_image_url ? `<a href="${esc(item.back_image_url)}" target="_blank" rel="noreferrer">Back cover</a>` : '';
+        const trailerLink = item.trailer_url ? `<a href="${esc(item.trailer_url)}" target="_blank" rel="noreferrer">Trailer</a>` : (item.trailer_search_url ? `<a href="${esc(item.trailer_search_url)}" target="_blank" rel="noreferrer">Find trailer</a>` : '');
+        const tags = [item.release_year, item.media_format, item.genre, item.studio_name].filter(Boolean).map(v => `<span class="movie-meta-chip">${esc(v)}</span>`).join('');
         return `
-          <article class="card">
-            ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(title)} cover" style="width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;margin-bottom:10px">` : ""}
-            <h2 style="margin:0 0 8px;font-size:1.1rem">${escapeHtml(title)}</h2>
-            ${upc}
-            ${year}
-            ${genre}
-            ${director}
-            ${actors}
-            ${summary}
-            <div style="margin-top:10px">
-              <a href="${imdbSearchUrl(item.title, item.upc)}" target="_blank" rel="noreferrer">Search IMDb</a>
+          <article class="card movie-card">
+            <div class="movie-cover-wrap">${image ? `<img src="${esc(image)}" alt="${esc(title)} cover" class="movie-cover" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.movie-cover-wrap').classList.add('is-missing'); this.remove();"/>` : '<div class="movie-cover-placeholder">No cover yet</div>'}</div>
+            <h2>${esc(title)}</h2>
+            <div class="small">UPC: ${esc(item.upc || '—')}</div>
+            <div class="movie-meta-row">${tags || '<span class="movie-meta-chip">Metadata to be enriched</span>'}</div>
+            ${item.director_names ? `<div class="small"><strong>Director:</strong> ${esc(item.director_names)}</div>` : ''}
+            ${item.actor_names ? `<div class="small"><strong>Cast:</strong> ${esc(item.actor_names)}</div>` : ''}
+            ${item.summary ? `<p class="small movie-summary-copy">${esc(item.summary)}</p>` : '<p class="small movie-summary-copy">Metadata can be enriched over time while the cover art is already live from R2.</p>'}
+            <div class="movie-link-row">
+              <a href="${imdbUrl(item)}" target="_blank" rel="noreferrer">Search IMDb</a>
+              ${backLink}
+              ${trailerLink}
             </div>
-          </article>
-        `;
-      }).join("") || `<div class="card">No movies matched your search.</div>`;
+          </article>`;
+      }).join('');
     }
-
-    fetch("/api/movies")
-      .then(r => {
-        if (!r.ok) throw new Error("Failed to load movie data");
-        return r.json();
-      })
-      .then(data => {
-        items = Array.isArray(data) ? data : (data.items || data.movies || []);
+    async function loadMovies(){
+      els.grid.innerHTML = '<article class="card">Loading movie catalog...</article>';
+      try {
+        const response = await fetch(qs());
+        const data = await response.json();
+        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load movie catalog.');
+        items = Array.isArray(data.items) ? data.items : [];
         render();
-      })
-      .catch(err => {
-        grid.innerHTML = `<div class="card">Could not load movie catalog.</div>`;
+      } catch (err) {
         console.error(err);
-      });
-
-    q.addEventListener("input", render);
+        els.grid.innerHTML = `<article class="card">Could not load movie catalog.</article>`;
+      }
+    }
+    let timer = null;
+    function debouncedLoad(){ clearTimeout(timer); timer = setTimeout(loadMovies, 200); }
+    [els.q, els.year, els.genre, els.actor, els.director, els.format].forEach((el) => el.addEventListener('input', debouncedLoad));
+    els.hasTrailer.addEventListener('change', loadMovies);
+    loadMovies();
   </script>
 </body>
 </html>
