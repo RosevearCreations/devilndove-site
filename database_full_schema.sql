@@ -623,6 +623,7 @@ CREATE TABLE IF NOT EXISTS site_item_inventory (
   category TEXT,
   source_url TEXT,
   amazon_url TEXT,
+  image_url TEXT,
   on_hand_quantity INTEGER NOT NULL DEFAULT 0,
   reserved_quantity INTEGER NOT NULL DEFAULT 0,
   incoming_quantity INTEGER NOT NULL DEFAULT 0,
@@ -631,6 +632,11 @@ CREATE TABLE IF NOT EXISTS site_item_inventory (
   supplier_name TEXT,
   supplier_sku TEXT,
   reorder_notes TEXT,
+  preferred_reorder_quantity INTEGER NOT NULL DEFAULT 0,
+  is_on_reorder_list INTEGER NOT NULL DEFAULT 0,
+  do_not_reorder INTEGER NOT NULL DEFAULT 0,
+  do_not_reuse INTEGER NOT NULL DEFAULT 0,
+  reuse_status TEXT,
   is_active INTEGER NOT NULL DEFAULT 1,
   last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -699,3 +705,19 @@ CREATE TABLE IF NOT EXISTS auth_recovery_requests (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_auth_recovery_requests_status_created_at ON auth_recovery_requests(status, created_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS product_resource_links (
+  product_resource_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  resource_kind TEXT NOT NULL CHECK (resource_kind IN ('tool','supply')),
+  source_key TEXT NOT NULL,
+  quantity_used INTEGER NOT NULL DEFAULT 1,
+  usage_notes TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  UNIQUE(product_id, resource_kind, source_key)
+);
+CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resource_links(product_id, sort_order);

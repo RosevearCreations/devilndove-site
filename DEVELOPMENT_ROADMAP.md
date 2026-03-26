@@ -42,6 +42,9 @@
 6. richer analytics dashboards and funnel reporting
 7. continue public search-engine awareness improvements on every outward-facing pass
 8. continue staged migration of high-value JSON collections into D1 for unified search, analytics, and inventory automation
+- continue enriching movies from UPC-only rows into title/summary/front/back-cover records
+- continue moving tools and supplies into D1-backed inventory operations with reorder and do-not-reuse controls
+- continue linking finished products to the tools and supplies used to make them
 
 ## Media-specific roadmap
 

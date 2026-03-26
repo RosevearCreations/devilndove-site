@@ -213,3 +213,42 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
+
+
+CREATE TABLE IF NOT EXISTS product_resource_links (
+  product_resource_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  resource_kind TEXT NOT NULL CHECK (resource_kind IN ('tool','supply')),
+  source_key TEXT NOT NULL,
+  quantity_used INTEGER NOT NULL DEFAULT 1,
+  usage_notes TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  UNIQUE(product_id, resource_kind, source_key)
+);
+CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resource_links(product_id, sort_order);
+
+
+ALTER TABLE site_item_inventory ADD COLUMN image_url TEXT;
+ALTER TABLE site_item_inventory ADD COLUMN preferred_reorder_quantity INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE site_item_inventory ADD COLUMN is_on_reorder_list INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE site_item_inventory ADD COLUMN do_not_reorder INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE site_item_inventory ADD COLUMN do_not_reuse INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE site_item_inventory ADD COLUMN reuse_status TEXT;
+
+CREATE TABLE IF NOT EXISTS product_resource_links (
+  product_resource_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  resource_kind TEXT NOT NULL CHECK (resource_kind IN ('tool','supply')),
+  source_key TEXT NOT NULL,
+  quantity_used INTEGER NOT NULL DEFAULT 1,
+  usage_notes TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  UNIQUE(product_id, resource_kind, source_key)
+);
+CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resource_links(product_id, sort_order);

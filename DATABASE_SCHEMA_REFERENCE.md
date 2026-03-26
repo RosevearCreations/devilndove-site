@@ -92,6 +92,13 @@ Uploaded R2-backed assets with product linkage, object key, sort order, optional
 Provider event log with idempotency, status, replay request metadata, retry attempt fields, and dispatch notes.
 
 ### site_item_inventory
+- now includes image_url, preferred_reorder_quantity, is_on_reorder_list, do_not_reorder, do_not_reuse, reuse_status
+
+product_resource_links
+- links a finished product to tools and supplies used in making it
+
+movie_catalog
+- public movie shelf table. Enrichment can be seeded from `/data/movies/movie_catalog_enriched.json`
 Operational inventory table for tools, supplies, and sellable items with on-hand, reserved, incoming, supplier, and cost fields.
 
 ### site_inventory_movements

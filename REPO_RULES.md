@@ -42,3 +42,12 @@
 
 - Footer must render on every outward-facing and member/admin page through the shared layout unless a page explicitly documents why it is excluded.
 - Continue improving search awareness every pass: strengthen crawl paths, keep one visible H1 on outward-facing pages, and prefer database-backed shared datasets over duplicated JSON whenever scope allows.
+
+
+## Movie enrichment files
+- Keep legacy `/data/catalog.json` untouched if needed for fallback, but place richer movie metadata in `/data/movies/movie_catalog_enriched.json`.
+- Use one record per movie and match by UPC where possible.
+
+## Outward-facing SEO rule
+- Every outward-facing page must continue to have exactly one H1.
+- Each outward-facing pass should also improve crawl/discovery/search clarity where practical.

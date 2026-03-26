@@ -14,7 +14,10 @@
 - inventory records now track reserved, incoming, supplier, and cost fields
 - inventory movement history is now logged for creates, stock adjustments, and deletes
 - public pages now have a stronger metadata baseline, canonicals, social tags, and explicit robots handling
-- public search page and search-event logging are in place
+- public search page
+- movies now have a richer enrichment path instead of remaining permanently UPC-only
+- tools and supplies inventory now supports reorder-list and do-not-reuse rules
+- products can now store linked tools/supplies used during creation and search-event logging are in place
 - analytics and notification foundations are present for future dashboards and workflows
 
 ## What remains the strongest next work
@@ -30,7 +33,10 @@
 
 - public SEO and H1 policy documented for future updates
 - public page head refresh with canonical, robots, Open Graph, and Twitter tags
-- search page added to the site and sitemap
+- search page
+- movies now have a richer enrichment path instead of remaining permanently UPC-only
+- tools and supplies inventory now supports reorder-list and do-not-reuse rules
+- products can now store linked tools/supplies used during creation added to the site and sitemap
 - inventory movement history foundation in schema and admin flow
 - updated full schema and upgrade SQL files
 
@@ -40,7 +46,10 @@
 - provider-side refunds and disputes are not automatically executed yet
 - R2 direct upload depends on the bucket binding and public base URL being configured
 - webhook replay tooling still queues and relabels events rather than running a background worker
-- search page currently blends API products with static JSON content; it is useful now but still a first-pass discovery layer
+- search page
+- movies now have a richer enrichment path instead of remaining permanently UPC-only
+- tools and supplies inventory now supports reorder-list and do-not-reuse rules
+- products can now store linked tools/supplies used during creation currently blends API products with static JSON content; it is useful now but still a first-pass discovery layer
 
 
 ## Latest pass checks

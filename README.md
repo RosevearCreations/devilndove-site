@@ -125,6 +125,8 @@ Admin operations added or deepened in the recent passes:
 - `/api/admin/payment-actions`
 - `/api/admin/media-assets`
 - `/api/admin/site-item-inventory`
+- `/api/admin/product-resources`
+- `/api/movies`
 - `/api/admin/import-products-preview`
 
 
