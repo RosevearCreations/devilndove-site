@@ -130,6 +130,7 @@ export async function onRequestGet(context) {
   const sourceType = normalizeText(url.searchParams.get('source_type'));
   const query = normalizeText(url.searchParams.get('q')).toLowerCase();
   const includeHistory = Number(url.searchParams.get('include_history') || 0) === 1;
+  const stockView = normalizeText(url.searchParams.get('stock_view')).toLowerCase();
   const rows = normalizeResults(await env.DB.prepare(`
     SELECT sii.*,
            COUNT(DISTINCT prl.product_id) AS linked_product_count,
@@ -146,7 +147,10 @@ export async function onRequestGet(context) {
              CASE WHEN (COALESCE(on_hand_quantity,0)-COALESCE(reserved_quantity,0)+COALESCE(incoming_quantity,0)) <= COALESCE(reorder_level,0) OR COALESCE(is_on_reorder_list,0)=1 THEN 0 ELSE 1 END,
              source_type ASC, category ASC, item_name ASC
   `).bind(sourceType, sourceType, query, `%${query}%`, `%${query}%`, `%${query}%`).all());
-  const items = rows.map(shape);
+  let items = rows.map(shape);
+  if (stockView === 'low') items = items.filter((x) => x.needs_reorder);
+  else if (stockView === 'reorder') items = items.filter((x) => x.is_on_reorder_list === 1);
+  else if (stockView === 'no_reuse') items = items.filter((x) => x.do_not_reuse === 1);
   return json({ ok: true, items, summary: {
     total_items: items.length, active_items: items.filter((x) => x.is_active === 1).length,
     low_stock_items: items.filter((x) => x.needs_reorder).length, total_on_hand: items.reduce((s, x) => s + x.on_hand_quantity, 0),

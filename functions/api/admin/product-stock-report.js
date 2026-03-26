@@ -1,0 +1,45 @@
+function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } }); }
+function normalizeText(value) { return String(value || '').trim(); }
+function getBearerToken(request) { const authHeader = request.headers.get('Authorization') || ''; const match = authHeader.match(/^Bearer\s+(.+)$/i); return match ? String(match[1] || '').trim() : ''; }
+function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
+async function getAdminUserFromRequest(request, env) {
+  const token = getBearerToken(request); if (!token) return null;
+  const session = await env.DB.prepare(`SELECT s.user_id, u.user_id AS resolved_user_id, u.email, u.display_name, u.role, u.is_active FROM sessions s INNER JOIN users u ON u.user_id = s.user_id WHERE (s.session_token = ? OR s.token = ?) AND s.expires_at > datetime('now') LIMIT 1`).bind(token, token).first();
+  if (!session || Number(session.is_active || 0) !== 1 || String(session.role || '').toLowerCase() !== 'admin') return null;
+  return { user_id: Number(session.resolved_user_id || session.user_id || 0), email: session.email || '' };
+}
+export async function onRequestGet(context) {
+  const { request, env } = context;
+  const adminUser = await getAdminUserFromRequest(request, env); if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  const url = new URL(request.url); const q = normalizeText(url.searchParams.get('q')).toLowerCase(); const lowOnly = normalizeText(url.searchParams.get('low_only')).toLowerCase() === '1';
+  const like = `%${q}%`;
+  const rows = normalizeResults(await env.DB.prepare(`
+    SELECT p.product_id, p.name, p.slug, p.status, p.currency, p.price_cents, p.inventory_tracking, p.inventory_quantity, p.featured_image_url,
+           COUNT(DISTINCT prl.product_resource_link_id) AS linked_resource_count,
+           SUM(CASE WHEN sii.site_item_inventory_id IS NOT NULL THEN 1 ELSE 0 END) AS linked_inventory_count,
+           SUM(CASE WHEN sii.site_item_inventory_id IS NOT NULL AND ((COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0) + COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) OR COALESCE(sii.is_on_reorder_list,0)=1) THEN 1 ELSE 0 END) AS linked_low_stock_count,
+           GROUP_CONCAT(DISTINCT CASE WHEN sii.site_item_inventory_id IS NOT NULL AND ((COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0) + COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) OR COALESCE(sii.is_on_reorder_list,0)=1) THEN sii.item_name ELSE NULL END) AS linked_low_stock_names
+    FROM products p
+    LEFT JOIN product_resource_links prl ON prl.product_id = p.product_id
+    LEFT JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
+    WHERE (? = '' OR LOWER(COALESCE(p.name,'')) LIKE ? OR LOWER(COALESCE(p.slug,'')) LIKE ? OR LOWER(COALESCE(p.sku,'')) LIKE ?)
+    GROUP BY p.product_id
+    ORDER BY CASE WHEN COALESCE(p.status,'draft') = 'active' THEN 0 ELSE 1 END,
+             CASE WHEN COALESCE(p.inventory_tracking,0)=1 AND COALESCE(p.inventory_quantity,0) <= 2 THEN 0 ELSE 1 END,
+             LOWER(COALESCE(p.name,'')) ASC
+  `).bind(q, like, like, like).all()).map((row) => {
+    const inventoryQty = Number(row.inventory_quantity || 0);
+    const tracking = Number(row.inventory_tracking || 0) === 1;
+    const lowStock = (tracking && inventoryQty <= 2) || Number(row.linked_low_stock_count || 0) > 0;
+    return {
+      product_id: Number(row.product_id || 0),
+      name: row.name || '', slug: row.slug || '', status: row.status || '', currency: row.currency || 'CAD',
+      price_cents: Number(row.price_cents || 0), inventory_tracking: tracking ? 1 : 0, inventory_quantity: inventoryQty,
+      featured_image_url: row.featured_image_url || '', linked_resource_count: Number(row.linked_resource_count || 0),
+      linked_inventory_count: Number(row.linked_inventory_count || 0), linked_low_stock_count: Number(row.linked_low_stock_count || 0),
+      linked_low_stock_names: row.linked_low_stock_names || '', low_stock: lowStock ? 1 : 0
+    };
+  });
+  const items = lowOnly ? rows.filter((row) => row.low_stock === 1) : rows;
+  return json({ ok: true, items, summary: { total_products: rows.length, low_stock_products: rows.filter((row) => row.low_stock === 1).length, tracked_products: rows.filter((row) => row.inventory_tracking === 1).length, products_with_resources: rows.filter((row) => row.linked_resource_count > 0).length } });
+}

@@ -74,7 +74,7 @@ export async function onRequestGet(context) {
   const sql = `
     SELECT p.*, tc.code AS tax_class_code, tc.name AS tax_class_name, tc.tax_rate AS tax_rate,
            ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override,
-           COUNT(pi.product_image_id) AS image_count
+           COUNT(pi.product_image_id) AS image_count, CASE WHEN COALESCE(p.inventory_tracking,0)=1 AND COALESCE(p.inventory_quantity,0) <= 2 THEN 1 ELSE 0 END AS low_stock_flag
     FROM products p
     LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id
     LEFT JOIN product_seo ps ON ps.product_id = p.product_id
@@ -84,5 +84,5 @@ export async function onRequestGet(context) {
     ORDER BY p.sort_order ASC, p.created_at DESC, p.product_id DESC
   `;
   const result = bindings.length ? await env.DB.prepare(sql).bind(...bindings).all() : await env.DB.prepare(sql).all();
-  return json({ ok: true, requested_by: adminUser, products: result.results || [] });
+  const products = (result.results || []).map((row) => ({ ...row, low_stock_flag: Number(row.low_stock_flag || 0) })); return json({ ok: true, requested_by: adminUser, products, summary: { total_products: products.length, low_stock_products: products.filter((row) => Number(row.low_stock_flag || 0) === 1).length } });
 }
