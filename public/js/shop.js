@@ -64,7 +64,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     hide(errorEl); hide(emptyEl); hide(productsEl); show(loadingEl);
     try {
       const response = await fetch(buildUrl(), { method: 'GET' });
-      const data = await response.json();
+      const rawText = await response.text();
+      let data = null;
+      try { data = JSON.parse(rawText); } catch { throw new Error('Store data returned invalid JSON.'); }
       if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load products.');
       const products = Array.isArray(data.products) ? data.products : [];
       if (summaryEl) summaryEl.textContent = `${products.length} product(s) found.`;
