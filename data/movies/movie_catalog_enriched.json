@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "upc": "012236043904",
+      "title": "Replace with movie title",
+      "summary": "Add a short back-cover summary here.",
+      "release_year": 1999,
+      "media_format": "DVD",
+      "genre": "Drama",
+      "director_names": "Director Name",
+      "actor_names": "Lead Actor, Supporting Actor",
+      "front_image_url": "/assets/movies/012236043904-front.jpg",
+      "back_image_url": "/assets/movies/012236043904-back.jpg",
+      "studio_name": "Studio Name",
+      "runtime_minutes": 120,
+      "featured_rank": 10,
+      "status": "active"
+    }
+  ],
+  "notes": {
+    "how_to_use": "Add one object per movie. Match records by UPC when possible. Put front/back cover files under /assets/movies/ or upload them to your media storage and place the public URLs here."
+  }
+}
