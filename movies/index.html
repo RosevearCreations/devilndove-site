@@ -37,7 +37,7 @@
       <div><label class="small" for="movieActorInput">Actor</label><input class="input" id="movieActorInput" placeholder="Actor name" type="text"/></div>
       <div><label class="small" for="movieDirectorInput">Director</label><input class="input" id="movieDirectorInput" placeholder="Director name" type="text"/></div>
     </div>
-    <div class="small" style="margin-top:10px">Showing <span id="movieShownCount">0</span> of <span id="movieTotalCount">0</span> movies.</div>
+    <div class="small" style="margin-top:10px">Showing <span id="movieShownCount">0</span> of <span id="movieTotalCount">0</span> movies.</div><div class="small" style="margin-top:6px">To enrich movies beyond UPC-only rows, add cover URLs and details to <code>/data/movies/movie_catalog_enriched.json</code>.</div>
   </div>
   <div class="card" style="margin-top:14px">
     <div id="movieMessage" class="small" style="display:none;margin-bottom:10px"></div>
@@ -92,7 +92,7 @@
     grid.innerHTML = filtered.map((item) => `
       <article class="movie-card">
         <div class="movie-card-media">
-          ${item.front_image_url ? `<img src="${escapeHtml(item.front_image_url)}" alt="${escapeHtml(item.title || item.upc)} front cover" loading="lazy"/>` : `<div class="movie-placeholder">${escapeHtml(item.title || item.upc || 'Movie')}</div>`}
+          ${item.front_image_url ? `<img src="${escapeHtml(item.front_image_url)}" alt="${escapeHtml(item.title || item.upc)} front cover" loading="lazy"/>` : `<div class="movie-placeholder">${escapeHtml(item.title || item.upc || 'Movie')}</div>`}${item.back_image_url ? `<img src="${escapeHtml(item.back_image_url)}" alt="${escapeHtml(item.title || item.upc)} back cover" loading="lazy"/>` : ``}
         </div>
         <div class="stack-sm">
           <div>
