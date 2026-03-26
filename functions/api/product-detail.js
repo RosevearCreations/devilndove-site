@@ -59,5 +59,50 @@ export async function onRequestGet(context) {
     ORDER BY product_image_annotation_id ASC
   `).bind(product.product_id).all());
 
-  return json({ ok: true, product, images, image_annotations });
+  const resource_links = normalizeResults(await env.DB.prepare(`
+    SELECT prl.product_resource_link_id, prl.product_id, prl.resource_kind, prl.source_key, prl.quantity_used,
+           prl.usage_notes, prl.sort_order,
+           ci.name AS resource_name, ci.image_url AS resource_image_url, ci.category AS resource_category,
+           ci.subcategory AS resource_subcategory, ci.short_description AS resource_short_description,
+           sii.site_item_inventory_id, sii.on_hand_quantity, sii.reserved_quantity, sii.incoming_quantity,
+           sii.reorder_level, sii.is_on_reorder_list, sii.do_not_reorder, sii.do_not_reuse, sii.reuse_status
+    FROM product_resource_links prl
+    LEFT JOIN catalog_items ci ON ci.item_kind = prl.resource_kind AND ci.source_key = prl.source_key
+    LEFT JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
+    WHERE prl.product_id = ?
+    ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
+  `).bind(product.product_id).all()).map((row) => ({
+    product_resource_link_id: Number(row.product_resource_link_id || 0),
+    product_id: Number(row.product_id || 0),
+    resource_kind: row.resource_kind || '',
+    source_key: row.source_key || '',
+    quantity_used: Number(row.quantity_used || 0),
+    usage_notes: row.usage_notes || '',
+    sort_order: Number(row.sort_order || 0),
+    resource_name: row.resource_name || row.source_key || '',
+    resource_image_url: row.resource_image_url || '',
+    resource_category: row.resource_category || '',
+    resource_subcategory: row.resource_subcategory || '',
+    resource_short_description: row.resource_short_description || '',
+    inventory: row.site_item_inventory_id ? {
+      site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+      on_hand_quantity: Number(row.on_hand_quantity || 0),
+      reserved_quantity: Number(row.reserved_quantity || 0),
+      incoming_quantity: Number(row.incoming_quantity || 0),
+      reorder_level: Number(row.reorder_level || 0),
+      is_on_reorder_list: Number(row.is_on_reorder_list || 0),
+      do_not_reorder: Number(row.do_not_reorder || 0),
+      do_not_reuse: Number(row.do_not_reuse || 0),
+      reuse_status: row.reuse_status || ''
+    } : null
+  }));
+
+  const resource_summary = {
+    total_linked_items: resource_links.length,
+    linked_tools: resource_links.filter((row) => row.resource_kind === 'tool').length,
+    linked_supplies: resource_links.filter((row) => row.resource_kind === 'supply').length,
+    low_stock_items: resource_links.filter((row) => row.inventory && ((Number(row.inventory.on_hand_quantity || 0) - Number(row.inventory.reserved_quantity || 0) + Number(row.inventory.incoming_quantity || 0)) <= Number(row.inventory.reorder_level || 0))).length
+  };
+
+  return json({ ok: true, product, images, image_annotations, resource_links, resource_summary });
 }

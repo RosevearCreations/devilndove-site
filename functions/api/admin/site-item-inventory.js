@@ -44,7 +44,9 @@ function shape(row) {
     updated_at: row.updated_at || null, preferred_reorder_quantity: preferred, is_on_reorder_list: reorderListed ? 1 : 0,
     do_not_reorder: doNotReorder ? 1 : 0, do_not_reuse: doNotReuse ? 1 : 0, reuse_status: row.reuse_status || '',
     available_quantity: onHand - reserved, projected_quantity: onHand - reserved + incoming,
-    needs_reorder: !doNotReorder && ((onHand - reserved + incoming) <= reorder || reorderListed)
+    needs_reorder: !doNotReorder && ((onHand - reserved + incoming) <= reorder || reorderListed),
+    linked_product_count: Number(row.linked_product_count || 0),
+    linked_product_names: row.linked_product_names || ''
   };
 }
 
@@ -79,6 +81,47 @@ async function getRecentMovements(env) {
   }));
 }
 
+
+
+async function syncInventoryFromCatalog(env, adminUser, sourceTypes = ['tool', 'supply']) {
+  const placeholders = sourceTypes.map(() => '?').join(',');
+  const rows = normalizeResults(await env.DB.prepare(`
+    SELECT item_kind, source_key, name, category, image_url, amazon_url
+    FROM catalog_items
+    WHERE item_kind IN (${placeholders}) AND COALESCE(status,'active') != 'archived'
+    ORDER BY item_kind ASC, LOWER(name) ASC
+  `).bind(...sourceTypes).all());
+  let synced = 0;
+  for (const row of rows) {
+    const existing = await env.DB.prepare(`SELECT * FROM site_item_inventory WHERE source_type = ? AND external_key = ? LIMIT 1`).bind(row.item_kind, row.source_key).first();
+    const onHand = Number(existing?.on_hand_quantity || 0);
+    const reserved = Number(existing?.reserved_quantity || 0);
+    const incoming = Number(existing?.incoming_quantity || 0);
+    const reorderLevel = Number(existing?.reorder_level || 0);
+    const unitCost = Number(existing?.unit_cost_cents || 0);
+    const preferredQty = Number(existing?.preferred_reorder_quantity || 0);
+    await env.DB.prepare(`
+      INSERT INTO site_item_inventory (
+        source_type, external_key, item_name, category, amazon_url, image_url,
+        on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level, unit_cost_cents,
+        preferred_reorder_quantity, is_active, last_seen_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(source_type, external_key) DO UPDATE SET
+        item_name=excluded.item_name,
+        category=excluded.category,
+        amazon_url=COALESCE(site_item_inventory.amazon_url, excluded.amazon_url),
+        image_url=COALESCE(site_item_inventory.image_url, excluded.image_url),
+        last_seen_at=CURRENT_TIMESTAMP,
+        updated_at=CURRENT_TIMESTAMP
+    `).bind(row.item_kind, row.source_key, row.name, row.category || null, row.amazon_url || null, row.image_url || null, onHand, reserved, incoming, reorderLevel, unitCost, preferredQty).run();
+    if (!existing) {
+      await logMovement(env, { source_type: row.item_kind, external_key: row.source_key, item_name: row.name, movement_type: 'sync_create', quantity_delta: 0, previous_on_hand_quantity: 0, new_on_hand_quantity: onHand, previous_reserved_quantity: 0, new_reserved_quantity: reserved, previous_incoming_quantity: 0, new_incoming_quantity: incoming, note: 'Synced inventory item from catalog.', actor_user_id: adminUser.user_id });
+    }
+    synced += 1;
+  }
+  return synced;
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const adminUser = await getAdminUserFromRequest(request, env);
@@ -88,10 +131,16 @@ export async function onRequestGet(context) {
   const query = normalizeText(url.searchParams.get('q')).toLowerCase();
   const includeHistory = Number(url.searchParams.get('include_history') || 0) === 1;
   const rows = normalizeResults(await env.DB.prepare(`
-    SELECT * FROM site_item_inventory
-    WHERE (? = '' OR source_type = ?)
-      AND (? = '' OR LOWER(COALESCE(item_name,'')) LIKE ? OR LOWER(COALESCE(category,'')) LIKE ? OR LOWER(COALESCE(supplier_name,'')) LIKE ?)
-    ORDER BY CASE WHEN COALESCE(is_active,0)=1 THEN 0 ELSE 1 END,
+    SELECT sii.*,
+           COUNT(DISTINCT prl.product_id) AS linked_product_count,
+           GROUP_CONCAT(DISTINCT p.name) AS linked_product_names
+    FROM site_item_inventory sii
+    LEFT JOIN product_resource_links prl ON prl.resource_kind = sii.source_type AND prl.source_key = sii.external_key
+    LEFT JOIN products p ON p.product_id = prl.product_id
+    WHERE (? = '' OR sii.source_type = ?)
+      AND (? = '' OR LOWER(COALESCE(sii.item_name,'')) LIKE ? OR LOWER(COALESCE(sii.category,'')) LIKE ? OR LOWER(COALESCE(sii.supplier_name,'')) LIKE ?)
+    GROUP BY sii.site_item_inventory_id
+    ORDER BY CASE WHEN COALESCE(sii.is_active,0)=1 THEN 0 ELSE 1 END,
              CASE WHEN COALESCE(do_not_reuse,0)=1 THEN 1 ELSE 0 END,
              CASE WHEN COALESCE(do_not_reorder,0)=1 THEN 1 ELSE 0 END,
              CASE WHEN (COALESCE(on_hand_quantity,0)-COALESCE(reserved_quantity,0)+COALESCE(incoming_quantity,0)) <= COALESCE(reorder_level,0) OR COALESCE(is_on_reorder_list,0)=1 THEN 0 ELSE 1 END,
@@ -111,6 +160,11 @@ export async function onRequestPost(context) {
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
   let body = {}; try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
+  if (normalizeText(body.action).toLowerCase() === 'sync_catalog') {
+    const sourceTypes = Array.isArray(body.source_types) && body.source_types.length ? body.source_types.map((v) => normalizeText(v).toLowerCase()).filter((v) => ['tool','supply'].includes(v)) : ['tool','supply'];
+    const synced = await syncInventoryFromCatalog(env, adminUser, sourceTypes);
+    return json({ ok: true, synced, source_types: sourceTypes });
+  }
   const sourceType = normalizeText(body.source_type) || 'supply';
   const externalKey = normalizeText(body.external_key) || crypto.randomUUID();
   const itemName = normalizeText(body.item_name);

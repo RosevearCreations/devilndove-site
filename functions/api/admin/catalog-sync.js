@@ -68,6 +68,14 @@ async function fetchJsonFromSite(request, path, strict = true) {
   return response.json().catch(() => (strict ? Promise.reject(new Error(`Invalid JSON at ${path}.`)) : null));
 }
 
+
+function unwrapCollectionItems(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.movies)) return data.movies;
+  return [];
+}
+
 function mapToolRow(row, index) {
   const name = normalizeText(row.item_name_suggested || row.name || row.example_image_file) || `Tool ${index + 1}`;
   const area = normalizeText(row.primary_area || row.area || 'Workshop Basics');
