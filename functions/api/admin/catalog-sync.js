@@ -61,11 +61,11 @@ function buildImageUrl(origin, folder, fileName, rawKey) {
   return `${origin}/${encoded}`;
 }
 
-async function fetchJsonFromSite(request, path) {
+async function fetchJsonFromSite(request, path, strict = true) {
   const url = new URL(path, request.url);
   const response = await fetch(url.toString(), { cf: { cacheTtl: 0, cacheEverything: false } });
-  if (!response.ok) throw new Error(`Failed to fetch ${path}.`);
-  return response.json();
+  if (!response.ok) { if (strict) throw new Error(`Failed to fetch ${path}.`); return null; }
+  return response.json().catch(() => (strict ? Promise.reject(new Error(`Invalid JSON at ${path}.`)) : null));
 }
 
 function mapToolRow(row, index) {
@@ -126,7 +126,7 @@ function mapSupplyRow(row, index) {
 
 function mapMovieRow(row, index) {
   const upc = normalizeText(row.upc || row.UPC || row.barcode || row.code);
-  const title = normalizeText(row.title || row.name || (upc ? `Movie ${upc}` : `Movie ${index + 1}`));
+  const title = normalizeText(row.title || row.name || row.movie_title || (upc ? `Movie ${upc}` : `Movie ${index + 1}`));
   const sourceKey = upc || normalizeText(row.slug || `${slugify(title)}-${index + 1}`);
   return {
     item_kind: 'movie',
@@ -137,8 +137,8 @@ function mapMovieRow(row, index) {
     category: normalizeText(row.genre || 'Movie'),
     subcategory: normalizeText(row.media_format || row.format || ''),
     item_type: 'movie',
-    short_description: normalizeText(row.summary || row.description || (upc ? `UPC ${upc}` : 'Movie catalog item')),
-    notes: normalizeText(row.director_names || row.actor_names || row.notes),
+    short_description: normalizeText(row.summary || row.description || row.plot_summary || row.synopsis || (upc ? `UPC ${upc}` : 'Movie catalog item')),
+    notes: normalizeText(row.director_names || row.actor_names || row.director || row.actors || row.notes),
     image_url: normalizeText(row.front_image_url || row.image_front || row.image || row.cover_front),
     r2_object_key: normalizeText(row.front_r2_object_key || row.r2_object_key),
     amazon_url: normalizeText(row.amazon_url),
@@ -266,7 +266,19 @@ export async function onRequestPost(context) {
 
   if (selectedKinds.includes('movie')) {
     const rows = await fetchJsonFromSite(request, '/data/catalog.json');
-    const mapped = (Array.isArray(rows?.items) ? rows.items : []).map(mapMovieRow);
+    const enriched = await fetchJsonFromSite(request, '/data/movies/movie_catalog_enriched.json', false);
+    const enrichedItems = Array.isArray(enriched?.items) ? enriched.items : [];
+    const mergedByKey = new Map();
+    for (const row of (Array.isArray(rows?.items) ? rows.items : [])) {
+      const key = normalizeText(row.upc || row.UPC || row.barcode || row.code || row.slug);
+      mergedByKey.set(key || String(mergedByKey.size + 1), { ...row });
+    }
+    for (const row of enrichedItems) {
+      const key = normalizeText(row.upc || row.UPC || row.barcode || row.code || row.slug);
+      const existing = mergedByKey.get(key || '') || {};
+      mergedByKey.set(key || String(mergedByKey.size + 1), { ...existing, ...row, upc: key || existing.upc || '' });
+    }
+    const mapped = Array.from(mergedByKey.values()).map(mapMovieRow);
     const upserted = await upsertCatalogRows(env, mapped);
     totalUpserted += upserted;
     summary.push({ item_kind: 'movie', fetched: mapped.length, upserted });
