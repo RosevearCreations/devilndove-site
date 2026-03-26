@@ -2,95 +2,47 @@
 
 ## Current completed foundations
 
-- CSV-first product mass upload foundation with downloadable template and required/optional field guidance
-- staged D1 migration foundation for tools, supplies, and featured creations through `catalog_items` and admin sync tooling
-
 - auth and session model
-- member orders and downloads
-- admin users and security tools
+- member orders/downloads
+- admin users/security tools
 - checkout and order creation
 - PayPal handoff
 - PayPal return capture
-- PayPal webhook reconciliation
-- Stripe hosted checkout session creation
-- Stripe webhook reconciliation
-- webhook event idempotency log foundation
-- webhook review and manual replay queue admin tooling
+- PayPal webhook reconciliation foundation
 - analytics and visitor monitoring foundation
 - product SEO tools
-- sitewide public SEO metadata refresh and explicit H1 policy baseline
-- public site search page plus search-event logging foundation
 - product media workflow foundation
-- direct admin image upload endpoint for R2 media
-- uploaded asset browser and delete foundation in admin
-- site inventory and reorder foundation
-- deeper site inventory fields for reserved, incoming, supplier, and cost tracking
-- inventory movement history foundation
-- refund and dispute workflow logging foundation in admin
-- import preview validation improvements for duplicate slugs and malformed media URLs
-- shared auth token fallback so the outward-facing site and admin area resolve the same active login more reliably
-- shared footer/widget layout hardening across standard pages
-- admin dashboard formatting refresh with cleaner summary cards and a live activity feed
+- site inventory/reorder foundation
 
 ## Strongest next steps after this pass
 
-1. webhook retry, replay, and dispatch hardening worker flow beyond admin requeue
-2. storefront and admin refund and dispute workflows with provider sync confirmation
-3. direct media replace polish, thumbnail and variant generation, and featured-image suggestions
-4. deeper inventory operations for products, tools, and supplies with movement history UX
-5. product import seeding refinement and richer row-by-row validation UX
+1. Stripe payment completion pass
+2. webhook retry / replay / dispatch hardening
+3. direct media upload workflow to R2
+4. deeper inventory operations for products, tools, and supplies
+5. product import seeding refinement and validation UX
 6. richer analytics dashboards and funnel reporting
-7. continue public search-engine awareness improvements on every outward-facing pass
-8. continue staged migration of high-value JSON collections into D1 for unified search, analytics, and inventory automation
-- continue enriching movies from UPC-only rows into title/summary/front/back-cover records
-- continue moving tools and supplies into D1-backed inventory operations with reorder and do-not-reuse controls
-- continue linking finished products to the tools and supplies used to make them
 
 ## Media-specific roadmap
 
-- uploaded asset gallery and browser in admin ✅ foundation added
-- image delete and reorder UI polish ✅ partial
-- thumbnail and variant handling
+- direct upload endpoint
+- image delete/reorder UI polish
+- thumbnail/variant handling
 - tighter annotation-to-storefront usage
-- optional automatic featured-image suggestion from uploaded media
 
 ## Payment-specific roadmap
 
-- webhook replay safety admin tooling ✅ partial foundation added
-- idempotency review dashboard using `webhook_events` ✅ partial foundation added
-- provider retry logging and admin resend tools ✅ partial foundation added
-- refund and dispute workflows ✅ local foundation added
-- optional Stripe customer portal and saved customer records later
-
-## Public SEO and search roadmap
-
-- one-H1 policy on all outward-facing pages ✅ baseline refreshed
-- canonical, robots, Open Graph, and Twitter tags on outward-facing pages ✅ baseline refreshed
-- noindex coverage on utility and private pages ✅ baseline refreshed
-- sitemap coverage for public collections and search page ✅ refreshed
-- structured data on home and major public pages ✅ baseline refreshed
-- continue improving crawl, discovery, and query-awareness each pass
+- webhook replay safety
+- idempotency improvements
+- provider retry logging
+- refund/dispute workflows
 
 
-## Data model caution now worth planning
+## Current pass completion update
 
-- the search page still blends live database products with JSON-driven tools, supplies, and creations
-- if the long-term plan is unified search, richer analytics, and inventory automation, migrating high-value JSON collections into D1 is now the right time to start while scope is still manageable
-
-
-## Current pass additions
-- Session/auth now uses a stronger same-site continuity path: auth endpoints set a first-party `dd_auth_token` cookie in addition to returning the bearer token. Public pages can resolve the signed-in member/admin state more reliably.
-- Added `movie_catalog` for staged migration of the legacy UPC-only movie JSON into D1. The public movies page now reads from `/api/movies`, which prefers D1 and falls back to `/data/catalog.json`.
-- Catalog sync now supports movies in addition to tools, supplies, and featured creations.
-- Public movie search UI now supports title, UPC, year, actor, and director fields when that data exists, while still working with legacy UPC-only data.
-- Product CSV preview now renders as a structured validation table instead of loose JSON/text lines.
-
-
-## Current pass update
-- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.json`, and the R2-hosted cover images more safely.
-- Movie search now supports title, UPC, year, actor, director, genre, studio, format, and optional trailer-link filtering.
-- `trailer_url` is now part of the movie enrichment path so trailer support can be stored directly when available.
-- Storefront product detail now includes linked tools and supplies from `product_resource_links` so each finished product can tell a clearer “made with these materials and tools” story.
-- Admin product-resource linking now supports usage notes for story-building and social-post context.
-- Admin inventory can now sync tool and supply records from `catalog_items` into `site_item_inventory`, reducing duplicate maintenance between JSON, catalog, and inventory records.
-- Continue the one-H1-per-exposed-page rule and continue improving page titles, descriptions, canonical tags, crawl paths, structured data relevance, and visible on-page content alignment on every outward-facing pass.
+- Replaced the placeholder movie enrichment file in the site package with the uploaded R2-backed movie catalog JSON so the public page and API are reading real `front_image_url` and `back_image_url` values.
+- Hardened `/api/movies` so partial rows can still derive cover URLs and trailer-search links instead of failing into blank cards.
+- Added a dedicated admin product stock and build-readiness report to surface finished-product stock levels plus linked low-stock tools/supplies.
+- Extended admin tools/supplies inventory operations with filtered views and direct sync buttons for catalog-backed tools or supplies.
+- Continued the D1-backed relationship model between finished products and the tools/supplies used to create them so future social/story outputs can explain how a piece was made.
+- Provider-confirmed refund/dispute sync, worker-driven webhook retry/replay, and invoice/refund receipt delivery remain next-phase work after this pass.

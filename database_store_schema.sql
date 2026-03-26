@@ -261,3 +261,6 @@ CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, 
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
 
+
+
+-- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.

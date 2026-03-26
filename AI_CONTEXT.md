@@ -78,3 +78,9 @@ This repo is in the payment, media, inventory, and public SEO hardening phase af
 - Admin product-resource linking now supports usage notes for story-building and social-post context.
 - Admin inventory can now sync tool and supply records from `catalog_items` into `site_item_inventory`, reducing duplicate maintenance between JSON, catalog, and inventory records.
 - Continue the one-H1-per-exposed-page rule and continue improving page titles, descriptions, canonical tags, crawl paths, structured data relevance, and visible on-page content alignment on every outward-facing pass.
+
+
+## Current pass reminders
+
+- Do not restore the movie catalog to the old placeholder `/assets/movies/...-front.jpg` sample paths; use the uploaded R2-backed enrichment JSON.
+- Maintain the relationship between finished products and linked tools/supplies because it supports future storytelling, social content, and build-history features.

@@ -110,3 +110,10 @@ Most important next layers after this pass are:
 - Admin product-resource linking now supports usage notes for story-building and social-post context.
 - Admin inventory can now sync tool and supply records from `catalog_items` into `site_item_inventory`, reducing duplicate maintenance between JSON, catalog, and inventory records.
 - Continue the one-H1-per-exposed-page rule and continue improving page titles, descriptions, canonical tags, crawl paths, structured data relevance, and visible on-page content alignment on every outward-facing pass.
+
+
+## Current pass update
+
+- Movies now depend on the real R2-backed enrichment file rather than the starter placeholder record. The page/API are aligned around `front_image_url` and `back_image_url`, with trailer-ready search support.
+- Admin now has a dedicated product stock and build-readiness report, bridging finished-product inventory with linked tool/supply inventory pressure.
+- Site inventory operations continue moving away from scattered JSON maintenance by syncing from `catalog_items` into `site_item_inventory`, then surfacing reorder/do-not-reuse status directly in admin views.

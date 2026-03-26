@@ -722,3 +722,6 @@ CREATE TABLE IF NOT EXISTS product_resource_links (
   UNIQUE(product_id, resource_kind, source_key)
 );
 CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resource_links(product_id, sort_order);
+
+
+-- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.

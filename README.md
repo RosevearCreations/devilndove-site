@@ -164,3 +164,12 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Admin product-resource linking now supports usage notes for story-building and social-post context.
 - Admin inventory can now sync tool and supply records from `catalog_items` into `site_item_inventory`, reducing duplicate maintenance between JSON, catalog, and inventory records.
 - Continue the one-H1-per-exposed-page rule and continue improving page titles, descriptions, canonical tags, crawl paths, structured data relevance, and visible on-page content alignment on every outward-facing pass.
+
+
+## Current pass highlights
+
+- Replaced the sample movie enrichment file with the real R2-backed `movie_catalog_enriched.json` so the movie page can resolve live front/back cover URLs instead of placeholder `/assets/movies` paths.
+- Hardened `/api/movies` to blend D1, enriched JSON, and legacy rows more safely, including derived R2 cover fallbacks and trailer-search links when a stored trailer URL is not available yet.
+- Added a new admin product stock report for finished products so the dashboard can show what is on hand, what is running low, and which linked tools/supplies are causing build-risk or reorder pressure.
+- Tightened admin site inventory controls with filter views (`low`, `reorder`, `do_not_reuse`) and one-click sync buttons for tools and supplies from the D1-backed catalog sync layer.
+- Continued the D1 relationship model for “how this was made” storytelling by keeping finished products linked to tools and supplies with usage notes for future social/story output.

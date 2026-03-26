@@ -155,3 +155,10 @@ Images are optional during import and can be added during later review before ac
 - Admin product-resource linking now supports usage notes for story-building and social-post context.
 - Admin inventory can now sync tool and supply records from `catalog_items` into `site_item_inventory`, reducing duplicate maintenance between JSON, catalog, and inventory records.
 - Continue the one-H1-per-exposed-page rule and continue improving page titles, descriptions, canonical tags, crawl paths, structured data relevance, and visible on-page content alignment on every outward-facing pass.
+
+
+## Current pass notes
+
+- `movie_catalog` remains the long-term home for enriched movie metadata, while `data/movies/movie_catalog_enriched.json` currently provides the live R2-backed image bridge for front/back covers.
+- `site_item_inventory` continues to be the operational inventory table for tools and supplies, including reorder, do-not-reorder, and do-not-reuse controls.
+- `product_resource_links` remains the relationship table connecting finished products to the tools and supplies used during the build process.

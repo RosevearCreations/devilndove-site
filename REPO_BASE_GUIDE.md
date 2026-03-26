@@ -121,3 +121,9 @@ When a public page is touched, review:
 - Admin product-resource linking now supports usage notes for story-building and social-post context.
 - Admin inventory can now sync tool and supply records from `catalog_items` into `site_item_inventory`, reducing duplicate maintenance between JSON, catalog, and inventory records.
 - Continue the one-H1-per-exposed-page rule and continue improving page titles, descriptions, canonical tags, crawl paths, structured data relevance, and visible on-page content alignment on every outward-facing pass.
+
+
+## Current pass operational note
+
+- The movie cover source of truth for public image URLs is now the uploaded `data/movies/movie_catalog_enriched.json`, backed by public R2 URLs under the `movies/` prefix.
+- Admin operators now have two inventory lenses: `site_item_inventory` for tools/supplies and the product stock report for finished-product readiness.

@@ -61,3 +61,10 @@
 - Admin product-resource linking now supports usage notes for story-building and social-post context.
 - Admin inventory can now sync tool and supply records from `catalog_items` into `site_item_inventory`, reducing duplicate maintenance between JSON, catalog, and inventory records.
 - Continue the one-H1-per-exposed-page rule and continue improving page titles, descriptions, canonical tags, crawl paths, structured data relevance, and visible on-page content alignment on every outward-facing pass.
+
+
+## Ongoing rule additions
+
+- Keep every outward-facing page to a single H1 only.
+- Continue improving crawl, discovery, and search intent on every outward-facing pass.
+- When public media or catalog data already exists in R2 or D1, do not regress pages back to placeholder local paths or sample JSON records.

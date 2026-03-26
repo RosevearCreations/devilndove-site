@@ -90,3 +90,10 @@
 - Admin product-resource linking now supports usage notes for story-building and social-post context.
 - Admin inventory can now sync tool and supply records from `catalog_items` into `site_item_inventory`, reducing duplicate maintenance between JSON, catalog, and inventory records.
 - Continue the one-H1-per-exposed-page rule and continue improving page titles, descriptions, canonical tags, crawl paths, structured data relevance, and visible on-page content alignment on every outward-facing pass.
+
+
+## Current pass health check
+
+- Movie cover URLs now point at the uploaded public R2 objects instead of the old placeholder local asset paths.
+- The public movie page is aligned with `/api/movies` and is expected to show covers whenever `front_image_url` or `back_image_url` exists in the enrichment file or D1 record.
+- Finished-product inventory visibility is stronger in admin through the new product stock report and the existing site inventory movement/reorder tooling.

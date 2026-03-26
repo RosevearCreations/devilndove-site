@@ -258,3 +258,6 @@ CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resourc
 ALTER TABLE movie_catalog ADD COLUMN trailer_url TEXT;
 
 -- Product resource story linkage already exists in base schema; keep using product_resource_links.
+
+
+-- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.
