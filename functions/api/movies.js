@@ -56,14 +56,15 @@ async function fetchEnrichedCatalog(request) {
 function normalizeMovieRow(row, index = 0) {
   const upc = normalizeText(row.upc || row.UPC || row.barcode || row.code);
   const explicitTitle = normalizeText(row.title || row.name || row.movie_title);
-  const title = explicitTitle || (upc ? `Movie ${upc}` : `Movie ${index + 1}`);
+  const title = explicitTitle || '';
+  const displayTitle = title || ''; 
   const trailerUrl = normalizeText(row.trailer_url || row.trailer || row.youtube_url || row.trailer_search_url);
   return {
     movie_catalog_id: Number(row.movie_catalog_id || 0),
     upc,
     slug: normalizeText(row.slug || slugify(explicitTitle || upc || `movie-${index + 1}`)),
-    title,
-    sort_title: normalizeText(row.sort_title || explicitTitle || upc || title),
+    title: displayTitle,
+    sort_title: normalizeText(row.sort_title || explicitTitle || upc || displayTitle || `movie-${index+1}`),
     summary: normalizeText(row.summary || row.description || row.plot_summary || row.synopsis),
     release_year: safeNumber(row.release_year),
     media_format: normalizeText(row.media_format || row.format || 'DVD/Blu-ray'),
@@ -89,7 +90,7 @@ function mergeMovieRows(primary, overlay) {
     ...Object.fromEntries(Object.entries(overlay || {}).filter(([_, v]) => !(v == null || v === ''))),
     movie_catalog_id: primary.movie_catalog_id || Number(overlay?.movie_catalog_id || 0) || 0,
     upc: primary.upc || overlay?.upc || '',
-    title: normalizeText(primary.title).startsWith('Movie ') ? (overlay?.title || primary.title) : (primary.title || overlay?.title || primary.upc || 'Untitled movie'),
+    title: primary.title || overlay?.title || '',
     sort_title: primary.sort_title || overlay?.sort_title || primary.title || overlay?.title || primary.upc || '',
     front_image_url: primary.front_image_url || overlay?.front_image_url || deriveCoverUrl(primary, 'front') || deriveCoverUrl(overlay || {}, 'front'),
     back_image_url: primary.back_image_url || overlay?.back_image_url || deriveCoverUrl(primary, 'back') || deriveCoverUrl(overlay || {}, 'back'),
