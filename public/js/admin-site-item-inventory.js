@@ -76,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="grid cols-4" style="gap:12px;align-items:end;margin-top:16px">
           <div><label class="small" for="siteInventorySearch">Search</label><input id="siteInventorySearch" type="text" placeholder="name, category, supplier" /></div>
           <div><label class="small" for="siteInventoryStockView">Stock view</label><select id="siteInventoryStockView"><option value="">All items</option><option value="low">Low stock</option><option value="reorder">Reorder list</option><option value="no_reuse">Do not reuse</option></select></div>
-          <div style="align-self:end;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh</button><button class="btn" type="button" id="siteInventorySyncToolsButton">Sync tools</button><button class="btn" type="button" id="siteInventorySyncSuppliesButton">Sync supplies</button></div>
+          <div><label class="small" for="siteInventorySourceFilter">Item type</label><select id="siteInventorySourceFilter"><option value="">Tools + supplies + other</option><option value="tool">Tools only</option><option value="supply">Supplies only</option><option value="product">Products only</option><option value="other">Other only</option></select></div>
+          <div style="align-self:end;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh</button><button class="btn" type="button" id="siteInventorySyncToolsButton">Sync tools</button><button class="btn" type="button" id="siteInventorySyncSuppliesButton">Sync supplies</button><button class="btn" type="button" id="siteInventorySyncCoreButton">Sync tools + supplies</button></div>
         </div>
 
         <div class="admin-table-wrap" style="margin-top:12px"><table><thead><tr><th>Item</th><th>Stock</th><th>Rules</th><th>Supplier</th><th>Linked Products</th><th>Cost</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
@@ -86,8 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryForm')?.addEventListener('submit', saveItem);
     document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', loadList);
     document.getElementById('siteInventoryStockView')?.addEventListener('change', loadList);
+    document.getElementById('siteInventorySourceFilter')?.addEventListener('change', loadList);
     document.getElementById('siteInventorySyncToolsButton')?.addEventListener('click', () => syncCatalog(['tool']));
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
+    document.getElementById('siteInventorySyncCoreButton')?.addEventListener('click', () => syncCatalog(['tool', 'supply']));
     document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(loadList, 250));
     document.getElementById('siteInventoryResetButton')?.addEventListener('click', () => document.getElementById('siteInventoryForm')?.reset());
     mountEl.addEventListener('click', onTableClick);
@@ -163,7 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setMessage('Loading inventory list...');
       const q = document.getElementById('siteInventorySearch')?.value || '';
       const stockView = document.getElementById('siteInventoryStockView')?.value || '';
-      const response = await window.DDAuth.apiFetch(`/api/admin/site-item-inventory?q=${encodeURIComponent(q)}&include_history=1&stock_view=${encodeURIComponent(stockView)}`);
+      const sourceType = document.getElementById('siteInventorySourceFilter')?.value || '';
+      const response = await window.DDAuth.apiFetch(`/api/admin/site-item-inventory?q=${encodeURIComponent(q)}&include_history=1&stock_view=${encodeURIComponent(stockView)}&source_type=${encodeURIComponent(sourceType)}`);
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load inventory list.');
       const summary = data.summary || {};
