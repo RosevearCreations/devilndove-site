@@ -75,9 +75,12 @@ async function fetchEnrichedCatalog(request) {
 
 function normalizeMovieRow(row, index = 0) {
   const upc = normalizeText(row.upc || row.UPC || row.barcode || row.code);
-  const explicitTitle = normalizeText(row.title || row.name || row.movie_title);
+  const explicitTitle = normalizeText(row.title || row.name || row.movie_title || row.movie_name || row.product_name);
   const title = explicitTitle || '';
   const trailerUrl = normalizeText(row.trailer_url || row.trailer || row.youtube_url || row.trailer_search_url);
+  const estimatedLow = safeNumber(row.estimated_value_low_cents || row.estimated_low_cents || row.value_low_cents);
+  const estimatedHigh = safeNumber(row.estimated_value_high_cents || row.estimated_high_cents || row.value_high_cents);
+  const estimatedCurrency = normalizeText(row.estimated_value_currency || row.value_currency || 'CAD') || 'CAD';
   return {
     movie_catalog_id: Number(row.movie_catalog_id || 0),
     upc,
@@ -96,6 +99,14 @@ function normalizeMovieRow(row, index = 0) {
     studio_name: normalizeText(row.studio_name || row.studio),
     trailer_url: trailerUrl,
     trailer_search_url: trailerUrl || buildTrailerSearchUrl(explicitTitle || upc, upc),
+    estimated_value_low_cents: estimatedLow,
+    estimated_value_high_cents: estimatedHigh,
+    estimated_value_currency: estimatedCurrency,
+    rarity_notes: normalizeText(row.rarity_notes || row.rarity || row.value_notes),
+    collection_notes: normalizeText(row.collection_notes || row.notes),
+    metadata_source: normalizeText(row.metadata_source || row.source_name || row.provider_name),
+    metadata_status: normalizeText(row.metadata_status || (explicitTitle ? 'enriched' : 'pending')) || 'pending',
+    imdb_id: normalizeText(row.imdb_id),
     status: normalizeText(row.status || 'active') || 'active',
     featured_rank: row.featured_rank == null || row.featured_rank === '' ? null : Number(row.featured_rank),
     updated_at: row.updated_at || null,
@@ -118,6 +129,14 @@ function mergeMovieRows(primary, overlay) {
   merged.front_image_url = primary.front_image_url || overlay?.front_image_url || deriveCoverUrl(primary, 'front') || deriveCoverUrl(overlay || {}, 'front');
   merged.back_image_url = primary.back_image_url || overlay?.back_image_url || deriveCoverUrl(primary, 'back') || deriveCoverUrl(overlay || {}, 'back');
   merged.trailer_search_url = primary.trailer_search_url || overlay?.trailer_search_url || buildTrailerSearchUrl(overlay?.title || primary.title, primary.upc || overlay?.upc);
+  merged.estimated_value_low_cents = primary.estimated_value_low_cents ?? overlay?.estimated_value_low_cents ?? null;
+  merged.estimated_value_high_cents = primary.estimated_value_high_cents ?? overlay?.estimated_value_high_cents ?? null;
+  merged.estimated_value_currency = primary.estimated_value_currency || overlay?.estimated_value_currency || 'CAD';
+  merged.rarity_notes = primary.rarity_notes || overlay?.rarity_notes || '';
+  merged.collection_notes = primary.collection_notes || overlay?.collection_notes || '';
+  merged.metadata_source = primary.metadata_source || overlay?.metadata_source || '';
+  merged.metadata_status = primary.metadata_status || overlay?.metadata_status || (merged.title ? 'enriched' : 'pending');
+  merged.imdb_id = primary.imdb_id || overlay?.imdb_id || '';
   merged.metadata_ready = Boolean(merged.title || merged.summary || merged.release_year || merged.genre || merged.director_names || merged.actor_names || merged.runtime_minutes || merged.studio_name);
   merged.display_title = merged.title || 'Metadata pending';
   merged.source_record = overlay?.source_record || primary.source_record || null;
@@ -136,7 +155,10 @@ function matchesQuery(row, q) {
     row.studio_name,
     row.media_format,
     String(row.release_year || ''),
-    row.trailer_url
+    row.trailer_url,
+    row.rarity_notes,
+    row.collection_notes,
+    row.metadata_status
   ].join(' ').toLowerCase();
   return haystack.includes(q);
 }
@@ -148,7 +170,8 @@ async function fetchDbMovies(env) {
   const rows = normalizeResults(await env.DB.prepare(`
     SELECT movie_catalog_id, upc, slug, title, sort_title, summary, release_year, media_format, genre,
            director_names, actor_names, front_image_url, back_image_url, runtime_minutes,
-           studio_name, trailer_url, status, featured_rank, source_record_json, updated_at
+           studio_name, trailer_url, estimated_value_low_cents, estimated_value_high_cents, estimated_value_currency,
+           rarity_notes, collection_notes, metadata_source, metadata_status, imdb_id, status, featured_rank, source_record_json, updated_at
     FROM movie_catalog
     WHERE COALESCE(status,'active') != 'archived'
     ORDER BY COALESCE(featured_rank, 999999) ASC, LOWER(COALESCE(sort_title, title, upc, '')) ASC
