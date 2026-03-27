@@ -167,3 +167,8 @@ Images are optional during import and can be added during later review before ac
 ## Current pass schema note
 
 No brand-new core tables were required for this pass. The largest work was defensive compatibility around existing `products`, `catalog_items`, `site_item_inventory`, `movie_catalog`, analytics, and webhook tables so partially migrated databases do not break the admin/dashboard JSON endpoints.
+
+
+## Movie metadata extension fields
+
+The `movie_catalog` table now supports `estimated_value_low_cents`, `estimated_value_high_cents`, `estimated_value_currency`, `rarity_notes`, `collection_notes`, `metadata_source`, `metadata_status`, and `imdb_id` for later metadata/value enrichment.

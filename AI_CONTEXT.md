@@ -84,3 +84,10 @@ This repo is in the payment, media, inventory, and public SEO hardening phase af
 
 - Do not restore the movie catalog to the old placeholder `/assets/movies/...-front.jpg` sample paths; use the uploaded R2-backed enrichment JSON.
 - Maintain the relationship between finished products and linked tools/supplies because it supports future storytelling, social content, and build-history features.
+
+
+## Current pass reminders
+
+- Tools public page should retain parity with supplies for reorder UX where practical.
+- Movie covers are R2-backed through `data/movies/movie_catalog_enriched.json`.
+- Movie metadata is only partially populated; do not treat UPC as the movie title.

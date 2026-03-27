@@ -117,3 +117,8 @@ Most important next layers after this pass are:
 - Movies now depend on the real R2-backed enrichment file rather than the starter placeholder record. The page/API are aligned around `front_image_url` and `back_image_url`, with trailer-ready search support.
 - Admin now has a dedicated product stock and build-readiness report, bridging finished-product inventory with linked tool/supply inventory pressure.
 - Site inventory operations continue moving away from scattered JSON maintenance by syncing from `catalog_items` into `site_item_inventory`, then surfacing reorder/do-not-reuse status directly in admin views.
+
+
+## Current pass focus
+
+This pass tightened the public tool reorder workflow, the admin combined reorder workflow, and the movie metadata/value model while keeping the R2-backed movie cover flow in place.

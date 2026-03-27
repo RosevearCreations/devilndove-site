@@ -68,3 +68,8 @@
 - Keep every outward-facing page to a single H1 only.
 - Continue improving crawl, discovery, and search intent on every outward-facing pass.
 - When public media or catalog data already exists in R2 or D1, do not regress pages back to placeholder local paths or sample JSON records.
+
+
+- Continue enforcing one H1 maximum on every outward-facing page.
+- Continue improving title links, descriptions, crawlable internal links, and visible structured-data alignment on every outward-facing pass.
+- Prefer moving high-duplication catalog/inventory data into D1 when the same facts are otherwise maintained in multiple JSON files.

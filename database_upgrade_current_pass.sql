@@ -204,6 +204,15 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   back_image_url TEXT,
   runtime_minutes INTEGER,
   studio_name TEXT,
+  trailer_url TEXT,
+  estimated_value_low_cents INTEGER,
+  estimated_value_high_cents INTEGER,
+  estimated_value_currency TEXT DEFAULT 'CAD',
+  rarity_notes TEXT,
+  collection_notes TEXT,
+  metadata_source TEXT,
+  metadata_status TEXT DEFAULT 'pending',
+  imdb_id TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','draft','archived')),
   featured_rank INTEGER,
   source_record_json TEXT,
@@ -214,6 +223,17 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
+
+
+ALTER TABLE movie_catalog ADD COLUMN trailer_url TEXT;
+ALTER TABLE movie_catalog ADD COLUMN estimated_value_low_cents INTEGER;
+ALTER TABLE movie_catalog ADD COLUMN estimated_value_high_cents INTEGER;
+ALTER TABLE movie_catalog ADD COLUMN estimated_value_currency TEXT DEFAULT 'CAD';
+ALTER TABLE movie_catalog ADD COLUMN rarity_notes TEXT;
+ALTER TABLE movie_catalog ADD COLUMN collection_notes TEXT;
+ALTER TABLE movie_catalog ADD COLUMN metadata_source TEXT;
+ALTER TABLE movie_catalog ADD COLUMN metadata_status TEXT DEFAULT 'pending';
+ALTER TABLE movie_catalog ADD COLUMN imdb_id TEXT;
 
 
 CREATE TABLE IF NOT EXISTS product_resource_links (
@@ -254,9 +274,6 @@ CREATE TABLE IF NOT EXISTS product_resource_links (
 );
 CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resource_links(product_id, sort_order);
 
-
--- Movie enrichment additions for trailer support
-ALTER TABLE movie_catalog ADD COLUMN trailer_url TEXT;
 
 -- Product resource story linkage already exists in base schema; keep using product_resource_links.
 

@@ -105,3 +105,10 @@
 - The remaining movie-data gap is metadata enrichment, not image delivery.
 - Admin dashboard widgets that previously failed with `Unexpected token '<'` were hardened so they return safe JSON even if a table has not been populated yet.
 - Catalog sync now fails collection-by-collection instead of taking down the whole tool when one JSON source is incomplete.
+
+
+## Current pass sanity notes
+
+- Tools page reorder features are now aligned more closely with supplies.
+- Admin inventory now includes a combined reorder screen for tools and supplies.
+- Movie covers load from the uploaded R2 URLs, but title/cast/director/runtime/value data still depends on future enrichment.

@@ -55,3 +55,11 @@
 - Continued the staged JSON → D1 migration path with more defensive catalog-sync behavior so missing or incomplete JSON collections no longer abort the whole sync run.
 - Strengthened the inventory operations foundation so product stock, linked tools/supplies, reorder pressure, and build readiness can still be reviewed while the catalog data keeps being migrated.
 - Movie metadata enrichment beyond UPC/cover data is still a next-phase data task because the uploaded movie JSON currently contains cover URLs but blank title/cast/director/runtime fields.
+
+
+## Current pass update
+
+- Tools reorder UX now matches supplies more closely on the public side.
+- Admin reorder workflow now treats tools and supplies together with copy/clear controls.
+- Movie API and page now understand extra metadata fields including estimated value, rarity notes, metadata source, metadata status, and IMDb IDs.
+- Full 1100+ movie metadata enrichment remains a dedicated data-ingestion task and is not safely auto-complete from the public web in one pass without a trusted bulk source.

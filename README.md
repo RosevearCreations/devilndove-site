@@ -182,3 +182,11 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Updated the movie page to render cover images from `/api/movies` and show richer metadata when it exists, while showing a clear enrichment-pending message when titles and credits are still blank in the source JSON.
 - Product image annotations now default to a clean empty array UI instead of example JSON pasted into the textarea itself.
 - SEO/search guidance remains aligned with Google Search Central guidance around clear title links, useful meta descriptions, JSON-LD structured data, and visible-content alignment. 
+
+
+## Current pass update
+
+- Tools public page now mirrors the supplies page reorder experience with reorder-only filtering plus copy and clear controls.
+- Admin inventory now has a combined reorder screen for tools and supplies with copy and clear actions.
+- Movies continue to use the R2-backed cover JSON and now support estimated value and metadata-status fields in the API and UI.
+- Full movie metadata still needs a dedicated enrichment source; the current uploaded movie JSON mostly provides UPC and cover links.
