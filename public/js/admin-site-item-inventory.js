@@ -79,6 +79,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><label class="small" for="siteInventorySourceFilter">Item type</label><select id="siteInventorySourceFilter"><option value="">Tools + supplies + other</option><option value="tool">Tools only</option><option value="supply">Supplies only</option><option value="product">Products only</option><option value="other">Other only</option></select></div>
           <div style="align-self:end;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh</button><button class="btn" type="button" id="siteInventorySyncToolsButton">Sync tools</button><button class="btn" type="button" id="siteInventorySyncSuppliesButton">Sync supplies</button><button class="btn" type="button" id="siteInventorySyncCoreButton">Sync tools + supplies</button></div>
         </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;margin-top:12px">
+          <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryReorderOnlyCheckbox" type="checkbox" /> Show reorder-needed only</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="siteInventoryCopyReorderButton">Copy reorder list</button><button class="btn" type="button" id="siteInventoryClearReorderButton">Clear reorder flags</button></div>
+        </div>
+        <div class="card" style="margin-top:12px"><h4 style="margin-top:0">Combined Reorder Screen</h4><div class="small" style="margin-bottom:10px">Shows tools and supplies together when they need reordering or were added to the reorder queue.</div><div id="siteInventoryReorderScreen" class="small">Loading reorder list...</div></div>
 
         <div class="admin-table-wrap" style="margin-top:12px"><table><thead><tr><th>Item</th><th>Stock</th><th>Rules</th><th>Supplier</th><th>Linked Products</th><th>Cost</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
         <div class="card" style="margin-top:16px"><h4 style="margin-top:0">Recent Inventory Movements</h4><div class="admin-table-wrap"><table><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Loading movement history...</td></tr></tbody></table></div></div>
@@ -88,6 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', loadList);
     document.getElementById('siteInventoryStockView')?.addEventListener('change', loadList);
     document.getElementById('siteInventorySourceFilter')?.addEventListener('change', loadList);
+    document.getElementById('siteInventoryReorderOnlyCheckbox')?.addEventListener('change', () => { if (document.getElementById('siteInventoryReorderOnlyCheckbox')?.checked) { document.getElementById('siteInventoryStockView').value = 'low'; } loadList(); });
+    document.getElementById('siteInventoryCopyReorderButton')?.addEventListener('click', copyReorderScreen);
+    document.getElementById('siteInventoryClearReorderButton')?.addEventListener('click', clearReorderFlags);
     document.getElementById('siteInventorySyncToolsButton')?.addEventListener('click', () => syncCatalog(['tool']));
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
     document.getElementById('siteInventorySyncCoreButton')?.addEventListener('click', () => syncCatalog(['tool', 'supply']));
@@ -131,6 +139,45 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     body.innerHTML = movements.map((row) => `<tr><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.created_at || '—')}</td><td style="padding:8px;border-bottom:1px solid #ddd"><strong>${escapeHtml(row.item_name || '—')}</strong><div class="small">${escapeHtml(row.source_type || '')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.movement_type || 'adjustment')}<div class="small">Δ ${row.quantity_delta || 0}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${row.previous_on_hand_quantity || 0} → ${row.new_on_hand_quantity || 0}<div class="small">Res ${row.previous_reserved_quantity || 0} → ${row.new_reserved_quantity || 0} • In ${row.previous_incoming_quantity || 0} → ${row.new_incoming_quantity || 0}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.note || '—')}</td></tr>`).join('');
+  }
+
+  function renderReorderScreen(items) {
+    const el = document.getElementById('siteInventoryReorderScreen');
+    if (!el) return;
+    const reorderItems = (Array.isArray(items) ? items : []).filter((x) => x.source_type === 'tool' || x.source_type === 'supply').filter((x) => x.needs_reorder || Number(x.is_on_reorder_list || 0) === 1);
+    if (!reorderItems.length) {
+      el.innerHTML = 'No tools or supplies currently need reordering.';
+      return;
+    }
+    el.innerHTML = reorderItems.map((x, idx) => `${idx + 1}. ${escapeHtml(x.item_name || '—')} (${escapeHtml(x.source_type || '')}) — on hand ${Number(x.on_hand_quantity || 0)}, reorder at ${Number(x.reorder_level || 0)}, preferred reorder ${Number(x.preferred_reorder_quantity || 0)}${x.amazon_url ? ` — <a href="${escapeHtml(x.amazon_url)}" target="_blank" rel="noopener">Amazon</a>` : ''}`).join('<br>');
+  }
+
+  async function copyReorderScreen() {
+    const body = document.getElementById('siteInventoryList');
+    const sourceType = document.getElementById('siteInventorySourceFilter')?.value || '';
+    try {
+      const response = await window.DDAuth.apiFetch(`/api/admin/site-item-inventory?stock_view=reorder&source_type=${encodeURIComponent(sourceType)}`);
+      const data = await response.json();
+      const items = Array.isArray(data.items) ? data.items.filter((x) => x.source_type === 'tool' || x.source_type === 'supply') : [];
+      if (!items.length) throw new Error('No reorder items to copy.');
+      const lines = ['Devil n Dove Admin Reorder List', ''];
+      items.forEach((x, idx) => { lines.push(`${idx + 1}. ${x.item_name} (${x.source_type})`); lines.push(`   On hand ${x.on_hand_quantity} | Reorder at ${x.reorder_level} | Preferred ${x.preferred_reorder_quantity || 0}`); if (x.amazon_url) lines.push(`   ${x.amazon_url}`); });
+      await navigator.clipboard.writeText(lines.join('\n'));
+      setMessage('Reorder list copied to clipboard.');
+    } catch (err) { setMessage(err.message || 'Failed to copy reorder list.', true); }
+  }
+
+  async function clearReorderFlags() {
+    if (!window.confirm('Clear reorder list flags for the current tools/supplies view?')) return;
+    const sourceType = document.getElementById('siteInventorySourceFilter')?.value || '';
+    const sourceTypes = sourceType ? [sourceType] : ['tool','supply'];
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'POST', body: JSON.stringify({ action: 'clear_reorder_list', source_types: sourceTypes }) });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to clear reorder flags.');
+      setMessage(`Cleared reorder flags for ${Number(data.cleared || 0)} items.`);
+      await loadList();
+    } catch (err) { setMessage(err.message || 'Failed to clear reorder flags.', true); }
   }
 
   async function syncCatalog(sourceTypes) {
@@ -186,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body.innerHTML = items.map((x) => `<tr><td style="padding:8px;border-bottom:1px solid #ddd">${x.image_url ? `<img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;display:block;margin-bottom:8px"/>` : ''}${x.needs_reorder ? '⚠️ ' : ''}<strong>${escapeHtml(x.item_name)}</strong><div class="small">${escapeHtml(x.source_type)} • ${escapeHtml(x.category || '—')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">On hand ${x.on_hand_quantity}<div class="small">Reserved ${x.reserved_quantity} • Incoming ${x.incoming_quantity} • Reorder ${x.reorder_level}</div><div class="small">Preferred reorder ${x.preferred_reorder_quantity || 0}</div></td><td style="padding:8px;border-bottom:1px solid #ddd"><div class="small">${x.is_on_reorder_list ? 'On reorder list' : 'Not queued'}</div><div class="small">${x.do_not_reorder ? 'Do not reorder' : 'Can reorder'}</div><div class="small">${x.do_not_reuse ? 'Do not reuse' : (x.reuse_status || 'Reusable/normal')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(x.supplier_name || '—')}<div class="small">${escapeHtml(x.supplier_sku || '')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${Number(x.linked_product_count || 0)}<div class="small">${escapeHtml(x.linked_product_names || '')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${fmtMoney(x.unit_cost_cents || 0)}</td><td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick Update</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td></tr>`).join('');
       }
       renderMovements(data.movements || []);
+      renderReorderScreen(items);
       setMessage('');
     } catch (err) {
       setMessage(err.message || 'Failed to load inventory list.', true);

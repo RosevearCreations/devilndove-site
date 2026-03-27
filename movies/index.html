@@ -124,6 +124,15 @@
         const runtime = item.runtime_minutes ? `<span class="movie-summary-chip"><strong>${esc(item.runtime_minutes)}</strong> min</span>` : '';
         const director = item.director_names ? `<div class="small"><strong>Director:</strong> ${esc(item.director_names)}</div>` : '';
         const actors = item.actor_names ? `<div class="small"><strong>Top actors:</strong> ${esc(item.actor_names)}</div>` : '';
+        const valueLow = Number.isFinite(Number(item.estimated_value_low_cents)) ? Number(item.estimated_value_low_cents) : null;
+        const valueHigh = Number.isFinite(Number(item.estimated_value_high_cents)) ? Number(item.estimated_value_high_cents) : null;
+        const valueCurrency = item.estimated_value_currency || 'CAD';
+        const money = (cents) => new Intl.NumberFormat(undefined, { style: 'currency', currency: valueCurrency }).format((Number(cents || 0))/100);
+        const valueLine = valueLow != null || valueHigh != null
+          ? `<div class="small"><strong>Estimated value:</strong> ${valueLow != null && valueHigh != null ? `${esc(money(valueLow))}–${esc(money(valueHigh))}` : esc(money(valueLow != null ? valueLow : valueHigh))}</div>`
+          : '';
+        const metadataStatus = item.metadata_status ? `<div class="small"><strong>Status:</strong> ${esc(item.metadata_status)}</div>` : '';
+        const rarityNotes = item.rarity_notes ? `<div class="small"><strong>Rarity:</strong> ${esc(item.rarity_notes)}</div>` : '';
         const summary = item.summary ? `<p class="small movie-summary-copy">${esc(item.summary)}</p>` : `<p class="small movie-summary-copy">${hasMetadata ? 'Summary still pending for this title.' : `Metadata is still being enriched for UPC ${esc(item.upc || '')}.`}</p>`;
         const upc = item.upc ? `<div class="small"><strong>UPC:</strong> ${esc(item.upc)}</div>` : '';
         const trailerHref = item.trailer_url || trailerSearchUrl(item.title || item.upc, item.release_year);
@@ -132,7 +141,7 @@
           `<h2 class="movie-card-title">${esc(title)}</h2>` +
           `<div class="movie-meta-row">${year}${genre}${format}${studio}</div>` +
           `<div class="movie-summary-chip-row">${runtime}</div>` +
-          `${upc}${director}${actors}${summary}` +
+          `${upc}${director}${actors}${valueLine}${metadataStatus}${rarityNotes}${summary}` +
           `<div class="movie-link-row"><a href="${imdbSearchUrl(item.title, item.upc)}" target="_blank" rel="noreferrer">Search IMDb</a><a href="${esc(trailerHref)}" target="_blank" rel="noreferrer">${item.trailer_url ? 'Watch trailer' : 'Search trailer'}</a></div>` +
           `</article>`;
       }).join('') || '<div class="card">No movies matched your filters.</div>';
