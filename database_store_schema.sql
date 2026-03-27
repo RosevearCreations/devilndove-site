@@ -265,3 +265,7 @@ CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
 
 
 -- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.
+
+
+-- Current pass note: movie pagination and admin UI cleanup did not require a new table.
+-- Existing movie_catalog and site_item_inventory structures are reused for the fuller public shelf and shared reorder workflows.
