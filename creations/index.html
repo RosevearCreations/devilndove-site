@@ -34,6 +34,14 @@
     .summary{ margin:0; color:#555; min-height:2.6em; }
     .action-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:auto; }
     .muted-box{ text-align:center; padding:28px 16px; color:#666; }
+    .stats-grid .stat-card, .panel, .creation-card{ background:#ffffff; color:#1f2937; box-shadow:0 10px 26px rgba(8,12,18,.10); }
+    .stats-grid .stat-card .small, .panel .small, .creation-card .small, .summary, .muted-box{ color:#4b5563; }
+    .creation-card h2, .creation-card h3, .title-row h3, .panel h2, .panel strong, .results-bar strong{ color:#111827; }
+    .creation-card a, .panel a{ color:#1d4ed8; }
+    .creation-card .btn, .panel .btn{ color:#111827; background:#eef6ff; border-color:#b7d7ff; }
+    .creation-card .btn.secondary, .panel .btn.secondary{ background:#fff4e8; border-color:#ffd2a8; }
+    .creation-card .pill, .chip{ color:#6b2f7a; }
+    .controls-grid .input, #q, #typeFilter, #subFilter, #materialFilter{ background:#ffffff; color:#111827; border:1px solid #d6dbe3; }
 
     @media (max-width: 980px){
       .stats-grid, .controls-grid, .catalog-grid, .video-grid{ grid-template-columns: 1fr 1fr; }

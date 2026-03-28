@@ -123,8 +123,17 @@
             <h2 style="margin:0;font-size:1.05rem">Tools &amp; supplies used</h2>
             <div class="small">Optional, but helpful for inventory and social storytelling.</div>
           </div>
-          <input class="input" type="search" id="mobileResourceSearch" placeholder="Search tools or supplies"/>
+          <div class="resource-picker-controls">
+            <input class="input" type="search" id="mobileResourceSearch" placeholder="Search tools or supplies"/>
+            <select class="input" id="mobileResourceKindFilter">
+              <option value="all">All tools &amp; supplies</option>
+              <option value="tool">Tools only</option>
+              <option value="supply">Supplies only</option>
+            </select>
+            <label class="mobile-stock-toggle"><input type="checkbox" id="mobileInStockOnly" checked/> In-stock only</label>
+          </div>
         </div>
+        <div class="small" id="mobileResourceSummary">Loading current stock lookup…</div>
         <div id="mobileSelectedResources" class="resource-linked-list"></div>
         <div id="mobileResourceGrid" class="resource-tile-grid"></div>
 
