@@ -147,6 +147,17 @@
       margin-top: 8px;
       line-height: 1.35;
     }
+    .toolbar-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:10px}
+    .toolbar-left,.toolbar-right{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .reorder-panel{margin-top:12px;border:1px solid rgba(255,255,255,0.10);border-radius:14px;padding:12px;background:rgba(255,255,255,0.02);display:none}
+    .reorder-panel.open{display:block}
+    .reorder-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+    .reorder-list{display:grid;gap:8px;margin-top:8px}
+    .reorder-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 10px;background:rgba(255,255,255,0.02)}
+    .reorder-row .name{font-size:13px;line-height:1.25}
+    .reorder-empty{font-size:13px;opacity:.8;padding:8px 2px}
+    .btnlink.secondary{ background: rgba(255,255,255,0.03); }
+    .btnlink.active{ border-color: rgba(140, 200, 255, .55); background: rgba(90, 150, 255, .10); }
   </style>
 <link href="https://devilndove.com/tools/" rel="canonical"/><meta content="Browse the tools Devil n Dove uses for jewelry making, casting, carving, laser work, resin, and workshop experiments." name="description"/><meta content="index,follow" name="robots"/><meta content="Devil n Dove" property="og:site_name"/><meta content="website" property="og:type"/><meta content="Devil n Dove Tools | Workshop Tools We Use" property="og:title"/><meta content="Browse the tools Devil n Dove uses for jewelry making, casting, carving, laser work, resin, and workshop experiments." property="og:description"/><meta content="https://devilndove.com/tools/" property="og:url"/><meta content="https://devilndove.com/assets/logo-clear.png" property="og:image"/><meta content="summary_large_image" name="twitter:card"/><meta content="Devil n Dove Tools | Workshop Tools We Use" name="twitter:title"/><meta content="Browse the tools Devil n Dove uses for jewelry making, casting, carving, laser work, resin, and workshop experiments." name="twitter:description"/><meta content="https://devilndove.com/assets/logo-clear.png" name="twitter:image"/><script id="pageStructuredData" type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Workshop tools we use at Devil n Dove","url":"https://devilndove.com/tools/","description":"Browse the tools Devil n Dove uses for jewelry making, casting, carving, laser work, resin, and workshop experiments.","isPartOf":{"@type":"WebSite","name":"Devil n Dove","url":"https://devilndove.com/"}}</script></head>
 <body>
@@ -214,6 +225,28 @@
 <div class="small" style="margin-top:10px">
         Showing <span id="toolShown">0</span> of <span id="toolTotal">0</span>
 </div>
+<div class="toolbar-row">
+<div class="toolbar-left">
+<label class="small" style="display:flex;gap:8px;align-items:center;margin:0">
+<input id="toolReorderOnly" type="checkbox"/>
+<span>Show reorder-needed only</span>
+</label>
+</div>
+<div class="toolbar-right">
+<button class="btnlink secondary" id="toggleToolReorderPanelBtn" type="button">Reorder list</button>
+<button class="btnlink secondary" id="copyToolReorderBtn" type="button">Copy reorder copy</button>
+<button class="btnlink secondary" id="clearToolReorderBtn" type="button">Clear</button>
+</div>
+</div>
+<div aria-live="polite" class="reorder-panel" id="toolReorderPanel">
+<div class="reorder-head">
+<div>
+<strong>Tool reorder list</strong>
+<div class="small">Local browser list for tools you want to reorder or review.</div>
+</div>
+</div>
+<div class="reorder-list" id="toolReorderListWrap"></div>
+</div>
 <div id="toolsGrid" style="margin-top:12px"></div>
 <div class="small" style="margin-top:12px">
         Links go to Amazon.ca (reference/search links only). Images are served from our R2 bucket.
@@ -237,313 +270,166 @@
           .replaceAll('"', '&quot;')
           .replaceAll("'", '&#39;');
       }
-
       function safeText(v){ return (v == null ? '' : String(v)).trim(); }
       function norm(v){ return safeText(v).toLowerCase(); }
-
       const ASSET_ORIGIN = "https://assets.devilndove.com";
-      const ASSET_PREFIX = "Toolshed"; // case-sensitive R2 folder
-      const DATA_URL = "/data/toolshed/toolshed_items_master.json"; // change only this if your path differs
-
-      const AREA_ORDER = [
-        "Security",
-        "Safety & PPE",
-        "Forge & Metalwork",
-        "Resin & UV",
-        "Clay",
-        "Laser & Engraving",
-        "3D & CNC",
-        "Sublimation",
-        "Craft & Cutting",
-        "Hand Tools",
-        "Measuring & Layout",
-        "Organization & Storage",
-        "Power & Tech",
-        "Filming & Streaming",
-        "Automotive",
-        "Reference",
-        "Pets",
-        "Health & Comfort",
-        "Workshop Basics"
-      ];
-      const areaRank = new Map(AREA_ORDER.map(function (a, i) { return [a, i]; }));
-
-      function byAreaThenName(a, b) {
-        const ra = areaRank.has(a) ? areaRank.get(a) : 999;
-        const rb = areaRank.has(b) ? areaRank.get(b) : 999;
-        if (ra !== rb) return ra - rb;
-        return a.localeCompare(b);
-      }
-
-      function encodeKeyPath(key){
-        return String(key).split('/').map(function (seg) {
-          return encodeURIComponent(seg);
-        }).join('/');
-      }
-
+      const ASSET_PREFIX = "Toolshed";
+      const DATA_URL = "/data/toolshed/toolshed_items_master.json";
+      const REORDER_STORAGE_KEY = "devilndove_tools_reorder_list_v1";
+      const AREA_ORDER = ["Security","Safety & PPE","Forge & Metalwork","Resin & UV","Clay","Laser & Engraving","3D & CNC","Sublimation","Craft & Cutting","Hand Tools","Measuring & Layout","Organization & Storage","Power & Tech","Filming & Streaming","Automotive","Reference","Pets","Health & Comfort","Workshop Basics"];
+      const areaRank = new Map(AREA_ORDER.map((a, i) => [a, i]));
+      const byAreaThenName = (a, b) => ((areaRank.has(a) ? areaRank.get(a) : 999) - (areaRank.has(b) ? areaRank.get(b) : 999)) || a.localeCompare(b);
+      const encodeKeyPath = (key) => String(key).split('/').map((seg) => encodeURIComponent(seg)).join('/');
       function getR2ImageUrl(item){
         const rawKey = safeText(item.r2_object_key);
         const file = safeText(item.example_image_file) || safeText(item.image_file) || safeText(item.filename);
-
-        const finalKey = rawKey
-          ? rawKey.replace(/^\/+/, '')
-          : (ASSET_PREFIX + "/" + file);
-
-        return ASSET_ORIGIN + "/" + encodeKeyPath(finalKey);
+        const finalKey = rawKey ? rawKey.replace(/^\/+/, '') : `${ASSET_PREFIX}/${file}`;
+        return `${ASSET_ORIGIN}/${encodeKeyPath(finalKey)}`;
       }
-
       function getAmazonUrl(item){
         if (safeText(item.amazon_url)) return item.amazon_url;
-        if (safeText(item.amazon_search_url)) return item.amazon_search_url;
-        if (safeText(item.amazon_search)) return item.amazon_search;
-
-        const q = encodeURIComponent(
-          safeText(item.item_name_suggested) ||
-          safeText(item.name) ||
-          safeText(item.example_image_file) ||
-          "workshop tool"
-        );
-        return "https://www.amazon.ca/s?k=" + q;
+        const q = encodeURIComponent(safeText(item.item_name_suggested) || safeText(item.name) || safeText(item.example_image_file) || 'workshop tool');
+        return `https://www.amazon.ca/s?k=${q}`;
       }
-
-      function getToolName(item){
-        return (
-          safeText(item.item_name_suggested) ||
-          safeText(item.name) ||
-          safeText(item.display_name) ||
-          safeText(item.example_image_file) ||
-          "Tool"
-        );
-      }
-
-      function getPrimaryArea(item){
-        return (
-          safeText(item.primary_area) ||
-          safeText(item.area) ||
-          "Workshop Basics"
-        );
-      }
-
-      function getCategory(item){
-        return (
-          safeText(item.category) ||
-          safeText(item.tool_category) ||
-          "Uncategorized"
-        );
-      }
-
+      const getToolName = (item) => safeText(item.item_name_suggested) || safeText(item.name) || safeText(item.display_name) || safeText(item.example_image_file) || 'Tool';
+      const getPrimaryArea = (item) => safeText(item.primary_area) || safeText(item.area) || 'Workshop Basics';
+      const getCategory = (item) => safeText(item.category) || safeText(item.tool_category) || 'Uncategorized';
       function getProcessTags(item){
-        if (Array.isArray(item.process_tags)) {
-          return item.process_tags.map(safeText).filter(Boolean);
-        }
-        if (typeof item.process_tags === "string") {
-          return item.process_tags.split(",").map(function (x) { return x.trim(); }).filter(Boolean);
-        }
-
-        // fallback if older key used
-        if (Array.isArray(item.tags)) {
-          return item.tags.map(safeText).filter(Boolean);
-        }
-        if (typeof item.tags === "string") {
-          return item.tags.split(",").map(function (x) { return x.trim(); }).filter(Boolean);
-        }
-
+        if (Array.isArray(item.process_tags)) return item.process_tags.map(safeText).filter(Boolean);
+        if (typeof item.process_tags === 'string') return item.process_tags.split(',').map((x) => x.trim()).filter(Boolean);
+        if (Array.isArray(item.tags)) return item.tags.map(safeText).filter(Boolean);
+        if (typeof item.tags === 'string') return item.tags.split(',').map((x) => x.trim()).filter(Boolean);
         return [];
       }
-
-      function getHowWeUse(item){
-        return (
-          safeText(item.how_we_use) ||
-          safeText(item.use_case) ||
-          safeText(item.use_cases) ||
-          safeText(item.notes_public) ||
-          ""
-        );
+      const getHowWeUse = (item) => safeText(item.how_we_use) || safeText(item.use_case) || safeText(item.use_cases) || safeText(item.notes_public) || safeText(item.notes);
+      const getBrand = (item) => safeText(item.brand_guess) || safeText(item.brand);
+      const toolKey = (item) => norm(item.source_key || item.item_group_key_strict || item.item_group_key_loose || getToolName(item));
+      const qEl = document.getElementById('toolQ');
+      const areaEl = document.getElementById('toolArea');
+      const catEl = document.getElementById('toolCat');
+      const tagEl = document.getElementById('toolTag');
+      const reorderOnlyEl = document.getElementById('toolReorderOnly');
+      const shownEl = document.getElementById('toolShown');
+      const totalEl = document.getElementById('toolTotal');
+      const gridEl = document.getElementById('toolsGrid');
+      const reorderPanelEl = document.getElementById('toolReorderPanel');
+      const reorderListWrapEl = document.getElementById('toolReorderListWrap');
+      const toggleReorderPanelBtn = document.getElementById('toggleToolReorderPanelBtn');
+      const copyReorderBtn = document.getElementById('copyToolReorderBtn');
+      const clearReorderBtn = document.getElementById('clearToolReorderBtn');
+      let reorderPanelOpen = false;
+      let allTools = [];
+      function loadReorderList(){ try { return JSON.parse(localStorage.getItem(REORDER_STORAGE_KEY) || '[]'); } catch { return []; } }
+      function saveReorderList(list){ localStorage.setItem(REORDER_STORAGE_KEY, JSON.stringify(list)); }
+      function reorderSet(){ return new Set(loadReorderList().map((entry) => entry.key)); }
+      function renderReorderPanel(){
+        const list = loadReorderList();
+        if (!list.length) { reorderListWrapEl.innerHTML = '<div class="reorder-empty">Your reorder list is empty.</div>'; return; }
+        reorderListWrapEl.innerHTML = list.map((entry) => `
+          <div class="reorder-row">
+            <div class="name"><strong>${escHtml(entry.name)}</strong><div class="small">${escHtml(entry.category || '')}</div></div>
+            <button class="btnlink secondary" type="button" data-remove-key="${escHtml(entry.key)}">Remove</button>
+            <a class="btnlink secondary" href="${escHtml(entry.amazon_url || '#')}" ${entry.amazon_url ? 'target="_blank" rel="noopener"' : ''}>Open link</a>
+          </div>`).join('');
+        Array.from(reorderListWrapEl.querySelectorAll('[data-remove-key]')).forEach((btn) => btn.addEventListener('click', () => {
+          saveReorderList(loadReorderList().filter((entry) => entry.key !== btn.getAttribute('data-remove-key')));
+          renderReorderPanel();
+          renderFiltered();
+        }));
       }
-
-      function getBrand(item){
-        return safeText(item.brand_guess) || safeText(item.brand) || "";
+      function addToReorder(item){
+        const key = toolKey(item);
+        const list = loadReorderList();
+        if (!list.some((entry) => entry.key === key)) {
+          list.push({ key, name: getToolName(item), category: getCategory(item), amazon_url: getAmazonUrl(item) });
+          saveReorderList(list);
+        }
+        if (reorderPanelOpen) renderReorderPanel();
       }
-
-      function buildToolCard(item){
-        const name = getToolName(item);
-        const brand = getBrand(item);
-        const area = getPrimaryArea(item);
-        const cat = getCategory(item);
-        const tags = getProcessTags(item);
-        const how = getHowWeUse(item);
-        const imgUrl = getR2ImageUrl(item);
-        const amazon = getAmazonUrl(item);
-
-        const visibleTags = [area, cat].concat(tags.slice(0, 3));
-
-        return `
-          <div class="tool card">
-            <div class="thumb">
-              <img
-                src="${imgUrl}"
-                alt="${escHtml(name)}"
-                loading="lazy"
-                onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escHtml(safeText(item.example_image_file) || safeText(item.image_file) || 'Unknown file')}</span></div>';"
-              />
-            </div>
-            <div class="body">
-              <div class="tname">${escHtml(name)}</div>
-
-              ${brand ? `<div class="meta-line"><strong>Brand:</strong> ${escHtml(brand)}</div>` : ""}
-
-              <div class="tags">
-                ${visibleTags.map(function (t) { return `<span class="tag">${escHtml(t)}</span>`; }).join("")}
-              </div>
-
-              ${how ? `<div class="note">${escHtml(how)}</div>` : ""}
-
-              <div class="actions">
-                <a class="btnlink" href="${amazon}" target="_blank" rel="noopener">Amazon.ca search</a>
-              </div>
-            </div>
-          </div>
-        `;
+      async function copyReorderText(){
+        const list = loadReorderList();
+        const text = list.length ? list.map((entry) => `${entry.name}${entry.category ? ` — ${entry.category}` : ''}${entry.amazon_url ? ` — ${entry.amazon_url}` : ''}`).join('\n') : 'No tools on reorder list.';
+        try { await navigator.clipboard.writeText(text); } catch {}
       }
-
-      const toolQEl = document.getElementById("toolQ");
-      const toolAreaEl = document.getElementById("toolArea");
-      const toolCatEl = document.getElementById("toolCat");
-      const toolTagEl = document.getElementById("toolTag");
-      const toolShownEl = document.getElementById("toolShown");
-      const toolTotalEl = document.getElementById("toolTotal");
-      const toolsGridEl = document.getElementById("toolsGrid");
-
-
       async function fetchCatalogItems(){
         try {
           const response = await fetch('/api/catalog-items?item_kind=tool&limit=500');
           const data = await response.json();
           if (!response.ok || !data?.ok) return [];
           return Array.isArray(data.items) ? data.items : [];
-        } catch (error) {
-          return [];
-        }
+        } catch { return []; }
       }
-
-      let allTools = [];
-
       function populateFilters(items){
-        const areas = new Set();
-        const cats = new Set();
-        const tags = new Set();
-
-        items.forEach(function (it) {
-          areas.add(getPrimaryArea(it));
-          cats.add(getCategory(it));
-          getProcessTags(it).forEach(function (t) { tags.add(t); });
-        });
-
-        Array.from(areas).sort(byAreaThenName).forEach(function (v) {
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.textContent = v;
-          toolAreaEl.appendChild(opt);
-        });
-
-        Array.from(cats).sort(function (a,b){ return a.localeCompare(b); }).forEach(function (v) {
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.textContent = v;
-          toolCatEl.appendChild(opt);
-        });
-
-        Array.from(tags).sort(function (a,b){ return a.localeCompare(b); }).forEach(function (v) {
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.textContent = v;
-          toolTagEl.appendChild(opt);
-        });
+        const areas = new Set(), cats = new Set(), tags = new Set();
+        items.forEach((it) => { areas.add(getPrimaryArea(it)); cats.add(getCategory(it)); getProcessTags(it).forEach((t) => tags.add(t)); });
+        Array.from(areas).sort(byAreaThenName).forEach((v) => { const opt = document.createElement('option'); opt.value = v; opt.textContent = v; areaEl.appendChild(opt); });
+        Array.from(cats).sort((a,b) => a.localeCompare(b)).forEach((v) => { const opt = document.createElement('option'); opt.value = v; opt.textContent = v; catEl.appendChild(opt); });
+        Array.from(tags).sort((a,b) => a.localeCompare(b)).forEach((v) => { const opt = document.createElement('option'); opt.value = v; opt.textContent = v; tagEl.appendChild(opt); });
       }
-
+      function buildToolCard(item, reorderKeys){
+        const name = getToolName(item), brand = getBrand(item), area = getPrimaryArea(item), cat = getCategory(item), tags = getProcessTags(item), how = getHowWeUse(item), imgUrl = getR2ImageUrl(item), amazon = getAmazonUrl(item), isReorder = reorderKeys.has(toolKey(item));
+        return `
+          <div class="tool card">
+            <div class="thumb">
+              <img src="${imgUrl}" alt="${escHtml(name)}" loading="lazy" onerror="this.outerHTML='<div class=&quot;ph&quot;>Missing image<br><span style=&quot;opacity:.7&quot;>${escHtml(safeText(item.example_image_file) || safeText(item.image_file) || 'Unknown file')}</span></div>';" />
+            </div>
+            <div class="body">
+              <div class="tname">${escHtml(name)}</div>
+              ${brand ? `<div class="meta-line"><strong>Brand:</strong> ${escHtml(brand)}</div>` : ''}
+              <div class="tags">
+                ${[area, cat].concat(tags.slice(0, 3)).map((t) => `<span class="tag">${escHtml(t)}</span>`).join('')}
+                ${isReorder ? '<span class="tag">Reorder</span>' : ''}
+              </div>
+              ${how ? `<div class="note">${escHtml(how)}</div>` : ''}
+              <div class="actions">
+                <button class="btnlink secondary" type="button" data-add-reorder="${escHtml(toolKey(item))}">Add to reorder</button>
+                <a class="btnlink" href="${amazon}" target="_blank" rel="noopener">Amazon.ca search</a>
+              </div>
+            </div>
+          </div>`;
+      }
       function renderGrouped(items, totalCount){
-        toolShownEl.textContent = String(items.length);
-        toolTotalEl.textContent = String(totalCount);
-
+        shownEl.textContent = String(items.length);
+        totalEl.textContent = String(totalCount);
+        const reorderKeys = reorderSet();
         const groups = {};
-        items.forEach(function (it) {
-          const area = getPrimaryArea(it);
-          if (!groups[area]) groups[area] = [];
-          groups[area].push(it);
-        });
-
-        Object.keys(groups).forEach(function (area) {
-          groups[area].sort(function (a, b) {
-            return getToolName(a).localeCompare(getToolName(b));
-          });
-        });
-
+        items.forEach((it) => { const area = getPrimaryArea(it); if (!groups[area]) groups[area] = []; groups[area].push(it); });
+        Object.keys(groups).forEach((area) => groups[area].sort((a,b) => getToolName(a).localeCompare(getToolName(b))));
         const areaNames = Object.keys(groups).sort(byAreaThenName);
-
-        if (!areaNames.length) {
-          toolsGridEl.innerHTML = `<div class="small">No tools match the current filters.</div>`;
-          return;
-        }
-
-        toolsGridEl.innerHTML = areaNames.map(function (area) {
-          const list = groups[area];
-          return `
-            <section class="area-block">
-              <div class="area-head">
-                <h2>${escHtml(area)}</h2>
-                <div class="muted">${list.length} item${list.length === 1 ? "" : "s"}</div>
-              </div>
-              <div class="subgrid">
-                ${list.map(buildToolCard).join("")}
-              </div>
-            </section>
-          `;
-        }).join("");
+        if (!areaNames.length) { gridEl.innerHTML = '<div class="small">No tools match the current filters.</div>'; return; }
+        gridEl.innerHTML = areaNames.map((area) => `
+          <section class="area-block">
+            <div class="area-head"><h2>${escHtml(area)}</h2><div class="muted">${groups[area].length} item${groups[area].length === 1 ? '' : 's'}</div></div>
+            <div class="subgrid">${groups[area].map((item) => buildToolCard(item, reorderKeys)).join('')}</div>
+          </section>`).join('');
+        Array.from(gridEl.querySelectorAll('[data-add-reorder]')).forEach((btn) => btn.addEventListener('click', () => {
+          const key = btn.getAttribute('data-add-reorder');
+          const item = allTools.find((entry) => toolKey(entry) === key);
+          if (!item) return;
+          addToReorder(item);
+          renderFiltered();
+        }));
       }
-
       function renderFiltered(){
-        const q = norm(toolQEl.value);
-        const areaVal = toolAreaEl.value;
-        const catVal = toolCatEl.value;
-        const tagVal = toolTagEl.value;
-
+        const q = norm(qEl.value), areaVal = areaEl.value, catVal = catEl.value, tagVal = tagEl.value, reorderKeys = reorderSet();
         let list = allTools.slice();
-
-        if (areaVal !== "all") {
-          list = list.filter(function (it) { return getPrimaryArea(it) === areaVal; });
-        }
-        if (catVal !== "all") {
-          list = list.filter(function (it) { return getCategory(it) === catVal; });
-        }
-        if (tagVal !== "all") {
-          list = list.filter(function (it) { return getProcessTags(it).includes(tagVal); });
-        }
-
+        if (areaVal !== 'all') list = list.filter((it) => getPrimaryArea(it) === areaVal);
+        if (catVal !== 'all') list = list.filter((it) => getCategory(it) === catVal);
+        if (tagVal !== 'all') list = list.filter((it) => getProcessTags(it).includes(tagVal));
+        if (reorderOnlyEl.checked) list = list.filter((it) => reorderKeys.has(toolKey(it)));
         if (q) {
-          list = list.filter(function (it) {
-            const hay = [
-              norm(getToolName(it)),
-              norm(getBrand(it)),
-              norm(getPrimaryArea(it)),
-              norm(getCategory(it)),
-              norm(getHowWeUse(it)),
-              norm(it.example_image_file),
-              getProcessTags(it).map(norm).join(" ")
-            ].join(" ");
-            return hay.includes(q);
-          });
+          list = list.filter((it) => [norm(getToolName(it)), norm(getBrand(it)), norm(getPrimaryArea(it)), norm(getCategory(it)), norm(getHowWeUse(it)), norm(it.example_image_file), getProcessTags(it).map(norm).join(' ')].join(' ').includes(q));
         }
-
         renderGrouped(list, allTools.length);
       }
-
       async function initToolsPage(){
         try {
           const migrated = await fetchCatalogItems();
           if (Array.isArray(migrated) && migrated.length) {
-            allTools = migrated.map(function (row) {
-              const source = row.source_record && typeof row.source_record === "object" ? row.source_record : {};
+            allTools = migrated.map((row) => {
+              const source = row.source_record && typeof row.source_record === 'object' ? row.source_record : {};
               return Object.assign({}, source, {
+                source_key: row.source_key || source.source_key,
                 item_name_suggested: row.name || source.item_name_suggested,
                 brand_guess: row.brand || source.brand_guess,
                 category: row.category || source.category,
@@ -552,39 +438,35 @@
                 how_we_use: row.notes || source.how_we_use,
                 amazon_url: row.amazon_url || source.amazon_url,
                 r2_object_key: row.r2_object_key || source.r2_object_key,
-                example_image_file: source.example_image_file || "",
+                example_image_file: source.example_image_file || '',
                 quantity_owned: row.quantity_on_hand || source.quantity_owned || 0
               });
             });
           } else {
-            const resp = await fetch(DATA_URL, { cache: "no-store" });
-            if (!resp.ok) throw new Error("Failed to load tools JSON: " + resp.status);
+            const resp = await fetch(DATA_URL, { cache: 'no-store' });
+            if (!resp.ok) throw new Error(`Failed to load tools JSON: ${resp.status}`);
             const data = await resp.json();
-            // Supports array root OR object with items
             allTools = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
           }
-
           if (!allTools.length) {
-            toolsGridEl.innerHTML = `<div class="small">No tools found in <code>${escHtml(DATA_URL)}</code></div>`;
-            toolShownEl.textContent = "0";
-            toolTotalEl.textContent = "0";
-            return;
+            gridEl.innerHTML = `<div class="small">No tools found in <code>${escHtml(DATA_URL)}</code></div>`;
+            shownEl.textContent = '0'; totalEl.textContent = '0'; return;
           }
-
           populateFilters(allTools);
-
-          toolQEl.addEventListener("input", renderFiltered);
-          toolAreaEl.addEventListener("change", renderFiltered);
-          toolCatEl.addEventListener("change", renderFiltered);
-          toolTagEl.addEventListener("change", renderFiltered);
-
+          qEl.addEventListener('input', renderFiltered);
+          areaEl.addEventListener('change', renderFiltered);
+          catEl.addEventListener('change', renderFiltered);
+          tagEl.addEventListener('change', renderFiltered);
+          reorderOnlyEl.addEventListener('change', renderFiltered);
+          toggleReorderPanelBtn.addEventListener('click', () => { reorderPanelOpen = !reorderPanelOpen; reorderPanelEl.classList.toggle('open', reorderPanelOpen); toggleReorderPanelBtn.classList.toggle('active', reorderPanelOpen); if (reorderPanelOpen) renderReorderPanel(); });
+          copyReorderBtn.addEventListener('click', copyReorderText);
+          clearReorderBtn.addEventListener('click', () => { localStorage.removeItem(REORDER_STORAGE_KEY); renderReorderPanel(); renderFiltered(); });
           renderFiltered();
         } catch (err) {
           console.error(err);
-          toolsGridEl.innerHTML = `<div class="small">Could not load tools data. Please check <code>${escHtml(DATA_URL)}</code>.</div>`;
+          gridEl.innerHTML = `<div class="small">Could not load tools data. Please check <code>${escHtml(DATA_URL)}</code>.</div>`;
         }
       }
-
       initToolsPage();
     })();
   </script>

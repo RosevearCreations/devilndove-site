@@ -65,3 +65,10 @@
 - Product records now support `product_number`, `product_category`, `color_name`, `shipping_code`, and `review_status`.
 - Storefront/admin product search can now match category and colour more directly.
 - SEO guidance remains aligned with Google Search Central: one clear H1 per outward-facing page, descriptive title links, page-specific meta descriptions, crawlable internal links, and structured data that matches visible content.
+
+## Current pass update
+
+- Moved the public movie pipeline forward again by preferring the uploaded `movie_catalog_enriched.v2.json` file in the public API and copying that v2 file into `/data/movies/` for deployment.
+- Improved the mobile product-capture workflow with stock-aware lookup and filters for linked tools and supplies so the phone flow can see what is currently on hand.
+- Added the same reorder-list controls to the public tools page that already existed on the supplies page: local reorder list, copy, clear, and reorder-only view.
+- The deeper inventory, direct media upload, Stripe completion, webhook hardening, product-import validation, and richer analytics work remain active roadmap items and are not being marked complete yet.
