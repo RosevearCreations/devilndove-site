@@ -147,24 +147,6 @@
       margin-top: 8px;
       line-height: 1.35;
     }
-
-    .toolbar-row{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:12px;
-    }
-    .toolbar-right, .toolbar-left{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .reorder-panel{ display:none; margin-top:12px; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); }
-    .reorder-panel.open{ display:block; }
-    .reorder-head{ display:flex; justify-content:space-between; gap:12px; margin-bottom:10px; }
-    .reorder-list{ display:grid; gap:8px; }
-    .reorder-row{ display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; }
-    .reorder-row .name{ font-weight:700; }
-    .reorder-empty{ opacity:.78; }
-    .tag-reorder{ border-color: rgba(255, 166, 0, 0.45); }
   </style>
 <link href="https://devilndove.com/tools/" rel="canonical"/><meta content="Browse the tools Devil n Dove uses for jewelry making, casting, carving, laser work, resin, and workshop experiments." name="description"/><meta content="index,follow" name="robots"/><meta content="Devil n Dove" property="og:site_name"/><meta content="website" property="og:type"/><meta content="Devil n Dove Tools | Workshop Tools We Use" property="og:title"/><meta content="Browse the tools Devil n Dove uses for jewelry making, casting, carving, laser work, resin, and workshop experiments." property="og:description"/><meta content="https://devilndove.com/tools/" property="og:url"/><meta content="https://devilndove.com/assets/logo-clear.png" property="og:image"/><meta content="summary_large_image" name="twitter:card"/><meta content="Devil n Dove Tools | Workshop Tools We Use" name="twitter:title"/><meta content="Browse the tools Devil n Dove uses for jewelry making, casting, carving, laser work, resin, and workshop experiments." name="twitter:description"/><meta content="https://devilndove.com/assets/logo-clear.png" name="twitter:image"/><script id="pageStructuredData" type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Workshop tools we use at Devil n Dove","url":"https://devilndove.com/tools/","description":"Browse the tools Devil n Dove uses for jewelry making, casting, carving, laser work, resin, and workshop experiments.","isPartOf":{"@type":"WebSite","name":"Devil n Dove","url":"https://devilndove.com/"}}</script></head>
 <body>
@@ -229,30 +211,8 @@
 </select>
 </div>
 </div>
-<div class="toolbar-row">
-<div class="toolbar-left">
-<label class="small" style="display:flex;gap:8px;align-items:center">
-<input id="toolReorderOnly" type="checkbox"/>
-            Show reorder-needed only
-          </label>
 <div class="small" style="margin-top:10px">
         Showing <span id="toolShown">0</span> of <span id="toolTotal">0</span>
-</div>
-</div>
-<div class="toolbar-right">
-<button class="btnlink secondary" id="toggleToolReorderPanel" type="button">Reorder List</button>
-<button class="btnlink secondary" id="copyToolReorderList" type="button">Copy List</button>
-<button class="btnlink secondary" id="clearToolReorderList" type="button">Clear List</button>
-</div>
-</div>
-<div aria-live="polite" class="reorder-panel" id="toolReorderPanel">
-<div class="reorder-head">
-<div>
-<strong>Tool Reorder List</strong>
-<div class="small-note">Saved in this browser. Use this as a planning list for replacement tools and workshop gear.</div>
-</div>
-</div>
-<div class="reorder-list" id="toolReorderListWrap"></div>
 </div>
 <div id="toolsGrid" style="margin-top:12px"></div>
 <div class="small" style="margin-top:12px">
@@ -284,7 +244,6 @@
       const ASSET_ORIGIN = "https://assets.devilndove.com";
       const ASSET_PREFIX = "Toolshed"; // case-sensitive R2 folder
       const DATA_URL = "/data/toolshed/toolshed_items_master.json"; // change only this if your path differs
-      const REORDER_STORAGE_KEY = "devilndove_tools_reorder_list_v1";
 
       const AREA_ORDER = [
         "Security",
@@ -401,38 +360,6 @@
           ""
         );
       }
-      function toNum(v){
-        const s = safeText(v);
-        if (!s) return null;
-        const n = Number(s);
-        return Number.isFinite(n) ? n : null;
-      }
-
-      function needsReorder(item){
-        const onHand = toNum(item.quantity_on_hand ?? item.on_hand_qty);
-        const reorderPoint = toNum(item.reorder_point);
-        if (onHand === null || reorderPoint === null) return false;
-        return onHand <= reorderPoint;
-      }
-
-      function getItemKey(item){
-        return safeText(item.source_key) || safeText(item.r2_object_key) || safeText(item.example_image_file) || safeText(item.name) || getToolName(item);
-      }
-
-      function readReorderList(){
-        try {
-          const raw = localStorage.getItem(REORDER_STORAGE_KEY);
-          if (!raw) return [];
-          const parsed = JSON.parse(raw);
-          return Array.isArray(parsed) ? parsed : [];
-        } catch (e) { return []; }
-      }
-      function writeReorderList(arr){ localStorage.setItem(REORDER_STORAGE_KEY, JSON.stringify(arr)); }
-      function addToReorderList(entry){ const current = readReorderList(); if (!current.some((x)=>x.key===entry.key)) { current.push(entry); writeReorderList(current); } }
-      function removeFromReorderList(key){ writeReorderList(readReorderList().filter((x)=>x.key!==key)); }
-      function clearReorderList(){ writeReorderList([]); }
-      function inReorderList(key){ return readReorderList().some((x)=>x.key===key); }
-
 
       function getBrand(item){
         return safeText(item.brand_guess) || safeText(item.brand) || "";
@@ -447,9 +374,6 @@
         const how = getHowWeUse(item);
         const imgUrl = getR2ImageUrl(item);
         const amazon = getAmazonUrl(item);
-        const itemKey = getItemKey(item);
-        const isReorder = needsReorder(item);
-        const alreadyAdded = inReorderList(itemKey);
 
         const visibleTags = [area, cat].concat(tags.slice(0, 3));
 
@@ -470,14 +394,12 @@
 
               <div class="tags">
                 ${visibleTags.map(function (t) { return `<span class="tag">${escHtml(t)}</span>`; }).join("")}
-                ${isReorder ? `<span class="tag tag-reorder">Reorder</span>` : ''}
               </div>
 
               ${how ? `<div class="note">${escHtml(how)}</div>` : ""}
 
               <div class="actions">
                 <a class="btnlink" href="${amazon}" target="_blank" rel="noopener">Amazon.ca search</a>
-                <button class="btnlink secondary ${alreadyAdded ? 'active' : ''}" type="button" data-add-tool-reorder="${escHtml(itemKey)}">${alreadyAdded ? 'In Reorder List' : 'Add to Reorder List'}</button>
               </div>
             </div>
           </div>
@@ -491,45 +413,7 @@
       const toolShownEl = document.getElementById("toolShown");
       const toolTotalEl = document.getElementById("toolTotal");
       const toolsGridEl = document.getElementById("toolsGrid");
-      const toolReorderOnlyEl = document.getElementById("toolReorderOnly");
-      const toggleToolReorderPanelBtn = document.getElementById("toggleToolReorderPanel");
-      const copyToolReorderListBtn = document.getElementById("copyToolReorderList");
-      const clearToolReorderListBtn = document.getElementById("clearToolReorderList");
-      const toolReorderPanelEl = document.getElementById("toolReorderPanel");
-      const toolReorderListWrapEl = document.getElementById("toolReorderListWrap");
 
-
-      let reorderPanelOpen = false;
-
-      function renderReorderPanel(){
-        const list = readReorderList();
-        if (!list.length) {
-          toolReorderListWrapEl.innerHTML = '<div class="reorder-empty">Your tool reorder list is empty.</div>';
-          return;
-        }
-        toolReorderListWrapEl.innerHTML = list.map(function(entry){
-          return `<div class="reorder-row"><div class="name">${escHtml(entry.name)}</div><a class="btnlink secondary" href="${escHtml(entry.amazon)}" target="_blank" rel="noopener">Amazon.ca</a><button class="btnlink secondary" type="button" data-remove-tool-key="${escHtml(entry.key)}">Remove</button></div>`;
-        }).join('');
-        Array.from(toolReorderListWrapEl.querySelectorAll('[data-remove-tool-key]')).forEach(function(btn){
-          btn.addEventListener('click', function(){ removeFromReorderList(btn.getAttribute('data-remove-tool-key')); renderReorderPanel(); renderFiltered(); });
-        });
-      }
-
-      function toggleReorderPanel(){
-        reorderPanelOpen = !reorderPanelOpen;
-        toolReorderPanelEl.classList.toggle('open', reorderPanelOpen);
-        toggleToolReorderPanelBtn.classList.toggle('active', reorderPanelOpen);
-        if (reorderPanelOpen) renderReorderPanel();
-      }
-
-      async function copyReorderListToClipboard(){
-        const list = readReorderList();
-        if (!list.length) { alert('Reorder list is empty.'); return; }
-        const lines = ['Devil n Dove Tools Reorder List',''];
-        list.forEach(function(entry, idx){ lines.push((idx+1)+'. '+entry.name); lines.push('   '+entry.amazon); });
-        try { await navigator.clipboard.writeText(lines.join('\n')); copyToolReorderListBtn.textContent='Copied!'; setTimeout(function(){ copyToolReorderListBtn.textContent='Copy List'; }, 1200); }
-        catch (e) { alert('Copy failed. Open the reorder panel and copy manually.'); }
-      }
 
       async function fetchCatalogItems(){
         try {
@@ -622,7 +506,6 @@
         const areaVal = toolAreaEl.value;
         const catVal = toolCatEl.value;
         const tagVal = toolTagEl.value;
-        const reorderOnly = !!toolReorderOnlyEl.checked;
 
         let list = allTools.slice();
 
@@ -634,10 +517,6 @@
         }
         if (tagVal !== "all") {
           list = list.filter(function (it) { return getProcessTags(it).includes(tagVal); });
-        }
-
-        if (reorderOnly) {
-          list = list.filter(needsReorder);
         }
 
         if (q) {
@@ -656,17 +535,6 @@
         }
 
         renderGrouped(list, allTools.length);
-
-        Array.from(toolsGridEl.querySelectorAll("[data-add-tool-reorder]")).forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            const key = btn.getAttribute("data-add-tool-reorder");
-            const item = allTools.find(function (x) { return getItemKey(x) === key; });
-            if (!item) return;
-            addToReorderList({ key: key, name: getToolName(item), amazon: getAmazonUrl(item) });
-            if (reorderPanelOpen) renderReorderPanel();
-            renderFiltered();
-          });
-        });
       }
 
       async function initToolsPage(){
@@ -685,10 +553,7 @@
                 amazon_url: row.amazon_url || source.amazon_url,
                 r2_object_key: row.r2_object_key || source.r2_object_key,
                 example_image_file: source.example_image_file || "",
-                quantity_owned: row.quantity_on_hand || source.quantity_owned || 0,
-                quantity_on_hand: row.quantity_on_hand || source.quantity_on_hand || source.on_hand_qty || 0,
-                reorder_point: row.reorder_point || source.reorder_point || 0,
-                source_key: row.source_key || source.source_key || ""
+                quantity_owned: row.quantity_on_hand || source.quantity_owned || 0
               });
             });
           } else {
@@ -712,10 +577,6 @@
           toolAreaEl.addEventListener("change", renderFiltered);
           toolCatEl.addEventListener("change", renderFiltered);
           toolTagEl.addEventListener("change", renderFiltered);
-          toolReorderOnlyEl.addEventListener("change", renderFiltered);
-          toggleToolReorderPanelBtn.addEventListener("click", toggleReorderPanel);
-          copyToolReorderListBtn.addEventListener("click", copyReorderListToClipboard);
-          clearToolReorderListBtn.addEventListener("click", function(){ if (!readReorderList().length) return; if (!confirm("Clear the entire tool reorder list?")) return; clearReorderList(); renderReorderPanel(); renderFiltered(); });
 
           renderFiltered();
         } catch (err) {
