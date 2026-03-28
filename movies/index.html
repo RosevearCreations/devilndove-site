@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <title>Movie Shelf | DVD & Blu-ray collection at Devil n Dove</title>
-  <meta name="description" content="Browse the Devil n Dove movie shelf with searchable cover art, film details, cast, director, runtime, and trailer links as the collection keeps being enriched."/>
+  <meta name="description" content="Browse the Devil n Dove movie shelf with searchable cover art, UPC lookup, film details, cast, director, runtime, and trailer links as the collection is enriched."/>
   <meta name="robots" content="index,follow"/>
   <link rel="canonical" href="https://devilndove.com/movies/"/>
   <link href="/css/styles.css" rel="stylesheet"/>
@@ -12,12 +12,12 @@
   <meta property="og:site_name" content="Devil n Dove"/>
   <meta property="og:type" content="website"/>
   <meta property="og:title" content="Movie Shelf | DVD & Blu-ray collection at Devil n Dove"/>
-  <meta property="og:description" content="Browse the Devil n Dove movie shelf with searchable cover art, film details, and trailer-ready links."/>
+  <meta property="og:description" content="Browse the Devil n Dove movie shelf with searchable cover art, film details, and future trailer links."/>
   <meta property="og:url" content="https://devilndove.com/movies/"/>
   <meta property="og:image" content="https://devilndove.com/assets/logo-clear.png"/>
   <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="Movie Shelf | DVD & Blu-ray collection at Devil n Dove"/>
-  <meta name="twitter:description" content="Browse the Devil n Dove movie shelf with searchable cover art, film details, and trailer-ready links."/>
+  <meta name="twitter:description" content="Browse the Devil n Dove movie shelf with searchable cover art, film details, and future trailer links."/>
   <meta name="twitter:image" content="https://devilndove.com/assets/logo-clear.png"/>
 </head>
 <body>
@@ -30,7 +30,7 @@
           <div class="small">Workshop • Art • Tools • Movies</div>
         </div>
       </div>
-      <div class="links">
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
         <a href="/index.html">Home</a>
         <a href="/about/index.html">About</a>
         <a href="/gallery/index.html">Art</a>
@@ -38,7 +38,7 @@
         <a href="/tools/index.html">Tools</a>
         <a href="/supplies/index.html">Supplies</a>
         <a href="/shop/index.html">Shop</a>
-        <a href="/movies/index.html" class="active">Movies</a>
+        <a href="/movies/index.html">Movies</a>
         <a href="/contact/index.html">Contact</a>
       </div>
     </div>
@@ -52,145 +52,29 @@
     </div>
 
     <div class="card">
-      <div class="grid cols-4 movie-filter-grid" style="gap:10px;align-items:end">
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;align-items:end">
         <div>
           <label class="small" for="q">Search movies</label>
-          <input class="input" id="q" placeholder="Search by title, cast, director, studio, genre, UPC..."/>
+          <input class="input" id="q" placeholder="Search by title, UPC, year, actor, director, genre, studio, format..."/>
         </div>
-        <div>
-          <label class="small" for="genreFilter">Genre</label>
-          <input class="input" id="genreFilter" placeholder="Action, comedy, sci-fi..."/>
-        </div>
-        <div>
-          <label class="small" for="yearFilter">Year</label>
-          <input class="input" id="yearFilter" placeholder="1990, 2004..."/>
-        </div>
-        <div>
-          <label class="small" for="limitFilter">Per page</label>
-          <select id="limitFilter">
-            <option value="60">60</option>
-            <option value="120">120</option>
-            <option value="180">180</option>
-          </select>
-        </div>
-      </div>
-      <div class="movie-toolbar" style="margin-top:12px">
-        <div class="small">Showing <span id="shownRange">0–0</span> of <span id="total">0</span> movies <span id="pageLabel"></span></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" id="prevPageBtn" type="button">Previous</button>
-          <button class="btn" id="nextPageBtn" type="button">Next</button>
-        </div>
+        <div style="text-align:right"><div class="small">Showing <span id="shown">0</span> of <span id="total">0</span></div></div>
       </div>
     </div>
 
-    <div id="movieGrid" class="movie-grid"></div>
+    <div id="movieGrid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:16px"></div>
   </div>
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/site-auth-ui.js"></script>
   <script>
-    const grid = document.getElementById('movieGrid');
-    const totalEl = document.getElementById('total');
-    const shownRangeEl = document.getElementById('shownRange');
-    const pageLabelEl = document.getElementById('pageLabel');
-    const qInput = document.getElementById('q');
-    const genreInput = document.getElementById('genreFilter');
-    const yearInput = document.getElementById('yearFilter');
-    const limitInput = document.getElementById('limitFilter');
-    const prevBtn = document.getElementById('prevPageBtn');
-    const nextBtn = document.getElementById('nextPageBtn');
-    let page = 1;
-    let state = { total: 0, total_pages: 1, shown_from: 0, shown_to: 0, items: [] };
-
-    const esc = (value) => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    const imdbSearchUrl = (title, upc) => 'https://www.google.com/search?q=' + encodeURIComponent(`${title || upc || ''} IMDb`);
-    const trailerSearchUrl = (title, year) => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(`${title || ''} ${year || ''} official trailer`);
-
-    function render() {
-      const items = Array.isArray(state.items) ? state.items : [];
-      totalEl.textContent = state.total || 0;
-      shownRangeEl.textContent = `${state.shown_from || 0}–${state.shown_to || 0}`;
-      pageLabelEl.textContent = state.total ? `(page ${state.page} of ${state.total_pages})` : '';
-      prevBtn.disabled = page <= 1;
-      nextBtn.disabled = !state.has_more;
-      grid.innerHTML = items.map((item) => {
-        const hasMetadata = Boolean(item.title || item.release_year || item.genre || item.director_names || item.actor_names || item.summary || item.runtime_minutes || item.studio_name);
-        const title = (item.title || '').trim() || 'Metadata pending';
-        const image = item.front_image_url || item.front_image || '';
-        const year = item.release_year ? `<span class="movie-meta-chip">${esc(item.release_year)}</span>` : '';
-        const genre = item.genre ? `<span class="movie-meta-chip">${esc(item.genre)}</span>` : '';
-        const format = item.media_format ? `<span class="movie-meta-chip">${esc(item.media_format)}</span>` : '';
-        const studio = item.studio_name ? `<span class="movie-meta-chip">${esc(item.studio_name)}</span>` : '';
-        const runtime = item.runtime_minutes ? `<span class="movie-summary-chip"><strong>${esc(item.runtime_minutes)}</strong> min</span>` : '';
-        const director = item.director_names ? `<div class="small"><strong>Director:</strong> ${esc(item.director_names)}</div>` : '';
-        const actors = item.actor_names ? `<div class="small"><strong>Top actors:</strong> ${esc(item.actor_names)}</div>` : '';
-        const valueLow = Number.isFinite(Number(item.estimated_value_low_cents)) ? Number(item.estimated_value_low_cents) : null;
-        const valueHigh = Number.isFinite(Number(item.estimated_value_high_cents)) ? Number(item.estimated_value_high_cents) : null;
-        const valueCurrency = item.estimated_value_currency || 'CAD';
-        const money = (cents) => new Intl.NumberFormat(undefined, { style: 'currency', currency: valueCurrency }).format((Number(cents || 0))/100);
-        const valueLine = valueLow != null || valueHigh != null
-          ? `<div class="small"><strong>Estimated value:</strong> ${valueLow != null && valueHigh != null ? `${esc(money(valueLow))}–${esc(money(valueHigh))}` : esc(money(valueLow != null ? valueLow : valueHigh))}</div>`
-          : '';
-        const metadataStatus = item.metadata_status ? `<div class="small"><strong>Status:</strong> ${esc(item.metadata_status)}</div>` : '';
-        const rarityNotes = item.rarity_notes ? `<div class="small"><strong>Rarity:</strong> ${esc(item.rarity_notes)}</div>` : '';
-        const summary = item.summary ? `<p class="small movie-summary-copy">${esc(item.summary)}</p>` : `<p class="small movie-summary-copy">${hasMetadata ? 'Summary still pending for this title.' : `Metadata is still being enriched for UPC ${esc(item.upc || '')}.`}</p>`;
-        const upc = item.upc ? `<div class="small"><strong>UPC:</strong> ${esc(item.upc)}</div>` : '';
-        const trailerHref = item.trailer_url || trailerSearchUrl(item.title || item.upc, item.release_year);
-        return `<article class="card movie-card-shell">` +
-          `<div class="movie-cover-wrap${image ? '' : ' is-missing'}">${image ? `<img class="movie-cover" src="${esc(image)}" alt="${esc(title)} cover" loading="lazy">` : `<div class="movie-cover-placeholder">Cover pending</div>`}</div>` +
-          `<h2 class="movie-card-title">${esc(title)}</h2>` +
-          `<div class="movie-meta-row">${year}${genre}${format}${studio}</div>` +
-          `<div class="movie-summary-chip-row">${runtime}</div>` +
-          `${upc}${director}${actors}${valueLine}${metadataStatus}${rarityNotes}${summary}` +
-          `<div class="movie-link-row"><a href="${imdbSearchUrl(item.title, item.upc)}" target="_blank" rel="noreferrer">Search IMDb</a><a href="${esc(trailerHref)}" target="_blank" rel="noreferrer">${item.trailer_url ? 'Watch trailer' : 'Search trailer'}</a></div>` +
-          `</article>`;
-      }).join('') || '<div class="card">No movies matched your filters.</div>';
-    }
-
-    async function loadMovies() {
-      grid.innerHTML = '<div class="card">Loading movie catalog…</div>';
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limitInput.value || 60),
-        q: qInput.value || '',
-        genre: genreInput.value || '',
-        year: yearInput.value || ''
-      });
-      try {
-        const response = await fetch('/api/movies?' + params.toString());
-        if (!response.ok) throw new Error('Failed to load movie data');
-        const data = await response.json();
-        state = {
-          total: Number(data.total || 0),
-          total_pages: Number(data.total_pages || 1),
-          shown_from: Number(data.shown_from || 0),
-          shown_to: Number(data.shown_to || 0),
-          page: Number(data.page || page),
-          has_more: Boolean(data.has_more),
-          items: Array.isArray(data.items) ? data.items : []
-        };
-        render();
-      } catch (error) {
-        console.error(error);
-        grid.innerHTML = '<div class="card">Could not load movie catalog.</div>';
-      }
-    }
-
-    function debouncedLoad() {
-      clearTimeout(window.__ddMovieLoadTimer);
-      window.__ddMovieLoadTimer = setTimeout(() => {
-        page = 1;
-        loadMovies();
-      }, 200);
-    }
-
-    qInput.addEventListener('input', debouncedLoad);
-    genreInput.addEventListener('input', debouncedLoad);
-    yearInput.addEventListener('input', debouncedLoad);
-    limitInput.addEventListener('change', () => { page = 1; loadMovies(); });
-    prevBtn.addEventListener('click', () => { if (page > 1) { page -= 1; loadMovies(); } });
-    nextBtn.addEventListener('click', () => { if (state.has_more) { page += 1; loadMovies(); } });
-    loadMovies();
+    const grid=document.getElementById('movieGrid'); const totalEl=document.getElementById('total'); const shownEl=document.getElementById('shown'); const q=document.getElementById('q'); let items=[];
+    const esc=(v)=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const imdbSearchUrl=(title,upc)=>'https://www.google.com/search?q='+encodeURIComponent(`${title||upc||''} IMDb`);
+    const trailerSearchUrl=(title,year)=>'https://www.youtube.com/results?search_query='+encodeURIComponent(`${title||''} ${year||''} official trailer`);
+    function matches(item,term){ if(!term) return true; const hay=[item.title,item.upc,item.summary,item.release_year,item.genre,item.director_names,item.actor_names,item.studio_name,item.media_format].join(' ').toLowerCase(); return hay.includes(term); }
+    function render(){ const term=(q.value||'').trim().toLowerCase(); const filtered=items.filter((item)=>matches(item,term)); totalEl.textContent=items.length; shownEl.textContent=filtered.length; grid.innerHTML = filtered.map((item)=>{ const title=(item.title||'').trim() || 'Title pending metadata'; const image=item.front_image_url || item.front_image || ''; const year=item.release_year ? `<div class="small"><strong>Year:</strong> ${esc(item.release_year)}</div>` : ''; const genre=item.genre ? `<div class="small"><strong>Genre:</strong> ${esc(item.genre)}</div>` : ''; const director=item.director_names ? `<div class="small"><strong>Director:</strong> ${esc(item.director_names)}</div>` : ''; const actors=item.actor_names ? `<div class="small"><strong>Cast:</strong> ${esc(item.actor_names)}</div>` : ''; const runtime=item.runtime_minutes ? `<div class="small"><strong>Length:</strong> ${esc(item.runtime_minutes)} min</div>` : ''; const summary=item.summary ? `<p class="small" style="margin-top:8px">${esc(item.summary)}</p>` : `<p class="small" style="margin-top:8px;color:#64748b">Metadata enrichment is still in progress for this cover.</p>`; const upc=item.upc ? `<div class="small"><strong>UPC:</strong> ${esc(item.upc)}</div>` : ''; const trailer=item.trailer_url ? `<a href="${esc(item.trailer_url)}" target="_blank" rel="noreferrer">Watch trailer</a>` : `<a href="${trailerSearchUrl(item.title||item.upc,item.release_year)}" target="_blank" rel="noreferrer">Search trailer</a>`; return `<article class="card">${image ? `<img src="${esc(image)}" alt="${esc(title)} cover" style="width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;margin-bottom:10px" loading="lazy">` : ''}<h2 style="margin:0 0 8px;font-size:1.1rem">${esc(title)}</h2>${upc}${year}${genre}${director}${actors}${runtime}${summary}<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px"><a href="${imdbSearchUrl(item.title, item.upc)}" target="_blank" rel="noreferrer">Search IMDb</a>${trailer}</div></article>`; }).join('') || `<div class="card">No movies matched your search.</div>`; }
+    fetch('/api/movies').then((r)=>{ if(!r.ok) throw new Error('Failed to load movie data'); return r.json(); }).then((data)=>{ items=Array.isArray(data) ? data : (data.items || data.movies || []); render(); }).catch((err)=>{ grid.innerHTML='<div class="card">Could not load movie catalog.</div>'; console.error(err); });
+    q.addEventListener('input', render);
   </script>
 </body>
 </html>
