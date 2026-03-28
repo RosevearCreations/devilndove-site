@@ -26,8 +26,13 @@ CREATE TABLE IF NOT EXISTS tax_classes (
 CREATE TABLE IF NOT EXISTS products (
   product_id INTEGER PRIMARY KEY AUTOINCREMENT,
   slug TEXT NOT NULL UNIQUE,
+  product_number INTEGER UNIQUE,
   sku TEXT UNIQUE,
   name TEXT NOT NULL,
+  product_category TEXT,
+  color_name TEXT,
+  shipping_code TEXT,
+  review_status TEXT NOT NULL DEFAULT 'pending_review' CHECK (review_status IN ('pending_review','approved','needs_changes','published')),
   short_description TEXT,
   description TEXT,
   product_type TEXT NOT NULL CHECK (product_type IN ('physical','digital')),
@@ -251,14 +256,6 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   runtime_minutes INTEGER,
   studio_name TEXT,
   trailer_url TEXT,
-  estimated_value_low_cents INTEGER,
-  estimated_value_high_cents INTEGER,
-  estimated_value_currency TEXT DEFAULT 'CAD',
-  rarity_notes TEXT,
-  collection_notes TEXT,
-  metadata_source TEXT,
-  metadata_status TEXT DEFAULT 'pending',
-  imdb_id TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','draft','archived')),
   featured_rank INTEGER,
   source_record_json TEXT,
@@ -273,7 +270,3 @@ CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
 
 
 -- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.
-
-
--- Current pass note: movie pagination and admin UI cleanup did not require a new table.
--- Existing movie_catalog and site_item_inventory structures are reused for the fuller public shelf and shared reorder workflows.

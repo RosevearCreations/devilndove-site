@@ -59,7 +59,9 @@
 
 ## Current pass update
 
-- Tools reorder UX now matches supplies more closely on the public side.
-- Admin reorder workflow now treats tools and supplies together with copy/clear controls.
-- Movie API and page now understand extra metadata fields including estimated value, rarity notes, metadata source, metadata status, and IMDb IDs.
-- Full 1100+ movie metadata enrichment remains a dedicated data-ingestion task and is not safely auto-complete from the public web in one pass without a trusted bulk source.
+- Mobile finished-product capture page added at `/admin/mobile-product/` for phone-first product entry.
+- The phone workflow now assigns the next available product number, supports category, colour, shipping code, tax code, SEO title/meta description, direct image upload to R2, and optional tool/supply links.
+- Products created from the phone workflow are saved as draft items with `review_status = pending_review` so they can be reviewed before publishing.
+- Product records now support `product_number`, `product_category`, `color_name`, `shipping_code`, and `review_status`.
+- Storefront/admin product search can now match category and colour more directly.
+- SEO guidance remains aligned with Google Search Central: one clear H1 per outward-facing page, descriptive title links, page-specific meta descriptions, crawlable internal links, and structured data that matches visible content.

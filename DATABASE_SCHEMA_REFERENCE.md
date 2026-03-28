@@ -169,6 +169,11 @@ Images are optional during import and can be added during later review before ac
 No brand-new core tables were required for this pass. The largest work was defensive compatibility around existing `products`, `catalog_items`, `site_item_inventory`, `movie_catalog`, analytics, and webhook tables so partially migrated databases do not break the admin/dashboard JSON endpoints.
 
 
-## Movie metadata extension fields
+## Current pass update
 
-The `movie_catalog` table now supports `estimated_value_low_cents`, `estimated_value_high_cents`, `estimated_value_currency`, `rarity_notes`, `collection_notes`, `metadata_source`, `metadata_status`, and `imdb_id` for later metadata/value enrichment.
+- Mobile finished-product capture page added at `/admin/mobile-product/` for phone-first product entry.
+- The phone workflow now assigns the next available product number, supports category, colour, shipping code, tax code, SEO title/meta description, direct image upload to R2, and optional tool/supply links.
+- Products created from the phone workflow are saved as draft items with `review_status = pending_review` so they can be reviewed before publishing.
+- Product records now support `product_number`, `product_category`, `color_name`, `shipping_code`, and `review_status`.
+- Storefront/admin product search can now match category and colour more directly.
+- SEO guidance remains aligned with Google Search Central: one clear H1 per outward-facing page, descriptive title links, page-specific meta descriptions, crawlable internal links, and structured data that matches visible content.

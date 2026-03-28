@@ -70,6 +70,11 @@
 - When public media or catalog data already exists in R2 or D1, do not regress pages back to placeholder local paths or sample JSON records.
 
 
-- Continue enforcing one H1 maximum on every outward-facing page.
-- Continue improving title links, descriptions, crawlable internal links, and visible structured-data alignment on every outward-facing pass.
-- Prefer moving high-duplication catalog/inventory data into D1 when the same facts are otherwise maintained in multiple JSON files.
+## Current pass update
+
+- Mobile finished-product capture page added at `/admin/mobile-product/` for phone-first product entry.
+- The phone workflow now assigns the next available product number, supports category, colour, shipping code, tax code, SEO title/meta description, direct image upload to R2, and optional tool/supply links.
+- Products created from the phone workflow are saved as draft items with `review_status = pending_review` so they can be reviewed before publishing.
+- Product records now support `product_number`, `product_category`, `color_name`, `shipping_code`, and `review_status`.
+- Storefront/admin product search can now match category and colour more directly.
+- SEO guidance remains aligned with Google Search Central: one clear H1 per outward-facing page, descriptive title links, page-specific meta descriptions, crawlable internal links, and structured data that matches visible content.

@@ -86,8 +86,11 @@ This repo is in the payment, media, inventory, and public SEO hardening phase af
 - Maintain the relationship between finished products and linked tools/supplies because it supports future storytelling, social content, and build-history features.
 
 
-## Current pass reminders
+## Current pass update
 
-- Tools public page should retain parity with supplies for reorder UX where practical.
-- Movie covers are R2-backed through `data/movies/movie_catalog_enriched.json`.
-- Movie metadata is only partially populated; do not treat UPC as the movie title.
+- Mobile finished-product capture page added at `/admin/mobile-product/` for phone-first product entry.
+- The phone workflow now assigns the next available product number, supports category, colour, shipping code, tax code, SEO title/meta description, direct image upload to R2, and optional tool/supply links.
+- Products created from the phone workflow are saved as draft items with `review_status = pending_review` so they can be reviewed before publishing.
+- Product records now support `product_number`, `product_category`, `color_name`, `shipping_code`, and `review_status`.
+- Storefront/admin product search can now match category and colour more directly.
+- SEO guidance remains aligned with Google Search Central: one clear H1 per outward-facing page, descriptive title links, page-specific meta descriptions, crawlable internal links, and structured data that matches visible content.

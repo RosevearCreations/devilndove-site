@@ -107,8 +107,11 @@
 - Catalog sync now fails collection-by-collection instead of taking down the whole tool when one JSON source is incomplete.
 
 
-## Current pass sanity notes
+## Current pass update
 
-- Tools page reorder features are now aligned more closely with supplies.
-- Admin inventory now includes a combined reorder screen for tools and supplies.
-- Movie covers load from the uploaded R2 URLs, but title/cast/director/runtime/value data still depends on future enrichment.
+- Mobile finished-product capture page added at `/admin/mobile-product/` for phone-first product entry.
+- The phone workflow now assigns the next available product number, supports category, colour, shipping code, tax code, SEO title/meta description, direct image upload to R2, and optional tool/supply links.
+- Products created from the phone workflow are saved as draft items with `review_status = pending_review` so they can be reviewed before publishing.
+- Product records now support `product_number`, `product_category`, `color_name`, `shipping_code`, and `review_status`.
+- Storefront/admin product search can now match category and colour more directly.
+- SEO guidance remains aligned with Google Search Central: one clear H1 per outward-facing page, descriptive title links, page-specific meta descriptions, crawlable internal links, and structured data that matches visible content.

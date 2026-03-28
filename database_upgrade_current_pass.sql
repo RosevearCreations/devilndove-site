@@ -204,15 +204,6 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   back_image_url TEXT,
   runtime_minutes INTEGER,
   studio_name TEXT,
-  trailer_url TEXT,
-  estimated_value_low_cents INTEGER,
-  estimated_value_high_cents INTEGER,
-  estimated_value_currency TEXT DEFAULT 'CAD',
-  rarity_notes TEXT,
-  collection_notes TEXT,
-  metadata_source TEXT,
-  metadata_status TEXT DEFAULT 'pending',
-  imdb_id TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','draft','archived')),
   featured_rank INTEGER,
   source_record_json TEXT,
@@ -223,17 +214,6 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
-
-
-ALTER TABLE movie_catalog ADD COLUMN trailer_url TEXT;
-ALTER TABLE movie_catalog ADD COLUMN estimated_value_low_cents INTEGER;
-ALTER TABLE movie_catalog ADD COLUMN estimated_value_high_cents INTEGER;
-ALTER TABLE movie_catalog ADD COLUMN estimated_value_currency TEXT DEFAULT 'CAD';
-ALTER TABLE movie_catalog ADD COLUMN rarity_notes TEXT;
-ALTER TABLE movie_catalog ADD COLUMN collection_notes TEXT;
-ALTER TABLE movie_catalog ADD COLUMN metadata_source TEXT;
-ALTER TABLE movie_catalog ADD COLUMN metadata_status TEXT DEFAULT 'pending';
-ALTER TABLE movie_catalog ADD COLUMN imdb_id TEXT;
 
 
 CREATE TABLE IF NOT EXISTS product_resource_links (
@@ -275,7 +255,22 @@ CREATE TABLE IF NOT EXISTS product_resource_links (
 CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resource_links(product_id, sort_order);
 
 
+-- Movie enrichment additions for trailer support
+ALTER TABLE movie_catalog ADD COLUMN trailer_url TEXT;
+
 -- Product resource story linkage already exists in base schema; keep using product_resource_links.
 
 
 -- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.
+
+
+-- Current pass: mobile finished-product capture support.
+ALTER TABLE products ADD COLUMN product_number INTEGER;
+ALTER TABLE products ADD COLUMN product_category TEXT;
+ALTER TABLE products ADD COLUMN color_name TEXT;
+ALTER TABLE products ADD COLUMN shipping_code TEXT;
+ALTER TABLE products ADD COLUMN review_status TEXT NOT NULL DEFAULT 'pending_review';
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_product_number ON products(product_number);
+UPDATE products
+SET review_status = CASE WHEN COALESCE(status, 'draft') = 'active' THEN 'published' ELSE 'pending_review' END
+WHERE review_status IS NULL OR review_status = '';
