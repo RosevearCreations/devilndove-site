@@ -46,10 +46,18 @@ async function fetchLegacyCatalog(request) {
 }
 
 async function fetchEnrichedCatalog(request) {
-  const data = await fetchJsonFromSite(request, '/data/movies/movie_catalog_enriched.json');
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.movies)) return data.movies;
+  const paths = [
+    '/data/movies/movie_catalog_enriched.v2.json',
+    '/assets/movies/movie_catalog_enriched.v2.json',
+    '/data/movies/movie_catalog_enriched.json',
+    '/assets/movies/movie_catalog_enriched.json'
+  ];
+  for (const path of paths) {
+    const data = await fetchJsonFromSite(request, path);
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data?.movies)) return data.movies;
+  }
   return [];
 }
 
@@ -75,6 +83,14 @@ function normalizeMovieRow(row, index = 0) {
     back_image_url: deriveCoverUrl(row, 'back'),
     runtime_minutes: safeNumber(row.runtime_minutes),
     studio_name: normalizeText(row.studio_name || row.studio),
+    imdb_id: normalizeText(row.imdb_id),
+    metadata_status: normalizeText(row.metadata_status || (explicitTitle ? 'enriched' : 'pending')),
+    metadata_source: normalizeText(row.metadata_source),
+    estimated_value_low_cents: safeNumber(row.estimated_value_low_cents),
+    estimated_value_high_cents: safeNumber(row.estimated_value_high_cents),
+    estimated_value_currency: normalizeText(row.estimated_value_currency || 'CAD'),
+    rarity_notes: normalizeText(row.rarity_notes),
+    collection_notes: normalizeText(row.collection_notes),
     trailer_url: trailerUrl,
     trailer_search_url: trailerUrl || buildTrailerSearchUrl(explicitTitle || upc, upc),
     status: normalizeText(row.status || 'active') || 'active',

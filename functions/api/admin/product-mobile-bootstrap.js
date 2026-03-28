@@ -35,12 +35,13 @@ export async function onRequestGet(context) {
            COALESCE(sii.on_hand_quantity,0) AS on_hand_quantity,
            COALESCE(sii.reorder_point,0) AS reorder_point,
            COALESCE(sii.is_on_reorder_list,0) AS is_on_reorder_list,
-           COALESCE(sii.do_not_reuse,0) AS do_not_reuse
+           COALESCE(sii.do_not_reuse,0) AS do_not_reuse,
+           CASE WHEN COALESCE(sii.reorder_point,0) > 0 AND COALESCE(sii.on_hand_quantity,0) <= COALESCE(sii.reorder_point,0) THEN 1 ELSE 0 END AS reorder_needed
     FROM catalog_items ci
     LEFT JOIN site_item_inventory sii ON sii.source_type = ci.item_kind AND sii.external_key = ci.source_key
     WHERE ci.item_kind IN ('tool','supply') AND COALESCE(ci.status,'active') != 'archived'
     ORDER BY ci.item_kind ASC, LOWER(ci.name) ASC
-    LIMIT 250
+    LIMIT 500
   `).all().catch(() => ({ results: [] })));
 
   return json({
@@ -50,6 +51,6 @@ export async function onRequestGet(context) {
     color_options: ['Silver','Gold','Black','White','Red','Blue','Green','Purple','Pink','Orange','Yellow','Brown','Clear','Multicolor'],
     shipping_code_options: ['standard-jewelry','small-parcel','oversize','pickup-only','digital'],
     tax_classes: taxClasses.map((row) => ({ tax_class_id: Number(row.tax_class_id || 0), code: row.code || '', name: row.name || '', tax_rate: Number(row.tax_rate || 0) })),
-    resources: resources.map((row) => ({ item_kind: row.item_kind || '', source_key: row.source_key || '', name: row.name || '', image_url: row.image_url || '', category: row.category || '', subcategory: row.subcategory || '', on_hand_quantity: Number(row.on_hand_quantity || 0), reorder_point: Number(row.reorder_point || 0), is_on_reorder_list: Number(row.is_on_reorder_list || 0), do_not_reuse: Number(row.do_not_reuse || 0) }))
+    resources: resources.map((row) => ({ item_kind: row.item_kind || '', source_key: row.source_key || '', name: row.name || '', image_url: row.image_url || '', category: row.category || '', subcategory: row.subcategory || '', on_hand_quantity: Number(row.on_hand_quantity || 0), reorder_point: Number(row.reorder_point || 0), is_on_reorder_list: Number(row.is_on_reorder_list || 0), do_not_reuse: Number(row.do_not_reuse || 0), reorder_needed: Number(row.reorder_needed || 0) }))
   });
 }
