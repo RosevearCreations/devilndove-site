@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const resourceGrid = document.getElementById('mobileResourceGrid');
   const selectedResourcesEl = document.getElementById('mobileSelectedResources');
   const resourceSearch = document.getElementById('mobileResourceSearch');
+  const resourceKindFilter = document.getElementById('mobileResourceKindFilter');
+  const inStockOnly = document.getElementById('mobileInStockOnly');
+  const resourceSummary = document.getElementById('mobileResourceSummary');
   const refreshButton = document.getElementById('mobileRefreshBootstrapButton');
   const resetButton = document.getElementById('mobileResetForNextButton');
 
@@ -96,11 +99,31 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderResourceGrid() {
     if (!resourceGrid) return;
     const q = String(resourceSearch?.value || '').trim().toLowerCase();
-    const rows = getResources().filter((row) => !q || [row.name, row.category, row.subcategory, row.item_kind].join(' ').toLowerCase().includes(q));
+    const kind = String(resourceKindFilter?.value || 'all').trim().toLowerCase();
+    const onlyInStock = !!inStockOnly?.checked;
+    const allRows = getResources();
+    const rows = allRows
+      .filter((row) => kind === 'all' || row.item_kind === kind)
+      .filter((row) => !onlyInStock || Number(row.on_hand_quantity || 0) > 0)
+      .filter((row) => !q || [row.name, row.category, row.subcategory, row.item_kind].join(' ').toLowerCase().includes(q))
+      .sort((a, b) => {
+        const qtyDiff = Number(b.on_hand_quantity || 0) - Number(a.on_hand_quantity || 0);
+        return qtyDiff || String(a.name || '').localeCompare(String(b.name || ''));
+      });
+    if (resourceSummary) {
+      const inStockCount = allRows.filter((row) => Number(row.on_hand_quantity || 0) > 0).length;
+      resourceSummary.textContent = `Showing ${rows.length} of ${allRows.length} resources. ${inStockCount} currently have stock on hand.`;
+    }
     resourceGrid.innerHTML = rows.map((row) => {
       const key = `${row.item_kind}:${row.source_key}`;
       const selected = selectedMap.has(key);
-      return `<button type="button" class="resource-tile${selected ? ' is-linked' : ''}" data-resource-key="${escapeHtml(key)}"><div class="resource-tile-media">${row.image_url ? `<img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.name)}"/>` : `<div class="resource-tile-placeholder">${escapeHtml(row.item_kind)}</div>`}</div><div><strong>${escapeHtml(row.name)}</strong></div><div class="small">${escapeHtml(row.item_kind)} · ${escapeHtml(row.category || row.subcategory || '')}</div><div class="small">On hand: ${Number(row.on_hand_quantity || 0)}</div></button>`;
+      const qty = Number(row.on_hand_quantity || 0);
+      const reorderPoint = Number(row.reorder_point || 0);
+      const statusBits = [qty > 0 ? `On hand: ${qty}` : 'Out of stock'];
+      if (reorderPoint > 0) statusBits.push(`Reorder at ${reorderPoint}`);
+      if (Number(row.is_on_reorder_list || 0) === 1) statusBits.push('On reorder list');
+      if (Number(row.do_not_reuse || 0) === 1) statusBits.push('Do not reuse');
+      return `<button type="button" class="resource-tile${selected ? ' is-linked' : ''}" data-resource-key="${escapeHtml(key)}"><div class="resource-tile-media">${row.image_url ? `<img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.name)}"/>` : `<div class="resource-tile-placeholder">${escapeHtml(row.item_kind)}</div>`}</div><div class="resource-tile-body"><div><strong>${escapeHtml(row.name)}</strong></div><div class="small">${escapeHtml(row.item_kind)} · ${escapeHtml(row.category || row.subcategory || '')}</div><div class="small">${escapeHtml(statusBits.join(' • '))}</div></div></button>`;
     }).join('');
     resourceGrid.querySelectorAll('[data-resource-key]').forEach((button) => button.addEventListener('click', () => {
       const [resourceKind, sourceKey] = String(button.dataset.resourceKey || '').split(':');
@@ -140,6 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (imageInput) imageInput.addEventListener('change', renderImages);
   if (resourceSearch) resourceSearch.addEventListener('input', renderResourceGrid);
+  if (resourceKindFilter) resourceKindFilter.addEventListener('change', renderResourceGrid);
+  if (inStockOnly) inStockOnly.addEventListener('change', renderResourceGrid);
   if (refreshButton) refreshButton.addEventListener('click', loadBootstrap);
   if (resetButton) resetButton.addEventListener('click', () => {
     form.reset();
