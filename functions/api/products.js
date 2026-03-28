@@ -36,10 +36,12 @@ export async function onRequestGet(context) {
       LOWER(COALESCE(p.short_description, '')) LIKE ? OR
       LOWER(COALESCE(p.description, '')) LIKE ? OR
       LOWER(COALESCE(p.sku, '')) LIKE ? OR
+      LOWER(COALESCE(p.product_category, '')) LIKE ? OR
+      LOWER(COALESCE(p.color_name, '')) LIKE ? OR
       LOWER(COALESCE(ps.keywords, '')) LIKE ?
     )`);
     const like = `%${q}%`;
-    bindings.push(like, like, like, like, like);
+    bindings.push(like, like, like, like, like, like, like);
   }
   if (['physical', 'digital'].includes(product_type)) {
     clauses.push(`p.product_type = ?`);
@@ -51,7 +53,7 @@ export async function onRequestGet(context) {
 
   const primarySql = `
     SELECT
-      p.product_id, p.slug, p.sku, p.name, p.short_description, p.description, p.product_type, p.status,
+      p.product_id, p.product_number, p.slug, p.sku, p.name, p.product_category, p.color_name, p.shipping_code, p.review_status, p.short_description, p.description, p.product_type, p.status,
       p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
       p.weight_grams, p.inventory_tracking, COALESCE(p.inventory_quantity, 0) AS inventory_quantity, p.digital_file_url, p.featured_image_url,
       p.sort_order, p.created_at, p.updated_at,
@@ -67,7 +69,7 @@ export async function onRequestGet(context) {
 
   const fallbackSql = `
     SELECT
-      p.product_id, p.slug, p.sku, p.name, p.short_description, p.description, p.product_type, p.status,
+      p.product_id, p.product_number, p.slug, p.sku, p.name, p.product_category, p.color_name, p.shipping_code, p.review_status, p.short_description, p.description, p.product_type, p.status,
       p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
       p.weight_grams, p.inventory_tracking, COALESCE(p.inventory_quantity, 0) AS inventory_quantity, p.digital_file_url, p.featured_image_url,
       p.sort_order, p.created_at, p.updated_at,
@@ -84,7 +86,7 @@ export async function onRequestGet(context) {
     return json({ ok: true, products: shapeProducts(rows) });
   } catch (primaryError) {
     try {
-      const fbBindings = q ? [ `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%` ] : [];
+      const fbBindings = q ? [ `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%` ] : [];
       if (['physical', 'digital'].includes(product_type)) fbBindings.push(product_type);
       if (min_price_cents != null) fbBindings.push(min_price_cents);
       if (max_price_cents != null) fbBindings.push(max_price_cents);
