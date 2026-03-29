@@ -208,3 +208,10 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - The movies page now uses the API paging metadata to show the real total catalog size, page number, page range, and next/previous navigation more honestly.
 - Added a more defensive movie-specific CSS layer so future generic card/grid changes are less likely to break the movie shelf again.
 - KNOWN_GAPS_AND_RISKS.md was rewritten to document the remaining payment, inventory, media, analytics, and metadata risks more clearly.
+
+
+## Current pass highlights
+
+- Admin action audit logging added for product, inventory, media, and webhook operations.
+- Account-recovery requests now capture IP/user-agent and apply light abuse throttling.
+- Webhook processing records now advance retry metadata more consistently.

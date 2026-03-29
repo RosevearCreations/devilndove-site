@@ -24,7 +24,7 @@ This pass concentrated on the two issues most visible to customers and operators
 
 ### 2. Admin and operational security still need a deeper hardening pass
 - Session and auth foundations are usable, and same-site continuity is better than before.
-- Recovery, privileged-action verification, stronger permission review, broader audit coverage, and more defensive failure handling are still incomplete.
+- Recovery, privileged-action verification, stronger permission review, broader audit coverage, and more defensive failure handling are still incomplete, though this pass adds IP/user-agent logging for account-recovery requests plus a new admin action audit trail for product, inventory, media, and webhook actions.
 - Risk: stale sessions, weak recovery controls, or limited operator visibility can still create trust damage and support burden.
 
 ### 3. Inventory is useful but still not fully authoritative
@@ -84,6 +84,7 @@ This pass concentrated on the two issues most visible to customers and operators
 - Continue reducing duplicate data sources.
 - Improve audit trails for product, inventory, order, and payment changes.
 - Add stronger operational visibility around privileged admin actions and destructive media or inventory edits.
+- Current-pass improvement: admin action audit logging now records key product, inventory, media, and webhook operator actions for later review.
 
 ## Recommended near-term priorities
 1. Complete Stripe payment and webhook hardening.

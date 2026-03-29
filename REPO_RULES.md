@@ -100,3 +100,7 @@
 - The movies page now uses the API paging metadata to show the real total catalog size, page number, page range, and next/previous navigation more honestly.
 - Added a more defensive movie-specific CSS layer so future generic card/grid changes are less likely to break the movie shelf again.
 - KNOWN_GAPS_AND_RISKS.md was rewritten to document the remaining payment, inventory, media, analytics, and metadata risks more clearly.
+
+
+- Every security/admin pass should prefer durable audit trails over silent destructive actions.
+- Recovery and privileged-action flows should capture only the minimum operational context needed for review (for example IP and user-agent) and must continue to return privacy-safe user-facing responses.

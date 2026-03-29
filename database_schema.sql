@@ -59,11 +59,33 @@ CREATE TABLE IF NOT EXISTS auth_recovery_requests (
   possible_email TEXT,
   display_name TEXT,
   note TEXT,
+  ip_address TEXT,
+  user_agent TEXT,
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','reviewed','resolved','closed')),
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_auth_recovery_requests_status_created_at ON auth_recovery_requests(status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS admin_action_audit (
+  admin_action_audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  actor_user_id INTEGER,
+  action_type TEXT NOT NULL,
+  target_type TEXT,
+  target_id INTEGER,
+  target_key TEXT,
+  request_method TEXT,
+  request_path TEXT,
+  ip_address TEXT,
+  user_agent TEXT,
+  details_json TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_admin_action_audit_created_at ON admin_action_audit(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_action_audit_actor ON admin_action_audit(actor_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_action_audit_target ON admin_action_audit(target_type, target_id, created_at DESC);
+
 
 
 CREATE TABLE IF NOT EXISTS movie_catalog (

@@ -199,3 +199,10 @@ No brand-new core tables were required for this pass. The largest work was defen
 - The movies page now uses the API paging metadata to show the real total catalog size, page number, page range, and next/previous navigation more honestly.
 - Added a more defensive movie-specific CSS layer so future generic card/grid changes are less likely to break the movie shelf again.
 - KNOWN_GAPS_AND_RISKS.md was rewritten to document the remaining payment, inventory, media, analytics, and metadata risks more clearly.
+
+
+### admin_action_audit
+Server-side audit trail for privileged operator actions such as product create/update/delete, inventory edits, media uploads, and webhook review actions.
+
+### auth_recovery_requests additions
+Now stores `ip_address` and `user_agent` for safer manual review and light abuse throttling.

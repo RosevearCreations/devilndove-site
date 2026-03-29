@@ -116,3 +116,6 @@ This repo is in the payment, media, inventory, and public SEO hardening phase af
 - The movies page now uses the API paging metadata to show the real total catalog size, page number, page range, and next/previous navigation more honestly.
 - Added a more defensive movie-specific CSS layer so future generic card/grid changes are less likely to break the movie shelf again.
 - KNOWN_GAPS_AND_RISKS.md was rewritten to document the remaining payment, inventory, media, analytics, and metadata risks more clearly.
+
+
+- Current pass added admin audit visibility and light recovery throttling; future security passes should build on those instead of duplicating them in parallel tables or logs.

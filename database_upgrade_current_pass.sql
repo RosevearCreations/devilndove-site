@@ -275,3 +275,27 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_products_product_number ON products(produc
 UPDATE products
 SET review_status = CASE WHEN COALESCE(status, 'draft') = 'active' THEN 'published' ELSE 'pending_review' END
 WHERE review_status IS NULL OR review_status = '';
+
+ALTER TABLE auth_recovery_requests ADD COLUMN ip_address TEXT;
+ALTER TABLE auth_recovery_requests ADD COLUMN user_agent TEXT;
+
+CREATE TABLE IF NOT EXISTS admin_action_audit (
+  admin_action_audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  actor_user_id INTEGER,
+  action_type TEXT NOT NULL,
+  target_type TEXT,
+  target_id INTEGER,
+  target_key TEXT,
+  request_method TEXT,
+  request_path TEXT,
+  ip_address TEXT,
+  user_agent TEXT,
+  details_json TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_admin_action_audit_created_at ON admin_action_audit(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_action_audit_actor ON admin_action_audit(actor_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_action_audit_target ON admin_action_audit(target_type, target_id, created_at DESC);
+
+-- Note: duplicate-column warnings are expected in D1/SQLite when these columns already exist.

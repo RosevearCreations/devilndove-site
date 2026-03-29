@@ -149,3 +149,8 @@ Most important next layers after this pass are:
 - The movies page now uses the API paging metadata to show the real total catalog size, page number, page range, and next/previous navigation more honestly.
 - Added a more defensive movie-specific CSS layer so future generic card/grid changes are less likely to break the movie shelf again.
 - KNOWN_GAPS_AND_RISKS.md was rewritten to document the remaining payment, inventory, media, analytics, and metadata risks more clearly.
+
+
+### Current pass additions
+- `admin_action_audit` for privileged operator visibility.
+- `auth_recovery_requests` now capture `ip_address` and `user_agent` for safer triage.
