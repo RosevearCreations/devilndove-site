@@ -92,3 +92,11 @@
 
 - Movie shelf layout and pagination were repaired.
 - No new schema tables were introduced in this pass; the focus was stability, layout repair, safer headers, and clearer risk documentation.
+
+
+## Current pass update
+
+- Rebuilt the public movie shelf layout with a dedicated card and pager structure so movie entries no longer collapse into unusable one-character columns.
+- The movies page now uses the API paging metadata to show the real total catalog size, page number, page range, and next/previous navigation more honestly.
+- Added a more defensive movie-specific CSS layer so future generic card/grid changes are less likely to break the movie shelf again.
+- KNOWN_GAPS_AND_RISKS.md was rewritten to document the remaining payment, inventory, media, analytics, and metadata risks more clearly.

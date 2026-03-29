@@ -1,3 +1,4 @@
+-- Current pass note: movie shelf layout and risk-documentation sweep completed; no schema structure changes were required in this pass.
 -- Current pass note: no brand-new required tables were added in this pass; the main work was endpoint hardening against partially migrated or lightly seeded D1 data so admin and storefront JSON routes fail gracefully instead of returning HTML errors.
 -- File: /database_upgrade_current_pass.sql
 -- Brief description: One-time upgrade SQL for existing Devil n Dove databases that were created
