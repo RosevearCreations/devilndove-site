@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div><label class="small" for="siteInventoryUnitCost">Unit Cost (cents)</label><input id="siteInventoryUnitCost" type="number" min="0" step="1" value="0" /></div>
             <div><label class="small" for="siteInventorySupplierName">Supplier</label><input id="siteInventorySupplierName" type="text" /></div>
             <div><label class="small" for="siteInventorySupplierSku">Supplier SKU</label><input id="siteInventorySupplierSku" type="text" /></div>
+            <div><label class="small" for="siteInventorySupplierContact">Supplier Contact</label><input id="siteInventorySupplierContact" type="text" placeholder="email or phone" /></div>
             <div><label class="small" for="siteInventoryReuseStatus">Reuse Status</label><input id="siteInventoryReuseStatus" type="text" placeholder="wash, refill, one-time use" /></div>
           </div>
           <div class="grid cols-4" style="gap:12px">
@@ -108,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
       unit_cost_cents: Number(document.getElementById('siteInventoryUnitCost')?.value || 0),
       supplier_name: document.getElementById('siteInventorySupplierName')?.value || '',
       supplier_sku: document.getElementById('siteInventorySupplierSku')?.value || '',
+      supplier_contact: document.getElementById('siteInventorySupplierContact')?.value || '',
       amazon_url: document.getElementById('siteInventoryAmazonUrl')?.value || '',
       source_url: document.getElementById('siteInventorySourceUrl')?.value || '',
       reorder_notes: document.getElementById('siteInventoryNotes')?.value || '',
@@ -179,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!items.length) {
         body.innerHTML = '<tr><td colspan="7" style="padding:8px">No site inventory items matched the current view.</td></tr>';
       } else {
-        body.innerHTML = items.map((x) => `<tr><td style="padding:8px;border-bottom:1px solid #ddd">${x.image_url ? `<img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;display:block;margin-bottom:8px"/>` : ''}${x.needs_reorder ? '⚠️ ' : ''}<strong>${escapeHtml(x.item_name)}</strong><div class="small">${escapeHtml(x.source_type)} • ${escapeHtml(x.category || '—')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">On hand ${x.on_hand_quantity}<div class="small">Reserved ${x.reserved_quantity} • Incoming ${x.incoming_quantity} • Reorder ${x.reorder_level}</div><div class="small">Preferred reorder ${x.preferred_reorder_quantity || 0}</div></td><td style="padding:8px;border-bottom:1px solid #ddd"><div class="small">${x.is_on_reorder_list ? 'On reorder list' : 'Not queued'}</div><div class="small">${x.do_not_reorder ? 'Do not reorder' : 'Can reorder'}</div><div class="small">${x.do_not_reuse ? 'Do not reuse' : (x.reuse_status || 'Reusable/normal')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(x.supplier_name || '—')}<div class="small">${escapeHtml(x.supplier_sku || '')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${Number(x.linked_product_count || 0)}<div class="small">${escapeHtml(x.linked_product_names || '')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${fmtMoney(x.unit_cost_cents || 0)}</td><td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick Update</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td></tr>`).join('');
+        body.innerHTML = items.map((x) => `<tr><td style="padding:8px;border-bottom:1px solid #ddd">${x.image_url ? `<img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;display:block;margin-bottom:8px"/>` : ''}${x.needs_reorder ? '⚠️ ' : ''}<strong>${escapeHtml(x.item_name)}</strong><div class="small">${escapeHtml(x.source_type)} • ${escapeHtml(x.category || '—')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">On hand ${x.on_hand_quantity}<div class="small">Reserved ${x.reserved_quantity} • Incoming ${x.incoming_quantity} • Reorder ${x.reorder_level}</div><div class="small">Preferred reorder ${x.preferred_reorder_quantity || 0}</div></td><td style="padding:8px;border-bottom:1px solid #ddd"><div class="small">${x.is_on_reorder_list ? 'On reorder list' : 'Not queued'}</div><div class="small">${x.do_not_reorder ? 'Do not reorder' : 'Can reorder'}</div><div class="small">${x.do_not_reuse ? 'Do not reuse' : (x.reuse_status || 'Reusable/normal')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(x.supplier_name || '—')}<div class="small">${escapeHtml(x.supplier_sku || '')}</div><div class="small">${escapeHtml(x.supplier_contact || '')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${Number(x.linked_product_count || 0)}<div class="small">${escapeHtml(x.linked_product_names || '')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${fmtMoney(x.unit_cost_cents || 0)}</td><td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick Update</button> <button class="btn" type="button" data-adjust-action="reserve" data-id="${x.site_item_inventory_id}">Reserve</button> <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button> <button class="btn" type="button" data-adjust-action="reorder_request" data-id="${x.site_item_inventory_id}">Reorder</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td></tr>`).join('');
       }
       renderMovements(data.movements || []);
       setMessage('');
@@ -211,6 +213,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       return;
     }
+
+    const adjustBtn = event.target.closest('[data-adjust-action]');
+    if (adjustBtn) {
+      const id = Number(adjustBtn.getAttribute('data-id') || 0);
+      const action = String(adjustBtn.getAttribute('data-adjust-action') || '').trim();
+      if (!id || !action) return;
+      const qty = Number(window.prompt('Quantity?', '1'));
+      if (!Number.isFinite(qty) || qty <= 0) return;
+      const note = String(window.prompt('Note?', action === 'reorder_request' ? 'Manual reorder request' : `Inventory ${action}`) || '').trim();
+      try {
+        setMessage(`Running ${action}...`);
+        const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'POST', body: JSON.stringify({ action, site_item_inventory_id: id, quantity: qty, note }) });
+        const data = await response.json();
+        if (!response.ok || !data?.ok) throw new Error(data?.error || `Failed to ${action}.`);
+        await loadList();
+      } catch (error) {
+        setMessage(error.message || `Failed to ${action}.`, true);
+      }
+      return;
+    }
+
     if (deleteBtn) {
       const id = Number(deleteBtn.getAttribute('data-delete-id') || 0);
       if (!id || !window.confirm('Delete this inventory item?')) return;

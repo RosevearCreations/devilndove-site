@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3 style="margin:0">Webhook Review & Replay</h3>
             <p class="small" style="margin:8px 0 0 0">Review idempotent webhook history, failed dispatch attempts, and safely requeue selected events.</p>
           </div>
-          <button class="btn" type="button" id="refreshWebhookEventsButton">Refresh Webhooks</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="refreshWebhookEventsButton">Refresh Webhooks</button><button class="btn" type="button" id="dispatchWebhookEventsButton">Dispatch Due</button></div>
         </div>
         <div id="webhookEventsMessage" class="small" style="display:none;margin-top:12px"></div>
         <div class="grid cols-3" style="gap:12px;margin-top:12px">
@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
 
     document.getElementById('refreshWebhookEventsButton')?.addEventListener('click', load);
+    document.getElementById('dispatchWebhookEventsButton')?.addEventListener('click', dispatchDue);
     document.getElementById('webhookProviderFilter')?.addEventListener('change', load);
     document.getElementById('webhookStatusFilter')?.addEventListener('change', load);
     document.getElementById('webhookSearchInput')?.addEventListener('input', debounce(load, 250));
@@ -125,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setValue('webhookSummaryIgnored', summary.ignored_events || 0);
       setValue('webhookSummaryDuplicate', summary.duplicate_events || 0);
       setValue('webhookSummaryProcessed', summary.processed_events || 0);
-      const rows = Array.isArray(data.events) ? data.events : [];
+      const rows = Array.isArray(data.items) ? data.items : [];
       const body = document.getElementById('webhookEventsTableBody');
       if (!body) return;
       if (!rows.length) {
@@ -158,11 +159,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+
+  async function dispatchDue() {
+    try {
+      setMessage('Dispatching due webhook events...');
+      const response = await window.DDAuth.apiFetch('/api/admin/webhook-dispatch', {
+        method: 'POST',
+        body: JSON.stringify({ mode: 'dispatch_due', limit: 25 })
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to dispatch due webhooks.');
+      setMessage(`Requeued ${Number(data.processed_count || 0)} due webhook event(s).`);
+      await load();
+    } catch (error) {
+      setMessage(error.message || 'Failed to dispatch due webhooks.', true);
+    }
+  }
+
   async function performAction(webhookEventId, action) {
     try {
       setMessage(`Running ${action}...`);
       const response = await window.DDAuth.apiFetch('/api/admin/webhook-events', {
-        method: 'POST',
+        method: 'PATCH',
         body: JSON.stringify({ webhook_event_id: webhookEventId, action })
       });
       const data = await response.json();

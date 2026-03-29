@@ -57,6 +57,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const taxClass = escapeHtml(product.tax_class_name || product.tax_class_code || "");
       const isArchived = String(product.status || "").toLowerCase() === "archived";
       const lowStock = Number(product.low_stock_flag || 0) === 1;
+      const ready = Number(product.is_ready_for_storefront || 0) === 1;
+      const reviewStatus = escapeHtml(product.review_status || 'pending_review');
+      const readyNotes = escapeHtml(product.ready_check_notes || '');
 
       return `
         <tr>
@@ -65,9 +68,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">${slug}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${sku}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${status}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${status}<div class="small">Review: ${reviewStatus}</div><div class="small">${ready ? 'Ready for storefront' : 'Needs review'}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${price}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? '⚠️ low stock' : 'healthy'}</div></td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? '⚠️ low stock' : 'healthy'}</div><div class="small">${ready ? 'Storefront ready' : readyNotes || 'Missing storefront fields'}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${shipping}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${taxClass}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">
