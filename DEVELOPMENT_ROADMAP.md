@@ -13,26 +13,26 @@
 - product SEO tools
 - product media workflow foundation
 - site inventory/reorder foundation
-- phone-first finished-product capture foundation
-- movie cover integration with enriched JSON support
+- movie cover pipeline with R2-backed imagery
+- movie shelf pagination foundation
+- mobile finished-product capture foundation
 
 ## Strongest next steps after this pass
 
 1. Stripe payment completion pass
 2. webhook retry / replay / dispatch hardening
-3. direct media upload workflow to R2 completion and lifecycle polish
+3. direct media upload workflow to R2 lifecycle completion
 4. deeper inventory operations for products, tools, and supplies
 5. product import seeding refinement and validation UX
 6. richer analytics dashboards and funnel reporting
-7. staged migration of duplicate JSON-backed collections into D1
 
 ## Media-specific roadmap
 
-- direct upload endpoint completion and consistency across admin flows
+- direct upload endpoint hardening and broader reuse
 - image delete/reorder UI polish
 - thumbnail/variant handling
 - tighter annotation-to-storefront usage
-- featured-image suggestion and storefront-ready image rules
+- stronger duplicate handling and media lifecycle audit coverage
 
 ## Payment-specific roadmap
 
@@ -40,27 +40,24 @@
 - idempotency improvements
 - provider retry logging
 - refund/dispute workflows
+- provider-confirmed reconciliation flows
 - invoice / refund / return receipt delivery
 
-## Inventory and catalog roadmap
+## Current pass completion update
 
-- stronger movement history and reservation logic
-- reorder automation and supplier-facing workflows
-- build readiness driven from linked tools/supplies and finished products
-- continue reducing duplicate JSON vs D1 sources
-- expand product-resource story links for social and merchandising use
+- Repaired the movie shelf layout so cards no longer collapse into unusable one-character columns under grid pressure.
+- Updated the movie API and page to use real paging metadata instead of treating the first batch as the whole catalog.
+- Improved movie shelf usability with proper page counts, next/previous controls, and more honest result counts.
+- Hardened key auth/payment/media JSON responses with safer baseline response headers.
+- Improved admin media upload reliability by allowing same-site auth-cookie fallback in addition to bearer auth.
+- Rewrote the Known Gaps and Risks document so it reflects the current state more honestly and can guide the next security/customer-experience passes.
 
-## Analytics roadmap
+## Still intentionally not marked complete
 
-- richer dashboard summary and trend views
-- funnel reporting by session and checkout stage
-- stronger abandoned-cart diagnostics
-- clearer source / campaign / landing-page attribution
-
-## Current pass update
-
-- Added real movie API pagination and updated the movie page so the full catalog can be browsed instead of stopping at the old 150-row default.
-- Continued CSS cleanup with more defensive layout rules to reduce overflow, overlap, and card/table breakage across admin and public pages.
-- Rewrote `KNOWN_GAPS_AND_RISKS.md` so the package now documents the remaining operational, security, data-model, and customer-experience risks honestly.
-- Refreshed roadmap and repo documentation to keep the next priorities clear: payment hardening, inventory depth, media lifecycle polish, analytics, and continued JSON → D1 migration.
-- SEO guidance remains active on every pass: one H1 per outward-facing page, stronger discovery wording, clearer metadata, and crawl-friendly page structure.
+- Stripe completion
+- worker-driven webhook retry/replay
+- provider-confirmed refund/dispute sync
+- full media lifecycle completion
+- full authoritative inventory movement model
+- richer funnel analytics
+- trusted movie metadata/value enrichment

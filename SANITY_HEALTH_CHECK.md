@@ -1,28 +1,31 @@
 # Sanity / Health Check
 
-## What is currently working well
-- Public site routing and shared layout are stable enough for continued feature work.
-- Movie covers load from the enriched pipeline, and the movie shelf now has real pagination support through `/api/movies`.
-- Admin foundations for users, products, orders, media, inventory, analytics, and webhook review are present.
-- Mobile finished-product capture exists and is useful for draft-first product entry.
-- Tools and supplies reorder workflows have moved closer together operationally.
+## Current build status
 
-## What still needs the most attention
-- Stripe completion and provider-confirmed payment reconciliation.
-- Webhook replay/retry hardening with auditable operator actions.
-- Inventory movement depth and single-source-of-truth cleanup.
-- Media lifecycle polish across upload, replace, reorder, and storefront usage.
-- Funnel-quality analytics and richer reporting.
-- Trusted movie metadata/value enrichment once IMDb/AWS access is ready.
+This build is in a better state for day-to-day browsing and admin use than the previous pass, but it is still not in the final security-complete or payments-complete state.
 
-## Current risk posture
-- Moderate operational risk from mixed JSON and D1 data sources.
-- Moderate UX risk on admin-heavy and small-screen layouts despite current CSS cleanup.
-- Moderate payment-state risk until Stripe and webhook workflows are completed end to end.
+## What improved in this pass
 
-## Recommended next build focus
-1. Stripe + webhook hardening.
-2. Inventory movement / reorder depth.
-3. Media lifecycle completion.
-4. Analytics and funnel reporting.
-5. Continued JSON → D1 migration.
+- Movie cards now stay readable and inside the layout frame.
+- Movie paging now reflects the full catalog instead of stopping the visible experience at the old default batch.
+- Small-screen handling for the movie shelf is materially improved.
+- Same-site admin media uploads are more reliable because auth-cookie fallback is now accepted.
+- Key JSON endpoints now return safer baseline headers.
+- Known gaps and risks are now documented in a much more actionable way.
+
+## Still the biggest unfinished areas
+
+- Stripe completion and refund/dispute safety
+- webhook retry/replay hardening
+- stronger media lifecycle completion
+- deeper inventory movement and reorder depth
+- richer analytics and funnel reporting
+- trusted movie metadata enrichment
+
+## Recommended next test cycle
+
+1. Test the movie shelf on desktop and on phone-width layouts.
+2. Verify paging across multiple movie pages and different page sizes.
+3. Test admin media upload from same-site mobile/admin flows.
+4. Confirm no layout overflow on dense cards and table-heavy admin screens.
+5. Continue into Stripe/webhook hardening next.
