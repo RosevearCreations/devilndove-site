@@ -299,3 +299,41 @@ CREATE INDEX IF NOT EXISTS idx_admin_action_audit_actor ON admin_action_audit(ac
 CREATE INDEX IF NOT EXISTS idx_admin_action_audit_target ON admin_action_audit(target_type, target_id, created_at DESC);
 
 -- Note: duplicate-column warnings are expected in D1/SQLite when these columns already exist.
+
+
+-- Current pass note: risk-hardening sweep added refund/dispute sync bookkeeping,
+-- inventory authority fields, product readiness fields, and notification outbox support.
+ALTER TABLE products ADD COLUMN is_ready_for_storefront INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE products ADD COLUMN ready_check_notes TEXT;
+ALTER TABLE payment_refunds ADD COLUMN provider_sync_status TEXT;
+ALTER TABLE payment_refunds ADD COLUMN provider_sync_note TEXT;
+ALTER TABLE payment_refunds ADD COLUMN provider_sync_at TEXT;
+ALTER TABLE payment_disputes ADD COLUMN provider_sync_status TEXT;
+ALTER TABLE payment_disputes ADD COLUMN provider_sync_note TEXT;
+ALTER TABLE payment_disputes ADD COLUMN provider_sync_at TEXT;
+ALTER TABLE site_item_inventory ADD COLUMN supplier_contact TEXT;
+ALTER TABLE site_item_inventory ADD COLUMN reservation_notes TEXT;
+ALTER TABLE site_item_inventory ADD COLUMN last_reorder_requested_at TEXT;
+ALTER TABLE site_item_inventory ADD COLUMN last_counted_at TEXT;
+ALTER TABLE auth_recovery_requests ADD COLUMN ip_address TEXT;
+ALTER TABLE auth_recovery_requests ADD COLUMN user_agent TEXT;
+
+CREATE TABLE IF NOT EXISTS notification_outbox (
+  notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notification_kind TEXT NOT NULL,
+  channel TEXT NOT NULL DEFAULT 'email',
+  destination TEXT,
+  related_order_id INTEGER,
+  related_payment_id INTEGER,
+  payload_json TEXT,
+  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','retry','sent','failed','cancelled')),
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at TEXT,
+  next_attempt_at TEXT,
+  provider_message_id TEXT,
+  error_text TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);

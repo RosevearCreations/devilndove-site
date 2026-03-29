@@ -220,3 +220,25 @@ VALUES
   ('site.notifications.retry_minutes', '15', 0),
   ('payments.paypal.enabled', 'true', 1),
   ('payments.stripe.enabled', 'true', 1);
+
+
+CREATE TABLE IF NOT EXISTS notification_outbox (
+  notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notification_kind TEXT NOT NULL,
+  channel TEXT NOT NULL DEFAULT 'email',
+  destination TEXT,
+  related_order_id INTEGER,
+  related_payment_id INTEGER,
+  payload_json TEXT,
+  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','retry','sent','failed','cancelled')),
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at TEXT,
+  next_attempt_at TEXT,
+  provider_message_id TEXT,
+  error_text TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);
+

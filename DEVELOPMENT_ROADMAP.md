@@ -77,3 +77,14 @@
 - Hardened account recovery requests with basic rate limiting and stored IP/user-agent context for safer review.
 - Improved webhook processing bookkeeping by incrementing attempt counts and scheduling next retry timestamps for failed provider events.
 - Added a read endpoint foundation for audit visibility at `/api/admin/audit-log`.
+
+## Current pass completion update
+
+- Addressed the payment/refund safety item with provider-aware refund sync attempts and queued receipt records.
+- Addressed the webhook retry/replay item with a new admin webhook dispatch endpoint for due/failed event requeueing.
+- Addressed the inventory-authority item with a rewritten inventory API that supports reserve/release/receive/reorder-request actions plus stronger movement logging.
+- Addressed the media-lifecycle item with restore/replace metadata support and duplicate visibility in admin media assets.
+- Addressed the analytics item with stronger funnel metrics in dashboard summary and visitor analytics.
+- Addressed the draft-to-publish governance item with product readiness checks and storefront-readiness flags.
+- The roadmap is not fully finished yet because Stripe checkout completion, real receipt delivery, deeper attribution, and trusted movie enrichment still remain open.
+

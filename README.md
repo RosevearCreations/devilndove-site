@@ -215,3 +215,13 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Admin action audit logging added for product, inventory, media, and webhook operations.
 - Account-recovery requests now capture IP/user-agent and apply light abuse throttling.
 - Webhook processing records now advance retry metadata more consistently.
+
+## Current pass update
+
+- Added provider-aware refund sync attempts for Stripe and PayPal in the admin payment workflow.
+- Added `notification_outbox` as a durable local queue for refund/dispute receipt messages.
+- Rewrote the admin inventory API to support create, reserve, release, receive, reorder-request, and catalog-sync operations with stronger movement logging.
+- Expanded admin media controls with restore/replace metadata support and duplicate visibility.
+- Expanded dashboard and visitor analytics with funnel-style metrics.
+- Added product readiness checks so draft/publish workflow has clearer storefront-readiness signals.
+

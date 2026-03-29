@@ -104,3 +104,10 @@
 
 - Every security/admin pass should prefer durable audit trails over silent destructive actions.
 - Recovery and privileged-action flows should capture only the minimum operational context needed for review (for example IP and user-agent) and must continue to return privacy-safe user-facing responses.
+
+
+Current-pass rules added:
+- Prefer DB-backed outbox records over immediate best-effort receipt sending when provider delivery is not yet fully wired.
+- Prefer explicit inventory actions (reserve, release, receive, reorder-request) over silent count edits wherever practical.
+- Expose storefront readiness as a computed/admin-visible state before broadening publish automation.
+

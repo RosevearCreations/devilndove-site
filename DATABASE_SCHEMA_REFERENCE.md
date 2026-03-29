@@ -206,3 +206,17 @@ Server-side audit trail for privileged operator actions such as product create/u
 
 ### auth_recovery_requests additions
 Now stores `ip_address` and `user_agent` for safer manual review and light abuse throttling.
+
+
+### notification_outbox
+Durable local queue for outbound receipts and related customer/admin notifications.
+
+### payment_refunds / payment_disputes sync fields
+`provider_sync_status`, `provider_sync_note`, and `provider_sync_at` record whether the local action was also pushed to the provider or is still local/manual only.
+
+### products readiness fields
+`is_ready_for_storefront` and `ready_check_notes` help govern draft-to-publish workflow.
+
+### site_item_inventory authority fields
+`supplier_contact`, `reservation_notes`, `last_reorder_requested_at`, and `last_counted_at` support more trustworthy inventory operations.
+

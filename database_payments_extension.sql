@@ -91,6 +91,9 @@ CREATE TABLE IF NOT EXISTS payment_refunds (
   refund_status TEXT NOT NULL DEFAULT 'recorded' CHECK (refund_status IN ('recorded','requested','submitted','succeeded','failed','cancelled')),
   reason TEXT,
   note TEXT,
+  provider_sync_status TEXT,
+  provider_sync_note TEXT,
+  provider_sync_at TEXT,
   created_by_user_id INTEGER,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -108,6 +111,9 @@ CREATE TABLE IF NOT EXISTS payment_disputes (
   reason TEXT,
   evidence_due_at TEXT,
   note TEXT,
+  provider_sync_status TEXT,
+  provider_sync_note TEXT,
+  provider_sync_at TEXT,
   created_by_user_id INTEGER,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -115,3 +121,25 @@ CREATE TABLE IF NOT EXISTS payment_disputes (
 
 CREATE INDEX IF NOT EXISTS idx_payment_refunds_order_id ON payment_refunds(order_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_payment_disputes_order_id ON payment_disputes(order_id, dispute_status);
+
+
+CREATE TABLE IF NOT EXISTS notification_outbox (
+  notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notification_kind TEXT NOT NULL,
+  channel TEXT NOT NULL DEFAULT 'email',
+  destination TEXT,
+  related_order_id INTEGER,
+  related_payment_id INTEGER,
+  payload_json TEXT,
+  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','retry','sent','failed','cancelled')),
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at TEXT,
+  next_attempt_at TEXT,
+  provider_message_id TEXT,
+  error_text TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);
+

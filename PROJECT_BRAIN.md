@@ -154,3 +154,7 @@ Most important next layers after this pass are:
 ### Current pass additions
 - `admin_action_audit` for privileged operator visibility.
 - `auth_recovery_requests` now capture `ip_address` and `user_agent` for safer triage.
+
+
+Current pass emphasis: risk reduction through payment safety, inventory authority, media lifecycle controls, funnel analytics, and draft readiness rather than only visual polish.
+

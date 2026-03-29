@@ -119,3 +119,11 @@ This repo is in the payment, media, inventory, and public SEO hardening phase af
 
 
 - Current pass added admin audit visibility and light recovery throttling; future security passes should build on those instead of duplicating them in parallel tables or logs.
+
+
+Current-pass emphasis:
+- Payment admin flow now attempts provider refund sync where possible.
+- Inventory API now supports action-specific mutations and improved ledger notes.
+- Product readiness is now a first-class admin concern.
+- Notification outbox is now present for later email/SMS delivery work.
+

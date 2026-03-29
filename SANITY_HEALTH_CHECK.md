@@ -44,3 +44,13 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Admin audit trail added for key privileged changes.
 - Account recovery request logging now stores IP and user-agent and applies light rate limiting.
 - Stripe and PayPal webhook event records now track attempts more honestly during processing.
+
+## Current pass health update
+
+- Payment/admin risk was reduced with provider refund sync attempts plus queued receipt records.
+- Inventory authority moved forward with stronger action-specific mutations and movement logging.
+- Media lifecycle moved forward with restore/replace metadata support.
+- Analytics moved forward with better funnel metrics.
+- Draft-to-publish workflow now has readiness signals.
+- The largest remaining unresolved areas are true outbound receipts, full Stripe completion, deeper provider-confirmed dispute sync, final D1 authority cleanup, and trusted movie metadata enrichment.
+

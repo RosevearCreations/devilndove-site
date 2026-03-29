@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS products (
   color_name TEXT,
   shipping_code TEXT,
   review_status TEXT NOT NULL DEFAULT 'pending_review' CHECK (review_status IN ('pending_review','approved','needs_changes','published')),
+  is_ready_for_storefront INTEGER NOT NULL DEFAULT 0,
+  ready_check_notes TEXT,
   short_description TEXT,
   description TEXT,
   product_type TEXT NOT NULL CHECK (product_type IN ('physical','digital')),
@@ -293,3 +295,25 @@ CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
 
 
 -- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.
+
+
+CREATE TABLE IF NOT EXISTS notification_outbox (
+  notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notification_kind TEXT NOT NULL,
+  channel TEXT NOT NULL DEFAULT 'email',
+  destination TEXT,
+  related_order_id INTEGER,
+  related_payment_id INTEGER,
+  payload_json TEXT,
+  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','retry','sent','failed','cancelled')),
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at TEXT,
+  next_attempt_at TEXT,
+  provider_message_id TEXT,
+  error_text TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);
+

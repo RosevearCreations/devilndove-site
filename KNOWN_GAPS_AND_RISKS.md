@@ -2,94 +2,155 @@
 
 ## Current pass focus and what was actually improved
 
-This pass concentrated on the two issues most visible to customers and operators right now:
-- fully rebuilding the movie shelf cards and pager so the page is usable on real screens
-- reducing a few practical reliability/security risks without pretending the full payment and refund roadmap is complete
+This pass concentrated on working down the open risk list in order instead of skipping ahead. The goal was to reduce operational risk with real code and schema changes, while staying honest about what still requires provider access, production credentials, or later UI polish.
 
 ### What improved in this pass
-- The movie shelf was rewritten with a dedicated card layout instead of continuing to fight the inherited shared card/grid styles.
-- Movie cards now render as stable two-cover media rows with a separate metadata body instead of collapsing into unusable narrow columns.
-- The movies page now reads the real paging metadata from `/api/movies` and shows the correct total, page, page size, and visible range.
-- The public movie API continues to support the enriched movie JSON and D1 blend, but now the shelf behavior more honestly reflects the full catalog rather than only the first batch.
-- CSS for the movie shelf is now scoped more defensively so future changes to generic `.card`, `.grid`, or admin layout styles are less likely to break the movie page again.
-- Existing endpoint hardening from prior passes remains in place: same-site auth-cookie support for admin media upload and safer JSON response headers on several auth/payment/media routes.
+- Payment/refund handling moved forward with provider-aware refund sync attempts for Stripe and PayPal when credentials and provider payment ids are available, plus queued receipt records for refund and dispute messages.
+- Webhook operations moved forward with a new admin dispatch endpoint that can requeue due or failed webhook events in a controlled batch with audit logging.
+- Inventory authority moved forward with a rewritten admin inventory endpoint that now supports create, update, reserve, release, receive, reorder-request, and catalog-sync actions while logging movements consistently.
+- Media lifecycle moved forward with better admin media asset controls for restore, replace metadata, duplicate visibility, delete audit logging, and same-site admin auth.
+- Analytics moved forward with stronger funnel metrics in both dashboard summary and visitor analytics.
+- Draft-to-publish workflow moved forward with product readiness checks and readiness flags that are now exposed in admin product responses.
+- Recovery and admin safety improvements from the prior pass remain in place, including IP/user-agent logging and admin action auditing.
 
-## Highest-priority gaps still open
+## Gap-by-gap status
 
-### 1. Payment and refund safety are still not complete
+### 1. Payment and refund safety
+#### Addressed in this pass
+- Admin refund actions now attempt provider-side refund sync for Stripe and PayPal when enough provider information is present.
+- Refund and dispute records now carry provider sync status, sync notes, and sync timestamps.
+- Refund and dispute actions now queue local notification records in `notification_outbox` so receipt delivery can be processed more reliably later.
+- Webhook bookkeeping already present from prior passes remains active.
+
+#### Still open
 - Stripe checkout is still not fully complete end to end.
-- PayPal and Stripe webhook foundations exist, but replay, retry scheduling, operator-safe resend tooling, idempotency review depth, and provider-confirmed refund/dispute synchronization are still incomplete.
-- Invoice / refund / return receipts by email or SMS are still unfinished.
-- Risk: payment state can still drift from provider state if retries, disputes, or manual corrections are not reconciled cleanly.
+- Provider-confirmed dispute sync is still not complete.
+- Actual outbound receipt delivery by email or SMS is still queued/foundation-level, not a full sending system.
 
-### 2. Admin and operational security still need a deeper hardening pass
-- Session and auth foundations are usable, and same-site continuity is better than before.
-- Recovery, privileged-action verification, stronger permission review, broader audit coverage, and more defensive failure handling are still incomplete, though this pass adds IP/user-agent logging for account-recovery requests plus a new admin action audit trail for product, inventory, media, and webhook actions.
-- Risk: stale sessions, weak recovery controls, or limited operator visibility can still create trust damage and support burden.
+#### Remaining risk
+- Payment state can still drift when providers send events after manual adjustments or when provider ids are missing on older payments.
 
-### 3. Inventory is useful but still not fully authoritative
-- Tools, supplies, and finished products share more structure now.
-- Movement history, reservations, supplier workflows, reorder automation, build-cost rollups, and stronger “single movement ledger” behavior remain incomplete.
-- Risk: stock counts can still drift when multiple workflows touch the same families without one authoritative movement model.
+### 2. Admin and operational security
+#### Addressed in this pass
+- More admin routes now rely on shared admin auth and audit helpers.
+- Webhook batch requeue actions are now auditable.
+- Inventory, media, and payment actions continue to feed the audit trail.
+- Recovery request hardening from the prior pass remains in place.
 
-### 4. Product/media workflow is stronger but still incomplete
-- Direct upload to R2 works in more places and is more reliable for same-site admin usage.
-- The full lifecycle still needs stronger delete/replace/reorder polish, duplicate handling, thumbnail or variant generation, and tighter storefront annotation usage.
-- Risk: media inconsistency still increases admin friction and can reduce storefront polish.
+#### Still open
+- Verified delivery for account recovery is not complete.
+- Step-up confirmation for sensitive destructive actions is still not complete.
+- Permission granularity still needs deeper review.
 
-### 5. Analytics remain useful but not yet decision-grade
-- Dashboard summary, live activity, and visitor analytics exist.
-- Funnel reporting, attribution, conversion diagnostics, build/readiness impact on sales, and abandonment analysis remain incomplete.
-- Risk: merchandising and UX decisions can still be made on shallow signals.
+#### Remaining risk
+- Session misuse, weak recovery delivery, or overly broad admin powers can still create operator and trust problems.
 
-### 6. Movie catalog enrichment remains incomplete even though the shelf is now usable
-- Covers, paging, and layout are now materially better.
-- Many rows still lack trusted title, cast, director, runtime, valuation, rarity, and collection metadata.
-- IMDb / AWS enrichment is still pending.
-- Risk: collection credibility, filtering quality, and valuation usefulness remain limited until a trusted metadata source is connected.
+### 3. Inventory authority
+#### Addressed in this pass
+- Inventory now has explicit reserve, release, receive, and reorder-request action paths.
+- Supplier contact, reservation notes, last reorder requested at, and last counted at are now tracked.
+- Inventory movement logging is used more consistently across actions.
+- Catalog sync remains available as a migration bridge.
+
+#### Still open
+- Supplier purchase order workflows are still not complete.
+- Build-cost rollups and full reservation governance are still incomplete.
+- The final single authoritative movement-ledger design still needs more UI coverage.
+
+#### Remaining risk
+- Counts are safer than before, but drift can still happen where legacy workflows bypass the stronger action path.
+
+### 4. Product/media workflow
+#### Addressed in this pass
+- Media assets now expose duplicate visibility information.
+- Media asset restore and replace metadata actions now exist in the admin API.
+- Media asset delete/replace operations now write clearer audit records.
+- Same-site admin upload continuity remains better than before.
+
+#### Still open
+- Thumbnail and variant generation are still not complete.
+- Bulk reorder/replace UI polish is still incomplete.
+- Storefront use of annotations still needs more polish.
+
+#### Remaining risk
+- Media handling is stronger, but the full lifecycle is still not fully operator-proof.
+
+### 5. Analytics and funnel reporting
+#### Addressed in this pass
+- Dashboard summary now exposes more funnel-oriented counts.
+- Visitor analytics now includes order and paid-order funnel metrics and per-day funnel breakdown data.
+- The app has a better basis for checking where visitor traffic turns into checkout and paid orders.
+
+#### Still open
+- Attribution, campaign analysis, and decision-grade merchandising diagnostics still need more work.
+- Build/readiness-to-sales analytics are still not complete.
+
+#### Remaining risk
+- The analytics story is improving, but it is still not a full decision-grade BI layer.
+
+### 6. Movie catalog enrichment
+#### Addressed in this pass
+- No new metadata source was added in this pass.
+- The gap remains documented so it is not mistaken for a solved area.
+
+#### Still open
+- Trusted title, cast, director, runtime, rarity, and valuation enrichment still depends on IMDb/AWS or another accepted metadata source.
+
+#### Remaining risk
+- The movie shelf is usable, but collection credibility and valuation depth are still limited.
 
 ## Data-model risks
 
-### JSON and D1 still overlap in too many places
-- Products, movies, tools, supplies, featured creations, and inventory-adjacent content still move through mixed JSON and D1 pathways.
-- Some fallbacks are operationally helpful, but they still create duplicate points of truth.
-- Risk: one surface can show newer data while another shows older data.
-- Recommended direction: continue staged migration toward D1-backed canonical records, leaving JSON only where it is intentionally static or deployment-friendly.
+### JSON and D1 overlap
+#### Addressed in this pass
+- Inventory operations are more D1-native now.
+- Notification/outbox and readiness state are now DB-backed instead of implied only in UI logic.
 
-### Catalog sync is still a bridge, not the final architecture
-- Catalog sync remains useful but still acts as a migration bridge.
-- Risk: sync drift, partial syncs, and confusing operator expectations remain possible until the final authority model is simplified.
+#### Still open
+- Products, movies, tools, supplies, and featured creations still use mixed JSON and D1 paths in places.
+
+#### Remaining risk
+- Duplicate points of truth still exist and should continue to be reduced pass by pass.
+
+### Catalog sync bridge
+#### Addressed in this pass
+- The bridge remains usable and inventory sync is more operationally useful.
+
+#### Still open
+- It is still a bridge and not the final authority model.
+
+#### Remaining risk
+- Sync drift and operator confusion remain possible until the final authority model is simplified.
 
 ## Customer-experience risks
 
-### Search and product discovery still need refinement
-- SEO foundations, one-H1 discipline, canonical/robots hygiene, and structured-data discipline have improved.
-- Category depth, search filtering, stronger collection landing-page copy, richer product stories, and clearer product availability messaging still need expansion.
-- Risk: good items remain under-discoverable in both search engines and on-site browsing.
+### Search and product discovery
+#### Addressed in this pass
+- Product readiness signals now help the app know when items are closer to being storefront-ready.
+- SEO/search guidance remains active across the docs.
 
-### Mobile and small-screen layout still require repeated real-device testing
-- This pass materially improves the movie shelf and reduces one of the worst visual failures.
-- Admin-heavy screens, tables, nested cards, and dense operational tools still need repeated phone and tablet testing.
-- Risk: friction remains for phone-based creation and admin work.
+#### Still open
+- Broader category/filter depth and stronger discovery landing pages still need more work.
 
-### Draft-to-publish workflow is still not fully governed
-- Mobile product capture supports pending review.
-- Broader approval, review, publishing governance, and “ready for storefront” validation still need stronger workflow controls.
-- Risk: incomplete or weakly reviewed items can still reach the storefront or remain stuck in draft too long.
+### Mobile and small-screen layout
+#### Addressed in this pass
+- Another CSS pass improved grid shrink behavior, table wrapping, and small-screen admin controls.
+
+#### Still open
+- Real-device testing still needs to continue for admin-heavy screens.
+
+### Draft-to-publish workflow
+#### Addressed in this pass
+- Products now expose readiness checks and ready/not-ready flags.
+- This gives the app a clearer basis for pending review vs storefront-ready behavior.
+
+#### Still open
+- Full governed approval/publish workflow is still incomplete.
 
 ## Security-forward next steps
-- Finish Stripe completion and provider-confirmed reconciliation.
-- Add webhook retry/replay safety with auditable operator actions.
-- Expand account recovery into verified delivery flows.
-- Continue reducing duplicate data sources.
-- Improve audit trails for product, inventory, order, and payment changes.
-- Add stronger operational visibility around privileged admin actions and destructive media or inventory edits.
-- Current-pass improvement: admin action audit logging now records key product, inventory, media, and webhook operator actions for later review.
-
-## Recommended near-term priorities
-1. Complete Stripe payment and webhook hardening.
-2. Finish deeper inventory movement and reorder operations.
-3. Continue product/media admin polish with stronger R2 lifecycle handling.
-4. Expand analytics and funnel reporting.
-5. Continue D1 migration for high-value collections.
-6. Revisit movie metadata enrichment once IMDb/AWS access is available.
+1. Finish Stripe checkout completion and provider-confirmed reconciliation.
+2. Turn notification outbox into actual receipt delivery.
+3. Add stronger privileged-action confirmation for destructive operations.
+4. Continue moving inventory and catalog operations toward a single D1 authority model.
+5. Expand analytics into deeper attribution and conversion diagnostics.
+6. Resume trusted movie metadata enrichment once IMDb/AWS access is available.

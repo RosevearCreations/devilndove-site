@@ -163,3 +163,10 @@ When a public page is touched, review:
 
 - `/functions/api/admin/audit-log.js` — read endpoint for recent privileged admin actions.
 - `/functions/api/_lib/adminAudit.js` — shared helper for admin cookie/bearer auth resolution and audit logging.
+
+
+New current-pass backend additions:
+- `functions/api/admin/webhook-dispatch.js` — batch requeues due/failed webhook events with audit logging.
+- `functions/api/admin/product-readiness.js` — returns storefront-readiness checks for a product.
+- `notification_outbox` — durable local queue for receipt and operational message intents.
+
