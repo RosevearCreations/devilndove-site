@@ -106,7 +106,7 @@ export async function onRequestPost(context) {
   const insertResult = await env.DB.prepare(`
     INSERT INTO products (
       product_number, slug, sku, name, product_category, color_name, shipping_code, review_status,
-      short_description, description, product_type, status, price_cents, compare_at_price_cents,
+      is_ready_for_storefront, ready_check_notes, short_description, description, product_type, status, price_cents, compare_at_price_cents,
       currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking,
       inventory_quantity, featured_image_url, sort_order, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending_review', ?, ?, 'physical', 'draft', ?, ?, ?, ?, ?, ?, ?, 1, ?, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)

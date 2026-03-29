@@ -18,6 +18,18 @@ function normalizeImageUrls(imageUrls) {
   return imageUrls.map((url) => String(url || "").trim()).filter(Boolean).slice(0, 5);
 }
 
+function computeReadiness(fields = {}) {
+  const failures = [];
+  if (!String(fields.name || '').trim()) failures.push('name');
+  if (!String(fields.slug || '').trim()) failures.push('slug');
+  if (Number(fields.price_cents || 0) <= 0) failures.push('price');
+  if (!String(fields.featured_image_url || '').trim()) failures.push('featured_image');
+  if (!String(fields.product_category || '').trim()) failures.push('category');
+  if (!String(fields.meta_title || '').trim()) failures.push('meta_title');
+  if (!String(fields.meta_description || '').trim()) failures.push('meta_description');
+  return { is_ready_for_storefront: failures.length === 0 ? 1 : 0, ready_check_notes: failures.join(', ') };
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   const authCheck = await requireAdmin(request, env);
@@ -60,6 +72,7 @@ export async function onRequestPost(context) {
   const og_title = String(body.og_title || '').trim() || null;
   const og_description = String(body.og_description || '').trim() || null;
   const og_image_url = String(body.og_image_url || '').trim() || null;
+  const readiness = computeReadiness({ name, slug, price_cents, featured_image_url, product_category, meta_title, meta_description });
 
   if (!Number.isInteger(product_id) || product_id <= 0) return json({ ok: false, error: "A valid product_id is required." }, 400);
   if (product_number !== null && (!Number.isInteger(product_number) || product_number <= 0)) return json({ ok: false, error: "product_number must be a valid whole number." }, 400);
@@ -109,6 +122,8 @@ export async function onRequestPost(context) {
       color_name = ?,
       shipping_code = ?,
       review_status = ?,
+      is_ready_for_storefront = ?,
+      ready_check_notes = ?,
       short_description = ?,
       description = ?,
       product_type = ?,
@@ -127,7 +142,7 @@ export async function onRequestPost(context) {
       sort_order = ?,
       updated_at = CURRENT_TIMESTAMP
     WHERE product_id = ?
-  `).bind(product_number, slug, sku, name, product_category, color_name, shipping_code, review_status, short_description, description, product_type, status, price_cents, compare_at_price_cents, currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking, inventory_quantity, digital_file_url, featured_image_url, sort_order, product_id).run();
+  `).bind(product_number, slug, sku, name, product_category, color_name, shipping_code, review_status, readiness.is_ready_for_storefront, readiness.ready_check_notes || null, short_description, description, product_type, status, price_cents, compare_at_price_cents, currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking, inventory_quantity, digital_file_url, featured_image_url, sort_order, product_id).run();
 
   try {
     await db.prepare(`

@@ -1,20 +1,8 @@
-// File: /functions/api/admin/media-assets.js
-// Brief description: Browses and manages uploaded media assets stored in R2 so admin can
-// inspect product-linked assets, soft delete them, and reuse uploaded media in product workflows.
+import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
-}
-function normalizeText(value) { return String(value || '').trim(); }
-function getDb(env) { return env.DB || env.DD_DB; }
-function getBearerToken(request) { const authHeader = request.headers.get('Authorization') || ''; const match = authHeader.match(/^Bearer\s+(.+)$/i); return match ? String(match[1] || '').trim() : ''; }
+function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
-async function getAdminUserFromRequest(request, env) {
-  const db = getDb(env); const token = getBearerToken(request); if (!token || !db) return null;
-  const session = await db.prepare(`SELECT s.user_id, u.user_id AS resolved_user_id, u.email, u.display_name, u.role, u.is_active FROM sessions s INNER JOIN users u ON u.user_id = s.user_id WHERE (s.session_token = ? OR s.token = ?) AND s.expires_at > datetime('now') LIMIT 1`).bind(token, token).first();
-  if (!session || Number(session.is_active || 0) !== 1 || String(session.role || '').toLowerCase() !== 'admin') return null;
-  return { user_id: Number(session.resolved_user_id || session.user_id || 0), email: session.email || '', display_name: session.display_name || '' };
-}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = getDb(env);
@@ -24,12 +12,13 @@ export async function onRequestGet(context) {
   const productId = Number(url.searchParams.get('product_id') || 0);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
   const includeDeleted = Number(url.searchParams.get('include_deleted') || 0) === 1 ? 1 : 0;
-  const limit = Math.max(1, Math.min(200, Number(url.searchParams.get('limit') || 50)));
+  const limit = Math.max(1, Math.min(250, Number(url.searchParams.get('limit') || 80)));
   const rows = normalizeResults(await db.prepare(`
     SELECT ma.media_asset_id, ma.product_id, ma.storage_provider, ma.bucket_name, ma.object_key, ma.public_url,
            ma.original_filename, ma.mime_type, ma.file_size_bytes, ma.variant_role, ma.sort_order,
            ma.annotation_notes, ma.created_at, ma.updated_at, ma.deleted_at,
-           p.name AS product_name
+           p.name AS product_name,
+           (SELECT COUNT(*) FROM media_assets ma2 WHERE ma2.deleted_at IS NULL AND COALESCE(ma2.public_url,'') = COALESCE(ma.public_url,'')) AS duplicate_public_url_count
     FROM media_assets ma
     LEFT JOIN products p ON p.product_id = ma.product_id
     WHERE (? = 0 OR ma.product_id = ?)
@@ -43,7 +32,7 @@ export async function onRequestGet(context) {
       )
     ORDER BY COALESCE(ma.sort_order, 999999) ASC, ma.created_at DESC, ma.media_asset_id DESC
     LIMIT ?
-  `).bind(productId, productId, includeDeleted, q, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, limit).all());
+  `).bind(productId, productId, includeDeleted, q, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, limit).all().catch(() => ({ results: [] })));
   return json({ ok: true, requested_by: adminUser, assets: rows.map((row) => ({
     media_asset_id: Number(row.media_asset_id || 0),
     product_id: row.product_id == null ? null : Number(row.product_id),
@@ -58,11 +47,13 @@ export async function onRequestGet(context) {
     variant_role: row.variant_role || null,
     sort_order: Number(row.sort_order || 0),
     annotation_notes: row.annotation_notes || null,
+    duplicate_public_url_count: Number(row.duplicate_public_url_count || 0),
     created_at: row.created_at || null,
     updated_at: row.updated_at || null,
     deleted_at: row.deleted_at || null
   })) });
 }
+
 export async function onRequestPatch(context) {
   const { request, env } = context;
   const db = getDb(env);
@@ -72,15 +63,37 @@ export async function onRequestPatch(context) {
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
   const mediaAssetId = Number(body.media_asset_id || 0);
   if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) return json({ ok: false, error: 'A valid media_asset_id is required.' }, 400);
-  await db.prepare(`UPDATE media_assets SET product_id = ?, variant_role = ?, sort_order = ?, annotation_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE media_asset_id = ?`).bind(
+  const existing = await db.prepare(`SELECT * FROM media_assets WHERE media_asset_id = ? LIMIT 1`).bind(mediaAssetId).first();
+  if (!existing) return json({ ok: false, error: 'Media asset not found.' }, 404);
+  const action = normalizeText(body.action).toLowerCase();
+  if (action === 'restore') {
+    await db.prepare(`UPDATE media_assets SET deleted_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE media_asset_id = ?`).bind(mediaAssetId).run();
+    await auditAdminAction(env, request, adminUser, { action_type: 'media_restore', target_type: 'media_asset', target_id: mediaAssetId, target_key: existing.object_key || String(mediaAssetId), details: { product_id: existing.product_id || null } });
+    return json({ ok: true, message: 'Media asset restored.', media_asset_id: mediaAssetId });
+  }
+  await db.prepare(`
+    UPDATE media_assets
+    SET product_id = ?,
+        variant_role = ?,
+        sort_order = ?,
+        annotation_notes = ?,
+        public_url = COALESCE(?, public_url),
+        object_key = COALESCE(?, object_key),
+        updated_at = CURRENT_TIMESTAMP
+    WHERE media_asset_id = ?
+  `).bind(
     body.product_id == null || body.product_id === '' ? null : Number(body.product_id),
     normalizeText(body.variant_role) || null,
     Number(body.sort_order || 0),
     normalizeText(body.annotation_notes) || null,
+    normalizeText(body.public_url) || null,
+    normalizeText(body.object_key) || null,
     mediaAssetId
   ).run();
-  return json({ ok: true, message: 'Media asset updated.', media_asset_id: mediaAssetId });
+  await auditAdminAction(env, request, adminUser, { action_type: action === 'replace' ? 'media_replace' : 'media_update', target_type: 'media_asset', target_id: mediaAssetId, target_key: normalizeText(body.object_key) || existing.object_key || String(mediaAssetId), details: { product_id: body.product_id ?? existing.product_id ?? null, variant_role: normalizeText(body.variant_role) || existing.variant_role || null, sort_order: Number(body.sort_order || existing.sort_order || 0), replaced_public_url: normalizeText(body.public_url) || null } });
+  return json({ ok: true, message: action === 'replace' ? 'Media asset replaced.' : 'Media asset updated.', media_asset_id: mediaAssetId });
 }
+
 export async function onRequestDelete(context) {
   const { request, env } = context;
   const db = getDb(env);
@@ -89,12 +102,13 @@ export async function onRequestDelete(context) {
   const url = new URL(request.url);
   const mediaAssetId = Number(url.searchParams.get('media_asset_id') || 0);
   if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) return json({ ok: false, error: 'A valid media_asset_id is required.' }, 400);
-  const asset = await db.prepare(`SELECT media_asset_id, object_key FROM media_assets WHERE media_asset_id = ? LIMIT 1`).bind(mediaAssetId).first();
+  const asset = await db.prepare(`SELECT media_asset_id, product_id, object_key, public_url FROM media_assets WHERE media_asset_id = ? LIMIT 1`).bind(mediaAssetId).first();
   if (!asset) return json({ ok: false, error: 'Media asset not found.' }, 404);
   const bucket = env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
   if (bucket && typeof bucket.delete === 'function' && asset.object_key) {
     try { await bucket.delete(asset.object_key); } catch {}
   }
   await db.prepare(`UPDATE media_assets SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE media_asset_id = ?`).bind(mediaAssetId).run();
+  await auditAdminAction(env, request, adminUser, { action_type: 'media_delete', target_type: 'media_asset', target_id: mediaAssetId, target_key: asset.object_key || String(mediaAssetId), details: { product_id: asset.product_id || null, public_url: asset.public_url || null } });
   return json({ ok: true, message: 'Media asset deleted.', media_asset_id: mediaAssetId });
 }
