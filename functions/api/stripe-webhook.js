@@ -147,12 +147,19 @@ async function registerWebhookEvent(env, provider, eventId, eventType, verificat
 async function markWebhookEvent(env, webhookEventId, processStatus, details = {}) {
   const db = getDb(env);
   if (!Number(webhookEventId)) return;
+  const shouldCountAttempt = ['processed', 'failed', 'ignored', 'received'].includes(processStatus);
+  const nextRetryAt = processStatus === 'failed'
+    ? new Date(Date.now() + Number(env.WEBHOOK_RETRY_MINUTES || 15) * 60 * 1000).toISOString()
+    : (details.next_retry_at ?? null);
   await db.prepare(`
     UPDATE webhook_events
     SET process_status = ?,
         related_order_id = COALESCE(?, related_order_id),
         related_payment_id = COALESCE(?, related_payment_id),
         error_text = ?,
+        attempt_count = CASE WHEN ? THEN COALESCE(attempt_count, 0) + 1 ELSE COALESCE(attempt_count, 0) END,
+        last_attempt_at = CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE last_attempt_at END,
+        next_retry_at = CASE WHEN ? = 'failed' THEN ? ELSE next_retry_at END,
         processed_at = CASE WHEN ? IN ('processed', 'ignored', 'duplicate') THEN CURRENT_TIMESTAMP ELSE processed_at END,
         updated_at = CURRENT_TIMESTAMP
     WHERE webhook_event_id = ?
@@ -161,6 +168,10 @@ async function markWebhookEvent(env, webhookEventId, processStatus, details = {}
     details.related_order_id ?? null,
     details.related_payment_id ?? null,
     details.error_text ?? null,
+    shouldCountAttempt ? 1 : 0,
+    shouldCountAttempt ? 1 : 0,
+    processStatus,
+    nextRetryAt,
     processStatus,
     Number(webhookEventId)
   ).run().catch(() => null);

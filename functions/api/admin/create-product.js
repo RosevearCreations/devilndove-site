@@ -1,59 +1,12 @@
+import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
+
 // File: /functions/api/admin/create-product.js
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" }
-  });
-}
-
-async function getSessionUser(env, token) {
-  if (!token) return null;
-
-  const sessionUser = await env.DB.prepare(`
-    SELECT
-      users.user_id,
-      users.email,
-      users.display_name,
-      users.role,
-      users.is_active
-    FROM sessions
-    JOIN users ON sessions.user_id = users.user_id
-    WHERE sessions.session_token = ?
-      AND sessions.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token)
-    .first();
-
-  return sessionUser || null;
-}
+function json(data, status = 200) { return jsonResponse(data, status); }
 
 async function requireAdmin(request, env) {
-  const auth = request.headers.get("Authorization") || "";
-  if (!auth.startsWith("Bearer ")) {
-    return { error: json({ ok: false, error: "Unauthorized." }, 401) };
-  }
-
-  const token = auth.slice(7).trim();
-  if (!token) {
-    return { error: json({ ok: false, error: "Missing session token." }, 401) };
-  }
-
-  const sessionUser = await getSessionUser(env, token);
-
-  if (!sessionUser) {
-    return { error: json({ ok: false, error: "Invalid session." }, 401) };
-  }
-
-  if (!sessionUser.is_active) {
-    return { error: json({ ok: false, error: "Account is inactive." }, 403) };
-  }
-
-  if (sessionUser.role !== "admin") {
-    return { error: json({ ok: false, error: "Forbidden." }, 403) };
-  }
-
+  const sessionUser = await getAdminUserFromRequest(request, env);
+  if (!sessionUser) return { error: json({ ok: false, error: "Unauthorized." }, 401) };
   return { sessionUser };
 }
 
@@ -134,24 +87,26 @@ export async function onRequestPost(context) {
   if (!Number.isInteger(sort_order)) return json({ ok: false, error: "sort_order must be a valid whole number." }, 400);
 
   if (product_number !== null) {
-    const existingProductNumber = await env.DB.prepare(`SELECT product_id FROM products WHERE product_number = ? LIMIT 1`).bind(product_number).first();
+    const db = getDb(env);
+
+  const existingProductNumber = await db.prepare(`SELECT product_id FROM products WHERE product_number = ? LIMIT 1`).bind(product_number).first();
     if (existingProductNumber) return json({ ok: false, error: "That product number already exists." }, 409);
   }
 
-  const existingSlug = await env.DB.prepare(`SELECT product_id FROM products WHERE slug = ? LIMIT 1`).bind(slug).first();
+  const existingSlug = await db.prepare(`SELECT product_id FROM products WHERE slug = ? LIMIT 1`).bind(slug).first();
   if (existingSlug) return json({ ok: false, error: "That product slug already exists." }, 409);
 
   if (sku) {
-    const existingSku = await env.DB.prepare(`SELECT product_id FROM products WHERE sku = ? LIMIT 1`).bind(sku).first();
+    const existingSku = await db.prepare(`SELECT product_id FROM products WHERE sku = ? LIMIT 1`).bind(sku).first();
     if (existingSku) return json({ ok: false, error: "That SKU already exists." }, 409);
   }
 
   if (tax_class_id !== null) {
-    const taxClass = await env.DB.prepare(`SELECT tax_class_id FROM tax_classes WHERE tax_class_id = ? AND is_active = 1 LIMIT 1`).bind(tax_class_id).first();
+    const taxClass = await db.prepare(`SELECT tax_class_id FROM tax_classes WHERE tax_class_id = ? AND is_active = 1 LIMIT 1`).bind(tax_class_id).first();
     if (!taxClass) return json({ ok: false, error: "Selected tax class was not found." }, 400);
   }
 
-  const insertResult = await env.DB.prepare(`
+  const insertResult = await db.prepare(`
     INSERT INTO products (
       product_number, slug, sku, name, product_category, color_name, shipping_code, review_status,
       short_description, description, product_type, status, price_cents, compare_at_price_cents,
@@ -188,7 +143,7 @@ export async function onRequestPost(context) {
   const newProductId = insertResult?.meta?.last_row_id;
 
   try {
-    await env.DB.prepare(`
+    await db.prepare(`
       INSERT INTO product_seo (
         product_id, meta_title, meta_description, keywords, h1_override, canonical_url, schema_type, og_title, og_description, og_image_url, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, 'Product', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
@@ -207,11 +162,11 @@ export async function onRequestPost(context) {
   } catch {}
 
   for (let i = 0; i < image_urls.length; i += 1) {
-    await env.DB.prepare(`INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(newProductId, image_urls[i], name, i).run();
+    await db.prepare(`INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(newProductId, image_urls[i], name, i).run();
   }
 
-  const createdProduct = await env.DB.prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`).bind(newProductId).first();
-  const createdImagesResult = await env.DB.prepare(`SELECT product_image_id, product_id, image_url, alt_text, sort_order, created_at FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, product_image_id ASC`).bind(newProductId).all();
+  const createdProduct = await db.prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`).bind(newProductId).first();
+  const createdImagesResult = await db.prepare(`SELECT product_image_id, product_id, image_url, alt_text, sort_order, created_at FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, product_image_id ASC`).bind(newProductId).all();
 
   return json({ ok: true, message: "Product created successfully.", product: createdProduct, images: createdImagesResult.results || [] }, 201);
 }

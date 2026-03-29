@@ -1,71 +1,12 @@
+import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+
 // File: /functions/api/admin/media-upload.js
 // Brief description: Accepts admin-authenticated image uploads and stores them in the configured
 // R2 bucket so product media can be uploaded directly instead of only pasting URLs.
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin" }
-  });
-}
+function json(data, status = 200) { return jsonResponse(data, status); }
 
-function normalizeText(value) {
-  return String(value || "").trim();
-}
 
-function getDb(env) {
-  return env.DB || env.DD_DB;
-}
-
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
-
-function parseCookies(request) {
-  const raw = request.headers.get("Cookie") || "";
-  return raw.split(/;\s*/).reduce((acc, part) => {
-    if (!part) return acc;
-    const eq = part.indexOf("=");
-    if (eq === -1) return acc;
-    const key = part.slice(0, eq).trim();
-    const value = part.slice(eq + 1).trim();
-    try { acc[key] = decodeURIComponent(value); } catch { acc[key] = value; }
-    return acc;
-  }, {});
-}
-
-function getRequestToken(request) {
-  const bearer = getBearerToken(request);
-  if (bearer) return bearer;
-  const cookies = parseCookies(request);
-  return String(cookies.dd_auth_token || '').trim();
-}
-
-async function getAdminUserFromRequest(request, env) {
-  const db = getDb(env);
-  const token = getRequestToken(request);
-  if (!token || !db) return null;
-
-  const session = await db.prepare(`
-    SELECT s.session_id, s.user_id, u.user_id AS resolved_user_id, u.email, u.display_name, u.role, u.is_active
-    FROM sessions s
-    INNER JOIN users u ON u.user_id = s.user_id
-    WHERE (s.session_token = ? OR s.token = ?)
-      AND s.expires_at > datetime('now')
-    LIMIT 1
-  `).bind(token, token).first();
-
-  if (!session) return null;
-  if (Number(session.is_active || 0) !== 1) return null;
-  if (String(session.role || '').toLowerCase() !== 'admin') return null;
-  return {
-    user_id: Number(session.resolved_user_id || session.user_id || 0),
-    email: session.email || '',
-    display_name: session.display_name || ''
-  };
-}
 
 function sanitizeFilename(filename) {
   const cleaned = String(filename || 'upload')
@@ -184,6 +125,14 @@ export async function onRequestPost(context) {
   } catch {
     // schema may not be migrated yet; upload itself already succeeded
   }
+
+  await auditAdminAction(env, request, adminUser, {
+    action_type: "media_upload",
+    target_type: "media_asset",
+    target_key: objectKey,
+    target_id: safeProductId || null,
+    details: { product_id: safeProductId, mime_type: mimeType, file_size_bytes: fileSize, public_url: publicUrl || null }
+  });
 
   return json({
     ok: true,
