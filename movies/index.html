@@ -54,7 +54,7 @@
     </div>
 
     <div class="card">
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;align-items:end">
+      <div class="grid" style="grid-template-columns:1fr minmax(180px,auto);gap:10px;align-items:end">
         <div>
           <label class="small" for="q">Search movies</label>
           <input class="input" id="q" placeholder="Search by title, UPC, year, actor, director, genre, studio, format..."/>
@@ -66,13 +66,14 @@
     </div>
 
     <div id="moviePager" class="card" style="margin-top:16px">
-      <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+      <div class="movie-pager-bar">
         <div class="small">
           Page <span id="moviePageNow">1</span> of <span id="moviePageTotal">1</span>
+          <span id="movieRange" class="movie-range-text"></span>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="movie-pager-controls">
           <label class="small" for="moviePerPage">Per page</label>
-          <select id="moviePerPage" class="input" style="width:auto;min-width:90px">
+          <select id="moviePerPage" class="input movie-per-page-select">
             <option value="50">50</option>
             <option value="100" selected>100</option>
             <option value="150">150</option>
@@ -97,6 +98,7 @@
     const q = document.getElementById('q');
     const pageNowEl = document.getElementById('moviePageNow');
     const pageTotalEl = document.getElementById('moviePageTotal');
+    const movieRangeEl = document.getElementById('movieRange');
     const prevBtn = document.getElementById('moviePrev');
     const nextBtn = document.getElementById('movieNext');
     const perPageEl = document.getElementById('moviePerPage');
@@ -107,11 +109,11 @@
     let currentLimit = 100;
 
     const esc = (v) => String(v ?? '')
-      .replace(/&/g,'&amp;')
-      .replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;')
-      .replace(/'/g,'&#39;');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
 
     const imdbSearchUrl = (title, upc) =>
       'https://www.google.com/search?q=' + encodeURIComponent(`${title || upc || ''} IMDb`);
@@ -135,10 +137,18 @@
       return hay.includes(term);
     }
 
-    function updatePager() {
-      pageNowEl.textContent = summary.page || 1;
-      pageTotalEl.textContent = summary.total_pages || 1;
-      prevBtn.disabled = (summary.page || 1) <= 1;
+    function updatePager(filteredCount) {
+      const totalItems = Number(summary.total_items || items.length || 0);
+      const page = Number(summary.page || currentPage || 1);
+      const limit = Number(summary.limit || currentLimit || filteredCount || 0);
+      const totalPages = Number(summary.total_pages || 1);
+      const start = totalItems ? ((page - 1) * limit) + 1 : 0;
+      const end = totalItems ? Math.min(start + filteredCount - 1, totalItems) : 0;
+
+      pageNowEl.textContent = String(page);
+      pageTotalEl.textContent = String(totalPages);
+      movieRangeEl.textContent = totalItems ? ` • ${start}-${end}` : '';
+      prevBtn.disabled = page <= 1;
       nextBtn.disabled = !summary.has_more;
       perPageEl.value = String(currentLimit);
     }
@@ -160,21 +170,23 @@
         const actors = item.actor_names ? `<div class="small"><strong>Cast:</strong> ${esc(item.actor_names)}</div>` : '';
         const runtime = item.runtime_minutes ? `<div class="small"><strong>Length:</strong> ${esc(item.runtime_minutes)} min</div>` : '';
         const summaryText = item.summary
-          ? `<p class="small" style="margin-top:8px">${esc(item.summary)}</p>`
-          : `<p class="small" style="margin-top:8px;color:#93a4bb">Metadata enrichment is still in progress for this cover.</p>`;
+          ? `<p class="small movie-card-summary">${esc(item.summary)}</p>`
+          : `<p class="small movie-card-summary movie-summary-pending">Metadata enrichment is still in progress for this cover.</p>`;
         const upc = item.upc ? `<div class="small"><strong>UPC:</strong> ${esc(item.upc)}</div>` : '';
         const trailer = item.trailer_url
           ? `<a href="${esc(item.trailer_url)}" target="_blank" rel="noreferrer">Watch trailer</a>`
           : `<a href="${trailerSearchUrl(item.title || item.upc, item.release_year)}" target="_blank" rel="noreferrer">Search trailer</a>`;
+
         return `<article class="card movie-card-rich">
           <div class="movie-card-media">
             ${front ? `<img src="${esc(front)}" alt="${esc(title)} front cover" loading="lazy">` : `<div class="movie-placeholder small">Front cover pending</div>`}
             ${back ? `<img src="${esc(back)}" alt="${esc(title)} back cover" loading="lazy">` : `<div class="movie-placeholder small">Back cover pending</div>`}
           </div>
-          <div>
-            <h2 style="margin:0 0 8px;font-size:1.1rem">${esc(title)}</h2>
-            ${upc}${year}${genre}${director}${actors}${runtime}${summaryText}
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
+          <div class="movie-card-body">
+            <h2 class="movie-card-title">${esc(title)}</h2>
+            <div class="movie-card-facts">${upc}${year}${genre}${director}${actors}${runtime}</div>
+            ${summaryText}
+            <div class="movie-card-links">
               <a href="${imdbSearchUrl(item.title, item.upc)}" target="_blank" rel="noreferrer">Search IMDb</a>
               ${trailer}
             </div>
@@ -182,7 +194,7 @@
         </article>`;
       }).join('') || `<div class="card">No movies matched your search.</div>`;
 
-      updatePager();
+      updatePager(filtered.length);
     }
 
     async function loadMovies() {
