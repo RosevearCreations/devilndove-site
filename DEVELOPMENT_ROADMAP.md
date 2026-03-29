@@ -13,22 +13,26 @@
 - product SEO tools
 - product media workflow foundation
 - site inventory/reorder foundation
+- phone-first finished-product capture foundation
+- movie cover integration with enriched JSON support
 
 ## Strongest next steps after this pass
 
 1. Stripe payment completion pass
 2. webhook retry / replay / dispatch hardening
-3. direct media upload workflow to R2
+3. direct media upload workflow to R2 completion and lifecycle polish
 4. deeper inventory operations for products, tools, and supplies
 5. product import seeding refinement and validation UX
 6. richer analytics dashboards and funnel reporting
+7. staged migration of duplicate JSON-backed collections into D1
 
 ## Media-specific roadmap
 
-- direct upload endpoint
+- direct upload endpoint completion and consistency across admin flows
 - image delete/reorder UI polish
 - thumbnail/variant handling
 - tighter annotation-to-storefront usage
+- featured-image suggestion and storefront-ready image rules
 
 ## Payment-specific roadmap
 
@@ -36,39 +40,27 @@
 - idempotency improvements
 - provider retry logging
 - refund/dispute workflows
+- invoice / refund / return receipt delivery
 
+## Inventory and catalog roadmap
 
-## Current pass completion update
+- stronger movement history and reservation logic
+- reorder automation and supplier-facing workflows
+- build readiness driven from linked tools/supplies and finished products
+- continue reducing duplicate JSON vs D1 sources
+- expand product-resource story links for social and merchandising use
 
-- Replaced the placeholder movie enrichment file in the site package with the uploaded R2-backed movie catalog JSON so the public page and API are reading real `front_image_url` and `back_image_url` values.
-- Hardened `/api/movies` so partial rows can still derive cover URLs and trailer-search links instead of failing into blank cards.
-- Added a dedicated admin product stock and build-readiness report to surface finished-product stock levels plus linked low-stock tools/supplies.
-- Extended admin tools/supplies inventory operations with filtered views and direct sync buttons for catalog-backed tools or supplies.
-- Continued the D1-backed relationship model between finished products and the tools/supplies used to create them so future social/story outputs can explain how a piece was made.
-- Provider-confirmed refund/dispute sync, worker-driven webhook retry/replay, and invoice/refund receipt delivery remain next-phase work after this pass.
+## Analytics roadmap
 
-
-## Current pass completion update
-
-- Fixed the movie-page regression by replacing the sample movie enrichment file with the uploaded R2-backed JSON and wiring the page back to `/api/movies`.
-- Hardened the admin and storefront JSON endpoints that were failing into HTML error pages so empty or partially migrated datasets now return safe JSON responses instead of breaking the dashboard.
-- Continued the staged JSON → D1 migration path with more defensive catalog-sync behavior so missing or incomplete JSON collections no longer abort the whole sync run.
-- Strengthened the inventory operations foundation so product stock, linked tools/supplies, reorder pressure, and build readiness can still be reviewed while the catalog data keeps being migrated.
-- Movie metadata enrichment beyond UPC/cover data is still a next-phase data task because the uploaded movie JSON currently contains cover URLs but blank title/cast/director/runtime fields.
-
+- richer dashboard summary and trend views
+- funnel reporting by session and checkout stage
+- stronger abandoned-cart diagnostics
+- clearer source / campaign / landing-page attribution
 
 ## Current pass update
 
-- Mobile finished-product capture page added at `/admin/mobile-product/` for phone-first product entry.
-- The phone workflow now assigns the next available product number, supports category, colour, shipping code, tax code, SEO title/meta description, direct image upload to R2, and optional tool/supply links.
-- Products created from the phone workflow are saved as draft items with `review_status = pending_review` so they can be reviewed before publishing.
-- Product records now support `product_number`, `product_category`, `color_name`, `shipping_code`, and `review_status`.
-- Storefront/admin product search can now match category and colour more directly.
-- SEO guidance remains aligned with Google Search Central: one clear H1 per outward-facing page, descriptive title links, page-specific meta descriptions, crawlable internal links, and structured data that matches visible content.
-
-## Current pass update
-
-- Moved the public movie pipeline forward again by preferring the uploaded `movie_catalog_enriched.v2.json` file in the public API and copying that v2 file into `/data/movies/` for deployment.
-- Improved the mobile product-capture workflow with stock-aware lookup and filters for linked tools and supplies so the phone flow can see what is currently on hand.
-- Added the same reorder-list controls to the public tools page that already existed on the supplies page: local reorder list, copy, clear, and reorder-only view.
-- The deeper inventory, direct media upload, Stripe completion, webhook hardening, product-import validation, and richer analytics work remain active roadmap items and are not being marked complete yet.
+- Added real movie API pagination and updated the movie page so the full catalog can be browsed instead of stopping at the old 150-row default.
+- Continued CSS cleanup with more defensive layout rules to reduce overflow, overlap, and card/table breakage across admin and public pages.
+- Rewrote `KNOWN_GAPS_AND_RISKS.md` so the package now documents the remaining operational, security, data-model, and customer-experience risks honestly.
+- Refreshed roadmap and repo documentation to keep the next priorities clear: payment hardening, inventory depth, media lifecycle polish, analytics, and continued JSON → D1 migration.
+- SEO guidance remains active on every pass: one H1 per outward-facing page, stronger discovery wording, clearer metadata, and crawl-friendly page structure.
