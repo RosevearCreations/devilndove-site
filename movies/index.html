@@ -84,7 +84,7 @@
       </div>
     </div>
 
-    <div id="movieGrid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:16px"></div>
+    <div id="movieGrid" class="grid movie-grid"></div>
   </div>
 
   <script src="/js/main.js"></script>
@@ -152,7 +152,8 @@
 
       grid.innerHTML = filtered.map((item) => {
         const title = (item.title || '').trim() || 'Title pending metadata';
-        const image = item.front_image_url || item.front_image || '';
+        const front = item.front_image_url || item.front_image || '';
+        const back = item.back_image_url || '';
         const year = item.release_year ? `<div class="small"><strong>Year:</strong> ${esc(item.release_year)}</div>` : '';
         const genre = item.genre ? `<div class="small"><strong>Genre:</strong> ${esc(item.genre)}</div>` : '';
         const director = item.director_names ? `<div class="small"><strong>Director:</strong> ${esc(item.director_names)}</div>` : '';
@@ -160,19 +161,23 @@
         const runtime = item.runtime_minutes ? `<div class="small"><strong>Length:</strong> ${esc(item.runtime_minutes)} min</div>` : '';
         const summaryText = item.summary
           ? `<p class="small" style="margin-top:8px">${esc(item.summary)}</p>`
-          : `<p class="small" style="margin-top:8px;color:#64748b">Metadata enrichment is still in progress for this cover.</p>`;
+          : `<p class="small" style="margin-top:8px;color:#93a4bb">Metadata enrichment is still in progress for this cover.</p>`;
         const upc = item.upc ? `<div class="small"><strong>UPC:</strong> ${esc(item.upc)}</div>` : '';
         const trailer = item.trailer_url
           ? `<a href="${esc(item.trailer_url)}" target="_blank" rel="noreferrer">Watch trailer</a>`
           : `<a href="${trailerSearchUrl(item.title || item.upc, item.release_year)}" target="_blank" rel="noreferrer">Search trailer</a>`;
-
-        return `<article class="card">
-          ${image ? `<img src="${esc(image)}" alt="${esc(title)} cover" style="width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;margin-bottom:10px" loading="lazy">` : ''}
-          <h2 style="margin:0 0 8px;font-size:1.1rem">${esc(title)}</h2>
-          ${upc}${year}${genre}${director}${actors}${runtime}${summaryText}
-          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
-            <a href="${imdbSearchUrl(item.title, item.upc)}" target="_blank" rel="noreferrer">Search IMDb</a>
-            ${trailer}
+        return `<article class="card movie-card-rich">
+          <div class="movie-card-media">
+            ${front ? `<img src="${esc(front)}" alt="${esc(title)} front cover" loading="lazy">` : `<div class="movie-placeholder small">Front cover pending</div>`}
+            ${back ? `<img src="${esc(back)}" alt="${esc(title)} back cover" loading="lazy">` : `<div class="movie-placeholder small">Back cover pending</div>`}
+          </div>
+          <div>
+            <h2 style="margin:0 0 8px;font-size:1.1rem">${esc(title)}</h2>
+            ${upc}${year}${genre}${director}${actors}${runtime}${summaryText}
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
+              <a href="${imdbSearchUrl(item.title, item.upc)}" target="_blank" rel="noreferrer">Search IMDb</a>
+              ${trailer}
+            </div>
           </div>
         </article>`;
       }).join('') || `<div class="card">No movies matched your search.</div>`;
