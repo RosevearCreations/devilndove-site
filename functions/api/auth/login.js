@@ -4,7 +4,7 @@
 // by the shared public/js/auth.js helper.
 
 function json(data, status = 200, headers = {}) {
-  return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", ...headers } });
+  return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin", ...headers } });
 }
 
 function normalizeText(value) { return String(value || "").trim(); }

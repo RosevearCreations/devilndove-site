@@ -1,7 +1,7 @@
 // File: /functions/api/auth/me.js
 // Brief description: Returns the currently logged-in user from the active bearer-token or auth-cookie session.
 
-function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } }); }
+function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin" } }); }
 function parseCookies(request) {
   const raw = request.headers.get("Cookie") || "";
   return raw.split(/;\s*/).reduce((acc, part) => {

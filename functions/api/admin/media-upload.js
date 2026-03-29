@@ -5,7 +5,7 @@
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin" }
   });
 }
 
@@ -23,9 +23,29 @@ function getBearerToken(request) {
   return match ? String(match[1] || "").trim() : "";
 }
 
+function parseCookies(request) {
+  const raw = request.headers.get("Cookie") || "";
+  return raw.split(/;\s*/).reduce((acc, part) => {
+    if (!part) return acc;
+    const eq = part.indexOf("=");
+    if (eq === -1) return acc;
+    const key = part.slice(0, eq).trim();
+    const value = part.slice(eq + 1).trim();
+    try { acc[key] = decodeURIComponent(value); } catch { acc[key] = value; }
+    return acc;
+  }, {});
+}
+
+function getRequestToken(request) {
+  const bearer = getBearerToken(request);
+  if (bearer) return bearer;
+  const cookies = parseCookies(request);
+  return String(cookies.dd_auth_token || '').trim();
+}
+
 async function getAdminUserFromRequest(request, env) {
   const db = getDb(env);
-  const token = getBearerToken(request);
+  const token = getRequestToken(request);
   if (!token || !db) return null;
 
   const session = await db.prepare(`
