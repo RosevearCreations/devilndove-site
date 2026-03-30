@@ -1,91 +1,105 @@
 // File: /functions/api/creations.js
-// Brief description: Public read endpoint for finished creations. It centralizes the
-// items-for-sale JSON path so the creations page and site search can share one source
-// of truth while the project continues its staged migration away from duplicated JSON reads.
+// Brief description: Public read endpoint for finished creations. It prefers D1 catalog_items
+// records for item_kind=creation and falls back to the current JSON source so public pages and
+// site search share one centralized data path during migration.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=120'
-    }
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=120' }
   });
 }
 
-function normalizeText(value) {
-  return String(value || '').trim();
+function normalizeText(value) { return String(value || '').trim(); }
+function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
+function slugify(value) { return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+
+function normalizeCreationFromCatalog(row) {
+  let source = {};
+  try { source = row.source_record_json ? JSON.parse(row.source_record_json) : {}; } catch { source = {}; }
+  return Object.assign({}, source, {
+    id: source.id || row.source_key || row.catalog_item_id,
+    name: row.name || source.name || source.title || 'Creation',
+    slug: row.slug || source.slug || slugify(row.name || source.name || source.title || 'creation'),
+    section: row.category || source.section || 'Featured creation',
+    type: row.subcategory || row.item_type || source.type || '',
+    image: row.image_url || source.image || source.image_url || source.src || '',
+    image_url: row.image_url || source.image || source.image_url || source.src || '',
+    description: row.short_description || source.description || '',
+    caption: row.notes || source.caption || source.description || source.alt || '',
+    notes: row.notes || source.notes || '',
+    material: source.material || source.materials || '',
+    tags: source.tags || [],
+    updated_at: row.updated_at || null,
+    source: 'catalog_items'
+  });
 }
 
-function getBaseUrl(request, env) {
-  return normalizeText(env.PUBLIC_SITE_URL || new URL(request.url).origin).replace(/\/$/, '');
-}
-
-function scoreText(query, ...parts) {
-  const haystack = parts.join(' ').toLowerCase();
-  if (!haystack || !query) return 0;
-  let score = 0;
-  if (haystack.includes(query)) score += 10;
-  for (const token of query.split(/\s+/).filter(Boolean)) {
-    if (haystack.includes(token)) score += 3;
+async function loadJsonFallback(request) {
+  try {
+    const response = await fetch(new URL('/data/itemsforsale/itemsforsale_items_master.json', request.url).toString(), { cf: { cacheTtl: 0, cacheEverything: false } });
+    if (!response.ok) return [];
+    const data = await response.json().catch(() => null);
+    const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+    return items.map((item, index) => Object.assign({}, item, {
+      id: item.id || item.slug || `${slugify(item.name || item.title || 'creation')}-${index + 1}`,
+      name: item.name || item.title || `Creation ${index + 1}`,
+      slug: item.slug || slugify(item.name || item.title || `creation-${index + 1}`),
+      image: item.image || item.image_url || item.src || '',
+      image_url: item.image || item.image_url || item.src || '',
+      source: 'json'
+    }));
+  } catch {
+    return [];
   }
-  return score;
-}
-
-function shapeItems(payload, query) {
-  const items = Array.isArray(payload?.items) ? payload.items : [];
-  return items.map((item, index) => {
-    const title = item?.title || item?.name || `Creation ${index + 1}`;
-    const searchScore = scoreText(query, title, item?.type, item?.subcategory, item?.description, item?.notes, ...(Array.isArray(item?.materials) ? item.materials : []), ...(Array.isArray(item?.tags) ? item.tags : []));
-    return {
-      id: normalizeText(item?.id || item?.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-')),
-      title,
-      type: normalizeText(item?.type),
-      subcategory: normalizeText(item?.subcategory),
-      materials: Array.isArray(item?.materials) ? item.materials.filter(Boolean) : [],
-      tags: Array.isArray(item?.tags) ? item.tags.filter(Boolean) : [],
-      image_file: normalizeText(item?.image_file),
-      r2_object_key: normalizeText(item?.r2_object_key),
-      alt: normalizeText(item?.alt),
-      status: normalizeText(item?.status),
-      shop_url: normalizeText(item?.shop_url),
-      description: normalizeText(item?.description),
-      notes: normalizeText(item?.notes),
-      search_score: searchScore
-    };
-  });
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
+  const db = env.DB || env.DD_DB;
   const url = new URL(request.url);
   const query = normalizeText(url.searchParams.get('q')).toLowerCase();
-  const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 250), 1), 500);
-  const dataUrl = `${getBaseUrl(request, env)}/data/itemsforsale/itemsforsale_items_master.json`;
+  const like = `%${query}%`;
+  const limit = Math.max(1, Math.min(Number(url.searchParams.get('limit') || 250), 500));
 
-  try {
-    const response = await fetch(dataUrl, { headers: { 'Cache-Control': 'no-cache' } });
-    const payload = await response.json().catch(() => null);
-    if (!response.ok || !payload) return json({ ok: false, error: 'Creations data could not be loaded.' }, 502);
-
-    const allItems = shapeItems(payload, query);
-    const filtered = query
-      ? allItems.filter((item) => Number(item.search_score || 0) > 0)
-      : allItems;
-
-    return json({
-      ok: true,
-      items: filtered.slice(0, limit),
-      summary: {
-        total_items: allItems.length,
-        visible_items: filtered.length,
-        query
-      },
-      asset_origin: payload?.asset_origin || 'https://assets.devilndove.com',
-      asset_prefix: payload?.asset_prefix || 'itemsforsale',
-      video: payload?.video || null
-    });
-  } catch (error) {
-    return json({ ok: false, error: String(error?.message || 'Unable to load creations data.') }, 500);
+  let items = [];
+  if (db) {
+    const rows = normalizeResults(await db.prepare(`
+      SELECT catalog_item_id, source_key, slug, name, category, subcategory, item_type, short_description,
+             notes, image_url, source_record_json, updated_at
+      FROM catalog_items
+      WHERE item_kind = 'creation'
+        AND COALESCE(visible_public, 1) = 1
+        AND COALESCE(status, 'active') = 'active'
+        AND (
+          ? = ''
+          OR LOWER(COALESCE(name, '')) LIKE ?
+          OR LOWER(COALESCE(category, '')) LIKE ?
+          OR LOWER(COALESCE(subcategory, '')) LIKE ?
+          OR LOWER(COALESCE(item_type, '')) LIKE ?
+          OR LOWER(COALESCE(short_description, '')) LIKE ?
+          OR LOWER(COALESCE(notes, '')) LIKE ?
+        )
+      ORDER BY COALESCE(sort_order, 0) ASC, LOWER(COALESCE(name, '')) ASC
+      LIMIT ?
+    `).bind(query, like, like, like, like, like, like, limit).all().catch(() => ({ results: [] })));
+    items = rows.map(normalizeCreationFromCatalog);
   }
+
+  if (!items.length) {
+    const fallback = await loadJsonFallback(request);
+    items = query
+      ? fallback.filter((item) => JSON.stringify(item).toLowerCase().includes(query)).slice(0, limit)
+      : fallback.slice(0, limit);
+  }
+
+  return json({
+    ok: true,
+    items,
+    summary: {
+      total_items: items.length,
+      query,
+      authority: items[0]?.source === 'catalog_items' ? 'd1' : 'json_fallback'
+    }
+  });
 }

@@ -1,4 +1,5 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+import { requireAdminStepUp } from "../_lib/adminStepUp.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -63,6 +64,8 @@ export async function onRequestPatch(context) {
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
   const mediaAssetId = Number(body.media_asset_id || 0);
   if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) return json({ ok: false, error: 'A valid media_asset_id is required.' }, 400);
+  const stepUp = await requireAdminStepUp(request, env, adminUser, { confirm_password: confirmPassword }, 'media deletion');
+  if (!stepUp.ok) return stepUp.response;
   const existing = await db.prepare(`SELECT * FROM media_assets WHERE media_asset_id = ? LIMIT 1`).bind(mediaAssetId).first();
   if (!existing) return json({ ok: false, error: 'Media asset not found.' }, 404);
   const action = normalizeText(body.action).toLowerCase();
@@ -101,6 +104,7 @@ export async function onRequestDelete(context) {
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
   const url = new URL(request.url);
   const mediaAssetId = Number(url.searchParams.get('media_asset_id') || 0);
+  const confirmPassword = normalizeText(url.searchParams.get('confirm_password') || request.headers.get('x-confirm-password'));
   if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) return json({ ok: false, error: 'A valid media_asset_id is required.' }, 400);
   const asset = await db.prepare(`SELECT media_asset_id, product_id, object_key, public_url FROM media_assets WHERE media_asset_id = ? LIMIT 1`).bind(mediaAssetId).first();
   if (!asset) return json({ ok: false, error: 'Media asset not found.' }, 404);

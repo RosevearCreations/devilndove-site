@@ -82,6 +82,77 @@ function deriveOrderStatus(existingOrderStatus, localPaymentStatus) {
   return current;
 }
 
+
+function mapStripeDisputeStatus(eventType, object) {
+  const type = normalizeText(eventType).toLowerCase();
+  const providerStatus = normalizeText(object?.status).toLowerCase();
+  if (type === 'charge.dispute.closed') {
+    if (normalizeText(object?.reason).toLowerCase() === 'won' || providerStatus === 'won') return 'won';
+    if (providerStatus === 'lost') return 'lost';
+    return 'closed';
+  }
+  if (type === 'charge.dispute.funds_reinstated') return 'won';
+  if (type === 'charge.dispute.funds_withdrawn') return 'under_review';
+  if (['warning_needs_response', 'warning_under_review', 'needs_response', 'under_review'].includes(providerStatus)) return 'under_review';
+  if (providerStatus === 'won') return 'won';
+  if (providerStatus === 'lost') return 'lost';
+  if (providerStatus === 'closed') return 'closed';
+  return 'open';
+}
+
+async function upsertStripeDispute(env, payment, order, object, eventType) {
+  const db = getDb(env);
+  const providerDisputeId = normalizeText(object?.id);
+  if (!providerDisputeId) return null;
+  const disputeStatus = mapStripeDisputeStatus(eventType, object);
+  const amountCents = Number(object?.amount || payment.amount_cents || 0);
+  const currency = normalizeText(object?.currency || order.currency || 'CAD').toUpperCase() || 'CAD';
+  const existing = await db.prepare(`
+    SELECT dispute_id
+    FROM payment_disputes
+    WHERE provider = 'stripe' AND provider_dispute_id = ?
+    LIMIT 1
+  `).bind(providerDisputeId).first().catch(() => null);
+  if (existing) {
+    await db.prepare(`
+      UPDATE payment_disputes
+      SET dispute_status = ?, amount_cents = ?, currency = ?, reason = ?, evidence_due_at = ?,
+          note = ?, provider_sync_status = 'confirmed', provider_sync_note = ?, provider_sync_at = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE dispute_id = ?
+    `).bind(
+      disputeStatus,
+      amountCents,
+      currency,
+      normalizeText(object?.reason) || null,
+      object?.evidence_details?.due_by ? new Date(Number(object.evidence_details.due_by) * 1000).toISOString() : null,
+      normalizeText(object?.reason_details?.network_reason_code || object?.reason) || null,
+      `Stripe webhook confirmed ${normalizeText(eventType) || 'dispute event'}.`,
+      Number(existing.dispute_id || 0)
+    ).run();
+    return { dispute_id: Number(existing.dispute_id || 0), dispute_status: disputeStatus, provider_dispute_id: providerDisputeId };
+  }
+  const inserted = await db.prepare(`
+    INSERT INTO payment_disputes (
+      payment_id, order_id, provider, provider_dispute_id, dispute_status, amount_cents, currency,
+      reason, evidence_due_at, note, provider_sync_status, provider_sync_note, provider_sync_at,
+      created_by_user_id, created_at, updated_at
+    ) VALUES (?, ?, 'stripe', ?, ?, ?, ?, ?, ?, ?, 'confirmed', ?, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `).bind(
+    Number(payment.payment_id || 0),
+    Number(order.order_id || 0),
+    providerDisputeId,
+    disputeStatus,
+    amountCents,
+    currency,
+    normalizeText(object?.reason) || null,
+    object?.evidence_details?.due_by ? new Date(Number(object.evidence_details.due_by) * 1000).toISOString() : null,
+    normalizeText(object?.reason_details?.network_reason_code || object?.reason) || null,
+    `Stripe webhook confirmed ${normalizeText(eventType) || 'dispute event'}.`
+  ).run();
+  return { dispute_id: Number(inserted?.meta?.last_row_id || 0), dispute_status: disputeStatus, provider_dispute_id: providerDisputeId };
+}
+
 function mapStripePaymentStatus(eventType, object) {
   const type = normalizeText(eventType).toLowerCase();
   const paymentStatus = normalizeText(object?.payment_status || object?.status).toLowerCase();
@@ -179,8 +250,8 @@ async function markWebhookEvent(env, webhookEventId, processStatus, details = {}
 
 async function findPaymentForStripeEvent(env, object) {
   const db = getDb(env);
-  const sessionId = normalizeText(object?.id);
-  const paymentIntentId = normalizeText(object?.payment_intent || object?.payment_intent?.id || object?.id);
+  const sessionId = normalizeText(object?.object === 'checkout.session' ? object?.id : '');
+  const paymentIntentId = normalizeText(object?.payment_intent || object?.payment_intent?.id || object?.latest_charge?.payment_intent || '');
   const metadataOrderId = Number(object?.metadata?.order_id || object?.payment_intent?.metadata?.order_id || 0);
 
   if (sessionId) {
@@ -268,6 +339,25 @@ export async function onRequestPost(context) {
       related_payment_id: Number(payment.payment_id || 0)
     });
     return json({ ok: true, ignored: true, reason: "Local order was not found for matched payment." });
+  }
+
+  if (eventType.startsWith('charge.dispute.')) {
+    const dispute = await upsertStripeDispute(env, payment, order, object, eventType);
+    await markWebhookEvent(env, webhookEvent.webhook_event_id, 'processed', {
+      related_order_id: Number(order.order_id || 0),
+      related_payment_id: Number(payment.payment_id || 0)
+    });
+    return json({
+      ok: true,
+      event_type: eventType || null,
+      dispute: dispute || null,
+      order: {
+        order_id: Number(order.order_id || 0),
+        order_number: order.order_number || '',
+        order_status: order.order_status || 'pending',
+        payment_status: order.payment_status || 'pending'
+      }
+    });
   }
 
   const sessionId = normalizeText(object?.object === "checkout.session" ? object.id : payment.provider_order_id || "");

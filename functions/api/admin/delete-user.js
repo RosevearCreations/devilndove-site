@@ -1,3 +1,6 @@
+import { auditAdminAction } from "../_lib/adminAudit.js";
+import { requireAdminStepUp } from "../_lib/adminStepUp.js";
+
 // File: /functions/api/admin/delete-user.js
 
 function json(data, status = 200) {
@@ -150,6 +153,9 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "Permanent delete confirmation is required." }, 400);
   }
 
+  const stepUp = await requireAdminStepUp(request, env, adminUser, body, `user ${action}`);
+  if (!stepUp.ok) return stepUp.response;
+
   const targetUser = await env.DB.prepare(`
     SELECT
       user_id,
@@ -226,6 +232,8 @@ export async function onRequestPost(context) {
       .bind(user_id)
       .first();
 
+    await auditAdminAction(env, request, adminUser, { action_type: 'user_deactivate', target_type: 'user', target_id: user_id, target_key: targetUser.email || String(user_id), details: { clear_sessions, deleted_sessions } });
+
     return json({
       ok: true,
       message: "User deactivated successfully.",
@@ -272,6 +280,8 @@ export async function onRequestPost(context) {
   `)
     .bind(user_id)
     .run();
+
+  await auditAdminAction(env, request, adminUser, { action_type: 'user_delete', target_type: 'user', target_id: user_id, target_key: targetUser.email || String(user_id), details: { clear_sessions, deleted_sessions } });
 
   return json({
     ok: true,
