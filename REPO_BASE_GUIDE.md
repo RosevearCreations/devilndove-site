@@ -170,8 +170,13 @@ New current-pass backend additions:
 - `functions/api/admin/product-readiness.js` — returns storefront-readiness checks for a product.
 - `notification_outbox` — durable local queue for receipt and operational message intents.
 
-## Current pass update
-- New public endpoint: `functions/api/stripe-return.js` for Stripe Checkout return reconciliation.
-- New public endpoint: `functions/api/creations.js` for centralized finished-creations reads.
-- `public/js/order-confirmation.js` now finalizes Stripe return sessions as well as PayPal returns.
-- `public/js/site-search.js` and `creations/index.html` now consume the shared creations API instead of maintaining separate direct-read logic.
+
+
+## Current pass endpoint additions
+
+- `functions/api/stripe-return.js` — finalizes a Stripe Checkout session on customer return.
+- `functions/api/creations.js` — centralized public finished-creations read path.
+- `functions/api/admin/notification-outbox.js` — review and process queued notification delivery.
+- `functions/api/_lib/notificationOutbox.js` — shared queue/dispatch helper for receipts and recovery notices.
+- `functions/api/_lib/adminStepUp.js` — shared password-confirmation step-up helper for destructive admin actions.
+- `functions/api/_lib/passwordHash.js` — shared password-hash verification helper.

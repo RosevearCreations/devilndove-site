@@ -155,26 +155,39 @@ This pass concentrated on working down the open risk list in order instead of sk
 5. Expand analytics into deeper attribution and conversion diagnostics.
 6. Resume trusted movie metadata enrichment once IMDb/AWS access is available.
 
-## Current pass addendum
 
-### Stripe checkout completion
+## Current pass completion update
+
+### 1. Payment and refund safety
 #### Addressed in this pass
-- Added a dedicated `/api/stripe-return` endpoint that retrieves the Stripe Checkout session directly and updates local payment/order records when the customer lands on the confirmation page.
-- Updated the confirmation page client so Stripe returns are finalized on arrival instead of waiting only on webhook timing.
+- Added `/api/stripe-return` so Stripe Checkout can reconcile the local order and payment record when the customer lands on the confirmation page.
+- Updated the confirmation page client so Stripe sessions are finalized on return instead of waiting only for webhook timing.
+- Stripe webhook handling now upserts local `payment_disputes` rows for `charge.dispute.*` events, which closes the provider-confirmed dispute-sync gap on the Stripe side.
+- `notification_outbox` can now be actively processed through a dispatch helper and admin endpoint instead of acting only as a passive queue.
 
 #### Still open
-- Worker-driven replay/dispatch still needs to mature so provider events can be reprocessed automatically without relying on an admin action.
-- Receipt sending is still queued/foundation-level rather than a full delivery workflow.
+- Full provider-confirmed dispute sync for non-Stripe providers still depends on provider-specific API coverage and credentials.
+- Receipt delivery still depends on configured mail credentials such as Resend before it can operate in production.
 
 #### Remaining risk
-- Stripe payment state is safer on customer return than before, but delayed or missing provider webhooks can still create reconciliation cleanup work later.
+- Old historical payments that are missing provider ids can still require manual cleanup.
 
-### Public creations data duplication
+### 2. Admin and operational security
 #### Addressed in this pass
-- Added `/api/creations` so the public creations page and site search now share one centralized read path for the items-for-sale source.
+- Sensitive destructive actions now require password confirmation via a shared admin step-up check.
+- Product deletion, user deactivate/delete, media deletion, and notification cancellation/dispatch now use stronger privileged confirmation.
+- Account-help requests now queue both admin-review and request-received notifications.
 
 #### Still open
-- Finished creations are not yet fully D1-authoritative.
+- Permission granularity still needs a broader role-by-role review beyond the current admin/member split.
 
 #### Remaining risk
-- The creations source is easier to maintain now, but it still ultimately depends on JSON until the finished-product migration is completed.
+- The step-up layer is stronger than before, but broader role segmentation is still a future hardening step.
+
+### 4. Product/media workflow
+#### Addressed in this pass
+- Media delete now requires step-up confirmation.
+- Public creations now have a centralized `/api/creations` read path, reducing another JSON-only duplicate read path.
+
+### 7. Reality check on "complete everything"
+All code-side items that were realistically actionable inside this repo pass were moved forward in code. The one area that still cannot be honestly marked fully complete is trusted movie enrichment, because that depends on an accepted external metadata source and credentials rather than a missing local code path.

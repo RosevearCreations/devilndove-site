@@ -158,7 +158,11 @@ Most important next layers after this pass are:
 
 Current pass emphasis: risk reduction through payment safety, inventory authority, media lifecycle controls, funnel analytics, and draft readiness rather than only visual polish.
 
+
+
 ## Current pass update
-- Stripe checkout no longer depends only on webhook timing for the customer-facing confirmation step. `/api/stripe-return` now retrieves the Checkout Session directly and reconciles the order on return.
-- Finished creations now use a shared `/api/creations` layer so the public page and search flow rely on one central source path while the later D1 migration is staged more carefully.
-- No new schema tables were added in this pass.
+- Added `/api/stripe-return` for customer-return reconciliation on Stripe Checkout.
+- Added `notification_outbox` dispatch processing so queued receipts and recovery notices can actually move toward delivery.
+- Added shared admin step-up confirmation for destructive admin actions.
+- Added `/api/creations` as the centralized public creations read path during the JSON-to-D1 migration.
+- Stripe webhook flow now confirms local dispute records from provider events instead of leaving dispute sync fully manual.

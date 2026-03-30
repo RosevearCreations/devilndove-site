@@ -88,13 +88,18 @@
 - Addressed the draft-to-publish governance item with product readiness checks and storefront-readiness flags.
 - The roadmap is not fully finished yet because Stripe checkout completion, real receipt delivery, deeper attribution, and trusted movie enrichment still remain open.
 
+
+
 ## Current pass completion update
-- Reduced the Stripe completion gap with a dedicated checkout return reconciliation endpoint at `/api/stripe-return` and confirmation-page support for Stripe session finalization.
-- Reduced public data duplication by centralizing finished creations behind `/api/creations` instead of having multiple client-side readers for the same items-for-sale JSON.
-- No new schema tables were required in this pass; the emphasis was payment completion hardening and lower-risk public data reads.
+
+- Restored and completed the Stripe return reconciliation path with `/api/stripe-return` plus confirmation-page finalize logic.
+- Added provider-confirmed Stripe dispute sync through `charge.dispute.*` webhook handling.
+- Added a real `notification_outbox` dispatch path with Resend-ready email delivery and admin processing controls.
+- Added shared admin step-up confirmation for destructive actions.
+- Added `/api/creations` so finished creations can move toward one public authority path instead of direct page-level JSON reads.
 
 ## Still intentionally not marked complete
-- Full worker-driven webhook replay execution is still not complete.
-- Real outbound receipt delivery from `notification_outbox` is still not complete.
-- Provider-confirmed dispute sync is still not complete.
-- Finished creations still need their eventual full D1 authority model rather than a centralized API over JSON.
+
+- trusted movie metadata/value enrichment remains blocked on external metadata-source access
+- full provider-confirmed dispute sync for every payment provider remains dependent on each provider's API coverage and credentials
+- full attribution and decision-grade merchandising analytics still need another pass
