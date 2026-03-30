@@ -45,6 +45,8 @@ export async function onRequestGet(context) {
            COUNT(DISTINCT prl.product_resource_link_id) AS linked_resource_count,
            COALESCE(SUM(COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0)), 0) AS linked_resource_cost_cents,
            SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 1 ELSE 0 END) AS missing_cost_links,
+           MIN(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL THEN CAST(MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) / prl.quantity_used AS INTEGER) ELSE NULL END) AS buildable_units_from_resources,
+           SUM(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL AND MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) < COALESCE(prl.quantity_used,0) THEN 1 ELSE 0 END) AS resource_shortage_links,
            CASE WHEN COALESCE(p.inventory_tracking,0)=1 AND COALESCE(p.inventory_quantity,0) <= 2 THEN 1 ELSE 0 END AS low_stock_flag
     FROM products p
     LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id
@@ -69,6 +71,8 @@ export async function onRequestGet(context) {
       gross_margin_cents: priceCents - linkedResourceCost,
       gross_margin_ratio: priceCents > 0 ? Number(((priceCents - linkedResourceCost) / priceCents).toFixed(4)) : 0,
       missing_cost_links: Number(row.missing_cost_links || 0),
+      buildable_units_from_resources: row.buildable_units_from_resources == null ? null : Number(row.buildable_units_from_resources || 0),
+      resource_shortage_links: Number(row.resource_shortage_links || 0),
       ...buildReadiness(row)
     };
   });
@@ -82,7 +86,8 @@ export async function onRequestGet(context) {
       ready_for_storefront_products: products.filter((row) => Number(row.is_ready_for_storefront || 0) === 1).length,
       pending_review_products: products.filter((row) => String(row.review_status || '').toLowerCase() === 'pending_review').length,
       products_with_cost_rollups: products.filter((row) => Number(row.linked_resource_count || 0) > 0).length,
-      products_missing_cost_links: products.filter((row) => Number(row.missing_cost_links || 0) > 0).length
+      products_missing_cost_links: products.filter((row) => Number(row.missing_cost_links || 0) > 0).length,
+      products_with_resource_shortages: products.filter((row) => Number(row.resource_shortage_links || 0) > 0).length
     }
   });
 }

@@ -88,6 +88,21 @@ export async function onRequestGet(context) {
       : fallback.slice(0, limit);
   }
 
+  const filter_groups = {
+    categories: Object.entries(items.reduce((acc, item) => {
+      const key = normalizeText(item.category || item.section || '').trim();
+      if (!key) return acc;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {})).map(([label, count]) => ({ label, count })).sort((a, b) => a.label.localeCompare(b.label)),
+    types: Object.entries(items.reduce((acc, item) => {
+      const key = normalizeText(item.subcategory || item.type || item.item_type || '').trim();
+      if (!key) return acc;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {})).map(([label, count]) => ({ label, count })).sort((a, b) => a.label.localeCompare(b.label))
+  };
+
   return json({
     ok: true,
     items,
@@ -95,6 +110,7 @@ export async function onRequestGet(context) {
       total_items: items.length,
       query,
       authority: items[0]?.source === 'catalog_items' ? 'd1' : 'json_fallback'
-    }
+    },
+    filter_groups
   });
 }

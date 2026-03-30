@@ -131,6 +131,87 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
   return { items: items.map(shape), summary, movements, supplier_reorder_groups: Object.values(supplier_reorder_groups) };
 }
 
+
+async function adjustProductResourceReservations(db, { productId = 0, quantityMultiplier = 1, release = false, note = '', actorUserId = null } = {}) {
+  const links = normalizeResults(await db.prepare(`
+    SELECT prl.product_resource_link_id, prl.resource_kind, prl.source_key, COALESCE(prl.quantity_used, 0) AS quantity_used,
+           sii.site_item_inventory_id, sii.item_name, sii.source_type, sii.external_key,
+           COALESCE(sii.on_hand_quantity, 0) AS on_hand_quantity,
+           COALESCE(sii.reserved_quantity, 0) AS reserved_quantity,
+           COALESCE(sii.incoming_quantity, 0) AS incoming_quantity,
+           COALESCE(sii.reservation_notes, '') AS reservation_notes
+    FROM product_resource_links prl
+    LEFT JOIN site_item_inventory sii
+      ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
+    WHERE prl.product_id = ?
+    ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
+  `).bind(productId).all().catch(() => ({ results: [] })));
+
+  const results = [];
+  for (const link of links) {
+    const requiredQty = Math.max(0, Number(link.quantity_used || 0) * Math.max(1, Number(quantityMultiplier || 1)));
+    if (!Number(link.site_item_inventory_id || 0) || requiredQty <= 0) {
+      results.push({
+        resource_kind: link.resource_kind || '',
+        source_key: link.source_key || '',
+        item_name: link.item_name || link.source_key || '',
+        required_quantity: requiredQty,
+        applied_quantity: 0,
+        available_before: 0,
+        shortage_quantity: requiredQty,
+        missing_inventory_link: 1
+      });
+      continue;
+    }
+    const previousReserved = Number(link.reserved_quantity || 0);
+    const previousOnHand = Number(link.on_hand_quantity || 0);
+    const previousIncoming = Number(link.incoming_quantity || 0);
+    const availableBefore = Math.max(0, previousOnHand - previousReserved);
+    const appliedQuantity = release ? Math.min(previousReserved, requiredQty) : requiredQty;
+    const nextReserved = release ? Math.max(0, previousReserved - requiredQty) : previousReserved + requiredQty;
+    const shortageQuantity = release ? 0 : Math.max(0, requiredQty - availableBefore);
+    const reservationNote = [normalizeText(note), `product:${productId}`, release ? 'release_product_resources' : 'reserve_product_resources'].filter(Boolean).join(' | ');
+
+    await db.prepare(`
+      UPDATE site_item_inventory
+      SET reserved_quantity = ?,
+          reservation_notes = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE site_item_inventory_id = ?
+    `).bind(nextReserved, reservationNote || null, Number(link.site_item_inventory_id || 0)).run();
+
+    await logMovement(db, {
+      site_item_inventory_id: Number(link.site_item_inventory_id || 0),
+      source_type: link.source_type || link.resource_kind || '',
+      external_key: link.external_key || link.source_key || '',
+      item_name: link.item_name || link.source_key || '',
+      movement_type: release ? 'release' : 'reserve',
+      quantity_delta: release ? -appliedQuantity : appliedQuantity,
+      previous_on_hand_quantity: previousOnHand,
+      new_on_hand_quantity: previousOnHand,
+      previous_reserved_quantity: previousReserved,
+      new_reserved_quantity: nextReserved,
+      previous_incoming_quantity: previousIncoming,
+      new_incoming_quantity: previousIncoming,
+      note: reservationNote || (release ? 'Product resource release recorded.' : 'Product resource reservation recorded.'),
+      actor_user_id: actorUserId
+    });
+
+    results.push({
+      resource_kind: link.resource_kind || '',
+      source_key: link.source_key || '',
+      item_name: link.item_name || link.source_key || '',
+      required_quantity: requiredQty,
+      applied_quantity: appliedQuantity,
+      available_before: availableBefore,
+      shortage_quantity: shortageQuantity,
+      missing_inventory_link: 0,
+      site_item_inventory_id: Number(link.site_item_inventory_id || 0)
+    });
+  }
+  return results;
+}
+
 async function syncCatalog(db, sourceTypes = []) {
   const rows = normalizeResults(await db.prepare(`
     SELECT item_kind, source_key, name, category, image_url, notes, quantity_on_hand, reorder_point, amazon_url, source_record_json
@@ -186,6 +267,44 @@ export async function onRequestPost(context) {
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
 
   const action = normalizeText(body.action).toLowerCase();
+  if (action === 'reserve_product_resources' || action === 'release_product_resources') {
+    const productId = Number(body.product_id || 0);
+    const quantityMultiplier = Math.max(1, Number(body.quantity_multiplier || 1));
+    if (!productId) return json({ ok: false, error: 'product_id is required for product resource reservations.' }, 400);
+    const product = await db.prepare(`SELECT product_id, slug, name FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
+    if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
+    const reservationRows = await adjustProductResourceReservations(db, {
+      productId,
+      quantityMultiplier,
+      release: action === 'release_product_resources',
+      note: normalizeText(body.note) || '',
+      actorUserId: adminUser.user_id
+    });
+    await auditAdminAction(env, request, adminUser, {
+      action_type: `inventory_${action}`,
+      target_type: 'product',
+      target_id: productId,
+      target_key: `${product.slug || product.name || productId}`,
+      details: {
+        quantity_multiplier: quantityMultiplier,
+        affected_items: reservationRows.length,
+        shortages: reservationRows.filter((row) => Number(row.shortage_quantity || 0) > 0).length
+      }
+    });
+    return json({
+      ok: true,
+      action,
+      product: { product_id: Number(product.product_id || 0), slug: product.slug || '', name: product.name || '' },
+      summary: {
+        affected_items: reservationRows.length,
+        total_required_quantity: reservationRows.reduce((sum, row) => sum + Number(row.required_quantity || 0), 0),
+        total_applied_quantity: reservationRows.reduce((sum, row) => sum + Number(row.applied_quantity || 0), 0),
+        shortage_item_count: reservationRows.filter((row) => Number(row.shortage_quantity || 0) > 0).length
+      },
+      reservations: reservationRows
+    });
+  }
+
   if (action === 'sync_catalog') {
     const sourceTypes = Array.isArray(body.source_types) && body.source_types.length ? body.source_types.map((value) => String(value || '').trim()).filter(Boolean) : ['tool', 'supply'];
     const synced = await syncCatalog(db, sourceTypes);

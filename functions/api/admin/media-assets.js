@@ -62,13 +62,43 @@ export async function onRequestPatch(context) {
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
+  const action = normalizeText(body.action).toLowerCase();
+
+  if (Array.isArray(body.asset_updates) && body.asset_updates.length) {
+    const updates = body.asset_updates.slice(0, 100);
+    let saved = 0;
+    for (const row of updates) {
+      const mediaAssetId = Number(row?.media_asset_id || 0);
+      if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) continue;
+      await db.prepare(`
+        UPDATE media_assets
+        SET sort_order = ?,
+            variant_role = COALESCE(?, variant_role),
+            annotation_notes = COALESCE(?, annotation_notes),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE media_asset_id = ?
+      `).bind(
+        Number(row?.sort_order || 0),
+        normalizeText(row?.variant_role) || null,
+        normalizeText(row?.annotation_notes) || null,
+        mediaAssetId
+      ).run();
+      saved += 1;
+    }
+    await auditAdminAction(env, request, adminUser, { action_type: 'media_bulk_update', target_type: 'media_asset', target_key: `count:${saved}`, details: { saved } });
+    return json({ ok: true, message: 'Media assets updated.', saved });
+  }
+
   const mediaAssetId = Number(body.media_asset_id || 0);
   if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) return json({ ok: false, error: 'A valid media_asset_id is required.' }, 400);
-  const stepUp = await requireAdminStepUp(request, env, adminUser, { confirm_password: confirmPassword }, 'media deletion');
-  if (!stepUp.ok) return stepUp.response;
+  const confirmPassword = normalizeText(body.confirm_password || request.headers.get('x-confirm-password'));
+  const requiresStepUp = ['replace', 'delete'].includes(action);
+  if (requiresStepUp) {
+    const stepUp = await requireAdminStepUp(request, env, adminUser, { confirm_password: confirmPassword }, 'media replacement');
+    if (!stepUp.ok) return stepUp.response;
+  }
   const existing = await db.prepare(`SELECT * FROM media_assets WHERE media_asset_id = ? LIMIT 1`).bind(mediaAssetId).first();
   if (!existing) return json({ ok: false, error: 'Media asset not found.' }, 404);
-  const action = normalizeText(body.action).toLowerCase();
   if (action === 'restore') {
     await db.prepare(`UPDATE media_assets SET deleted_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE media_asset_id = ?`).bind(mediaAssetId).run();
     await auditAdminAction(env, request, adminUser, { action_type: 'media_restore', target_type: 'media_asset', target_id: mediaAssetId, target_key: existing.object_key || String(mediaAssetId), details: { product_id: existing.product_id || null } });
@@ -108,6 +138,8 @@ export async function onRequestDelete(context) {
   if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) return json({ ok: false, error: 'A valid media_asset_id is required.' }, 400);
   const asset = await db.prepare(`SELECT media_asset_id, product_id, object_key, public_url FROM media_assets WHERE media_asset_id = ? LIMIT 1`).bind(mediaAssetId).first();
   if (!asset) return json({ ok: false, error: 'Media asset not found.' }, 404);
+  const stepUp = await requireAdminStepUp(request, env, adminUser, { confirm_password: confirmPassword }, 'media deletion');
+  if (!stepUp.ok) return stepUp.response;
   const bucket = env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
   if (bucket && typeof bucket.delete === 'function' && asset.object_key) {
     try { await bucket.delete(asset.object_key); } catch {}

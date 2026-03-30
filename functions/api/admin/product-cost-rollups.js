@@ -28,6 +28,8 @@ export async function onRequestGet(context) {
       SUM(CASE WHEN prl.resource_kind = 'supply' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) ELSE 0 END) AS supply_cost_cents,
       SUM(CASE WHEN prl.resource_kind = 'tool' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) ELSE 0 END) AS tool_usage_cost_cents,
       SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 1 ELSE 0 END) AS missing_cost_links,
+      MIN(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL THEN CAST(MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) / prl.quantity_used AS INTEGER) ELSE NULL END) AS buildable_units_from_resources,
+      SUM(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL AND MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) < COALESCE(prl.quantity_used,0) THEN 1 ELSE 0 END) AS resource_shortage_links,
       GROUP_CONCAT(DISTINCT CASE WHEN sii.site_item_inventory_id IS NULL THEN prl.resource_kind || ':' || prl.source_key ELSE NULL END) AS missing_resources
     FROM products p
     LEFT JOIN product_resource_links prl ON prl.product_id = p.product_id
@@ -57,6 +59,8 @@ export async function onRequestGet(context) {
       gross_margin_cents: margin,
       gross_margin_ratio: price > 0 ? Number((margin / price).toFixed(4)) : 0,
       missing_cost_links: Number(row.missing_cost_links || 0),
+      buildable_units_from_resources: row.buildable_units_from_resources == null ? null : Number(row.buildable_units_from_resources || 0),
+      resource_shortage_links: Number(row.resource_shortage_links || 0),
       missing_resources: row.missing_resources || ''
     };
   });
@@ -69,6 +73,7 @@ export async function onRequestGet(context) {
       total_products: items.length,
       products_with_costs: items.filter((row) => row.linked_resource_count > 0).length,
       products_missing_cost_links: items.filter((row) => row.missing_cost_links > 0).length,
+      products_with_resource_shortages: items.filter((row) => Number(row.resource_shortage_links || 0) > 0).length,
       average_margin_ratio: items.length ? Number((items.reduce((sum, row) => sum + Number(row.gross_margin_ratio || 0), 0) / items.length).toFixed(4)) : 0
     }
   });
