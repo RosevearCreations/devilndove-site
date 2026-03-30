@@ -401,3 +401,5 @@ ALTER TABLE supplier_purchase_orders ADD COLUMN received_completed_at TEXT;
 ALTER TABLE supplier_purchase_order_items ADD COLUMN quantity_received INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE supplier_purchase_order_items ADD COLUMN incoming_applied_at TEXT;
 ALTER TABLE supplier_purchase_order_items ADD COLUMN received_at TEXT;
+
+-- Current pass note: no new schema objects were required. This pass hardened product-level reservation flow, mobile bootstrap reliability, and catalog/filter API responses using existing tables.

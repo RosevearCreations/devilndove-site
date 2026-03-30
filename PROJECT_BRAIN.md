@@ -179,3 +179,6 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Public tools and supplies now have centralized public API read paths that prefer D1-backed catalog records before JSON fallback.
 - Gallery/creations reads are more centralized as migration continues away from scattered direct JSON fetches.
 - Purchase-order lifecycle now feeds inventory state more directly by applying ordered quantities to incoming stock and received quantities to on-hand stock.
+
+- Inventory authority now includes product-level reservation/release actions that operate across linked tool/supply records, not only one inventory row at a time.
+- Public catalog APIs now expose category/type filter summaries to support richer discovery UX without returning to scattered JSON parsing.

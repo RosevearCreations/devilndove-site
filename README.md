@@ -251,3 +251,7 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 ## Current pass update
 - Public tools and supplies pages now have centralized API read paths (`/api/tools`, `/api/supplies`) with JSON fallback during migration.
 - Purchase-order receiving can now apply ordered quantities into incoming stock and received quantities into on-hand stock.
+
+- Added shared product-level inventory reservation/release actions for linked resource governance.
+- Public `/api/tools`, `/api/supplies`, and `/api/creations` now include filter-group summaries for discovery/filter UX.
+- Hardened `/api/admin/product-mobile-bootstrap` by switching it to shared admin auth and corrected inventory reorder fields.

@@ -151,3 +151,7 @@ Current-pass emphasis:
 - Public tools and supplies now prefer centralized `/api/tools` and `/api/supplies` read paths with JSON fallback during migration.
 - Gallery and creations now prefer centralized API reads instead of depending only on direct items-for-sale JSON reads.
 - Supplier purchase orders now support ordered-to-incoming and received-to-on-hand inventory automation with per-line received quantity tracking.
+
+- Product-level inventory reservation now has a shared admin action path so linked tools/supplies can be reserved or released together during build/publish prep.
+- Public tools, supplies, and creations APIs now expose filter-group summaries for category/type discovery improvements.
+- Mobile product bootstrap now uses the shared admin auth helper and corrected inventory reorder fields to avoid false bootstrap failures.

@@ -191,3 +191,6 @@ New current-pass backend additions:
 ## Current pass update
 - Added public read endpoints: `/functions/api/tools.js` and `/functions/api/supplies.js`.
 - Updated purchase-order handling so status changes can move inventory into incoming and on-hand states.
+
+- `functions/api/admin/site-item-inventory.js` now supports product-level reservation/release actions across linked resources.
+- `functions/api/admin/product-mobile-bootstrap.js` is part of the phone-first product entry path and now relies on shared admin auth helpers.

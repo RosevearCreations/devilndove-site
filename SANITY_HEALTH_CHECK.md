@@ -82,3 +82,7 @@ This build is in a better state for day-to-day browsing and admin use than the p
 ## Current pass update
 - Public read-path duplication was reduced again by adding centralized `/api/tools` and `/api/supplies` endpoints and using API-first reads for gallery/creations migration paths.
 - Supplier purchase-order workflow now updates inventory more honestly when orders are marked ordered or received.
+
+- Product-level resource reservation actions are now present in admin inventory workflows.
+- Mobile quick-product bootstrap has been hardened against false unauthorized/bootstrap failures.
+- Media asset admin patching now supports batch sort/variant updates and no longer references an undefined confirmation variable.

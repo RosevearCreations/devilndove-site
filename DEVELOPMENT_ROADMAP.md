@@ -121,3 +121,10 @@
 - Reduced another public JSON duplication point by adding centralized tools/supplies API reads for outward-facing pages and search.
 - Moved purchase-order receiving closer to authority by applying ordered quantities to incoming stock and received quantities to on-hand stock.
 - Remaining inventory work should now focus more on reservation governance and UI depth instead of basic supplier receiving math.
+
+## Current pass completion update
+
+- Added product-level reservation actions for linked tool/supply inventory.
+- Product cost/reporting endpoints now expose buildable-unit and resource-shortage signals.
+- Public catalog APIs now expose filter-group summaries for stronger category/discovery UX.
+- Mobile quick-product bootstrap reliability improved by switching to shared admin auth and corrected inventory-field usage.

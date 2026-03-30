@@ -242,3 +242,24 @@ All code-side items that were realistically actionable inside this repo pass wer
 
 #### Remaining risk
 - Mixed authority still exists in some areas, but another outward-facing JSON duplication point has been reduced.
+
+
+## Current pass completion update
+
+### 3. Inventory authority
+#### Addressed in this pass
+- Added product-level reservation actions so admin can reserve or release all linked tool/supply inventory for a product in one request instead of adjusting every item manually.
+- Product cost rollups and product-list responses now expose `buildable_units_from_resources` and `resource_shortage_links` to make resource pressure and reservation risk more visible before publish/build decisions.
+- The quick mobile-product bootstrap endpoint now uses the shared admin auth path and the correct inventory reorder field, which reduces false 500s during phone-first product entry.
+
+#### Still open
+- Reservation controls still need broader frontend coverage so every legacy UI path uses the stronger product-level reservation workflow.
+
+### 4. Product/media workflow
+#### Addressed in this pass
+- Fixed the admin media asset patch route so it no longer references an undefined step-up variable.
+- Added bulk media metadata/sort updates through the media-assets patch route so reorder and variant-role cleanup can be applied in batches instead of one image at a time.
+
+### Customer-experience risks
+#### Addressed in this pass
+- Public tools, supplies, and creations APIs now return filter-group summaries for categories/types, which gives the storefront a stronger base for broader discovery filters and landing-page navigation.

@@ -245,3 +245,5 @@ Durable audit trail of governed product review actions such as approve, needs ch
 ## Current pass update
 - `supplier_purchase_orders` now includes ordered/received lifecycle timestamps.
 - `supplier_purchase_order_items` now track `quantity_received`, `incoming_applied_at`, and `received_at` to support inventory receiving automation.
+
+- No new tables were required in this pass. Inventory governance improvements were implemented through action-path logic and existing `site_item_inventory`, `site_inventory_movements`, and `product_resource_links` tables.
