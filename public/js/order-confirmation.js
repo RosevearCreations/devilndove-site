@@ -1,6 +1,6 @@
 // File: /public/js/order-confirmation.js
 // Brief description: Handles the checkout confirmation page, including guest snapshots
-// and PayPal/Stripe return completion.
+// plus PayPal and Stripe return completion.
 
 document.addEventListener("DOMContentLoaded", () => {
   const messageEl = document.getElementById("orderConfirmationMessage");
@@ -157,15 +157,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setMessage("Loading your order confirmation...");
     renderFromUrlState(state);
     if (saved && confirmationMatchesState(saved, state)) renderFromSavedConfirmation(saved, state);
+    if (state.payment_provider === 'stripe' && state.stripe_session_id && state.order_id) {
+      setMessage('Finalizing your Stripe payment...');
+      const stripeResult = await finalizeStripeReturn(state);
+      if (stripeResult?.payment_status) state.payment_status = stripeResult.payment_status;
+    }
     if (state.payment_provider === 'paypal' && state.paypal_token && state.order_id) {
       setMessage('Finalizing your PayPal payment...');
       const paypalResult = await finalizePaypalReturn(state);
       if (paypalResult?.payment_status) state.payment_status = paypalResult.payment_status;
-    }
-    if (state.payment_provider === 'stripe' && state.stripe_session_id && state.order_id) {
-      setMessage('Confirming your Stripe payment...');
-      const stripeResult = await finalizeStripeReturn(state);
-      if (stripeResult?.payment_status) state.payment_status = stripeResult.payment_status;
     }
     const payload = state.order_id ? await fetchOrderDetail(state.order_id) : null;
     if (payload?.order) { renderFromOrderPayload(payload, state); setMessage(''); return; }
