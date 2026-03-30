@@ -127,3 +127,8 @@ Current-pass emphasis:
 - Product readiness is now a first-class admin concern.
 - Notification outbox is now present for later email/SMS delivery work.
 
+## Current pass update
+- Stripe checkout return confirmation now has a dedicated `/api/stripe-return` path so the confirmation page can reconcile Stripe Checkout sessions even before the webhook worker catches up.
+- The order confirmation client now finalizes Stripe return sessions in the same way it already finalized PayPal returns, reducing the chance of a paid Stripe order looking stuck in `pending` on first load.
+- Finished creations now have a shared `/api/creations` read path so the public creations page and site search no longer maintain separate direct JSON-reading logic for the same items-for-sale source.
+- No brand-new schema tables were required for this pass; the schema truth remains current, but the docs now reflect the stronger Stripe return flow and the reduced JSON duplication around creations.

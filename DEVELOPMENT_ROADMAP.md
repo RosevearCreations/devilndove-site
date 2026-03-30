@@ -88,3 +88,13 @@
 - Addressed the draft-to-publish governance item with product readiness checks and storefront-readiness flags.
 - The roadmap is not fully finished yet because Stripe checkout completion, real receipt delivery, deeper attribution, and trusted movie enrichment still remain open.
 
+## Current pass completion update
+- Reduced the Stripe completion gap with a dedicated checkout return reconciliation endpoint at `/api/stripe-return` and confirmation-page support for Stripe session finalization.
+- Reduced public data duplication by centralizing finished creations behind `/api/creations` instead of having multiple client-side readers for the same items-for-sale JSON.
+- No new schema tables were required in this pass; the emphasis was payment completion hardening and lower-risk public data reads.
+
+## Still intentionally not marked complete
+- Full worker-driven webhook replay execution is still not complete.
+- Real outbound receipt delivery from `notification_outbox` is still not complete.
+- Provider-confirmed dispute sync is still not complete.
+- Finished creations still need their eventual full D1 authority model rather than a centralized API over JSON.

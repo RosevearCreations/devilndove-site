@@ -220,3 +220,6 @@ Durable local queue for outbound receipts and related customer/admin notificatio
 ### site_item_inventory authority fields
 `supplier_contact`, `reservation_notes`, `last_reorder_requested_at`, and `last_counted_at` support more trustworthy inventory operations.
 
+## Current pass schema note
+- No new required tables or columns were introduced in this pass.
+- The current behavioral change is that Stripe return reconciliation now has a dedicated endpoint layer, and finished creations now have a shared public API layer for staged migration away from duplicated direct JSON reads.

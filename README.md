@@ -225,3 +225,8 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Expanded dashboard and visitor analytics with funnel-style metrics.
 - Added product readiness checks so draft/publish workflow has clearer storefront-readiness signals.
 
+## Current pass update
+- Added `/api/stripe-return` so Stripe Checkout returns can reconcile local order/payment state immediately on the confirmation page.
+- Updated `public/js/order-confirmation.js` so Stripe return sessions are finalized client-side in the same spirit as the existing PayPal return capture flow.
+- Added `/api/creations` so the creations page and public search share one read path for the items-for-sale source instead of duplicating direct JSON access logic.
+- No new schema tables were required in this pass.

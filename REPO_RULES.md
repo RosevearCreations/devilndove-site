@@ -111,3 +111,7 @@ Current-pass rules added:
 - Prefer explicit inventory actions (reserve, release, receive, reorder-request) over silent count edits wherever practical.
 - Expose storefront readiness as a computed/admin-visible state before broadening publish automation.
 
+## Current pass reminder
+- Keep Stripe return reconciliation aligned between `/api/stripe-return`, `stripe-webhook.js`, and the confirmation page so customer-visible payment state does not drift.
+- Keep finished-creations reads centralized through `/api/creations` until the later D1 authority migration is complete.
+- No new schema tables were introduced in this pass, so schema docs should stay synchronized mainly through behavioral and endpoint notes.

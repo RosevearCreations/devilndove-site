@@ -54,3 +54,7 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Draft-to-publish workflow now has readiness signals.
 - The largest remaining unresolved areas are true outbound receipts, full Stripe completion, deeper provider-confirmed dispute sync, final D1 authority cleanup, and trusted movie metadata enrichment.
 
+## Current pass health update
+- Stripe completion is in a better state than before because the confirmation page can now reconcile Stripe Checkout sessions directly through `/api/stripe-return`.
+- Public creations data reads are slightly healthier because the creations page and search now share one API path instead of duplicating JSON-reading logic.
+- The project still needs worker-grade webhook replay and real outbound notification delivery, but customer-facing order confirmation is less fragile than in the prior pass.

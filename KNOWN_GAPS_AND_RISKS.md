@@ -154,3 +154,27 @@ This pass concentrated on working down the open risk list in order instead of sk
 4. Continue moving inventory and catalog operations toward a single D1 authority model.
 5. Expand analytics into deeper attribution and conversion diagnostics.
 6. Resume trusted movie metadata enrichment once IMDb/AWS access is available.
+
+## Current pass addendum
+
+### Stripe checkout completion
+#### Addressed in this pass
+- Added a dedicated `/api/stripe-return` endpoint that retrieves the Stripe Checkout session directly and updates local payment/order records when the customer lands on the confirmation page.
+- Updated the confirmation page client so Stripe returns are finalized on arrival instead of waiting only on webhook timing.
+
+#### Still open
+- Worker-driven replay/dispatch still needs to mature so provider events can be reprocessed automatically without relying on an admin action.
+- Receipt sending is still queued/foundation-level rather than a full delivery workflow.
+
+#### Remaining risk
+- Stripe payment state is safer on customer return than before, but delayed or missing provider webhooks can still create reconciliation cleanup work later.
+
+### Public creations data duplication
+#### Addressed in this pass
+- Added `/api/creations` so the public creations page and site search now share one centralized read path for the items-for-sale source.
+
+#### Still open
+- Finished creations are not yet fully D1-authoritative.
+
+#### Remaining risk
+- The creations source is easier to maintain now, but it still ultimately depends on JSON until the finished-product migration is completed.

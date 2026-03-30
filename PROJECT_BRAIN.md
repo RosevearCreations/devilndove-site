@@ -158,3 +158,7 @@ Most important next layers after this pass are:
 
 Current pass emphasis: risk reduction through payment safety, inventory authority, media lifecycle controls, funnel analytics, and draft readiness rather than only visual polish.
 
+## Current pass update
+- Stripe checkout no longer depends only on webhook timing for the customer-facing confirmation step. `/api/stripe-return` now retrieves the Checkout Session directly and reconciles the order on return.
+- Finished creations now use a shared `/api/creations` layer so the public page and search flow rely on one central source path while the later D1 migration is staged more carefully.
+- No new schema tables were added in this pass.
