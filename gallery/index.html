@@ -174,7 +174,8 @@
 <script src="/js/main.js"></script>
 <script>
     (function () {
-      const DATA_URL = "/data/itemsforsale/itemsforsale_items_master.json";
+      const DATA_URL = "/api/creations?limit=500";
+      const DATA_FALLBACK_URL = "/data/itemsforsale/itemsforsale_items_master.json";
 
       function safeText(v){ return (v == null ? "" : String(v)).trim(); }
       function norm(v){ return safeText(v).toLowerCase(); }
@@ -193,6 +194,7 @@
       }
 
       function itemImageUrl(meta, it){
+        if (safeText(it.image) || safeText(it.image_url)) return safeText(it.image) || safeText(it.image_url);
         const origin = safeText(meta.asset_origin) || "https://assets.devilndove.com";
         const key = safeText(it.r2_object_key) || ("Itemsforsale/" + safeText(it.image_file));
         return origin + "/" + encodeKeyPath(key.replace(/^\/+/, ""));
@@ -288,13 +290,24 @@
           const r = await fetch(DATA_URL, { cache: "no-store" });
           if (!r.ok) throw new Error("JSON load failed: " + r.status);
           meta = await r.json();
-          items = Array.isArray(meta.items) ? meta.items.slice() : [];
+          items = Array.isArray(meta.items) ? meta.items.slice() : (Array.isArray(meta) ? meta.slice() : []);
           render();
           qEl.addEventListener("input", render);
           typeEl.addEventListener("change", render);
         } catch (e){
           console.error(e);
-          gridEl.innerHTML = `<div class="small">Could not load <code>${escHtml(DATA_URL)}</code></div>`;
+          try {
+            const r = await fetch(DATA_FALLBACK_URL, { cache: "no-store" });
+            if (!r.ok) throw new Error("Fallback JSON load failed: " + r.status);
+            meta = await r.json();
+            items = Array.isArray(meta.items) ? meta.items.slice() : (Array.isArray(meta) ? meta.slice() : []);
+            render();
+            qEl.addEventListener("input", render);
+            typeEl.addEventListener("change", render);
+          } catch (fallbackError) {
+            console.error(fallbackError);
+            gridEl.innerHTML = `<div class="small">Could not load <code>${escHtml(DATA_URL)}</code></div>`;
+          }
         }
       }
 

@@ -91,48 +91,58 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function fetchTools(query) {
-    const migrated = await fetchCatalogItems('tool', 'Tool', '/tools/', query);
-    if (migrated.length) return migrated;
-    const rows = await fetchJson('/data/toolshed/toolshed_items_master.json');
-    if (!Array.isArray(rows)) return [];
-    return rows.map((row) => ({
-      type: 'Tool',
-      name: row.item_name_suggested || row.brand_guess || 'Workshop tool',
-      summary: [row.category, row.notes, row.location_zone, row.location_shelf].filter(Boolean).join(' • '),
-      url: '/tools/',
-      score: scoreText(query, row.item_name_suggested, row.brand_guess, row.category, row.notes, row.location_zone, row.location_shelf)
-    })).filter((row) => row.score > 0);
+    try {
+      const response = await fetch(`/api/tools?q=${encodeURIComponent(query)}&limit=250`);
+      const data = await response.json();
+      if (!response.ok || !data?.ok) return [];
+      return (Array.isArray(data.items) ? data.items : []).map((row) => ({
+        type: 'Tool',
+        name: row.item_name_suggested || row.name || row.brand_guess || 'Workshop tool',
+        summary: [row.primary_area, row.category, row.notes_public, row.notes, row.location_zone, row.location_shelf].filter(Boolean).join(' • '),
+        url: '/tools/',
+        image: row.image_url || '',
+        score: scoreText(query, row.item_name_suggested, row.name, row.brand_guess, row.category, row.primary_area, row.notes_public, row.notes, row.location_zone, row.location_shelf)
+      })).filter((row) => row.score > 0 || !query);
+    } catch {
+      return [];
+    }
   }
 
   async function fetchSupplies(query) {
-    const migrated = await fetchCatalogItems('supply', 'Supply', '/supplies/', query);
-    if (migrated.length) return migrated;
-    const rows = await fetchJson('/data/supplies/supplies_items_master.json');
-    if (!Array.isArray(rows)) return [];
-    return rows.map((row) => ({
-      type: 'Supply',
-      name: row.item_name_suggested || row.consumable_type || 'Workshop supply',
-      summary: [row.consumable_type, row.process_tags, row.notes, row.storage_location].filter(Boolean).join(' • '),
-      url: '/supplies/',
-      score: scoreText(query, row.item_name_suggested, row.consumable_type, row.process_tags, row.notes, row.storage_location)
-    })).filter((row) => row.score > 0);
+    try {
+      const response = await fetch(`/api/supplies?q=${encodeURIComponent(query)}&limit=250`);
+      const data = await response.json();
+      if (!response.ok || !data?.ok) return [];
+      return (Array.isArray(data.items) ? data.items : []).map((row) => ({
+        type: 'Supply',
+        name: row.item_name_suggested || row.name || row.consumable_type || 'Workshop supply',
+        summary: [row.consumable_type, row.primary_area, row.process_tags, row.notes, row.storage_location].filter(Boolean).join(' • '),
+        url: '/supplies/',
+        image: row.image_url || '',
+        score: scoreText(query, row.item_name_suggested, row.name, row.consumable_type, row.primary_area, row.process_tags, row.notes, row.storage_location)
+      })).filter((row) => row.score > 0 || !query);
+    } catch {
+      return [];
+    }
   }
 
   async function fetchCreations(query) {
-    const migrated = await fetchCatalogItems('creation', 'Creation', '/creations/', query);
-    if (migrated.length) return migrated;
-    const data = await fetchJson('/data/site/featured-items.json');
-    const rows = Array.isArray(data?.items) ? data.items : [];
-    return rows.map((row) => ({
-      type: 'Creation',
-      name: row.name || 'Featured creation',
-      summary: [row.section, row.type, row.alt].filter(Boolean).join(' • '),
-      url: '/creations/',
-      image: row.image || '',
-      score: scoreText(query, row.name, row.section, row.type, row.alt)
-    })).filter((row) => row.score > 0);
+    try {
+      const response = await fetch(`/api/creations?q=${encodeURIComponent(query)}&limit=250`);
+      const data = await response.json();
+      if (!response.ok || !data?.ok) return [];
+      return (Array.isArray(data.items) ? data.items : []).map((row) => ({
+        type: 'Creation',
+        name: row.name || row.title || 'Featured creation',
+        summary: [row.section, row.type, row.alt, row.caption, row.description].filter(Boolean).join(' • '),
+        url: '/creations/',
+        image: row.image || row.image_url || '',
+        score: scoreText(query, row.name, row.title, row.section, row.type, row.alt, row.caption, row.description)
+      })).filter((row) => row.score > 0 || !query);
+    } catch {
+      return [];
+    }
   }
-
 
   async function fetchMovies(query) {
     try {
