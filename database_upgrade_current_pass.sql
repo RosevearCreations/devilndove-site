@@ -403,3 +403,6 @@ ALTER TABLE supplier_purchase_order_items ADD COLUMN incoming_applied_at TEXT;
 ALTER TABLE supplier_purchase_order_items ADD COLUMN received_at TEXT;
 
 -- Current pass note: no new schema objects were required. This pass hardened product-level reservation flow, mobile bootstrap reliability, and catalog/filter API responses using existing tables.
+
+
+-- Current pass note: no new schema objects were required. Existing notification_outbox usage was expanded for immediate receipt dispatch, and storefront discovery/filter improvements used existing product/catalog schema.

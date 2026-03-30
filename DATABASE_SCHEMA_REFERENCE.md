@@ -247,3 +247,9 @@ Durable audit trail of governed product review actions such as approve, needs ch
 - `supplier_purchase_order_items` now track `quantity_received`, `incoming_applied_at`, and `received_at` to support inventory receiving automation.
 
 - No new tables were required in this pass. Inventory governance improvements were implemented through action-path logic and existing `site_item_inventory`, `site_inventory_movements`, and `product_resource_links` tables.
+
+
+## Current pass update
+- No new schema objects were required in this pass.
+- Existing `notification_outbox` is now used more actively because refund/dispute admin actions and provider-confirmed Stripe webhook events both attempt immediate delivery processing.
+- Existing storefront/product tables now support richer outward-facing discovery through API-level filter summaries without additional schema changes.

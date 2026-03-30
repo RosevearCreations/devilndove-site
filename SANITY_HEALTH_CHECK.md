@@ -86,3 +86,15 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Product-level resource reservation actions are now present in admin inventory workflows.
 - Mobile quick-product bootstrap has been hardened against false unauthorized/bootstrap failures.
 - Media asset admin patching now supports batch sort/variant updates and no longer references an undefined confirmation variable.
+
+
+## Current pass health update
+- Customer receipt delivery is more real than before because refund/dispute actions now attempt immediate queued-email dispatch instead of only storing queue rows.
+- Stripe provider-confirmed refund/dispute customer notices now have a direct queue-and-dispatch path when customer email and mail credentials are present.
+- Public product discovery moved forward with live category/colour/type summaries from `/api/products`.
+- Public tools and supplies moved one step closer to single read authority by using their dedicated APIs on the outward-facing pages.
+
+## Remaining honest gaps
+- non-Stripe provider-confirmed dispute automation is still not complete
+- broader role/permission segmentation is still a future security pass
+- trusted movie enrichment still depends on external accepted metadata access

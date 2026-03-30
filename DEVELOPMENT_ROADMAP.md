@@ -128,3 +128,9 @@
 - Product cost/reporting endpoints now expose buildable-unit and resource-shortage signals.
 - Public catalog APIs now expose filter-group summaries for stronger category/discovery UX.
 - Mobile quick-product bootstrap reliability improved by switching to shared admin auth and corrected inventory-field usage.
+
+
+## Current pass completion update
+- Receipt delivery is now more operational because admin refund/dispute actions and Stripe provider-confirmed webhook events both try to dispatch queued notifications immediately when delivery credentials exist.
+- Storefront discovery moved forward with live `/api/products` filter summaries plus dedicated tool/supply public API usage on the outward-facing pages.
+- Remaining strongest next steps are still deeper role segmentation, broader reservation UI coverage, fuller provider coverage beyond Stripe, and trusted movie enrichment from an accepted external source.

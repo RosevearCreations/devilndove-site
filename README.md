@@ -255,3 +255,10 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Added shared product-level inventory reservation/release actions for linked resource governance.
 - Public `/api/tools`, `/api/supplies`, and `/api/creations` now include filter-group summaries for discovery/filter UX.
 - Hardened `/api/admin/product-mobile-bootstrap` by switching it to shared admin auth and corrected inventory reorder fields.
+
+
+## Current pass update
+- Refund/dispute actions now attempt immediate queued receipt delivery when mail credentials are configured.
+- Stripe webhook reconciliation now also queues and attempts provider-confirmed refund/dispute customer notices.
+- `/api/products` now returns discovery-friendly filter summaries for category, colour, and product type.
+- Public tools and supplies pages now consume their dedicated centralized APIs instead of the broader generic catalog endpoint.

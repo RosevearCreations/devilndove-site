@@ -194,3 +194,10 @@ New current-pass backend additions:
 
 - `functions/api/admin/site-item-inventory.js` now supports product-level reservation/release actions across linked resources.
 - `functions/api/admin/product-mobile-bootstrap.js` is part of the phone-first product entry path and now relies on shared admin auth helpers.
+
+
+## Current pass update
+- `functions/api/admin/payment-actions.js` now queues and attempts immediate customer receipt delivery for refund/dispute admin actions.
+- `functions/api/stripe-webhook.js` now also queues provider-confirmed Stripe refund/dispute customer notices when a local order email is present.
+- `functions/api/products.js` now returns product filter summaries for category/colour/type.
+- `tools/index.html` and `supplies/index.html` now consume `/api/tools` and `/api/supplies` directly instead of the generic catalog-items endpoint.

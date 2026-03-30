@@ -353,7 +353,7 @@
       }
       async function fetchCatalogItems(){
         try {
-          const response = await fetch('/api/catalog-items?item_kind=tool&limit=500');
+          const response = await fetch('/api/tools?limit=500');
           const data = await response.json();
           if (!response.ok || !data?.ok) return [];
           return Array.isArray(data.items) ? data.items : [];
@@ -427,19 +427,18 @@
           const migrated = await fetchCatalogItems();
           if (Array.isArray(migrated) && migrated.length) {
             allTools = migrated.map((row) => {
-              const source = row.source_record && typeof row.source_record === 'object' ? row.source_record : {};
-              return Object.assign({}, source, {
-                source_key: row.source_key || source.source_key,
-                item_name_suggested: row.name || source.item_name_suggested,
-                brand_guess: row.brand || source.brand_guess,
-                category: row.category || source.category,
-                primary_area: row.subcategory || source.primary_area,
-                notes: row.notes || source.notes,
-                how_we_use: row.notes || source.how_we_use,
-                amazon_url: row.amazon_url || source.amazon_url,
-                r2_object_key: row.r2_object_key || source.r2_object_key,
-                example_image_file: source.example_image_file || '',
-                quantity_owned: row.quantity_on_hand || source.quantity_owned || 0
+              return Object.assign({}, row, {
+                source_key: row.source_key || row.id || '',
+                item_name_suggested: row.item_name_suggested || row.name || '',
+                brand_guess: row.brand_guess || row.brand || '',
+                category: row.category || '',
+                primary_area: row.primary_area || row.subcategory || '',
+                notes: row.notes || '',
+                how_we_use: row.how_we_use || row.notes || '',
+                amazon_url: row.amazon_url || '',
+                r2_object_key: row.r2_object_key || '',
+                example_image_file: row.example_image_file || '',
+                quantity_owned: row.quantity_owned || row.quantity_on_hand || 0
               });
             });
           } else {

@@ -155,3 +155,11 @@ Current-pass emphasis:
 - Product-level inventory reservation now has a shared admin action path so linked tools/supplies can be reserved or released together during build/publish prep.
 - Public tools, supplies, and creations APIs now expose filter-group summaries for category/type discovery improvements.
 - Mobile product bootstrap now uses the shared admin auth helper and corrected inventory reorder fields to avoid false bootstrap failures.
+
+
+## Current pass update
+- Admin refund/dispute actions now try to dispatch queued receipt emails immediately instead of relying only on later outbox processing.
+- Stripe webhook reconciliation now queues and attempts provider-confirmed customer notices for refund/dispute events when customer email is present.
+- `/api/products` now exposes `filter_groups` for category, colour, and product type discovery.
+- Public tools and supplies pages now read through `/api/tools` and `/api/supplies` instead of the broader generic catalog endpoint, reducing another outward-facing duplication path.
+- No new schema tables were required in this pass; the work used existing payments, notification, catalog, and storefront tables.

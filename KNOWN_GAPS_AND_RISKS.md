@@ -263,3 +263,28 @@ All code-side items that were realistically actionable inside this repo pass wer
 ### Customer-experience risks
 #### Addressed in this pass
 - Public tools, supplies, and creations APIs now return filter-group summaries for categories/types, which gives the storefront a stronger base for broader discovery filters and landing-page navigation.
+
+
+## Current pass completion update
+
+### 1. Payment and refund safety
+#### Addressed in this pass
+- Admin refund and dispute actions now try to dispatch queued receipt emails immediately after recording the local event instead of leaving all delivery to a later manual outbox sweep.
+- Stripe webhook reconciliation now queues and attempts provider-confirmed dispute and refund/customer-notice emails when a matching customer email is available.
+
+#### Still open
+- Non-Stripe provider-confirmed dispute syncing still depends on provider-specific API coverage and credentials.
+- Production delivery still depends on working mail credentials such as `RESEND_API_KEY` and `NOTIFICATION_FROM_EMAIL`.
+
+### Data-model risks
+#### Addressed in this pass
+- Public storefront product reads now expose live filter-group summaries for category, colour, and product type directly from `/api/products`, reducing more page-level discovery guesswork.
+- Public tools and supplies pages now consume their dedicated centralized APIs (`/api/tools` and `/api/supplies`) instead of the broader generic catalog endpoint, which reduces another outward-facing duplication path.
+
+#### Remaining risk
+- Products themselves are still D1-backed, but some storefront and admin workflows still need more shared API-first authority to fully retire legacy mixed paths.
+
+### Customer-experience risks
+#### Addressed in this pass
+- Shop results now expose clearer discovery context from live category/colour counts.
+- Outward-facing tool and supply discovery now leans on the dedicated centralized public APIs that already expose filter summaries.

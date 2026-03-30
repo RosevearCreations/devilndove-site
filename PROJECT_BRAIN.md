@@ -182,3 +182,9 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 
 - Inventory authority now includes product-level reservation/release actions that operate across linked tool/supply records, not only one inventory row at a time.
 - Public catalog APIs now expose category/type filter summaries to support richer discovery UX without returning to scattered JSON parsing.
+
+
+## Current pass update
+- Payment notification flow is no longer only a passive queue: admin refund/dispute actions and Stripe provider-confirmed webhook events now attempt immediate outbox delivery when mail credentials are configured.
+- Storefront product reads now expose discovery summaries for category, colour, and product type.
+- Public tools and supplies pages now rely on their dedicated centralized APIs instead of the generic catalog endpoint, which continues the migration away from scattered outward-facing data paths.
