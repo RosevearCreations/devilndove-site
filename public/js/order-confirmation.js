@@ -1,6 +1,6 @@
 // File: /public/js/order-confirmation.js
 // Brief description: Handles the checkout confirmation page, including guest snapshots
-// and PayPal return completion.
+// and PayPal/Stripe return completion.
 
 document.addEventListener("DOMContentLoaded", () => {
   const messageEl = document.getElementById("orderConfirmationMessage");
@@ -48,7 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
       payment_provider: String(url.searchParams.get("payment_provider") || url.searchParams.get("provider") || "").trim(),
       payment_status: String(url.searchParams.get("payment_status") || "").trim(),
       paypal_token: String(url.searchParams.get("token") || "").trim(),
-      payer_id: String(url.searchParams.get("PayerID") || "").trim()
+      payer_id: String(url.searchParams.get("PayerID") || "").trim(),
+      stripe_session_id: String(url.searchParams.get("session_id") || "").trim()
     };
   }
   function loadSavedConfirmation() {
@@ -72,6 +73,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return (!response.ok || !data?.ok) ? null : data;
     } catch { return null; }
   }
+
+  async function finalizeStripeReturn(state) {
+    if (!state.order_id || !state.stripe_session_id) return null;
+    try {
+      const response = await fetch('/api/stripe-return', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: state.order_id, session_id: state.stripe_session_id })
+      });
+      const data = await response.json().catch(() => null);
+      return (!response.ok || !data?.ok) ? null : data;
+    } catch { return null; }
+  }
+
   async function finalizePaypalReturn(state) {
     if (!state.order_id || !state.paypal_token) return null;
     try {
@@ -146,6 +161,11 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage('Finalizing your PayPal payment...');
       const paypalResult = await finalizePaypalReturn(state);
       if (paypalResult?.payment_status) state.payment_status = paypalResult.payment_status;
+    }
+    if (state.payment_provider === 'stripe' && state.stripe_session_id && state.order_id) {
+      setMessage('Confirming your Stripe payment...');
+      const stripeResult = await finalizeStripeReturn(state);
+      if (stripeResult?.payment_status) state.payment_status = stripeResult.payment_status;
     }
     const payload = state.order_id ? await fetchOrderDetail(state.order_id) : null;
     if (payload?.order) { renderFromOrderPayload(payload, state); setMessage(''); return; }

@@ -119,6 +119,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function fetchCreations(query) {
+    try {
+      const response = await fetch(`/api/creations?q=${encodeURIComponent(query)}&limit=120`);
+      const data = await response.json();
+      if (response.ok && data?.ok) {
+        return (Array.isArray(data.items) ? data.items : []).map((row) => ({
+          type: 'Creation',
+          name: row.title || 'Featured creation',
+          summary: [row.type, row.subcategory, ...(Array.isArray(row.materials) ? row.materials : []), ...(Array.isArray(row.tags) ? row.tags : []), row.description || row.notes].filter(Boolean).join(' • '),
+          url: '/creations/',
+          image: row.r2_object_key ? `${String(data.asset_origin || 'https://assets.devilndove.com').replace(/\/$/, '')}/${String(row.r2_object_key).replace(/^\//, '')}` : '',
+          score: scoreText(query, row.title, row.type, row.subcategory, ...(Array.isArray(row.materials) ? row.materials : []), ...(Array.isArray(row.tags) ? row.tags : []), row.description, row.notes)
+        })).filter((row) => row.score > 0 || !query);
+      }
+    } catch {}
     const migrated = await fetchCatalogItems('creation', 'Creation', '/creations/', query);
     if (migrated.length) return migrated;
     const data = await fetchJson('/data/site/featured-items.json');
