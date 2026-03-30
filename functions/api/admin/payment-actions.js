@@ -1,5 +1,4 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
-import { processNotificationOutbox } from "../_lib/notificationOutbox.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 
@@ -149,7 +148,7 @@ export async function onRequestPost(context) {
 
   const action = normalizeText(body.action).toLowerCase();
   const paymentId = Number(body.payment_id || 0);
-  if (!['refund','dispute'].includes(action)) return json({ ok: false, error: 'Unsupported payment action.' }, 400);
+  if (!['refund', 'dispute'].includes(action)) return json({ ok: false, error: 'Unsupported payment action.' }, 400);
   if (!Number.isInteger(paymentId) || paymentId <= 0) return json({ ok: false, error: 'A valid payment_id is required.' }, 400);
 
   const payment = await db.prepare(`
@@ -174,7 +173,9 @@ export async function onRequestPost(context) {
     const reason = normalizeText(body.reason);
     const note = normalizeText(body.note);
     const syncProvider = body.sync_provider == null ? 1 : (Number(body.sync_provider) === 1 ? 1 : 0);
-    if (!Number.isFinite(refundAmount) || refundAmount <= 0) return json({ ok: false, error: 'Refund amount must be greater than zero.' }, 400);
+    if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
+      return json({ ok: false, error: 'Refund amount must be greater than zero.' }, 400);
+    }
 
     let providerSync = { attempted: false, provider_sync_status: 'local_only', provider_sync_note: 'Refund recorded locally only.' };
     if (syncProvider) {
@@ -187,6 +188,7 @@ export async function onRequestPost(context) {
 
     const status = refundAmount >= Number(payment.amount_cents || 0) ? 'refunded' : 'partially_refunded';
     const refundStatus = providerSync.provider_refund_status || (providerSync.provider_sync_status === 'succeeded' ? 'submitted' : 'recorded');
+
     const refundInsert = await db.prepare(`
       INSERT INTO payment_refunds (
         payment_id, order_id, provider, provider_refund_id, amount_cents, currency, refund_status,
@@ -225,7 +227,14 @@ export async function onRequestPost(context) {
       WHERE order_id = ?
     `).bind(status, status, Number(payment.order_id || 0)).run();
 
-    await addHistory(db, Number(payment.order_id || 0), order.order_status || null, status === 'refunded' ? 'refunded' : order.order_status || null, note || `Refund recorded for payment ${paymentId}.`);
+    await addHistory(
+      db,
+      Number(payment.order_id || 0),
+      order.order_status || null,
+      status === 'refunded' ? 'refunded' : order.order_status || null,
+      note || `Refund recorded for payment ${paymentId}.`
+    );
+
     await queueReceipt(db, 'refund_receipt', Number(payment.order_id || 0), paymentId, normalizeText(order.customer_email), {
       order_number: order.order_number || '',
       amount_cents: refundAmount,
@@ -236,9 +245,8 @@ export async function onRequestPost(context) {
       provider: payment.provider || 'other',
       provider_sync_status: providerSync.provider_sync_status || 'local_only'
     });
-    const notificationDispatch = await processNotificationOutbox(env, { limit: 10 }).catch((error) => ({ ok: false, error: error?.message || 'Notification dispatch failed.' }));
-    const notificationDispatch = await processNotificationOutbox(env, { limit: 10 }).catch((error) => ({ ok: false, error: error?.message || 'Notification dispatch failed.' }));
-  await auditAdminAction(env, request, adminUser, {
+
+    await auditAdminAction(env, request, adminUser, {
       action_type: 'payment_refund',
       target_type: 'payment',
       target_id: paymentId,
@@ -248,12 +256,19 @@ export async function onRequestPost(context) {
         refund_amount_cents: refundAmount,
         provider: payment.provider || 'other',
         provider_sync_status: providerSync.provider_sync_status || 'local_only',
-        provider_sync_note: providerSync.provider_sync_note || null,
-        notification_dispatch: notificationDispatch
+        provider_sync_note: providerSync.provider_sync_note || null
       }
     });
 
-    return json({ ok: true, message: 'Refund recorded.', action, payment_id: paymentId, order_id: Number(payment.order_id || 0), payment_status: status, provider_sync: providerSync });
+    return json({
+      ok: true,
+      message: 'Refund recorded.',
+      action,
+      payment_id: paymentId,
+      order_id: Number(payment.order_id || 0),
+      payment_status: status,
+      provider_sync: providerSync
+    });
   }
 
   const disputeAmount = Math.max(0, Number(body.amount_cents || payment.amount_cents || 0));
@@ -272,7 +287,7 @@ export async function onRequestPost(context) {
     Number(payment.order_id || 0),
     payment.provider || 'other',
     normalizeText(body.provider_dispute_id) || null,
-    ['open','under_review','won','lost','closed'].includes(disputeStatus) ? disputeStatus : 'open',
+    ['open', 'under_review', 'won', 'lost', 'closed'].includes(disputeStatus) ? disputeStatus : 'open',
     disputeAmount,
     normalizeText(body.currency || payment.currency || order.currency || 'CAD').toUpperCase(),
     reason || null,
@@ -281,9 +296,27 @@ export async function onRequestPost(context) {
     adminUser.user_id
   ).run();
 
-  await db.prepare(`UPDATE payments SET updated_at = CURRENT_TIMESTAMP, notes = TRIM(COALESCE(notes,'') || CASE WHEN COALESCE(notes,'') = '' THEN '' ELSE ' | ' END || ?) WHERE payment_id = ?`).bind(`Dispute logged by admin${reason ? `: ${reason}` : ''}`, paymentId).run();
-  await db.prepare(`UPDATE orders SET updated_at = CURRENT_TIMESTAMP WHERE order_id = ?`).bind(Number(payment.order_id || 0)).run();
-  await addHistory(db, Number(payment.order_id || 0), order.order_status || null, order.order_status || null, note || `Dispute logged for payment ${paymentId}.`);
+  await db.prepare(`
+    UPDATE payments
+    SET updated_at = CURRENT_TIMESTAMP,
+        notes = TRIM(COALESCE(notes,'') || CASE WHEN COALESCE(notes,'') = '' THEN '' ELSE ' | ' END || ?)
+    WHERE payment_id = ?
+  `).bind(`Dispute logged by admin${reason ? `: ${reason}` : ''}`, paymentId).run();
+
+  await db.prepare(`
+    UPDATE orders
+    SET updated_at = CURRENT_TIMESTAMP
+    WHERE order_id = ?
+  `).bind(Number(payment.order_id || 0)).run();
+
+  await addHistory(
+    db,
+    Number(payment.order_id || 0),
+    order.order_status || null,
+    order.order_status || null,
+    note || `Dispute logged for payment ${paymentId}.`
+  );
+
   await queueReceipt(db, 'dispute_notice', Number(payment.order_id || 0), paymentId, normalizeText(order.customer_email), {
     order_number: order.order_number || '',
     amount_cents: disputeAmount,
@@ -293,13 +326,25 @@ export async function onRequestPost(context) {
     note,
     provider: payment.provider || 'other'
   });
+
   await auditAdminAction(env, request, adminUser, {
     action_type: 'payment_dispute',
     target_type: 'payment',
     target_id: paymentId,
     target_key: payment.provider_payment_id || payment.provider_order_id || String(paymentId),
-    details: { dispute_id: Number(insert?.meta?.last_row_id || 0), dispute_status, reason, notification_dispatch: notificationDispatch }
+    details: {
+      dispute_id: Number(insert?.meta?.last_row_id || 0),
+      dispute_status,
+      reason
+    }
   });
 
-  return json({ ok: true, message: 'Dispute recorded locally.', action, payment_id: paymentId, order_id: Number(payment.order_id || 0), dispute_status: disputeStatus || 'open' });
+  return json({
+    ok: true,
+    message: 'Dispute recorded locally.',
+    action,
+    payment_id: paymentId,
+    order_id: Number(payment.order_id || 0),
+    dispute_status: disputeStatus || 'open'
+  });
 }
