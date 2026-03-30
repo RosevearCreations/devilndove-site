@@ -139,6 +139,7 @@
 <script src="/js/main.js"></script>
 <script>
     const DATA_URL = '/api/creations';
+    const DATA_FALLBACK_URL = '/data/itemsforsale/itemsforsale_items_master.json';
     const FALLBACK_ASSET_ORIGIN = 'https://assets.devilndove.com';
 
     const state = { all: [], filtered: [] };
@@ -278,7 +279,6 @@
       try {
         const res = await fetch(DATA_URL, { cache: 'no-store' });
         const data = await res.json();
-        if (!res.ok || !data?.ok) throw new Error(data?.error || 'Failed to load creations API.');
         state.all = (data.items || []).slice().sort((a,b)=>String(a.title || '').localeCompare(String(b.title || '')));
 
         els.statTotal.textContent = String(state.all.length);
