@@ -191,3 +191,34 @@ This pass concentrated on working down the open risk list in order instead of sk
 
 ### 7. Reality check on "complete everything"
 All code-side items that were realistically actionable inside this repo pass were moved forward in code. The one area that still cannot be honestly marked fully complete is trusted movie enrichment, because that depends on an accepted external metadata source and credentials rather than a missing local code path.
+
+## Current pass completion update
+
+### 3. Inventory authority
+#### Addressed in this pass
+- Added grouped supplier reorder suggestions directly to the inventory response so reorder work can be turned into actual supplier draft orders.
+- Added `supplier_purchase_orders` and `supplier_purchase_order_items` plus `/api/admin/purchase-orders` for draft purchase-order workflow.
+- Reorder drafts now stamp `last_reorder_requested_at` and keep inventory items on the reorder list.
+
+#### Still open
+- Full receiving automation that writes back ordered quantities into incoming stock is still not complete.
+- Final end-to-end reservation governance across every legacy workflow still needs more UI coverage.
+
+### 5. Analytics and funnel reporting
+#### Addressed in this pass
+- Visitor analytics now expose top referrers, top entry paths, and zero-result site searches.
+- Dashboard summary now exposes publish-ready products, pending-review products, and active purchase-order draft counts.
+- Product cost rollups now give admin a stronger basis for build-readiness-to-margin checks.
+
+#### Still open
+- Campaign attribution is stronger than before, but still not a full ad-platform attribution layer.
+
+### Draft-to-publish workflow
+#### Addressed in this pass
+- Added `/api/admin/product-review-actions` for approve, needs-changes, publish, and unpublish operations.
+- Added `product_review_actions` so review history is durable and auditable.
+- Product list now exposes linked resource cost, rough margin, and missing-cost warnings to support better publish decisions.
+
+#### Still open
+- Role-by-role review authority is still limited by the current broad admin/member split.
+

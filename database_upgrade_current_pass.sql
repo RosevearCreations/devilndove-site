@@ -337,3 +337,54 @@ CREATE TABLE IF NOT EXISTS notification_outbox (
 );
 CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
 CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);
+
+
+-- Current pass additions: governed product review actions and supplier purchase-order drafts.
+
+
+CREATE TABLE IF NOT EXISTS supplier_purchase_orders (
+  supplier_purchase_order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  supplier_name TEXT NOT NULL,
+  supplier_contact TEXT,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','submitted','ordered','received','cancelled')),
+  notes TEXT,
+  total_estimated_cents INTEGER NOT NULL DEFAULT 0,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_supplier_purchase_orders_status ON supplier_purchase_orders(status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS supplier_purchase_order_items (
+  supplier_purchase_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  supplier_purchase_order_id INTEGER NOT NULL,
+  site_item_inventory_id INTEGER,
+  item_name TEXT NOT NULL,
+  source_type TEXT,
+  external_key TEXT,
+  quantity_ordered INTEGER NOT NULL DEFAULT 1,
+  unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  line_total_cents INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (supplier_purchase_order_id) REFERENCES supplier_purchase_orders(supplier_purchase_order_id) ON DELETE CASCADE,
+  FOREIGN KEY (site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_supplier_purchase_order_items_po ON supplier_purchase_order_items(supplier_purchase_order_id);
+
+CREATE TABLE IF NOT EXISTS product_review_actions (
+  product_review_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  action_type TEXT NOT NULL CHECK (action_type IN ('approve','request_changes','publish','unpublish')),
+  previous_review_status TEXT,
+  new_review_status TEXT,
+  previous_status TEXT,
+  new_status TEXT,
+  actor_user_id INTEGER,
+  note TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_actions(product_id, created_at DESC);
+

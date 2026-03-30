@@ -180,3 +180,9 @@ New current-pass backend additions:
 - `functions/api/_lib/notificationOutbox.js` — shared queue/dispatch helper for receipts and recovery notices.
 - `functions/api/_lib/adminStepUp.js` — shared password-confirmation step-up helper for destructive admin actions.
 - `functions/api/_lib/passwordHash.js` — shared password-hash verification helper.
+
+## Current pass additions
+- `/api/admin/product-review-actions` for governed review/publish flow
+- `/api/admin/product-cost-rollups` for build-cost and rough margin visibility
+- `/api/admin/purchase-orders` for supplier reorder draft workflow
+

@@ -239,3 +239,10 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - `RESEND_API_KEY`
 - `NOTIFICATION_FROM_EMAIL`
 - `NOTIFICATION_ADMIN_TO` or `ACCOUNT_HELP_REVIEW_EMAIL`
+
+## Current pass additions
+- Governed product review and publish actions
+- Product build-cost rollups from linked tools and supplies
+- Supplier purchase-order draft workflow
+- Expanded analytics for referrers, entry paths, and zero-result searches
+

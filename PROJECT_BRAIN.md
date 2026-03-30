@@ -166,3 +166,10 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Added shared admin step-up confirmation for destructive admin actions.
 - Added `/api/creations` as the centralized public creations read path during the JSON-to-D1 migration.
 - Stripe webhook flow now confirms local dispute records from provider events instead of leaving dispute sync fully manual.
+
+## Current pass update
+- Draft-to-publish governance is now more explicit: review actions are handled through `/api/admin/product-review-actions` and logged in `product_review_actions`.
+- Supplier reorder work now has first-class draft documents through `supplier_purchase_orders` and `supplier_purchase_order_items`.
+- Product operations now include build-cost visibility from linked tools and supplies, which helps pricing, readiness, and margin checks.
+- Analytics now expose referrers, entry paths, and zero-result search terms for clearer discovery diagnostics.
+

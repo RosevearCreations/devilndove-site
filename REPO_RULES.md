@@ -118,3 +118,9 @@ Current-pass rules added:
 - Keep outward-facing pages on the one-H1 rule. Current scan shows the exposed `index.html` pages still meet that requirement.
 - Prefer centralized API reads over direct page-level JSON when a D1-aware endpoint already exists.
 - For destructive admin actions, keep the shared step-up confirmation path in place rather than duplicating weaker one-off checks.
+
+## Current pass rule additions
+- Product publish actions should go through governed review endpoints rather than ad-hoc status edits whenever possible.
+- When linked resource cost data exists, keep publish/readiness decisions aligned with that cost visibility rather than ignoring it.
+- Reorder workflow should prefer supplier purchase-order drafts over scattered manual notes when the D1 tables are available.
+

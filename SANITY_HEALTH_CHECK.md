@@ -63,3 +63,17 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Destructive admin actions now require password confirmation.
 - Public creations now use a centralized API path instead of another page-level direct JSON dependency.
 - The biggest remaining unresolved area is trusted movie enrichment, because that depends on external metadata access rather than an unfinished local endpoint.
+
+## Current pass health update
+- Stripe return reconciliation remains in place.
+- Notification outbox dispatch remains in place.
+- Draft-to-publish governance moved forward with explicit review/publish actions and durable review logs.
+- Inventory authority moved forward with supplier purchase-order drafts and grouped reorder suggestions.
+- Product margin visibility moved forward with linked-resource cost rollups.
+- Analytics moved forward with referrer, entry-path, and zero-result search diagnostics.
+
+## Remaining honest gaps
+- worker-grade automated webhook replay/dispatch is still not fully autonomous yet
+- permission granularity still needs deeper role segmentation
+- trusted movie enrichment still depends on external accepted data access
+

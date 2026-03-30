@@ -136,3 +136,12 @@ Current-pass emphasis:
 - Shared admin step-up password confirmation now protects destructive actions.
 - Public creations now load through `/api/creations` first so finished-creation reads can keep moving away from scattered JSON-only page logic.
 - Production receipt and recovery delivery now expect mail credentials such as `RESEND_API_KEY` and `NOTIFICATION_FROM_EMAIL`.
+
+## Current pass update
+- Added governed product review actions at `/api/admin/product-review-actions` so approve, needs-changes, publish, and unpublish are now explicit audited operations instead of only status edits.
+- Added `product_review_actions` as the durable review log for draft-to-publish governance.
+- Added `/api/admin/product-cost-rollups` and expanded the product list so linked tools/supplies now surface estimated build cost, missing cost links, and rough margin visibility.
+- Added supplier purchase-order draft support with `supplier_purchase_orders` and `supplier_purchase_order_items`, plus `/api/admin/purchase-orders` for grouped reorder workflow.
+- Inventory responses now include supplier-grouped reorder suggestions so reorder work can move toward a more governed D1-first path.
+- Visitor analytics now expose top referrers, top entry paths, and zero-result site searches to improve discovery and merchandising diagnostics.
+

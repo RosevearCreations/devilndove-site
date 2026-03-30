@@ -228,3 +228,15 @@ Durable local queue for outbound receipts and related customer/admin notificatio
 - Existing `notification_outbox` is now actively used by a real dispatch helper and admin processing endpoint.
 - Existing `payment_disputes` is now updated from Stripe dispute webhook events, not only manual admin entry.
 - Existing schema now supports stronger admin step-up confirmation without another table because password confirmation is checked against the current admin session.
+
+## Current pass schema additions
+
+### `supplier_purchase_orders`
+Draft reorder header records grouped by supplier so inventory reorder work can be staged, reviewed, and later submitted.
+
+### `supplier_purchase_order_items`
+Line items for supplier purchase-order drafts, linked back to `site_item_inventory` where possible.
+
+### `product_review_actions`
+Durable audit trail of governed product review actions such as approve, needs changes, publish, and unpublish.
+

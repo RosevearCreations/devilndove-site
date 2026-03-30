@@ -103,3 +103,15 @@
 - trusted movie metadata/value enrichment remains blocked on external metadata-source access
 - full provider-confirmed dispute sync for every payment provider remains dependent on each provider's API coverage and credentials
 - full attribution and decision-grade merchandising analytics still need another pass
+
+## Current pass completion update
+- Added governed product approval/publish actions with audited review history.
+- Added product build-cost rollups so linked tool/supply costs can be checked before publishing.
+- Added supplier purchase-order draft tables and API coverage to move reorder work beyond ad-hoc notes.
+- Expanded analytics with top-referrer, entry-path, and zero-result search diagnostics.
+
+## Still intentionally not marked complete
+- fully automated worker-driven webhook retries beyond admin dispatch
+- full multi-role permission granularity beyond current admin/member model
+- fully trusted external movie enrichment and valuation data
+
