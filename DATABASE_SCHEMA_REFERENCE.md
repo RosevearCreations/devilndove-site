@@ -240,3 +240,8 @@ Line items for supplier purchase-order drafts, linked back to `site_item_invento
 ### `product_review_actions`
 Durable audit trail of governed product review actions such as approve, needs changes, publish, and unpublish.
 
+
+
+## Current pass update
+- `supplier_purchase_orders` now includes ordered/received lifecycle timestamps.
+- `supplier_purchase_order_items` now track `quantity_received`, `incoming_applied_at`, and `received_at` to support inventory receiving automation.

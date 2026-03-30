@@ -173,3 +173,9 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Product operations now include build-cost visibility from linked tools and supplies, which helps pricing, readiness, and margin checks.
 - Analytics now expose referrers, entry paths, and zero-result search terms for clearer discovery diagnostics.
 
+
+
+## Current pass update
+- Public tools and supplies now have centralized public API read paths that prefer D1-backed catalog records before JSON fallback.
+- Gallery/creations reads are more centralized as migration continues away from scattered direct JSON fetches.
+- Purchase-order lifecycle now feeds inventory state more directly by applying ordered quantities to incoming stock and received quantities to on-hand stock.

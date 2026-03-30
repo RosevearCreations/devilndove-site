@@ -311,6 +311,7 @@
 
     async function init(){
       const payload = await fetchFirst([
+        "/api/tools?limit=1000",
         "/data/toolshed/toolshed_items_master.json",
         "/data/toolshed_items_master.json",
         "/data/tools.json"

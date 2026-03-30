@@ -186,3 +186,8 @@ New current-pass backend additions:
 - `/api/admin/product-cost-rollups` for build-cost and rough margin visibility
 - `/api/admin/purchase-orders` for supplier reorder draft workflow
 
+
+
+## Current pass update
+- Added public read endpoints: `/functions/api/tools.js` and `/functions/api/supplies.js`.
+- Updated purchase-order handling so status changes can move inventory into incoming and on-hand states.

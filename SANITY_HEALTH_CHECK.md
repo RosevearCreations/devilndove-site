@@ -77,3 +77,8 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - permission granularity still needs deeper role segmentation
 - trusted movie enrichment still depends on external accepted data access
 
+
+
+## Current pass update
+- Public read-path duplication was reduced again by adding centralized `/api/tools` and `/api/supplies` endpoints and using API-first reads for gallery/creations migration paths.
+- Supplier purchase-order workflow now updates inventory more honestly when orders are marked ordered or received.

@@ -246,3 +246,8 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Supplier purchase-order draft workflow
 - Expanded analytics for referrers, entry paths, and zero-result searches
 
+
+
+## Current pass update
+- Public tools and supplies pages now have centralized API read paths (`/api/tools`, `/api/supplies`) with JSON fallback during migration.
+- Purchase-order receiving can now apply ordered quantities into incoming stock and received quantities into on-hand stock.

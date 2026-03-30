@@ -349,6 +349,8 @@ CREATE TABLE IF NOT EXISTS supplier_purchase_orders (
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','submitted','ordered','received','cancelled')),
   notes TEXT,
   total_estimated_cents INTEGER NOT NULL DEFAULT 0,
+  ordered_applied_at TEXT,
+  received_completed_at TEXT,
   created_by_user_id INTEGER,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -364,6 +366,9 @@ CREATE TABLE IF NOT EXISTS supplier_purchase_order_items (
   source_type TEXT,
   external_key TEXT,
   quantity_ordered INTEGER NOT NULL DEFAULT 1,
+  quantity_received INTEGER NOT NULL DEFAULT 0,
+  incoming_applied_at TEXT,
+  received_at TEXT,
   unit_cost_cents INTEGER NOT NULL DEFAULT 0,
   line_total_cents INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -388,3 +393,11 @@ CREATE TABLE IF NOT EXISTS product_review_actions (
 );
 CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_actions(product_id, created_at DESC);
 
+
+
+-- Current pass follow-up: purchase-order receiving automation
+ALTER TABLE supplier_purchase_orders ADD COLUMN ordered_applied_at TEXT;
+ALTER TABLE supplier_purchase_orders ADD COLUMN received_completed_at TEXT;
+ALTER TABLE supplier_purchase_order_items ADD COLUMN quantity_received INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE supplier_purchase_order_items ADD COLUMN incoming_applied_at TEXT;
+ALTER TABLE supplier_purchase_order_items ADD COLUMN received_at TEXT;

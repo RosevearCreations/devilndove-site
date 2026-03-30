@@ -115,3 +115,9 @@
 - full multi-role permission granularity beyond current admin/member model
 - fully trusted external movie enrichment and valuation data
 
+
+
+## Current pass completion update
+- Reduced another public JSON duplication point by adding centralized tools/supplies API reads for outward-facing pages and search.
+- Moved purchase-order receiving closer to authority by applying ordered quantities to incoming stock and received quantities to on-hand stock.
+- Remaining inventory work should now focus more on reservation governance and UI depth instead of basic supplier receiving math.

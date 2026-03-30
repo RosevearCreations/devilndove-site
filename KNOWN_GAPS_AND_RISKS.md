@@ -222,3 +222,23 @@ All code-side items that were realistically actionable inside this repo pass wer
 #### Still open
 - Role-by-role review authority is still limited by the current broad admin/member split.
 
+
+
+## Current pass completion update
+
+### 3. Inventory authority
+#### Addressed in this pass
+- Supplier purchase-order workflow now moves ordered quantities into `incoming_quantity` when a draft is marked ordered.
+- Supplier purchase-order receiving now moves received quantities from incoming stock into on-hand stock and records received quantity per line item.
+- Purchase-order rows now expose ordered-vs-received totals for safer receiving review.
+
+#### Still open
+- Reservation governance still needs broader UI coverage across every legacy path that can consume inventory.
+
+### Data-model risks
+#### Addressed in this pass
+- Public tools and supplies now have centralized read endpoints (`/api/tools` and `/api/supplies`) that prefer D1-backed catalog rows before falling back to legacy JSON.
+- Public gallery/creations reads now prefer centralized API paths before using the legacy items-for-sale JSON.
+
+#### Remaining risk
+- Mixed authority still exists in some areas, but another outward-facing JSON duplication point has been reduced.

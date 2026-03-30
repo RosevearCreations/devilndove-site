@@ -145,3 +145,9 @@ Current-pass emphasis:
 - Inventory responses now include supplier-grouped reorder suggestions so reorder work can move toward a more governed D1-first path.
 - Visitor analytics now expose top referrers, top entry paths, and zero-result site searches to improve discovery and merchandising diagnostics.
 
+
+
+## Current pass update
+- Public tools and supplies now prefer centralized `/api/tools` and `/api/supplies` read paths with JSON fallback during migration.
+- Gallery and creations now prefer centralized API reads instead of depending only on direct items-for-sale JSON reads.
+- Supplier purchase orders now support ordered-to-incoming and received-to-on-hand inventory automation with per-line received quantity tracking.
