@@ -19,6 +19,26 @@ function shapeProducts(rows) {
   return rows.map((row) => ({ ...row, seo_h1: row.h1_override || row.name || "" }));
 }
 
+function buildFilterGroups(products) {
+  const group = (values) => Object.entries(values).map(([label, count]) => ({ label, count })).sort((a, b) => a.label.localeCompare(b.label));
+  const categories = {};
+  const colors = {};
+  const productTypes = {};
+  products.forEach((product) => {
+    const category = normalizeText(product.product_category);
+    const color = normalizeText(product.color_name);
+    const productType = normalizeText(product.product_type);
+    if (category) categories[category] = (categories[category] || 0) + 1;
+    if (color) colors[color] = (colors[color] || 0) + 1;
+    if (productType) productTypes[productType] = (productTypes[productType] || 0) + 1;
+  });
+  return {
+    categories: group(categories),
+    colors: group(colors),
+    product_types: group(productTypes)
+  };
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -92,9 +112,10 @@ export async function onRequestGet(context) {
       if (max_price_cents != null) fbBindings.push(max_price_cents);
       if (requires_shipping === '1' || requires_shipping === '0') fbBindings.push(Number(requires_shipping));
       const rows = await runProductQuery(env, fallbackSql, fbBindings);
-      return json({ ok: true, products: shapeProducts(rows), warning: 'Fallback product query used.' });
+      const products = shapeProducts(rows);
+      return json({ ok: true, products, warning: 'Fallback product query used.', summary: { total_products: products.length, authority: 'd1_fallback_query' }, filter_groups: buildFilterGroups(products) });
     } catch (fallbackError) {
-      return json({ ok: true, products: [], warning: 'Products endpoint fallback returned no records.', error_detail: String(fallbackError?.message || primaryError?.message || 'Unknown error') });
+      return json({ ok: true, products: [], warning: 'Products endpoint fallback returned no records.', error_detail: String(fallbackError?.message || primaryError?.message || 'Unknown error'), summary: { total_products: 0, authority: 'error' }, filter_groups: { categories: [], colors: [], product_types: [] } });
     }
   }
 }

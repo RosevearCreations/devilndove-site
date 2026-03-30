@@ -100,6 +100,16 @@ function mapStripeDisputeStatus(eventType, object) {
   return 'open';
 }
 
+
+async function queueProviderNotification(env, payload) {
+  const db = getDb(env);
+  await queueNotification(db, payload).catch(() => null);
+}
+
+async function dispatchQueuedNotifications(env, limit = 5) {
+  return processNotificationOutbox(env, { limit }).catch(() => ({ ok: false }));
+}
+
 async function upsertStripeDispute(env, payment, order, object, eventType) {
   const db = getDb(env);
   const providerDisputeId = normalizeText(object?.id);
@@ -328,7 +338,7 @@ export async function onRequestPost(context) {
   }
 
   const order = await db.prepare(`
-    SELECT order_id, order_number, order_status, payment_status, total_cents, currency
+    SELECT order_id, order_number, order_status, payment_status, total_cents, currency, customer_email, customer_name
     FROM orders
     WHERE order_id = ?
     LIMIT 1
@@ -343,6 +353,25 @@ export async function onRequestPost(context) {
 
   if (eventType.startsWith('charge.dispute.')) {
     const dispute = await upsertStripeDispute(env, payment, order, object, eventType);
+    if (dispute && normalizeText(order.customer_email)) {
+      await queueProviderNotification(env, {
+        notification_kind: 'dispute_notice',
+        channel: 'email',
+        destination: normalizeText(order.customer_email),
+        related_order_id: Number(order.order_id || 0),
+        related_payment_id: Number(payment.payment_id || 0),
+        payload: {
+          order_number: order.order_number || '',
+          amount_cents: Number(object?.amount || payment.amount_cents || 0),
+          currency: normalizeText(object?.currency || order.currency || 'CAD').toUpperCase() || 'CAD',
+          customer_name: normalizeText(order.customer_name),
+          reason: normalizeText(object?.reason) || '',
+          dispute_status: dispute.dispute_status || 'open',
+          provider: 'stripe'
+        }
+      });
+      await dispatchQueuedNotifications(env, 5);
+    }
     await markWebhookEvent(env, webhookEvent.webhook_event_id, 'processed', {
       related_order_id: Number(order.order_id || 0),
       related_payment_id: Number(payment.payment_id || 0)
@@ -414,6 +443,26 @@ export async function onRequestPost(context) {
     nextOrderStatus,
     `Stripe webhook reconciled event ${eventType || "UNKNOWN"} for payment ${paymentIntentId || sessionId || "unknown"}.`
   );
+
+  if (['refunded', 'partially_refunded'].includes(localPaymentStatus) && normalizeText(order.customer_email)) {
+    await queueProviderNotification(env, {
+      notification_kind: 'refund_receipt',
+      channel: 'email',
+      destination: normalizeText(order.customer_email),
+      related_order_id: Number(order.order_id || 0),
+      related_payment_id: Number(payment.payment_id || 0),
+      payload: {
+        order_number: order.order_number || '',
+        amount_cents: Number(object?.amount_refunded || object?.amount || payment.amount_cents || 0),
+        currency: normalizeText(object?.currency || order.currency || 'CAD').toUpperCase() || 'CAD',
+        customer_name: normalizeText(order.customer_name),
+        reason: normalizeText(object?.reason || 'Provider-confirmed Stripe refund'),
+        refund_status: localPaymentStatus,
+        provider: 'stripe'
+      }
+    });
+    await dispatchQueuedNotifications(env, 5);
+  }
 
   await markWebhookEvent(env, webhookEvent.webhook_event_id, "processed", {
     related_order_id: Number(order.order_id || 0),

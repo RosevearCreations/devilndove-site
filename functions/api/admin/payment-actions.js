@@ -1,4 +1,5 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+import { processNotificationOutbox } from "../_lib/notificationOutbox.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 
@@ -235,7 +236,9 @@ export async function onRequestPost(context) {
       provider: payment.provider || 'other',
       provider_sync_status: providerSync.provider_sync_status || 'local_only'
     });
-    await auditAdminAction(env, request, adminUser, {
+    const notificationDispatch = await processNotificationOutbox(env, { limit: 10 }).catch((error) => ({ ok: false, error: error?.message || 'Notification dispatch failed.' }));
+    const notificationDispatch = await processNotificationOutbox(env, { limit: 10 }).catch((error) => ({ ok: false, error: error?.message || 'Notification dispatch failed.' }));
+  await auditAdminAction(env, request, adminUser, {
       action_type: 'payment_refund',
       target_type: 'payment',
       target_id: paymentId,
@@ -245,7 +248,8 @@ export async function onRequestPost(context) {
         refund_amount_cents: refundAmount,
         provider: payment.provider || 'other',
         provider_sync_status: providerSync.provider_sync_status || 'local_only',
-        provider_sync_note: providerSync.provider_sync_note || null
+        provider_sync_note: providerSync.provider_sync_note || null,
+        notification_dispatch: notificationDispatch
       }
     });
 
@@ -294,7 +298,7 @@ export async function onRequestPost(context) {
     target_type: 'payment',
     target_id: paymentId,
     target_key: payment.provider_payment_id || payment.provider_order_id || String(paymentId),
-    details: { dispute_id: Number(insert?.meta?.last_row_id || 0), dispute_status, reason }
+    details: { dispute_id: Number(insert?.meta?.last_row_id || 0), dispute_status, reason, notification_dispatch: notificationDispatch }
   });
 
   return json({ ok: true, message: 'Dispute recorded locally.', action, payment_id: paymentId, order_id: Number(payment.order_id || 0), dispute_status: disputeStatus || 'open' });
