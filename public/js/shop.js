@@ -69,7 +69,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       try { data = JSON.parse(rawText); } catch { throw new Error('Store data returned invalid JSON.'); }
       if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load products.');
       const products = Array.isArray(data.products) ? data.products : [];
-      if (summaryEl) summaryEl.textContent = `${products.length} product(s) found.`;
+      const categoryCount = Array.isArray(data?.filter_groups?.categories) ? data.filter_groups.categories.length : 0;
+      const colorCount = Array.isArray(data?.filter_groups?.colors) ? data.filter_groups.colors.length : 0;
+      if (summaryEl) summaryEl.textContent = `${products.length} product(s) found.${categoryCount || colorCount ? ` ${categoryCount} categor${categoryCount === 1 ? 'y' : 'ies'} and ${colorCount} colour option${colorCount === 1 ? '' : 's'} in this result set.` : ''}`;
       if (!products.length) { show(emptyEl); return; }
       renderProducts(products); show(productsEl);
       productsEl.querySelectorAll('[data-add-shop-cart-id]').forEach(button => {
