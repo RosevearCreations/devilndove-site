@@ -30,7 +30,10 @@ export async function onRequestGet(context) {
     recent_searches_count: await safeCount(db, `SELECT COUNT(*) AS count FROM site_search_events WHERE created_at >= datetime('now', '-1 day')`),
     active_visitor_sessions_count: await safeCount(db, `SELECT COUNT(*) AS count FROM site_visitor_sessions WHERE last_seen_at >= datetime('now', '-30 minutes')`),
     queued_notifications_count: await safeCount(db, `SELECT COUNT(*) AS count FROM notification_outbox WHERE status IN ('queued','retry')`),
-    audited_admin_actions_count: await safeCount(db, `SELECT COUNT(*) AS count FROM admin_action_audit WHERE created_at >= datetime('now', '-7 days')`)
+    audited_admin_actions_count: await safeCount(db, `SELECT COUNT(*) AS count FROM admin_action_audit WHERE created_at >= datetime('now', '-7 days')`),
+    pending_review_products_count: await safeCount(db, `SELECT COUNT(*) AS count FROM products WHERE review_status = 'pending_review'`),
+    publish_ready_products_count: await safeCount(db, `SELECT COUNT(*) AS count FROM products WHERE is_ready_for_storefront = 1 AND review_status IN ('approved','published')`),
+    purchase_order_drafts_count: await safeCount(db, `SELECT COUNT(*) AS count FROM supplier_purchase_orders WHERE status IN ('draft','submitted','ordered')`)
   };
 
   return json({

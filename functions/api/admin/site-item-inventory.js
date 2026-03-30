@@ -115,7 +115,20 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
     LIMIT 50
   `).all().catch(() => ({ results: [] }))) : [];
 
-  return { items: items.map(shape), summary, movements };
+  const supplier_reorder_groups = items
+    .filter((row) => Number(row.do_not_reorder || 0) !== 1)
+    .filter((row) => Number(row.is_on_reorder_list || 0) === 1 || ((Number(row.on_hand_quantity || 0) + Number(row.incoming_quantity || 0)) <= Number(row.reorder_level || 0)))
+    .reduce((acc, row) => {
+      const key = normalizeText(row.supplier_name) || 'Unassigned Supplier';
+      if (!acc[key]) acc[key] = { supplier_name: key, supplier_contact: row.supplier_contact || '', item_count: 0, estimated_total_cents: 0, items: [] };
+      const suggested_quantity = Math.max(1, Number(row.preferred_reorder_quantity || 0) || Math.max(1, Number(row.reorder_level || 0) - (Number(row.on_hand_quantity || 0) + Number(row.incoming_quantity || 0))));
+      acc[key].item_count += 1;
+      acc[key].estimated_total_cents += suggested_quantity * Number(row.unit_cost_cents || 0);
+      acc[key].items.push({ site_item_inventory_id: Number(row.site_item_inventory_id || 0), item_name: row.item_name || '', suggested_quantity, unit_cost_cents: Number(row.unit_cost_cents || 0) });
+      return acc;
+    }, {});
+
+  return { items: items.map(shape), summary, movements, supplier_reorder_groups: Object.values(supplier_reorder_groups) };
 }
 
 async function syncCatalog(db, sourceTypes = []) {
