@@ -60,6 +60,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const ready = Number(product.is_ready_for_storefront || 0) === 1;
       const reviewStatus = escapeHtml(product.review_status || 'pending_review');
       const readyNotes = escapeHtml(product.ready_check_notes || '');
+      const linkedResourceCount = Number(product.linked_resource_count || 0);
+      const linkedResourceCost = escapeHtml(formatMoney(product.linked_resource_cost_cents || 0, product.currency));
+      const grossMargin = escapeHtml(formatMoney(product.gross_margin_cents || 0, product.currency));
+      const missingCostLinks = Number(product.missing_cost_links || 0);
 
       return `
         <tr>
@@ -70,13 +74,22 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${status}<div class="small">Review: ${reviewStatus}</div><div class="small">${ready ? 'Ready for storefront' : 'Needs review'}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${price}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? '⚠️ low stock' : 'healthy'}</div><div class="small">${ready ? 'Storefront ready' : readyNotes || 'Missing storefront fields'}</div></td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? '⚠️ low stock' : 'healthy'}</div><div class="small">${ready ? 'Storefront ready' : readyNotes || 'Missing storefront fields'}</div><div class="small">Cost ${linkedResourceCost} • Margin ${grossMargin}</div><div class="small">${linkedResourceCount} linked resources${missingCostLinks ? ` • ${missingCostLinks} missing costs` : ''}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${shipping}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${taxClass}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn" type="button" data-edit-product-id="${productId}">
                 Edit
+              </button>
+              <button class="btn" type="button" data-review-action="approve" data-product-id="${productId}">
+                Approve
+              </button>
+              <button class="btn" type="button" data-review-action="request_changes" data-product-id="${productId}">
+                Needs Changes
+              </button>
+              <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}">
+                Publish
               </button>
               <button
                 class="btn"
@@ -157,6 +170,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.addEventListener("dd:product-archived", async () => {
     await loadProducts({ silent: true });
+  });
+
+  async function runReviewAction(productId, action) {
+    const note = window.prompt('Optional note for this review action:', '');
+    const payload = { product_id: Number(productId || 0), action, note: String(note || '').trim() };
+    if (action === 'publish' || action === 'unpublish') {
+      const password = window.prompt('Confirm your admin password to continue:');
+      if (!password) return;
+      payload.confirm_password = password;
+    }
+    const response = await window.DDAuth.apiFetch('/api/admin/product-review-actions', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    if (!response.ok || !data?.ok) throw new Error(data?.error || `Failed to ${action} product.`);
+    document.dispatchEvent(new CustomEvent('dd:product-updated', { detail: data.product || null }));
+  }
+
+  document.addEventListener('click', async (event) => {
+    const reviewButton = event.target.closest('[data-review-action]');
+    if (!reviewButton) return;
+    if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+    const productId = Number(reviewButton.getAttribute('data-product-id') || 0);
+    const action = String(reviewButton.getAttribute('data-review-action') || '').trim();
+    if (!productId || !action) return;
+    try {
+      await runReviewAction(productId, action);
+      await loadProducts({ silent: true });
+    } catch (error) {
+      if (errorEl) errorEl.textContent = error.message || `Failed to ${action} product.`;
+      show(errorEl);
+    }
   });
 
   if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
