@@ -163,3 +163,8 @@ Current-pass emphasis:
 - `/api/products` now exposes `filter_groups` for category, colour, and product type discovery.
 - Public tools and supplies pages now read through `/api/tools` and `/api/supplies` instead of the broader generic catalog endpoint, reducing another outward-facing duplication path.
 - No new schema tables were required in this pass; the work used existing payments, notification, catalog, and storefront tables.
+
+## Current pass update
+- Bulk product import now validates and seeds newer finished-product fields more fully: product number, category, colour, shipping code, review status, SEO rows, tags, and extra product images can all be staged during import.
+- Direct admin media upload can now attach an uploaded image directly into `product_images`/`product_image_annotations`, optionally set it as featured, and carry a simple variant-role note so the R2 upload path is more reusable across product-entry workflows.
+

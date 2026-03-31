@@ -1,3 +1,4 @@
+-- Current pass note: bulk product import now uses the existing products/product_images/product_tags/product_seo/product_image_annotations/media_assets schema more fully, but it did not require brand-new mandatory tables or columns.
 -- Current pass note: Stripe return reconciliation, notification-outbox dispatch wiring, creations API centralization, and admin step-up hardening were completed in code without requiring new mandatory schema objects.
 -- Current pass note: no brand-new required tables were added in this pass; the main work was endpoint hardening against partially migrated or lightly seeded D1 data so admin and storefront JSON routes fail gracefully instead of returning HTML errors.
 -- File: /database_upgrade_current_pass.sql

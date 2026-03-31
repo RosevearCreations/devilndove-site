@@ -288,3 +288,15 @@ All code-side items that were realistically actionable inside this repo pass wer
 #### Addressed in this pass
 - Shop results now expose clearer discovery context from live category/colour counts.
 - Outward-facing tool and supply discovery now leans on the dedicated centralized public APIs that already expose filter summaries.
+
+## Current pass completion update
+
+### Product/media workflow
+#### Addressed in this pass
+- Direct media upload can now attach an uploaded file directly into `product_images` and `product_image_annotations`, optionally set the featured image, and carry simple variant-role notes in the media record.
+- Bulk product import now seeds richer finished-product records, including SEO rows, tags, category/colour/shipping fields, and extra product-image rows.
+- Import preview now catches duplicate slugs, SKUs, and product numbers before insert, which reduces failed batches and cleanup work.
+
+#### Still open
+- True thumbnail/variant file generation is still not complete; this pass improved metadata/attachment lifecycle rather than image processing.
+

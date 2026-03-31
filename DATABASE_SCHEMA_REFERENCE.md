@@ -253,3 +253,8 @@ Durable audit trail of governed product review actions such as approve, needs ch
 - No new schema objects were required in this pass.
 - Existing `notification_outbox` is now used more actively because refund/dispute admin actions and provider-confirmed Stripe webhook events both attempt immediate delivery processing.
 - Existing storefront/product tables now support richer outward-facing discovery through API-level filter summaries without additional schema changes.
+
+## Current pass schema note
+- No new tables were added in this pass.
+- This pass instead increased use of existing schema paths: `products`, `product_images`, `product_tags`, `product_seo`, `product_image_annotations`, and `media_assets` are now used more fully by bulk import and direct media-upload flows.
+

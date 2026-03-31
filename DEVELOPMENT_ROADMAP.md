@@ -134,3 +134,14 @@
 - Receipt delivery is now more operational because admin refund/dispute actions and Stripe provider-confirmed webhook events both try to dispatch queued notifications immediately when delivery credentials exist.
 - Storefront discovery moved forward with live `/api/products` filter summaries plus dedicated tool/supply public API usage on the outward-facing pages.
 - Remaining strongest next steps are still deeper role segmentation, broader reservation UI coverage, fuller provider coverage beyond Stripe, and trusted movie enrichment from an accepted external source.
+
+## Current pass completion update
+- Product import preview now checks duplicate slugs, SKUs, and product numbers before insert, while also validating newer finished-product fields like category, colour, review status, SEO title/meta length, tags, and additional image URLs.
+- Product bulk import now seeds richer finished-product records with product number, category, colour, shipping code, review status, SEO rows, tags, and optional additional product images instead of only creating minimal draft shells.
+- Direct media upload can now attach uploaded files straight into product images/annotations, set featured images, and record variant-role notes in one step, which moves the R2 upload flow closer to a full operator-ready lifecycle.
+
+## Still intentionally not marked complete
+- thumbnail/variant file generation still needs an image-processing pass rather than only metadata/role handling
+- worker-driven webhook replay remains a later hardening layer beyond current admin-triggered dispatch
+- trusted external movie enrichment and valuation still depend on external data access
+

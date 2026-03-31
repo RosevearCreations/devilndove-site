@@ -98,3 +98,9 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - non-Stripe provider-confirmed dispute automation is still not complete
 - broader role/permission segmentation is still a future security pass
 - trusted movie enrichment still depends on external accepted metadata access
+
+## Current pass update
+- Bulk import quality improved: preview now catches duplicate slugs/SKUs/product numbers plus newer field-validation issues before insert.
+- Bulk import completeness improved: imports can now seed richer finished-product metadata, tags, SEO rows, and additional product-image rows.
+- Media upload lifecycle improved: direct R2 uploads can now attach to product galleries and optionally set the featured image in the same step.
+

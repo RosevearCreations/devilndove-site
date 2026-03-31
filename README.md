@@ -262,3 +262,8 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Stripe webhook reconciliation now also queues and attempts provider-confirmed refund/dispute customer notices.
 - `/api/products` now returns discovery-friendly filter summaries for category, colour, and product type.
 - Public tools and supplies pages now consume their dedicated centralized APIs instead of the broader generic catalog endpoint.
+
+## Current pass update
+- Bulk product import is now more production-friendly: preview checks duplicate slugs, SKUs, and product numbers, and import can seed richer finished-product fields, SEO rows, tags, and extra product images.
+- Admin media upload can now attach uploads directly to product galleries and optionally set the featured image, making the R2 upload flow more reusable during product-entry work.
+

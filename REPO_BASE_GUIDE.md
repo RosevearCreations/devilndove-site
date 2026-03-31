@@ -201,3 +201,9 @@ New current-pass backend additions:
 - `functions/api/stripe-webhook.js` now also queues provider-confirmed Stripe refund/dispute customer notices when a local order email is present.
 - `functions/api/products.js` now returns product filter summaries for category/colour/type.
 - `tools/index.html` and `supplies/index.html` now consume `/api/tools` and `/api/supplies` directly instead of the generic catalog-items endpoint.
+
+## Current pass update
+- `functions/api/admin/import-products-preview.js` now performs broader draft-import validation, including duplicate slug/SKU/product-number checks and validation for newer finished-product/SEO/image fields.
+- `functions/api/admin/import-products.js` now seeds richer finished-product records, tags, SEO rows, and extra gallery rows instead of only minimal core product fields.
+- `functions/api/admin/media-upload.js` now supports one-step attachment from R2 upload into `product_images` and `product_image_annotations`, including optional featured-image updates.
+
