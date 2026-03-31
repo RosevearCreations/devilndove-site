@@ -1,59 +1,13 @@
+import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+
 // File: /functions/api/admin/import-products.js
-// Brief description: Imports validated product rows in bulk so finished products can be seeded faster. Featured images remain optional at import time and can be reviewed later before store-ready status is applied.
+// Brief description: Imports validated product rows in bulk so finished products can be seeded faster.
+// This pass now supports more finished-product fields, optional SEO rows, tags, and extra image rows
+// so imports can produce cleaner draft records instead of partial shells.
 
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" }
-  });
+  return jsonResponse(data, status);
 }
-
-function normalizeText(value) {
-  return String(value || "").trim();
-}
-
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
-
-async function getAdminUserFromRequest(request, env) {
-  const token = getBearerToken(request);
-  if (!token) return null;
-
-  const session = await env.DB.prepare(`
-    SELECT
-      s.session_id,
-      s.user_id,
-      u.user_id AS resolved_user_id,
-      u.email,
-      u.display_name,
-      u.role,
-      u.is_active
-    FROM sessions s
-    INNER JOIN users u ON u.user_id = s.user_id
-    WHERE (s.session_token = ? OR s.token = ?)
-      AND s.expires_at > datetime('now')
-    LIMIT 1
-  `).bind(token, token).first();
-
-  if (!session) return null;
-  if (Number(session.is_active || 0) !== 1) return null;
-  if (String(session.role || '').toLowerCase() !== 'admin') return null;
-
-  return {
-    user_id: Number(session.resolved_user_id || session.user_id || 0),
-    email: session.email || '',
-    display_name: session.display_name || '',
-    role: 'admin'
-  };
-}
-
-function normalizeResults(result) {
-  return Array.isArray(result?.results) ? result.results : [];
-}
-
 
 function normalizeSlug(value) {
   return String(value || '')
@@ -61,60 +15,190 @@ function normalizeSlug(value) {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
+function parseInteger(value) {
+  if (value == null || value === '') return null;
+  const num = Number(value);
+  return Number.isInteger(num) ? num : null;
+}
+
+function normalizeBooleanFlag(value, fallback = 0) {
+  if (value == null || value === '') return fallback;
+  if ([1, '1', true, 'true', 'yes', 'y'].includes(value)) return 1;
+  if ([0, '0', false, 'false', 'no', 'n'].includes(value)) return 0;
+  return null;
+}
+
+function splitMultiValue(value) {
+  return String(value || '')
+    .split(/[|,]/)
+    .map((entry) => normalizeText(entry))
+    .filter(Boolean);
+}
+
+function normalizeReviewStatus(value) {
+  const candidate = normalizeText(value).toLowerCase();
+  return ['pending_review', 'approved', 'needs_changes', 'published'].includes(candidate)
+    ? candidate
+    : 'pending_review';
+}
+
+function normalizeStatus(value) {
+  const candidate = normalizeText(value).toLowerCase();
+  return ['draft', 'active', 'archived'].includes(candidate) ? candidate : 'draft';
+}
+
+function normalizeProductType(value) {
+  const candidate = normalizeText(value).toLowerCase();
+  return ['physical', 'digital'].includes(candidate) ? candidate : '';
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
+  const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+
   let body = {};
-  try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
+  try {
+    body = await request.json();
+  } catch {
+    return json({ ok: false, error: 'Invalid JSON body.' }, 400);
+  }
+
   const rows = Array.isArray(body.rows) ? body.rows : [];
   if (!rows.length) return json({ ok: false, error: 'rows are required.' }, 400);
 
   let inserted = 0;
   const errors = [];
+  const importedProductIds = [];
+
   for (let i = 0; i < rows.length; i += 1) {
     const row = rows[i] || {};
     const name = normalizeText(row.name);
     const slug = normalizeSlug(row.slug || row.name);
-    const product_type = normalizeText(row.product_type || 'physical').toLowerCase();
-    const status = ['draft','active','archived'].includes(normalizeText(row.status).toLowerCase()) ? normalizeText(row.status).toLowerCase() : 'draft';
-    const price_cents = Number.isInteger(Number(row.price_cents)) ? Number(row.price_cents) : null;
-    if (!name || !slug || !['physical','digital'].includes(product_type) || price_cents == null || price_cents < 0) {
+    const productType = normalizeProductType(row.product_type || 'physical');
+    const status = normalizeStatus(row.status);
+    const reviewStatus = normalizeReviewStatus(row.review_status);
+    const priceCents = parseInteger(row.price_cents);
+    const compareAtPriceCents = parseInteger(row.compare_at_price_cents);
+    const inventoryQuantity = parseInteger(row.inventory_quantity);
+    const productNumber = parseInteger(row.product_number);
+    const weightGrams = parseInteger(row.weight_grams);
+    const sortOrder = parseInteger(row.sort_order);
+    const inventoryTracking = normalizeBooleanFlag(row.inventory_tracking, 0);
+    const requiresShipping = normalizeBooleanFlag(row.requires_shipping, productType === 'physical' ? 1 : 0);
+    const taxable = normalizeBooleanFlag(row.taxable, 1);
+    const readyForStorefront = normalizeBooleanFlag(row.is_ready_for_storefront, 0);
+    const featuredImageUrl = normalizeText(row.featured_image_url) || null;
+    const additionalImageUrls = splitMultiValue(row.additional_image_urls);
+    const tags = splitMultiValue(row.tags);
+    const metaTitle = normalizeText(row.meta_title);
+    const metaDescription = normalizeText(row.meta_description);
+    const keywords = normalizeText(row.keywords || tags.join(', '));
+
+    if (!name || !slug || !['physical', 'digital'].includes(productType) || priceCents == null || priceCents < 0) {
       errors.push({ row_number: i + 1, error: 'Missing required name/slug/product_type/price_cents.' });
       continue;
     }
+
     try {
-      await env.DB.prepare(`
+      const insert = await db.prepare(`
         INSERT INTO products (
-          slug, sku, name, short_description, description, product_type, status, price_cents,
-          compare_at_price_cents, currency, taxable, tax_class_id, requires_shipping, weight_grams,
-          inventory_tracking, inventory_quantity, digital_file_url, featured_image_url, sort_order, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          slug, product_number, sku, name, product_category, color_name, shipping_code,
+          review_status, is_ready_for_storefront, ready_check_notes,
+          short_description, description, product_type, status, price_cents,
+          compare_at_price_cents, currency, taxable, tax_class_id, tax_class_code,
+          requires_shipping, weight_grams, inventory_tracking, inventory_quantity,
+          digital_file_url, featured_image_url, sort_order, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `).bind(
         slug,
+        productNumber,
         normalizeText(row.sku) || null,
         name,
+        normalizeText(row.product_category) || null,
+        normalizeText(row.color_name) || null,
+        normalizeText(row.shipping_code) || null,
+        reviewStatus,
+        readyForStorefront == null ? 0 : readyForStorefront,
+        normalizeText(row.ready_check_notes) || null,
         normalizeText(row.short_description) || null,
         normalizeText(row.description) || null,
-        product_type,
+        productType,
         status,
-        price_cents,
-        Number.isInteger(Number(row.compare_at_price_cents)) ? Number(row.compare_at_price_cents) : null,
+        priceCents,
+        compareAtPriceCents,
         normalizeText(row.currency || 'CAD').toUpperCase() || 'CAD',
-        Number(row.taxable) === 0 ? 0 : 1,
-        Number.isInteger(Number(row.tax_class_id)) ? Number(row.tax_class_id) : null,
-        Number(row.requires_shipping) === 1 ? 1 : 0,
-        Number.isInteger(Number(row.weight_grams)) ? Number(row.weight_grams) : null,
-        Number(row.inventory_tracking) === 1 ? 1 : 0,
-        Number.isInteger(Number(row.inventory_quantity)) ? Number(row.inventory_quantity) : 0,
+        taxable == null ? 1 : taxable,
+        parseInteger(row.tax_class_id),
+        normalizeText(row.tax_class_code) || null,
+        requiresShipping == null ? (productType === 'physical' ? 1 : 0) : requiresShipping,
+        weightGrams,
+        inventoryTracking == null ? 0 : inventoryTracking,
+        inventoryQuantity == null ? 0 : inventoryQuantity,
         normalizeText(row.digital_file_url) || null,
-        normalizeText(row.featured_image_url) || null,
-        Number.isInteger(Number(row.sort_order)) ? Number(row.sort_order) : 0
+        featuredImageUrl,
+        sortOrder == null ? 0 : sortOrder
       ).run();
+
+      const productId = Number(insert?.meta?.last_row_id || 0);
+      importedProductIds.push(productId);
+
+      if (featuredImageUrl) {
+        await db.prepare(`
+          INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
+          VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP)
+        `).bind(productId, featuredImageUrl, normalizeText(row.featured_image_alt || name) || name).run().catch(() => null);
+      }
+
+      for (let imageIndex = 0; imageIndex < additionalImageUrls.length; imageIndex += 1) {
+        const imageUrl = additionalImageUrls[imageIndex];
+        await db.prepare(`
+          INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
+          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        `).bind(productId, imageUrl, name, imageIndex + 1).run().catch(() => null);
+      }
+
+      for (const tag of tags) {
+        await db.prepare(`
+          INSERT INTO product_tags (product_id, tag, created_at)
+          VALUES (?, ?, CURRENT_TIMESTAMP)
+        `).bind(productId, tag).run().catch(() => null);
+      }
+
+      if (metaTitle || metaDescription || keywords || featuredImageUrl) {
+        await db.prepare(`
+          INSERT INTO product_seo (
+            product_id, meta_title, meta_description, keywords, og_title, og_description, og_image_url,
+            created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `).bind(
+          productId,
+          metaTitle || null,
+          metaDescription || null,
+          keywords || null,
+          metaTitle || name,
+          metaDescription || normalizeText(row.short_description) || null,
+          featuredImageUrl || null
+        ).run().catch(() => null);
+      }
+
       inserted += 1;
     } catch (error) {
       errors.push({ row_number: i + 1, error: error.message || 'Insert failed.' });
     }
   }
-  return json({ ok: true, inserted_count: inserted, error_count: errors.length, errors });
+
+  await auditAdminAction(env, request, adminUser, {
+    action_type: 'product_import',
+    target_type: 'product_batch',
+    target_key: `rows:${rows.length}`,
+    details: {
+      inserted_count: inserted,
+      error_count: errors.length,
+      imported_product_ids: importedProductIds.slice(0, 50)
+    }
+  });
+
+  return json({ ok: true, inserted_count: inserted, error_count: errors.length, errors, imported_product_ids: importedProductIds });
 }

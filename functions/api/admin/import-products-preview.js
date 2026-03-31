@@ -1,47 +1,12 @@
+import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+
 // File: /functions/api/admin/import-products-preview.js
 // Brief description: Previews bulk product import rows for admin workflow cleanup. It accepts
-// CSV or JSON row data, normalizes important fields, and reports validation problems so admins
-// can clean data before a full import/insert step is run.
+// CSV or JSON row data, normalizes important fields, reports validation problems, and surfaces
+// duplicate risks so admins can clean data before a full import/insert step.
 
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" }
-  });
-}
-
-function normalizeText(value) {
-  return String(value || '').trim();
-}
-
-function getBearerToken(request) {
-  const authHeader = request.headers.get('Authorization') || '';
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || '').trim() : '';
-}
-
-async function getAdminUserFromRequest(request, env) {
-  const token = getBearerToken(request);
-  if (!token) return null;
-
-  const session = await env.DB.prepare(`
-    SELECT s.user_id, u.user_id AS resolved_user_id, u.email, u.display_name, u.role, u.is_active
-    FROM sessions s
-    INNER JOIN users u ON u.user_id = s.user_id
-    WHERE (s.session_token = ? OR s.token = ?)
-      AND s.expires_at > datetime('now')
-    LIMIT 1
-  `).bind(token, token).first();
-
-  if (!session) return null;
-  if (Number(session.is_active || 0) !== 1) return null;
-  if (String(session.role || '').toLowerCase() !== 'admin') return null;
-
-  return {
-    user_id: Number(session.resolved_user_id || session.user_id || 0),
-    email: session.email || '',
-    display_name: session.display_name || ''
-  };
+  return jsonResponse(data, status);
 }
 
 function slugify(value) {
@@ -51,8 +16,50 @@ function slugify(value) {
     .replace(/^-+|-+$/g, '');
 }
 
+function parseInteger(value) {
+  if (value == null || value === '') return null;
+  const num = Number(value);
+  return Number.isInteger(num) ? num : null;
+}
+
+function normalizeBooleanFlag(value, fallback = 0) {
+  if (value == null || value === '') return fallback;
+  if ([1, '1', true, 'true', 'yes', 'y'].includes(value)) return 1;
+  if ([0, '0', false, 'false', 'no', 'n'].includes(value)) return 0;
+  return null;
+}
+
+function splitMultiValue(value) {
+  return String(value || '')
+    .split(/[|,]/)
+    .map((entry) => normalizeText(entry))
+    .filter(Boolean);
+}
+
+function normalizeStatus(value) {
+  const candidate = normalizeText(value).toLowerCase();
+  return ['draft', 'active', 'archived'].includes(candidate) ? candidate : 'draft';
+}
+
+function normalizeReviewStatus(value) {
+  const candidate = normalizeText(value).toLowerCase();
+  return ['pending_review', 'approved', 'needs_changes', 'published'].includes(candidate)
+    ? candidate
+    : 'pending_review';
+}
+
+function normalizeProductType(value) {
+  const candidate = normalizeText(value).toLowerCase();
+  return ['physical', 'digital'].includes(candidate) ? candidate : '';
+}
+
+function validateHttpUrl(value) {
+  return /^https?:\/\//i.test(normalizeText(value));
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
+  const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
@@ -69,54 +76,133 @@ export async function onRequestPost(context) {
   }
 
   const previewSlugs = new Map();
+  const previewSkus = new Map();
+  const previewProductNumbers = new Map();
   rows.forEach((row) => {
     const previewSlug = normalizeText(row?.slug) || slugify(normalizeText(row?.name));
-    if (!previewSlug) return;
-    previewSlugs.set(previewSlug, (previewSlugs.get(previewSlug) || 0) + 1);
+    const previewSku = normalizeText(row?.sku);
+    const previewProductNumber = parseInteger(row?.product_number);
+    if (previewSlug) previewSlugs.set(previewSlug, (previewSlugs.get(previewSlug) || 0) + 1);
+    if (previewSku) previewSkus.set(previewSku, (previewSkus.get(previewSku) || 0) + 1);
+    if (previewProductNumber != null) previewProductNumbers.set(String(previewProductNumber), (previewProductNumbers.get(String(previewProductNumber)) || 0) + 1);
   });
 
-  const slugCandidates = Array.from(previewSlugs.keys()).slice(0, 200);
+  const slugCandidates = Array.from(previewSlugs.keys()).slice(0, 300);
+  const skuCandidates = Array.from(previewSkus.keys()).slice(0, 300);
+  const productNumberCandidates = Array.from(previewProductNumbers.keys()).slice(0, 300);
+
   const existingSlugMap = new Map();
+  const existingSkuMap = new Map();
+  const existingProductNumberMap = new Map();
+
   if (slugCandidates.length) {
     const placeholders = slugCandidates.map(() => '?').join(',');
-    const existingRows = await env.DB.prepare(`SELECT slug FROM products WHERE slug IN (${placeholders})`).bind(...slugCandidates).all().catch(() => ({ results: [] }));
+    const existingRows = await db.prepare(`SELECT slug FROM products WHERE slug IN (${placeholders})`).bind(...slugCandidates).all().catch(() => ({ results: [] }));
     for (const existingRow of Array.isArray(existingRows?.results) ? existingRows.results : []) {
-      existingSlugMap.set(String(existingRow.slug || '').trim(), true);
+      existingSlugMap.set(normalizeText(existingRow.slug), true);
     }
   }
 
+  if (skuCandidates.length) {
+    const placeholders = skuCandidates.map(() => '?').join(',');
+    const existingRows = await db.prepare(`SELECT sku FROM products WHERE sku IN (${placeholders})`).bind(...skuCandidates).all().catch(() => ({ results: [] }));
+    for (const existingRow of Array.isArray(existingRows?.results) ? existingRows.results : []) {
+      existingSkuMap.set(normalizeText(existingRow.sku), true);
+    }
+  }
+
+  if (productNumberCandidates.length) {
+    const placeholders = productNumberCandidates.map(() => '?').join(',');
+    const existingRows = await db.prepare(`SELECT product_number FROM products WHERE product_number IN (${placeholders})`).bind(...productNumberCandidates).all().catch(() => ({ results: [] }));
+    for (const existingRow of Array.isArray(existingRows?.results) ? existingRows.results : []) {
+      existingProductNumberMap.set(String(existingRow.product_number), true);
+    }
+  }
+
+  const issueCounts = new Map();
   const preview = rows.map((row, index) => {
     const name = normalizeText(row?.name);
     const slug = normalizeText(row?.slug) || slugify(name);
     const sku = normalizeText(row?.sku);
-    const product_type = ['physical', 'digital'].includes(normalizeText(row?.product_type).toLowerCase())
-      ? normalizeText(row?.product_type).toLowerCase()
-      : '';
-    const status = ['draft', 'active', 'archived'].includes(normalizeText(row?.status).toLowerCase())
-      ? normalizeText(row?.status).toLowerCase()
-      : 'draft';
-    const price = Number(row?.price_cents);
+    const productNumber = parseInteger(row?.product_number);
+    const productCategory = normalizeText(row?.product_category);
+    const colorName = normalizeText(row?.color_name);
+    const shippingCode = normalizeText(row?.shipping_code);
+    const productType = normalizeProductType(row?.product_type);
+    const status = normalizeStatus(row?.status);
+    const reviewStatus = normalizeReviewStatus(row?.review_status);
+    const price = parseInteger(row?.price_cents);
+    const compareAtPrice = parseInteger(row?.compare_at_price_cents);
+    const inventoryQuantity = parseInteger(row?.inventory_quantity);
+    const sortOrder = parseInteger(row?.sort_order);
+    const weightGrams = parseInteger(row?.weight_grams);
+    const inventoryTracking = normalizeBooleanFlag(row?.inventory_tracking, 0);
+    const requiresShipping = normalizeBooleanFlag(row?.requires_shipping, 0);
+    const taxable = normalizeBooleanFlag(row?.taxable, 1);
+    const readyFlag = normalizeBooleanFlag(row?.is_ready_for_storefront, 0);
+    const featuredImageUrl = normalizeText(row?.featured_image_url);
+    const additionalImageUrls = splitMultiValue(row?.additional_image_urls);
+    const tags = splitMultiValue(row?.tags);
+    const metaTitle = normalizeText(row?.meta_title);
+    const metaDescription = normalizeText(row?.meta_description);
     const issues = [];
 
     if (!name) issues.push('Missing name.');
     if (!slug) issues.push('Missing slug.');
-    if (!product_type) issues.push('product_type must be physical or digital.');
-    if (!Number.isInteger(price) || price < 0) issues.push('price_cents must be a whole number.');
+    if (!productType) issues.push('product_type must be physical or digital.');
+    if (price == null || price < 0) issues.push('price_cents must be a whole number at or above zero.');
+    if (compareAtPrice != null && compareAtPrice < 0) issues.push('compare_at_price_cents must be zero or higher when provided.');
+    if (productNumber != null && productNumber <= 0) issues.push('product_number must be greater than zero when provided.');
+    if (inventoryQuantity != null && inventoryQuantity < 0) issues.push('inventory_quantity cannot be negative.');
+    if (weightGrams != null && weightGrams < 0) issues.push('weight_grams cannot be negative.');
+    if (sortOrder != null && sortOrder < 0) issues.push('sort_order cannot be negative.');
     if (slug && (previewSlugs.get(slug) || 0) > 1) issues.push('Slug is duplicated in this import batch.');
+    if (sku && (previewSkus.get(sku) || 0) > 1) issues.push('SKU is duplicated in this import batch.');
+    if (productNumber != null && (previewProductNumbers.get(String(productNumber)) || 0) > 1) issues.push('product_number is duplicated in this import batch.');
     if (slug && existingSlugMap.has(slug)) issues.push('Slug already exists in the database.');
-    if (normalizeText(row?.featured_image_url) && !/^https?:\/\//i.test(normalizeText(row?.featured_image_url))) issues.push('featured_image_url must start with http or https when provided.');
-    if (row?.inventory_tracking != null && ![0,1,'0','1',true,false].includes(row.inventory_tracking)) issues.push('inventory_tracking should be 0 or 1.');
+    if (sku && existingSkuMap.has(sku)) issues.push('SKU already exists in the database.');
+    if (productNumber != null && existingProductNumberMap.has(String(productNumber))) issues.push('product_number already exists in the database.');
+    if (featuredImageUrl && !validateHttpUrl(featuredImageUrl)) issues.push('featured_image_url must start with http or https when provided.');
+    if (additionalImageUrls.some((url) => !validateHttpUrl(url))) issues.push('additional_image_urls must all start with http or https.');
+    if (productType === 'digital' && requiresShipping === 1) issues.push('Digital products should not require shipping.');
+    if (productType === 'physical' && requiresShipping == null) issues.push('requires_shipping should be 0 or 1 for physical products.');
+    if (inventoryTracking == null) issues.push('inventory_tracking should be 0 or 1.');
+    if (requiresShipping == null) issues.push('requires_shipping should be 0 or 1.');
+    if (taxable == null) issues.push('taxable should be 0 or 1.');
+    if (readyFlag == null) issues.push('is_ready_for_storefront should be 0 or 1.');
+    if (metaTitle.length > 70) issues.push('meta_title should stay at or under 70 characters.');
+    if (metaDescription.length > 160) issues.push('meta_description should stay at or under 160 characters.');
+
+    issues.forEach((issue) => issueCounts.set(issue, (issueCounts.get(issue) || 0) + 1));
 
     return {
       row_number: index + 1,
       normalized: {
+        product_number: productNumber,
         name,
         slug,
         sku,
-        product_type: product_type || null,
+        product_category: productCategory || null,
+        color_name: colorName || null,
+        shipping_code: shippingCode || null,
+        product_type: productType || null,
         status,
-        price_cents: Number.isInteger(price) && price >= 0 ? price : null,
-        currency: normalizeText(row?.currency || 'CAD').toUpperCase() || 'CAD'
+        review_status: reviewStatus,
+        is_ready_for_storefront: readyFlag == null ? null : readyFlag,
+        price_cents: price,
+        compare_at_price_cents: compareAtPrice,
+        currency: normalizeText(row?.currency || 'CAD').toUpperCase() || 'CAD',
+        inventory_tracking: inventoryTracking,
+        inventory_quantity: inventoryQuantity == null ? 0 : inventoryQuantity,
+        requires_shipping: requiresShipping,
+        taxable,
+        weight_grams: weightGrams,
+        sort_order: sortOrder == null ? 0 : sortOrder,
+        featured_image_url: featuredImageUrl || null,
+        additional_image_urls: additionalImageUrls,
+        tags,
+        meta_title: metaTitle || null,
+        meta_description: metaDescription || null
       },
       issues,
       valid: issues.length === 0
@@ -129,7 +215,11 @@ export async function onRequestPost(context) {
     summary: {
       total_rows: preview.length,
       valid_rows: preview.filter((row) => row.valid).length,
-      invalid_rows: preview.filter((row) => !row.valid).length
+      invalid_rows: preview.filter((row) => !row.valid).length,
+      duplicate_slug_rows: preview.filter((row) => row.issues.includes('Slug is duplicated in this import batch.')).length,
+      duplicate_sku_rows: preview.filter((row) => row.issues.includes('SKU is duplicated in this import batch.')).length,
+      duplicate_product_number_rows: preview.filter((row) => row.issues.includes('product_number is duplicated in this import batch.')).length,
+      issue_breakdown: Array.from(issueCounts.entries()).map(([issue, count]) => ({ issue, count }))
     },
     requested_by: adminUser
   });
