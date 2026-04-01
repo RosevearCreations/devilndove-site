@@ -3,6 +3,18 @@ import { requireAdminStepUp } from "../_lib/adminStepUp.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
+function deriveVariantUrls(publicUrl = '') {
+  const url = normalizeText(publicUrl);
+  if (!url) return [];
+  const dotIndex = url.lastIndexOf('.');
+  if (dotIndex <= url.lastIndexOf('/')) return [];
+  const base = url.slice(0, dotIndex);
+  const ext = url.slice(dotIndex);
+  return ['thumb', 'medium', 'large', 'webp'].map((variant) => ({
+    variant,
+    url: variant === 'webp' ? `${base}.webp` : `${base}_${variant}${ext}`
+  }));
+}
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -51,7 +63,8 @@ export async function onRequestGet(context) {
     duplicate_public_url_count: Number(row.duplicate_public_url_count || 0),
     created_at: row.created_at || null,
     updated_at: row.updated_at || null,
-    deleted_at: row.deleted_at || null
+    deleted_at: row.deleted_at || null,
+    derived_variant_urls: deriveVariantUrls(row.public_url || null)
   })) });
 }
 

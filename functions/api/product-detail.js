@@ -42,10 +42,12 @@ export async function onRequestGet(context) {
     SELECT pi.product_image_id, pi.product_id, pi.image_url,
            COALESCE(pia.alt_text, pi.alt_text, p.name) AS alt_text,
            pi.sort_order, pi.created_at,
-           pia.image_title, pia.caption, pia.focal_point_x, pia.focal_point_y, pia.annotation_notes
+           pia.image_title, pia.caption, pia.focal_point_x, pia.focal_point_y, pia.annotation_notes,
+           ma.variant_role
     FROM product_images pi
     LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
     LEFT JOIN products p ON p.product_id = pi.product_id
+    LEFT JOIN media_assets ma ON ma.product_id = pi.product_id AND ma.public_url = pi.image_url AND ma.deleted_at IS NULL
     WHERE pi.product_id = ?
     ORDER BY pi.sort_order ASC, pi.product_image_id ASC
     LIMIT 20
@@ -104,5 +106,23 @@ export async function onRequestGet(context) {
     low_stock_items: resource_links.filter((row) => row.inventory && ((Number(row.inventory.on_hand_quantity || 0) - Number(row.inventory.reserved_quantity || 0) + Number(row.inventory.incoming_quantity || 0)) <= Number(row.inventory.reorder_level || 0))).length
   };
 
-  return json({ ok: true, product, images, image_annotations, resource_links, resource_summary });
+  const storefront_images = images.map((row) => ({
+    product_image_id: Number(row.product_image_id || 0),
+    image_url: row.image_url || '',
+    alt_text: row.alt_text || product.name || '',
+    image_title: row.image_title || '',
+    caption: row.caption || '',
+    variant_role: row.variant_role || '',
+    annotation_notes: row.annotation_notes || '',
+    sort_order: Number(row.sort_order || 0)
+  }));
+
+  const image_groups = {
+    featured: storefront_images.find((row) => row.image_url === product.featured_image_url) || storefront_images[0] || null,
+    detail: storefront_images.filter((row) => ['detail','hero','featured'].includes(String(row.variant_role || '').toLowerCase())),
+    gallery: storefront_images.filter((row) => !['detail','hero','featured'].includes(String(row.variant_role || '').toLowerCase())),
+    annotated: storefront_images.filter((row) => row.caption || row.annotation_notes || row.image_title)
+  };
+
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary });
 }

@@ -103,7 +103,8 @@ export async function onRequestGet(context) {
 
   try {
     const rows = await runProductQuery(env, primarySql, bindings);
-    return json({ ok: true, products: shapeProducts(rows) });
+    const products = shapeProducts(rows);
+    return json({ ok: true, products, summary: { total_products: products.length, authority: 'd1_primary_query' }, filter_groups: buildFilterGroups(products) });
   } catch (primaryError) {
     try {
       const fbBindings = q ? [ `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%` ] : [];
