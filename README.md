@@ -267,3 +267,10 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Bulk product import is now more production-friendly: preview checks duplicate slugs, SKUs, and product numbers, and import can seed richer finished-product fields, SEO rows, tags, and extra product images.
 - Admin media upload can now attach uploads directly to product galleries and optionally set the featured image, making the R2 upload flow more reusable during product-entry work.
 
+
+
+## Current pass update
+- Added frontend product-resource reservation controls in the admin stock report.
+- Expanded storefront product detail media payloads with grouped image data and variant-role hints.
+- Expanded analytics with top product page paths and top ordered products.
+- Continued reducing public JSON duplication by moving more reads onto `/api/supplies` and `/api/tools`.

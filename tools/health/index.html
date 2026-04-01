@@ -33,7 +33,7 @@
             Quick checks for: broken image links, missing categories/areas, and exact duplicate photos.
           </p>
 <p class="small">
-            Data source: <span class="mono">/data/toolshed/toolshed_items_master.json</span>
+            Data source: <span class="mono">/api/tools?limit=2000</span>
 </p>
 </div>
 <div class="hero-media">
@@ -99,7 +99,7 @@
 <script src="/js/main.js"></script>
 <script>
     const escapeHtml = (window.DD && window.DD.escapeHtml) ? window.DD.escapeHtml : (s)=>String(s??"");
-    const TOOLS_JSON = "/data/toolshed/toolshed_items_master.json";
+    const TOOLS_JSON = "/api/tools?limit=2000";
 
     const ASSETS_BASE = "https://assets.devilndove.com";
     const TOOLS_PREFIX = "Toolshed"; // must match R2 folder capitalization
@@ -125,8 +125,8 @@
     async function loadTools(){
       const res = await fetch(TOOLS_JSON, { cache: "no-store" });
       const data = await res.json();
-      const items = (data.items || data || []);
-      return Array.isArray(items) ? items : (items.items || []);
+      const items = Array.isArray(data.items) ? data.items : (data.items || data || []);
+      return Array.isArray(items) ? items : [];
     }
 
     function areaOf(t){

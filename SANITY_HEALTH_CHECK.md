@@ -104,3 +104,11 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Bulk import completeness improved: imports can now seed richer finished-product metadata, tags, SEO rows, and additional product-image rows.
 - Media upload lifecycle improved: direct R2 uploads can now attach to product galleries and optionally set the featured image in the same step.
 
+
+
+## Current pass sanity update
+- Product stock report now supports frontend reserve/release actions for linked resources.
+- Storefront product detail now returns grouped image structures plus variant-role hints.
+- Media asset reads expose derived variant URL suggestions for later image-processing rollout.
+- Visitor analytics expose top product paths and top ordered products.
+- Public supplies discovery and tools health now use centralized API reads more consistently.

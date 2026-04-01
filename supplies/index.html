@@ -356,8 +356,9 @@
       function norm(v){ return safeText(v).toLowerCase(); }
 
       const ASSET_ORIGIN = "https://assets.devilndove.com";
-      const DATA_URL = "/data/supplies/supplies_items_master.json";
+      const DATA_URL = "/api/supplies?limit=2000";
       const REORDER_STORAGE_KEY = "devilndove_supplies_reorder_list_v1";
+      let apiFilterGroups = { categories: [], types: [] };
 
       const AREA_ORDER = [
         "Security",
@@ -516,11 +517,13 @@
 
       async function fetchCatalogItems(){
         try {
-          const response = await fetch('/api/supplies?limit=500');
+          const response = await fetch(DATA_URL, { cache: 'no-store' });
           const data = await response.json();
           if (!response.ok || !data?.ok) return [];
+          apiFilterGroups = data?.filter_groups || { categories: [], types: [] };
           return Array.isArray(data.items) ? data.items : [];
         } catch (error) {
+          apiFilterGroups = { categories: [], types: [] };
           return [];
         }
       }
@@ -743,8 +746,8 @@
       }
 
       function populateFilters(items){
-        const areaSet = new Set();
-        const typeSet = new Set();
+        const areaSet = new Set(apiFilterGroups.categories.map(function (row) { return safeText(row.label); }).filter(Boolean));
+        const typeSet = new Set(apiFilterGroups.types.map(function (row) { return safeText(row.label); }).filter(Boolean));
         const hazardSet = new Set();
 
         items.forEach(function (it) {
@@ -753,21 +756,25 @@
           getHazardTags(it).forEach(function (h) { hazardSet.add(h); });
         });
 
-        Array.from(areaSet).sort(areaSort).forEach(function (v) {
+        supAreaEl.innerHTML = '<option value="all">All</option>';
+        supTypeEl.innerHTML = '<option value="all">All</option>';
+        supHazardEl.innerHTML = '<option value="all">All</option>';
+
+        Array.from(areaSet).filter(Boolean).sort(areaSort).forEach(function (v) {
           const opt = document.createElement("option");
           opt.value = v;
           opt.textContent = v;
           supAreaEl.appendChild(opt);
         });
 
-        Array.from(typeSet).sort(function (a, b) { return a.localeCompare(b); }).forEach(function (v) {
+        Array.from(typeSet).filter(Boolean).sort(function (a, b) { return a.localeCompare(b); }).forEach(function (v) {
           const opt = document.createElement("option");
           opt.value = v;
           opt.textContent = v;
           supTypeEl.appendChild(opt);
         });
 
-        Array.from(hazardSet).sort(function (a, b) { return a.localeCompare(b); }).forEach(function (v) {
+        Array.from(hazardSet).filter(Boolean).sort(function (a, b) { return a.localeCompare(b); }).forEach(function (v) {
           const opt = document.createElement("option");
           opt.value = v;
           opt.textContent = v;
@@ -793,11 +800,6 @@
                 reorder_point: row.reorder_point || ''
               });
             });
-          } else {
-            const resp = await fetch(DATA_URL, { cache: "no-store" });
-            if (!resp.ok) throw new Error("Failed to load supplies JSON: " + resp.status);
-            const data = await resp.json();
-            allSupplies = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
           }
 
           if (!allSupplies.length) {

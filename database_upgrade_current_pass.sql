@@ -407,3 +407,10 @@ ALTER TABLE supplier_purchase_order_items ADD COLUMN received_at TEXT;
 
 
 -- Current pass note: no new schema objects were required. Existing notification_outbox usage was expanded for immediate receipt dispatch, and storefront discovery/filter improvements used existing product/catalog schema.
+
+
+-- Current pass note:
+-- No new mandatory schema objects were introduced in this pass.
+-- This pass extends existing inventory/media/analytics behavior in code using current tables,
+-- especially site_item_inventory, site_inventory_movements, product_resource_links,
+-- product_images, product_image_annotations, media_assets, site_page_views, and order_items.

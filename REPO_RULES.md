@@ -124,3 +124,9 @@ Current-pass rules added:
 - When linked resource cost data exists, keep publish/readiness decisions aligned with that cost visibility rather than ignoring it.
 - Reorder workflow should prefer supplier purchase-order drafts over scattered manual notes when the D1 tables are available.
 
+
+
+## Current pass reminder
+- Keep outward-facing supplies/tools reads on centralized APIs when touching those pages.
+- Keep stock-report reservation controls aligned with site-item-inventory product-resource actions.
+- Keep one H1 per exposed page and continue incremental search/discovery improvements on every pass.

@@ -193,3 +193,10 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - The import pipeline is less shell-only now: admin preview/import can validate and create richer finished-product records, including SEO rows, tags, and extra image rows during product seeding.
 - The direct R2 media upload path is no longer only an asset drop. It can now attach uploaded images directly to a product gallery and featured-image flow, which reduces one more manual step between upload and storefront readiness.
 
+
+
+## Current pass update
+- Product stock readiness is no longer only a read-only report: admin can now reserve or release linked tool/supply inventory directly from the stock-report UI.
+- Product-detail media responses now include grouped storefront image structures that blend product images, annotations, and media variant-role hints more cleanly.
+- Analytics now include top product page paths and top ordered products so the dashboard can better compare discovery versus sales pressure.
+- The public supplies page and the tools health screen both moved farther toward centralized API-first reads during the JSON-to-D1 transition.

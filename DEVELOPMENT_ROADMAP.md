@@ -145,3 +145,15 @@
 - worker-driven webhook replay remains a later hardening layer beyond current admin-triggered dispatch
 - trusted external movie enrichment and valuation still depend on external data access
 
+
+
+## Current pass completion update
+- Extended product-level reservation governance into the admin stock-report UI so linked tools/supplies can be reserved or released from a real frontend path.
+- Improved storefront/media readiness by exposing grouped product image data, variant-role awareness, and derived variant URL suggestions.
+- Expanded analytics with top product-detail paths and top ordered products so merchandising diagnostics move closer to decision-grade reporting.
+- Reduced another public JSON dependency by moving the public supplies page and the internal tools health screen onto centralized API reads.
+
+## Still intentionally not marked complete
+- actual generated thumbnail/variant files still need image-processing infrastructure
+- broader multi-role permission granularity still remains for a future security pass
+- trusted external movie enrichment still depends on the separate movie-data workflow and external source access

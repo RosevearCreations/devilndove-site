@@ -168,3 +168,11 @@ Current-pass emphasis:
 - Bulk product import now validates and seeds newer finished-product fields more fully: product number, category, colour, shipping code, review status, SEO rows, tags, and extra product images can all be staged during import.
 - Direct admin media upload can now attach an uploaded image directly into `product_images`/`product_image_annotations`, optionally set it as featured, and carry a simple variant-role note so the R2 upload path is more reusable across product-entry workflows.
 
+
+
+## Current pass update
+- Admin stock reporting now supports batch reserve/release actions for linked product resources from the frontend, not only the inventory API.
+- Storefront product detail now includes grouped image data with variant-role awareness and annotated-image grouping.
+- Admin media asset reads now expose derived variant URL suggestions to support later thumbnail/variant rollout.
+- Visitor analytics now surface top product-detail paths and top ordered products for better merchandising diagnostics.
+- Public supplies and tools-health reads now lean more consistently on centralized API authority instead of direct page-level JSON reads.

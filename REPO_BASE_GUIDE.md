@@ -207,3 +207,10 @@ New current-pass backend additions:
 - `functions/api/admin/import-products.js` now seeds richer finished-product records, tags, SEO rows, and extra gallery rows instead of only minimal core product fields.
 - `functions/api/admin/media-upload.js` now supports one-step attachment from R2 upload into `product_images` and `product_image_annotations`, including optional featured-image updates.
 
+
+
+## Current pass update
+- `functions/api/admin/product-stock-report.js` and `public/js/admin-product-stock-report.js` now form a fuller reservation-governance path from report view to inventory reservation action.
+- `functions/api/product-detail.js` now shapes grouped storefront image data using product images, annotations, and media variant-role hints.
+- `functions/api/admin/visitor-analytics.js` now adds merchandising diagnostics for top product-detail paths and top ordered products.
+- `supplies/index.html` and `tools/health/index.html` now rely more directly on centralized public API reads.

@@ -258,3 +258,9 @@ Durable audit trail of governed product review actions such as approve, needs ch
 - No new tables were added in this pass.
 - This pass instead increased use of existing schema paths: `products`, `product_images`, `product_tags`, `product_seo`, `product_image_annotations`, and `media_assets` are now used more fully by bulk import and direct media-upload flows.
 
+
+
+## Current pass schema note
+- No new mandatory tables were added in this pass.
+- Current-pass code uses existing schema more fully, especially `site_item_inventory`, `site_inventory_movements`, `product_resource_links`, `product_images`, `product_image_annotations`, `media_assets`, `site_page_views`, and `order_items`.
+- Dashboard/reporting now also leans on duplicate-media counts and product build-risk calculations derived from existing tables rather than new schema additions.

@@ -300,3 +300,38 @@ All code-side items that were realistically actionable inside this repo pass wer
 #### Still open
 - True thumbnail/variant file generation is still not complete; this pass improved metadata/attachment lifecycle rather than image processing.
 
+
+
+## Current pass completion update
+
+### 3. Inventory authority
+#### Addressed in this pass
+- Product stock reporting now exposes `buildable_units_from_resources` and `resource_shortage_links` directly in the stock-report endpoint so build pressure is visible without switching reports.
+- The admin product stock report UI now lets admin reserve or release all linked tool/supply inventory for a product in one workflow, which extends reservation governance into another real frontend path instead of leaving it API-only.
+
+#### Still open
+- Reservation controls still need to appear in every older admin workflow that can consume inventory.
+
+### 4. Product/media workflow
+#### Addressed in this pass
+- Admin media asset reads now expose derived variant URL suggestions (`thumb`, `medium`, `large`, `webp`) so the storefront/media workflow has a clearer path for later variant-file rollout.
+- Storefront product detail now returns grouped image data with variant-role awareness plus annotated-image grouping, which improves annotation-to-storefront usage.
+
+#### Still open
+- True generated thumbnails/variants still need actual image-processing infrastructure rather than metadata alone.
+
+### 5. Analytics and funnel reporting
+#### Addressed in this pass
+- Visitor analytics now include top product-detail paths and top ordered products, giving admin stronger merchandising diagnostics around what is being viewed versus what is actually selling.
+- Dashboard summary now exposes `product_build_risk_count` and duplicate-media counts for faster operational triage.
+
+#### Still open
+- Campaign attribution still is not a full ad-platform attribution layer.
+
+### Data-model risks
+#### Addressed in this pass
+- Public supplies discovery now uses the centralized `/api/supplies` path end to end on the outward-facing page instead of falling back to page-level JSON reads.
+- The internal tools health page now reads from `/api/tools`, which reduces another direct JSON dependency during the migration period.
+
+#### Remaining risk
+- Some mixed JSON/D1 authority still remains, especially around movies and a few legacy admin/read paths.
