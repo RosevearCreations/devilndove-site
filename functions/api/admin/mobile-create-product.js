@@ -5,10 +5,21 @@ function normalizeText(value) { return String(value || '').trim(); }
 function slugify(value) {
   return String(value || '').trim().toLowerCase().replace(/['"]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
+function parseCookies(request) {
+  const raw = request.headers.get('Cookie') || '';
+  return raw.split(/;\s*/).reduce((acc, part) => {
+    const eq = part.indexOf('=');
+    if (eq === -1) return acc;
+    acc[part.slice(0, eq).trim()] = decodeURIComponent(part.slice(eq + 1).trim());
+    return acc;
+  }, {});
+}
 function getBearerToken(request) {
   const authHeader = request.headers.get('Authorization') || '';
   const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || '').trim() : '';
+  if (match) return String(match[1] || '').trim();
+  const cookies = parseCookies(request);
+  return normalizeText(cookies.dd_auth_token);
 }
 async function getAdminUserFromRequest(request, env) {
   const token = getBearerToken(request);
@@ -70,6 +81,7 @@ export async function onRequestPost(context) {
   try { form = await request.formData(); } catch { return json({ ok: false, error: 'Expected multipart/form-data upload.' }, 400); }
 
   const name = normalizeText(form.get('name'));
+  const captureReference = normalizeText(form.get('capture_reference'));
   const productCategory = normalizeText(form.get('product_category'));
   const colorName = normalizeText(form.get('color_name'));
   const shortDescription = normalizeText(form.get('short_description'));
@@ -92,30 +104,32 @@ export async function onRequestPost(context) {
   const weightGrams = weightGramsRaw ? Number(weightGramsRaw) : null;
   const resourceLinksRaw = normalizeText(form.get('resource_links_json'));
 
-  if (!name) return json({ ok: false, error: 'Product name is required.' }, 400);
-  if (!productCategory) return json({ ok: false, error: 'Category is required.' }, 400);
   if (!Number.isInteger(priceCents) || priceCents < 0) return json({ ok: false, error: 'price_cents must be a valid whole number.' }, 400);
   if (compareAtPriceCents !== null && (!Number.isInteger(compareAtPriceCents) || compareAtPriceCents < 0)) return json({ ok: false, error: 'compare_at_price_cents must be a valid whole number.' }, 400);
   if (weightGrams !== null && (!Number.isInteger(weightGrams) || weightGrams < 0)) return json({ ok: false, error: 'weight_grams must be a valid whole number.' }, 400);
   if (taxClassId !== null && (!Number.isInteger(taxClassId) || taxClassId <= 0)) return json({ ok: false, error: 'tax_class_id must be a valid id.' }, 400);
 
+  const files = form.getAll('images').filter((file) => file && typeof file.arrayBuffer === 'function');
+  if (!name && !captureReference && !files.length) return json({ ok: false, error: 'Add at least a name, a reference, or a photo before saving.' }, 400);
+
   const productNumber = await getNextProductNumber(env);
-  const slug = slugify(`${name}-${productNumber}`) || `product-${productNumber}`;
+  const resolvedName = name || captureReference || `Draft product ${productNumber}`;
+  const slug = slugify(`${resolvedName}-${productNumber}`) || `product-${productNumber}`;
   const sku = skuOverride || `DND-${String(productNumber).padStart(5, '0')}`;
+  const readyNotes = [captureReference ? `Capture reference: ${captureReference}` : '', !name ? 'Partial draft saved without final product name.' : '', !productCategory ? 'Category still needed.' : '', priceCents === 0 ? 'Price still needed.' : ''].filter(Boolean).join(' ');
 
   const insertResult = await env.DB.prepare(`
     INSERT INTO products (
-      product_number, slug, sku, name, product_category, color_name, shipping_code, review_status,
+      product_number, slug, sku, name, capture_reference, product_category, color_name, shipping_code, review_status,
       is_ready_for_storefront, ready_check_notes, short_description, description, product_type, status, price_cents, compare_at_price_cents,
       currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking,
       inventory_quantity, featured_image_url, sort_order, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending_review', ?, ?, 'physical', 'draft', ?, ?, ?, ?, ?, ?, ?, 1, ?, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).bind(productNumber, slug, sku, name, productCategory || null, colorName || null, shippingCode || null, shortDescription || null, description || null, priceCents, compareAtPriceCents, currency, taxable, taxClassId, requiresShipping, weightGrams, inventoryQuantity).run();
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending_review', ?, ?, ?, ?, 'physical', 'draft', ?, ?, ?, ?, ?, ?, ?, 1, ?, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `).bind(productNumber, slug, sku, resolvedName, captureReference || null, productCategory || null, colorName || null, shippingCode || null, 0, readyNotes || null, shortDescription || null, description || null, priceCents, compareAtPriceCents, currency, taxable, taxClassId, requiresShipping, weightGrams, inventoryQuantity).run();
 
   const productId = Number(insertResult?.meta?.last_row_id || 0);
   if (!productId) return json({ ok: false, error: 'Product could not be created.' }, 500);
 
-  const files = form.getAll('images').filter((file) => file && typeof file.arrayBuffer === 'function');
   const bucket = env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
   const uploaded = [];
 
@@ -135,7 +149,7 @@ export async function onRequestPost(context) {
       });
       const publicUrl = buildPublicUrl(env, objectKey);
       uploaded.push({ object_key: objectKey, public_url: publicUrl || '', original_filename: originalName });
-      await env.DB.prepare(`INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(productId, publicUrl || objectKey, `${name} photo ${index + 1}`, index).run();
+      await env.DB.prepare(`INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(productId, publicUrl || objectKey, `${resolvedName} photo ${index + 1}`, index).run();
       try {
         await env.DB.prepare(`INSERT INTO media_assets (product_id, storage_provider, bucket_name, object_key, public_url, original_filename, mime_type, file_size_bytes, created_by_user_id, created_at, updated_at) VALUES (?, 'r2', ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(productId, normalizeText(env.PRODUCT_MEDIA_BUCKET_NAME || env.R2_BUCKET_NAME || 'product-media'), objectKey, publicUrl || null, originalName, mimeType, Number(file.size || 0), adminUser.user_id).run();
       } catch {}
@@ -148,14 +162,14 @@ export async function onRequestPost(context) {
   }
 
   try {
-    const seoTitle = metaTitle || `${name}${productCategory ? ` ${productCategory}` : ''}${colorName ? ` ${colorName}` : ''} | Devil n Dove`;
-    const seoDescription = metaDescription || shortDescription || description || `Handmade ${productCategory || 'creation'} by Devil n Dove.`;
+    const seoTitle = metaTitle || `${resolvedName}${productCategory ? ` ${productCategory}` : ''}${colorName ? ` ${colorName}` : ''} | Devil n Dove`;
+    const seoDescription = metaDescription || shortDescription || description || captureReference || `Draft ${productCategory || 'creation'} by Devil n Dove.`;
     await upsertProductSeo(env, {
       product_id: productId,
       meta_title: seoTitle,
       meta_description: seoDescription,
-      keywords: keywords || [name, productCategory, colorName, 'handmade', 'Devil n Dove', 'Ontario'].filter(Boolean).join(', '),
-      h1_override: name,
+      keywords: keywords || [resolvedName, captureReference, productCategory, colorName, 'handmade', 'Devil n Dove', 'Ontario'].filter(Boolean).join(', '),
+      h1_override: resolvedName,
       canonical_url: `/shop/product/?slug=${slug}`,
       og_title: seoTitle,
       og_description: seoDescription,
@@ -176,5 +190,5 @@ export async function onRequestPost(context) {
   } catch {}
 
   const createdProduct = await env.DB.prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
-  return json({ ok: true, message: 'Finished product saved for review.', product: createdProduct, uploaded_images: uploaded, next_product_number: productNumber + 1 }, 201);
+  return json({ ok: true, message: 'Draft product saved. You can come back later to finish the details.', product: createdProduct, uploaded_images: uploaded, next_product_number: productNumber + 1 }, 201);
 }

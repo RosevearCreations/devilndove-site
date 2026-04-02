@@ -75,7 +75,8 @@ export async function onRequestPost(context) {
   for (let i = 0; i < rows.length; i += 1) {
     const row = rows[i] || {};
     const name = normalizeText(row.name);
-    const slug = normalizeSlug(row.slug || row.name);
+    const slug = normalizeSlug(row.slug || row.name || row.capture_reference || `draft-product-${i + 1}`);
+    const captureReference = normalizeText(row.capture_reference);
     const productType = normalizeProductType(row.product_type || 'physical');
     const status = normalizeStatus(row.status);
     const reviewStatus = normalizeReviewStatus(row.review_status);
@@ -96,15 +97,17 @@ export async function onRequestPost(context) {
     const metaDescription = normalizeText(row.meta_description);
     const keywords = normalizeText(row.keywords || tags.join(', '));
 
-    if (!name || !slug || !['physical', 'digital'].includes(productType) || priceCents == null || priceCents < 0) {
-      errors.push({ row_number: i + 1, error: 'Missing required name/slug/product_type/price_cents.' });
+    const hasMinimumPartialEntry = Boolean(name || captureReference || featuredImageUrl || additionalImageUrls.length);
+    const resolvedName = name || captureReference || `Draft product ${i + 1}`;
+    if (!hasMinimumPartialEntry || !slug || !['physical', 'digital'].includes(productType) || priceCents == null || priceCents < 0) {
+      errors.push({ row_number: i + 1, error: 'Missing required slug/product_type/price_cents or there is no name/reference/image clue.' });
       continue;
     }
 
     try {
       const insert = await db.prepare(`
         INSERT INTO products (
-          slug, product_number, sku, name, product_category, color_name, shipping_code,
+          slug, product_number, sku, name, capture_reference, product_category, color_name, shipping_code,
           review_status, is_ready_for_storefront, ready_check_notes,
           short_description, description, product_type, status, price_cents,
           compare_at_price_cents, currency, taxable, tax_class_id, tax_class_code,
@@ -115,13 +118,14 @@ export async function onRequestPost(context) {
         slug,
         productNumber,
         normalizeText(row.sku) || null,
-        name,
+        resolvedName,
+        captureReference || null,
         normalizeText(row.product_category) || null,
         normalizeText(row.color_name) || null,
         normalizeText(row.shipping_code) || null,
         reviewStatus,
         readyForStorefront == null ? 0 : readyForStorefront,
-        normalizeText(row.ready_check_notes) || null,
+        normalizeText(row.ready_check_notes) || (captureReference ? `Capture reference: ${captureReference}` : null),
         normalizeText(row.short_description) || null,
         normalizeText(row.description) || null,
         productType,
@@ -148,7 +152,7 @@ export async function onRequestPost(context) {
         await db.prepare(`
           INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
           VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP)
-        `).bind(productId, featuredImageUrl, normalizeText(row.featured_image_alt || name) || name).run().catch(() => null);
+        `).bind(productId, featuredImageUrl, normalizeText(row.featured_image_alt || resolvedName) || resolvedName).run().catch(() => null);
       }
 
       for (let imageIndex = 0; imageIndex < additionalImageUrls.length; imageIndex += 1) {
@@ -156,7 +160,7 @@ export async function onRequestPost(context) {
         await db.prepare(`
           INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
           VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-        `).bind(productId, imageUrl, name, imageIndex + 1).run().catch(() => null);
+        `).bind(productId, imageUrl, resolvedName, imageIndex + 1).run().catch(() => null);
       }
 
       for (const tag of tags) {
@@ -177,7 +181,7 @@ export async function onRequestPost(context) {
           metaTitle || null,
           metaDescription || null,
           keywords || null,
-          metaTitle || name,
+          metaTitle || resolvedName,
           metaDescription || normalizeText(row.short_description) || null,
           featuredImageUrl || null
         ).run().catch(() => null);

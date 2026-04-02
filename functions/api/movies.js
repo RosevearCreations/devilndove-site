@@ -91,8 +91,10 @@ function normalizeMovieRow(row, index = 0) {
     runtime_minutes: safeNumber(row.runtime_minutes),
     studio_name: normalizeText(row.studio_name || row.studio),
     imdb_id: normalizeText(row.imdb_id),
+    alternate_identifier: normalizeText(row.alternate_identifier),
     metadata_status: normalizeText(row.metadata_status || (explicitTitle ? 'enriched' : 'pending')),
     metadata_source: normalizeText(row.metadata_source),
+    collection_notes: normalizeText(row.collection_notes),
     estimated_value_low_cents: safeNumber(row.estimated_value_low_cents),
     estimated_value_high_cents: safeNumber(row.estimated_value_high_cents),
     estimated_value_currency: normalizeText(row.estimated_value_currency || 'CAD'),
@@ -165,7 +167,7 @@ export async function onRequestGet(context) {
     dbItems = normalizeResults(await env.DB.prepare(`
       SELECT movie_catalog_id, upc, slug, title, sort_title, summary, release_year, media_format, genre,
              director_names, actor_names, front_image_url, back_image_url, runtime_minutes,
-             studio_name, trailer_url, status, featured_rank, source_record_json, updated_at
+             studio_name, trailer_url, imdb_id, alternate_identifier, metadata_status, collection_notes, status, featured_rank, source_record_json, updated_at
       FROM movie_catalog
       WHERE COALESCE(status,'active') != 'archived'
         AND (? = '' OR LOWER(COALESCE(title,'')) LIKE ? OR LOWER(COALESCE(upc,'')) LIKE ? OR LOWER(COALESCE(summary,'')) LIKE ? OR LOWER(COALESCE(genre,'')) LIKE ?)

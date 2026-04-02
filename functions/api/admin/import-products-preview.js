@@ -122,9 +122,10 @@ export async function onRequestPost(context) {
   const issueCounts = new Map();
   const preview = rows.map((row, index) => {
     const name = normalizeText(row?.name);
-    const slug = normalizeText(row?.slug) || slugify(name);
+    const slug = normalizeText(row?.slug) || slugify(name || captureReference || `draft-product-${index + 1}`);
     const sku = normalizeText(row?.sku);
     const productNumber = parseInteger(row?.product_number);
+    const captureReference = normalizeText(row?.capture_reference);
     const productCategory = normalizeText(row?.product_category);
     const colorName = normalizeText(row?.color_name);
     const shippingCode = normalizeText(row?.shipping_code);
@@ -147,7 +148,8 @@ export async function onRequestPost(context) {
     const metaDescription = normalizeText(row?.meta_description);
     const issues = [];
 
-    if (!name) issues.push('Missing name.');
+    const hasMinimumPartialEntry = Boolean(name || captureReference || featuredImageUrl || additionalImageUrls.length);
+    if (!hasMinimumPartialEntry) issues.push('Add at least a name, capture_reference, or one image URL.');
     if (!slug) issues.push('Missing slug.');
     if (!productType) issues.push('product_type must be physical or digital.');
     if (price == null || price < 0) issues.push('price_cents must be a whole number at or above zero.');
@@ -180,12 +182,13 @@ export async function onRequestPost(context) {
       normalized: {
         product_number: productNumber,
         name,
+        capture_reference: captureReference || null,
         slug,
         sku,
         product_category: productCategory || null,
         color_name: colorName || null,
         shipping_code: shippingCode || null,
-        product_type: productType || null,
+        product_type: productType || 'physical',
         status,
         review_status: reviewStatus,
         is_ready_for_storefront: readyFlag == null ? null : readyFlag,
