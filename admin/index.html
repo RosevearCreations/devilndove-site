@@ -1,236 +1,418 @@
 <!-- File: /admin/index.html -->
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Admin Dashboard — Devil n Dove</title>
-<link href="/css/styles.css" rel="stylesheet"/>
-<link href="/assets/mark.png" rel="icon" type="image/png"/>
-<meta content="Devil n Dove admin dashboard for users, products, orders, payments, access tiers, and site operations." name="description"/>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>Admin Dashboard — Devil n Dove</title>
+  <link href="/css/styles.css" rel="stylesheet"/>
+  <link href="/assets/mark.png" rel="icon" type="image/png"/>
+  <meta content="Devil n Dove admin dashboard for users, products, orders, payments, access tiers, site operations, and movie detail editing." name="description"/>
 </head>
 <body>
-<div class="container admin-shell">
-<div class="nav">
-<div class="brand">
-<img alt="Devil n Dove logo" src="/assets/logo-clear.png"/>
-<div>
-<div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-<div class="small">Admin Dashboard</div>
-</div>
-</div>
-<div class="links">
-<a href="/">Home</a>
-<a href="/shop/">Shop</a>
-<a href="/members/">Members</a>
-<a href="/admin/">Admin</a>
-<button class="btn" data-nav-logout="" type="button">Logout</button>
-</div>
-</div>
-<div class="hero">
-<div>
-<h1>Admin Dashboard</h1>
-<p>
-          Manage users, access tiers, products, orders, payments, and core site operations.
+  <div class="container admin-shell">
+    <div class="nav">
+      <div class="brand">
+        <img alt="Devil n Dove logo" src="/assets/logo-clear.png"/>
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Admin Dashboard</div>
+        </div>
+      </div>
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/shop/">Shop</a>
+        <a href="/members/">Members</a>
+        <a href="/admin/">Admin</a>
+        <button class="btn" data-nav-logout="" type="button">Logout</button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <h1>Admin Dashboard</h1>
+        <p>
+          Manage users, access tiers, products, orders, payments, movie details, and core site operations.
         </p>
-</div>
-</div>
-<div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
-<div class="grid cols-3" style="gap:18px">
-<div class="card">
-<h2 style="margin-top:0">Quick Actions</h2>
-<div style="display:grid;gap:10px">
-<a class="btn" href="#usersSection">Manage Users</a>
-<a class="btn" href="#accessTiersSection">Access Tiers</a>
-<a class="btn" href="#productsSection">Products</a>
-<a class="btn primary" href="/admin/mobile-product/">Phone Product Capture</a>
-<a class="btn" href="#analyticsSection">Analytics</a>
-<a class="btn" href="#ordersSection">Orders</a>
-<button class="btn" id="refreshDashboardSummaryButton" type="button">Refresh Summary</button>
-</div>
-</div>
-<div class="card">
-<h2 style="margin-top:0">Security</h2>
-<div class="small" style="display:grid;gap:8px">
-<div>Admin endpoints require a valid active admin session.</div>
-<div>Roles and business access tiers remain separate systems.</div>
-<div>Order and payment records are available through protected admin routes.</div>
-</div>
-</div>
-<div class="card">
-<h2 style="margin-top:0">Project State</h2>
-<div class="small" style="display:grid;gap:8px">
-<div>Checkout foundation is active.</div>
-<div>Payment preparation exists for future provider handoff.</div>
-<div>Manual/admin payment recording is enabled.</div>
-</div>
-</div>
-</div>
-<div class="card" style="margin-top:18px">
-<h2 style="margin-top:0">Dashboard Summary</h2>
-<div class="small" id="dashboardSummaryMessage" style="display:none;margin-bottom:10px"></div>
-<div class="admin-summary-grid">
-<div class="admin-stat"><div class="admin-stat-label">Users</div><div class="admin-stat-value" id="summaryUsersCount">—</div></div>
-<div class="admin-stat"><div class="admin-stat-label">Products</div><div class="admin-stat-value" id="summaryProductsCount">—</div></div>
-<div class="admin-stat"><div class="admin-stat-label">Orders</div><div class="admin-stat-value" id="summaryOrdersCount">—</div></div>
-<div class="admin-stat"><div class="admin-stat-label">Payments</div><div class="admin-stat-value" id="summaryPaymentsCount">—</div></div>
-<div class="admin-stat"><div class="admin-stat-label">Low Stock</div><div class="admin-stat-value" id="summaryLowStockCount">—</div></div>
-<div class="admin-stat"><div class="admin-stat-label">Failed Webhooks</div><div class="admin-stat-value" id="summaryFailedWebhooksCount">—</div></div>
-<div class="admin-stat"><div class="admin-stat-label">Open Disputes</div><div class="admin-stat-value" id="summaryOpenDisputesCount">—</div></div>
-<div class="admin-stat"><div class="admin-stat-label">Live Visitors</div><div class="admin-stat-value" id="summaryLiveVisitorsCount">—</div></div>
-<div class="admin-stat"><div class="admin-stat-label">Searches (24h)</div><div class="admin-stat-value" id="summaryRecentSearchesCount">—</div></div>
-</div>
-</div>
-<div class="card" id="usersSection" style="margin-top:18px">
-<h2 style="margin-top:0">Users</h2>
-<p class="small">User management tools remain in place through the existing admin modules.</p>
-<div id="usersAdminMount"></div>
-</div>
-<div class="card" id="accessTiersSection" style="margin-top:18px">
-<h2 style="margin-top:0">Access Tiers</h2>
-<p class="small">
+      </div>
+    </div>
+
+    <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
+
+    <div class="grid cols-3" style="gap:18px">
+      <div class="card">
+        <h2 style="margin-top:0">Quick Actions</h2>
+        <div style="display:grid;gap:10px">
+          <a class="btn" href="#usersSection">Manage Users</a>
+          <a class="btn" href="#accessTiersSection">Access Tiers</a>
+          <a class="btn" href="#productsSection">Products</a>
+          <a class="btn primary" href="/admin/mobile-product/">Phone Product Capture</a>
+          <a class="btn" href="#moviesSection">Movies</a>
+          <a class="btn" href="#analyticsSection">Analytics</a>
+          <a class="btn" href="#ordersSection">Orders</a>
+          <button class="btn" id="refreshDashboardSummaryButton" type="button">Refresh Summary</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">Security</h2>
+        <div class="small" style="display:grid;gap:8px">
+          <div>Admin endpoints require a valid active admin session.</div>
+          <div>Roles and business access tiers remain separate systems.</div>
+          <div>Order and payment records are available through protected admin routes.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">Project State</h2>
+        <div class="small" style="display:grid;gap:8px">
+          <div>Checkout foundation is active.</div>
+          <div>Payment preparation exists for future provider handoff.</div>
+          <div>Manual/admin payment recording is enabled.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Dashboard Summary</h2>
+      <div class="small" id="dashboardSummaryMessage" style="display:none;margin-bottom:10px"></div>
+      <div class="admin-summary-grid">
+        <div class="admin-stat"><div class="admin-stat-label">Users</div><div class="admin-stat-value" id="summaryUsersCount">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Products</div><div class="admin-stat-value" id="summaryProductsCount">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Orders</div><div class="admin-stat-value" id="summaryOrdersCount">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Payments</div><div class="admin-stat-value" id="summaryPaymentsCount">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Low Stock</div><div class="admin-stat-value" id="summaryLowStockCount">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Failed Webhooks</div><div class="admin-stat-value" id="summaryFailedWebhooksCount">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Open Disputes</div><div class="admin-stat-value" id="summaryOpenDisputesCount">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Live Visitors</div><div class="admin-stat-value" id="summaryLiveVisitorsCount">—</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Searches (24h)</div><div class="admin-stat-value" id="summaryRecentSearchesCount">—</div></div>
+      </div>
+    </div>
+
+    <div class="card" id="usersSection" style="margin-top:18px">
+      <h2 style="margin-top:0">Users</h2>
+      <p class="small">User management tools remain in place through the existing admin modules.</p>
+      <div id="usersAdminMount"></div>
+    </div>
+
+    <div class="card" id="accessTiersSection" style="margin-top:18px">
+      <h2 style="margin-top:0">Access Tiers</h2>
+      <p class="small">
         Business/content access tiers stay separate from system roles like member and admin.
       </p>
-<div id="accessTiersAdminMount"></div>
-</div>
-<div class="card" id="productsSection" style="margin-top:18px">
-<div id="productSeoAdminMount"></div>
-<div id="productImageAnnotationAdminMount"></div>
-<div id="siteInventoryAdminMount"></div>
-<div id="catalogSyncAdminMount"></div>
-<div id="notificationAdminMount"></div>
-<div id="appSettingsAdminMount"></div>
-<h2 style="margin-top:0">Products</h2>
-<p class="small">Product management remains handled by the existing modular admin scripts.</p>
-<div id="productsAdminMount"></div>
-<div id="productMediaAdminMount"></div>
-<div id="productResourcesAdminMount"></div>
-<div id="productStockReportMount"></div>
-<div id="mediaLibraryAdminMount"></div>
-<div id="movieCatalogAdminMount"></div>
-<div class="admin-quick-link-grid"><div class="admin-quick-link-card"><h3 style="margin:0 0 8px 0">Mobile finished-product capture</h3><p class="small" style="margin:0 0 10px 0">Create one product at a time from a phone, upload photos directly, tag tools and supplies used, and send the draft into review.</p><a class="btn primary" href="/admin/mobile-product/">Open phone workflow</a></div></div>
-</div>
-<div class="card" id="analyticsSection" style="margin-top:18px"><h2 style="margin-top:0">Analytics, Visitors, Security &amp; Webhooks</h2><p class="small">Monitor visitors, page flows, abandoned carts, low-stock items, and webhook replay/review status.</p><div id="adminLiveActivityMount"></div><div id="analyticsAdminMount"></div><div id="webhookEventsAdminMount"></div></div>
-<div class="card" id="ordersSection" style="margin-top:18px">
-<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-<div>
-<h2 style="margin:0">Orders</h2>
-<p class="small" style="margin:8px 0 0 0">
+      <div id="accessTiersAdminMount"></div>
+    </div>
+
+    <div class="card" id="productsSection" style="margin-top:18px">
+      <div id="productSeoAdminMount"></div>
+      <div id="productImageAnnotationAdminMount"></div>
+      <div id="siteInventoryAdminMount"></div>
+      <div id="catalogSyncAdminMount"></div>
+      <div id="notificationAdminMount"></div>
+      <div id="appSettingsAdminMount"></div>
+
+      <h2 style="margin-top:0">Products</h2>
+      <p class="small">Product management remains handled by the existing modular admin scripts.</p>
+
+      <div id="productsAdminMount"></div>
+      <div id="productMediaAdminMount"></div>
+      <div id="productResourcesAdminMount"></div>
+      <div id="productStockReportMount"></div>
+      <div id="mediaLibraryAdminMount"></div>
+
+      <div class="admin-quick-link-grid">
+        <div class="admin-quick-link-card">
+          <h3 style="margin:0 0 8px 0">Mobile finished-product capture</h3>
+          <p class="small" style="margin:0 0 10px 0">
+            Create one product at a time from a phone, upload photos directly, tag tools and supplies used, and send the draft into review.
+          </p>
+          <a class="btn primary" href="/admin/mobile-product/">Open phone workflow</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="moviesSection" style="margin-top:18px">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap">
+        <div>
+          <h2 style="margin-top:0">Movies</h2>
+          <p class="small" style="margin:6px 0 0 0">
+            This editor uses <code>movie_catalog_enriched.v2.json</code> as the base truth and stores manual edits in D1 as an overlay.
+          </p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <div>
+            <label class="small" for="adminMoviesSearch">Search Movies</label>
+            <input id="adminMoviesSearch" type="text" placeholder="Title, UPC, actor, director..."/>
+          </div>
+          <button class="btn" id="refreshMoviesButton" type="button">Refresh Movies</button>
+        </div>
+      </div>
+
+      <div id="adminMoviesMessage" class="small" style="display:none;margin-top:12px"></div>
+
+      <div class="grid cols-2" style="gap:16px;margin-top:16px">
+        <div>
+          <div id="adminMoviesList"></div>
+        </div>
+
+        <div>
+          <form id="adminMovieForm" class="grid" style="gap:12px">
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieUpc">UPC</label>
+                <input id="movieUpc" type="text"/>
+              </div>
+              <div>
+                <label class="small" for="movieSlug">Slug</label>
+                <input id="movieSlug" type="text"/>
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieTitle">Title</label>
+                <input id="movieTitle" type="text"/>
+              </div>
+              <div>
+                <label class="small" for="movieYear">Year</label>
+                <input id="movieYear" type="number"/>
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieActors">Actors</label>
+                <input id="movieActors" type="text"/>
+              </div>
+              <div>
+                <label class="small" for="movieDirectors">Directors</label>
+                <input id="movieDirectors" type="text"/>
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieGenre">Genre</label>
+                <input id="movieGenre" type="text"/>
+              </div>
+              <div>
+                <label class="small" for="movieFormat">Format</label>
+                <input id="movieFormat" type="text"/>
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieStudio">Studio</label>
+                <input id="movieStudio" type="text"/>
+              </div>
+              <div>
+                <label class="small" for="movieRuntime">Runtime Minutes</label>
+                <input id="movieRuntime" type="number"/>
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieImdbId">IMDb ID</label>
+                <input id="movieImdbId" type="text"/>
+              </div>
+              <div>
+                <label class="small" for="movieAltId">Alternate Identifier</label>
+                <input id="movieAltId" type="text"/>
+              </div>
+            </div>
+
+            <div>
+              <label class="small" for="movieTrailer">Trailer URL</label>
+              <input id="movieTrailer" type="text"/>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieFront">Front Image URL</label>
+                <input id="movieFront" type="text"/>
+              </div>
+              <div>
+                <label class="small" for="movieBack">Back Image URL</label>
+                <input id="movieBack" type="text"/>
+              </div>
+            </div>
+
+            <div>
+              <label class="small" for="movieSummary">Summary</label>
+              <textarea id="movieSummary" rows="4"></textarea>
+            </div>
+
+            <div>
+              <label class="small" for="movieNotes">Collection Notes</label>
+              <textarea id="movieNotes" rows="3"></textarea>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieMetadataStatus">Metadata Status</label>
+                <select id="movieMetadataStatus">
+                  <option value="">Select</option>
+                  <option value="pending">Pending</option>
+                  <option value="manually_reviewed">Manually Reviewed</option>
+                  <option value="enriched">Enriched</option>
+                  <option value="visitor_contributed">Visitor Contributed</option>
+                </select>
+              </div>
+              <div>
+                <label class="small" for="movieStatus">Status</label>
+                <select id="movieStatus">
+                  <option value="active">Active</option>
+                  <option value="draft">Draft</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <button class="btn" type="submit">Save Movie</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="analyticsSection" style="margin-top:18px">
+      <h2 style="margin-top:0">Analytics, Visitors, Security &amp; Webhooks</h2>
+      <p class="small">Monitor visitors, page flows, abandoned carts, low-stock items, and webhook replay/review status.</p>
+      <div id="adminLiveActivityMount"></div>
+      <div id="analyticsAdminMount"></div>
+      <div id="webhookEventsAdminMount"></div>
+    </div>
+
+    <div class="card" id="ordersSection" style="margin-top:18px">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+        <div>
+          <h2 style="margin:0">Orders</h2>
+          <p class="small" style="margin:8px 0 0 0">
             Review orders, payment states, fulfillment type, and open the full admin order detail view.
           </p>
-</div>
-<button class="btn" id="refreshOrdersButton" type="button">Refresh Orders</button>
-</div>
-<div class="grid cols-4" style="gap:12px;margin-top:16px">
-<div>
-<label class="small" for="orderStatusFilter">Order Status</label>
-<select id="orderStatusFilter">
-<option value="">All</option>
-<option value="draft">Draft</option>
-<option value="pending">Pending</option>
-<option value="paid">Paid</option>
-<option value="fulfilled">Fulfilled</option>
-<option value="cancelled">Cancelled</option>
-<option value="refunded">Refunded</option>
-</select>
-</div>
-<div>
-<label class="small" for="orderPaymentStatusFilter">Payment Status</label>
-<select id="orderPaymentStatusFilter">
-<option value="">All</option>
-<option value="pending">Pending</option>
-<option value="authorized">Authorized</option>
-<option value="paid">Paid</option>
-<option value="failed">Failed</option>
-<option value="cancelled">Cancelled</option>
-<option value="refunded">Refunded</option>
-<option value="partially_refunded">Partially Refunded</option>
-</select>
-</div>
-<div>
-<label class="small" for="orderFulfillmentFilter">Fulfillment</label>
-<select id="orderFulfillmentFilter">
-<option value="">All</option>
-<option value="shipping">Shipping</option>
-<option value="digital">Digital</option>
-<option value="mixed">Mixed</option>
-<option value="pickup">Pickup</option>
-</select>
-</div>
-<div>
-<label class="small" for="orderSearchInput">Search</label>
-<input autocomplete="off" id="orderSearchInput" placeholder="Order #, name, email, method..." type="text"/>
-</div>
-</div>
-<div class="small" id="ordersMessage" style="display:none;margin-top:14px"></div>
-<div class="small" id="ordersSummary" style="margin-top:10px"></div>
-<div class="small" id="ordersEmpty" style="display:none;margin-top:10px">
+        </div>
+        <button class="btn" id="refreshOrdersButton" type="button">Refresh Orders</button>
+      </div>
+
+      <div class="grid cols-4" style="gap:12px;margin-top:16px">
+        <div>
+          <label class="small" for="orderStatusFilter">Order Status</label>
+          <select id="orderStatusFilter">
+            <option value="">All</option>
+            <option value="draft">Draft</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="fulfilled">Fulfilled</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small" for="orderPaymentStatusFilter">Payment Status</label>
+          <select id="orderPaymentStatusFilter">
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="authorized">Authorized</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
+            <option value="partially_refunded">Partially Refunded</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small" for="orderFulfillmentFilter">Fulfillment</label>
+          <select id="orderFulfillmentFilter">
+            <option value="">All</option>
+            <option value="shipping">Shipping</option>
+            <option value="digital">Digital</option>
+            <option value="mixed">Mixed</option>
+            <option value="pickup">Pickup</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="small" for="orderSearchInput">Search</label>
+          <input autocomplete="off" id="orderSearchInput" placeholder="Order #, name, email, method..." type="text"/>
+        </div>
+      </div>
+
+      <div class="small" id="ordersMessage" style="display:none;margin-top:14px"></div>
+      <div class="small" id="ordersSummary" style="margin-top:10px"></div>
+      <div class="small" id="ordersEmpty" style="display:none;margin-top:10px">
         No orders are available yet.
       </div>
-<div class="admin-table-wrap" style="margin-top:14px">
-<table>
-<thead>
-<tr>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Order</th>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Customer</th>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Fulfillment</th>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payment</th>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Total</th>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Outstanding</th>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payments</th>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
-<th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Action</th>
-</tr>
-</thead>
-<tbody id="ordersTableBody">
-<tr>
-<td colspan="10" style="padding:12px">Loading orders...</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="footer card" style="margin-top:18px"></div>
-</div>
-<script src="/js/main.js"></script>
-<script src="/public/js/auth.js"></script>
-<script src="/public/js/site-auth-ui.js"></script>
-<script src="/public/js/site-analytics.js"></script>
-<script src="/public/js/admin-self-protect.js"></script>
-<script src="/public/js/admin.js"></script>
-<script src="/public/js/admin-dashboard-summary.js"></script>
-<script src="/public/js/admin-users.js"></script>
-<script src="/public/js/admin-create-user.js"></script>
-<script src="/public/js/admin-user-profiles.js"></script>
-<script src="/public/js/admin-user-update.js"></script>
-<script src="/public/js/admin-reset-password.js"></script>
-<script src="/public/js/admin-delete-user.js"></script>
-<script src="/public/js/admin-cleanup-sessions.js"></script>
-<script src="/public/js/admin-security-summary.js"></script>
-<script src="/public/js/admin-access-tiers.js"></script>
-<script src="/public/js/admin-products.js"></script>
-<script src="/public/js/admin-create-product.js"></script>
-<script src="/public/js/admin-edit-product.js"></script>
-<script src="/public/js/admin-delete-product.js"></script>
-<script src="/public/js/admin-archive-product.js"></script>
-<script src="/public/js/admin-orders.js"></script>
-<script src="/public/js/admin-order-detail.js"></script>
-<script src="/public/js/admin-product-bulk-tools.js"></script>
-<script src="/public/js/admin-import-products.js"></script>
-<script src="/public/js/admin-visitor-analytics.js"></script>
-<script src="/public/js/admin-product-seo.js"></script>
-<script src="/public/js/admin-product-images.js"></script>
-<script src="/public/js/admin-product-resources.js"></script>
-<script src="/public/js/admin-product-stock-report.js"></script>
-<script src="/public/js/admin-product-image-annotations.js"></script>
-<script src="/public/js/admin-site-item-inventory.js"></script>
-<script src="/public/js/admin-catalog-sync.js"></script>
-<script src="/public/js/admin-notifications.js"></script>
-<script src="/public/js/admin-app-settings.js"></script>
-<script src="/public/js/admin-webhook-events.js"></script>
-<script src="/public/js/admin-live-activity.js"></script>
-<script src="/public/js/admin-movie-catalog.js"></script>
+
+      <div class="admin-table-wrap" style="margin-top:14px">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Order</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Customer</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Fulfillment</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payment</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Total</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Outstanding</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Payments</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Created</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Action</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr>
+              <td colspan="10" style="padding:12px">Loading orders...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/site-analytics.js"></script>
+  <script src="/public/js/admin-self-protect.js"></script>
+  <script src="/public/js/admin.js"></script>
+  <script src="/public/js/admin-dashboard-summary.js"></script>
+  <script src="/public/js/admin-users.js"></script>
+  <script src="/public/js/admin-create-user.js"></script>
+  <script src="/public/js/admin-user-profiles.js"></script>
+  <script src="/public/js/admin-user-update.js"></script>
+  <script src="/public/js/admin-reset-password.js"></script>
+  <script src="/public/js/admin-delete-user.js"></script>
+  <script src="/public/js/admin-cleanup-sessions.js"></script>
+  <script src="/public/js/admin-security-summary.js"></script>
+  <script src="/public/js/admin-access-tiers.js"></script>
+  <script src="/public/js/admin-products.js"></script>
+  <script src="/public/js/admin-create-product.js"></script>
+  <script src="/public/js/admin-edit-product.js"></script>
+  <script src="/public/js/admin-delete-product.js"></script>
+  <script src="/public/js/admin-archive-product.js"></script>
+  <script src="/public/js/admin-orders.js"></script>
+  <script src="/public/js/admin-order-detail.js"></script>
+  <script src="/public/js/admin-product-bulk-tools.js"></script>
+  <script src="/public/js/admin-import-products.js"></script>
+  <script src="/public/js/admin-visitor-analytics.js"></script>
+  <script src="/public/js/admin-product-seo.js"></script>
+  <script src="/public/js/admin-product-images.js"></script>
+  <script src="/public/js/admin-product-resources.js"></script>
+  <script src="/public/js/admin-product-stock-report.js"></script>
+  <script src="/public/js/admin-product-image-annotations.js"></script>
+  <script src="/public/js/admin-site-item-inventory.js"></script>
+  <script src="/public/js/admin-catalog-sync.js"></script>
+  <script src="/public/js/admin-notifications.js"></script>
+  <script src="/public/js/admin-app-settings.js"></script>
+  <script src="/public/js/admin-webhook-events.js"></script>
+  <script src="/public/js/admin-live-activity.js"></script>
+  <script src="/public/js/admin-movie-catalog.js"></script>
 </body>
 </html>
