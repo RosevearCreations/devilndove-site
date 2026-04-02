@@ -157,3 +157,10 @@
 - actual generated thumbnail/variant files still need image-processing infrastructure
 - broader multi-role permission granularity still remains for a future security pass
 - trusted external movie enrichment still depends on the separate movie-data workflow and external source access
+
+
+## Current pass completion update
+
+- Extended product-resource reservation controls into the main admin products list so linked tools/supplies can be reserved or released from another real day-to-day workflow.
+- Hardened the toolshed and supplies discovery pages around centralized API reads and shared filter-group metadata rather than page-local JSON assumptions.
+- Storefront product detail now ships lightweight variant-url hints plus build-summary context to support later media-variant rollout and richer product storytelling.

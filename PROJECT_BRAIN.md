@@ -200,3 +200,9 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Product-detail media responses now include grouped storefront image structures that blend product images, annotations, and media variant-role hints more cleanly.
 - Analytics now include top product page paths and top ordered products so the dashboard can better compare discovery versus sales pressure.
 - The public supplies page and the tools health screen both moved farther toward centralized API-first reads during the JSON-to-D1 transition.
+
+
+## Current pass update
+- Reservation governance now appears in another operational admin surface: the main products list can reserve or release linked tool/supply inventory per product.
+- Toolshed discovery now leans on the centralized tools API path rather than multiple direct JSON fallbacks.
+- Storefront product detail now carries grouped image, annotation, variant-role, and build-summary context in one payload.

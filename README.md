@@ -274,3 +274,9 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Expanded storefront product detail media payloads with grouped image data and variant-role hints.
 - Expanded analytics with top product page paths and top ordered products.
 - Continued reducing public JSON duplication by moving more reads onto `/api/supplies` and `/api/tools`.
+
+
+## Current pass highlights
+- Added reserve/release linked-resource controls to the main admin products list.
+- Moved toolshed discovery more firmly behind the centralized `/api/tools` authority path.
+- Expanded storefront product detail to return build-summary context and lightweight image variant-url hints.

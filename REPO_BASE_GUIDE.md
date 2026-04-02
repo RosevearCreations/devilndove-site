@@ -214,3 +214,9 @@ New current-pass backend additions:
 - `functions/api/product-detail.js` now shapes grouped storefront image data using product images, annotations, and media variant-role hints.
 - `functions/api/admin/visitor-analytics.js` now adds merchandising diagnostics for top product-detail paths and top ordered products.
 - `supplies/index.html` and `tools/health/index.html` now rely more directly on centralized public API reads.
+
+
+## Current pass note
+- `public/js/admin-products.js` now covers another reservation-governance path by calling `/api/admin/site-item-inventory` for product-level reserve/release actions.
+- `toolshed/index.html` now relies on `/api/tools` as the primary discovery authority instead of direct JSON fallback chaining.
+- `functions/api/product-detail.js` now returns `build_summary` and lightweight image `variant_urls` hints alongside grouped image/annotation data.

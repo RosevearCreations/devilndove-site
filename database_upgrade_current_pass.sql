@@ -414,3 +414,15 @@ ALTER TABLE supplier_purchase_order_items ADD COLUMN received_at TEXT;
 -- This pass extends existing inventory/media/analytics behavior in code using current tables,
 -- especially site_item_inventory, site_inventory_movements, product_resource_links,
 -- product_images, product_image_annotations, media_assets, site_page_views, and order_items.
+
+
+-- Current pass note:
+-- No mandatory schema changes were added in this pass.
+-- The current pass extends existing API/frontend use of:
+--   products
+--   product_images
+--   product_image_annotations
+--   media_assets
+--   product_resource_links
+--   site_item_inventory
+-- Continue applying this file only when later passes introduce real D1 schema changes.

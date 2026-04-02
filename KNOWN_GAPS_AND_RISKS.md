@@ -335,3 +335,30 @@ All code-side items that were realistically actionable inside this repo pass wer
 
 #### Remaining risk
 - Some mixed JSON/D1 authority still remains, especially around movies and a few legacy admin/read paths.
+
+
+## Current pass completion update
+
+### 3. Inventory authority
+#### Addressed in this pass
+- The admin product list now lets staff reserve or release all linked tool/supply inventory for a product directly from the main products screen, not only from the stock-report view.
+- Storefront product detail now returns `build_summary` so buildable-unit pressure and shortage counts can be surfaced without a separate admin-only lookup.
+
+#### Still open
+- Some older admin and import-oriented workflows still do not expose the stronger reservation actions inline.
+
+### 4. Product/media workflow
+#### Addressed in this pass
+- Storefront product detail now returns lightweight `variant_urls` hints with each storefront image so later real thumbnail/variant rollout has a cleaner contract.
+- Annotated/grouped image responses now ship with build-summary context in the same payload, which reduces extra product-detail lookups in later UI work.
+
+#### Still open
+- Real generated thumbnail/variant files still require image-processing infrastructure rather than URL/metadata hints alone.
+
+### Data-model risks
+#### Addressed in this pass
+- The toolshed page now reads from the centralized `/api/tools` endpoint only, instead of falling back through multiple direct JSON paths.
+- Supplies discovery now uses API-provided filter groups more consistently, reducing another page-level derivation path.
+
+#### Remaining risk
+- Mixed JSON/D1 authority still remains in movies and a few legacy admin/read flows.

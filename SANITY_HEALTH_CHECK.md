@@ -112,3 +112,9 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Media asset reads expose derived variant URL suggestions for later image-processing rollout.
 - Visitor analytics expose top product paths and top ordered products.
 - Public supplies discovery and tools health now use centralized API reads more consistently.
+
+
+## Current pass update
+- Admin products screen now includes reserve/release controls for linked resources.
+- Toolshed page now reads through `/api/tools` instead of direct JSON fallback chaining.
+- Product detail payload now includes `build_summary` and image `variant_urls` hints.

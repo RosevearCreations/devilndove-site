@@ -130,3 +130,8 @@ Current-pass rules added:
 - Keep outward-facing supplies/tools reads on centralized APIs when touching those pages.
 - Keep stock-report reservation controls aligned with site-item-inventory product-resource actions.
 - Keep one H1 per exposed page and continue incremental search/discovery improvements on every pass.
+
+
+## Current pass reminder
+- Keep public tools/supplies/creations discovery on centralized API paths whenever possible instead of adding new direct JSON reads.
+- Preserve the one-H1-per-exposed-page rule and continue documenting every reservation-governance and media-lifecycle change in the repo markdown files.

@@ -176,3 +176,9 @@ Current-pass emphasis:
 - Admin media asset reads now expose derived variant URL suggestions to support later thumbnail/variant rollout.
 - Visitor analytics now surface top product-detail paths and top ordered products for better merchandising diagnostics.
 - Public supplies and tools-health reads now lean more consistently on centralized API authority instead of direct page-level JSON reads.
+
+
+## Current pass update
+- Admin product list now exposes reserve/release actions for linked product resources, extending reservation governance beyond the stock-report-only path.
+- The public toolshed page now depends on `/api/tools` as its main authority path instead of chaining through multiple direct JSON fallbacks.
+- Storefront product detail now returns `build_summary` and lightweight `variant_urls` hints for each image so later media-variant rollout has a cleaner contract.

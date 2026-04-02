@@ -276,53 +276,37 @@
       render(list,totalCount);
     }
 
-    async function fetchFirst(urls){
-      for(const u of urls){
-        try{
-          const res = await fetch(u,{cache:"no-store"});
-          if(res.ok) return await res.json();
-        }catch(e){}
+    async function fetchTools(){
+      try {
+        const res = await fetch('/api/tools?limit=1000', { cache: 'no-store' });
+        const payload = await res.json().catch(() => null);
+        if (!res.ok || !payload?.ok) return null;
+        return payload;
+      } catch {
+        return null;
       }
-      return null;
     }
 
     function normalizeTools(payload){
-      // Exporter array schema
-      if(Array.isArray(payload)){
-        const tools = payload.map(it=>({
-          item_name_suggested: it.item_name_suggested,
-          example_image_file: it.example_image_file,
-          category: it.category || "Uncategorized",
-          primary_area: it.primary_area || "Workshop Basics",
-          process_tags: it.process_tags || [],
-          notes: it.notes || "",
-          amazon_url: it.amazon_url || (it.amazon_asin ? `https://www.amazon.ca/dp/${it.amazon_asin}` : "")
-        }));
-        return { tools, totalCount: tools.length };
+      if (payload && Array.isArray(payload.items)) {
+        return {
+          tools: payload.items.slice(),
+          totalCount: Number(payload.summary?.total_items || payload.items.length || 0),
+          filterGroups: payload.filter_groups || { categories: [], types: [] }
+        };
       }
-
-      // Legacy schema
-      if(payload && Array.isArray(payload.items)){
-        return { tools: payload.items.slice(), totalCount: Number(payload.count)||payload.items.length };
-      }
-
-      return { tools: [], totalCount: 0 };
+      return { tools: [], totalCount: 0, filterGroups: { categories: [], types: [] } };
     }
 
     async function init(){
-      const payload = await fetchFirst([
-        "/api/tools?limit=1000",
-        "/data/toolshed/toolshed_items_master.json",
-        "/data/toolshed_items_master.json",
-        "/data/tools.json"
-      ]);
+      const payload = await fetchTools();
 
       if(!payload){
-        grid.innerHTML = `<div class="small">Could not load tools data.</div>`;
+        grid.innerHTML = `<div class="small">Could not load tools data from the centralized tools API.</div>`;
         return;
       }
 
-      const { tools, totalCount } = normalizeTools(payload);
+      const { tools, totalCount, filterGroups } = normalizeTools(payload);
 
       // Areas
       const areas = Array.from(new Set(tools.map(getArea))).sort((a,b)=>a.localeCompare(b));
@@ -333,15 +317,17 @@
       });
 
       // Categories
-      const cats = Array.from(new Set(tools.map(getCat))).sort((a,b)=>a.localeCompare(b));
+      const apiCats = Array.isArray(filterGroups.categories) ? filterGroups.categories.map((entry) => entry.label).filter(Boolean) : [];
+      const cats = Array.from(new Set((apiCats.length ? apiCats : tools.map(getCat)))).sort((a,b)=>a.localeCompare(b));
       cats.forEach(c=>{
         const opt=document.createElement('option');
         opt.value=c; opt.textContent=c;
         catSel.appendChild(opt);
       });
 
-      // Tags (optional; may be empty for now)
-      const tags = Array.from(new Set(tools.flatMap(getTags).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+      // Tags/types
+      const apiTypes = Array.isArray(filterGroups.types) ? filterGroups.types.map((entry) => entry.label).filter(Boolean) : [];
+      const tags = Array.from(new Set((apiTypes.length ? apiTypes : tools.flatMap(getTags)).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
       tags.forEach(t=>{
         const opt=document.createElement('option');
         opt.value=t; opt.textContent=t;
@@ -358,6 +344,7 @@
     }
 
     init();
+
   </script>
 <script src="/public/js/auth.js"></script><script src="/public/js/site-auth-ui.js"></script></body>
 </html>
