@@ -1,6 +1,3 @@
-// File: /functions/api/admin/movies.js
-// Purpose: Admin movie list + editor using JSON base truth with D1 overlay persistence.
-
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText, auditAdminAction } from "../_lib/adminAudit.js";
 
 function json(data, status = 200) {
@@ -34,8 +31,7 @@ async function fetchMovieJsonBase(request) {
     "/data/movies/movie_catalog_enriched.v2.json",
     "/assets/movies/movie_catalog_enriched.v2.json",
     "/data/movies/movie_catalog_enriched.json",
-    "/assets/movies/movie_catalog_enriched.json",
-    "/data/catalog.json"
+    "/assets/movies/movie_catalog_enriched.json"
   ];
 
   for (const path of paths) {
@@ -51,32 +47,35 @@ async function fetchMovieJsonBase(request) {
 
 function normalizeMovieRow(row, index = 0) {
   const upc = normalizeText(row.upc || row.UPC || row.barcode || row.code);
-  const title = normalizeText(row.title || row.name || row.movie_title);
+  const title = normalizeText(row.title || row.name || row.movie_title || row.primaryTitle);
+  const originalTitle = normalizeText(row.original_title || row.originalTitle);
 
   return {
     movie_catalog_id: Number(row.movie_catalog_id || 0),
     upc,
     slug: normalizeText(row.slug || slugify(title || upc || `movie-${index + 1}`)),
-    title: title || "",
-    sort_title: normalizeText(row.sort_title || title || upc || `movie-${index + 1}`),
+    title,
+    original_title: originalTitle,
+    sort_title: normalizeText(row.sort_title || title || originalTitle || upc || `movie-${index + 1}`),
     summary: normalizeText(row.summary || row.description || row.plot_summary || row.synopsis),
-    release_year: safeNumber(row.release_year ?? row.year),
+    release_year: safeNumber(row.release_year ?? row.year ?? row.startYear),
     media_format: normalizeText(row.media_format || row.format || "DVD/Blu-ray"),
     genre: normalizeText(row.genre),
-    director_names: normalizeText(row.director_names || row.director),
-    actor_names: normalizeText(row.actor_names || row.actors),
-    front_image_url: normalizeText(row.front_image_url),
-    back_image_url: normalizeText(row.back_image_url),
+    director_names: normalizeText(row.director_names || row.director || row.directors),
+    actor_names: normalizeText(row.actor_names || row.actors || row.cast_names || row.cast),
+    front_image_url: normalizeText(row.front_image_url || row.front_image || row.image_front),
+    back_image_url: normalizeText(row.back_image_url || row.back_image || row.image_back),
     runtime_minutes: safeNumber(row.runtime_minutes),
     studio_name: normalizeText(row.studio_name || row.studio),
     trailer_url: normalizeText(row.trailer_url || row.trailer || row.youtube_url),
-    imdb_id: normalizeText(row.imdb_id),
+    imdb_id: normalizeText(row.imdb_id || row.tconst),
     alternate_identifier: normalizeText(row.alternate_identifier),
     metadata_status: normalizeText(row.metadata_status || "pending"),
+    metadata_source: normalizeText(row.metadata_source),
     collection_notes: normalizeText(row.collection_notes),
+    rarity_notes: normalizeText(row.rarity_notes),
     status: normalizeText(row.status || "active") || "active",
-    featured_rank: row.featured_rank == null || row.featured_rank === "" ? null : Number(row.featured_rank),
-    updated_at: row.updated_at || null
+    featured_rank: row.featured_rank == null || row.featured_rank === "" ? null : Number(row.featured_rank)
   };
 }
 
@@ -87,8 +86,6 @@ function mergeMovieRows(baseRow, overlayRow) {
     if (typeof value === "string" && !value.trim()) continue;
     merged[key] = value;
   }
-  merged.upc = normalizeText(merged.upc);
-  merged.slug = normalizeText(merged.slug || slugify(merged.title || merged.upc));
   return merged;
 }
 
@@ -99,6 +96,7 @@ async function ensureMovieTable(db) {
       upc TEXT NOT NULL UNIQUE,
       slug TEXT,
       title TEXT,
+      original_title TEXT,
       sort_title TEXT,
       summary TEXT,
       release_year INTEGER,
@@ -114,11 +112,11 @@ async function ensureMovieTable(db) {
       imdb_id TEXT,
       alternate_identifier TEXT,
       metadata_status TEXT,
+      metadata_source TEXT,
       collection_notes TEXT,
+      rarity_notes TEXT,
       status TEXT NOT NULL DEFAULT 'active',
       featured_rank INTEGER,
-      source_record_json TEXT,
-      source_json_path TEXT,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
@@ -140,6 +138,7 @@ async function fetchOverlayRows(db) {
       upc,
       slug,
       title,
+      original_title,
       sort_title,
       summary,
       release_year,
@@ -155,10 +154,11 @@ async function fetchOverlayRows(db) {
       imdb_id,
       alternate_identifier,
       metadata_status,
+      metadata_source,
       collection_notes,
+      rarity_notes,
       status,
-      featured_rank,
-      updated_at
+      featured_rank
     FROM movie_catalog
     WHERE COALESCE(status, 'active') != 'archived'
     ORDER BY COALESCE(featured_rank, 999999) ASC, LOWER(COALESCE(sort_title, title, upc, '')) ASC
@@ -173,6 +173,7 @@ function matchesQuery(row, q) {
     row.upc,
     row.slug,
     row.title,
+    row.original_title,
     row.summary,
     row.release_year,
     row.actor_names,
@@ -181,7 +182,8 @@ function matchesQuery(row, q) {
     row.media_format,
     row.studio_name,
     row.imdb_id,
-    row.alternate_identifier
+    row.alternate_identifier,
+    row.collection_notes
   ].join(" ").toLowerCase();
 
   return hay.includes(q);
@@ -237,10 +239,7 @@ export async function onRequestPost(context) {
 
   const db = getDb(env);
   if (!db) {
-    return json({
-      ok: false,
-      error: "Movie editing requires a D1 binding so edits can be stored as an overlay."
-    }, 500);
+    return json({ ok: false, error: "Movie editing requires D1 for overlay saves." }, 500);
   }
 
   await ensureMovieTable(db);
@@ -265,6 +264,7 @@ export async function onRequestPost(context) {
     upc: upc || slug,
     slug,
     title,
+    original_title: normalizeText(body.original_title),
     sort_title: normalizeText(body.sort_title || title || upc),
     summary: normalizeText(body.summary),
     release_year: safeNumber(body.release_year),
@@ -280,7 +280,9 @@ export async function onRequestPost(context) {
     imdb_id: normalizeText(body.imdb_id),
     alternate_identifier: normalizeText(body.alternate_identifier),
     metadata_status: normalizeText(body.metadata_status || "manually_reviewed"),
+    metadata_source: normalizeText(body.metadata_source || "manual_overlay"),
     collection_notes: normalizeText(body.collection_notes),
+    rarity_notes: normalizeText(body.rarity_notes),
     status,
     featured_rank: body.featured_rank == null || body.featured_rank === "" ? null : Number(body.featured_rank)
   };
@@ -299,6 +301,7 @@ export async function onRequestPost(context) {
         upc = ?,
         slug = ?,
         title = ?,
+        original_title = ?,
         sort_title = ?,
         summary = ?,
         release_year = ?,
@@ -314,7 +317,9 @@ export async function onRequestPost(context) {
         imdb_id = ?,
         alternate_identifier = ?,
         metadata_status = ?,
+        metadata_source = ?,
         collection_notes = ?,
+        rarity_notes = ?,
         status = ?,
         featured_rank = ?,
         updated_at = CURRENT_TIMESTAMP
@@ -323,6 +328,7 @@ export async function onRequestPost(context) {
       payload.upc,
       payload.slug,
       payload.title,
+      payload.original_title,
       payload.sort_title,
       payload.summary,
       payload.release_year,
@@ -338,7 +344,9 @@ export async function onRequestPost(context) {
       payload.imdb_id,
       payload.alternate_identifier,
       payload.metadata_status,
+      payload.metadata_source,
       payload.collection_notes,
+      payload.rarity_notes,
       payload.status,
       payload.featured_rank,
       Number(existing.movie_catalog_id)
@@ -346,15 +354,17 @@ export async function onRequestPost(context) {
   } else {
     await db.prepare(`
       INSERT INTO movie_catalog (
-        upc, slug, title, sort_title, summary, release_year, media_format, genre,
-        director_names, actor_names, front_image_url, back_image_url, runtime_minutes,
-        studio_name, trailer_url, imdb_id, alternate_identifier, metadata_status,
-        collection_notes, status, featured_rank, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        upc, slug, title, original_title, sort_title, summary, release_year,
+        media_format, genre, director_names, actor_names, front_image_url,
+        back_image_url, runtime_minutes, studio_name, trailer_url, imdb_id,
+        alternate_identifier, metadata_status, metadata_source, collection_notes,
+        rarity_notes, status, featured_rank, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       payload.upc,
       payload.slug,
       payload.title,
+      payload.original_title,
       payload.sort_title,
       payload.summary,
       payload.release_year,
@@ -370,7 +380,9 @@ export async function onRequestPost(context) {
       payload.imdb_id,
       payload.alternate_identifier,
       payload.metadata_status,
+      payload.metadata_source,
       payload.collection_notes,
+      payload.rarity_notes,
       payload.status,
       payload.featured_rank
     ).run();
