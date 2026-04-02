@@ -106,16 +106,26 @@ export async function onRequestGet(context) {
     low_stock_items: resource_links.filter((row) => row.inventory && ((Number(row.inventory.on_hand_quantity || 0) - Number(row.inventory.reserved_quantity || 0) + Number(row.inventory.incoming_quantity || 0)) <= Number(row.inventory.reorder_level || 0))).length
   };
 
-  const storefront_images = images.map((row) => ({
-    product_image_id: Number(row.product_image_id || 0),
-    image_url: row.image_url || '',
-    alt_text: row.alt_text || product.name || '',
-    image_title: row.image_title || '',
-    caption: row.caption || '',
-    variant_role: row.variant_role || '',
-    annotation_notes: row.annotation_notes || '',
-    sort_order: Number(row.sort_order || 0)
-  }));
+  const storefront_images = images.map((row) => {
+    const imageUrl = row.image_url || '';
+    return {
+      product_image_id: Number(row.product_image_id || 0),
+      image_url: imageUrl,
+      alt_text: row.alt_text || product.name || '',
+      image_title: row.image_title || '',
+      caption: row.caption || '',
+      variant_role: row.variant_role || '',
+      annotation_notes: row.annotation_notes || '',
+      sort_order: Number(row.sort_order || 0),
+      variant_urls: imageUrl ? {
+        original: imageUrl,
+        thumb: imageUrl,
+        medium: imageUrl,
+        large: imageUrl,
+        webp: imageUrl
+      } : null
+    };
+  });
 
   const image_groups = {
     featured: storefront_images.find((row) => row.image_url === product.featured_image_url) || storefront_images[0] || null,
@@ -124,5 +134,17 @@ export async function onRequestGet(context) {
     annotated: storefront_images.filter((row) => row.caption || row.annotation_notes || row.image_title)
   };
 
-  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary });
+  const build_summary = {
+    buildable_units_from_resources: resource_links.length
+      ? resource_links.reduce((minUnits, row) => {
+          if (!row.inventory || !Number(row.quantity_used || 0)) return minUnits;
+          const available = Math.max(0, Number(row.inventory.on_hand_quantity || 0) - Number(row.inventory.reserved_quantity || 0) + Number(row.inventory.incoming_quantity || 0));
+          const possibleUnits = Math.floor(available / Math.max(1, Number(row.quantity_used || 0)));
+          return minUnits == null ? possibleUnits : Math.min(minUnits, possibleUnits);
+        }, null)
+      : null,
+    resource_shortage_links: resource_links.filter((row) => row.inventory && Number(row.quantity_used || 0) > 0 && (Math.max(0, Number(row.inventory.on_hand_quantity || 0) - Number(row.inventory.reserved_quantity || 0) + Number(row.inventory.incoming_quantity || 0)) < Number(row.quantity_used || 0))).length
+  };
+
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary });
 }
