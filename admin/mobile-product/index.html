@@ -29,7 +29,7 @@
     <div class="hero compact-hero">
       <div>
         <h1>Quick finished product capture</h1>
-        <p>Create one draft product from a phone, upload images directly, add SEO basics, tag the tools and supplies used, and move straight to the next item.</p>
+        <p>Create one draft product from a phone, upload images directly, add SEO basics, tag the tools and supplies used, and move straight to the next item. Partial entries are allowed so you can save a photo, name, or reference now and finish the details later.</p>
       </div>
     </div>
 
@@ -46,20 +46,20 @@
       <form id="mobileProductForm" class="mobile-product-form">
         <div class="mobile-form-grid">
           <label>
-            <span>Product name *</span>
-            <input class="input" type="text" name="name" required maxlength="160" placeholder="Example: Hammered copper leaf ring"/>
+            <span>Product name</span>
+            <input class="input" type="text" name="name" maxlength="160" placeholder="Example: Hammered copper leaf ring"/>
           </label>
           <label>
-            <span>Category *</span>
-            <select class="input" name="product_category" id="mobileProductCategory" required></select>
+            <span>Category</span>
+            <select class="input" name="product_category" id="mobileProductCategory"></select>
           </label>
           <label>
             <span>Colour</span>
             <select class="input" name="color_name" id="mobileColorName"></select>
           </label>
           <label>
-            <span>Price (CAD) *</span>
-            <input class="input" type="number" name="price" min="0" step="0.01" required placeholder="49.95"/>
+            <span>Price (CAD)</span>
+            <input class="input" type="number" name="price" min="0" step="0.01" placeholder="49.95"/>
           </label>
           <label>
             <span>Compare-at price</span>
@@ -80,6 +80,10 @@
           <label>
             <span>Weight (grams)</span>
             <input class="input" type="number" name="weight_grams" min="0" step="1" placeholder="45"/>
+          </label>
+                    <label>
+            <span>Reference / identifier</span>
+            <input class="input" type="text" name="capture_reference" maxlength="120" placeholder="Photo batch, shelf note, customer note, UPC, temp code"/>
           </label>
           <label>
             <span>SKU override</span>
@@ -137,8 +141,9 @@
         <div id="mobileSelectedResources" class="resource-linked-list"></div>
         <div id="mobileResourceGrid" class="resource-tile-grid"></div>
 
+        <div class="small" style="margin-top:8px;margin-bottom:4px">Only one clue is enough: a photo, a quick name, or a temporary identifier. Everything can stay in draft mode until you finish the listing later.</div>
         <div class="mobile-form-actions">
-          <button class="btn primary" type="submit">Save draft for review</button>
+          <button class="btn primary" type="submit">Save partial draft</button>
           <button class="btn" type="button" id="mobileResetForNextButton">Clear for next product</button>
         </div>
       </form>
