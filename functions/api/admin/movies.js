@@ -1,72 +1,396 @@
-import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+// File: /functions/api/admin/movies.js
+// Purpose: Admin movie list + editor using JSON base truth with D1 overlay persistence.
 
-function json(data, status = 200) { return jsonResponse(data, status); }
-function safeInt(value) { if (value == null || value === "") return null; const num = Number(value); return Number.isInteger(num) ? num : null; }
-function slugify(value) { return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
-function asMovie(row) { return {
-  movie_catalog_id: Number(row.movie_catalog_id || 0),
-  upc: normalizeText(row.upc),
-  slug: normalizeText(row.slug),
-  title: normalizeText(row.title),
-  sort_title: normalizeText(row.sort_title),
-  summary: normalizeText(row.summary),
-  release_year: safeInt(row.release_year),
-  media_format: normalizeText(row.media_format),
-  genre: normalizeText(row.genre),
-  director_names: normalizeText(row.director_names),
-  actor_names: normalizeText(row.actor_names),
-  front_image_url: normalizeText(row.front_image_url),
-  back_image_url: normalizeText(row.back_image_url),
-  runtime_minutes: safeInt(row.runtime_minutes),
-  studio_name: normalizeText(row.studio_name),
-  trailer_url: normalizeText(row.trailer_url),
-  imdb_id: normalizeText(row.imdb_id),
-  alternate_identifier: normalizeText(row.alternate_identifier),
-  metadata_status: normalizeText(row.metadata_status || 'pending'),
-  collection_notes: normalizeText(row.collection_notes),
-  status: normalizeText(row.status || 'draft'),
-  featured_rank: row.featured_rank == null || row.featured_rank === '' ? null : Number(row.featured_rank),
-  updated_at: row.updated_at || null
-}; }
+import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText, auditAdminAction } from "../_lib/adminAudit.js";
+
+function json(data, status = 200) {
+  return jsonResponse(data, status, { "Cache-Control": "no-store" });
+}
+
+function safeNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function slugify(value) {
+  return normalizeText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+async function fetchJsonFromSite(request, path) {
+  const url = new URL(path, request.url);
+  const response = await fetch(url.toString(), {
+    cf: { cacheTtl: 0, cacheEverything: false }
+  }).catch(() => null);
+
+  if (!response || !response.ok) return null;
+  return response.json().catch(() => null);
+}
+
+async function fetchMovieJsonBase(request) {
+  const paths = [
+    "/data/movies/movie_catalog_enriched.v2.json",
+    "/assets/movies/movie_catalog_enriched.v2.json",
+    "/data/movies/movie_catalog_enriched.json",
+    "/assets/movies/movie_catalog_enriched.json",
+    "/data/catalog.json"
+  ];
+
+  for (const path of paths) {
+    const data = await fetchJsonFromSite(request, path);
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data?.movies)) return data.movies;
+    if (Array.isArray(data?.titles)) return data.titles;
+  }
+
+  return [];
+}
+
+function normalizeMovieRow(row, index = 0) {
+  const upc = normalizeText(row.upc || row.UPC || row.barcode || row.code);
+  const title = normalizeText(row.title || row.name || row.movie_title);
+
+  return {
+    movie_catalog_id: Number(row.movie_catalog_id || 0),
+    upc,
+    slug: normalizeText(row.slug || slugify(title || upc || `movie-${index + 1}`)),
+    title: title || "",
+    sort_title: normalizeText(row.sort_title || title || upc || `movie-${index + 1}`),
+    summary: normalizeText(row.summary || row.description || row.plot_summary || row.synopsis),
+    release_year: safeNumber(row.release_year ?? row.year),
+    media_format: normalizeText(row.media_format || row.format || "DVD/Blu-ray"),
+    genre: normalizeText(row.genre),
+    director_names: normalizeText(row.director_names || row.director),
+    actor_names: normalizeText(row.actor_names || row.actors),
+    front_image_url: normalizeText(row.front_image_url),
+    back_image_url: normalizeText(row.back_image_url),
+    runtime_minutes: safeNumber(row.runtime_minutes),
+    studio_name: normalizeText(row.studio_name || row.studio),
+    trailer_url: normalizeText(row.trailer_url || row.trailer || row.youtube_url),
+    imdb_id: normalizeText(row.imdb_id),
+    alternate_identifier: normalizeText(row.alternate_identifier),
+    metadata_status: normalizeText(row.metadata_status || "pending"),
+    collection_notes: normalizeText(row.collection_notes),
+    status: normalizeText(row.status || "active") || "active",
+    featured_rank: row.featured_rank == null || row.featured_rank === "" ? null : Number(row.featured_rank),
+    updated_at: row.updated_at || null
+  };
+}
+
+function mergeMovieRows(baseRow, overlayRow) {
+  const merged = { ...baseRow };
+  for (const [key, value] of Object.entries(overlayRow || {})) {
+    if (value == null) continue;
+    if (typeof value === "string" && !value.trim()) continue;
+    merged[key] = value;
+  }
+  merged.upc = normalizeText(merged.upc);
+  merged.slug = normalizeText(merged.slug || slugify(merged.title || merged.upc));
+  return merged;
+}
+
+async function ensureMovieTable(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS movie_catalog (
+      movie_catalog_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      upc TEXT NOT NULL UNIQUE,
+      slug TEXT,
+      title TEXT,
+      sort_title TEXT,
+      summary TEXT,
+      release_year INTEGER,
+      media_format TEXT,
+      genre TEXT,
+      director_names TEXT,
+      actor_names TEXT,
+      front_image_url TEXT,
+      back_image_url TEXT,
+      runtime_minutes INTEGER,
+      studio_name TEXT,
+      trailer_url TEXT,
+      imdb_id TEXT,
+      alternate_identifier TEXT,
+      metadata_status TEXT,
+      collection_notes TEXT,
+      status TEXT NOT NULL DEFAULT 'active',
+      featured_rank INTEGER,
+      source_record_json TEXT,
+      source_json_path TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run().catch(() => null);
+}
+
+async function fetchOverlayRows(db) {
+  if (!db) return [];
+
+  const hasTable = await db.prepare(
+    `SELECT name FROM sqlite_master WHERE type='table' AND name='movie_catalog' LIMIT 1`
+  ).first().catch(() => null);
+
+  if (!hasTable?.name) return [];
+
+  const result = await db.prepare(`
+    SELECT
+      movie_catalog_id,
+      upc,
+      slug,
+      title,
+      sort_title,
+      summary,
+      release_year,
+      media_format,
+      genre,
+      director_names,
+      actor_names,
+      front_image_url,
+      back_image_url,
+      runtime_minutes,
+      studio_name,
+      trailer_url,
+      imdb_id,
+      alternate_identifier,
+      metadata_status,
+      collection_notes,
+      status,
+      featured_rank,
+      updated_at
+    FROM movie_catalog
+    WHERE COALESCE(status, 'active') != 'archived'
+    ORDER BY COALESCE(featured_rank, 999999) ASC, LOWER(COALESCE(sort_title, title, upc, '')) ASC
+  `).all().catch(() => ({ results: [] }));
+
+  return Array.isArray(result?.results) ? result.results.map(normalizeMovieRow) : [];
+}
+
+function matchesQuery(row, q) {
+  if (!q) return true;
+  const hay = [
+    row.upc,
+    row.slug,
+    row.title,
+    row.summary,
+    row.release_year,
+    row.actor_names,
+    row.director_names,
+    row.genre,
+    row.media_format,
+    row.studio_name,
+    row.imdb_id,
+    row.alternate_identifier
+  ].join(" ").toLowerCase();
+
+  return hay.includes(q);
+}
 
 export async function onRequestGet(context) {
   const { request, env } = context;
-  const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
-  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
+
+  const db = getDb(env);
   const url = new URL(request.url);
-  const q = normalizeText(url.searchParams.get('q')).toLowerCase();
-  const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 50), 1), 200);
-  const like = `%${q}%`;
-  const rows = await db.prepare(`SELECT movie_catalog_id, upc, slug, title, sort_title, summary, release_year, media_format, genre, director_names, actor_names, front_image_url, back_image_url, runtime_minutes, studio_name, trailer_url, imdb_id, alternate_identifier, metadata_status, collection_notes, status, featured_rank, updated_at FROM movie_catalog WHERE (? = '' OR LOWER(COALESCE(title,'')) LIKE ? OR LOWER(COALESCE(upc,'')) LIKE ? OR LOWER(COALESCE(imdb_id,'')) LIKE ? OR LOWER(COALESCE(actor_names,'')) LIKE ? OR LOWER(COALESCE(alternate_identifier,'')) LIKE ?) ORDER BY LOWER(COALESCE(sort_title,title,upc,'')) ASC LIMIT ?`).bind(q, like, like, like, like, like, limit).all().catch(() => ({ results: [] }));
-  return json({ ok: true, items: (rows.results || []).map(asMovie), summary: { count: (rows.results || []).length, query: q } });
+  const q = normalizeText(url.searchParams.get("q")).toLowerCase();
+
+  const baseRows = (await fetchMovieJsonBase(request)).map(normalizeMovieRow);
+  const overlayRows = await fetchOverlayRows(db);
+
+  const byKey = new Map();
+
+  for (const row of baseRows) {
+    const key = normalizeText(row.upc || row.slug);
+    if (!key) continue;
+    byKey.set(key, row);
+  }
+
+  for (const row of overlayRows) {
+    const key = normalizeText(row.upc || row.slug);
+    if (!key) continue;
+    const existing = byKey.get(key);
+    byKey.set(key, existing ? mergeMovieRows(existing, row) : row);
+  }
+
+  const items = Array.from(byKey.values())
+    .filter((row) => matchesQuery(row, q))
+    .sort((a, b) => String(a.sort_title || a.title || "").localeCompare(String(b.sort_title || b.title || ""), undefined, { sensitivity: "base" }));
+
+  return json({
+    ok: true,
+    items,
+    summary: {
+      total_movies: items.length,
+      source_of_truth: "movie_catalog_enriched.v2.json with D1 overlay",
+      has_db: !!db,
+      db_overlay_rows: overlayRows.length
+    }
+  });
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-  const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
-  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  let body = {};
-  try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
-  const movieCatalogId = safeInt(body.movie_catalog_id);
-  const currentRow = movieCatalogId ? await db.prepare(`SELECT upc, slug FROM movie_catalog WHERE movie_catalog_id=? LIMIT 1`).bind(movieCatalogId).first().catch(() => null) : null;
-  const upc = normalizeText(body.upc) || normalizeText(currentRow?.upc);
-  const title = normalizeText(body.title);
-  const imdbId = normalizeText(body.imdb_id);
-  const alternateIdentifier = normalizeText(body.alternate_identifier);
-  if (!upc && !imdbId && !alternateIdentifier && !title) return json({ ok: false, error: 'Add at least a title, UPC, IMDb id, or alternate identifier.' }, 400);
-  const slug = normalizeText(body.slug) || normalizeText(currentRow?.slug) || slugify(title || upc || imdbId || alternateIdentifier || 'movie');
-  const resolvedUpc = upc || alternateIdentifier || imdbId || `draft-${Date.now()}`;
-  const values = [resolvedUpc, slug, title || null, normalizeText(body.sort_title) || title || resolvedUpc || null, normalizeText(body.summary) || null, safeInt(body.release_year), normalizeText(body.media_format) || null, normalizeText(body.genre) || null, normalizeText(body.director_names) || null, normalizeText(body.actor_names) || null, normalizeText(body.front_image_url) || null, normalizeText(body.back_image_url) || null, safeInt(body.runtime_minutes), normalizeText(body.studio_name) || null, normalizeText(body.trailer_url) || null, imdbId || null, alternateIdentifier || null, normalizeText(body.metadata_status || 'contributed') || 'contributed', normalizeText(body.collection_notes) || null, ['active','draft','archived'].includes(normalizeText(body.status).toLowerCase()) ? normalizeText(body.status).toLowerCase() : 'draft', body.featured_rank == null || body.featured_rank === '' ? null : Number(body.featured_rank)];
-  let resultId = movieCatalogId || 0;
-  if (movieCatalogId) {
-    await db.prepare(`UPDATE movie_catalog SET upc=?, slug=?, title=?, sort_title=?, summary=?, release_year=?, media_format=?, genre=?, director_names=?, actor_names=?, front_image_url=?, back_image_url=?, runtime_minutes=?, studio_name=?, trailer_url=?, imdb_id=?, alternate_identifier=?, metadata_status=?, collection_notes=?, status=?, featured_rank=?, updated_at=CURRENT_TIMESTAMP WHERE movie_catalog_id=?`).bind(...values, movieCatalogId).run();
-  } else {
-    const insert = await db.prepare(`INSERT INTO movie_catalog (upc, slug, title, sort_title, summary, release_year, media_format, genre, director_names, actor_names, front_image_url, back_image_url, runtime_minutes, studio_name, trailer_url, imdb_id, alternate_identifier, metadata_status, collection_notes, status, featured_rank, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(...values).run();
-    resultId = Number(insert?.meta?.last_row_id || 0);
+  if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
+
+  const db = getDb(env);
+  if (!db) {
+    return json({
+      ok: false,
+      error: "Movie editing requires a D1 binding so edits can be stored as an overlay."
+    }, 500);
   }
-  const saved = await db.prepare(`SELECT movie_catalog_id, upc, slug, title, sort_title, summary, release_year, media_format, genre, director_names, actor_names, front_image_url, back_image_url, runtime_minutes, studio_name, trailer_url, imdb_id, alternate_identifier, metadata_status, collection_notes, status, featured_rank, updated_at FROM movie_catalog WHERE movie_catalog_id=? LIMIT 1`).bind(resultId).first();
-  await auditAdminAction(env, request, adminUser, { action_type: movieCatalogId ? 'movie_update' : 'movie_create', target_type: 'movie_catalog', target_id: resultId, target_key: upc || imdbId || alternateIdentifier || title, details: { title, upc, imdb_id: imdbId, metadata_status: normalizeText(body.metadata_status || 'contributed') || 'contributed' } });
-  return json({ ok: true, item: asMovie(saved), message: movieCatalogId ? 'Movie details updated.' : 'Movie draft saved.' });
+
+  await ensureMovieTable(db);
+
+  let body = {};
+  try {
+    body = await request.json();
+  } catch {
+    return json({ ok: false, error: "Invalid JSON body." }, 400);
+  }
+
+  const upc = normalizeText(body.upc);
+  const title = normalizeText(body.title);
+  const slug = normalizeText(body.slug || slugify(title || upc));
+  const status = normalizeText(body.status || "active") || "active";
+
+  if (!upc && !slug) {
+    return json({ ok: false, error: "UPC or slug is required." }, 400);
+  }
+
+  const payload = {
+    upc: upc || slug,
+    slug,
+    title,
+    sort_title: normalizeText(body.sort_title || title || upc),
+    summary: normalizeText(body.summary),
+    release_year: safeNumber(body.release_year),
+    media_format: normalizeText(body.media_format),
+    genre: normalizeText(body.genre),
+    director_names: normalizeText(body.director_names),
+    actor_names: normalizeText(body.actor_names),
+    front_image_url: normalizeText(body.front_image_url),
+    back_image_url: normalizeText(body.back_image_url),
+    runtime_minutes: safeNumber(body.runtime_minutes),
+    studio_name: normalizeText(body.studio_name),
+    trailer_url: normalizeText(body.trailer_url),
+    imdb_id: normalizeText(body.imdb_id),
+    alternate_identifier: normalizeText(body.alternate_identifier),
+    metadata_status: normalizeText(body.metadata_status || "manually_reviewed"),
+    collection_notes: normalizeText(body.collection_notes),
+    status,
+    featured_rank: body.featured_rank == null || body.featured_rank === "" ? null : Number(body.featured_rank)
+  };
+
+  const existing = await db.prepare(`
+    SELECT movie_catalog_id
+    FROM movie_catalog
+    WHERE upc = ? OR slug = ?
+    LIMIT 1
+  `).bind(payload.upc, payload.slug).first().catch(() => null);
+
+  if (existing?.movie_catalog_id) {
+    await db.prepare(`
+      UPDATE movie_catalog
+      SET
+        upc = ?,
+        slug = ?,
+        title = ?,
+        sort_title = ?,
+        summary = ?,
+        release_year = ?,
+        media_format = ?,
+        genre = ?,
+        director_names = ?,
+        actor_names = ?,
+        front_image_url = ?,
+        back_image_url = ?,
+        runtime_minutes = ?,
+        studio_name = ?,
+        trailer_url = ?,
+        imdb_id = ?,
+        alternate_identifier = ?,
+        metadata_status = ?,
+        collection_notes = ?,
+        status = ?,
+        featured_rank = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE movie_catalog_id = ?
+    `).bind(
+      payload.upc,
+      payload.slug,
+      payload.title,
+      payload.sort_title,
+      payload.summary,
+      payload.release_year,
+      payload.media_format,
+      payload.genre,
+      payload.director_names,
+      payload.actor_names,
+      payload.front_image_url,
+      payload.back_image_url,
+      payload.runtime_minutes,
+      payload.studio_name,
+      payload.trailer_url,
+      payload.imdb_id,
+      payload.alternate_identifier,
+      payload.metadata_status,
+      payload.collection_notes,
+      payload.status,
+      payload.featured_rank,
+      Number(existing.movie_catalog_id)
+    ).run();
+  } else {
+    await db.prepare(`
+      INSERT INTO movie_catalog (
+        upc, slug, title, sort_title, summary, release_year, media_format, genre,
+        director_names, actor_names, front_image_url, back_image_url, runtime_minutes,
+        studio_name, trailer_url, imdb_id, alternate_identifier, metadata_status,
+        collection_notes, status, featured_rank, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(
+      payload.upc,
+      payload.slug,
+      payload.title,
+      payload.sort_title,
+      payload.summary,
+      payload.release_year,
+      payload.media_format,
+      payload.genre,
+      payload.director_names,
+      payload.actor_names,
+      payload.front_image_url,
+      payload.back_image_url,
+      payload.runtime_minutes,
+      payload.studio_name,
+      payload.trailer_url,
+      payload.imdb_id,
+      payload.alternate_identifier,
+      payload.metadata_status,
+      payload.collection_notes,
+      payload.status,
+      payload.featured_rank
+    ).run();
+  }
+
+  await auditAdminAction(env, request, adminUser, {
+    action_type: "movie_save",
+    target_type: "movie_catalog",
+    target_key: payload.upc || payload.slug,
+    details: {
+      upc: payload.upc,
+      slug: payload.slug,
+      title: payload.title,
+      metadata_status: payload.metadata_status
+    }
+  });
+
+  return json({
+    ok: true,
+    message: "Movie saved.",
+    item: payload
+  });
 }
