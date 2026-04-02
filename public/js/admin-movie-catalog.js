@@ -1,6 +1,3 @@
-// File: /public/js/admin-movie-catalog.js
-// Purpose: Admin movie list/editor using /api/admin/movies.
-
 document.addEventListener("DOMContentLoaded", () => {
   const listEl = document.getElementById("adminMoviesList");
   const searchEl = document.getElementById("adminMoviesSearch");
@@ -14,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     upc: document.getElementById("movieUpc"),
     slug: document.getElementById("movieSlug"),
     title: document.getElementById("movieTitle"),
+    original_title: document.getElementById("movieOriginalTitle"),
     release_year: document.getElementById("movieYear"),
     actor_names: document.getElementById("movieActors"),
     director_names: document.getElementById("movieDirectors"),
@@ -28,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     back_image_url: document.getElementById("movieBack"),
     summary: document.getElementById("movieSummary"),
     collection_notes: document.getElementById("movieNotes"),
+    rarity_notes: document.getElementById("movieRarityNotes"),
     metadata_status: document.getElementById("movieMetadataStatus"),
     status: document.getElementById("movieStatus")
   };
@@ -77,6 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const sub = [
         item.release_year || "",
         item.media_format || "",
+        item.director_names || "",
         item.upc ? `UPC: ${item.upc}` : ""
       ].filter(Boolean).join(" • ");
 
@@ -105,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await response.json().catch(() => null);
 
     if (!response.ok || !data?.ok) {
+      items = [];
       renderList([]);
       setMessage(data?.error || "Could not load movies.", true);
       return;
