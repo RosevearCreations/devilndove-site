@@ -7,7 +7,7 @@
   <title>Admin Dashboard — Devil n Dove</title>
   <link href="/css/styles.css" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
-  <meta content="Devil n Dove admin dashboard for users, products, orders, payments, access tiers, site operations, and movie detail editing." name="description"/>
+  <meta content="Devil n Dove admin dashboard for users, products, orders, payments, access tiers, site operations, and movie editing." name="description"/>
 </head>
 <body>
   <div class="container admin-shell">
@@ -32,7 +32,7 @@
       <div>
         <h1>Admin Dashboard</h1>
         <p>
-          Manage users, access tiers, products, orders, payments, movie details, and core site operations.
+          Manage users, access tiers, products, orders, payments, movies, and core site operations.
         </p>
       </div>
     </div>
@@ -142,7 +142,7 @@
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
           <div>
             <label class="small" for="adminMoviesSearch">Search Movies</label>
-            <input id="adminMoviesSearch" type="text" placeholder="Title, UPC, actor, director..."/>
+            <input id="adminMoviesSearch" type="text" placeholder="Title, UPC, actor, director, summary, studio..." />
           </div>
           <button class="btn" id="refreshMoviesButton" type="button">Refresh Movies</button>
         </div>
@@ -156,92 +156,150 @@
         </div>
 
         <div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <div class="small" style="margin-bottom:6px">Front Cover</div>
+                <div id="movieFrontPreview" style="aspect-ratio:2 / 3;border:1px solid #ddd;border-radius:12px;overflow:hidden;background:#111"></div>
+              </div>
+              <div>
+                <div class="small" style="margin-bottom:6px">Back Cover</div>
+                <div id="movieBackPreview" style="aspect-ratio:2 / 3;border:1px solid #ddd;border-radius:12px;overflow:hidden;background:#111"></div>
+              </div>
+            </div>
+            <div id="moviePreviewMeta" class="small" style="margin-top:10px"></div>
+          </div>
+
           <form id="adminMovieForm" class="grid" style="gap:12px">
             <div class="grid cols-2" style="gap:12px">
               <div>
                 <label class="small" for="movieUpc">UPC</label>
-                <input id="movieUpc" type="text"/>
+                <input id="movieUpc" type="text" />
               </div>
               <div>
                 <label class="small" for="movieSlug">Slug</label>
-                <input id="movieSlug" type="text"/>
+                <input id="movieSlug" type="text" />
               </div>
             </div>
 
             <div class="grid cols-2" style="gap:12px">
               <div>
                 <label class="small" for="movieTitle">Title</label>
-                <input id="movieTitle" type="text"/>
+                <input id="movieTitle" type="text" />
               </div>
               <div>
-                <label class="small" for="movieYear">Year</label>
-                <input id="movieYear" type="number"/>
+                <label class="small" for="movieOriginalTitle">Original Title</label>
+                <input id="movieOriginalTitle" type="text" />
               </div>
             </div>
 
             <div class="grid cols-2" style="gap:12px">
               <div>
-                <label class="small" for="movieActors">Actors</label>
-                <input id="movieActors" type="text"/>
+                <label class="small" for="movieYear">Year</label>
+                <input id="movieYear" type="number" />
               </div>
               <div>
-                <label class="small" for="movieDirectors">Directors</label>
-                <input id="movieDirectors" type="text"/>
+                <label class="small" for="movieFormat">Format</label>
+                <input id="movieFormat" type="text" />
               </div>
             </div>
 
             <div class="grid cols-2" style="gap:12px">
               <div>
                 <label class="small" for="movieGenre">Genre</label>
-                <input id="movieGenre" type="text"/>
+                <input id="movieGenre" type="text" />
               </div>
-              <div>
-                <label class="small" for="movieFormat">Format</label>
-                <input id="movieFormat" type="text"/>
-              </div>
-            </div>
-
-            <div class="grid cols-2" style="gap:12px">
               <div>
                 <label class="small" for="movieStudio">Studio</label>
-                <input id="movieStudio" type="text"/>
-              </div>
-              <div>
-                <label class="small" for="movieRuntime">Runtime Minutes</label>
-                <input id="movieRuntime" type="number"/>
+                <input id="movieStudio" type="text" />
               </div>
             </div>
 
             <div class="grid cols-2" style="gap:12px">
               <div>
-                <label class="small" for="movieImdbId">IMDb ID</label>
-                <input id="movieImdbId" type="text"/>
+                <label class="small" for="movieDirectors">Directors</label>
+                <input id="movieDirectors" type="text" />
               </div>
               <div>
-                <label class="small" for="movieAltId">Alternate Identifier</label>
-                <input id="movieAltId" type="text"/>
+                <label class="small" for="movieActors">Actors</label>
+                <input id="movieActors" type="text" />
               </div>
             </div>
 
-            <div>
-              <label class="small" for="movieTrailer">Trailer URL</label>
-              <input id="movieTrailer" type="text"/>
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieRuntime">Runtime Minutes</label>
+                <input id="movieRuntime" type="number" />
+              </div>
+              <div>
+                <label class="small" for="movieImdbId">IMDb ID</label>
+                <input id="movieImdbId" type="text" />
+              </div>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieAltId">Alternate Identifier</label>
+                <input id="movieAltId" type="text" />
+              </div>
+              <div>
+                <label class="small" for="movieTrailer">Trailer URL</label>
+                <input id="movieTrailer" type="text" />
+              </div>
             </div>
 
             <div class="grid cols-2" style="gap:12px">
               <div>
                 <label class="small" for="movieFront">Front Image URL</label>
-                <input id="movieFront" type="text"/>
+                <input id="movieFront" type="text" />
               </div>
               <div>
                 <label class="small" for="movieBack">Back Image URL</label>
-                <input id="movieBack" type="text"/>
+                <input id="movieBack" type="text" />
               </div>
             </div>
 
             <div>
               <label class="small" for="movieSummary">Summary</label>
-              <textarea id="movieSummary" rows="4"></textarea>
+              <textarea id="movieSummary" rows="6"></textarea>
+            </div>
+
+            <div class="grid cols-2" style="gap:12px">
+              <div>
+                <label class="small" for="movieMetadataSource">Metadata Source</label>
+                <input id="movieMetadataSource" type="text" />
+              </div>
+              <div>
+                <label class="small" for="movieMetadataStatus">Metadata Status</label>
+                <select id="movieMetadataStatus">
+                  <option value="">Select</option>
+                  <option value="pending">Pending</option>
+                  <option value="partially_enriched">Partially Enriched</option>
+                  <option value="manually_reviewed">Manually Reviewed</option>
+                  <option value="enriched">Enriched</option>
+                  <option value="visitor_contributed">Visitor Contributed</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid cols-3" style="gap:12px">
+              <div>
+                <label class="small" for="movieValueLow">Estimated Value Low (cents)</label>
+                <input id="movieValueLow" type="number" />
+              </div>
+              <div>
+                <label class="small" for="movieValueHigh">Estimated Value High (cents)</label>
+                <input id="movieValueHigh" type="number" />
+              </div>
+              <div>
+                <label class="small" for="movieValueCurrency">Value Currency</label>
+                <input id="movieValueCurrency" type="text" />
+              </div>
+            </div>
+
+            <div>
+              <label class="small" for="movieRarityNotes">Rarity Notes</label>
+              <textarea id="movieRarityNotes" rows="3"></textarea>
             </div>
 
             <div>
@@ -249,17 +307,12 @@
               <textarea id="movieNotes" rows="3"></textarea>
             </div>
 
+            <div>
+              <label class="small" for="movieValueSearchUrl">Value Search URL</label>
+              <input id="movieValueSearchUrl" type="text" />
+            </div>
+
             <div class="grid cols-2" style="gap:12px">
-              <div>
-                <label class="small" for="movieMetadataStatus">Metadata Status</label>
-                <select id="movieMetadataStatus">
-                  <option value="">Select</option>
-                  <option value="pending">Pending</option>
-                  <option value="manually_reviewed">Manually Reviewed</option>
-                  <option value="enriched">Enriched</option>
-                  <option value="visitor_contributed">Visitor Contributed</option>
-                </select>
-              </div>
               <div>
                 <label class="small" for="movieStatus">Status</label>
                 <select id="movieStatus">
@@ -267,6 +320,10 @@
                   <option value="draft">Draft</option>
                   <option value="archived">Archived</option>
                 </select>
+              </div>
+              <div>
+                <label class="small" for="movieFeaturedRank">Featured Rank</label>
+                <input id="movieFeaturedRank" type="number" />
               </div>
             </div>
 
