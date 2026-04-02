@@ -206,3 +206,8 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Reservation governance now appears in another operational admin surface: the main products list can reserve or release linked tool/supply inventory per product.
 - Toolshed discovery now leans on the centralized tools API path rather than multiple direct JSON fallbacks.
 - Storefront product detail now carries grouped image, annotation, variant-role, and build-summary context in one payload.
+
+
+## Current pass update
+- The phone-first finished-product flow no longer assumes every draft is storefront-ready. Partial intake is now allowed through `capture_reference` plus draft-mode saving.
+- Admin now includes a movie catalog editing workflow so the movie system can accept staff-curated and future visitor-contributed metadata directly into D1 without depending only on source JSON edits.

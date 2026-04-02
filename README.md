@@ -280,3 +280,9 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Added reserve/release linked-resource controls to the main admin products list.
 - Moved toolshed discovery more firmly behind the centralized `/api/tools` authority path.
 - Expanded storefront product detail to return build-summary context and lightweight image variant-url hints.
+
+
+## Current pass additions
+- `data/finished_products_import_template.csv` provides a detailed starter format for bulk finished-product uploads.
+- `/admin/mobile-product/` now supports partial draft saves using `capture_reference` plus optional photos.
+- Admin now includes a movie catalog editor backed by `/api/admin/movies`.

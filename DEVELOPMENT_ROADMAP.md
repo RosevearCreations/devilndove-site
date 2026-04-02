@@ -164,3 +164,10 @@
 - Extended product-resource reservation controls into the main admin products list so linked tools/supplies can be reserved or released from another real day-to-day workflow.
 - Hardened the toolshed and supplies discovery pages around centralized API reads and shared filter-group metadata rather than page-local JSON assumptions.
 - Storefront product detail now ships lightweight variant-url hints plus build-summary context to support later media-variant rollout and richer product storytelling.
+
+
+## Current pass completion update
+
+- Mobile product capture now supports partial draft intake using a new `capture_reference` field, so a phone-first session can save a photo, a name, or a temporary identifier before the product is ready for full storefront data.
+- Added a detailed finished-products CSV template at `/data/finished_products_import_template.csv` for larger batch seeding.
+- Added an admin movie catalog editor so staff can update title/year/actors/UPC/IMDb id and notes directly in D1 while the movie-enrichment pipeline is still being built out.

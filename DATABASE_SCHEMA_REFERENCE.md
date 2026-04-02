@@ -269,3 +269,8 @@ Durable audit trail of governed product review actions such as approve, needs ch
 ## Current pass schema note
 - No new tables were required in this pass.
 - This pass extended the use of existing product/resource/media tables by exposing richer reservation and product-detail payloads rather than adding new schema objects.
+
+
+## Current pass additions
+- `products.capture_reference` stores a temporary phone-first intake identifier for partial product drafts.
+- `movie_catalog` now supports `imdb_id`, `alternate_identifier`, `metadata_status`, and `collection_notes` so admin can curate or review movie metadata directly in D1.

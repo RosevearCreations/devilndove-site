@@ -362,3 +362,20 @@ All code-side items that were realistically actionable inside this repo pass wer
 
 #### Remaining risk
 - Mixed JSON/D1 authority still remains in movies and a few legacy admin/read flows.
+
+
+## Current pass completion update
+
+### Product/mobile workflow
+#### Addressed in this pass
+- Mobile finished-product capture now supports partial draft entry so staff can save only a photo, a temporary name, or another identifier and move on without filling every storefront field first.
+- Products now support `capture_reference`, which gives intake and follow-up work a safer temporary identifier during phone-first capture.
+- Added a detailed finished-products CSV template at `/data/finished_products_import_template.csv` so large batches can be prepared with the same field names the bulk import endpoints expect.
+
+### Movie catalog enrichment
+#### Addressed in this pass
+- Added an admin movie-details editor backed by `movie_catalog`, so title, year, actors, UPC, IMDb id, and alternate identifiers can now be reviewed and updated in-app instead of only through source JSON edits.
+- Movie catalog rows now support `imdb_id`, `alternate_identifier`, `metadata_status`, and `collection_notes`, which creates a better path for staff-curated or visitor-contributed metadata before external enrichment is complete.
+
+#### Still open
+- Trusted bulk movie enrichment still depends on an accepted external metadata source or on locally processed enrichment files.

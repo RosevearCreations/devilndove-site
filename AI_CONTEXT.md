@@ -182,3 +182,8 @@ Current-pass emphasis:
 - Admin product list now exposes reserve/release actions for linked product resources, extending reservation governance beyond the stock-report-only path.
 - The public toolshed page now depends on `/api/tools` as its main authority path instead of chaining through multiple direct JSON fallbacks.
 - Storefront product detail now returns `build_summary` and lightweight `variant_urls` hints for each image so later media-variant rollout has a cleaner contract.
+
+
+- Current pass update: mobile finished-product capture now allows partial draft intake with a `capture_reference`, so one photo or temporary identifier is enough to save a draft and continue.
+- Current pass update: admin now has a movie catalog detail editor backed by `movie_catalog` for title/year/actor/UPC/IMDb-id/manual-note editing.
+- Current pass update: `/data/finished_products_import_template.csv` is now the detailed CSV template for bulk finished-product uploads.

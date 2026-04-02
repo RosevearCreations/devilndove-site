@@ -220,3 +220,9 @@ New current-pass backend additions:
 - `public/js/admin-products.js` now covers another reservation-governance path by calling `/api/admin/site-item-inventory` for product-level reserve/release actions.
 - `toolshed/index.html` now relies on `/api/tools` as the primary discovery authority instead of direct JSON fallback chaining.
 - `functions/api/product-detail.js` now returns `build_summary` and lightweight image `variant_urls` hints alongside grouped image/annotation data.
+
+
+## Current pass additions
+- `data/finished_products_import_template.csv` is the detailed CSV template for bulk finished-product imports.
+- `functions/api/admin/movies.js` powers admin-side movie detail editing against `movie_catalog`.
+- `public/js/admin-movie-catalog.js` mounts the movie catalog editor inside `/admin/`.

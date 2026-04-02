@@ -135,3 +135,7 @@ Current-pass rules added:
 ## Current pass reminder
 - Keep public tools/supplies/creations discovery on centralized API paths whenever possible instead of adding new direct JSON reads.
 - Preserve the one-H1-per-exposed-page rule and continue documenting every reservation-governance and media-lifecycle change in the repo markdown files.
+
+
+- Bulk finished-product import work should stay aligned with `data/finished_products_import_template.csv` so CSV headers match the preview/import endpoints.
+- Mobile product capture must continue to allow partial draft intake; do not reintroduce storefront-level mandatory fields into the phone-first save path.

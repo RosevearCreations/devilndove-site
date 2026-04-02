@@ -118,3 +118,9 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Admin products screen now includes reserve/release controls for linked resources.
 - Toolshed page now reads through `/api/tools` instead of direct JSON fallback chaining.
 - Product detail payload now includes `build_summary` and image `variant_urls` hints.
+
+
+## Current pass check
+- Mobile product capture now supports partial draft saves and no longer requires every storefront field before intake can continue.
+- Admin movie-catalog editing is now available for manual metadata cleanup while the movie-enrichment pipeline is still being processed offline.
+- Bulk finished-product CSV seeding now has a detailed template file in `data/finished_products_import_template.csv`.

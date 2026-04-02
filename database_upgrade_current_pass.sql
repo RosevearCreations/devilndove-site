@@ -426,3 +426,11 @@ ALTER TABLE supplier_purchase_order_items ADD COLUMN received_at TEXT;
 --   product_resource_links
 --   site_item_inventory
 -- Continue applying this file only when later passes introduce real D1 schema changes.
+
+
+ALTER TABLE products ADD COLUMN capture_reference TEXT;
+ALTER TABLE movie_catalog ADD COLUMN imdb_id TEXT;
+ALTER TABLE movie_catalog ADD COLUMN alternate_identifier TEXT;
+ALTER TABLE movie_catalog ADD COLUMN metadata_status TEXT NOT NULL DEFAULT 'pending';
+ALTER TABLE movie_catalog ADD COLUMN collection_notes TEXT;
+-- Current pass note: mobile product capture now supports partial draft entries with only a photo, a name, or a temporary reference, and admin now has an in-app movie detail editor backed by movie_catalog.
