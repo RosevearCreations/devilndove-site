@@ -1,249 +1,288 @@
 // File: /functions/api/movies.js
-// Brief description: Public read endpoint for the movie shelf. It blends D1 movie records with
-// enriched JSON and legacy rows, while deriving safe fallback cover/trailer URLs when metadata is partial.
-// This version adds real pagination, safer headers, and fuller catalog reporting.
+// Purpose: Public movie catalog API with safe JSON-first fallback and optional D1 overlay merge.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=120',
-      'X-Content-Type-Options': 'nosniff',
-      'Referrer-Policy': 'strict-origin-when-cross-origin'
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=120",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
     }
   });
 }
 
-function normalizeText(value) { return String(value || '').trim(); }
-function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
-function slugify(value) {
-  return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+function normalizeText(value) {
+  return String(value || "").trim();
 }
+
 function safeNumber(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 }
-function buildTrailerSearchUrl(title, upc) {
-  const q = encodeURIComponent([normalizeText(title), normalizeText(upc), 'official trailer'].filter(Boolean).join(' '));
-  return q ? `https://www.youtube.com/results?search_query=${q}` : '';
+
+function slugify(value) {
+  return normalizeText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
+
+function buildTrailerSearchUrl(title, upc) {
+  const q = encodeURIComponent(
+    [normalizeText(title), normalizeText(upc), "official trailer"].filter(Boolean).join(" ")
+  );
+  return q ? `https://www.youtube.com/results?search_query=${q}` : "";
+}
+
 function deriveCoverUrl(row, side) {
   const upc = normalizeText(row.upc || row.UPC || row.barcode || row.code);
-  if (!upc) return '';
-  const explicit = normalizeText(side === 'front'
-    ? (row.front_image_url || row.image_front || row.front_image || row.image || row.cover_front)
-    : (row.back_image_url || row.image_back || row.back_image || row.cover_back));
+  if (!upc) return "";
+
+  const explicit = normalizeText(
+    side === "front"
+      ? (row.front_image_url || row.image_front || row.front_image || row.image || row.cover_front)
+      : (row.back_image_url || row.image_back || row.back_image || row.cover_back)
+  );
   if (explicit) return explicit;
-  const prefix = normalizeText(row.cover_base_url || row.r2_movie_base_url || 'https://pub-f8137eb938da486a9f24410ccf49087c.r2.dev/movies');
-  return `${prefix.replace(/\/$/, '')}/${upc}${side === 'front' ? 'f' : 'b'}.jpg`;
+
+  const base = normalizeText(
+    row.cover_base_url ||
+    row.r2_movie_base_url ||
+    "https://pub-f8137eb938da486a9f24410ccf49087c.r2.dev/movies"
+  ).replace(/\/$/, "");
+
+  return `${base}/${upc}${side === "front" ? "f" : "b"}.jpg`;
 }
 
 async function fetchJsonFromSite(request, path) {
   const url = new URL(path, request.url);
-  const response = await fetch(url.toString(), { cf: { cacheTtl: 0, cacheEverything: false } });
-  if (!response.ok) return null;
+  const response = await fetch(url.toString(), {
+    cf: { cacheTtl: 0, cacheEverything: false }
+  }).catch(() => null);
+
+  if (!response || !response.ok) return null;
   return response.json().catch(() => null);
 }
 
-async function fetchLegacyCatalog(request) {
-  const data = await fetchJsonFromSite(request, '/data/catalog.json');
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.movies)) return data.movies;
-  return [];
-}
-
-async function fetchEnrichedCatalog(request) {
+async function fetchMovieJsonBase(request) {
   const paths = [
-    '/data/movies/movie_catalog_enriched.v2.json',
-    '/assets/movies/movie_catalog_enriched.v2.json',
-    '/data/movies/movie_catalog_enriched.json',
-    '/assets/movies/movie_catalog_enriched.json'
+    "/data/movies/movie_catalog_enriched.v2.json",
+    "/assets/movies/movie_catalog_enriched.v2.json",
+    "/data/movies/movie_catalog_enriched.json",
+    "/assets/movies/movie_catalog_enriched.json",
+    "/data/catalog.json"
   ];
+
   for (const path of paths) {
     const data = await fetchJsonFromSite(request, path);
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.items)) return data.items;
     if (Array.isArray(data?.movies)) return data.movies;
+    if (Array.isArray(data?.titles)) return data.titles;
   }
+
   return [];
 }
 
 function normalizeMovieRow(row, index = 0) {
   const upc = normalizeText(row.upc || row.UPC || row.barcode || row.code);
-  const explicitTitle = normalizeText(row.title || row.name || row.movie_title);
-  const trailerUrl = normalizeText(row.trailer_url || row.trailer || row.youtube_url || row.trailer_search_url);
+  const title = normalizeText(row.title || row.name || row.movie_title);
+  const trailerUrl = normalizeText(row.trailer_url || row.trailer || row.youtube_url);
+
   return {
     movie_catalog_id: Number(row.movie_catalog_id || 0),
     upc,
-    slug: normalizeText(row.slug || slugify(explicitTitle || upc || `movie-${index + 1}`)),
-    title: explicitTitle || '',
-    sort_title: normalizeText(row.sort_title || explicitTitle || upc || `movie-${index + 1}`),
+    slug: normalizeText(row.slug || slugify(title || upc || `movie-${index + 1}`)),
+    title: title || "",
+    sort_title: normalizeText(row.sort_title || title || upc || `movie-${index + 1}`),
     summary: normalizeText(row.summary || row.description || row.plot_summary || row.synopsis),
-    release_year: safeNumber(row.release_year),
-    media_format: normalizeText(row.media_format || row.format || 'DVD/Blu-ray'),
+    release_year: safeNumber(row.release_year ?? row.year),
+    media_format: normalizeText(row.media_format || row.format || "DVD/Blu-ray"),
     genre: normalizeText(row.genre),
     director_names: normalizeText(row.director_names || row.director),
     actor_names: normalizeText(row.actor_names || row.actors),
-    front_image_url: deriveCoverUrl(row, 'front'),
-    back_image_url: deriveCoverUrl(row, 'back'),
+    front_image_url: normalizeText(row.front_image_url || deriveCoverUrl(row, "front")),
+    back_image_url: normalizeText(row.back_image_url || deriveCoverUrl(row, "back")),
     runtime_minutes: safeNumber(row.runtime_minutes),
     studio_name: normalizeText(row.studio_name || row.studio),
-    imdb_id: normalizeText(row.imdb_id),
-    alternate_identifier: normalizeText(row.alternate_identifier),
-    metadata_status: normalizeText(row.metadata_status || (explicitTitle ? 'enriched' : 'pending')),
-    metadata_source: normalizeText(row.metadata_source),
-    collection_notes: normalizeText(row.collection_notes),
-    estimated_value_low_cents: safeNumber(row.estimated_value_low_cents),
-    estimated_value_high_cents: safeNumber(row.estimated_value_high_cents),
-    estimated_value_currency: normalizeText(row.estimated_value_currency || 'CAD'),
-    rarity_notes: normalizeText(row.rarity_notes),
-    collection_notes: normalizeText(row.collection_notes),
     trailer_url: trailerUrl,
-    trailer_search_url: trailerUrl || buildTrailerSearchUrl(explicitTitle || upc, upc),
-    status: normalizeText(row.status || 'active') || 'active',
-    featured_rank: row.featured_rank == null || row.featured_rank === '' ? null : Number(row.featured_rank),
-    updated_at: row.updated_at || null,
-    source_record: row?.source_record || row || null
+    trailer_search_url: trailerUrl || buildTrailerSearchUrl(title, upc),
+    imdb_id: normalizeText(row.imdb_id),
+    metadata_status: normalizeText(row.metadata_status || (title ? "enriched" : "pending")),
+    alternate_identifier: normalizeText(row.alternate_identifier),
+    collection_notes: normalizeText(row.collection_notes),
+    status: normalizeText(row.status || "active") || "active",
+    featured_rank: row.featured_rank == null || row.featured_rank === "" ? null : Number(row.featured_rank),
+    updated_at: row.updated_at || null
   };
 }
 
-function mergeMovieRows(primary, overlay) {
-  return {
-    ...primary,
-    ...Object.fromEntries(Object.entries(overlay || {}).filter(([_, v]) => !(v == null || v === ''))),
-    movie_catalog_id: primary.movie_catalog_id || Number(overlay?.movie_catalog_id || 0) || 0,
-    upc: primary.upc || overlay?.upc || '',
-    title: primary.title || overlay?.title || '',
-    sort_title: primary.sort_title || overlay?.sort_title || primary.title || overlay?.title || primary.upc || '',
-    front_image_url: primary.front_image_url || overlay?.front_image_url || deriveCoverUrl(primary, 'front') || deriveCoverUrl(overlay || {}, 'front'),
-    back_image_url: primary.back_image_url || overlay?.back_image_url || deriveCoverUrl(primary, 'back') || deriveCoverUrl(overlay || {}, 'back'),
-    trailer_search_url: primary.trailer_search_url || overlay?.trailer_search_url || buildTrailerSearchUrl(overlay?.title || primary.title, primary.upc || overlay?.upc),
-    source_record: overlay?.source_record || primary.source_record || null
-  };
+function mergeMovieRows(baseRow, overlayRow) {
+  const merged = { ...baseRow };
+
+  for (const [key, value] of Object.entries(overlayRow || {})) {
+    if (value == null) continue;
+    if (typeof value === "string" && !value.trim()) continue;
+    merged[key] = value;
+  }
+
+  merged.upc = normalizeText(merged.upc);
+  merged.slug = normalizeText(merged.slug || slugify(merged.title || merged.upc));
+  merged.front_image_url = normalizeText(merged.front_image_url || deriveCoverUrl(merged, "front"));
+  merged.back_image_url = normalizeText(merged.back_image_url || deriveCoverUrl(merged, "back"));
+  merged.trailer_search_url = normalizeText(
+    merged.trailer_search_url || merged.trailer_url || buildTrailerSearchUrl(merged.title, merged.upc)
+  );
+
+  return merged;
 }
 
 function matchesQuery(row, q) {
   if (!q) return true;
   const hay = [
-    row.upc, row.title, row.summary, row.director_names, row.actor_names, row.genre,
-    row.studio_name, row.media_format, String(row.release_year || ''), row.trailer_url
-  ].join(' ').toLowerCase();
+    row.upc,
+    row.slug,
+    row.title,
+    row.summary,
+    row.release_year,
+    row.actor_names,
+    row.director_names,
+    row.genre,
+    row.media_format,
+    row.studio_name,
+    row.imdb_id,
+    row.alternate_identifier
+  ].join(" ").toLowerCase();
+
   return hay.includes(q);
 }
 
-function hasTruthyTrailerFilter(value) {
-  return ['1', 'true', 'yes'].includes(String(value || '').toLowerCase());
+async function fetchDbOverlay(env) {
+  const db = env.DB || env.DD_DB;
+  if (!db) return [];
+
+  const hasTable = await db
+    .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='movie_catalog' LIMIT 1`)
+    .first()
+    .catch(() => null);
+
+  if (!hasTable?.name) return [];
+
+  const result = await db.prepare(`
+    SELECT
+      movie_catalog_id,
+      upc,
+      slug,
+      title,
+      sort_title,
+      summary,
+      release_year,
+      media_format,
+      genre,
+      director_names,
+      actor_names,
+      front_image_url,
+      back_image_url,
+      runtime_minutes,
+      studio_name,
+      trailer_url,
+      imdb_id,
+      status,
+      featured_rank,
+      updated_at,
+      source_record_json
+    FROM movie_catalog
+    WHERE COALESCE(status, 'active') != 'archived'
+    ORDER BY COALESCE(featured_rank, 999999) ASC, LOWER(COALESCE(sort_title, title, upc, '')) ASC
+  `).all().catch(() => ({ results: [] }));
+
+  return Array.isArray(result?.results) ? result.results.map(normalizeMovieRow) : [];
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
   const url = new URL(request.url);
-  const q = normalizeText(url.searchParams.get('q')).toLowerCase();
-  const year = normalizeText(url.searchParams.get('year')).toLowerCase();
-  const actor = normalizeText(url.searchParams.get('actor')).toLowerCase();
-  const director = normalizeText(url.searchParams.get('director')).toLowerCase();
-  const genre = normalizeText(url.searchParams.get('genre')).toLowerCase();
-  const studio = normalizeText(url.searchParams.get('studio')).toLowerCase();
-  const format = normalizeText(url.searchParams.get('format')).toLowerCase();
-  const upc = normalizeText(url.searchParams.get('upc')).toLowerCase();
-  const hasTrailer = normalizeText(url.searchParams.get('has_trailer')).toLowerCase();
-  const page = Math.max(Number(url.searchParams.get('page') || 1), 1);
-  const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 100), 1), 500);
-  const offset = (page - 1) * limit;
-  const likeQ = `%${q}%`;
-  const likeYear = `%${year}%`;
-  const likeActor = `%${actor}%`;
-  const likeDirector = `%${director}%`;
-  const likeGenre = `%${genre}%`;
-  const likeStudio = `%${studio}%`;
-  const likeFormat = `%${format}%`;
-  const likeUpc = `%${upc}%`;
 
-  let dbItems = [];
-  const hasTable = await env.DB.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='movie_catalog' LIMIT 1`).first().catch(() => null);
-  if (hasTable?.name === 'movie_catalog') {
-    dbItems = normalizeResults(await env.DB.prepare(`
-      SELECT movie_catalog_id, upc, slug, title, sort_title, summary, release_year, media_format, genre,
-             director_names, actor_names, front_image_url, back_image_url, runtime_minutes,
-             studio_name, trailer_url, imdb_id, alternate_identifier, metadata_status, collection_notes, status, featured_rank, source_record_json, updated_at
-      FROM movie_catalog
-      WHERE COALESCE(status,'active') != 'archived'
-        AND (? = '' OR LOWER(COALESCE(title,'')) LIKE ? OR LOWER(COALESCE(upc,'')) LIKE ? OR LOWER(COALESCE(summary,'')) LIKE ? OR LOWER(COALESCE(genre,'')) LIKE ?)
-        AND (? = '' OR LOWER(COALESCE(CAST(release_year AS TEXT),'')) LIKE ?)
-        AND (? = '' OR LOWER(COALESCE(actor_names,'')) LIKE ?)
-        AND (? = '' OR LOWER(COALESCE(director_names,'')) LIKE ?)
-        AND (? = '' OR LOWER(COALESCE(genre,'')) LIKE ?)
-        AND (? = '' OR LOWER(COALESCE(studio_name,'')) LIKE ?)
-        AND (? = '' OR LOWER(COALESCE(media_format,'')) LIKE ?)
-        AND (? = '' OR LOWER(COALESCE(upc,'')) LIKE ?)
-        AND (? = '' OR ((? IN ('1','true','yes')) AND TRIM(COALESCE(trailer_url,'')) != '') OR ((? IN ('0','false','no')) AND TRIM(COALESCE(trailer_url,'')) = ''))
-      ORDER BY COALESCE(featured_rank,999999) ASC, LOWER(COALESCE(sort_title,title,upc,'')) ASC
-      LIMIT 5000
-    `).bind(q, likeQ, likeQ, likeQ, likeQ, year, likeYear, actor, likeActor, director, likeDirector, genre, likeGenre, studio, likeStudio, format, likeFormat, upc, likeUpc, hasTrailer, hasTrailer, hasTrailer).all()).map((row, index) => {
-      let source_record = null;
-      try { source_record = row.source_record_json ? JSON.parse(row.source_record_json) : null; } catch {}
-      return normalizeMovieRow({ ...row, source_record }, index);
-    });
+  const q = normalizeText(url.searchParams.get("q")).toLowerCase();
+  const page = Math.max(Number(url.searchParams.get("page") || 1), 1);
+  const limit = Math.min(Math.max(Number(url.searchParams.get("limit") || 100), 1), 500);
+
+  const baseItems = (await fetchMovieJsonBase(request)).map(normalizeMovieRow);
+  const overlayItems = await fetchDbOverlay(env);
+
+  const byKey = new Map();
+
+  for (const row of baseItems) {
+    const key = normalizeText(row.upc || row.slug);
+    if (!key) continue;
+    byKey.set(key, row);
   }
 
-  const enriched = (await fetchEnrichedCatalog(request) || []).map(normalizeMovieRow);
-  const enrichedByUpc = new Map(enriched.map((row) => [row.upc || row.slug, row]));
-
-  let items = dbItems.map((row) => mergeMovieRows(row, enrichedByUpc.get(row.upc || row.slug)));
-
-  if (!items.length) {
-    const fallback = (await fetchLegacyCatalog(request)).map(normalizeMovieRow);
-    items = fallback.map((row) => mergeMovieRows(row, enrichedByUpc.get(row.upc || row.slug)));
+  for (const row of overlayItems) {
+    const key = normalizeText(row.upc || row.slug);
+    if (!key) continue;
+    const existing = byKey.get(key);
+    byKey.set(key, existing ? mergeMovieRows(existing, row) : row);
   }
 
-  if (!dbItems.length && enriched.length) {
-    const existing = new Set(items.map((row) => row.upc || row.slug));
-    for (const row of enriched) {
-      const key = row.upc || row.slug;
-      if (!existing.has(key)) items.push(row);
+  let items = Array.from(byKey.values());
+
+  items = items.filter((row) => matchesQuery(row, q));
+
+  items.sort((a, b) => {
+    const ar = Number.isFinite(a.featured_rank) ? a.featured_rank : 999999;
+    const br = Number.isFinite(b.featured_rank) ? b.featured_rank : 999999;
+    if (ar !== br) return ar - br;
+    return String(a.sort_title || a.title || a.upc || "").localeCompare(
+      String(b.sort_title || b.title || b.upc || ""),
+      undefined,
+      { sensitivity: "base" }
+    );
+  });
+
+  const total = items.length;
+  const totalPages = Math.max(Math.ceil(total / limit), 1);
+  const safePage = Math.min(page, totalPages);
+  const offset = (safePage - 1) * limit;
+  const paged = items.slice(offset, offset + limit);
+
+  const years = new Set();
+  const formats = new Set();
+  const genres = new Set();
+
+  for (const row of items) {
+    if (row.release_year) years.add(String(row.release_year));
+    if (row.media_format) formats.add(row.media_format);
+    if (row.genre) {
+      for (const part of String(row.genre).split(",").map((v) => v.trim()).filter(Boolean)) {
+        genres.add(part);
+      }
     }
   }
 
-  items = items.filter((row) => matchesQuery(row, q))
-    .filter((row) => !year || String(row.release_year || '').toLowerCase().includes(year))
-    .filter((row) => !actor || String(row.actor_names || '').toLowerCase().includes(actor))
-    .filter((row) => !director || String(row.director_names || '').toLowerCase().includes(director))
-    .filter((row) => !genre || String(row.genre || '').toLowerCase().includes(genre))
-    .filter((row) => !studio || String(row.studio_name || '').toLowerCase().includes(studio))
-    .filter((row) => !format || String(row.media_format || '').toLowerCase().includes(format))
-    .filter((row) => !upc || String(row.upc || '').toLowerCase().includes(upc))
-    .filter((row) => !hasTrailer || (hasTruthyTrailerFilter(hasTrailer) ? Boolean(String(row.trailer_url || '').trim()) : !String(row.trailer_url || '').trim()))
-    .sort((a, b) => {
-      const ar = a.featured_rank == null ? 999999 : Number(a.featured_rank);
-      const br = b.featured_rank == null ? 999999 : Number(b.featured_rank);
-      if (ar !== br) return ar - br;
-      return String(a.sort_title || a.title || a.upc).localeCompare(String(b.sort_title || b.title || b.upc));
-    });
-
-  const totalItems = items.length;
-  const pagedItems = items.slice(offset, offset + limit);
-  const availableGenres = [...new Set(items.map((row) => normalizeText(row.genre)).filter(Boolean))].sort();
-  const availableFormats = [...new Set(items.map((row) => normalizeText(row.media_format)).filter(Boolean))].sort();
-  const availableStudios = [...new Set(items.map((row) => normalizeText(row.studio_name)).filter(Boolean))].sort();
-
   return json({
     ok: true,
-    items: pagedItems,
-    summary: {
-      total_items: totalItems,
-      page,
+    items: paged,
+    pagination: {
+      page: safePage,
       limit,
-      total_pages: Math.max(1, Math.ceil(totalItems / limit)),
-      has_more: offset + limit < totalItems,
-      query: q,
-      has_enriched_json: enriched.length > 0,
-      source: dbItems.length ? 'd1-blended' : 'json-blended',
-      with_front_image: pagedItems.filter((row) => row.front_image_url).length,
-      with_back_image: pagedItems.filter((row) => row.back_image_url).length,
-      with_trailer: pagedItems.filter((row) => row.trailer_url).length
+      total,
+      total_pages: totalPages,
+      shown: paged.length,
+      from: total ? offset + 1 : 0,
+      to: total ? offset + paged.length : 0
     },
-    filters: { genres: availableGenres, formats: availableFormats, studios: availableStudios }
+    summary: {
+      total_movies: total,
+      source_of_truth: "movie_catalog_enriched.v2.json with D1 overlay",
+      has_db_overlay: overlayItems.length > 0
+    },
+    filter_groups: {
+      years: Array.from(years).sort(),
+      formats: Array.from(formats).sort((a, b) => a.localeCompare(b)),
+      genres: Array.from(genres).sort((a, b) => a.localeCompare(b))
+    }
   });
 }
