@@ -58,24 +58,28 @@ function normalizeMovieRow(row, index = 0) {
     original_title: originalTitle,
     sort_title: normalizeText(row.sort_title || title || originalTitle || upc || `movie-${index + 1}`),
     summary: normalizeText(row.summary || row.description || row.plot_summary || row.synopsis),
-    release_year: safeNumber(row.release_year ?? row.year ?? row.startYear),
+    release_year: normalizeText(row.release_year ?? row.year ?? row.startYear),
     media_format: normalizeText(row.media_format || row.format || "DVD/Blu-ray"),
     genre: normalizeText(row.genre),
     director_names: normalizeText(row.director_names || row.director || row.directors),
     actor_names: normalizeText(row.actor_names || row.actors || row.cast_names || row.cast),
     front_image_url: normalizeText(row.front_image_url || row.front_image || row.image_front),
     back_image_url: normalizeText(row.back_image_url || row.back_image || row.image_back),
-    runtime_minutes: safeNumber(row.runtime_minutes),
+    runtime_minutes: normalizeText(row.runtime_minutes),
     studio_name: normalizeText(row.studio_name || row.studio),
     trailer_url: normalizeText(row.trailer_url || row.trailer || row.youtube_url),
     imdb_id: normalizeText(row.imdb_id || row.tconst),
     alternate_identifier: normalizeText(row.alternate_identifier),
     metadata_status: normalizeText(row.metadata_status || "pending"),
     metadata_source: normalizeText(row.metadata_source),
-    collection_notes: normalizeText(row.collection_notes),
+    estimated_value_low_cents: row.estimated_value_low_cents == null ? "" : String(row.estimated_value_low_cents),
+    estimated_value_high_cents: row.estimated_value_high_cents == null ? "" : String(row.estimated_value_high_cents),
+    estimated_value_currency: normalizeText(row.estimated_value_currency || "CAD"),
     rarity_notes: normalizeText(row.rarity_notes),
+    collection_notes: normalizeText(row.collection_notes),
+    value_search_url: normalizeText(row.value_search_url),
     status: normalizeText(row.status || "active") || "active",
-    featured_rank: row.featured_rank == null || row.featured_rank === "" ? null : Number(row.featured_rank)
+    featured_rank: row.featured_rank == null || row.featured_rank === "" ? "" : String(row.featured_rank)
   };
 }
 
@@ -113,14 +117,35 @@ async function ensureMovieTable(db) {
       alternate_identifier TEXT,
       metadata_status TEXT,
       metadata_source TEXT,
-      collection_notes TEXT,
+      estimated_value_low_cents INTEGER,
+      estimated_value_high_cents INTEGER,
+      estimated_value_currency TEXT,
       rarity_notes TEXT,
+      collection_notes TEXT,
+      value_search_url TEXT,
       status TEXT NOT NULL DEFAULT 'active',
       featured_rank INTEGER,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `).run().catch(() => null);
+
+  const tableInfo = await db.prepare(`PRAGMA table_info(movie_catalog)`).all().catch(() => ({ results: [] }));
+  const existingCols = new Set((tableInfo.results || []).map((row) => row.name));
+
+  const maybeAdd = async (name, sqlType) => {
+    if (!existingCols.has(name)) {
+      await db.prepare(`ALTER TABLE movie_catalog ADD COLUMN ${name} ${sqlType}`).run().catch(() => null);
+    }
+  };
+
+  await maybeAdd("original_title", "TEXT");
+  await maybeAdd("metadata_source", "TEXT");
+  await maybeAdd("estimated_value_low_cents", "INTEGER");
+  await maybeAdd("estimated_value_high_cents", "INTEGER");
+  await maybeAdd("estimated_value_currency", "TEXT");
+  await maybeAdd("rarity_notes", "TEXT");
+  await maybeAdd("value_search_url", "TEXT");
 }
 
 async function fetchOverlayRows(db) {
@@ -155,8 +180,12 @@ async function fetchOverlayRows(db) {
       alternate_identifier,
       metadata_status,
       metadata_source,
-      collection_notes,
+      estimated_value_low_cents,
+      estimated_value_high_cents,
+      estimated_value_currency,
       rarity_notes,
+      collection_notes,
+      value_search_url,
       status,
       featured_rank
     FROM movie_catalog
@@ -183,7 +212,10 @@ function matchesQuery(row, q) {
     row.studio_name,
     row.imdb_id,
     row.alternate_identifier,
-    row.collection_notes
+    row.metadata_source,
+    row.rarity_notes,
+    row.collection_notes,
+    row.value_search_url
   ].join(" ").toLowerCase();
 
   return hay.includes(q);
@@ -195,6 +227,10 @@ export async function onRequestGet(context) {
   if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
 
   const db = getDb(env);
+  if (db) {
+    await ensureMovieTable(db);
+  }
+
   const url = new URL(request.url);
   const q = normalizeText(url.searchParams.get("q")).toLowerCase();
 
@@ -281,8 +317,12 @@ export async function onRequestPost(context) {
     alternate_identifier: normalizeText(body.alternate_identifier),
     metadata_status: normalizeText(body.metadata_status || "manually_reviewed"),
     metadata_source: normalizeText(body.metadata_source || "manual_overlay"),
-    collection_notes: normalizeText(body.collection_notes),
+    estimated_value_low_cents: safeNumber(body.estimated_value_low_cents),
+    estimated_value_high_cents: safeNumber(body.estimated_value_high_cents),
+    estimated_value_currency: normalizeText(body.estimated_value_currency || "CAD"),
     rarity_notes: normalizeText(body.rarity_notes),
+    collection_notes: normalizeText(body.collection_notes),
+    value_search_url: normalizeText(body.value_search_url),
     status,
     featured_rank: body.featured_rank == null || body.featured_rank === "" ? null : Number(body.featured_rank)
   };
@@ -318,8 +358,12 @@ export async function onRequestPost(context) {
         alternate_identifier = ?,
         metadata_status = ?,
         metadata_source = ?,
-        collection_notes = ?,
+        estimated_value_low_cents = ?,
+        estimated_value_high_cents = ?,
+        estimated_value_currency = ?,
         rarity_notes = ?,
+        collection_notes = ?,
+        value_search_url = ?,
         status = ?,
         featured_rank = ?,
         updated_at = CURRENT_TIMESTAMP
@@ -345,8 +389,12 @@ export async function onRequestPost(context) {
       payload.alternate_identifier,
       payload.metadata_status,
       payload.metadata_source,
-      payload.collection_notes,
+      payload.estimated_value_low_cents,
+      payload.estimated_value_high_cents,
+      payload.estimated_value_currency,
       payload.rarity_notes,
+      payload.collection_notes,
+      payload.value_search_url,
       payload.status,
       payload.featured_rank,
       Number(existing.movie_catalog_id)
@@ -357,9 +405,11 @@ export async function onRequestPost(context) {
         upc, slug, title, original_title, sort_title, summary, release_year,
         media_format, genre, director_names, actor_names, front_image_url,
         back_image_url, runtime_minutes, studio_name, trailer_url, imdb_id,
-        alternate_identifier, metadata_status, metadata_source, collection_notes,
-        rarity_notes, status, featured_rank, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        alternate_identifier, metadata_status, metadata_source,
+        estimated_value_low_cents, estimated_value_high_cents, estimated_value_currency,
+        rarity_notes, collection_notes, value_search_url, status, featured_rank,
+        created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       payload.upc,
       payload.slug,
@@ -381,8 +431,12 @@ export async function onRequestPost(context) {
       payload.alternate_identifier,
       payload.metadata_status,
       payload.metadata_source,
-      payload.collection_notes,
+      payload.estimated_value_low_cents,
+      payload.estimated_value_high_cents,
+      payload.estimated_value_currency,
       payload.rarity_notes,
+      payload.collection_notes,
+      payload.value_search_url,
       payload.status,
       payload.featured_rank
     ).run();
