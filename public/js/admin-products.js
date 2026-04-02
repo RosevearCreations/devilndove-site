@@ -64,6 +64,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const linkedResourceCost = escapeHtml(formatMoney(product.linked_resource_cost_cents || 0, product.currency));
       const grossMargin = escapeHtml(formatMoney(product.gross_margin_cents || 0, product.currency));
       const missingCostLinks = Number(product.missing_cost_links || 0);
+      const buildableUnits = product.buildable_units_from_resources == null ? '' : String(Number(product.buildable_units_from_resources || 0));
+      const shortageLinks = Number(product.resource_shortage_links || 0);
 
       return `
         <tr>
@@ -74,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${status}<div class="small">Review: ${reviewStatus}</div><div class="small">${ready ? 'Ready for storefront' : 'Needs review'}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${price}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? '⚠️ low stock' : 'healthy'}</div><div class="small">${ready ? 'Storefront ready' : readyNotes || 'Missing storefront fields'}</div><div class="small">Cost ${linkedResourceCost} • Margin ${grossMargin}</div><div class="small">${linkedResourceCount} linked resources${missingCostLinks ? ` • ${missingCostLinks} missing costs` : ''}</div></td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? '⚠️ low stock' : 'healthy'}</div><div class="small">${ready ? 'Storefront ready' : readyNotes || 'Missing storefront fields'}</div><div class="small">Cost ${linkedResourceCost} • Margin ${grossMargin}</div><div class="small">${linkedResourceCount} linked resources${missingCostLinks ? ` • ${missingCostLinks} missing costs` : ''}</div><div class="small">${buildableUnits ? `Buildable units ${escapeHtml(buildableUnits)}` : 'Buildable units unknown'}${shortageLinks ? ` • ${shortageLinks} shortages` : ''}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${shipping}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${taxClass}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">
@@ -90,6 +92,12 @@ document.addEventListener("DOMContentLoaded", async () => {
               </button>
               <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}">
                 Publish
+              </button>
+              <button class="btn" type="button" data-resource-action="reserve" data-product-id="${productId}">
+                Reserve Resources
+              </button>
+              <button class="btn" type="button" data-resource-action="release" data-product-id="${productId}">
+                Release Resources
               </button>
               <button
                 class="btn"
@@ -189,18 +197,58 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.dispatchEvent(new CustomEvent('dd:product-updated', { detail: data.product || null }));
   }
 
+  async function runResourceAction(productId, action) {
+    const quantityInput = window.prompt('Quantity multiplier for linked resources:', '1');
+    if (quantityInput === null) return;
+    const quantityMultiplier = Math.max(1, Number(quantityInput || 1));
+    if (!Number.isFinite(quantityMultiplier)) {
+      throw new Error('Quantity multiplier must be a valid number.');
+    }
+    const note = window.prompt(`Optional note for ${action} resources:`, '') || '';
+    const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: action === 'reserve' ? 'reserve_product_resources' : 'release_product_resources',
+        product_id: Number(productId || 0),
+        quantity_multiplier: quantityMultiplier,
+        note: String(note).trim()
+      })
+    });
+    const data = await response.json();
+    if (!response.ok || !data?.ok) throw new Error(data?.error || `Failed to ${action} resources.`);
+    const summary = data.summary || {};
+    window.alert(`${action === 'reserve' ? 'Reserved' : 'Released'} resources for ${data.product?.name || 'product'}.
+Affected items: ${Number(summary.affected_items || 0)}
+Shortage items: ${Number(summary.shortage_item_count || 0)}`);
+    document.dispatchEvent(new CustomEvent('dd:product-updated', { detail: data.product || null }));
+  }
+
   document.addEventListener('click', async (event) => {
     const reviewButton = event.target.closest('[data-review-action]');
-    if (!reviewButton) return;
+    const resourceButton = event.target.closest('[data-resource-action]');
+    if (!reviewButton && !resourceButton) return;
     if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
-    const productId = Number(reviewButton.getAttribute('data-product-id') || 0);
-    const action = String(reviewButton.getAttribute('data-review-action') || '').trim();
+    if (reviewButton) {
+      const productId = Number(reviewButton.getAttribute('data-product-id') || 0);
+      const action = String(reviewButton.getAttribute('data-review-action') || '').trim();
+      if (!productId || !action) return;
+      try {
+        await runReviewAction(productId, action);
+        await loadProducts({ silent: true });
+      } catch (error) {
+        if (errorEl) errorEl.textContent = error.message || `Failed to ${action} product.`;
+        show(errorEl);
+      }
+      return;
+    }
+    const productId = Number(resourceButton.getAttribute('data-product-id') || 0);
+    const action = String(resourceButton.getAttribute('data-resource-action') || '').trim();
     if (!productId || !action) return;
     try {
-      await runReviewAction(productId, action);
+      await runResourceAction(productId, action);
       await loadProducts({ silent: true });
     } catch (error) {
-      if (errorEl) errorEl.textContent = error.message || `Failed to ${action} product.`;
+      if (errorEl) errorEl.textContent = error.message || `Failed to ${action} product resources.`;
       show(errorEl);
     }
   });
