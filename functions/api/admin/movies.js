@@ -147,19 +147,43 @@ async function ensureMovieTable(db) {
     }
   };
 
+  await maybeAdd("slug", "TEXT");
+  await maybeAdd("title", "TEXT");
   await maybeAdd("original_title", "TEXT");
+  await maybeAdd("sort_title", "TEXT");
+  await maybeAdd("summary", "TEXT");
+  await maybeAdd("release_year", "INTEGER");
+  await maybeAdd("media_format", "TEXT");
+  await maybeAdd("genre", "TEXT");
+  await maybeAdd("director_names", "TEXT");
+  await maybeAdd("actor_names", "TEXT");
+  await maybeAdd("front_image_url", "TEXT");
+  await maybeAdd("back_image_url", "TEXT");
+  await maybeAdd("runtime_minutes", "INTEGER");
+  await maybeAdd("studio_name", "TEXT");
+  await maybeAdd("trailer_url", "TEXT");
+  await maybeAdd("imdb_id", "TEXT");
+  await maybeAdd("alternate_identifier", "TEXT");
+  await maybeAdd("metadata_status", "TEXT");
   await maybeAdd("metadata_source", "TEXT");
   await maybeAdd("estimated_value_low_cents", "INTEGER");
   await maybeAdd("estimated_value_high_cents", "INTEGER");
   await maybeAdd("estimated_value_currency", "TEXT");
   await maybeAdd("rarity_notes", "TEXT");
+  await maybeAdd("collection_notes", "TEXT");
   await maybeAdd("value_search_url", "TEXT");
+  await maybeAdd("status", "TEXT");
+  await maybeAdd("featured_rank", "INTEGER");
+  await maybeAdd("created_at", "TEXT");
+  await maybeAdd("updated_at", "TEXT");
 }
 
 async function fetchOverlayRows(db) {
   if (!db) return [];
   const exists = await tableExists(db, "movie_catalog");
   if (!exists) return [];
+
+  await ensureMovieTable(db);
 
   const result = await db.prepare(`
     SELECT
