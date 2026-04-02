@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const refreshBtn = document.getElementById("refreshMoviesButton");
   const messageEl = document.getElementById("adminMoviesMessage");
   const form = document.getElementById("adminMovieForm");
+  const previewFront = document.getElementById("movieFrontPreview");
+  const previewBack = document.getElementById("movieBackPreview");
+  const previewMeta = document.getElementById("moviePreviewMeta");
 
   if (!listEl || !form) return;
 
@@ -25,10 +28,16 @@ document.addEventListener("DOMContentLoaded", () => {
     front_image_url: document.getElementById("movieFront"),
     back_image_url: document.getElementById("movieBack"),
     summary: document.getElementById("movieSummary"),
-    collection_notes: document.getElementById("movieNotes"),
-    rarity_notes: document.getElementById("movieRarityNotes"),
+    metadata_source: document.getElementById("movieMetadataSource"),
     metadata_status: document.getElementById("movieMetadataStatus"),
-    status: document.getElementById("movieStatus")
+    estimated_value_low_cents: document.getElementById("movieValueLow"),
+    estimated_value_high_cents: document.getElementById("movieValueHigh"),
+    estimated_value_currency: document.getElementById("movieValueCurrency"),
+    rarity_notes: document.getElementById("movieRarityNotes"),
+    collection_notes: document.getElementById("movieNotes"),
+    value_search_url: document.getElementById("movieValueSearchUrl"),
+    status: document.getElementById("movieStatus"),
+    featured_rank: document.getElementById("movieFeaturedRank")
   };
 
   let items = [];
@@ -49,11 +58,37 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/'/g, "&#39;");
   }
 
+  function renderPreview(item = {}) {
+    if (previewFront) {
+      previewFront.innerHTML = item.front_image_url
+        ? `<img src="${esc(item.front_image_url)}" alt="Front cover preview" style="display:block;width:100%;height:100%;object-fit:cover">`
+        : `<div class="small" style="padding:10px">Front cover pending</div>`;
+    }
+
+    if (previewBack) {
+      previewBack.innerHTML = item.back_image_url
+        ? `<img src="${esc(item.back_image_url)}" alt="Back cover preview" style="display:block;width:100%;height:100%;object-fit:cover">`
+        : `<div class="small" style="padding:10px">Back cover pending</div>`;
+    }
+
+    if (previewMeta) {
+      const parts = [
+        item.title || "",
+        item.release_year || "",
+        item.media_format || "",
+        item.upc ? `UPC: ${item.upc}` : "",
+        item.metadata_status || ""
+      ].filter(Boolean);
+      previewMeta.innerHTML = parts.length ? esc(parts.join(" • ")) : "No movie selected";
+    }
+  }
+
   function fillForm(item = {}) {
     Object.entries(fields).forEach(([key, el]) => {
       if (!el) return;
       el.value = item[key] ?? "";
     });
+    renderPreview(item);
   }
 
   function currentFormPayload() {
@@ -84,6 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <button type="button" class="card admin-movie-pick" data-key="${esc(item.upc || item.slug)}" style="display:block;width:100%;text-align:left;margin-bottom:10px">
           <div style="font-weight:700">${esc(title)}</div>
           <div class="small">${esc(sub)}</div>
+          ${item.summary ? `<div class="small" style="margin-top:6px;opacity:.8">${esc(item.summary.slice(0, 140))}${item.summary.length > 140 ? "..." : ""}</div>` : ""}
         </button>
       `;
     }).join("");
@@ -138,6 +174,13 @@ document.addEventListener("DOMContentLoaded", () => {
     await loadMovies();
   }
 
+  Object.entries(fields).forEach(([key, el]) => {
+    if (!el) return;
+    if (key === "front_image_url" || key === "back_image_url" || key === "title" || key === "release_year" || key === "upc" || key === "media_format" || key === "metadata_status") {
+      el.addEventListener("input", () => renderPreview(currentFormPayload()));
+    }
+  });
+
   refreshBtn?.addEventListener("click", loadMovies);
   searchEl?.addEventListener("input", () => {
     clearTimeout(searchEl._ddMovieTimer);
@@ -145,5 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   form.addEventListener("submit", saveMovie);
+  renderPreview({});
   loadMovies();
 });
