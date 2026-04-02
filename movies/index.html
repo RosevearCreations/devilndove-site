@@ -12,12 +12,12 @@
   <meta property="og:site_name" content="Devil n Dove"/>
   <meta property="og:type" content="website"/>
   <meta property="og:title" content="Movie Shelf | DVD & Blu-ray collection at Devil n Dove"/>
-  <meta property="og:description" content="Browse the Devil n Dove movie shelf with searchable cover art, film details, and future trailer links."/>
+  <meta property="og:description" content="Browse the Devil n Dove movie shelf with searchable cover art, film details, and trailer links."/>
   <meta property="og:url" content="https://devilndove.com/movies/"/>
   <meta property="og:image" content="https://devilndove.com/assets/logo-clear.png"/>
   <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="Movie Shelf | DVD & Blu-ray collection at Devil n Dove"/>
-  <meta name="twitter:description" content="Browse the Devil n Dove movie shelf with searchable cover art, film details, and future trailer links."/>
+  <meta name="twitter:description" content="Browse the Devil n Dove movie shelf with searchable cover art, film details, and trailer links."/>
   <meta name="twitter:image" content="https://devilndove.com/assets/logo-clear.png"/>
   <style>
     .movie-shell { display:grid; gap:16px; }
@@ -266,32 +266,38 @@
       const page = Number(summary.page || currentPage || 1);
       const limit = Number(summary.limit || currentLimit || filteredCount || 0);
       const totalPages = Number(summary.total_pages || 1);
-      const start = totalItems ? ((page - 1) * limit) + 1 : 0;
-      const end = totalItems ? Math.min(start + filteredCount - 1, totalItems) : 0;
+      const from = Number(summary.from || (totalItems ? ((page - 1) * limit) + 1 : 0));
+      const to = Number(summary.to || (totalItems ? Math.min(from + filteredCount - 1, totalItems) : 0));
 
       totalEl.textContent = String(totalItems);
       shownEl.textContent = String(filteredCount);
       pageNowEl.textContent = String(page);
       pageTotalEl.textContent = String(totalPages);
-      movieRangeEl.textContent = totalItems ? ` • ${start}-${end}` : '';
+      movieRangeEl.textContent = totalItems ? ` • ${from}-${to}` : '';
       prevBtn.disabled = page <= 1;
       nextBtn.disabled = !summary.has_more;
-      perPageEl.value = String(currentLimit);
+      perPageEl.value = String(limit);
     }
 
     function movieCardHtml(item) {
       const title = (item.title || '').trim() || 'Title pending metadata';
-      const front = item.front_image_url || item.front_image || '';
+      const originalTitle = item.original_title ? `<div class="small"><strong>Original title:</strong> ${esc(item.original_title)}</div>` : '';
+      const front = item.front_image_url || '';
       const back = item.back_image_url || '';
       const year = item.release_year ? `<div class="small"><strong>Year:</strong> ${esc(item.release_year)}</div>` : '';
       const genre = item.genre ? `<div class="small"><strong>Genre:</strong> ${esc(item.genre)}</div>` : '';
       const director = item.director_names ? `<div class="small"><strong>Director:</strong> ${esc(item.director_names)}</div>` : '';
       const actors = item.actor_names ? `<div class="small"><strong>Cast:</strong> ${esc(item.actor_names)}</div>` : '';
       const runtime = item.runtime_minutes ? `<div class="small"><strong>Length:</strong> ${esc(item.runtime_minutes)} min</div>` : '';
+      const studio = item.studio_name ? `<div class="small"><strong>Studio:</strong> ${esc(item.studio_name)}</div>` : '';
+      const format = item.media_format ? `<div class="small"><strong>Format:</strong> ${esc(item.media_format)}</div>` : '';
+      const imdbId = item.imdb_id ? `<div class="small"><strong>IMDb:</strong> ${esc(item.imdb_id)}</div>` : '';
       const upc = item.upc ? `<div class="small"><strong>UPC:</strong> ${esc(item.upc)}</div>` : '';
+      const metadata = item.metadata_status ? `<div class="small"><strong>Status:</strong> ${esc(item.metadata_status)}</div>` : '';
       const summaryText = item.summary
         ? `<p class="small movie-summary">${esc(item.summary)}</p>`
         : `<p class="small movie-summary movie-summary-pending">Metadata enrichment is still in progress for this cover.</p>`;
+
       const trailer = item.trailer_url
         ? `<a href="${esc(item.trailer_url)}" target="_blank" rel="noreferrer">Watch trailer</a>`
         : `<a href="${trailerSearchUrl(item.title || item.upc, item.release_year)}" target="_blank" rel="noreferrer">Search trailer</a>`;
@@ -307,7 +313,19 @@
         </div>
         <div class="movie-body">
           <h2 class="movie-title">${esc(title)}</h2>
-          <div class="movie-facts">${upc}${year}${genre}${director}${actors}${runtime}</div>
+          <div class="movie-facts">
+            ${upc}
+            ${year}
+            ${originalTitle}
+            ${genre}
+            ${format}
+            ${studio}
+            ${director}
+            ${actors}
+            ${runtime}
+            ${imdbId}
+            ${metadata}
+          </div>
           ${summaryText}
           <div class="movie-links">
             <a href="${imdbSearchUrl(item.title, item.upc)}" target="_blank" rel="noreferrer">Search IMDb</a>
@@ -318,9 +336,8 @@
     }
 
     function render() {
-      const filtered = items;
-      grid.innerHTML = filtered.map(movieCardHtml).join('') || `<div class="card">No movies matched your search.</div>`;
-      updatePager(filtered.length);
+      grid.innerHTML = items.map(movieCardHtml).join('') || `<div class="card">No movies matched your search.</div>`;
+      updatePager(items.length);
     }
 
     async function loadMovies() {
@@ -331,7 +348,7 @@
       if (term) params.set('q', term);
 
       try {
-        const response = await fetch('/api/movies?' + params.toString());
+        const response = await fetch('/api/movies?' + params.toString(), { credentials: 'same-origin' });
         if (!response.ok) throw new Error('Failed to load movie data');
         const data = await response.json();
         items = Array.isArray(data) ? data : (data.items || data.movies || []);
