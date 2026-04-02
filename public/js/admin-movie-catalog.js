@@ -143,7 +143,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!response.ok || !data?.ok) {
       items = [];
       renderList([]);
-      setMessage(data?.error || "Could not load movies.", true);
+      setMessage(
+        [data?.error, data?.details].filter(Boolean).join(" — ") || "Could not load movies.",
+        true
+      );
       return;
     }
 
@@ -166,7 +169,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await response.json().catch(() => null);
 
     if (!response.ok || !data?.ok) {
-      setMessage(data?.error || "Could not save movie.", true);
+      setMessage(
+        [data?.error, data?.details].filter(Boolean).join(" — ") || "Could not save movie.",
+        true
+      );
+      console.error("Movie save error:", data);
       return;
     }
 
