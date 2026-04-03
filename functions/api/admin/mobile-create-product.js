@@ -51,8 +51,8 @@ function buildPublicUrl(env, objectKey) {
   return `${base.replace(/\/$/, '')}/${String(objectKey || '').replace(/^\/+/, '')}`;
 }
 async function getNextProductNumber(env) {
-  const row = await env.DB.prepare(`SELECT COALESCE(MAX(product_number), 0) + 1 AS next_product_number FROM products`).first().catch(() => ({ next_product_number: 1 }));
-  return Number(row?.next_product_number || 1);
+  const row = await env.DB.prepare(`SELECT CASE WHEN COALESCE(MAX(product_number), 0) < 1000 THEN 1000 ELSE COALESCE(MAX(product_number), 0) + 1 END AS next_product_number FROM products`).first().catch(() => ({ next_product_number: 1 }));
+  return Number(row?.next_product_number || 1000);
 }
 async function upsertProductSeo(env, payload) {
   await env.DB.prepare(`

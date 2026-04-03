@@ -22,6 +22,14 @@ function parseInteger(value) {
   return Number.isInteger(num) ? num : null;
 }
 
+function parseProductNumberValue(value) {
+  const normalized = String(value == null ? '' : value).trim().toUpperCase();
+  if (!normalized) return null;
+  const stripped = normalized.startsWith('DD') ? normalized.slice(2) : normalized;
+  const parsed = Number(stripped);
+  return Number.isInteger(parsed) ? parsed : null;
+}
+
 function normalizeBooleanFlag(value, fallback = 0) {
   if (value == null || value === '') return fallback;
   if ([1, '1', true, 'true', 'yes', 'y'].includes(value)) return 1;
@@ -81,7 +89,7 @@ export async function onRequestPost(context) {
   rows.forEach((row) => {
     const previewSlug = normalizeText(row?.slug) || slugify(normalizeText(row?.name));
     const previewSku = normalizeText(row?.sku);
-    const previewProductNumber = parseInteger(row?.product_number);
+    const previewProductNumber = parseProductNumberValue(row?.product_number);
     if (previewSlug) previewSlugs.set(previewSlug, (previewSlugs.get(previewSlug) || 0) + 1);
     if (previewSku) previewSkus.set(previewSku, (previewSkus.get(previewSku) || 0) + 1);
     if (previewProductNumber != null) previewProductNumbers.set(String(previewProductNumber), (previewProductNumbers.get(String(previewProductNumber)) || 0) + 1);
@@ -124,7 +132,7 @@ export async function onRequestPost(context) {
     const name = normalizeText(row?.name);
     const slug = normalizeText(row?.slug) || slugify(name || captureReference || `draft-product-${index + 1}`);
     const sku = normalizeText(row?.sku);
-    const productNumber = parseInteger(row?.product_number);
+    const productNumber = parseProductNumberValue(row?.product_number);
     const captureReference = normalizeText(row?.capture_reference);
     const productCategory = normalizeText(row?.product_category);
     const colorName = normalizeText(row?.color_name);

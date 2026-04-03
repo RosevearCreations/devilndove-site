@@ -21,6 +21,14 @@ function parseInteger(value) {
   return Number.isInteger(num) ? num : null;
 }
 
+function parseProductNumberValue(value) {
+  const normalized = String(value == null ? '' : value).trim().toUpperCase();
+  if (!normalized) return null;
+  const stripped = normalized.startsWith('DD') ? normalized.slice(2) : normalized;
+  const parsed = Number(stripped);
+  return Number.isInteger(parsed) ? parsed : null;
+}
+
 function normalizeBooleanFlag(value, fallback = 0) {
   if (value == null || value === '') return fallback;
   if ([1, '1', true, 'true', 'yes', 'y'].includes(value)) return 1;
@@ -83,7 +91,7 @@ export async function onRequestPost(context) {
     const priceCents = parseInteger(row.price_cents);
     const compareAtPriceCents = parseInteger(row.compare_at_price_cents);
     const inventoryQuantity = parseInteger(row.inventory_quantity);
-    const productNumber = parseInteger(row.product_number);
+    const productNumber = parseProductNumberValue(row.product_number);
     const weightGrams = parseInteger(row.weight_grams);
     const sortOrder = parseInteger(row.sort_order);
     const inventoryTracking = normalizeBooleanFlag(row.inventory_tracking, 0);
