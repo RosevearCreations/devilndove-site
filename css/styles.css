@@ -289,3 +289,62 @@ textarea {
     width: 100%;
   }
 }
+
+
+/* Current pass: install shell polish, route-normalized UI, and form/control fixes */
+:root { color-scheme: dark; }
+html { -webkit-text-size-adjust: 100%; }
+.nav .links { display:flex; gap:10px; flex-wrap:wrap; align-items:center; min-width:0; }
+.nav .links > * { min-width:0; }
+.site-footer-search,
+.dd-install-actions,
+.form-actions,
+.inline-actions,
+.admin-toolbar,
+.mobile-form-actions { min-width:0; }
+.site-footer-search { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.site-footer-search input { min-width:0; flex:1 1 220px; }
+.dd-install-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.dd-install-actions .btn { flex:1 1 180px; justify-content:center; }
+label, .card label, .admin-panel label { min-width:0; }
+input, select, textarea, button, .btn { min-width:0; }
+.grid > *, .mobile-form-grid > *, .resource-picker-controls > *, .site-footer-grid > * { min-width:0; }
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="month"] {
+  color-scheme: dark;
+  padding-right: 44px;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.1);
+  opacity: .9;
+  cursor: pointer;
+}
+input::placeholder,
+textarea::placeholder { color: rgba(170,179,194,.82); }
+.admin-table-wrap table,
+.table-wrap table,
+.card table { min-width: 720px; }
+@media (max-width: 900px) {
+  .site-footer-search,
+  .dd-install-actions,
+  .mobile-form-actions,
+  .resource-picker-controls { grid-template-columns: 1fr !important; }
+  .site-footer-search .btn,
+  .dd-install-actions .btn,
+  .mobile-form-actions .btn { width:100%; }
+}
+@media (max-width: 720px) {
+  .nav .links { width:100%; }
+  .nav .links a,
+  .nav .links button,
+  .nav .links span { flex:1 1 calc(50% - 10px); }
+  .site-footer-search input { flex-basis:100%; }
+  .admin-table-wrap table,
+  .table-wrap table,
+  .card table { min-width: 640px; }
+}
