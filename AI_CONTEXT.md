@@ -71,7 +71,7 @@ This repo is in the payment, media, inventory, and public SEO hardening phase af
 
 
 ## Current pass update
-- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.json`, and the R2-hosted cover images more safely.
+- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.v2.json`, and the R2-hosted cover images more safely.
 - Movie search now supports title, UPC, year, actor, director, genre, studio, format, and optional trailer-link filtering.
 - `trailer_url` is now part of the movie enrichment path so trailer support can be stored directly when available.
 - Storefront product detail now includes linked tools and supplies from `product_resource_links` so each finished product can tell a clearer “made with these materials and tools” story.
@@ -187,3 +187,17 @@ Current-pass emphasis:
 - Current pass update: mobile finished-product capture now allows partial draft intake with a `capture_reference`, so one photo or temporary identifier is enough to save a draft and continue.
 - Current pass update: admin now has a movie catalog detail editor backed by `movie_catalog` for title/year/actor/UPC/IMDb-id/manual-note editing.
 - Current pass update: `/data/finished_products_import_template.csv` is now the detailed CSV template for bulk finished-product uploads.
+
+
+## Current pass update
+- Movie workflow is now explicitly JSON-first again: `data/movies/movie_catalog_enriched.v2.json` remains the movie base truth for the public shelf and admin listing.
+- D1 `movie_catalog` is now treated as a manual edit overlay for movie details rather than the primary source of truth. This lets admin add missing title, year, actor, director, UPC, metadata-source, rarity, value, and notes fields without breaking the live movie shelf.
+- The movie admin editor is expected to show front and back covers plus the richer metadata already present in the JSON rows, then allow manual edits on top of those fields.
+- The movie save route now needs to harden old-table compatibility by ensuring late-added columns such as `imdb_id`, `metadata_source`, value fields, and notes fields exist before writes.
+- Mobile finished-product capture now needs to preserve a true partial-draft workflow: photo-only, name-only, or reference-only records must be savable without the later mandatory publish fields.
+- A detailed finished-product CSV template is now a repo requirement so most completed products can be imported in bulk while partial rows can still enter as draft records.
+
+## Current pass update
+- Catalog sync now uses `movie_catalog_enriched.v2.json` for movie imports so repo-side sync matches the JSON-first movie source already used elsewhere.
+- Schema references and upgrade SQL were aligned with the current movie overlay/editor fields and the governed review/reorder tables already present in the codebase.
+- Exposed HTML pages were checked again and continue to keep a single H1 per page.

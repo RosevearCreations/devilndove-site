@@ -1,5 +1,4 @@
--- Current pass note: movie shelf layout and risk-documentation sweep completed; no schema structure changes were required in this pass.
--- Current pass note: no brand-new required tables were added in this pass; the main work was endpoint hardening against partially migrated or lightly seeded D1 data so admin and storefront JSON routes fail gracefully instead of returning HTML errors.
+-- Current pass note: movie/admin compatibility, JSON-first movie overlay stability, and schema-reference sync were updated in this pass.
 -- =========================================================
 -- DEVIL N DOVE
 -- STORE / COMMERCE EXTENSION SCHEMA
@@ -30,6 +29,7 @@ CREATE TABLE IF NOT EXISTS products (
   product_number INTEGER UNIQUE,
   sku TEXT UNIQUE,
   name TEXT NOT NULL,
+  capture_reference TEXT,
   product_category TEXT,
   color_name TEXT,
   shipping_code TEXT,
@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS order_status_history (
   FOREIGN KEY (changed_by_user_id) REFERENCES users(user_id)
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_product_number ON products(product_number);
 CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
 CREATE INDEX IF NOT EXISTS idx_products_type ON products(product_type);
 CREATE INDEX IF NOT EXISTS idx_products_sort ON products(sort_order);
@@ -269,6 +270,7 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   upc TEXT NOT NULL UNIQUE,
   slug TEXT,
   title TEXT,
+  original_title TEXT,
   sort_title TEXT,
   summary TEXT,
   release_year INTEGER,
@@ -281,6 +283,16 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   runtime_minutes INTEGER,
   studio_name TEXT,
   trailer_url TEXT,
+  imdb_id TEXT,
+  alternate_identifier TEXT,
+  metadata_status TEXT NOT NULL DEFAULT 'pending',
+  metadata_source TEXT,
+  estimated_value_low_cents INTEGER,
+  estimated_value_high_cents INTEGER,
+  estimated_value_currency TEXT,
+  rarity_notes TEXT,
+  collection_notes TEXT,
+  value_search_url TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','draft','archived')),
   featured_rank INTEGER,
   source_record_json TEXT,
@@ -291,10 +303,11 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_imdb_id ON movie_catalog(imdb_id);
 
 
 
--- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.
+-- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.v2.json and can derive a trailer search URL at runtime when trailer_url is blank.
 
 
 CREATE TABLE IF NOT EXISTS notification_outbox (
@@ -316,4 +329,35 @@ CREATE TABLE IF NOT EXISTS notification_outbox (
 );
 CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
 CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);
+
+
+CREATE TABLE IF NOT EXISTS product_resource_links (
+  product_resource_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  resource_kind TEXT NOT NULL CHECK (resource_kind IN ('tool','supply')),
+  source_key TEXT NOT NULL,
+  quantity_used INTEGER NOT NULL DEFAULT 1,
+  usage_notes TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  UNIQUE(product_id, resource_kind, source_key)
+);
+CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resource_links(product_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS product_review_actions (
+  product_review_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  action_type TEXT NOT NULL CHECK (action_type IN ('approve','request_changes','publish','unpublish')),
+  previous_review_status TEXT,
+  new_review_status TEXT,
+  previous_status TEXT,
+  new_status TEXT,
+  actor_user_id INTEGER,
+  note TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_actions(product_id, created_at DESC);
 

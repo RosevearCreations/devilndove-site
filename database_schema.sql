@@ -1,5 +1,4 @@
--- Current pass note: movie shelf layout and risk-documentation sweep completed; no schema structure changes were required in this pass.
--- Current pass note: no brand-new required tables were added in this pass; the main work was endpoint hardening against partially migrated or lightly seeded D1 data so admin and storefront JSON routes fail gracefully instead of returning HTML errors.
+-- Current pass note: movie/admin compatibility, JSON-first movie overlay stability, and schema-reference sync were updated in this pass.
 -- File: /database_schema.sql
 -- Brief description: Core application auth and admin schema for the current Devil n Dove build.
 
@@ -93,6 +92,7 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   upc TEXT NOT NULL UNIQUE,
   slug TEXT,
   title TEXT,
+  original_title TEXT,
   sort_title TEXT,
   summary TEXT,
   release_year INTEGER,
@@ -105,6 +105,16 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   runtime_minutes INTEGER,
   studio_name TEXT,
   trailer_url TEXT,
+  imdb_id TEXT,
+  alternate_identifier TEXT,
+  metadata_status TEXT NOT NULL DEFAULT 'pending',
+  metadata_source TEXT,
+  estimated_value_low_cents INTEGER,
+  estimated_value_high_cents INTEGER,
+  estimated_value_currency TEXT,
+  rarity_notes TEXT,
+  collection_notes TEXT,
+  value_search_url TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','draft','archived')),
   featured_rank INTEGER,
   source_record_json TEXT,
@@ -115,9 +125,10 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_imdb_id ON movie_catalog(imdb_id);
 
 
--- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.
+-- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.v2.json and can derive a trailer search URL at runtime when trailer_url is blank.
 
 
 CREATE TABLE IF NOT EXISTS notification_outbox (
@@ -139,4 +150,36 @@ CREATE TABLE IF NOT EXISTS notification_outbox (
 );
 CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
 CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);
+
+
+CREATE TABLE IF NOT EXISTS supplier_purchase_orders (
+  supplier_purchase_order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  supplier_name TEXT NOT NULL,
+  supplier_contact TEXT,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','submitted','ordered','received','cancelled')),
+  notes TEXT,
+  total_estimated_cents INTEGER NOT NULL DEFAULT 0,
+  ordered_applied_at TEXT,
+  received_completed_at TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_supplier_purchase_orders_status ON supplier_purchase_orders(status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS product_review_actions (
+  product_review_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  action_type TEXT NOT NULL CHECK (action_type IN ('approve','request_changes','publish','unpublish')),
+  previous_review_status TEXT,
+  new_review_status TEXT,
+  previous_status TEXT,
+  new_status TEXT,
+  actor_user_id INTEGER,
+  note TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_actions(product_id, created_at DESC);
 

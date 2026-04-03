@@ -107,14 +107,14 @@ When a public page is touched, review:
 ## Current pass additions
 - Session/auth now uses a stronger same-site continuity path: auth endpoints set a first-party `dd_auth_token` cookie in addition to returning the bearer token. Public pages can resolve the signed-in member/admin state more reliably.
 - Added `movie_catalog` for staged migration of the legacy UPC-only movie JSON into D1. The public movies page now reads from `/api/movies`, which prefers D1 and falls back to `/data/
-  - `/data/movies/movie_catalog_enriched.json` is now the supported repo file for richer movie metadata, front/back cover URLs, summary, cast, director, and yearcatalog.json`.
+  - `/data/movies/movie_catalog_enriched.v2.json` is now the supported repo file for richer movie metadata, front/back cover URLs, summary, cast, director, and yearcatalog.json`.
 - Catalog sync now supports movies in addition to tools, supplies, and featured creations.
 - Public movie search UI now supports title, UPC, year, actor, and director fields when that data exists, while still working with legacy UPC-only data.
 - Product CSV preview now renders as a structured validation table instead of loose JSON/text lines.
 
 
 ## Current pass update
-- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.json`, and the R2-hosted cover images more safely.
+- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.v2.json`, and the R2-hosted cover images more safely.
 - Movie search now supports title, UPC, year, actor, director, genre, studio, format, and optional trailer-link filtering.
 - `trailer_url` is now part of the movie enrichment path so trailer support can be stored directly when available.
 - Storefront product detail now includes linked tools and supplies from `product_resource_links` so each finished product can tell a clearer “made with these materials and tools” story.
@@ -125,7 +125,7 @@ When a public page is touched, review:
 
 ## Current pass operational note
 
-- The movie cover source of truth for public image URLs is now the uploaded `data/movies/movie_catalog_enriched.json`, backed by public R2 URLs under the `movies/` prefix.
+- The movie cover source of truth for public image URLs is now the uploaded `data/movies/movie_catalog_enriched.v2.json`, backed by public R2 URLs under the `movies/` prefix.
 - Admin operators now have two inventory lenses: `site_item_inventory` for tools/supplies and the product stock report for finished-product readiness.
 
 
@@ -226,3 +226,16 @@ New current-pass backend additions:
 - `data/finished_products_import_template.csv` is the detailed CSV template for bulk finished-product imports.
 - `functions/api/admin/movies.js` powers admin-side movie detail editing against `movie_catalog`.
 - `public/js/admin-movie-catalog.js` mounts the movie catalog editor inside `/admin/`.
+
+
+## Current repo guide update
+- `data/movies/movie_catalog_enriched.v2.json` remains the current movie source-of-truth file for public reads.
+- `functions/api/movies.js` should stay JSON-first with optional D1 overlay merge logic, not D1-first, until movie migration is explicitly signed off.
+- `functions/api/admin/movies.js` is the manual movie overlay editor route and must remain backward-compatible with older `movie_catalog` table shapes.
+- `public/js/admin-movie-catalog.js` should expose the richer movie-card editing view, including cover previews and existing JSON metadata, not just a minimal subset of fields.
+- `data/finished_products_import_template.csv` is now part of the expected bulk finished-product workflow.
+
+## Current pass update
+- Catalog sync now uses `movie_catalog_enriched.v2.json` for movie imports so repo-side sync matches the JSON-first movie source already used elsewhere.
+- Schema references and upgrade SQL were aligned with the current movie overlay/editor fields and the governed review/reorder tables already present in the codebase.
+- Exposed HTML pages were checked again and continue to keep a single H1 per page.

@@ -5,6 +5,9 @@
 This pass concentrated on working down the open risk list in order instead of skipping ahead. The goal was to reduce operational risk with real code and schema changes, while staying honest about what still requires provider access, production credentials, or later UI polish.
 
 ### What improved in this pass
+- Movie sync drift was reduced by moving catalog-sync movie imports to `movie_catalog_enriched.v2.json`, matching the JSON-first source already used by the public and admin movie flows.
+- Schema-reference drift was reduced by updating the core/store schema files and the incremental upgrade SQL to include the richer movie overlay fields and current review/purchase-order governance tables.
+- Public page SEO guardrails were checked again; exposed pages still keep a single H1 each.
 - Payment/refund handling moved forward with provider-aware refund sync attempts for Stripe and PayPal when credentials and provider payment ids are available, plus queued receipt records for refund and dispute messages.
 - Webhook operations moved forward with a new admin dispatch endpoint that can requeue due or failed webhook events in a controlled batch with audit logging.
 - Inventory authority moved forward with a rewritten admin inventory endpoint that now supports create, update, reserve, release, receive, reorder-request, and catalog-sync actions while logging movements consistently.
@@ -379,3 +382,29 @@ All code-side items that were realistically actionable inside this repo pass wer
 
 #### Still open
 - Trusted bulk movie enrichment still depends on an accepted external metadata source or on locally processed enrichment files.
+
+
+## Current pass completion update
+
+### 6. Movie catalog enrichment
+#### Addressed in this pass
+- Reconfirmed that `movie_catalog_enriched.v2.json` remains the current movie base truth for the live shelf while local/manual movie edits are layered through D1 as an overlay rather than a full migration.
+- The admin movie editing workflow now targets richer manual curation fields, including title, year, actor names, director names, metadata source/status, collection notes, rarity notes, value fields, UPC, IMDb id, alternate identifier, trailer URL, and front/back cover URLs.
+- The movie handoff direction is now clearer: do not force full D1 authority for movies until the enrichment pipeline is stable and verified against the live collection file.
+
+#### Still open
+- The movie edit screen still needs to visually show every important JSON-backed field consistently, especially cover previews, summary, source/value fields, and existing metadata already present in `movie_catalog_enriched.v2.json`.
+- Old D1 `movie_catalog` tables can still fail writes until compatibility upgrades finish adding every later movie column automatically.
+- Trusted external movie enrichment remains dependent on the local/offline processing workflow rather than a finished in-repo provider integration.
+
+#### Remaining risk
+- If movie reads drift away from the JSON-first source too early, the live shelf can lose already-curated metadata or show incomplete cards.
+
+### Draft-to-publish workflow
+#### Addressed in this pass
+- The intended phone-first product-entry direction is now explicit: new finished products must be savable as partial drafts with only a photo, only a name, only a capture reference, or any small subset of fields while the operator moves on to the next item.
+- The finished-product CSV requirement is now clearer: the repo needs a detailed import template for bulk entry of completed products while still allowing draft-like partial intake where appropriate.
+
+#### Still open
+- The mobile product screen still needs to enforce the “save partial draft now, complete later” flow consistently before publish-time validation rules are applied.
+- Bulk import still needs continued tuning so draft and ready-for-review rows are both handled cleanly.

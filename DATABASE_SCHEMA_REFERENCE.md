@@ -98,7 +98,7 @@ product_resource_links
 - links a finished product to tools and supplies used in making it
 
 movie_catalog
-- public movie shelf table. Enrichment can be seeded from `/data/movies/movie_catalog_enriched.json`
+- public movie shelf table. Enrichment can be seeded from `/data/movies/movie_catalog_enriched.v2.json`
 Operational inventory table for tools, supplies, and sellable items with on-hand, reserved, incoming, supplier, and cost fields.
 
 ### site_inventory_movements
@@ -148,7 +148,9 @@ Images are optional during import and can be added during later review before ac
 
 
 ## Current pass update
-- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.json`, and the R2-hosted cover images more safely.
+- `movie_catalog` schema references now include the richer admin-overlay movie fields: `original_title`, `imdb_id`, `alternate_identifier`, `metadata_status`, `metadata_source`, estimated value fields, `rarity_notes`, `collection_notes`, and `value_search_url`.
+- `database_schema.sql`, `database_store_schema.sql`, and `database_upgrade_current_pass.sql` were synchronized forward so older environments have a clearer upgrade path for the current movie/editor/admin flows.
+- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.v2.json`, and the R2-hosted cover images more safely.
 - Movie search now supports title, UPC, year, actor, director, genre, studio, format, and optional trailer-link filtering.
 - `trailer_url` is now part of the movie enrichment path so trailer support can be stored directly when available.
 - Storefront product detail now includes linked tools and supplies from `product_resource_links` so each finished product can tell a clearer “made with these materials and tools” story.
@@ -159,7 +161,7 @@ Images are optional during import and can be added during later review before ac
 
 ## Current pass notes
 
-- `movie_catalog` remains the long-term home for enriched movie metadata, while `data/movies/movie_catalog_enriched.json` currently provides the live R2-backed image bridge for front/back covers.
+- `movie_catalog` remains the long-term home for enriched movie metadata, while `data/movies/movie_catalog_enriched.v2.json` currently provides the live R2-backed image bridge for front/back covers.
 - `site_item_inventory` continues to be the operational inventory table for tools and supplies, including reorder, do-not-reorder, and do-not-reuse controls.
 - `product_resource_links` remains the relationship table connecting finished products to the tools and supplies used during the build process.
 
@@ -274,3 +276,29 @@ Durable audit trail of governed product review actions such as approve, needs ch
 ## Current pass additions
 - `products.capture_reference` stores a temporary phone-first intake identifier for partial product drafts.
 - `movie_catalog` now supports `imdb_id`, `alternate_identifier`, `metadata_status`, and `collection_notes` so admin can curate or review movie metadata directly in D1.
+
+
+## Current pass schema note
+
+### movie_catalog
+Current practical role:
+- manual/admin overlay table for movie metadata edits
+- not yet the primary authoritative source for the live movie shelf
+
+Important compatibility note:
+Older databases may have an early `movie_catalog` shape that is missing later columns such as:
+- `imdb_id`
+- `alternate_identifier`
+- `metadata_source`
+- `estimated_value_low_cents`
+- `estimated_value_high_cents`
+- `estimated_value_currency`
+- `rarity_notes`
+- `collection_notes`
+- `value_search_url`
+- `original_title`
+
+Admin movie write routes should therefore ensure column compatibility before insert/update operations.
+
+### products partial-intake note
+Products now need to support a real partial-draft intake path for phone-first capture and CSV-first bulk entry. Publish-time validation can remain stricter, but early draft-save validation must stay light.

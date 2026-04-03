@@ -124,3 +124,10 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Mobile product capture now supports partial draft saves and no longer requires every storefront field before intake can continue.
 - Admin movie-catalog editing is now available for manual metadata cleanup while the movie-enrichment pipeline is still being processed offline.
 - Bulk finished-product CSV seeding now has a detailed template file in `data/finished_products_import_template.csv`.
+
+
+## Current pass health update
+- Movie truth is still JSON-first. This is intentional and safer while the enrichment pipeline is still being processed outside the site build.
+- Manual movie editing is now expected to work through a D1 overlay, but the route still needs schema-hardening against older `movie_catalog` tables missing late-added columns such as `imdb_id`, metadata source, and value fields.
+- The admin movie editor should be considered incomplete unless it visibly shows both cover images and the richer JSON-backed fields already present in the live movie records.
+- Partial mobile finished-product draft capture remains a required workflow and should not be blocked by later publish-time required fields.

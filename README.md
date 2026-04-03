@@ -157,7 +157,7 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 
 
 ## Current pass update
-- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.json`, and the R2-hosted cover images more safely.
+- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.v2.json`, and the R2-hosted cover images more safely.
 - Movie search now supports title, UPC, year, actor, director, genre, studio, format, and optional trailer-link filtering.
 - `trailer_url` is now part of the movie enrichment path so trailer support can be stored directly when available.
 - Storefront product detail now includes linked tools and supplies from `product_resource_links` so each finished product can tell a clearer “made with these materials and tools” story.
@@ -168,7 +168,7 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 
 ## Current pass highlights
 
-- Replaced the sample movie enrichment file with the real R2-backed `movie_catalog_enriched.json` so the movie page can resolve live front/back cover URLs instead of placeholder `/assets/movies` paths.
+- Replaced the sample movie enrichment file with the real R2-backed `movie_catalog_enriched.v2.json` so the movie page can resolve live front/back cover URLs instead of placeholder `/assets/movies` paths.
 - Hardened `/api/movies` to blend D1, enriched JSON, and legacy rows more safely, including derived R2 cover fallbacks and trailer-search links when a stored trailer URL is not available yet.
 - Added a new admin product stock report for finished products so the dashboard can show what is on hand, what is running low, and which linked tools/supplies are causing build-risk or reorder pressure.
 - Tightened admin site inventory controls with filter views (`low`, `reorder`, `do_not_reuse`) and one-click sync buttons for tools and supplies from the D1-backed catalog sync layer.
@@ -177,7 +177,7 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 
 ## Current pass update
 
-- Replaced the placeholder movie enrichment file with the uploaded R2-backed `movie_catalog_enriched.json` so the public movie page reads real cover URLs.
+- Replaced the placeholder movie enrichment file with the uploaded R2-backed `movie_catalog_enriched.v2.json` so the public movie page reads real cover URLs.
 - Hardened `/api/products`, `/api/admin/dashboard-summary`, `/api/admin/site-item-inventory`, `/api/admin/product-stock-report`, `/api/admin/visitor-analytics`, `/api/admin/live-activity`, `/api/admin/webhook-events`, and `/api/admin/catalog-sync` so incomplete seed data or partially-migrated tables return safe JSON instead of HTML error pages.
 - Updated the movie page to render cover images from `/api/movies` and show richer metadata when it exists, while showing a clear enrichment-pending message when titles and credits are still blank in the source JSON.
 - Product image annotations now default to a clean empty array UI instead of example JSON pasted into the textarea itself.
@@ -286,3 +286,18 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - `data/finished_products_import_template.csv` provides a detailed starter format for bulk finished-product uploads.
 - `/admin/mobile-product/` now supports partial draft saves using `capture_reference` plus optional photos.
 - Admin now includes a movie catalog editor backed by `/api/admin/movies`.
+
+
+## Current movie workflow note
+- The live movie collection currently remains JSON-first, with `data/movies/movie_catalog_enriched.v2.json` acting as the base truth.
+- D1 `movie_catalog` is presently used as a manual overlay for edits and added metadata rather than a complete authoritative replacement.
+- The admin movie editor should therefore load the JSON-backed movie card details first, then save manual updates into the overlay path.
+
+## Current finished-product intake note
+- Phone-first product capture must continue supporting partial drafts so workshop intake can happen quickly even when only a photo, temporary reference, or partial description is available.
+- Bulk finished-product entry should use the detailed CSV template as the preferred mass-upload path for more complete product records.
+
+## Current pass update
+- Catalog sync now uses `movie_catalog_enriched.v2.json` for movie imports so repo-side sync matches the JSON-first movie source already used elsewhere.
+- Schema references and upgrade SQL were aligned with the current movie overlay/editor fields and the governed review/reorder tables already present in the codebase.
+- Exposed HTML pages were checked again and continue to keep a single H1 per page.

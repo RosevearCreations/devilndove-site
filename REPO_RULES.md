@@ -45,7 +45,7 @@
 
 
 ## Movie enrichment files
-- Keep legacy `/data/catalog.json` untouched if needed for fallback, but place richer movie metadata in `/data/movies/movie_catalog_enriched.json`.
+- Keep legacy `/data/catalog.json` untouched if needed for fallback, but place richer movie metadata in `/data/movies/movie_catalog_enriched.v2.json`.
 - Use one record per movie and match by UPC where possible.
 
 ## Outward-facing SEO rule
@@ -54,7 +54,7 @@
 
 
 ## Current pass update
-- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.json`, and the R2-hosted cover images more safely.
+- Movie catalog wiring now blends D1 `movie_catalog`, `/data/movies/movie_catalog_enriched.v2.json`, and the R2-hosted cover images more safely.
 - Movie search now supports title, UPC, year, actor, director, genre, studio, format, and optional trailer-link filtering.
 - `trailer_url` is now part of the movie enrichment path so trailer support can be stored directly when available.
 - Storefront product detail now includes linked tools and supplies from `product_resource_links` so each finished product can tell a clearer “made with these materials and tools” story.

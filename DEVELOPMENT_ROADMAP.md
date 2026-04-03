@@ -171,3 +171,17 @@
 - Mobile product capture now supports partial draft intake using a new `capture_reference` field, so a phone-first session can save a photo, a name, or a temporary identifier before the product is ready for full storefront data.
 - Added a detailed finished-products CSV template at `/data/finished_products_import_template.csv` for larger batch seeding.
 - Added an admin movie catalog editor so staff can update title/year/actors/UPC/IMDb id and notes directly in D1 while the movie-enrichment pipeline is still being built out.
+
+
+## Current pass movie and product-entry update
+- Keep `movie_catalog_enriched.v2.json` as the active movie base truth until the movie enrichment pipeline is stable enough to prove a clean sync/import path.
+- Treat `movie_catalog` in D1 as an edit overlay for manual corrections and contributed metadata, not as the primary movie source yet.
+- Finish the admin movie editor so it visibly loads the front cover, back cover, title, year, summary, actor names, director names, studio, runtime, metadata source/status, rarity notes, value fields, and collection notes from the JSON-first movie payload.
+- Harden the movie save path against legacy D1 schemas by auto-adding missing columns before writes.
+- Keep improving the mobile finished-product workflow so partial drafts can be captured quickly in sequence before later review and publishing.
+- Keep expanding the finished-product CSV import path so completed products can be loaded in bulk with SEO, media, tags, category, colour, shipping, readiness, and draft-review support.
+
+## Current pass update
+- Catalog sync now uses `movie_catalog_enriched.v2.json` for movie imports so repo-side sync matches the JSON-first movie source already used elsewhere.
+- Schema references and upgrade SQL were aligned with the current movie overlay/editor fields and the governed review/reorder tables already present in the codebase.
+- Exposed HTML pages were checked again and continue to keep a single H1 per page.

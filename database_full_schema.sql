@@ -633,6 +633,7 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   upc TEXT NOT NULL UNIQUE,
   slug TEXT,
   title TEXT,
+  original_title TEXT,
   sort_title TEXT,
   summary TEXT,
   release_year INTEGER,
@@ -648,7 +649,13 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
   imdb_id TEXT,
   alternate_identifier TEXT,
   metadata_status TEXT NOT NULL DEFAULT 'pending',
+  metadata_source TEXT,
+  estimated_value_low_cents INTEGER,
+  estimated_value_high_cents INTEGER,
+  estimated_value_currency TEXT,
+  rarity_notes TEXT,
   collection_notes TEXT,
+  value_search_url TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','draft','archived')),
   featured_rank INTEGER,
   source_record_json TEXT,
@@ -659,6 +666,7 @@ CREATE TABLE IF NOT EXISTS movie_catalog (
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_imdb_id ON movie_catalog(imdb_id);
 
 
 CREATE TABLE IF NOT EXISTS site_item_inventory (
@@ -847,4 +855,4 @@ CREATE TABLE IF NOT EXISTS product_review_actions (
 CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_actions(product_id, created_at DESC);
 
 
--- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.json and can derive a trailer search URL at runtime when trailer_url is blank.
+-- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.v2.json and can derive a trailer search URL at runtime when trailer_url is blank.
