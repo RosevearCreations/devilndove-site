@@ -348,3 +348,50 @@ textarea::placeholder { color: rgba(170,179,194,.82); }
   .table-wrap table,
   .card table { min-width: 640px; }
 }
+
+
+/* Current pass: mobile install shell, admin phone workflow, and overlap fixes */
+body.dd-standalone .nav { position: sticky; top: 0; z-index: 40; background: rgba(11,13,16,.96); backdrop-filter: blur(10px); padding-top: max(16px, env(safe-area-inset-top)); }
+body.dd-standalone .container { padding-top: 18px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+body.dd-standalone .dd-auth-widget { bottom: calc(12px + env(safe-area-inset-bottom)); }
+.compact-hero h1 { font-size: clamp(1.7rem, 5vw, 2.2rem); }
+.mobile-capture-shell, .mobile-admin-shell { max-width: 980px; }
+.mobile-capture-card, .mobile-admin-card { overflow: hidden; }
+.mobile-capture-topline, .mobile-admin-topline { display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+.mobile-capture-number { font-size: clamp(1.5rem, 5vw, 2.3rem); font-weight: 900; line-height: 1; }
+.mobile-form-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+.mobile-product-form, .mobile-admin-form { display:grid; gap:14px; }
+.mobile-product-form > label, .mobile-form-grid > label, .mobile-admin-form > label { display:grid; gap:6px; min-width:0; }
+.mobile-image-preview-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap:12px; }
+.mobile-image-preview-card { border:1px solid var(--border); border-radius:14px; padding:10px; background:rgba(255,255,255,.03); display:grid; gap:8px; }
+.mobile-image-preview-card img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; }
+.mobile-app-panel { display:grid; gap:12px; }
+.mobile-launch-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:12px; }
+.mobile-launch-card { display:grid; gap:8px; padding:14px; border-radius:16px; border:1px solid var(--border); background:linear-gradient(180deg, rgba(46,168,255,.08), rgba(255,255,255,.03)); }
+.mobile-launch-card .btn { width:100%; justify-content:center; }
+.mobile-stock-toggle { display:flex; gap:8px; align-items:center; border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:#0f131a; }
+.resource-picker-head { display:grid; gap:12px; margin-top:6px; }
+.resource-picker-controls { display:grid; grid-template-columns: minmax(0,1fr) 180px auto; gap:10px; align-items:center; }
+.resource-linked-summary { display:grid; gap:8px; min-width:0; }
+.resource-linked-card { background: rgba(255,255,255,.03); border-color: var(--border); }
+.resource-linked-actions { flex-wrap: wrap; }
+.mobile-inline-input { max-width: 120px; }
+.admin-quick-link-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:12px; margin-top:14px; }
+.admin-quick-link-card { padding:14px; border-radius:16px; border:1px solid var(--border); background:rgba(255,255,255,.03); }
+.admin-table-wrap td .btn, .admin-table-wrap th .btn { margin-bottom: 6px; }
+.admin-table-wrap td { overflow-wrap:anywhere; }
+input[type=search], input[type=text], input[type=url], input[type=number], select, textarea { overflow:hidden; text-overflow:ellipsis; }
+input[type=checkbox] { width:auto; accent-color: var(--orange); }
+input[type=file] { padding:12px; }
+#ddInstallAppButton[hidden] { display:none !important; }
+@media (max-width: 820px) {
+  .mobile-form-grid, .resource-picker-controls, .mobile-capture-topline, .mobile-admin-topline { grid-template-columns: 1fr; }
+  .resource-linked-card { flex-direction: column; align-items: stretch; }
+  .resource-linked-actions { justify-content: flex-start; }
+}
+@media (max-width: 640px) {
+  .mobile-form-grid { grid-template-columns: 1fr; }
+  .nav .links a, .nav .links button, .nav .links span { flex: 1 1 100%; }
+  .movie-toolbar-grid { grid-template-columns: 1fr; }
+  .admin-table-wrap table, .table-wrap table, .card table { min-width: 560px; }
+}
