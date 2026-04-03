@@ -218,3 +218,9 @@ Current-pass emphasis:
 - A new protected route `/admin/mobile-inventory/` now exists for phone-first tool/supply intake.
 - `_headers` is now part of the repo and should be treated as active security infrastructure.
 - Files prefixed with `RM_` were reviewed as unlinked/duplicate candidates and are intended for later removal after one more human check.
+
+
+## Current pass context
+- New orders now seed `accounting_order_records` for future bookkeeping.
+- Admin orders now include a lightweight accounting summary mount.
+- Admin password reset is now intended to support any account, including other admins, with step-up confirmation.

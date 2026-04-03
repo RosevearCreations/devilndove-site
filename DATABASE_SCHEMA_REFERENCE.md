@@ -321,3 +321,7 @@ This pass did not introduce new D1 tables or column additions. The main repo cha
 - tighter service-worker behavior around sensitive routes
 - mobile/admin UI expansion with `/admin/mobile-inventory/`
 - repo cleanup using `RM_` prefixes for duplicate/unlinked files
+
+
+## Current pass addendum
+- Added `accounting_order_records` as a lightweight order-linked accounting shadow table. It is not the final accounting backend, but it preserves booked totals, outstanding amounts, and tax liability from the moment an order is created.

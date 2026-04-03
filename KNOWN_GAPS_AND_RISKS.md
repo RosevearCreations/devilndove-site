@@ -478,3 +478,15 @@ The following files were not found on active repo paths and were renamed with an
 - `data/data/supplies/RM_supplies_metadata.zip`
 - `RM_repair.sql`
 - `assets/movies/RM_movie_catalog_review_queue_v2.csv`
+
+
+## Current pass addendum
+- Added basic accounting shadow records so every newly created order now seeds an `accounting_order_records` row for later bookkeeping, tax, and revenue work.
+- Added a first admin accounting interface inside the orders area so booked, paid, outstanding, and tax-liability totals are visible before the deeper accounting backend exists.
+- Tightened admin password control so an admin can reset any user password, including another admin account, with step-up password confirmation and audit logging.
+- Continued another CSS pass around admin form density, mobile wrapping, and accounting/password tools.
+
+### Still honestly open after this pass
+- Full double-entry accounting, COGS, inventory valuation, and tax remittance workflows still need the later accounting backend.
+- Broader multi-role permission granularity still remains beyond the current admin/member split even though admin password resets are now tighter and auditable.
+- Mixed JSON/D1 authority still remains in some movie and legacy admin/read paths.

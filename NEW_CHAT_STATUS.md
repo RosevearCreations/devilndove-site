@@ -99,3 +99,10 @@ At minimum, the admin movie workflow should expose and allow edits for:
 3. Review the `RM_` files and remove them only after one more visual/file-level check.
 4. Continue the JSON-to-D1 authority reduction in the remaining mixed areas, especially movies and any leftover legacy admin reads.
 5. Resume social ingestion and Amazon lookup only when approved provider access is available.
+
+
+## Latest pass handoff
+- Basic accounting shadow records were added for new orders.
+- Admin accounting summary UI now exists in the orders area.
+- Admin password reset now supports any account, including admin-to-admin resets, with stronger confirmation and audit coverage.
+- Schema references and upgrade SQL now include `accounting_order_records`.

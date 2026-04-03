@@ -240,3 +240,7 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - The artist/admin phone workflow now has two intended protected entry points: `/admin/mobile-product/` for finished-product capture and `/admin/mobile-inventory/` for tools/supplies intake.
 - Browser security hardening now includes a repo `_headers` file plus a stricter service-worker bypass for sensitive routes.
 - Duplicate dead files are now being marked with `RM_` before removal instead of being silently deleted.
+
+
+## Current pass note
+The store now seeds a lightweight accounting shadow record for every new order so later bookkeeping, tax, and revenue tooling has a stable starting point. Admin also has a first accounting-facing summary view.

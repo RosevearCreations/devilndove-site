@@ -150,3 +150,9 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - New phone-first admin route added: `/admin/mobile-inventory/`.
 - Dead-file cleanup has started safely through `RM_` prefixes instead of permanent deletion.
 - This pass did not add new D1 tables; it focused on mobile shell polish, CSS stability, browser security hardening, and cleanup discipline.
+
+
+## Current pass update
+- Orders now create a lightweight accounting-ready record in `accounting_order_records`.
+- Admin now has a first accounting view under the orders area.
+- Admin password reset now supports any user, including admins, with step-up confirmation.

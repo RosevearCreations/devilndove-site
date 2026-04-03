@@ -319,3 +319,9 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Added `/admin/mobile-inventory/` as a dedicated phone-friendly intake page for tools and supplies.
 - Updated the manifest and service worker again so the installable app shell feels more complete while avoiding offline caching of sensitive pages.
 - Renamed clearly unlinked duplicate/legacy files with an `RM_` prefix instead of deleting them outright.
+
+
+## Current pass highlights
+- Basic accounting shadow records now exist for newly created orders.
+- Admin can reset any user password, including another admin, with step-up confirmation.
+- Admin orders area now includes a starter accounting summary block.

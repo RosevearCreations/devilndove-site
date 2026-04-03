@@ -203,3 +203,14 @@
 - Added stronger browser security defaults and no-store handling through `_headers`.
 - Tightened standalone/mobile app feel and service-worker behavior for safer install use.
 - Started explicit dead-file retirement workflow using the `RM_` filename prefix.
+
+
+## Current pass addendum
+- Added basic accounting shadow records plus an admin accounting summary interface to prepare for the later accounting backend.
+- Tightened privileged password control so admin can reset any account, including another admin, with step-up confirmation and audit coverage.
+- Continued CSS stabilization for dense admin tools before broader stress testing.
+
+## Strongest next steps after this pass
+1. Expand accounting shadow records into a fuller bookkeeping backend with costs, tax remittance, and profitability.
+2. Extend payment/accounting sync so paid/refunded states update the accounting shadow rows automatically from provider events.
+3. Continue role granularity and sensitive-action hardening before stress testing.
