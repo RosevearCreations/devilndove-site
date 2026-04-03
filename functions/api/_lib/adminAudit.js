@@ -73,6 +73,7 @@ export async function getAdminUserFromRequest(request, env) {
     if (String(session.role || '').toLowerCase() !== 'admin') return null;
 
     return {
+      session_id: Number(session.session_id || 0),
       user_id: Number(session.resolved_user_id || session.user_id || 0),
       email: session.email || '',
       display_name: session.display_name || ''
