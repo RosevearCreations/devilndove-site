@@ -313,3 +313,11 @@ Products now need to support a real partial-draft intake path for phone-first ca
 - Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
 - Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
 - This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Current pass note
+This pass did not introduce new D1 tables or column additions. The main repo changes were:
+- stronger browser/app security defaults through `_headers`
+- tighter service-worker behavior around sensitive routes
+- mobile/admin UI expansion with `/admin/mobile-inventory/`
+- repo cleanup using `RM_` prefixes for duplicate/unlinked files

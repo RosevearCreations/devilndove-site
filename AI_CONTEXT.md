@@ -212,3 +212,9 @@ Current-pass emphasis:
 - Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
 - Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
 - This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Current pass note
+- A new protected route `/admin/mobile-inventory/` now exists for phone-first tool/supply intake.
+- `_headers` is now part of the repo and should be treated as active security infrastructure.
+- Files prefixed with `RM_` were reviewed as unlinked/duplicate candidates and are intended for later removal after one more human check.

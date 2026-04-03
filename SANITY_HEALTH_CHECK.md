@@ -142,3 +142,11 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
 - Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
 - This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Current pass health notes
+- Public route normalization remains intact and the app shell now behaves more consistently in standalone mode.
+- Sensitive admin/member/auth routes now have stronger no-store/browser-security defaults through `_headers` and are skipped by the service-worker cache.
+- New phone-first admin route added: `/admin/mobile-inventory/`.
+- Dead-file cleanup has started safely through `RM_` prefixes instead of permanent deletion.
+- This pass did not add new D1 tables; it focused on mobile shell polish, CSS stability, browser security hardening, and cleanup discipline.

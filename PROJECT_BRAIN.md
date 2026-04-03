@@ -234,3 +234,9 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
 - Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
 - This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Current pass note
+- The artist/admin phone workflow now has two intended protected entry points: `/admin/mobile-product/` for finished-product capture and `/admin/mobile-inventory/` for tools/supplies intake.
+- Browser security hardening now includes a repo `_headers` file plus a stricter service-worker bypass for sensitive routes.
+- Duplicate dead files are now being marked with `RM_` before removal instead of being silently deleted.

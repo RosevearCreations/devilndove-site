@@ -312,3 +312,10 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
 - Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
 - This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Current pass update
+- Added `_headers` for stronger browser-side security defaults and no-store cache control on admin/member/auth/API routes.
+- Added `/admin/mobile-inventory/` as a dedicated phone-friendly intake page for tools and supplies.
+- Updated the manifest and service worker again so the installable app shell feels more complete while avoiding offline caching of sensitive pages.
+- Renamed clearly unlinked duplicate/legacy files with an `RM_` prefix instead of deleting them outright.

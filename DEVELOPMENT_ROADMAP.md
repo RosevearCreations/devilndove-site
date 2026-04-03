@@ -196,3 +196,10 @@
 - Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
 - Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
 - This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Newly completed or moved forward in this pass
+- Added dedicated phone inventory intake at `/admin/mobile-inventory/`.
+- Added stronger browser security defaults and no-store handling through `_headers`.
+- Tightened standalone/mobile app feel and service-worker behavior for safer install use.
+- Started explicit dead-file retirement workflow using the `RM_` filename prefix.

@@ -85,3 +85,17 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
 - Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
 - This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## New current state from this pass
+- Public/mobile shell is more installable and more app-like. The site now has a stronger manifest, a tighter service-worker cache policy, and a new mobile inventory intake route at `/admin/mobile-inventory/`.
+- Browser security hardening moved forward with a new `_headers` file that adds no-store rules for sensitive areas and baseline CSP/frame/referrer protections.
+- Another CSS hardening pass reduced mobile/admin overlap issues and improved dark-mode calendar/date control visibility.
+- A repo cleanup pass renamed clearly unlinked duplicate/legacy files with an `RM_` prefix instead of deleting them.
+
+## Best next steps after this pass
+1. Test the install flow on Android and iPhone home-screen entry.
+2. Test `/admin/mobile-product/` and `/admin/mobile-inventory/` on a real phone.
+3. Review the `RM_` files and remove them only after one more visual/file-level check.
+4. Continue the JSON-to-D1 authority reduction in the remaining mixed areas, especially movies and any leftover legacy admin reads.
+5. Resume social ingestion and Amazon lookup only when approved provider access is available.

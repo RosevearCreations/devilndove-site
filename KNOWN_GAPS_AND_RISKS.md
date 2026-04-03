@@ -443,3 +443,38 @@ All code-side items that were realistically actionable inside this repo pass wer
 - Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
 - Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
 - This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Current pass addendum
+- Added `_headers` with stricter browser security defaults, no-store caching for admin/member/auth paths, frame blocking, and a tighter site-wide CSP baseline.
+- Service worker caching now bypasses admin, member, login, register, account-help, and API routes so sensitive pages are not stored offline.
+- Added `/admin/mobile-inventory/` as a dedicated phone-friendly intake page for tools and supplies, built on the same protected inventory operations already used in admin.
+- Tightened the installable phone shell again with a stronger manifest, app shortcuts for quick capture and inventory intake, and better standalone-mode layout behavior.
+- Added another CSS pass to reduce input/button overlap, improve resource-card wrapping, improve mobile action layouts, and keep dark-mode date/calendar controls readable.
+- Performed a dead-file sweep on clearly unlinked duplicate repo files and prefixed them with `RM_` so they are easier to review and remove later without touching active paths.
+
+### Still honestly open after this pass
+- Full automated Instagram, TikTok, and X ingestion still needs approved API or feed access.
+- Full Amazon product-detail import from barcode still needs Amazon Product Advertising API access or another approved source.
+- Full role-by-role permission granularity is still broader than desired even after tighter headers, step-up, and cache controls.
+- Mixed JSON/D1 authority still remains in some movie and legacy admin/read paths.
+- Trusted movie enrichment still depends on the external enrichment workflow rather than a finished in-repo provider integration.
+
+### Dead-file review result in this pass
+The following files were not found on active repo paths and were renamed with an `RM_` prefix instead of being deleted:
+- `data/data/RM_catalog.json`
+- `data/data/RM_products.json`
+- `data/data/RM_tools.json`
+- `data/data/site/RM_featured-items.json`
+- `data/data/itemsforsale/RM_itemsforsale_items_master.json`
+- `data/data/toolshed/RM_exact_duplicate_report.json`
+- `data/data/toolshed/RM_toolshed_items_master.json`
+- `data/data/supplies/RM_README.txt`
+- `data/data/supplies/RM_exact_duplicate_report.json`
+- `data/data/supplies/RM_supplies_images_inventory.csv`
+- `data/data/supplies/RM_supplies_images_inventory.json`
+- `data/data/supplies/RM_supplies_items_master.csv`
+- `data/data/supplies/RM_supplies_items_master.json`
+- `data/data/supplies/RM_supplies_metadata.zip`
+- `RM_repair.sql`
+- `assets/movies/RM_movie_catalog_review_queue_v2.csv`

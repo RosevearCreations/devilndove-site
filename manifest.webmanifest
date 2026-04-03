@@ -2,13 +2,14 @@
   "id": "/",
   "name": "Devil n Dove",
   "short_name": "Devil n Dove",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#111827",
   "theme_color": "#111827",
   "description": "Handmade jewelry, workshop creations, tools, supplies, movies, and maker-life updates from Southern Ontario.",
+  "categories": ["shopping", "lifestyle", "productivity"],
   "prefer_related_applications": false,
   "icons": [
     {
@@ -37,9 +38,14 @@
       "url": "/shop/"
     },
     {
-      "name": "Tools",
-      "short_name": "Tools",
-      "url": "/tools/"
+      "name": "Quick Capture",
+      "short_name": "Capture",
+      "url": "/admin/mobile-product/"
+    },
+    {
+      "name": "Inventory Intake",
+      "short_name": "Inventory",
+      "url": "/admin/mobile-inventory/"
     },
     {
       "name": "Socials",

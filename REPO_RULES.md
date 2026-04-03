@@ -150,3 +150,7 @@ Current-pass rules added:
 - Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
 - Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
 - This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Current pass housekeeping rule
+- When duplicate or clearly unlinked repo files are found, prefer renaming them with an `RM_` prefix first instead of deleting them immediately.
