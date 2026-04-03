@@ -395,3 +395,19 @@ input[type=file] { padding:12px; }
   .movie-toolbar-grid { grid-template-columns: 1fr; }
   .admin-table-wrap table, .table-wrap table, .card table { min-width: 560px; }
 }
+
+
+/* Current pass: tighter admin/accounting/password layouts */
+#adminAccountingMount .admin-stat-value { font-size: 1.3rem; }
+#adminAccountingMount table td, #adminAccountingMount table th { white-space: normal; }
+#adminResetPasswordForm .grid { align-items: end; }
+#adminResetPasswordForm input, #adminResetPasswordForm select { width: 100%; }
+#adminResetPasswordForm .btn { min-width: 180px; }
+.admin-table-wrap { scrollbar-width: thin; }
+@media (max-width: 720px) {
+  #adminAccountingMount .admin-summary-grid { grid-template-columns: 1fr 1fr; }
+  #adminResetPasswordForm .btn { width: 100%; }
+}
+@media (max-width: 560px) {
+  #adminAccountingMount .admin-summary-grid { grid-template-columns: 1fr; }
+}
