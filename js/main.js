@@ -2,6 +2,8 @@
 (() => {
   "use strict";
 
+  let deferredInstallPrompt = null;
+
   function escapeHtml(s) {
     return String(s ?? "")
       .replace(/&/g, "&amp;")
@@ -17,6 +19,10 @@
     return `https://www.amazon.ca/s?k=${encodeURIComponent(q)}`;
   }
 
+  function isStandaloneMode() {
+    return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
   function buildSharedNav() {
     return `
       <div class="brand">
@@ -27,27 +33,30 @@
         </div>
       </div>
       <div class="links" aria-label="Primary navigation">
-        <a href="/index.html" data-nav="/">Home</a>
-        <a href="/about/index.html" data-nav="/about/">About</a>
-        <a href="/gallery/index.html" data-nav="/gallery/">Art</a>
-        <a href="/creations/index.html" data-nav="/creations/">Creations</a>
-        <a href="/tools/index.html" data-nav="/tools/">Tools</a>
-        <a href="/supplies/index.html" data-nav="/supplies/">Supplies</a>
-        <a href="/shop/index.html" data-nav="/shop/">Shop</a>
-        <a href="/search/index.html" data-nav="/search/">Search</a>
-        <a href="/movies/index.html" data-nav="/movies/">Movies</a>
-        <a href="/socials/index.html" data-nav="/socials/">Socials</a>
-        <a href="/contact/index.html" data-nav="/contact/">Contact</a>
-        <a href="/cart/index.html" data-nav="/cart/">Cart</a>
-        <a href="/login/index.html" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
-        <a href="/register/index.html" data-nav="/register/" data-show-when-logged-out style="display:none">Register</a>
-        <a href="/members/index.html" data-nav="/members/" data-show-when-logged-in style="display:none">Members</a>
-        <a href="/admin/index.html" data-nav="/admin/" data-show-when-admin style="display:none">Admin</a>
+        <a href="/" data-nav="/">Home</a>
+        <a href="/about/" data-nav="/about/">About</a>
+        <a href="/gallery/" data-nav="/gallery/">Art</a>
+        <a href="/creations/" data-nav="/creations/">Creations</a>
+        <a href="/tools/" data-nav="/tools/">Tools</a>
+        <a href="/supplies/" data-nav="/supplies/">Supplies</a>
+        <a href="/shop/" data-nav="/shop/">Shop</a>
+        <a href="/search/" data-nav="/search/">Search</a>
+        <a href="/movies/" data-nav="/movies/">Movies</a>
+        <a href="/socials/" data-nav="/socials/">Socials</a>
+        <a href="/contact/" data-nav="/contact/">Contact</a>
+        <a href="/cart/" data-nav="/cart/">Cart</a>
+        <a href="/login/" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
+        <a href="/register/" data-nav="/register/" data-show-when-logged-out style="display:none">Register</a>
+        <a href="/members/" data-nav="/members/" data-show-when-logged-in style="display:none">Members</a>
+        <a href="/admin/" data-nav="/admin/" data-show-when-admin style="display:none">Admin</a>
       </div>`;
   }
 
   function buildSharedFooter() {
     const year = new Date().getFullYear();
+    const installNote = isStandaloneMode()
+      ? '<p class="small" id="ddInstallMessage">Devil n Dove is installed on this device.</p>'
+      : '<p class="small" id="ddInstallMessage">Install Devil n Dove on your phone for a cleaner home-screen icon and quicker access.</p>';
     return `
       <div class="site-footer-grid">
         <div>
@@ -57,32 +66,36 @@
         <div>
           <div class="site-footer-heading">Explore</div>
           <div class="site-footer-links">
-            <a href="/shop/index.html">Shop</a>
-            <a href="/gallery/index.html">Gallery</a>
-            <a href="/creations/index.html">Creations</a>
-            <a href="/tools/index.html">Tools</a>
-            <a href="/supplies/index.html">Supplies</a>
-            <a href="/movies/index.html">Movies</a>
-            <a href="/socials/index.html">Socials</a>
+            <a href="/shop/">Shop</a>
+            <a href="/gallery/">Gallery</a>
+            <a href="/creations/">Creations</a>
+            <a href="/tools/">Tools</a>
+            <a href="/supplies/">Supplies</a>
+            <a href="/movies/">Movies</a>
+            <a href="/socials/">Socials</a>
           </div>
         </div>
         <div>
           <div class="site-footer-heading">Member account</div>
           <div class="site-footer-links">
-            <a href="/login/index.html">Login</a>
-            <a href="/register/index.html">Register</a>
-            <a href="/members/index.html">Settings</a>
-            <a href="/account-help/index.html?mode=password">Forgot password</a>
-            <a href="/account-help/index.html?mode=email">Forgot email</a>
+            <a href="/login/">Login</a>
+            <a href="/register/">Register</a>
+            <a href="/members/">Settings</a>
+            <a href="/account-help/?mode=password">Forgot password</a>
+            <a href="/account-help/?mode=email">Forgot email</a>
           </div>
         </div>
         <div>
           <div class="site-footer-heading">Search the site</div>
-          <form action="/search/index.html" class="site-footer-search" method="get" role="search">
+          <form action="/search/" class="site-footer-search" method="get" role="search">
             <input aria-label="Search Devil n Dove" name="q" placeholder="Search products, tools, supplies, art..." type="search" />
             <button class="btn" type="submit">Search</button>
           </form>
-          <p class="small">Search stays visible in the footer on every public page to improve discovery and crawl paths.</p>
+          ${installNote}
+          <div class="dd-install-actions">
+            <button class="btn" id="ddInstallAppButton" type="button" ${isStandaloneMode() ? 'style="display:none"' : ''}>Install app</button>
+            <a class="btn" href="/socials/">Social hub</a>
+          </div>
         </div>
       </div>
       <div class="site-footer-bottom small">© ${year} Devil n Dove. Built for storefront discovery, workshop sharing, and member access.</div>`;
@@ -128,9 +141,8 @@
     footer.innerHTML = buildSharedFooter();
   }
 
-
   function ensureHeadTag(tagName, attrs = {}) {
-    const selector = Object.entries(attrs).map(([key, value]) => `[${key}="${String(value).replace(/"/g, '\"')}"]`).join('');
+    const selector = Object.entries(attrs).map(([key, value]) => `[${key}="${String(value).replace(/"/g, '\\"')}"]`).join('');
     let el = selector ? document.head.querySelector(`${tagName}${selector}`) : null;
     if (!el) {
       el = document.createElement(tagName);
@@ -143,12 +155,51 @@
   function ensurePwaShell() {
     ensureHeadTag('link', { rel: 'manifest', href: '/manifest.webmanifest' });
     ensureHeadTag('meta', { name: 'theme-color', content: '#111827' });
+    ensureHeadTag('meta', { name: 'apple-mobile-web-app-capable', content: 'yes' });
+    ensureHeadTag('meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' });
+    ensureHeadTag('meta', { name: 'apple-mobile-web-app-title', content: 'Devil n Dove' });
+    ensureHeadTag('meta', { name: 'mobile-web-app-capable', content: 'yes' });
     ensureHeadTag('link', { rel: 'apple-touch-icon', href: '/assets/icons/icon-180.png' });
+    ensureHeadTag('link', { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/assets/icons/icon-192.png' });
+    ensureHeadTag('link', { rel: 'icon', type: 'image/png', sizes: '512x512', href: '/assets/icons/icon-512.png' });
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(() => null);
       }, { once: true });
     }
+  }
+
+  function wireInstallPrompt() {
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      const button = document.getElementById('ddInstallAppButton');
+      if (button) button.hidden = false;
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      const button = document.getElementById('ddInstallAppButton');
+      const note = document.getElementById('ddInstallMessage');
+      if (button) button.style.display = 'none';
+      if (note) note.textContent = 'Devil n Dove is installed on this device.';
+    });
+
+    document.addEventListener('click', async (event) => {
+      const button = event.target instanceof Element ? event.target.closest('#ddInstallAppButton') : null;
+      if (!button) return;
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        try { await deferredInstallPrompt.userChoice; } catch (_) {}
+        return;
+      }
+      const note = document.getElementById('ddInstallMessage');
+      if (note) {
+        note.textContent = /iphone|ipad|ipod/i.test(navigator.userAgent)
+          ? 'On iPhone or iPad, open Share and choose Add to Home Screen.'
+          : 'Use your browser menu and choose Install app or Add to Home Screen.';
+      }
+    });
   }
 
   function ensureGlobalScript(src) {
@@ -167,6 +218,7 @@
     ensurePwaShell();
     injectSharedNav();
     injectSharedFooter();
+    wireInstallPrompt();
     ensureGlobalScript('/public/js/auth.js');
     ensureGlobalScript('/public/js/site-auth-ui.js');
     ensureGlobalScript('/public/js/site-analytics.js');
