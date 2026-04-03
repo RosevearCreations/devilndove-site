@@ -80,3 +80,8 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - A new `/socials/` page exists and is seeded from `/data/site/social-feed.json`. It currently has profile links and five YouTube videos.
 - Admin tools/supplies intake already existed in `siteInventoryAdminMount`; it now also has a barcode-photo helper. It can detect a barcode and prepare an Amazon search URL, but it does not yet pull structured Amazon details automatically.
 
+## Current pass addendum
+- Normalized public route links away from explicit `/index.html` navigation and added a `_redirects` file so direct `.../index.html` requests resolve more cleanly alongside directory routes.
+- Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
+- Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
+- This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
