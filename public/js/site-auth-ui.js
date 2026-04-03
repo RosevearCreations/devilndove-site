@@ -54,9 +54,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const body = floatingWidgetEl.querySelector('#ddAuthWidgetBody');
     const logout = floatingWidgetEl.querySelector('#ddAuthWidgetLogout');
     toggle?.addEventListener('click', () => {
-      body.style.display = body.style.display === 'none' ? 'block' : 'block';
-      if (body.style.display === 'block' && toggle.textContent === 'Open') toggle.textContent = 'Close';
-      else if (toggle.textContent === 'Close') { body.style.display = 'none'; toggle.textContent = 'Open'; }
+      const opening = body.style.display === 'none';
+      body.style.display = opening ? 'block' : 'none';
+      toggle.textContent = opening ? 'Close' : 'Open';
+    });
+    document.addEventListener('click', (event) => {
+      if (!floatingWidgetEl || body.style.display === 'none') return;
+      if (floatingWidgetEl.contains(event.target)) return;
+      body.style.display = 'none';
+      if (toggle) toggle.textContent = 'Open';
     });
     logout?.addEventListener('click', async () => {
       try { await window.DDAuth.logout(); } finally { window.location.href = '/'; }

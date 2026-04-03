@@ -23,6 +23,14 @@
     return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
+  function applyShellStateClasses() {
+    const body = document.body;
+    if (!body) return;
+    body.classList.toggle('dd-standalone', isStandaloneMode());
+    body.classList.toggle('dd-touch', window.matchMedia?.('(pointer: coarse)').matches || /iphone|ipad|android/i.test(navigator.userAgent));
+    body.classList.toggle('dd-ios', /iphone|ipad|ipod/i.test(navigator.userAgent));
+  }
+
   function buildSharedNav() {
     return `
       <div class="brand">
@@ -170,19 +178,17 @@
   }
 
   function wireInstallPrompt() {
+    applyShellStateClasses();
     window.addEventListener('beforeinstallprompt', (event) => {
       event.preventDefault();
       deferredInstallPrompt = event;
-      const button = document.getElementById('ddInstallAppButton');
-      if (button) button.hidden = false;
+      document.querySelectorAll('#ddInstallAppButton').forEach((button) => { button.hidden = false; button.style.display = ''; });
     });
 
     window.addEventListener('appinstalled', () => {
       deferredInstallPrompt = null;
-      const button = document.getElementById('ddInstallAppButton');
-      const note = document.getElementById('ddInstallMessage');
-      if (button) button.style.display = 'none';
-      if (note) note.textContent = 'Devil n Dove is installed on this device.';
+      document.querySelectorAll('#ddInstallAppButton').forEach((button) => { button.style.display = 'none'; });
+      document.querySelectorAll('#ddInstallMessage').forEach((note) => { note.textContent = 'Devil n Dove is installed on this device.'; });
     });
 
     document.addEventListener('click', async (event) => {
@@ -193,12 +199,11 @@
         try { await deferredInstallPrompt.userChoice; } catch (_) {}
         return;
       }
-      const note = document.getElementById('ddInstallMessage');
-      if (note) {
+      document.querySelectorAll('#ddInstallMessage').forEach((note) => {
         note.textContent = /iphone|ipad|ipod/i.test(navigator.userAgent)
           ? 'On iPhone or iPad, open Share and choose Add to Home Screen.'
           : 'Use your browser menu and choose Install app or Add to Home Screen.';
-      }
+      });
     });
   }
 
@@ -216,6 +221,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     ensurePwaShell();
+    applyShellStateClasses();
     injectSharedNav();
     injectSharedFooter();
     wireInstallPrompt();
