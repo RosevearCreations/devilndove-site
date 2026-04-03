@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <form id="siteInventoryForm" class="grid" style="gap:12px">
           <div class="grid cols-4" style="gap:12px">
             <div><label class="small" for="siteInventorySourceType">Source Type</label><select id="siteInventorySourceType"><option value="tool">Tool</option><option value="supply">Supply</option><option value="product">Product</option><option value="other">Other</option></select></div>
-            <div><label class="small" for="siteInventoryExternalKey">External Key</label><input id="siteInventoryExternalKey" type="text" placeholder="sku, source key, item id" /></div>
+            <div><label class="small" for="siteInventoryExternalKey">Barcode / ASIN / External Key</label><input id="siteInventoryExternalKey" type="text" placeholder="UPC, EAN, ASIN, sku, source key" /></div>
             <div><label class="small" for="siteInventoryItemName">Item Name</label><input id="siteInventoryItemName" type="text" /></div>
             <div><label class="small" for="siteInventoryCategory">Category</label><input id="siteInventoryCategory" type="text" /></div>
           </div>
@@ -47,6 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
             <div><label class="small" for="siteInventoryAmazonUrl">Amazon URL</label><input id="siteInventoryAmazonUrl" type="url" placeholder="https://..." /></div>
             <div><label class="small" for="siteInventoryIsActive">Status</label><select id="siteInventoryIsActive"><option value="1">Active</option><option value="0">Inactive</option></select></div>
           </div>
+          
+          <div class="grid cols-3" style="gap:12px">
+            <div>
+              <label class="small" for="siteInventoryBarcodePhoto">Scan barcode from photo</label>
+              <input id="siteInventoryBarcodePhoto" type="file" accept="image/*" capture="environment" />
+              <div class="small">Phone camera barcode scan fills the external key when the browser supports BarcodeDetector.</div>
+            </div>
+            <div style="align-self:end"><button class="btn" type="button" id="siteInventoryAmazonLookupButton">Use Amazon search link</button></div>
+            <div style="align-self:end"><button class="btn" type="button" id="siteInventoryClearBarcodeButton">Clear barcode helper</button></div>
+          </div>
+
           <div class="grid cols-5" style="gap:12px">
             <div><label class="small" for="siteInventoryOnHand">On Hand</label><input id="siteInventoryOnHand" type="number" min="0" step="1" value="0" /></div>
             <div><label class="small" for="siteInventoryReservedInput">Reserved</label><input id="siteInventoryReservedInput" type="number" min="0" step="1" value="0" /></div>
@@ -91,6 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
     document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(loadList, 250));
     document.getElementById('siteInventoryResetButton')?.addEventListener('click', () => document.getElementById('siteInventoryForm')?.reset());
+    document.getElementById('siteInventoryAmazonLookupButton')?.addEventListener('click', applyAmazonLookup);
+    document.getElementById('siteInventoryClearBarcodeButton')?.addEventListener('click', clearBarcodeHelper);
+    document.getElementById('siteInventoryBarcodePhoto')?.addEventListener('change', scanBarcodePhoto);
     mountEl.addEventListener('click', onTableClick);
   }
 
@@ -121,6 +135,50 @@ document.addEventListener('DOMContentLoaded', () => {
       reuse_status: document.getElementById('siteInventoryReuseStatus')?.value || ''
     };
   }
+
+
+  async function scanBarcodePhoto(event) {
+    const file = event?.target?.files?.[0];
+    if (!file) return;
+    if (!('BarcodeDetector' in window)) {
+      setMessage('This browser does not support in-browser barcode detection yet. You can still type or paste the UPC/ASIN manually.', true);
+      return;
+    }
+    try {
+      const detector = new window.BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code'] });
+      const bitmap = await createImageBitmap(file);
+      const results = await detector.detect(bitmap);
+      const code = String(results?.[0]?.rawValue || '').trim();
+      if (!code) throw new Error('No barcode could be detected from that photo.');
+      const keyInput = document.getElementById('siteInventoryExternalKey');
+      if (keyInput && !keyInput.value.trim()) keyInput.value = code;
+      applyAmazonLookup();
+      setMessage(`Detected barcode: ${code}`);
+    } catch (error) {
+      setMessage(error.message || 'Could not detect a barcode from that photo.', true);
+    }
+  }
+
+  function applyAmazonLookup() {
+    const key = String(document.getElementById('siteInventoryExternalKey')?.value || '').trim();
+    if (!key) {
+      setMessage('Enter or scan a barcode/ASIN first.', true);
+      return;
+    }
+    const amazonUrlField = document.getElementById('siteInventoryAmazonUrl');
+    const sourceUrlField = document.getElementById('siteInventorySourceUrl');
+    const lookupUrl = window.DD?.amazonSearchUrl ? window.DD.amazonSearchUrl(key) : `https://www.amazon.ca/s?k=${encodeURIComponent(key)}`;
+    if (amazonUrlField && !amazonUrlField.value.trim()) amazonUrlField.value = lookupUrl;
+    if (sourceUrlField && !sourceUrlField.value.trim()) sourceUrlField.value = lookupUrl;
+    setMessage('Amazon search link prepared from the scanned or entered code. Product details still need review before saving.');
+  }
+
+  function clearBarcodeHelper() {
+    const barcodeInput = document.getElementById('siteInventoryBarcodePhoto');
+    if (barcodeInput) barcodeInput.value = '';
+    setMessage('Barcode helper cleared.');
+  }
+
 
   function renderMovements(movements) {
     const body = document.getElementById('siteInventoryMovementList');

@@ -36,6 +36,7 @@
         <a href="/shop/index.html" data-nav="/shop/">Shop</a>
         <a href="/search/index.html" data-nav="/search/">Search</a>
         <a href="/movies/index.html" data-nav="/movies/">Movies</a>
+        <a href="/socials/index.html" data-nav="/socials/">Socials</a>
         <a href="/contact/index.html" data-nav="/contact/">Contact</a>
         <a href="/cart/index.html" data-nav="/cart/">Cart</a>
         <a href="/login/index.html" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
@@ -62,6 +63,7 @@
             <a href="/tools/index.html">Tools</a>
             <a href="/supplies/index.html">Supplies</a>
             <a href="/movies/index.html">Movies</a>
+            <a href="/socials/index.html">Socials</a>
           </div>
         </div>
         <div>
@@ -126,6 +128,29 @@
     footer.innerHTML = buildSharedFooter();
   }
 
+
+  function ensureHeadTag(tagName, attrs = {}) {
+    const selector = Object.entries(attrs).map(([key, value]) => `[${key}="${String(value).replace(/"/g, '\"')}"]`).join('');
+    let el = selector ? document.head.querySelector(`${tagName}${selector}`) : null;
+    if (!el) {
+      el = document.createElement(tagName);
+      document.head.appendChild(el);
+    }
+    Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+    return el;
+  }
+
+  function ensurePwaShell() {
+    ensureHeadTag('link', { rel: 'manifest', href: '/manifest.webmanifest' });
+    ensureHeadTag('meta', { name: 'theme-color', content: '#111827' });
+    ensureHeadTag('link', { rel: 'apple-touch-icon', href: '/assets/icons/icon-180.png' });
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => null);
+      }, { once: true });
+    }
+  }
+
   function ensureGlobalScript(src) {
     if (!src || document.querySelector(`script[src="${src}"]`)) return;
     const script = document.createElement('script');
@@ -139,6 +164,7 @@
   window.DD.amazonSearchUrl = amazonSearchUrl;
 
   document.addEventListener('DOMContentLoaded', () => {
+    ensurePwaShell();
     injectSharedNav();
     injectSharedFooter();
     ensureGlobalScript('/public/js/auth.js');
