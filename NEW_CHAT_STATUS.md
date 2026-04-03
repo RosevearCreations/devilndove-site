@@ -68,3 +68,15 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Continue the Known Gaps list from the remaining repo-safe items.
 - Keep docs aligned with the JSON-first movie truth and overlay-only D1 strategy.
 - Continue reducing duplicate truth paths between JSON, D1, and admin screens where the repo can do so honestly.
+
+- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
+- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
+- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
+- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
+
+## Fresh-chat handoff update
+- The repo now includes a first-pass PWA shell (`manifest.webmanifest`, `sw.js`, generated icons) so Devil n Dove can be saved to a phone home screen more like an app.
+- New finished products are now intended to start from code DD1000 upward, while the underlying DB still stores the numeric part.
+- A new `/socials/` page exists and is seeded from `/data/site/social-feed.json`. It currently has profile links and five YouTube videos.
+- Admin tools/supplies intake already existed in `siteInventoryAdminMount`; it now also has a barcode-photo helper. It can detect a barcode and prepare an Amazon search URL, but it does not yet pull structured Amazon details automatically.
+

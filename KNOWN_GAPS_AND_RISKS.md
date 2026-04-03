@@ -408,3 +408,33 @@ All code-side items that were realistically actionable inside this repo pass wer
 #### Still open
 - The mobile product screen still needs to enforce the “save partial draft now, complete later” flow consistently before publish-time validation rules are applied.
 - Bulk import still needs continued tuning so draft and ready-for-review rows are both handled cleanly.
+
+- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
+- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
+- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
+- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
+
+## Current pass completion update
+
+### Product numbering and phone install shell
+#### Addressed in this pass
+- New finished-product numbering now starts at DD1000 for new records while keeping the stored database field numeric for compatibility.
+- Added a manifest, service worker, and generated icons so the public site can be installed to a phone home screen as a cleaner app-like entry point.
+
+#### Still open
+- A richer offline-first install experience still needs more testing across Android and iPhone browsers.
+
+### Social hub
+#### Addressed in this pass
+- Added `/socials/` as a first shared social landing page and seeded it with profile links plus five public YouTube videos.
+
+#### Still open
+- Automated Instagram, TikTok, and X post ingestion still needs an approved API/source or a manual content sync file.
+
+### Inventory intake and barcode workflow
+#### Addressed in this pass
+- The admin inventory editor already supported manual tool/supply creation; this pass added a phone-photo barcode helper that can detect a barcode in-browser and prepare an Amazon search URL from it.
+
+#### Still open
+- Automatic detail import from Amazon is still not complete because it requires Amazon Product Advertising API access or another approved product metadata source.
+
