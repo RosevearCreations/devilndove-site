@@ -325,3 +325,8 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Basic accounting shadow records now exist for newly created orders.
 - Admin can reset any user password, including another admin, with step-up confirmation.
 - Admin orders area now includes a starter accounting summary block.
+
+
+### Current pass update
+- Mobile admin capture and inventory pages now include a stronger installed-app treatment with a shortcut dock and safer sticky action layout.
+- Starter accounting records now resync from Stripe/PayPal reconciliation and admin refund actions.

@@ -490,3 +490,15 @@ The following files were not found on active repo paths and were renamed with an
 - Full double-entry accounting, COGS, inventory valuation, and tax remittance workflows still need the later accounting backend.
 - Broader multi-role permission granularity still remains beyond the current admin/member split even though admin password resets are now tighter and auditable.
 - Mixed JSON/D1 authority still remains in some movie and legacy admin/read paths.
+
+
+## Current pass addendum
+- The starter accounting shadow layer now resyncs from Stripe return, Stripe webhook, PayPal return, PayPal webhook, and admin refund actions, which reduces drift between order/payment state and accounting summary records.
+- Phone-first admin pages now have a more complete installed-app feel with a bottom dock, sticky primary actions, and safer standalone safe-area spacing.
+
+### Still honestly open after this pass
+- Fully automated worker-driven webhook retry/replay is still not complete even though admin dispatch and provider-triggered accounting sync are stronger.
+- Real generated media thumbnails/variants still need image-processing infrastructure.
+- Full role-by-role permission granularity still remains beyond the current admin/member split.
+- Mixed JSON/D1 authority still remains in some movie and legacy admin/read paths.
+- Trusted movie enrichment still depends on the external enrichment workflow.

@@ -244,3 +244,8 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 
 ## Current pass note
 The store now seeds a lightweight accounting shadow record for every new order so later bookkeeping, tax, and revenue tooling has a stable starting point. Admin also has a first accounting-facing summary view.
+
+
+### Current pass focus
+- Keep the phone-first artist workflow smooth enough for real workshop use.
+- Keep the accountant/admin side grounded with safer password control plus starter accounting summaries that stay closer to payment reality.

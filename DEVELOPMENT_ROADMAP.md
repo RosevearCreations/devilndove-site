@@ -214,3 +214,9 @@
 1. Expand accounting shadow records into a fuller bookkeeping backend with costs, tax remittance, and profitability.
 2. Extend payment/accounting sync so paid/refunded states update the accounting shadow rows automatically from provider events.
 3. Continue role granularity and sensitive-action hardening before stress testing.
+
+
+## Current pass addendum
+- Payment returns, Stripe webhooks, PayPal webhooks, and admin refund actions now resync `accounting_order_records` so the starter accounting layer moves closer to live order/payment state instead of staying order-create only.
+- Mobile admin capture and inventory pages now have a stronger installed-app feel with a bottom dock, safer sticky actions, and better safe-area behavior on phones.
+- Remaining strongest next steps are now worker-style webhook automation, thumbnail generation, deeper role granularity, and the larger accounting backend rather than basic phone-shell or order-shadow setup.

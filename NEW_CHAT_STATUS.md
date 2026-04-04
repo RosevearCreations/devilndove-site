@@ -106,3 +106,9 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Admin accounting summary UI now exists in the orders area.
 - Admin password reset now supports any account, including admin-to-admin resets, with stronger confirmation and audit coverage.
 - Schema references and upgrade SQL now include `accounting_order_records`.
+
+
+## Current pass handoff note
+- Accounting shadow rows are no longer order-create only; they now resync on Stripe return, Stripe webhook reconciliation, PayPal return, PayPal webhook reconciliation, and admin refund actions.
+- Mobile artist-side admin pages now behave more like an installed app with safer sticky actions and a bottom shortcut dock.
+- The remaining work is now more about deeper backend completion than basic mobile shell or summary-record groundwork.

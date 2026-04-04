@@ -224,3 +224,8 @@ Current-pass emphasis:
 - New orders now seed `accounting_order_records` for future bookkeeping.
 - Admin orders now include a lightweight accounting summary mount.
 - Admin password reset is now intended to support any account, including other admins, with step-up confirmation.
+
+
+## Current pass note for future work
+- `accounting_order_records` now need to be treated as a live shadow layer that is refreshed from order-create, payment returns, payment webhooks, and admin refunds.
+- Mobile admin phone UX now includes a bottom dock and sticky actions; future changes should preserve safe-area spacing and installed-app behavior.

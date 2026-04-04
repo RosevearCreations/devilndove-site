@@ -325,3 +325,7 @@ This pass did not introduce new D1 tables or column additions. The main repo cha
 
 ## Current pass addendum
 - Added `accounting_order_records` as a lightweight order-linked accounting shadow table. It is not the final accounting backend, but it preserves booked totals, outstanding amounts, and tax liability from the moment an order is created.
+
+
+## Current pass note
+- No new table structure was added in this pass. The important behavior change is that existing `accounting_order_records` are now resynced from payment reconciliation paths instead of only being created at order creation time.

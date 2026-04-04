@@ -156,3 +156,8 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Orders now create a lightweight accounting-ready record in `accounting_order_records`.
 - Admin now has a first accounting view under the orders area.
 - Admin password reset now supports any user, including admins, with step-up confirmation.
+
+
+## Current pass completion update
+- Mobile admin pages received another fit-and-finish pass for installed phone use, including safe-area spacing, sticky action treatment, and a bottom shortcut dock.
+- Accounting summary records now resync from major payment reconciliation paths, reducing stale totals in the starter accounting interface.
