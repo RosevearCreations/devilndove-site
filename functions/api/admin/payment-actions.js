@@ -1,4 +1,5 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+import { syncAccountingForOrder } from "../_lib/accounting.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 
@@ -245,6 +246,8 @@ export async function onRequestPost(context) {
       provider: payment.provider || 'other',
       provider_sync_status: providerSync.provider_sync_status || 'local_only'
     });
+
+    await syncAccountingForOrder(env, Number(payment.order_id || 0), { note: `Admin refund sync for payment ${paymentId}.` }).catch(() => null);
 
     await auditAdminAction(env, request, adminUser, {
       action_type: 'payment_refund',

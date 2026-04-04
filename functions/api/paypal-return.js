@@ -1,3 +1,5 @@
+import { syncAccountingForOrder } from './_lib/accounting.js';
+
 // File: /functions/api/paypal-return.js
 // Brief description: Handles the PayPal approval return flow, captures the PayPal order,
 // updates local payment/order records, and records order history so checkout completion
@@ -161,6 +163,7 @@ export async function onRequestPost(context) {
   `).bind(paymentStatus, nextOrderStatus, order_id).run();
 
   await addHistory(env, order_id, normalizeText(localOrder.order_status).toLowerCase() || 'pending', nextOrderStatus, `PayPal return capture completed for provider order ${paypal_order_id}.`);
+  await syncAccountingForOrder(env, order_id, { note: `PayPal return capture sync for provider order ${paypal_order_id}.` }).catch(() => null);
 
   return json({
     ok: true,

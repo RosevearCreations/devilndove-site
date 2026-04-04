@@ -1,3 +1,5 @@
+import { syncAccountingForOrder } from './_lib/accounting.js';
+
 // File: /functions/api/stripe-webhook.js
 // Brief description: Receives Stripe webhook events, verifies the signature, records idempotent
 // webhook history, and reconciles local payment/order state for Checkout Session and refund events.
@@ -443,6 +445,7 @@ export async function onRequestPost(context) {
     nextOrderStatus,
     `Stripe webhook reconciled event ${eventType || "UNKNOWN"} for payment ${paymentIntentId || sessionId || "unknown"}.`
   );
+  await syncAccountingForOrder(env, Number(order.order_id || 0), { note: `Stripe webhook sync for ${eventType || 'stripe_event'}.` }).catch(() => null);
 
   if (['refunded', 'partially_refunded'].includes(localPaymentStatus) && normalizeText(order.customer_email)) {
     await queueProviderNotification(env, {
