@@ -139,7 +139,6 @@
 <script src="/js/main.js"></script>
 <script>
     const DATA_URL = '/api/creations';
-    const DATA_FALLBACK_URL = '/data/itemsforsale/itemsforsale_items_master.json';
     const FALLBACK_ASSET_ORIGIN = 'https://assets.devilndove.com';
 
     const state = { all: [], filtered: [] };
@@ -174,8 +173,7 @@
 
     function toSearchText(item){
       return [
-        item.title, item.type, item.subcategory, item.notes, item.description,
-        ...(item.materials || []), ...(item.tags || [])
+        item.title || item.name, item.type, item.subcategory, item.notes, item.description || item.summary, ...(item.materials || []), ...(item.tags || [])
       ].filter(Boolean).join(' ').toLowerCase();
     }
 
@@ -279,7 +277,7 @@
       try {
         const res = await fetch(DATA_URL, { cache: 'no-store' });
         const data = await res.json();
-        state.all = (data.items || []).slice().sort((a,b)=>String(a.title || '').localeCompare(String(b.title || '')));
+        state.all = (data.items || []).slice().sort((a,b)=>String(a.title || a.name || '').localeCompare(String(b.title || b.name || '')));
 
         els.statTotal.textContent = String(state.all.length);
         els.statSubs.textContent = String(unique(state.all.map(i => i.subcategory)).length);

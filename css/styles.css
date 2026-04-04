@@ -427,3 +427,37 @@ input[type=file] { padding:12px; }
 .dd-standalone .container{padding-top:max(16px,env(safe-area-inset-top,0px));}
 .dd-touch .btn,.dd-touch .mobile-bottom-dock a{min-height:46px;}
 @media (max-width:720px){.mobile-admin-topline .btn,.mobile-launch-card .btn{width:100%;justify-content:center;}.mobile-bottom-dock{grid-template-columns:repeat(2,minmax(0,1fr));}.mobile-sticky-actions{padding:10px;}}
+
+
+/* Current pass: mobile fit, gallery/creations polish, and admin overflow hardening */
+:root{--safe-bottom:env(safe-area-inset-bottom,0px);--safe-top:env(safe-area-inset-top,0px)}
+body.dd-standalone{padding-bottom:calc(8px + var(--safe-bottom));}
+@media (max-width:900px){
+  .nav .links{gap:8px;flex-wrap:wrap}
+  .nav .links a,.nav .links .btn{min-height:42px}
+  .hero,.card,.panel{overflow-wrap:anywhere}
+  .results-bar,.resource-picker-head,.mobile-admin-topline,.mobile-launch-grid,.admin-quick-link-grid{min-width:0}
+  .table-wrap,table{display:block;max-width:100%;overflow-x:auto}
+  .creation-card .action-row,.mobile-form-actions,.resource-linked-summary,.resource-linked-actions{min-width:0}
+}
+@media (max-width:720px){
+  .container{padding-left:14px;padding-right:14px}
+  .card,.panel,.hero{border-radius:16px}
+  .mobile-bottom-dock{position:fixed;left:12px;right:12px;bottom:calc(8px + var(--safe-bottom));margin:0}
+  .mobile-admin-shell,.mobile-capture-shell{padding-bottom:calc(128px + var(--safe-bottom))}
+  .mobile-sticky-actions{bottom:calc(74px + var(--safe-bottom))}
+  .mobile-sticky-actions .btn{width:100%}
+  .resource-linked-summary .input,.mobile-product-form .input, .mobile-admin-form .input, .mobile-admin-form textarea, .mobile-product-form textarea, .mobile-product-form select{max-width:100%}
+  .creation-card img,.item .thumb img{max-height:clamp(220px,46vw,320px);object-fit:cover}
+}
+@media (max-width:520px){
+  .nav{gap:10px}
+  .nav .brand{min-width:0}
+  .nav .brand img{width:40px;height:40px}
+  .nav .links{width:100%}
+  .nav .links a,.nav .links .btn{flex:1 1 calc(50% - 6px);justify-content:center;text-align:center}
+  .results-bar{gap:10px}
+  .results-bar .btn{width:100%;justify-content:center}
+  .chip-row{gap:6px}
+  .resource-tile-grid,.catalog-grid,.subgrid{grid-template-columns:1fr}
+}
