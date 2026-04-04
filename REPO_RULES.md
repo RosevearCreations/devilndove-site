@@ -1,5 +1,13 @@
 # Repo Rules
 
+## Current pass reminder
+- Keep public pages on centralized API reads where available instead of adding new page-level JSON fallbacks.
+- Keep one H1 per exposed page.
+- Keep docs/schema references synchronized even on passes that are mostly CSS/mobile polish.
+
+
+# Repo Rules
+
 - Keep all schema files and Markdown docs in sync with the current build state.
 - When payment flow changes, update both code and the database and payment documentation together.
 - When media workflow changes, update both admin UI notes and deployment binding notes together.

@@ -1,5 +1,23 @@
 # Development Roadmap
 
+## Current pass completion update
+
+- Continued mobile-first polish with safer standalone spacing, stronger bottom-dock behavior, and less small-screen overlap across the phone admin workflow.
+- Reduced another public JSON duplication point by keeping creations and gallery on the centralized `/api/creations` path instead of page-level JSON assumptions.
+- Improved creation/gallery data normalization so titles, materials, summaries, and asset-origin handling are more consistent whether the source is D1 or the migration fallback.
+- Continued docs/schema synchronization for the current build; no new D1 table was required in this pass.
+
+## Strongest next steps after this pass
+
+1. Finish the remaining mixed JSON/D1 authority cleanup on the last legacy read paths.
+2. Keep tightening mobile/admin layout behavior with real-device testing before stress testing.
+3. Continue deeper payment + accounting convergence so provider events and bookkeeping stay aligned.
+4. Finish the remaining media lifecycle work around generated variants/thumbnails and richer annotation usage.
+5. Continue movie-editor polish while keeping `movie_catalog_enriched.v2.json` as the active base truth.
+
+
+# Development Roadmap
+
 ## Current completed foundations
 
 - auth and session model

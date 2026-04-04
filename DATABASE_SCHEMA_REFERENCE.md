@@ -1,5 +1,11 @@
 # Database Schema Reference
 
+## Current pass note
+This pass did not add a new D1 table. The main repo-side progress was another reduction of public JSON duplication and more mobile/admin CSS hardening. Existing schema references remain current for the codebase after this pass.
+
+
+# Database Schema Reference
+
 ## Core auth
 
 ### users

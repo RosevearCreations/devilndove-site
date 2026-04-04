@@ -1,5 +1,13 @@
 # AI Context
 
+## Current pass priorities that were moved forward
+- Mobile/admin CSS polish for real phone use.
+- Another public JSON-to-API convergence step through `/api/creations`.
+- Docs/schema synchronization without claiming a new schema change that did not happen.
+
+
+# AI Context
+
 ## Current phase
 
 This repo is in the payment, media, inventory, and public SEO hardening phase after the main storefront, auth, and admin foundations were already built.

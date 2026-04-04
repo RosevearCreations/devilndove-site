@@ -1,3 +1,11 @@
+# Devil n Dove Site
+
+## Current pass snapshot
+- Mobile/admin shell was tightened again for smaller screens and installed-app use.
+- Public creations and gallery pages now lean on the centralized `/api/creations` path instead of page-level JSON source assumptions.
+- No new schema expansion was required in this pass; docs and schema references were refreshed to stay aligned.
+
+
 # Devil n Dove Website
 
 Devil n Dove is a public website, storefront, member area, and admin management system for the workshop.

@@ -1,3 +1,17 @@
+# NEW CHAT STATUS
+
+## Current pass status
+- Latest pass focused on mobile/admin CSS fit, centralized creations/gallery authority, and docs/schema refresh.
+- No new D1 table was introduced in this pass.
+- Public creations/gallery pages now lean on `/api/creations` as the single page-facing source, while the API itself still keeps the controlled D1-first + migration-fallback behavior.
+- Mobile shell spacing, bottom dock behavior, and sticky action treatment were tightened again for phone-first admin use.
+
+## Best next development lane
+1. Finish the remaining mixed JSON/D1 read-path cleanup.
+2. Continue payment/accounting convergence and webhook hardening.
+3. Continue media lifecycle completion, especially real variant generation.
+4. Keep the movie editor and movie overlay path stable without forcing full D1 authority too early.
+
 # New Chat Status
 
 ## Current handoff summary

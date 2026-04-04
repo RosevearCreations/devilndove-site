@@ -1,5 +1,12 @@
 # Repo Base Guide
 
+## Current pass note
+- `creations/index.html` and `gallery/index.html` should treat `/api/creations` as the page-facing data source.
+- The API keeps the D1-first plus controlled fallback logic, which is the safer place to hold temporary migration behavior.
+
+
+# Repo Base Guide
+
 ## Purpose
 
 This repo runs the Devil n Dove website as:

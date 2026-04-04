@@ -1,5 +1,13 @@
 # Project Brain
 
+## Current pass
+- Keep pushing public reads toward centralized API-first authority while preserving safe migration fallback inside the API layer instead of in the page templates.
+- Keep the phone/admin workflow smooth enough for repeated workshop use: fewer overlaps, safer sticky actions, stronger dock spacing, and cleaner installed-app behavior.
+- Avoid forcing full D1 authority in the movie workflow until the enrichment overlay path is fully stable.
+
+
+# Project Brain
+
 ## Core mental model
 
 This repo is now a combined:

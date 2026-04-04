@@ -1,3 +1,11 @@
+# SANITY HEALTH CHECK
+
+## Current pass summary
+- Mobile/admin shell: improved again for smaller screens and installed-app safe-area handling.
+- Public creations/gallery: moved further toward centralized API-first behavior.
+- Schema drift: no new schema expansion in this pass; schema docs refreshed to match.
+- H1 guardrail: exposed pages should still remain at one H1 each.
+
 # Sanity / Health Check
 
 ## Current build status

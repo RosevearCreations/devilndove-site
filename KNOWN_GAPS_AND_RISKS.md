@@ -2,6 +2,26 @@
 
 ## Current pass focus and what was actually improved
 
+This pass focused on closing smaller but still meaningful readiness gaps before stress testing: another mobile CSS fit pass, another reduction of public JSON duplication, and cleaner consistency between centralized API reads and the storefront pages that render them.
+
+### What improved in this pass
+- Mobile/admin layout was tightened again with stronger small-screen wrapping, safer sticky action spacing, and better installed-app dock behavior.
+- Public creations and gallery pages now rely on the centralized `/api/creations` authority path instead of carrying their own page-level JSON source assumptions.
+- Creation records now normalize title/name, materials, summaries, and image origin data more consistently whether the current source is D1-backed catalog data or the temporary migration fallback.
+- Docs/schema references were synchronized again so the handoff reflects a CSS/mobile/API-authority pass rather than a schema-expansion pass.
+
+## Still honestly open after this pass
+- Final mixed JSON/D1 authority cleanup still remains in some movie and legacy admin/read paths.
+- Real generated media thumbnails/variants still need image-processing infrastructure rather than URL hints and metadata alone.
+- Full provider-confirmed reconciliation beyond the current supported flows still needs more payment-provider coverage.
+- Trusted movie enrichment still depends on the external enrichment workflow rather than a finished in-repo provider integration.
+- Real-device stress testing is still needed to prove the newer mobile/admin shell under longer sessions.
+
+
+# Known Gaps and Risks
+
+## Current pass focus and what was actually improved
+
 This pass concentrated on working down the open risk list in order instead of skipping ahead. The goal was to reduce operational risk with real code and schema changes, while staying honest about what still requires provider access, production credentials, or later UI polish.
 
 ### What improved in this pass
