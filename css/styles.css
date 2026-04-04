@@ -411,3 +411,19 @@ input[type=file] { padding:12px; }
 @media (max-width: 560px) {
   #adminAccountingMount .admin-summary-grid { grid-template-columns: 1fr; }
 }
+
+
+/* Current pass: mobile app fit-and-finish */
+.mobile-admin-shell,.mobile-capture-shell{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));}
+.mobile-app-panel,.mobile-capture-card{scroll-margin-top:90px;}
+.mobile-launch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;}
+.mobile-launch-card{display:grid;gap:10px;border:1px solid var(--border);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);min-width:0;}
+.mobile-admin-topline{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;}
+.mobile-bottom-dock{position:sticky;bottom:0;z-index:45;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:10px;border:1px solid var(--border);border-radius:18px;background:rgba(17,24,39,.94);backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.24);margin-top:18px;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 4px);}
+.mobile-bottom-dock a{display:flex;align-items:center;justify-content:center;text-align:center;min-height:44px;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#fff;font-weight:700;text-decoration:none;}
+.mobile-bottom-dock a.is-active{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22);}
+.mobile-sticky-actions{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);z-index:30;padding:12px;border-radius:16px;background:linear-gradient(180deg,rgba(17,24,39,.92),rgba(17,24,39,.98));border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 26px rgba(0,0,0,.22);}
+.dd-standalone .nav{position:sticky;top:0;z-index:35;padding-top:calc(10px + env(safe-area-inset-top,0px));}
+.dd-standalone .container{padding-top:max(16px,env(safe-area-inset-top,0px));}
+.dd-touch .btn,.dd-touch .mobile-bottom-dock a{min-height:46px;}
+@media (max-width:720px){.mobile-admin-topline .btn,.mobile-launch-card .btn{width:100%;justify-content:center;}.mobile-bottom-dock{grid-template-columns:repeat(2,minmax(0,1fr));}.mobile-sticky-actions{padding:10px;}}
