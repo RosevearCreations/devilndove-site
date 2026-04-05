@@ -522,3 +522,8 @@ The following files were not found on active repo paths and were renamed with an
 - Full role-by-role permission granularity still remains beyond the current admin/member split.
 - Mixed JSON/D1 authority still remains in some movie and legacy admin/read paths.
 - Trusted movie enrichment still depends on the external enrichment workflow.
+
+## Current pass addendum
+- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
+- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
+- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.

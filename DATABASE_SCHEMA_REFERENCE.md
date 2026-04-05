@@ -335,3 +335,8 @@ This pass did not introduce new D1 tables or column additions. The main repo cha
 
 ## Current pass note
 - No new table structure was added in this pass. The important behavior change is that existing `accounting_order_records` are now resynced from payment reconciliation paths instead of only being created at order creation time.
+
+## Current pass addendum
+- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
+- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
+- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.

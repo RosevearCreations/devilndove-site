@@ -238,3 +238,8 @@
 - Payment returns, Stripe webhooks, PayPal webhooks, and admin refund actions now resync `accounting_order_records` so the starter accounting layer moves closer to live order/payment state instead of staying order-create only.
 - Mobile admin capture and inventory pages now have a stronger installed-app feel with a bottom dock, safer sticky actions, and better safe-area behavior on phones.
 - Remaining strongest next steps are now worker-style webhook automation, thumbnail generation, deeper role granularity, and the larger accounting backend rather than basic phone-shell or order-shadow setup.
+
+## Current pass addendum
+- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
+- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
+- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.
