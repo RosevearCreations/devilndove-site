@@ -22,7 +22,7 @@
       <div class="links">
         <a href="/">Home</a>
         <a href="/shop/">Shop</a>
-        <a href="/members/">Members</a>
+        <a href="/members/?admin_preview=1">Members</a>
         <a href="/admin/">Admin</a>
         <button class="btn" data-nav-logout="" type="button">Logout</button>
       </div>
@@ -51,6 +51,7 @@
           <a class="btn" href="#moviesSection">Movies</a>
           <a class="btn" href="#analyticsSection">Analytics</a>
           <a class="btn" href="#ordersSection">Orders</a>
+          <a class="btn" href="/members/?admin_preview=1">Preview Member View</a>
           <button class="btn" id="refreshDashboardSummaryButton" type="button">Refresh Summary</button>
         </div>
       </div>
@@ -74,7 +75,7 @@
       </div>
     </div>
 
-    <div class="card" style="margin-top:18px">
+    <div class="card" data-admin-panel data-panel-open style="margin-top:18px">
       <h2 style="margin-top:0">Dashboard Summary</h2>
       <div class="small" id="dashboardSummaryMessage" style="display:none;margin-bottom:10px"></div>
       <div class="admin-summary-grid">
@@ -90,13 +91,13 @@
       </div>
     </div>
 
-    <div class="card" id="usersSection" style="margin-top:18px">
+    <div class="card" data-admin-panel id="usersSection" style="margin-top:18px">
       <h2 style="margin-top:0">Users</h2>
       <p class="small">User management tools remain in place through the existing admin modules.</p>
       <div id="usersAdminMount"></div>
     </div>
 
-    <div class="card" id="accessTiersSection" style="margin-top:18px">
+    <div class="card" data-admin-panel id="accessTiersSection" style="margin-top:18px">
       <h2 style="margin-top:0">Access Tiers</h2>
       <p class="small">
         Business/content access tiers stay separate from system roles like member and admin.
@@ -104,7 +105,7 @@
       <div id="accessTiersAdminMount"></div>
     </div>
 
-    <div class="card" id="productsSection" style="margin-top:18px">
+    <div class="card" data-admin-panel id="productsSection" style="margin-top:18px">
       <div id="productSeoAdminMount"></div>
       <div id="productImageAnnotationAdminMount"></div>
       <div id="siteInventoryAdminMount"></div>
@@ -132,7 +133,7 @@
       </div>
     </div>
 
-    <div class="card" id="moviesSection" style="margin-top:18px">
+    <div class="card" data-admin-panel id="moviesSection" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap">
         <div>
           <h2 style="margin-top:0">Movies</h2>
@@ -336,7 +337,7 @@
       </div>
     </div>
 
-    <div class="card" id="analyticsSection" style="margin-top:18px">
+    <div class="card" data-admin-panel id="analyticsSection" style="margin-top:18px">
       <h2 style="margin-top:0">Analytics, Visitors, Security &amp; Webhooks</h2>
       <p class="small">Monitor visitors, page flows, abandoned carts, low-stock items, and webhook replay/review status.</p>
       <div id="adminLiveActivityMount"></div>
@@ -344,7 +345,7 @@
       <div id="webhookEventsAdminMount"></div>
     </div>
 
-    <div class="card" id="ordersSection" style="margin-top:18px">
+    <div class="card" data-admin-panel id="ordersSection" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
         <div>
           <h2 style="margin:0">Orders</h2>
@@ -474,5 +475,6 @@
   <script src="/public/js/admin-webhook-events.js"></script>
   <script src="/public/js/admin-live-activity.js"></script>
   <script src="/public/js/admin-movie-catalog.js"></script>
+  <script src="/public/js/admin-panel-routing.js"></script>
 </body>
 </html>

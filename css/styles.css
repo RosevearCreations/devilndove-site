@@ -461,3 +461,22 @@ body.dd-standalone{padding-bottom:calc(8px + var(--safe-bottom));}
   .chip-row{gap:6px}
   .resource-tile-grid,.catalog-grid,.subgrid{grid-template-columns:1fr}
 }
+
+
+/* Admin panel accordion and tighter admin/mobile polish */
+.admin-panel > h2,.admin-panel > div > h2{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.admin-panel-toggle{margin-left:auto;white-space:nowrap;}
+.admin-panel.is-collapsed{opacity:.98;}
+.admin-panel-body[hidden]{display:none !important;}
+.admin-panel .admin-panel-body{display:grid;gap:14px;}
+.admin-shell .grid.cols-3{align-items:start;}
+.admin-shell .card{scroll-margin-top:90px;}
+#membersAdminPreviewNote{border-left:4px solid var(--brand,#7c3aed);}
+@media (max-width: 860px){
+  .admin-panel-toggle{width:100%;justify-content:center;}
+  .admin-panel > h2,.admin-panel > div > h2{align-items:flex-start;}
+}
+@media (max-width: 720px){
+  .admin-shell .hero,.admin-shell .nav,.admin-shell .card{overflow-wrap:anywhere;}
+  .admin-shell .admin-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
