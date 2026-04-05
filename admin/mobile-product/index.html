@@ -34,33 +34,6 @@
     </div>
 
     <div id="mobileProductAccessMessage" class="card" style="display:none;margin-bottom:16px"></div>
-    <section class="card mobile-admin-card mobile-app-panel" style="margin-bottom:16px">
-      <div class="mobile-admin-topline">
-        <div>
-          <h2 style="margin:0">Artist phone workflow</h2>
-          <div class="small">Install the app once, then use quick capture and inventory intake as your workshop shortcuts.</div>
-        </div>
-        <a class="btn" href="/admin/mobile-inventory/">Inventory intake</a>
-      </div>
-      <div class="mobile-launch-grid">
-        <div class="mobile-launch-card">
-          <strong>Install Devil n Dove</strong>
-          <div class="small">Use the install button for a cleaner icon and app-style launch from your phone.</div>
-          <button class="btn" id="ddInstallAppButton" type="button">Install app</button>
-        </div>
-        <div class="mobile-launch-card">
-          <strong>Inventory intake</strong>
-          <div class="small">Add tools or supplies, use the barcode helper, and queue reorder details.</div>
-          <a class="btn" href="/admin/mobile-inventory/">Open intake page</a>
-        </div>
-        <div class="mobile-launch-card">
-          <strong>Back to admin</strong>
-          <div class="small">Use the full admin dashboard later for review, edits, orders, and accounting.</div>
-          <a class="btn" href="/admin/">Open full admin</a>
-        </div>
-      </div>
-      <div class="small" id="ddInstallMessage">Install Devil n Dove on your phone for a cleaner app icon and quicker workshop access.</div>
-    </section>
     <div class="card mobile-capture-card">
       <div class="mobile-capture-topline">
         <div>
@@ -169,21 +142,13 @@
         <div id="mobileResourceGrid" class="resource-tile-grid"></div>
 
         <div class="small" style="margin-top:8px;margin-bottom:4px">Only one clue is enough: a photo, a quick name, or a temporary identifier. Everything can stay in draft mode until you finish the listing later.</div>
-        <div class="mobile-form-actions mobile-sticky-actions">
+        <div class="mobile-form-actions">
           <button class="btn primary" type="submit">Save partial draft</button>
           <button class="btn" type="button" id="mobileResetForNextButton">Clear for next product</button>
         </div>
       </form>
     </div>
-  
-    <nav class="mobile-bottom-dock" aria-label="Phone admin shortcuts">
-      <a href="/admin/mobile-product/" class="is-active">Capture</a>
-      <a href="/admin/mobile-inventory/">Inventory</a>
-      <a href="/admin/">Admin</a>
-      <a href="/socials/">Socials</a>
-      <a href="/shop/">Store</a>
-      <a href="/creations/">Artist</a>
-    </nav>
+  </div>
 
   <script src="/js/main.js"></script>
   <script src="/public/js/auth.js"></script>
