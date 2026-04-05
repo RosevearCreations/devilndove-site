@@ -101,6 +101,19 @@
     return !!getToken();
   }
 
+  function shouldClearAuthFromResponse(url, response) {
+    const path = String(url || '');
+    if (!response || response.status !== 401) return false;
+    if (path.includes('/api/auth/login')) return false;
+    if (path.includes('/api/auth/logout')) return false;
+    return (
+      path.includes('/api/auth/me')
+      || path.includes('/api/auth/session-info')
+      || path.includes('/api/auth/change-password')
+      || path.includes('/api/auth/logout-all')
+    );
+  }
+
   async function apiFetch(url, options = {}) {
     const token = getToken();
     const headers = new Headers(options.headers || {});
@@ -109,7 +122,7 @@
     }
     if (token) headers.set('Authorization', `Bearer ${token}`);
     const response = await fetch(url, { ...options, headers, credentials: 'same-origin' });
-    if (response.status === 401 && !String(url).includes('/api/auth/login')) {
+    if (shouldClearAuthFromResponse(url, response)) {
       clearAuth();
       document.dispatchEvent(new CustomEvent('dd:auth-changed', { detail: { ok: false, logged_in: false, user: null } }));
     }

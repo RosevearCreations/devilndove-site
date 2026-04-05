@@ -6,6 +6,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const membersSectionEl = document.getElementById("membersSection");
   const accessMessageEl = document.getElementById("membersAccessMessage");
+  const adminPreviewNoteEl = document.getElementById("membersAdminPreviewNote");
 
   if (!window.DDAuth) return;
 
@@ -34,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resolved = true;
     showMembersSection(true);
     setAccessMessage("");
+    if (adminPreviewNoteEl) adminPreviewNoteEl.style.display = String(user?.role || "").toLowerCase() === "admin" ? "block" : "none";
     document.dispatchEvent(new CustomEvent("dd:member-access-granted", {
       detail: {
         ok: true,
