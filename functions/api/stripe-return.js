@@ -1,5 +1,3 @@
-import { syncAccountingForOrder } from './_lib/accounting.js';
-
 // File: /functions/api/stripe-return.js
 // Brief description: Finalizes a Stripe Checkout return by retrieving the Checkout Session,
 // reconciling local payment and order state, and recording history so the confirmation page
@@ -149,7 +147,6 @@ export async function onRequestPost(context) {
   `).bind(localPaymentStatus, nextOrderStatus, orderId).run();
 
   await addHistory(db, orderId, normalizeText(localOrder.order_status).toLowerCase() || 'pending', nextOrderStatus, `Stripe return finalize processed for checkout session ${sessionId}.`);
-  await syncAccountingForOrder(env, orderId, { note: `Stripe return finalize sync for checkout session ${sessionId}.` }).catch(() => null);
 
   return json({
     ok: true,

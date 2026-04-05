@@ -35,9 +35,7 @@ export async function onRequestGet(context) {
     publish_ready_products_count: await safeCount(db, `SELECT COUNT(*) AS count FROM products WHERE is_ready_for_storefront = 1 AND review_status IN ('approved','published')`),
     purchase_order_drafts_count: await safeCount(db, `SELECT COUNT(*) AS count FROM supplier_purchase_orders WHERE status IN ('draft','submitted','ordered')`),
     product_build_risk_count: await safeCount(db, `SELECT COUNT(DISTINCT p.product_id) AS count FROM products p INNER JOIN product_resource_links prl ON prl.product_id = p.product_id INNER JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key WHERE (COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0) + COALESCE(sii.incoming_quantity,0)) < COALESCE(prl.quantity_used,0)`),
-    duplicate_media_assets_count: await safeCount(db, `SELECT COUNT(*) AS count FROM (SELECT public_url FROM media_assets WHERE deleted_at IS NULL AND COALESCE(public_url,'') != '' GROUP BY public_url HAVING COUNT(*) > 1)`),
-    accounting_records_count: await safeCount(db, `SELECT COUNT(*) AS count FROM accounting_order_records`),
-    accounting_open_records_count: await safeCount(db, `SELECT COUNT(*) AS count FROM accounting_order_records WHERE entry_status IN ('open','partially_paid')`)
+    duplicate_media_assets_count: await safeCount(db, `SELECT COUNT(*) AS count FROM (SELECT public_url FROM media_assets WHERE deleted_at IS NULL AND COALESCE(public_url,'') != '' GROUP BY public_url HAVING COUNT(*) > 1)`)
   };
 
   return json({

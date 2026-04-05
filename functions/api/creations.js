@@ -14,38 +14,22 @@ function normalizeText(value) { return String(value || '').trim(); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
 function slugify(value) { return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
 
-function normalizeMaterials(source) {
-  if (Array.isArray(source?.materials)) return source.materials.filter(Boolean).map((value) => normalizeText(value));
-  const single = normalizeText(source?.material || source?.materials || '');
-  return single ? [single] : [];
-}
-
 function normalizeCreationFromCatalog(row) {
   let source = {};
   try { source = row.source_record_json ? JSON.parse(row.source_record_json) : {}; } catch { source = {}; }
-  const title = row.name || source.title || source.name || 'Creation';
-  const materials = normalizeMaterials(source);
   return Object.assign({}, source, {
     id: source.id || row.source_key || row.catalog_item_id,
-    title,
-    name: title,
-    slug: row.slug || source.slug || slugify(title || 'creation'),
+    name: row.name || source.name || source.title || 'Creation',
+    slug: row.slug || source.slug || slugify(row.name || source.name || source.title || 'creation'),
     section: row.category || source.section || 'Featured creation',
-    category: row.category || source.category || source.section || 'Featured creation',
     type: row.subcategory || row.item_type || source.type || '',
-    subcategory: row.subcategory || source.subcategory || source.type || '',
-    item_type: row.item_type || source.item_type || source.type || '',
     image: row.image_url || source.image || source.image_url || source.src || '',
     image_url: row.image_url || source.image || source.image_url || source.src || '',
-    description: row.short_description || source.description || source.summary || '',
-    summary: source.summary || row.short_description || source.description || '',
+    description: row.short_description || source.description || '',
     caption: row.notes || source.caption || source.description || source.alt || '',
     notes: row.notes || source.notes || '',
-    materials,
-    material: materials[0] || '',
-    tags: Array.isArray(source.tags) ? source.tags : [],
-    status: normalizeText(source.status || 'active') || 'active',
-    shop_url: normalizeText(source.shop_url || ''),
+    material: source.material || source.materials || '',
+    tags: source.tags || [],
     updated_at: row.updated_at || null,
     source: 'catalog_items'
   });
@@ -57,23 +41,14 @@ async function loadJsonFallback(request) {
     if (!response.ok) return [];
     const data = await response.json().catch(() => null);
     const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
-    return items.map((item, index) => {
-      const title = item.title || item.name || `Creation ${index + 1}`;
-      const materials = normalizeMaterials(item);
-      return Object.assign({}, item, {
-        id: item.id || item.slug || `${slugify(title)}-${index + 1}`,
-        title,
-        name: title,
-        slug: item.slug || slugify(title || `creation-${index + 1}`),
-        image: item.image || item.image_url || item.src || '',
-        image_url: item.image || item.image_url || item.src || '',
-        materials,
-        material: materials[0] || '',
-        category: item.category || item.section || 'Featured creation',
-        status: normalizeText(item.status || 'active') || 'active',
-        source: 'json'
-      });
-    });
+    return items.map((item, index) => Object.assign({}, item, {
+      id: item.id || item.slug || `${slugify(item.name || item.title || 'creation')}-${index + 1}`,
+      name: item.name || item.title || `Creation ${index + 1}`,
+      slug: item.slug || slugify(item.name || item.title || `creation-${index + 1}`),
+      image: item.image || item.image_url || item.src || '',
+      image_url: item.image || item.image_url || item.src || '',
+      source: 'json'
+    }));
   } catch {
     return [];
   }
@@ -141,8 +116,6 @@ export async function onRequestGet(context) {
       query,
       authority: items[0]?.source === 'catalog_items' ? 'd1' : 'json_fallback'
     },
-    asset_origin: 'https://assets.devilndove.com',
-    asset_prefix: 'itemsforsale',
     filter_groups
   });
 }

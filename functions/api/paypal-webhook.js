@@ -1,5 +1,3 @@
-import { syncAccountingForOrder } from './_lib/accounting.js';
-
 // File: /functions/api/paypal-webhook.js
 // Brief description: Receives PayPal webhook events, verifies the signature, records idempotent
 // webhook history, and reconciles local payment/order state for payment and refund events.
@@ -288,7 +286,6 @@ export async function onRequestPost(context) {
     nextOrderStatus,
     `PayPal webhook reconciled event ${eventType || "UNKNOWN"} for provider order ${providerOrderId}.`
   );
-  await syncAccountingForOrder(env, Number(order.order_id || 0), { note: `PayPal webhook sync for ${eventType || 'paypal_event'}.` }).catch(() => null);
 
   await markWebhookEvent(env, webhookEvent.webhook_event_id, "processed", {
     related_order_id: Number(order.order_id || 0),
