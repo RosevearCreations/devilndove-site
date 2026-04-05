@@ -58,7 +58,30 @@ export async function onRequestGet(context) {
     GROUP BY p.product_id
     ORDER BY p.sort_order ASC, p.created_at DESC, p.product_id DESC
   `;
-  const result = bindings.length ? await db.prepare(sql).bind(...bindings).all() : await db.prepare(sql).all();
+  let result;
+  try {
+    result = bindings.length ? await db.prepare(sql).bind(...bindings).all() : await db.prepare(sql).all();
+  } catch (error) {
+    const fallbackSql = `
+      SELECT p.*, tc.code AS tax_class_code, tc.name AS tax_class_name, tc.tax_rate AS tax_rate,
+             ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override,
+             COUNT(DISTINCT pi.product_image_id) AS image_count,
+             0 AS linked_resource_count,
+             0 AS linked_resource_cost_cents,
+             0 AS missing_cost_links,
+             NULL AS buildable_units_from_resources,
+             0 AS resource_shortage_links,
+             CASE WHEN COALESCE(p.inventory_tracking,0)=1 AND COALESCE(p.inventory_quantity,0) <= 2 THEN 1 ELSE 0 END AS low_stock_flag
+      FROM products p
+      LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id
+      LEFT JOIN product_seo ps ON ps.product_id = p.product_id
+      LEFT JOIN product_images pi ON pi.product_id = p.product_id
+      WHERE ${clauses.join(' AND ')}
+      GROUP BY p.product_id
+      ORDER BY p.sort_order ASC, p.created_at DESC, p.product_id DESC
+    `;
+    result = bindings.length ? await db.prepare(fallbackSql).bind(...bindings).all() : await db.prepare(fallbackSql).all();
+  }
   const rawProducts = Array.isArray(result?.results) ? result.results : [];
   const products = rawProducts.map((row) => {
     const linkedResourceCost = Number(row.linked_resource_cost_cents || 0);

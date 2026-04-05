@@ -13,6 +13,14 @@ async function requireAdmin(request, env) {
 function normalizeSlug(value) {
   return String(value || "").trim().toLowerCase().replace(/['"]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
+function parseProductNumberValue(value) {
+  const normalized = String(value == null ? '' : value).trim().toUpperCase();
+  if (!normalized) return null;
+  const stripped = normalized.startsWith('DD') ? normalized.slice(2) : normalized;
+  const parsed = Number(stripped);
+  return Number.isInteger(parsed) ? parsed : NaN;
+}
+
 function normalizeImageUrls(imageUrls) {
   if (!Array.isArray(imageUrls)) return [];
   return imageUrls.map((url) => String(url || "").trim()).filter(Boolean).slice(0, 5);
@@ -39,7 +47,7 @@ export async function onRequestPost(context) {
   try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON body." }, 400); }
 
   const product_id = Number(body.product_id);
-  const product_number = body.product_number == null || body.product_number === "" ? null : Number(body.product_number);
+  const product_number = parseProductNumberValue(body.product_number);
   const name = String(body.name || "").trim();
   const slug = normalizeSlug(body.slug || body.name || "");
   const sku = String(body.sku || "").trim() || null;
