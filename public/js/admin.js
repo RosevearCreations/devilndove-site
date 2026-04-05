@@ -21,12 +21,38 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+  function humanizePanelName(value) {
+    const text = String(value || '').trim();
+    if (!text) return 'Panel';
+    return text
+      .replace(/Section$/i, '')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, (ch) => ch.toUpperCase());
+  }
+
+  function getDirectPanelHeading(section) {
+    return Array.from(section.children).find((child) => child.tagName === 'H2') || null;
+  }
+
+  function ensurePanelHeading(section) {
+    let heading = getDirectPanelHeading(section);
+    if (heading) return heading;
+    const generated = document.createElement('h2');
+    generated.style.marginTop = '0';
+    generated.textContent = humanizePanelName(section.getAttribute('data-admin-panel-title') || section.id || 'Panel');
+    section.insertBefore(generated, section.firstChild || null);
+    return generated;
+  }
+
   function setupPanelAccordion() {
     const sections = Array.from(document.querySelectorAll('[data-admin-panel]'));
     if (!sections.length) return;
 
     sections.forEach((section, index) => {
-      const heading = section.querySelector('h2');
+      const heading = ensurePanelHeading(section);
       if (!heading) return;
       section.classList.add('admin-panel');
       let toggle = heading.querySelector('.admin-panel-toggle');

@@ -12,6 +12,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let resolved = false;
 
+  function isAdminPreviewMode() {
+    try {
+      const params = new URLSearchParams(window.location.search || "");
+      return params.get("admin_preview") === "1";
+    } catch {
+      return false;
+    }
+  }
+
   function showMembersSection(show) {
     if (!membersSectionEl) return;
     membersSectionEl.style.display = show ? "" : "none";
@@ -53,6 +62,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   showMembersSection(false);
+
+  const cachedUser = window.DDAuth.getStoredUser ? window.DDAuth.getStoredUser() : null;
+  const cachedRole = String(cachedUser?.role || '').trim().toLowerCase();
+
+  if (isAdminPreviewMode() && cachedUser && cachedRole === 'admin') {
+    handleAllowed(cachedUser);
+  }
 
   if (!window.DDAuth.isLoggedIn()) {
     handleDenied();
