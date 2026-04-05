@@ -1,11 +1,5 @@
 # Database Schema Reference
 
-## Current pass note
-This pass did not add a new D1 table. The main repo-side progress was another reduction of public JSON duplication and more mobile/admin CSS hardening. Existing schema references remain current for the codebase after this pass.
-
-
-# Database Schema Reference
-
 ## Core auth
 
 ### users
@@ -308,35 +302,3 @@ Admin movie write routes should therefore ensure column compatibility before ins
 
 ### products partial-intake note
 Products now need to support a real partial-draft intake path for phone-first capture and CSV-first bulk entry. Publish-time validation can remain stricter, but early draft-save validation must stay light.
-
-- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
-- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
-- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
-- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
-
-## Current pass addendum
-- Normalized public route links away from explicit `/index.html` navigation and added a `_redirects` file so direct `.../index.html` requests resolve more cleanly alongside directory routes.
-- Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
-- Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
-- This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
-
-
-## Current pass note
-This pass did not introduce new D1 tables or column additions. The main repo changes were:
-- stronger browser/app security defaults through `_headers`
-- tighter service-worker behavior around sensitive routes
-- mobile/admin UI expansion with `/admin/mobile-inventory/`
-- repo cleanup using `RM_` prefixes for duplicate/unlinked files
-
-
-## Current pass addendum
-- Added `accounting_order_records` as a lightweight order-linked accounting shadow table. It is not the final accounting backend, but it preserves booked totals, outstanding amounts, and tax liability from the moment an order is created.
-
-
-## Current pass note
-- No new table structure was added in this pass. The important behavior change is that existing `accounting_order_records` are now resynced from payment reconciliation paths instead of only being created at order creation time.
-
-## Current pass addendum
-- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
-- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
-- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.

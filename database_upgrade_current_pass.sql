@@ -206,33 +206,3 @@ CREATE TABLE IF NOT EXISTS supplier_purchase_order_items (
   FOREIGN KEY (supplier_purchase_order_id) REFERENCES supplier_purchase_orders(supplier_purchase_order_id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_supplier_purchase_order_items_po ON supplier_purchase_order_items(supplier_purchase_order_id);
-
-
--- Basic accounting shadow records created when checkout orders are created.
-CREATE TABLE IF NOT EXISTS accounting_order_records (
-  accounting_order_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  order_id INTEGER NOT NULL UNIQUE,
-  order_number TEXT NOT NULL,
-  entry_status TEXT NOT NULL DEFAULT 'open' CHECK (entry_status IN ('open','partially_paid','paid','refunded','cancelled','archived')),
-  customer_name TEXT,
-  customer_email TEXT,
-  currency TEXT NOT NULL DEFAULT 'CAD',
-  subtotal_cents INTEGER NOT NULL DEFAULT 0,
-  discount_cents INTEGER NOT NULL DEFAULT 0,
-  shipping_cents INTEGER NOT NULL DEFAULT 0,
-  tax_cents INTEGER NOT NULL DEFAULT 0,
-  total_cents INTEGER NOT NULL DEFAULT 0,
-  amount_paid_cents INTEGER NOT NULL DEFAULT 0,
-  amount_outstanding_cents INTEGER NOT NULL DEFAULT 0,
-  revenue_cents INTEGER NOT NULL DEFAULT 0,
-  tax_liability_cents INTEGER NOT NULL DEFAULT 0,
-  source_order_status TEXT,
-  source_payment_status TEXT,
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_order_records_status ON accounting_order_records(entry_status, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_order_records_customer_email ON accounting_order_records(customer_email, created_at DESC);
