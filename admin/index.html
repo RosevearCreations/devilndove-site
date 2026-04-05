@@ -75,7 +75,7 @@
       </div>
     </div>
 
-    <div class="card" data-admin-panel data-panel-open style="margin-top:18px">
+    <div class="card" data-admin-panel data-admin-panel-title="Dashboard Summary" data-panel-open style="margin-top:18px">
       <h2 style="margin-top:0">Dashboard Summary</h2>
       <div class="small" id="dashboardSummaryMessage" style="display:none;margin-bottom:10px"></div>
       <div class="admin-summary-grid">
@@ -91,13 +91,13 @@
       </div>
     </div>
 
-    <div class="card" data-admin-panel id="usersSection" style="margin-top:18px">
+    <div class="card" data-admin-panel data-admin-panel-title="Users" id="usersSection" style="margin-top:18px">
       <h2 style="margin-top:0">Users</h2>
       <p class="small">User management tools remain in place through the existing admin modules.</p>
       <div id="usersAdminMount"></div>
     </div>
 
-    <div class="card" data-admin-panel id="accessTiersSection" style="margin-top:18px">
+    <div class="card" data-admin-panel data-admin-panel-title="Access Tiers" id="accessTiersSection" style="margin-top:18px">
       <h2 style="margin-top:0">Access Tiers</h2>
       <p class="small">
         Business/content access tiers stay separate from system roles like member and admin.
@@ -105,14 +105,7 @@
       <div id="accessTiersAdminMount"></div>
     </div>
 
-    <div class="card" data-admin-panel id="productsSection" style="margin-top:18px">
-      <div id="productSeoAdminMount"></div>
-      <div id="productImageAnnotationAdminMount"></div>
-      <div id="siteInventoryAdminMount"></div>
-      <div id="catalogSyncAdminMount"></div>
-      <div id="notificationAdminMount"></div>
-      <div id="appSettingsAdminMount"></div>
-
+    <div class="card" data-admin-panel data-admin-panel-title="Products" id="productsSection" style="margin-top:18px">
       <h2 style="margin-top:0">Products</h2>
       <p class="small">Product management remains handled by the existing modular admin scripts.</p>
 
@@ -121,6 +114,12 @@
       <div id="productResourcesAdminMount"></div>
       <div id="productStockReportMount"></div>
       <div id="mediaLibraryAdminMount"></div>
+      <div id="productSeoAdminMount"></div>
+      <div id="productImageAnnotationAdminMount"></div>
+      <div id="siteInventoryAdminMount"></div>
+      <div id="catalogSyncAdminMount"></div>
+      <div id="notificationAdminMount"></div>
+      <div id="appSettingsAdminMount"></div>
 
       <div class="admin-quick-link-grid">
         <div class="admin-quick-link-card">
@@ -133,7 +132,7 @@
       </div>
     </div>
 
-    <div class="card" data-admin-panel id="moviesSection" style="margin-top:18px">
+    <div class="card" data-admin-panel data-admin-panel-title="Movies" id="moviesSection" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap">
         <div>
           <h2 style="margin-top:0">Movies</h2>
@@ -337,7 +336,7 @@
       </div>
     </div>
 
-    <div class="card" data-admin-panel id="analyticsSection" style="margin-top:18px">
+    <div class="card" data-admin-panel data-admin-panel-title="Analytics, Visitors, Security & Webhooks" id="analyticsSection" style="margin-top:18px">
       <h2 style="margin-top:0">Analytics, Visitors, Security &amp; Webhooks</h2>
       <p class="small">Monitor visitors, page flows, abandoned carts, low-stock items, and webhook replay/review status.</p>
       <div id="adminLiveActivityMount"></div>
@@ -345,7 +344,7 @@
       <div id="webhookEventsAdminMount"></div>
     </div>
 
-    <div class="card" data-admin-panel id="ordersSection" style="margin-top:18px">
+    <div class="card" data-admin-panel data-admin-panel-title="Orders & Accounting" id="ordersSection" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
         <div>
           <h2 style="margin:0">Orders</h2>
