@@ -12,7 +12,7 @@ const CORE_ASSETS = [
   '/manifest.webmanifest',
   '/socials/'
 ];
-const NO_CACHE_PATH_PREFIXES = ['/admin/', '/members/', '/login/', '/register/', '/account-help/', '/functions/api/'];
+const NO_CACHE_PATH_PREFIXES = ['/admin/', '/members/', '/login/', '/register/', '/account-help/', '/api/', '/functions/api/'];
 
 function shouldBypassCache(url) {
   return NO_CACHE_PATH_PREFIXES.some((prefix) => url.pathname.startsWith(prefix));
@@ -35,7 +35,14 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
   if (shouldBypassCache(url)) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(
+      fetch(event.request).catch(async () => {
+        if (event.request.mode === 'navigate') {
+          return (await caches.match('/offline.html')) || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        }
+        return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+      })
+    );
     return;
   }
 

@@ -1,5 +1,23 @@
 # Development Roadmap
 
+## Current pass completion update
+
+- Continued mobile-first polish with safer standalone spacing, stronger bottom-dock behavior, and less small-screen overlap across the phone admin workflow.
+- Reduced another public JSON duplication point by keeping creations and gallery on the centralized `/api/creations` path instead of page-level JSON assumptions.
+- Improved creation/gallery data normalization so titles, materials, summaries, and asset-origin handling are more consistent whether the source is D1 or the migration fallback.
+- Continued docs/schema synchronization for the current build; no new D1 table was required in this pass.
+
+## Strongest next steps after this pass
+
+1. Finish the remaining mixed JSON/D1 authority cleanup on the last legacy read paths.
+2. Keep tightening mobile/admin layout behavior with real-device testing before stress testing.
+3. Continue deeper payment + accounting convergence so provider events and bookkeeping stay aligned.
+4. Finish the remaining media lifecycle work around generated variants/thumbnails and richer annotation usage.
+5. Continue movie-editor polish while keeping `movie_catalog_enriched.v2.json` as the active base truth.
+
+
+# Development Roadmap
+
 ## Current completed foundations
 
 - auth and session model
@@ -185,3 +203,49 @@
 - Catalog sync now uses `movie_catalog_enriched.v2.json` for movie imports so repo-side sync matches the JSON-first movie source already used elsewhere.
 - Schema references and upgrade SQL were aligned with the current movie overlay/editor fields and the governed review/reorder tables already present in the codebase.
 - Exposed HTML pages were checked again and continue to keep a single H1 per page.
+
+- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
+- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
+- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
+- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
+
+## Current pass addendum
+- Normalized public route links away from explicit `/index.html` navigation and added a `_redirects` file so direct `.../index.html` requests resolve more cleanly alongside directory routes.
+- Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
+- Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
+- This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Newly completed or moved forward in this pass
+- Added dedicated phone inventory intake at `/admin/mobile-inventory/`.
+- Added stronger browser security defaults and no-store handling through `_headers`.
+- Tightened standalone/mobile app feel and service-worker behavior for safer install use.
+- Started explicit dead-file retirement workflow using the `RM_` filename prefix.
+
+
+## Current pass addendum
+- Added basic accounting shadow records plus an admin accounting summary interface to prepare for the later accounting backend.
+- Tightened privileged password control so admin can reset any account, including another admin, with step-up confirmation and audit coverage.
+- Continued CSS stabilization for dense admin tools before broader stress testing.
+
+## Strongest next steps after this pass
+1. Expand accounting shadow records into a fuller bookkeeping backend with costs, tax remittance, and profitability.
+2. Extend payment/accounting sync so paid/refunded states update the accounting shadow rows automatically from provider events.
+3. Continue role granularity and sensitive-action hardening before stress testing.
+
+
+## Current pass addendum
+- Payment returns, Stripe webhooks, PayPal webhooks, and admin refund actions now resync `accounting_order_records` so the starter accounting layer moves closer to live order/payment state instead of staying order-create only.
+- Mobile admin capture and inventory pages now have a stronger installed-app feel with a bottom dock, safer sticky actions, and better safe-area behavior on phones.
+- Remaining strongest next steps are now worker-style webhook automation, thumbnail generation, deeper role granularity, and the larger accounting backend rather than basic phone-shell or order-shadow setup.
+
+## Current pass addendum
+- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
+- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
+- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.
+
+## Current pass addendum
+- Fixed the Admin-to-Members preview/logout path again by making admin preview stay in cached-admin review mode instead of falling through to member-login protection.
+- Added a safer fallback query on `/api/admin/products` so older or partially migrated databases do not hard-fail the Admin dashboard with a 500 during load.
+- Restored admin movie saves through the shared authenticated admin fetch path and persisted Admin accordion open/closed state across returns to the dashboard.
+- Tightened the service worker so `/api/` requests bypass offline caching and rejected admin/member fetches no longer throw the same noisy unhandled fetch failure during dashboard loads.

@@ -1,5 +1,13 @@
 # Repo Rules
 
+## Current pass reminder
+- Keep public pages on centralized API reads where available instead of adding new page-level JSON fallbacks.
+- Keep one H1 per exposed page.
+- Keep docs/schema references synchronized even on passes that are mostly CSS/mobile polish.
+
+
+# Repo Rules
+
 - Keep all schema files and Markdown docs in sync with the current build state.
 - When payment flow changes, update both code and the database and payment documentation together.
 - When media workflow changes, update both admin UI notes and deployment binding notes together.
@@ -139,3 +147,18 @@ Current-pass rules added:
 
 - Bulk finished-product import work should stay aligned with `data/finished_products_import_template.csv` so CSV headers match the preview/import endpoints.
 - Mobile product capture must continue to allow partial draft intake; do not reintroduce storefront-level mandatory fields into the phone-first save path.
+
+- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
+- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
+- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
+- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
+
+## Current pass addendum
+- Normalized public route links away from explicit `/index.html` navigation and added a `_redirects` file so direct `.../index.html` requests resolve more cleanly alongside directory routes.
+- Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
+- Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
+- This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Current pass housekeeping rule
+- When duplicate or clearly unlinked repo files are found, prefer renaming them with an `RM_` prefix first instead of deleting them immediately.

@@ -1,3 +1,11 @@
+# SANITY HEALTH CHECK
+
+## Current pass summary
+- Mobile/admin shell: improved again for smaller screens and installed-app safe-area handling.
+- Public creations/gallery: moved further toward centralized API-first behavior.
+- Schema drift: no new schema expansion in this pass; schema docs refreshed to match.
+- H1 guardrail: exposed pages should still remain at one H1 each.
+
 # Sanity / Health Check
 
 ## Current build status
@@ -131,3 +139,45 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Manual movie editing is now expected to work through a D1 overlay, but the route still needs schema-hardening against older `movie_catalog` tables missing late-added columns such as `imdb_id`, metadata source, and value fields.
 - The admin movie editor should be considered incomplete unless it visibly shows both cover images and the richer JSON-backed fields already present in the live movie records.
 - Partial mobile finished-product draft capture remains a required workflow and should not be blocked by later publish-time required fields.
+
+- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
+- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
+- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
+- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
+
+## Current pass addendum
+- Normalized public route links away from explicit `/index.html` navigation and added a `_redirects` file so direct `.../index.html` requests resolve more cleanly alongside directory routes.
+- Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
+- Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
+- This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
+
+
+## Current pass health notes
+- Public route normalization remains intact and the app shell now behaves more consistently in standalone mode.
+- Sensitive admin/member/auth routes now have stronger no-store/browser-security defaults through `_headers` and are skipped by the service-worker cache.
+- New phone-first admin route added: `/admin/mobile-inventory/`.
+- Dead-file cleanup has started safely through `RM_` prefixes instead of permanent deletion.
+- This pass did not add new D1 tables; it focused on mobile shell polish, CSS stability, browser security hardening, and cleanup discipline.
+
+
+## Current pass update
+- Orders now create a lightweight accounting-ready record in `accounting_order_records`.
+- Admin now has a first accounting view under the orders area.
+- Admin password reset now supports any user, including admins, with step-up confirmation.
+
+
+## Current pass completion update
+- Mobile admin pages received another fit-and-finish pass for installed phone use, including safe-area spacing, sticky action treatment, and a bottom shortcut dock.
+- Accounting summary records now resync from major payment reconciliation paths, reducing stale totals in the starter accounting interface.
+
+
+## Current pass addendum
+- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
+- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
+- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
+- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.
+
+## Current pass addendum
+- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
+- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
+- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.
