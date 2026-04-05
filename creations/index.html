@@ -62,15 +62,15 @@
 </div>
 </div>
 <div style="display:flex;gap:14px;flex-wrap:wrap">
-<a href="/index.html">Home</a>
-<a href="/about/index.html">About</a>
-<a href="/gallery/index.html">Art</a>
-<a href="/creations/index.html">Creations</a>
-<a href="/tools/index.html">Tools</a>
-<a href="/supplies/index.html">Supplies</a>
-<a href="/shop/index.html">Shop</a>
-<a href="/movies/index.html">Movies</a>
-<a href="/contact/index.html">Contact</a>
+<a href="/">Home</a>
+<a href="/about/">About</a>
+<a href="/gallery/">Art</a>
+<a href="/creations/">Creations</a>
+<a href="/tools/">Tools</a>
+<a href="/supplies/">Supplies</a>
+<a href="/shop/">Shop</a>
+<a href="/movies/">Movies</a>
+<a href="/contact/">Contact</a>
 </div>
 </div>
 <section class="hero">
@@ -80,8 +80,8 @@
         This page is built to scale. Right now it shows the finished pieces already in your JSON, and later it can grow into the main home for hundreds of rings, pendants, sets, experiments, and one-off builds.
       </p>
 <div class="hero-cta">
-<a class="btn" href="/shop/index.html">Visit the shop page</a>
-<a class="btn secondary" href="/gallery/index.html">See the broader art gallery</a>
+<a class="btn" href="/shop/">Visit the shop page</a>
+<a class="btn secondary" href="/gallery/">See the broader art gallery</a>
 </div>
 </section>
 <section aria-label="Creations summary" class="stats-grid">
@@ -139,7 +139,6 @@
 <script src="/js/main.js"></script>
 <script>
     const DATA_URL = '/api/creations';
-    const DATA_FALLBACK_URL = '/data/itemsforsale/itemsforsale_items_master.json';
     const FALLBACK_ASSET_ORIGIN = 'https://assets.devilndove.com';
 
     const state = { all: [], filtered: [] };
@@ -174,8 +173,7 @@
 
     function toSearchText(item){
       return [
-        item.title, item.type, item.subcategory, item.notes, item.description,
-        ...(item.materials || []), ...(item.tags || [])
+        item.title || item.name, item.type, item.subcategory, item.notes, item.description || item.summary, ...(item.materials || []), ...(item.tags || [])
       ].filter(Boolean).join(' ').toLowerCase();
     }
 
@@ -231,7 +229,7 @@
         card.className = 'creation-card';
         const tags = (item.tags || []).slice(0, 4).map(t => `<span class="pill">${nice(t)}</span>`).join('');
         const materials = (item.materials || []).slice(0, 3).map(m => `<span class="pill">${nice(m)}</span>`).join('');
-        const actionHref = item.shop_url || '/contact/index.html';
+        const actionHref = item.shop_url || '/contact/';
         const actionLabel = item.shop_url ? 'View listing' : 'Ask about this piece';
         card.innerHTML = `
           <img src="${imageUrl(data, item)}" alt="${item.alt || item.title || 'Devil n Dove creation'}" loading="lazy" />
@@ -249,7 +247,7 @@
             ${tags ? `<div class="chip-row">${tags}</div>` : ''}
             <div class="action-row">
               <a class="btn" href="${actionHref}">${actionLabel}</a>
-              <a class="btn secondary" href="/gallery/index.html">More art</a>
+              <a class="btn secondary" href="/gallery/">More art</a>
             </div>
           </div>
         `;
@@ -279,7 +277,7 @@
       try {
         const res = await fetch(DATA_URL, { cache: 'no-store' });
         const data = await res.json();
-        state.all = (data.items || []).slice().sort((a,b)=>String(a.title || '').localeCompare(String(b.title || '')));
+        state.all = (data.items || []).slice().sort((a,b)=>String(a.title || a.name || '').localeCompare(String(b.title || b.name || '')));
 
         els.statTotal.textContent = String(state.all.length);
         els.statSubs.textContent = String(unique(state.all.map(i => i.subcategory)).length);
