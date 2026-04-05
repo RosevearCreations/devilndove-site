@@ -338,3 +338,10 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 ### Current pass update
 - Mobile admin capture and inventory pages now include a stronger installed-app treatment with a shortcut dock and safer sticky action layout.
 - Starter accounting records now resync from Stripe/PayPal reconciliation and admin refund actions.
+
+
+## Current pass addendum
+- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
+- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
+- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
+- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.

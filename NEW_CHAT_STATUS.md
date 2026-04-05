@@ -126,3 +126,10 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Accounting shadow rows are no longer order-create only; they now resync on Stripe return, Stripe webhook reconciliation, PayPal return, PayPal webhook reconciliation, and admin refund actions.
 - Mobile artist-side admin pages now behave more like an installed app with safer sticky actions and a bottom shortcut dock.
 - The remaining work is now more about deeper backend completion than basic mobile shell or summary-record groundwork.
+
+
+## Current pass addendum
+- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
+- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
+- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
+- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.

@@ -237,3 +237,10 @@ Current-pass emphasis:
 ## Current pass note for future work
 - `accounting_order_records` now need to be treated as a live shadow layer that is refreshed from order-create, payment returns, payment webhooks, and admin refunds.
 - Mobile admin phone UX now includes a bottom dock and sticky actions; future changes should preserve safe-area spacing and installed-app behavior.
+
+
+## Current pass addendum
+- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
+- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
+- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
+- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.

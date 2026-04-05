@@ -257,3 +257,10 @@ The store now seeds a lightweight accounting shadow record for every new order s
 ### Current pass focus
 - Keep the phone-first artist workflow smooth enough for real workshop use.
 - Keep the accountant/admin side grounded with safer password control plus starter accounting summaries that stay closer to payment reality.
+
+
+## Current pass addendum
+- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
+- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
+- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
+- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.

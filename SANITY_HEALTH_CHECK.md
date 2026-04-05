@@ -169,3 +169,10 @@ This build is in a better state for day-to-day browsing and admin use than the p
 ## Current pass completion update
 - Mobile admin pages received another fit-and-finish pass for installed phone use, including safe-area spacing, sticky action treatment, and a bottom shortcut dock.
 - Accounting summary records now resync from major payment reconciliation paths, reducing stale totals in the starter accounting interface.
+
+
+## Current pass addendum
+- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
+- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
+- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
+- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.
