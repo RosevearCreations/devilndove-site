@@ -125,15 +125,15 @@
 </div>
 </div>
 <div style="display:flex;gap:14px;flex-wrap:wrap">
-<a href="/index.html">Home</a>
-<a href="/about/index.html">About</a>
-<a href="/gallery/index.html">Art</a>
-<a href="/creations/index.html">Creations</a>
-<a href="/tools/index.html">Tools</a>
-<a href="/supplies/index.html">Supplies</a>
-<a href="/shop/index.html">Shop</a>
-<a href="/movies/index.html">Movies</a>
-<a href="/contact/index.html">Contact</a>
+<a href="/">Home</a>
+<a href="/about/">About</a>
+<a href="/gallery/">Art</a>
+<a href="/creations/">Creations</a>
+<a href="/tools/">Tools</a>
+<a href="/supplies/">Supplies</a>
+<a href="/shop/">Shop</a>
+<a href="/movies/">Movies</a>
+<a href="/contact/">Contact</a>
 </div>
 </div>
 <div class="hero">
@@ -175,7 +175,6 @@
 <script>
     (function () {
       const DATA_URL = "/api/creations?limit=500";
-      const DATA_FALLBACK_URL = "/data/itemsforsale/itemsforsale_items_master.json";
 
       function safeText(v){ return (v == null ? "" : String(v)).trim(); }
       function norm(v){ return safeText(v).toLowerCase(); }
@@ -224,7 +223,8 @@
         const name = getItemName(it);
         const url = itemImageUrl(meta, it);
         const tags = getTags(it);
-        const shopUrl = safeText(it.shop_url) || "/contact/index.html";
+        const summary = safeText(it.description) || safeText(it.summary) || safeText(it.notes);
+        const shopUrl = safeText(it.shop_url) || "/contact/";
 
         return `
           <div class="item card">
@@ -241,6 +241,7 @@
               <div class="tags">
                 ${tags.map(t => `<span class="tag">${escHtml(t)}</span>`).join("")}
               </div>
+              ${summary ? `<div class="small" style="margin-top:8px;opacity:.84">${escHtml(summary.slice(0, 140))}${summary.length > 140 ? "..." : ""}</div>` : ""}
               <div class="actions">
                 <a class="btnlink" href="${shopUrl}" ${shopUrl.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>View / Inquire</a>
               </div>
@@ -296,18 +297,7 @@
           typeEl.addEventListener("change", render);
         } catch (e){
           console.error(e);
-          try {
-            const r = await fetch(DATA_FALLBACK_URL, { cache: "no-store" });
-            if (!r.ok) throw new Error("Fallback JSON load failed: " + r.status);
-            meta = await r.json();
-            items = Array.isArray(meta.items) ? meta.items.slice() : (Array.isArray(meta) ? meta.slice() : []);
-            render();
-            qEl.addEventListener("input", render);
-            typeEl.addEventListener("change", render);
-          } catch (fallbackError) {
-            console.error(fallbackError);
-            gridEl.innerHTML = `<div class="small">Could not load <code>${escHtml(DATA_URL)}</code></div>`;
-          }
+          gridEl.innerHTML = `<div class="small">Could not load <code>${escHtml(DATA_URL)}</code></div>`;
         }
       }
 
