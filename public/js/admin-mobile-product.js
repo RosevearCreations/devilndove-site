@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load mobile product tools.');
       bootstrap = data;
-      nextNumberEl.textContent = String(data.next_product_code || (data.next_product_number ? `DD${String(data.next_product_number).padStart(4, '0')}` : '—'));
+      nextNumberEl.textContent = String(data.next_product_number || '—');
       fillSelect(categorySelect, data.category_options || [], 'Select a category');
       fillSelect(colorSelect, data.color_options || [], 'Choose a colour');
       fillSelect(shippingSelect, data.shipping_code_options || [], 'Select shipping code');
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await window.DDAuth.apiFetch('/api/admin/mobile-create-product', { method: 'POST', body: formData });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to save product.');
-        setMessage(`Saved product ${data.product?.product_number ? `DD${String(data.product.product_number).padStart(4, '0')}` : '—'} for review.`);
+        setMessage(`Saved product #${data.product?.product_number || '—'} for review.`);
         form.reset();
         selectedMap = new Map();
         renderImages();

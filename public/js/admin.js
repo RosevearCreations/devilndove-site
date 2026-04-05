@@ -20,78 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
     el.textContent = value;
   }
 
-
-  function humanizePanelName(value) {
-    const text = String(value || '').trim();
-    if (!text) return 'Panel';
-    return text
-      .replace(/Section$/i, '')
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .replace(/[_-]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .replace(/\b\w/g, (ch) => ch.toUpperCase());
-  }
-
-  function getDirectPanelHeading(section) {
-    return Array.from(section.children).find((child) => child.tagName === 'H2') || null;
-  }
-
-  function ensurePanelHeading(section) {
-    let heading = getDirectPanelHeading(section);
-    if (heading) return heading;
-    const generated = document.createElement('h2');
-    generated.style.marginTop = '0';
-    generated.textContent = humanizePanelName(section.getAttribute('data-admin-panel-title') || section.id || 'Panel');
-    section.insertBefore(generated, section.firstChild || null);
-    return generated;
-  }
-
-  function setupPanelAccordion() {
-    const sections = Array.from(document.querySelectorAll('[data-admin-panel]'));
-    if (!sections.length) return;
-
-    sections.forEach((section, index) => {
-      const heading = ensurePanelHeading(section);
-      if (!heading) return;
-      section.classList.add('admin-panel');
-      let toggle = heading.querySelector('.admin-panel-toggle');
-      if (!toggle) {
-        toggle = document.createElement('button');
-        toggle.type = 'button';
-        toggle.className = 'btn admin-panel-toggle';
-        toggle.innerHTML = '<span class="admin-panel-toggle-label">Collapse</span><span aria-hidden="true">▾</span>';
-        heading.appendChild(toggle);
-      }
-      const body = document.createElement('div');
-      body.className = 'admin-panel-body';
-      const children = Array.from(section.children).filter((child) => child !== heading);
-      children.forEach((child) => body.appendChild(child));
-      section.appendChild(body);
-      const defaultOpen = section.hasAttribute('data-panel-open') || index < 2;
-      section.dataset.panelOpen = defaultOpen ? '1' : '0';
-      body.hidden = !defaultOpen;
-      toggle.querySelector('.admin-panel-toggle-label').textContent = defaultOpen ? 'Collapse' : 'Expand';
-      section.classList.toggle('is-collapsed', !defaultOpen);
-      toggle.addEventListener('click', () => {
-        const opening = section.dataset.panelOpen !== '1';
-        section.dataset.panelOpen = opening ? '1' : '0';
-        body.hidden = !opening;
-        section.classList.toggle('is-collapsed', !opening);
-        toggle.querySelector('.admin-panel-toggle-label').textContent = opening ? 'Collapse' : 'Expand';
-      });
-    });
-
-    if (window.location.hash) {
-      const target = document.querySelector(window.location.hash);
-      const panel = target?.closest?.('[data-admin-panel]');
-      if (panel && panel.dataset.panelOpen !== '1') {
-        const toggle = panel.querySelector('.admin-panel-toggle');
-        toggle?.click();
-      }
-    }
-  }
-
   function titleCase(value) {
     const text = String(value || "").trim();
     if (!text) return "—";
@@ -152,6 +80,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  setupPanelAccordion();
   renderSignedOut();
 });

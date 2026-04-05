@@ -88,11 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setAll("[data-member-updated-at]", formatDate(user?.updated_at));
     setAll("[data-member-session-expires]", formatDate(session?.expires_at));
 
-    if (role === "admin") {
-      setAccessMessage("Admin preview mode is active. You are viewing the member area with admin access so you can review layout and account tools.");
-    } else {
-      setAccessMessage("");
-    }
+    setAccessMessage("");
     showMembersSection(true);
   }
 
