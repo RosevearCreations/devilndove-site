@@ -2,26 +2,6 @@
 
 ## Current pass focus and what was actually improved
 
-This pass focused on closing smaller but still meaningful readiness gaps before stress testing: another mobile CSS fit pass, another reduction of public JSON duplication, and cleaner consistency between centralized API reads and the storefront pages that render them.
-
-### What improved in this pass
-- Mobile/admin layout was tightened again with stronger small-screen wrapping, safer sticky action spacing, and better installed-app dock behavior.
-- Public creations and gallery pages now rely on the centralized `/api/creations` authority path instead of carrying their own page-level JSON source assumptions.
-- Creation records now normalize title/name, materials, summaries, and image origin data more consistently whether the current source is D1-backed catalog data or the temporary migration fallback.
-- Docs/schema references were synchronized again so the handoff reflects a CSS/mobile/API-authority pass rather than a schema-expansion pass.
-
-## Still honestly open after this pass
-- Final mixed JSON/D1 authority cleanup still remains in some movie and legacy admin/read paths.
-- Real generated media thumbnails/variants still need image-processing infrastructure rather than URL hints and metadata alone.
-- Full provider-confirmed reconciliation beyond the current supported flows still needs more payment-provider coverage.
-- Trusted movie enrichment still depends on the external enrichment workflow rather than a finished in-repo provider integration.
-- Real-device stress testing is still needed to prove the newer mobile/admin shell under longer sessions.
-
-
-# Known Gaps and Risks
-
-## Current pass focus and what was actually improved
-
 This pass concentrated on working down the open risk list in order instead of skipping ahead. The goal was to reduce operational risk with real code and schema changes, while staying honest about what still requires provider access, production credentials, or later UI polish.
 
 ### What improved in this pass
@@ -510,27 +490,3 @@ The following files were not found on active repo paths and were renamed with an
 - Full double-entry accounting, COGS, inventory valuation, and tax remittance workflows still need the later accounting backend.
 - Broader multi-role permission granularity still remains beyond the current admin/member split even though admin password resets are now tighter and auditable.
 - Mixed JSON/D1 authority still remains in some movie and legacy admin/read paths.
-
-
-## Current pass addendum
-- The starter accounting shadow layer now resyncs from Stripe return, Stripe webhook, PayPal return, PayPal webhook, and admin refund actions, which reduces drift between order/payment state and accounting summary records.
-- Phone-first admin pages now have a more complete installed-app feel with a bottom dock, sticky primary actions, and safer standalone safe-area spacing.
-
-### Still honestly open after this pass
-- Fully automated worker-driven webhook retry/replay is still not complete even though admin dispatch and provider-triggered accounting sync are stronger.
-- Real generated media thumbnails/variants still need image-processing infrastructure.
-- Full role-by-role permission granularity still remains beyond the current admin/member split.
-- Mixed JSON/D1 authority still remains in some movie and legacy admin/read paths.
-- Trusted movie enrichment still depends on the external enrichment workflow.
-
-## Current pass addendum
-- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
-- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
-- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.
-
-## Current pass addendum
-- Admin preview/logout risk was reduced again by keeping `/members/?admin_preview=1` in cached-admin layout-review mode instead of letting it fall through into member-only redirect logic.
-- Admin dashboard load risk was reduced again by adding a fallback products query when richer inventory/resource joins are not yet available in the target database.
-- Movie editor regression risk was reduced again by restoring save/load calls through the shared authenticated admin fetch helper.
-- Admin UI cohesion improved again because accordion section state now persists between visits instead of reopening every section on return.
-- Service-worker noise risk was reduced again by bypassing `/api/` requests and catching rejected bypass fetches more defensively.

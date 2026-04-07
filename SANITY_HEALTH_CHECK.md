@@ -1,11 +1,3 @@
-# SANITY HEALTH CHECK
-
-## Current pass summary
-- Mobile/admin shell: improved again for smaller screens and installed-app safe-area handling.
-- Public creations/gallery: moved further toward centralized API-first behavior.
-- Schema drift: no new schema expansion in this pass; schema docs refreshed to match.
-- H1 guardrail: exposed pages should still remain at one H1 each.
-
 # Sanity / Health Check
 
 ## Current build status
@@ -164,20 +156,3 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Orders now create a lightweight accounting-ready record in `accounting_order_records`.
 - Admin now has a first accounting view under the orders area.
 - Admin password reset now supports any user, including admins, with step-up confirmation.
-
-
-## Current pass completion update
-- Mobile admin pages received another fit-and-finish pass for installed phone use, including safe-area spacing, sticky action treatment, and a bottom shortcut dock.
-- Accounting summary records now resync from major payment reconciliation paths, reducing stale totals in the starter accounting interface.
-
-
-## Current pass addendum
-- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
-- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
-- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
-- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.
-
-## Current pass addendum
-- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
-- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
-- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.

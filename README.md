@@ -1,11 +1,3 @@
-# Devil n Dove Site
-
-## Current pass snapshot
-- Mobile/admin shell was tightened again for smaller screens and installed-app use.
-- Public creations and gallery pages now lean on the centralized `/api/creations` path instead of page-level JSON source assumptions.
-- No new schema expansion was required in this pass; docs and schema references were refreshed to stay aligned.
-
-
 # Devil n Dove Website
 
 Devil n Dove is a public website, storefront, member area, and admin management system for the workshop.
@@ -333,20 +325,3 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Basic accounting shadow records now exist for newly created orders.
 - Admin can reset any user password, including another admin, with step-up confirmation.
 - Admin orders area now includes a starter accounting summary block.
-
-
-### Current pass update
-- Mobile admin capture and inventory pages now include a stronger installed-app treatment with a shortcut dock and safer sticky action layout.
-- Starter accounting records now resync from Stripe/PayPal reconciliation and admin refund actions.
-
-
-## Current pass addendum
-- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
-- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
-- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
-- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.
-
-## Current pass addendum
-- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
-- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
-- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.

@@ -1,17 +1,3 @@
-# NEW CHAT STATUS
-
-## Current pass status
-- Latest pass focused on mobile/admin CSS fit, centralized creations/gallery authority, and docs/schema refresh.
-- No new D1 table was introduced in this pass.
-- Public creations/gallery pages now lean on `/api/creations` as the single page-facing source, while the API itself still keeps the controlled D1-first + migration-fallback behavior.
-- Mobile shell spacing, bottom dock behavior, and sticky action treatment were tightened again for phone-first admin use.
-
-## Best next development lane
-1. Finish the remaining mixed JSON/D1 read-path cleanup.
-2. Continue payment/accounting convergence and webhook hardening.
-3. Continue media lifecycle completion, especially real variant generation.
-4. Keep the movie editor and movie overlay path stable without forcing full D1 authority too early.
-
 # New Chat Status
 
 ## Current handoff summary
@@ -120,21 +106,3 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Admin accounting summary UI now exists in the orders area.
 - Admin password reset now supports any account, including admin-to-admin resets, with stronger confirmation and audit coverage.
 - Schema references and upgrade SQL now include `accounting_order_records`.
-
-
-## Current pass handoff note
-- Accounting shadow rows are no longer order-create only; they now resync on Stripe return, Stripe webhook reconciliation, PayPal return, PayPal webhook reconciliation, and admin refund actions.
-- Mobile artist-side admin pages now behave more like an installed app with safer sticky actions and a bottom shortcut dock.
-- The remaining work is now more about deeper backend completion than basic mobile shell or summary-record groundwork.
-
-
-## Current pass addendum
-- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
-- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
-- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
-- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.
-
-## Current pass addendum
-- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
-- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
-- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.

@@ -1,13 +1,5 @@
 # Project Brain
 
-## Current pass
-- Keep pushing public reads toward centralized API-first authority while preserving safe migration fallback inside the API layer instead of in the page templates.
-- Keep the phone/admin workflow smooth enough for repeated workshop use: fewer overlaps, safer sticky actions, stronger dock spacing, and cleaner installed-app behavior.
-- Avoid forcing full D1 authority in the movie workflow until the enrichment overlay path is fully stable.
-
-
-# Project Brain
-
 ## Core mental model
 
 This repo is now a combined:
@@ -252,20 +244,3 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 
 ## Current pass note
 The store now seeds a lightweight accounting shadow record for every new order so later bookkeeping, tax, and revenue tooling has a stable starting point. Admin also has a first accounting-facing summary view.
-
-
-### Current pass focus
-- Keep the phone-first artist workflow smooth enough for real workshop use.
-- Keep the accountant/admin side grounded with safer password control plus starter accounting summaries that stay closer to payment reality.
-
-
-## Current pass addendum
-- Fixed the Admin → Members preview/logout issue by stopping generic member-page 401s from clearing the whole site session automatically; auth is now cleared only on session-check/auth endpoints.
-- Admin can now open the Members area in preview mode to review layout and account tools without being forced into a member-only logout loop.
-- The Admin dashboard is moving toward a more manageable shell by turning the long major sections into collapsible panels while keeping direct anchor links working.
-- Continued mobile-app/store polish by keeping phone-first admin pages linked to Store and Artist surfaces for quicker installed-app movement.
-
-## Current pass addendum
-- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
-- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
-- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.

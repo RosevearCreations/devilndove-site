@@ -1,23 +1,5 @@
 # Development Roadmap
 
-## Current pass completion update
-
-- Continued mobile-first polish with safer standalone spacing, stronger bottom-dock behavior, and less small-screen overlap across the phone admin workflow.
-- Reduced another public JSON duplication point by keeping creations and gallery on the centralized `/api/creations` path instead of page-level JSON assumptions.
-- Improved creation/gallery data normalization so titles, materials, summaries, and asset-origin handling are more consistent whether the source is D1 or the migration fallback.
-- Continued docs/schema synchronization for the current build; no new D1 table was required in this pass.
-
-## Strongest next steps after this pass
-
-1. Finish the remaining mixed JSON/D1 authority cleanup on the last legacy read paths.
-2. Keep tightening mobile/admin layout behavior with real-device testing before stress testing.
-3. Continue deeper payment + accounting convergence so provider events and bookkeeping stay aligned.
-4. Finish the remaining media lifecycle work around generated variants/thumbnails and richer annotation usage.
-5. Continue movie-editor polish while keeping `movie_catalog_enriched.v2.json` as the active base truth.
-
-
-# Development Roadmap
-
 ## Current completed foundations
 
 - auth and session model
@@ -232,20 +214,3 @@
 1. Expand accounting shadow records into a fuller bookkeeping backend with costs, tax remittance, and profitability.
 2. Extend payment/accounting sync so paid/refunded states update the accounting shadow rows automatically from provider events.
 3. Continue role granularity and sensitive-action hardening before stress testing.
-
-
-## Current pass addendum
-- Payment returns, Stripe webhooks, PayPal webhooks, and admin refund actions now resync `accounting_order_records` so the starter accounting layer moves closer to live order/payment state instead of staying order-create only.
-- Mobile admin capture and inventory pages now have a stronger installed-app feel with a bottom dock, safer sticky actions, and better safe-area behavior on phones.
-- Remaining strongest next steps are now worker-style webhook automation, thumbnail generation, deeper role granularity, and the larger accounting backend rather than basic phone-shell or order-shadow setup.
-
-## Current pass addendum
-- Fixed the admin-to-members preview/logout problem by keeping auth clearing limited to real auth/session routes and allowing a safer cached-admin preview fallback on `/members/?admin_preview=1`.
-- Fixed the unnamed admin accordion section by using explicit panel titles/direct child headings and moving the Products heading ahead of injected module mounts.
-- Continued mobile/admin/store polish with quicker Artist and Store links from the phone-first admin surfaces.
-
-## Current pass addendum
-- Fixed the Admin-to-Members preview/logout path again by making admin preview stay in cached-admin review mode instead of falling through to member-login protection.
-- Added a safer fallback query on `/api/admin/products` so older or partially migrated databases do not hard-fail the Admin dashboard with a 500 during load.
-- Restored admin movie saves through the shared authenticated admin fetch path and persisted Admin accordion open/closed state across returns to the dashboard.
-- Tightened the service worker so `/api/` requests bypass offline caching and rejected admin/member fetches no longer throw the same noisy unhandled fetch failure during dashboard loads.
