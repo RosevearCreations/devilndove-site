@@ -889,3 +889,40 @@ CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_
 
 
 -- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.v2.json and can derive a trailer search URL at runtime when trailer_url is blank.
+
+
+-- ACCOUNTING BACKEND FOUNDATION (PASS: EXPENSES + PRODUCT COSTS)
+CREATE TABLE IF NOT EXISTS accounting_expenses (
+  expense_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  expense_date TEXT NOT NULL,
+  vendor TEXT,
+  category TEXT,
+  description TEXT,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  receipt_url TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_expenses_date ON accounting_expenses(expense_date DESC, expense_id DESC);
+CREATE INDEX IF NOT EXISTS idx_accounting_expenses_vendor ON accounting_expenses(vendor, expense_date DESC);
+
+CREATE TABLE IF NOT EXISTS product_costs (
+  product_cost_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  effective_date TEXT NOT NULL,
+  unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  vendor TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_product_costs_product ON product_costs(product_id, effective_date DESC, product_cost_id DESC);
