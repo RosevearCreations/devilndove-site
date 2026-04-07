@@ -31,7 +31,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const mo = document.getElementById("mpMarketingOptIn"); if (mo) mo.checked = Number(profile.marketing_opt_in || 0) === 1;
     const ou = document.getElementById("mpOrderUpdatesOptIn"); if (ou) ou.checked = Number(profile.order_updates_opt_in ?? 1) === 1;
     const vs = document.getElementById("mpVerificationStatus"); if (vs) vs.textContent = `${Number(profile.email_verified || 0) === 1 ? "Email ✓" : "Email ✕"} • ${Number(profile.phone_verified || 0) === 1 ? "Phone ✓" : "Phone ✕"}`;
-    const tiers = document.getElementById("mpTierCodes"); if (tiers) tiers.textContent = Array.isArray(profile.access_tier_codes) && profile.access_tier_codes.length ? profile.access_tier_codes.join(", ") : "No tiers assigned.";
+    const tierCodes = Array.isArray(profile.access_tier_codes) ? profile.access_tier_codes : [];
+    const tiers = document.getElementById("mpTierCodes");
+    if (tiers) tiers.textContent = tierCodes.length ? tierCodes.join(", ") : "No tiers assigned.";
+    const primary = document.getElementById("mpPrimaryTier");
+    if (primary) primary.textContent = getPrimaryTierLabel(tierCodes);
   }
 
   async function loadProfile() {
