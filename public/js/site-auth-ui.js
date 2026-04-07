@@ -117,15 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.dispatchEvent(new CustomEvent('dd:admin-ready', { detail: { ok: isAdmin, logged_in: loggedIn, user, session } }));
   }
 
-  function isAdminPreviewMode() {
-    try {
-      const params = new URLSearchParams(window.location.search || '');
-      return params.get('admin_preview') === '1';
-    } catch {
-      return false;
-    }
-  }
-
   async function refreshAuthState() {
     const cachedUser = window.DDAuth.getStoredUser();
     if (cachedUser) {
@@ -144,12 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
       applyUi(data?.user || null);
       emitAuthEvents(data?.user || null, data?.session || null);
     } catch {
-      const cachedRole = String(cachedUser?.role || '').trim().toLowerCase();
-      if (isAdminPreviewMode() && cachedUser && cachedRole === 'admin') {
-        applyUi(cachedUser);
-        emitAuthEvents(cachedUser, null);
-        return;
-      }
       window.DDAuth.clearAuth();
       applyUi(null);
       emitAuthEvents(null, null);

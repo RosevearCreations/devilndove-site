@@ -6,20 +6,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   const membersSectionEl = document.getElementById("membersSection");
   const accessMessageEl = document.getElementById("membersAccessMessage");
-  const adminPreviewNoteEl = document.getElementById("membersAdminPreviewNote");
 
   if (!window.DDAuth) return;
 
   let resolved = false;
-
-  function isAdminPreviewMode() {
-    try {
-      const params = new URLSearchParams(window.location.search || "");
-      return params.get("admin_preview") === "1";
-    } catch {
-      return false;
-    }
-  }
 
   function showMembersSection(show) {
     if (!membersSectionEl) return;
@@ -44,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
     resolved = true;
     showMembersSection(true);
     setAccessMessage("");
-    if (adminPreviewNoteEl) adminPreviewNoteEl.style.display = String(user?.role || "").toLowerCase() === "admin" ? "block" : "none";
     document.dispatchEvent(new CustomEvent("dd:member-access-granted", {
       detail: {
         ok: true,
@@ -62,14 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   showMembersSection(false);
-
-  const cachedUser = window.DDAuth.getStoredUser ? window.DDAuth.getStoredUser() : null;
-  const cachedRole = String(cachedUser?.role || '').trim().toLowerCase();
-
-  if (isAdminPreviewMode() && cachedUser && cachedRole === 'admin') {
-    handleAllowed(cachedUser);
-    return;
-  }
 
   if (!window.DDAuth.isLoggedIn()) {
     handleDenied();
