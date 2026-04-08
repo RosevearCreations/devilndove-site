@@ -29,6 +29,8 @@
   async function load() {
     try {
       const res = await window.DDAuth.apiFetch("/api/admin/tier-policies");
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) throw new Error("Tier Policy endpoint is not available yet.");
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load tier policies.");
       const rows = Array.isArray(data.tier_policies) ? data.tier_policies : [];
@@ -86,6 +88,8 @@
         method: "POST",
         body: JSON.stringify(payload)
       });
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) throw new Error("Tier Policy endpoint is not available yet.");
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Failed to save tier policy.");
       setMessage(`Saved ${code.toUpperCase()} policy.`);
