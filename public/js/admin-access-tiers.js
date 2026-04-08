@@ -44,12 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
               <div>
                 <label class="small" for="assignAccessTierSelect">Access Tier</label>
                 <select id="assignAccessTierSelect"></select>
-                <div class="small" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-                  <span style="opacity:.85">Quick assign:</span>
-                  <button class="btn" type="button" data-quick-tier-code="customer_bronze">Bronze</button>
-                  <button class="btn" type="button" data-quick-tier-code="customer_silver">Silver</button>
-                  <button class="btn" type="button" data-quick-tier-code="customer_gold">Gold</button>
-                </div>
               </div>
 
               <div>
@@ -111,17 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
     modalEl.querySelector("#assignAccessTierButton").addEventListener("click", async () => {
       await assignTier();
     });
-    modalEl.querySelectorAll('[data-quick-tier-code]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        clearAssignMessage();
-        const code = btn.getAttribute('data-quick-tier-code');
-        const tierId = findTierIdByCode(code);
-        const select = document.getElementById('assignAccessTierSelect');
-        if (select && tierId) select.value = String(tierId);
-        await assignTier();
-      });
-    });
-
 
     modalEl.querySelector("#accessTierTableBody").addEventListener("click", async (event) => {
       const button = event.target.closest("[data-remove-user-access-tier-id]");
@@ -162,13 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!el) return;
     el.textContent = "";
     el.style.display = "none";
-  }
-
-
-  function findTierIdByCode(code) {
-    const target = String(code || '').toLowerCase();
-    const tier = availableTiers.find((t) => String(t.code || '').toLowerCase() === target);
-    return tier ? Number(tier.access_tier_id || 0) : 0;
   }
 
   function formatDate(value) {
