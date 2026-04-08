@@ -310,3 +310,11 @@ Products now need to support a real partial-draft intake path for phone-first ca
 - `accounting_expenses`: operating expenses such as electricity, water, gas, rent, internet, software, and advertising.
 - `accounting_writeoffs`: damaged, obsolete, gifted, lost, or other write-off events.
 - `product_costs`: point-in-time per-unit cost entries used to grow toward fuller cost-of-goods and profit-and-loss reporting.
+
+
+## Current pass addendum
+- Fixed the Members department so Access Tiers render as a visible standalone interface instead of only a hidden modal dependency.
+- Rewired Tier Policy admin/member JSON contracts so the admin editor and member account views use the same DB-backed field names.
+- Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
+- Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
+- Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.

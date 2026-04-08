@@ -140,3 +140,11 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Added accounting templates (CSV + XLSX) so GL and month-end bookkeeping can be seeded faster.
 - Continued mobile direction by making the lighter departmental pages easier to use on smaller screens than the former all-in-one Admin page.
 - Continued JSON-to-DB convergence by moving tier policy and accounting records into D1-backed tables instead of temporary page-only assumptions.
+
+
+## Current pass addendum
+- Fixed the Members department so Access Tiers render as a visible standalone interface instead of only a hidden modal dependency.
+- Rewired Tier Policy admin/member JSON contracts so the admin editor and member account views use the same DB-backed field names.
+- Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
+- Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
+- Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.
