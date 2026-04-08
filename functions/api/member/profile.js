@@ -1,15 +1,7 @@
 // File: /functions/api/member/profile.js
-// Brief description: Gets or updates the logged-in member profile with contact details,
-// preferences, and address information while keeping verification fields read-only for the member.
+// Brief description: Gets or updates the logged-in member profile with contact details.
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
-}
+import { getDb, getRequestToken, jsonResponse } from "../_lib/adminAudit.js";
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -17,9 +9,7 @@ function normalizeText(value) {
 
 function normalizeContactMethod(value) {
   const normalized = normalizeText(value).toLowerCase();
-  return ["email", "phone", "text", "mail", "none"].includes(normalized)
-    ? normalized
-    : "email";
+  return ["email", "phone", "text", "mail", "none"].includes(normalized) ? normalized : "email";
 }
 
 function normalizeBool(value, fallback = 0) {
@@ -28,28 +18,14 @@ function normalizeBool(value, fallback = 0) {
   return fallback;
 }
 
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
-
 async function getMemberUserFromRequest(request, env) {
-  const token = getBearerToken(request);
-  if (!token) return null;
+  const token = getRequestToken(request);
+  const db = getDb(env);
+  if (!token || !db) return null;
 
-  const session = await env.DB.prepare(`
-    SELECT
-      s.session_id,
-      s.user_id,
-      s.expires_at,
-      u.user_id AS resolved_user_id,
-      u.email,
-      u.display_name,
-      u.role,
-      u.is_active,
-      u.created_at,
-      u.updated_at
+  const session = await db.prepare(`
+    SELECT s.session_id, s.user_id, s.expires_at,
+      u.user_id AS resolved_user_id, u.email, u.display_name, u.role, u.is_active, u.created_at, u.updated_at
     FROM sessions s
     JOIN users u ON u.user_id = s.user_id
     WHERE (s.session_token = ? OR s.token = ?)
@@ -68,50 +44,29 @@ async function getMemberUserFromRequest(request, env) {
     display_name: session.display_name || "",
     role: session.role || "member",
     created_at: session.created_at || null,
-    updated_at: session.updated_at || null
+    updated_at: session.updated_at || null,
   };
 }
 
 async function getTierCodesForUser(env, userId) {
-  const result = await env.DB.prepare(`
+  const db = getDb(env);
+  const result = await db.prepare(`
     SELECT at.code
     FROM user_access_tiers uat
     JOIN access_tiers at ON at.access_tier_id = uat.access_tier_id
     WHERE uat.user_id = ?
     ORDER BY at.code ASC
   `).bind(userId).all();
-
   return (Array.isArray(result?.results) ? result.results : []).map((row) => row.code || "");
 }
 
 async function readProfile(env, user) {
-  const profile = await env.DB.prepare(`
-    SELECT
-      user_profile_id,
-      user_id,
-      profile_type,
-      preferred_name,
-      company_name,
-      phone,
-      phone_verified,
-      email_verified,
-      preferred_contact_method,
-      contact_notes,
-      marketing_opt_in,
-      order_updates_opt_in,
-      address_line1,
-      address_line2,
-      city,
-      province,
-      postal_code,
-      country,
-      emergency_contact_name,
-      emergency_contact_phone,
-      employee_code,
-      department,
-      job_title,
-      created_at,
-      updated_at
+  const db = getDb(env);
+  const profile = await db.prepare(`
+    SELECT user_profile_id, user_id, profile_type, preferred_name, company_name, phone, phone_verified, email_verified,
+      preferred_contact_method, contact_notes, marketing_opt_in, order_updates_opt_in,
+      address_line1, address_line2, city, province, postal_code, country,
+      emergency_contact_name, emergency_contact_phone, employee_code, department, job_title, created_at, updated_at
     FROM user_profiles
     WHERE user_id = ?
     LIMIT 1
@@ -124,7 +79,7 @@ async function readProfile(env, user) {
       display_name: user.display_name,
       role: user.role,
       created_at: user.created_at,
-      updated_at: user.updated_at
+      updated_at: user.updated_at,
     },
     profile: {
       user_profile_id: Number(profile?.user_profile_id || 0),
@@ -152,30 +107,24 @@ async function readProfile(env, user) {
       job_title: profile?.job_title || "",
       access_tier_codes: await getTierCodesForUser(env, user.user_id),
       created_at: profile?.created_at || null,
-      updated_at: profile?.updated_at || null
-    }
+      updated_at: profile?.updated_at || null,
+    },
   };
 }
 
 export async function onRequestGet(context) {
-  const { request, env } = context;
-  const memberUser = await getMemberUserFromRequest(request, env);
-  if (!memberUser) return json({ ok: false, error: "Unauthorized." }, 401);
-  const payload = await readProfile(env, memberUser);
-  return json({ ok: true, ...payload });
+  const memberUser = await getMemberUserFromRequest(context.request, context.env);
+  if (!memberUser) return jsonResponse({ ok: false, error: "Unauthorized." }, 401);
+  const payload = await readProfile(context.env, memberUser);
+  return jsonResponse({ ok: true, ...payload });
 }
 
 export async function onRequestPost(context) {
-  const { request, env } = context;
-  const memberUser = await getMemberUserFromRequest(request, env);
-  if (!memberUser) return json({ ok: false, error: "Unauthorized." }, 401);
-
+  const memberUser = await getMemberUserFromRequest(context.request, context.env);
+  if (!memberUser) return jsonResponse({ ok: false, error: "Unauthorized." }, 401);
+  const db = getDb(context.env);
   let body;
-  try {
-    body = await request.json();
-  } catch {
-    return json({ ok: false, error: "Invalid JSON body." }, 400);
-  }
+  try { body = await context.request.json(); } catch { return jsonResponse({ ok:false, error:"Invalid JSON body." }, 400); }
 
   const preferred_name = normalizeText(body.preferred_name);
   const company_name = normalizeText(body.company_name);
@@ -191,27 +140,12 @@ export async function onRequestPost(context) {
   const postal_code = normalizeText(body.postal_code);
   const country = normalizeText(body.country);
 
-  await env.DB.prepare(`
+  await db.prepare(`
     INSERT INTO user_profiles (
-      user_id,
-      profile_type,
-      preferred_name,
-      company_name,
-      phone,
-      preferred_contact_method,
-      contact_notes,
-      marketing_opt_in,
-      order_updates_opt_in,
-      address_line1,
-      address_line2,
-      city,
-      province,
-      postal_code,
-      country,
-      created_at,
-      updated_at
-    )
-    VALUES (?, 'customer', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      user_id, profile_type, preferred_name, company_name, phone, preferred_contact_method, contact_notes,
+      marketing_opt_in, order_updates_opt_in, address_line1, address_line2, city, province, postal_code, country,
+      created_at, updated_at
+    ) VALUES (?, 'customer', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     ON CONFLICT(user_id) DO UPDATE SET
       preferred_name = excluded.preferred_name,
       company_name = excluded.company_name,
@@ -244,6 +178,6 @@ export async function onRequestPost(context) {
     country || null
   ).run();
 
-  const payload = await readProfile(env, memberUser);
-  return json({ ok: true, message: "Profile updated successfully.", ...payload });
+  const payload = await readProfile(context.env, memberUser);
+  return jsonResponse({ ok: true, message: "Profile updated successfully.", ...payload });
 }
