@@ -1,44 +1,202 @@
-// File: /functions/api/admin/accounting-monthly-summary-export.js
-// Brief description: CSV monthly summary export for accountants.
-import { getAdminUserFromRequest, getDb } from "../_lib/adminAudit.js";
+import { json, requireAdmin } from '../../_lib/http.js';
 
-function csvEscape(value) {
-  const text = String(value ?? '');
-  if (/[",
-]/.test(text)) return '"' + text.replace(/"/g, '""') + '"';
-  return text;
+function csvCell(value) {
+  if (value === null || value === undefined) return '';
+  const str = String(value);
+  if (/[",\n\r]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
 }
 
-async function ensureTables(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS general_ledger_accounts (gl_account_id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, name TEXT NOT NULL, category TEXT NOT NULL, parent_group TEXT, normal_balance TEXT NOT NULL DEFAULT 'debit', is_active INTEGER NOT NULL DEFAULT 1, sort_order INTEGER NOT NULL DEFAULT 0, notes TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_expenses (expense_id INTEGER PRIMARY KEY AUTOINCREMENT, expense_date TEXT NOT NULL, vendor TEXT, category TEXT, description TEXT, amount_cents INTEGER NOT NULL DEFAULT 0, currency TEXT NOT NULL DEFAULT 'CAD', tax_cents INTEGER NOT NULL DEFAULT 0, receipt_url TEXT, notes TEXT, created_by_user_id INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_writeoffs (writeoff_id INTEGER PRIMARY KEY AUTOINCREMENT, writeoff_date TEXT NOT NULL, writeoff_type TEXT NOT NULL, description TEXT, amount_cents INTEGER NOT NULL DEFAULT 0, currency TEXT NOT NULL DEFAULT 'CAD', gl_account_code TEXT, product_id INTEGER, quantity REAL, notes TEXT, created_by_user_id INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_order_records (accounting_order_record_id INTEGER PRIMARY KEY AUTOINCREMENT, order_id INTEGER, order_number TEXT, customer_email TEXT, currency TEXT NOT NULL DEFAULT 'CAD', subtotal_cents INTEGER NOT NULL DEFAULT 0, shipping_cents INTEGER NOT NULL DEFAULT 0, tax_cents INTEGER NOT NULL DEFAULT 0, discount_cents INTEGER NOT NULL DEFAULT 0, total_cents INTEGER NOT NULL DEFAULT 0, paid_cents INTEGER NOT NULL DEFAULT 0, refunded_cents INTEGER NOT NULL DEFAULT 0, outstanding_cents INTEGER NOT NULL DEFAULT 0, entry_status TEXT NOT NULL DEFAULT 'open', payment_provider TEXT, payment_status TEXT, notes TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+function toCsv(rows) {
+  if (!Array.isArray(rows) || !rows.length) return '';
+  const headers = Object.keys(rows[0]);
+  const lines = [
+    headers.map(csvCell).join(','),
+    ...rows.map((row) => headers.map((key) => csvCell(row[key])).join(',')),
+  ];
+  return lines.join('\n');
+}
+
+async function tableExists(db, tableName) {
+  try {
+    const result = await db
+      .prepare(
+        `SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1`
+      )
+      .bind(tableName)
+      .first();
+    return !!result;
+  } catch {
+    return false;
+  }
+}
+
+async function safeAll(db, sql, bindings = []) {
+  try {
+    const stmt = db.prepare(sql).bind(...bindings);
+    const result = await stmt.all();
+    return Array.isArray(result?.results) ? result.results : [];
+  } catch {
+    return [];
+  }
+}
+
+function monthRange(monthValue) {
+  const raw = String(monthValue || '').trim();
+  const match = /^(\d{4})-(\d{2})$/.exec(raw);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (!year || month < 1 || month > 12) return null;
+
+  const start = `${match[1]}-${match[2]}-01`;
+  const nextYear = month === 12 ? year + 1 : year;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const end = `${String(nextYear).padStart(4, '0')}-${String(nextMonth).padStart(2, '0')}-01`;
+
+  return { raw, start, end };
+}
+
+async function loadOrderSummary(env, range) {
+  if (!env?.DB) return [];
+
+  const hasOrders = await tableExists(env.DB, 'orders');
+  if (!hasOrders) return [];
+
+  return safeAll(
+    env.DB,
+    `
+      SELECT
+        'order' AS row_type,
+        substr(COALESCE(created_at, datetime('now')), 1, 7) AS period_month,
+        id AS reference_id,
+        COALESCE(order_number, CAST(id AS TEXT)) AS reference_code,
+        COALESCE(customer_email, '') AS party,
+        COALESCE(status, '') AS status,
+        ROUND(COALESCE(total_amount, total, 0), 2) AS amount,
+        ROUND(COALESCE(tax_amount, tax_total, 0), 2) AS tax_amount,
+        '' AS ledger_code,
+        '' AS ledger_name,
+        COALESCE(notes, '') AS notes
+      FROM orders
+      WHERE substr(COALESCE(created_at, datetime('now')), 1, 10) >= ?
+        AND substr(COALESCE(created_at, datetime('now')), 1, 10) < ?
+      ORDER BY COALESCE(created_at, datetime('now')) DESC
+    `,
+    [range.start, range.end]
+  );
+}
+
+async function loadExpenseSummary(env, range) {
+  if (!env?.DB) return [];
+
+  const hasExpenses = await tableExists(env.DB, 'accounting_expenses');
+  if (!hasExpenses) return [];
+
+  return safeAll(
+    env.DB,
+    `
+      SELECT
+        'expense' AS row_type,
+        substr(COALESCE(expense_date, created_at, datetime('now')), 1, 7) AS period_month,
+        id AS reference_id,
+        COALESCE(reference_number, CAST(id AS TEXT)) AS reference_code,
+        COALESCE(vendor_name, payee_name, '') AS party,
+        COALESCE(status, '') AS status,
+        ROUND(COALESCE(amount, 0), 2) AS amount,
+        ROUND(COALESCE(tax_amount, 0), 2) AS tax_amount,
+        COALESCE(ledger_code, '') AS ledger_code,
+        COALESCE(ledger_name, '') AS ledger_name,
+        COALESCE(notes, '') AS notes
+      FROM accounting_expenses
+      WHERE substr(COALESCE(expense_date, created_at, datetime('now')), 1, 10) >= ?
+        AND substr(COALESCE(expense_date, created_at, datetime('now')), 1, 10) < ?
+      ORDER BY COALESCE(expense_date, created_at, datetime('now')) DESC
+    `,
+    [range.start, range.end]
+  );
+}
+
+async function loadWriteoffSummary(env, range) {
+  if (!env?.DB) return [];
+
+  const hasWriteoffs = await tableExists(env.DB, 'accounting_writeoffs');
+  if (!hasWriteoffs) return [];
+
+  return safeAll(
+    env.DB,
+    `
+      SELECT
+        'writeoff' AS row_type,
+        substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 7) AS period_month,
+        id AS reference_id,
+        COALESCE(reference_number, CAST(id AS TEXT)) AS reference_code,
+        COALESCE(item_name, product_name, reason_code, '') AS party,
+        COALESCE(status, '') AS status,
+        ROUND(COALESCE(total_amount, amount, 0), 2) AS amount,
+        ROUND(COALESCE(tax_amount, 0), 2) AS tax_amount,
+        COALESCE(ledger_code, '') AS ledger_code,
+        COALESCE(ledger_name, '') AS ledger_name,
+        COALESCE(notes, '') AS notes
+      FROM accounting_writeoffs
+      WHERE substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 10) >= ?
+        AND substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 10) < ?
+      ORDER BY COALESCE(writeoff_date, created_at, datetime('now')) DESC
+    `,
+    [range.start, range.end]
+  );
 }
 
 export async function onRequestGet(context) {
-  const { request, env } = context;
-  const db = getDb(env);
-  await ensureTables(db);
-  const adminUser = await getAdminUserFromRequest(env, request);
-  if (!adminUser?.ok) return new Response('Unauthorized', { status: 401 });
-  const url = new URL(request.url);
-  const month = (url.searchParams.get('month') || new Date().toISOString().slice(0,7)).slice(0,7);
-  const start = `${month}-01`;
-  const end = `${month}-31`;
-  const rows = [];
-  rows.push(['Section','Date','GL Code','Category','Description','Amount','Currency','Notes']);
-  const revenue = await db.prepare(`SELECT created_at, total_cents, tax_cents, shipping_cents, refunded_cents, payment_status, order_number FROM accounting_order_records WHERE substr(created_at,1,7)=? ORDER BY created_at ASC`).bind(month).all();
-  for (const r of (revenue.results||[])) {
-    rows.push(['Revenue', String(r.created_at||''), '4000', 'Sales Revenue', `Order ${r.order_number||''}`.trim(), ((Number(r.total_cents||0)-Number(r.tax_cents||0)-Number(r.shipping_cents||0))/100).toFixed(2), r.currency||'CAD', r.payment_status||'']);
-    if (Number(r.shipping_cents||0)) rows.push(['Revenue', String(r.created_at||''), '4050', 'Shipping Income', `Order ${r.order_number||''} shipping`, (Number(r.shipping_cents||0)/100).toFixed(2), r.currency||'CAD', '']);
-    if (Number(r.refunded_cents||0)) rows.push(['Adjustments', String(r.created_at||''), '6900', 'Refund/Write-Off Adjustments', `Order ${r.order_number||''} refunded`, (Number(r.refunded_cents||0)/100).toFixed(2), r.currency||'CAD', 'Refunded']);
+  const adminCheck = await requireAdmin(context);
+  if (adminCheck) return adminCheck;
+
+  const url = new URL(context.request.url);
+  const range = monthRange(url.searchParams.get('month'));
+  if (!range) {
+    return json(
+      { ok: false, error: 'Please provide month in YYYY-MM format.' },
+      { status: 400 }
+    );
   }
-  const expenses = await db.prepare(`SELECT expense_date, category, description, amount_cents, tax_cents, currency, vendor, notes FROM accounting_expenses WHERE expense_date >= ? AND expense_date <= ? ORDER BY expense_date ASC`).bind(start,end).all();
-  for (const r of (expenses.results||[])) rows.push(['Expense', r.expense_date||'', '', r.category||'Operating Expense', [r.vendor,r.description].filter(Boolean).join(' — '), (Number(r.amount_cents||0)/100).toFixed(2), r.currency||'CAD', r.notes||'']);
-  const writeoffs = await db.prepare(`SELECT writeoff_date, gl_account_code, writeoff_type, description, amount_cents, currency, notes FROM accounting_writeoffs WHERE writeoff_date >= ? AND writeoff_date <= ? ORDER BY writeoff_date ASC`).bind(start,end).all();
-  for (const r of (writeoffs.results||[])) rows.push(['Write-Off', r.writeoff_date||'', r.gl_account_code||'6900', r.writeoff_type||'Write-Off', r.description||'', (Number(r.amount_cents||0)/100).toFixed(2), r.currency||'CAD', r.notes||'']);
-  const body = rows.map(row => row.map(csvEscape).join(',')).join('
-');
-  return new Response(body, { status: 200, headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="accounting-monthly-summary-${month}.csv"` } });
+
+  const [orders, expenses, writeoffs] = await Promise.all([
+    loadOrderSummary(context.env, range),
+    loadExpenseSummary(context.env, range),
+    loadWriteoffSummary(context.env, range),
+  ]);
+
+  const rows = [...orders, ...expenses, ...writeoffs];
+
+  const csv = toCsv(
+    rows.length
+      ? rows
+      : [
+          {
+            row_type: 'empty',
+            period_month: range.raw,
+            reference_id: '',
+            reference_code: '',
+            party: '',
+            status: '',
+            amount: 0,
+            tax_amount: 0,
+            ledger_code: '',
+            ledger_name: '',
+            notes: '',
+          },
+        ]
+  );
+
+  return new Response(csv, {
+    status: 200,
+    headers: {
+      'content-type': 'text/csv; charset=utf-8',
+      'content-disposition': `attachment; filename="accounting-monthly-summary-${range.raw}.csv"`,
+      'cache-control': 'no-store',
+    },
+  });
 }
