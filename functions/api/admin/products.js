@@ -21,6 +21,52 @@ function buildReadiness(row = {}) {
   };
 }
 
+async function loadProductsPrimary(db, clauses, bindings) {
+  const sql = `
+    SELECT p.*, tc.code AS tax_class_code, tc.name AS tax_class_name, tc.tax_rate AS tax_rate,
+           ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override,
+           COUNT(DISTINCT pi.product_image_id) AS image_count,
+           COUNT(DISTINCT prl.product_resource_link_id) AS linked_resource_count,
+           COALESCE(SUM(COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0)), 0) AS linked_resource_cost_cents,
+           SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 1 ELSE 0 END) AS missing_cost_links,
+           MIN(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL THEN CAST(((CASE WHEN COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0) > 0 THEN COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0) ELSE 0 END) / prl.quantity_used) AS INTEGER) ELSE NULL END) AS buildable_units_from_resources,
+           SUM(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL AND (CASE WHEN COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0) > 0 THEN COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0) ELSE 0 END) < COALESCE(prl.quantity_used,0) THEN 1 ELSE 0 END) AS resource_shortage_links,
+           CASE WHEN COALESCE(p.inventory_tracking,0)=1 AND COALESCE(p.inventory_quantity,0) <= 2 THEN 1 ELSE 0 END AS low_stock_flag
+    FROM products p
+    LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id
+    LEFT JOIN product_seo ps ON ps.product_id = p.product_id
+    LEFT JOIN product_images pi ON pi.product_id = p.product_id
+    LEFT JOIN product_resource_links prl ON prl.product_id = p.product_id
+    LEFT JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
+    WHERE ${clauses.join(' AND ')}
+    GROUP BY p.product_id
+    ORDER BY p.sort_order ASC, p.created_at DESC, p.product_id DESC
+  `;
+  return bindings.length ? await db.prepare(sql).bind(...bindings).all() : await db.prepare(sql).all();
+}
+
+async function loadProductsFallback(db, clauses, bindings) {
+  const sql = `
+    SELECT p.*, tc.code AS tax_class_code, tc.name AS tax_class_name, tc.tax_rate AS tax_rate,
+           ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override,
+           COUNT(DISTINCT pi.product_image_id) AS image_count,
+           0 AS linked_resource_count,
+           0 AS linked_resource_cost_cents,
+           0 AS missing_cost_links,
+           NULL AS buildable_units_from_resources,
+           0 AS resource_shortage_links,
+           CASE WHEN COALESCE(p.inventory_tracking,0)=1 AND COALESCE(p.inventory_quantity,0) <= 2 THEN 1 ELSE 0 END AS low_stock_flag
+    FROM products p
+    LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id
+    LEFT JOIN product_seo ps ON ps.product_id = p.product_id
+    LEFT JOIN product_images pi ON pi.product_id = p.product_id
+    WHERE ${clauses.join(' AND ')}
+    GROUP BY p.product_id
+    ORDER BY p.sort_order ASC, p.created_at DESC, p.product_id DESC
+  `;
+  return bindings.length ? await db.prepare(sql).bind(...bindings).all() : await db.prepare(sql).all();
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = getDb(env);
@@ -38,27 +84,18 @@ export async function onRequestGet(context) {
     const like = `%${q}%`;
     bindings.push(like, like, like, like);
   }
-  const sql = `
-    SELECT p.*, tc.code AS tax_class_code, tc.name AS tax_class_name, tc.tax_rate AS tax_rate,
-           ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override,
-           COUNT(DISTINCT pi.product_image_id) AS image_count,
-           COUNT(DISTINCT prl.product_resource_link_id) AS linked_resource_count,
-           COALESCE(SUM(COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0)), 0) AS linked_resource_cost_cents,
-           SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 1 ELSE 0 END) AS missing_cost_links,
-           MIN(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL THEN CAST(MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) / prl.quantity_used AS INTEGER) ELSE NULL END) AS buildable_units_from_resources,
-           SUM(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL AND MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) < COALESCE(prl.quantity_used,0) THEN 1 ELSE 0 END) AS resource_shortage_links,
-           CASE WHEN COALESCE(p.inventory_tracking,0)=1 AND COALESCE(p.inventory_quantity,0) <= 2 THEN 1 ELSE 0 END AS low_stock_flag
-    FROM products p
-    LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id
-    LEFT JOIN product_seo ps ON ps.product_id = p.product_id
-    LEFT JOIN product_images pi ON pi.product_id = p.product_id
-    LEFT JOIN product_resource_links prl ON prl.product_id = p.product_id
-    LEFT JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
-    WHERE ${clauses.join(' AND ')}
-    GROUP BY p.product_id
-    ORDER BY p.sort_order ASC, p.created_at DESC, p.product_id DESC
-  `;
-  const result = bindings.length ? await db.prepare(sql).bind(...bindings).all() : await db.prepare(sql).all();
+
+  let result;
+  let degraded = false;
+  let degradedReason = '';
+  try {
+    result = await loadProductsPrimary(db, clauses, bindings);
+  } catch (error) {
+    degraded = true;
+    degradedReason = String(error?.message || error || 'Primary product query failed.');
+    result = await loadProductsFallback(db, clauses, bindings);
+  }
+
   const rawProducts = Array.isArray(result?.results) ? result.results : [];
   const products = rawProducts.map((row) => {
     const linkedResourceCost = Number(row.linked_resource_cost_cents || 0);
@@ -79,6 +116,8 @@ export async function onRequestGet(context) {
   return json({
     ok: true,
     requested_by: adminUser,
+    degraded_query: degraded ? 1 : 0,
+    degraded_reason: degradedReason,
     products,
     summary: {
       total_products: products.length,
