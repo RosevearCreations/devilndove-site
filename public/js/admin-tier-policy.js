@@ -1,104 +1,86 @@
 // File: /public/js/admin-tier-policy.js
-// Brief description: Admin editor for Bronze/Silver/Gold member-facing tier descriptions and benefits.
-(function () {
-  const mountEl = document.getElementById("adminTierPolicyMount");
-  if (!mountEl || !window.DDAuth) return;
+// Brief description: Admin editor for Bronze, Silver, and Gold member-facing tier policy text.
 
-  function esc(value) {
-    return String(value ?? "").replace(/[&<>\"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+document.addEventListener("DOMContentLoaded", () => {
+  const mount = document.getElementById("tierPolicyAdminMount");
+  if (!mount || !window.DDAuth) return;
+
+  mount.innerHTML = `
+    <div class="card" style="margin-top:18px">
+      <h3 style="margin-top:0">Tier Policy</h3>
+      <p class="small">Control what Bronze, Silver, and Gold members see in their account area. Keep benefits simple now so the system can grow later.</p>
+      <div class="small" id="tierPolicyMessage" style="display:none;margin-bottom:10px"></div>
+      <div id="tierPolicyCards" class="tier-policy-grid"></div>
+    </div>`;
+
+  const cards = mount.querySelector('#tierPolicyCards');
+  const message = mount.querySelector('#tierPolicyMessage');
+
+  function setMessage(text, isError = false) {
+    message.textContent = text || '';
+    message.style.display = text ? 'block' : 'none';
+    message.style.color = isError ? '#b00020' : '';
   }
 
-  function setMessage(message, isError = false) {
-    const el = document.getElementById("tierPolicyMessage");
-    if (!el) return;
-    el.style.display = message ? "block" : "none";
-    el.textContent = message || "";
-    el.style.color = isError ? "#b91c1c" : "";
+  function normalizeBenefits(text) {
+    return String(text || '').split(/\n+/).map((line) => line.trim()).filter(Boolean);
   }
 
-  function renderShell() {
-    mountEl.innerHTML = `
-      <div class="card">
-        <h3 style="margin-top:0">Tier Policy</h3>
-        <p class="small" style="margin-top:0">Control what Bronze, Silver, and Gold members see in their account area. Keep benefits simple now so the system can grow later.</p>
-        <div id="tierPolicyMessage" class="small" style="display:none;margin-bottom:12px"></div>
-        <div id="tierPolicyList" class="grid cols-3" style="gap:12px"></div>
-      </div>`;
-  }
-
-  async function load() {
-    try {
-      const res = await window.DDAuth.apiFetch("/api/admin/tier-policies");
-      const contentType = res.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) throw new Error("Tier Policy endpoint is not available yet.");
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to load tier policies.");
-      const rows = Array.isArray(data.tier_policies) ? data.tier_policies : [];
-      const list = document.getElementById("tierPolicyList");
-      if (!list) return;
-      list.innerHTML = rows.map((row) => {
-        let benefits = [];
+  async function loadPolicies() {
+    setMessage('');
+    const response = await window.DDAuth.apiFetch('/api/admin/tier-policies');
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) throw new Error('Tier Policy endpoint is not available yet.');
+    const data = await response.json();
+    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed loading tier policies.');
+    const policies = Array.isArray(data.policies) ? data.policies : [];
+    cards.innerHTML = '';
+    policies.forEach((policy) => {
+      const article = document.createElement('article');
+      article.className = 'card';
+      article.innerHTML = `
+        <form class="grid" data-tier-policy-form style="gap:10px">
+          <input type="hidden" name="code" value="${policy.code || ''}">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+            <h4 style="margin:0">${policy.name || policy.code || 'Tier'}</h4>
+            <label class="small"><input type="checkbox" name="is_visible" ${Number(policy.is_visible || 1) ? 'checked' : ''}> Visible</label>
+          </div>
+          <div class="grid cols-2" style="gap:10px">
+            <div><label class="small">Public title</label><input name="display_title" type="text" value="${policy.display_title || policy.name || ''}"></div>
+            <div><label class="small">Badge color</label><input name="badge_color" type="text" value="${policy.badge_color || ''}" placeholder="#8f6b2f"></div>
+          </div>
+          <div><label class="small">Short description</label><textarea name="short_description" rows="3">${policy.short_description || ''}</textarea></div>
+          <div><label class="small">Benefits (one per line)</label><textarea name="benefits_text" rows="5">${(policy.benefits || []).join('\n')}</textarea></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn primary" type="submit">Save ${policy.name || policy.code || 'tier'}</button>
+            <span class="small" data-tier-policy-status></span>
+          </div>
+        </form>`;
+      const form = article.querySelector('[data-tier-policy-form]');
+      const status = article.querySelector('[data-tier-policy-status]');
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        status.textContent = 'Saving…';
         try {
-          const parsed = JSON.parse(row.benefits_json || "[]");
-          benefits = Array.isArray(parsed) ? parsed : [];
-        } catch {
-          benefits = [];
+          const payload = {
+            code: form.code.value,
+            display_title: form.display_title.value,
+            short_description: form.short_description.value,
+            benefits: normalizeBenefits(form.benefits_text.value),
+            badge_color: form.badge_color.value,
+            is_visible: !!form.is_visible.checked
+          };
+          const saveResponse = await window.DDAuth.apiFetch('/api/admin/tier-policies', { method: 'POST', body: JSON.stringify(payload) });
+          const saveData = await saveResponse.json();
+          if (!saveResponse.ok || !saveData?.ok) throw new Error(saveData?.error || 'Failed saving tier policy.');
+          status.textContent = 'Saved.';
+        } catch (error) {
+          status.textContent = String(error?.message || error || 'Save failed.');
         }
-        return `
-          <form class="card tier-policy-form" data-code="${esc(row.access_tier_code)}" style="margin:0;border-top:4px solid ${esc(row.badge_color || "#444")}">
-            <div style="font-weight:700;margin-bottom:8px">${esc(row.title || row.access_tier_code || "Tier")}</div>
-            <label class="small">Title</label>
-            <input name="title" type="text" value="${esc(row.title || "")}" />
-            <label class="small">Short Description</label>
-            <input name="short_description" type="text" value="${esc(row.short_description || "")}" />
-            <label class="small">Benefits (one per line)</label>
-            <textarea name="benefits_text" rows="6">${esc(benefits.join("\n"))}</textarea>
-            <div class="grid cols-2" style="gap:10px">
-              <div>
-                <label class="small">Badge Color</label>
-                <input name="badge_color" type="text" value="${esc(row.badge_color || "")}" />
-              </div>
-              <div>
-                <label class="small">Sort Order</label>
-                <input name="sort_order" type="number" value="${esc(row.sort_order || 0)}" />
-              </div>
-            </div>
-            <label class="small" style="display:flex;gap:8px;align-items:center">
-              <input name="is_visible" type="checkbox" ${Number(row.is_visible || 0) === 1 ? "checked" : ""}/> Visible to members
-            </label>
-            <button class="btn" type="submit">Save Policy</button>
-          </form>`;
-      }).join("");
-      list.querySelectorAll(".tier-policy-form").forEach((form) => form.addEventListener("submit", save));
-    } catch (error) {
-      setMessage(error.message || "Failed to load tier policies.", true);
-    }
-  }
-
-  async function save(event) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const code = form.getAttribute("data-code") || "";
-    const payload = Object.fromEntries(new FormData(form).entries());
-    payload.access_tier_code = code;
-    payload.is_visible = form.querySelector('input[name="is_visible"]')?.checked ? 1 : 0;
-    try {
-      setMessage("Saving tier policy...");
-      const res = await window.DDAuth.apiFetch("/api/admin/tier-policies", {
-        method: "POST",
-        body: JSON.stringify(payload)
       });
-      const contentType = res.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) throw new Error("Tier Policy endpoint is not available yet.");
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Failed to save tier policy.");
-      setMessage(`Saved ${code.toUpperCase()} policy.`);
-      await load();
-    } catch (error) {
-      setMessage(error.message || "Failed to save tier policy.", true);
-    }
+      cards.appendChild(article);
+    });
   }
 
-  renderShell();
-  load();
-})();
+  loadPolicies().catch((error) => setMessage(String(error?.message || error || 'Failed loading tier policies.'), true));
+});

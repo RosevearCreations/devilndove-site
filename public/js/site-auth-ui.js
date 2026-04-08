@@ -33,19 +33,19 @@ document.addEventListener("DOMContentLoaded", () => {
         <div id="ddAuthWidgetLoggedIn" style="display:none">
           <div class="small" id="ddAuthWidgetUserLabel" style="margin-bottom:10px"></div>
           <div class="dd-auth-widget-links">
-            <a href="/members/">Settings</a>
-            <a href="/members/#orders">Orders</a>
-            <a href="/admin/" id="ddAuthWidgetAdminLink" style="display:none">Admin Dashboard</a>
+            <a href="/members/index.html">Settings</a>
+            <a href="/members/index.html#orders">Orders</a>
+            <a href="/admin/index.html" id="ddAuthWidgetAdminLink" style="display:none">Admin Dashboard</a>
             <button class="btn" type="button" id="ddAuthWidgetLogout">Logout</button>
           </div>
         </div>
         <div id="ddAuthWidgetLoggedOut" style="display:none">
           <div class="small" style="margin-bottom:10px">You are currently logged out.</div>
           <div class="dd-auth-widget-links">
-            <a href="/login/">Login</a>
-            <a href="/register/">Create account</a>
-            <a href="/account-help/?mode=password">Forgot password</a>
-            <a href="/account-help/?mode=email">Forgot email</a>
+            <a href="/login/index.html">Login</a>
+            <a href="/register/index.html">Create account</a>
+            <a href="/account-help/index.html?mode=password">Forgot password</a>
+            <a href="/account-help/index.html?mode=email">Forgot email</a>
           </div>
         </div>
       </div>`;
@@ -54,15 +54,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const body = floatingWidgetEl.querySelector('#ddAuthWidgetBody');
     const logout = floatingWidgetEl.querySelector('#ddAuthWidgetLogout');
     toggle?.addEventListener('click', () => {
-      const opening = body.style.display === 'none';
-      body.style.display = opening ? 'block' : 'none';
-      toggle.textContent = opening ? 'Close' : 'Open';
-    });
-    document.addEventListener('click', (event) => {
-      if (!floatingWidgetEl || body.style.display === 'none') return;
-      if (floatingWidgetEl.contains(event.target)) return;
-      body.style.display = 'none';
-      if (toggle) toggle.textContent = 'Open';
+      body.style.display = body.style.display === 'none' ? 'block' : 'block';
+      if (body.style.display === 'block' && toggle.textContent === 'Open') toggle.textContent = 'Close';
+      else if (toggle.textContent === 'Close') { body.style.display = 'none'; toggle.textContent = 'Open'; }
     });
     logout?.addEventListener('click', async () => {
       try { await window.DDAuth.logout(); } finally { window.location.href = '/'; }

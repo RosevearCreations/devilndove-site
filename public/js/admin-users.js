@@ -129,9 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage("Loading users...");
       if (refreshButton) { refreshButton.disabled = true; refreshButton.textContent = "Loading..."; }
       allUsers = await fetchUsers();
-      window.__ddAdminUsersCache = allUsers.slice();
       renderTable(allUsers.filter(matchesFilters));
-      document.dispatchEvent(new CustomEvent("dd:users-loaded", { detail: { users: allUsers.slice() } }));
       setMessage(`Loaded ${allUsers.length} user${allUsers.length === 1 ? "" : "s"}.`);
     } catch (error) {
       allUsers = [];

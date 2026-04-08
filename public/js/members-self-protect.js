@@ -6,7 +6,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const membersSectionEl = document.getElementById("membersSection");
   const accessMessageEl = document.getElementById("membersAccessMessage");
-  const adminPreview = new URL(window.location.href).searchParams.get("admin_preview") === "1";
 
   if (!window.DDAuth) return;
 
@@ -25,17 +24,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function redirectToLogin() {
-    if (adminPreview) return;
     const next = `${window.location.pathname}${window.location.search || ""}${window.location.hash || ""}`;
     const url = new URL("/login/", window.location.origin);
     url.searchParams.set("next", next);
     window.location.href = url.toString();
   }
 
-  function handleAllowed(user, message = "") {
+  function handleAllowed(user) {
     resolved = true;
     showMembersSection(true);
-    setAccessMessage(message);
+    setAccessMessage("");
     document.dispatchEvent(new CustomEvent("dd:member-access-granted", {
       detail: {
         ok: true,
@@ -64,24 +62,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const user = event?.detail?.user || null;
 
     if (!ok || !user) {
-      if (adminPreview) {
-        const cachedUser = window.DDAuth.getStoredUser();
-        const cachedRole = String(cachedUser?.role || "").trim().toLowerCase();
-        if (cachedUser && cachedRole === "admin") {
-          handleAllowed(cachedUser, "Admin preview mode: reviewing the member layout without switching accounts.");
-          return;
-        }
-      }
       handleDenied();
       return;
     }
 
     const role = String(user.role || "").trim().toLowerCase();
-
-    if (adminPreview && role === "admin") {
-      handleAllowed(user, "Admin preview mode: reviewing the member layout without switching accounts.");
-      return;
-    }
 
     if (!["member", "admin"].includes(role)) {
       handleDenied("Your account does not have access to the member area.");

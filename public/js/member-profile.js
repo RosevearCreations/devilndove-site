@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hasRendered) return;
     hasRendered = true;
     mountEl.innerHTML = `
-      <div class="card" style="margin-top:18px"><h3 style="margin-top:0">Contact Profile</h3><p class="small" style="margin-top:0">Keep your address, phone, and contact preferences current.</p><div id="memberProfileMessage" class="small" style="display:none;margin-bottom:12px"></div><form id="memberProfileForm" class="grid" style="gap:12px"><div class="grid cols-3" style="gap:12px"><div><label class="small" for="mpPreferredName">Preferred Name</label><input id="mpPreferredName" type="text" /></div><div><label class="small" for="mpCompanyName">Company</label><input id="mpCompanyName" type="text" /></div><div><label class="small" for="mpPhone">Phone</label><input id="mpPhone" type="text" /></div></div><div class="grid cols-3" style="gap:12px"><div><label class="small" for="mpPreferredContactMethod">Preferred Contact</label><select id="mpPreferredContactMethod"><option value="email">Email</option><option value="phone">Phone</option><option value="text">Text</option><option value="mail">Mail</option><option value="none">Do Not Contact</option></select></div><label class="small" style="display:flex;gap:8px;align-items:flex-start"><input id="mpMarketingOptIn" type="checkbox" /><span>Marketing Opt-In</span></label><label class="small" style="display:flex;gap:8px;align-items:flex-start"><input id="mpOrderUpdatesOptIn" type="checkbox" checked /><span>Order Updates Opt-In</span></label></div><div class="small">Verification: <span id="mpVerificationStatus">Email ✕ • Phone ✕</span></div><div class="small">Assigned tiers: <span id="mpTierCodes">—</span></div><div id="mpTierPolicies" class="grid cols-3" style="gap:10px"></div><div><label class="small" for="mpContactNotes">Contact Notes</label><input id="mpContactNotes" type="text" placeholder="Optional delivery/contact preference notes" /></div><div class="card"><h4 style="margin-top:0">Address</h4><div class="grid" style="gap:12px"><div><label class="small" for="mpAddress1">Address 1</label><input id="mpAddress1" type="text" /></div><div><label class="small" for="mpAddress2">Address 2</label><input id="mpAddress2" type="text" /></div><div class="grid cols-4" style="gap:12px"><div><label class="small" for="mpCity">City</label><input id="mpCity" type="text" /></div><div><label class="small" for="mpProvince">Province/State</label><input id="mpProvince" type="text" /></div><div><label class="small" for="mpPostal">Postal Code</label><input id="mpPostal" type="text" /></div><div><label class="small" for="mpCountry">Country</label><input id="mpCountry" type="text" /></div></div></div></div><div><button class="btn" type="submit" id="saveMemberProfileButton">Save Profile</button></div></form></div>`;
+      <div class="card" style="margin-top:18px"><h3 style="margin-top:0">Contact Profile</h3><p class="small" style="margin-top:0">Keep your address, phone, and contact preferences current.</p><div id="memberProfileMessage" class="small" style="display:none;margin-bottom:12px"></div><form id="memberProfileForm" class="grid" style="gap:12px"><div class="grid cols-3" style="gap:12px"><div><label class="small" for="mpPreferredName">Preferred Name</label><input id="mpPreferredName" type="text" /></div><div><label class="small" for="mpCompanyName">Company</label><input id="mpCompanyName" type="text" /></div><div><label class="small" for="mpPhone">Phone</label><input id="mpPhone" type="text" /></div></div><div class="grid cols-3" style="gap:12px"><div><label class="small" for="mpPreferredContactMethod">Preferred Contact</label><select id="mpPreferredContactMethod"><option value="email">Email</option><option value="phone">Phone</option><option value="text">Text</option><option value="mail">Mail</option><option value="none">Do Not Contact</option></select></div><label class="small" style="display:flex;gap:8px;align-items:flex-start"><input id="mpMarketingOptIn" type="checkbox" /><span>Marketing Opt-In</span></label><label class="small" style="display:flex;gap:8px;align-items:flex-start"><input id="mpOrderUpdatesOptIn" type="checkbox" checked /><span>Order Updates Opt-In</span></label></div><div class="small">Verification: <span id="mpVerificationStatus">Email ✕ • Phone ✕</span></div><div class="small">Assigned tiers: <span id="mpTierCodes">—</span></div><div><label class="small" for="mpContactNotes">Contact Notes</label><input id="mpContactNotes" type="text" placeholder="Optional delivery/contact preference notes" /></div><div class="card"><h4 style="margin-top:0">Address</h4><div class="grid" style="gap:12px"><div><label class="small" for="mpAddress1">Address 1</label><input id="mpAddress1" type="text" /></div><div><label class="small" for="mpAddress2">Address 2</label><input id="mpAddress2" type="text" /></div><div class="grid cols-4" style="gap:12px"><div><label class="small" for="mpCity">City</label><input id="mpCity" type="text" /></div><div><label class="small" for="mpProvince">Province/State</label><input id="mpProvince" type="text" /></div><div><label class="small" for="mpPostal">Postal Code</label><input id="mpPostal" type="text" /></div><div><label class="small" for="mpCountry">Country</label><input id="mpCountry" type="text" /></div></div></div></div><div><button class="btn" type="submit" id="saveMemberProfileButton">Save Profile</button></div></form></div>`;
     document.getElementById("memberProfileForm")?.addEventListener("submit", handleSubmit);
   }
 
@@ -31,19 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const mo = document.getElementById("mpMarketingOptIn"); if (mo) mo.checked = Number(profile.marketing_opt_in || 0) === 1;
     const ou = document.getElementById("mpOrderUpdatesOptIn"); if (ou) ou.checked = Number(profile.order_updates_opt_in ?? 1) === 1;
     const vs = document.getElementById("mpVerificationStatus"); if (vs) vs.textContent = `${Number(profile.email_verified || 0) === 1 ? "Email ✓" : "Email ✕"} • ${Number(profile.phone_verified || 0) === 1 ? "Phone ✓" : "Phone ✕"}`;
-    
-const tiers = document.getElementById("mpTierCodes"); if (tiers) tiers.textContent = Array.isArray(profile.access_tier_codes) && profile.access_tier_codes.length ? profile.access_tier_codes.join(", ") : "No tiers assigned.";
-const policyMount = document.getElementById("mpTierPolicies");
-if (policyMount) {
-  const policies = Array.isArray(profile.tier_policies) ? profile.tier_policies : [];
-  policyMount.innerHTML = policies.length ? policies.map((policy) => `
-    <div class="card" style="margin:0;border-top:4px solid ${policy.badge_color || '#444'}">
-      <div style="font-weight:700">${policy.title || policy.access_tier_code || ''}</div>
-      <div class="small" style="margin:4px 0 8px 0">${policy.short_description || ''}</div>
-      <ul class="small" style="margin:0;padding-left:18px">${(Array.isArray(policy.benefits) ? policy.benefits : []).map((benefit) => `<li>${benefit}</li>`).join('')}</ul>
-    </div>`).join('') : '<div class="small">No tier policy details yet.</div>';
-}
-
+    const tierCodes = Array.isArray(profile.access_tier_codes) ? profile.access_tier_codes : [];
+    const tiers = document.getElementById("mpTierCodes"); if (tiers) tiers.textContent = tierCodes.length ? tierCodes.join(", ") : "No tiers assigned.";
   }
 
   async function loadProfile() {
@@ -51,6 +40,26 @@ if (policyMount) {
     const data = await response.json();
     if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to load profile.");
     return data;
+  }
+
+
+  async function loadTierPolicies() {
+    const response = await window.DDAuth.apiFetch("/api/member/tier-policies", { method: "GET" });
+    const data = await response.json();
+    if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to load tier benefits.");
+    return Array.isArray(data.policies) ? data.policies : [];
+  }
+
+  function renderTierPolicies(policies) {
+    const existing = document.getElementById("memberTierPoliciesCard");
+    if (existing) existing.remove();
+    if (!Array.isArray(policies) || !policies.length) return;
+    const card = document.createElement("div");
+    card.id = "memberTierPoliciesCard";
+    card.className = "card";
+    card.style.marginTop = "18px";
+    card.innerHTML = `<h3 style="margin-top:0">Active Tier Benefits</h3>${policies.map((policy) => `<div class="tier-policy-member-card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><strong>${policy.display_title || policy.name || policy.code || 'Tier'}</strong><span class="status-chip" style="background:${policy.badge_color || '#444'};color:#fff">${policy.code || ''}</span></div><div class="small" style="margin-top:6px">${policy.short_description || ''}</div><ul class="small compact-list">${(policy.benefits || []).map((item) => `<li>${item}</li>`).join('')}</ul></div>`).join('')}`;
+    mountEl.appendChild(card);
   }
 
   async function handleSubmit(event) {
@@ -92,6 +101,7 @@ if (policyMount) {
     try {
       setMessage("Loading profile...");
       fill(await loadProfile());
+      try { renderTierPolicies(await loadTierPolicies()); } catch {}
       setMessage("");
     } catch (error) {
       setMessage(error.message || "Failed to load profile.", true);

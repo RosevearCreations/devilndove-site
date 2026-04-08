@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadMovies() {
     setMessage("Loading movies...");
     const q = encodeURIComponent(searchEl?.value || "");
-    const response = await window.DDAuth.apiFetch(`/api/admin/movies?q=${q}`, { method: "GET" });
+    const response = await fetch(`/api/admin/movies?q=${q}`, { credentials: "same-origin" });
     const data = await response.json().catch(() => null);
 
     if (!response.ok || !data?.ok) {
@@ -159,8 +159,10 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     setMessage("Saving movie...");
 
-    const response = await window.DDAuth.apiFetch("/api/admin/movies", {
+    const response = await fetch("/api/admin/movies", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify(currentFormPayload())
     });
 
