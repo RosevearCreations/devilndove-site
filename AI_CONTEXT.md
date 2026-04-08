@@ -231,3 +231,8 @@ Current-pass emphasis:
 - Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
 - Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
 - Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
+
+
+## Current pass update
+- Tier Policy route/UI mismatch is resolved in code in this pass; treat Bronze/Silver/Gold policy editing as part of the live membership system now, not a future placeholder.
+- The next accounting step should focus on allocating overhead and ledger-coded costs into richer cost and profit reporting rather than only adding more raw capture forms.

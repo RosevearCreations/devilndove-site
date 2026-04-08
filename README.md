@@ -332,3 +332,8 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
 - Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
 - Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
+
+
+## Current pass update
+- Working tier policy management now exists for Bronze, Silver, and Gold through dedicated admin/member endpoints and UI mounts.
+- Starter accounting now covers expenses, product costs, write-offs, GL accounts, monthly export, and template CSVs for import prep.

@@ -113,3 +113,8 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
 - Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
 - Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
+
+
+## Current pass update
+- Tier Policy is now actually implemented in the current build through working admin/member endpoints plus admin and member UI hooks, closing the earlier HTML-instead-of-JSON failure.
+- The starter accounting layer is now wired correctly for expenses, product costs, write-offs, general ledger accounts, and monthly export groundwork.

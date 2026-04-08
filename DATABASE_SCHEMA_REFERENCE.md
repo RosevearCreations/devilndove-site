@@ -332,3 +332,7 @@ This pass did not introduce new D1 tables or column additions. The main repo cha
 - Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
 - Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
 - Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
+
+
+## Current pass addendum
+Newer live-start tables expected by the current membership/accounting build now include `membership_tier_policies`, `accounting_expenses`, `product_costs`, `accounting_writeoffs`, and `general_ledger_accounts`.

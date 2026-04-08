@@ -221,3 +221,10 @@
 - Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
 - Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
 - Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
+
+
+## Current pass addendum
+- Implemented the missing Tier Policy route layer properly by wiring `/api/admin/tier-policies`, `/api/member/tier-policies`, and the admin/member tier-policy UI onto the shared auth helpers that already power the rest of the app.
+- Continued the accounting foundation by fixing the starter expense, product-cost, write-off, and general-ledger admin endpoints so they authenticate correctly and can now serve as the next safe base for fuller P&L work.
+- Added starter accounting import templates for write-offs and general-ledger accounts and kept the existing monthly export in place for accountant handoff.
+- Continued docs/schema synchronization for the current build and treated the prior “Tier Policy missing” gap as closed in code.

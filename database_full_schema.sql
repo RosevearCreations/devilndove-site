@@ -889,3 +889,87 @@ CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_
 
 
 -- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.v2.json and can derive a trailer search URL at runtime when trailer_url is blank.
+
+
+-- Membership tier policy display table
+CREATE TABLE IF NOT EXISTS membership_tier_policies (
+  membership_tier_policy_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  access_tier_code TEXT NOT NULL UNIQUE,
+  title TEXT NOT NULL,
+  short_description TEXT,
+  benefits_json TEXT,
+  badge_color TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_visible INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_membership_tier_policies_sort ON membership_tier_policies(sort_order ASC, access_tier_code ASC);
+
+CREATE TABLE IF NOT EXISTS accounting_expenses (
+  expense_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  expense_date TEXT NOT NULL,
+  vendor TEXT,
+  category TEXT,
+  description TEXT,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  receipt_url TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_expenses_date ON accounting_expenses(expense_date DESC, expense_id DESC);
+
+CREATE TABLE IF NOT EXISTS product_costs (
+  product_cost_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  effective_date TEXT NOT NULL,
+  unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  vendor TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_product_costs_product ON product_costs(product_id, effective_date DESC, product_cost_id DESC);
+
+CREATE TABLE IF NOT EXISTS accounting_writeoffs (
+  writeoff_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  writeoff_date TEXT NOT NULL,
+  writeoff_type TEXT NOT NULL,
+  description TEXT,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  gl_account_code TEXT,
+  product_id INTEGER,
+  quantity REAL,
+  reference_number TEXT,
+  total_amount REAL,
+  tax_amount REAL,
+  ledger_code TEXT,
+  ledger_name TEXT,
+  status TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_writeoffs_date ON accounting_writeoffs(writeoff_date DESC, writeoff_id DESC);
+
+CREATE TABLE IF NOT EXISTS general_ledger_accounts (
+  gl_account_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  parent_group TEXT,
+  normal_balance TEXT NOT NULL DEFAULT 'debit',
+  is_active INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_gl_accounts_category ON general_ledger_accounts(category, sort_order, code);

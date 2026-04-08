@@ -497,3 +497,9 @@ The following files were not found on active repo paths and were renamed with an
 - Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
 - Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
 - Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
+
+
+## Current pass addendum
+- The prior Tier Policy error was caused by missing or miswired auth/route plumbing rather than the membership concept itself. That gap is now moved forward by wiring the admin tier-policy endpoint, member tier-policy endpoint, and member-account tier-benefit display onto the shared auth pattern already used elsewhere.
+- The starter accounting backend is more trustworthy now because the expense, product-cost, write-off, and general-ledger endpoints no longer fail from reversed admin-auth helper usage.
+- Remaining accounting risk is no longer “basic capture is missing”; it is now fuller overhead allocation, cost rollup logic, and deeper reporting.
