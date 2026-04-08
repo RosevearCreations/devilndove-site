@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" href="/assets/mark.png"/>
   <link rel="stylesheet" href="/css/styles.css"/>
 </head>
-<body>
+<body data-admin-page="mobile-inventory">
   <div class="container admin-shell mobile-admin-shell">
     <div class="nav">
       <div class="brand">
@@ -40,7 +40,7 @@
       <div class="mobile-admin-topline">
         <div>
           <h2 style="margin:0">Artist phone workflow</h2>
-          <div class="small">Use this page for workshop intake. Use the other admin screens later for deeper editing and accounting.</div>
+          <div class="small">Use this page for workshop intake. Use the dedicated admin screens later for products, orders, accounting, membership, and movies.</div>
         </div>
         <button class="btn" id="ddInstallAppButton" type="button">Install app</button>
       </div>
@@ -59,7 +59,7 @@
         <div class="mobile-launch-card">
           <strong>Social hub</strong>
           <div class="small">Check profile links and recent video-ready pages.</div>
-          <a class="btn" href="/socials/">Open socials</a>
+          <div class="dd-install-actions" style="margin-top:0"><a class="btn" href="/socials/">Socials</a><a class="btn" href="/admin/products/">Products</a><a class="btn" href="/admin/accounting/">Accounting</a></div>
         </div>
       </div>
     </section>

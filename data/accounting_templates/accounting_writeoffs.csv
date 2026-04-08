@@ -1,2 +1,2 @@
-writeoff_date,writeoff_type,description,amount,currency,gl_account_code,product_id,quantity,notes
-2026-04-07,inventory,Damaged pendant,12.50,CAD,6900,123,1,Dropped during finishing
+writeoff_date,item_name,amount,reason_code,notes
+2026-04-01,Broken mold,18.00,damaged,Discarded after failure
