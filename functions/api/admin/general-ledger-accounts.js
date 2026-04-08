@@ -31,14 +31,14 @@ async function ensureTables(db){
 }
 export async function onRequest(context){
  const {request, env}=context; const db=getDb(env); await ensureTables(db);
- const adminUser=await getAdminUserFromRequest(env, request); if(!adminUser?.ok) return json({ok:false,error:'Admin authentication required.'},401);
+ const adminUser=await getAdminUserFromRequest(request, env); if(!adminUser) return json({ok:false,error:'Admin authentication required.'},401);
  if(request.method==='GET'){
    const rows=await db.prepare(`SELECT gl_account_id, code, name, category, parent_group, normal_balance, is_active, sort_order, notes FROM general_ledger_accounts ORDER BY category ASC, sort_order ASC, code ASC`).all();
    return json({ok:true, accounts: rows.results||[]});
  }
  if(request.method!=='POST') return json({ok:false,error:'Method not allowed.'},405);
  let body={}; try{ body=await request.json(); }catch{}
- const code=normalizeText(body.code).upper(); const name=normalizeText(body.name); const category=normalizeText(body.category)||'Operating Expense'; const parent_group=normalizeText(body.parent_group)||null; const normal_balance=(normalizeText(body.normal_balance)||'debit').lower()==='credit'?'credit':'debit'; const sort_order=Number(body.sort_order||0); const notes=normalizeText(body.notes)||null; const is_active=Number(body.is_active===false?0:body.is_active||1)?1:0;
+ const code=normalizeText(body.code).toUpperCase(); const name=normalizeText(body.name); const category=normalizeText(body.category)||'Operating Expense'; const parent_group=normalizeText(body.parent_group)||null; const normal_balance=(normalizeText(body.normal_balance)||'debit').toLowerCase()==='credit'?'credit':'debit'; const sort_order=Number(body.sort_order||0); const notes=normalizeText(body.notes)||null; const is_active=Number(body.is_active===false?0:body.is_active||1)?1:0;
  if(!code || !name) return json({ok:false,error:'code and name are required.'},400);
  await db.prepare(`INSERT INTO general_ledger_accounts (code,name,category,parent_group,normal_balance,is_active,sort_order,notes,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(code) DO UPDATE SET name=excluded.name, category=excluded.category, parent_group=excluded.parent_group, normal_balance=excluded.normal_balance, is_active=excluded.is_active, sort_order=excluded.sort_order, notes=excluded.notes, updated_at=CURRENT_TIMESTAMP`).bind(code,name,category,parent_group,normal_balance,is_active,sort_order,notes).run();
  await auditAdminAction(env, request, adminUser, { action_type:'gl_account_upserted', action_summary:`Updated GL account ${code} ${name}.`, action_details:{code,name,category} });

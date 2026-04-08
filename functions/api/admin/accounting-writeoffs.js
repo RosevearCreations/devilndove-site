@@ -21,7 +21,7 @@ async function ensureTables(db){
   )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_writeoffs_date ON accounting_writeoffs(writeoff_date DESC, writeoff_id DESC)`).run();
 }
-export async function onRequest(context){ const {request, env}=context; const db=getDb(env); await ensureTables(db); const adminUser=await getAdminUserFromRequest(env, request); if(!adminUser?.ok) return json({ok:false,error:'Admin authentication required.'},401);
+export async function onRequest(context){ const {request, env}=context; const db=getDb(env); await ensureTables(db); const adminUser=await getAdminUserFromRequest(request, env); if(!adminUser) return json({ok:false,error:'Admin authentication required.'},401);
  const url=new URL(request.url); const limit=Math.min(Math.max(Number(url.searchParams.get('limit')||50),1),200);
  if(request.method==='GET'){
    const rows=await db.prepare(`SELECT writeoff_id, writeoff_date, writeoff_type, description, amount_cents, currency, gl_account_code, product_id, quantity, notes, created_at FROM accounting_writeoffs ORDER BY writeoff_date DESC, writeoff_id DESC LIMIT ?`).bind(limit).all();

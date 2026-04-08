@@ -1,20 +1,14 @@
 // File: /functions/api/member/tier-policies.js
 // Brief description: Returns visible membership tier policies and highlights the member's active tiers.
 
-import { getDb, jsonResponse } from "../_lib/adminAudit.js";
+import { getDb, getRequestToken, jsonResponse } from "../_lib/adminAudit.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
 }
 
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
-
 async function getMemberUserFromRequest(request, env) {
-  const token = getBearerToken(request);
+  const token = getRequestToken(request);
   if (!token) return null;
   const session = await env.DB.prepare(`
     SELECT s.user_id, u.role, u.is_active

@@ -40,8 +40,8 @@ export async function onRequest(context) {
   const db = getDb(env);
   await ensureTables(db);
 
-  const adminUser = await getAdminUserFromRequest(env, request);
-  if (!adminUser?.ok) return json({ ok: false, error: "Admin authentication required." }, 401);
+  const adminUser = await getAdminUserFromRequest(request, env);
+  if (!adminUser) return json({ ok: false, error: "Admin authentication required." }, 401);
 
   const url = new URL(request.url);
   const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 50), 1), 200);

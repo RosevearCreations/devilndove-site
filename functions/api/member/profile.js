@@ -28,14 +28,8 @@ function normalizeBool(value, fallback = 0) {
   return fallback;
 }
 
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
-
 async function getMemberUserFromRequest(request, env) {
-  const token = getBearerToken(request);
+  const token = getRequestToken(request);
   if (!token) return null;
 
   const session = await env.DB.prepare(`
