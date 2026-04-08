@@ -1,6 +1,7 @@
 # wrangler.toml
 name = "devilndove-site"
-compatibility_date = "2026-03-10"
+compatibility_date = "2026-04-08"
+pages_build_output_dir = "."
 
 [[d1_databases]]
 binding = "DB"
