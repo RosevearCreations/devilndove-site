@@ -300,3 +300,29 @@ textarea {
 .tier-policy-member-card { border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px; margin-top:12px; }
 .compact-list { padding-left:18px; margin:0; }
 @media (max-width: 720px) { .department-grid { grid-template-columns:1fr; } .admin-department-links { overflow:auto; padding-bottom:4px; } }
+
+
+.admin-card-links {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap:10px;
+}
+.admin-card-links .btn,
+.admin-department-links .btn {
+  min-height: 44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.tier-policy-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap:14px;
+}
+@media (max-width: 720px) {
+  .admin-card-links,
+  .admin-department-links {
+    grid-template-columns: 1fr 1fr;
+  }
+}
