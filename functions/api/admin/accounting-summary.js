@@ -1,112 +1,204 @@
-// File: /functions/api/admin/accounting-summary.js
-// Brief description: Returns the current lightweight accounting shadow records
-// and summary totals so admin can review revenue/tax/order amounts before
-// a fuller accounting backend is added.
+// File: /functions/api/admin/accounting-monthly-summary-export.js
+// Brief description: Exports a monthly accounting CSV for admin review.
 
 import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
+
+function csvCell(value) {
+  if (value === null || value === undefined) return "";
+  const str = String(value);
+  if (/[",\n\r]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function toCsv(rows) {
+  if (!Array.isArray(rows) || !rows.length) return "";
+  const headers = Object.keys(rows[0]);
+  const lines = [
+    headers.map(csvCell).join(","),
+    ...rows.map((row) => headers.map((key) => csvCell(row[key])).join(",")),
+  ];
+  return lines.join("\n");
+}
+
+function monthRange(monthValue) {
+  const raw = String(monthValue || "").trim();
+  const match = /^(\d{4})-(\d{2})$/.exec(raw);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (!year || month < 1 || month > 12) return null;
+
+  const start = `${match[1]}-${match[2]}-01`;
+  const nextYear = month === 12 ? year + 1 : year;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const end = `${String(nextYear).padStart(4, "0")}-${String(nextMonth).padStart(2, "0")}-01`;
+
+  return { raw, start, end };
+}
 
 function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
-async function ensureAccountingTables(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_order_records (
-      accounting_order_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_id INTEGER NOT NULL UNIQUE,
-      order_number TEXT NOT NULL,
-      entry_status TEXT NOT NULL DEFAULT 'open' CHECK (entry_status IN ('open','partially_paid','paid','refunded','cancelled','archived')),
-      customer_name TEXT,
-      customer_email TEXT,
-      currency TEXT NOT NULL DEFAULT 'CAD',
-      subtotal_cents INTEGER NOT NULL DEFAULT 0,
-      discount_cents INTEGER NOT NULL DEFAULT 0,
-      shipping_cents INTEGER NOT NULL DEFAULT 0,
-      tax_cents INTEGER NOT NULL DEFAULT 0,
-      total_cents INTEGER NOT NULL DEFAULT 0,
-      amount_paid_cents INTEGER NOT NULL DEFAULT 0,
-      amount_outstanding_cents INTEGER NOT NULL DEFAULT 0,
-      revenue_cents INTEGER NOT NULL DEFAULT 0,
-      tax_liability_cents INTEGER NOT NULL DEFAULT 0,
-      source_order_status TEXT,
-      source_payment_status TEXT,
-      notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
-    )
-  `).run();
+async function tableExists(db, tableName) {
+  try {
+    const row = await db
+      .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1`)
+      .bind(tableName)
+      .first();
+    return !!row;
+  } catch {
+    return false;
+  }
+}
+
+async function safeQuery(db, sql, bindings = []) {
+  try {
+    const result = await db.prepare(sql).bind(...bindings).all();
+    return normalizeResults(result);
+  } catch {
+    return [];
+  }
+}
+
+async function loadOrders(db, range) {
+  const hasOrders = await tableExists(db, "orders");
+  if (!hasOrders) return [];
+
+  return safeQuery(
+    db,
+    `
+      SELECT
+        'order' AS row_type,
+        substr(COALESCE(created_at, datetime('now')), 1, 7) AS period_month,
+        id AS reference_id,
+        COALESCE(order_number, CAST(id AS TEXT)) AS reference_code,
+        COALESCE(customer_email, '') AS party,
+        COALESCE(status, '') AS status,
+        ROUND(COALESCE(total_amount, total, 0), 2) AS amount,
+        ROUND(COALESCE(tax_amount, tax_total, 0), 2) AS tax_amount,
+        '' AS ledger_code,
+        '' AS ledger_name,
+        COALESCE(notes, '') AS notes
+      FROM orders
+      WHERE substr(COALESCE(created_at, datetime('now')), 1, 10) >= ?
+        AND substr(COALESCE(created_at, datetime('now')), 1, 10) < ?
+      ORDER BY COALESCE(created_at, datetime('now')) DESC
+    `,
+    [range.start, range.end]
+  );
+}
+
+async function loadExpenses(db, range) {
+  const hasExpenses = await tableExists(db, "accounting_expenses");
+  if (!hasExpenses) return [];
+
+  return safeQuery(
+    db,
+    `
+      SELECT
+        'expense' AS row_type,
+        substr(COALESCE(expense_date, created_at, datetime('now')), 1, 7) AS period_month,
+        expense_id AS reference_id,
+        COALESCE(reference_number, CAST(expense_id AS TEXT)) AS reference_code,
+        COALESCE(vendor_name, payee_name, '') AS party,
+        COALESCE(status, '') AS status,
+        ROUND(COALESCE(amount, 0), 2) AS amount,
+        ROUND(COALESCE(tax_amount, 0), 2) AS tax_amount,
+        COALESCE(ledger_code, '') AS ledger_code,
+        COALESCE(ledger_name, '') AS ledger_name,
+        COALESCE(notes, '') AS notes
+      FROM accounting_expenses
+      WHERE substr(COALESCE(expense_date, created_at, datetime('now')), 1, 10) >= ?
+        AND substr(COALESCE(expense_date, created_at, datetime('now')), 1, 10) < ?
+      ORDER BY COALESCE(expense_date, created_at, datetime('now')) DESC
+    `,
+    [range.start, range.end]
+  );
+}
+
+async function loadWriteoffs(db, range) {
+  const hasWriteoffs = await tableExists(db, "accounting_writeoffs");
+  if (!hasWriteoffs) return [];
+
+  return safeQuery(
+    db,
+    `
+      SELECT
+        'writeoff' AS row_type,
+        substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 7) AS period_month,
+        writeoff_id AS reference_id,
+        COALESCE(reference_number, CAST(writeoff_id AS TEXT)) AS reference_code,
+        COALESCE(item_name, product_name, reason_code, '') AS party,
+        COALESCE(status, '') AS status,
+        ROUND(COALESCE(total_amount, amount, 0), 2) AS amount,
+        ROUND(COALESCE(tax_amount, 0), 2) AS tax_amount,
+        COALESCE(ledger_code, '') AS ledger_code,
+        COALESCE(ledger_name, '') AS ledger_name,
+        COALESCE(notes, '') AS notes
+      FROM accounting_writeoffs
+      WHERE substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 10) >= ?
+        AND substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 10) < ?
+      ORDER BY COALESCE(writeoff_date, created_at, datetime('now')) DESC
+    `,
+    [range.start, range.end]
+  );
 }
 
 export async function onRequestGet(context) {
-  const { request, env } = context;
-  const db = getDb(env);
-  const adminUser = await getAdminUserFromRequest(request, env);
-  if (!adminUser) return jsonResponse({ ok:false, error:'Unauthorized.' }, 401);
+  const db = getDb(context.env);
+  if (!db) {
+    return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
+  }
 
-  await ensureAccountingTables(db);
+  const adminUser = await getAdminUserFromRequest(context.request, context.env);
+  if (!adminUser) {
+    return jsonResponse({ ok: false, error: "Admin access required." }, 401);
+  }
 
-  const summaryRow = await db.prepare(`
-    SELECT
-      COUNT(*) AS records_count,
-      COALESCE(SUM(total_cents),0) AS total_booked_cents,
-      COALESCE(SUM(amount_paid_cents),0) AS total_paid_cents,
-      COALESCE(SUM(amount_outstanding_cents),0) AS total_outstanding_cents,
-      COALESCE(SUM(tax_liability_cents),0) AS total_tax_cents,
-      SUM(CASE WHEN entry_status IN ('open','partially_paid') THEN 1 ELSE 0 END) AS open_records_count
-    FROM accounting_order_records
-  `).first().catch(() => null) || {};
+  const url = new URL(context.request.url);
+  const range = monthRange(url.searchParams.get("month"));
+  if (!range) {
+    return jsonResponse({ ok: false, error: "Please provide month in YYYY-MM format." }, 400);
+  }
 
-  const recent = normalizeResults(await db.prepare(`
-    SELECT
-      accounting_order_record_id,
-      order_id,
-      order_number,
-      entry_status,
-      customer_name,
-      customer_email,
-      currency,
-      total_cents,
-      amount_paid_cents,
-      amount_outstanding_cents,
-      tax_liability_cents,
-      source_order_status,
-      source_payment_status,
-      created_at,
-      updated_at
-    FROM accounting_order_records
-    ORDER BY created_at DESC, accounting_order_record_id DESC
-    LIMIT 25
-  `).all().catch(() => ({results:[]})));
+  const [orders, expenses, writeoffs] = await Promise.all([
+    loadOrders(db, range),
+    loadExpenses(db, range),
+    loadWriteoffs(db, range),
+  ]);
 
-  return jsonResponse({
-    ok:true,
-    requested_by:{ user_id: adminUser.user_id, email: adminUser.email, display_name: adminUser.display_name },
-    summary:{
-      records_count:Number(summaryRow.records_count||0),
-      total_booked_cents:Number(summaryRow.total_booked_cents||0),
-      total_paid_cents:Number(summaryRow.total_paid_cents||0),
-      total_outstanding_cents:Number(summaryRow.total_outstanding_cents||0),
-      total_tax_cents:Number(summaryRow.total_tax_cents||0),
-      open_records_count:Number(summaryRow.open_records_count||0)
+  const rows = [...orders, ...expenses, ...writeoffs];
+
+  const csv = toCsv(
+    rows.length
+      ? rows
+      : [
+          {
+            row_type: "empty",
+            period_month: range.raw,
+            reference_id: "",
+            reference_code: "",
+            party: "",
+            status: "",
+            amount: 0,
+            tax_amount: 0,
+            ledger_code: "",
+            ledger_name: "",
+            notes: "",
+          },
+        ]
+  );
+
+  return new Response(csv, {
+    status: 200,
+    headers: {
+      "content-type": "text/csv; charset=utf-8",
+      "content-disposition": `attachment; filename="accounting-monthly-summary-${range.raw}.csv"`,
+      "cache-control": "no-store",
     },
-    records: recent.map((row) => ({
-      accounting_order_record_id:Number(row.accounting_order_record_id||0),
-      order_id:Number(row.order_id||0),
-      order_number:row.order_number||'',
-      entry_status:row.entry_status||'open',
-      customer_name:row.customer_name||'',
-      customer_email:row.customer_email||'',
-      currency:row.currency||'CAD',
-      total_cents:Number(row.total_cents||0),
-      amount_paid_cents:Number(row.amount_paid_cents||0),
-      amount_outstanding_cents:Number(row.amount_outstanding_cents||0),
-      tax_liability_cents:Number(row.tax_liability_cents||0),
-      source_order_status:row.source_order_status||'',
-      source_payment_status:row.source_payment_status||'',
-      created_at:row.created_at||null,
-      updated_at:row.updated_at||null
-    }))
   });
 }
