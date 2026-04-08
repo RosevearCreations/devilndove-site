@@ -69,52 +69,11 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Keep docs aligned with the JSON-first movie truth and overlay-only D1 strategy.
 - Continue reducing duplicate truth paths between JSON, D1, and admin screens where the repo can do so honestly.
 
-- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
-- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
-- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
-- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
-
-## Fresh-chat handoff update
-- The repo now includes a first-pass PWA shell (`manifest.webmanifest`, `sw.js`, generated icons) so Devil n Dove can be saved to a phone home screen more like an app.
-- New finished products are now intended to start from code DD1000 upward, while the underlying DB still stores the numeric part.
-- A new `/socials/` page exists and is seeded from `/data/site/social-feed.json`. It currently has profile links and five YouTube videos.
-- Admin tools/supplies intake already existed in `siteInventoryAdminMount`; it now also has a barcode-photo helper. It can detect a barcode and prepare an Amazon search URL, but it does not yet pull structured Amazon details automatically.
 
 ## Current pass addendum
-- Normalized public route links away from explicit `/index.html` navigation and added a `_redirects` file so direct `.../index.html` requests resolve more cleanly alongside directory routes.
-- Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
-- Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
-- This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
-
-
-## New current state from this pass
-- Public/mobile shell is more installable and more app-like. The site now has a stronger manifest, a tighter service-worker cache policy, and a new mobile inventory intake route at `/admin/mobile-inventory/`.
-- Browser security hardening moved forward with a new `_headers` file that adds no-store rules for sensitive areas and baseline CSP/frame/referrer protections.
-- Another CSS hardening pass reduced mobile/admin overlap issues and improved dark-mode calendar/date control visibility.
-- A repo cleanup pass renamed clearly unlinked duplicate/legacy files with an `RM_` prefix instead of deleting them.
-
-## Best next steps after this pass
-1. Test the install flow on Android and iPhone home-screen entry.
-2. Test `/admin/mobile-product/` and `/admin/mobile-inventory/` on a real phone.
-3. Review the `RM_` files and remove them only after one more visual/file-level check.
-4. Continue the JSON-to-D1 authority reduction in the remaining mixed areas, especially movies and any leftover legacy admin reads.
-5. Resume social ingestion and Amazon lookup only when approved provider access is available.
-
-
-## Latest pass handoff
-- Basic accounting shadow records were added for new orders.
-- Admin accounting summary UI now exists in the orders area.
-- Admin password reset now supports any account, including admin-to-admin resets, with stronger confirmation and audit coverage.
-- Schema references and upgrade SQL now include `accounting_order_records`.
-
-
-## Current pass addendum
-- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
-- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
-- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
-- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
-
-
-## Current pass update
-- Tier Policy is now actually implemented in the current build through working admin/member endpoints plus admin and member UI hooks, closing the earlier HTML-instead-of-JSON failure.
-- The starter accounting layer is now wired correctly for expenses, product costs, write-offs, general ledger accounts, and monthly export groundwork.
+- Marked the previous admin preview, products fallback, movie save, and accordion issues as completed/fixed in the documentation.
+- Departmentalized Admin into standalone interfaces: Members, Catalog, Orders, Accounting, Analytics, Operations, and Movies, reducing the size and risk of the main dashboard file.
+- Added real starter routes/UI for tier policy, general ledger accounts, expenses, write-offs, product unit costs, and monthly accounting CSV export.
+- Added accounting templates (CSV + XLSX) so GL and month-end bookkeeping can be seeded faster.
+- Continued mobile direction by making the lighter departmental pages easier to use on smaller screens than the former all-in-one Admin page.
+- Continued JSON-to-DB convergence by moving tier policy and accounting records into D1-backed tables instead of temporary page-only assumptions.

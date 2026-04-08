@@ -303,36 +303,10 @@ Admin movie write routes should therefore ensure column compatibility before ins
 ### products partial-intake note
 Products now need to support a real partial-draft intake path for phone-first capture and CSV-first bulk entry. Publish-time validation can remain stricter, but early draft-save validation must stay light.
 
-- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
-- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
-- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
-- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
 
-## Current pass addendum
-- Normalized public route links away from explicit `/index.html` navigation and added a `_redirects` file so direct `.../index.html` requests resolve more cleanly alongside directory routes.
-- Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
-- Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
-- This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
-
-
-## Current pass note
-This pass did not introduce new D1 tables or column additions. The main repo changes were:
-- stronger browser/app security defaults through `_headers`
-- tighter service-worker behavior around sensitive routes
-- mobile/admin UI expansion with `/admin/mobile-inventory/`
-- repo cleanup using `RM_` prefixes for duplicate/unlinked files
-
-
-## Current pass addendum
-- Added `accounting_order_records` as a lightweight order-linked accounting shadow table. It is not the final accounting backend, but it preserves booked totals, outstanding amounts, and tax liability from the moment an order is created.
-
-
-## Current pass addendum
-- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
-- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
-- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
-- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
-
-
-## Current pass addendum
-Newer live-start tables expected by the current membership/accounting build now include `membership_tier_policies`, `accounting_expenses`, `product_costs`, `accounting_writeoffs`, and `general_ledger_accounts`.
+## Pass 16 additions
+- `membership_tier_policies`: member-facing Bronze/Silver/Gold descriptions, benefits, visibility, and badge styling.
+- `general_ledger_accounts`: starter chart of accounts for operating costs and sales grouping.
+- `accounting_expenses`: operating expenses such as electricity, water, gas, rent, internet, software, and advertising.
+- `accounting_writeoffs`: damaged, obsolete, gifted, lost, or other write-off events.
+- `product_costs`: point-in-time per-unit cost entries used to grow toward fuller cost-of-goods and profit-and-loss reporting.

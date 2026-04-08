@@ -1,10 +1,15 @@
 # wrangler.toml
 name = "devilndove-site"
-compatibility_date = "2026-04-09"
-compatibility_date = "2026-04-10"
+compatibility_date = "2026-03-10"
 
-# Cloudflare D1 database binding.
-# The live code expects env.DB, so bind the production database as DB in Pages/Workers.
 [[d1_databases]]
 binding = "DB"
 database_name = "devilndove-prod"
+database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"
+
+# Optional direct-upload bucket for product media.
+# Add this after creating the R2 bucket used for admin image uploads.
+[[r2_buckets]]
+binding = "PRODUCT_MEDIA_BUCKET"
+bucket_name = "devilndove-product-media"
+preview_bucket_name = "devilndove-product-media"

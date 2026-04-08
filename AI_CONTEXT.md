@@ -202,37 +202,11 @@ Current-pass emphasis:
 - Schema references and upgrade SQL were aligned with the current movie overlay/editor fields and the governed review/reorder tables already present in the codebase.
 - Exposed HTML pages were checked again and continue to keep a single H1 per page.
 
-- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
-- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
-- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
-- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
 
 ## Current pass addendum
-- Normalized public route links away from explicit `/index.html` navigation and added a `_redirects` file so direct `.../index.html` requests resolve more cleanly alongside directory routes.
-- Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
-- Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
-- This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
-
-
-## Current pass note
-- A new protected route `/admin/mobile-inventory/` now exists for phone-first tool/supply intake.
-- `_headers` is now part of the repo and should be treated as active security infrastructure.
-- Files prefixed with `RM_` were reviewed as unlinked/duplicate candidates and are intended for later removal after one more human check.
-
-
-## Current pass context
-- New orders now seed `accounting_order_records` for future bookkeeping.
-- Admin orders now include a lightweight accounting summary mount.
-- Admin password reset is now intended to support any account, including other admins, with step-up confirmation.
-
-
-## Current pass addendum
-- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
-- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
-- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
-- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
-
-
-## Current pass update
-- Tier Policy route/UI mismatch is resolved in code in this pass; treat Bronze/Silver/Gold policy editing as part of the live membership system now, not a future placeholder.
-- The next accounting step should focus on allocating overhead and ledger-coded costs into richer cost and profit reporting rather than only adding more raw capture forms.
+- Marked the previous admin preview, products fallback, movie save, and accordion issues as completed/fixed in the documentation.
+- Departmentalized Admin into standalone interfaces: Members, Catalog, Orders, Accounting, Analytics, Operations, and Movies, reducing the size and risk of the main dashboard file.
+- Added real starter routes/UI for tier policy, general ledger accounts, expenses, write-offs, product unit costs, and monthly accounting CSV export.
+- Added accounting templates (CSV + XLSX) so GL and month-end bookkeeping can be seeded faster.
+- Continued mobile direction by making the lighter departmental pages easier to use on smaller screens than the former all-in-one Admin page.
+- Continued JSON-to-DB convergence by moving tier policy and accounting records into D1-backed tables instead of temporary page-only assumptions.

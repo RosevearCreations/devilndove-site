@@ -186,45 +186,11 @@
 - Schema references and upgrade SQL were aligned with the current movie overlay/editor fields and the governed review/reorder tables already present in the codebase.
 - Exposed HTML pages were checked again and continue to keep a single H1 per page.
 
-- New finished-product numbering now starts at DD1000 for newly created products. Internally the database still stores the numeric portion as `1000`, `1001`, and so on, while the UI can present the public/admin-friendly `DD1000` style code.
-- Added a first-pass installable phone experience with `manifest.webmanifest`, `sw.js`, and generated app icons so visitors can save Devil n Dove to a home screen more cleanly than a plain browser shortcut.
-- Added a new `/socials/` page backed by `/data/site/social-feed.json` and seeded it with your current profile links plus a first saved list of five public YouTube videos.
-- The admin tools-and-supplies inventory editor now includes a barcode-photo helper that can fill the external key from a phone photo when the browser supports `BarcodeDetector`. It prepares an Amazon search link, but full product-detail import from Amazon is still blocked until Amazon Product Advertising API credentials or another approved catalog source is added.
 
 ## Current pass addendum
-- Normalized public route links away from explicit `/index.html` navigation and added a `_redirects` file so direct `.../index.html` requests resolve more cleanly alongside directory routes.
-- Expanded the installable phone shell with a stronger manifest, install prompt handling, Apple home-screen metadata, and an offline fallback page.
-- Added another CSS hardening pass for mobile/admin layout overflow and dark-mode calendar/date picker visibility.
-- This pass did not require a new D1 schema table change; schema reference files were refreshed to reflect that the changes were routing/PWA/CSS/app-shell focused rather than DB-structure focused.
-
-
-## Newly completed or moved forward in this pass
-- Added dedicated phone inventory intake at `/admin/mobile-inventory/`.
-- Added stronger browser security defaults and no-store handling through `_headers`.
-- Tightened standalone/mobile app feel and service-worker behavior for safer install use.
-- Started explicit dead-file retirement workflow using the `RM_` filename prefix.
-
-
-## Current pass addendum
-- Added basic accounting shadow records plus an admin accounting summary interface to prepare for the later accounting backend.
-- Tightened privileged password control so admin can reset any account, including another admin, with step-up confirmation and audit coverage.
-- Continued CSS stabilization for dense admin tools before broader stress testing.
-
-## Strongest next steps after this pass
-1. Expand accounting shadow records into a fuller bookkeeping backend with costs, tax remittance, and profitability.
-2. Extend payment/accounting sync so paid/refunded states update the accounting shadow rows automatically from provider events.
-3. Continue role granularity and sensitive-action hardening before stress testing.
-
-
-## Current pass addendum
-- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
-- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
-- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
-- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
-
-
-## Current pass addendum
-- Implemented the missing Tier Policy route layer properly by wiring `/api/admin/tier-policies`, `/api/member/tier-policies`, and the admin/member tier-policy UI onto the shared auth helpers that already power the rest of the app.
-- Continued the accounting foundation by fixing the starter expense, product-cost, write-off, and general-ledger admin endpoints so they authenticate correctly and can now serve as the next safe base for fuller P&L work.
-- Added starter accounting import templates for write-offs and general-ledger accounts and kept the existing monthly export in place for accountant handoff.
-- Continued docs/schema synchronization for the current build and treated the prior “Tier Policy missing” gap as closed in code.
+- Marked the previous admin preview, products fallback, movie save, and accordion issues as completed/fixed in the documentation.
+- Departmentalized Admin into standalone interfaces: Members, Catalog, Orders, Accounting, Analytics, Operations, and Movies, reducing the size and risk of the main dashboard file.
+- Added real starter routes/UI for tier policy, general ledger accounts, expenses, write-offs, product unit costs, and monthly accounting CSV export.
+- Added accounting templates (CSV + XLSX) so GL and month-end bookkeeping can be seeded faster.
+- Continued mobile direction by making the lighter departmental pages easier to use on smaller screens than the former all-in-one Admin page.
+- Continued JSON-to-DB convergence by moving tier policy and accounting records into D1-backed tables instead of temporary page-only assumptions.

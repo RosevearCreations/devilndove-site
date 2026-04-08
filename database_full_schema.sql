@@ -338,39 +338,6 @@ CREATE TABLE IF NOT EXISTS webhook_events (
   UNIQUE(provider, provider_event_id)
 );
 
-
-
--- ---------------------------------------------------------
--- BASIC ACCOUNTING ORDER RECORDS
--- ---------------------------------------------------------
-CREATE TABLE IF NOT EXISTS accounting_order_records (
-  accounting_order_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  order_id INTEGER NOT NULL UNIQUE,
-  order_number TEXT NOT NULL,
-  entry_status TEXT NOT NULL DEFAULT 'open' CHECK (entry_status IN ('open','partially_paid','paid','refunded','cancelled','archived')),
-  customer_name TEXT,
-  customer_email TEXT,
-  currency TEXT NOT NULL DEFAULT 'CAD',
-  subtotal_cents INTEGER NOT NULL DEFAULT 0,
-  discount_cents INTEGER NOT NULL DEFAULT 0,
-  shipping_cents INTEGER NOT NULL DEFAULT 0,
-  tax_cents INTEGER NOT NULL DEFAULT 0,
-  total_cents INTEGER NOT NULL DEFAULT 0,
-  amount_paid_cents INTEGER NOT NULL DEFAULT 0,
-  amount_outstanding_cents INTEGER NOT NULL DEFAULT 0,
-  revenue_cents INTEGER NOT NULL DEFAULT 0,
-  tax_liability_cents INTEGER NOT NULL DEFAULT 0,
-  source_order_status TEXT,
-  source_payment_status TEXT,
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_order_records_status ON accounting_order_records(entry_status, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_order_records_customer_email ON accounting_order_records(customer_email, created_at DESC);
-
 CREATE TABLE IF NOT EXISTS media_assets (
   media_asset_id INTEGER PRIMARY KEY AUTOINCREMENT,
   product_id INTEGER,
@@ -891,85 +858,61 @@ CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_
 -- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.v2.json and can derive a trailer search URL at runtime when trailer_url is blank.
 
 
--- Membership tier policy display table
+-- Pass 16: departmental accounting + membership policy foundation
 CREATE TABLE IF NOT EXISTS membership_tier_policies (
   membership_tier_policy_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  access_tier_code TEXT NOT NULL UNIQUE,
-  title TEXT NOT NULL,
+  code TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  display_title TEXT,
   short_description TEXT,
   benefits_json TEXT,
   badge_color TEXT,
-  sort_order INTEGER NOT NULL DEFAULT 0,
   is_visible INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS idx_membership_tier_policies_sort ON membership_tier_policies(sort_order ASC, access_tier_code ASC);
-
-CREATE TABLE IF NOT EXISTS accounting_expenses (
-  expense_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  expense_date TEXT NOT NULL,
-  vendor TEXT,
-  category TEXT,
-  description TEXT,
-  amount_cents INTEGER NOT NULL DEFAULT 0,
-  currency TEXT NOT NULL DEFAULT 'CAD',
-  tax_cents INTEGER NOT NULL DEFAULT 0,
-  receipt_url TEXT,
-  notes TEXT,
-  created_by_user_id INTEGER,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_expenses_date ON accounting_expenses(expense_date DESC, expense_id DESC);
-
-CREATE TABLE IF NOT EXISTS product_costs (
-  product_cost_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_id INTEGER NOT NULL,
-  effective_date TEXT NOT NULL,
-  unit_cost_cents INTEGER NOT NULL DEFAULT 0,
-  currency TEXT NOT NULL DEFAULT 'CAD',
-  vendor TEXT,
-  notes TEXT,
-  created_by_user_id INTEGER,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_product_costs_product ON product_costs(product_id, effective_date DESC, product_cost_id DESC);
-
-CREATE TABLE IF NOT EXISTS accounting_writeoffs (
-  writeoff_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  writeoff_date TEXT NOT NULL,
-  writeoff_type TEXT NOT NULL,
-  description TEXT,
-  amount_cents INTEGER NOT NULL DEFAULT 0,
-  currency TEXT NOT NULL DEFAULT 'CAD',
-  gl_account_code TEXT,
-  product_id INTEGER,
-  quantity REAL,
-  reference_number TEXT,
-  total_amount REAL,
-  tax_amount REAL,
-  ledger_code TEXT,
-  ledger_name TEXT,
-  status TEXT,
-  notes TEXT,
-  created_by_user_id INTEGER,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_writeoffs_date ON accounting_writeoffs(writeoff_date DESC, writeoff_id DESC);
 
 CREATE TABLE IF NOT EXISTS general_ledger_accounts (
   gl_account_id INTEGER PRIMARY KEY AUTOINCREMENT,
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
-  category TEXT NOT NULL,
-  parent_group TEXT,
-  normal_balance TEXT NOT NULL DEFAULT 'debit',
+  category TEXT NOT NULL DEFAULT 'expense',
   is_active INTEGER NOT NULL DEFAULT 1,
-  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS accounting_expenses (
+  expense_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  expense_date TEXT,
+  vendor_name TEXT,
+  amount REAL NOT NULL DEFAULT 0,
+  tax_amount REAL NOT NULL DEFAULT 0,
+  ledger_code TEXT,
+  ledger_name TEXT,
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS idx_gl_accounts_category ON general_ledger_accounts(category, sort_order, code);
+
+CREATE TABLE IF NOT EXISTS accounting_writeoffs (
+  writeoff_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  writeoff_date TEXT,
+  item_name TEXT NOT NULL,
+  amount REAL NOT NULL DEFAULT 0,
+  reason_code TEXT NOT NULL DEFAULT 'other',
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS product_costs (
+  product_cost_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_number TEXT NOT NULL,
+  cost_per_unit REAL NOT NULL DEFAULT 0,
+  effective_date TEXT,
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
