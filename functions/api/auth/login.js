@@ -73,13 +73,6 @@ function getBearerToken(request) {
   return match ? String(match[1] || "").trim() : "";
 }
 
-function getRequestToken(request) {
-  const bearer = getBearerToken(request);
-  if (bearer) return bearer;
-  const cookies = parseCookies(request);
-  return String(cookies.dd_auth_token || "").trim();
-}
-
 function buildSessionCookie(request, token, maxAgeSeconds = 60 * 60 * 24 * 30) {
   const url = new URL(request.url);
   const secure = url.protocol === "https:";
@@ -99,10 +92,6 @@ function buildSessionCookie(request, token, maxAgeSeconds = 60 * 60 * 24 * 30) {
   }
 
   return parts.join("; ");
-}
-
-function clearSessionCookie(request) {
-  return buildSessionCookie(request, "", 0);
 }
 
 export async function onRequestPost(context) {
