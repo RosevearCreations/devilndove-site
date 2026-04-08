@@ -101,39 +101,6 @@ function calculateTaxCents(subtotalCents, shippingCents, taxRate = 0.13) {
   return Math.round(taxableBase * taxRate);
 }
 
-async function ensureAccountingTables(db) {
-  try {
-    await db.prepare(`
-      CREATE TABLE IF NOT EXISTS accounting_order_records (
-        accounting_order_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        order_id INTEGER NOT NULL UNIQUE,
-        order_number TEXT NOT NULL,
-        entry_status TEXT NOT NULL DEFAULT 'open' CHECK (entry_status IN ('open','partially_paid','paid','refunded','cancelled','archived')),
-        customer_name TEXT,
-        customer_email TEXT,
-        currency TEXT NOT NULL DEFAULT 'CAD',
-        subtotal_cents INTEGER NOT NULL DEFAULT 0,
-        discount_cents INTEGER NOT NULL DEFAULT 0,
-        shipping_cents INTEGER NOT NULL DEFAULT 0,
-        tax_cents INTEGER NOT NULL DEFAULT 0,
-        total_cents INTEGER NOT NULL DEFAULT 0,
-        amount_paid_cents INTEGER NOT NULL DEFAULT 0,
-        amount_outstanding_cents INTEGER NOT NULL DEFAULT 0,
-        revenue_cents INTEGER NOT NULL DEFAULT 0,
-        tax_liability_cents INTEGER NOT NULL DEFAULT 0,
-        source_order_status TEXT,
-        source_payment_status TEXT,
-        notes TEXT,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
-      )
-    `).run();
-    await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_order_records_status ON accounting_order_records(entry_status, created_at DESC)`).run();
-  } catch {}
-}
-
 function validateShippingFields(fulfillmentType, shipping) {
   if (!["shipping", "mixed"].includes(String(fulfillmentType || "").toLowerCase())) {
     return "";
@@ -151,8 +118,6 @@ function validateShippingFields(fulfillmentType, shipping) {
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-
-  await ensureAccountingTables(env.DB);
 
   let body;
   try {
@@ -466,50 +431,6 @@ export async function onRequestPost(context) {
   `)
     .bind(order_id)
     .first();
-
-  try {
-    await env.DB.prepare(`
-      INSERT INTO accounting_order_records (
-        order_id, order_number, entry_status, customer_name, customer_email, currency,
-        subtotal_cents, discount_cents, shipping_cents, tax_cents, total_cents,
-        amount_paid_cents, amount_outstanding_cents, revenue_cents, tax_liability_cents,
-        source_order_status, source_payment_status, notes, updated_at, last_synced_at
-      ) VALUES (?, ?, 'open', ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      ON CONFLICT(order_id) DO UPDATE SET
-        order_number = excluded.order_number,
-        customer_name = excluded.customer_name,
-        customer_email = excluded.customer_email,
-        currency = excluded.currency,
-        subtotal_cents = excluded.subtotal_cents,
-        discount_cents = excluded.discount_cents,
-        shipping_cents = excluded.shipping_cents,
-        tax_cents = excluded.tax_cents,
-        total_cents = excluded.total_cents,
-        amount_outstanding_cents = excluded.amount_outstanding_cents,
-        tax_liability_cents = excluded.tax_liability_cents,
-        source_order_status = excluded.source_order_status,
-        source_payment_status = excluded.source_payment_status,
-        notes = excluded.notes,
-        updated_at = CURRENT_TIMESTAMP,
-        last_synced_at = CURRENT_TIMESTAMP
-    `).bind(
-      Number(createdOrder?.order_id || order_id || 0),
-      createdOrder?.order_number || order_number,
-      createdOrder?.customer_name || customer_name,
-      createdOrder?.customer_email || customer_email,
-      createdOrder?.currency || currency,
-      Number(createdOrder?.subtotal_cents || subtotal_cents || 0),
-      Number(createdOrder?.discount_cents || discount_cents || 0),
-      Number(createdOrder?.shipping_cents || shipping_cents || 0),
-      Number(createdOrder?.tax_cents || tax_cents || 0),
-      Number(createdOrder?.total_cents || total_cents || 0),
-      Math.max(Number(createdOrder?.total_cents || total_cents || 0), 0),
-      Number(createdOrder?.tax_cents || tax_cents || 0),
-      createdOrder?.order_status || 'pending',
-      createdOrder?.payment_status || 'pending',
-      `Checkout order created via ${payment_method || 'pending'} flow.`
-    ).run();
-  } catch {}
 
   return json({
     ok: true,
