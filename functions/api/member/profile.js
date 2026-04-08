@@ -28,8 +28,14 @@ function normalizeBool(value, fallback = 0) {
   return fallback;
 }
 
+function getBearerToken(request) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+  return match ? String(match[1] || "").trim() : "";
+}
+
 async function getMemberUserFromRequest(request, env) {
-  const token = getRequestToken(request);
+  const token = getBearerToken(request);
   if (!token) return null;
 
   const session = await env.DB.prepare(`
@@ -76,53 +82,6 @@ async function getTierCodesForUser(env, userId) {
   `).bind(userId).all();
 
   return (Array.isArray(result?.results) ? result.results : []).map((row) => row.code || "");
-}
-
-
-async function ensureTierPolicyTable(env) {
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS membership_tier_policies (
-      membership_tier_policy_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      access_tier_code TEXT NOT NULL UNIQUE,
-      title TEXT NOT NULL,
-      short_description TEXT,
-      benefits_json TEXT,
-      badge_color TEXT,
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      is_visible INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-}
-
-async function getTierPoliciesForCodes(env, codes) {
-  await ensureTierPolicyTable(env);
-  const normalized = Array.isArray(codes) ? codes.map((code) => String(code || '').trim().toLowerCase()).filter(Boolean) : [];
-  if (!normalized.length) return [];
-  const placeholders = normalized.map(() => '?').join(',');
-  const result = await env.DB.prepare(`
-    SELECT access_tier_code, title, short_description, benefits_json, badge_color, sort_order, is_visible
-    FROM membership_tier_policies
-    WHERE lower(access_tier_code) IN (${placeholders})
-    ORDER BY sort_order ASC, access_tier_code ASC
-  `).bind(...normalized).all();
-  return (Array.isArray(result?.results) ? result.results : []).map((row) => ({
-    access_tier_code: row.access_tier_code || '',
-    title: row.title || row.access_tier_code || '',
-    short_description: row.short_description || '',
-    benefits: (() => {
-      try {
-        const parsed = JSON.parse(row.benefits_json || '[]');
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
-    })(),
-    badge_color: row.badge_color || '',
-    sort_order: Number(row.sort_order || 0),
-    is_visible: Number(row.is_visible || 0)
-  }));
 }
 
 async function readProfile(env, user) {
@@ -192,7 +151,6 @@ async function readProfile(env, user) {
       department: profile?.department || "",
       job_title: profile?.job_title || "",
       access_tier_codes: await getTierCodesForUser(env, user.user_id),
-      tier_policies: await getTierPoliciesForCodes(env, await getTierCodesForUser(env, user.user_id)),
       created_at: profile?.created_at || null,
       updated_at: profile?.updated_at || null
     }
