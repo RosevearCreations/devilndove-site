@@ -1,7 +1,7 @@
 # wrangler.toml
 name = "devilndove-site"
-compatibility_date = "2026-03-24"
-compatibility_date = "2026-03-10"
+compatibility_date = "2026-04-09"
+compatibility_date = "2026-04-10"
 
 # Cloudflare D1 database binding.
 # The live code expects env.DB, so bind the production database as DB in Pages/Workers.
