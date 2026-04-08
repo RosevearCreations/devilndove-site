@@ -325,3 +325,10 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Basic accounting shadow records now exist for newly created orders.
 - Admin can reset any user password, including another admin, with step-up confirmation.
 - Admin orders area now includes a starter accounting summary block.
+
+
+## Current pass addendum
+- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
+- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
+- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
+- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.

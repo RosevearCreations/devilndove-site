@@ -106,3 +106,10 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Admin accounting summary UI now exists in the orders area.
 - Admin password reset now supports any account, including admin-to-admin resets, with stronger confirmation and audit coverage.
 - Schema references and upgrade SQL now include `accounting_order_records`.
+
+
+## Current pass addendum
+- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
+- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
+- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
+- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.

@@ -156,3 +156,10 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Orders now create a lightweight accounting-ready record in `accounting_order_records`.
 - Admin now has a first accounting view under the orders area.
 - Admin password reset now supports any user, including admins, with step-up confirmation.
+
+
+## Current pass addendum
+- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
+- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
+- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
+- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.

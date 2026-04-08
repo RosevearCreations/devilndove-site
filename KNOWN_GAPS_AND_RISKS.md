@@ -490,3 +490,10 @@ The following files were not found on active repo paths and were renamed with an
 - Full double-entry accounting, COGS, inventory valuation, and tax remittance workflows still need the later accounting backend.
 - Broader multi-role permission granularity still remains beyond the current admin/member split even though admin password resets are now tighter and auditable.
 - Mixed JSON/D1 authority still remains in some movie and legacy admin/read paths.
+
+
+## Current pass addendum
+- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
+- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
+- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
+- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.

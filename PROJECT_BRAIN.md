@@ -244,3 +244,10 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 
 ## Current pass note
 The store now seeds a lightweight accounting shadow record for every new order so later bookkeeping, tax, and revenue tooling has a stable starting point. Admin also has a first accounting-facing summary view.
+
+
+## Current pass addendum
+- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
+- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
+- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
+- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.

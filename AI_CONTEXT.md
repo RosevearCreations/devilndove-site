@@ -224,3 +224,10 @@ Current-pass emphasis:
 - New orders now seed `accounting_order_records` for future bookkeeping.
 - Admin orders now include a lightweight accounting summary mount.
 - Admin password reset is now intended to support any account, including other admins, with step-up confirmation.
+
+
+## Current pass addendum
+- Fixed the Admin-to-Members override preview so `admin_preview=1` no longer falls through into the member-login redirect path.
+- Hardened the admin products read path with a degraded-query fallback so older or partially migrated D1 schemas do not throw a dashboard-breaking 500.
+- Restored admin movie save/load through the shared authenticated admin fetch helper instead of a bare same-origin fetch path.
+- Re-enabled collapsible admin panels with local-state persistence and safer service-worker handling for `/api/` and protected routes.
