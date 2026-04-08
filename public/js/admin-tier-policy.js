@@ -22,6 +22,15 @@ document.addEventListener("DOMContentLoaded", () => {
     message.style.color = isError ? '#b00020' : '';
   }
 
+  function esc(v) {
+    return String(v ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
   function normalizeBenefits(text) {
     return String(text || '').split(/\n+/).map((line) => line.trim()).filter(Boolean);
   }
@@ -33,26 +42,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!contentType.includes('application/json')) throw new Error('Tier Policy endpoint is not available yet.');
     const data = await response.json();
     if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed loading tier policies.');
-    const policies = Array.isArray(data.policies) ? data.policies : [];
+    const policies = Array.isArray(data.items) ? data.items : [];
     cards.innerHTML = '';
     policies.forEach((policy) => {
       const article = document.createElement('article');
       article.className = 'card';
       article.innerHTML = `
         <form class="grid" data-tier-policy-form style="gap:10px">
-          <input type="hidden" name="code" value="${policy.code || ''}">
+          <input type="hidden" name="tier_code" value="${esc(policy.tier_code || '')}">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-            <h4 style="margin:0">${policy.name || policy.code || 'Tier'}</h4>
-            <label class="small"><input type="checkbox" name="is_visible" ${Number(policy.is_visible || 1) ? 'checked' : ''}> Visible</label>
+            <h4 style="margin:0">${esc(policy.title || policy.tier_code || 'Tier')}</h4>
+            <label class="small"><input type="checkbox" name="is_visible" ${policy.is_visible ? 'checked' : ''}> Visible</label>
           </div>
           <div class="grid cols-2" style="gap:10px">
-            <div><label class="small">Public title</label><input name="display_title" type="text" value="${policy.display_title || policy.name || ''}"></div>
-            <div><label class="small">Badge color</label><input name="badge_color" type="text" value="${policy.badge_color || ''}" placeholder="#8f6b2f"></div>
+            <div><label class="small">Public title</label><input name="title" type="text" value="${esc(policy.title || '')}"></div>
+            <div><label class="small">Badge color</label><input name="badge_color" type="text" value="${esc(policy.badge_color || '')}" placeholder="#8f6b2f"></div>
           </div>
-          <div><label class="small">Short description</label><textarea name="short_description" rows="3">${policy.short_description || ''}</textarea></div>
-          <div><label class="small">Benefits (one per line)</label><textarea name="benefits_text" rows="5">${(policy.benefits || []).join('\n')}</textarea></div>
+          <div class="grid cols-2" style="gap:10px">
+            <div><label class="small">Sort order</label><input name="sort_order" type="number" value="${Number(policy.sort_order || 0)}"></div>
+            <div></div>
+          </div>
+          <div><label class="small">Short description</label><textarea name="short_description" rows="3">${esc(policy.short_description || '')}</textarea></div>
+          <div><label class="small">Benefits (one per line)</label><textarea name="benefits_text" rows="5">${esc((policy.benefits || []).join('\n'))}</textarea></div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <button class="btn primary" type="submit">Save ${policy.name || policy.code || 'tier'}</button>
+            <button class="btn primary" type="submit">Save ${esc(policy.title || policy.tier_code || 'tier')}</button>
             <span class="small" data-tier-policy-status></span>
           </div>
         </form>`;
@@ -63,11 +76,12 @@ document.addEventListener("DOMContentLoaded", () => {
         status.textContent = 'Saving…';
         try {
           const payload = {
-            code: form.code.value,
-            display_title: form.display_title.value,
+            tier_code: form.tier_code.value,
+            title: form.title.value,
             short_description: form.short_description.value,
             benefits: normalizeBenefits(form.benefits_text.value),
             badge_color: form.badge_color.value,
+            sort_order: Number(form.sort_order.value || 0),
             is_visible: !!form.is_visible.checked
           };
           const saveResponse = await window.DDAuth.apiFetch('/api/admin/tier-policies', { method: 'POST', body: JSON.stringify(payload) });
