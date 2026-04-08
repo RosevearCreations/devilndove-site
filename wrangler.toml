@@ -9,5 +9,5 @@ database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"
 
 [[r2_buckets]]
 binding = "PRODUCT_MEDIA_BUCKET"
-bucket_name = "devilndove-product-media"
-preview_bucket_name = "devilndove-product-media"
+bucket_name = "devilndove-toolshed-images"
+preview_bucket_name = "devilndove-toolshed-images"
