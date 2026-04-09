@@ -266,3 +266,17 @@ CREATE TABLE IF NOT EXISTS product_costs (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+
+CREATE TABLE IF NOT EXISTS accounting_overhead_allocations (
+  allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_month TEXT NOT NULL,
+  ledger_code TEXT NOT NULL DEFAULT '',
+  ledger_name TEXT NOT NULL DEFAULT '',
+  allocation_basis TEXT NOT NULL DEFAULT 'manual',
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  notes TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(period_month, ledger_code)
+);

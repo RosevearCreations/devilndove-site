@@ -318,3 +318,7 @@ Products now need to support a real partial-draft intake path for phone-first ca
 - Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
 - Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
 - Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.
+
+
+## accounting_overhead_allocations
+Monthly overhead allocation rows used to move real operating costs like rent, hydro, gas, water, and internet into a rough P&L view and later into fuller cost allocation logic.

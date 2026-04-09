@@ -75,3 +75,10 @@ Local SEO is mostly consistency + trust + relevance. The site can support that, 
 - Replaced the long phone Admin link list with a grouped tree-style mobile menu so the phone workflow uses collapsible sections instead of one uninterrupted list.
 - Continued mobile-first workflow tuning by surfacing Today, quick expense, quick write-off, product cost, and export actions closer to the top of the phone dashboard.
 - Continued docs/current-build synchronization for the present mobile-navigation and admin-usability pass.
+
+
+## Current pass addendum
+- Customer-facing home/shop flow was made friendlier and clearer on phone and desktop with stronger exploration sections and clearer action cards.
+- Accounting moved forward with monthly overhead allocations and a rough net-after-overhead view in the accounting report so operating costs can start flowing toward fuller P&L reporting.
+- Mobile admin moved forward again with a direct overhead-allocation shortcut from the phone dashboard.
+- Schema and template files were updated for the new overhead allocation layer.
