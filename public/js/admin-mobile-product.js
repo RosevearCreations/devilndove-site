@@ -17,9 +17,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const resourceSummary = document.getElementById('mobileResourceSummary');
   const refreshButton = document.getElementById('mobileRefreshBootstrapButton');
   const resetButton = document.getElementById('mobileResetForNextButton');
+  const draftProductIdInput = document.getElementById('mobileDraftProductId');
+  const draftSearchInput = document.getElementById('mobileDraftSearch');
+  const draftSelect = document.getElementById('mobileDraftSelect');
+  const draftSummary = document.getElementById('mobileDraftSummary');
+  const refreshDraftsButton = document.getElementById('mobileRefreshDraftsButton');
 
   let bootstrap = null;
+  let drafts = [];
   let selectedMap = new Map();
+  let loadedDraft = null;
 
   function setMessage(message, isError = false) {
     if (!messageEl) return;
@@ -40,6 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!Number.isFinite(amount) || amount < 0) return NaN;
     return Math.round(amount * 100);
   }
+  function centsToDollars(value) {
+    const cents = Number(value || 0);
+    if (!Number.isFinite(cents) || cents <= 0) return '';
+    return (cents / 100).toFixed(2);
+  }
   function escapeHtml(value) {
     return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
@@ -53,16 +65,25 @@ document.addEventListener('DOMContentLoaded', () => {
       return `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`;
     }).join('');
   }
+  function getResources() { return Array.isArray(bootstrap?.resources) ? bootstrap.resources : []; }
+  function selectedList() { return Array.from(selectedMap.values()).sort((a, b) => a.sort_order - b.sort_order); }
+  function setField(name, value) {
+    const field = form?.elements?.[name];
+    if (!field) return;
+    field.value = value == null ? '' : String(value);
+  }
+
   function renderImages() {
     if (!imagePreviewEl || !imageInput) return;
     const files = Array.from(imageInput.files || []);
-    imagePreviewEl.innerHTML = files.map((file) => {
+    const existing = loadedDraft?.images || [];
+    const fileHtml = files.map((file) => {
       const url = URL.createObjectURL(file);
       return `<div class="mobile-image-preview-card"><img src="${url}" alt="${escapeHtml(file.name)}"/><div class="small">${escapeHtml(file.name)}</div></div>`;
     }).join('');
+    const existingHtml = files.length ? '' : existing.map((image) => `<div class="mobile-image-preview-card"><img src="${escapeHtml(image.image_url)}" alt="${escapeHtml(image.alt_text || loadedDraft?.name || 'Draft image')}"/><div class="small">Saved draft image</div></div>`).join('');
+    imagePreviewEl.innerHTML = fileHtml || existingHtml;
   }
-  function getResources() { return Array.isArray(bootstrap?.resources) ? bootstrap.resources : []; }
-  function selectedList() { return Array.from(selectedMap.values()).sort((a, b) => a.sort_order - b.sort_order); }
 
   function renderSelectedResources() {
     if (!selectedResourcesEl) return;
@@ -137,6 +158,80 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
   }
 
+  function resetFormState(message = 'Ready for the next product.') {
+    if (form) form.reset();
+    if (draftProductIdInput) draftProductIdInput.value = '';
+    loadedDraft = null;
+    selectedMap = new Map();
+    renderImages();
+    renderSelectedResources();
+    renderResourceGrid();
+    if (draftSummary) draftSummary.textContent = 'Choose a draft to load it into the form.';
+    setMessage(message);
+  }
+
+  function applyDraft(draft) {
+    if (!draft || !form) return;
+    loadedDraft = draft;
+    if (draftProductIdInput) draftProductIdInput.value = String(draft.product_id || '');
+    setField('name', draft.name);
+    setField('product_category', draft.product_category);
+    setField('color_name', draft.color_name);
+    setField('price', centsToDollars(draft.price_cents));
+    setField('compare_at_price', centsToDollars(draft.compare_at_price_cents));
+    setField('inventory_quantity', draft.inventory_quantity || 1);
+    setField('shipping_code', draft.shipping_code);
+    setField('tax_class_id', draft.tax_class_id || '');
+    setField('weight_grams', draft.weight_grams || '');
+    setField('capture_reference', draft.capture_reference);
+    setField('sku', draft.sku);
+    setField('short_description', draft.short_description);
+    setField('description', draft.description);
+    setField('meta_title', draft.meta_title || '');
+    setField('keywords', draft.keywords || '');
+    setField('meta_description', draft.meta_description || '');
+    imageInput.value = '';
+    selectedMap = new Map((draft.resource_links || []).map((row, index) => {
+      const resource = getResources().find((entry) => entry.item_kind === row.resource_kind && entry.source_key === row.source_key);
+      const key = `${row.resource_kind}:${row.source_key}`;
+      return [key, {
+        key,
+        resource_kind: row.resource_kind,
+        source_key: row.source_key,
+        name: resource?.name || row.source_key,
+        quantity_used: Number(row.quantity_used || 1),
+        usage_notes: row.usage_notes || '',
+        sort_order: index
+      }];
+    }));
+    renderImages();
+    renderSelectedResources();
+    renderResourceGrid();
+    if (draftSummary) draftSummary.textContent = `Editing draft DD${String(draft.product_number || '').padStart(4, '0')} · ${draft.name || draft.capture_reference || 'Unnamed draft'} · ${draft.image_count || 0} images · ${draft.linked_resource_count || 0} linked resources.`;
+    setMessage(`Loaded draft #${draft.product_number || draft.product_id}. Save to continue working in this same screen.`);
+  }
+
+  function renderDraftOptions() {
+    if (!draftSelect) return;
+    const query = String(draftSearchInput?.value || '').trim().toLowerCase();
+    const filtered = drafts.filter((row) => !query || [row.name, row.capture_reference, row.slug, row.sku, `dd${row.product_number}`].join(' ').toLowerCase().includes(query));
+    draftSelect.innerHTML = '<option value="">Start a new draft</option>' + filtered.map((row) => `<option value="${row.product_id}">DD${String(row.product_number || '').padStart(4,'0')} · ${escapeHtml(row.name || row.capture_reference || row.slug || 'Draft')} · ${escapeHtml(row.updated_at || '')}</option>`).join('');
+    if (draftSummary) draftSummary.textContent = filtered.length ? `${filtered.length} draft products ready to continue in this screen.` : 'No draft products matched that search yet.';
+  }
+
+  async function loadDrafts() {
+    if (!window.DDAuth?.isLoggedIn()) return;
+    try {
+      const response = await window.DDAuth.apiFetch(`/api/admin/mobile-product-drafts?status=draft&limit=30&q=${encodeURIComponent(String(draftSearchInput?.value || '').trim())}`);
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load draft products.');
+      drafts = Array.isArray(data.drafts) ? data.drafts : [];
+      renderDraftOptions();
+    } catch (error) {
+      if (draftSummary) draftSummary.textContent = error.message || 'Could not load draft products.';
+    }
+  }
+
   async function loadBootstrap() {
     setMessage('');
     setAccess('');
@@ -156,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fillSelect(taxSelect, (data.tax_classes || []).map((row) => ({ value: row.tax_class_id, label: `${row.name}${row.code ? ` (${row.code})` : ''}` })), 'No tax class');
       renderSelectedResources();
       renderResourceGrid();
+      await loadDrafts();
     } catch (error) {
       setAccess(error.message || 'Could not load admin mobile product tools.', true);
     }
@@ -166,14 +262,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (resourceKindFilter) resourceKindFilter.addEventListener('change', renderResourceGrid);
   if (inStockOnly) inStockOnly.addEventListener('change', renderResourceGrid);
   if (refreshButton) refreshButton.addEventListener('click', loadBootstrap);
-  if (resetButton) resetButton.addEventListener('click', () => {
-    form.reset();
-    selectedMap = new Map();
-    renderImages();
-    renderSelectedResources();
-    renderResourceGrid();
-    setMessage('Ready for the next product.');
-    loadBootstrap();
+  if (refreshDraftsButton) refreshDraftsButton.addEventListener('click', loadDrafts);
+  if (draftSearchInput) draftSearchInput.addEventListener('input', loadDrafts);
+  if (draftSelect) draftSelect.addEventListener('change', () => {
+    const draft = drafts.find((row) => String(row.product_id) === String(draftSelect.value || ''));
+    if (!draft) return resetFormState('Ready for a new draft.');
+    applyDraft(draft);
+  });
+  if (resetButton) resetButton.addEventListener('click', async () => {
+    resetFormState();
+    await loadBootstrap();
   });
 
   if (form) {
@@ -189,17 +287,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (compareAtPriceCents !== '') formData.set('compare_at_price_cents', String(compareAtPriceCents));
       formData.set('resource_links_json', JSON.stringify(selectedList().map((row, index) => ({ resource_kind: row.resource_kind, source_key: row.source_key, quantity_used: row.quantity_used || 1, usage_notes: row.usage_notes || '', sort_order: index }))));
       const submitButton = form.querySelector('button[type="submit"]');
-      const originalText = submitButton?.textContent || 'Save draft for review';
+      const originalText = submitButton?.textContent || 'Save partial draft';
       try {
-        if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Saving...'; }
+        if (submitButton) { submitButton.disabled = true; submitButton.textContent = draftProductIdInput?.value ? 'Updating…' : 'Saving…'; }
         const response = await window.DDAuth.apiFetch('/api/admin/mobile-create-product', { method: 'POST', body: formData });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to save product.');
-        setMessage(`Saved product #${data.product?.product_number || '—'} for review.`);
-        form.reset();
-        selectedMap = new Map();
-        renderImages();
-        renderSelectedResources();
+        const wasUpdating = !!draftProductIdInput?.value;
+        setMessage(wasUpdating ? `Updated draft product #${data.product?.product_number || '—'}.` : `Saved product #${data.product?.product_number || '—'} for review.`);
+        resetFormState(wasUpdating ? 'Draft updated. Choose it again if you want to continue refining it.' : 'Ready for the next product.');
         await loadBootstrap();
       } catch (error) {
         setMessage(error.message || 'Failed to save product.', true);
