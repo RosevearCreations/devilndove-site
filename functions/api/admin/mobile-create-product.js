@@ -80,7 +80,7 @@ export async function onRequestPost(context) {
   let form;
   try { form = await request.formData(); } catch { return json({ ok: false, error: 'Expected multipart/form-data upload.' }, 400); }
 
-  const productId = Number(form.get('product_id') || 0) || 0;
+  const requestedProductId = Number(form.get('product_id') || 0) || 0;
   const name = normalizeText(form.get('name'));
   const captureReference = normalizeText(form.get('capture_reference'));
   const productCategory = normalizeText(form.get('product_category'));
@@ -111,25 +111,125 @@ export async function onRequestPost(context) {
   if (taxClassId !== null && (!Number.isInteger(taxClassId) || taxClassId <= 0)) return json({ ok: false, error: 'tax_class_id must be a valid id.' }, 400);
 
   const files = form.getAll('images').filter((file) => file && typeof file.arrayBuffer === 'function');
-  if (!name && !captureReference && !files.length) return json({ ok: false, error: 'Add at least a name, a reference, or a photo before saving.' }, 400);
+  if (!name && !captureReference && !files.length && !requestedProductId) {
+    return json({ ok: false, error: 'Add at least a name, a reference, or a photo before saving.' }, 400);
+  }
 
-  const productNumber = await getNextProductNumber(env);
-  const resolvedName = name || captureReference || `Draft product ${productNumber}`;
-  const slug = slugify(`${resolvedName}-${productNumber}`) || `product-${productNumber}`;
-  const sku = skuOverride || `DND-${String(productNumber).padStart(5, '0')}`;
-  const readyNotes = [captureReference ? `Capture reference: ${captureReference}` : '', !name ? 'Partial draft saved without final product name.' : '', !productCategory ? 'Category still needed.' : '', priceCents === 0 ? 'Price still needed.' : ''].filter(Boolean).join(' ');
+  let resolvedProductId = requestedProductId;
+  let productNumber = 0;
+  let resolvedName = '';
+  let slug = '';
+  let sku = '';
+  let readyNotes = '';
 
-  const insertResult = await env.DB.prepare(`
-    INSERT INTO products (
-      product_number, slug, sku, name, capture_reference, product_category, color_name, shipping_code, review_status,
-      is_ready_for_storefront, ready_check_notes, short_description, description, product_type, status, price_cents, compare_at_price_cents,
-      currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking,
-      inventory_quantity, featured_image_url, sort_order, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending_review', ?, ?, ?, ?, 'physical', 'draft', ?, ?, ?, ?, ?, ?, ?, 1, ?, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).bind(productNumber, slug, sku, resolvedName, captureReference || null, productCategory || null, colorName || null, shippingCode || null, 0, readyNotes || null, shortDescription || null, description || null, priceCents, compareAtPriceCents, currency, taxable, taxClassId, requiresShipping, weightGrams, inventoryQuantity).run();
+  if (resolvedProductId > 0) {
+    const existing = await env.DB.prepare(`
+      SELECT product_id, product_number, slug, sku, name, capture_reference, featured_image_url
+      FROM products
+      WHERE product_id = ?
+      LIMIT 1
+    `).bind(resolvedProductId).first();
 
-  const productId = Number(insertResult?.meta?.last_row_id || 0);
-  if (!productId) return json({ ok: false, error: 'Product could not be created.' }, 500);
+    if (!existing) return json({ ok: false, error: 'Draft product not found.' }, 404);
+
+    productNumber = Number(existing.product_number || 0);
+    resolvedName = name || captureReference || normalizeText(existing.name) || `Draft product ${productNumber || resolvedProductId}`;
+    slug = normalizeText(existing.slug) || slugify(`${resolvedName}-${productNumber || resolvedProductId}`) || `product-${productNumber || resolvedProductId}`;
+    sku = skuOverride || normalizeText(existing.sku) || `DND-${String(productNumber || resolvedProductId).padStart(5, '0')}`;
+    readyNotes = [
+      captureReference ? `Capture reference: ${captureReference}` : '',
+      !name ? 'Partial draft saved without final product name.' : '',
+      !productCategory ? 'Category still needed.' : '',
+      priceCents === 0 ? 'Price still needed.' : ''
+    ].filter(Boolean).join(' ');
+
+    await env.DB.prepare(`
+      UPDATE products
+      SET
+        name = ?,
+        capture_reference = ?,
+        product_category = ?,
+        color_name = ?,
+        shipping_code = ?,
+        review_status = 'pending_review',
+        is_ready_for_storefront = 0,
+        ready_check_notes = ?,
+        short_description = ?,
+        description = ?,
+        price_cents = ?,
+        compare_at_price_cents = ?,
+        currency = ?,
+        taxable = ?,
+        tax_class_id = ?,
+        requires_shipping = ?,
+        weight_grams = ?,
+        inventory_quantity = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE product_id = ?
+    `).bind(
+      resolvedName,
+      captureReference || null,
+      productCategory || null,
+      colorName || null,
+      shippingCode || null,
+      readyNotes || null,
+      shortDescription || null,
+      description || null,
+      priceCents,
+      compareAtPriceCents,
+      currency,
+      taxable,
+      taxClassId,
+      requiresShipping,
+      weightGrams,
+      inventoryQuantity,
+      resolvedProductId
+    ).run();
+  } else {
+    productNumber = await getNextProductNumber(env);
+    resolvedName = name || captureReference || `Draft product ${productNumber}`;
+    slug = slugify(`${resolvedName}-${productNumber}`) || `product-${productNumber}`;
+    sku = skuOverride || `DND-${String(productNumber).padStart(5, '0')}`;
+    readyNotes = [
+      captureReference ? `Capture reference: ${captureReference}` : '',
+      !name ? 'Partial draft saved without final product name.' : '',
+      !productCategory ? 'Category still needed.' : '',
+      priceCents === 0 ? 'Price still needed.' : ''
+    ].filter(Boolean).join(' ');
+
+    const insertResult = await env.DB.prepare(`
+      INSERT INTO products (
+        product_number, slug, sku, name, capture_reference, product_category, color_name, shipping_code, review_status,
+        is_ready_for_storefront, ready_check_notes, short_description, description, product_type, status, price_cents, compare_at_price_cents,
+        currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking,
+        inventory_quantity, featured_image_url, sort_order, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending_review', ?, ?, ?, ?, 'physical', 'draft', ?, ?, ?, ?, ?, ?, ?, 1, ?, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(
+      productNumber,
+      slug,
+      sku,
+      resolvedName,
+      captureReference || null,
+      productCategory || null,
+      colorName || null,
+      shippingCode || null,
+      0,
+      readyNotes || null,
+      shortDescription || null,
+      description || null,
+      priceCents,
+      compareAtPriceCents,
+      currency,
+      taxable,
+      taxClassId,
+      requiresShipping,
+      weightGrams,
+      inventoryQuantity
+    ).run();
+
+    resolvedProductId = Number(insertResult?.meta?.last_row_id || 0);
+    if (!resolvedProductId) return json({ ok: false, error: 'Product could not be created.' }, 500);
+  }
 
   const bucket = env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
   const uploaded = [];
@@ -143,30 +243,51 @@ export async function onRequestPost(context) {
       if (!buffer || Number(file.size || 0) <= 0) continue;
       const originalName = sanitizeFilename(file.name || `image-${index + 1}`);
       const extension = inferExtension(originalName, mimeType);
-      const objectKey = ['products', String(productId), `${Date.now()}-${index + 1}-${crypto.randomUUID()}.${extension}`].join('/');
+      const objectKey = ['products', String(resolvedProductId), `${Date.now()}-${index + 1}-${crypto.randomUUID()}.${extension}`].join('/');
       await bucket.put(objectKey, buffer, {
         httpMetadata: { contentType: mimeType, cacheControl: 'public, max-age=31536000, immutable' },
-        customMetadata: { original_name: originalName, product_id: String(productId), uploaded_by_user_id: String(adminUser.user_id || '') }
+        customMetadata: { original_name: originalName, product_id: String(resolvedProductId), uploaded_by_user_id: String(adminUser.user_id || '') }
       });
       const publicUrl = buildPublicUrl(env, objectKey);
       uploaded.push({ object_key: objectKey, public_url: publicUrl || '', original_filename: originalName });
-      await env.DB.prepare(`INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(productId, publicUrl || objectKey, `${resolvedName} photo ${index + 1}`, index).run();
+      await env.DB.prepare(`
+        INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).bind(resolvedProductId, publicUrl || objectKey, `${resolvedName} photo ${index + 1}`, index).run();
       try {
-        await env.DB.prepare(`INSERT INTO media_assets (product_id, storage_provider, bucket_name, object_key, public_url, original_filename, mime_type, file_size_bytes, created_by_user_id, created_at, updated_at) VALUES (?, 'r2', ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(productId, normalizeText(env.PRODUCT_MEDIA_BUCKET_NAME || env.R2_BUCKET_NAME || 'product-media'), objectKey, publicUrl || null, originalName, mimeType, Number(file.size || 0), adminUser.user_id).run();
+        await env.DB.prepare(`
+          INSERT INTO media_assets (
+            product_id, storage_provider, bucket_name, object_key, public_url, original_filename,
+            mime_type, file_size_bytes, created_by_user_id, created_at, updated_at
+          ) VALUES (?, 'r2', ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `).bind(
+          resolvedProductId,
+          normalizeText(env.PRODUCT_MEDIA_BUCKET_NAME || env.R2_BUCKET_NAME || 'product-media'),
+          objectKey,
+          publicUrl || null,
+          originalName,
+          mimeType,
+          Number(file.size || 0),
+          adminUser.user_id
+        ).run();
       } catch {}
     }
   }
 
   const featuredImageUrl = uploaded[0]?.public_url || null;
   if (featuredImageUrl) {
-    await env.DB.prepare(`UPDATE products SET featured_image_url = ?, updated_at = CURRENT_TIMESTAMP WHERE product_id = ?`).bind(featuredImageUrl, productId).run();
+    await env.DB.prepare(`
+      UPDATE products
+      SET featured_image_url = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE product_id = ?
+    `).bind(featuredImageUrl, resolvedProductId).run();
   }
 
   try {
     const seoTitle = metaTitle || `${resolvedName}${productCategory ? ` ${productCategory}` : ''}${colorName ? ` ${colorName}` : ''} | Devil n Dove`;
     const seoDescription = metaDescription || shortDescription || description || captureReference || `Draft ${productCategory || 'creation'} by Devil n Dove.`;
     await upsertProductSeo(env, {
-      product_id: productId,
+      product_id: resolvedProductId,
       meta_title: seoTitle,
       meta_description: seoDescription,
       keywords: keywords || [resolvedName, captureReference, productCategory, colorName, 'handmade', 'Devil n Dove', 'Ontario'].filter(Boolean).join(', '),
@@ -181,15 +302,36 @@ export async function onRequestPost(context) {
   try {
     const parsedLinks = JSON.parse(resourceLinksRaw || '[]');
     const links = Array.isArray(parsedLinks) ? parsedLinks : [];
+
+    await env.DB.prepare(`DELETE FROM product_resource_links WHERE product_id = ?`).bind(resolvedProductId).run();
+
     for (let index = 0; index < links.length; index += 1) {
       const row = links[index] || {};
       const resourceKind = normalizeText(row.resource_kind).toLowerCase();
       const sourceKey = normalizeText(row.source_key);
       if (!['tool', 'supply'].includes(resourceKind) || !sourceKey) continue;
-      await env.DB.prepare(`INSERT INTO product_resource_links (product_id, resource_kind, source_key, quantity_used, usage_notes, sort_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(productId, resourceKind, sourceKey, Math.max(1, Number(row.quantity_used || 1) || 1), normalizeText(row.usage_notes) || null, index).run();
+      await env.DB.prepare(`
+        INSERT INTO product_resource_links (
+          product_id, resource_kind, source_key, quantity_used, usage_notes, sort_order, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `).bind(
+        resolvedProductId,
+        resourceKind,
+        sourceKey,
+        Math.max(1, Number(row.quantity_used || 1) || 1),
+        normalizeText(row.usage_notes) || null,
+        index
+      ).run();
     }
   } catch {}
 
-  const createdProduct = await env.DB.prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
-  return json({ ok: true, message: 'Draft product saved. You can come back later to finish the details.', product: createdProduct, uploaded_images: uploaded, next_product_number: productNumber + 1 }, 201);
+  const createdProduct = await env.DB.prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`).bind(resolvedProductId).first();
+
+  return json({
+    ok: true,
+    message: requestedProductId > 0 ? 'Draft product updated.' : 'Draft product saved. You can come back later to finish the details.',
+    product: createdProduct,
+    uploaded_images: uploaded,
+    next_product_number: productNumber + 1
+  }, requestedProductId > 0 ? 200 : 201);
 }
