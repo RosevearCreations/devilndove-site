@@ -80,6 +80,7 @@ export async function onRequestPost(context) {
   let form;
   try { form = await request.formData(); } catch { return json({ ok: false, error: 'Expected multipart/form-data upload.' }, 400); }
 
+  const productId = Number(form.get('product_id') || 0) || 0;
   const name = normalizeText(form.get('name'));
   const captureReference = normalizeText(form.get('capture_reference'));
   const productCategory = normalizeText(form.get('product_category'));
