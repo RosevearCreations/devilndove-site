@@ -228,3 +228,15 @@
 - Accounting now includes an estimated item-costing view that blends direct unit cost, linked-resource cost, and allocated overhead into a fuller rough unit cost.
 - Mobile accounting quick links now surface item-costing review alongside expense, write-off, overhead, and export workflows.
 - This pass did not add a new table; it moved forward the workflow and reporting layer on top of the current accounting schema.
+
+## Current pass completion update
+- Corrected accounting-reporting drift so the rough P&L and item-costing views now match the live accounting table shapes instead of newer assumed cents/id columns.
+- Improved phone workflow again by keeping updated product drafts open in the same mobile capture screen and by restoring saved SEO fields when a draft is reopened.
+- Added a live phone-dashboard accounting snapshot so quick daily admin/accounting review no longer depends on opening the full accounting department page.
+- Continued local-search tuning by tightening Southern Ontario copy on key public pages and by reinforcing LocalBusiness-style structured data on About and Contact.
+
+## Still intentionally not marked complete
+- final per-item overhead allocation logic remains rough revenue-share rather than a finished costing/accounting rule set
+- full deeper P&L / double-entry accounting remains future work beyond the current rough reporting layer
+- broader mixed JSON/D1 cleanup in older paths still remains open
+

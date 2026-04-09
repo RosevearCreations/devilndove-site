@@ -173,3 +173,10 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Mobile product capture now supports reopening and continuing saved drafts in the same screen.
 - Accounting overview now includes estimated item costing using available cost and overhead data.
 - No new schema table was required in this pass; reporting and workflow layers were advanced on the existing schema.
+
+## Current pass addendum
+- Rough P&L/reporting drift was reduced by realigning accounting summary code to the live expense/write-off table shapes.
+- Estimated item costing was realigned to the current `product_costs` table shape so the cost view is less likely to silently under-report or fail.
+- Mobile product draft continuation was checked again and now restores saved SEO data from `product_seo` when reopening drafts.
+- Public exposed pages still keep the one-H1-per-page rule after this pass.
+

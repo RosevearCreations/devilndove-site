@@ -341,3 +341,10 @@ This pass continued the lighter departmental admin shell, improved phone-first q
 - Added in-place mobile draft continuation for product capture.
 - Added estimated item-costing reporting inside Accounting.
 - Continued mobile-first admin quick-action refinement.
+
+## Current pass note
+- Corrected the accounting-reporting layer so rough P&L and estimated item costing now align with the actual current schema.
+- Added a live month snapshot to the phone dashboard for revenue, overhead, costing warnings, and draft visibility.
+- Improved mobile product continuation so saved SEO fields reload and updated drafts stay open in the same capture workflow.
+- Continued public SEO tuning on key pages with stronger Southern Ontario / Canada copy and reinforced About/Contact structured data.
+

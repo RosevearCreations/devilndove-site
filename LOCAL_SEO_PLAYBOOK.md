@@ -86,3 +86,9 @@ Local SEO is mostly consistency + trust + relevance. The site can support that, 
 
 ## Current pass note
 - Continue prioritizing clear mobile entry points and task-oriented navigation because better mobile experience improves engagement and local conversion signals.
+
+## Current pass addendum
+- Reinforced Southern Ontario / Canada relevance in key public-page descriptions so the public copy stays closer to the real regional service/workshop identity.
+- About and Contact now carry a stronger Organization/LocalBusiness structured-data graph tied to the public site identity, region, and social profiles.
+- Keep validating structured data against visible page content and avoid adding location precision that the public pages do not actually support.
+

@@ -248,3 +248,8 @@ New current-pass backend additions:
 - Added accounting templates (CSV + XLSX) so GL and month-end bookkeeping can be seeded faster.
 - Continued mobile direction by making the lighter departmental pages easier to use on smaller screens than the former all-in-one Admin page.
 - Continued JSON-to-DB convergence by moving tier policy and accounting records into D1-backed tables instead of temporary page-only assumptions.
+
+## Current pass note
+- When continuing accounting work, do not assume cents-based expense/write-off tables. The current schema still stores those rows in real-dollar columns and reporting converts them as needed.
+- When continuing product-cost work, do not assume `product_costs` is keyed by `product_id`; the current repo schema still keys that table by `product_number`.
+

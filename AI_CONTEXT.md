@@ -241,3 +241,10 @@ Current-pass emphasis:
 ## Current pass note
 - Treat `/admin/mobile-product/` as the primary phone-first draft intake and draft-continuation workflow.
 - Treat `/api/admin/accounting-item-costing` as the current rough full-unit-cost reporting source.
+
+## Current pass addendum
+- Fixed a live accounting schema/code drift: monthly rough P&L now reads the real `amount` / `tax_amount` fields from `accounting_expenses` and the real `amount` field from `accounting_writeoffs` instead of non-existent cents columns.
+- Fixed the estimated item-costing source so it now matches the real `product_costs` table shape (`product_number` + `cost_per_unit`) before blending in linked-resource cost and allocated overhead.
+- Mobile product draft continuation is stronger because saved SEO fields now reload with the draft and updated drafts stay open in the same phone screen after save.
+- The phone dashboard now includes a live month snapshot for revenue, overhead, costing warnings, and draft-product visibility without forcing a jump to the full accounting page.
+

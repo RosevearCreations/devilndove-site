@@ -110,3 +110,16 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Fixed the missing phone-draft continuation gap by adding a draft picker to the mobile product capture screen and update-in-place draft saves.
 - Added an estimated item-costing accounting view so rough full unit cost can include direct costs, linked resources, and allocated overhead.
 - Mobile admin quick links now expose item-costing review directly from the phone dashboard.
+
+## Current pass update
+- Fixed a real accounting-schema mismatch in the reporting layer: the rough P&L now reads the live `amount` / `tax_amount` accounting columns instead of non-existent cents columns.
+- Fixed the estimated item-costing layer so it now joins product costs by `product_number` and uses real-dollar `cost_per_unit`, then blends that with linked-resource cost and allocated overhead.
+- Mobile draft continuation is better because saved SEO rows reload with the draft and updated drafts stay open in-place after save.
+- The phone dashboard now has a live month snapshot for rough revenue, overhead, costing warnings, and visible draft-product status.
+- Public SEO copy was tuned again around Southern Ontario / Canada language and About/Contact now carry a stronger LocalBusiness-style structured-data graph.
+
+## Honest remaining open items
+- overhead allocation is still rough revenue-share logic, not true final per-item absorption accounting
+- deeper accounting / P&L / double-entry still remains future work
+- remaining mixed JSON/D1 cleanup and broader real-device stress testing still remain open
+

@@ -148,3 +148,8 @@ Current-pass rules added:
 - Added accounting templates (CSV + XLSX) so GL and month-end bookkeeping can be seeded faster.
 - Continued mobile direction by making the lighter departmental pages easier to use on smaller screens than the former all-in-one Admin page.
 - Continued JSON-to-DB convergence by moving tier policy and accounting records into D1-backed tables instead of temporary page-only assumptions.
+
+## Current pass note
+- Keep accounting/reporting changes aligned to the actual SQL files before changing admin JS/API code. Recent drift came from code assuming cents/id columns that the repo schema did not define.
+- Keep mobile workflow changes in sync across HTML, JS, SQL references, and handoff docs in the same pass.
+

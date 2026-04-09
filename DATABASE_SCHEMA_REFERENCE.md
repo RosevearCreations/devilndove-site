@@ -327,3 +327,10 @@ Monthly overhead allocation rows used to move real operating costs like rent, hy
 ## Current pass note
 - No new table was added in this pass.
 - Estimated item costing uses existing `product_costs`, `product_resource_links`, `site_item_inventory`, and `accounting_overhead_allocations`.
+
+## Current pass addendum
+- `accounting_expenses` remains a real-dollar table (`amount`, `tax_amount`) rather than a cents table. Repo code must convert to cents only at reporting time.
+- `accounting_writeoffs` likewise remains a real-dollar table (`amount`) and should be treated the same way in rough P&L/reporting code.
+- `product_costs` currently keys product costing by `product_number` and stores `cost_per_unit` as a real-dollar amount. Costing/reporting code should not assume `product_id` or `cost_per_unit_cents` in this table.
+- Added supporting indexes for `accounting_expenses`, `accounting_writeoffs`, `product_costs`, and `accounting_overhead_allocations` so the phone dashboard and accounting overview can query the current schema more reliably.
+

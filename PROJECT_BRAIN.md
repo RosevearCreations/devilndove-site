@@ -264,3 +264,9 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 ## Current pass note
 - Phone capture now supports reopening draft products in the same workflow.
 - Accounting now has an estimated fully loaded item-costing view based on direct costs, linked resources, and overhead allocation.
+
+## Current pass addendum
+- The current accounting truth is still rough, but the repo now correctly treats `accounting_expenses` / `accounting_writeoffs` as real-dollar tables and `product_costs` as a `product_number` + `cost_per_unit` table.
+- Treat the phone dashboard as a fast operational shell for daily accounting visibility, not just a launcher.
+- Treat the mobile product capture screen as the preferred place to reopen and continue unfinished finished-product drafts.
+

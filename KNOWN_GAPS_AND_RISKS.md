@@ -450,3 +450,25 @@ All code-side items that were realistically actionable inside this repo pass wer
 - The mobile finished-product workflow is stronger because saved drafts can now be reopened and continued from the same capture screen.
 - Rough per-item costing moved forward by blending direct product cost, linked resource cost, and allocated overhead into a fuller estimated unit cost view.
 - Still honestly open: final true per-item overhead allocation rules, fuller P&L/reporting depth, and broader real-device stress testing on phone and desktop.
+
+## Current pass addendum
+
+### Accounting/reporting drift
+#### Addressed in this pass
+- Fixed the rough P&L drift where reporting code had been reading non-existent cents columns from `accounting_expenses` and `accounting_writeoffs`.
+- Fixed the item-costing drift where reporting code had been assuming `product_costs` used `product_id` and `cost_per_unit_cents` instead of the current `product_number` and `cost_per_unit` structure.
+- Added read-performance indexes for the current accounting/reporting tables so the newer phone/admin summary paths are less fragile under repeated refreshes.
+
+#### Still open
+- The current accounting layer is still intentionally rough and should not be mistaken for finished double-entry accounting.
+- Overhead allocation is still revenue-share based and not a final per-item costing rule.
+
+### Draft-to-publish workflow
+#### Addressed in this pass
+- Mobile draft continuation is stronger because reopened drafts now restore saved SEO fields and updated drafts stay in the same screen instead of forcing a choose-it-again loop.
+- The phone dashboard now shows live draft-product visibility so staff can spot unfinished intake faster.
+
+#### Still open
+- Broader real-device stress testing is still needed on phone and desktop.
+- Bulk import still needs more tuning so draft-like rows and fuller review-ready rows behave consistently.
+
