@@ -43,7 +43,30 @@
         <button type="button" class="btn" id="mobileRefreshBootstrapButton">Refresh</button>
       </div>
       <div id="mobileProductMessage" class="small" style="display:none;margin-bottom:12px"></div>
+
+      <div class="card" style="margin:0 0 14px 0;padding:14px;border:1px solid rgba(0,0,0,.08)">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap">
+          <div>
+            <div class="small">Continue an existing draft</div>
+            <div class="small">Pick a saved draft and keep working in this same capture screen.</div>
+          </div>
+          <button type="button" class="btn" id="mobileRefreshDraftsButton">Refresh drafts</button>
+        </div>
+        <div class="mobile-form-grid" style="margin-top:10px">
+          <label>
+            <span>Find draft</span>
+            <input class="input" type="search" id="mobileDraftSearch" placeholder="Search name, DD number, SKU, reference"/>
+          </label>
+          <label>
+            <span>Draft list</span>
+            <select class="input" id="mobileDraftSelect"><option value="">Loading drafts…</option></select>
+          </label>
+        </div>
+        <div class="small" id="mobileDraftSummary" style="margin-top:8px">Choose a draft to load it into the form.</div>
+      </div>
+
       <form id="mobileProductForm" class="mobile-product-form">
+        <input type="hidden" name="product_id" id="mobileDraftProductId" value=""/>
         <div class="mobile-form-grid">
           <label>
             <span>Product name</span>
