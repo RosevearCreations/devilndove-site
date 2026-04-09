@@ -361,3 +361,7 @@ textarea {
 @media (max-width:520px){
   .mobile-admin-tree-links{grid-template-columns:1fr}
 }
+
+
+/* Pass 20 customer-experience + overhead accounting */
+.customer-welcome-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.customer-highlight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}.customer-welcome strong{display:block;margin-bottom:6px}.customer-welcome p{margin:0}.accounting-insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.admin-dashboard-grid .btn.primary{box-shadow:0 8px 20px rgba(0,0,0,.08)}#accountingBackendMount .grid.cols-2{align-items:start}@media (max-width:720px){.customer-highlight-grid,.customer-welcome-grid{grid-template-columns:1fr}}
