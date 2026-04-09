@@ -383,3 +383,15 @@ textarea {
   font-size: .82rem;
   background: rgba(255,255,255,.92);
 }
+
+
+/* Current pass: mobile draft/readiness and phone dashboard helpers */
+.mobile-draft-readiness{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;background:rgba(255,255,255,.03)}
+.mobile-draft-status-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.mobile-readiness-chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.mobile-readiness-chip{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.12);font-size:.82rem}
+.mobile-readiness-chip.is-done{background:rgba(10,122,47,.08);border-color:rgba(10,122,47,.22)}
+.mobile-readiness-chip.is-missing{background:rgba(185,28,28,.08);border-color:rgba(185,28,28,.2)}
+.mobile-summary-list{display:grid;gap:10px}
+.mobile-summary-list-item{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:10px;background:rgba(255,255,255,.03)}
+@media (max-width:720px){.mobile-draft-status-head{align-items:stretch}}
