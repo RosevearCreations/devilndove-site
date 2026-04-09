@@ -53,6 +53,7 @@ export async function onRequestGet(context) {
   const hasExpenses = await tableExists(db, 'accounting_expenses');
   const hasWriteoffs = await tableExists(db, 'accounting_writeoffs');
   const hasGl = await tableExists(db, 'general_ledger_accounts');
+  const hasOverhead = await tableExists(db, 'accounting_overhead_allocations');
 
   const orderSummary = hasOrders ? await scalar(db, `
     SELECT
@@ -97,6 +98,28 @@ export async function onRequestGet(context) {
     ORDER BY total_cents DESC, ledger_name ASC
   `, [range.start, range.end]) : [];
 
+
+  const overheadSummary = hasOverhead ? await scalar(db, `
+    SELECT
+      COALESCE(SUM(COALESCE(amount_cents,0)),0) AS overhead_cents,
+      COUNT(*) AS overhead_count
+    FROM accounting_overhead_allocations
+    WHERE period_month = ?
+  `, [range.raw]) : {};
+
+  const overheadGroups = hasOverhead ? await safeAll(db, `
+    SELECT
+      COALESCE(NULLIF(ledger_code,''), 'UNASSIGNED') AS ledger_code,
+      COALESCE(NULLIF(ledger_name,''), 'Unassigned') AS ledger_name,
+      COALESCE(SUM(COALESCE(amount_cents,0)),0) AS total_cents,
+      COUNT(*) AS entry_count,
+      COALESCE(MIN(allocation_basis),'manual') AS allocation_basis
+    FROM accounting_overhead_allocations
+    WHERE period_month = ?
+    GROUP BY ledger_code, ledger_name
+    ORDER BY total_cents DESC, ledger_name ASC
+  `, [range.raw]) : [];
+
   const glAccounts = hasGl ? await safeAll(db, `
     SELECT code, name, category, parent_group, normal_balance, sort_order
     FROM general_ledger_accounts
@@ -110,6 +133,7 @@ export async function onRequestGet(context) {
   const expenseCents = Number(expenseSummary.expense_cents || 0);
   const expenseTaxCents = Number(expenseSummary.expense_tax_cents || 0);
   const writeoffCents = Number(writeoffSummary.writeoff_cents || 0);
+  const overheadCents = Number(overheadSummary.overhead_cents || 0);
 
   return jsonResponse({
     ok: true,
@@ -118,19 +142,29 @@ export async function onRequestGet(context) {
       order_count: Number(orderSummary.order_count || 0),
       expense_count: Number(expenseSummary.expense_count || 0),
       writeoff_count: Number(writeoffSummary.writeoff_count || 0),
+      overhead_count: Number(overheadSummary.overhead_count || 0),
       booked_amount: bookedAmount,
       booked_tax: bookedTax,
       recognized_amount: recognizedAmount,
       operating_expense_cents: expenseCents,
       operating_expense_tax_cents: expenseTaxCents,
       writeoff_cents: writeoffCents,
-      rough_net_before_cogs_cents: Math.round((recognizedAmount * 100) - expenseCents - expenseTaxCents - writeoffCents)
+      rough_net_before_cogs_cents: Math.round((recognizedAmount * 100) - expenseCents - expenseTaxCents - writeoffCents),
+      overhead_allocated_cents: overheadCents,
+      rough_net_after_overhead_cents: Math.round((recognizedAmount * 100) - expenseCents - expenseTaxCents - writeoffCents - overheadCents)
     },
     expense_groups: groupedExpenses.map((row) => ({
       ledger_code: row.ledger_code || 'UNASSIGNED',
       ledger_name: row.ledger_name || 'Unassigned',
       total_cents: Number(row.total_cents || 0),
       entry_count: Number(row.entry_count || 0)
+    })),
+    overhead_groups: overheadGroups.map((row) => ({
+      ledger_code: row.ledger_code || 'UNASSIGNED',
+      ledger_name: row.ledger_name || 'Unassigned',
+      total_cents: Number(row.total_cents || 0),
+      entry_count: Number(row.entry_count || 0),
+      allocation_basis: row.allocation_basis || 'manual'
     })),
     general_ledger_accounts: glAccounts.map((row) => ({
       code: row.code || '',
