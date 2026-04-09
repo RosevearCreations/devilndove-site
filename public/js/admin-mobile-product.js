@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const draftSearchInput = document.getElementById('mobileDraftSearch');
   const draftSelect = document.getElementById('mobileDraftSelect');
   const draftSummary = document.getElementById('mobileDraftSummary');
+  const draftReadiness = document.getElementById('mobileDraftReadiness');
   const refreshDraftsButton = document.getElementById('mobileRefreshDraftsButton');
 
   let bootstrap = null;
@@ -106,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedMap.delete(button.dataset.resourceRemove);
       renderSelectedResources();
       renderResourceGrid();
+      renderDraftReadiness(loadedDraft);
     }));
     selectedResourcesEl.querySelectorAll('[data-resource-qty]').forEach((input) => input.addEventListener('input', () => {
       const row = selectedMap.get(input.dataset.resourceQty);
@@ -155,7 +157,46 @@ document.addEventListener('DOMContentLoaded', () => {
       else selectedMap.set(key, { key, resource_kind: resourceKind, source_key: sourceKey, name: row.name, quantity_used: 1, usage_notes: '', sort_order: selectedMap.size });
       renderSelectedResources();
       renderResourceGrid();
+      renderDraftReadiness(loadedDraft);
     }));
+  }
+
+  function draftChecklist(draft) {
+    const liveDraft = draft || {};
+    const imageCount = Number(liveDraft.image_count || (liveDraft.images || []).length || 0);
+    const checks = [
+      { label: 'Name', done: !!String(liveDraft.name || '').trim() },
+      { label: 'Category', done: !!String(liveDraft.product_category || '').trim() },
+      { label: 'Price', done: Number(liveDraft.price_cents || 0) > 0 },
+      { label: 'Photo', done: imageCount > 0 || !!String(liveDraft.featured_image_url || '').trim() },
+      { label: 'Story', done: !!String(liveDraft.short_description || liveDraft.description || '').trim() },
+      { label: 'SEO basics', done: !!String(liveDraft.meta_title || '').trim() && !!String(liveDraft.meta_description || '').trim() },
+      { label: 'Linked resources', done: selectedList().length > 0 }
+    ];
+    return { checks, imageCount };
+  }
+
+  function renderDraftReadiness(draft) {
+    if (!draftReadiness) return;
+    if (!draft) {
+      draftReadiness.innerHTML = '<div class="small">Select a saved draft to see what is still missing before it is ready for fuller review.</div>';
+      return;
+    }
+    const { checks, imageCount } = draftChecklist(draft);
+    const missing = checks.filter((row) => !row.done);
+    const ready = checks.filter((row) => row.done).length;
+    draftReadiness.innerHTML = `
+      <div class="mobile-draft-status-head">
+        <div>
+          <strong>${escapeHtml(draft.name || draft.capture_reference || `DD${draft.product_number || draft.product_id}`)}</strong>
+          <div class="small">DD${String(draft.product_number || '').padStart(4,'0')} · ${escapeHtml(draft.status || 'draft')} · ${escapeHtml(draft.review_status || 'pending_review')} · ${imageCount} images · ${selectedList().length} linked resources</div>
+        </div>
+        <div class="small">Last updated: ${escapeHtml(draft.updated_at || '—')}</div>
+      </div>
+      <div class="mobile-readiness-chip-row">${checks.map((row) => `<span class="mobile-readiness-chip${row.done ? ' is-done' : ' is-missing'}">${escapeHtml(row.label)}</span>`).join('')}</div>
+      <div class="small" style="margin-top:8px">${missing.length ? `Still missing: ${escapeHtml(missing.map((row) => row.label).join(', '))}.` : 'This draft now has the main basics filled in for later review and refinement.'}</div>
+      <div class="small">${ready} of ${checks.length} quick mobile checks complete.</div>
+    `;
   }
 
   function resetFormState(message = 'Ready for the next product.') {
@@ -166,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderImages();
     renderSelectedResources();
     renderResourceGrid();
+    renderDraftReadiness(null);
     if (draftSummary) draftSummary.textContent = 'Choose a draft to load it into the form.';
     setMessage(message);
   }
@@ -174,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!draft || !form) return;
     loadedDraft = draft;
     if (draftProductIdInput) draftProductIdInput.value = String(draft.product_id || '');
+    if (draftSelect) draftSelect.value = String(draft.product_id || '');
     setField('name', draft.name);
     setField('product_category', draft.product_category);
     setField('color_name', draft.color_name);
@@ -207,32 +250,43 @@ document.addEventListener('DOMContentLoaded', () => {
     renderImages();
     renderSelectedResources();
     renderResourceGrid();
+    renderDraftReadiness(draft);
     if (draftSummary) draftSummary.textContent = `Editing draft DD${String(draft.product_number || '').padStart(4, '0')} · ${draft.name || draft.capture_reference || 'Unnamed draft'} · ${draft.image_count || 0} images · ${draft.linked_resource_count || 0} linked resources.`;
-    setMessage(`Loaded draft #${draft.product_number || draft.product_id}. Save to continue working in this same screen.`);
+    setMessage(`Loaded draft #${draft.product_number || draft.product_id}. Continue working without leaving this screen.`);
   }
 
-  function renderDraftOptions() {
+  function renderDraftOptions(selectedId = null) {
     if (!draftSelect) return;
     const query = String(draftSearchInput?.value || '').trim().toLowerCase();
-    const filtered = drafts.filter((row) => !query || [row.name, row.capture_reference, row.slug, row.sku, `dd${row.product_number}`].join(' ').toLowerCase().includes(query));
+    let filtered = drafts.filter((row) => !query || [row.name, row.capture_reference, row.slug, row.sku, `dd${row.product_number}`].join(' ').toLowerCase().includes(query));
+    const keepId = String(selectedId || loadedDraft?.product_id || '');
+    if (keepId && !filtered.some((row) => String(row.product_id) === keepId)) {
+      const current = drafts.find((row) => String(row.product_id) === keepId);
+      if (current) filtered = [current, ...filtered];
+    }
     draftSelect.innerHTML = '<option value="">Start a new draft</option>' + filtered.map((row) => `<option value="${row.product_id}">DD${String(row.product_number || '').padStart(4,'0')} · ${escapeHtml(row.name || row.capture_reference || row.slug || 'Draft')} · ${escapeHtml(row.updated_at || '')}</option>`).join('');
-    if (draftSummary) draftSummary.textContent = filtered.length ? `${filtered.length} draft products ready to continue in this screen.` : 'No draft products matched that search yet.';
+    if (keepId && filtered.some((row) => String(row.product_id) === keepId)) draftSelect.value = keepId;
+    if (draftSummary && !loadedDraft) draftSummary.textContent = filtered.length ? `${filtered.length} draft products ready to continue in this screen.` : 'No draft products matched that search yet.';
   }
 
-  async function loadDrafts() {
+  async function loadDrafts(selectedId = null) {
     if (!window.DDAuth?.isLoggedIn()) return;
     try {
-      const response = await window.DDAuth.apiFetch(`/api/admin/mobile-product-drafts?status=draft&limit=30&q=${encodeURIComponent(String(draftSearchInput?.value || '').trim())}`);
+      const response = await window.DDAuth.apiFetch('/api/admin/mobile-product-drafts?status=draft&limit=50');
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load draft products.');
       drafts = Array.isArray(data.drafts) ? data.drafts : [];
-      renderDraftOptions();
+      renderDraftOptions(selectedId);
+      if (selectedId) {
+        const selected = drafts.find((row) => String(row.product_id) === String(selectedId));
+        if (selected) applyDraft(selected);
+      }
     } catch (error) {
       if (draftSummary) draftSummary.textContent = error.message || 'Could not load draft products.';
     }
   }
 
-  async function loadBootstrap() {
+  async function loadBootstrap(selectedDraftId = null) {
     setMessage('');
     setAccess('');
     try {
@@ -251,19 +305,19 @@ document.addEventListener('DOMContentLoaded', () => {
       fillSelect(taxSelect, (data.tax_classes || []).map((row) => ({ value: row.tax_class_id, label: `${row.name}${row.code ? ` (${row.code})` : ''}` })), 'No tax class');
       renderSelectedResources();
       renderResourceGrid();
-      await loadDrafts();
+      await loadDrafts(selectedDraftId);
     } catch (error) {
       setAccess(error.message || 'Could not load admin mobile product tools.', true);
     }
   }
 
-  if (imageInput) imageInput.addEventListener('change', renderImages);
+  if (imageInput) imageInput.addEventListener('change', () => { renderImages(); renderDraftReadiness(loadedDraft); });
   if (resourceSearch) resourceSearch.addEventListener('input', renderResourceGrid);
   if (resourceKindFilter) resourceKindFilter.addEventListener('change', renderResourceGrid);
   if (inStockOnly) inStockOnly.addEventListener('change', renderResourceGrid);
-  if (refreshButton) refreshButton.addEventListener('click', loadBootstrap);
-  if (refreshDraftsButton) refreshDraftsButton.addEventListener('click', loadDrafts);
-  if (draftSearchInput) draftSearchInput.addEventListener('input', loadDrafts);
+  if (refreshButton) refreshButton.addEventListener('click', () => loadBootstrap(draftProductIdInput?.value || null));
+  if (refreshDraftsButton) refreshDraftsButton.addEventListener('click', () => loadDrafts(draftProductIdInput?.value || null));
+  if (draftSearchInput) draftSearchInput.addEventListener('input', () => renderDraftOptions(draftProductIdInput?.value || null));
   if (draftSelect) draftSelect.addEventListener('change', () => {
     const draft = drafts.find((row) => String(row.product_id) === String(draftSelect.value || ''));
     if (!draft) return resetFormState('Ready for a new draft.');
@@ -288,15 +342,22 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.set('resource_links_json', JSON.stringify(selectedList().map((row, index) => ({ resource_kind: row.resource_kind, source_key: row.source_key, quantity_used: row.quantity_used || 1, usage_notes: row.usage_notes || '', sort_order: index }))));
       const submitButton = form.querySelector('button[type="submit"]');
       const originalText = submitButton?.textContent || 'Save partial draft';
+      const existingProductId = draftProductIdInput?.value || '';
       try {
-        if (submitButton) { submitButton.disabled = true; submitButton.textContent = draftProductIdInput?.value ? 'Updating…' : 'Saving…'; }
+        if (submitButton) { submitButton.disabled = true; submitButton.textContent = existingProductId ? 'Updating…' : 'Saving…'; }
         const response = await window.DDAuth.apiFetch('/api/admin/mobile-create-product', { method: 'POST', body: formData });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to save product.');
-        const wasUpdating = !!draftProductIdInput?.value;
-        setMessage(wasUpdating ? `Updated draft product #${data.product?.product_number || '—'}.` : `Saved product #${data.product?.product_number || '—'} for review.`);
-        resetFormState(wasUpdating ? 'Draft updated. Choose it again if you want to continue refining it.' : 'Ready for the next product.');
-        await loadBootstrap();
+        const savedProductId = String(data.product?.product_id || existingProductId || '');
+        if (existingProductId) {
+          setMessage(`Updated draft product #${data.product?.product_number || '—'} and kept it open for continued editing.`);
+          await loadBootstrap(savedProductId);
+        } else {
+          setMessage(`Saved product #${data.product?.product_number || '—'} for review. Ready for the next product.`);
+          resetFormState('Ready for the next product.');
+          if (draftSearchInput) draftSearchInput.value = '';
+          await loadBootstrap();
+        }
       } catch (error) {
         setMessage(error.message || 'Failed to save product.', true);
       } finally {
