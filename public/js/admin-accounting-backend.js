@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div id="accountingBackendMessage" class="small" style="display:none;margin-top:10px"></div>
     </div>
     <div class="grid cols-2" style="gap:18px;margin-top:18px">
-      <div class="card">
+      <div class="card" id="gl-accounts">
         <h3 style="margin-top:0">General ledger accounts</h3>
         <form id="glAccountForm" class="grid" style="gap:8px">
           <input name="code" type="text" placeholder="6100" />
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </form>
         <div id="glAccountsList" class="small" style="margin-top:10px"></div>
       </div>
-      <div class="card">
+      <div class="card" id="expense-entry">
         <h3 style="margin-top:0">Expense entry</h3>
         <form id="expenseForm" class="grid" style="gap:8px">
           <input name="expense_date" type="date"/>
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </form>
         <div id="expensesList" class="small" style="margin-top:10px"></div>
       </div>
-      <div class="card">
+      <div class="card" id="writeoff-entry">
         <h3 style="margin-top:0">Write-off entry</h3>
         <form id="writeoffForm" class="grid" style="gap:8px">
           <input name="writeoff_date" type="date"/>
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </form>
         <div id="writeoffsList" class="small" style="margin-top:10px"></div>
       </div>
-      <div class="card">
+      <div class="card" id="product-costs">
         <h3 style="margin-top:0">Product unit costs</h3>
         <form id="productCostForm" class="grid" style="gap:8px">
           <input name="product_number" type="text" placeholder="DD1000"/>
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div id="productCostsList" class="small" style="margin-top:10px"></div>
       </div>
     </div>
-    <div class="card" style="margin-top:18px">
+    <div class="card" id="export-presets" style="margin-top:18px">
       <h3 style="margin-top:0">Export presets</h3>
       <div class="grid cols-3" style="gap:12px;align-items:end">
         <div><label class="small" for="monthlyExportMonth">Month-end</label><input id="monthlyExportMonth" type="month"/></div>
@@ -217,5 +217,10 @@ document.addEventListener("DOMContentLoaded", () => {
     await downloadCsv(`/api/admin/accounting-period-summary-export?scope=year&period=${encodeURIComponent(year)}`, `devilndove-accounting-${year}.csv`);
   });
 
-  refreshAll().catch((error) => setMessage(String(error?.message || error || 'Failed loading accounting tools.'), true));
+  refreshAll().then(() => {
+    if (window.location.hash) {
+      const target = document.querySelector(window.location.hash);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }).catch((error) => setMessage(String(error?.message || error || 'Failed loading accounting tools.'), true));
 });
