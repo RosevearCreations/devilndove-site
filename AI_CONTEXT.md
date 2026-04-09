@@ -218,3 +218,8 @@ Current-pass emphasis:
 - Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
 - Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
 - Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.
+
+
+## Current pass note
+- The repo currently favors a lighter Admin launcher plus department pages.
+- Mobile-first quick actions are being moved upward so the phone dashboard can handle more real daily use without loading long desktop-oriented screens.

@@ -85,3 +85,9 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
 - Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
 - Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.
+
+
+## Current pass status
+- Departmental admin pages remain the active direction and the lighter launcher dashboard is still the preferred shell over a single long admin page.
+- Accounting now has clearer quick-action launch points and export preset entry points, especially for phone use.
+- Mobile-first work should continue by moving more common daily actions onto the phone dashboard before broader stress testing.

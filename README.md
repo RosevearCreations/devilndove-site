@@ -318,3 +318,7 @@ Public SEO passes should stay aligned with current Google Search guidance: stron
 - Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
 - Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
 - Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.
+
+
+## Current pass note
+This pass continued the lighter departmental admin shell, improved phone-first quick actions, and tightened accounting navigation with direct anchors for ledger, expense, write-off, cost, and export workflows.

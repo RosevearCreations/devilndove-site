@@ -202,3 +202,9 @@
 - Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
 - Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
 - Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.
+
+
+## Current pass addendum
+- Continued mobile-first admin polish with a stronger phone dashboard, clearer quick-action launch cards, and direct anchors into accounting tasks like expenses, write-offs, product costs, and export presets.
+- Continued admin shell cleanup by reinforcing the departmental launcher model so the main dashboard stays lighter and department pages act more like standalone work surfaces.
+- Continued docs/schema synchronization for the current build while keeping the main open items focused on deeper accounting logic, remaining mixed JSON/D1 cleanup, and broader real-device stress testing.

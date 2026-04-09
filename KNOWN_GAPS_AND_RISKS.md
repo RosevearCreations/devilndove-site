@@ -425,3 +425,9 @@ All code-side items that were realistically actionable inside this repo pass wer
 - Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
 - Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
 - Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.
+
+
+## Current pass addendum
+- Mobile/admin workflow risk is reduced again because phone users now have clearer quick-action routes into Today, inventory, expenses, write-offs, product costs, and export presets instead of depending on longer department pages.
+- UI cohesion risk is reduced again because the departmental launcher model is reinforced and accounting actions now have direct anchors/buttons, which lowers scroll friction on both desktop and phone screens.
+- Mixed JSON/D1 authority still remains in older areas, but this pass focused on workflow usability, lighter admin navigation, and current-build synchronization rather than a deeper schema expansion.

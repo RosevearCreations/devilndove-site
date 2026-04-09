@@ -148,3 +148,9 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
 - Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
 - Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.
+
+
+## Current pass checks
+- Public exposed pages were checked again for the one-H1 rule.
+- Admin/department/mobile layouts received another CSS pass to reduce action-row drift and long-scroll friction.
+- Accounting quick links and export preset anchors were aligned with the dedicated accounting department screen.

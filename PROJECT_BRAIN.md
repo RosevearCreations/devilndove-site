@@ -240,3 +240,9 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Strengthened the Accounting department with visible starter forms plus month-end, quarter-end, and year-end CSV export presets.
 - Added a new phone-first Admin Dashboard at `/admin/mobile/` with Today, Quick Add, receiving, and export-oriented shortcuts.
 - Continued moving the admin shell toward dashboard-style department buttons instead of long scroll-heavy interfaces.
+
+
+## Current pass direction
+- Keep Admin split into department pages instead of rebuilding a giant all-in-one dashboard.
+- Keep moving the phone dashboard toward daily real-use actions: Today, inventory, expense entry, write-offs, product intake, and exports.
+- Keep accounting focused on growing from capture/export structure into fuller P&L and overhead allocation later.

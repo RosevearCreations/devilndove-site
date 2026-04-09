@@ -64,3 +64,8 @@ Avoid:
 ## Notes
 
 Local SEO is mostly consistency + trust + relevance. The site can support that, but GBP + reviews + strong product pages are usually the biggest drivers.
+
+
+## Current pass local SEO reminder
+- Keep page titles and meta descriptions localized and natural for Southern Ontario intent rather than stuffing repeated city names.
+- Continue using dedicated public landing pages and clean department/admin separation so private routes stay non-indexed and public content remains easier for crawlers to understand.
