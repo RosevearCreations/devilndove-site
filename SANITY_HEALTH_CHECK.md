@@ -154,3 +154,9 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Public exposed pages were checked again for the one-H1 rule.
 - Admin/department/mobile layouts received another CSS pass to reduce action-row drift and long-scroll friction.
 - Accounting quick links and export preset anchors were aligned with the dedicated accounting department screen.
+
+
+## Current pass addendum
+- Replaced the long phone Admin link list with a grouped tree-style mobile menu so the phone workflow uses collapsible sections instead of one uninterrupted list.
+- Continued mobile-first workflow tuning by surfacing Today, quick expense, quick write-off, product cost, and export actions closer to the top of the phone dashboard.
+- Continued docs/current-build synchronization for the present mobile-navigation and admin-usability pass.

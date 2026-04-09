@@ -223,3 +223,9 @@ Current-pass emphasis:
 ## Current pass note
 - The repo currently favors a lighter Admin launcher plus department pages.
 - Mobile-first quick actions are being moved upward so the phone dashboard can handle more real daily use without loading long desktop-oriented screens.
+
+
+## Current pass addendum
+- Replaced the long phone Admin link list with a grouped tree-style mobile menu so the phone workflow uses collapsible sections instead of one uninterrupted list.
+- Continued mobile-first workflow tuning by surfacing Today, quick expense, quick write-off, product cost, and export actions closer to the top of the phone dashboard.
+- Continued docs/current-build synchronization for the present mobile-navigation and admin-usability pass.

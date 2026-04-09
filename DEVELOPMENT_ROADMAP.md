@@ -208,3 +208,9 @@
 - Continued mobile-first admin polish with a stronger phone dashboard, clearer quick-action launch cards, and direct anchors into accounting tasks like expenses, write-offs, product costs, and export presets.
 - Continued admin shell cleanup by reinforcing the departmental launcher model so the main dashboard stays lighter and department pages act more like standalone work surfaces.
 - Continued docs/schema synchronization for the current build while keeping the main open items focused on deeper accounting logic, remaining mixed JSON/D1 cleanup, and broader real-device stress testing.
+
+
+## Current pass addendum
+- Replaced the long phone Admin link list with a grouped tree-style mobile menu so the phone workflow uses collapsible sections instead of one uninterrupted list.
+- Continued mobile-first workflow tuning by surfacing Today, quick expense, quick write-off, product cost, and export actions closer to the top of the phone dashboard.
+- Continued docs/current-build synchronization for the present mobile-navigation and admin-usability pass.

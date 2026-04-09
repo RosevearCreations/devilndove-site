@@ -69,3 +69,9 @@ Local SEO is mostly consistency + trust + relevance. The site can support that, 
 ## Current pass local SEO reminder
 - Keep page titles and meta descriptions localized and natural for Southern Ontario intent rather than stuffing repeated city names.
 - Continue using dedicated public landing pages and clean department/admin separation so private routes stay non-indexed and public content remains easier for crawlers to understand.
+
+
+## Current pass addendum
+- Replaced the long phone Admin link list with a grouped tree-style mobile menu so the phone workflow uses collapsible sections instead of one uninterrupted list.
+- Continued mobile-first workflow tuning by surfacing Today, quick expense, quick write-off, product cost, and export actions closer to the top of the phone dashboard.
+- Continued docs/current-build synchronization for the present mobile-navigation and admin-usability pass.

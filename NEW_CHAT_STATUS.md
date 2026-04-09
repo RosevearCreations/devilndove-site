@@ -91,3 +91,9 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Departmental admin pages remain the active direction and the lighter launcher dashboard is still the preferred shell over a single long admin page.
 - Accounting now has clearer quick-action launch points and export preset entry points, especially for phone use.
 - Mobile-first work should continue by moving more common daily actions onto the phone dashboard before broader stress testing.
+
+
+## Current pass addendum
+- Replaced the long phone Admin link list with a grouped tree-style mobile menu so the phone workflow uses collapsible sections instead of one uninterrupted list.
+- Continued mobile-first workflow tuning by surfacing Today, quick expense, quick write-off, product cost, and export actions closer to the top of the phone dashboard.
+- Continued docs/current-build synchronization for the present mobile-navigation and admin-usability pass.

@@ -431,3 +431,9 @@ All code-side items that were realistically actionable inside this repo pass wer
 - Mobile/admin workflow risk is reduced again because phone users now have clearer quick-action routes into Today, inventory, expenses, write-offs, product costs, and export presets instead of depending on longer department pages.
 - UI cohesion risk is reduced again because the departmental launcher model is reinforced and accounting actions now have direct anchors/buttons, which lowers scroll friction on both desktop and phone screens.
 - Mixed JSON/D1 authority still remains in older areas, but this pass focused on workflow usability, lighter admin navigation, and current-build synchronization rather than a deeper schema expansion.
+
+
+## Current pass addendum
+- Replaced the long phone Admin link list with a grouped tree-style mobile menu so the phone workflow uses collapsible sections instead of one uninterrupted list.
+- Continued mobile-first workflow tuning by surfacing Today, quick expense, quick write-off, product cost, and export actions closer to the top of the phone dashboard.
+- Continued docs/current-build synchronization for the present mobile-navigation and admin-usability pass.
