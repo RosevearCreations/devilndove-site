@@ -63,11 +63,15 @@ export async function onRequestGet(context) {
       p.tax_class_id,
       p.weight_grams,
       p.updated_at,
+      COALESCE(ps.meta_title,'') AS meta_title,
+      COALESCE(ps.meta_description,'') AS meta_description,
+      COALESCE(ps.keywords,'') AS keywords,
       COUNT(DISTINCT pi.product_image_id) AS image_count,
       COUNT(DISTINCT prl.product_resource_link_id) AS linked_resource_count
     FROM products p
     LEFT JOIN product_images pi ON pi.product_id = p.product_id
     LEFT JOIN product_resource_links prl ON prl.product_id = p.product_id
+    LEFT JOIN product_seo ps ON ps.product_id = p.product_id
     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
     GROUP BY p.product_id
     ORDER BY COALESCE(p.updated_at, p.created_at) DESC, p.product_id DESC
@@ -127,6 +131,9 @@ export async function onRequestGet(context) {
       currency: row.currency || 'CAD',
       short_description: row.short_description || '',
       description: row.description || '',
+      meta_title: row.meta_title || '',
+      meta_description: row.meta_description || '',
+      keywords: row.keywords || '',
       featured_image_url: row.featured_image_url || '',
       inventory_quantity: Number(row.inventory_quantity || 0),
       review_status: row.review_status || '',

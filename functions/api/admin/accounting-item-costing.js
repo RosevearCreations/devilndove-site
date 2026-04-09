@@ -26,6 +26,7 @@ function normalizeResults(result) {
 }
 
 function c(v) { return Number(v || 0); }
+function dollarsToCents(v) { return Math.round(Number(v || 0) * 100); }
 
 export async function onRequestGet(context) {
   const db = getDb(context.env);
@@ -38,7 +39,9 @@ export async function onRequestGet(context) {
   if (!range) return jsonResponse({ ok:false, error:'Please provide month in YYYY-MM format.' }, 400);
 
   const hasProducts = await tableExists(db, 'products');
-  if (!hasProducts) return jsonResponse({ ok:true, period: range.raw, items: [], summary: { active_product_count: 0, total_allocated_overhead_cents: 0, average_allocated_overhead_cents: 0, average_full_unit_cost_cents: 0 } });
+  if (!hasProducts) {
+    return jsonResponse({ ok:true, period: range.raw, items: [], summary: { active_product_count: 0, draft_product_count: 0, total_allocated_overhead_cents: 0, average_allocated_overhead_cents: 0, average_full_unit_cost_cents: 0, negative_margin_count: 0, missing_cost_link_count: 0, uncosted_product_count: 0 } });
+  }
 
   const hasProductCosts = await tableExists(db, 'product_costs');
   const hasResourceLinks = await tableExists(db, 'product_resource_links');
@@ -55,26 +58,25 @@ export async function onRequestGet(context) {
       p.review_status,
       p.currency,
       COALESCE(p.price_cents,0) AS price_cents,
-      COALESCE(pc.cost_per_unit_cents,0) AS direct_unit_cost_cents,
+      COALESCE(pc.cost_per_unit,0) AS direct_unit_cost,
       COALESCE(resource_rollup.linked_resource_cost_cents,0) AS linked_resource_cost_cents,
       COALESCE(resource_rollup.linked_resource_count,0) AS linked_resource_count,
-      COALESCE(resource_rollup.missing_cost_links,0) AS missing_cost_links
+      COALESCE(resource_rollup.missing_cost_links,0) AS missing_cost_links,
+      COALESCE(pc.effective_date, pc.created_at, '') AS direct_cost_effective_date
     FROM products p
-    LEFT JOIN (
-      SELECT pc1.product_id, pc1.cost_per_unit_cents
-      FROM product_costs pc1
-      INNER JOIN (
-        SELECT product_id, MAX(COALESCE(effective_date, created_at, CURRENT_TIMESTAMP)) AS max_effective
-        FROM product_costs
-        GROUP BY product_id
-      ) latest ON latest.product_id = pc1.product_id AND COALESCE(pc1.effective_date, pc1.created_at, CURRENT_TIMESTAMP) = latest.max_effective
-    ) pc ON pc.product_id = p.product_id
+    LEFT JOIN product_costs pc ON pc.product_cost_id = (
+      SELECT pc2.product_cost_id
+      FROM product_costs pc2
+      WHERE CAST(pc2.product_number AS TEXT) = CAST(p.product_number AS TEXT)
+      ORDER BY COALESCE(pc2.effective_date, pc2.created_at, '1970-01-01') DESC, pc2.product_cost_id DESC
+      LIMIT 1
+    )
     LEFT JOIN (
       SELECT
         prl.product_id,
         COUNT(*) AS linked_resource_count,
         SUM(CASE WHEN sii.site_item_inventory_id IS NOT NULL THEN COALESCE(prl.quantity_used,0) * COALESCE(sii.unit_cost_cents,0) ELSE 0 END) AS linked_resource_cost_cents,
-        SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 1 ELSE 0 END) AS missing_cost_links
+        SUM(CASE WHEN sii.site_item_inventory_id IS NULL OR COALESCE(sii.unit_cost_cents,0) <= 0 THEN 1 ELSE 0 END) AS missing_cost_links
       FROM product_resource_links prl
       LEFT JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
       GROUP BY prl.product_id
@@ -90,13 +92,13 @@ export async function onRequestGet(context) {
 
   const totalOverhead = c(overheadRow?.total_overhead_cents);
   const activeRows = rows.filter((row) => String(row.status || '').toLowerCase() === 'active');
-  const allocationBaseRows = activeRows.length ? activeRows : rows;
+  const allocationBaseRows = activeRows.length ? activeRows : rows.filter((row) => c(row.price_cents) > 0);
   const revenueWeightTotal = allocationBaseRows.reduce((sum, row) => sum + Math.max(1, c(row.price_cents)), 0);
 
   const items = rows.map((row) => {
-    const direct = hasProductCosts ? c(row.direct_unit_cost_cents) : 0;
+    const direct = hasProductCosts ? dollarsToCents(row.direct_unit_cost) : 0;
     const resource = hasResourceLinks && hasInventory ? c(row.linked_resource_cost_cents) : 0;
-    const baseUnitCost = Math.max(direct, resource, direct + resource ? 0 : 0);
+    const baseUnitCost = direct + resource;
     const usesRowForAllocation = allocationBaseRows.some((entry) => Number(entry.product_id || 0) === Number(row.product_id || 0));
     const weight = usesRowForAllocation ? Math.max(1, c(row.price_cents)) : 0;
     const allocatedOverhead = revenueWeightTotal > 0 ? Math.round(totalOverhead * (weight / revenueWeightTotal)) : 0;
@@ -118,6 +120,7 @@ export async function onRequestGet(context) {
       rough_unit_margin_cents: c(row.price_cents) - fullUnitCost,
       linked_resource_count: c(row.linked_resource_count),
       missing_cost_links: c(row.missing_cost_links),
+      direct_cost_effective_date: row.direct_cost_effective_date || '',
       allocation_basis: usesRowForAllocation ? 'revenue-share' : 'none'
     };
   });
@@ -128,9 +131,15 @@ export async function onRequestGet(context) {
     items,
     summary: {
       active_product_count: activeRows.length,
+      draft_product_count: rows.filter((row) => String(row.status || '').toLowerCase() === 'draft').length,
+      priced_product_count: rows.filter((row) => c(row.price_cents) > 0).length,
       total_allocated_overhead_cents: totalOverhead,
       average_allocated_overhead_cents: items.length ? Math.round(items.reduce((sum, row) => sum + c(row.allocated_overhead_cents), 0) / items.length) : 0,
-      average_full_unit_cost_cents: items.length ? Math.round(items.reduce((sum, row) => sum + c(row.estimated_full_unit_cost_cents), 0) / items.length) : 0
+      average_full_unit_cost_cents: items.length ? Math.round(items.reduce((sum, row) => sum + c(row.estimated_full_unit_cost_cents), 0) / items.length) : 0,
+      negative_margin_count: items.filter((row) => c(row.rough_unit_margin_cents) < 0).length,
+      missing_cost_link_count: items.filter((row) => c(row.missing_cost_links) > 0).length,
+      uncosted_product_count: items.filter((row) => c(row.base_unit_cost_cents) <= 0).length,
+      rough_costed_margin_cents_total: items.reduce((sum, row) => sum + c(row.rough_unit_margin_cents), 0)
     }
   });
 }

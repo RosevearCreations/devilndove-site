@@ -39,6 +39,10 @@ async function safeAll(db, sql, bindings = []) {
   } catch { return []; }
 }
 
+function centsFromDollars(value) {
+  return Math.round(Number(value || 0) * 100);
+}
+
 export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok:false, error:'Database binding is not configured.' }, 500);
@@ -68,8 +72,8 @@ export async function onRequestGet(context) {
 
   const expenseSummary = hasExpenses ? await scalar(db, `
     SELECT
-      COALESCE(SUM(COALESCE(amount_cents,0)),0) AS expense_cents,
-      COALESCE(SUM(COALESCE(tax_cents,0)),0) AS expense_tax_cents,
+      COALESCE(SUM(CAST(ROUND(COALESCE(amount,0) * 100.0) AS INTEGER)),0) AS expense_cents,
+      COALESCE(SUM(CAST(ROUND(COALESCE(tax_amount,0) * 100.0) AS INTEGER)),0) AS expense_tax_cents,
       COUNT(*) AS expense_count
     FROM accounting_expenses
     WHERE substr(COALESCE(expense_date, created_at, datetime('now')),1,10) >= ?
@@ -78,7 +82,7 @@ export async function onRequestGet(context) {
 
   const writeoffSummary = hasWriteoffs ? await scalar(db, `
     SELECT
-      COALESCE(SUM(COALESCE(amount_cents,0)),0) AS writeoff_cents,
+      COALESCE(SUM(CAST(ROUND(COALESCE(amount,0) * 100.0) AS INTEGER)),0) AS writeoff_cents,
       COUNT(*) AS writeoff_count
     FROM accounting_writeoffs
     WHERE substr(COALESCE(writeoff_date, created_at, datetime('now')),1,10) >= ?
@@ -88,8 +92,8 @@ export async function onRequestGet(context) {
   const groupedExpenses = hasExpenses ? await safeAll(db, `
     SELECT
       COALESCE(NULLIF(ledger_code,''), 'UNASSIGNED') AS ledger_code,
-      COALESCE(NULLIF(ledger_name,''), COALESCE(category,'Unassigned')) AS ledger_name,
-      COALESCE(SUM(COALESCE(amount_cents,0) + COALESCE(tax_cents,0)),0) AS total_cents,
+      COALESCE(NULLIF(ledger_name,''), 'Unassigned') AS ledger_name,
+      COALESCE(SUM(CAST(ROUND((COALESCE(amount,0) + COALESCE(tax_amount,0)) * 100.0) AS INTEGER)),0) AS total_cents,
       COUNT(*) AS entry_count
     FROM accounting_expenses
     WHERE substr(COALESCE(expense_date, created_at, datetime('now')),1,10) >= ?
@@ -97,7 +101,6 @@ export async function onRequestGet(context) {
     GROUP BY ledger_code, ledger_name
     ORDER BY total_cents DESC, ledger_name ASC
   `, [range.start, range.end]) : [];
-
 
   const overheadSummary = hasOverhead ? await scalar(db, `
     SELECT
@@ -134,6 +137,7 @@ export async function onRequestGet(context) {
   const expenseTaxCents = Number(expenseSummary.expense_tax_cents || 0);
   const writeoffCents = Number(writeoffSummary.writeoff_cents || 0);
   const overheadCents = Number(overheadSummary.overhead_cents || 0);
+  const roughNetBeforeOverheadCents = centsFromDollars(recognizedAmount) - expenseCents - expenseTaxCents - writeoffCents;
 
   return jsonResponse({
     ok: true,
@@ -149,9 +153,9 @@ export async function onRequestGet(context) {
       operating_expense_cents: expenseCents,
       operating_expense_tax_cents: expenseTaxCents,
       writeoff_cents: writeoffCents,
-      rough_net_before_cogs_cents: Math.round((recognizedAmount * 100) - expenseCents - expenseTaxCents - writeoffCents),
+      rough_net_before_cogs_cents: roughNetBeforeOverheadCents,
       overhead_allocated_cents: overheadCents,
-      rough_net_after_overhead_cents: Math.round((recognizedAmount * 100) - expenseCents - expenseTaxCents - writeoffCents - overheadCents)
+      rough_net_after_overhead_cents: roughNetBeforeOverheadCents - overheadCents
     },
     expense_groups: groupedExpenses.map((row) => ({
       ledger_code: row.ledger_code || 'UNASSIGNED',
