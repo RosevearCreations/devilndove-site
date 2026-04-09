@@ -326,3 +326,19 @@ textarea {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+
+/* Pass 18 admin launcher + mobile accounting anchors */
+.admin-dashboard-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+.admin-dashboard-grid .btn { justify-content:center; text-align:center; min-height:44px; }
+.admin-department-links.card { padding:14px; }
+.department-card h2 { margin-bottom:8px; }
+.department-card p { margin-bottom:0; }
+#accountingBackendMount .card[id] { scroll-margin-top: 88px; }
+@media (max-width: 720px) {
+  .admin-dashboard-grid { grid-template-columns:1fr 1fr; }
+}
+@media (max-width: 520px) {
+  .admin-dashboard-grid { grid-template-columns:1fr; }
+  .nav .links { gap:8px; }
+}
