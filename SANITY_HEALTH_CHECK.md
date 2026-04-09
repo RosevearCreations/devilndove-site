@@ -167,3 +167,9 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Accounting moved forward with monthly overhead allocations and a rough net-after-overhead view in the accounting report so operating costs can start flowing toward fuller P&L reporting.
 - Mobile admin moved forward again with a direct overhead-allocation shortcut from the phone dashboard.
 - Schema and template files were updated for the new overhead allocation layer.
+
+
+## Current pass note
+- Mobile product capture now supports reopening and continuing saved drafts in the same screen.
+- Accounting overview now includes estimated item costing using available cost and overhead data.
+- No new schema table was required in this pass; reporting and workflow layers were advanced on the existing schema.

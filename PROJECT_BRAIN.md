@@ -259,3 +259,8 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Accounting moved forward with monthly overhead allocations and a rough net-after-overhead view in the accounting report so operating costs can start flowing toward fuller P&L reporting.
 - Mobile admin moved forward again with a direct overhead-allocation shortcut from the phone dashboard.
 - Schema and template files were updated for the new overhead allocation layer.
+
+
+## Current pass note
+- Phone capture now supports reopening draft products in the same workflow.
+- Accounting now has an estimated fully loaded item-costing view based on direct costs, linked resources, and overhead allocation.

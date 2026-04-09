@@ -221,3 +221,10 @@
 - Accounting moved forward with monthly overhead allocations and a rough net-after-overhead view in the accounting report so operating costs can start flowing toward fuller P&L reporting.
 - Mobile admin moved forward again with a direct overhead-allocation shortcut from the phone dashboard.
 - Schema and template files were updated for the new overhead allocation layer.
+
+
+## Current pass addendum
+- Mobile product capture can now continue an existing saved draft in the same phone-first screen instead of forcing staff back to a separate admin workflow.
+- Accounting now includes an estimated item-costing view that blends direct unit cost, linked-resource cost, and allocated overhead into a fuller rough unit cost.
+- Mobile accounting quick links now surface item-costing review alongside expense, write-off, overhead, and export workflows.
+- This pass did not add a new table; it moved forward the workflow and reporting layer on top of the current accounting schema.

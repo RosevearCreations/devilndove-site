@@ -335,3 +335,9 @@ This pass continued the lighter departmental admin shell, improved phone-first q
 - Accounting moved forward with monthly overhead allocations and a rough net-after-overhead view in the accounting report so operating costs can start flowing toward fuller P&L reporting.
 - Mobile admin moved forward again with a direct overhead-allocation shortcut from the phone dashboard.
 - Schema and template files were updated for the new overhead allocation layer.
+
+
+## Current pass note
+- Added in-place mobile draft continuation for product capture.
+- Added estimated item-costing reporting inside Accounting.
+- Continued mobile-first admin quick-action refinement.

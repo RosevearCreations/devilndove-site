@@ -104,3 +104,9 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Accounting moved forward with monthly overhead allocations and a rough net-after-overhead view in the accounting report so operating costs can start flowing toward fuller P&L reporting.
 - Mobile admin moved forward again with a direct overhead-allocation shortcut from the phone dashboard.
 - Schema and template files were updated for the new overhead allocation layer.
+
+
+## Current pass update
+- Fixed the missing phone-draft continuation gap by adding a draft picker to the mobile product capture screen and update-in-place draft saves.
+- Added an estimated item-costing accounting view so rough full unit cost can include direct costs, linked resources, and allocated overhead.
+- Mobile admin quick links now expose item-costing review directly from the phone dashboard.

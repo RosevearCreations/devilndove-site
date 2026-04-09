@@ -322,3 +322,8 @@ Products now need to support a real partial-draft intake path for phone-first ca
 
 ## accounting_overhead_allocations
 Monthly overhead allocation rows used to move real operating costs like rent, hydro, gas, water, and internet into a rough P&L view and later into fuller cost allocation logic.
+
+
+## Current pass note
+- No new table was added in this pass.
+- Estimated item costing uses existing `product_costs`, `product_resource_links`, `site_item_inventory`, and `accounting_overhead_allocations`.

@@ -444,3 +444,9 @@ All code-side items that were realistically actionable inside this repo pass wer
 - Accounting moved forward with monthly overhead allocations and a rough net-after-overhead view in the accounting report so operating costs can start flowing toward fuller P&L reporting.
 - Mobile admin moved forward again with a direct overhead-allocation shortcut from the phone dashboard.
 - Schema and template files were updated for the new overhead allocation layer.
+
+
+## Current pass addendum
+- The mobile finished-product workflow is stronger because saved drafts can now be reopened and continued from the same capture screen.
+- Rough per-item costing moved forward by blending direct product cost, linked resource cost, and allocated overhead into a fuller estimated unit cost view.
+- Still honestly open: final true per-item overhead allocation rules, fuller P&L/reporting depth, and broader real-device stress testing on phone and desktop.

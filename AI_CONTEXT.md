@@ -236,3 +236,8 @@ Current-pass emphasis:
 - Accounting moved forward with monthly overhead allocations and a rough net-after-overhead view in the accounting report so operating costs can start flowing toward fuller P&L reporting.
 - Mobile admin moved forward again with a direct overhead-allocation shortcut from the phone dashboard.
 - Schema and template files were updated for the new overhead allocation layer.
+
+
+## Current pass note
+- Treat `/admin/mobile-product/` as the primary phone-first draft intake and draft-continuation workflow.
+- Treat `/api/admin/accounting-item-costing` as the current rough full-unit-cost reporting source.
