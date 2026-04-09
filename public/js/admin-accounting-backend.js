@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   mount.innerHTML = `
     <div class="card">
       <h2 style="margin-top:0">Accounting Backend (Starter)</h2>
-      <p class="small">Track general ledger accounts, operating expenses, write-offs, unit costs, and export presets for accountants.</p>
+      <p class="small">Track general ledger accounts, operating expenses, overhead allocations, write-offs, unit costs, and export presets for accountants.</p>
       <div id="accountingBackendMessage" class="small" style="display:none;margin-top:10px"></div>
     </div>
     <div class="grid cols-2" style="gap:18px;margin-top:18px">
@@ -34,6 +34,19 @@ document.addEventListener("DOMContentLoaded", () => {
           <button class="btn primary" type="submit">Add expense</button>
         </form>
         <div id="expensesList" class="small" style="margin-top:10px"></div>
+      </div>
+      <div class="card" id="overhead-allocation">
+        <h3 style="margin-top:0">Overhead allocation</h3>
+        <form id="overheadForm" class="grid" style="gap:8px">
+          <input name="period_month" type="month"/>
+          <input name="ledger_code" type="text" placeholder="6200"/>
+          <input name="ledger_name" type="text" placeholder="Rent allocation"/>
+          <select name="allocation_basis"><option value="manual">Manual</option><option value="revenue">Revenue</option><option value="orders">Orders</option><option value="units">Units</option></select>
+          <input name="amount" type="number" step="0.01" placeholder="Allocated amount"/>
+          <textarea name="notes" rows="3" placeholder="How this overhead should flow into rough P&amp;L or later item costs"></textarea>
+          <button class="btn primary" type="submit">Save overhead allocation</button>
+        </form>
+        <div id="overheadList" class="small" style="margin-top:10px"></div>
       </div>
       <div class="card" id="writeoff-entry">
         <h3 style="margin-top:0">Write-off entry</h3>
@@ -76,6 +89,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const message = mount.querySelector('#accountingBackendMessage');
   const state = { gl: [] };
 
+  function activeMonth() {
+    return String(mount.querySelector('#monthlyExportMonth')?.value || new Date().toISOString().slice(0,7));
+  }
+
   function setMessage(text, isError = false) {
     message.textContent = text || '';
     message.style.display = text ? 'block' : 'none';
@@ -115,6 +132,14 @@ document.addEventListener("DOMContentLoaded", () => {
     renderSmallList(mount.querySelector('#expensesList'), Array.isArray(data.expenses) ? data.expenses : [], (row) => `<div>${row.expense_date || row.created_at || ''} — ${row.vendor_name || ''} — $${Number(row.amount || 0).toFixed(2)} ${row.ledger_code ? `(${row.ledger_code})` : ''}</div>`);
   }
 
+
+  async function loadOverhead() {
+    const response = await window.DDAuth.apiFetch(`/api/admin/accounting-overhead-allocations?month=${encodeURIComponent(activeMonth())}`);
+    const data = await readJson(response, 'Overhead endpoint is unavailable.');
+    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed loading overhead allocations.');
+    renderSmallList(mount.querySelector('#overheadList'), Array.isArray(data.allocations) ? data.allocations : [], (row) => `<div>${row.period_month || ''} — ${row.ledger_code || ''} — $${Number(row.amount || 0).toFixed(2)} <span class="small">(${row.allocation_basis || 'manual'})</span></div>`);
+  }
+
   async function loadWriteoffs() {
     const response = await window.DDAuth.apiFetch('/api/admin/accounting-writeoffs');
     const data = await readJson(response, 'Write-off endpoint is unavailable.');
@@ -131,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function refreshAll() {
     await loadGl();
-    await Promise.all([loadExpenses(), loadWriteoffs(), loadProductCosts()]);
+    await Promise.all([loadExpenses(), loadOverhead(), loadWriteoffs(), loadProductCosts()]);
   }
 
   mount.querySelector('#glAccountForm')?.addEventListener('submit', async (event) => {
@@ -155,6 +180,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!response.ok || !data?.ok) return setMessage(data?.error || 'Failed saving expense.', true);
     form.reset();
     setMessage('Expense saved.');
+    refreshAll().catch((error) => setMessage(String(error?.message || error), true));
+  });
+
+
+  mount.querySelector('#overheadForm')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form).entries());
+    const response = await window.DDAuth.apiFetch('/api/admin/accounting-overhead-allocations', { method: 'POST', body: JSON.stringify(payload) });
+    const data = await readJson(response, 'Overhead save failed.');
+    if (!response.ok || !data?.ok) return setMessage(data?.error || 'Failed saving overhead allocation.', true);
+    setMessage('Overhead allocation saved.');
     refreshAll().catch((error) => setMessage(String(error?.message || error), true));
   });
 
@@ -216,6 +253,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!year) return setMessage('Choose a year first.', true);
     await downloadCsv(`/api/admin/accounting-period-summary-export?scope=year&period=${encodeURIComponent(year)}`, `devilndove-accounting-${year}.csv`);
   });
+
+  const monthlyInput = mount.querySelector('#monthlyExportMonth');
+  if (monthlyInput && !monthlyInput.value) monthlyInput.value = new Date().toISOString().slice(0,7);
+  const overheadMonth = mount.querySelector('#overheadForm [name=period_month]');
+  if (overheadMonth && !overheadMonth.value) overheadMonth.value = activeMonth();
 
   refreshAll().then(() => {
     if (window.location.hash) {
