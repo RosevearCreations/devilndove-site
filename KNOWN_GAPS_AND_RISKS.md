@@ -472,3 +472,17 @@ All code-side items that were realistically actionable inside this repo pass wer
 - Broader real-device stress testing is still needed on phone and desktop.
 - Bulk import still needs more tuning so draft-like rows and fuller review-ready rows behave consistently.
 
+## Current pass update — what improved this round
+- Reduced accounting drift again by correcting monthly exports and live activity to the real order/accounting columns.
+- Added the missing `accounting_order_records` schema coverage to the repo SQL references so code and schema handoff match better.
+- Estimated item costing is still rough, but it is less naive now because overhead can be distributed by monthly basis-aware pools instead of only one flat price-share pass.
+
+## Still honestly open after this pass
+- The costing layer is still not true final absorption accounting because production-run quantities and final per-item overhead rules are not yet authoritative.
+- Rough sold-unit COGS is still operational guidance, not audited accounting.
+- Real phone/desktop stress testing is still required.
+
+## Follow-Up Pass Addendum — 2026-04-09
+- Shared public navigation and footer links were further normalized to clean directory URLs in the common JS layer so crawlable internal paths now better match canonical public routes.
+- The floating site auth widget toggle was fixed so the account panel can properly open and close on phone and desktop instead of staying effectively stuck open once triggered.
+- Accounting and reporting notes in this pass should be read with the newer basis-aware overhead language: estimates now better describe recognized revenue, sold-unit COGS, and rough gross-after-COGS while deeper accounting remains an open roadmap item.

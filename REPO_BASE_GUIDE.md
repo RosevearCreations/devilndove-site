@@ -253,3 +253,8 @@ New current-pass backend additions:
 - When continuing accounting work, do not assume cents-based expense/write-off tables. The current schema still stores those rows in real-dollar columns and reporting converts them as needed.
 - When continuing product-cost work, do not assume `product_costs` is keyed by `product_id`; the current repo schema still keys that table by `product_number`.
 
+
+## Follow-Up Pass Addendum — 2026-04-09
+- Shared public navigation and footer links were further normalized to clean directory URLs in the common JS layer so crawlable internal paths now better match canonical public routes.
+- The floating site auth widget toggle was fixed so the account panel can properly open and close on phone and desktop instead of staying effectively stuck open once triggered.
+- Accounting and reporting notes in this pass should be read with the newer basis-aware overhead language: estimates now better describe recognized revenue, sold-unit COGS, and rough gross-after-COGS while deeper accounting remains an open roadmap item.

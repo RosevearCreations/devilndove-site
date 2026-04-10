@@ -270,3 +270,11 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Treat the phone dashboard as a fast operational shell for daily accounting visibility, not just a launcher.
 - Treat the mobile product capture screen as the preferred place to reopen and continue unfinished finished-product drafts.
 
+## Current pass update — mental model refresh
+- Treat accounting as three layers now: raw operational entries (`accounting_expenses`, `accounting_writeoffs`, overhead allocations), shadow order accounting (`accounting_order_records`), and rough costing (`product_costs` + resource links + monthly overhead pools).
+- The accounting UI is still rough-reporting-first, but the repo is now more internally consistent about which tables drive revenue recognition and exports.
+
+## Follow-Up Pass Addendum — 2026-04-09
+- Shared public navigation and footer links were further normalized to clean directory URLs in the common JS layer so crawlable internal paths now better match canonical public routes.
+- The floating site auth widget toggle was fixed so the account panel can properly open and close on phone and desktop instead of staying effectively stuck open once triggered.
+- Accounting and reporting notes in this pass should be read with the newer basis-aware overhead language: estimates now better describe recognized revenue, sold-unit COGS, and rough gross-after-COGS while deeper accounting remains an open roadmap item.

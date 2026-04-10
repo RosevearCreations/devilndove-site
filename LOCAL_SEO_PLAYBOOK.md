@@ -92,3 +92,12 @@ Local SEO is mostly consistency + trust + relevance. The site can support that, 
 - About and Contact now carry a stronger Organization/LocalBusiness structured-data graph tied to the public site identity, region, and social profiles.
 - Keep validating structured data against visible page content and avoid adding location precision that the public pages do not actually support.
 
+## Current pass update — local search hygiene
+- More public links now favor clean directory URLs instead of `/index.html` paths, which keeps internal linking more consistent with the canonical page shape.
+- Contact-page structured data now matches visible contact information more closely by including the visible support email on the contact page only.
+- Continue filling out Google Business Profile completeness, reviews, photos, and consistent business details because those remain outside the repo but strongly affect local visibility.
+
+## Follow-Up Pass Addendum — 2026-04-09
+- Shared public navigation and footer links were further normalized to clean directory URLs in the common JS layer so crawlable internal paths now better match canonical public routes.
+- The floating site auth widget toggle was fixed so the account panel can properly open and close on phone and desktop instead of staying effectively stuck open once triggered.
+- Accounting and reporting notes in this pass should be read with the newer basis-aware overhead language: estimates now better describe recognized revenue, sold-unit COGS, and rough gross-after-COGS while deeper accounting remains an open roadmap item.

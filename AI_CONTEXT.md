@@ -248,3 +248,12 @@ Current-pass emphasis:
 - Mobile product draft continuation is stronger because saved SEO fields now reload with the draft and updated drafts stay open in the same phone screen after save.
 - The phone dashboard now includes a live month snapshot for revenue, overhead, costing warnings, and draft-product visibility without forcing a jump to the full accounting page.
 
+## Current pass update — basis-aware costing and accounting sync
+- Accounting now prefers the shadow `accounting_order_records` table for recognized revenue when it exists, and falls back to the corrected `orders.order_status` / `orders.payment_status` columns when it does not.
+- Estimated item costing is now basis-aware by month: `manual` and `revenue` allocate by price-share, `orders` allocates by sold-order count when available, and `units` allocates by sold quantity when available.
+- Public/local SEO cleanup in this pass also normalized more public navigation links toward clean directory URLs instead of `/index.html` paths.
+
+## Follow-Up Pass Addendum — 2026-04-09
+- Shared public navigation and footer links were further normalized to clean directory URLs in the common JS layer so crawlable internal paths now better match canonical public routes.
+- The floating site auth widget toggle was fixed so the account panel can properly open and close on phone and desktop instead of staying effectively stuck open once triggered.
+- Accounting and reporting notes in this pass should be read with the newer basis-aware overhead language: estimates now better describe recognized revenue, sold-unit COGS, and rough gross-after-COGS while deeper accounting remains an open roadmap item.

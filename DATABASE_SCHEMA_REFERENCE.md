@@ -334,3 +334,11 @@ Monthly overhead allocation rows used to move real operating costs like rent, hy
 - `product_costs` currently keys product costing by `product_number` and stores `cost_per_unit` as a real-dollar amount. Costing/reporting code should not assume `product_id` or `cost_per_unit_cents` in this table.
 - Added supporting indexes for `accounting_expenses`, `accounting_writeoffs`, `product_costs`, and `accounting_overhead_allocations` so the phone dashboard and accounting overview can query the current schema more reliably.
 
+## Current pass update — accounting shadow sync
+- `accounting_order_records` is part of the expected schema and should now be treated as the preferred monthly recognized-revenue source for rough accounting exports and reporting.
+- Added/expected indexes for `accounting_order_records`, `accounting_overhead_allocations(period_month, allocation_basis, ledger_code)`, and `order_items(product_id, created_at DESC)` to support month reporting and sold-unit costing reads.
+
+## Follow-Up Pass Addendum — 2026-04-09
+- Shared public navigation and footer links were further normalized to clean directory URLs in the common JS layer so crawlable internal paths now better match canonical public routes.
+- The floating site auth widget toggle was fixed so the account panel can properly open and close on phone and desktop instead of staying effectively stuck open once triggered.
+- Accounting and reporting notes in this pass should be read with the newer basis-aware overhead language: estimates now better describe recognized revenue, sold-unit COGS, and rough gross-after-COGS while deeper accounting remains an open roadmap item.

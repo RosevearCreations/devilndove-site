@@ -348,3 +348,8 @@ This pass continued the lighter departmental admin shell, improved phone-first q
 - Improved mobile product continuation so saved SEO fields reload and updated drafts stay open in the same capture workflow.
 - Continued public SEO tuning on key pages with stronger Southern Ontario / Canada copy and reinforced About/Contact structured data.
 
+
+## Follow-Up Pass Addendum — 2026-04-09
+- Shared public navigation and footer links were further normalized to clean directory URLs in the common JS layer so crawlable internal paths now better match canonical public routes.
+- The floating site auth widget toggle was fixed so the account panel can properly open and close on phone and desktop instead of staying effectively stuck open once triggered.
+- Accounting and reporting notes in this pass should be read with the newer basis-aware overhead language: estimates now better describe recognized revenue, sold-unit COGS, and rough gross-after-COGS while deeper accounting remains an open roadmap item.
