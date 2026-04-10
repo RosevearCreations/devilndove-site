@@ -3,40 +3,11 @@
 // and summary totals so admin can review revenue/tax/order amounts before
 // a fuller accounting backend is added.
 
-import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
+import { getAdminUserFromRequest, jsonResponse } from "../_lib/adminAudit.js";
+import { ensureAccountingSchema, getDb } from "../_lib/accounting.js";
 
 function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
-}
-
-async function ensureAccountingTables(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_order_records (
-      accounting_order_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_id INTEGER NOT NULL UNIQUE,
-      order_number TEXT NOT NULL,
-      entry_status TEXT NOT NULL DEFAULT 'open' CHECK (entry_status IN ('open','partially_paid','paid','refunded','cancelled','archived')),
-      customer_name TEXT,
-      customer_email TEXT,
-      currency TEXT NOT NULL DEFAULT 'CAD',
-      subtotal_cents INTEGER NOT NULL DEFAULT 0,
-      discount_cents INTEGER NOT NULL DEFAULT 0,
-      shipping_cents INTEGER NOT NULL DEFAULT 0,
-      tax_cents INTEGER NOT NULL DEFAULT 0,
-      total_cents INTEGER NOT NULL DEFAULT 0,
-      amount_paid_cents INTEGER NOT NULL DEFAULT 0,
-      amount_outstanding_cents INTEGER NOT NULL DEFAULT 0,
-      revenue_cents INTEGER NOT NULL DEFAULT 0,
-      tax_liability_cents INTEGER NOT NULL DEFAULT 0,
-      source_order_status TEXT,
-      source_payment_status TEXT,
-      notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
-    )
-  `).run();
 }
 
 export async function onRequestGet(context) {
@@ -45,7 +16,7 @@ export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return jsonResponse({ ok:false, error:'Unauthorized.' }, 401);
 
-  await ensureAccountingTables(db);
+  await ensureAccountingSchema(db);
 
   const summaryRow = await db.prepare(`
     SELECT
