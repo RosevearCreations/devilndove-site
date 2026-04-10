@@ -274,7 +274,7 @@
       function norm(v){ return safeText(v).toLowerCase(); }
       const ASSET_ORIGIN = "https://assets.devilndove.com";
       const ASSET_PREFIX = "Toolshed";
-      const DATA_URL = "/data/toolshed/toolshed_items_master.json";
+      const DATA_URL = "/api/tools?limit=500";
       const REORDER_STORAGE_KEY = "devilndove_tools_reorder_list_v1";
       const AREA_ORDER = ["Security","Safety & PPE","Forge & Metalwork","Resin & UV","Clay","Laser & Engraving","3D & CNC","Sublimation","Craft & Cutting","Hand Tools","Measuring & Layout","Organization & Storage","Power & Tech","Filming & Streaming","Automotive","Reference","Pets","Health & Comfort","Workshop Basics"];
       const areaRank = new Map(AREA_ORDER.map((a, i) => [a, i]));
@@ -353,7 +353,7 @@
       }
       async function fetchCatalogItems(){
         try {
-          const response = await fetch('/api/tools?limit=500');
+          const response = await fetch(DATA_URL, { cache: 'no-store' });
           const data = await response.json();
           if (!response.ok || !data?.ok) return [];
           return Array.isArray(data.items) ? data.items : [];
@@ -425,30 +425,23 @@
       async function initToolsPage(){
         try {
           const migrated = await fetchCatalogItems();
-          if (Array.isArray(migrated) && migrated.length) {
-            allTools = migrated.map((row) => {
-              return Object.assign({}, row, {
-                source_key: row.source_key || row.id || '',
-                item_name_suggested: row.item_name_suggested || row.name || '',
-                brand_guess: row.brand_guess || row.brand || '',
-                category: row.category || '',
-                primary_area: row.primary_area || row.subcategory || '',
-                notes: row.notes || '',
-                how_we_use: row.how_we_use || row.notes || '',
-                amazon_url: row.amazon_url || '',
-                r2_object_key: row.r2_object_key || '',
-                example_image_file: row.example_image_file || '',
-                quantity_owned: row.quantity_owned || row.quantity_on_hand || 0
-              });
+          allTools = Array.isArray(migrated) ? migrated.map((row) => {
+            return Object.assign({}, row, {
+              source_key: row.source_key || row.id || '',
+              item_name_suggested: row.item_name_suggested || row.name || '',
+              brand_guess: row.brand_guess || row.brand || '',
+              category: row.category || '',
+              primary_area: row.primary_area || row.subcategory || '',
+              notes: row.notes || '',
+              how_we_use: row.how_we_use || row.notes || '',
+              amazon_url: row.amazon_url || '',
+              r2_object_key: row.r2_object_key || '',
+              example_image_file: row.example_image_file || '',
+              quantity_owned: row.quantity_owned || row.quantity_on_hand || 0
             });
-          } else {
-            const resp = await fetch(DATA_URL, { cache: 'no-store' });
-            if (!resp.ok) throw new Error(`Failed to load tools JSON: ${resp.status}`);
-            const data = await resp.json();
-            allTools = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
-          }
+          }) : [];
           if (!allTools.length) {
-            gridEl.innerHTML = `<div class="small">No tools found in <code>${escHtml(DATA_URL)}</code></div>`;
+            gridEl.innerHTML = `<div class="small">No tools found from <code>${escHtml(DATA_URL)}</code></div>`;
             shownEl.textContent = '0'; totalEl.textContent = '0'; return;
           }
           populateFilters(allTools);
@@ -463,7 +456,7 @@
           renderFiltered();
         } catch (err) {
           console.error(err);
-          gridEl.innerHTML = `<div class="small">Could not load tools data. Please check <code>${escHtml(DATA_URL)}</code>.</div>`;
+          gridEl.innerHTML = `<div class="small">Could not load tools data from <code>${escHtml(DATA_URL)}</code>.</div>`;
         }
       }
       initToolsPage();

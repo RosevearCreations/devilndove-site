@@ -175,7 +175,6 @@
 <script>
     (function () {
       const DATA_URL = "/api/creations?limit=500";
-      const DATA_FALLBACK_URL = "/data/itemsforsale/itemsforsale_items_master.json";
 
       function safeText(v){ return (v == null ? "" : String(v)).trim(); }
       function norm(v){ return safeText(v).toLowerCase(); }
@@ -288,7 +287,7 @@
       async function init(){
         try{
           const r = await fetch(DATA_URL, { cache: "no-store" });
-          if (!r.ok) throw new Error("JSON load failed: " + r.status);
+          if (!r.ok) throw new Error("API load failed: " + r.status);
           meta = await r.json();
           items = Array.isArray(meta.items) ? meta.items.slice() : (Array.isArray(meta) ? meta.slice() : []);
           render();
@@ -296,18 +295,7 @@
           typeEl.addEventListener("change", render);
         } catch (e){
           console.error(e);
-          try {
-            const r = await fetch(DATA_FALLBACK_URL, { cache: "no-store" });
-            if (!r.ok) throw new Error("Fallback JSON load failed: " + r.status);
-            meta = await r.json();
-            items = Array.isArray(meta.items) ? meta.items.slice() : (Array.isArray(meta) ? meta.slice() : []);
-            render();
-            qEl.addEventListener("input", render);
-            typeEl.addEventListener("change", render);
-          } catch (fallbackError) {
-            console.error(fallbackError);
-            gridEl.innerHTML = `<div class="small">Could not load <code>${escHtml(DATA_URL)}</code></div>`;
-          }
+          gridEl.innerHTML = `<div class="small">Could not load <code>${escHtml(DATA_URL)}</code>.</div>`;
         }
       }
 
