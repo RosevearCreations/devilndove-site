@@ -27,21 +27,21 @@
         </div>
       </div>
       <div class="links" aria-label="Primary navigation">
-        <a href="/index.html" data-nav="/">Home</a>
-        <a href="/about/index.html" data-nav="/about/">About</a>
-        <a href="/gallery/index.html" data-nav="/gallery/">Art</a>
-        <a href="/creations/index.html" data-nav="/creations/">Creations</a>
-        <a href="/tools/index.html" data-nav="/tools/">Tools</a>
-        <a href="/supplies/index.html" data-nav="/supplies/">Supplies</a>
-        <a href="/shop/index.html" data-nav="/shop/">Shop</a>
-        <a href="/search/index.html" data-nav="/search/">Search</a>
-        <a href="/movies/index.html" data-nav="/movies/">Movies</a>
-        <a href="/contact/index.html" data-nav="/contact/">Contact</a>
-        <a href="/cart/index.html" data-nav="/cart/">Cart</a>
-        <a href="/login/index.html" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
-        <a href="/register/index.html" data-nav="/register/" data-show-when-logged-out style="display:none">Register</a>
-        <a href="/members/index.html" data-nav="/members/" data-show-when-logged-in style="display:none">Members</a>
-        <a href="/admin/index.html" data-nav="/admin/" data-show-when-admin style="display:none">Admin</a>
+        <a href="/" data-nav="/">Home</a>
+        <a href="/about/" data-nav="/about/">About</a>
+        <a href="/gallery/" data-nav="/gallery/">Art</a>
+        <a href="/creations/" data-nav="/creations/">Creations</a>
+        <a href="/tools/" data-nav="/tools/">Tools</a>
+        <a href="/supplies/" data-nav="/supplies/">Supplies</a>
+        <a href="/shop/" data-nav="/shop/">Shop</a>
+        <a href="/search/" data-nav="/search/">Search</a>
+        <a href="/movies/" data-nav="/movies/">Movies</a>
+        <a href="/contact/" data-nav="/contact/">Contact</a>
+        <a href="/cart/" data-nav="/cart/">Cart</a>
+        <a href="/login/" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
+        <a href="/register/" data-nav="/register/" data-show-when-logged-out style="display:none">Register</a>
+        <a href="/members/" data-nav="/members/" data-show-when-logged-in style="display:none">Members</a>
+        <a href="/admin/" data-nav="/admin/" data-show-when-admin style="display:none">Admin</a>
       </div>`;
   }
 
@@ -56,27 +56,27 @@
         <div>
           <div class="site-footer-heading">Explore</div>
           <div class="site-footer-links">
-            <a href="/shop/index.html">Shop</a>
-            <a href="/gallery/index.html">Gallery</a>
-            <a href="/creations/index.html">Creations</a>
-            <a href="/tools/index.html">Tools</a>
-            <a href="/supplies/index.html">Supplies</a>
-            <a href="/movies/index.html">Movies</a>
+            <a href="/shop/">Shop</a>
+            <a href="/gallery/">Gallery</a>
+            <a href="/creations/">Creations</a>
+            <a href="/tools/">Tools</a>
+            <a href="/supplies/">Supplies</a>
+            <a href="/movies/">Movies</a>
           </div>
         </div>
         <div>
           <div class="site-footer-heading">Member account</div>
           <div class="site-footer-links">
-            <a href="/login/index.html">Login</a>
-            <a href="/register/index.html">Register</a>
-            <a href="/members/index.html">Settings</a>
-            <a href="/account-help/index.html?mode=password">Forgot password</a>
-            <a href="/account-help/index.html?mode=email">Forgot email</a>
+            <a href="/login/">Login</a>
+            <a href="/register/">Register</a>
+            <a href="/members/">Settings</a>
+            <a href="/account-help/?mode=password">Forgot password</a>
+            <a href="/account-help/?mode=email">Forgot email</a>
           </div>
         </div>
         <div>
           <div class="site-footer-heading">Search the site</div>
-          <form action="/search/index.html" class="site-footer-search" method="get" role="search">
+          <form action="/search/" class="site-footer-search" method="get" role="search">
             <input aria-label="Search Devil n Dove" name="q" placeholder="Search products, tools, supplies, art..." type="search" />
             <button class="btn" type="submit">Search</button>
           </form>

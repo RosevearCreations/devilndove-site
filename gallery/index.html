@@ -125,15 +125,15 @@
 </div>
 </div>
 <div style="display:flex;gap:14px;flex-wrap:wrap">
-<a href="/index.html">Home</a>
-<a href="/about/index.html">About</a>
-<a href="/gallery/index.html">Art</a>
-<a href="/creations/index.html">Creations</a>
-<a href="/tools/index.html">Tools</a>
-<a href="/supplies/index.html">Supplies</a>
-<a href="/shop/index.html">Shop</a>
-<a href="/movies/index.html">Movies</a>
-<a href="/contact/index.html">Contact</a>
+<a href="/">Home</a>
+<a href="/about/">About</a>
+<a href="/gallery/">Art</a>
+<a href="/creations/">Creations</a>
+<a href="/tools/">Tools</a>
+<a href="/supplies/">Supplies</a>
+<a href="/shop/">Shop</a>
+<a href="/movies/">Movies</a>
+<a href="/contact/">Contact</a>
 </div>
 </div>
 <div class="hero">
@@ -224,7 +224,7 @@
         const name = getItemName(it);
         const url = itemImageUrl(meta, it);
         const tags = getTags(it);
-        const shopUrl = safeText(it.shop_url) || "/contact/index.html";
+        const shopUrl = safeText(it.shop_url) || "/contact/";
 
         return `
           <div class="item card">
