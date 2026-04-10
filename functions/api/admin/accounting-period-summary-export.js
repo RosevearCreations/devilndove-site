@@ -3,15 +3,14 @@ import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit
 function csvCell(value) {
   if (value === null || value === undefined) return "";
   const str = String(value);
-  return /[",
-
-]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+  const needsQuotes = str.includes(",") || str.includes("
+") || str.includes("") || str.includes(""");
+  return needsQuotes ? `"${str.replaceAll(""", """")}"` : str;
 }
 function toCsv(rows) {
   if (!rows.length) return '';
   const headers = Object.keys(rows[0]);
-  return [headers.map(csvCell).join(','), ...rows.map((row) => headers.map((key) => csvCell(row[key])).join(','))].join('
-');
+  return [headers.map(csvCell).join(','), ...rows.map((row) => headers.map((key) => csvCell(row[key])).join(','))].join('\n');
 }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
 async function tableExists(db, tableName) { try { return !!(await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`).bind(tableName).first()); } catch { return false; } }
@@ -35,13 +34,9 @@ function getRange(scope, period) {
 }
 async function loadRows(db, range) {
   const rows = [];
-  if (await tableExists(db, 'accounting_order_records')) {
-    rows.push(...await safeQuery(db, `SELECT 'accounting_order' AS row_type, substr(COALESCE(last_synced_at, updated_at, created_at, datetime('now')),1,10) AS entry_date, COALESCE(order_number, CAST(order_id AS TEXT)) AS reference_code, COALESCE(customer_email,'') AS party, COALESCE(entry_status,'') AS status, ROUND(COALESCE(revenue_cents,0) / 100.0,2) AS amount, ROUND(COALESCE(tax_liability_cents,0) / 100.0,2) AS tax_amount, '' AS ledger_code, '' AS ledger_name, COALESCE(notes,'') AS notes FROM accounting_order_records WHERE substr(COALESCE(last_synced_at, updated_at, created_at, datetime('now')),1,10) >= ? AND substr(COALESCE(last_synced_at, updated_at, created_at, datetime('now')),1,10) < ? ORDER BY COALESCE(last_synced_at, updated_at, created_at, datetime('now')) DESC`, [range.start, range.end]));
-  } else if (await tableExists(db, 'orders')) {
-    rows.push(...await safeQuery(db, `SELECT 'order' AS row_type, substr(COALESCE(created_at, datetime('now')),1,10) AS entry_date, COALESCE(order_number, CAST(order_id AS TEXT)) AS reference_code, COALESCE(customer_email,'') AS party, TRIM(COALESCE(order_status,'') || CASE WHEN COALESCE(payment_status,'') <> '' THEN ' / ' || payment_status ELSE '' END) AS status, ROUND(COALESCE(total_cents,0) / 100.0,2) AS amount, ROUND(COALESCE(tax_cents,0) / 100.0,2) AS tax_amount, '' AS ledger_code, '' AS ledger_name, COALESCE(notes,'') AS notes FROM orders WHERE substr(COALESCE(created_at, datetime('now')),1,10) >= ? AND substr(COALESCE(created_at, datetime('now')),1,10) < ? ORDER BY COALESCE(created_at, datetime('now')) DESC`, [range.start, range.end]));
-  }
-  if (await tableExists(db, 'accounting_expenses')) rows.push(...await safeQuery(db, `SELECT 'expense' AS row_type, substr(COALESCE(expense_date, created_at, datetime('now')),1,10) AS entry_date, COALESCE(CAST(expense_id AS TEXT), '') AS reference_code, COALESCE(vendor_name,'') AS party, '' AS status, ROUND(COALESCE(amount,0),2) AS amount, ROUND(COALESCE(tax_amount,0),2) AS tax_amount, COALESCE(ledger_code,'') AS ledger_code, COALESCE(ledger_name,'') AS ledger_name, COALESCE(notes,'') AS notes FROM accounting_expenses WHERE substr(COALESCE(expense_date, created_at, datetime('now')),1,10) >= ? AND substr(COALESCE(expense_date, created_at, datetime('now')),1,10) < ? ORDER BY COALESCE(expense_date, created_at, datetime('now')) DESC`, [range.start, range.end]));
-  if (await tableExists(db, 'accounting_writeoffs')) rows.push(...await safeQuery(db, `SELECT 'writeoff' AS row_type, substr(COALESCE(writeoff_date, created_at, datetime('now')),1,10) AS entry_date, COALESCE(CAST(writeoff_id AS TEXT), '') AS reference_code, COALESCE(item_name,'') AS party, COALESCE(reason_code,'') AS status, ROUND(COALESCE(amount,0),2) AS amount, 0 AS tax_amount, 'WRITEOFF' AS ledger_code, 'Write-Offs' AS ledger_name, COALESCE(notes,'') AS notes FROM accounting_writeoffs WHERE substr(COALESCE(writeoff_date, created_at, datetime('now')),1,10) >= ? AND substr(COALESCE(writeoff_date, created_at, datetime('now')),1,10) < ? ORDER BY COALESCE(writeoff_date, created_at, datetime('now')) DESC`, [range.start, range.end]));
+  if (await tableExists(db, 'orders')) rows.push(...await safeQuery(db, `SELECT 'order' AS row_type, substr(COALESCE(created_at, datetime('now')),1,10) AS entry_date, COALESCE(order_number, CAST(id AS TEXT)) AS reference_code, COALESCE(customer_email,'') AS party, COALESCE(status,'') AS status, ROUND(COALESCE(total_amount,total,0),2) AS amount, ROUND(COALESCE(tax_amount,tax_total,0),2) AS tax_amount, '' AS ledger_code, '' AS ledger_name, COALESCE(notes,'') AS notes FROM orders WHERE substr(COALESCE(created_at, datetime('now')),1,10) >= ? AND substr(COALESCE(created_at, datetime('now')),1,10) < ? ORDER BY COALESCE(created_at, datetime('now')) DESC`, [range.start, range.end]));
+  if (await tableExists(db, 'accounting_expenses')) rows.push(...await safeQuery(db, `SELECT 'expense' AS row_type, substr(COALESCE(expense_date, created_at, datetime('now')),1,10) AS entry_date, COALESCE(reference_number, CAST(expense_id AS TEXT)) AS reference_code, COALESCE(vendor_name,'') AS party, '' AS status, ROUND(COALESCE(amount,0),2) AS amount, ROUND(COALESCE(tax_amount,0),2) AS tax_amount, COALESCE(ledger_code,'') AS ledger_code, COALESCE(ledger_name,'') AS ledger_name, COALESCE(notes,'') AS notes FROM accounting_expenses WHERE substr(COALESCE(expense_date, created_at, datetime('now')),1,10) >= ? AND substr(COALESCE(expense_date, created_at, datetime('now')),1,10) < ? ORDER BY COALESCE(expense_date, created_at, datetime('now')) DESC`, [range.start, range.end]));
+  if (await tableExists(db, 'accounting_writeoffs')) rows.push(...await safeQuery(db, `SELECT 'writeoff' AS row_type, substr(COALESCE(writeoff_date, created_at, datetime('now')),1,10) AS entry_date, COALESCE(reference_number, CAST(writeoff_id AS TEXT)) AS reference_code, COALESCE(item_name,'') AS party, COALESCE(reason_code,'') AS status, ROUND(COALESCE(amount,0),2) AS amount, 0 AS tax_amount, 'WRITEOFF' AS ledger_code, 'Write-Offs' AS ledger_name, COALESCE(notes,'') AS notes FROM accounting_writeoffs WHERE substr(COALESCE(writeoff_date, created_at, datetime('now')),1,10) >= ? AND substr(COALESCE(writeoff_date, created_at, datetime('now')),1,10) < ? ORDER BY COALESCE(writeoff_date, created_at, datetime('now')) DESC`, [range.start, range.end]));
   return rows;
 }
 export async function onRequestGet(context) {

@@ -1,10 +1,8 @@
 // File: /functions/api/admin/accounting-profit-loss.js
 // Brief description: Returns a simple monthly profit/loss style summary so the
-// accounting screen can show revenue, expenses, write-offs, overhead, and a
-// rough sold-unit costing view.
+// accounting screen can show revenue, expenses, write-offs, and net movement.
 
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-import { computeMonthlyItemCosting, tableExists } from './_costing.js';
 
 function monthRange(monthValue) {
   const raw = String(monthValue || '').trim();
@@ -18,6 +16,13 @@ function monthRange(monthValue) {
   const nextMonth = month === 12 ? 1 : month + 1;
   const end = `${String(nextYear).padStart(4,'0')}-${String(nextMonth).padStart(2,'0')}-01`;
   return { raw, start, end };
+}
+
+async function tableExists(db, tableName) {
+  try {
+    const row = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`).bind(tableName).first();
+    return !!row;
+  } catch { return false; }
 }
 
 async function scalar(db, sql, bindings = []) {
@@ -38,74 +43,6 @@ function centsFromDollars(value) {
   return Math.round(Number(value || 0) * 100);
 }
 
-function cents(value) {
-  return Number(value || 0);
-}
-
-async function loadRevenueSummary(db, range) {
-  const hasAccountingOrders = await tableExists(db, 'accounting_order_records');
-  if (hasAccountingOrders) {
-    const summary = await scalar(db, `
-      SELECT
-        COALESCE(SUM(COALESCE(total_cents,0)),0) AS booked_cents,
-        COALESCE(SUM(COALESCE(tax_liability_cents,0)),0) AS recognized_tax_cents,
-        COALESCE(SUM(COALESCE(revenue_cents,0)),0) AS recognized_cents,
-        COUNT(*) AS order_count,
-        SUM(CASE WHEN COALESCE(revenue_cents,0) > 0 THEN 1 ELSE 0 END) AS recognized_order_count
-      FROM accounting_order_records
-      WHERE substr(COALESCE(last_synced_at, updated_at, created_at, datetime('now')),1,10) >= ?
-        AND substr(COALESCE(last_synced_at, updated_at, created_at, datetime('now')),1,10) < ?
-    `, [range.start, range.end]);
-    return {
-      source: 'accounting_order_records',
-      order_count: cents(summary.order_count),
-      recognized_order_count: cents(summary.recognized_order_count),
-      booked_cents: cents(summary.booked_cents),
-      recognized_cents: cents(summary.recognized_cents),
-      recognized_tax_cents: cents(summary.recognized_tax_cents),
-    };
-  }
-
-  const hasOrders = await tableExists(db, 'orders');
-  if (!hasOrders) {
-    return { source: 'none', order_count: 0, recognized_order_count: 0, booked_cents: 0, recognized_cents: 0, recognized_tax_cents: 0 };
-  }
-
-  const summary = await scalar(db, `
-    SELECT
-      COALESCE(SUM(COALESCE(total_cents,0)),0) AS booked_cents,
-      COALESCE(SUM(CASE
-        WHEN LOWER(COALESCE(payment_status,'')) IN ('paid','completed','captured','partially_refunded','refunded')
-          OR LOWER(COALESCE(order_status,'')) IN ('paid','fulfilled','refunded')
-        THEN COALESCE(tax_cents,0)
-        ELSE 0
-      END),0) AS recognized_tax_cents,
-      COALESCE(SUM(CASE
-        WHEN LOWER(COALESCE(payment_status,'')) IN ('paid','completed','captured','partially_refunded','refunded')
-          OR LOWER(COALESCE(order_status,'')) IN ('paid','fulfilled','refunded')
-        THEN COALESCE(total_cents,0)
-        ELSE 0
-      END),0) AS recognized_cents,
-      COUNT(*) AS order_count,
-      SUM(CASE
-        WHEN LOWER(COALESCE(payment_status,'')) IN ('paid','completed','captured','partially_refunded','refunded')
-          OR LOWER(COALESCE(order_status,'')) IN ('paid','fulfilled','refunded')
-        THEN 1 ELSE 0 END) AS recognized_order_count
-    FROM orders
-    WHERE substr(COALESCE(created_at, datetime('now')),1,10) >= ?
-      AND substr(COALESCE(created_at, datetime('now')),1,10) < ?
-  `, [range.start, range.end]);
-
-  return {
-    source: 'orders',
-    order_count: cents(summary.order_count),
-    recognized_order_count: cents(summary.recognized_order_count),
-    booked_cents: cents(summary.booked_cents),
-    recognized_cents: cents(summary.recognized_cents),
-    recognized_tax_cents: cents(summary.recognized_tax_cents),
-  };
-}
-
 export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok:false, error:'Database binding is not configured.' }, 500);
@@ -116,13 +53,22 @@ export async function onRequestGet(context) {
   const range = monthRange(url.searchParams.get('month') || new Date().toISOString().slice(0,7));
   if (!range) return jsonResponse({ ok:false, error:'Please provide month in YYYY-MM format.' }, 400);
 
+  const hasOrders = await tableExists(db, 'orders');
   const hasExpenses = await tableExists(db, 'accounting_expenses');
   const hasWriteoffs = await tableExists(db, 'accounting_writeoffs');
   const hasGl = await tableExists(db, 'general_ledger_accounts');
   const hasOverhead = await tableExists(db, 'accounting_overhead_allocations');
 
-  const revenueSummary = await loadRevenueSummary(db, range);
-  const costing = await computeMonthlyItemCosting(db, range);
+  const orderSummary = hasOrders ? await scalar(db, `
+    SELECT
+      COALESCE(SUM(COALESCE(total_amount,total,0)),0) AS booked_amount,
+      COALESCE(SUM(COALESCE(tax_amount,tax_total,0)),0) AS booked_tax,
+      SUM(CASE WHEN LOWER(COALESCE(status,'')) IN ('paid','fulfilled') THEN COALESCE(total_amount,total,0) ELSE 0 END) AS recognized_amount,
+      COUNT(*) AS order_count
+    FROM orders
+    WHERE substr(COALESCE(created_at, datetime('now')),1,10) >= ?
+      AND substr(COALESCE(created_at, datetime('now')),1,10) < ?
+  `, [range.start, range.end]) : {};
 
   const expenseSummary = hasExpenses ? await scalar(db, `
     SELECT
@@ -184,63 +130,53 @@ export async function onRequestGet(context) {
     LIMIT 250
   `) : [];
 
-  const recognizedRevenueCents = cents(revenueSummary.recognized_cents);
-  const expenseCents = cents(expenseSummary.expense_cents);
-  const expenseTaxCents = cents(expenseSummary.expense_tax_cents);
-  const writeoffCents = cents(writeoffSummary.writeoff_cents);
-  const overheadCents = cents(overheadSummary.overhead_cents);
-  const roughNetBeforeOverheadCents = recognizedRevenueCents - expenseCents - expenseTaxCents - writeoffCents;
-  const estimatedSoldUnitCogs = cents(costing.summary?.estimated_recognized_full_cogs_cents);
+  const bookedAmount = Number(orderSummary.booked_amount || 0);
+  const bookedTax = Number(orderSummary.booked_tax || 0);
+  const recognizedAmount = Number(orderSummary.recognized_amount || 0);
+  const expenseCents = Number(expenseSummary.expense_cents || 0);
+  const expenseTaxCents = Number(expenseSummary.expense_tax_cents || 0);
+  const writeoffCents = Number(writeoffSummary.writeoff_cents || 0);
+  const overheadCents = Number(overheadSummary.overhead_cents || 0);
+  const roughNetBeforeOverheadCents = centsFromDollars(recognizedAmount) - expenseCents - expenseTaxCents - writeoffCents;
 
   return jsonResponse({
     ok: true,
     period: range.raw,
     summary: {
-      revenue_source: revenueSummary.source,
-      order_count: revenueSummary.order_count,
-      recognized_order_count: revenueSummary.recognized_order_count,
-      expense_count: cents(expenseSummary.expense_count),
-      writeoff_count: cents(writeoffSummary.writeoff_count),
-      overhead_count: cents(overheadSummary.overhead_count),
-      booked_amount: Number((cents(revenueSummary.booked_cents) / 100).toFixed(2)),
-      booked_tax: Number((cents(revenueSummary.recognized_tax_cents) / 100).toFixed(2)),
-      recognized_amount: Number((recognizedRevenueCents / 100).toFixed(2)),
-      recognized_amount_cents: recognizedRevenueCents,
+      order_count: Number(orderSummary.order_count || 0),
+      expense_count: Number(expenseSummary.expense_count || 0),
+      writeoff_count: Number(writeoffSummary.writeoff_count || 0),
+      overhead_count: Number(overheadSummary.overhead_count || 0),
+      booked_amount: bookedAmount,
+      booked_tax: bookedTax,
+      recognized_amount: recognizedAmount,
       operating_expense_cents: expenseCents,
       operating_expense_tax_cents: expenseTaxCents,
       writeoff_cents: writeoffCents,
       rough_net_before_cogs_cents: roughNetBeforeOverheadCents,
       overhead_allocated_cents: overheadCents,
-      rough_net_after_overhead_cents: roughNetBeforeOverheadCents - overheadCents,
-      sold_quantity_in_period: cents(costing.summary?.sold_quantity_in_period),
-      sold_order_count_in_period: cents(costing.summary?.sold_order_count_in_period),
-      products_sold_in_period: cents(costing.summary?.products_sold_in_period),
-      estimated_recognized_base_cogs_cents: cents(costing.summary?.estimated_recognized_base_cogs_cents),
-      estimated_recognized_overhead_cogs_cents: cents(costing.summary?.estimated_recognized_overhead_cogs_cents),
-      estimated_recognized_full_cogs_cents: estimatedSoldUnitCogs,
-      rough_gross_after_estimated_cogs_cents: recognizedRevenueCents - estimatedSoldUnitCogs,
+      rough_net_after_overhead_cents: roughNetBeforeOverheadCents - overheadCents
     },
     expense_groups: groupedExpenses.map((row) => ({
       ledger_code: row.ledger_code || 'UNASSIGNED',
       ledger_name: row.ledger_name || 'Unassigned',
-      total_cents: cents(row.total_cents),
-      entry_count: cents(row.entry_count),
+      total_cents: Number(row.total_cents || 0),
+      entry_count: Number(row.entry_count || 0)
     })),
     overhead_groups: overheadGroups.map((row) => ({
       ledger_code: row.ledger_code || 'UNASSIGNED',
       ledger_name: row.ledger_name || 'Unassigned',
-      total_cents: cents(row.total_cents),
-      entry_count: cents(row.entry_count),
-      allocation_basis: row.allocation_basis || 'manual',
+      total_cents: Number(row.total_cents || 0),
+      entry_count: Number(row.entry_count || 0),
+      allocation_basis: row.allocation_basis || 'manual'
     })),
-    costing_summary: costing.summary || {},
     general_ledger_accounts: glAccounts.map((row) => ({
       code: row.code || '',
       name: row.name || '',
       category: row.category || '',
       parent_group: row.parent_group || '',
       normal_balance: row.normal_balance || '',
-      sort_order: Number(row.sort_order || 0),
-    })),
+      sort_order: Number(row.sort_order || 0)
+    }))
   });
 }
