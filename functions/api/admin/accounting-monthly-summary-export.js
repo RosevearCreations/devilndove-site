@@ -3,7 +3,9 @@ import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit
 function csvCell(value) {
   if (value === null || value === undefined) return "";
   const str = String(value);
-  if (/[",\n\r]/.test(str)) {
+  if (/[",
+
+]/.test(str)) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
@@ -16,7 +18,8 @@ function toCsv(rows) {
     headers.map(csvCell).join(","),
     ...rows.map((row) => headers.map((key) => csvCell(row[key])).join(",")),
   ];
-  return lines.join("\n");
+  return lines.join("
+");
 }
 
 function monthRange(monthValue) {
@@ -62,6 +65,31 @@ async function safeQuery(db, sql, bindings = []) {
 }
 
 async function loadOrders(db, range) {
+  if (await tableExists(db, "accounting_order_records")) {
+    return safeQuery(
+      db,
+      `
+        SELECT
+          'accounting_order' AS row_type,
+          substr(COALESCE(last_synced_at, updated_at, created_at, datetime('now')), 1, 7) AS period_month,
+          accounting_order_record_id AS reference_id,
+          COALESCE(order_number, CAST(order_id AS TEXT)) AS reference_code,
+          COALESCE(customer_email, '') AS party,
+          COALESCE(entry_status, '') AS status,
+          ROUND(COALESCE(revenue_cents, 0) / 100.0, 2) AS amount,
+          ROUND(COALESCE(tax_liability_cents, 0) / 100.0, 2) AS tax_amount,
+          '' AS ledger_code,
+          '' AS ledger_name,
+          COALESCE(notes, '') AS notes
+        FROM accounting_order_records
+        WHERE substr(COALESCE(last_synced_at, updated_at, created_at, datetime('now')), 1, 10) >= ?
+          AND substr(COALESCE(last_synced_at, updated_at, created_at, datetime('now')), 1, 10) < ?
+        ORDER BY COALESCE(last_synced_at, updated_at, created_at, datetime('now')) DESC
+      `,
+      [range.start, range.end]
+    );
+  }
+
   const hasOrders = await tableExists(db, "orders");
   if (!hasOrders) return [];
 
@@ -71,12 +99,12 @@ async function loadOrders(db, range) {
       SELECT
         'order' AS row_type,
         substr(COALESCE(created_at, datetime('now')), 1, 7) AS period_month,
-        id AS reference_id,
-        COALESCE(order_number, CAST(id AS TEXT)) AS reference_code,
+        order_id AS reference_id,
+        COALESCE(order_number, CAST(order_id AS TEXT)) AS reference_code,
         COALESCE(customer_email, '') AS party,
-        COALESCE(status, '') AS status,
-        ROUND(COALESCE(total_amount, total, 0), 2) AS amount,
-        ROUND(COALESCE(tax_amount, tax_total, 0), 2) AS tax_amount,
+        TRIM(COALESCE(order_status, '') || CASE WHEN COALESCE(payment_status, '') <> '' THEN ' / ' || payment_status ELSE '' END) AS status,
+        ROUND(COALESCE(total_cents, 0) / 100.0, 2) AS amount,
+        ROUND(COALESCE(tax_cents, 0) / 100.0, 2) AS tax_amount,
         '' AS ledger_code,
         '' AS ledger_name,
         COALESCE(notes, '') AS notes
@@ -100,9 +128,9 @@ async function loadExpenses(db, range) {
         'expense' AS row_type,
         substr(COALESCE(expense_date, created_at, datetime('now')), 1, 7) AS period_month,
         expense_id AS reference_id,
-        COALESCE(reference_number, CAST(expense_id AS TEXT)) AS reference_code,
-        COALESCE(vendor_name, payee_name, '') AS party,
-        COALESCE(status, '') AS status,
+        COALESCE(CAST(expense_id AS TEXT), '') AS reference_code,
+        COALESCE(vendor_name, '') AS party,
+        '' AS status,
         ROUND(COALESCE(amount, 0), 2) AS amount,
         ROUND(COALESCE(tax_amount, 0), 2) AS tax_amount,
         COALESCE(ledger_code, '') AS ledger_code,
@@ -128,13 +156,13 @@ async function loadWriteoffs(db, range) {
         'writeoff' AS row_type,
         substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 7) AS period_month,
         writeoff_id AS reference_id,
-        COALESCE(reference_number, CAST(writeoff_id AS TEXT)) AS reference_code,
-        COALESCE(item_name, product_name, reason_code, '') AS party,
-        COALESCE(status, '') AS status,
-        ROUND(COALESCE(total_amount, amount, 0), 2) AS amount,
-        ROUND(COALESCE(tax_amount, 0), 2) AS tax_amount,
-        COALESCE(ledger_code, '') AS ledger_code,
-        COALESCE(ledger_name, '') AS ledger_name,
+        COALESCE(CAST(writeoff_id AS TEXT), '') AS reference_code,
+        COALESCE(item_name, reason_code, '') AS party,
+        COALESCE(reason_code, '') AS status,
+        ROUND(COALESCE(amount, 0), 2) AS amount,
+        0 AS tax_amount,
+        'WRITEOFF' AS ledger_code,
+        'Write-Offs' AS ledger_name,
         COALESCE(notes, '') AS notes
       FROM accounting_writeoffs
       WHERE substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 10) >= ?
