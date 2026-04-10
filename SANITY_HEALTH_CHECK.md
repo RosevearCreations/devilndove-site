@@ -180,12 +180,8 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Mobile product draft continuation was checked again and now restores saved SEO data from `product_seo` when reopening drafts.
 - Public exposed pages still keep the one-H1-per-page rule after this pass.
 
-## Current pass update checks
-- Verify `/api/admin/accounting-profit-loss` and `/api/admin/accounting-item-costing` against the live D1 database after applying the updated schema files.
-- Verify monthly CSV exports now show correct order references and statuses instead of outdated column assumptions.
-- Verify phone dashboard accounting cards load the new sold-unit COGS and gross-after-COGS values on real devices.
+## 2026-04-10 deploy hotfix
 
-## Follow-Up Pass Addendum — 2026-04-09
-- Shared public navigation and footer links were further normalized to clean directory URLs in the common JS layer so crawlable internal paths now better match canonical public routes.
-- The floating site auth widget toggle was fixed so the account panel can properly open and close on phone and desktop instead of staying effectively stuck open once triggered.
-- Accounting and reporting notes in this pass should be read with the newer basis-aware overhead language: estimates now better describe recognized revenue, sold-unit COGS, and rough gross-after-COGS while deeper accounting remains an open roadmap item.
+- Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
+- This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
+

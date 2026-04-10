@@ -240,12 +240,8 @@
 - full deeper P&L / double-entry accounting remains future work beyond the current rough reporting layer
 - broader mixed JSON/D1 cleanup in older paths still remains open
 
-## Current pass update — what moved forward now
-- Basis-aware monthly overhead spreading now exists in the rough costing layer instead of one flat undifferentiated revenue-share.
-- Rough monthly reporting now includes an estimated sold-unit COGS view and gross-after-estimated-COGS view, while still honestly keeping fuller double-entry accounting as future work.
-- Accounting exports and activity feeds were corrected to the live order column names and shadow accounting table.
+## 2026-04-10 deploy hotfix
 
-## Follow-Up Pass Addendum — 2026-04-09
-- Shared public navigation and footer links were further normalized to clean directory URLs in the common JS layer so crawlable internal paths now better match canonical public routes.
-- The floating site auth widget toggle was fixed so the account panel can properly open and close on phone and desktop instead of staying effectively stuck open once triggered.
-- Accounting and reporting notes in this pass should be read with the newer basis-aware overhead language: estimates now better describe recognized revenue, sold-unit COGS, and rough gross-after-COGS while deeper accounting remains an open roadmap item.
+- Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
+- This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
+
