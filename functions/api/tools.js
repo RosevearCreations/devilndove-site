@@ -105,6 +105,8 @@ export async function onRequestGet(context) {
 
   return json({
     ok: true,
+    asset_origin: 'https://assets.devilndove.com',
+    asset_prefix: 'toolshed',
     items,
     summary: {
       total_items: items.length,
