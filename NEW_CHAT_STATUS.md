@@ -128,3 +128,16 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Latest pass update
+- Public gallery/creations pages now rely on `/api/creations` instead of keeping another direct JSON-read fallback in the page code.
+- The public tools page now uses `/api/tools` as its page authority rather than reading `/data/toolshed/toolshed_items_master.json` directly.
+- `/admin/mobile/` now shows open accounting-record count plus paid, outstanding, and tax-liability snapshot values for quicker phone-side review.
+- `functions/api/admin/accounting-summary.js` now shares the same accounting schema helper as the rest of the accounting layer, which reduces future drift.
+- Schema/upgrade SQL now includes extra `catalog_items` indexes to support centralized public catalog reads.
+
+## Still open after this pass
+- movies remain intentionally JSON-first with D1 overlay logic rather than full D1 authority
+- social feed content still reads from JSON
+- real phone/desktop stress testing is still needed
+- deeper accounting remains rough and is not yet final double-entry
+

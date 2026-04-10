@@ -253,3 +253,8 @@ Current-pass emphasis:
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Current pass context note
+- Public tools and gallery/creations pages moved further toward centralized API reads (`/api/tools`, `/api/creations`) instead of page-level direct JSON fetches.
+- Phone admin now includes open accounting snapshot cards for paid, outstanding, and tax-liability visibility.
+- `accounting-summary` now shares the common accounting schema helper to reduce drift.
+

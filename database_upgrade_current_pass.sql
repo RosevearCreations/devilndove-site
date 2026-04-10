@@ -63,6 +63,41 @@ CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year)
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
 CREATE INDEX IF NOT EXISTS idx_movie_catalog_imdb_id ON movie_catalog(imdb_id);
 
+
+-- UNIFIED CATALOG SUPPORT (for environments that have not created it yet).
+CREATE TABLE IF NOT EXISTS catalog_items (
+  catalog_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  item_kind TEXT NOT NULL CHECK (item_kind IN ('tool','supply','creation','other')),
+  source_key TEXT NOT NULL,
+  slug TEXT,
+  name TEXT NOT NULL,
+  brand TEXT,
+  category TEXT,
+  subcategory TEXT,
+  item_type TEXT,
+  short_description TEXT,
+  notes TEXT,
+  image_url TEXT,
+  r2_object_key TEXT,
+  amazon_url TEXT,
+  storage_location TEXT,
+  quantity_on_hand INTEGER NOT NULL DEFAULT 0,
+  reorder_point INTEGER NOT NULL DEFAULT 0,
+  visible_public INTEGER NOT NULL DEFAULT 1,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived','draft')),
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  source_record_json TEXT,
+  source_json_path TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(item_kind, source_key)
+);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_kind ON catalog_items(item_kind);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_slug ON catalog_items(slug);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_status_public ON catalog_items(status, visible_public);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_public_sort ON catalog_items(item_kind, status, visible_public, sort_order, name);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_grouping ON catalog_items(item_kind, category, subcategory, item_type);
+
 -- Phone-first product capture and review governance.
 ALTER TABLE products ADD COLUMN product_number INTEGER;
 ALTER TABLE products ADD COLUMN capture_reference TEXT;

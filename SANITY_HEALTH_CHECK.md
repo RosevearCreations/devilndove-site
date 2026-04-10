@@ -185,3 +185,9 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Current pass verification focus
+
+- Verify `/admin/mobile/` renders the added accounting snapshot cards correctly on phone width and desktop width.
+- Verify `/tools/`, `/gallery/`, and `/creations/` still load from their centralized APIs after deployment.
+- Confirm the new `catalog_items` indexes are present after running `database_upgrade_current_pass.sql` in environments that use the public catalog APIs heavily.
+

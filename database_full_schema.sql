@@ -627,6 +627,8 @@ CREATE TABLE IF NOT EXISTS catalog_items (
 CREATE INDEX IF NOT EXISTS idx_catalog_items_kind ON catalog_items(item_kind);
 CREATE INDEX IF NOT EXISTS idx_catalog_items_slug ON catalog_items(slug);
 CREATE INDEX IF NOT EXISTS idx_catalog_items_status_public ON catalog_items(status, visible_public);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_public_sort ON catalog_items(item_kind, status, visible_public, sort_order, name);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_grouping ON catalog_items(item_kind, category, subcategory, item_type);
 
 CREATE TABLE IF NOT EXISTS movie_catalog (
   movie_catalog_id INTEGER PRIMARY KEY AUTOINCREMENT,

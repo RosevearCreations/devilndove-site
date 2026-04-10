@@ -339,3 +339,7 @@ Monthly overhead allocation rows used to move real operating costs like rent, hy
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Current pass schema note
+- Added `catalog_items` lookup indexes for centralized public catalog reads: `idx_catalog_items_public_sort` and `idx_catalog_items_grouping`.
+- `database_upgrade_current_pass.sql` now includes unified-catalog support creation/index statements so older environments can safely move toward the same public catalog lookup path.
+

@@ -353,3 +353,10 @@ This pass continued the lighter departmental admin shell, improved phone-first q
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Current pass update
+
+- Public gallery and creations now rely on `/api/creations` instead of keeping another direct page-level JSON read path.
+- Public tools now treat `/api/tools` as the page authority instead of fetching the legacy tools JSON file directly in the page.
+- The phone admin dashboard now exposes open accounting-record count plus paid, outstanding, and tax-liability snapshot values for faster daily review.
+- Schema/upgrade SQL now includes extra `catalog_items` lookup indexes to support centralized public catalog reads as D1 authority expands.
+

@@ -245,3 +245,14 @@
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Current pass addendum
+- Reduced another duplicate-truth risk by moving the public gallery and tools pages to rely on their centralized API endpoints instead of page-level direct JSON fetches.
+- Strengthened phone-first accounting visibility by adding open-record, paid, outstanding, and tax-liability snapshot cards to `/admin/mobile/`.
+- Removed one more internal schema drift point by making `accounting-summary` rely on the shared accounting schema helper instead of its own private table definition copy.
+- Added catalog-item lookup indexes in the schema/upgrade files to better support centralized public tools and creations reads as D1 authority continues to expand.
+
+## Strongest next steps after this pass
+1. Keep removing remaining page-level JSON reads from outward-facing pages where centralized APIs already exist.
+2. Expand the phone dashboard from snapshot cards into a real day-close/month-end checklist surface.
+3. Continue turning rough accounting views into governed ledger workflows without pretending the current layer is final double-entry accounting.
+

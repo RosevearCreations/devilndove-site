@@ -275,3 +275,7 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Current pass note
+- Public catalog cleanup continued by moving gallery/creations and tools farther onto shared API authority.
+- Mobile admin/accounting usability moved forward again with a stronger phone snapshot for open records and outstanding values.
+

@@ -158,3 +158,7 @@ Current-pass rules added:
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Current pass rules addendum
+- When a centralized public API already contains its own fallback logic, do not keep a second page-level direct JSON fallback in the HTML unless there is a clearly documented reason.
+- Keep phone-first admin improvements focused on fewer taps for daily accounting visibility, not only launch links into larger department screens.
+

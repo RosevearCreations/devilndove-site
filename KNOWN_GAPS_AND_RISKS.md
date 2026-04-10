@@ -477,3 +477,21 @@ All code-side items that were realistically actionable inside this repo pass wer
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Current pass addendum
+
+### Data-model risks
+#### Addressed in this pass
+- The public gallery and creations flows now lean on `/api/creations` instead of maintaining another direct page-level JSON read path.
+- The public tools page now treats `/api/tools` as its page authority instead of loading the legacy tools JSON directly inside the page.
+- `accounting-summary` now reuses the shared accounting schema helper, which removes another internal code/schema duplication point.
+
+#### Still open
+- Mixed JSON/D1 authority still remains in movies, social feed content, and a few older admin/read flows.
+
+### Mobile and small-screen layout
+#### Addressed in this pass
+- The phone dashboard now shows open accounting-record counts plus paid, outstanding, and tax-liability snapshot values without forcing a jump to the full accounting department first.
+
+#### Still open
+- Real-device stress testing still needs a fuller pass on phone and desktop, especially around long admin lists, reorder actions, and accounting-heavy views.
+

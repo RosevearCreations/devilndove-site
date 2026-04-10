@@ -258,3 +258,8 @@ New current-pass backend additions:
 - Fixed a Cloudflare Pages build blocker in the accounting CSV export helpers by replacing the regex-based CSV quoting check with a simpler string-contains check.
 - This hotfix does not change the database shape. Schema files remain current for this pass because no SQL migration was required.
 
+## Current pass addendum
+- `/tools/` now treats `/api/tools` as the page authority instead of directly loading the legacy tools JSON file in the page.
+- `/gallery/` and `/creations/` now rely on `/api/creations` rather than carrying another page-level JSON-read path.
+- `functions/api/admin/accounting-summary.js` now shares the central accounting schema helper so the accounting shadow table shape is not maintained in two places.
+
