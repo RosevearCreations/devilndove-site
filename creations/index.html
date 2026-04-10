@@ -162,6 +162,27 @@
       videoChips: document.getElementById('videoChips')
     };
 
+    function ensureStatusEl(){
+      let el = document.getElementById('creationsStatus');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'creationsStatus';
+        el.className = 'status-note';
+        el.style.display = 'none';
+        const catalog = document.getElementById('catalog');
+        catalog?.parentElement?.insertBefore(el, catalog);
+      }
+      return el;
+    }
+
+    function setStatus(text, tone='info'){
+      const el = ensureStatusEl();
+      if (!text) { el.textContent = ''; el.style.display = 'none'; el.className = 'status-note'; return; }
+      el.textContent = text;
+      el.className = `status-note ${tone}`;
+      el.style.display = 'block';
+    }
+
     const nice = (v) => String(v || '').replace(/[-_]+/g, ' ').replace(/\w/g, c => c.toUpperCase());
     const unique = (arr) => [...new Set(arr.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b)));
 
@@ -277,16 +298,19 @@
 
     async function init(){
       try {
-        const res = await fetch(DATA_URL, { cache: 'no-store' });
-        const data = await res.json();
-        state.all = (data.items || []).slice().sort((a,b)=>String(a.title || '').localeCompare(String(b.title || '')));
+        let res = await fetch(DATA_URL, { cache: 'no-store' });
+        let data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) throw new Error(data?.error || `Creations API responded ${res.status}.`);
+        if (data?.fallback_used || data?.summary?.authority === 'json_fallback') setStatus('Showing fallback creations data while the live catalog read recovers.', 'warning');
+        state.all = (data.items || []).slice().sort((a,b)=>String(a.title || a.name || '').localeCompare(String(b.title || b.name || '')));
+        if (!state.all.length) throw new Error('No creations were returned from the live API.');
 
         els.statTotal.textContent = String(state.all.length);
-        els.statSubs.textContent = String(unique(state.all.map(i => i.subcategory)).length);
+        els.statSubs.textContent = String(unique(state.all.map(i => i.subcategory || i.type)).length);
         els.statMaterials.textContent = String(unique(state.all.flatMap(i => i.materials || [])).length);
 
         fillSelect(els.typeFilter, unique(state.all.map(i => i.type)));
-        fillSelect(els.subFilter, unique(state.all.map(i => i.subcategory)));
+        fillSelect(els.subFilter, unique(state.all.map(i => i.subcategory || i.type)));
         fillSelect(els.materialFilter, unique(state.all.flatMap(i => i.materials || [])));
 
         renderVideo(data);
@@ -302,6 +326,30 @@
         });
       } catch (err) {
         console.error(err);
+        const fallback = await fetch(DATA_FALLBACK_URL, { cache: 'no-store' }).then((r) => r.ok ? r.json() : []).catch(() => []);
+        const fallbackItems = Array.isArray(fallback) ? fallback : (Array.isArray(fallback?.items) ? fallback.items : []);
+        if (fallbackItems.length) {
+          const data = { asset_origin: FALLBACK_ASSET_ORIGIN, asset_prefix: 'itemsforsale', summary: { authority: 'json_fallback' }, items: fallbackItems };
+          setStatus('Live creations API is unavailable. Showing the local creations fallback list.', 'warning');
+          state.all = fallbackItems.slice().sort((a,b)=>String(a.title || a.name || '').localeCompare(String(b.title || b.name || '')));
+          els.statTotal.textContent = String(state.all.length);
+          els.statSubs.textContent = String(unique(state.all.map(i => i.subcategory || i.type)).length);
+          els.statMaterials.textContent = String(unique(state.all.flatMap(i => i.materials || [])).length);
+          fillSelect(els.typeFilter, unique(state.all.map(i => i.type)));
+          fillSelect(els.subFilter, unique(state.all.map(i => i.subcategory || i.type)));
+          fillSelect(els.materialFilter, unique(state.all.flatMap(i => i.materials || [])));
+          applyFilters(data);
+          [els.q, els.typeFilter, els.subFilter, els.materialFilter].forEach(el => el.addEventListener('input', () => applyFilters(data)));
+          els.resetBtn.addEventListener('click', () => {
+            els.q.value = '';
+            els.typeFilter.value = 'all';
+            els.subFilter.value = 'all';
+            els.materialFilter.value = 'all';
+            applyFilters(data);
+          });
+          return;
+        }
+        setStatus(err?.message || 'We could not load the creations catalog just now.', 'error');
         els.catalog.innerHTML = '<div class="panel muted-box" style="grid-column:1/-1">We could not load the creations catalog just now.</div>';
       }
     }

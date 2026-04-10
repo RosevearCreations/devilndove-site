@@ -175,8 +175,28 @@
 <script>
     (function () {
       const DATA_URL = "/api/creations?limit=500";
+      const DATA_FALLBACK_URL = "/data/itemsforsale/itemsforsale_items_master.json";
 
       function safeText(v){ return (v == null ? "" : String(v)).trim(); }
+      function ensureStatusEl(){
+        let el = document.getElementById('galleryStatus');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'galleryStatus';
+          el.className = 'status-note';
+          el.style.display = 'none';
+          const grid = document.getElementById('grid');
+          grid?.parentElement?.insertBefore(el, grid);
+        }
+        return el;
+      }
+      function setStatus(text, tone='info'){
+        const el = ensureStatusEl();
+        if (!text) { el.textContent = ''; el.style.display = 'none'; el.className = 'status-note'; return; }
+        el.textContent = text;
+        el.className = `status-note ${tone}`;
+        el.style.display = 'block';
+      }
       function norm(v){ return safeText(v).toLowerCase(); }
 
       function escHtml(v){
@@ -286,16 +306,31 @@
 
       async function init(){
         try{
-          const r = await fetch(DATA_URL, { cache: "no-store" });
-          if (!r.ok) throw new Error("API load failed: " + r.status);
-          meta = await r.json();
-          items = Array.isArray(meta.items) ? meta.items.slice() : (Array.isArray(meta) ? meta.slice() : []);
+          let response = await fetch(DATA_URL, { cache: "no-store" });
+          let data = await response.json().catch(() => null);
+          if (!response.ok || !data?.ok) throw new Error(data?.error || `API load failed: ${response.status}`);
+          meta = data;
+          items = Array.isArray(meta.items) ? meta.items.slice() : [];
+          if (data?.fallback_used || data?.summary?.authority === 'json_fallback') setStatus('Showing fallback creations data while the live catalog read recovers.', 'warning');
+          if (!items.length) throw new Error('No creations were returned from the live API.');
           render();
           qEl.addEventListener("input", render);
           typeEl.addEventListener("change", render);
         } catch (e){
           console.error(e);
-          gridEl.innerHTML = `<div class="small">Could not load <code>${escHtml(DATA_URL)}</code>.</div>`;
+          const fallback = await fetch(DATA_FALLBACK_URL, { cache: 'no-store' }).then((r) => r.ok ? r.json() : []).catch(() => []);
+          const fallbackItems = Array.isArray(fallback) ? fallback : (Array.isArray(fallback?.items) ? fallback.items : []);
+          if (fallbackItems.length) {
+            meta = { asset_origin: 'https://assets.devilndove.com', asset_prefix: 'itemsforsale', summary: { authority: 'json_fallback' } };
+            items = fallbackItems.slice();
+            setStatus('Live creations API is unavailable. Showing the local gallery fallback list.', 'warning');
+            render();
+            qEl.addEventListener("input", render);
+            typeEl.addEventListener("change", render);
+            return;
+          }
+          setStatus(e?.message || 'Could not load creations right now.', 'error');
+          gridEl.innerHTML = `<div class="small">Could not load creations right now.</div>`;
         }
       }
 

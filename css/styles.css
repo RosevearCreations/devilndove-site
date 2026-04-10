@@ -395,3 +395,6 @@ textarea {
 .mobile-summary-list{display:grid;gap:10px}
 .mobile-summary-list-item{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:10px;background:rgba(255,255,255,.03)}
 @media (max-width:720px){.mobile-draft-status-head{align-items:stretch}}
+
+
+.status-note{margin:10px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);font-size:13px;line-height:1.4}.status-note.warning{border-color:rgba(194,147,0,.35);background:rgba(194,147,0,.08)}.status-note.error{border-color:rgba(176,0,32,.35);background:rgba(176,0,32,.08)}.status-note.success{border-color:rgba(0,128,96,.35);background:rgba(0,128,96,.08)}
