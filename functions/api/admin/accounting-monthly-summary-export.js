@@ -2,22 +2,26 @@ import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit
 
 function csvCell(value) {
   if (value === null || value === undefined) return "";
+
   const str = String(value);
-  const needsQuotes = str.includes(",") || str.includes("
-") || str.includes("") || str.includes(""");
-  if (needsQuotes) {
-    return `"${str.replaceAll(""", """")}"`;
-  }
-  return str;
+  const needsQuotes = [",", "\"", String.fromCharCode(10), String.fromCharCode(13)].some((token) =>
+    str.includes(token)
+  );
+
+  if (!needsQuotes) return str;
+
+  return `"${str.replace(/"/g, "\"\"")}"`;
 }
 
 function toCsv(rows) {
   if (!Array.isArray(rows) || !rows.length) return "";
+
   const headers = Object.keys(rows[0]);
   const lines = [
-    headers.map(csvCell).join(","),
+    headers.map((header) => csvCell(header)).join(","),
     ...rows.map((row) => headers.map((key) => csvCell(row[key])).join(",")),
   ];
+
   return lines.join("\n");
 }
 
@@ -45,7 +49,7 @@ function normalizeResults(result) {
 async function tableExists(db, tableName) {
   try {
     const row = await db
-      .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1`)
+      .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1")
       .bind(tableName)
       .first();
     return !!row;
@@ -64,6 +68,32 @@ async function safeQuery(db, sql, bindings = []) {
 }
 
 async function loadOrders(db, range) {
+  const hasAccountingOrders = await tableExists(db, "accounting_order_records");
+  if (hasAccountingOrders) {
+    return safeQuery(
+      db,
+      `
+        SELECT
+          'order' AS row_type,
+          substr(COALESCE(order_date, created_at, datetime('now')), 1, 7) AS period_month,
+          id AS reference_id,
+          COALESCE(order_number, CAST(id AS TEXT)) AS reference_code,
+          COALESCE(customer_name, customer_email, '') AS party,
+          COALESCE(status, payment_status, fulfillment_status, '') AS status,
+          ROUND(COALESCE(total_amount, grand_total, subtotal_amount, 0), 2) AS amount,
+          ROUND(COALESCE(tax_amount, tax_total, 0), 2) AS tax_amount,
+          '' AS ledger_code,
+          '' AS ledger_name,
+          COALESCE(notes, '') AS notes
+        FROM accounting_order_records
+        WHERE substr(COALESCE(order_date, created_at, datetime('now')), 1, 10) >= ?
+          AND substr(COALESCE(order_date, created_at, datetime('now')), 1, 10) < ?
+        ORDER BY COALESCE(order_date, created_at, datetime('now')) DESC
+      `,
+      [range.start, range.end]
+    );
+  }
+
   const hasOrders = await tableExists(db, "orders");
   if (!hasOrders) return [];
 
