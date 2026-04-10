@@ -275,7 +275,28 @@
       const ASSET_ORIGIN = "https://assets.devilndove.com";
       const ASSET_PREFIX = "Toolshed";
       const DATA_URL = "/api/tools?limit=500";
+      const DATA_FALLBACK_URL = "/data/toolshed/toolshed_items_master.json";
       const REORDER_STORAGE_KEY = "devilndove_tools_reorder_list_v1";
+      function ensureStatusEl(){
+        let el = document.getElementById('toolsStatus');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'toolsStatus';
+          el.className = 'status-note';
+          el.style.display = 'none';
+          const parent = document.getElementById('toolsGrid')?.parentElement;
+          const before = document.getElementById('toolsGrid');
+          if (parent && before) parent.insertBefore(el, before);
+        }
+        return el;
+      }
+      function setStatus(text, tone='info'){
+        const el = ensureStatusEl();
+        if (!text) { el.textContent = ''; el.style.display = 'none'; el.className = 'status-note'; return; }
+        el.textContent = text;
+        el.className = `status-note ${tone}`;
+        el.style.display = 'block';
+      }
       const AREA_ORDER = ["Security","Safety & PPE","Forge & Metalwork","Resin & UV","Clay","Laser & Engraving","3D & CNC","Sublimation","Craft & Cutting","Hand Tools","Measuring & Layout","Organization & Storage","Power & Tech","Filming & Streaming","Automotive","Reference","Pets","Health & Comfort","Workshop Basics"];
       const areaRank = new Map(AREA_ORDER.map((a, i) => [a, i]));
       const byAreaThenName = (a, b) => ((areaRank.has(a) ? areaRank.get(a) : 999) - (areaRank.has(b) ? areaRank.get(b) : 999)) || a.localeCompare(b);
@@ -351,13 +372,34 @@
         const text = list.length ? list.map((entry) => `${entry.name}${entry.category ? ` — ${entry.category}` : ''}${entry.amazon_url ? ` — ${entry.amazon_url}` : ''}`).join('\n') : 'No tools on reorder list.';
         try { await navigator.clipboard.writeText(text); } catch {}
       }
+      async function fetchJsonRows(url){
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+          if (!response.ok) return [];
+          const data = await response.json().catch(() => null);
+          return Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+        } catch { return []; }
+      }
       async function fetchCatalogItems(){
         try {
           const response = await fetch(DATA_URL, { cache: 'no-store' });
-          const data = await response.json();
-          if (!response.ok || !data?.ok) return [];
-          return Array.isArray(data.items) ? data.items : [];
-        } catch { return []; }
+          const data = await response.json().catch(() => null);
+          if (response.ok && data?.ok && Array.isArray(data.items) && data.items.length) {
+            return {
+              items: data.items,
+              warning: data?.fallback_used || data?.summary?.authority === 'json_fallback'
+                ? 'Showing fallback tools data while the live catalog read recovers.'
+                : ''
+            };
+          }
+          throw new Error(data?.error || `Tools API responded ${response.status}.`);
+        } catch (error) {
+          const fallbackItems = await fetchJsonRows(DATA_FALLBACK_URL);
+          if (fallbackItems.length) {
+            return { items: fallbackItems, warning: 'Live tools API is unavailable. Showing the local tools fallback list.' };
+          }
+          return { items: [], error: error?.message || 'Could not load tools data.' };
+        }
       }
       function populateFilters(items){
         const areas = new Set(), cats = new Set(), tags = new Set();
@@ -425,7 +467,8 @@
       async function initToolsPage(){
         try {
           const migrated = await fetchCatalogItems();
-          allTools = Array.isArray(migrated) ? migrated.map((row) => {
+          setStatus(migrated.warning || '', migrated.warning ? 'warning' : 'info');
+          allTools = Array.isArray(migrated.items) ? migrated.items.map((row) => {
             return Object.assign({}, row, {
               source_key: row.source_key || row.id || '',
               item_name_suggested: row.item_name_suggested || row.name || '',
@@ -441,7 +484,8 @@
             });
           }) : [];
           if (!allTools.length) {
-            gridEl.innerHTML = `<div class="small">No tools found from <code>${escHtml(DATA_URL)}</code></div>`;
+            setStatus(migrated.error || `No tools found from ${DATA_URL}.`, migrated.error ? 'error' : 'warning');
+            gridEl.innerHTML = `<div class="small">No tools are available right now.</div>`;
             shownEl.textContent = '0'; totalEl.textContent = '0'; return;
           }
           populateFilters(allTools);
@@ -456,7 +500,8 @@
           renderFiltered();
         } catch (err) {
           console.error(err);
-          gridEl.innerHTML = `<div class="small">Could not load tools data from <code>${escHtml(DATA_URL)}</code>.</div>`;
+          setStatus(err?.message || 'Could not load tools data right now.', 'error');
+          gridEl.innerHTML = `<div class="small">Could not load tools data right now.</div>`;
         }
       }
       initToolsPage();

@@ -86,6 +86,25 @@ CREATE INDEX IF NOT EXISTS idx_admin_action_audit_actor ON admin_action_audit(ac
 CREATE INDEX IF NOT EXISTS idx_admin_action_audit_target ON admin_action_audit(target_type, target_id, created_at DESC);
 
 
+CREATE TABLE IF NOT EXISTS runtime_incidents (
+  runtime_incident_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  incident_scope TEXT,
+  incident_code TEXT,
+  severity TEXT DEFAULT 'warning',
+  endpoint_path TEXT,
+  request_method TEXT,
+  message TEXT,
+  details_json TEXT,
+  related_user_id INTEGER,
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_runtime_incidents_created_at ON runtime_incidents(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_runtime_incidents_scope ON runtime_incidents(incident_scope, severity, created_at DESC);
+
+
+
 
 CREATE TABLE IF NOT EXISTS movie_catalog (
   movie_catalog_id INTEGER PRIMARY KEY AUTOINCREMENT,

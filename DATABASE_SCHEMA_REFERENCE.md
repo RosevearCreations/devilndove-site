@@ -343,3 +343,10 @@ Monthly overhead allocation rows used to move real operating costs like rent, hy
 - Added `catalog_items` lookup indexes for centralized public catalog reads: `idx_catalog_items_public_sort` and `idx_catalog_items_grouping`.
 - `database_upgrade_current_pass.sql` now includes unified-catalog support creation/index statements so older environments can safely move toward the same public catalog lookup path.
 
+
+
+## Current pass update - runtime and fallback hardening
+- Added `runtime_incidents` for lightweight server-side fallback/error visibility when public catalog reads or admin summary reads drift.
+- New columns tracked: `incident_scope`, `incident_code`, `severity`, `endpoint_path`, `request_method`, `message`, `details_json`, `related_user_id`, `ip_address`, `user_agent`, and `created_at`.
+- This table is intentionally simple and operational. It is meant for fast incident review, not a full observability platform.
+- Public tools, supplies, and creations endpoints now expose `fallback_used`, `summary.authority`, and `diagnostics.warnings` so pages can stay usable while clearly signaling fallback mode.
