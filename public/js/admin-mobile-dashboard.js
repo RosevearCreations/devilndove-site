@@ -17,12 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const summary=report?.summary||{};
     const costingSummary=costing?.summary||{};
     monthStats.innerHTML = `
-      <div class="admin-stat"><div class="admin-stat-label">Recognized revenue</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Number(summary.recognized_amount_cents||Math.round(Number(summary.recognized_amount||0)*100))))}</div></div>
-      <div class="admin-stat"><div class="admin-stat-label">Est. sold-unit COGS</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Number(summary.estimated_recognized_full_cogs_cents||0)))}</div></div>
-      <div class="admin-stat"><div class="admin-stat-label">Gross after est. COGS</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Number(summary.rough_gross_after_estimated_cogs_cents||0)))}</div></div>
+      <div class="admin-stat"><div class="admin-stat-label">Recognized revenue</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Math.round(Number(summary.recognized_amount||0)*100)))}</div></div>
+      <div class="admin-stat"><div class="admin-stat-label">Expenses + tax</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Number(summary.operating_expense_cents||0)+Number(summary.operating_expense_tax_cents||0)))}</div></div>
       <div class="admin-stat"><div class="admin-stat-label">Allocated overhead</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Number(summary.overhead_allocated_cents||0)))}</div></div>
       <div class="admin-stat"><div class="admin-stat-label">Net after overhead</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Number(summary.rough_net_after_overhead_cents||0)))}</div></div>
-      <div class="admin-stat"><div class="admin-stat-label">Paid units</div><div class="admin-stat-value">${escapeHtml(String(Number(summary.sold_quantity_in_period||0)))}</div></div>
       <div class="admin-stat"><div class="admin-stat-label">Negative margins</div><div class="admin-stat-value">${escapeHtml(String(Number(costingSummary.negative_margin_count||0)))}</div></div>
       <div class="admin-stat"><div class="admin-stat-label">Missing cost links</div><div class="admin-stat-value">${escapeHtml(String(Number(costingSummary.missing_cost_link_count||0)))}</div></div>`;
   }
