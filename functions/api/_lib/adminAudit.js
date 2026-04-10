@@ -114,3 +114,60 @@ export async function auditAdminAction(env, request, adminUser, payload = {}) {
     ).run();
   } catch {}
 }
+
+
+export async function captureRuntimeIncident(env, request, payload = {}) {
+  const db = getDb(env);
+  if (!db) return false;
+
+  try {
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS runtime_incidents (
+        runtime_incident_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        incident_scope TEXT,
+        incident_code TEXT,
+        severity TEXT DEFAULT 'warning',
+        endpoint_path TEXT,
+        request_method TEXT,
+        message TEXT,
+        details_json TEXT,
+        related_user_id INTEGER,
+        ip_address TEXT,
+        user_agent TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run();
+  } catch {}
+
+  try {
+    await db.prepare(`
+      INSERT INTO runtime_incidents (
+        incident_scope,
+        incident_code,
+        severity,
+        endpoint_path,
+        request_method,
+        message,
+        details_json,
+        related_user_id,
+        ip_address,
+        user_agent,
+        created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `).bind(
+      normalizeText(payload.incident_scope) || 'runtime',
+      normalizeText(payload.incident_code) || 'unspecified',
+      normalizeText(payload.severity) || 'warning',
+      new URL(request.url).pathname,
+      normalizeText(request.method) || null,
+      normalizeText(payload.message) || 'Runtime incident recorded.',
+      JSON.stringify(payload.details || {}),
+      payload.related_user_id == null || payload.related_user_id === '' ? null : Number(payload.related_user_id),
+      getClientIp(request) || null,
+      normalizeText(request.headers.get('User-Agent')) || null,
+    ).run();
+    return true;
+  } catch {
+    return false;
+  }
+}
