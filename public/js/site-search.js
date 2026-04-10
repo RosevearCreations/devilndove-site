@@ -1,6 +1,7 @@
 // File: /public/js/site-search.js
 // Brief description: Public site search across storefront products, tools, supplies,
-// featured creations, and key landing pages with lightweight analytics logging.
+// featured creations, movies, and key landing pages with lightweight analytics logging.
+// It now degrades more gracefully when one or more live sources are unavailable.
 
 document.addEventListener('DOMContentLoaded', () => {
   const inputEl = document.getElementById('siteSearchInput');
@@ -43,127 +44,21 @@ document.addEventListener('DOMContentLoaded', () => {
     return score;
   }
 
-  async function fetchProducts(query) {
+  async function fetchSearchSource(label, url, extractor, mapper, query) {
     try {
-      const response = await fetch(`/api/products?q=${encodeURIComponent(query)}`);
-      const data = await response.json();
-      if (!response.ok || !data?.ok) return [];
-      return (Array.isArray(data.products) ? data.products : []).map((row) => ({
-        type: 'Product',
-        name: row.name || 'Product',
-        summary: row.short_description || row.meta_description || row.product_type || 'Storefront product',
-        url: `/shop/product/?slug=${encodeURIComponent(row.slug || '')}`,
-        image: row.featured_image_url || row.og_image_url || '',
-        score: scoreText(query, row.name, row.short_description, row.meta_description, row.keywords, row.product_type)
-      })).filter((row) => row.score > 0 || !query);
-    } catch {
-      return [];
-    }
-  }
-
-  async function fetchJson(url) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) return null;
-      return await response.json();
-    } catch {
-      return null;
-    }
-  }
-
-  async function fetchCatalogItems(itemKind, typeLabel, urlPath, query) {
-    try {
-      const response = await fetch(`/api/catalog-items?item_kind=${encodeURIComponent(itemKind)}&q=${encodeURIComponent(query)}&limit=250`);
-      const data = await response.json();
-      if (!response.ok || !data?.ok) return [];
-      const rows = Array.isArray(data.items) ? data.items : [];
-      return rows.map((row) => ({
-        type: typeLabel,
-        name: row.name || `${typeLabel} item`,
-        summary: [row.category, row.subcategory, row.short_description, row.notes].filter(Boolean).join(' • '),
-        url: urlPath,
-        image: row.image_url || '',
-        score: scoreText(query, row.name, row.brand, row.category, row.subcategory, row.item_type, row.short_description, row.notes)
-      })).filter((row) => row.score > 0 || !query);
-    } catch {
-      return [];
-    }
-  }
-
-  async function fetchTools(query) {
-    try {
-      const response = await fetch(`/api/tools?q=${encodeURIComponent(query)}&limit=250`);
-      const data = await response.json();
-      if (!response.ok || !data?.ok) return [];
-      return (Array.isArray(data.items) ? data.items : []).map((row) => ({
-        type: 'Tool',
-        name: row.item_name_suggested || row.name || row.brand_guess || 'Workshop tool',
-        summary: [row.primary_area, row.category, row.notes_public, row.notes, row.location_zone, row.location_shelf].filter(Boolean).join(' • '),
-        url: '/tools/',
-        image: row.image_url || '',
-        score: scoreText(query, row.item_name_suggested, row.name, row.brand_guess, row.category, row.primary_area, row.notes_public, row.notes, row.location_zone, row.location_shelf)
-      })).filter((row) => row.score > 0 || !query);
-    } catch {
-      return [];
-    }
-  }
-
-  async function fetchSupplies(query) {
-    try {
-      const response = await fetch(`/api/supplies?q=${encodeURIComponent(query)}&limit=250`);
-      const data = await response.json();
-      if (!response.ok || !data?.ok) return [];
-      return (Array.isArray(data.items) ? data.items : []).map((row) => ({
-        type: 'Supply',
-        name: row.item_name_suggested || row.name || row.consumable_type || 'Workshop supply',
-        summary: [row.consumable_type, row.primary_area, row.process_tags, row.notes, row.storage_location].filter(Boolean).join(' • '),
-        url: '/supplies/',
-        image: row.image_url || '',
-        score: scoreText(query, row.item_name_suggested, row.name, row.consumable_type, row.primary_area, row.process_tags, row.notes, row.storage_location)
-      })).filter((row) => row.score > 0 || !query);
-    } catch {
-      return [];
-    }
-  }
-
-  async function fetchCreations(query) {
-    try {
-      const response = await fetch(`/api/creations?q=${encodeURIComponent(query)}&limit=250`);
-      const data = await response.json();
-      if (!response.ok || !data?.ok) return [];
-      return (Array.isArray(data.items) ? data.items : []).map((row) => ({
-        type: 'Creation',
-        name: row.name || row.title || 'Featured creation',
-        summary: [row.section, row.type, row.alt, row.caption, row.description].filter(Boolean).join(' • '),
-        url: '/creations/',
-        image: row.image || row.image_url || '',
-        score: scoreText(query, row.name, row.title, row.section, row.type, row.alt, row.caption, row.description)
-      })).filter((row) => row.score > 0 || !query);
-    } catch {
-      return [];
-    }
-  }
-
-  async function fetchMovies(query) {
-    try {
-      const response = await fetch(`/api/movies?q=${encodeURIComponent(query)}&limit=120`);
-      const data = await response.json();
-      if (!response.ok || !data?.ok) return [];
-      return (Array.isArray(data.items) ? data.items : []).map((row) => ({
-        type: 'Movie',
-        name: row.title || row.upc || 'Movie',
-        summary: [row.release_year, row.genre, row.director_names, row.actor_names, row.summary].filter(Boolean).join(' • '),
-        url: '/movies/',
-        image: row.front_image_url || '',
-        score: scoreText(query, row.title, row.upc, row.release_year, row.genre, row.director_names, row.actor_names, row.summary)
-      })).filter((row) => row.score > 0 || !query);
-    } catch {
-      return [];
+      const response = await fetch(url, { cache: 'no-store' });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || `${label} search source is unavailable.`);
+      const rows = extractor(data);
+      return { label, items: rows.map((row) => mapper(row, query)).filter((row) => row.score > 0 || !query), warning: Array.isArray(data?.diagnostics?.warnings) && data.diagnostics.warnings.length ? `${label} is using fallback data.` : '' };
+    } catch (error) {
+      return { label, items: [], error: error?.message || `${label} search source is unavailable.` };
     }
   }
 
   function fetchPages(query) {
-    return staticPages.map((row) => ({ ...row, score: scoreText(query, row.name, row.summary) }))
+    return staticPages
+      .map((row) => ({ ...row, score: scoreText(query, row.name, row.summary) }))
       .filter((row) => row.score > 0 || (!query && row.url === '/shop/'));
   }
 
@@ -177,16 +72,16 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch {}
   }
 
-  function render(results, query) {
+  function render(results, query, notice = '') {
     if (!resultsEl || !summaryEl || !emptyEl) return;
     if (!results.length) {
       resultsEl.innerHTML = '';
       emptyEl.style.display = '';
-      summaryEl.textContent = query ? `No results found for “${query}”.` : 'Enter a search term to begin.';
+      summaryEl.textContent = query ? `No results found for “${query}”.${notice ? ` ${notice}` : ''}` : 'Enter a search term to begin.';
       return;
     }
     emptyEl.style.display = 'none';
-    summaryEl.textContent = `${results.length} result(s) found${query ? ` for “${query}”` : ''}.`;
+    summaryEl.textContent = `${results.length} result(s) found${query ? ` for “${query}”` : ''}.${notice ? ` ${notice}` : ''}`;
     resultsEl.innerHTML = results.map((row) => `
       <article class="card">
         ${row.image ? `<img src="${escapeHtml(row.image)}" alt="${escapeHtml(row.name)}" style="width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:12px;margin-bottom:12px"/>` : ''}
@@ -205,18 +100,62 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     summaryEl.textContent = 'Searching...';
-    const [products, tools, supplies, creations, movies] = await Promise.all([
-      fetchProducts(query),
-      fetchTools(query),
-      fetchSupplies(query),
-      fetchCreations(query),
-      fetchMovies(query)
+
+    const sources = await Promise.all([
+      fetchSearchSource('Products', `/api/products?q=${encodeURIComponent(query)}`, (data) => Array.isArray(data.products) ? data.products : [], (row, q) => ({
+        type: 'Product',
+        name: row.name || 'Product',
+        summary: row.short_description || row.meta_description || row.product_type || 'Storefront product',
+        url: `/shop/product/?slug=${encodeURIComponent(row.slug || '')}`,
+        image: row.featured_image_url || row.og_image_url || '',
+        score: scoreText(q, row.name, row.short_description, row.meta_description, row.keywords, row.product_type)
+      }), query),
+      fetchSearchSource('Tools', `/api/tools?q=${encodeURIComponent(query)}&limit=250`, (data) => Array.isArray(data.items) ? data.items : [], (row, q) => ({
+        type: 'Tool',
+        name: row.item_name_suggested || row.name || row.brand_guess || 'Workshop tool',
+        summary: [row.primary_area, row.category, row.notes_public, row.notes, row.location_zone, row.location_shelf].filter(Boolean).join(' • '),
+        url: '/tools/',
+        image: row.image_url || '',
+        score: scoreText(q, row.item_name_suggested, row.name, row.brand_guess, row.category, row.primary_area, row.notes_public, row.notes, row.location_zone, row.location_shelf)
+      }), query),
+      fetchSearchSource('Supplies', `/api/supplies?q=${encodeURIComponent(query)}&limit=250`, (data) => Array.isArray(data.items) ? data.items : [], (row, q) => ({
+        type: 'Supply',
+        name: row.item_name_suggested || row.name || row.consumable_type || 'Workshop supply',
+        summary: [row.consumable_type, row.primary_area, row.process_tags, row.notes, row.storage_location].filter(Boolean).join(' • '),
+        url: '/supplies/',
+        image: row.image_url || '',
+        score: scoreText(q, row.item_name_suggested, row.name, row.consumable_type, row.primary_area, row.process_tags, row.notes, row.storage_location)
+      }), query),
+      fetchSearchSource('Creations', `/api/creations?q=${encodeURIComponent(query)}&limit=250`, (data) => Array.isArray(data.items) ? data.items : [], (row, q) => ({
+        type: 'Creation',
+        name: row.name || row.title || 'Featured creation',
+        summary: [row.section, row.type, row.alt, row.caption, row.description].filter(Boolean).join(' • '),
+        url: '/creations/',
+        image: row.image || row.image_url || '',
+        score: scoreText(q, row.name, row.title, row.section, row.type, row.alt, row.caption, row.description)
+      }), query),
+      fetchSearchSource('Movies', `/api/movies?q=${encodeURIComponent(query)}&limit=120`, (data) => Array.isArray(data.items) ? data.items : [], (row, q) => ({
+        type: 'Movie',
+        name: row.title || row.upc || 'Movie',
+        summary: [row.release_year, row.genre, row.director_names, row.actor_names, row.summary].filter(Boolean).join(' • '),
+        url: '/movies/',
+        image: row.front_image_url || '',
+        score: scoreText(q, row.title, row.upc, row.release_year, row.genre, row.director_names, row.actor_names, row.summary)
+      }), query)
     ]);
+
     const pages = fetchPages(query);
-    const results = [...products, ...tools, ...supplies, ...creations, ...movies, ...pages]
+    const results = [...sources.flatMap((source) => source.items), ...pages]
       .sort((a, b) => Number(b.score || 0) - Number(a.score || 0) || String(a.name || '').localeCompare(String(b.name || '')))
       .slice(0, 36);
-    render(results, query);
+
+    const warnings = sources.map((source) => source.warning).filter(Boolean);
+    const failures = sources.filter((source) => source.error).map((source) => source.label);
+    const noticeParts = [];
+    if (warnings.length) noticeParts.push(Array.from(new Set(warnings)).join(' '));
+    if (failures.length) noticeParts.push(`Some live sources are unavailable right now: ${Array.from(new Set(failures)).join(', ')}. Static page results are still included.`);
+
+    render(results, query, noticeParts.join(' '));
     logSearch(query, results.length);
   }
 
