@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const SNAPSHOT_KEY = 'dd_mobile_admin_dashboard_snapshot_v2';
   const ORDER_PENDING_ACTIONS_KEY = 'dd_admin_order_pending_actions_v1';
+  const PRODUCT_PENDING_ACTIONS_KEY = 'dd_admin_product_review_pending_actions_v1';
 
   function centsToMoney(cents, currency = 'CAD') {
     const value = Number(cents || 0) / 100;
@@ -26,13 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function parseSafeJson(value, fallback = null) { try { return JSON.parse(value); } catch { return fallback; } }
   function loadSnapshot() { return parseSafeJson(localStorage.getItem(SNAPSHOT_KEY) || 'null', null); }
   function saveSnapshot(snapshot) { try { localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot)); } catch {} }
-  function loadPendingClientActionsCount() {
+  function countLocalRows(key) {
     try {
-      const rows = JSON.parse(localStorage.getItem(ORDER_PENDING_ACTIONS_KEY) || '[]');
+      const rows = JSON.parse(localStorage.getItem(key) || '[]');
       return Array.isArray(rows) ? rows.length : 0;
     } catch {
       return 0;
     }
+  }
+  function loadPendingClientActionsCount() {
+    return countLocalRows(ORDER_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_PENDING_ACTIONS_KEY);
   }
 
   function renderMonthSummary(report, costing) {
@@ -44,7 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="admin-stat"><div class="admin-stat-label">Allocated overhead</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Number(summary.overhead_allocated_cents || 0)))}</div></div>
       <div class="admin-stat"><div class="admin-stat-label">Net after overhead</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Number(summary.rough_net_after_overhead_cents || 0)))}</div></div>
       <div class="admin-stat"><div class="admin-stat-label">Negative margins</div><div class="admin-stat-value">${escapeHtml(String(Number(costingSummary.negative_margin_count || 0)))}</div></div>
-      <div class="admin-stat"><div class="admin-stat-label">Missing cost links</div><div class="admin-stat-value">${escapeHtml(String(Number(costingSummary.missing_cost_link_count || 0)))}</div></div>`;
+      <div class="admin-stat"><div class="admin-stat-label">Missing cost links</div><div class="admin-stat-value">${escapeHtml(String(Number(costingSummary.missing_cost_link_count || 0)))}</div></div>
+      <div class="admin-stat"><div class="admin-stat-label">Products sold this month</div><div class="admin-stat-value">${escapeHtml(String(Number(costingSummary.products_sold_in_period || 0)))}</div></div>
+      <div class="admin-stat"><div class="admin-stat-label">Recognized full COGS</div><div class="admin-stat-value">${escapeHtml(centsToMoney(Number(costingSummary.estimated_recognized_full_cogs_cents || 0)))}</div></div>`;
   }
 
   function renderAccountingSummary(payload) {
@@ -82,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_admin_actions_count || 0)))}</strong><div class="small">Shared queued admin fallback actions</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.failed_shared_admin_actions_count || 0)))}</strong><div class="small">Shared queued actions still failing replay</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_admin_order_actions_count || 0)))}</strong><div class="small">Shared queued order/payment actions</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_product_review_actions_count || 0)))}</strong><div class="small">Shared queued product review actions</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.outstanding_orders_count || 0)))}</strong><div class="small">Orders still waiting for payment or closure</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.payment_sync_failures_count || 0)))}</strong><div class="small">Provider refund sync failures</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(pendingClientActions || 0)))}</strong><div class="small">Browser-only fallback actions still not shared</div></div>
