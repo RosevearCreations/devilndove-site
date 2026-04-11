@@ -5,9 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const monthStats = document.getElementById('mobileAdminMonthSummary');
   const draftStats = document.getElementById('mobileAdminDraftSummary');
   const accountingStats = document.getElementById('mobileAdminAccountingSummary');
-  if (!monthInput || !refreshButton || !messageEl || !monthStats || !draftStats || !accountingStats || !window.DDAuth) return;
+  const healthStats = document.getElementById('mobileAdminHealthSummary');
+  if (!monthInput || !refreshButton || !messageEl || !monthStats || !draftStats || !accountingStats || !healthStats || !window.DDAuth) return;
 
-  const SNAPSHOT_KEY = 'dd_mobile_admin_dashboard_snapshot_v1';
+  const SNAPSHOT_KEY = 'dd_mobile_admin_dashboard_snapshot_v2';
 
   function centsToMoney(cents, currency = 'CAD') {
     const value = Number(cents || 0) / 100;
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function setMessage(text, tone = 'info') {
     messageEl.textContent = text || '';
     messageEl.style.display = text ? 'block' : 'none';
-    messageEl.style.color = tone === 'error' ? '#b00020' : (tone === 'warning' ? '#8a5a00' : '');
+    messageEl.className = text ? `status-note ${tone}` : 'status-note';
   }
   function monthValue() { return String(monthInput.value || new Date().toISOString().slice(0, 7)); }
   function parseSafeJson(value, fallback = null) { try { return JSON.parse(value); } catch { return fallback; } }
@@ -61,6 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }).join('')}</div><div class="small" style="margin-top:8px">${rows.length} draft products available from this screen.</div>` : '<div class="small">No draft products are waiting right now.</div>';
   }
 
+  function renderHealthSummary(summary) {
+    const s = summary || {};
+    healthStats.innerHTML = `
+      <div class="mobile-summary-list">
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.recent_runtime_incidents_count || 0)))}</strong><div class="small">Runtime incidents in the last 7 days</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.failed_webhooks_count || 0)))}</strong><div class="small">Failed webhook events waiting for review</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.queued_notifications_count || 0)))}</strong><div class="small">Queued or retry notifications</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.open_recovery_requests_count || 0)))}</strong><div class="small">Open account-help requests</div></div>
+      </div>`;
+  }
+
   async function fetchJsonState(url, fallbackLabel) {
     try {
       const response = await window.DDAuth.apiFetch(url);
@@ -77,11 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const month = monthValue();
     const cached = loadSnapshot();
 
-    const [reportState, costState, draftsState, accountingState] = await Promise.all([
+    const [reportState, costState, draftsState, accountingState, dashboardState] = await Promise.all([
       fetchJsonState(`/api/admin/accounting-profit-loss?month=${encodeURIComponent(month)}`, 'Failed loading accounting snapshot.'),
       fetchJsonState(`/api/admin/accounting-item-costing?month=${encodeURIComponent(month)}`, 'Failed loading costing snapshot.'),
       fetchJsonState('/api/admin/mobile-product-drafts?status=draft&limit=12', 'Failed loading draft products.'),
-      fetchJsonState('/api/admin/accounting-summary', 'Failed loading accounting records.')
+      fetchJsonState('/api/admin/accounting-summary', 'Failed loading accounting records.'),
+      fetchJsonState('/api/admin/dashboard-summary', 'Failed loading site health snapshot.')
     ]);
 
     const effective = {
@@ -90,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       costing: costState.data || (cached?.costing ?? null),
       drafts: draftsState.data || (cached?.drafts ?? null),
       accounting: accountingState.data || (cached?.accounting ?? null),
+      dashboard: dashboardState.data || (cached?.dashboard ?? null),
       cached_at: new Date().toISOString()
     };
 
@@ -102,18 +116,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (effective.accounting) renderAccountingSummary(effective.accounting);
     else accountingStats.innerHTML = '<div class="small">Accounting snapshot is unavailable right now.</div>';
 
-    if (reportState.ok || costState.ok || draftsState.ok || accountingState.ok) saveSnapshot(effective);
+    if (effective.dashboard) renderHealthSummary(effective.dashboard.summary || {});
+    else healthStats.innerHTML = '<div class="small">Site health snapshot is unavailable right now.</div>';
 
-    const warnings = [reportState, costState, draftsState, accountingState]
+    if (reportState.ok || costState.ok || draftsState.ok || accountingState.ok || dashboardState.ok) saveSnapshot(effective);
+
+    const warnings = [reportState, costState, draftsState, accountingState, dashboardState]
       .filter((entry) => !entry.ok)
       .map((entry) => entry.error);
 
     if (!warnings.length) {
-      setMessage(`Loaded ${month} phone dashboard snapshot.`);
+      setMessage(`Loaded ${month} phone dashboard snapshot.`, 'success');
       return;
     }
 
-    if (effective.report || effective.costing || effective.drafts || effective.accounting) {
+    if (effective.report || effective.costing || effective.drafts || effective.accounting || effective.dashboard) {
       setMessage(`Showing partial dashboard data. ${warnings.join(' ')}`, 'warning');
       return;
     }

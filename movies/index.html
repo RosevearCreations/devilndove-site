@@ -224,6 +224,7 @@
         </div>
       </div>
 
+      <div id="movieStatus" class="status-note" style="display:none"></div>
       <div id="movieGrid" class="movie-grid-reset"></div>
     </div>
   </div>
@@ -242,6 +243,8 @@
     const prevBtn = document.getElementById('moviePrev');
     const nextBtn = document.getElementById('movieNext');
     const perPageEl = document.getElementById('moviePerPage');
+    const statusEl = document.getElementById('movieStatus');
+    const SNAPSHOT_KEY = 'dd_movies_snapshot_v2';
 
     let items = [];
     let summary = {};
@@ -260,6 +263,34 @@
 
     const trailerSearchUrl = (title, year) =>
       'https://www.youtube.com/results?search_query=' + encodeURIComponent(`${title || ''} ${year || ''} official trailer`);
+
+    function setStatus(message, tone = 'info') {
+      if (!statusEl) return;
+      statusEl.textContent = message || '';
+      statusEl.style.display = message ? 'block' : 'none';
+      statusEl.className = message ? `status-note ${tone}` : 'status-note';
+    }
+
+    function snapshotKey(params) {
+      return params.toString() || 'all';
+    }
+
+    function loadSnapshot(key) {
+      try {
+        const payload = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '{}');
+        return payload[key] || null;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveSnapshot(key, data) {
+      try {
+        const payload = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '{}');
+        payload[key] = { ...data, cached_at: new Date().toISOString() };
+        localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(payload));
+      } catch {}
+    }
 
     function updatePager(filteredCount) {
       const totalItems = Number(summary.total_items || items.length || 0);
@@ -346,16 +377,30 @@
       params.set('page', String(currentPage));
       params.set('limit', String(currentLimit));
       if (term) params.set('q', term);
+      const key = snapshotKey(params);
+      setStatus('');
 
       try {
         const response = await fetch('/api/movies?' + params.toString(), { credentials: 'same-origin' });
-        if (!response.ok) throw new Error('Failed to load movie data');
-        const data = await response.json();
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load movie data');
         items = Array.isArray(data) ? data : (data.items || data.movies || []);
         summary = data.summary || {};
         render();
+        saveSnapshot(key, { data });
+        if (data?.warning) setStatus(data.warning, 'warning');
       } catch (err) {
-        grid.innerHTML = '<div class="card">Could not load movie catalog.</div>';
+        const cached = loadSnapshot(key);
+        if (cached?.data) {
+          const data = cached.data;
+          items = Array.isArray(data) ? data : (data.items || data.movies || []);
+          summary = data.summary || {};
+          render();
+          setStatus(`Live movie catalog is unavailable. Showing the last saved snapshot from ${cached.cached_at || 'an earlier visit'}.`, 'warning');
+        } else {
+          grid.innerHTML = '<div class="card">Could not load movie catalog.</div>';
+          setStatus(err?.message || 'Could not load movie catalog.', 'error');
+        }
         console.error(err);
       }
     }

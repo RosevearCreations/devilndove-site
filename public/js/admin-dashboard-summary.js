@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderEmpty() {
-    ["summaryUsersCount","summaryProductsCount","summaryOrdersCount","summaryPaymentsCount","summaryLowStockCount","summaryFailedWebhooksCount","summaryOpenDisputesCount","summaryLiveVisitorsCount","summaryRecentSearchesCount"].forEach((id) => setValue(id, "—"));
+    ["summaryUsersCount","summaryProductsCount","summaryOrdersCount","summaryPaymentsCount","summaryLowStockCount","summaryFailedWebhooksCount","summaryOpenDisputesCount","summaryLiveVisitorsCount","summaryRecentSearchesCount","summaryRuntimeIncidentsCount"].forEach((id) => setValue(id, "—"));
   }
 
   function renderSummary(summary) {
@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setValue("summaryOpenDisputesCount", formatCount(summary?.open_disputes_count));
     setValue("summaryLiveVisitorsCount", formatCount(summary?.active_visitor_sessions_count));
     setValue("summaryRecentSearchesCount", formatCount(summary?.recent_searches_count));
+    setValue("summaryRuntimeIncidentsCount", formatCount(summary?.recent_runtime_incidents_count));
   }
 
   async function fetchSummary() {
