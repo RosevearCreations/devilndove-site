@@ -37,7 +37,10 @@ export async function onRequestGet(context) {
     product_build_risk_count: await safeCount(db, `SELECT COUNT(DISTINCT p.product_id) AS count FROM products p INNER JOIN product_resource_links prl ON prl.product_id = p.product_id INNER JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key WHERE (COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0) + COALESCE(sii.incoming_quantity,0)) < COALESCE(prl.quantity_used,0)`),
     duplicate_media_assets_count: await safeCount(db, `SELECT COUNT(*) AS count FROM (SELECT public_url FROM media_assets WHERE deleted_at IS NULL AND COALESCE(public_url,'') != '' GROUP BY public_url HAVING COUNT(*) > 1)`),
     recent_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE created_at >= datetime('now', '-7 days')`),
-    error_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE LOWER(COALESCE(severity,'')) = 'error' AND created_at >= datetime('now', '-7 days')`)
+    error_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE LOWER(COALESCE(severity,'')) = 'error' AND created_at >= datetime('now', '-7 days')`),
+    admin_order_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE incident_scope = 'admin_orders' AND created_at >= datetime('now', '-7 days')`),
+    outstanding_orders_count: await safeCount(db, `SELECT COUNT(*) AS count FROM orders WHERE LOWER(COALESCE(payment_status,'')) IN ('pending','authorized','partially_refunded') OR LOWER(COALESCE(order_status,'')) IN ('pending','paid')`),
+    payment_sync_failures_count: await safeCount(db, `SELECT COUNT(*) AS count FROM payment_refunds WHERE provider_sync_status = 'failed'`)
   };
 
   return json({

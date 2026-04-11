@@ -1,38 +1,11 @@
 // File: /functions/api/admin/order-payments.js
-// Brief description: Returns payment summary data for an order including refunds and disputes
-// so the admin detail view can reconcile payment workflow state in one request.
+// Brief description: Returns payment summary data for an order including refunds and disputes,
+// while keeping partial fallback data available when one payment workflow table drifts.
+
+import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
-}
-
-function getBearerToken(request) {
-  const authHeader = request.headers.get('Authorization') || '';
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || '').trim() : '';
-}
-
-async function getAdminUserFromRequest(request, env) {
-  const token = getBearerToken(request);
-  if (!token) return null;
-  const session = await env.DB.prepare(`
-    SELECT s.session_id, s.user_id, u.user_id AS resolved_user_id, u.email, u.display_name, u.role, u.is_active
-    FROM sessions s
-    INNER JOIN users u ON u.user_id = s.user_id
-    WHERE (s.session_token = ? OR s.token = ?)
-      AND s.expires_at > datetime('now')
-    LIMIT 1
-  `).bind(token, token).first();
-  if (!session) return null;
-  if (Number(session.is_active || 0) !== 1) return null;
-  if (String(session.role || '').toLowerCase() !== 'admin') return null;
-  return {
-    session_id: Number(session.session_id || 0),
-    user_id: Number(session.resolved_user_id || session.user_id || 0),
-    email: session.email || '',
-    display_name: session.display_name || '',
-    role: 'admin'
-  };
+  return jsonResponse(data, status, { "Cache-Control": "no-store" });
 }
 
 function normalizeResults(result) {
@@ -82,16 +55,23 @@ function summarizePayments(orderTotalCents, payments) {
   };
 }
 
+async function runSafeQuery(db, sql, bindings = []) {
+  const result = await db.prepare(sql).bind(...bindings).all();
+  return normalizeResults(result);
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
+  const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
 
   const url = new URL(request.url);
   const order_id = Number(url.searchParams.get('order_id'));
   if (!Number.isInteger(order_id) || order_id <= 0) return json({ ok: false, error: 'A valid order_id is required.' }, 400);
 
-  const order = await env.DB.prepare(`
+  const order = await db.prepare(`
     SELECT order_id, order_number, payment_status, total_cents, currency, created_at, updated_at
     FROM orders
     WHERE order_id = ?
@@ -99,33 +79,73 @@ export async function onRequestGet(context) {
   `).bind(order_id).first();
   if (!order) return json({ ok: false, error: 'Order not found.' }, 404);
 
-  const payments = normalizeResults(await env.DB.prepare(`
-    SELECT payment_id, order_id, provider, provider_payment_id, provider_order_id, payment_status, amount_cents,
-           currency, payment_method_label, transaction_reference, paid_at, created_at, updated_at, notes
-    FROM payments
-    WHERE order_id = ?
-    ORDER BY created_at DESC, payment_id DESC
-  `).bind(order_id).all());
+  const warnings = [];
 
-  const refunds = normalizeResults(await env.DB.prepare(`
-    SELECT refund_id, payment_id, order_id, provider, provider_refund_id, amount_cents, currency, refund_status, reason, note, created_at, updated_at
-    FROM payment_refunds
-    WHERE order_id = ?
-    ORDER BY created_at DESC, refund_id DESC
-  `).bind(order_id).all().catch(() => ({ results: [] })));
+  let payments = [];
+  try {
+    payments = await runSafeQuery(db, `
+      SELECT payment_id, order_id, provider, provider_payment_id, provider_order_id, payment_status, amount_cents,
+             currency, payment_method_label, transaction_reference, paid_at, created_at, updated_at, notes
+      FROM payments
+      WHERE order_id = ?
+      ORDER BY created_at DESC, payment_id DESC
+    `, [order_id]);
+  } catch (error) {
+    warnings.push('payments_query_failed');
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'admin_orders',
+      incident_code: 'order_payments_query_failed',
+      severity: 'warning',
+      message: 'Admin order payments query failed. Returning a safe empty payments list.',
+      details: { order_id, error: String(error?.message || error || 'Unknown order payments query error') }
+    });
+  }
 
-  const disputes = normalizeResults(await env.DB.prepare(`
-    SELECT dispute_id, payment_id, order_id, provider, provider_dispute_id, dispute_status, amount_cents, currency, reason, evidence_due_at, note, created_at, updated_at
-    FROM payment_disputes
-    WHERE order_id = ?
-    ORDER BY created_at DESC, dispute_id DESC
-  `).bind(order_id).all().catch(() => ({ results: [] })));
+  let refunds = [];
+  try {
+    refunds = await runSafeQuery(db, `
+      SELECT refund_id, payment_id, order_id, provider, provider_refund_id, amount_cents, currency, refund_status, reason, note, created_at, updated_at
+      FROM payment_refunds
+      WHERE order_id = ?
+      ORDER BY created_at DESC, refund_id DESC
+    `, [order_id]);
+  } catch (error) {
+    warnings.push('refunds_query_failed');
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'admin_orders',
+      incident_code: 'order_refunds_query_failed',
+      severity: 'warning',
+      message: 'Admin order refunds query failed. Returning a safe empty refunds list.',
+      details: { order_id, error: String(error?.message || error || 'Unknown order refunds query error') }
+    });
+  }
+
+  let disputes = [];
+  try {
+    disputes = await runSafeQuery(db, `
+      SELECT dispute_id, payment_id, order_id, provider, provider_dispute_id, dispute_status, amount_cents, currency, reason, evidence_due_at, note, created_at, updated_at
+      FROM payment_disputes
+      WHERE order_id = ?
+      ORDER BY created_at DESC, dispute_id DESC
+    `, [order_id]);
+  } catch (error) {
+    warnings.push('disputes_query_failed');
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'admin_orders',
+      incident_code: 'order_disputes_query_failed',
+      severity: 'warning',
+      message: 'Admin order disputes query failed. Returning a safe empty disputes list.',
+      details: { order_id, error: String(error?.message || error || 'Unknown order disputes query error') }
+    });
+  }
 
   const summary = summarizePayments(order.total_cents, payments);
 
   return json({
     ok: true,
     requested_by: { user_id: adminUser.user_id, email: adminUser.email, display_name: adminUser.display_name },
+    warning: warnings.length ? 'Some payment workflow sections used safe empty fallbacks.' : '',
+    diagnostics: { warnings, authority: warnings.length ? 'partial_fallback' : 'primary_queries' },
     order: {
       order_id: Number(order.order_id || 0),
       order_number: order.order_number || '',
