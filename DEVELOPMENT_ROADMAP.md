@@ -22,8 +22,8 @@
 1. Stripe payment completion pass
 2. webhook retry / replay / dispatch hardening
 3. direct media upload workflow to R2 lifecycle completion
-4. deeper inventory operations for products, tools, and supplies
-5. product import seeding refinement and validation UX
+4. broader write-path fallback and replay coverage beyond admin order detail
+5. deeper inventory operations for products, tools, and supplies
 6. richer analytics dashboards and funnel reporting
 
 ## Media-specific roadmap
@@ -282,3 +282,16 @@
 - movies remain intentionally JSON-first with D1 overlay until trusted enrichment lands
 - broader admin/payment/order write-path fallback and replay still need another pass
 - real phone and desktop stress testing still needs a fuller run
+
+
+## Current pass completion update
+- Extended admin order resilience from read-only fallback into write-path preservation.
+- Order status updates, manual payment recording, and refund/dispute actions now log runtime incidents more defensively instead of only failing silently or hard.
+- The admin order-detail screen can now preserve failed write attempts in browser storage so operators can retry them later without retyping the whole action.
+- The phone dashboard now exposes both server-side admin write incident counts and browser-local pending fallback actions for quicker follow-up.
+
+## Still intentionally not marked complete
+- automatic replay/dispatch of saved client-side fallback actions across browsers or staff devices
+- deeper double-entry accounting and final overhead allocation rules
+- movie authority simplification beyond the current JSON-first plus D1 overlay model
+- broader real-device stress testing across phone and desktop admin screens

@@ -1,4 +1,4 @@
--- Current pass note: movie shelf layout and risk-documentation sweep completed; no schema structure changes were required in this pass.
+-- Current pass note: admin write-path resilience now extends beyond read-only fallback. Order status updates, manual payment recording, and refund/dispute actions log server-side incidents more defensively, while the order-detail UI can preserve failed admin writes locally for manual retry. Composite payment/refund/dispute indexes were added to keep these health and follow-up queries fast as the fallback layer grows.
 -- Current pass note: no brand-new required tables were added in this pass; the main work was endpoint hardening against partially migrated or lightly seeded D1 data so admin and storefront JSON routes fail gracefully instead of returning HTML errors.
 -- File: /database_full_schema.sql
 -- Brief description: Full current database schema for the Devil n Dove platform.
@@ -364,6 +364,7 @@ CREATE INDEX IF NOT EXISTS idx_payments_provider ON payments(provider);
 CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(payment_status);
 CREATE INDEX IF NOT EXISTS idx_payments_provider_payment_id ON payments(provider_payment_id);
 CREATE INDEX IF NOT EXISTS idx_payments_provider_order_id ON payments(provider_order_id);
+CREATE INDEX IF NOT EXISTS idx_payments_order_status_created_at ON payments(order_id, payment_status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_webhook_events_provider_status ON webhook_events(provider, process_status);
 CREATE INDEX IF NOT EXISTS idx_webhook_events_received_at ON webhook_events(received_at);
 CREATE INDEX IF NOT EXISTS idx_media_assets_product_id ON media_assets(product_id);
@@ -417,6 +418,8 @@ CREATE TABLE IF NOT EXISTS payment_disputes (
 
 CREATE INDEX IF NOT EXISTS idx_payment_refunds_order_id ON payment_refunds(order_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_payment_disputes_order_id ON payment_disputes(order_id, dispute_status);
+CREATE INDEX IF NOT EXISTS idx_payment_refunds_sync_status ON payment_refunds(provider_sync_status, refund_status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payment_disputes_status_provider ON payment_disputes(dispute_status, provider_sync_status, created_at DESC);
 
 
 CREATE TABLE IF NOT EXISTS notification_outbox (

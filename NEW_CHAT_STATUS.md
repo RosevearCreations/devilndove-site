@@ -2,7 +2,7 @@
 
 ## Current handoff summary
 
-This handoff is updated for the latest repo pass. The build focus remained movie stability, mobile product capture, schema/doc sync, and reducing duplicate truth risks where the repo could safely move forward in one pass.
+This handoff is updated for the latest repo pass. The build focus remained admin resilience, mobile follow-up visibility, schema/doc sync, and reducing duplicate truth risks where the repo could safely move forward in one pass.
 
 ## Most important current truths
 - `data/movies/movie_catalog_enriched.v2.json` remains the active movie base truth.
@@ -150,3 +150,9 @@ At minimum, the admin movie workflow should expose and allow edits for:
 ## Latest handoff note
 
 This pass focused on admin order resiliency rather than new storefront features. The strongest shipped changes are: partial-fallback order APIs, cached admin order snapshots in the browser, and expanded phone dashboard health counts for order/payment incidents. The next strongest step is write-path hardening for refunds/disputes/payment-entry flows plus real device testing.
+
+
+## Latest pass addendum
+- Saved local fallback actions now exist for failed admin order writes in the browser, so operators can retry order-status, manual-payment, and refund/dispute actions without retyping.
+- Server-side runtime incidents now cover these write paths more explicitly, and the mobile dashboard shows those warnings plus the local pending-action count.
+- Composite payment/refund/dispute indexes were added to keep the new follow-up health queries responsive.

@@ -29,6 +29,8 @@ The current build includes:
 - inventory movement history logging for stock changes
 - local refund and dispute workflow logging for orders and payments
 - live admin activity feed for recent searches, visitor sessions, cart events, orders, and webhook activity
+- runtime incident logging now covers more admin order/payment write paths and surfaces them in the phone dashboard health view
+- admin order detail now preserves failed order-status, payment, and refund/dispute writes locally for manual retry in the same browser
 
 ## Main payment status
 

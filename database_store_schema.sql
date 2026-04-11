@@ -1,4 +1,4 @@
--- Current pass note: movie/admin compatibility, JSON-first movie overlay stability, and schema-reference sync were updated in this pass.
+-- Current pass note: admin write-path resilience now extends beyond read-only fallback. Order status updates, manual payment recording, and refund/dispute actions log server-side incidents more defensively, while the order-detail UI can preserve failed admin writes locally for manual retry. Composite payment/refund/dispute indexes were added where those tables exist so health and follow-up queries stay responsive.
 -- =========================================================
 -- DEVIL N DOVE
 -- STORE / COMMERCE EXTENSION SCHEMA

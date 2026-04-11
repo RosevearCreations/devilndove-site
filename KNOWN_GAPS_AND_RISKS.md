@@ -533,3 +533,17 @@ All code-side items that were realistically actionable inside this repo pass wer
 
 #### Remaining risk
 - admin work is safer than before, but stale cached order data can still require a manual refresh once the live endpoint recovers
+
+
+### Admin order/payment write resilience
+#### Addressed in this pass
+- Order status updates, manual payment recording, and refund/dispute actions now capture more server-side runtime incidents with clearer scope codes.
+- The admin order-detail screen now keeps failed write attempts locally so staff can retry them without re-entering everything.
+- Phone health summary now surfaces admin write incident counts plus local saved fallback actions in the current browser.
+
+#### Still open
+- Saved local fallback actions are browser-local and still need a broader replay/queue model if the same work should move across devices or staff sessions.
+- More admin write flows outside order detail still need the same preserved-intent fallback pattern.
+
+#### Remaining risk
+- This is safer than a pure hard-fail flow, but it is not yet a full durable cross-device operations queue.

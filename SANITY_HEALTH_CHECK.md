@@ -202,3 +202,14 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - changed admin order/payment Pages Functions parsed successfully
 - phone dashboard health block now expects order/payment incident counts from `/api/admin/dashboard-summary`
 - public one-H1 rule still needs to remain part of the normal sweep each pass
+
+
+## Current pass reliability update
+- Admin order write paths are safer because failed status/payment/refund/dispute actions no longer have to disappear immediately; they can be saved locally for retry in the same browser.
+- Server-side runtime incidents now cover these write paths more explicitly, which gives the phone dashboard a more honest health readout.
+- Composite payment/refund/dispute indexes were added to support the growing health/follow-up queries.
+
+## Remaining honest gaps
+- saved local fallback actions are still browser-local rather than a fully durable shared operations queue
+- deeper accounting completion and final overhead rules remain open
+- real phone and desktop stress testing still needs a fuller pass

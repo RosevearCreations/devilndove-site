@@ -50,10 +50,10 @@ Includes `payment_status` and `payment_method` in the current schema.
 ### order_status_history
 ### payments
 ### payment_refunds
-Local refund audit table for admin and provider reconciliation.
+Local refund audit table for admin and provider reconciliation. Indexed by provider sync status and refund status for faster health/follow-up review.
 
 ### payment_disputes
-Local dispute audit table for chargeback and admin follow-up.
+Local dispute audit table for chargeback and admin follow-up. Indexed by dispute status and provider sync status for faster health/follow-up review.
 
 ## Growth, analytics, SEO, media, and inventory
 
@@ -358,3 +358,7 @@ Monthly overhead allocation rows used to move real operating costs like rent, hy
 ## Current pass note
 
 `runtime_incidents` now has an additional `(incident_code, endpoint_path, created_at)` index so the admin fallback/error trail stays queryable as order/payment incident coverage expands.
+
+
+### runtime_incidents
+Stores fallback and error events from public/admin paths. Current write-path coverage now includes order-status updates, manual payment records, and refund/dispute follow-up warnings.
