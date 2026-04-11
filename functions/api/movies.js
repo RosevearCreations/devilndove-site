@@ -1,3 +1,5 @@
+import { captureRuntimeIncident } from "./_lib/adminAudit.js";
+
 // File: /functions/api/movies.js
 // JSON-first movie API using movie_catalog_enriched.v2.json as the base truth.
 
@@ -301,8 +303,22 @@ export async function onRequestGet(context) {
   const page = Math.max(Number(url.searchParams.get("page") || 1), 1);
   const limit = Math.min(Math.max(Number(url.searchParams.get("limit") || 100), 1), 500);
 
-  const baseItems = (await fetchBaseMovieCatalog(request)).map(normalizeMovieRow);
+  const warnings = [];
+  const baseRows = await fetchBaseMovieCatalog(request);
+  const baseItems = baseRows.map(normalizeMovieRow);
   const overlayItems = await fetchDbOverlay(env);
+
+  if (!baseItems.length) {
+    warnings.push('movie_json_base_unavailable');
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'public_movies',
+      incident_code: 'movie_json_base_unavailable',
+      severity: 'warning',
+      message: 'Movie base JSON returned no rows. Public movie API is relying on any available D1 overlay or an empty safe result.',
+      details: { query: q, page, limit }
+    });
+  }
+  if (!overlayItems.length) warnings.push('movie_d1_overlay_empty');
 
   const byKey = new Map();
 
@@ -376,6 +392,8 @@ export async function onRequestGet(context) {
       formats: availableFormats,
       studios: availableStudios,
       years: availableYears
-    }
+    },
+    warning: warnings.includes('movie_json_base_unavailable') ? 'Movie JSON base read is unavailable right now. Showing any available overlay rows and safe empty fields where needed.' : '',
+    diagnostics: { warnings, query: q, page: safePage, limit }
   });
 }
