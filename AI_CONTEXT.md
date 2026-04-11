@@ -262,3 +262,7 @@ Current-pass emphasis:
 - Added `/api/social-feed` as the public authority path for social profile/video feed reads.
 - Added browser snapshot fallback on shop, movies, socials, and phone dashboard so public/admin continuity is safer during live endpoint drift.
 - Added `/api/admin/runtime-incidents` for reviewing records stored in the existing `runtime_incidents` table.
+
+## Current pass note
+
+When continuing from this build, treat the admin orders area as partially hardened: list/detail/payment reads now prefer safe partial responses and browser snapshots, but write-path recovery still remains open work.

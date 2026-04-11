@@ -267,3 +267,18 @@
 2. Continue spreading cached fallback and partial-load handling through more admin-heavy payment and order screens.
 3. Keep reducing public JSON duplication by moving remaining direct file reads behind APIs where practical.
 4. Continue deeper accounting authority work beyond the current rough-overhead / rough-P&L layer.
+
+## Current pass completion update
+
+- Added partial-fallback coverage to admin orders, order detail, and order-payment reads so those screens can keep working with safe empty sections or cached snapshots instead of failing all at once.
+- Added browser snapshot fallback for the admin orders list and admin order detail modal.
+- Expanded the phone dashboard health block with order/payment incident counts, outstanding order counts, and provider refund-sync failure counts.
+- Added another runtime-incidents index to keep the growing fallback/error log queryable as the incident trail expands.
+
+## Still intentionally not marked complete
+
+- final per-item overhead allocation rules still need another accounting pass
+- deeper P&L / double-entry workflow is still incomplete
+- movies remain intentionally JSON-first with D1 overlay until trusted enrichment lands
+- broader admin/payment/order write-path fallback and replay still need another pass
+- real phone and desktop stress testing still needs a fuller run

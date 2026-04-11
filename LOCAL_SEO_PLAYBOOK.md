@@ -110,3 +110,7 @@ Local SEO is mostly consistency + trust + relevance. The site can support that, 
 ## Current pass SEO note
 - This pass kept the one-clear-title pattern on exposed pages while improving runtime resilience, which helps avoid blank/failed catalog screens that can hurt user trust and crawl usefulness.
 - Shop and movie shelf fallback now preserve descriptive page content more reliably during temporary endpoint problems.
+
+## Current pass note
+
+This pass was mostly admin-resiliency work. Keep the usual one-H1, descriptive title, and local-service wording habits unchanged while order/payment fallback hardening continues in the back office.

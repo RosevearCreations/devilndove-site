@@ -364,3 +364,7 @@ This pass continued the lighter departmental admin shell, improved phone-first q
 - Added API-backed social feed reads plus last-good snapshot fallback for the shop, movie shelf, social hub, and phone dashboard.
 - Added `/api/admin/runtime-incidents` for lightweight admin review of fallback/error records already stored in `runtime_incidents`.
 - Strengthened `/api/products` and `/api/movies` diagnostics so operator-facing pages can degrade more honestly instead of failing silently.
+
+## Current pass note
+
+This pass hardens the admin orders area with partial API fallbacks, cached browser snapshots, and expanded phone health counts so order/payment work can continue during query drift instead of collapsing into a blank admin state.

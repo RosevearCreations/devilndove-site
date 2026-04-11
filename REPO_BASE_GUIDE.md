@@ -267,3 +267,7 @@ New current-pass backend additions:
 - Public social data should now be loaded through `/api/social-feed` instead of direct browser reads from `data/site/social-feed.json`.
 - Shop, movie shelf, social hub, and phone dashboard each keep a last-good client snapshot for fallback continuity.
 - Runtime incident review now has a dedicated admin endpoint: `/api/admin/runtime-incidents`.
+
+## Current pass note
+
+The admin orders stack now has both server-side partial fallbacks and client-side cached snapshots. Future work in this area should preserve both layers instead of returning to single-point hard failures.

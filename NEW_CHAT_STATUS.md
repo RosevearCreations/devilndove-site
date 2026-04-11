@@ -146,3 +146,7 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - Shop, movies, socials, and the phone dashboard now keep last-good snapshot fallback data in the browser for safer public/admin continuity.
 - `/api/admin/runtime-incidents` now exposes recent fallback/error records for admin review.
 - `dashboard-summary` now tracks recent runtime-incident counts for quicker phone/admin health checks.
+
+## Latest handoff note
+
+This pass focused on admin order resiliency rather than new storefront features. The strongest shipped changes are: partial-fallback order APIs, cached admin order snapshots in the browser, and expanded phone dashboard health counts for order/payment incidents. The next strongest step is write-path hardening for refunds/disputes/payment-entry flows plus real device testing.

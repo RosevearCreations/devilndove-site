@@ -166,3 +166,7 @@ Current-pass rules added:
 - Prefer the API path (`/api/social-feed`) over direct browser reads of `data/site/social-feed.json`.
 - Keep using runtime-incident capture plus client-side snapshot fallback together when hardening public/admin pages.
 - Do not remove the movie JSON-first base truth yet; that area is still intentionally JSON-first with D1 overlay.
+
+## Current pass note
+
+For admin order/payment work, prefer partial success plus a warning over whole-screen failure whenever a supporting table or summary query is missing.

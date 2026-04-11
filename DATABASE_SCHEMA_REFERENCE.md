@@ -354,3 +354,7 @@ Monthly overhead allocation rows used to move real operating costs like rent, hy
 ## Current pass note
 - No new table was required in this pass. The new runtime-incident review endpoint (`/api/admin/runtime-incidents`) reuses the existing `runtime_incidents` table that was added in the prior fallback-hardening pass.
 - Current fallback coverage now depends on both server-side `runtime_incidents` logging and client-side last-good snapshot storage on the shop, movie shelf, social hub, and phone dashboard.
+
+## Current pass note
+
+`runtime_incidents` now has an additional `(incident_code, endpoint_path, created_at)` index so the admin fallback/error trail stays queryable as order/payment incident coverage expands.

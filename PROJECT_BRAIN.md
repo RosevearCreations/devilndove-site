@@ -283,3 +283,7 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Social hub is now API-backed via `/api/social-feed`.
 - Public shop and movies plus admin phone snapshot now keep last-good client fallback state.
 - Runtime incidents now have a read endpoint for admin review and count-level visibility in dashboard summary.
+
+## Current pass note
+
+Operational priority moved to admin resiliency this pass: order list, order detail, and payment detail screens now degrade more gracefully, and the phone dashboard now surfaces order/payment incident pressure for quicker triage.

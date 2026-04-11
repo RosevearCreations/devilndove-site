@@ -517,3 +517,19 @@ All code-side items that were realistically actionable inside this repo pass wer
 #### Still open
 - Movies remain intentionally JSON-first with D1 overlay.
 - Mixed JSON and D1 authority still remains in older/internal paths and should keep shrinking pass by pass.
+
+## Current pass completion update
+
+### 1. Admin order and payment fallback coverage
+#### Addressed in this pass
+- Admin orders now has a fallback query if the richer payment-rollup query fails.
+- Admin order detail now returns partial data instead of failing the whole modal when item or history reads drift.
+- Admin order payments now returns safe empty refunds/disputes/payments sections when one supporting table fails.
+- The browser now keeps last-good order list and order-detail snapshots so day-to-day admin work can continue during API drift.
+
+#### Still open
+- destructive/write paths such as refunds, disputes, and payment-entry flows still need broader replay/fallback coverage
+- operator-facing retry flows for partial-write failures still need another pass
+
+#### Remaining risk
+- admin work is safer than before, but stale cached order data can still require a manual refresh once the live endpoint recovers

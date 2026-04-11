@@ -195,3 +195,10 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Check `/api/social-feed` when the social hub looks blank before assuming the public JSON file is wrong.
 - Check `/api/admin/runtime-incidents` when fallback warnings appear on shop, movies, socials, or the phone dashboard.
 - Remember that the shop, movie shelf, social hub, and phone dashboard can now intentionally show cached last-good data during live endpoint trouble.
+
+## Current pass checks
+
+- changed admin order JS files parsed successfully
+- changed admin order/payment Pages Functions parsed successfully
+- phone dashboard health block now expects order/payment incident counts from `/api/admin/dashboard-summary`
+- public one-H1 rule still needs to remain part of the normal sweep each pass
