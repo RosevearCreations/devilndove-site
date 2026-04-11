@@ -1,4 +1,4 @@
-import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 
@@ -140,6 +140,7 @@ async function queueReceipt(db, kind, orderId, paymentId, destination, payload) 
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
@@ -167,6 +168,8 @@ export async function onRequestPost(context) {
     LIMIT 1
   `).bind(Number(payment.order_id || 0)).first();
   if (!order) return json({ ok: false, error: 'Order not found for payment.' }, 404);
+
+  const warnings = [];
 
   if (action === 'refund') {
     const refundAmount = Math.max(0, Number(body.amount_cents || 0));
@@ -211,40 +214,88 @@ export async function onRequestPost(context) {
       adminUser.user_id
     ).run();
 
-    await db.prepare(`
-      UPDATE payments
-      SET payment_status = ?,
-          updated_at = CURRENT_TIMESTAMP,
-          notes = TRIM(COALESCE(notes,'') || CASE WHEN COALESCE(notes,'') = '' THEN '' ELSE ' | ' END || ?)
-      WHERE payment_id = ?
-    `).bind(status, `Refund logged by admin${reason ? `: ${reason}` : ''}`, paymentId).run();
+    try {
+      await db.prepare(`
+        UPDATE payments
+        SET payment_status = ?,
+            updated_at = CURRENT_TIMESTAMP,
+            notes = TRIM(COALESCE(notes,'') || CASE WHEN COALESCE(notes,'') = '' THEN '' ELSE ' | ' END || ?)
+        WHERE payment_id = ?
+      `).bind(status, `Refund logged by admin${reason ? `: ${reason}` : ''}`, paymentId).run();
+    } catch (error) {
+      warnings.push('Refund recorded, but the payment row note/status was not fully refreshed.');
+      await captureRuntimeIncident(env, request, {
+        incident_scope: 'admin_payment_actions',
+        incident_code: 'refund_payment_update_failed',
+        severity: 'warning',
+        message: error?.message || 'Refund recorded but payment update failed.',
+        related_user_id: adminUser.user_id,
+        details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
+      });
+    }
 
-    await db.prepare(`
-      UPDATE orders
-      SET payment_status = ?,
-          order_status = CASE WHEN ? = 'refunded' THEN 'refunded' ELSE order_status END,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE order_id = ?
-    `).bind(status, status, Number(payment.order_id || 0)).run();
+    try {
+      await db.prepare(`
+        UPDATE orders
+        SET payment_status = ?,
+            order_status = CASE WHEN ? = 'refunded' THEN 'refunded' ELSE order_status END,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE order_id = ?
+      `).bind(status, status, Number(payment.order_id || 0)).run();
+    } catch (error) {
+      warnings.push('Refund recorded, but the parent order status did not refresh cleanly.');
+      await captureRuntimeIncident(env, request, {
+        incident_scope: 'admin_payment_actions',
+        incident_code: 'refund_order_update_failed',
+        severity: 'warning',
+        message: error?.message || 'Refund recorded but order update failed.',
+        related_user_id: adminUser.user_id,
+        details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
+      });
+    }
 
-    await addHistory(
-      db,
-      Number(payment.order_id || 0),
-      order.order_status || null,
-      status === 'refunded' ? 'refunded' : order.order_status || null,
-      note || `Refund recorded for payment ${paymentId}.`
-    );
+    try {
+      await addHistory(
+        db,
+        Number(payment.order_id || 0),
+        order.order_status || null,
+        status === 'refunded' ? 'refunded' : order.order_status || null,
+        note || `Refund recorded for payment ${paymentId}.`
+      );
+    } catch (error) {
+      warnings.push('Refund recorded, but order history logging failed.');
+      await captureRuntimeIncident(env, request, {
+        incident_scope: 'admin_payment_actions',
+        incident_code: 'refund_history_failed',
+        severity: 'warning',
+        message: error?.message || 'Refund recorded but history logging failed.',
+        related_user_id: adminUser.user_id,
+        details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
+      });
+    }
 
-    await queueReceipt(db, 'refund_receipt', Number(payment.order_id || 0), paymentId, normalizeText(order.customer_email), {
-      order_number: order.order_number || '',
-      amount_cents: refundAmount,
-      currency: normalizeText(body.currency || payment.currency || order.currency || 'CAD').toUpperCase(),
-      customer_name: normalizeText(order.customer_name),
-      reason,
-      note,
-      provider: payment.provider || 'other',
-      provider_sync_status: providerSync.provider_sync_status || 'local_only'
-    });
+    try {
+      await queueReceipt(db, 'refund_receipt', Number(payment.order_id || 0), paymentId, normalizeText(order.customer_email), {
+        order_number: order.order_number || '',
+        amount_cents: refundAmount,
+        currency: normalizeText(body.currency || payment.currency || order.currency || 'CAD').toUpperCase(),
+        customer_name: normalizeText(order.customer_name),
+        reason,
+        note,
+        provider: payment.provider || 'other',
+        provider_sync_status: providerSync.provider_sync_status || 'local_only'
+      });
+    } catch (error) {
+      warnings.push('Refund recorded, but receipt queueing failed.');
+      await captureRuntimeIncident(env, request, {
+        incident_scope: 'admin_payment_actions',
+        incident_code: 'refund_receipt_queue_failed',
+        severity: 'warning',
+        message: error?.message || 'Refund recorded but receipt queueing failed.',
+        related_user_id: adminUser.user_id,
+        details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
+      });
+    }
 
     await auditAdminAction(env, request, adminUser, {
       action_type: 'payment_refund',
@@ -262,12 +313,15 @@ export async function onRequestPost(context) {
 
     return json({
       ok: true,
-      message: 'Refund recorded.',
+      message: warnings.length ? 'Refund recorded with warnings.' : 'Refund recorded.',
+      warning: warnings[0] || '',
+      warnings,
       action,
       payment_id: paymentId,
       order_id: Number(payment.order_id || 0),
       payment_status: status,
-      provider_sync: providerSync
+      provider_sync: providerSync,
+      fallback_state: warnings.length ? 'refund_recorded_with_partial_followup' : null
     });
   }
 
@@ -296,36 +350,84 @@ export async function onRequestPost(context) {
     adminUser.user_id
   ).run();
 
-  await db.prepare(`
-    UPDATE payments
-    SET updated_at = CURRENT_TIMESTAMP,
-        notes = TRIM(COALESCE(notes,'') || CASE WHEN COALESCE(notes,'') = '' THEN '' ELSE ' | ' END || ?)
-    WHERE payment_id = ?
-  `).bind(`Dispute logged by admin${reason ? `: ${reason}` : ''}`, paymentId).run();
+  try {
+    await db.prepare(`
+      UPDATE payments
+      SET updated_at = CURRENT_TIMESTAMP,
+          notes = TRIM(COALESCE(notes,'') || CASE WHEN COALESCE(notes,'') = '' THEN '' ELSE ' | ' END || ?)
+      WHERE payment_id = ?
+    `).bind(`Dispute logged by admin${reason ? `: ${reason}` : ''}`, paymentId).run();
+  } catch (error) {
+    warnings.push('Dispute recorded, but the payment row note was not fully refreshed.');
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'admin_payment_actions',
+      incident_code: 'dispute_payment_update_failed',
+      severity: 'warning',
+      message: error?.message || 'Dispute recorded but payment update failed.',
+      related_user_id: adminUser.user_id,
+      details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
+    });
+  }
 
-  await db.prepare(`
-    UPDATE orders
-    SET updated_at = CURRENT_TIMESTAMP
-    WHERE order_id = ?
-  `).bind(Number(payment.order_id || 0)).run();
+  try {
+    await db.prepare(`
+      UPDATE orders
+      SET updated_at = CURRENT_TIMESTAMP
+      WHERE order_id = ?
+    `).bind(Number(payment.order_id || 0)).run();
+  } catch (error) {
+    warnings.push('Dispute recorded, but the parent order update stamp failed.');
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'admin_payment_actions',
+      incident_code: 'dispute_order_update_failed',
+      severity: 'warning',
+      message: error?.message || 'Dispute recorded but order update failed.',
+      related_user_id: adminUser.user_id,
+      details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
+    });
+  }
 
-  await addHistory(
-    db,
-    Number(payment.order_id || 0),
-    order.order_status || null,
-    order.order_status || null,
-    note || `Dispute logged for payment ${paymentId}.`
-  );
+  try {
+    await addHistory(
+      db,
+      Number(payment.order_id || 0),
+      order.order_status || null,
+      order.order_status || null,
+      note || `Dispute logged for payment ${paymentId}.`
+    );
+  } catch (error) {
+    warnings.push('Dispute recorded, but order history logging failed.');
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'admin_payment_actions',
+      incident_code: 'dispute_history_failed',
+      severity: 'warning',
+      message: error?.message || 'Dispute recorded but history logging failed.',
+      related_user_id: adminUser.user_id,
+      details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
+    });
+  }
 
-  await queueReceipt(db, 'dispute_notice', Number(payment.order_id || 0), paymentId, normalizeText(order.customer_email), {
-    order_number: order.order_number || '',
-    amount_cents: disputeAmount,
-    currency: normalizeText(body.currency || payment.currency || order.currency || 'CAD').toUpperCase(),
-    customer_name: normalizeText(order.customer_name),
-    reason,
-    note,
-    provider: payment.provider || 'other'
-  });
+  try {
+    await queueReceipt(db, 'dispute_notice', Number(payment.order_id || 0), paymentId, normalizeText(order.customer_email), {
+      order_number: order.order_number || '',
+      amount_cents: disputeAmount,
+      currency: normalizeText(body.currency || payment.currency || order.currency || 'CAD').toUpperCase(),
+      customer_name: normalizeText(order.customer_name),
+      reason,
+      note,
+      provider: payment.provider || 'other'
+    });
+  } catch (error) {
+    warnings.push('Dispute recorded, but receipt queueing failed.');
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'admin_payment_actions',
+      incident_code: 'dispute_receipt_queue_failed',
+      severity: 'warning',
+      message: error?.message || 'Dispute recorded but receipt queueing failed.',
+      related_user_id: adminUser.user_id,
+      details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
+    });
+  }
 
   await auditAdminAction(env, request, adminUser, {
     action_type: 'payment_dispute',
@@ -341,10 +443,13 @@ export async function onRequestPost(context) {
 
   return json({
     ok: true,
-    message: 'Dispute recorded locally.',
+    message: warnings.length ? 'Dispute recorded with warnings.' : 'Dispute recorded locally.',
+    warning: warnings[0] || '',
+    warnings,
     action,
     payment_id: paymentId,
     order_id: Number(payment.order_id || 0),
-    dispute_status: disputeStatus || 'open'
+    dispute_status: disputeStatus || 'open',
+    fallback_state: warnings.length ? 'dispute_recorded_with_partial_followup' : null
   });
 }

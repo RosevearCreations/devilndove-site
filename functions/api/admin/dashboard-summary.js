@@ -39,6 +39,7 @@ export async function onRequestGet(context) {
     recent_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE created_at >= datetime('now', '-7 days')`),
     error_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE LOWER(COALESCE(severity,'')) = 'error' AND created_at >= datetime('now', '-7 days')`),
     admin_order_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE incident_scope = 'admin_orders' AND created_at >= datetime('now', '-7 days')`),
+    admin_write_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE incident_scope IN ('admin_order_status_update','admin_record_payment','admin_payment_actions') AND created_at >= datetime('now', '-7 days')`),
     outstanding_orders_count: await safeCount(db, `SELECT COUNT(*) AS count FROM orders WHERE LOWER(COALESCE(payment_status,'')) IN ('pending','authorized','partially_refunded') OR LOWER(COALESCE(order_status,'')) IN ('pending','paid')`),
     payment_sync_failures_count: await safeCount(db, `SELECT COUNT(*) AS count FROM payment_refunds WHERE provider_sync_status = 'failed'`)
   };
