@@ -279,3 +279,7 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 - Public catalog cleanup continued by moving gallery/creations and tools farther onto shared API authority.
 - Mobile admin/accounting usability moved forward again with a stronger phone snapshot for open records and outstanding values.
 
+## Current pass completion update
+- Social hub is now API-backed via `/api/social-feed`.
+- Public shop and movies plus admin phone snapshot now keep last-good client fallback state.
+- Runtime incidents now have a read endpoint for admin review and count-level visibility in dashboard summary.

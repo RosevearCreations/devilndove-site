@@ -106,3 +106,7 @@ Local SEO is mostly consistency + trust + relevance. The site can support that, 
 ## Current pass update
 - SEO work remains paired with reliability work: if a page can keep rendering with a safe fallback, search users and direct visitors are less likely to hit dead-end empty experiences.
 - Continue keeping one clear H1 per exposed page, descriptive titles/meta, and locally relevant wording while the fallback/runtime hardening work continues underneath.
+
+## Current pass SEO note
+- This pass kept the one-clear-title pattern on exposed pages while improving runtime resilience, which helps avoid blank/failed catalog screens that can hurt user trust and crawl usefulness.
+- Shop and movie shelf fallback now preserve descriptive page content more reliably during temporary endpoint problems.

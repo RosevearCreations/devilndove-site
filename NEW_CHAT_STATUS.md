@@ -141,3 +141,8 @@ At minimum, the admin movie workflow should expose and allow edits for:
 - real phone/desktop stress testing is still needed
 - deeper accounting remains rough and is not yet final double-entry
 
+## Latest pass update
+- `/api/social-feed` now fronts the public social hub so that page no longer reads `data/site/social-feed.json` directly in the browser.
+- Shop, movies, socials, and the phone dashboard now keep last-good snapshot fallback data in the browser for safer public/admin continuity.
+- `/api/admin/runtime-incidents` now exposes recent fallback/error records for admin review.
+- `dashboard-summary` now tracks recent runtime-incident counts for quicker phone/admin health checks.

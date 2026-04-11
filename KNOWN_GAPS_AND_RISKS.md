@@ -495,3 +495,25 @@ All code-side items that were realistically actionable inside this repo pass wer
 #### Still open
 - Real-device stress testing still needs a fuller pass on phone and desktop, especially around long admin lists, reorder actions, and accounting-heavy views.
 
+## Current pass completion update
+
+### 1. Runtime resilience and fallback
+#### Addressed in this pass
+- The shop, movie shelf, social hub, and phone dashboard now keep a last-good client snapshot so temporary API or D1 issues do not always leave a blank page.
+- Added `/api/admin/runtime-incidents` so fallback/error visibility is no longer limited to raw DB inspection.
+- Public products and movies now emit clearer diagnostics and runtime-incident records when their richer live query path drifts.
+
+#### Still open
+- Cached fallback is stronger on the public side than before, but broader admin/order/payment coverage still needs another pass.
+- Runtime incidents are visible, but there is not yet a full acknowledge/resolve/retry workflow in the admin UI.
+
+#### Remaining risk
+- Cached snapshots keep the site usable, but they are still snapshots and can become stale until live reads recover.
+
+### Data-model risks
+#### Addressed in this pass
+- The social hub now reads through `/api/social-feed` rather than fetching its JSON file directly in the browser.
+
+#### Still open
+- Movies remain intentionally JSON-first with D1 overlay.
+- Mixed JSON and D1 authority still remains in older/internal paths and should keep shrinking pass by pass.

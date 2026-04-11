@@ -258,3 +258,7 @@ Current-pass emphasis:
 - Phone admin now includes open accounting snapshot cards for paid, outstanding, and tax-liability visibility.
 - `accounting-summary` now shares the common accounting schema helper to reduce drift.
 
+## Current pass completion update
+- Added `/api/social-feed` as the public authority path for social profile/video feed reads.
+- Added browser snapshot fallback on shop, movies, socials, and phone dashboard so public/admin continuity is safer during live endpoint drift.
+- Added `/api/admin/runtime-incidents` for reviewing records stored in the existing `runtime_incidents` table.

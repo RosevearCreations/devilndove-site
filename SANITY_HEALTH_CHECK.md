@@ -191,3 +191,7 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Verify `/tools/`, `/gallery/`, and `/creations/` still load from their centralized APIs after deployment.
 - Confirm the new `catalog_items` indexes are present after running `database_upgrade_current_pass.sql` in environments that use the public catalog APIs heavily.
 
+## Current pass sanity note
+- Check `/api/social-feed` when the social hub looks blank before assuming the public JSON file is wrong.
+- Check `/api/admin/runtime-incidents` when fallback warnings appear on shop, movies, socials, or the phone dashboard.
+- Remember that the shop, movie shelf, social hub, and phone dashboard can now intentionally show cached last-good data during live endpoint trouble.

@@ -360,3 +360,7 @@ This pass continued the lighter departmental admin shell, improved phone-first q
 - The phone admin dashboard now exposes open accounting-record count plus paid, outstanding, and tax-liability snapshot values for faster daily review.
 - Schema/upgrade SQL now includes extra `catalog_items` lookup indexes to support centralized public catalog reads as D1 authority expands.
 
+## Current pass completion update
+- Added API-backed social feed reads plus last-good snapshot fallback for the shop, movie shelf, social hub, and phone dashboard.
+- Added `/api/admin/runtime-incidents` for lightweight admin review of fallback/error records already stored in `runtime_incidents`.
+- Strengthened `/api/products` and `/api/movies` diagnostics so operator-facing pages can degrade more honestly instead of failing silently.

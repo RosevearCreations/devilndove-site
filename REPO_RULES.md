@@ -162,3 +162,7 @@ Current-pass rules added:
 - When a centralized public API already contains its own fallback logic, do not keep a second page-level direct JSON fallback in the HTML unless there is a clearly documented reason.
 - Keep phone-first admin improvements focused on fewer taps for daily accounting visibility, not only launch links into larger department screens.
 
+## Current pass rule note
+- Prefer the API path (`/api/social-feed`) over direct browser reads of `data/site/social-feed.json`.
+- Keep using runtime-incident capture plus client-side snapshot fallback together when hardening public/admin pages.
+- Do not remove the movie JSON-first base truth yet; that area is still intentionally JSON-first with D1 overlay.

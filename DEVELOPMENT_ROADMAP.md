@@ -256,3 +256,14 @@
 2. Expand the phone dashboard from snapshot cards into a real day-close/month-end checklist surface.
 3. Continue turning rough accounting views into governed ledger workflows without pretending the current layer is final double-entry accounting.
 
+## Current pass completion update
+- Added API-backed social hub reads at `/api/social-feed` so the public social page no longer reads its JSON file directly in the browser.
+- Added cached client-side fallback for the shop, movie shelf, social hub, and phone dashboard so the last successful snapshot can still render when a live endpoint drifts or D1 is temporarily unavailable.
+- Added `/api/admin/runtime-incidents` and surfaced recent runtime-incident counts in the admin summary / phone dashboard so fallback and queue health are more visible during day-to-day operations.
+- Hardened `/api/products` and `/api/movies` with safer diagnostics and runtime-incident capture instead of failing silently.
+
+## Strongest next steps after this pass
+1. Extend runtime-incident review into a fuller admin operations screen with retry guidance and acknowledge / resolve actions.
+2. Continue spreading cached fallback and partial-load handling through more admin-heavy payment and order screens.
+3. Keep reducing public JSON duplication by moving remaining direct file reads behind APIs where practical.
+4. Continue deeper accounting authority work beyond the current rough-overhead / rough-P&L layer.

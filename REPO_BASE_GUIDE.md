@@ -263,3 +263,7 @@ New current-pass backend additions:
 - `/gallery/` and `/creations/` now rely on `/api/creations` rather than carrying another page-level JSON-read path.
 - `functions/api/admin/accounting-summary.js` now shares the central accounting schema helper so the accounting shadow table shape is not maintained in two places.
 
+## Current pass completion update
+- Public social data should now be loaded through `/api/social-feed` instead of direct browser reads from `data/site/social-feed.json`.
+- Shop, movie shelf, social hub, and phone dashboard each keep a last-good client snapshot for fallback continuity.
+- Runtime incident review now has a dedicated admin endpoint: `/api/admin/runtime-incidents`.

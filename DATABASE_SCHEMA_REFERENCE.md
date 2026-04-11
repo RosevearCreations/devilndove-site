@@ -350,3 +350,7 @@ Monthly overhead allocation rows used to move real operating costs like rent, hy
 - New columns tracked: `incident_scope`, `incident_code`, `severity`, `endpoint_path`, `request_method`, `message`, `details_json`, `related_user_id`, `ip_address`, `user_agent`, and `created_at`.
 - This table is intentionally simple and operational. It is meant for fast incident review, not a full observability platform.
 - Public tools, supplies, and creations endpoints now expose `fallback_used`, `summary.authority`, and `diagnostics.warnings` so pages can stay usable while clearly signaling fallback mode.
+
+## Current pass note
+- No new table was required in this pass. The new runtime-incident review endpoint (`/api/admin/runtime-incidents`) reuses the existing `runtime_incidents` table that was added in the prior fallback-hardening pass.
+- Current fallback coverage now depends on both server-side `runtime_incidents` logging and client-side last-good snapshot storage on the shop, movie shelf, social hub, and phone dashboard.
