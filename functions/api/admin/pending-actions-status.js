@@ -43,7 +43,9 @@ async function ensureTable(db) {
   await db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_pending_actions_client_action_id ON admin_pending_actions(client_action_id)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_status_created ON admin_pending_actions(queue_status, created_at DESC)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_order_status ON admin_pending_actions(order_id, queue_status, created_at DESC)`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pending_actions(action_scope, queue_status, created_at DESC)`).run();
 }
+
 
 export async function onRequestPost(context) {
   const { request, env } = context;

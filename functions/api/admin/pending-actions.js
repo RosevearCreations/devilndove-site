@@ -78,7 +78,9 @@ async function ensureTable(db) {
   await db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_pending_actions_client_action_id ON admin_pending_actions(client_action_id)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_status_created ON admin_pending_actions(queue_status, created_at DESC)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_order_status ON admin_pending_actions(order_id, queue_status, created_at DESC)`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pending_actions(action_scope, queue_status, created_at DESC)`).run();
 }
+
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -93,6 +95,7 @@ export async function onRequestGet(context) {
   const url = new URL(request.url);
   const orderId = Number(url.searchParams.get("order_id") || 0);
   const includeResolved = String(url.searchParams.get("include_resolved") || "").trim().toLowerCase() === "1";
+  const actionScope = normalizeText(url.searchParams.get("action_scope") || "").toLowerCase();
   const limit = Math.min(Math.max(Number(url.searchParams.get("limit") || 50), 1), 200);
   const statuses = includeResolved
     ? ["queued", "retrying", "failed", "completed", "dismissed"]
@@ -103,6 +106,10 @@ export async function onRequestGet(context) {
   if (Number.isInteger(orderId) && orderId > 0) {
     where.push("order_id = ?");
     bindings.push(orderId);
+  }
+  if (actionScope) {
+    where.push("LOWER(COALESCE(action_scope,'')) = ?");
+    bindings.push(actionScope);
   }
   bindings.push(limit);
 

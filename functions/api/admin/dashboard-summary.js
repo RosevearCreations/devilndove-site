@@ -39,9 +39,10 @@ export async function onRequestGet(context) {
     recent_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE created_at >= datetime('now', '-7 days')`),
     error_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE LOWER(COALESCE(severity,'')) = 'error' AND created_at >= datetime('now', '-7 days')`),
     admin_order_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE incident_scope = 'admin_orders' AND created_at >= datetime('now', '-7 days')`),
-    admin_write_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE incident_scope IN ('admin_order_status_update','admin_record_payment','admin_payment_actions') AND created_at >= datetime('now', '-7 days')`),
+    admin_write_runtime_incidents_count: await safeCount(db, `SELECT COUNT(*) AS count FROM runtime_incidents WHERE incident_scope IN ('admin_order_status_update','admin_record_payment','admin_payment_actions','admin_product_review_actions') AND created_at >= datetime('now', '-7 days')`),
     pending_shared_admin_actions_count: await safeCount(db, `SELECT COUNT(*) AS count FROM admin_pending_actions WHERE queue_status IN ('queued','retrying','failed')`),
     pending_shared_admin_order_actions_count: await safeCount(db, `SELECT COUNT(*) AS count FROM admin_pending_actions WHERE order_id IS NOT NULL AND queue_status IN ('queued','retrying','failed')`),
+    pending_shared_product_review_actions_count: await safeCount(db, `SELECT COUNT(*) AS count FROM admin_pending_actions WHERE LOWER(COALESCE(action_scope,'')) = 'product_review' AND queue_status IN ('queued','retrying','failed')`),
     failed_shared_admin_actions_count: await safeCount(db, `SELECT COUNT(*) AS count FROM admin_pending_actions WHERE queue_status = 'failed'`),
     outstanding_orders_count: await safeCount(db, `SELECT COUNT(*) AS count FROM orders WHERE LOWER(COALESCE(payment_status,'')) IN ('pending','authorized','partially_refunded') OR LOWER(COALESCE(order_status,'')) IN ('pending','paid')`),
     payment_sync_failures_count: await safeCount(db, `SELECT COUNT(*) AS count FROM payment_refunds WHERE provider_sync_status = 'failed'`)
