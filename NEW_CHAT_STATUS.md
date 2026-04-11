@@ -156,3 +156,7 @@ This pass focused on admin order resiliency rather than new storefront features.
 - Saved local fallback actions now exist for failed admin order writes in the browser, so operators can retry order-status, manual-payment, and refund/dispute actions without retyping.
 - Server-side runtime incidents now cover these write paths more explicitly, and the mobile dashboard shows those warnings plus the local pending-action count.
 - Composite payment/refund/dispute indexes were added to keep the new follow-up health queries responsive.
+
+## Latest handoff note
+
+This pass focused on moving failed admin write actions beyond one browser. A new `admin_pending_actions` table plus `/api/admin/pending-actions` endpoints now back a shared replay queue for order-status updates, manual payment entries, and refund/dispute actions. The order-detail screen now prefers the shared queue and only keeps browser-local fallback when the shared queue cannot be reached. The phone dashboard also shows shared queue health counts.

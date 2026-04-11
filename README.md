@@ -370,3 +370,9 @@ This pass continued the lighter departmental admin shell, improved phone-first q
 ## Current pass note
 
 This pass hardens the admin orders area with partial API fallbacks, cached browser snapshots, and expanded phone health counts so order/payment work can continue during query drift instead of collapsing into a blank admin state.
+
+## Latest pass update
+
+- Added a shared replay queue for failed admin order/payment writes so status changes, manual payments, and refund/dispute actions can survive beyond a single browser.
+- Browser-local saved actions still remain as the last fallback if the shared queue cannot be reached.
+- Docs, schema files, and the phone dashboard were updated to reflect the new queue-health layer.

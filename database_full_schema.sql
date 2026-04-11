@@ -963,3 +963,31 @@ CREATE INDEX IF NOT EXISTS idx_accounting_writeoffs_date ON accounting_writeoffs
 CREATE INDEX IF NOT EXISTS idx_product_costs_product_number_effective ON product_costs(product_number, effective_date DESC, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_overhead_allocations_month ON accounting_overhead_allocations(period_month, ledger_code);
 -- Current pass note: runtime_incidents remains the server-side fallback/error log table, and `/api/admin/runtime-incidents` now reads from it for admin review while client pages keep last-good snapshot fallbacks in the browser. This pass also adds order/payment-focused partial fallbacks plus a code/path index so admin incident review can stay fast as more endpoint warnings are recorded.
+
+
+CREATE TABLE IF NOT EXISTS admin_pending_actions (
+  admin_pending_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  client_action_id TEXT,
+  action_scope TEXT,
+  order_id INTEGER,
+  action_label TEXT,
+  endpoint_path TEXT,
+  http_method TEXT,
+  payload_json TEXT,
+  queue_status TEXT DEFAULT 'queued',
+  last_error TEXT,
+  warning TEXT,
+  attempt_count INTEGER DEFAULT 0,
+  created_by_user_id INTEGER,
+  resolved_by_user_id INTEGER,
+  source_device_label TEXT,
+  last_attempt_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  resolved_at TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_pending_actions_client_action_id ON admin_pending_actions(client_action_id);
+CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_status_created ON admin_pending_actions(queue_status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_order_status ON admin_pending_actions(order_id, queue_status, created_at DESC);
+
+-- Current pass note: admin_pending_actions now provides a shared cross-device replay queue for failed admin write actions, while browser-local fallback remains the last safety net when even the queue cannot be reached.

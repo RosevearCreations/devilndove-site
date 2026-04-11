@@ -213,3 +213,9 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - saved local fallback actions are still browser-local rather than a fully durable shared operations queue
 - deeper accounting completion and final overhead rules remain open
 - real phone and desktop stress testing still needs a fuller pass
+
+## Latest pass update
+
+- Check that `/api/admin/pending-actions` and `/api/admin/pending-actions-status` respond for an authenticated admin session.
+- Confirm failed admin order writes appear in the shared queue, can be replayed from the order-detail screen, and update queue status afterward.
+- Confirm the phone dashboard shows shared queue counts alongside local browser-only fallback counts.

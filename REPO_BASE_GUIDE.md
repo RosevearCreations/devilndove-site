@@ -271,3 +271,8 @@ New current-pass backend additions:
 ## Current pass note
 
 The admin orders stack now has both server-side partial fallbacks and client-side cached snapshots. Future work in this area should preserve both layers instead of returning to single-point hard failures.
+
+## Latest pass update
+
+- New admin API files: `/functions/api/admin/pending-actions.js` and `/functions/api/admin/pending-actions-status.js`.
+- New schema authority item: `admin_pending_actions` in the main schema files and current-pass upgrade SQL.

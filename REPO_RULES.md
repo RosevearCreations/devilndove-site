@@ -170,3 +170,7 @@ Current-pass rules added:
 ## Current pass note
 
 For admin order/payment work, prefer partial success plus a warning over whole-screen failure whenever a supporting table or summary query is missing.
+
+## Latest pass note
+
+- Keep failed admin write actions on the shared `admin_pending_actions` queue when possible, and only fall back to browser-local saved actions when the queue itself is unavailable.

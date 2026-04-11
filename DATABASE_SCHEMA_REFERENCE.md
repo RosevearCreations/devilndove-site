@@ -362,3 +362,9 @@ Monthly overhead allocation rows used to move real operating costs like rent, hy
 
 ### runtime_incidents
 Stores fallback and error events from public/admin paths. Current write-path coverage now includes order-status updates, manual payment records, and refund/dispute follow-up warnings.
+
+## Latest pass update
+
+- Added `admin_pending_actions` as the shared cross-device replay queue for failed admin writes.
+- Key columns include `client_action_id`, `action_scope`, `order_id`, `endpoint_path`, `http_method`, `payload_json`, `queue_status`, `attempt_count`, and replay timing fields.
+- Matching indexes now cover client-action dedupe and queue/order status lookup paths.

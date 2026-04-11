@@ -266,3 +266,8 @@ Current-pass emphasis:
 ## Current pass note
 
 When continuing from this build, treat the admin orders area as partially hardened: list/detail/payment reads now prefer safe partial responses and browser snapshots, but write-path recovery still remains open work.
+
+## Latest pass context
+
+- Failed admin order/payment writes are no longer only browser-local. The repo now includes a D1-backed `admin_pending_actions` queue plus API endpoints for listing and updating queued actions.
+- `public/js/admin-order-detail.js` should be treated as the current frontend authority for queue save/retry/dismiss behavior.

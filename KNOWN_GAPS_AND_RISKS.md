@@ -547,3 +547,9 @@ All code-side items that were realistically actionable inside this repo pass wer
 
 #### Remaining risk
 - This is safer than a pure hard-fail flow, but it is not yet a full durable cross-device operations queue.
+
+## Latest pass update
+
+- The earlier browser-only fallback-action limitation has been reduced: failed admin order/payment writes can now be saved into a shared D1-backed queue and replayed from another signed-in device.
+- Browser-local fallback still remains intentionally as the last safety net when the shared queue itself cannot be reached, so the old limitation is not completely gone yet.
+- Remaining honest open items still include rough overhead allocation, incomplete deeper accounting, movie JSON-first authority, and real phone/desktop stress testing.

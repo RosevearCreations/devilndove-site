@@ -287,3 +287,8 @@ Current pass emphasis: risk reduction through payment safety, inventory authorit
 ## Current pass note
 
 Operational priority moved to admin resiliency this pass: order list, order detail, and payment detail screens now degrade more gracefully, and the phone dashboard now surfaces order/payment incident pressure for quicker triage.
+
+## Latest pass update
+
+- Admin resilience now has two layers for failed writes: a shared D1-backed queue first and browser-local fallback second.
+- The main day-to-day surface for this queue is the order-detail modal plus the phone dashboard health block.

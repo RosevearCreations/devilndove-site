@@ -295,3 +295,10 @@
 - deeper double-entry accounting and final overhead allocation rules
 - movie authority simplification beyond the current JSON-first plus D1 overlay model
 - broader real-device stress testing across phone and desktop admin screens
+
+## Latest pass update
+
+- Added a shared `admin_pending_actions` queue so failed admin order/payment writes can be replayed across devices instead of living only inside one browser.
+- `/api/admin/pending-actions` and `/api/admin/pending-actions-status` now provide the queue foundation for cross-device retry, dismissal, and status tracking.
+- `admin-order-detail.js` now tries the shared queue first and falls back to browser-local storage only if the queue itself cannot be reached.
+- The next strongest step after this pass is broader write-path coverage beyond order detail plus a worker-driven or admin-triggered replay center for the shared queue.

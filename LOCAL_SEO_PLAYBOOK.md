@@ -114,3 +114,7 @@ Local SEO is mostly consistency + trust + relevance. The site can support that, 
 ## Current pass note
 
 This pass was mostly admin-resiliency work. Keep the usual one-H1, descriptive title, and local-service wording habits unchanged while order/payment fallback hardening continues in the back office.
+
+## Latest pass note
+
+- SEO work this pass stayed focused on preserving one clear H1 per public page and avoiding layout/fallback regressions while the admin resilience layer was expanded.
