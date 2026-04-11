@@ -219,3 +219,8 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Check that `/api/admin/pending-actions` and `/api/admin/pending-actions-status` respond for an authenticated admin session.
 - Confirm failed admin order writes appear in the shared queue, can be replayed from the order-detail screen, and update queue status afterward.
 - Confirm the phone dashboard shows shared queue counts alongside local browser-only fallback counts.
+
+## Current pass checks to remember
+- If the social hub shows blank YouTube cards, check `/api/social-feed` for `thumbnail_url` and `thumbnail_candidates` before assuming the page script is broken.
+- If product review actions fail to persist, check `admin_pending_actions` for `action_scope = 'product_review'` and check runtime incidents for `admin_product_review_actions`.
+- If costing looks too flat, confirm `/api/admin/accounting-item-costing` is returning `overhead_pools`, `sold_quantity_in_period`, and `estimated_recognized_full_cogs_cents`.

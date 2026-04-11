@@ -376,3 +376,8 @@ This pass hardens the admin orders area with partial API fallbacks, cached brows
 - Added a shared replay queue for failed admin order/payment writes so status changes, manual payments, and refund/dispute actions can survive beyond a single browser.
 - Browser-local saved actions still remain as the last fallback if the shared queue cannot be reached.
 - Docs, schema files, and the phone dashboard were updated to reflect the new queue-health layer.
+
+## Current pass update
+- Added stronger public social-hub fallback by deriving YouTube thumbnails and rotating through fallback thumbnail URLs.
+- Added shared replay coverage for failed product review actions in the admin products workflow.
+- Upgraded rough item costing to use the shared costing engine so overhead basis and recognized rough COGS are more honest.

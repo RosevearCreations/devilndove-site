@@ -160,3 +160,9 @@ This pass focused on admin order resiliency rather than new storefront features.
 ## Latest handoff note
 
 This pass focused on moving failed admin write actions beyond one browser. A new `admin_pending_actions` table plus `/api/admin/pending-actions` endpoints now back a shared replay queue for order-status updates, manual payment entries, and refund/dispute actions. The order-detail screen now prefers the shared queue and only keeps browser-local fallback when the shared queue cannot be reached. The phone dashboard also shows shared queue health counts.
+
+## Current pass handoff update
+- Fixed the social hub YouTube thumbnail problem by deriving thumbnail fallbacks in `/api/social-feed` and rendering thumbnail cards in `public/js/social-hub.js`.
+- Moved shared replay coverage beyond order detail by queueing failed product review actions from `public/js/admin-products.js` into `admin_pending_actions`, with retry/dismiss controls in the products screen.
+- Switched `/api/admin/accounting-item-costing` over to the shared `_costing.js` engine, which now exposes basis-aware overhead pools plus rough recognized COGS metrics to the accounting UI.
+- Added `idx_admin_pending_actions_scope_status` to all main schema files and the current-pass upgrade SQL.

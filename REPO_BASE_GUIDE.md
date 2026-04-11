@@ -276,3 +276,8 @@ The admin orders stack now has both server-side partial fallbacks and client-sid
 
 - New admin API files: `/functions/api/admin/pending-actions.js` and `/functions/api/admin/pending-actions-status.js`.
 - New schema authority item: `admin_pending_actions` in the main schema files and current-pass upgrade SQL.
+
+## Current pass note
+- Treat `/api/social-feed` as the authority for YouTube thumbnail URLs and fallback candidates on the public social page.
+- Treat `admin_pending_actions` as shared replay coverage for product review actions as well as order/payment writes.
+- Treat `/api/admin/accounting-item-costing` as a thin endpoint over `_costing.js`, not as a separate standalone costing model.

@@ -174,3 +174,7 @@ For admin order/payment work, prefer partial success plus a warning over whole-s
 ## Latest pass note
 
 - Keep failed admin write actions on the shared `admin_pending_actions` queue when possible, and only fall back to browser-local saved actions when the queue itself is unavailable.
+
+## Current pass note
+- When extending admin replay coverage, prefer the shared `admin_pending_actions` queue first and browser-local storage only as the last safety net. This now applies to product review actions too, not only order detail writes.
+- When changing the social hub, prefer thumbnail/image cards with graceful fallback over brittle iframe-only presentation.

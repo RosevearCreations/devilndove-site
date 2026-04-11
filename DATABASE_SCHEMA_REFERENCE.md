@@ -368,3 +368,7 @@ Stores fallback and error events from public/admin paths. Current write-path cov
 - Added `admin_pending_actions` as the shared cross-device replay queue for failed admin writes.
 - Key columns include `client_action_id`, `action_scope`, `order_id`, `endpoint_path`, `http_method`, `payload_json`, `queue_status`, `attempt_count`, and replay timing fields.
 - Matching indexes now cover client-action dedupe and queue/order status lookup paths.
+
+## Current pass update
+- Added `idx_admin_pending_actions_scope_status` so shared pending admin actions can be filtered and reviewed by action scope more efficiently.
+- `admin_pending_actions` should now be read as the shared replay queue for both order/payment writes and product review/publish writes.

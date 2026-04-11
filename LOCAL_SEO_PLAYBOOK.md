@@ -118,3 +118,6 @@ This pass was mostly admin-resiliency work. Keep the usual one-H1, descriptive t
 ## Latest pass note
 
 - SEO work this pass stayed focused on preserving one clear H1 per public page and avoiding layout/fallback regressions while the admin resilience layer was expanded.
+
+## Current pass note
+- The public social hub now uses API-backed thumbnail cards for YouTube content, which keeps the page more stable and more descriptive for visitors while preserving the one-clear-title rule on exposed pages.

@@ -271,3 +271,8 @@ When continuing from this build, treat the admin orders area as partially harden
 
 - Failed admin order/payment writes are no longer only browser-local. The repo now includes a D1-backed `admin_pending_actions` queue plus API endpoints for listing and updating queued actions.
 - `public/js/admin-order-detail.js` should be treated as the current frontend authority for queue save/retry/dismiss behavior.
+
+## Current pass update
+- `/api/admin/accounting-item-costing` now uses the shared `_costing.js` engine so item costing reflects basis-aware overhead pools, sold-unit recognition, and rough recognized COGS instead of the older flat revenue-share-only view.
+- The public social hub now returns derived YouTube thumbnail URLs and fallback candidates through `/api/social-feed`, and the browser renders thumbnail cards instead of relying on fragile iframe-only embeds.
+- Shared `admin_pending_actions` queue coverage now includes product review actions from the catalog/products screen, with browser-local storage kept only as the last safety net.

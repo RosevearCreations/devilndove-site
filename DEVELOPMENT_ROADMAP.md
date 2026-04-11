@@ -302,3 +302,14 @@
 - `/api/admin/pending-actions` and `/api/admin/pending-actions-status` now provide the queue foundation for cross-device retry, dismissal, and status tracking.
 - `admin-order-detail.js` now tries the shared queue first and falls back to browser-local storage only if the queue itself cannot be reached.
 - The next strongest step after this pass is broader write-path coverage beyond order detail plus a worker-driven or admin-triggered replay center for the shared queue.
+
+## Current pass completion update
+- Repaired the social hub YouTube presentation by deriving thumbnail fallbacks in `/api/social-feed` and rendering thumbnail cards instead of depending on fragile embeds.
+- Extended shared write-path replay beyond order detail by queueing failed product review actions from the catalog/products screen into `admin_pending_actions`.
+- Upgraded `/api/admin/accounting-item-costing` to the shared costing engine so overhead pools can follow basis-aware logic (`manual`, `revenue`, `units`, `orders`) and expose rough recognized COGS.
+
+## Still intentionally not marked complete
+- full double-entry accounting and deeper P&L layers remain open beyond the rough costing/reporting layer
+- movies still remain JSON-first with D1 overlay
+- broader write-path queue coverage beyond order detail and product review still needs another pass
+- real phone and desktop stress testing still needs a fuller run

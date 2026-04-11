@@ -292,3 +292,8 @@ Operational priority moved to admin resiliency this pass: order list, order deta
 
 - Admin resilience now has two layers for failed writes: a shared D1-backed queue first and browser-local fallback second.
 - The main day-to-day surface for this queue is the order-detail modal plus the phone dashboard health block.
+
+## Current pass update
+- Social hub YouTube cards now prefer derived thumbnail URLs/fallbacks through `/api/social-feed` instead of fragile iframe-only presentation.
+- Shared admin replay queue coverage now reaches the product review workflow in addition to order/payment order-detail actions.
+- Accounting item costing now relies on the shared costing helper for basis-aware overhead pool allocation.

@@ -553,3 +553,28 @@ All code-side items that were realistically actionable inside this repo pass wer
 - The earlier browser-only fallback-action limitation has been reduced: failed admin order/payment writes can now be saved into a shared D1-backed queue and replayed from another signed-in device.
 - Browser-local fallback still remains intentionally as the last safety net when the shared queue itself cannot be reached, so the old limitation is not completely gone yet.
 - Remaining honest open items still include rough overhead allocation, incomplete deeper accounting, movie JSON-first authority, and real phone/desktop stress testing.
+
+## Current pass update
+
+### 7. Public social hub reliability
+#### Addressed in this pass
+- `/api/social-feed` now derives YouTube thumbnail URLs and fallback candidates from each video id.
+- The social hub page now renders thumbnail cards with image fallback rotation instead of depending only on embedded iframes.
+
+#### Still open
+- The social feed is still a curated/manual source rather than a provider-approved auto-ingest.
+
+### 8. Shared admin replay queue coverage
+#### Addressed in this pass
+- Shared replay coverage now includes failed product review actions (`approve`, `request_changes`, `publish`) from the catalog/products workflow.
+- The products screen now keeps shared queued review actions visible and retryable, with browser-local fallback kept only when the shared queue cannot be reached.
+
+#### Still open
+- Broader write-path replay still needs to spread into more admin workflows such as media, inventory, and supplier operations.
+
+### 9. Rough accounting realism
+#### Addressed in this pass
+- `/api/admin/accounting-item-costing` now uses the shared costing engine so overhead can follow basis-aware pools and expose sold-unit/order context plus rough recognized COGS.
+
+#### Still open
+- This is still rough operational accounting rather than final per-item accounting or true double-entry.
