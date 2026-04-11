@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!monthInput || !refreshButton || !messageEl || !monthStats || !draftStats || !accountingStats || !healthStats || !window.DDAuth) return;
 
   const SNAPSHOT_KEY = 'dd_mobile_admin_dashboard_snapshot_v2';
+  const ORDER_PENDING_ACTIONS_KEY = 'dd_admin_order_pending_actions_v1';
 
   function centsToMoney(cents, currency = 'CAD') {
     const value = Number(cents || 0) / 100;
@@ -25,6 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function parseSafeJson(value, fallback = null) { try { return JSON.parse(value); } catch { return fallback; } }
   function loadSnapshot() { return parseSafeJson(localStorage.getItem(SNAPSHOT_KEY) || 'null', null); }
   function saveSnapshot(snapshot) { try { localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot)); } catch {} }
+  function loadPendingClientActionsCount() {
+    try {
+      const rows = JSON.parse(localStorage.getItem(ORDER_PENDING_ACTIONS_KEY) || '[]');
+      return Array.isArray(rows) ? rows.length : 0;
+    } catch {
+      return 0;
+    }
+  }
 
   function renderMonthSummary(report, costing) {
     const summary = report?.summary || {};
@@ -64,12 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderHealthSummary(summary) {
     const s = summary || {};
+    const pendingClientActions = loadPendingClientActionsCount();
     healthStats.innerHTML = `
       <div class="mobile-summary-list">
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.recent_runtime_incidents_count || 0)))}</strong><div class="small">Runtime incidents in the last 7 days</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.admin_order_runtime_incidents_count || 0)))}</strong><div class="small">Order and payment incident warnings</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.admin_write_runtime_incidents_count || 0)))}</strong><div class="small">Admin write-path incident warnings</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.outstanding_orders_count || 0)))}</strong><div class="small">Orders still waiting for payment or closure</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.payment_sync_failures_count || 0)))}</strong><div class="small">Provider refund sync failures</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(pendingClientActions || 0)))}</strong><div class="small">Saved local fallback actions in this browser</div></div>
       </div>`;
   }
 

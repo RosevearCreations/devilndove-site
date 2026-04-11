@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!ordersTableBody || !window.DDAuth) return;
 
   const SNAPSHOT_KEY = "dd_admin_order_detail_snapshot_v1";
+  const PENDING_ACTIONS_KEY = "dd_admin_order_pending_actions_v1";
   let modalEl = null;
   let currentOrderId = null;
   let isLoadingOrder = false;
@@ -284,6 +285,11 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
             <div class="card" style="margin-top:18px">
+              <h3 style="margin-top:0">Pending Local Fallback Actions</h3>
+              <div id="adminOrderPendingActions" class="small">No local fallback actions saved.</div>
+            </div>
+
+            <div class="card" style="margin-top:18px">
               <h3 style="margin-top:0">Status History</h3>
               <div style="overflow:auto">
                 <table style="width:100%;border-collapse:collapse">
@@ -333,6 +339,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (paymentActionForm) {
       paymentActionForm.addEventListener("submit", onSubmitPaymentAction);
     }
+
+    modalEl.addEventListener("click", async (event) => {
+      const retryButton = event.target.closest("[data-retry-pending-action]");
+      if (retryButton) {
+        const actionId = retryButton.getAttribute("data-retry-pending-action");
+        await retryPendingAction(actionId);
+        return;
+      }
+
+      const clearButton = event.target.closest("[data-clear-pending-action]");
+      if (clearButton) {
+        const actionId = clearButton.getAttribute("data-clear-pending-action");
+        removePendingAction(actionId);
+        renderPendingActions(currentOrderId);
+      }
+    });
 
     return modalEl;
   }
@@ -545,6 +567,126 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {}
   }
 
+
+  function loadPendingActions() {
+    try {
+      const rows = JSON.parse(localStorage.getItem(PENDING_ACTIONS_KEY) || "[]");
+      return Array.isArray(rows) ? rows : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function savePendingActions(actions) {
+    try {
+      localStorage.setItem(PENDING_ACTIONS_KEY, JSON.stringify(Array.isArray(actions) ? actions : []));
+    } catch {}
+  }
+
+  function getPendingActionsForOrder(orderId) {
+    return loadPendingActions().filter((row) => Number(row.order_id || 0) === Number(orderId || 0));
+  }
+
+  function upsertPendingAction(action) {
+    const rows = loadPendingActions();
+    const payloadKey = JSON.stringify(action.payload || {});
+    const existingIndex = rows.findIndex((row) =>
+      Number(row.order_id || 0) === Number(action.order_id || 0) &&
+      String(row.endpoint || '') === String(action.endpoint || '') &&
+      JSON.stringify(row.payload || {}) === payloadKey
+    );
+
+    const nextRow = {
+      id: existingIndex >= 0 ? rows[existingIndex].id : `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      order_id: Number(action.order_id || 0),
+      label: String(action.label || 'Pending admin action').trim() || 'Pending admin action',
+      endpoint: String(action.endpoint || '').trim(),
+      method: String(action.method || 'POST').trim().toUpperCase() || 'POST',
+      payload: action.payload || {},
+      created_at: existingIndex >= 0 ? rows[existingIndex].created_at : new Date().toISOString(),
+      last_attempt_at: existingIndex >= 0 ? rows[existingIndex].last_attempt_at || null : null,
+      attempt_count: Number(existingIndex >= 0 ? rows[existingIndex].attempt_count || 0 : 0),
+      last_error: String(action.last_error || '').trim(),
+      warning: String(action.warning || '').trim()
+    };
+
+    if (existingIndex >= 0) rows.splice(existingIndex, 1, nextRow);
+    else rows.unshift(nextRow);
+    savePendingActions(rows);
+    return nextRow;
+  }
+
+  function removePendingAction(actionId) {
+    savePendingActions(loadPendingActions().filter((row) => String(row.id) !== String(actionId || '')));
+  }
+
+  function updatePendingActionFailure(actionId, errorMessage) {
+    const rows = loadPendingActions();
+    const index = rows.findIndex((row) => String(row.id) === String(actionId || ''));
+    if (index === -1) return;
+    rows[index] = {
+      ...rows[index],
+      attempt_count: Number(rows[index].attempt_count || 0) + 1,
+      last_attempt_at: new Date().toISOString(),
+      last_error: String(errorMessage || 'Replay failed.').trim()
+    };
+    savePendingActions(rows);
+  }
+
+  function renderPendingActions(orderId) {
+    const el = document.getElementById("adminOrderPendingActions");
+    if (!el) return;
+
+    const rows = getPendingActionsForOrder(orderId);
+    if (!rows.length) {
+      el.innerHTML = 'No local fallback actions saved.';
+      return;
+    }
+
+    el.innerHTML = rows.map((row) => `
+      <div class="mobile-summary-list-item" style="margin-bottom:10px">
+        <div><strong>${escapeHtml(row.label || 'Pending action')}</strong></div>
+        <div class="small">Saved ${escapeHtml(formatDate(row.created_at))}${row.last_attempt_at ? ` • Last retry ${escapeHtml(formatDate(row.last_attempt_at))}` : ''}</div>
+        <div class="small">${escapeHtml(row.last_error || row.warning || 'Stored locally because the live save failed or returned only a partial success.')}</div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" type="button" data-retry-pending-action="${escapeHtml(String(row.id || ''))}">Retry</button>
+          <button class="btn" type="button" data-clear-pending-action="${escapeHtml(String(row.id || ''))}">Clear</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function retryPendingAction(actionId) {
+    const action = loadPendingActions().find((row) => String(row.id) === String(actionId || ''));
+    if (!action) {
+      renderPendingActions(currentOrderId);
+      return;
+    }
+
+    setMessage(`Retrying ${action.label || 'saved action'}...`);
+    try {
+      const response = await window.DDAuth.apiFetch(action.endpoint, {
+        method: action.method || 'POST',
+        body: JSON.stringify(action.payload || {})
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || data?.warning || 'Replay failed.');
+      }
+      removePendingAction(actionId);
+      renderPendingActions(currentOrderId);
+      setMessage(`Replayed saved action: ${action.label || 'pending action'}.`, data?.warnings?.length ? 'warning' : 'success');
+      if (currentOrderId) {
+        await loadOrder(currentOrderId);
+        document.dispatchEvent(new CustomEvent("dd:order-updated", { detail: { order_id: currentOrderId } }));
+      }
+    } catch (error) {
+      updatePendingActionFailure(actionId, error?.message || 'Replay failed.');
+      renderPendingActions(currentOrderId);
+      setMessage(`${action.label || 'Saved action'} is still pending. ${error?.message || 'Replay failed.'}`, 'warning');
+    }
+  }
+
   function renderOrderDetail(detailPayload, paymentsPayload) {
     const order = detailPayload?.order || {};
     const items = Array.isArray(detailPayload?.items) ? detailPayload.items : [];
@@ -581,6 +723,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPayments(paymentsPayload, currency);
     renderPaymentActions(paymentsPayload, currency);
     fillPaymentForm(order);
+    renderPendingActions(currentOrderId || order.order_id);
     const firstPayment = Array.isArray(paymentsPayload?.payments) ? paymentsPayload.payments[0] : null;
     const paymentIdEl = document.getElementById("adminPaymentActionPaymentId");
     if (paymentIdEl && firstPayment?.payment_id) paymentIdEl.value = String(firstPayment.payment_id);
@@ -659,6 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       setLoadingState(false);
+      renderPendingActions(orderId);
       setMessage(error.message || "Failed to load order.", "error");
     } finally {
       isLoadingOrder = false;
@@ -710,7 +854,17 @@ document.addEventListener("DOMContentLoaded", () => {
         detail: { order: data.order || null }
       }));
     } catch (error) {
-      setMessage(error.message || "Failed to update order status.", "error");
+      upsertPendingAction({
+        order_id: currentOrderId,
+        label: `Update order status to ${new_status || "pending"}`,
+        endpoint: "/api/admin/update-order-status",
+        method: "POST",
+        payload: { order_id: currentOrderId, new_status, note },
+        last_error: error.message || "Failed to update order status.",
+        warning: "Saved locally so it can be retried without retyping."
+      });
+      renderPendingActions(currentOrderId);
+      setMessage(`Live save failed. The status update was saved locally for retry. ${error.message || ""}`.trim(), "warning");
     } finally {
       if (button) {
         button.disabled = false;
@@ -771,7 +925,17 @@ document.addEventListener("DOMContentLoaded", () => {
         detail: { order: data.order || null }
       }));
     } catch (error) {
-      setMessage(error.message || "Failed to record payment.", "error");
+      upsertPendingAction({
+        order_id: currentOrderId,
+        label: `Record ${payload.payment_status || "payment"} payment`,
+        endpoint: "/api/admin/record-payment",
+        method: "POST",
+        payload,
+        last_error: error.message || "Failed to record payment.",
+        warning: "Saved locally so the payment record can be retried later."
+      });
+      renderPendingActions(currentOrderId);
+      setMessage(`Live save failed. The payment entry was saved locally for retry. ${error.message || ""}`.trim(), "warning");
     } finally {
       isRecordingPayment = false;
 
@@ -813,7 +977,23 @@ document.addEventListener("DOMContentLoaded", () => {
       await loadOrder(currentOrderId);
       document.dispatchEvent(new CustomEvent("dd:order-updated", { detail: { order_id: currentOrderId } }));
     } catch (error) {
-      setMessage(error.message || "Failed to record payment action.", "error");
+      upsertPendingAction({
+        order_id: currentOrderId,
+        label: `Record ${String(actionEl?.value || "refund").trim().toLowerCase()} action for payment ${String(paymentIdEl?.value || "").trim() || "?"}`,
+        endpoint: "/api/admin/payment-actions",
+        method: "POST",
+        payload: {
+          payment_id: Number(paymentIdEl?.value || 0),
+          action: String(actionEl?.value || "refund").trim().toLowerCase(),
+          amount_cents: Number(amountEl?.value || 0),
+          reason: String(reasonEl?.value || "").trim(),
+          note: String(noteEl?.value || "").trim()
+        },
+        last_error: error.message || "Failed to record payment action.",
+        warning: "Saved locally so the refund/dispute action can be retried later."
+      });
+      renderPendingActions(currentOrderId);
+      setMessage(`Live save failed. The payment action was saved locally for retry. ${error.message || ""}`.trim(), "warning");
     } finally {
       if (button) { button.disabled = false; button.textContent = originalText; }
     }
