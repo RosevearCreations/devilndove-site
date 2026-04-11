@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const SNAPSHOT_KEY = "dd_admin_order_detail_snapshot_v1";
   const PENDING_ACTIONS_KEY = "dd_admin_order_pending_actions_v1";
+  let currentServerPendingActions = [];
   let modalEl = null;
   let currentOrderId = null;
   let isLoadingOrder = false;
@@ -350,8 +351,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const clearButton = event.target.closest("[data-clear-pending-action]");
       if (clearButton) {
-        const actionId = clearButton.getAttribute("data-clear-pending-action");
-        removePendingAction(actionId);
+        const actionId = String(clearButton.getAttribute("data-clear-pending-action") || "");
+        if (actionId.startsWith("server:")) {
+          const lookupId = actionId.split(":").slice(1).join(":");
+          const action = currentServerPendingActions.find((row) => String(row.admin_pending_action_id || row.client_action_id || "") === lookupId);
+          if (action) {
+            updateServerPendingActionStatus(action, "dismissed", "Dismissed by admin.", false)
+              .then(() => {
+                removeServerPendingAction(action);
+                if (action.client_action_id) removePendingAction(action.client_action_id);
+                renderPendingActions(currentOrderId);
+              })
+              .catch(() => renderPendingActions(currentOrderId));
+          }
+          return;
+        }
+        const lookupId = actionId.includes(":") ? actionId.split(":").slice(1).join(":") : actionId;
+        removePendingAction(lookupId);
         renderPendingActions(currentOrderId);
       }
     });
@@ -583,6 +599,85 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {}
   }
 
+  function setServerPendingActions(actions) {
+    currentServerPendingActions = Array.isArray(actions) ? actions : [];
+  }
+
+  function getServerPendingActionsForOrder(orderId) {
+    return currentServerPendingActions.filter((row) => Number(row.order_id || 0) === Number(orderId || 0));
+  }
+
+  function mergePendingActionsForOrder(orderId) {
+    const serverRows = getServerPendingActionsForOrder(orderId).map((row) => ({ ...row, storage_scope: "shared_queue" }));
+    const serverClientIds = new Set(serverRows.map((row) => String(row.client_action_id || "")).filter(Boolean));
+    const localRows = getPendingActionsForOrder(orderId)
+      .filter((row) => !serverClientIds.has(String(row.id || "")))
+      .map((row) => ({ ...row, storage_scope: "browser_local" }));
+    return [...serverRows, ...localRows].sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+  }
+
+  async function fetchServerPendingActions(orderId) {
+    const response = await window.DDAuth.apiFetch(`/api/admin/pending-actions?order_id=${encodeURIComponent(orderId)}&limit=50`, {
+      method: "GET"
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to load shared pending actions.");
+    return data;
+  }
+
+  async function queuePendingActionServer(action) {
+    const response = await window.DDAuth.apiFetch("/api/admin/pending-actions", {
+      method: "POST",
+      body: JSON.stringify({
+        client_action_id: String(action.id || "").trim(),
+        action_scope: String(action.action_scope || "admin_write").trim() || "admin_write",
+        order_id: Number(action.order_id || 0),
+        label: action.label || "Pending admin action",
+        endpoint: action.endpoint || "",
+        method: action.method || "POST",
+        payload: action.payload || {},
+        queue_status: "queued",
+        last_error: action.last_error || "",
+        warning: action.warning || "",
+        source_device_label: "browser-fallback"
+      })
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to save action to the shared queue.");
+    return data.action || null;
+  }
+
+  async function updateServerPendingActionStatus(action, queueStatus, errorMessage = "", incrementAttempt = false) {
+    if (!action?.admin_pending_action_id && !action?.client_action_id) return null;
+    const response = await window.DDAuth.apiFetch("/api/admin/pending-actions-status", {
+      method: "POST",
+      body: JSON.stringify({
+        admin_pending_action_id: Number(action.admin_pending_action_id || 0),
+        client_action_id: action.client_action_id || "",
+        queue_status: queueStatus,
+        last_error: errorMessage || "",
+        increment_attempt: incrementAttempt ? 1 : 0
+      })
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to update shared pending action status.");
+    return data.action || null;
+  }
+
+  function upsertServerPendingAction(action) {
+    if (!action) return;
+    const rows = Array.isArray(currentServerPendingActions) ? [...currentServerPendingActions] : [];
+    const key = Number(action.admin_pending_action_id || 0);
+    const index = rows.findIndex((row) => Number(row.admin_pending_action_id || 0) === key || (action.client_action_id && String(row.client_action_id || "") === String(action.client_action_id || "")));
+    if (index >= 0) rows.splice(index, 1, action);
+    else rows.unshift(action);
+    currentServerPendingActions = rows;
+  }
+
+  function removeServerPendingAction(action) {
+    currentServerPendingActions = currentServerPendingActions.filter((row) => Number(row.admin_pending_action_id || 0) !== Number(action?.admin_pending_action_id || 0) && String(row.client_action_id || "") !== String(action?.client_action_id || ""));
+  }
+
   function getPendingActionsForOrder(orderId) {
     return loadPendingActions().filter((row) => Number(row.order_id || 0) === Number(orderId || 0));
   }
@@ -637,27 +732,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const el = document.getElementById("adminOrderPendingActions");
     if (!el) return;
 
-    const rows = getPendingActionsForOrder(orderId);
+    const rows = mergePendingActionsForOrder(orderId);
     if (!rows.length) {
-      el.innerHTML = 'No local fallback actions saved.';
+      el.innerHTML = 'No shared or browser-only fallback actions are saved right now.';
       return;
     }
 
-    el.innerHTML = rows.map((row) => `
-      <div class="mobile-summary-list-item" style="margin-bottom:10px">
-        <div><strong>${escapeHtml(row.label || 'Pending action')}</strong></div>
-        <div class="small">Saved ${escapeHtml(formatDate(row.created_at))}${row.last_attempt_at ? ` • Last retry ${escapeHtml(formatDate(row.last_attempt_at))}` : ''}</div>
-        <div class="small">${escapeHtml(row.last_error || row.warning || 'Stored locally because the live save failed or returned only a partial success.')}</div>
-        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" type="button" data-retry-pending-action="${escapeHtml(String(row.id || ''))}">Retry</button>
-          <button class="btn" type="button" data-clear-pending-action="${escapeHtml(String(row.id || ''))}">Clear</button>
+    el.innerHTML = rows.map((row) => {
+      const storageScope = row.storage_scope === "shared_queue" ? "Shared queue" : "Browser only";
+      const actionKey = row.storage_scope === "shared_queue"
+        ? `server:${String(row.admin_pending_action_id || row.client_action_id || '')}`
+        : `local:${String(row.id || '')}`;
+      return `
+        <div class="mobile-summary-list-item" style="margin-bottom:10px">
+          <div><strong>${escapeHtml(row.label || 'Pending action')}</strong></div>
+          <div class="small">${escapeHtml(storageScope)} • Saved ${escapeHtml(formatDate(row.created_at))}${row.last_attempt_at ? ` • Last retry ${escapeHtml(formatDate(row.last_attempt_at))}` : ''}</div>
+          <div class="small">${escapeHtml(row.last_error || row.warning || 'Saved so the action can be replayed later if the live write path fails.')}</div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" type="button" data-retry-pending-action="${escapeHtml(actionKey)}">Retry</button>
+            <button class="btn" type="button" data-clear-pending-action="${escapeHtml(actionKey)}">${row.storage_scope === "shared_queue" ? "Dismiss" : "Clear"}</button>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   async function retryPendingAction(actionId) {
-    const action = loadPendingActions().find((row) => String(row.id) === String(actionId || ''));
+    const rawId = String(actionId || '');
+    const isServerAction = rawId.startsWith('server:');
+    const lookupId = rawId.includes(':') ? rawId.split(':').slice(1).join(':') : rawId;
+    const action = isServerAction
+      ? currentServerPendingActions.find((row) => String(row.admin_pending_action_id || row.client_action_id || '') === lookupId)
+      : loadPendingActions().find((row) => String(row.id) === lookupId);
+
     if (!action) {
       renderPendingActions(currentOrderId);
       return;
@@ -665,6 +772,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setMessage(`Retrying ${action.label || 'saved action'}...`);
     try {
+      if (isServerAction) {
+        await updateServerPendingActionStatus(action, 'retrying', '', false);
+      }
       const response = await window.DDAuth.apiFetch(action.endpoint, {
         method: action.method || 'POST',
         body: JSON.stringify(action.payload || {})
@@ -673,7 +783,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!response.ok || !data?.ok) {
         throw new Error(data?.error || data?.warning || 'Replay failed.');
       }
-      removePendingAction(actionId);
+      if (isServerAction) {
+        await updateServerPendingActionStatus(action, 'completed', '', true);
+        removeServerPendingAction(action);
+        if (action.client_action_id) removePendingAction(action.client_action_id);
+      } else {
+        removePendingAction(lookupId);
+      }
       renderPendingActions(currentOrderId);
       setMessage(`Replayed saved action: ${action.label || 'pending action'}.`, data?.warnings?.length ? 'warning' : 'success');
       if (currentOrderId) {
@@ -681,10 +797,32 @@ document.addEventListener("DOMContentLoaded", () => {
         document.dispatchEvent(new CustomEvent("dd:order-updated", { detail: { order_id: currentOrderId } }));
       }
     } catch (error) {
-      updatePendingActionFailure(actionId, error?.message || 'Replay failed.');
+      if (isServerAction) {
+        try {
+          const updated = await updateServerPendingActionStatus(action, 'failed', error?.message || 'Replay failed.', true);
+          upsertServerPendingAction({ ...action, ...(updated || {}), queue_status: 'failed', last_error: error?.message || 'Replay failed.' });
+        } catch {}
+      } else {
+        updatePendingActionFailure(lookupId, error?.message || 'Replay failed.');
+      }
       renderPendingActions(currentOrderId);
       setMessage(`${action.label || 'Saved action'} is still pending. ${error?.message || 'Replay failed.'}`, 'warning');
     }
+  }
+
+  async function persistPendingAction(action) {
+    const localRow = upsertPendingAction(action);
+    try {
+      const saved = await queuePendingActionServer({ ...localRow, action_scope: action.action_scope || localRow.action_scope || "admin_write" });
+      if (saved) {
+        upsertServerPendingAction(saved);
+        removePendingAction(localRow.id);
+        renderPendingActions(currentOrderId || localRow.order_id);
+        return { storage: "shared_queue", action: saved };
+      }
+    } catch {}
+    renderPendingActions(currentOrderId || localRow.order_id);
+    return { storage: "browser_local", action: localRow };
   }
 
   function renderOrderDetail(detailPayload, paymentsPayload) {
@@ -769,13 +907,15 @@ document.addEventListener("DOMContentLoaded", () => {
       setLoadingState(true);
 
       const cached = loadSnapshot(orderId);
-      const [detailState, paymentsState] = await Promise.allSettled([
+      const [detailState, paymentsState, pendingActionsState] = await Promise.allSettled([
         fetchOrderDetail(orderId),
-        fetchOrderPayments(orderId)
+        fetchOrderPayments(orderId),
+        fetchServerPendingActions(orderId)
       ]);
 
       const liveDetail = detailState.status === "fulfilled" ? detailState.value : null;
       const livePayments = paymentsState.status === "fulfilled" ? paymentsState.value : null;
+      setServerPendingActions(pendingActionsState.status === "fulfilled" ? (pendingActionsState.value?.actions || []) : []);
       const detailPayload = liveDetail || cached?.detailPayload || null;
       const paymentsPayload = livePayments || cached?.paymentsPayload || { summary: {}, payments: [], refunds: [], disputes: [] };
 
@@ -790,6 +930,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const warnings = [];
       if (detailState.status !== "fulfilled") warnings.push(detailState.reason?.message || "Order detail used a cached snapshot.");
       if (paymentsState.status !== "fulfilled") warnings.push(paymentsState.reason?.message || "Payments used a cached snapshot.");
+      if (pendingActionsState.status !== "fulfilled") warnings.push(pendingActionsState.reason?.message || "Shared pending actions could not be loaded.");
       if (detailPayload?.warning) warnings.push(detailPayload.warning);
       if (paymentsPayload?.warning) warnings.push(paymentsPayload.warning);
 
@@ -854,17 +995,17 @@ document.addEventListener("DOMContentLoaded", () => {
         detail: { order: data.order || null }
       }));
     } catch (error) {
-      upsertPendingAction({
+      const savedState = await persistPendingAction({
+        action_scope: "order_status_update",
         order_id: currentOrderId,
         label: `Update order status to ${new_status || "pending"}`,
         endpoint: "/api/admin/update-order-status",
         method: "POST",
         payload: { order_id: currentOrderId, new_status, note },
         last_error: error.message || "Failed to update order status.",
-        warning: "Saved locally so it can be retried without retyping."
+        warning: "Saved so it can be retried without retyping if the live write path fails."
       });
-      renderPendingActions(currentOrderId);
-      setMessage(`Live save failed. The status update was saved locally for retry. ${error.message || ""}`.trim(), "warning");
+      setMessage(`Live save failed. The status update was saved to ${savedState.storage === "shared_queue" ? "the shared replay queue" : "this browser only"}. ${error.message || ""}`.trim(), "warning");
     } finally {
       if (button) {
         button.disabled = false;
@@ -925,17 +1066,17 @@ document.addEventListener("DOMContentLoaded", () => {
         detail: { order: data.order || null }
       }));
     } catch (error) {
-      upsertPendingAction({
+      const savedState = await persistPendingAction({
+        action_scope: "record_payment",
         order_id: currentOrderId,
         label: `Record ${payload.payment_status || "payment"} payment`,
         endpoint: "/api/admin/record-payment",
         method: "POST",
         payload,
         last_error: error.message || "Failed to record payment.",
-        warning: "Saved locally so the payment record can be retried later."
+        warning: "Saved so the payment record can be retried later if the live write path fails."
       });
-      renderPendingActions(currentOrderId);
-      setMessage(`Live save failed. The payment entry was saved locally for retry. ${error.message || ""}`.trim(), "warning");
+      setMessage(`Live save failed. The payment entry was saved to ${savedState.storage === "shared_queue" ? "the shared replay queue" : "this browser only"}. ${error.message || ""}`.trim(), "warning");
     } finally {
       isRecordingPayment = false;
 
@@ -977,7 +1118,8 @@ document.addEventListener("DOMContentLoaded", () => {
       await loadOrder(currentOrderId);
       document.dispatchEvent(new CustomEvent("dd:order-updated", { detail: { order_id: currentOrderId } }));
     } catch (error) {
-      upsertPendingAction({
+      const savedState = await persistPendingAction({
+        action_scope: "payment_action",
         order_id: currentOrderId,
         label: `Record ${String(actionEl?.value || "refund").trim().toLowerCase()} action for payment ${String(paymentIdEl?.value || "").trim() || "?"}`,
         endpoint: "/api/admin/payment-actions",
@@ -990,10 +1132,9 @@ document.addEventListener("DOMContentLoaded", () => {
           note: String(noteEl?.value || "").trim()
         },
         last_error: error.message || "Failed to record payment action.",
-        warning: "Saved locally so the refund/dispute action can be retried later."
+        warning: "Saved so the refund/dispute action can be retried later if the live write path fails."
       });
-      renderPendingActions(currentOrderId);
-      setMessage(`Live save failed. The payment action was saved locally for retry. ${error.message || ""}`.trim(), "warning");
+      setMessage(`Live save failed. The payment action was saved to ${savedState.storage === "shared_queue" ? "the shared replay queue" : "this browser only"}. ${error.message || ""}`.trim(), "warning");
     } finally {
       if (button) { button.disabled = false; button.textContent = originalText; }
     }

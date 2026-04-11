@@ -79,9 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.recent_runtime_incidents_count || 0)))}</strong><div class="small">Runtime incidents in the last 7 days</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.admin_order_runtime_incidents_count || 0)))}</strong><div class="small">Order and payment incident warnings</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.admin_write_runtime_incidents_count || 0)))}</strong><div class="small">Admin write-path incident warnings</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_admin_actions_count || 0)))}</strong><div class="small">Shared queued admin fallback actions</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.failed_shared_admin_actions_count || 0)))}</strong><div class="small">Shared queued actions still failing replay</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_admin_order_actions_count || 0)))}</strong><div class="small">Shared queued order/payment actions</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.outstanding_orders_count || 0)))}</strong><div class="small">Orders still waiting for payment or closure</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.payment_sync_failures_count || 0)))}</strong><div class="small">Provider refund sync failures</div></div>
-        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(pendingClientActions || 0)))}</strong><div class="small">Saved local fallback actions in this browser</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(pendingClientActions || 0)))}</strong><div class="small">Browser-only fallback actions still not shared</div></div>
       </div>`;
   }
 
