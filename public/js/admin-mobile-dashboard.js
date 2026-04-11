@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
     healthStats.innerHTML = `
       <div class="mobile-summary-list">
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.recent_runtime_incidents_count || 0)))}</strong><div class="small">Runtime incidents in the last 7 days</div></div>
-        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.failed_webhooks_count || 0)))}</strong><div class="small">Failed webhook events waiting for review</div></div>
-        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.queued_notifications_count || 0)))}</strong><div class="small">Queued or retry notifications</div></div>
-        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.open_recovery_requests_count || 0)))}</strong><div class="small">Open account-help requests</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.admin_order_runtime_incidents_count || 0)))}</strong><div class="small">Order and payment incident warnings</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.outstanding_orders_count || 0)))}</strong><div class="small">Orders still waiting for payment or closure</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.payment_sync_failures_count || 0)))}</strong><div class="small">Provider refund sync failures</div></div>
       </div>`;
   }
 

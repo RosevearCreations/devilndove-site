@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!ordersTableBody || !window.DDAuth) return;
 
+  const SNAPSHOT_KEY = "dd_admin_order_detail_snapshot_v1";
   let modalEl = null;
   let currentOrderId = null;
   let isLoadingOrder = false;
@@ -346,15 +347,15 @@ document.addEventListener("DOMContentLoaded", () => {
     modalEl.style.display = "none";
   }
 
-  function setMessage(message, isError = false) {
+  function setMessage(message, tone = "info") {
     ensureModal();
 
     const el = document.getElementById("adminOrderDetailMessage");
     if (!el) return;
 
-    el.textContent = message;
+    el.textContent = message || "";
     el.style.display = message ? "block" : "none";
-    el.style.color = isError ? "#b00020" : "";
+    el.className = message ? `status-note ${tone}` : "status-note";
   }
 
   function setLoadingState(isLoading) {
@@ -521,6 +522,29 @@ document.addEventListener("DOMContentLoaded", () => {
     if (actionAmountEl) actionAmountEl.value = String(order.total_cents || 0);
   }
 
+  function loadSnapshot(orderId) {
+    try {
+      const raw = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || "{}");
+      return raw?.[String(orderId)] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveSnapshot(orderId, detailPayload, paymentsPayload) {
+    if (!orderId || (!detailPayload && !paymentsPayload)) return;
+    try {
+      const raw = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || "{}");
+      const current = raw?.[String(orderId)] || {};
+      raw[String(orderId)] = {
+        detailPayload: detailPayload || current.detailPayload || null,
+        paymentsPayload: paymentsPayload || current.paymentsPayload || null,
+        cached_at: new Date().toISOString()
+      };
+      localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(raw));
+    } catch {}
+  }
+
   function renderOrderDetail(detailPayload, paymentsPayload) {
     const order = detailPayload?.order || {};
     const items = Array.isArray(detailPayload?.items) ? detailPayload.items : [];
@@ -567,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
       method: "GET"
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
     if (!response.ok || !data?.ok) {
       throw new Error(data?.error || "Failed to load order detail.");
@@ -581,7 +605,7 @@ document.addEventListener("DOMContentLoaded", () => {
       method: "GET"
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
     if (!response.ok || !data?.ok) {
       throw new Error(data?.error || "Failed to load order payments.");
@@ -598,19 +622,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       showModal();
-      setMessage("");
+      setMessage("Loading order...");
       setLoadingState(true);
 
-      const [detailPayload, paymentsPayload] = await Promise.all([
+      const cached = loadSnapshot(orderId);
+      const [detailState, paymentsState] = await Promise.allSettled([
         fetchOrderDetail(orderId),
         fetchOrderPayments(orderId)
       ]);
 
+      const liveDetail = detailState.status === "fulfilled" ? detailState.value : null;
+      const livePayments = paymentsState.status === "fulfilled" ? paymentsState.value : null;
+      const detailPayload = liveDetail || cached?.detailPayload || null;
+      const paymentsPayload = livePayments || cached?.paymentsPayload || { summary: {}, payments: [], refunds: [], disputes: [] };
+
+      if (!detailPayload) {
+        throw new Error((detailState.reason && detailState.reason.message) || "Failed to load order detail.");
+      }
+
       renderOrderDetail(detailPayload, paymentsPayload);
       setLoadingState(false);
+      saveSnapshot(orderId, liveDetail, livePayments);
+
+      const warnings = [];
+      if (detailState.status !== "fulfilled") warnings.push(detailState.reason?.message || "Order detail used a cached snapshot.");
+      if (paymentsState.status !== "fulfilled") warnings.push(paymentsState.reason?.message || "Payments used a cached snapshot.");
+      if (detailPayload?.warning) warnings.push(detailPayload.warning);
+      if (paymentsPayload?.warning) warnings.push(paymentsPayload.warning);
+
+      if (warnings.length) {
+        const cachedAt = cached?.cached_at ? new Date(cached.cached_at).toLocaleString() : "an earlier visit";
+        const snapshotSuffix = cached?.cached_at ? ` Cached snapshot: ${cachedAt}.` : "";
+        setMessage(`Showing partial order data. ${warnings.join(" ")}${snapshotSuffix}`, "warning");
+      } else {
+        setMessage("Order detail loaded.", "success");
+      }
     } catch (error) {
       setLoadingState(false);
-      setMessage(error.message || "Failed to load order.", true);
+      setMessage(error.message || "Failed to load order.", "error");
     } finally {
       isLoadingOrder = false;
     }
@@ -655,13 +704,13 @@ document.addEventListener("DOMContentLoaded", () => {
         noteEl.value = "";
       }
 
-      setMessage("Order status updated.");
+      setMessage("Order status updated.", "success");
       await loadOrder(currentOrderId);
       document.dispatchEvent(new CustomEvent("dd:order-updated", {
         detail: { order: data.order || null }
       }));
     } catch (error) {
-      setMessage(error.message || "Failed to update order status.", true);
+      setMessage(error.message || "Failed to update order status.", "error");
     } finally {
       if (button) {
         button.disabled = false;
@@ -716,13 +765,13 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(data?.error || "Failed to record payment.");
       }
 
-      setMessage("Payment recorded.");
+      setMessage("Payment recorded.", "success");
       await loadOrder(currentOrderId);
       document.dispatchEvent(new CustomEvent("dd:order-updated", {
         detail: { order: data.order || null }
       }));
     } catch (error) {
-      setMessage(error.message || "Failed to record payment.", true);
+      setMessage(error.message || "Failed to record payment.", "error");
     } finally {
       isRecordingPayment = false;
 
@@ -760,11 +809,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to record payment action.");
       if (noteEl) noteEl.value = "";
       if (reasonEl) reasonEl.value = "";
-      setMessage(data.message || "Payment action recorded.");
+      setMessage(data.message || "Payment action recorded.", "success");
       await loadOrder(currentOrderId);
       document.dispatchEvent(new CustomEvent("dd:order-updated", { detail: { order_id: currentOrderId } }));
     } catch (error) {
-      setMessage(error.message || "Failed to record payment action.", true);
+      setMessage(error.message || "Failed to record payment action.", "error");
     } finally {
       if (button) { button.disabled = false; button.textContent = originalText; }
     }
