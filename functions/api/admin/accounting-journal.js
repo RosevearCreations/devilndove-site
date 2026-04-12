@@ -1,15 +1,11 @@
 import {
-  auditAdminAction,
-  captureRuntimeIncident,
   getAdminUserFromRequest,
   getDb,
   jsonResponse,
+  auditAdminAction,
+  captureRuntimeIncident,
   normalizeText,
 } from "../_lib/adminAudit.js";
-
-function json(data, status = 200) {
-  return jsonResponse(data, status, { "Cache-Control": "no-store" });
-}
 
 function monthRange(monthValue) {
   const raw = String(monthValue || "").trim();
@@ -30,10 +26,6 @@ function monthRange(monthValue) {
 
 function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
-}
-
-function asInt(value) {
-  return Math.round(Number(value || 0));
 }
 
 async function safeFirst(db, sql, bindings = [], fallback = {}) {
@@ -69,52 +61,54 @@ async function tableExists(db, tableName) {
 async function ensureJournalSchema(db) {
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS accounting_journal_entries (
-      accounting_journal_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      journal_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
       period_month TEXT NOT NULL,
-      entry_date TEXT,
+      entry_date TEXT NOT NULL,
       source_type TEXT NOT NULL,
-      source_id TEXT,
-      source_reference TEXT,
-      memo TEXT,
-      is_balanced INTEGER NOT NULL DEFAULT 1,
+      source_key TEXT NOT NULL,
+      reference_code TEXT,
+      description TEXT,
+      status TEXT NOT NULL DEFAULT 'draft',
       total_debit_cents INTEGER NOT NULL DEFAULT 0,
       total_credit_cents INTEGER NOT NULL DEFAULT 0,
+      imbalance_cents INTEGER NOT NULL DEFAULT 0,
+      notes TEXT,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(period_month, source_type, source_id)
+      UNIQUE (period_month, source_type, source_key)
     )
   `).run();
 
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS accounting_journal_lines (
-      accounting_journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      accounting_journal_entry_id INTEGER NOT NULL,
-      line_order INTEGER NOT NULL DEFAULT 0,
-      ledger_code TEXT NOT NULL,
-      ledger_name TEXT NOT NULL,
-      entry_side TEXT NOT NULL CHECK(entry_side IN ('debit','credit')),
-      amount_cents INTEGER NOT NULL DEFAULT 0,
-      memo TEXT,
+      journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      journal_entry_id INTEGER NOT NULL,
+      line_number INTEGER NOT NULL,
+      ledger_code TEXT,
+      ledger_name TEXT,
+      line_description TEXT,
+      debit_cents INTEGER NOT NULL DEFAULT 0,
+      credit_cents INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (accounting_journal_entry_id) REFERENCES accounting_journal_entries(accounting_journal_entry_id) ON DELETE CASCADE
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (journal_entry_id, line_number),
+      FOREIGN KEY (journal_entry_id) REFERENCES accounting_journal_entries(journal_entry_id) ON DELETE CASCADE
     )
   `).run();
 
   await db.prepare(
-    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_period ON accounting_journal_entries(period_month, entry_date DESC, accounting_journal_entry_id DESC)"
+    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_period ON accounting_journal_entries(period_month, entry_date DESC, journal_entry_id DESC)"
   ).run();
   await db.prepare(
-    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_id, period_month)"
+    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_key)"
   ).run();
   await db.prepare(
-    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_balance ON accounting_journal_entries(period_month, is_balanced, created_at DESC)"
+    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(journal_entry_id, line_number ASC)"
   ).run();
-  await db.prepare(
-    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(accounting_journal_entry_id, line_order ASC)"
-  ).run();
-  await db.prepare(
-    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_ledger ON accounting_journal_lines(ledger_code, entry_side, created_at DESC)"
-  ).run();
+}
+
+function asInt(value) {
+  return Math.round(Number(value || 0));
 }
 
 function buildRevenueLines(summary) {
@@ -122,31 +116,29 @@ function buildRevenueLines(summary) {
   const taxRecognized = asInt(summary.tax_recognized_cents);
   const salesRecognized = Math.max(0, cashGross - taxRecognized);
 
-  const lines = [
+  return [
     {
       ledger_code: "1000",
       ledger_name: "Cash Clearing",
-      entry_side: "debit",
-      amount_cents: cashGross,
-      memo: "Recognized cash receipts",
+      line_description: "Recognized cash receipts",
+      debit_cents: cashGross,
+      credit_cents: 0,
     },
     {
       ledger_code: "4000",
       ledger_name: "Sales Revenue",
-      entry_side: "credit",
-      amount_cents: salesRecognized,
-      memo: "Recognized sales before tax",
+      line_description: "Recognized sales before tax",
+      debit_cents: 0,
+      credit_cents: salesRecognized,
     },
     {
       ledger_code: "2300",
       ledger_name: "Sales Tax Payable",
-      entry_side: "credit",
-      amount_cents: taxRecognized,
-      memo: "Recognized sales tax liability",
+      line_description: "Recognized sales tax liability",
+      debit_cents: 0,
+      credit_cents: taxRecognized,
     },
-  ];
-
-  return lines.filter((line) => Number(line.amount_cents || 0) > 0);
+  ].filter((line) => line.debit_cents > 0 || line.credit_cents > 0);
 }
 
 function buildExpenseLines(group) {
@@ -157,16 +149,16 @@ function buildExpenseLines(group) {
     {
       ledger_code: normalizeText(group.ledger_code) || "6100",
       ledger_name: normalizeText(group.ledger_name) || "Operating Expense",
-      entry_side: "debit",
-      amount_cents: total,
-      memo: `${normalizeText(group.ledger_name) || "Expense"} for ${normalizeText(group.period_month)}`,
+      line_description: `${normalizeText(group.ledger_name) || "Expense"} for ${normalizeText(group.period_month)}`,
+      debit_cents: total,
+      credit_cents: 0,
     },
     {
       ledger_code: "2100",
       ledger_name: "Accounts Payable",
-      entry_side: "credit",
-      amount_cents: total,
-      memo: "Expense accrual",
+      line_description: "Expense accrual",
+      debit_cents: 0,
+      credit_cents: total,
     },
   ];
 }
@@ -179,16 +171,16 @@ function buildWriteoffLines(group) {
     {
       ledger_code: normalizeText(group.ledger_code) || "6900",
       ledger_name: normalizeText(group.ledger_name) || "Write-Off Expense",
-      entry_side: "debit",
-      amount_cents: total,
-      memo: `${normalizeText(group.ledger_name) || "Write-Off"} for ${normalizeText(group.period_month)}`,
+      line_description: `${normalizeText(group.ledger_name) || "Write-Off"} for ${normalizeText(group.period_month)}`,
+      debit_cents: total,
+      credit_cents: 0,
     },
     {
       ledger_code: "1400",
       ledger_name: "Inventory / Asset Clearing",
-      entry_side: "credit",
-      amount_cents: total,
-      memo: "Write-off clearing",
+      line_description: "Write-off clearing",
+      debit_cents: 0,
+      credit_cents: total,
     },
   ];
 }
@@ -201,16 +193,16 @@ function buildOverheadLines(group) {
     {
       ledger_code: normalizeText(group.ledger_code) || "6200",
       ledger_name: normalizeText(group.ledger_name) || "Allocated Overhead",
-      entry_side: "debit",
-      amount_cents: total,
-      memo: `${normalizeText(group.ledger_name) || "Allocated Overhead"} for ${normalizeText(group.period_month)}`,
+      line_description: `${normalizeText(group.ledger_name) || "Allocated Overhead"} for ${normalizeText(group.period_month)}`,
+      debit_cents: total,
+      credit_cents: 0,
     },
     {
       ledger_code: "2190",
       ledger_name: "Overhead Clearing",
-      entry_side: "credit",
-      amount_cents: total,
-      memo: "Allocated overhead clearing",
+      line_description: "Allocated overhead clearing",
+      debit_cents: 0,
+      credit_cents: total,
     },
   ];
 }
@@ -219,130 +211,117 @@ function summarizeLines(lines) {
   let totalDebit = 0;
   let totalCredit = 0;
 
-  const normalized = lines
-    .map((line, index) => {
-      const entrySide = String(line.entry_side || "").toLowerCase() === "credit" ? "credit" : "debit";
-      const amount = Math.max(0, asInt(line.amount_cents));
-      if (!amount) return null;
-      if (entrySide === "debit") totalDebit += amount;
-      else totalCredit += amount;
-      return {
-        line_order: index + 1,
-        ledger_code: normalizeText(line.ledger_code) || "0000",
-        ledger_name: normalizeText(line.ledger_name) || "Unmapped Ledger",
-        entry_side: entrySide,
-        amount_cents: amount,
-        memo: normalizeText(line.memo) || null,
-      };
-    })
-    .filter(Boolean);
+  const normalized = lines.map((line, index) => {
+    const debit = Math.max(0, asInt(line.debit_cents));
+    const credit = Math.max(0, asInt(line.credit_cents));
+    totalDebit += debit;
+    totalCredit += credit;
+
+    return {
+      line_number: index + 1,
+      ledger_code: normalizeText(line.ledger_code) || null,
+      ledger_name: normalizeText(line.ledger_name) || null,
+      line_description: normalizeText(line.line_description) || null,
+      debit_cents: debit,
+      credit_cents: credit,
+    };
+  });
 
   return {
     lines: normalized,
     total_debit_cents: totalDebit,
     total_credit_cents: totalCredit,
-    is_balanced: totalDebit === totalCredit ? 1 : 0,
     imbalance_cents: totalDebit - totalCredit,
   };
 }
 
-async function deleteManagedEntries(db, periodMonth) {
-  await db.prepare(`
-    DELETE FROM accounting_journal_entries
-    WHERE period_month = ?
-      AND source_type IN ('revenue_summary', 'expense_summary', 'writeoff_summary', 'overhead_summary')
-  `).bind(periodMonth).run();
-}
-
-async function upsertEntry(db, periodMonth, entryDate, sourceType, sourceId, memo, lines, sourceReference = null) {
+async function upsertEntry(db, periodMonth, entryDate, sourceType, sourceKey, description, lines, referenceCode = null) {
   const summary = summarizeLines(lines);
-  if (!summary.lines.length) return null;
 
   await db.prepare(`
     INSERT INTO accounting_journal_entries (
       period_month,
       entry_date,
       source_type,
-      source_id,
-      source_reference,
-      memo,
-      is_balanced,
+      source_key,
+      reference_code,
+      description,
+      status,
       total_debit_cents,
       total_credit_cents,
+      imbalance_cents,
       updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(period_month, source_type, source_id) DO UPDATE SET
+    ) VALUES (?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(period_month, source_type, source_key) DO UPDATE SET
       entry_date = excluded.entry_date,
-      source_reference = excluded.source_reference,
-      memo = excluded.memo,
-      is_balanced = excluded.is_balanced,
+      reference_code = excluded.reference_code,
+      description = excluded.description,
       total_debit_cents = excluded.total_debit_cents,
       total_credit_cents = excluded.total_credit_cents,
+      imbalance_cents = excluded.imbalance_cents,
       updated_at = CURRENT_TIMESTAMP
   `).bind(
     periodMonth,
     entryDate,
     sourceType,
-    sourceId,
-    sourceReference,
-    memo,
-    summary.is_balanced,
+    sourceKey,
+    referenceCode,
+    description,
     summary.total_debit_cents,
-    summary.total_credit_cents
+    summary.total_credit_cents,
+    summary.imbalance_cents
   ).run();
 
   const entry = await db.prepare(`
     SELECT
-      accounting_journal_entry_id,
+      journal_entry_id,
       period_month,
       entry_date,
       source_type,
-      source_id,
-      source_reference,
-      memo,
-      is_balanced,
+      source_key,
+      reference_code,
+      description,
+      status,
       total_debit_cents,
       total_credit_cents,
-      created_at,
-      updated_at
+      imbalance_cents
     FROM accounting_journal_entries
-    WHERE period_month = ? AND source_type = ? AND source_id = ?
+    WHERE period_month = ? AND source_type = ? AND source_key = ?
     LIMIT 1
-  `).bind(periodMonth, sourceType, sourceId).first();
+  `).bind(periodMonth, sourceType, sourceKey).first();
 
-  if (!entry?.accounting_journal_entry_id) return null;
+  if (!entry?.journal_entry_id) return null;
 
-  await db.prepare("DELETE FROM accounting_journal_lines WHERE accounting_journal_entry_id = ?")
-    .bind(entry.accounting_journal_entry_id)
+  await db.prepare("DELETE FROM accounting_journal_lines WHERE journal_entry_id = ?")
+    .bind(entry.journal_entry_id)
     .run();
 
   for (const line of summary.lines) {
     await db.prepare(`
       INSERT INTO accounting_journal_lines (
-        accounting_journal_entry_id,
-        line_order,
+        journal_entry_id,
+        line_number,
         ledger_code,
         ledger_name,
-        entry_side,
-        amount_cents,
-        memo,
-        created_at
+        line_description,
+        debit_cents,
+        credit_cents,
+        updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `).bind(
-      entry.accounting_journal_entry_id,
-      line.line_order,
+      entry.journal_entry_id,
+      line.line_number,
       line.ledger_code,
       line.ledger_name,
-      line.entry_side,
-      line.amount_cents,
-      line.memo
+      line.line_description,
+      line.debit_cents,
+      line.credit_cents
     ).run();
   }
 
   return {
     ...entry,
     lines: summary.lines,
-    imbalance_cents: summary.imbalance_cents,
   };
 }
 
@@ -438,7 +417,6 @@ async function loadSourceSummaries(db, range) {
 
 async function syncJournal(db, range) {
   await ensureJournalSchema(db);
-  await deleteManagedEntries(db, range.raw);
 
   const { revenueSummary, expenseGroups, writeoffGroups, overheadGroups } = await loadSourceSummaries(db, range);
   const upserts = [];
@@ -459,46 +437,46 @@ async function syncJournal(db, range) {
   }
 
   for (const group of expenseGroups) {
-    const ledgerCode = normalizeText(group.ledger_code) || "6100";
+    const sourceKey = `${range.raw}:expense:${normalizeText(group.ledger_code) || "6100"}`;
     const entry = await upsertEntry(
       db,
       range.raw,
       range.end,
       "expense_summary",
-      `${range.raw}:expense:${ledgerCode}`,
+      sourceKey,
       `${normalizeText(group.ledger_name) || "Operating Expense"} summary for ${range.raw}`,
       buildExpenseLines(group),
-      `EXP-${range.raw}-${ledgerCode}`
+      `EXP-${range.raw}-${normalizeText(group.ledger_code) || "6100"}`
     );
     if (entry) upserts.push(entry);
   }
 
   for (const group of writeoffGroups) {
-    const ledgerCode = normalizeText(group.ledger_code) || "6900";
+    const sourceKey = `${range.raw}:writeoff:${normalizeText(group.ledger_code) || "6900"}`;
     const entry = await upsertEntry(
       db,
       range.raw,
       range.end,
       "writeoff_summary",
-      `${range.raw}:writeoff:${ledgerCode}`,
+      sourceKey,
       `${normalizeText(group.ledger_name) || "Write-Off Expense"} summary for ${range.raw}`,
       buildWriteoffLines(group),
-      `WRO-${range.raw}-${ledgerCode}`
+      `WRO-${range.raw}-${normalizeText(group.ledger_code) || "6900"}`
     );
     if (entry) upserts.push(entry);
   }
 
   for (const group of overheadGroups) {
-    const ledgerCode = normalizeText(group.ledger_code) || "6200";
+    const sourceKey = `${range.raw}:overhead:${normalizeText(group.ledger_code) || "6200"}`;
     const entry = await upsertEntry(
       db,
       range.raw,
       range.end,
       "overhead_summary",
-      `${range.raw}:overhead:${ledgerCode}`,
+      sourceKey,
       `${normalizeText(group.ledger_name) || "Allocated Overhead"} summary for ${range.raw}`,
       buildOverheadLines(group),
-      `OVH-${range.raw}-${ledgerCode}`
+      `OVH-${range.raw}-${normalizeText(group.ledger_code) || "6200"}`
     );
     if (entry) upserts.push(entry);
   }
@@ -519,21 +497,23 @@ async function fetchJournal(db, periodMonth) {
     db,
     `
       SELECT
-        accounting_journal_entry_id,
+        journal_entry_id,
         period_month,
         entry_date,
         source_type,
-        source_id,
-        source_reference,
-        memo,
-        is_balanced,
+        source_key,
+        reference_code,
+        description,
+        status,
         total_debit_cents,
         total_credit_cents,
+        imbalance_cents,
+        notes,
         created_at,
         updated_at
       FROM accounting_journal_entries
       WHERE period_month = ?
-      ORDER BY entry_date DESC, accounting_journal_entry_id DESC
+      ORDER BY entry_date DESC, journal_entry_id DESC
     `,
     [periodMonth]
   );
@@ -542,105 +522,83 @@ async function fetchJournal(db, periodMonth) {
     db,
     `
       SELECT
-        accounting_journal_line_id,
-        accounting_journal_entry_id,
-        line_order,
+        journal_line_id,
+        journal_entry_id,
+        line_number,
         ledger_code,
         ledger_name,
-        entry_side,
-        amount_cents,
-        memo,
-        created_at
+        line_description,
+        debit_cents,
+        credit_cents,
+        created_at,
+        updated_at
       FROM accounting_journal_lines
-      WHERE accounting_journal_entry_id IN (
-        SELECT accounting_journal_entry_id
+      WHERE journal_entry_id IN (
+        SELECT journal_entry_id
         FROM accounting_journal_entries
         WHERE period_month = ?
       )
-      ORDER BY accounting_journal_entry_id DESC, line_order ASC
+      ORDER BY journal_entry_id DESC, line_number ASC
     `,
     [periodMonth]
   );
 
   const lineMap = new Map();
-  const ledgerMap = new Map();
   for (const line of lines) {
-    const entryId = Number(line.accounting_journal_entry_id || 0);
-    if (!lineMap.has(entryId)) lineMap.set(entryId, []);
-    const normalizedLine = {
-      accounting_journal_line_id: Number(line.accounting_journal_line_id || 0),
-      accounting_journal_entry_id: entryId,
-      line_order: Number(line.line_order || 0),
+    const key = Number(line.journal_entry_id || 0);
+    if (!lineMap.has(key)) lineMap.set(key, []);
+    lineMap.get(key).push({
+      journal_line_id: Number(line.journal_line_id || 0),
+      line_number: Number(line.line_number || 0),
       ledger_code: line.ledger_code || "",
       ledger_name: line.ledger_name || "",
-      entry_side: line.entry_side || "debit",
-      amount_cents: Number(line.amount_cents || 0),
-      memo: line.memo || "",
-      created_at: line.created_at || null,
-      debit_cents: String(line.entry_side || "").toLowerCase() === "debit" ? Number(line.amount_cents || 0) : 0,
-      credit_cents: String(line.entry_side || "").toLowerCase() === "credit" ? Number(line.amount_cents || 0) : 0,
-    };
-    lineMap.get(entryId).push(normalizedLine);
-
-    const ledgerKey = `${normalizedLine.ledger_code}::${normalizedLine.ledger_name}`;
-    const existingLedger = ledgerMap.get(ledgerKey) || {
-      ledger_code: normalizedLine.ledger_code,
-      ledger_name: normalizedLine.ledger_name,
-      debit_cents: 0,
-      credit_cents: 0,
-    };
-    existingLedger.debit_cents += normalizedLine.debit_cents;
-    existingLedger.credit_cents += normalizedLine.credit_cents;
-    ledgerMap.set(ledgerKey, existingLedger);
+      line_description: line.line_description || "",
+      debit_cents: Number(line.debit_cents || 0),
+      credit_cents: Number(line.credit_cents || 0),
+      created_at: line.created_at || "",
+      updated_at: line.updated_at || "",
+    });
   }
 
   let totalDebit = 0;
   let totalCredit = 0;
-  let balancedEntryCount = 0;
-  let imbalanceCount = 0;
+  let imbalanceEntryCount = 0;
 
   const normalizedEntries = entries.map((entry) => {
     const debit = Number(entry.total_debit_cents || 0);
     const credit = Number(entry.total_credit_cents || 0);
-    const isBalanced = Number(entry.is_balanced || 0) === 1;
+    const imbalance = Number(entry.imbalance_cents || 0);
     totalDebit += debit;
     totalCredit += credit;
-    if (isBalanced) balancedEntryCount += 1;
-    else imbalanceCount += 1;
+    if (imbalance !== 0) imbalanceEntryCount += 1;
 
     return {
-      accounting_journal_entry_id: Number(entry.accounting_journal_entry_id || 0),
+      journal_entry_id: Number(entry.journal_entry_id || 0),
       period_month: entry.period_month || periodMonth,
       entry_date: entry.entry_date || "",
       source_type: entry.source_type || "",
-      source_id: entry.source_id || "",
-      source_reference: entry.source_reference || "",
-      memo: entry.memo || "",
-      is_balanced: isBalanced ? 1 : 0,
+      source_key: entry.source_key || "",
+      reference_code: entry.reference_code || "",
+      description: entry.description || "",
+      status: entry.status || "draft",
       total_debit_cents: debit,
       total_credit_cents: credit,
-      imbalance_cents: debit - credit,
-      created_at: entry.created_at || null,
-      updated_at: entry.updated_at || null,
-      lines: lineMap.get(Number(entry.accounting_journal_entry_id || 0)) || [],
+      imbalance_cents: imbalance,
+      notes: entry.notes || "",
+      created_at: entry.created_at || "",
+      updated_at: entry.updated_at || "",
+      lines: lineMap.get(Number(entry.journal_entry_id || 0)) || [],
     };
-  });
-
-  const ledgerSummary = Array.from(ledgerMap.values()).sort((a, b) => {
-    if (a.ledger_code !== b.ledger_code) return String(a.ledger_code).localeCompare(String(b.ledger_code));
-    return String(a.ledger_name).localeCompare(String(b.ledger_name));
   });
 
   return {
     entries: normalizedEntries,
-    ledger_summary: ledgerSummary,
     summary: {
       entry_count: normalizedEntries.length,
-      balanced_entry_count: balancedEntryCount,
-      imbalance_count: imbalanceCount,
       total_debit_cents: totalDebit,
       total_credit_cents: totalCredit,
       journal_imbalance_cents: totalDebit - totalCredit,
+      imbalance_entry_count: imbalanceEntryCount,
     },
   };
 }
@@ -657,35 +615,25 @@ async function handleGet(context, db) {
   const url = new URL(context.request.url);
   const range = monthRange(url.searchParams.get("month") || new Date().toISOString().slice(0, 7));
   if (!range) {
-    return json({ ok: false, error: "Please provide month in YYYY-MM format." }, 400);
+    return jsonResponse({ ok: false, error: "Please provide month in YYYY-MM format." }, 400);
   }
 
   const journal = await fetchJournal(db, range.raw);
-  return json({ ok: true, period: range.raw, ...journal });
+  return jsonResponse({
+    ok: true,
+    period: range.raw,
+    ...journal,
+  });
 }
 
 async function handlePost(context, db, adminUser) {
   const body = await readJsonBody(context.request);
-  const action = normalizeText(body.action || "sync_month").toLowerCase();
   const range = monthRange(body.month || new Date().toISOString().slice(0, 7));
   if (!range) {
-    return json({ ok: false, error: "Please provide month in YYYY-MM format." }, 400);
+    return jsonResponse({ ok: false, error: "Please provide month in YYYY-MM format." }, 400);
   }
 
   try {
-    if (action === "clear_month") {
-      await ensureJournalSchema(db);
-      await deleteManagedEntries(db, range.raw);
-      await auditAdminAction(context.env, context.request, adminUser, {
-        action_type: "accounting_journal_clear",
-        target_type: "accounting_journal",
-        target_key: range.raw,
-        details: { month: range.raw },
-      });
-      const journal = await fetchJournal(db, range.raw);
-      return json({ ok: true, period: range.raw, cleared: true, ...journal });
-    }
-
     const syncResult = await syncJournal(db, range);
     const journal = await fetchJournal(db, range.raw);
 
@@ -696,27 +644,29 @@ async function handlePost(context, db, adminUser) {
       details: syncResult,
     });
 
-    return json({ ok: true, period: range.raw, sync_result: syncResult, ...journal });
+    return jsonResponse({
+      ok: true,
+      period: range.raw,
+      sync_result: syncResult,
+      ...journal,
+    });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: "accounting_journal",
       incident_code: "journal_sync_failed",
       severity: "error",
       message: "Failed to sync monthly accounting journal.",
-      related_user_id: Number(adminUser.user_id || 0),
+      related_user_id: adminUser.user_id,
       details: {
         month: range.raw,
-        action,
         error: String(error?.message || error || "Unknown error"),
       },
     });
 
-    return json(
+    return jsonResponse(
       {
         ok: false,
-        error: action === "clear_month"
-          ? "Could not clear accounting journal rows for this month."
-          : "Could not sync accounting journal for this month.",
+        error: "Could not sync accounting journal for this month.",
         period: range.raw,
       },
       500
@@ -726,20 +676,20 @@ async function handlePost(context, db, adminUser) {
 
 export async function onRequestGet(context) {
   const db = getDb(context.env);
-  if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
+  if (!db) return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
 
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
-  if (!adminUser) return json({ ok: false, error: "Admin access required." }, 401);
+  if (!adminUser) return jsonResponse({ ok: false, error: "Admin access required." }, 401);
 
   return handleGet(context, db);
 }
 
 export async function onRequestPost(context) {
   const db = getDb(context.env);
-  if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
+  if (!db) return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
 
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
-  if (!adminUser) return json({ ok: false, error: "Admin access required." }, 401);
+  if (!adminUser) return jsonResponse({ ok: false, error: "Admin access required." }, 401);
 
   return handlePost(context, db, adminUser);
 }

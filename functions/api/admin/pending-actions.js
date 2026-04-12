@@ -79,7 +79,6 @@ async function ensureTable(db) {
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_status_created ON admin_pending_actions(queue_status, created_at DESC)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_order_status ON admin_pending_actions(order_id, queue_status, created_at DESC)`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pending_actions(action_scope, queue_status, created_at DESC)`).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_endpoint_status ON admin_pending_actions(action_scope, endpoint_path, queue_status, created_at DESC)`).run();
 }
 
 
