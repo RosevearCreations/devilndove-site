@@ -294,3 +294,11 @@ The admin orders stack now has both server-side partial fallbacks and client-sid
 - Tool, supply, and featured creation syncs continue to upsert into `catalog_items`.
 - Movie sync now upserts into `movie_catalog` so hybrid JSON + D1 movie authority can move forward without crashing `catalog_items`.
 - The admin catalog sync panel now reports fetched counts, upsert counts, target table, source path, and warnings for each selected collection.
+
+## Current Pass Note — 2026-04-12
+
+- Movie catalog sync was changed from one-row-at-a-time D1 writes to chunked `db.batch(...)` upserts so large movie imports stay under the Worker invocation API-request ceiling.
+- `/api/admin/products` was hardened to detect optional table availability and fall back to a simpler products query instead of failing the full admin page with a 500 during staged migration.
+- `_headers` now explicitly allows `https://static.cloudflareinsights.com` in `script-src` so the Cloudflare Insights beacon is no longer blocked by the current CSP.
+- Catalog sync remains the correct path for moving Tools, Supplies, and Featured Creations toward D1-first authority. Movies remain hybrid, but the migration path is now batch-safe.
+
