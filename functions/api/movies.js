@@ -113,6 +113,20 @@ function deriveCoverUrl(row, side) {
   return `${base}/${upc}${side === "front" ? "f" : "b"}.jpg`;
 }
 
+
+function movieIdentityKeys(row) {
+  const keys = [];
+  const upc = normalizeText(row.upc).toLowerCase();
+  const slug = normalizeText(row.slug).toLowerCase();
+  const title = normalizeText(row.title || row.original_title).toLowerCase();
+  const year = normalizeText(row.release_year).toLowerCase();
+  if (upc) keys.push(`upc:${upc}`);
+  if (slug) keys.push(`slug:${slug}`);
+  if (title && year) keys.push(`titleyear:${title}::${year}`);
+  if (title) keys.push(`title:${title}`);
+  return Array.from(new Set(keys));
+}
+
 function buildTrailerSearchUrl(title, year) {
   const q = encodeURIComponent([normalizeText(title), normalizeText(year), "official trailer"].filter(Boolean).join(" "));
   return q ? `https://www.youtube.com/results?search_query=${q}` : "";
@@ -321,21 +335,27 @@ export async function onRequestGet(context) {
   if (!overlayItems.length) warnings.push('movie_d1_overlay_empty');
 
   const byKey = new Map();
+  const canonicalItems = [];
 
-  for (const row of baseItems) {
-    const key = normalizeText(row.upc || row.slug);
-    if (!key) continue;
-    byKey.set(key, row);
+  function registerMovie(row) {
+    const keys = movieIdentityKeys(row);
+    let existing = null;
+    for (const key of keys) {
+      if (byKey.has(key)) { existing = byKey.get(key); break; }
+    }
+    const merged = existing ? mergeMovieRows(existing, row) : row;
+    if (!existing) canonicalItems.push(merged);
+    else {
+      const index = canonicalItems.indexOf(existing);
+      if (index >= 0) canonicalItems[index] = merged;
+    }
+    for (const key of keys) byKey.set(key, merged);
   }
 
-  for (const row of overlayItems) {
-    const key = normalizeText(row.upc || row.slug);
-    if (!key) continue;
-    const existing = byKey.get(key);
-    byKey.set(key, existing ? mergeMovieRows(existing, row) : row);
-  }
+  baseItems.forEach(registerMovie);
+  overlayItems.forEach(registerMovie);
 
-  let items = Array.from(byKey.values())
+  let items = canonicalItems
     .filter((row) => row.status !== "archived")
     .filter((row) => matchesQuery(row, q))
     .filter((row) => filterByField(row, year, row.release_year))
@@ -379,7 +399,10 @@ export async function onRequestGet(context) {
       has_more: safePage < totalPages,
       from: totalItems ? offset + 1 : 0,
       to: totalItems ? offset + pagedItems.length : 0,
-      source: "movie_catalog_enriched.v2.json with optional D1 overlay",
+      source: !baseItems.length && overlayItems.length ? 'D1 overlay rows only' : 'movie_catalog_enriched.v2.json with D1 overlay and title/year matching',
+      authority_mode: !baseItems.length && overlayItems.length ? 'd1-overlay-only' : (overlayItems.length >= Math.max(1, Math.floor(baseItems.length * 0.8)) ? 'hybrid-d1-ready' : 'json-base-with-d1-overlay'),
+      base_row_count: baseItems.length,
+      overlay_row_count: overlayItems.length,
       has_db_overlay: overlayItems.length > 0,
       with_front_image: items.filter((row) => row.front_image_url).length,
       with_back_image: items.filter((row) => row.back_image_url).length,
