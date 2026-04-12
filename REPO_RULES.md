@@ -1,3 +1,4 @@
+- Latest pass reminder: when migrating toward one source of truth, every admin list endpoint must tolerate partially migrated databases without returning a hard 500.
 # Repo Rules
 
 - Keep all schema files and Markdown docs in sync with the current build state.
@@ -185,12 +186,3 @@ For admin order/payment work, prefer partial success plus a warning over whole-s
 - Expanded shared replay coverage from order/payment and product review into product edit/update failures through the same `admin_pending_actions` queue, with browser-local storage kept only as the last safety net.
 - Strengthened the public movies API merge logic so D1 overlay rows can match JSON rows by UPC, slug, or title/year instead of only one identifier path.
 - Updated the phone dashboard and accounting overview to show journal health, explicit overhead overrides, and queued product-edit actions more honestly.
-
-
-## Current pass completion update
-
-- Re-aligned `/api/admin/accounting-journal` to the documented SQL journal schema and rebuilt the month-sync flow so managed journal rows are cleared and rebuilt more honestly.
-- Expanded shared replay beyond order/product-edit work: failed create-product and product-SEO saves now queue into `admin_pending_actions`, with browser-local fallback remaining only as the last safety net.
-- Added reporting/support indexes for journal balance review and for queue filtering by scope plus endpoint.
-- Added a D1-preview mode to `/api/movies` so movie authority migration can be tested safely before a full D1 cutover.
-- Source-of-truth direction after this pass: keep consolidating products, accounting, inventory, and admin replay into D1-first authority; keep movies hybrid a little longer until D1-preview parity is proven.
