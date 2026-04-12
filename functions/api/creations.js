@@ -27,34 +27,61 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 }
 
-function repairAbsoluteUrl(value) {
+function repairProtocol(value) {
   const raw = normalizeText(value);
   if (!raw) return "";
   if (/^https?:\/\/.+/i.test(raw)) return raw;
   if (/^https?:\/[^/].+/i.test(raw)) {
-    return raw.replace(/^https?:\//i, (match) => match.startsWith("https") ? "https://" : "http://");
+    return raw.replace(/^https?:\//i, (match) =>
+      match.toLowerCase().startsWith("https") ? "https://" : "http://"
+    );
   }
   return raw;
 }
 
-function normalizeAssetKey(value, assetPrefix = "Itemsforsale") {
-  const raw = normalizeText(value).replace(/^\/+/, "");
-  if (!raw) return "";
+function normalizeAbsoluteAssetUrl(value, assetOrigin, assetPrefix = "Itemsforsale") {
+  const repaired = repairProtocol(value);
+  if (!/^https?:\/\//i.test(repaired)) return repaired;
 
-  const repaired = repairAbsoluteUrl(raw);
-  if (/^https?:\/\//i.test(repaired) || repaired.startsWith("/")) {
+  try {
+    const parsed = new URL(repaired);
+    const origin = new URL(assetOrigin);
+
+    if (parsed.origin !== origin.origin) {
+      return repaired;
+    }
+
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    if (!parts.length) return repaired;
+
+    if (parts[0].toLowerCase() === "itemsforsale") {
+      parts[0] = assetPrefix;
+      parsed.pathname = `/${parts.map(encodeURIComponent).join("/")}`;
+      return parsed.toString();
+    }
+
+    return repaired;
+  } catch {
     return repaired;
   }
+}
 
-  const parts = repaired.split("/").filter(Boolean);
+function normalizeAssetKey(value, assetPrefix = "Itemsforsale") {
+  const raw = repairProtocol(value).replace(/^\/+/, "");
+  if (!raw) return "";
+
+  if (/^https?:\/\//i.test(raw)) {
+    return raw;
+  }
+
+  const parts = raw.split("/").filter(Boolean);
   if (!parts.length) return "";
 
   if (parts.length === 1) {
     return `${assetPrefix}/${parts[0]}`;
   }
 
-  const first = parts[0].toLowerCase();
-  if (first === "itemsforsale") {
+  if (parts[0].toLowerCase() === "itemsforsale") {
     parts[0] = assetPrefix;
   }
 
@@ -65,8 +92,13 @@ function buildAssetUrl(value, assetOrigin, assetPrefix = "Itemsforsale") {
   const raw = normalizeText(value);
   if (!raw) return "";
 
-  const repaired = repairAbsoluteUrl(raw);
-  if (/^https?:\/\//i.test(repaired) || repaired.startsWith("/")) {
+  const repaired = repairProtocol(raw);
+
+  if (/^https?:\/\//i.test(repaired)) {
+    return normalizeAbsoluteAssetUrl(repaired, assetOrigin, assetPrefix);
+  }
+
+  if (repaired.startsWith("/")) {
     return repaired;
   }
 
@@ -74,7 +106,7 @@ function buildAssetUrl(value, assetOrigin, assetPrefix = "Itemsforsale") {
   if (!key) return "";
 
   if (/^https?:\/\//i.test(key) || key.startsWith("/")) {
-    return key;
+    return normalizeAbsoluteAssetUrl(key, assetOrigin, assetPrefix);
   }
 
   const encoded = key
@@ -111,53 +143,24 @@ function normalizeCreationItem(source, row = null, options = {}) {
     buildAssetUrl(sourceImageValue, assetOrigin, assetPrefix) ||
     buildAssetUrl(finalR2Key, assetOrigin, assetPrefix);
 
-  const title =
-    row?.name ||
-    source.title ||
-    source.name ||
-    "Creation";
+  const title = row?.name || source.title || source.name || "Creation";
 
   return {
     ...source,
     id: source.id || row?.source_key || row?.catalog_item_id || slugify(title),
     name: row?.name || source.name || source.title || "Creation",
     title,
-    slug:
-      row?.slug ||
-      source.slug ||
-      slugify(title),
-    section:
-      row?.category ||
-      source.section ||
-      "Featured creation",
-    category:
-      row?.category ||
-      source.category ||
-      source.section ||
-      "Featured creation",
-    type:
-      row?.subcategory ||
-      row?.item_type ||
-      source.type ||
-      source.subcategory ||
-      "",
-    subcategory:
-      row?.subcategory ||
-      source.subcategory ||
-      row?.item_type ||
-      source.type ||
-      "",
+    slug: row?.slug || source.slug || slugify(title),
+    section: row?.category || source.section || "Featured creation",
+    category: row?.category || source.category || source.section || "Featured creation",
+    type: row?.subcategory || row?.item_type || source.type || source.subcategory || "",
+    subcategory: row?.subcategory || source.subcategory || row?.item_type || source.type || "",
     image: finalImageUrl,
     image_url: finalImageUrl,
     image_file: finalImageFile,
     r2_object_key: finalR2Key,
     description: row?.short_description || source.description || "",
-    caption:
-      row?.notes ||
-      source.caption ||
-      source.description ||
-      source.alt ||
-      "",
+    caption: row?.notes || source.caption || source.description || source.alt || "",
     notes: row?.notes || source.notes || "",
     material: source.material || source.materials || "",
     materials: Array.isArray(source.materials)
@@ -196,9 +199,7 @@ async function loadJsonFallback(request, assetOrigin, assetPrefix) {
               `${slugify(item.name || item.title || "creation")}-${index + 1}`,
             name: item.name || item.title || `Creation ${index + 1}`,
             title: item.title || item.name || `Creation ${index + 1}`,
-            slug:
-              item.slug ||
-              slugify(item.name || item.title || `creation-${index + 1}`),
+            slug: item.slug || slugify(item.name || item.title || `creation-${index + 1}`),
           },
           null,
           { asset_origin: assetOrigin, asset_prefix: assetPrefix }
@@ -270,6 +271,7 @@ export async function onRequestGet(context) {
         } catch {
           source = {};
         }
+
         return normalizeCreationItem(source, row, {
           asset_origin: assetOrigin,
           asset_prefix: assetPrefix,
@@ -300,9 +302,7 @@ export async function onRequestGet(context) {
 
     if (fallback.items.length) {
       items = query
-        ? fallback.items
-            .filter((item) => JSON.stringify(item).toLowerCase().includes(query))
-            .slice(0, limit)
+        ? fallback.items.filter((item) => JSON.stringify(item).toLowerCase().includes(query)).slice(0, limit)
         : fallback.items.slice(0, limit);
 
       authority = items.length ? "json_fallback" : authority;
