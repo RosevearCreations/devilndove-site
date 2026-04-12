@@ -1044,3 +1044,8 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- Current pass note: catalog migration sync now accepts both collections and legacy item_kinds payloads.
 -- Tools, supplies, and featured creations continue to upsert into catalog_items.
 -- Movies now sync into movie_catalog so hybrid JSON + D1 movie authority can advance without violating the catalog_items item_kind constraint.
+-- Current Pass Note — 2026-04-12
+-- Movie catalog sync now uses chunked D1 batch upserts to stay below Worker invocation request ceilings.
+-- Admin products now supports degraded query fallback during staged schema/data migrations.
+-- No new tables were introduced in this pass; schema files were refreshed to reflect the current operational state.
+
