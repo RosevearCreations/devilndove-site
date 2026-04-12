@@ -199,11 +199,18 @@ export async function computeMonthlyItemCosting(db, range) {
   `).bind(...salesBindings).all().catch(() => ({ results: [] })));
 
   const overheadPools = hasOverhead ? normalizeResults(await db.prepare(`
-    SELECT allocation_basis, COALESCE(SUM(COALESCE(amount_cents,0)),0) AS amount_cents
+    SELECT ledger_code, allocation_basis, COALESCE(SUM(COALESCE(amount_cents,0)),0) AS amount_cents
     FROM accounting_overhead_allocations
     WHERE period_month = ?
-    GROUP BY allocation_basis
-    ORDER BY allocation_basis ASC
+    GROUP BY ledger_code, allocation_basis
+    ORDER BY ledger_code ASC, allocation_basis ASC
+  `).bind(range.raw).all().catch(() => ({ results: [] }))) : [];
+
+  const hasProductOverheadOverrides = await tableExists(db, 'accounting_overhead_product_allocations');
+  const productOverheadOverrides = hasProductOverheadOverrides ? normalizeResults(await db.prepare(`
+    SELECT period_month, ledger_code, product_id, amount_cents, notes
+    FROM accounting_overhead_product_allocations
+    WHERE period_month = ?
   `).bind(range.raw).all().catch(() => ({ results: [] }))) : [];
 
   const candidateRows = chooseAllocationRows(rows);
@@ -213,9 +220,37 @@ export async function computeMonthlyItemCosting(db, range) {
   for (const poolRow of overheadPools) {
     const poolAmount = Math.max(0, cents(poolRow.amount_cents));
     if (!poolAmount) continue;
-    const weightMeta = describeWeighting(poolRow.allocation_basis, candidateRows);
-    const poolAllocations = buildAllocationMap(poolAmount, candidateRows, weightMeta.weightFn);
-    for (const row of candidateRows) {
+
+    const ledgerCode = String(poolRow.ledger_code || '').trim().toUpperCase();
+    const explicitOverrides = productOverheadOverrides.filter((row) => String(row.ledger_code || '').trim().toUpperCase() === ledgerCode);
+    const reservedOverrideCents = explicitOverrides.reduce((sum, row) => sum + Math.max(0, cents(row.amount_cents)), 0);
+
+    for (const overrideRow of explicitOverrides) {
+      const productId = Number(overrideRow.product_id || 0);
+      if (!productId) continue;
+      const product = rows.find((entry) => Number(entry.product_id || 0) === productId) || null;
+      const soldUnits = Math.max(0, cents(product?.sold_quantity_in_period));
+      const divisorUnits = soldUnits > 0 ? soldUnits : 1;
+      const current = allocationDetailsByProduct.get(productId) || [];
+      const overrideAmount = Math.max(0, cents(overrideRow.amount_cents));
+      current.push({
+        allocation_basis: 'product_override',
+        weighting_mode: ledgerCode ? `explicit-${ledgerCode.toLowerCase()}` : 'explicit-product-override',
+        allocated_pool_cents: overrideAmount,
+        allocated_per_unit_cents: Math.round(overrideAmount / divisorUnits),
+        divisor_units: divisorUnits,
+        ledger_code: ledgerCode,
+        notes: overrideRow.notes || '',
+      });
+      allocationDetailsByProduct.set(productId, current);
+    }
+
+    const distributableAmount = Math.max(0, poolAmount - reservedOverrideCents);
+    const overriddenProductIds = new Set(explicitOverrides.map((row) => Number(row.product_id || 0)).filter((id) => id > 0));
+    const allocationRows = candidateRows.filter((row) => !overriddenProductIds.has(Number(row.product_id || 0)));
+    const weightMeta = describeWeighting(poolRow.allocation_basis, allocationRows);
+    const poolAllocations = buildAllocationMap(distributableAmount, allocationRows, weightMeta.weightFn);
+    for (const row of allocationRows) {
       const productId = Number(row.product_id || 0);
       if (!productId) continue;
       const productPoolShare = cents(poolAllocations.get(productId));
@@ -229,14 +264,19 @@ export async function computeMonthlyItemCosting(db, range) {
         allocated_pool_cents: productPoolShare,
         allocated_per_unit_cents: Math.round(productPoolShare / divisorUnits),
         divisor_units: divisorUnits,
+        ledger_code: ledgerCode,
       });
       allocationDetailsByProduct.set(productId, current);
     }
     overheadPoolSummaries.push({
+      ledger_code: ledgerCode,
       allocation_basis: weightMeta.applied_basis,
       weighting_mode: weightMeta.weighting_mode,
       amount_cents: poolAmount,
-      product_count: candidateRows.length,
+      reserved_override_cents: reservedOverrideCents,
+      distributed_pool_cents: distributableAmount,
+      explicit_override_count: explicitOverrides.length,
+      product_count: allocationRows.length,
     });
   }
 
@@ -303,6 +343,7 @@ export async function computeMonthlyItemCosting(db, range) {
       estimated_recognized_overhead_cogs_cents: recognizedOverheadCogs,
       estimated_recognized_full_cogs_cents: recognizedBaseCogs + recognizedOverheadCogs,
       overhead_pools: overheadPoolSummaries,
+      explicit_product_overrides_count: productOverheadOverrides.length,
     },
   };
 }
