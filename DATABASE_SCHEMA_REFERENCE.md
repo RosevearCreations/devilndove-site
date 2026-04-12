@@ -372,3 +372,10 @@ Stores fallback and error events from public/admin paths. Current write-path cov
 ## Current pass update
 - Added `idx_admin_pending_actions_scope_status` so shared pending admin actions can be filtered and reviewed by action scope more efficiently.
 - `admin_pending_actions` should now be read as the shared replay queue for both order/payment writes and product review/publish writes.
+
+## Current pass completion update
+- Added `accounting_overhead_product_allocations` so monthly overhead can now be assigned directly to specific products by ledger code instead of relying only on pool-wide share logic.
+- Added a rough journal foundation with `accounting_journal_entries` and `accounting_journal_lines`, plus `/api/admin/accounting-journal` to sync and review month-level double-entry style bookkeeping.
+- Expanded shared replay coverage from order/payment and product review into product edit/update failures through the same `admin_pending_actions` queue, with browser-local storage kept only as the last safety net.
+- Strengthened the public movies API merge logic so D1 overlay rows can match JSON rows by UPC, slug, or title/year instead of only one identifier path.
+- Updated the phone dashboard and accounting overview to show journal health, explicit overhead overrides, and queued product-edit actions more honestly.

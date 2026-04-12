@@ -281,3 +281,10 @@ The admin orders stack now has both server-side partial fallbacks and client-sid
 - Treat `/api/social-feed` as the authority for YouTube thumbnail URLs and fallback candidates on the public social page.
 - Treat `admin_pending_actions` as shared replay coverage for product review actions as well as order/payment writes.
 - Treat `/api/admin/accounting-item-costing` as a thin endpoint over `_costing.js`, not as a separate standalone costing model.
+
+## Current pass completion update
+- Added `accounting_overhead_product_allocations` so monthly overhead can now be assigned directly to specific products by ledger code instead of relying only on pool-wide share logic.
+- Added a rough journal foundation with `accounting_journal_entries` and `accounting_journal_lines`, plus `/api/admin/accounting-journal` to sync and review month-level double-entry style bookkeeping.
+- Expanded shared replay coverage from order/payment and product review into product edit/update failures through the same `admin_pending_actions` queue, with browser-local storage kept only as the last safety net.
+- Strengthened the public movies API merge logic so D1 overlay rows can match JSON rows by UPC, slug, or title/year instead of only one identifier path.
+- Updated the phone dashboard and accounting overview to show journal health, explicit overhead overrides, and queued product-edit actions more honestly.

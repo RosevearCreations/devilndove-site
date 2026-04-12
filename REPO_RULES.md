@@ -178,3 +178,10 @@ For admin order/payment work, prefer partial success plus a warning over whole-s
 ## Current pass note
 - When extending admin replay coverage, prefer the shared `admin_pending_actions` queue first and browser-local storage only as the last safety net. This now applies to product review actions too, not only order detail writes.
 - When changing the social hub, prefer thumbnail/image cards with graceful fallback over brittle iframe-only presentation.
+
+## Current pass completion update
+- Added `accounting_overhead_product_allocations` so monthly overhead can now be assigned directly to specific products by ledger code instead of relying only on pool-wide share logic.
+- Added a rough journal foundation with `accounting_journal_entries` and `accounting_journal_lines`, plus `/api/admin/accounting-journal` to sync and review month-level double-entry style bookkeeping.
+- Expanded shared replay coverage from order/payment and product review into product edit/update failures through the same `admin_pending_actions` queue, with browser-local storage kept only as the last safety net.
+- Strengthened the public movies API merge logic so D1 overlay rows can match JSON rows by UPC, slug, or title/year instead of only one identifier path.
+- Updated the phone dashboard and accounting overview to show journal health, explicit overhead overrides, and queued product-edit actions more honestly.

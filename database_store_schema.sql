@@ -467,6 +467,54 @@ CREATE INDEX IF NOT EXISTS idx_accounting_overhead_allocations_month ON accounti
 -- Current pass note: runtime_incidents remains the server-side fallback/error log table, and `/api/admin/runtime-incidents` now reads from it for admin review while client pages keep last-good snapshot fallbacks in the browser. This pass also adds order/payment-focused partial fallbacks plus a code/path index so admin incident review can stay fast as more endpoint warnings are recorded.
 
 
+
+CREATE TABLE IF NOT EXISTS accounting_overhead_product_allocations (
+  overhead_product_allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_month TEXT NOT NULL,
+  ledger_code TEXT NOT NULL DEFAULT '',
+  product_id INTEGER NOT NULL,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(period_month, ledger_code, product_id)
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_month ON accounting_overhead_product_allocations(period_month, ledger_code, product_id);
+CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_product ON accounting_overhead_product_allocations(product_id, period_month DESC);
+
+CREATE TABLE IF NOT EXISTS accounting_journal_entries (
+  accounting_journal_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_month TEXT NOT NULL,
+  entry_date TEXT,
+  source_type TEXT NOT NULL,
+  source_id TEXT,
+  source_reference TEXT,
+  memo TEXT,
+  is_balanced INTEGER NOT NULL DEFAULT 1,
+  total_debit_cents INTEGER NOT NULL DEFAULT 0,
+  total_credit_cents INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(period_month, source_type, source_id)
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_period ON accounting_journal_entries(period_month, entry_date DESC, accounting_journal_entry_id DESC);
+CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_id, period_month);
+
+CREATE TABLE IF NOT EXISTS accounting_journal_lines (
+  accounting_journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  accounting_journal_entry_id INTEGER NOT NULL,
+  line_order INTEGER NOT NULL DEFAULT 0,
+  ledger_code TEXT NOT NULL,
+  ledger_name TEXT NOT NULL,
+  entry_side TEXT NOT NULL CHECK(entry_side IN ('debit','credit')),
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  memo TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (accounting_journal_entry_id) REFERENCES accounting_journal_entries(accounting_journal_entry_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(accounting_journal_entry_id, line_order ASC);
+CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_ledger ON accounting_journal_lines(ledger_code, entry_side, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS admin_pending_actions (
   admin_pending_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
   client_action_id TEXT,

@@ -276,3 +276,10 @@ When continuing from this build, treat the admin orders area as partially harden
 - `/api/admin/accounting-item-costing` now uses the shared `_costing.js` engine so item costing reflects basis-aware overhead pools, sold-unit recognition, and rough recognized COGS instead of the older flat revenue-share-only view.
 - The public social hub now returns derived YouTube thumbnail URLs and fallback candidates through `/api/social-feed`, and the browser renders thumbnail cards instead of relying on fragile iframe-only embeds.
 - Shared `admin_pending_actions` queue coverage now includes product review actions from the catalog/products screen, with browser-local storage kept only as the last safety net.
+
+## Current pass completion update
+- Added `accounting_overhead_product_allocations` so monthly overhead can now be assigned directly to specific products by ledger code instead of relying only on pool-wide share logic.
+- Added a rough journal foundation with `accounting_journal_entries` and `accounting_journal_lines`, plus `/api/admin/accounting-journal` to sync and review month-level double-entry style bookkeeping.
+- Expanded shared replay coverage from order/payment and product review into product edit/update failures through the same `admin_pending_actions` queue, with browser-local storage kept only as the last safety net.
+- Strengthened the public movies API merge logic so D1 overlay rows can match JSON rows by UPC, slug, or title/year instead of only one identifier path.
+- Updated the phone dashboard and accounting overview to show journal health, explicit overhead overrides, and queued product-edit actions more honestly.
