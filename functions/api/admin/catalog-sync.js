@@ -253,10 +253,16 @@ function mapMovieRow(row, index, sourcePath) {
   };
 }
 
+function chunkRows(rows, size = 50) {
+  const chunks = [];
+  for (let index = 0; index < rows.length; index += size) chunks.push(rows.slice(index, index + size));
+  return chunks;
+}
+
 async function upsertCatalogRows(db, rows) {
   let upserted = 0;
-  for (const row of rows) {
-    await db.prepare(`
+  for (const chunk of chunkRows(rows, 50)) {
+    const statements = chunk.map((row) => db.prepare(`
       INSERT INTO catalog_items (
         item_kind, source_key, slug, name, brand, category, subcategory, item_type,
         short_description, notes, image_url, r2_object_key, amazon_url, storage_location,
@@ -302,16 +308,17 @@ async function upsertCatalogRows(db, rows) {
       Number(row.sort_order || 0),
       row.source_record_json || null,
       row.source_json_path || null
-    ).run();
-    upserted += 1;
+    ));
+    await db.batch(statements);
+    upserted += chunk.length;
   }
   return upserted;
 }
 
 async function upsertMovieRows(db, rows) {
   let upserted = 0;
-  for (const row of rows) {
-    await db.prepare(`
+  for (const chunk of chunkRows(rows, 25)) {
+    const statements = chunk.map((row) => db.prepare(`
       INSERT INTO movie_catalog (
         upc, slug, title, original_title, sort_title, summary, release_year,
         media_format, genre, director_names, actor_names, front_image_url,
@@ -383,8 +390,9 @@ async function upsertMovieRows(db, rows) {
       row.featured_rank,
       row.source_record_json || null,
       row.source_json_path || null
-    ).run();
-    upserted += 1;
+    ));
+    await db.batch(statements);
+    upserted += chunk.length;
   }
   return upserted;
 }
@@ -487,6 +495,7 @@ export async function onRequestPost(context) {
         source_path: fetched.source_path || definition.fetch_paths[0],
         tried_paths: fetched.tried_paths,
         warnings: fetched.warnings,
+        write_mode: collection === 'movies' ? 'batched_d1_upsert_25' : 'batched_d1_upsert_50',
       });
     }
 
