@@ -1,4 +1,3 @@
--- Current pass note: no new schema objects were required; this pass focused on admin compatibility hardening for catalog sync and products during staged JSON-to-D1 migration.
 -- File: /database_upgrade_current_pass.sql
 -- Brief description: Incremental upgrade SQL for older Devil n Dove D1/SQLite databases.
 -- This pass focuses on movie overlay compatibility, phone-first product capture fields,
@@ -425,3 +424,7 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_order_status ON admin_pendi
 CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pending_actions(action_scope, queue_status, created_at DESC);
 
 -- Current pass note: admin_pending_actions now provides a shared cross-device replay queue for failed admin writes, including order/payment actions and product review actions, while browser-local fallback remains the last safety net when even the queue cannot be reached.
+
+-- Current pass note: catalog migration sync now accepts both collections and legacy item_kinds payloads.
+-- Tools, supplies, and featured creations continue to upsert into catalog_items.
+-- Movies now sync into movie_catalog so hybrid JSON + D1 movie authority can advance without violating the catalog_items item_kind constraint.

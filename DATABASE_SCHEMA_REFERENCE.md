@@ -1,4 +1,3 @@
-- No new core tables were introduced in this pass. The strongest work was compatibility hardening around existing `catalog_items`, `products`, `product_seo`, `product_images`, `product_resource_links`, and `site_item_inventory` so partially migrated databases keep the admin UI usable during source-of-truth cleanup.
 # Database Schema Reference
 
 ## Core auth
@@ -380,3 +379,9 @@ Stores fallback and error events from public/admin paths. Current write-path cov
 - Expanded shared replay coverage from order/payment and product review into product edit/update failures through the same `admin_pending_actions` queue, with browser-local storage kept only as the last safety net.
 - Strengthened the public movies API merge logic so D1 overlay rows can match JSON rows by UPC, slug, or title/year instead of only one identifier path.
 - Updated the phone dashboard and accounting overview to show journal health, explicit overhead overrides, and queued product-edit actions more honestly.
+
+## Current pass note
+- Catalog migration sync now accepts both `collections` and legacy `item_kinds` payloads.
+- Tool, supply, and featured creation syncs continue to upsert into `catalog_items`.
+- Movie sync now upserts into `movie_catalog` so hybrid JSON + D1 movie authority can move forward without crashing `catalog_items`.
+- The admin catalog sync panel now reports fetched counts, upsert counts, target table, source path, and warnings for each selected collection.

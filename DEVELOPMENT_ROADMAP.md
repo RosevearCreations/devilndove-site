@@ -1,4 +1,3 @@
-- Current pass: fixed admin catalog sync request/response shape, added source-path fallback for JSON imports into `catalog_items`, hardened `/api/admin/products` so partially migrated databases no longer 500, and allowed Cloudflare Insights through CSP when enabled.
 # Development Roadmap
 
 ## Current completed foundations
@@ -321,3 +320,9 @@
 - Expanded shared replay coverage from order/payment and product review into product edit/update failures through the same `admin_pending_actions` queue, with browser-local storage kept only as the last safety net.
 - Strengthened the public movies API merge logic so D1 overlay rows can match JSON rows by UPC, slug, or title/year instead of only one identifier path.
 - Updated the phone dashboard and accounting overview to show journal health, explicit overhead overrides, and queued product-edit actions more honestly.
+
+## Current pass note
+- Catalog migration sync now accepts both `collections` and legacy `item_kinds` payloads.
+- Tool, supply, and featured creation syncs continue to upsert into `catalog_items`.
+- Movie sync now upserts into `movie_catalog` so hybrid JSON + D1 movie authority can move forward without crashing `catalog_items`.
+- The admin catalog sync panel now reports fetched counts, upsert counts, target table, source path, and warnings for each selected collection.
