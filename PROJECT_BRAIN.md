@@ -320,3 +320,10 @@ Operational priority moved to admin resiliency this pass: order list, order deta
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass update — 2026-04-12
+
+- Finished products now assume a DD-series numbering floor of `DD1000`.
+- The phone-first product capture path and the regular create-product path now share the same numbering helper logic.
+- Older databases may not have the app setting row yet, so the runtime fallback to `1000` is intentional and should remain in place until every environment is upgraded.
+

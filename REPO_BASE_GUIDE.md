@@ -304,3 +304,16 @@ The admin orders stack now has both server-side partial fallbacks and client-sid
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass update — 2026-04-12
+
+Touched areas in this pass:
+- `functions/api/admin/_product-numbering.js`
+- `functions/api/admin/product-mobile-bootstrap.js`
+- `functions/api/admin/mobile-create-product.js`
+- `functions/api/admin/create-product.js`
+- `public/js/admin-mobile-product.js`
+- `admin/mobile-product/index.html`
+- `offline.html`
+- main schema/upgrade SQL files and handoff docs
+

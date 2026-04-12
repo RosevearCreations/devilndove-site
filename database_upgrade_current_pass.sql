@@ -1,3 +1,4 @@
+-- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- File: /database_upgrade_current_pass.sql
 -- Brief description: Incremental upgrade SQL for older Devil n Dove D1/SQLite databases.
 -- This pass focuses on movie overlay compatibility, phone-first product capture fields,
@@ -7,6 +8,20 @@
 -- If a statement fails with a duplicate-column error, skip that one and continue.
 
 PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS app_settings (
+  app_setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  setting_key TEXT NOT NULL UNIQUE,
+  setting_value TEXT,
+  is_public INTEGER NOT NULL DEFAULT 0,
+  updated_by_user_id INTEGER,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (updated_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
+INSERT OR IGNORE INTO app_settings (setting_key, setting_value, is_public)
+VALUES ('site.catalog.product_number_start', '1000', 0);
+
 
 -- Movie overlay compatibility for JSON-first + D1-override workflow.
 CREATE TABLE IF NOT EXISTS movie_catalog (

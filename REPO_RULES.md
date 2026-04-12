@@ -201,3 +201,10 @@ For admin order/payment work, prefer partial success plus a warning over whole-s
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass rule addendum — 2026-04-12
+
+- Treat `DD1000` as the minimum finished-product number unless the database already has a higher product number.
+- Any new product-entry workflow must use the shared numbering helper or the same app-setting-backed logic, not its own local counter.
+- When docs or schema seeds change around numbering or SEO policy, update the handoff markdown files in the same pass.
+

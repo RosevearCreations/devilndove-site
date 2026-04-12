@@ -1,3 +1,4 @@
+-- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- File: /database_growth_analytics_seo_extension.sql
 -- Brief description: Adds analytics/security, SEO, media, inventory, movement history,
 -- search logging, and notification foundations for the current Devil n Dove build.
@@ -217,6 +218,7 @@ VALUES
   ('site.seo.default_keywords', 'Devil n Dove, handmade jewelry Ontario, artisan workshop, creative supplies, workshop tools, polymer clay jewelry, maker shop Southern Ontario', 1),
   ('site.seo.primary_h1_pattern', 'Devil n Dove | Handmade Jewelry, Creative Supplies, and Workshop Tools in Southern Ontario', 1),
   ('site.business.primary_location', 'Tillsonburg, Ontario, Canada', 1),
+  ('site.catalog.product_number_start', '1000', 0),
   ('site.notifications.retry_minutes', '15', 0),
   ('payments.paypal.enabled', 'true', 1),
   ('payments.stripe.enabled', 'true', 1);

@@ -247,3 +247,11 @@ This build is in a better state for day-to-day browsing and admin use than the p
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass check items — 2026-04-12
+
+- Verify `/admin/mobile-product/` shows `DD1000` as the first next-product number on an empty/low-number environment.
+- Verify a new phone-captured draft saves as `DD1000`, then the next bootstrap call shows `DD1001`.
+- Verify the standard admin create-product flow also writes a product number instead of leaving it null.
+- Verify exposed HTML pages still resolve to a single H1 each, and keep checking title/description/canonical consistency on public pages.
+

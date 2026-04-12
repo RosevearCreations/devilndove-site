@@ -1,3 +1,4 @@
+-- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- Current pass note: admin write-path resilience now extends beyond read-only fallback. Order status updates, manual payment recording, and refund/dispute actions log server-side incidents more defensively, while the order-detail UI can preserve failed admin writes locally for manual retry. Composite payment/refund/dispute indexes were added where those tables exist so health and follow-up queries stay responsive.
 -- =========================================================
 -- DEVIL N DOVE
@@ -286,6 +287,20 @@ CREATE INDEX IF NOT EXISTS idx_catalog_items_slug ON catalog_items(slug);
 CREATE INDEX IF NOT EXISTS idx_catalog_items_status_public ON catalog_items(status, visible_public);
 CREATE INDEX IF NOT EXISTS idx_catalog_items_public_sort ON catalog_items(item_kind, status, visible_public, sort_order, name);
 CREATE INDEX IF NOT EXISTS idx_catalog_items_grouping ON catalog_items(item_kind, category, subcategory, item_type);
+
+CREATE TABLE IF NOT EXISTS app_settings (
+  app_setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  setting_key TEXT NOT NULL UNIQUE,
+  setting_value TEXT,
+  is_public INTEGER NOT NULL DEFAULT 0,
+  updated_by_user_id INTEGER,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (updated_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
+INSERT OR IGNORE INTO app_settings (setting_key, setting_value, is_public)
+VALUES ('site.catalog.product_number_start', '1000', 0);
+
 
 CREATE TABLE IF NOT EXISTS movie_catalog (
   movie_catalog_id INTEGER PRIMARY KEY AUTOINCREMENT,

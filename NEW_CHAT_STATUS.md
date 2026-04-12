@@ -189,3 +189,12 @@ This pass focused on moving failed admin write actions beyond one browser. A new
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass handoff — 2026-04-12
+
+- Fixed the admin mobile-product numbering bug: the DD sequence now starts at `DD1000` and increments by `1` from the current highest product number.
+- Shared the numbering rule across `/api/admin/product-mobile-bootstrap`, `/api/admin/mobile-create-product`, and `/api/admin/create-product`.
+- Seeded `site.catalog.product_number_start` in the schema files so the baseline is documented as data, while runtime still falls back safely to `1000` on older databases.
+- Added a more graceful mobile bootstrap fallback and tightened the offline fallback page head tags.
+- Next sensible check: verify imports/backfills cannot still create low manual product numbers that break the DD sequence.
+

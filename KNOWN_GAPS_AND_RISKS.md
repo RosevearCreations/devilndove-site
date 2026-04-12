@@ -601,3 +601,14 @@ All code-side items that were realistically actionable inside this repo pass wer
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass update — 2026-04-12
+
+### Product numbering drift
+#### Addressed in this pass
+- The phone-first capture path no longer starts at `1`; it now respects a DD-series floor of `1000`.
+- The standard create-product API now uses the same next-number rule instead of leaving product numbers blank unless supplied manually.
+
+#### Still open
+- Imports and any external/manual backfill workflow still need the same DD-series guardrail review so older numbering cannot be reintroduced by batch operations.
+

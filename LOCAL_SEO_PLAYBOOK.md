@@ -144,3 +144,10 @@ This pass was mostly admin-resiliency work. Keep the usual one-H1, descriptive t
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass update — 2026-04-12
+
+- The public-page audit for this pass still shows one H1 per exposed HTML page.
+- The offline fallback page now includes a description/canonical/Open Graph block so even non-indexed fallback shells stay structurally tidy and easier to maintain.
+- Continue prioritizing clear page titles, visible main headings, and Southern Ontario wording that matches how real shoppers search.
+

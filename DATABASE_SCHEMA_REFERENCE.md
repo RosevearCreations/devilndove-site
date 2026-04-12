@@ -395,3 +395,10 @@ Stores fallback and error events from public/admin paths. Current write-path cov
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass update — 2026-04-12
+
+- `app_settings` now carries `site.catalog.product_number_start = 1000` as the default DD-series starting point for finished products.
+- Product entry code now reads this setting when available and safely falls back to `1000` for older databases that have not yet been upgraded.
+- Schema and upgrade SQL should keep this setting seeded so mobile and desktop product creation stay aligned.
+

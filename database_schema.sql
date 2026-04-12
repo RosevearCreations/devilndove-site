@@ -1,3 +1,4 @@
+-- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- Current pass note: admin write-path resilience now extends beyond read-only fallback. Order status updates, manual payment recording, and refund/dispute actions log server-side incidents more defensively, while the order-detail UI can preserve failed admin writes locally for manual retry. Composite payment/refund/dispute indexes were added where those tables exist so health and follow-up queries stay responsive.
 -- File: /database_schema.sql
 -- Brief description: Core application auth and admin schema for the current Devil n Dove build.
@@ -105,6 +106,20 @@ CREATE INDEX IF NOT EXISTS idx_runtime_incidents_scope ON runtime_incidents(inci
 CREATE INDEX IF NOT EXISTS idx_runtime_incidents_code_path ON runtime_incidents(incident_code, endpoint_path, created_at DESC);
 
 
+
+
+CREATE TABLE IF NOT EXISTS app_settings (
+  app_setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  setting_key TEXT NOT NULL UNIQUE,
+  setting_value TEXT,
+  is_public INTEGER NOT NULL DEFAULT 0,
+  updated_by_user_id INTEGER,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (updated_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
+INSERT OR IGNORE INTO app_settings (setting_key, setting_value, is_public)
+VALUES ('site.catalog.product_number_start', '1000', 0);
 
 
 CREATE TABLE IF NOT EXISTS movie_catalog (

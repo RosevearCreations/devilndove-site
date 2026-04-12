@@ -404,3 +404,11 @@ This pass hardens the admin orders area with partial API fallbacks, cached brows
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass update — 2026-04-12
+
+- Mobile product capture now treats the DD series as the authority for finished-product numbering, starting at `DD1000` when the catalog is empty or when older numbering is lower.
+- Product-number generation is now shared between the mobile bootstrap, mobile save flow, and general create-product API so numbering does not drift between entry paths.
+- The mobile capture screen now shows the next DD number more clearly and keeps default category/shipping choices available even if the bootstrap payload has a temporary problem.
+- `offline.html` now carries a fuller fallback head block so the offline shell stays structurally consistent with the one-H1 / title / description / canonical discipline used elsewhere.
+

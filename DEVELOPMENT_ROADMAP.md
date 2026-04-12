@@ -336,3 +336,15 @@
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass update — 2026-04-12
+
+### Completed in this pass
+- Fixed the phone-first next-product number so the DD sequence starts at `DD1000` instead of `1` on empty or low-number catalogs.
+- Unified product-number generation across the mobile bootstrap, phone save flow, and standard admin create-product API.
+- Added a safer bootstrap fallback for the mobile product screen so core entry fields remain usable even if optional lookup data has a temporary issue.
+
+### Next strongest follow-up
+- Extend the same DD-series guardrails to any CSV/import or backfill workflow that can still inject lower manual product numbers.
+- Surface the configurable `site.catalog.product_number_start` setting in the admin settings UI once the current creation path is fully verified.
+
