@@ -1,3 +1,4 @@
+// Maintenance-only helper retained for reseed/recovery work after the main catalog migration completed.
 // File: /public/js/admin-catalog-sync.js
 // Brief description: Starts the staged migration of duplicated catalog JSON into D1 so search,
 // inventory, movie overlays, and admin operations can share one cleaner source of truth.

@@ -21,3 +21,6 @@ VALUES (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Current pass note: the initial D1 catalog migration completed successfully for Tools, Supplies, Movies, and Featured Creations.
+-- The main Catalog admin page no longer exposes the day-to-day migration panel, while `/api/admin/catalog-sync` remains available for maintenance or reseed recovery only.

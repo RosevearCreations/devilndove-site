@@ -1049,3 +1049,6 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- Admin products now supports degraded query fallback during staged schema/data migrations.
 -- No new tables were introduced in this pass; schema files were refreshed to reflect the current operational state.
 
+
+-- Current pass note: the initial D1 catalog migration completed successfully for Tools, Supplies, Movies, and Featured Creations.
+-- The main Catalog admin page no longer exposes the day-to-day migration panel, while `/api/admin/catalog-sync` remains available for maintenance or reseed recovery only.
