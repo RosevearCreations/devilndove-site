@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const ORDER_PENDING_ACTIONS_KEY = 'dd_admin_order_pending_actions_v1';
   const PRODUCT_PENDING_ACTIONS_KEY = 'dd_admin_product_review_pending_actions_v1';
   const PRODUCT_UPDATE_PENDING_ACTIONS_KEY = 'dd_admin_product_update_pending_actions_v1';
+  const PRODUCT_SEO_PENDING_ACTIONS_KEY = 'dd_admin_product_seo_pending_actions_v1';
+  const PRODUCT_CREATE_PENDING_ACTIONS_KEY = 'dd_admin_product_create_pending_actions_v1';
 
   function centsToMoney(cents, currency = 'CAD') {
     const value = Number(cents || 0) / 100;
@@ -37,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   function loadPendingClientActionsCount() {
-    return countLocalRows(ORDER_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_UPDATE_PENDING_ACTIONS_KEY);
+    return countLocalRows(ORDER_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_UPDATE_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_SEO_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_CREATE_PENDING_ACTIONS_KEY);
   }
 
   function renderMonthSummary(report, costing) {
@@ -91,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_admin_order_actions_count || 0)))}</strong><div class="small">Shared queued order/payment actions</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_product_review_actions_count || 0)))}</strong><div class="small">Shared queued product review actions</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_product_update_actions_count || 0)))}</strong><div class="small">Shared queued product edit actions</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_product_seo_actions_count || 0)))}</strong><div class="small">Shared queued product SEO actions</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_product_create_actions_count || 0)))}</strong><div class="small">Shared queued create-product actions</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.outstanding_orders_count || 0)))}</strong><div class="small">Orders still waiting for payment or closure</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.payment_sync_failures_count || 0)))}</strong><div class="small">Provider refund sync failures</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.journal_imbalance_count || 0)))}</strong><div class="small">Journal rows still out of balance</div></div>
