@@ -1,3 +1,4 @@
+import { getNextProductNumber } from './_product-numbering.js';
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 
 // File: /functions/api/admin/create-product.js
@@ -49,7 +50,9 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "Invalid JSON body." }, 400);
   }
 
-  const product_number = body.product_number == null || body.product_number === "" ? null : Number(body.product_number);
+  const db = getDb(env);
+
+  const requested_product_number = body.product_number == null || body.product_number === "" ? null : Number(body.product_number);
   const name = String(body.name || "").trim();
   const slug = normalizeSlug(body.slug || body.name || "");
   const sku = String(body.sku || "").trim() || null;
@@ -84,9 +87,13 @@ export async function onRequestPost(context) {
   const og_image_url = String(body.og_image_url || '').trim() || null;
   const readiness = computeReadiness({ name, slug, price_cents, featured_image_url, product_category, meta_title, meta_description });
 
-  if (product_number !== null && (!Number.isInteger(product_number) || product_number <= 0)) {
+  if (requested_product_number !== null && (!Number.isInteger(requested_product_number) || requested_product_number <= 0)) {
     return json({ ok: false, error: "product_number must be a valid whole number." }, 400);
   }
+
+  const product_number = requested_product_number === null
+    ? await getNextProductNumber(db)
+    : requested_product_number;
   if (!name) return json({ ok: false, error: "Product name is required." }, 400);
   if (!slug) return json({ ok: false, error: "A valid slug is required." }, 400);
   if (!['physical', 'digital'].includes(product_type)) return json({ ok: false, error: "Product type must be physical or digital." }, 400);
@@ -99,12 +106,8 @@ export async function onRequestPost(context) {
   if (!Number.isInteger(inventory_quantity) || inventory_quantity < 0) return json({ ok: false, error: "inventory_quantity must be a valid whole number." }, 400);
   if (!Number.isInteger(sort_order)) return json({ ok: false, error: "sort_order must be a valid whole number." }, 400);
 
-  if (product_number !== null) {
-    const db = getDb(env);
-
   const existingProductNumber = await db.prepare(`SELECT product_id FROM products WHERE product_number = ? LIMIT 1`).bind(product_number).first();
-    if (existingProductNumber) return json({ ok: false, error: "That product number already exists." }, 409);
-  }
+  if (existingProductNumber) return json({ ok: false, error: "That product number already exists." }, 409);
 
   const existingSlug = await db.prepare(`SELECT product_id FROM products WHERE slug = ? LIMIT 1`).bind(slug).first();
   if (existingSlug) return json({ ok: false, error: "That product slug already exists." }, 409);

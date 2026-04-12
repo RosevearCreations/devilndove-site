@@ -1,4 +1,5 @@
 import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
+import { getNextProductNumber, getProductNumberStart } from "./_product-numbering.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -10,8 +11,8 @@ export async function onRequestGet(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-
-  const nextProductRow = await db.prepare(`SELECT COALESCE(MAX(product_number), 0) + 1 AS next_product_number FROM products`).first().catch(() => ({ next_product_number: 1 }));
+  const nextProductNumber = await getNextProductNumber(db);
+  const productNumberStart = await getProductNumberStart(db);
   const taxClasses = normalizeResults(await db.prepare(`SELECT tax_class_id, code, name, COALESCE(rate_percent, tax_rate, 0) AS tax_rate FROM tax_classes WHERE COALESCE(is_active,1)=1 ORDER BY LOWER(name) ASC`).all().catch(() => ({ results: [] })));
   const categoryRows = normalizeResults(await db.prepare(`
     SELECT DISTINCT TRIM(product_category) AS product_category
@@ -38,7 +39,8 @@ export async function onRequestGet(context) {
 
   return json({
     ok: true,
-    next_product_number: Number(nextProductRow?.next_product_number || 1),
+    next_product_number: Number(nextProductNumber || productNumberStart || 1000),
+    product_number_start: Number(productNumberStart || 1000),
     category_options: categoryOptions,
     color_options: ['Silver','Gold','Black','White','Red','Blue','Green','Purple','Pink','Orange','Yellow','Brown','Clear','Multicolor'],
     shipping_code_options: ['standard-jewelry','small-parcel','oversize','pickup-only','digital'],

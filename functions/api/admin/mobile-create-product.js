@@ -1,3 +1,5 @@
+import { getNextProductNumber } from './_product-numbering.js';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 }
@@ -49,10 +51,6 @@ function buildPublicUrl(env, objectKey) {
   const base = normalizeText(env.PRODUCT_MEDIA_PUBLIC_BASE_URL || env.R2_PUBLIC_BASE_URL || env.PUBLIC_R2_BASE_URL);
   if (!base) return null;
   return `${base.replace(/\/$/, '')}/${String(objectKey || '').replace(/^\/+/, '')}`;
-}
-async function getNextProductNumber(env) {
-  const row = await env.DB.prepare(`SELECT COALESCE(MAX(product_number), 0) + 1 AS next_product_number FROM products`).first().catch(() => ({ next_product_number: 1 }));
-  return Number(row?.next_product_number || 1);
 }
 async function upsertProductSeo(env, payload) {
   await env.DB.prepare(`
@@ -186,7 +184,7 @@ export async function onRequestPost(context) {
       resolvedProductId
     ).run();
   } else {
-    productNumber = await getNextProductNumber(env);
+    productNumber = await getNextProductNumber(env.DB);
     resolvedName = name || captureReference || `Draft product ${productNumber}`;
     slug = slugify(`${resolvedName}-${productNumber}`) || `product-${productNumber}`;
     sku = skuOverride || `DND-${String(productNumber).padStart(5, '0')}`;
@@ -332,6 +330,6 @@ export async function onRequestPost(context) {
     message: requestedProductId > 0 ? 'Draft product updated.' : 'Draft product saved. You can come back later to finish the details.',
     product: createdProduct,
     uploaded_images: uploaded,
-    next_product_number: productNumber + 1
+    next_product_number: await getNextProductNumber(env.DB)
   }, requestedProductId > 0 ? 200 : 201);
 }
