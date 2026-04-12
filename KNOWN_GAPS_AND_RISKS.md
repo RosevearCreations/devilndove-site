@@ -585,3 +585,22 @@ All code-side items that were realistically actionable inside this repo pass wer
 - Expanded shared replay coverage from order/payment and product review into product edit/update failures through the same `admin_pending_actions` queue, with browser-local storage kept only as the last safety net.
 - Strengthened the public movies API merge logic so D1 overlay rows can match JSON rows by UPC, slug, or title/year instead of only one identifier path.
 - Updated the phone dashboard and accounting overview to show journal health, explicit overhead overrides, and queued product-edit actions more honestly.
+
+
+## Current pass completion update
+
+### Data-model risks
+#### Addressed in this pass
+- The rough journal code now matches the documented SQL table shape instead of maintaining a conflicting entry/line model in the endpoint itself.
+- Shared replay coverage now includes failed create-product and product-SEO writes in addition to the earlier order/payment, review, and product-edit paths.
+- The movie API now supports a D1-preview read mode so D1 authority can be tested safely before a final cutover.
+
+#### Still open
+- Movies are still not fully D1-authoritative, because JSON remains the safer base until D1 parity is proven on live data.
+- The shared replay queue still needs to spread to more admin write paths like media, inventory, and purchase-order updates.
+- Journal review/posting depth is better, but still not accountant-grade double-entry workflow.
+
+#### Recommendation
+- Migrate toward one source of truth now, but do it by domain.
+- Treat D1 as the target authority for products, accounting, inventory, and admin replay first.
+- Keep movies hybrid until the D1-preview mode proves row parity, image coverage, and metadata completeness on the real catalog.

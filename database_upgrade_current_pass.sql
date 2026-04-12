@@ -381,6 +381,7 @@ CREATE TABLE IF NOT EXISTS accounting_journal_entries (
 );
 CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_period ON accounting_journal_entries(period_month, entry_date DESC, accounting_journal_entry_id DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_id, period_month);
+CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_balance ON accounting_journal_entries(period_month, is_balanced, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS accounting_journal_lines (
   accounting_journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -422,5 +423,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_pending_actions_client_action_id ON 
 CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_status_created ON admin_pending_actions(queue_status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_order_status ON admin_pending_actions(order_id, queue_status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pending_actions(action_scope, queue_status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_endpoint_status ON admin_pending_actions(action_scope, endpoint_path, queue_status, created_at DESC);
 
--- Current pass note: admin_pending_actions now provides a shared cross-device replay queue for failed admin writes, including order/payment actions and product review actions, while browser-local fallback remains the last safety net when even the queue cannot be reached.
+-- Current pass note: admin_pending_actions now provides a shared cross-device replay queue for failed admin writes, including order/payment, product review, product edit, product SEO, and create-product actions, while browser-local fallback remains the last safety net when even the queue cannot be reached.

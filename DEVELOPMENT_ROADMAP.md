@@ -22,9 +22,10 @@
 1. Stripe payment completion pass
 2. webhook retry / replay / dispatch hardening
 3. direct media upload workflow to R2 lifecycle completion
-4. broader write-path fallback and replay coverage beyond admin order detail
-5. deeper inventory operations for products, tools, and supplies
-6. richer analytics dashboards and funnel reporting
+4. broader write-path fallback and replay coverage beyond orders, product edits, product SEO, and create-product flows
+5. journal posting / review refinement and safer accountant handoff exports
+6. deeper inventory operations for products, tools, and supplies
+7. richer analytics dashboards and funnel reporting
 
 ## Media-specific roadmap
 
@@ -320,3 +321,18 @@
 - Expanded shared replay coverage from order/payment and product review into product edit/update failures through the same `admin_pending_actions` queue, with browser-local storage kept only as the last safety net.
 - Strengthened the public movies API merge logic so D1 overlay rows can match JSON rows by UPC, slug, or title/year instead of only one identifier path.
 - Updated the phone dashboard and accounting overview to show journal health, explicit overhead overrides, and queued product-edit actions more honestly.
+
+
+## Current pass completion update
+
+- Re-aligned `/api/admin/accounting-journal` to the actual SQL schema so the rough journal layer now uses the same entry/line table shape the repo documents.
+- Journal rebuild now clears and rebuilds the managed month rows instead of only upserting, which reduces stale summary rows when expense/write-off/overhead groups change.
+- Broadened the shared replay queue beyond product edits: failed create-product and product-SEO saves now go into `admin_pending_actions` first, with browser-only fallback kept as the last safety net.
+- Added queue/reporting indexes for `admin_pending_actions` plus a journal balance index for faster month-end review.
+- Added a D1-preview mode to `/api/movies` so movie migration can be tested more safely before switching the public page to fully D1-authoritative reads.
+
+## Source-of-truth direction after this pass
+
+- Yes: keep moving toward one source of truth, but do it in stages instead of flipping everything at once.
+- Products, admin writes, accounting, tools, and supplies are now the best candidates to keep consolidating into D1-first authority.
+- Movies should keep the JSON base plus D1 overlay a little longer while the new D1-preview path is tested for parity and missing-field coverage.
