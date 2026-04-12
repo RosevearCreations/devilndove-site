@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const SNAPSHOT_KEY = 'dd_mobile_admin_dashboard_snapshot_v2';
   const ORDER_PENDING_ACTIONS_KEY = 'dd_admin_order_pending_actions_v1';
   const PRODUCT_PENDING_ACTIONS_KEY = 'dd_admin_product_review_pending_actions_v1';
+  const PRODUCT_UPDATE_PENDING_ACTIONS_KEY = 'dd_admin_product_update_pending_actions_v1';
 
   function centsToMoney(cents, currency = 'CAD') {
     const value = Number(cents || 0) / 100;
@@ -36,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   function loadPendingClientActionsCount() {
-    return countLocalRows(ORDER_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_PENDING_ACTIONS_KEY);
+    return countLocalRows(ORDER_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_PENDING_ACTIONS_KEY) + countLocalRows(PRODUCT_UPDATE_PENDING_ACTIONS_KEY);
   }
 
   function renderMonthSummary(report, costing) {
@@ -89,8 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.failed_shared_admin_actions_count || 0)))}</strong><div class="small">Shared queued actions still failing replay</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_admin_order_actions_count || 0)))}</strong><div class="small">Shared queued order/payment actions</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_product_review_actions_count || 0)))}</strong><div class="small">Shared queued product review actions</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.pending_shared_product_update_actions_count || 0)))}</strong><div class="small">Shared queued product edit actions</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.outstanding_orders_count || 0)))}</strong><div class="small">Orders still waiting for payment or closure</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.payment_sync_failures_count || 0)))}</strong><div class="small">Provider refund sync failures</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.journal_imbalance_count || 0)))}</strong><div class="small">Journal rows still out of balance</div></div>
+        <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(s.overhead_product_override_count || 0)))}</strong><div class="small">Explicit overhead product overrides</div></div>
         <div class="mobile-summary-list-item"><strong>${escapeHtml(String(Number(pendingClientActions || 0)))}</strong><div class="small">Browser-only fallback actions still not shared</div></div>
       </div>`;
   }
