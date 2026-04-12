@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -141,6 +140,7 @@
     const DATA_URL = '/api/creations';
     const DATA_FALLBACK_URL = '/data/itemsforsale/itemsforsale_items_master.json';
     const FALLBACK_ASSET_ORIGIN = 'https://assets.devilndove.com';
+    const FALLBACK_ASSET_PREFIX = 'Itemsforsale';
 
     const state = { all: [], filtered: [] };
     const els = {
@@ -183,14 +183,112 @@
       el.style.display = 'block';
     }
 
-    const nice = (v) => String(v || '').replace(/[-_]+/g, ' ').replace(/\w/g, c => c.toUpperCase());
+    const nice = (v) => String(v || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     const unique = (arr) => [...new Set(arr.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b)));
 
-    function imageUrl(data, item){
+    function ensureProtocol(url){
+      const raw = String(url || '').trim();
+      if (!raw) return '';
+      if (/^https?:\/\/.+/i.test(raw)) return raw;
+      if (/^https?:\/[^/].+/i.test(raw)) {
+        return raw.replace(/^https?:\//i, (m) => m.toLowerCase().startsWith('https') ? 'https://' : 'http://');
+      }
+      return raw;
+    }
+
+    function normalizeAssetKey(value, prefix){
+      let raw = String(value || '').trim().replace(/^\/+/, '');
+      if (!raw) return '';
+
+      raw = ensureProtocol(raw);
+      if (/^https?:\/\//i.test(raw) || raw.startsWith('/')) return raw;
+
+      const parts = raw.split('/').filter(Boolean);
+      if (!parts.length) return '';
+
+      if (parts.length === 1) return `${prefix}/${parts[0]}`;
+
+      if ((parts[0] || '').toLowerCase() === 'itemsforsale') {
+        parts[0] = prefix;
+      }
+
+      return parts.join('/');
+    }
+
+    function normalizeAbsoluteAssetUrl(value, assetOrigin, prefix){
+      const repaired = ensureProtocol(value);
+      if (!/^https?:\/\//i.test(repaired)) return repaired;
+
+      try {
+        const parsed = new URL(repaired);
+        const origin = new URL(assetOrigin);
+        if (parsed.origin !== origin.origin) return repaired;
+
+        const parts = parsed.pathname.split('/').filter(Boolean);
+        if (!parts.length) return repaired;
+
+        if ((parts[0] || '').toLowerCase() === 'itemsforsale') {
+          parts[0] = prefix;
+          parsed.pathname = `/${parts.map(encodeURIComponent).join('/')}`;
+          return parsed.toString();
+        }
+
+        return repaired;
+      } catch {
+        return repaired;
+      }
+    }
+
+    function imageCandidates(data, item){
       const origin = data.asset_origin || FALLBACK_ASSET_ORIGIN;
-      const prefix = data.asset_prefix || 'itemsforsale';
-      const key = item.r2_object_key || (item.image_file ? `${prefix}/${item.image_file}` : '');
-      return key ? `${origin.replace(/\/$/, '')}/${key.replace(/^\//, '')}` : '/assets/mark.png';
+      const prefix = data.asset_prefix || FALLBACK_ASSET_PREFIX;
+      const candidates = [];
+
+      const directValues = [
+        item.image,
+        item.image_url,
+        item.r2_object_key,
+        item.image_file
+      ];
+
+      directValues.forEach((value) => {
+        let raw = String(value || '').trim();
+        if (!raw) return;
+
+        raw = ensureProtocol(raw);
+
+        if (/^https?:\/\//i.test(raw)) {
+          candidates.push(normalizeAbsoluteAssetUrl(raw, origin, prefix));
+          return;
+        }
+
+        if (raw.startsWith('/')) {
+          candidates.push(raw);
+          return;
+        }
+
+        const normalizedKey = normalizeAssetKey(raw, prefix);
+        if (!normalizedKey) return;
+
+        if (/^https?:\/\//i.test(normalizedKey) || normalizedKey.startsWith('/')) {
+          candidates.push(normalizeAbsoluteAssetUrl(normalizedKey, origin, prefix));
+          return;
+        }
+
+        candidates.push(`${origin.replace(/\/$/, '')}/${normalizedKey.split('/').map(encodeURIComponent).join('/')}`);
+      });
+
+      const seen = new Set();
+      return candidates.filter((url) => {
+        const key = String(url || '').trim();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function imageUrl(data, item){
+      return imageCandidates(data, item)[0] || '/assets/mark.png';
     }
 
     function toSearchText(item){
@@ -236,6 +334,34 @@
       els.activeChips.innerHTML = chips.length ? chips.map(c => `<span class="chip">${c}</span>`).join('') : '';
     }
 
+    function wireImageFallbacks(data){
+      const imgs = els.catalog.querySelectorAll('img[data-fallbacks]');
+      imgs.forEach((img) => {
+        let fallbacks = [];
+        try {
+          fallbacks = JSON.parse(img.getAttribute('data-fallbacks') || '[]');
+        } catch {
+          fallbacks = [];
+        }
+
+        let index = Math.max(0, fallbacks.indexOf(img.getAttribute('src')));
+
+        img.onerror = function(){
+          index += 1;
+          while (index < fallbacks.length && String(fallbacks[index] || '').trim() === String(this.src || '').trim()) {
+            index += 1;
+          }
+
+          if (index < fallbacks.length) {
+            this.src = fallbacks[index];
+            return;
+          }
+
+          this.src = '/assets/mark.png';
+        };
+      });
+    }
+
     function renderCards(data){
       const items = state.filtered;
       els.catalog.innerHTML = '';
@@ -254,8 +380,14 @@
         const materials = (item.materials || []).slice(0, 3).map(m => `<span class="pill">${nice(m)}</span>`).join('');
         const actionHref = item.shop_url || '/contact/index.html';
         const actionLabel = item.shop_url ? 'View listing' : 'Ask about this piece';
+        const fallbacks = imageCandidates(data, item);
         card.innerHTML = `
-          <img src="${imageUrl(data, item)}" alt="${item.alt || item.title || 'Devil n Dove creation'}" loading="lazy" />
+          <img
+            src="${imageUrl(data, item)}"
+            alt="${item.alt || item.title || 'Devil n Dove creation'}"
+            loading="lazy"
+            data-fallbacks='${JSON.stringify(fallbacks).replace(/'/g, '&#39;')}'
+          />
           <div class="creation-body">
             <div class="meta-line">
               ${item.type ? `<span class="pill">${nice(item.type)}</span>` : ''}
@@ -276,6 +408,8 @@
         `;
         els.catalog.appendChild(card);
       });
+
+      wireImageFallbacks(data);
     }
 
     function applyFilters(data){
@@ -329,7 +463,7 @@
         const fallback = await fetch(DATA_FALLBACK_URL, { cache: 'no-store' }).then((r) => r.ok ? r.json() : []).catch(() => []);
         const fallbackItems = Array.isArray(fallback) ? fallback : (Array.isArray(fallback?.items) ? fallback.items : []);
         if (fallbackItems.length) {
-          const data = { asset_origin: FALLBACK_ASSET_ORIGIN, asset_prefix: 'itemsforsale', summary: { authority: 'json_fallback' }, items: fallbackItems };
+          const data = { asset_origin: FALLBACK_ASSET_ORIGIN, asset_prefix: FALLBACK_ASSET_PREFIX, summary: { authority: 'json_fallback' }, items: fallbackItems };
           setStatus('Live creations API is unavailable. Showing the local creations fallback list.', 'warning');
           state.all = fallbackItems.slice().sort((a,b)=>String(a.title || a.name || '').localeCompare(String(b.title || b.name || '')));
           els.statTotal.textContent = String(state.all.length);
