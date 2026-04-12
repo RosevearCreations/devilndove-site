@@ -314,6 +314,7 @@ export async function onRequestGet(context) {
   const studio = normalizeText(url.searchParams.get("studio")).toLowerCase();
   const format = normalizeText(url.searchParams.get("format")).toLowerCase();
   const upc = normalizeText(url.searchParams.get("upc")).toLowerCase();
+  const sourcePriority = normalizeText(url.searchParams.get("source_priority")).toLowerCase();
   const page = Math.max(Number(url.searchParams.get("page") || 1), 1);
   const limit = Math.min(Math.max(Number(url.searchParams.get("limit") || 100), 1), 500);
 
@@ -352,8 +353,15 @@ export async function onRequestGet(context) {
     for (const key of keys) byKey.set(key, merged);
   }
 
-  baseItems.forEach(registerMovie);
-  overlayItems.forEach(registerMovie);
+  if (sourcePriority === 'json') {
+    baseItems.forEach(registerMovie);
+  } else if (sourcePriority === 'd1') {
+    overlayItems.forEach(registerMovie);
+    if (!overlayItems.length) warnings.push('movie_d1_overlay_empty');
+  } else {
+    baseItems.forEach(registerMovie);
+    overlayItems.forEach(registerMovie);
+  }
 
   let items = canonicalItems
     .filter((row) => row.status !== "archived")
@@ -399,8 +407,8 @@ export async function onRequestGet(context) {
       has_more: safePage < totalPages,
       from: totalItems ? offset + 1 : 0,
       to: totalItems ? offset + pagedItems.length : 0,
-      source: !baseItems.length && overlayItems.length ? 'D1 overlay rows only' : 'movie_catalog_enriched.v2.json with D1 overlay and title/year matching',
-      authority_mode: !baseItems.length && overlayItems.length ? 'd1-overlay-only' : (overlayItems.length >= Math.max(1, Math.floor(baseItems.length * 0.8)) ? 'hybrid-d1-ready' : 'json-base-with-d1-overlay'),
+      source: sourcePriority === 'd1' ? 'D1 preview rows only' : (sourcePriority === 'json' ? 'movie_catalog_enriched.v2.json only' : (!baseItems.length && overlayItems.length ? 'D1 overlay rows only' : 'movie_catalog_enriched.v2.json with D1 overlay and title/year matching')),
+      authority_mode: sourcePriority === 'd1' ? (overlayItems.length ? 'd1-preferred-preview' : 'd1-preview-empty') : (sourcePriority === 'json' ? 'json-only-preview' : (!baseItems.length && overlayItems.length ? 'd1-overlay-only' : (overlayItems.length >= Math.max(1, Math.floor(baseItems.length * 0.8)) ? 'hybrid-d1-ready' : 'json-base-with-d1-overlay'))),
       base_row_count: baseItems.length,
       overlay_row_count: overlayItems.length,
       has_db_overlay: overlayItems.length > 0,
@@ -417,6 +425,6 @@ export async function onRequestGet(context) {
       years: availableYears
     },
     warning: warnings.includes('movie_json_base_unavailable') ? 'Movie JSON base read is unavailable right now. Showing any available overlay rows and safe empty fields where needed.' : '',
-    diagnostics: { warnings, query: q, page: safePage, limit }
+    diagnostics: { warnings, query: q, page: safePage, limit, source_priority: sourcePriority || 'hybrid' }
   });
 }
