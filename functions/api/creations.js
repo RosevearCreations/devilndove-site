@@ -27,34 +27,55 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 }
 
-function normalizeAssetKey(value, assetPrefix = "itemsforsale") {
+function repairAbsoluteUrl(value) {
+  const raw = normalizeText(value);
+  if (!raw) return "";
+  if (/^https?:\/\/.+/i.test(raw)) return raw;
+  if (/^https?:\/[^/].+/i.test(raw)) {
+    return raw.replace(/^https?:\//i, (match) => match.startsWith("https") ? "https://" : "http://");
+  }
+  return raw;
+}
+
+function normalizeAssetKey(value, assetPrefix = "Itemsforsale") {
   const raw = normalizeText(value).replace(/^\/+/, "");
   if (!raw) return "";
 
-  const parts = raw.split("/").filter(Boolean);
+  const repaired = repairAbsoluteUrl(raw);
+  if (/^https?:\/\//i.test(repaired) || repaired.startsWith("/")) {
+    return repaired;
+  }
+
+  const parts = repaired.split("/").filter(Boolean);
   if (!parts.length) return "";
 
   if (parts.length === 1) {
     return `${assetPrefix}/${parts[0]}`;
   }
 
-  if (parts[0].toLowerCase() === "itemsforsale") {
+  const first = parts[0].toLowerCase();
+  if (first === "itemsforsale") {
     parts[0] = assetPrefix;
   }
 
   return parts.join("/");
 }
 
-function buildAssetUrl(value, assetOrigin, assetPrefix = "itemsforsale") {
+function buildAssetUrl(value, assetOrigin, assetPrefix = "Itemsforsale") {
   const raw = normalizeText(value);
   if (!raw) return "";
 
-  if (/^https?:\/\//i.test(raw) || raw.startsWith("/")) {
-    return raw;
+  const repaired = repairAbsoluteUrl(raw);
+  if (/^https?:\/\//i.test(repaired) || repaired.startsWith("/")) {
+    return repaired;
   }
 
-  const key = normalizeAssetKey(raw, assetPrefix);
+  const key = normalizeAssetKey(repaired, assetPrefix);
   if (!key) return "";
+
+  if (/^https?:\/\//i.test(key) || key.startsWith("/")) {
+    return key;
+  }
 
   const encoded = key
     .split("/")
@@ -66,7 +87,7 @@ function buildAssetUrl(value, assetOrigin, assetPrefix = "itemsforsale") {
 
 function normalizeCreationItem(source, row = null, options = {}) {
   const assetOrigin = options.asset_origin || "https://assets.devilndove.com";
-  const assetPrefix = options.asset_prefix || "itemsforsale";
+  const assetPrefix = options.asset_prefix || "Itemsforsale";
 
   const sourceImageFile = normalizeText(source.image_file);
   const sourceR2Key = normalizeAssetKey(source.r2_object_key || source.image_key || "", assetPrefix);
@@ -78,10 +99,10 @@ function normalizeCreationItem(source, row = null, options = {}) {
   const rowImageValue = normalizeText(row?.image_url || "");
   const finalImageFile =
     sourceImageFile ||
-    (sourceR2Key ? sourceR2Key.split("/").pop() : "");
+    (sourceR2Key && !/^https?:\/\//i.test(sourceR2Key) ? sourceR2Key.split("/").pop() : "");
 
   const finalR2Key =
-    sourceR2Key ||
+    (!/^https?:\/\//i.test(sourceR2Key) ? sourceR2Key : "") ||
     normalizeAssetKey(sourceImageFile, assetPrefix) ||
     normalizeAssetKey(rowImageValue, assetPrefix);
 
@@ -199,7 +220,7 @@ export async function onRequestGet(context) {
   const limit = Math.max(1, Math.min(Number(url.searchParams.get("limit") || 250), 500));
   const warnings = [];
   const assetOrigin = "https://assets.devilndove.com";
-  const assetPrefix = "itemsforsale";
+  const assetPrefix = "Itemsforsale";
 
   let items = [];
   let authority = "empty";
