@@ -39,7 +39,7 @@
           <div class="dd-install-actions" style="margin-top:0">
             <div><label class="small" for="accountingReportMonth">Month</label><input id="accountingReportMonth" type="month"/></div>
             <button class="btn" id="refreshAccountingReportButton" type="button">Refresh report</button>
-            <button class="btn" id="syncAccountingJournalButton" type="button">Rebuild journal</button>
+            <button class="btn" id="syncAccountingJournalButton" type="button">Sync journal</button>
           </div>
         </div>
         <div id="accountingReportMessage" class="small" style="display:none;margin-top:10px"></div>
@@ -131,7 +131,7 @@
     const journalWrap = document.getElementById('accountingJournalSummary');
     if (journalWrap) {
       const rows = Array.isArray(journal?.ledger_summary) ? journal.ledger_summary : [];
-      journalWrap.innerHTML = `<div class="small" style="margin-bottom:8px">${escapeHtml(String(Number(journalSummary.entry_count || 0)))} entries • ${escapeHtml(String(Number(journalSummary.balanced_entry_count || 0)))} balanced • ${escapeHtml(String(Number(journalSummary.imbalance_count || 0)))} imbalanced</div>${renderTableRows(rows, 'No journal rows exist yet for the selected month. Use Rebuild journal to rebuild the current rough double-entry layer from the month sources.', (ledgerRows) => `<div class="table-wrap"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Code</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Name</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Debit</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Credit</th></tr></thead><tbody>${ledgerRows.map((row) => `<tr><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(row.ledger_code || '')}</td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(row.ledger_name || '')}</td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.debit_cents || 0)))}</td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.credit_cents || 0)))}</td></tr>`).join('')}</tbody></table></div>`)}`;
+      journalWrap.innerHTML = `<div class="small" style="margin-bottom:8px">${escapeHtml(String(Number(journalSummary.entry_count || 0)))} entries • ${escapeHtml(String(Number(journalSummary.balanced_entry_count || 0)))} balanced • ${escapeHtml(String(Number(journalSummary.imbalance_count || 0)))} imbalanced</div>${renderTableRows(rows, 'No journal rows exist yet for the selected month. Use Sync journal to build the current rough double-entry layer.', (ledgerRows) => `<div class="table-wrap"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Code</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Name</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Debit</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Credit</th></tr></thead><tbody>${ledgerRows.map((row) => `<tr><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(row.ledger_code || '')}</td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(row.ledger_name || '')}</td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.debit_cents || 0)))}</td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.credit_cents || 0)))}</td></tr>`).join('')}</tbody></table></div>`)}`;
     }
 
     const glMap = document.getElementById('accountingGlMap');
@@ -150,12 +150,12 @@
   }
 
   async function syncJournal() {
-    setMessage('Rebuilding rough journal from the month sources...', 'warning');
+    setMessage('Syncing rough journal...', 'warning');
     try {
       const response = await window.DDAuth.apiFetch('/api/admin/accounting-journal', { method: 'POST', body: JSON.stringify({ action: 'sync_month', month: monthValue() }) });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to sync accounting journal.');
-      setMessage(`Journal rebuilt for ${data.period}.`, 'success');
+      setMessage(`Journal synced for ${data.period}.`, 'success');
       await loadReport();
     } catch (error) {
       setMessage(error.message || 'Failed to sync accounting journal.', 'error');
