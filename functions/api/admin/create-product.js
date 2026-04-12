@@ -1,20 +1,21 @@
-import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
+import {
+  auditAdminAction,
+  captureRuntimeIncident,
+  getAdminUserFromRequest,
+  getDb,
+  jsonResponse,
+  normalizeText,
+} from "../_lib/adminAudit.js";
 
-// File: /functions/api/admin/create-product.js
-
-function json(data, status = 200) { return jsonResponse(data, status); }
-
-async function requireAdmin(request, env) {
-  const sessionUser = await getAdminUserFromRequest(request, env);
-  if (!sessionUser) return { error: json({ ok: false, error: "Unauthorized." }, 401) };
-  return { sessionUser };
+function json(data, status = 200) {
+  return jsonResponse(data, status, { "Cache-Control": "no-store" });
 }
 
 function normalizeSlug(value) {
   return String(value || "")
     .trim()
     .toLowerCase()
-    .replace(/['"]/g, "")
+    .replace(/["']/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
@@ -26,23 +27,28 @@ function normalizeImageUrls(imageUrls) {
 
 function computeReadiness(fields = {}) {
   const failures = [];
-  if (!String(fields.name || '').trim()) failures.push('name');
-  if (!String(fields.slug || '').trim()) failures.push('slug');
-  if (Number(fields.price_cents || 0) <= 0) failures.push('price');
-  if (!String(fields.featured_image_url || '').trim()) failures.push('featured_image');
-  if (!String(fields.product_category || '').trim()) failures.push('category');
-  if (!String(fields.meta_title || '').trim()) failures.push('meta_title');
-  if (!String(fields.meta_description || '').trim()) failures.push('meta_description');
-  return { is_ready_for_storefront: failures.length === 0 ? 1 : 0, ready_check_notes: failures.join(', ') };
+  if (!String(fields.name || "").trim()) failures.push("name");
+  if (!String(fields.slug || "").trim()) failures.push("slug");
+  if (Number(fields.price_cents || 0) <= 0) failures.push("price");
+  if (!String(fields.featured_image_url || "").trim()) failures.push("featured_image");
+  if (!String(fields.product_category || "").trim()) failures.push("category");
+  if (!String(fields.meta_title || "").trim()) failures.push("meta_title");
+  if (!String(fields.meta_description || "").trim()) failures.push("meta_description");
+  return {
+    is_ready_for_storefront: failures.length === 0 ? 1 : 0,
+    ready_check_notes: failures.join(", "),
+  };
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
+  const adminUser = await getAdminUserFromRequest(request, env);
+  if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
 
-  const authCheck = await requireAdmin(request, env);
-  if (authCheck.error) return authCheck.error;
+  const db = getDb(env);
+  if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
 
-  let body;
+  let body = {};
   try {
     body = await request.json();
   } catch {
@@ -50,59 +56,75 @@ export async function onRequestPost(context) {
   }
 
   const product_number = body.product_number == null || body.product_number === "" ? null : Number(body.product_number);
-  const name = String(body.name || "").trim();
+  const name = normalizeText(body.name);
   const slug = normalizeSlug(body.slug || body.name || "");
-  const sku = String(body.sku || "").trim() || null;
-  const product_category = String(body.product_category || "").trim() || null;
-  const color_name = String(body.color_name || "").trim() || null;
-  const shipping_code = String(body.shipping_code || "").trim() || null;
-  const review_status = String(body.review_status || "pending_review").trim().toLowerCase();
-  const short_description = String(body.short_description || "").trim() || null;
-  const description = String(body.description || "").trim() || null;
-  const product_type = String(body.product_type || "").trim().toLowerCase();
-  const status = String(body.status || "draft").trim().toLowerCase();
+  const sku = normalizeText(body.sku) || null;
+  const product_category = normalizeText(body.product_category) || null;
+  const color_name = normalizeText(body.color_name) || null;
+  const shipping_code = normalizeText(body.shipping_code) || null;
+  const review_status = normalizeText(body.review_status || "pending_review").toLowerCase();
+  const short_description = normalizeText(body.short_description) || null;
+  const description = normalizeText(body.description) || null;
+  const product_type = normalizeText(body.product_type).toLowerCase();
+  const status = normalizeText(body.status || "draft").toLowerCase();
   const price_cents = Number(body.price_cents);
   const compare_at_price_cents = body.compare_at_price_cents == null || body.compare_at_price_cents === "" ? null : Number(body.compare_at_price_cents);
-  const currency = String(body.currency || "CAD").trim().toUpperCase();
+  const currency = normalizeText(body.currency || "CAD").toUpperCase() || "CAD";
   const taxable = Number(body.taxable) === 0 ? 0 : 1;
   const tax_class_id = body.tax_class_id == null || body.tax_class_id === "" ? null : Number(body.tax_class_id);
   const requires_shipping = Number(body.requires_shipping) === 1 ? 1 : 0;
   const weight_grams = body.weight_grams == null || body.weight_grams === "" ? null : Number(body.weight_grams);
   const inventory_tracking = Number(body.inventory_tracking) === 1 ? 1 : 0;
   const inventory_quantity = body.inventory_quantity == null || body.inventory_quantity === "" ? 0 : Number(body.inventory_quantity);
-  const digital_file_url = String(body.digital_file_url || "").trim() || null;
-  const featured_image_url = String(body.featured_image_url || "").trim() || null;
+  const digital_file_url = normalizeText(body.digital_file_url) || null;
+  const featured_image_url = normalizeText(body.featured_image_url) || null;
   const sort_order = body.sort_order == null || body.sort_order === "" ? 0 : Number(body.sort_order);
   const image_urls = normalizeImageUrls(body.image_urls);
-  const meta_title = String(body.meta_title || '').trim() || null;
-  const meta_description = String(body.meta_description || '').trim() || null;
-  const keywords = String(body.keywords || '').trim() || null;
-  const h1_override = String(body.h1_override || '').trim() || null;
-  const canonical_url = String(body.canonical_url || '').trim() || null;
-  const og_title = String(body.og_title || '').trim() || null;
-  const og_description = String(body.og_description || '').trim() || null;
-  const og_image_url = String(body.og_image_url || '').trim() || null;
-  const readiness = computeReadiness({ name, slug, price_cents, featured_image_url, product_category, meta_title, meta_description });
+  const meta_title = normalizeText(body.meta_title) || null;
+  const meta_description = normalizeText(body.meta_description) || null;
+  const keywords = normalizeText(body.keywords) || null;
+  const h1_override = normalizeText(body.h1_override) || null;
+  const canonical_url = normalizeText(body.canonical_url) || null;
+  const og_title = normalizeText(body.og_title) || null;
+  const og_description = normalizeText(body.og_description) || null;
+  const og_image_url = normalizeText(body.og_image_url) || null;
+  const readiness = computeReadiness({
+    name,
+    slug,
+    price_cents,
+    featured_image_url,
+    product_category,
+    meta_title,
+    meta_description,
+  });
 
   if (product_number !== null && (!Number.isInteger(product_number) || product_number <= 0)) {
     return json({ ok: false, error: "product_number must be a valid whole number." }, 400);
   }
   if (!name) return json({ ok: false, error: "Product name is required." }, 400);
   if (!slug) return json({ ok: false, error: "A valid slug is required." }, 400);
-  if (!['physical', 'digital'].includes(product_type)) return json({ ok: false, error: "Product type must be physical or digital." }, 400);
-  if (!['draft', 'active', 'archived'].includes(status)) return json({ ok: false, error: "Status must be draft, active, or archived." }, 400);
-  if (!['pending_review', 'approved', 'needs_changes', 'published'].includes(review_status)) return json({ ok: false, error: "review_status must be pending_review, approved, needs_changes, or published." }, 400);
+  if (!["physical", "digital"].includes(product_type)) return json({ ok: false, error: "Product type must be physical or digital." }, 400);
+  if (!["draft", "active", "archived"].includes(status)) return json({ ok: false, error: "Status must be draft, active, or archived." }, 400);
+  if (!["pending_review", "approved", "needs_changes", "published"].includes(review_status)) {
+    return json({ ok: false, error: "review_status must be pending_review, approved, needs_changes, or published." }, 400);
+  }
   if (!Number.isInteger(price_cents) || price_cents < 0) return json({ ok: false, error: "price_cents must be a valid whole number of cents." }, 400);
-  if (compare_at_price_cents !== null && (!Number.isInteger(compare_at_price_cents) || compare_at_price_cents < 0)) return json({ ok: false, error: "compare_at_price_cents must be a valid whole number of cents." }, 400);
-  if (tax_class_id !== null && (!Number.isInteger(tax_class_id) || tax_class_id <= 0)) return json({ ok: false, error: "tax_class_id must be a valid id." }, 400);
-  if (weight_grams !== null && (!Number.isInteger(weight_grams) || weight_grams < 0)) return json({ ok: false, error: "weight_grams must be a valid whole number." }, 400);
-  if (!Number.isInteger(inventory_quantity) || inventory_quantity < 0) return json({ ok: false, error: "inventory_quantity must be a valid whole number." }, 400);
+  if (compare_at_price_cents !== null && (!Number.isInteger(compare_at_price_cents) || compare_at_price_cents < 0)) {
+    return json({ ok: false, error: "compare_at_price_cents must be a valid whole number of cents." }, 400);
+  }
+  if (tax_class_id !== null && (!Number.isInteger(tax_class_id) || tax_class_id <= 0)) {
+    return json({ ok: false, error: "tax_class_id must be a valid id." }, 400);
+  }
+  if (weight_grams !== null && (!Number.isInteger(weight_grams) || weight_grams < 0)) {
+    return json({ ok: false, error: "weight_grams must be a valid whole number." }, 400);
+  }
+  if (!Number.isInteger(inventory_quantity) || inventory_quantity < 0) {
+    return json({ ok: false, error: "inventory_quantity must be a valid whole number." }, 400);
+  }
   if (!Number.isInteger(sort_order)) return json({ ok: false, error: "sort_order must be a valid whole number." }, 400);
 
   if (product_number !== null) {
-    const db = getDb(env);
-
-  const existingProductNumber = await db.prepare(`SELECT product_id FROM products WHERE product_number = ? LIMIT 1`).bind(product_number).first();
+    const existingProductNumber = await db.prepare(`SELECT product_id FROM products WHERE product_number = ? LIMIT 1`).bind(product_number).first();
     if (existingProductNumber) return json({ ok: false, error: "That product number already exists." }, 409);
   }
 
@@ -119,48 +141,50 @@ export async function onRequestPost(context) {
     if (!taxClass) return json({ ok: false, error: "Selected tax class was not found." }, 400);
   }
 
-  const insertResult = await db.prepare(`
-    INSERT INTO products (
-      product_number, slug, sku, name, product_category, color_name, shipping_code, review_status,
-      is_ready_for_storefront, ready_check_notes, short_description, description, product_type, status, price_cents, compare_at_price_cents,
-      currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking,
-      inventory_quantity, digital_file_url, featured_image_url, sort_order, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).bind(
-    product_number,
-    slug,
-    sku,
-    name,
-    product_category,
-    color_name,
-    shipping_code,
-    review_status,
-    readiness.is_ready_for_storefront,
-    readiness.ready_check_notes || null,
-    short_description,
-    description,
-    product_type,
-    status,
-    price_cents,
-    compare_at_price_cents,
-    currency,
-    taxable,
-    tax_class_id,
-    requires_shipping,
-    weight_grams,
-    inventory_tracking,
-    inventory_quantity,
-    digital_file_url,
-    featured_image_url,
-    sort_order
-  ).run();
-
-  const newProductId = insertResult?.meta?.last_row_id;
-
+  let newProductId = 0;
   try {
+    const insertResult = await db.prepare(`
+      INSERT INTO products (
+        product_number, slug, sku, name, product_category, color_name, shipping_code, review_status,
+        is_ready_for_storefront, ready_check_notes, short_description, description, product_type, status, price_cents, compare_at_price_cents,
+        currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking,
+        inventory_quantity, digital_file_url, featured_image_url, sort_order, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(
+      product_number,
+      slug,
+      sku,
+      name,
+      product_category,
+      color_name,
+      shipping_code,
+      review_status,
+      readiness.is_ready_for_storefront,
+      readiness.ready_check_notes || null,
+      short_description,
+      description,
+      product_type,
+      status,
+      price_cents,
+      compare_at_price_cents,
+      currency,
+      taxable,
+      tax_class_id,
+      requires_shipping,
+      weight_grams,
+      inventory_tracking,
+      inventory_quantity,
+      digital_file_url,
+      featured_image_url,
+      sort_order
+    ).run();
+
+    newProductId = Number(insertResult?.meta?.last_row_id || 0);
+
     await db.prepare(`
       INSERT INTO product_seo (
-        product_id, meta_title, meta_description, keywords, h1_override, canonical_url, schema_type, og_title, og_description, og_image_url, created_at, updated_at
+        product_id, meta_title, meta_description, keywords, h1_override, canonical_url,
+        schema_type, og_title, og_description, og_image_url, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, 'Product', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       ON CONFLICT(product_id) DO UPDATE SET
         meta_title = excluded.meta_title,
@@ -173,15 +197,72 @@ export async function onRequestPost(context) {
         og_description = excluded.og_description,
         og_image_url = excluded.og_image_url,
         updated_at = CURRENT_TIMESTAMP
-    `).bind(Number(newProductId || 0), meta_title, meta_description, keywords, h1_override, canonical_url, og_title, og_description, og_image_url).run();
-  } catch {}
+    `).bind(
+      newProductId,
+      meta_title,
+      meta_description,
+      keywords,
+      h1_override,
+      canonical_url,
+      og_title,
+      og_description,
+      og_image_url
+    ).run();
 
-  for (let i = 0; i < image_urls.length; i += 1) {
-    await db.prepare(`INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(newProductId, image_urls[i], name, i).run();
+    for (let i = 0; i < image_urls.length; i += 1) {
+      await db.prepare(`
+        INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).bind(newProductId, image_urls[i], name, i).run();
+    }
+  } catch (error) {
+    await captureRuntimeIncident(env, request, {
+      incident_scope: "admin_create_product",
+      incident_code: "create_product_failed",
+      severity: "warning",
+      message: "Create product failed during write.",
+      related_user_id: Number(adminUser.user_id || 0),
+      details: {
+        slug,
+        sku,
+        product_number,
+        error: String(error?.message || error || "Unknown create product write error"),
+      },
+    });
+    return json({ ok: false, error: "Failed to create product right now." }, 500);
   }
 
   const createdProduct = await db.prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`).bind(newProductId).first();
-  const createdImagesResult = await db.prepare(`SELECT product_image_id, product_id, image_url, alt_text, sort_order, created_at FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, product_image_id ASC`).bind(newProductId).all();
+  const createdImagesResult = await db.prepare(`
+    SELECT product_image_id, product_id, image_url, alt_text, sort_order, created_at
+    FROM product_images
+    WHERE product_id = ?
+    ORDER BY sort_order ASC, product_image_id ASC
+  `).bind(newProductId).all();
 
-  return json({ ok: true, message: "Product created successfully.", product: createdProduct, images: createdImagesResult.results || [] }, 201);
+  await auditAdminAction(env, request, adminUser, {
+    action_type: "create_product",
+    target_type: "product",
+    target_id: newProductId,
+    target_key: slug,
+    details: {
+      name,
+      product_number,
+      sku,
+      status,
+      review_status,
+      is_ready_for_storefront: readiness.is_ready_for_storefront,
+      image_count: image_urls.length,
+    },
+  });
+
+  return json(
+    {
+      ok: true,
+      message: "Product created successfully.",
+      product: createdProduct,
+      images: Array.isArray(createdImagesResult?.results) ? createdImagesResult.results : [],
+    },
+    201
+  );
 }
