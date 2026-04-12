@@ -299,3 +299,10 @@ When continuing from this build, treat the admin orders area as partially harden
 
 
 - Current pass: the main Catalog admin page no longer shows the day-to-day migration panel after the full D1 catalog sync completed successfully. The sync route remains available only for maintenance or reseed recovery, and the docs now treat catalog migration as completed rather than an active daily admin step.
+
+## Current pass update — 2026-04-12
+
+- Treat `DD1000` as the minimum finished-product number for new product capture unless the database already has a higher product number.
+- The shared product-number rule now applies to the phone-first capture flow and the standard admin create-product API.
+- When older databases do not yet have the app setting row, runtime code must still fall back safely to `1000`.
+

@@ -56,6 +56,22 @@ document.addEventListener('DOMContentLoaded', () => {
   function escapeHtml(value) {
     return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
+  function formatProductNumber(value) {
+    const parsed = Number(value || 0);
+    if (!Number.isInteger(parsed) || parsed <= 0) return 'DD1000';
+    return `DD${String(parsed).padStart(4, '0')}`;
+  }
+  function getBootstrapFallback() {
+    return {
+      next_product_number: 1000,
+      product_number_start: 1000,
+      category_options: ['Rings','Necklaces','Bracelets','Earrings','Pendants','CNC Components','3D Printed Items','Laser Engraved Items','Polymer Clay Items','Home Decor','Accessories','Other'],
+      color_options: ['Silver','Gold','Black','White','Red','Blue','Green','Purple','Pink','Orange','Yellow','Brown','Clear','Multicolor'],
+      shipping_code_options: ['standard-jewelry','small-parcel','oversize','pickup-only','digital'],
+      tax_classes: [],
+      resources: []
+    };
+  }
   function fillSelect(select, options, placeholder) {
     if (!select) return;
     const rows = Array.isArray(options) ? options : [];
@@ -251,8 +267,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSelectedResources();
     renderResourceGrid();
     renderDraftReadiness(draft);
-    if (draftSummary) draftSummary.textContent = `Editing draft DD${String(draft.product_number || '').padStart(4, '0')} · ${draft.name || draft.capture_reference || 'Unnamed draft'} · ${draft.image_count || 0} images · ${draft.linked_resource_count || 0} linked resources.`;
-    setMessage(`Loaded draft #${draft.product_number || draft.product_id}. Continue working without leaving this screen.`);
+    if (draftSummary) draftSummary.textContent = `Editing draft ${formatProductNumber(draft.product_number)} · ${draft.name || draft.capture_reference || 'Unnamed draft'} · ${draft.image_count || 0} images · ${draft.linked_resource_count || 0} linked resources.`;
+    setMessage(`Loaded draft ${formatProductNumber(draft.product_number || draft.product_id)}. Continue working without leaving this screen.`);
   }
 
   function renderDraftOptions(selectedId = null) {
@@ -264,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const current = drafts.find((row) => String(row.product_id) === keepId);
       if (current) filtered = [current, ...filtered];
     }
-    draftSelect.innerHTML = '<option value="">Start a new draft</option>' + filtered.map((row) => `<option value="${row.product_id}">DD${String(row.product_number || '').padStart(4,'0')} · ${escapeHtml(row.name || row.capture_reference || row.slug || 'Draft')} · ${escapeHtml(row.updated_at || '')}</option>`).join('');
+    draftSelect.innerHTML = '<option value="">Start a new draft</option>' + filtered.map((row) => `<option value="${row.product_id}">${formatProductNumber(row.product_number)} · ${escapeHtml(row.name || row.capture_reference || row.slug || 'Draft')} · ${escapeHtml(row.updated_at || '')}</option>`).join('');
     if (keepId && filtered.some((row) => String(row.product_id) === keepId)) draftSelect.value = keepId;
     if (draftSummary && !loadedDraft) draftSummary.textContent = filtered.length ? `${filtered.length} draft products ready to continue in this screen.` : 'No draft products matched that search yet.';
   }
@@ -297,16 +313,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await window.DDAuth.apiFetch('/api/admin/product-mobile-bootstrap');
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load mobile product tools.');
-      bootstrap = data;
-      nextNumberEl.textContent = String(data.next_product_number || '—');
-      fillSelect(categorySelect, data.category_options || [], 'Select a category');
-      fillSelect(colorSelect, data.color_options || [], 'Choose a colour');
-      fillSelect(shippingSelect, data.shipping_code_options || [], 'Select shipping code');
-      fillSelect(taxSelect, (data.tax_classes || []).map((row) => ({ value: row.tax_class_id, label: `${row.name}${row.code ? ` (${row.code})` : ''}` })), 'No tax class');
+      bootstrap = { ...getBootstrapFallback(), ...(data || {}) };
+      nextNumberEl.textContent = formatProductNumber(bootstrap.next_product_number);
+      fillSelect(categorySelect, bootstrap.category_options || [], 'Select a category');
+      fillSelect(colorSelect, bootstrap.color_options || [], 'Choose a colour');
+      fillSelect(shippingSelect, bootstrap.shipping_code_options || [], 'Select shipping code');
+      fillSelect(taxSelect, (bootstrap.tax_classes || []).map((row) => ({ value: row.tax_class_id, label: `${row.name}${row.code ? ` (${row.code})` : ''}` })), 'No tax class');
       renderSelectedResources();
       renderResourceGrid();
       await loadDrafts(selectedDraftId);
     } catch (error) {
+      bootstrap = getBootstrapFallback();
+      nextNumberEl.textContent = formatProductNumber(bootstrap.next_product_number);
+      fillSelect(categorySelect, bootstrap.category_options || [], 'Select a category');
+      fillSelect(colorSelect, bootstrap.color_options || [], 'Choose a colour');
+      fillSelect(shippingSelect, bootstrap.shipping_code_options || [], 'Select shipping code');
+      fillSelect(taxSelect, [], 'No tax class');
+      renderSelectedResources();
+      renderResourceGrid();
       setAccess(error.message || 'Could not load admin mobile product tools.', true);
     }
   }
@@ -350,10 +374,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to save product.');
         const savedProductId = String(data.product?.product_id || existingProductId || '');
         if (existingProductId) {
-          setMessage(`Updated draft product #${data.product?.product_number || '—'} and kept it open for continued editing.`);
+          setMessage(`Updated draft product ${formatProductNumber(data.product?.product_number)} and kept it open for continued editing.`);
           await loadBootstrap(savedProductId);
         } else {
-          setMessage(`Saved product #${data.product?.product_number || '—'} for review. Ready for the next product.`);
+          setMessage(`Saved product ${formatProductNumber(data.product?.product_number)} for review. Ready for the next product.`);
           resetFormState('Ready for the next product.');
           if (draftSearchInput) draftSearchInput.value = '';
           await loadBootstrap();
