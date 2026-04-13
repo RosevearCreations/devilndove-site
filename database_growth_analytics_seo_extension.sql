@@ -1,4 +1,5 @@
 -- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
+-- Current pass note: broad product repricing is now handled in code through the existing products table and admin bulk tooling; no new required schema tables were needed for this pass.
 -- File: /database_growth_analytics_seo_extension.sql
 -- Brief description: Adds analytics/security, SEO, media, inventory, movement history,
 -- search logging, and notification foundations for the current Devil n Dove build.

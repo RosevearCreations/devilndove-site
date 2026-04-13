@@ -306,3 +306,9 @@ When continuing from this build, treat the admin orders area as partially harden
 - The shared product-number rule now applies to the phone-first capture flow and the standard admin create-product API.
 - When older databases do not yet have the app setting row, runtime code must still fall back safely to `1000`.
 
+
+## Current pass update
+- Admin bulk product tooling now supports controlled price updates by selected product IDs, by product category, or across the full catalog.
+- Bulk price changes can preview affected rows before save, which makes tariff, packaging, and broad selling-price revisions safer.
+- The earlier bulk-tool risk where shipping/tax flags could be overwritten unintentionally during unrelated edits was corrected by switching those controls to explicit “No change / Yes / No” choices.
+- Public exposed HTML pages were checked again and still keep the one-H1-per-page rule.
