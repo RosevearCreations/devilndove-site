@@ -198,3 +198,14 @@ This pass focused on moving failed admin write actions beyond one browser. A new
 - Added a more graceful mobile bootstrap fallback and tightened the offline fallback page head tags.
 - Next sensible check: verify imports/backfills cannot still create low manual product numbers that break the DD sequence.
 
+
+## Latest handoff note
+- Mobile/DD numbering remains on the DD1000 baseline introduced in the prior pass.
+- The products admin now also has broader price-control coverage: one item through the normal edit form, or multi-item/category/all-catalog changes through the bulk tools.
+- Bulk pricing now has preview-before-save support and no longer forces shipping/tax flag changes when those fields are left alone.
+- Public exposed pages were checked again and still keep the one-H1 rule.
+- No new required schema tables were introduced in this pass; this was a code, workflow, and documentation sync pass.
+
+## Recommended next actions in a new chat
+- Add bulk raw-material / packaging cost adjustments to `site_item_inventory` using the same scope model as the new catalog pricing controls.
+- Continue the Known Gaps list from the remaining cost, inventory-authority, and analytics items that are still honest and repo-safe.

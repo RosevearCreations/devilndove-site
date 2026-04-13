@@ -255,3 +255,15 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Verify the standard admin create-product flow also writes a product number instead of leaving it null.
 - Verify exposed HTML pages still resolve to a single H1 each, and keep checking title/description/canonical consistency on public pages.
 
+
+## Current pass health update
+- Product pricing control is better covered now: single-item edit remains in place and bulk repricing now works by IDs, category, or full catalog.
+- Bulk repricing includes preview-before-save, which lowers operator risk during tariff or packaging-related price changes.
+- The older bulk-tool shipping/tax overwrite risk was corrected.
+- Exposed HTML pages were rechecked and still keep the one-H1 rule.
+
+## Recommended next test cycle
+1. Test single-product price edits from the main products grid.
+2. Test bulk repricing by IDs, by category, and across the whole catalog using preview before save.
+3. Confirm compare-at behavior for “copy previous live price” and “clear compare-at”.
+4. Confirm unrelated fields stay unchanged when left on “No change”.

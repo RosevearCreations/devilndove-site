@@ -208,3 +208,7 @@ For admin order/payment work, prefer partial success plus a warning over whole-s
 - Any new product-entry workflow must use the shared numbering helper or the same app-setting-backed logic, not its own local counter.
 - When docs or schema seeds change around numbering or SEO policy, update the handoff markdown files in the same pass.
 
+
+## Current pass rule additions
+- Bulk admin controls must never overwrite shipping/tax/inventory flags just because a form field had a default value; every optional bulk change needs a true no-change path.
+- Wide catalog price changes should prefer preview-first workflows before commit whenever the scope is a category or the full product list.

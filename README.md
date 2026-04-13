@@ -412,3 +412,16 @@ This pass hardens the admin orders area with partial API fallbacks, cached brows
 - The mobile capture screen now shows the next DD number more clearly and keeps default category/shipping choices available even if the bootstrap payload has a temporary problem.
 - `offline.html` now carries a fuller fallback head block so the offline shell stays structurally consistent with the one-H1 / title / description / canonical discipline used elsewhere.
 
+
+## Latest pass update
+
+Implemented now:
+- product price editing by individual item through the standard admin edit workflow
+- bulk price adjustments by selected product IDs, by product category, or across the entire product catalog
+- preview-first bulk repricing with optional compare-at handling for safer tariff/packaging-driven changes
+- safer bulk controls so shipping and taxable flags only change when explicitly selected
+- another public H1 audit pass with exposed pages still holding to one H1 each
+
+Still to deepen later:
+- bulk unit-cost adjustments on `site_item_inventory`
+- margin-target or cost-delta-driven price automation

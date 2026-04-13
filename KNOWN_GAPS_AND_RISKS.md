@@ -612,3 +612,19 @@ All code-side items that were realistically actionable inside this repo pass wer
 #### Still open
 - Imports and any external/manual backfill workflow still need the same DD-series guardrail review so older numbering cannot be reintroduced by batch operations.
 
+
+## Current pass update
+
+### Product pricing controls
+#### Addressed in this pass
+- Single-item price edits remain available in the standard product editor.
+- Bulk pricing now supports three scopes: selected product IDs, one product category, or the entire product catalog.
+- Bulk pricing now supports preview-before-save so broad repricing can be checked safely before commit.
+- The previous bulk-control risk where shipping/tax flags could be changed accidentally during unrelated bulk edits was corrected.
+
+#### Still open
+- Bulk cost updates for `site_item_inventory` are still not in the same category/all-items pattern yet.
+- Product-price automation based on cost deltas, tariff percentages, or target margin rules is still future work.
+
+#### Remaining risk
+- Selling-price control is materially better now, but cost-side repricing still needs another pass before the full price-to-cost workflow can be called mature.

@@ -327,3 +327,8 @@ Operational priority moved to admin resiliency this pass: order list, order deta
 - The phone-first product capture path and the regular create-product path now share the same numbering helper logic.
 - Older databases may not have the app setting row yet, so the runtime fallback to `1000` is intentional and should remain in place until every environment is upgraded.
 
+
+## Latest pass additions
+- Catalog pricing control is now split into two safe paths: per-item edit for precise single-product changes and bulk scope controls for selected IDs, one category, or the full product list.
+- Bulk repricing now supports preview-first review plus compare-at handling, which gives the repo a better base for tariff, shipping, packaging, or other broad selling-price changes.
+- Public exposed-page H1 count was rechecked and remains aligned with the one-H1 rule.

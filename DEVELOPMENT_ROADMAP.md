@@ -348,3 +348,15 @@
 - Extend the same DD-series guardrails to any CSV/import or backfill workflow that can still inject lower manual product numbers.
 - Surface the configurable `site.catalog.product_number_start` setting in the admin settings UI once the current creation path is fully verified.
 
+
+## Current pass completion update
+- Verified that single-item pricing already exists through the normal product edit workflow.
+- Expanded bulk product tools so pricing can now be adjusted by selected items, by category, or across the full product inventory.
+- Added preview-first bulk pricing so wide catalog changes can be checked before save when tariffs, packaging, or other cost pressures require repricing.
+- Corrected a real admin safety risk where older bulk controls could overwrite `requires_shipping` and `taxable` even when the operator did not intend to change those fields.
+- Reconfirmed the public one-H1 rule across exposed HTML pages during this pass.
+
+## Strongest next steps after this pass
+1. Add bulk unit-cost adjustment support for `site_item_inventory` so raw material and packaging cost changes can be applied with the same by-item / by-category / all-items pattern.
+2. Push cost-change visibility deeper into product costing so margin warnings react faster after supplier or tariff shifts.
+3. Continue reducing mixed JSON/D1 authority paths where the same public/admin data still has duplicate truth risks.

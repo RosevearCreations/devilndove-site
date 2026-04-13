@@ -1,4 +1,5 @@
 -- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
+-- Current pass note: broad product repricing is now handled in code through the existing products table and admin bulk tooling; no new required schema tables were needed for this pass.
 -- File: /database_upgrade_current_pass.sql
 -- Brief description: Incremental upgrade SQL for older Devil n Dove D1/SQLite databases.
 -- This pass focuses on movie overlay compatibility, phone-first product capture fields,

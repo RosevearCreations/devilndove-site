@@ -317,3 +317,8 @@ Touched areas in this pass:
 - `offline.html`
 - main schema/upgrade SQL files and handoff docs
 
+
+## Current pass repo note
+- `functions/api/admin/bulk-update-products.js` now handles scope-aware repricing by IDs, category, or all products.
+- `public/js/admin-product-bulk-tools.js` now exposes preview-first repricing and safer no-change handling for shipping/tax flags.
+- Public H1 counts were rechecked during this pass and remain within the one-H1 rule for exposed pages.

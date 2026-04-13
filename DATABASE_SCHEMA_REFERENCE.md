@@ -402,3 +402,9 @@ Stores fallback and error events from public/admin paths. Current write-path cov
 - Product entry code now reads this setting when available and safely falls back to `1000` for older databases that have not yet been upgraded.
 - Schema and upgrade SQL should keep this setting seeded so mobile and desktop product creation stay aligned.
 
+
+## Current pass schema status
+- No brand-new required tables were added for the bulk price-adjustment pass.
+- Product price adjustments continue to use the existing `products` table (`price_cents`, `compare_at_price_cents`, `product_category`, `updated_at`).
+- `app_settings` remains the place for repo-wide catalog defaults such as `site.catalog.product_number_start`.
+- This pass was mainly code-path hardening and admin workflow expansion rather than a structural D1 migration.

@@ -151,3 +151,7 @@ This pass was mostly admin-resiliency work. Keep the usual one-H1, descriptive t
 - The offline fallback page now includes a description/canonical/Open Graph block so even non-indexed fallback shells stay structurally tidy and easier to maintain.
 - Continue prioritizing clear page titles, visible main headings, and Southern Ontario wording that matches how real shoppers search.
 
+
+## Current pass addendum
+- Another exposed-page audit confirmed the current HTML pages still keep the one-H1 rule.
+- Continue matching page titles, main headings, and visible copy to plain-language product and local-intent terms rather than stacked or repetitive headings.
