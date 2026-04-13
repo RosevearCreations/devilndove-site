@@ -88,7 +88,10 @@ export async function onRequestPost(context) {
   const caption = normalizeText(form.get('caption'));
   const imageTitle = normalizeText(form.get('image_title'));
   const variantRole = normalizeText(form.get('variant_role') || 'gallery');
-  const annotationNotes = normalizeText(form.get('annotation_notes')) || (variantRole ? `variant_role:${variantRole}` : '');
+  const uploadScopeRaw = normalizeText(form.get('upload_scope') || (safeProductId ? 'product' : 'brand')).toLowerCase();
+  const uploadScope = ['product', 'brand', 'creation', 'social', 'general'].includes(uploadScopeRaw) ? uploadScopeRaw : (safeProductId ? 'product' : 'general');
+  const assetTag = normalizeText(form.get('asset_tag'));
+  const annotationNotes = normalizeText(form.get('annotation_notes')) || [assetTag, uploadScope !== 'product' ? `${uploadScope}_asset` : '', variantRole ? `variant_role:${variantRole}` : ''].filter(Boolean).join(' | ');
 
   let product = null;
   if (safeProductId) {
@@ -98,11 +101,17 @@ export async function onRequestPost(context) {
     }
   }
 
-  const objectKey = [
-    'products',
-    safeProductId ? String(safeProductId) : 'unassigned',
-    `${Date.now()}-${crypto.randomUUID()}.${extension}`
-  ].join('/');
+  const objectPrefix = uploadScope === 'product'
+    ? ['products', safeProductId ? String(safeProductId) : 'unassigned'].join('/')
+    : uploadScope === 'brand'
+      ? 'brand'
+      : uploadScope === 'creation'
+        ? 'creations'
+        : uploadScope === 'social'
+          ? 'social'
+          : 'uploads';
+
+  const objectKey = `${objectPrefix}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
 
   const buffer = await file.arrayBuffer();
   await bucket.put(objectKey, buffer, {
@@ -114,7 +123,8 @@ export async function onRequestPost(context) {
       original_name: originalName,
       product_id: safeProductId ? String(safeProductId) : '',
       uploaded_by_user_id: String(adminUser.user_id || ''),
-      variant_role: variantRole || ''
+      variant_role: variantRole || '',
+      upload_scope: uploadScope || ''
     }
   });
 
@@ -133,11 +143,12 @@ export async function onRequestPost(context) {
         original_filename,
         mime_type,
         file_size_bytes,
-        notes,
+        variant_role,
+        annotation_notes,
         created_by_user_id,
         created_at,
         updated_at
-      ) VALUES (?, 'r2', ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, 'r2', ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       safeProductId,
       normalizeText(env.PRODUCT_MEDIA_BUCKET_NAME || env.R2_BUCKET_NAME || 'product-media'),
@@ -146,6 +157,7 @@ export async function onRequestPost(context) {
       originalName,
       mimeType,
       fileSize,
+      variantRole || null,
       annotationNotes || null,
       adminUser.user_id
     ).run();
@@ -210,6 +222,8 @@ export async function onRequestPost(context) {
       attached_to_product: attachToProduct,
       set_featured: setFeatured,
       variant_role: variantRole || null,
+      upload_scope: uploadScope || null,
+      asset_tag: assetTag || null,
       media_asset_id: mediaAssetId,
       product_image_id: productImageId
     }
@@ -229,7 +243,9 @@ export async function onRequestPost(context) {
       file_size_bytes: fileSize,
       attached_to_product: attachToProduct,
       set_featured: setFeatured,
-      variant_role: variantRole || null
+      variant_role: variantRole || null,
+      upload_scope: uploadScope || null,
+      asset_tag: assetTag || null
     }
   });
 }

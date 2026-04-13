@@ -37,9 +37,12 @@ export async function onRequestGet(context) {
   const defaultCategories = ['Rings','Necklaces','Bracelets','Earrings','Pendants','CNC Components','3D Printed Items','Laser Engraved Items','Polymer Clay Items','Home Decor','Accessories','Other'];
   const categoryOptions = Array.from(new Set([...defaultCategories, ...categoryRows.map((row) => String(row.product_category || '').trim()).filter(Boolean)]));
 
+  const nextProductNumberValue = Number(nextProductNumber || productNumberStart || 1000);
+
   return json({
     ok: true,
-    next_product_number: Number(nextProductNumber || productNumberStart || 1000),
+    next_product_number: nextProductNumberValue,
+    next_product_number_label: `DD${String(nextProductNumberValue).padStart(4, '0')}`,
     product_number_start: Number(productNumberStart || 1000),
     category_options: categoryOptions,
     color_options: ['Silver','Gold','Black','White','Red','Blue','Green','Purple','Pink','Orange','Yellow','Brown','Clear','Multicolor'],
