@@ -312,3 +312,10 @@ When continuing from this build, treat the admin orders area as partially harden
 - Bulk price changes can preview affected rows before save, which makes tariff, packaging, and broad selling-price revisions safer.
 - The earlier bulk-tool risk where shipping/tax flags could be overwritten unintentionally during unrelated edits was corrected by switching those controls to explicit “No change / Yes / No” choices.
 - Public exposed HTML pages were checked again and still keep the one-H1-per-page rule.
+
+## 2026-04-13 pass update
+- Repaired the phone capture next-number display so the admin UI now shows `DD1000`-style labels instead of a bare numeric value when the next product number is loaded.
+- Restored stronger public social discovery by adding the Socials route back into the shared navigation/footer and hydrating the footer profile list from `/api/social-feed` instead of keeping another hard-coded duplicate set of links.
+- Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
+- Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
+

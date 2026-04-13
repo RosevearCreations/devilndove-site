@@ -332,3 +332,10 @@ Operational priority moved to admin resiliency this pass: order list, order deta
 - Catalog pricing control is now split into two safe paths: per-item edit for precise single-product changes and bulk scope controls for selected IDs, one category, or the full product list.
 - Bulk repricing now supports preview-first review plus compare-at handling, which gives the repo a better base for tariff, shipping, packaging, or other broad selling-price changes.
 - Public exposed-page H1 count was rechecked and remains aligned with the one-H1 rule.
+
+## 2026-04-13 pass update
+- Repaired the phone capture next-number display so the admin UI now shows `DD1000`-style labels instead of a bare numeric value when the next product number is loaded.
+- Restored stronger public social discovery by adding the Socials route back into the shared navigation/footer and hydrating the footer profile list from `/api/social-feed` instead of keeping another hard-coded duplicate set of links.
+- Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
+- Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
+

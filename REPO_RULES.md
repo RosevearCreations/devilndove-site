@@ -212,3 +212,10 @@ For admin order/payment work, prefer partial success plus a warning over whole-s
 ## Current pass rule additions
 - Bulk admin controls must never overwrite shipping/tax/inventory flags just because a form field had a default value; every optional bulk change needs a true no-change path.
 - Wide catalog price changes should prefer preview-first workflows before commit whenever the scope is a category or the full product list.
+
+## 2026-04-13 pass update
+- Repaired the phone capture next-number display so the admin UI now shows `DD1000`-style labels instead of a bare numeric value when the next product number is loaded.
+- Restored stronger public social discovery by adding the Socials route back into the shared navigation/footer and hydrating the footer profile list from `/api/social-feed` instead of keeping another hard-coded duplicate set of links.
+- Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
+- Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
+

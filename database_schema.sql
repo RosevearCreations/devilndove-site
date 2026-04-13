@@ -390,3 +390,9 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 
 -- Current pass note: the initial D1 catalog migration completed successfully for Tools, Supplies, Movies, and Featured Creations.
 -- The main Catalog admin page no longer exposes the day-to-day migration panel, while `/api/admin/catalog-sync` remains available for maintenance or reseed recovery only.
+
+-- 2026-04-13 pass note:
+-- No brand-new required tables were introduced in this pass.
+-- Current pass focused on DD-series label display, standalone brand-asset uploads,
+-- and public social-link restoration through shared UI/footer behavior.
+

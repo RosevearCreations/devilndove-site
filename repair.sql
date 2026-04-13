@@ -90,3 +90,9 @@ FROM member_sessions_legacy;
 -- SELECT COUNT(*) AS new_sessions FROM sessions;
 
 PRAGMA foreign_keys = ON;
+
+-- 2026-04-13 pass note:
+-- No brand-new required tables were introduced in this pass.
+-- Current pass focused on DD-series label display, standalone brand-asset uploads,
+-- and public social-link restoration through shared UI/footer behavior.
+

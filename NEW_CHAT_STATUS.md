@@ -209,3 +209,10 @@ This pass focused on moving failed admin write actions beyond one browser. A new
 ## Recommended next actions in a new chat
 - Add bulk raw-material / packaging cost adjustments to `site_item_inventory` using the same scope model as the new catalog pricing controls.
 - Continue the Known Gaps list from the remaining cost, inventory-authority, and analytics items that are still honest and repo-safe.
+
+## 2026-04-13 pass update
+- Repaired the phone capture next-number display so the admin UI now shows `DD1000`-style labels instead of a bare numeric value when the next product number is loaded.
+- Restored stronger public social discovery by adding the Socials route back into the shared navigation/footer and hydrating the footer profile list from `/api/social-feed` instead of keeping another hard-coded duplicate set of links.
+- Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
+- Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
+
