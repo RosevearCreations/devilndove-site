@@ -36,6 +36,7 @@
         <a href="/shop/index.html" data-nav="/shop/">Shop</a>
         <a href="/search/index.html" data-nav="/search/">Search</a>
         <a href="/movies/index.html" data-nav="/movies/">Movies</a>
+        <a href="/socials/index.html" data-nav="/socials/">Socials</a>
         <a href="/contact/index.html" data-nav="/contact/">Contact</a>
         <a href="/cart/index.html" data-nav="/cart/">Cart</a>
         <a href="/login/index.html" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
@@ -62,6 +63,7 @@
             <a href="/tools/index.html">Tools</a>
             <a href="/supplies/index.html">Supplies</a>
             <a href="/movies/index.html">Movies</a>
+            <a href="/socials/index.html">Socials</a>
           </div>
         </div>
         <div>
@@ -72,6 +74,13 @@
             <a href="/members/index.html">Settings</a>
             <a href="/account-help/index.html?mode=password">Forgot password</a>
             <a href="/account-help/index.html?mode=email">Forgot email</a>
+          </div>
+        </div>
+        <div>
+          <div class="site-footer-heading">Follow</div>
+          <div class="site-footer-links" id="siteFooterSocialLinks">
+            <a href="/socials/index.html">Social hub</a>
+            <span class="small">Loading profile links…</span>
           </div>
         </div>
         <div>
@@ -108,6 +117,25 @@
     setActiveLink(nav);
   }
 
+  async function hydrateFooterSocials() {
+    const socialWrap = document.getElementById('siteFooterSocialLinks');
+    if (!socialWrap) return;
+    socialWrap.innerHTML = '<a href="/socials/index.html">Social hub</a><span class="small">Loading profile links…</span>';
+    try {
+      const response = await fetch('/api/social-feed', { headers: { Accept: 'application/json' } });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load social links.');
+      const profiles = data && data.profiles && typeof data.profiles === 'object' ? data.profiles : {};
+      const preferredOrder = ['youtube', 'instagram', 'tiktok', 'facebook', 'x', 'patreon'];
+      const rows = preferredOrder.map((key) => profiles[key]).filter(Boolean);
+      socialWrap.innerHTML = ['<a href="/socials/index.html">Social hub</a>']
+        .concat(rows.map((row) => `<a href="${escapeHtml(row.url || '/socials/index.html')}" rel="noopener" target="_blank">${escapeHtml(row.label || row.handle || 'Social')}</a>`))
+        .join('');
+    } catch (_error) {
+      socialWrap.innerHTML = '<a href="/socials/index.html">Social hub</a><span class="small">Profile links are temporarily unavailable here.</span>';
+    }
+  }
+
   function injectSharedFooter() {
     const container = document.querySelector('.container') || document.body;
     let footer = document.querySelector('footer.footer, .footer');
@@ -141,6 +169,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     injectSharedNav();
     injectSharedFooter();
+    hydrateFooterSocials();
     ensureGlobalScript('/public/js/auth.js');
     ensureGlobalScript('/public/js/site-auth-ui.js');
     ensureGlobalScript('/public/js/site-analytics.js');

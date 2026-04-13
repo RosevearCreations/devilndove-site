@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load mobile product tools.');
       bootstrap = { ...getBootstrapFallback(), ...(data || {}) };
-      nextNumberEl.textContent = formatProductNumber(bootstrap.next_product_number);
+      nextNumberEl.textContent = String(bootstrap.next_product_number_label || formatProductNumber(bootstrap.next_product_number));
       fillSelect(categorySelect, bootstrap.category_options || [], 'Select a category');
       fillSelect(colorSelect, bootstrap.color_options || [], 'Choose a colour');
       fillSelect(shippingSelect, bootstrap.shipping_code_options || [], 'Select shipping code');
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await loadDrafts(selectedDraftId);
     } catch (error) {
       bootstrap = getBootstrapFallback();
-      nextNumberEl.textContent = formatProductNumber(bootstrap.next_product_number);
+      nextNumberEl.textContent = String(bootstrap.next_product_number_label || formatProductNumber(bootstrap.next_product_number));
       fillSelect(categorySelect, bootstrap.category_options || [], 'Select a category');
       fillSelect(colorSelect, bootstrap.color_options || [], 'Choose a colour');
       fillSelect(shippingSelect, bootstrap.shipping_code_options || [], 'Select shipping code');
