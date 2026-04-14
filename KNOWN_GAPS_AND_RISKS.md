@@ -635,3 +635,17 @@ All code-side items that were realistically actionable inside this repo pass wer
 - Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
 - Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
 
+## Current pass completion update
+
+### 3. Inventory authority
+#### Addressed in this pass
+- Added a bulk unit-cost update workflow for `site_item_inventory` with preview support before save.
+- Inventory costs can now be updated by selected ids, by category, by source type, or across the whole inventory for tariff, shipping, packaging, or supplier cost increases.
+- The new cost-update path writes admin audit records and movement-log notes so pricing-side and costing-side changes are easier to trace later.
+
+#### Still open
+- Finished-product repricing is still a separate workflow from resource-cost updates, so full automatic margin re-evaluation is not complete yet.
+
+#### Remaining risk
+- Cost authority is stronger than before, but operator judgement is still required to decide when inventory cost changes should also trigger storefront price changes.
+

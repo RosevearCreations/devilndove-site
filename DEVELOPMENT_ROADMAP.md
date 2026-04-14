@@ -367,3 +367,12 @@
 - Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
 - Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
 
+## Current pass completion update
+- Added bulk unit-cost update coverage for tools, supplies, products, and other site inventory so tariff, shipping, packaging, or supplier increases can be previewed and applied by ids, category, source type, or the whole inventory.
+- Strengthened the inventory admin screen with a dedicated preview/apply workflow for cost changes and expanded quick-update prompts so one-off unit-cost fixes are easier during live operations.
+
+## Strongest next steps after this pass
+1. Connect bulk inventory cost changes more directly into finished-product repricing suggestions and margin warnings.
+2. Continue reducing JSON/D1 overlap around creations, featured content, and reusable brand assets.
+3. Keep hardening fallback behavior for admin-heavy workflows that rely on long-lived catalog data.
+

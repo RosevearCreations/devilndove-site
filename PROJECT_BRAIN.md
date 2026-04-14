@@ -339,3 +339,7 @@ Operational priority moved to admin resiliency this pass: order list, order deta
 - Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
 - Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
 
+## Current pass note
+- Inventory operations now cover both stock movement and bulk unit-cost changes.
+- Use the catalog department page inventory block for tariffs, packaging increases, supplier changes, or shipping-related cost corrections before repricing products.
+

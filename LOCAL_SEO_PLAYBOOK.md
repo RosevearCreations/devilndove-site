@@ -162,3 +162,7 @@ This pass was mostly admin-resiliency work. Keep the usual one-H1, descriptive t
 - Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
 - Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
 
+## Current pass note
+- Public HTML pages were rechecked for the one-H1 rule in this pass and the current exposed pages still return one main heading each.
+- Keep continuing the existing pattern of descriptive titles, concise meta descriptions, and Southern Ontario wording on public collection and company pages.
+

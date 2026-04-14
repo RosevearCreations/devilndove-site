@@ -432,3 +432,7 @@ Still to deepen later:
 - Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
 - Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
 
+## Current pass note
+- Added bulk site-inventory cost update tooling in the admin catalog workflow.
+- This makes it easier to handle tariff changes, packaging increases, and supplier cost changes without editing every supply or tool one by one.
+

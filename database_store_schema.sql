@@ -576,3 +576,7 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- Current pass focused on DD-series label display, standalone brand-asset uploads,
 -- and public social-link restoration through shared UI/footer behavior.
 
+-- Current pass note
+-- Added bulk site-inventory unit-cost update workflow in application code.
+-- No schema expansion was required in this pass; existing site_item_inventory and site_inventory_movements tables were reused.
+

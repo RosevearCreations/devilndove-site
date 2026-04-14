@@ -319,3 +319,8 @@ When continuing from this build, treat the admin orders area as partially harden
 - Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
 - Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
 
+## Current pass note
+- Added a new admin endpoint and frontend path for bulk unit-cost updates on `site_item_inventory`.
+- Selection scope now covers selected inventory ids, category, source type, or the entire site inventory.
+- The workflow includes preview-before-apply, audit logging, and movement-note logging for tariff, shipping, packaging, or supplier cost changes.
+

@@ -216,3 +216,10 @@ This pass focused on moving failed admin write actions beyond one browser. A new
 - Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
 - Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
 
+## Current pass handoff update
+- Bulk unit-cost updates were added for site inventory through a new admin API route: `/api/admin/bulk-update-site-inventory`.
+- The admin catalog inventory section now includes a preview/apply bulk cost tool with scope by ids, category, source type, or all inventory.
+- Quick inventory updates now also allow one-off unit-cost correction from the table prompt.
+- Public H1 audit still came back clean for exposed HTML pages.
+- No schema expansion was required in this pass; the work reused `site_item_inventory` and `site_inventory_movements`.
+

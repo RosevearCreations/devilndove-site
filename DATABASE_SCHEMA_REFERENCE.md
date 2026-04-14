@@ -415,3 +415,8 @@ Stores fallback and error events from public/admin paths. Current write-path cov
 - Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
 - Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
 
+## Current pass note
+- No new tables were required in this pass.
+- Existing `site_item_inventory` and `site_inventory_movements` structures now support bulk unit-cost changes through new API/frontend logic rather than schema expansion.
+- `site_inventory_movements.movement_type` is now also used for `cost_update` entries written by the new bulk inventory cost workflow.
+

@@ -274,3 +274,7 @@ This build is in a better state for day-to-day browsing and admin use than the p
 - Added a catalog-side **Brand, Socials & Creations** helper so reusable brand images can be uploaded as standalone brand assets and the current public social links can be verified from admin.
 - Confirmed that public gallery and creations are still fed through the finished-product plus catalog-sync flow; a fully separate creations-only editor remains a next-step item rather than a completed interface.
 
+## Current pass note
+- Verified public HTML pages still satisfy the one-H1 rule in this pass.
+- Added a new inventory-cost admin path that parsed cleanly in code checks before packaging the build.
+
