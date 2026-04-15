@@ -61,6 +61,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!Number.isInteger(parsed) || parsed <= 0) return 'DD1000';
     return `DD${String(parsed).padStart(4, '0')}`;
   }
+
+  async function parseApiResponse(response, fallbackMessage) {
+    const raw = await response.text().catch(() => '');
+    let data = null;
+    try {
+      data = raw ? JSON.parse(raw) : null;
+    } catch {}
+    if (!response.ok || !data?.ok) {
+      const cleaned = String(raw || '').trim().replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const message = data?.error || (cleaned && !/^<!doctype/i.test(cleaned) ? cleaned.slice(0, 220) : '') || fallbackMessage || `Request failed with status ${response.status}.`;
+      throw new Error(message);
+    }
+    return data;
+  }
+
   function getBootstrapFallback() {
     return {
       next_product_number: 1000,
@@ -289,8 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!window.DDAuth?.isLoggedIn()) return;
     try {
       const response = await window.DDAuth.apiFetch('/api/admin/mobile-product-drafts?status=draft&limit=50');
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load draft products.');
+      const data = await parseApiResponse(response, 'Failed to load draft products.');
       drafts = Array.isArray(data.drafts) ? data.drafts : [];
       renderDraftOptions(selectedId);
       if (selectedId) {
@@ -311,8 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const response = await window.DDAuth.apiFetch('/api/admin/product-mobile-bootstrap');
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load mobile product tools.');
+      const data = await parseApiResponse(response, 'Failed to load mobile product tools.');
       bootstrap = { ...getBootstrapFallback(), ...(data || {}) };
       nextNumberEl.textContent = String(bootstrap.next_product_number_label || formatProductNumber(bootstrap.next_product_number));
       fillSelect(categorySelect, bootstrap.category_options || [], 'Select a category');
@@ -370,8 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         if (submitButton) { submitButton.disabled = true; submitButton.textContent = existingProductId ? 'Updating…' : 'Saving…'; }
         const response = await window.DDAuth.apiFetch('/api/admin/mobile-create-product', { method: 'POST', body: formData });
-        const data = await response.json();
-        if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to save product.');
+        const data = await parseApiResponse(response, 'Failed to save product.');
         const savedProductId = String(data.product?.product_id || existingProductId || '');
         if (existingProductId) {
           setMessage(`Updated draft product ${formatProductNumber(data.product?.product_number)} and kept it open for continued editing.`);
