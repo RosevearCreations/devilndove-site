@@ -1,5 +1,13 @@
 # Known Gaps and Risks
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 ## Current pass focus and what was actually improved
 
 This pass concentrated on working down the open risk list in order instead of skipping ahead. The goal was to reduce operational risk with real code and schema changes, while staying honest about what still requires provider access, production credentials, or later UI polish.
@@ -648,4 +656,3 @@ All code-side items that were realistically actionable inside this repo pass wer
 
 #### Remaining risk
 - Cost authority is stronger than before, but operator judgement is still required to decide when inventory cost changes should also trigger storefront price changes.
-

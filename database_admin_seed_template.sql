@@ -3,6 +3,7 @@
 -- Temporary password for this template hash: ChangeMe123!
 -- Change the email before running and change the password immediately after first login.
 
+-- Current pass note: phone product capture now resolves the shared D1 binding through DB or DD_DB and returns structured JSON failures instead of HTML parser breaks.
 INSERT INTO users (
   email,
   password_hash,
@@ -33,4 +34,3 @@ VALUES (
 -- Current pass note
 -- Added bulk site-inventory unit-cost update workflow in application code.
 -- No schema expansion was required in this pass; existing site_item_inventory and site_inventory_movements tables were reused.
-

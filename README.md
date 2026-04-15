@@ -1,5 +1,13 @@
 # Devil n Dove Website
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 Devil n Dove is a public website, storefront, member area, and admin management system for the workshop.
 
 ## Current state
@@ -435,4 +443,3 @@ Still to deepen later:
 ## Current pass note
 - Added bulk site-inventory cost update tooling in the admin catalog workflow.
 - This makes it easier to handle tariff changes, packaging increases, and supplier cost changes without editing every supply or tool one by one.
-

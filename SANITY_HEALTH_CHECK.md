@@ -1,5 +1,13 @@
 # Sanity / Health Check
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 ## Current build status
 
 This build is in a better state for day-to-day browsing and admin use than the previous pass, but it is still not in the final security-complete or payments-complete state.
@@ -277,4 +285,3 @@ This build is in a better state for day-to-day browsing and admin use than the p
 ## Current pass note
 - Verified public HTML pages still satisfy the one-H1 rule in this pass.
 - Added a new inventory-cost admin path that parsed cleanly in code checks before packaging the build.
-

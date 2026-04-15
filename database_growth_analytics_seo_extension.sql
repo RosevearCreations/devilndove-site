@@ -4,6 +4,7 @@
 -- Brief description: Adds analytics/security, SEO, media, inventory, movement history,
 -- search logging, and notification foundations for the current Devil n Dove build.
 
+-- Current pass note: phone product capture now resolves the shared D1 binding through DB or DD_DB and returns structured JSON failures instead of HTML parser breaks.
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS site_visitors (
@@ -313,4 +314,3 @@ CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_
 -- Current pass note
 -- Added bulk site-inventory unit-cost update workflow in application code.
 -- No schema expansion was required in this pass; existing site_item_inventory and site_inventory_movements tables were reused.
-

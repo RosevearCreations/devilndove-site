@@ -1,5 +1,13 @@
 # Database Schema Reference
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 ## Core auth
 
 ### users
@@ -419,4 +427,3 @@ Stores fallback and error events from public/admin paths. Current write-path cov
 - No new tables were required in this pass.
 - Existing `site_item_inventory` and `site_inventory_movements` structures now support bulk unit-cost changes through new API/frontend logic rather than schema expansion.
 - `site_inventory_movements.movement_type` is now also used for `cost_update` entries written by the new bulk inventory cost workflow.
-

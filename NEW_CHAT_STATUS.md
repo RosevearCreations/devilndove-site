@@ -1,5 +1,13 @@
 # New Chat Status
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 ## Current handoff summary
 
 This handoff is updated for the latest repo pass. The build focus remained admin resilience, mobile follow-up visibility, schema/doc sync, and reducing duplicate truth risks where the repo could safely move forward in one pass.
@@ -222,4 +230,3 @@ This pass focused on moving failed admin write actions beyond one browser. A new
 - Quick inventory updates now also allow one-off unit-cost correction from the table prompt.
 - Public H1 audit still came back clean for exposed HTML pages.
 - No schema expansion was required in this pass; the work reused `site_item_inventory` and `site_inventory_movements`.
-

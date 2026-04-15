@@ -1,5 +1,13 @@
 # Local SEO Playbook (Devil n Dove)
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 This checklist focuses on **local discovery** without risky keyword stuffing. It is meant to be used alongside the site's existing SEO fields.
 
 ## Quick wins (1–2 hours)
@@ -165,4 +173,3 @@ This pass was mostly admin-resiliency work. Keep the usual one-H1, descriptive t
 ## Current pass note
 - Public HTML pages were rechecked for the one-H1 rule in this pass and the current exposed pages still return one main heading each.
 - Keep continuing the existing pattern of descriptive titles, concise meta descriptions, and Southern Ontario wording on public collection and company pages.
-

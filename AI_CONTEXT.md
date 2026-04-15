@@ -1,5 +1,13 @@
 # AI Context
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 ## Current phase
 
 This repo is in the payment, media, inventory, and public SEO hardening phase after the main storefront, auth, and admin foundations were already built.
@@ -323,4 +331,3 @@ When continuing from this build, treat the admin orders area as partially harden
 - Added a new admin endpoint and frontend path for bulk unit-cost updates on `site_item_inventory`.
 - Selection scope now covers selected inventory ids, category, source type, or the entire site inventory.
 - The workflow includes preview-before-apply, audit logging, and movement-note logging for tariff, shipping, packaging, or supplier cost changes.
-

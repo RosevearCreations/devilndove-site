@@ -1,5 +1,13 @@
 # Repo Base Guide
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 ## Purpose
 
 This repo runs the Devil n Dove website as:
@@ -333,4 +341,3 @@ Touched areas in this pass:
 - New admin API file: `functions/api/admin/bulk-update-site-inventory.js`
 - Updated frontend file: `public/js/admin-site-item-inventory.js`
 - These files now own the new preview/apply bulk cost workflow for `site_item_inventory`.
-

@@ -1,5 +1,13 @@
 # Project Brain
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 ## Core mental model
 
 This repo is now a combined:
@@ -342,4 +350,3 @@ Operational priority moved to admin resiliency this pass: order list, order deta
 ## Current pass note
 - Inventory operations now cover both stock movement and bulk unit-cost changes.
 - Use the catalog department page inventory block for tariffs, packaging increases, supplier changes, or shipping-related cost corrections before repricing products.
-

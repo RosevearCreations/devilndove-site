@@ -1,5 +1,13 @@
 # Development Roadmap
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 ## Current completed foundations
 
 - auth and session model
@@ -375,4 +383,3 @@
 1. Connect bulk inventory cost changes more directly into finished-product repricing suggestions and margin warnings.
 2. Continue reducing JSON/D1 overlap around creations, featured content, and reusable brand assets.
 3. Keep hardening fallback behavior for admin-heavy workflows that rely on long-lived catalog data.
-

@@ -1,5 +1,13 @@
 # Repo Rules
 
+
+## Current pass update
+
+- Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.
+- The mobile save endpoint now returns structured JSON failures and records a runtime incident when the save path breaks unexpectedly.
+- The phone product-capture page now parses failed responses safely, so HTML 500 pages no longer surface as `Unexpected token '<'` in the admin UI.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
 - Keep all schema files and Markdown docs in sync with the current build state.
 - When payment flow changes, update both code and the database and payment documentation together.
 - When media workflow changes, update both admin UI notes and deployment binding notes together.
@@ -222,4 +230,3 @@ For admin order/payment work, prefer partial success plus a warning over whole-s
 ## Current pass note
 - Keep `site_item_inventory` cost changes going through the admin API paths so audit logging and movement-note history remain intact.
 - Avoid bypassing the new bulk inventory cost endpoint when mass supplier/tariff changes are needed.
-
