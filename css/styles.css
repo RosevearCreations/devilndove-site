@@ -398,3 +398,14 @@ textarea {
 
 
 .status-note{margin:10px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);font-size:13px;line-height:1.4}.status-note.warning{border-color:rgba(194,147,0,.35);background:rgba(194,147,0,.08)}.status-note.error{border-color:rgba(176,0,32,.35);background:rgba(176,0,32,.08)}.status-note.success{border-color:rgba(0,128,96,.35);background:rgba(0,128,96,.08)}
+
+
+.mobile-required-note{background:rgba(10,122,47,.06)}
+.mobile-required-field{position:relative;padding:10px 12px;border:1px solid rgba(10,122,47,.18);border-radius:14px;background:rgba(10,122,47,.03);transition:border-color .2s ease, box-shadow .2s ease, background .2s ease}
+.mobile-required-field .input{border:2px solid rgba(10,122,47,.28)}
+.mobile-required-field.is-ready{border-color:rgba(10,122,47,.42);background:rgba(10,122,47,.07);box-shadow:0 0 0 2px rgba(10,122,47,.06)}
+.mobile-required-field.is-ready .input{border-color:rgba(10,122,47,.55);box-shadow:0 0 0 2px rgba(10,122,47,.12)}
+.mobile-required-field.is-missing{border-color:rgba(10,122,47,.22);background:rgba(10,122,47,.03)}
+.mobile-required-field.is-missing .input{border-color:rgba(10,122,47,.32)}
+.mobile-required-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(10,122,47,.10);border:1px solid rgba(10,122,47,.24);font-size:.72rem;font-weight:600;vertical-align:middle}
+.mobile-readiness-chip.is-optional{background:rgba(67,97,238,.08);border-color:rgba(67,97,238,.18)}

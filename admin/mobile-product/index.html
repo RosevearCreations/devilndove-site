@@ -66,23 +66,28 @@
         <div id="mobileDraftReadiness" class="mobile-draft-readiness" style="margin-top:10px"><div class="small">Select a saved draft to see what is still missing before it is ready for fuller review.</div></div>
       </div>
 
+      <div class="card mobile-required-note" style="margin:0;padding:14px;border:1px solid rgba(10,122,47,.22)">
+        <strong>Approval-required fields</strong>
+        <div class="small" style="margin-top:6px">Green outlined fields are the ones that must be filled before a draft can be approved for storefront go-live. Save a draft any time, then return later to finish the approval fields.</div>
+      </div>
+
       <form id="mobileProductForm" class="mobile-product-form">
         <input type="hidden" name="product_id" id="mobileDraftProductId" value=""/>
         <div class="mobile-form-grid">
-          <label>
-            <span>Product name</span>
+          <label class="mobile-required-field" data-ready-key="name">
+            <span>Product name <span class="mobile-required-badge">Needed to approve</span></span>
             <input class="input" type="text" name="name" maxlength="160" placeholder="Example: Hammered copper leaf ring"/>
           </label>
-          <label>
-            <span>Category</span>
+          <label class="mobile-required-field" data-ready-key="product_category">
+            <span>Category <span class="mobile-required-badge">Needed to approve</span></span>
             <select class="input" name="product_category" id="mobileProductCategory"></select>
           </label>
           <label>
             <span>Colour</span>
             <select class="input" name="color_name" id="mobileColorName"></select>
           </label>
-          <label>
-            <span>Price (CAD)</span>
+          <label class="mobile-required-field" data-ready-key="price">
+            <span>Price (CAD) <span class="mobile-required-badge">Needed to approve</span></span>
             <input class="input" type="number" name="price" min="0" step="0.01" placeholder="49.95"/>
           </label>
           <label>
@@ -115,8 +120,8 @@
           </label>
         </div>
 
-        <label>
-          <span>Brief product description</span>
+        <label class="mobile-required-field" data-ready-key="short_description">
+          <span>Brief product description <span class="mobile-required-badge">40+ chars to approve</span></span>
           <textarea class="input" name="short_description" rows="3" maxlength="320" placeholder="Short shopper-friendly summary."></textarea>
         </label>
         <label>
@@ -125,8 +130,8 @@
         </label>
 
         <div class="mobile-form-grid">
-          <label>
-            <span>SEO title</span>
+          <label class="mobile-required-field" data-ready-key="meta_title">
+            <span>SEO title <span class="mobile-required-badge">10+ chars to approve</span></span>
             <input class="input" type="text" name="meta_title" maxlength="70" placeholder="Auto-generated if left blank"/>
           </label>
           <label>
@@ -134,13 +139,13 @@
             <input class="input" type="text" name="keywords" maxlength="255" placeholder="ring, copper ring, handmade jewelry, Ontario"/>
           </label>
         </div>
-        <label>
-          <span>SEO meta description</span>
+        <label class="mobile-required-field" data-ready-key="meta_description">
+          <span>SEO meta description <span class="mobile-required-badge">50+ chars to approve</span></span>
           <textarea class="input" name="meta_description" rows="3" maxlength="160" placeholder="Short search-friendly description. Auto-generated if left blank."></textarea>
         </label>
 
-        <label>
-          <span>Photos</span>
+        <label class="mobile-required-field" data-ready-key="photos">
+          <span>Photos <span class="mobile-required-badge">First photo needed to approve</span></span>
           <input class="input" type="file" name="images" id="mobileProductImages" accept="image/*" capture="environment" multiple/>
           <div class="small">Upload phone photos directly. The first image becomes the featured image.</div>
         </label>
