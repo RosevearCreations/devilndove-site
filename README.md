@@ -443,3 +443,10 @@ Still to deepen later:
 ## Current pass note
 - Added bulk site-inventory cost update tooling in the admin catalog workflow.
 - This makes it easier to handle tariff changes, packaging increases, and supplier cost changes without editing every supply or tool one by one.
+
+## Pass 20 note — mobile capture compatibility repair
+- Repaired the phone capture save path so it no longer hard-fails when the live `products` table is missing newer mobile-capture columns such as `capture_reference`.
+- The mobile save endpoint now checks the live table columns first and only writes optional mobile fields that actually exist in the current database.
+- The mobile drafts endpoint now also tolerates missing optional product columns so older partially-migrated databases can still load saved drafts instead of failing on select/search.
+- Follow-up priority: run the current schema upgrade on production so mobile capture can use the full metadata set, but the app now degrades safely until that migration is finished.
+

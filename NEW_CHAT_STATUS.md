@@ -230,3 +230,10 @@ This pass focused on moving failed admin write actions beyond one browser. A new
 - Quick inventory updates now also allow one-off unit-cost correction from the table prompt.
 - Public H1 audit still came back clean for exposed HTML pages.
 - No schema expansion was required in this pass; the work reused `site_item_inventory` and `site_inventory_movements`.
+
+## Pass 20 note — mobile capture compatibility repair
+- Repaired the phone capture save path so it no longer hard-fails when the live `products` table is missing newer mobile-capture columns such as `capture_reference`.
+- The mobile save endpoint now checks the live table columns first and only writes optional mobile fields that actually exist in the current database.
+- The mobile drafts endpoint now also tolerates missing optional product columns so older partially-migrated databases can still load saved drafts instead of failing on select/search.
+- Follow-up priority: run the current schema upgrade on production so mobile capture can use the full metadata set, but the app now degrades safely until that migration is finished.
+

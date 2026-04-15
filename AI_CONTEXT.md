@@ -331,3 +331,10 @@ When continuing from this build, treat the admin orders area as partially harden
 - Added a new admin endpoint and frontend path for bulk unit-cost updates on `site_item_inventory`.
 - Selection scope now covers selected inventory ids, category, source type, or the entire site inventory.
 - The workflow includes preview-before-apply, audit logging, and movement-note logging for tariff, shipping, packaging, or supplier cost changes.
+
+## Pass 20 note — mobile capture compatibility repair
+- Repaired the phone capture save path so it no longer hard-fails when the live `products` table is missing newer mobile-capture columns such as `capture_reference`.
+- The mobile save endpoint now checks the live table columns first and only writes optional mobile fields that actually exist in the current database.
+- The mobile drafts endpoint now also tolerates missing optional product columns so older partially-migrated databases can still load saved drafts instead of failing on select/search.
+- Follow-up priority: run the current schema upgrade on production so mobile capture can use the full metadata set, but the app now degrades safely until that migration is finished.
+

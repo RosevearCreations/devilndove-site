@@ -1065,3 +1065,11 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- Current pass note
 -- Added bulk site-inventory unit-cost update workflow in application code.
 -- No schema expansion was required in this pass; existing site_item_inventory and site_inventory_movements tables were reused.
+
+-- Pass 20 note — mobile capture compatibility repair
+-- The live production database may still be missing one or more newer mobile-capture columns
+-- on `products` (for example `capture_reference`) even though the current schema files include them.
+-- Application code now checks the live table shape before writing optional mobile-capture fields so
+-- `/api/admin/mobile-create-product` and `/api/admin/mobile-product-drafts` keep working during a
+-- partial migration window. The preferred long-term fix is still to complete the products-table upgrade.
+

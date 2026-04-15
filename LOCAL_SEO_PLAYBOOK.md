@@ -173,3 +173,10 @@ This pass was mostly admin-resiliency work. Keep the usual one-H1, descriptive t
 ## Current pass note
 - Public HTML pages were rechecked for the one-H1 rule in this pass and the current exposed pages still return one main heading each.
 - Keep continuing the existing pattern of descriptive titles, concise meta descriptions, and Southern Ontario wording on public collection and company pages.
+
+## Pass 20 note — mobile capture compatibility repair
+- Repaired the phone capture save path so it no longer hard-fails when the live `products` table is missing newer mobile-capture columns such as `capture_reference`.
+- The mobile save endpoint now checks the live table columns first and only writes optional mobile fields that actually exist in the current database.
+- The mobile drafts endpoint now also tolerates missing optional product columns so older partially-migrated databases can still load saved drafts instead of failing on select/search.
+- Follow-up priority: run the current schema upgrade on production so mobile capture can use the full metadata set, but the app now degrades safely until that migration is finished.
+
