@@ -27,6 +27,18 @@ function formatProductNumberLabel(value) {
   if (!Number.isInteger(parsed) || parsed <= 0) return 'DD1000';
   return `DD${String(parsed).padStart(4, '0')}`;
 }
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+function selectColumnSql(columnSet, columnName, alias = columnName) {
+  return columnSet.has(columnName) ? columnName : `NULL AS ${alias}`;
+}
 async function upsertProductSeo(db, payload) {
   await db.prepare(`
     INSERT INTO product_seo (
@@ -98,6 +110,15 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: 'Add at least a name, a reference, or a photo before saving.' }, 400);
     }
 
+    const productColumns = await getTableColumnSet(db, 'products');
+    const supportsCaptureReference = productColumns.has('capture_reference');
+    const supportsProductCategory = productColumns.has('product_category');
+    const supportsColorName = productColumns.has('color_name');
+    const supportsShippingCode = productColumns.has('shipping_code');
+    const supportsReviewStatus = productColumns.has('review_status');
+    const supportsReadyFlag = productColumns.has('is_ready_for_storefront');
+    const supportsReadyNotes = productColumns.has('ready_check_notes');
+
     let resolvedProductId = requestedProductId;
     let productNumber = 0;
     let resolvedName = '';
@@ -107,7 +128,9 @@ export async function onRequestPost(context) {
 
     if (resolvedProductId > 0) {
       const existing = await db.prepare(`
-        SELECT product_id, product_number, slug, sku, name, capture_reference, featured_image_url
+        SELECT product_id, product_number, slug, sku, name,
+               ${selectColumnSql(productColumns, 'capture_reference')},
+               featured_image_url
         FROM products
         WHERE product_id = ?
         LIMIT 1
@@ -126,36 +149,31 @@ export async function onRequestPost(context) {
         priceCents === 0 ? 'Price still needed.' : ''
       ].filter(Boolean).join(' ');
 
-      await db.prepare(`
-        UPDATE products
-        SET
-          name = ?,
-          capture_reference = ?,
-          product_category = ?,
-          color_name = ?,
-          shipping_code = ?,
-          review_status = 'pending_review',
-          is_ready_for_storefront = 0,
-          ready_check_notes = ?,
-          short_description = ?,
-          description = ?,
-          price_cents = ?,
-          compare_at_price_cents = ?,
-          currency = ?,
-          taxable = ?,
-          tax_class_id = ?,
-          requires_shipping = ?,
-          weight_grams = ?,
-          inventory_quantity = ?,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE product_id = ?
-      `).bind(
-        resolvedName,
-        captureReference || null,
-        productCategory || null,
-        colorName || null,
-        shippingCode || null,
-        readyNotes || null,
+      const updateAssignments = ['name = ?'];
+      const updateBindings = [resolvedName];
+
+      if (supportsCaptureReference) { updateAssignments.push('capture_reference = ?'); updateBindings.push(captureReference || null); }
+      if (supportsProductCategory) { updateAssignments.push('product_category = ?'); updateBindings.push(productCategory || null); }
+      if (supportsColorName) { updateAssignments.push('color_name = ?'); updateBindings.push(colorName || null); }
+      if (supportsShippingCode) { updateAssignments.push('shipping_code = ?'); updateBindings.push(shippingCode || null); }
+      if (supportsReviewStatus) updateAssignments.push(`review_status = 'pending_review'`);
+      if (supportsReadyFlag) updateAssignments.push('is_ready_for_storefront = 0');
+      if (supportsReadyNotes) { updateAssignments.push('ready_check_notes = ?'); updateBindings.push(readyNotes || null); }
+
+      updateAssignments.push(
+        'short_description = ?',
+        'description = ?',
+        'price_cents = ?',
+        'compare_at_price_cents = ?',
+        'currency = ?',
+        'taxable = ?',
+        'tax_class_id = ?',
+        'requires_shipping = ?',
+        'weight_grams = ?',
+        'inventory_quantity = ?',
+        'updated_at = CURRENT_TIMESTAMP'
+      );
+      updateBindings.push(
         shortDescription || null,
         description || null,
         priceCents,
@@ -167,7 +185,13 @@ export async function onRequestPost(context) {
         weightGrams,
         inventoryQuantity,
         resolvedProductId
-      ).run();
+      );
+
+      await db.prepare(`
+        UPDATE products
+        SET ${updateAssignments.join(',\n          ')}
+        WHERE product_id = ?
+      `).bind(...updateBindings).run();
     } else {
       productNumber = await getNextProductNumber(db);
       resolvedName = name || captureReference || `Draft product ${productNumber}`;
@@ -180,26 +204,45 @@ export async function onRequestPost(context) {
         priceCents === 0 ? 'Price still needed.' : ''
       ].filter(Boolean).join(' ');
 
-      const insertResult = await db.prepare(`
-        INSERT INTO products (
-          product_number, slug, sku, name, capture_reference, product_category, color_name, shipping_code, review_status,
-          is_ready_for_storefront, ready_check_notes, short_description, description, product_type, status, price_cents, compare_at_price_cents,
-          currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking,
-          inventory_quantity, featured_image_url, sort_order, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending_review', ?, ?, ?, ?, 'physical', 'draft', ?, ?, ?, ?, ?, ?, ?, 1, ?, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `).bind(
-        productNumber,
-        slug,
-        sku,
-        resolvedName,
-        captureReference || null,
-        productCategory || null,
-        colorName || null,
-        shippingCode || null,
-        0,
-        readyNotes || null,
+      const insertColumns = ['product_number', 'slug', 'sku', 'name'];
+      const insertPlaceholders = ['?', '?', '?', '?'];
+      const insertBindings = [productNumber, slug, sku, resolvedName];
+
+      if (supportsCaptureReference) { insertColumns.push('capture_reference'); insertPlaceholders.push('?'); insertBindings.push(captureReference || null); }
+      if (supportsProductCategory) { insertColumns.push('product_category'); insertPlaceholders.push('?'); insertBindings.push(productCategory || null); }
+      if (supportsColorName) { insertColumns.push('color_name'); insertPlaceholders.push('?'); insertBindings.push(colorName || null); }
+      if (supportsShippingCode) { insertColumns.push('shipping_code'); insertPlaceholders.push('?'); insertBindings.push(shippingCode || null); }
+      if (supportsReviewStatus) { insertColumns.push('review_status'); insertPlaceholders.push('?'); insertBindings.push('pending_review'); }
+      if (supportsReadyFlag) { insertColumns.push('is_ready_for_storefront'); insertPlaceholders.push('?'); insertBindings.push(0); }
+      if (supportsReadyNotes) { insertColumns.push('ready_check_notes'); insertPlaceholders.push('?'); insertBindings.push(readyNotes || null); }
+
+      insertColumns.push(
+        'short_description',
+        'description',
+        'product_type',
+        'status',
+        'price_cents',
+        'compare_at_price_cents',
+        'currency',
+        'taxable',
+        'tax_class_id',
+        'requires_shipping',
+        'weight_grams',
+        'inventory_tracking',
+        'inventory_quantity',
+        'featured_image_url',
+        'sort_order',
+        'created_at',
+        'updated_at'
+      );
+      insertPlaceholders.push(
+        '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', 'NULL', '?', 'CURRENT_TIMESTAMP', 'CURRENT_TIMESTAMP'
+      );
+      insertBindings.push(
         shortDescription || null,
         description || null,
+        'physical',
+        'draft',
         priceCents,
         compareAtPriceCents,
         currency,
@@ -207,8 +250,16 @@ export async function onRequestPost(context) {
         taxClassId,
         requiresShipping,
         weightGrams,
-        inventoryQuantity
-      ).run();
+        1,
+        inventoryQuantity,
+        0
+      );
+
+      const insertResult = await db.prepare(`
+        INSERT INTO products (
+          ${insertColumns.join(', ')}
+        ) VALUES (${insertPlaceholders.join(', ')})
+      `).bind(...insertBindings).run();
 
       resolvedProductId = Number(insertResult?.meta?.last_row_id || 0);
       if (!resolvedProductId) return json({ ok: false, error: 'Product could not be created.' }, 500);

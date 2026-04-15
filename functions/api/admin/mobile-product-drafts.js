@@ -9,12 +9,32 @@ function moneyCents(value) {
   return Number.isFinite(amount) ? amount : 0;
 }
 
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+function selectColumnSql(columnSet, columnName, alias = columnName) {
+  return columnSet.has(columnName) ? `p.${columnName}` : `NULL AS ${alias}`;
+}
+
 export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
 
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: "Unauthorized." }, 401);
+
+  const productColumns = await getTableColumnSet(db, 'products');
+  const supportsCaptureReference = productColumns.has('capture_reference');
+  const supportsProductCategory = productColumns.has('product_category');
+  const supportsColorName = productColumns.has('color_name');
+  const supportsShippingCode = productColumns.has('shipping_code');
+  const supportsReviewStatus = productColumns.has('review_status');
 
   const url = new URL(context.request.url);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
@@ -28,13 +48,14 @@ export async function onRequestGet(context) {
     bindings.push(status);
   }
   if (q) {
-    where.push(`(
-      LOWER(COALESCE(p.name,'')) LIKE ? OR
-      LOWER(COALESCE(p.capture_reference,'')) LIKE ? OR
-      LOWER(COALESCE(p.slug,'')) LIKE ? OR
-      LOWER(COALESCE(p.sku,'')) LIKE ? OR
-      CAST(COALESCE(p.product_number,0) AS TEXT) LIKE ?
-    )`);
+    const searchParts = [
+      `LOWER(COALESCE(p.name,'')) LIKE ?`,
+      supportsCaptureReference ? `LOWER(COALESCE(p.capture_reference,'')) LIKE ?` : `'' LIKE ?`,
+      `LOWER(COALESCE(p.slug,'')) LIKE ?`,
+      `LOWER(COALESCE(p.sku,'')) LIKE ?`,
+      `CAST(COALESCE(p.product_number,0) AS TEXT) LIKE ?`
+    ];
+    where.push(`(${searchParts.join(' OR ')})`);
     const like = `%${q}%`;
     bindings.push(like, like, like, like, like);
   }
@@ -47,10 +68,10 @@ export async function onRequestGet(context) {
       p.slug,
       p.sku,
       p.name,
-      p.capture_reference,
-      p.product_category,
-      p.color_name,
-      p.shipping_code,
+      ${selectColumnSql(productColumns, 'capture_reference')},
+      ${selectColumnSql(productColumns, 'product_category')},
+      ${selectColumnSql(productColumns, 'color_name')},
+      ${selectColumnSql(productColumns, 'shipping_code')},
       p.price_cents,
       p.compare_at_price_cents,
       p.currency,
@@ -58,7 +79,7 @@ export async function onRequestGet(context) {
       p.description,
       p.featured_image_url,
       p.inventory_quantity,
-      p.review_status,
+      ${selectColumnSql(productColumns, 'review_status')},
       p.status,
       p.tax_class_id,
       p.weight_grams,
