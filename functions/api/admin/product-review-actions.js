@@ -60,7 +60,12 @@ export async function onRequestPost(context) {
   const readiness = buildReadiness(row);
   let nextReviewStatus = String(row.review_status || "pending_review").toLowerCase();
   let nextStatus = String(row.status || "draft").toLowerCase();
-  if (action === "approve") nextReviewStatus = "approved";
+  if (action === "approve") {
+    if (Number(readiness.is_ready_for_storefront || 0) !== 1) {
+      return json({ ok: false, error: `Product is not ready to approve yet: ${readiness.ready_check_notes || "missing required fields"}.` }, 400);
+    }
+    nextReviewStatus = "approved";
+  }
   if (action === "request_changes") {
     nextReviewStatus = "needs_changes";
     if (nextStatus === "active") nextStatus = "draft";
