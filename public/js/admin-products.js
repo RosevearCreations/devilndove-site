@@ -124,8 +124,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       const isArchived = String(product.status || "").toLowerCase() === "archived";
       const lowStock = Number(product.low_stock_flag || 0) === 1;
       const ready = Number(product.is_ready_for_storefront || 0) === 1;
+      const reviewStatusValue = String(product.review_status || "pending_review").toLowerCase();
       const reviewStatus = escapeHtml(product.review_status || "pending_review");
       const readyNotes = escapeHtml(product.ready_check_notes || "");
+      const canApprove = ready;
+      const canPublish = ready && ["approved", "published"].includes(reviewStatusValue);
+      const approveTitle = canApprove ? 'Approve this draft for storefront review.' : `Finish required approval fields first${readyNotes ? `: ${readyNotes}` : '.'}`;
+      const publishTitle = canPublish ? 'Publish this product to the storefront.' : (!ready ? `Finish required approval fields first${readyNotes ? `: ${readyNotes}` : '.'}` : 'Approve this product before publishing.');
       const linkedResourceCount = Number(product.linked_resource_count || 0);
       const linkedResourceCost = escapeHtml(formatMoney(product.linked_resource_cost_cents || 0, product.currency));
       const grossMargin = escapeHtml(formatMoney(product.gross_margin_cents || 0, product.currency));
@@ -148,9 +153,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn" type="button" data-edit-product-id="${productId}">Edit</button>
-              <button class="btn" type="button" data-review-action="approve" data-product-id="${productId}">Approve</button>
+              <button class="btn" type="button" data-review-action="approve" data-product-id="${productId}" ${canApprove ? '' : 'disabled'} title="${escapeHtml(approveTitle)}">Approve</button>
               <button class="btn" type="button" data-review-action="request_changes" data-product-id="${productId}">Needs Changes</button>
-              <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}">Publish</button>
+              <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}" ${canPublish ? '' : 'disabled'} title="${escapeHtml(publishTitle)}">Publish</button>
               <button class="btn" type="button" data-resource-action="reserve" data-product-id="${productId}">Reserve Resources</button>
               <button class="btn" type="button" data-resource-action="release" data-product-id="${productId}">Release Resources</button>
               <button class="btn" type="button" data-archive-product-id="${productId}" ${isArchived ? "disabled" : ""}>Archive</button>

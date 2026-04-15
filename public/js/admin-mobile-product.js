@@ -61,6 +61,54 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!Number.isInteger(parsed) || parsed <= 0) return 'DD1000';
     return `DD${String(parsed).padStart(4, '0')}`;
   }
+  function normalizeText(value) {
+    return String(value ?? '').trim();
+  }
+  function buildLiveDraft(baseDraft = null) {
+    const source = baseDraft || loadedDraft || {};
+    const savedImages = Number(source.image_count || (Array.isArray(source.images) ? source.images.length : 0) || 0);
+    const pendingImages = Number(imageInput?.files?.length || 0);
+    const totalImages = Math.max(savedImages, pendingImages);
+    return {
+      ...source,
+      product_number: Number(source.product_number || bootstrap?.next_product_number || 1000),
+      status: source.status || 'draft',
+      review_status: source.review_status || 'pending_review',
+      updated_at: source.updated_at || null,
+      name: normalizeText(form?.elements?.name?.value || source.name || ''),
+      product_category: normalizeText(form?.elements?.product_category?.value || source.product_category || ''),
+      price_cents: Number.isFinite(Number(form?.elements?.price?.value)) && normalizeText(form?.elements?.price?.value) ? dollarsToCents(form?.elements?.price?.value) : Number(source.price_cents || 0),
+      short_description: normalizeText(form?.elements?.short_description?.value || source.short_description || ''),
+      description: normalizeText(form?.elements?.description?.value || source.description || ''),
+      meta_title: normalizeText(form?.elements?.meta_title?.value || source.meta_title || ''),
+      meta_description: normalizeText(form?.elements?.meta_description?.value || source.meta_description || ''),
+      image_count: totalImages,
+      featured_image_url: totalImages > 0 ? (source.featured_image_url || '__local__') : normalizeText(source.featured_image_url || ''),
+      linked_resource_count: selectedList().length,
+      resource_links: selectedList(),
+      images: totalImages > 0 ? (Array.isArray(source.images) ? source.images : [{}]) : []
+    };
+  }
+  function updateRequiredFieldStates(draft = null) {
+    const liveDraft = buildLiveDraft(draft);
+    const fieldStates = {
+      name: normalizeText(liveDraft.name).length > 0,
+      product_category: normalizeText(liveDraft.product_category).length > 0,
+      price: Number(liveDraft.price_cents || 0) > 0,
+      short_description: normalizeText(liveDraft.short_description).length >= 40,
+      meta_title: normalizeText(liveDraft.meta_title).length >= 10,
+      meta_description: normalizeText(liveDraft.meta_description).length >= 50,
+      photos: Number(liveDraft.image_count || 0) > 0 || normalizeText(liveDraft.featured_image_url).length > 0
+    };
+    document.querySelectorAll('[data-ready-key]').forEach((label) => {
+      const key = String(label.getAttribute('data-ready-key') || '');
+      const isReady = !!fieldStates[key];
+      label.classList.toggle('is-ready', isReady);
+      label.classList.toggle('is-missing', !isReady);
+      label.setAttribute('data-ready-state', isReady ? 'ready' : 'missing');
+    });
+    return fieldStates;
+  }
 
   async function parseApiResponse(response, fallbackMessage) {
     const raw = await response.text().catch(() => '');
@@ -193,40 +241,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function draftChecklist(draft) {
-    const liveDraft = draft || {};
+    const liveDraft = buildLiveDraft(draft);
     const imageCount = Number(liveDraft.image_count || (liveDraft.images || []).length || 0);
     const checks = [
-      { label: 'Name', done: !!String(liveDraft.name || '').trim() },
-      { label: 'Category', done: !!String(liveDraft.product_category || '').trim() },
-      { label: 'Price', done: Number(liveDraft.price_cents || 0) > 0 },
-      { label: 'Photo', done: imageCount > 0 || !!String(liveDraft.featured_image_url || '').trim() },
-      { label: 'Story', done: !!String(liveDraft.short_description || liveDraft.description || '').trim() },
-      { label: 'SEO basics', done: !!String(liveDraft.meta_title || '').trim() && !!String(liveDraft.meta_description || '').trim() },
-      { label: 'Linked resources', done: selectedList().length > 0 }
+      { key: 'name', label: 'Name', done: normalizeText(liveDraft.name).length > 0 },
+      { key: 'product_category', label: 'Category', done: normalizeText(liveDraft.product_category).length > 0 },
+      { key: 'price', label: 'Price', done: Number(liveDraft.price_cents || 0) > 0 },
+      { key: 'photos', label: 'First photo', done: imageCount > 0 || normalizeText(liveDraft.featured_image_url).length > 0 },
+      { key: 'short_description', label: 'Short description (40+ chars)', done: normalizeText(liveDraft.short_description).length >= 40 },
+      { key: 'meta_title', label: 'SEO title (10+ chars)', done: normalizeText(liveDraft.meta_title).length >= 10 },
+      { key: 'meta_description', label: 'SEO description (50+ chars)', done: normalizeText(liveDraft.meta_description).length >= 50 },
+      { key: 'linked_resources', label: 'Linked resources (optional)', done: selectedList().length > 0, optional: true }
     ];
-    return { checks, imageCount };
+    return { checks, imageCount, liveDraft };
   }
 
   function renderDraftReadiness(draft) {
     if (!draftReadiness) return;
-    if (!draft) {
-      draftReadiness.innerHTML = '<div class="small">Select a saved draft to see what is still missing before it is ready for fuller review.</div>';
-      return;
-    }
-    const { checks, imageCount } = draftChecklist(draft);
-    const missing = checks.filter((row) => !row.done);
-    const ready = checks.filter((row) => row.done).length;
+    const { checks, imageCount, liveDraft } = draftChecklist(draft);
+    updateRequiredFieldStates(liveDraft);
+    const requiredChecks = checks.filter((row) => !row.optional);
+    const missing = requiredChecks.filter((row) => !row.done);
+    const ready = requiredChecks.filter((row) => row.done).length;
+    const optional = checks.filter((row) => row.optional);
     draftReadiness.innerHTML = `
       <div class="mobile-draft-status-head">
         <div>
-          <strong>${escapeHtml(draft.name || draft.capture_reference || `DD${draft.product_number || draft.product_id}`)}</strong>
-          <div class="small">DD${String(draft.product_number || '').padStart(4,'0')} · ${escapeHtml(draft.status || 'draft')} · ${escapeHtml(draft.review_status || 'pending_review')} · ${imageCount} images · ${selectedList().length} linked resources</div>
+          <strong>${escapeHtml(liveDraft.name || liveDraft.capture_reference || `DD${liveDraft.product_number || liveDraft.product_id || bootstrap?.next_product_number || 1000}`)}</strong>
+          <div class="small">${formatProductNumber(liveDraft.product_number || liveDraft.product_id || bootstrap?.next_product_number || 1000)} · ${escapeHtml(liveDraft.status || 'draft')} · ${escapeHtml(liveDraft.review_status || 'pending_review')} · ${imageCount} images · ${selectedList().length} linked resources</div>
         </div>
-        <div class="small">Last updated: ${escapeHtml(draft.updated_at || '—')}</div>
+        <div class="small">Last updated: ${escapeHtml(liveDraft.updated_at || 'Not saved yet')}</div>
       </div>
-      <div class="mobile-readiness-chip-row">${checks.map((row) => `<span class="mobile-readiness-chip${row.done ? ' is-done' : ' is-missing'}">${escapeHtml(row.label)}</span>`).join('')}</div>
-      <div class="small" style="margin-top:8px">${missing.length ? `Still missing: ${escapeHtml(missing.map((row) => row.label).join(', '))}.` : 'This draft now has the main basics filled in for later review and refinement.'}</div>
-      <div class="small">${ready} of ${checks.length} quick mobile checks complete.</div>
+      <div class="mobile-readiness-chip-row">${requiredChecks.map((row) => `<span class="mobile-readiness-chip${row.done ? ' is-done' : ' is-missing'}">${escapeHtml(row.label)}</span>`).join('')}</div>
+      ${optional.length ? `<div class="mobile-readiness-chip-row">${optional.map((row) => `<span class="mobile-readiness-chip is-optional">${escapeHtml(row.label)}</span>`).join('')}</div>` : ''}
+      <div class="small" style="margin-top:8px">${missing.length ? `Still missing before approval: ${escapeHtml(missing.map((row) => row.label).join(', '))}.` : 'All approval-required fields are now filled. This draft is ready for approval and storefront go-live checks.'}</div>
+      <div class="small">${ready} of ${requiredChecks.length} approval-required checks complete.</div>
     `;
   }
 
@@ -349,6 +398,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (imageInput) imageInput.addEventListener('change', () => { renderImages(); renderDraftReadiness(loadedDraft); });
+  if (form) {
+    form.querySelectorAll('input, select, textarea').forEach((field) => {
+      field.addEventListener('input', () => renderDraftReadiness(loadedDraft));
+      field.addEventListener('change', () => renderDraftReadiness(loadedDraft));
+    });
+  }
   if (resourceSearch) resourceSearch.addEventListener('input', renderResourceGrid);
   if (resourceKindFilter) resourceKindFilter.addEventListener('change', renderResourceGrid);
   if (inStockOnly) inStockOnly.addEventListener('change', renderResourceGrid);
@@ -389,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
           setMessage(`Updated draft product ${formatProductNumber(data.product?.product_number)} and kept it open for continued editing.`);
           await loadBootstrap(savedProductId);
         } else {
-          setMessage(`Saved product ${formatProductNumber(data.product?.product_number)} for review. Ready for the next product.`);
+          setMessage(`Saved draft ${formatProductNumber(data.product?.product_number)}. Fill the green approval fields before approve / publish.`);
           resetFormState('Ready for the next product.');
           if (draftSearchInput) draftSearchInput.value = '';
           await loadBootstrap();
@@ -403,4 +458,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadBootstrap();
+  renderDraftReadiness(null);
 });
