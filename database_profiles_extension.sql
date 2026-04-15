@@ -115,3 +115,5 @@ CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification
 -- `/api/admin/mobile-create-product` and `/api/admin/mobile-product-drafts` keep working during a
 -- partial migration window. The preferred long-term fix is still to complete the products-table upgrade.
 
+-- Current Pass Note — 2026-04-14
+-- Approval-required storefront fields are now surfaced in the mobile capture UI and approval is blocked until readiness checks pass.

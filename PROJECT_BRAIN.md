@@ -357,3 +357,7 @@ Operational priority moved to admin resiliency this pass: order list, order deta
 - The mobile drafts endpoint now also tolerates missing optional product columns so older partially-migrated databases can still load saved drafts instead of failing on select/search.
 - Follow-up priority: run the current schema upgrade on production so mobile capture can use the full metadata set, but the app now degrades safely until that migration is finished.
 
+## Current Pass Note — 2026-04-14
+- Added approval-required field guidance to the mobile product capture flow, with green outlined required fields for approval readiness.
+- Approval-required checks now update live for name, category, price, first photo, short description, SEO title, and SEO meta description.
+- Product approval is now blocked until storefront readiness passes, and the admin products table disables Approve/Publish until required fields are complete.

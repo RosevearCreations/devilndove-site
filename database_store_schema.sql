@@ -588,3 +588,5 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- `/api/admin/mobile-create-product` and `/api/admin/mobile-product-drafts` keep working during a
 -- partial migration window. The preferred long-term fix is still to complete the products-table upgrade.
 
+-- Current Pass Note — 2026-04-14
+-- Approval-required storefront fields are now surfaced in the mobile capture UI and approval is blocked until readiness checks pass.
