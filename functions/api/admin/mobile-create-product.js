@@ -1,32 +1,77 @@
+// File: /functions/api/admin/mobile-create-product.js
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { getNextProductNumber } from './_product-numbering.js';
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
 }
+
 function slugify(value) {
-  return String(value || '').trim().toLowerCase().replace(/['"]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/['"]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
+
 function sanitizeFilename(filename) {
-  const cleaned = String(filename || 'upload').replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/-+/g, '-').replace(/^[-.]+|[-.]+$/g, '');
+  const cleaned = String(filename || 'upload')
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^[-.]+|[-.]+$/g, '');
   return cleaned || 'upload';
 }
+
 function inferExtension(filename, mimeType) {
   const fromName = String(filename || '').match(/\.([a-zA-Z0-9]+)$/)?.[1]?.toLowerCase();
   if (fromName) return fromName;
-  const map = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg', 'image/avif': 'avif' };
+  const map = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+    'image/svg+xml': 'svg',
+    'image/avif': 'avif'
+  };
   return map[String(mimeType || '').toLowerCase()] || 'bin';
 }
-function buildPublicUrl(env, objectKey) {
-  const base = normalizeText(env.PRODUCT_MEDIA_PUBLIC_BASE_URL || env.R2_PUBLIC_BASE_URL || env.PUBLIC_R2_BASE_URL);
-  if (!base) return null;
-  return `${base.replace(/\/$/, '')}/${String(objectKey || '').replace(/^\/+/, '')}`;
+
+const DEFAULT_PRODUCT_MEDIA_PUBLIC_BASE_URL = 'https://assets.devilndove.com';
+
+function getProductMediaPublicBase(env) {
+  return normalizeText(
+    env.PRODUCT_MEDIA_PUBLIC_BASE_URL ||
+    env.R2_PUBLIC_BASE_URL ||
+    env.PUBLIC_R2_BASE_URL ||
+    env.ASSET_ORIGIN ||
+    DEFAULT_PRODUCT_MEDIA_PUBLIC_BASE_URL
+  );
 }
+
+function buildPublicUrl(env, objectKey) {
+  const cleanKey = normalizeText(objectKey);
+  if (!cleanKey) return null;
+  const base = getProductMediaPublicBase(env);
+  if (!base) return null;
+  return `${base.replace(/\/$/, '')}/${cleanKey.replace(/^\/+/, '')}`;
+}
+
+function normalizeStoredImageUrl(env, value) {
+  const cleanValue = normalizeText(value);
+  if (!cleanValue) return '';
+  if (/^https?:\/\//i.test(cleanValue) || cleanValue.startsWith('data:') || cleanValue.startsWith('blob:')) {
+    return cleanValue;
+  }
+  return buildPublicUrl(env, cleanValue) || cleanValue;
+}
+
 function formatProductNumberLabel(value) {
   const parsed = Number(value || 0);
   if (!Number.isInteger(parsed) || parsed <= 0) return 'DD1000';
   return `DD${String(parsed).padStart(4, '0')}`;
 }
+
 async function getTableColumnSet(db, tableName) {
   try {
     const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
@@ -36,9 +81,11 @@ async function getTableColumnSet(db, tableName) {
     return new Set();
   }
 }
+
 function selectColumnSql(columnSet, columnName, alias = columnName) {
   return columnSet.has(columnName) ? columnName : `NULL AS ${alias}`;
 }
+
 async function upsertProductSeo(db, payload) {
   await db.prepare(`
     INSERT INTO product_seo (
@@ -54,7 +101,17 @@ async function upsertProductSeo(db, payload) {
       og_description = excluded.og_description,
       og_image_url = excluded.og_image_url,
       updated_at = CURRENT_TIMESTAMP
-  `).bind(payload.product_id, payload.meta_title, payload.meta_description, payload.keywords, payload.h1_override, payload.canonical_url, payload.og_title, payload.og_description, payload.og_image_url).run();
+  `).bind(
+    payload.product_id,
+    payload.meta_title,
+    payload.meta_description,
+    payload.keywords,
+    payload.h1_override,
+    payload.canonical_url,
+    payload.og_title,
+    payload.og_description,
+    payload.og_image_url
+  ).run();
 }
 
 export async function onRequestPost(context) {
@@ -100,10 +157,18 @@ export async function onRequestPost(context) {
     const weightGrams = weightGramsRaw ? Number(weightGramsRaw) : null;
     const resourceLinksRaw = normalizeText(form.get('resource_links_json'));
 
-    if (!Number.isInteger(priceCents) || priceCents < 0) return json({ ok: false, error: 'price_cents must be a valid whole number.' }, 400);
-    if (compareAtPriceCents !== null && (!Number.isInteger(compareAtPriceCents) || compareAtPriceCents < 0)) return json({ ok: false, error: 'compare_at_price_cents must be a valid whole number.' }, 400);
-    if (weightGrams !== null && (!Number.isInteger(weightGrams) || weightGrams < 0)) return json({ ok: false, error: 'weight_grams must be a valid whole number.' }, 400);
-    if (taxClassId !== null && (!Number.isInteger(taxClassId) || taxClassId <= 0)) return json({ ok: false, error: 'tax_class_id must be a valid id.' }, 400);
+    if (!Number.isInteger(priceCents) || priceCents < 0) {
+      return json({ ok: false, error: 'price_cents must be a valid whole number.' }, 400);
+    }
+    if (compareAtPriceCents !== null && (!Number.isInteger(compareAtPriceCents) || compareAtPriceCents < 0)) {
+      return json({ ok: false, error: 'compare_at_price_cents must be a valid whole number.' }, 400);
+    }
+    if (weightGrams !== null && (!Number.isInteger(weightGrams) || weightGrams < 0)) {
+      return json({ ok: false, error: 'weight_grams must be a valid whole number.' }, 400);
+    }
+    if (taxClassId !== null && (!Number.isInteger(taxClassId) || taxClassId <= 0)) {
+      return json({ ok: false, error: 'tax_class_id must be a valid id.' }, 400);
+    }
 
     const files = form.getAll('images').filter((file) => file && typeof file.arrayBuffer === 'function');
     if (!name && !captureReference && !files.length && !requestedProductId) {
@@ -118,9 +183,6 @@ export async function onRequestPost(context) {
     const supportsReviewStatus = productColumns.has('review_status');
     const supportsReadyFlag = productColumns.has('is_ready_for_storefront');
     const supportsReadyNotes = productColumns.has('ready_check_notes');
-    const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
-    const supportsConsumptionMode = resourceLinkColumns.has('consumption_mode');
-    const supportsLotSizeUnits = resourceLinkColumns.has('lot_size_units');
 
     let resolvedProductId = requestedProductId;
     let productNumber = 0;
@@ -155,13 +217,28 @@ export async function onRequestPost(context) {
       const updateAssignments = ['name = ?'];
       const updateBindings = [resolvedName];
 
-      if (supportsCaptureReference) { updateAssignments.push('capture_reference = ?'); updateBindings.push(captureReference || null); }
-      if (supportsProductCategory) { updateAssignments.push('product_category = ?'); updateBindings.push(productCategory || null); }
-      if (supportsColorName) { updateAssignments.push('color_name = ?'); updateBindings.push(colorName || null); }
-      if (supportsShippingCode) { updateAssignments.push('shipping_code = ?'); updateBindings.push(shippingCode || null); }
+      if (supportsCaptureReference) {
+        updateAssignments.push('capture_reference = ?');
+        updateBindings.push(captureReference || null);
+      }
+      if (supportsProductCategory) {
+        updateAssignments.push('product_category = ?');
+        updateBindings.push(productCategory || null);
+      }
+      if (supportsColorName) {
+        updateAssignments.push('color_name = ?');
+        updateBindings.push(colorName || null);
+      }
+      if (supportsShippingCode) {
+        updateAssignments.push('shipping_code = ?');
+        updateBindings.push(shippingCode || null);
+      }
       if (supportsReviewStatus) updateAssignments.push(`review_status = 'pending_review'`);
       if (supportsReadyFlag) updateAssignments.push('is_ready_for_storefront = 0');
-      if (supportsReadyNotes) { updateAssignments.push('ready_check_notes = ?'); updateBindings.push(readyNotes || null); }
+      if (supportsReadyNotes) {
+        updateAssignments.push('ready_check_notes = ?');
+        updateBindings.push(readyNotes || null);
+      }
 
       updateAssignments.push(
         'short_description = ?',
@@ -211,13 +288,41 @@ export async function onRequestPost(context) {
       const insertPlaceholders = ['?', '?', '?', '?'];
       const insertBindings = [productNumber, slug, sku, resolvedName];
 
-      if (supportsCaptureReference) { insertColumns.push('capture_reference'); insertPlaceholders.push('?'); insertBindings.push(captureReference || null); }
-      if (supportsProductCategory) { insertColumns.push('product_category'); insertPlaceholders.push('?'); insertBindings.push(productCategory || null); }
-      if (supportsColorName) { insertColumns.push('color_name'); insertPlaceholders.push('?'); insertBindings.push(colorName || null); }
-      if (supportsShippingCode) { insertColumns.push('shipping_code'); insertPlaceholders.push('?'); insertBindings.push(shippingCode || null); }
-      if (supportsReviewStatus) { insertColumns.push('review_status'); insertPlaceholders.push('?'); insertBindings.push('pending_review'); }
-      if (supportsReadyFlag) { insertColumns.push('is_ready_for_storefront'); insertPlaceholders.push('?'); insertBindings.push(0); }
-      if (supportsReadyNotes) { insertColumns.push('ready_check_notes'); insertPlaceholders.push('?'); insertBindings.push(readyNotes || null); }
+      if (supportsCaptureReference) {
+        insertColumns.push('capture_reference');
+        insertPlaceholders.push('?');
+        insertBindings.push(captureReference || null);
+      }
+      if (supportsProductCategory) {
+        insertColumns.push('product_category');
+        insertPlaceholders.push('?');
+        insertBindings.push(productCategory || null);
+      }
+      if (supportsColorName) {
+        insertColumns.push('color_name');
+        insertPlaceholders.push('?');
+        insertBindings.push(colorName || null);
+      }
+      if (supportsShippingCode) {
+        insertColumns.push('shipping_code');
+        insertPlaceholders.push('?');
+        insertBindings.push(shippingCode || null);
+      }
+      if (supportsReviewStatus) {
+        insertColumns.push('review_status');
+        insertPlaceholders.push('?');
+        insertBindings.push('pending_review');
+      }
+      if (supportsReadyFlag) {
+        insertColumns.push('is_ready_for_storefront');
+        insertPlaceholders.push('?');
+        insertBindings.push(0);
+      }
+      if (supportsReadyNotes) {
+        insertColumns.push('ready_check_notes');
+        insertPlaceholders.push('?');
+        insertBindings.push(readyNotes || null);
+      }
 
       insertColumns.push(
         'short_description',
@@ -271,26 +376,54 @@ export async function onRequestPost(context) {
     const bucket = env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
     const uploaded = [];
 
+    const currentMaxSortResult = resolvedProductId
+      ? await db.prepare(`SELECT COALESCE(MAX(sort_order), -1) AS max_sort FROM product_images WHERE product_id = ?`).bind(resolvedProductId).first().catch(() => null)
+      : null;
+    let nextImageSortOrder = Number(currentMaxSortResult?.max_sort ?? -1) + 1;
+
     if (bucket && typeof bucket.put === 'function') {
       for (let index = 0; index < files.length; index += 1) {
         const file = files[index];
         const mimeType = normalizeText(file.type || 'application/octet-stream').toLowerCase();
         if (!mimeType.startsWith('image/')) continue;
+
         const buffer = await file.arrayBuffer();
         if (!buffer || Number(file.size || 0) <= 0) continue;
+
         const originalName = sanitizeFilename(file.name || `image-${index + 1}`);
         const extension = inferExtension(originalName, mimeType);
         const objectKey = ['products', String(resolvedProductId), `${Date.now()}-${index + 1}-${crypto.randomUUID()}.${extension}`].join('/');
+
         await bucket.put(objectKey, buffer, {
           httpMetadata: { contentType: mimeType, cacheControl: 'public, max-age=31536000, immutable' },
-          customMetadata: { original_name: originalName, product_id: String(resolvedProductId), uploaded_by_user_id: String(adminUser.user_id || '') }
+          customMetadata: {
+            original_name: originalName,
+            product_id: String(resolvedProductId),
+            uploaded_by_user_id: String(adminUser.user_id || '')
+          }
         });
+
         const publicUrl = buildPublicUrl(env, objectKey);
-        uploaded.push({ object_key: objectKey, public_url: publicUrl || '', original_filename: originalName });
+        const storedImageUrl = normalizeStoredImageUrl(env, publicUrl || objectKey);
+        const sortOrder = nextImageSortOrder;
+        nextImageSortOrder += 1;
+
+        uploaded.push({
+          object_key: objectKey,
+          public_url: storedImageUrl,
+          original_filename: originalName
+        });
+
         await db.prepare(`
           INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
           VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-        `).bind(resolvedProductId, publicUrl || objectKey, `${resolvedName} photo ${index + 1}`, index).run();
+        `).bind(
+          resolvedProductId,
+          storedImageUrl,
+          `${resolvedName} photo ${index + 1}`,
+          sortOrder
+        ).run();
+
         try {
           await db.prepare(`
             INSERT INTO media_assets (
@@ -301,7 +434,7 @@ export async function onRequestPost(context) {
             resolvedProductId,
             normalizeText(env.PRODUCT_MEDIA_BUCKET_NAME || env.R2_BUCKET_NAME || 'product-media'),
             objectKey,
-            publicUrl || null,
+            storedImageUrl || null,
             originalName,
             mimeType,
             Number(file.size || 0),
@@ -311,7 +444,7 @@ export async function onRequestPost(context) {
       }
     }
 
-    const featuredImageUrl = uploaded[0]?.public_url || null;
+    const featuredImageUrl = normalizeStoredImageUrl(env, uploaded[0]?.public_url || '') || null;
     if (featuredImageUrl) {
       await db.prepare(`
         UPDATE products
@@ -348,49 +481,36 @@ export async function onRequestPost(context) {
         const sourceKey = normalizeText(row.source_key);
         if (!['tool', 'supply'].includes(resourceKind) || !sourceKey) continue;
 
-        const consumptionMode = ['per_unit', 'end_of_lot', 'story_only'].includes(normalizeText(row.consumption_mode).toLowerCase())
-          ? normalizeText(row.consumption_mode).toLowerCase()
-          : 'per_unit';
-        const lotSizeUnits = Math.max(1, Number(row.lot_size_units || 1) || 1);
-
-        const insertColumns = ['product_id', 'resource_kind', 'source_key', 'quantity_used', 'usage_notes', 'sort_order', 'created_at', 'updated_at'];
-        const insertPlaceholders = ['?', '?', '?', '?', '?', '?', 'CURRENT_TIMESTAMP', 'CURRENT_TIMESTAMP'];
-        const insertBindings = [
+        await db.prepare(`
+          INSERT INTO product_resource_links (
+            product_id, resource_kind, source_key, quantity_used, usage_notes, sort_order, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `).bind(
           resolvedProductId,
           resourceKind,
           sourceKey,
           Math.max(1, Number(row.quantity_used || 1) || 1),
           normalizeText(row.usage_notes) || null,
           index
-        ];
-        let insertPosition = 5;
-        if (supportsConsumptionMode) {
-          insertColumns.splice(insertPosition, 0, 'consumption_mode');
-          insertPlaceholders.splice(insertPosition, 0, '?');
-          insertBindings.splice(insertPosition, 0, consumptionMode);
-          insertPosition += 1;
-        }
-        if (supportsLotSizeUnits) {
-          insertColumns.splice(insertPosition, 0, 'lot_size_units');
-          insertPlaceholders.splice(insertPosition, 0, '?');
-          insertBindings.splice(insertPosition, 0, lotSizeUnits);
-        }
-        await db.prepare(`
-          INSERT INTO product_resource_links (
-            ${insertColumns.join(', ')}
-          ) VALUES (${insertPlaceholders.join(', ')})
-        `).bind(...insertBindings).run();
+        ).run();
       }
     } catch {}
 
     const createdProduct = await db.prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`).bind(resolvedProductId).first();
+    const normalizedProduct = createdProduct
+      ? {
+          ...createdProduct,
+          featured_image_url: normalizeStoredImageUrl(env, createdProduct?.featured_image_url || '')
+        }
+      : createdProduct;
+
     const nextProductNumber = await getNextProductNumber(db);
 
     return json({
       ok: true,
       message: requestedProductId > 0 ? 'Draft product updated.' : 'Draft product saved. You can come back later to finish the details.',
-      product: createdProduct,
-      product_number_label: formatProductNumberLabel(createdProduct?.product_number || productNumber),
+      product: normalizedProduct,
+      product_number_label: formatProductNumberLabel(normalizedProduct?.product_number || productNumber),
       uploaded_images: uploaded,
       next_product_number: nextProductNumber,
       next_product_number_label: formatProductNumberLabel(nextProductNumber)
