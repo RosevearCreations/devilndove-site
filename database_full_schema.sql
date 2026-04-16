@@ -755,6 +755,9 @@ VALUES
   ('site.seo.primary_h1_pattern', 'Devil n Dove | Handmade Jewelry, Creative Supplies, and Workshop Tools in Southern Ontario', 1),
   ('site.business.primary_location', 'Tillsonburg, Ontario, Canada', 1),
   ('site.catalog.product_number_start', '1000', 0),
+  ('site.catalog.product_category_options', '[]', 0),
+  ('site.catalog.color_options', '[]', 0),
+  ('site.catalog.shipping_code_options', '[]', 0),
   ('site.notifications.retry_minutes', '15', 0),
   ('payments.paypal.enabled', 'true', 1),
   ('payments.stripe.enabled', 'true', 1);
@@ -826,6 +829,8 @@ CREATE TABLE IF NOT EXISTS product_resource_links (
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  consumption_mode TEXT NOT NULL DEFAULT 'per_unit' CHECK (consumption_mode IN ('per_unit','end_of_lot','story_only')),
+  lot_size_units INTEGER NOT NULL DEFAULT 1,
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
   UNIQUE(product_id, resource_kind, source_key)
 );
@@ -1075,3 +1080,9 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 
 -- Current Pass Note — 2026-04-14
 -- Approval-required storefront fields are now surfaced in the mobile capture UI and approval is blocked until readiness checks pass.
+
+
+-- Current Pass Note — 2026-04-15
+-- Added app_settings-backed dropdown master-data keys for product categories, colours, and shipping codes.
+-- Product resource links now support per-unit, end-of-lot, and story-only inventory usage modes.
+-- End-of-lot mode is intended for supplies such as wax/resin/clay where one lot may cover many finished products before inventory should be reduced.

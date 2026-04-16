@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS app_settings (
 );
 
 INSERT OR IGNORE INTO app_settings (setting_key, setting_value, is_public)
-VALUES ('site.catalog.product_number_start', '1000', 0);
+VALUES ('site.catalog.product_number_start', '1000', 0),
+       ('site.catalog.product_category_options', '[]', 0),
+       ('site.catalog.color_options', '[]', 0),
+       ('site.catalog.shipping_code_options', '[]', 0);
 
 
 -- Movie overlay compatibility for JSON-first + D1-override workflow.
@@ -161,6 +164,8 @@ CREATE TABLE IF NOT EXISTS product_resource_links (
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  consumption_mode TEXT NOT NULL DEFAULT 'per_unit' CHECK (consumption_mode IN ('per_unit','end_of_lot','story_only')),
+  lot_size_units INTEGER NOT NULL DEFAULT 1,
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
   UNIQUE(product_id, resource_kind, source_key)
 );
@@ -472,3 +477,15 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 
 -- Current Pass Note — 2026-04-14
 -- Approval-required storefront fields are now surfaced in the mobile capture UI and approval is blocked until readiness checks pass.
+
+
+ALTER TABLE product_resource_links ADD COLUMN consumption_mode TEXT NOT NULL DEFAULT 'per_unit';
+ALTER TABLE product_resource_links ADD COLUMN lot_size_units INTEGER NOT NULL DEFAULT 1;
+
+-- Current pass note: dropdown master-data now uses app_settings, and resource links support per-product, end-of-lot, or story-only inventory usage.
+
+
+-- Current Pass Note — 2026-04-15
+-- Added app_settings-backed dropdown master-data keys for product categories, colours, and shipping codes.
+-- Product resource links now support per-unit, end-of-lot, and story-only inventory usage modes.
+-- End-of-lot mode is intended for supplies such as wax/resin/clay where one lot may cover many finished products before inventory should be reduced.

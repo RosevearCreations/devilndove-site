@@ -241,3 +241,13 @@ For admin order/payment work, prefer partial success plus a warning over whole-s
 - Added approval-required field guidance to the mobile product capture flow, with green outlined required fields for approval readiness.
 - Approval-required checks now update live for name, category, price, first photo, short description, SEO title, and SEO meta description.
 - Product approval is now blocked until storefront readiness passes, and the admin products table disables Approve/Publish until required fields are complete.
+
+
+## Current Pass Note — 2026-04-15
+- Added an admin dropdown manager for product categories, colours, shipping codes, and tax codes so these lists can now be maintained without code edits.
+- Phone product bootstrap now reads dropdown option sets from `app_settings`, while tax classes continue to come from the `tax_classes` table.
+- Product resource search now includes inventory-only tools and supplies, so materials like wax can appear even before a matching `catalog_items` row exists.
+- Product resource links now support `per_unit`, `end_of_lot`, and `story_only` inventory-use modes.
+- `end_of_lot` is intended for materials such as wax, resin, clay, or similar lot/container supplies where one inventory lot can cover many finished products.
+- Cost rollups, product stock math, and resource shortage checks now account for end-of-lot usage, while automatic reserve/release skips those links so inventory is not consumed one finished product at a time.
+- Follow-up priority: surface the same dropdown-managed values in every desktop create/edit product form once the full desktop editor is consolidated into one stable screen.

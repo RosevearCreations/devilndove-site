@@ -380,6 +380,8 @@ CREATE TABLE IF NOT EXISTS product_resource_links (
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  consumption_mode TEXT NOT NULL DEFAULT 'per_unit' CHECK (consumption_mode IN ('per_unit','end_of_lot','story_only')),
+  lot_size_units INTEGER NOT NULL DEFAULT 1,
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
   UNIQUE(product_id, resource_kind, source_key)
 );
@@ -590,3 +592,9 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 
 -- Current Pass Note — 2026-04-14
 -- Approval-required storefront fields are now surfaced in the mobile capture UI and approval is blocked until readiness checks pass.
+
+
+-- Current Pass Note — 2026-04-15
+-- Added app_settings-backed dropdown master-data keys for product categories, colours, and shipping codes.
+-- Product resource links now support per-unit, end-of-lot, and story-only inventory usage modes.
+-- End-of-lot mode is intended for supplies such as wax/resin/clay where one lot may cover many finished products before inventory should be reduced.

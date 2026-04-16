@@ -72,3 +72,9 @@ VALUES
 
 -- Current Pass Note — 2026-04-14
 -- Approval-required storefront fields are now surfaced in the mobile capture UI and approval is blocked until readiness checks pass.
+
+
+-- Current Pass Note — 2026-04-15
+-- Added app_settings-backed dropdown master-data keys for product categories, colours, and shipping codes.
+-- Product resource links now support per-unit, end-of-lot, and story-only inventory usage modes.
+-- End-of-lot mode is intended for supplies such as wax/resin/clay where one lot may cover many finished products before inventory should be reduced.
