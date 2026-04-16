@@ -1,3 +1,4 @@
+// File: /functions/api/admin/mobile-product-drafts.js
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 
 function normalizeResults(result) {
@@ -18,8 +19,31 @@ async function getTableColumnSet(db, tableName) {
     return new Set();
   }
 }
+
+const DEFAULT_PRODUCT_MEDIA_PUBLIC_BASE_URL = 'https://assets.devilndove.com';
+
 function selectColumnSql(columnSet, columnName, alias = columnName) {
   return columnSet.has(columnName) ? `p.${columnName}` : `NULL AS ${alias}`;
+}
+
+function getProductMediaPublicBase(env) {
+  return normalizeText(
+    env.PRODUCT_MEDIA_PUBLIC_BASE_URL ||
+    env.R2_PUBLIC_BASE_URL ||
+    env.PUBLIC_R2_BASE_URL ||
+    env.ASSET_ORIGIN ||
+    DEFAULT_PRODUCT_MEDIA_PUBLIC_BASE_URL
+  );
+}
+
+function normalizeStoredImageUrl(env, value) {
+  const cleanValue = normalizeText(value);
+  if (!cleanValue) return '';
+  if (/^https?:\/\//i.test(cleanValue) || cleanValue.startsWith('data:') || cleanValue.startsWith('blob:')) {
+    return cleanValue;
+  }
+  const base = getProductMediaPublicBase(env);
+  return base ? `${base.replace(/\/$/, '')}/${cleanValue.replace(/^\/+/, '')}` : cleanValue;
 }
 
 export async function onRequestGet(context) {
@@ -35,9 +59,6 @@ export async function onRequestGet(context) {
   const supportsColorName = productColumns.has('color_name');
   const supportsShippingCode = productColumns.has('shipping_code');
   const supportsReviewStatus = productColumns.has('review_status');
-  const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
-  const supportsConsumptionMode = resourceLinkColumns.has('consumption_mode');
-  const supportsLotSizeUnits = resourceLinkColumns.has('lot_size_units');
 
   const url = new URL(context.request.url);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
@@ -46,10 +67,12 @@ export async function onRequestGet(context) {
 
   const bindings = [];
   const where = [];
+
   if (status) {
     where.push(`LOWER(COALESCE(p.status,'draft')) = ?`);
     bindings.push(status);
   }
+
   if (q) {
     const searchParts = [
       `LOWER(COALESCE(p.name,'')) LIKE ?`,
@@ -62,6 +85,7 @@ export async function onRequestGet(context) {
     const like = `%${q}%`;
     bindings.push(like, like, like, like, like);
   }
+
   bindings.push(limit);
 
   const rows = normalizeResults(await db.prepare(`
@@ -102,31 +126,37 @@ export async function onRequestGet(context) {
     LIMIT ?
   `).bind(...bindings).all().catch(() => ({ results: [] })));
 
-  let imageMap = new Map();
-  let resourceMap = new Map();
+  const imageMap = new Map();
+  const resourceMap = new Map();
+
   if (rows.length) {
     const ids = rows.map((row) => Number(row.product_id || 0)).filter(Boolean);
     const placeholders = ids.map(() => '?').join(',');
+
     const imageRows = normalizeResults(await db.prepare(`
       SELECT product_id, image_url, alt_text, sort_order
       FROM product_images
       WHERE product_id IN (${placeholders})
       ORDER BY product_id ASC, sort_order ASC, product_image_id ASC
     `).bind(...ids).all().catch(() => ({ results: [] })));
+
     imageRows.forEach((row) => {
       const list = imageMap.get(Number(row.product_id || 0)) || [];
-      list.push({ image_url: row.image_url || '', alt_text: row.alt_text || '', sort_order: Number(row.sort_order || 0) });
+      list.push({
+        image_url: normalizeStoredImageUrl(context.env, row.image_url || ''),
+        alt_text: row.alt_text || '',
+        sort_order: Number(row.sort_order || 0)
+      });
       imageMap.set(Number(row.product_id || 0), list);
     });
 
     const resourceRows = normalizeResults(await db.prepare(`
-      SELECT product_id, resource_kind, source_key, quantity_used, usage_notes, sort_order,
-             ${supportsConsumptionMode ? 'consumption_mode' : `'per_unit' AS consumption_mode`},
-             ${supportsLotSizeUnits ? 'lot_size_units' : '1 AS lot_size_units'}
+      SELECT product_id, resource_kind, source_key, quantity_used, usage_notes, sort_order
       FROM product_resource_links
       WHERE product_id IN (${placeholders})
       ORDER BY product_id ASC, sort_order ASC, product_resource_link_id ASC
     `).bind(...ids).all().catch(() => ({ results: [] })));
+
     resourceRows.forEach((row) => {
       const list = resourceMap.get(Number(row.product_id || 0)) || [];
       list.push({
@@ -134,8 +164,6 @@ export async function onRequestGet(context) {
         source_key: row.source_key || '',
         quantity_used: Number(row.quantity_used || 1),
         usage_notes: row.usage_notes || '',
-        consumption_mode: row.consumption_mode || 'per_unit',
-        lot_size_units: Math.max(1, Number(row.lot_size_units || 1) || 1),
         sort_order: Number(row.sort_order || 0)
       });
       resourceMap.set(Number(row.product_id || 0), list);
@@ -162,7 +190,7 @@ export async function onRequestGet(context) {
       meta_title: row.meta_title || '',
       meta_description: row.meta_description || '',
       keywords: row.keywords || '',
-      featured_image_url: row.featured_image_url || '',
+      featured_image_url: normalizeStoredImageUrl(context.env, row.featured_image_url || ''),
       inventory_quantity: Number(row.inventory_quantity || 0),
       review_status: row.review_status || '',
       status: row.status || 'draft',
