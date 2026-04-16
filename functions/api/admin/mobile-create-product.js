@@ -118,6 +118,9 @@ export async function onRequestPost(context) {
     const supportsReviewStatus = productColumns.has('review_status');
     const supportsReadyFlag = productColumns.has('is_ready_for_storefront');
     const supportsReadyNotes = productColumns.has('ready_check_notes');
+    const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
+    const supportsConsumptionMode = resourceLinkColumns.has('consumption_mode');
+    const supportsLotSizeUnits = resourceLinkColumns.has('lot_size_units');
 
     let resolvedProductId = requestedProductId;
     let productNumber = 0;
@@ -344,18 +347,39 @@ export async function onRequestPost(context) {
         const resourceKind = normalizeText(row.resource_kind).toLowerCase();
         const sourceKey = normalizeText(row.source_key);
         if (!['tool', 'supply'].includes(resourceKind) || !sourceKey) continue;
-        await db.prepare(`
-          INSERT INTO product_resource_links (
-            product_id, resource_kind, source_key, quantity_used, usage_notes, sort_order, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        `).bind(
+
+        const consumptionMode = ['per_unit', 'end_of_lot', 'story_only'].includes(normalizeText(row.consumption_mode).toLowerCase())
+          ? normalizeText(row.consumption_mode).toLowerCase()
+          : 'per_unit';
+        const lotSizeUnits = Math.max(1, Number(row.lot_size_units || 1) || 1);
+
+        const insertColumns = ['product_id', 'resource_kind', 'source_key', 'quantity_used', 'usage_notes', 'sort_order', 'created_at', 'updated_at'];
+        const insertPlaceholders = ['?', '?', '?', '?', '?', '?', 'CURRENT_TIMESTAMP', 'CURRENT_TIMESTAMP'];
+        const insertBindings = [
           resolvedProductId,
           resourceKind,
           sourceKey,
           Math.max(1, Number(row.quantity_used || 1) || 1),
           normalizeText(row.usage_notes) || null,
           index
-        ).run();
+        ];
+        let insertPosition = 5;
+        if (supportsConsumptionMode) {
+          insertColumns.splice(insertPosition, 0, 'consumption_mode');
+          insertPlaceholders.splice(insertPosition, 0, '?');
+          insertBindings.splice(insertPosition, 0, consumptionMode);
+          insertPosition += 1;
+        }
+        if (supportsLotSizeUnits) {
+          insertColumns.splice(insertPosition, 0, 'lot_size_units');
+          insertPlaceholders.splice(insertPosition, 0, '?');
+          insertBindings.splice(insertPosition, 0, lotSizeUnits);
+        }
+        await db.prepare(`
+          INSERT INTO product_resource_links (
+            ${insertColumns.join(', ')}
+          ) VALUES (${insertPlaceholders.join(', ')})
+        `).bind(...insertBindings).run();
       }
     } catch {}
 

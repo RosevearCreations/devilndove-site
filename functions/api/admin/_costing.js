@@ -138,6 +138,10 @@ export async function computeMonthlyItemCosting(db, range) {
   const hasProductCosts = await tableExists(db, 'product_costs');
   const hasResourceLinks = await tableExists(db, 'product_resource_links');
   const hasInventory = await tableExists(db, 'site_item_inventory');
+  const resourceLinkColumns = hasResourceLinks ? await db.prepare(`PRAGMA table_info(product_resource_links)`).all().catch(() => ({ results: [] })) : { results: [] };
+  const resourceColumnSet = new Set((Array.isArray(resourceLinkColumns?.results) ? resourceLinkColumns.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  const hasConsumptionMode = resourceColumnSet.has('consumption_mode');
+  const hasLotSizeUnits = resourceColumnSet.has('lot_size_units');
   const hasOverhead = await tableExists(db, 'accounting_overhead_allocations');
   const hasOrders = await tableExists(db, 'orders');
   const hasOrderItems = await tableExists(db, 'order_items');
@@ -173,7 +177,7 @@ export async function computeMonthlyItemCosting(db, range) {
       SELECT
         prl.product_id,
         COUNT(*) AS linked_resource_count,
-        SUM(CASE WHEN sii.site_item_inventory_id IS NOT NULL THEN COALESCE(prl.quantity_used,0) * COALESCE(sii.unit_cost_cents,0) ELSE 0 END) AS linked_resource_cost_cents,
+        SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN COALESCE(prl.quantity_used,0) * COALESCE(sii.unit_cost_cents,0) / COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1) ELSE COALESCE(prl.quantity_used,0) * COALESCE(sii.unit_cost_cents,0) END) AS linked_resource_cost_cents,
         SUM(CASE WHEN sii.site_item_inventory_id IS NULL OR COALESCE(sii.unit_cost_cents,0) <= 0 THEN 1 ELSE 0 END) AS missing_cost_links
       FROM product_resource_links prl
       LEFT JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key

@@ -2,6 +2,7 @@ import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
+async function getTableColumnSet(db, tableName) { try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); const rows = Array.isArray(result?.results) ? result.results : []; return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean)); } catch { return new Set(); } }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -13,6 +14,11 @@ export async function onRequestGet(context) {
   const productId = Number(url.searchParams.get('product_id') || 0);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
   const like = `%${q}%`;
+  const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
+  const hasConsumptionMode = resourceLinkColumns.has('consumption_mode');
+  const hasLotSizeUnits = resourceLinkColumns.has('lot_size_units');
+  const modeExpr = hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`;
+  const lotExpr = hasLotSizeUnits ? `COALESCE(NULLIF(prl.lot_size_units,0),1)` : `1`;
 
   const rows = normalizeResults(await db.prepare(`
     SELECT
@@ -24,12 +30,12 @@ export async function onRequestGet(context) {
       p.currency,
       COALESCE(p.price_cents, 0) AS price_cents,
       COUNT(prl.product_resource_link_id) AS linked_resource_count,
-      COALESCE(SUM(COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0)), 0) AS linked_resource_cost_cents,
-      SUM(CASE WHEN prl.resource_kind = 'supply' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) ELSE 0 END) AS supply_cost_cents,
-      SUM(CASE WHEN prl.resource_kind = 'tool' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) ELSE 0 END) AS tool_usage_cost_cents,
+      COALESCE(SUM(CASE WHEN ${modeExpr} = 'story_only' THEN 0 WHEN ${modeExpr} = 'end_of_lot' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) / ${lotExpr} ELSE COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) END), 0) AS linked_resource_cost_cents,
+      SUM(CASE WHEN prl.resource_kind = 'supply' THEN CASE WHEN ${modeExpr} = 'story_only' THEN 0 WHEN ${modeExpr} = 'end_of_lot' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) / ${lotExpr} ELSE COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) END ELSE 0 END) AS supply_cost_cents,
+      SUM(CASE WHEN prl.resource_kind = 'tool' THEN CASE WHEN ${modeExpr} = 'story_only' THEN 0 WHEN ${modeExpr} = 'end_of_lot' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) / ${lotExpr} ELSE COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) END ELSE 0 END) AS tool_usage_cost_cents,
       SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 1 ELSE 0 END) AS missing_cost_links,
-      MIN(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL THEN CAST(MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) / prl.quantity_used AS INTEGER) ELSE NULL END) AS buildable_units_from_resources,
-      SUM(CASE WHEN COALESCE(prl.quantity_used, 0) > 0 AND sii.site_item_inventory_id IS NOT NULL AND MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) < COALESCE(prl.quantity_used,0) THEN 1 ELSE 0 END) AS resource_shortage_links,
+      MIN(CASE WHEN sii.site_item_inventory_id IS NULL OR ${modeExpr} = 'story_only' THEN NULL WHEN COALESCE(prl.quantity_used, 0) > 0 AND ${modeExpr} = 'end_of_lot' THEN CAST((MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) * ${lotExpr}) / COALESCE(NULLIF(prl.quantity_used,0),1) AS INTEGER) WHEN COALESCE(prl.quantity_used, 0) > 0 THEN CAST(MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) / prl.quantity_used AS INTEGER) ELSE NULL END) AS buildable_units_from_resources,
+      SUM(CASE WHEN sii.site_item_inventory_id IS NULL OR ${modeExpr} = 'story_only' THEN 0 WHEN ${modeExpr} = 'end_of_lot' AND (MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) * ${lotExpr}) < COALESCE(prl.quantity_used,0) THEN 1 WHEN ${modeExpr} != 'end_of_lot' AND MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) < COALESCE(prl.quantity_used,0) THEN 1 ELSE 0 END) AS resource_shortage_links,
       GROUP_CONCAT(DISTINCT CASE WHEN sii.site_item_inventory_id IS NULL THEN prl.resource_kind || ':' || prl.source_key ELSE NULL END) AS missing_resources
     FROM products p
     LEFT JOIN product_resource_links prl ON prl.product_id = p.product_id

@@ -2,6 +2,7 @@ import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normali
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
+async function getTableColumnSet(db, tableName) { try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); const rows = Array.isArray(result?.results) ? result.results : []; return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean)); } catch { return new Set(); } }
 
 function shape(row = {}) {
   const onHand = Number(row.on_hand_quantity || 0);
@@ -133,8 +134,13 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
 
 
 async function adjustProductResourceReservations(db, { productId = 0, quantityMultiplier = 1, release = false, note = '', actorUserId = null } = {}) {
+  const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
+  const supportsConsumptionMode = resourceLinkColumns.has('consumption_mode');
+  const supportsLotSizeUnits = resourceLinkColumns.has('lot_size_units');
   const links = normalizeResults(await db.prepare(`
     SELECT prl.product_resource_link_id, prl.resource_kind, prl.source_key, COALESCE(prl.quantity_used, 0) AS quantity_used,
+           ${supportsConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit' AS consumption_mode`},
+           ${supportsLotSizeUnits ? `COALESCE(prl.lot_size_units,1)` : `1 AS lot_size_units`},
            sii.site_item_inventory_id, sii.item_name, sii.source_type, sii.external_key,
            COALESCE(sii.on_hand_quantity, 0) AS on_hand_quantity,
            COALESCE(sii.reserved_quantity, 0) AS reserved_quantity,
@@ -150,11 +156,15 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
   const results = [];
   for (const link of links) {
     const requiredQty = Math.max(0, Number(link.quantity_used || 0) * Math.max(1, Number(quantityMultiplier || 1)));
+    const consumptionMode = String(link.consumption_mode || 'per_unit').trim().toLowerCase() || 'per_unit';
+    const lotSizeUnits = Math.max(1, Number(link.lot_size_units || 1) || 1);
     if (!Number(link.site_item_inventory_id || 0) || requiredQty <= 0) {
       results.push({
         resource_kind: link.resource_kind || '',
         source_key: link.source_key || '',
         item_name: link.item_name || link.source_key || '',
+        consumption_mode: consumptionMode,
+        lot_size_units: lotSizeUnits,
         required_quantity: requiredQty,
         applied_quantity: 0,
         available_before: 0,
@@ -167,10 +177,49 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
     const previousOnHand = Number(link.on_hand_quantity || 0);
     const previousIncoming = Number(link.incoming_quantity || 0);
     const availableBefore = Math.max(0, previousOnHand - previousReserved);
+    const reservationNote = [normalizeText(note), `product:${productId}`, release ? 'release_product_resources' : 'reserve_product_resources'].filter(Boolean).join(' | ');
+
+    if (consumptionMode === 'story_only') {
+      results.push({
+        resource_kind: link.resource_kind || '',
+        source_key: link.source_key || '',
+        item_name: link.item_name || link.source_key || '',
+        consumption_mode: consumptionMode,
+        lot_size_units: lotSizeUnits,
+        required_quantity: requiredQty,
+        applied_quantity: 0,
+        available_before: availableBefore,
+        shortage_quantity: 0,
+        missing_inventory_link: 0,
+        skipped_automatic_inventory: 1,
+        site_item_inventory_id: Number(link.site_item_inventory_id || 0)
+      });
+      continue;
+    }
+
+    if (consumptionMode === 'end_of_lot') {
+      const availableProductUnits = Math.max(0, previousOnHand + previousIncoming) * lotSizeUnits;
+      const shortageQuantity = release ? 0 : Math.max(0, requiredQty - availableProductUnits);
+      results.push({
+        resource_kind: link.resource_kind || '',
+        source_key: link.source_key || '',
+        item_name: link.item_name || link.source_key || '',
+        consumption_mode: consumptionMode,
+        lot_size_units: lotSizeUnits,
+        required_quantity: requiredQty,
+        applied_quantity: 0,
+        available_before: availableProductUnits,
+        shortage_quantity: shortageQuantity,
+        missing_inventory_link: 0,
+        deferred_until_lot_end: 1,
+        site_item_inventory_id: Number(link.site_item_inventory_id || 0)
+      });
+      continue;
+    }
+
     const appliedQuantity = release ? Math.min(previousReserved, requiredQty) : requiredQty;
     const nextReserved = release ? Math.max(0, previousReserved - requiredQty) : previousReserved + requiredQty;
     const shortageQuantity = release ? 0 : Math.max(0, requiredQty - availableBefore);
-    const reservationNote = [normalizeText(note), `product:${productId}`, release ? 'release_product_resources' : 'reserve_product_resources'].filter(Boolean).join(' | ');
 
     await db.prepare(`
       UPDATE site_item_inventory
@@ -201,6 +250,8 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
       resource_kind: link.resource_kind || '',
       source_key: link.source_key || '',
       item_name: link.item_name || link.source_key || '',
+      consumption_mode: consumptionMode,
+      lot_size_units: lotSizeUnits,
       required_quantity: requiredQty,
       applied_quantity: appliedQuantity,
       available_before: availableBefore,
