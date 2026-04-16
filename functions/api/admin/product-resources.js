@@ -36,6 +36,23 @@ function json(data, status = 200) {
   return jsonResponse(data, status);
 }
 
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+function coalesceSql(expressions, fallback = "NULL") {
+  const usable = expressions.filter(Boolean);
+  if (!usable.length) return fallback;
+  if (usable.length === 1) return usable[0];
+  return `COALESCE(${usable.join(', ')})`;
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = getDb(env);
@@ -49,10 +66,71 @@ export async function onRequestGet(context) {
   }
 
   try {
+    const [inventoryColumns, catalogColumns] = await Promise.all([
+      getTableColumnSet(db, 'site_item_inventory'),
+      getTableColumnSet(db, 'catalog_items')
+    ]);
+
     const url = new URL(request.url);
     const productId = Number(url.searchParams.get('product_id') || 0);
     const query = normalizeText(url.searchParams.get('q')).toLowerCase();
     const like = `%${query}%`;
+
+    const inventoryKindExpr = coalesceSql([
+      inventoryColumns.has('item_kind') ? 'sii.item_kind' : '',
+      inventoryColumns.has('source_type') ? 'sii.source_type' : ''
+    ], "'supply'");
+
+    const inventorySourceTypeExpr = coalesceSql([
+      inventoryColumns.has('source_type') ? 'sii.source_type' : '',
+      inventoryColumns.has('item_kind') ? 'sii.item_kind' : ''
+    ], "'supply'");
+
+    const inventoryExternalKeyExpr = coalesceSql([
+      inventoryColumns.has('external_key') ? 'sii.external_key' : '',
+      inventoryColumns.has('source_key') ? 'sii.source_key' : ''
+    ], "NULL");
+
+    const inventoryNameExpr = coalesceSql([
+      inventoryColumns.has('item_name') ? 'sii.item_name' : '',
+      inventoryColumns.has('name') ? 'sii.name' : '',
+      inventoryExternalKeyExpr !== "NULL" ? inventoryExternalKeyExpr : ''
+    ], "''");
+
+    const inventoryCategoryExpr = inventoryColumns.has('category') ? 'sii.category' : "''";
+    const inventorySubcategoryExpr = inventoryColumns.has('subcategory') ? 'sii.subcategory' : "''";
+    const inventoryOnHandExpr = coalesceSql([
+      inventoryColumns.has('on_hand_quantity') ? 'sii.on_hand_quantity' : '',
+      inventoryColumns.has('quantity_on_hand') ? 'sii.quantity_on_hand' : '',
+      inventoryColumns.has('quantity') ? 'sii.quantity' : ''
+    ], '0');
+    const inventoryReorderExpr = coalesceSql([
+      inventoryColumns.has('is_on_reorder_list') ? 'sii.is_on_reorder_list' : '',
+      inventoryColumns.has('reorder_flag') ? 'sii.reorder_flag' : ''
+    ], '0');
+    const inventoryDoNotReuseExpr = inventoryColumns.has('do_not_reuse') ? 'sii.do_not_reuse' : '0';
+    const inventoryImageExpr = coalesceSql([
+      inventoryColumns.has('image_url') ? 'sii.image_url' : '',
+      inventoryColumns.has('featured_image_url') ? 'sii.featured_image_url' : ''
+    ], "''");
+    const inventoryIdExpr = inventoryColumns.has('site_item_inventory_id') ? 'sii.site_item_inventory_id' : '0';
+
+    const canJoinCatalogInventory =
+      catalogColumns.has('item_kind') &&
+      catalogColumns.has('source_key') &&
+      (inventoryColumns.has('source_type') || inventoryColumns.has('item_kind')) &&
+      (inventoryColumns.has('external_key') || inventoryColumns.has('source_key'));
+
+    const catalogInventoryJoinSql = canJoinCatalogInventory
+      ? `
+        LEFT JOIN site_item_inventory sii
+          ON ${inventorySourceTypeExpr} = ci.item_kind
+         AND ${inventoryExternalKeyExpr} = ci.source_key
+      `
+      : `
+        LEFT JOIN site_item_inventory sii
+          ON 1 = 0
+      `;
 
     const products = normalizeResults(
       await db.prepare(`
@@ -78,14 +156,12 @@ export async function onRequestGet(context) {
           ci.image_url,
           ci.category,
           ci.subcategory,
-          sii.site_item_inventory_id,
-          sii.on_hand_quantity,
-          sii.is_on_reorder_list,
-          sii.do_not_reuse
+          ${inventoryIdExpr} AS site_item_inventory_id,
+          ${inventoryOnHandExpr} AS on_hand_quantity,
+          ${inventoryReorderExpr} AS is_on_reorder_list,
+          ${inventoryDoNotReuseExpr} AS do_not_reuse
         FROM catalog_items ci
-        LEFT JOIN site_item_inventory sii
-          ON sii.source_type = ci.item_kind
-         AND sii.external_key = ci.source_key
+        ${catalogInventoryJoinSql}
         WHERE ci.item_kind IN ('tool', 'supply')
           AND COALESCE(ci.status, 'active') != 'archived'
           AND (
@@ -110,59 +186,71 @@ export async function onRequestGet(context) {
       do_not_reuse: Number(row.do_not_reuse || 0)
     }));
 
-    const inventoryOnlyResources = normalizeResults(
-      await db.prepare(`
+    const canReadInventoryOnly =
+      inventoryColumns.size > 0 &&
+      (inventoryColumns.has('item_name') || inventoryColumns.has('name') || inventoryColumns.has('external_key') || inventoryColumns.has('source_key'));
+
+    const inventoryOnlySql = canReadInventoryOnly
+      ? `
         SELECT
-          sii.site_item_inventory_id,
-          sii.item_name,
-          sii.item_kind,
-          sii.source_type,
-          sii.external_key,
-          sii.category,
-          sii.subcategory,
-          sii.on_hand_quantity,
-          sii.is_on_reorder_list,
-          sii.do_not_reuse,
-          sii.image_url
+          ${inventoryIdExpr} AS site_item_inventory_id,
+          ${inventoryNameExpr} AS item_name,
+          ${inventoryKindExpr} AS item_kind,
+          ${inventorySourceTypeExpr} AS source_type,
+          ${inventoryExternalKeyExpr} AS external_key,
+          ${inventoryCategoryExpr} AS category,
+          ${inventorySubcategoryExpr} AS subcategory,
+          ${inventoryOnHandExpr} AS on_hand_quantity,
+          ${inventoryReorderExpr} AS is_on_reorder_list,
+          ${inventoryDoNotReuseExpr} AS do_not_reuse,
+          ${inventoryImageExpr} AS image_url
         FROM site_item_inventory sii
-        WHERE COALESCE(sii.item_kind, sii.source_type) IN ('tool', 'supply')
+        WHERE ${inventoryKindExpr} IN ('tool', 'supply')
           AND (
             ? = ''
-            OR LOWER(COALESCE(sii.item_name, '')) LIKE ?
-            OR LOWER(COALESCE(sii.category, '')) LIKE ?
-            OR LOWER(COALESCE(sii.subcategory, '')) LIKE ?
+            OR LOWER(COALESCE(${inventoryNameExpr}, '')) LIKE ?
+            OR LOWER(COALESCE(${inventoryCategoryExpr}, '')) LIKE ?
+            OR LOWER(COALESCE(${inventorySubcategoryExpr}, '')) LIKE ?
           )
+          ${canJoinCatalogInventory ? `
           AND NOT EXISTS (
             SELECT 1
             FROM catalog_items ci
-            WHERE ci.item_kind = COALESCE(sii.item_kind, sii.source_type)
-              AND ci.source_key = sii.external_key
-          )
-        ORDER BY LOWER(COALESCE(sii.item_name, '')) ASC
+            WHERE ci.item_kind = ${inventoryKindExpr}
+              AND ci.source_key = ${inventoryExternalKeyExpr}
+          )` : ''}
+        ORDER BY LOWER(COALESCE(${inventoryNameExpr}, '')) ASC
         LIMIT 300
-      `).bind(query, like, like, like).all()
-    ).map((row) => {
-      const itemKind = row.item_kind || row.source_type || 'supply';
-      const sourceKey = row.external_key || `inventory:${row.site_item_inventory_id}`;
-      return {
-        item_kind: itemKind,
-        source_key: sourceKey,
-        name: row.item_name || sourceKey,
-        image_url: normalizeImageUrl(env, row.image_url || ''),
-        category: row.category || '',
-        subcategory: row.subcategory || '',
-        site_item_inventory_id: Number(row.site_item_inventory_id || 0),
-        on_hand_quantity: Number(row.on_hand_quantity || 0),
-        is_on_reorder_list: Number(row.is_on_reorder_list || 0),
-        do_not_reuse: Number(row.do_not_reuse || 0)
-      };
-    });
+      `
+      : null;
+
+    const inventoryOnlyResources = inventoryOnlySql
+      ? normalizeResults(
+          await db.prepare(inventoryOnlySql).bind(query, like, like, like).all()
+        ).map((row) => {
+          const itemKind = row.item_kind || row.source_type || 'supply';
+          const sourceKey = row.external_key || `inventory:${row.site_item_inventory_id}`;
+          return {
+            item_kind: itemKind,
+            source_key: sourceKey,
+            name: row.item_name || sourceKey,
+            image_url: normalizeImageUrl(env, row.image_url || ''),
+            category: row.category || '',
+            subcategory: row.subcategory || '',
+            site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+            on_hand_quantity: Number(row.on_hand_quantity || 0),
+            is_on_reorder_list: Number(row.is_on_reorder_list || 0),
+            do_not_reuse: Number(row.do_not_reuse || 0)
+          };
+        })
+      : [];
 
     const resourceMap = new Map();
     [...catalogResources, ...inventoryOnlyResources].forEach((item) => {
       const key = `${item.item_kind}::${item.source_key}`;
       if (!resourceMap.has(key)) resourceMap.set(key, item);
     });
+
     const resources = Array.from(resourceMap.values());
 
     const links = productId
