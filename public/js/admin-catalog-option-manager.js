@@ -1,9 +1,9 @@
 // File: /public/js/admin-catalog-option-manager.js
-// Brief description: Admin editor for product dropdown master data and tax codes.
+// Admin editor for product dropdown master data and tax codes.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountEl = document.getElementById('catalogOptionManagerMount');
-  if (!mountEl || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  if (!mountEl) return;
 
   const state = {
     option_sets: { category_options: [], color_options: [], shipping_code_options: [] },
@@ -28,6 +28,41 @@ document.addEventListener('DOMContentLoaded', () => {
       .map((entry) => String(entry || '').trim())
       .filter(Boolean)))
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  }
+
+  function formatPercent(value) {
+    const numeric = Number(value || 0);
+    return Number.isFinite(numeric) ? (numeric * 100).toFixed(3).replace(/\.0+$|(?<=\.\d*[1-9])0+$/g, '') : '0';
+  }
+
+  function taxRateFromPercentInput(value) {
+    const numeric = Number(value || 0);
+    if (!Number.isFinite(numeric) || numeric < 0) return 0;
+    return numeric > 1 ? numeric / 100 : numeric;
+  }
+
+  async function readJsonResponse(response, fallbackMessage) {
+    const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error(data?.error || fallbackMessage);
+      return data;
+    }
+    const text = await response.text().catch(() => '');
+    throw new Error(text ? `${fallbackMessage} Server returned HTML instead of JSON.` : fallbackMessage);
+  }
+
+  function renderTaxClassRows() {
+    const rows = Array.isArray(state.tax_classes) ? state.tax_classes : [];
+    if (!rows.length) return '<tr><td colspan="5" style="padding:8px">No tax codes saved yet.</td></tr>';
+    return rows.map((row) => `
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #ddd"><strong>${escapeHtml(row.code || '')}</strong></td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.name || '')}<div class="small">${escapeHtml(row.description || '')}</div></td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatPercent(row.tax_rate || 0))}%</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${Number(row.is_active || 0) === 1 ? 'Active' : 'Inactive'}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-tax-class="${Number(row.tax_class_id || 0)}">Edit</button> <button class="btn" type="button" data-delete-tax-class="${Number(row.tax_class_id || 0)}">Remove / Disable</button></td>
+      </tr>`).join('');
   }
 
   function render() {
@@ -89,19 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function renderTaxClassRows() {
-    const rows = Array.isArray(state.tax_classes) ? state.tax_classes : [];
-    if (!rows.length) return '<tr><td colspan="5" style="padding:8px">No tax codes saved yet.</td></tr>';
-    return rows.map((row) => `
-      <tr>
-        <td style="padding:8px;border-bottom:1px solid #ddd"><strong>${escapeHtml(row.code || '')}</strong></td>
-        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.name || '')}<div class="small">${escapeHtml(row.description || '')}</div></td>
-        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(formatPercent(row.tax_rate || 0))}%</td>
-        <td style="padding:8px;border-bottom:1px solid #ddd">${Number(row.is_active || 0) === 1 ? 'Active' : 'Inactive'}</td>
-        <td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-tax-class="${Number(row.tax_class_id || 0)}">Edit</button> <button class="btn" type="button" data-delete-tax-class="${Number(row.tax_class_id || 0)}">Remove / Disable</button></td>
-      </tr>`).join('');
-  }
-
   function openTaxClassForm(row = null) {
     const wrap = document.getElementById('catalogTaxClassFormWrap');
     if (!wrap) return;
@@ -123,27 +145,31 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('catalogTaxClassForm')?.addEventListener('submit', saveTaxClass);
   }
 
+  function broadcastUpdate() {
+    document.dispatchEvent(new CustomEvent('dd:catalog-options-updated', {
+      detail: { option_sets: state.option_sets, tax_classes: state.tax_classes }
+    }));
+  }
+
   async function load() {
+    if (!window.DDAuth?.isLoggedIn()) return;
     try {
       setMessage('Loading dropdown values...');
       const response = await window.DDAuth.apiFetch('/api/admin/catalog-option-sets');
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load dropdown values.');
+      const data = await readJsonResponse(response, 'Failed to load dropdown values.');
       state.option_sets = data.option_sets || state.option_sets;
       state.tax_classes = Array.isArray(data.tax_classes) ? data.tax_classes : [];
       render();
       setMessage('');
+      broadcastUpdate();
     } catch (error) {
+      render();
       setMessage(error.message || 'Failed to load dropdown values.', true);
     }
   }
 
   async function saveOptionSet(optionSet) {
-    const map = {
-      categories: 'catalogCategoriesTextarea',
-      colors: 'catalogColorsTextarea',
-      shipping_codes: 'catalogShippingTextarea'
-    };
+    const map = { categories: 'catalogCategoriesTextarea', colors: 'catalogColorsTextarea', shipping_codes: 'catalogShippingTextarea' };
     const field = document.getElementById(map[optionSet]);
     if (!field) return;
     try {
@@ -152,11 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         body: JSON.stringify({ action: 'save_option_set', option_set: optionSet, values: splitLines(field.value) })
       });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save option set.');
+      const data = await readJsonResponse(response, 'Failed to save option set.');
       state.option_sets = data.option_sets || state.option_sets;
       render();
       setMessage('Dropdown values saved.');
+      broadcastUpdate();
     } catch (error) {
       setMessage(error.message || 'Failed to save option set.', true);
     }
@@ -176,12 +202,12 @@ document.addEventListener('DOMContentLoaded', () => {
         is_active: Number(document.getElementById('catalogTaxClassActive')?.value || 1)
       };
       const response = await window.DDAuth.apiFetch('/api/admin/catalog-option-sets', { method: 'POST', body: JSON.stringify(payload) });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save tax code.');
+      const data = await readJsonResponse(response, 'Failed to save tax code.');
       state.option_sets = data.option_sets || state.option_sets;
       state.tax_classes = Array.isArray(data.tax_classes) ? data.tax_classes : [];
       render();
       setMessage('Tax code saved.');
+      broadcastUpdate();
     } catch (error) {
       setMessage(error.message || 'Failed to save tax code.', true);
     }
@@ -196,17 +222,18 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         body: JSON.stringify({ action: 'delete_tax_class', tax_class_id: taxClassId })
       });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to remove tax code.');
+      const data = await readJsonResponse(response, 'Failed to remove tax code.');
       state.option_sets = data.option_sets || state.option_sets;
       state.tax_classes = Array.isArray(data.tax_classes) ? data.tax_classes : [];
       render();
       setMessage('Tax code removed or disabled.');
+      broadcastUpdate();
     } catch (error) {
       setMessage(error.message || 'Failed to remove tax code.', true);
     }
   }
 
   document.addEventListener('dd:admin-ready', async (event) => { if (!event?.detail?.ok) return; await load(); });
-  load();
+  render();
+  if (window.DDAuth?.isLoggedIn()) load();
 });

@@ -176,8 +176,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="resource-linked-card">
         <div class="resource-linked-summary">
           <div><strong>${escapeHtml(row.name)}</strong> <span class="small">(${escapeHtml(row.resource_kind)})</span></div>
+          <div class="small" style="margin:4px 0 0 0">Usage unit ${escapeHtml(row.usage_unit_label || 'unit')} • ${Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1)} per stock unit</div>
           <div class="grid cols-2" style="gap:8px;margin:8px 0">
-            <label class="small">Quantity used <input class="input mobile-inline-input" data-resource-qty="${escapeHtml(row.key)}" type="number" min="1" step="1" value="${Number(row.quantity_used || 1)}"/></label>
+            <label class="small">Quantity used (${escapeHtml(row.usage_unit_label || 'unit')}) <input class="input mobile-inline-input" data-resource-qty="${escapeHtml(row.key)}" type="number" min="1" step="1" value="${Number(row.quantity_used || 1)}"/></label>
             <label class="small">Inventory use
               <select class="input" data-resource-mode="${escapeHtml(row.key)}">
                 <option value="per_unit" ${String(row.consumption_mode || 'per_unit') === 'per_unit' ? 'selected' : ''}>Per product</option>
@@ -246,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const reorderPoint = Number(row.reorder_point || 0);
       const incomingQty = Number(row.incoming_quantity || 0);
       const statusBits = [qty > 0 ? `On hand: ${qty}` : 'Out of stock'];
+      statusBits.push(`${Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1)} ${row.usage_unit_label || 'unit'} per stock unit`);
       if (incomingQty > 0) statusBits.push(`Incoming: ${incomingQty}`);
       if (reorderPoint > 0) statusBits.push(`Reorder at ${reorderPoint}`);
       if (Number(row.is_on_reorder_list || 0) === 1) statusBits.push('On reorder list');
@@ -258,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!row) return;
       const key = `${resourceKind}:${sourceKey}`;
       if (selectedMap.has(key)) selectedMap.delete(key);
-      else selectedMap.set(key, { key, resource_kind: resourceKind, source_key: sourceKey, name: row.name, quantity_used: 1, usage_notes: '', consumption_mode: 'per_unit', lot_size_units: 1, sort_order: selectedMap.size });
+      else selectedMap.set(key, { key, resource_kind: resourceKind, source_key: sourceKey, name: row.name, quantity_used: 1, usage_notes: '', consumption_mode: 'per_unit', lot_size_units: 1, usage_unit_label: row.usage_unit_label || 'unit', usage_units_per_stock_unit: Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1), sort_order: selectedMap.size });
       renderSelectedResources();
       renderResourceGrid();
       renderDraftReadiness(loadedDraft);
@@ -348,6 +350,8 @@ document.addEventListener('DOMContentLoaded', () => {
         source_key: row.source_key,
         name: resource?.name || row.source_key,
         quantity_used: Number(row.quantity_used || 1),
+        usage_unit_label: resource?.usage_unit_label || 'unit',
+        usage_units_per_stock_unit: Math.max(1, Number(resource?.usage_units_per_stock_unit || 1) || 1),
         usage_notes: row.usage_notes || '',
         consumption_mode: row.consumption_mode || 'per_unit',
         lot_size_units: Math.max(1, Number(row.lot_size_units || 1) || 1),

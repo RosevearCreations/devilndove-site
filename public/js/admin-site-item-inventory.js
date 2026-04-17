@@ -4,7 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountEl = document.getElementById('siteInventoryAdminMount');
-  if (!mountEl || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  if (!mountEl) return;
 
   let rendered = false;
 
@@ -272,10 +272,15 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="grid cols-5" style="gap:12px">
             <div><label class="small" for="siteInventoryUnitCost">Unit Cost (cents)</label><input id="siteInventoryUnitCost" type="number" min="0" step="1" value="0" /></div>
+            <div><label class="small" for="siteInventoryUsageUnitLabel">Usage Unit</label><input id="siteInventoryUsageUnitLabel" type="text" placeholder="cup, wick, gram, spool" value="unit" /></div>
+            <div><label class="small" for="siteInventoryUsageUnitsPerStock">Usage Units Per Stock Unit</label><input id="siteInventoryUsageUnitsPerStock" type="number" min="1" step="0.001" value="1" /></div>
             <div><label class="small" for="siteInventorySupplierName">Supplier</label><input id="siteInventorySupplierName" type="text" /></div>
             <div><label class="small" for="siteInventorySupplierSku">Supplier SKU</label><input id="siteInventorySupplierSku" type="text" /></div>
+          </div>
+          <div class="grid cols-3" style="gap:12px">
             <div><label class="small" for="siteInventorySupplierContact">Supplier Contact</label><input id="siteInventorySupplierContact" type="text" placeholder="email or phone" /></div>
             <div><label class="small" for="siteInventoryReuseStatus">Reuse Status</label><input id="siteInventoryReuseStatus" type="text" placeholder="wash, refill, one-time use" /></div>
+            <div class="small" style="align-self:end">Examples: candle wax block = 20 cups per stock unit, wick bag = 100 wicks, PLA spool = 1000 grams.</div>
           </div>
           <div class="grid cols-4" style="gap:12px">
             <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryOnReorderList" type="checkbox" /> On reorder list</label>
@@ -396,6 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
       reorder_level: Number(document.getElementById('siteInventoryReorder')?.value || 0),
       preferred_reorder_quantity: Number(document.getElementById('siteInventoryPreferredReorderQty')?.value || 0),
       unit_cost_cents: Number(document.getElementById('siteInventoryUnitCost')?.value || 0),
+      usage_unit_label: document.getElementById('siteInventoryUsageUnitLabel')?.value || 'unit',
+      usage_units_per_stock_unit: Math.max(1, Number(document.getElementById('siteInventoryUsageUnitsPerStock')?.value || 1) || 1),
       supplier_name: document.getElementById('siteInventorySupplierName')?.value || '',
       supplier_sku: document.getElementById('siteInventorySupplierSku')?.value || '',
       supplier_contact: document.getElementById('siteInventorySupplierContact')?.value || '',
@@ -446,6 +453,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save inventory item.');
       setMessage('Inventory item saved.');
       document.getElementById('siteInventoryForm')?.reset();
+      const usageUnitEl = document.getElementById('siteInventoryUsageUnitLabel'); if (usageUnitEl) usageUnitEl.value = 'unit';
+      const usageUnitsEl = document.getElementById('siteInventoryUsageUnitsPerStock'); if (usageUnitsEl) usageUnitsEl.value = '1';
       await loadList();
     } catch (err) {
       setMessage(err.message || 'Failed to save inventory item.', true);
@@ -482,11 +491,11 @@ document.addEventListener('DOMContentLoaded', () => {
               ${x.needs_reorder ? '⚠️ ' : ''}<strong>${escapeHtml(x.item_name)}</strong>
               <div class="small">#${x.site_item_inventory_id} · ${escapeHtml(x.source_type)} • ${escapeHtml(x.category || '—')}</div>
             </td>
-            <td style="padding:8px;border-bottom:1px solid #ddd">On hand ${x.on_hand_quantity}<div class="small">Reserved ${x.reserved_quantity} • Incoming ${x.incoming_quantity} • Reorder ${x.reorder_level}</div><div class="small">Preferred reorder ${x.preferred_reorder_quantity || 0}</div></td>
+            <td style="padding:8px;border-bottom:1px solid #ddd">On hand ${x.on_hand_quantity}<div class="small">Reserved ${x.reserved_quantity} • Incoming ${x.incoming_quantity} • Reorder ${x.reorder_level}</div><div class="small">Usage unit ${escapeHtml(x.usage_unit_label || 'unit')} • ${Number(x.usage_units_per_stock_unit || 1)} per stock unit</div><div class="small">Preferred reorder ${x.preferred_reorder_quantity || 0}</div></td>
             <td style="padding:8px;border-bottom:1px solid #ddd"><div class="small">${x.is_on_reorder_list ? 'On reorder list' : 'Not queued'}</div><div class="small">${x.do_not_reorder ? 'Do not reorder' : 'Can reorder'}</div><div class="small">${x.do_not_reuse ? 'Do not reuse' : (x.reuse_status || 'Reusable/normal')}</div></td>
             <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(x.supplier_name || '—')}<div class="small">${escapeHtml(x.supplier_sku || '')}</div><div class="small">${escapeHtml(x.supplier_contact || '')}</div></td>
             <td style="padding:8px;border-bottom:1px solid #ddd">${Number(x.linked_product_count || 0)}<div class="small">${escapeHtml(x.linked_product_names || '')}</div></td>
-            <td style="padding:8px;border-bottom:1px solid #ddd">${fmtMoney(x.unit_cost_cents || 0)}</td>
+            <td style="padding:8px;border-bottom:1px solid #ddd">${fmtMoney(x.unit_cost_cents || 0)}<div class="small">≈ ${fmtMoney(Math.round((Number(x.unit_cost_cents || 0)) / Math.max(1, Number(x.usage_units_per_stock_unit || 1))))} per ${escapeHtml(x.usage_unit_label || 'unit')}</div></td>
             <td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick Update</button> <button class="btn" type="button" data-adjust-action="reserve" data-id="${x.site_item_inventory_id}">Reserve</button> <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button> <button class="btn" type="button" data-adjust-action="reorder_request" data-id="${x.site_item_inventory_id}">Reorder</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td>
           </tr>
         `).join('');
@@ -521,6 +530,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (unitCostRaw === null) return;
       const unitCostDollars = Number(unitCostRaw);
       if (!Number.isFinite(unitCostDollars) || unitCostDollars < 0) return;
+      const usageLabel = String(window.prompt('Usage unit label?', String(item?.usage_unit_label || 'unit')) || '').trim() || 'unit';
+      const usageUnitsRaw = window.prompt('How many usage units are in one stock unit?', String(Number(item?.usage_units_per_stock_unit || 1)));
+      if (usageUnitsRaw === null) return;
+      const usageUnitsPerStock = Math.max(1, Number(usageUnitsRaw || 1) || 1);
       const reorderList = window.confirm('Put this item on the reorder list? Click Cancel to leave it off.');
       const doNotReuse = window.confirm('Mark this item as DO NOT REUSE? Click Cancel to leave reusable/normal.');
       const movementNote = String(window.prompt('Movement note?', 'Manual stock / cost correction') || '').trim();
@@ -534,6 +547,8 @@ document.addEventListener('DOMContentLoaded', () => {
             item_name: item?.item_name || '',
             on_hand_quantity: onHand,
             unit_cost_cents: Math.round(unitCostDollars * 100),
+            usage_unit_label: usageLabel,
+            usage_units_per_stock_unit: usageUnitsPerStock,
             is_on_reorder_list: reorderList ? 1 : 0,
             do_not_reuse: doNotReuse ? 1 : 0,
             movement_note: movementNote || 'Inventory quantity / cost updated.'
@@ -595,4 +610,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   render();
+  if (window.DDAuth?.isLoggedIn()) loadList();
 });
