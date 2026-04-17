@@ -33,6 +33,17 @@ document.addEventListener("DOMContentLoaded", () => {
       </p>
 
       <form id="memberChangePasswordForm" class="grid" style="gap:12px">
+        <input
+          id="memberChangePasswordUsername"
+          name="username"
+          type="email"
+          autocomplete="username"
+          hidden
+          tabindex="-1"
+          aria-hidden="true"
+          value=""
+        />
+
         <div>
           <label class="small" for="memberCurrentPassword">Current Password</label>
           <input
@@ -90,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentPasswordEl = document.getElementById("memberCurrentPassword");
     const newPasswordEl = document.getElementById("memberNewPassword");
     const confirmNewPasswordEl = document.getElementById("memberConfirmNewPassword");
+    const usernameEl = document.getElementById("memberChangePasswordUsername");
     const button = document.getElementById("memberChangePasswordButton");
     const form = document.getElementById("memberChangePasswordForm");
 
@@ -127,10 +139,20 @@ document.addEventListener("DOMContentLoaded", () => {
         button.textContent = "Saving...";
       }
 
+      const sessionInfo = await window.DDAuth.fetchSessionInfo().catch(() => null);
+      const email = String(sessionInfo?.user?.email || "");
+      if (usernameEl) {
+        usernameEl.value = email;
+      }
+
       await window.DDAuth.changePassword(current_password, new_password);
 
       if (form) {
         form.reset();
+      }
+
+      if (usernameEl) {
+        usernameEl.value = email;
       }
 
       setMessage("Password changed successfully.");
@@ -144,13 +166,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  document.addEventListener("dd:members-ready", (event) => {
+  document.addEventListener("dd:members-ready", async (event) => {
     if (!event?.detail?.ok) return;
     renderUi();
+
+    const usernameEl = document.getElementById("memberChangePasswordUsername");
+    if (usernameEl) {
+      usernameEl.value = String(event.detail?.user?.email || "");
+    }
   });
 
-  document.addEventListener("dd:member-access-ready", (event) => {
+  document.addEventListener("dd:member-access-ready", async (event) => {
     if (!event?.detail?.ok) return;
     renderUi();
+
+    const usernameEl = document.getElementById("memberChangePasswordUsername");
+    if (usernameEl) {
+      usernameEl.value = String(event.detail?.user?.email || "");
+    }
   });
 });
