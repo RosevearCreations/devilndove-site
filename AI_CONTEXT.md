@@ -1,6 +1,14 @@
 # AI Context
 
 
+
+## Current pass snapshot
+
+- Dropdown manager is wired on admin catalog/products for categories, colours, shipping codes, and tax codes.
+- Inventory now speaks in both stock units and usage units.
+- Resource linking now gives more operator-facing feedback for batch materials and end-of-lot planning.
+- Public trust/conversion improvements should now be guided by the new craft-commerce benchmark notes.
+
 ## Current pass update
 
 - Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.

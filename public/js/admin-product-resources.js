@@ -39,9 +39,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function describeUsageUnit(item) {
+    const stockLabel = String(item?.stock_unit_label || 'unit').trim() || 'unit';
     const label = String(item?.usage_unit_label || item?.usage_unit_name || 'unit').trim() || 'unit';
     const perStock = Math.max(1, Number(item?.usage_units_per_stock_unit || 1) || 1);
-    return { label, perStock };
+    return { stockLabel, label, perStock };
+  }
+
+  function buildUsagePreview(link) {
+    const resource = link?.resource || {};
+    const usage = describeUsageUnit(resource);
+    const onHandStock = Math.max(0, Number(resource?.on_hand_quantity || 0));
+    const unitCostCents = Math.max(0, Number(resource?.unit_cost_cents || 0));
+    const qtyUsed = Math.max(1, Number(link?.quantity_used || 1) || 1);
+    const lotSize = Math.max(1, Number(link?.lot_size_units || 1) || 1);
+    const mode = String(link?.consumption_mode || 'per_unit').trim() || 'per_unit';
+    const totalUsageUnits = onHandStock * usage.perStock;
+    const buildable = mode === 'end_of_lot'
+      ? Math.floor((totalUsageUnits * lotSize) / qtyUsed)
+      : Math.floor(totalUsageUnits / qtyUsed);
+    const costPerUseCents = usage.perStock > 0 ? Math.round((unitCostCents * qtyUsed) / usage.perStock) : 0;
+    const costPerFinishedCents = mode === 'end_of_lot' ? Math.round(costPerUseCents / lotSize) : costPerUseCents;
+    return { usage, onHandStock, totalUsageUnits, buildable, costPerUseCents, costPerFinishedCents, mode, qtyUsed, lotSize };
+  }
+
+  function formatMoney(cents) {
+    const amount = Number(cents || 0) / 100;
+    try {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'CAD' }).format(amount);
+    } catch {
+      return `$${amount.toFixed(2)}`;
+    }
   }
 
   function render() {
@@ -113,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="resource-tile-body">
             <strong>${escapeHtml(item.name)}</strong>
             <div class="small">${escapeHtml(item.item_kind)} • ${escapeHtml(item.category || item.subcategory || '')}</div>
-            <div class="small">On hand ${Number(item.on_hand_quantity || 0)} • ${usageMeta.perStock} ${escapeHtml(usageMeta.label)} per stock unit</div>
+            <div class="small">On hand ${Number(item.on_hand_quantity || 0)} ${escapeHtml(usageMeta.stockLabel)} • 1 ${escapeHtml(usageMeta.stockLabel)} = ${usageMeta.perStock} ${escapeHtml(usageMeta.label)}</div>
             <div class="small">${Number(item.is_on_reorder_list || 0) === 1 ? 'On reorder list' : 'Normal stock'}${Number(item.do_not_reuse || 0) === 1 ? ' • do not reuse' : ''}</div>
           </div>
         </button>`;
@@ -128,15 +155,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     el.innerHTML = state.links.map((link, idx) => {
-      const usageMeta = describeUsageUnit(link.resource || {});
+      const usagePreview = buildUsagePreview(link);
+      const usageMeta = usagePreview.usage;
       const mode = String(link.consumption_mode || 'per_unit');
       return `
         <div class="resource-linked-card">
           <div class="resource-linked-summary">
             <strong>${escapeHtml(link.name || link.source_key)}</strong>
-            <div class="small">${escapeHtml(link.resource_kind)} • stock unit holds ${escapeHtml(String(usageMeta.perStock))} ${escapeHtml(usageMeta.label)}</div>
+            <div class="small">${escapeHtml(link.resource_kind)} • 1 ${escapeHtml(usageMeta.stockLabel)} holds ${escapeHtml(String(usageMeta.perStock))} ${escapeHtml(usageMeta.label)}</div>
             <label class="small" style="display:block;margin-top:6px">How much per use / batch <input class="input" data-link-qty="${idx}" type="number" min="1" step="1" value="${Math.max(1, Number(link.quantity_used || 1) || 1)}" /></label>
             <div class="small">Enter how many ${escapeHtml(usageMeta.label)} this product uses${mode === 'end_of_lot' ? ' per batch/lot' : ' per finished item'}.</div>
+            <div class="small" style="margin-top:4px">Current stock ≈ ${escapeHtml(String(usagePreview.totalUsageUnits))} ${escapeHtml(usageMeta.label)} across ${escapeHtml(String(usagePreview.onHandStock))} ${escapeHtml(usageMeta.stockLabel)}.</div>
             <label class="small" style="display:block;margin-top:6px">Inventory handling
               <select class="input" data-link-mode="${idx}">
                 <option value="per_unit" ${mode === 'per_unit' ? 'selected' : ''}>Per product</option>
@@ -148,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <input class="input" data-link-lot="${idx}" type="number" min="1" step="1" value="${Math.max(1, Number(link.lot_size_units || 1) || 1)}" />
             </label>
             <div class="small" style="margin-top:4px">${mode === 'end_of_lot' ? `End-of-lot spreads ${escapeHtml(usageMeta.label)} usage across multiple finished products without per-item reservation.` : (mode === 'story_only' ? 'Story only keeps this item in the making record without touching cost or stock math.' : `Per product treats the quantity as ${escapeHtml(usageMeta.label)} used on every finished item.`)}</div>
+            <div class="small">Estimated cost ${escapeHtml(formatMoney(usagePreview.costPerFinishedCents))} per finished product${mode === 'end_of_lot' ? ` • lot covers about ${escapeHtml(String(usagePreview.lotSize))} finished products` : ''} • buildable now ≈ ${escapeHtml(String(Math.max(0, usagePreview.buildable)))}.</div>
             <textarea class="input" data-link-note="${idx}" rows="2" placeholder="How was this item used for the story of this product?">${escapeHtml(link.usage_notes || '')}</textarea>
           </div>
           <div class="resource-linked-actions">

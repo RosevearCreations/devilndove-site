@@ -53,6 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!Number.isFinite(cents) || cents <= 0) return '';
     return (cents / 100).toFixed(2);
   }
+  function formatMoney(cents) {
+    const amount = Number(cents || 0) / 100;
+    try {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'CAD' }).format(amount);
+    } catch {
+      return `$${amount.toFixed(2)}`;
+    }
+  }
   function escapeHtml(value) {
     return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
@@ -145,6 +153,30 @@ document.addEventListener('DOMContentLoaded', () => {
       return `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`;
     }).join('');
   }
+
+  function describeUsageMeta(row) {
+    return {
+      stockLabel: String(row?.stock_unit_label || 'unit').trim() || 'unit',
+      usageLabel: String(row?.usage_unit_label || 'unit').trim() || 'unit',
+      perStock: Math.max(1, Number(row?.usage_units_per_stock_unit || 1) || 1)
+    };
+  }
+
+  function calcUsagePreview(row) {
+    const meta = describeUsageMeta(row);
+    const onHandStock = Math.max(0, Number(row?.on_hand_quantity || 0));
+    const qtyUsed = Math.max(1, Number(row?.quantity_used || 1) || 1);
+    const lotSize = Math.max(1, Number(row?.lot_size_units || 1) || 1);
+    const unitCostCents = Math.max(0, Number(row?.unit_cost_cents || 0));
+    const mode = String(row?.consumption_mode || 'per_unit').trim() || 'per_unit';
+    const totalUsageUnits = onHandStock * meta.perStock;
+    const buildable = mode === 'end_of_lot'
+      ? Math.floor((totalUsageUnits * lotSize) / qtyUsed)
+      : Math.floor(totalUsageUnits / qtyUsed);
+    const costPerUseCents = meta.perStock > 0 ? Math.round((unitCostCents * qtyUsed) / meta.perStock) : 0;
+    const costPerFinishedCents = mode === 'end_of_lot' ? Math.round(costPerUseCents / lotSize) : costPerUseCents;
+    return { meta, onHandStock, totalUsageUnits, buildable, lotSize, costPerFinishedCents, mode };
+  }
   function getResources() { return Array.isArray(bootstrap?.resources) ? bootstrap.resources : []; }
   function selectedList() { return Array.from(selectedMap.values()).sort((a, b) => a.sort_order - b.sort_order); }
   function setField(name, value) {
@@ -176,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="resource-linked-card">
         <div class="resource-linked-summary">
           <div><strong>${escapeHtml(row.name)}</strong> <span class="small">(${escapeHtml(row.resource_kind)})</span></div>
-          <div class="small" style="margin:4px 0 0 0">Usage unit ${escapeHtml(row.usage_unit_label || 'unit')} • ${Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1)} per stock unit</div>
+          <div class="small" style="margin:4px 0 0 0">1 ${escapeHtml(describeUsageMeta(row).stockLabel)} = ${Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1)} ${escapeHtml(row.usage_unit_label || 'unit')}</div>
           <div class="grid cols-2" style="gap:8px;margin:8px 0">
             <label class="small">Quantity used (${escapeHtml(row.usage_unit_label || 'unit')}) <input class="input mobile-inline-input" data-resource-qty="${escapeHtml(row.key)}" type="number" min="1" step="1" value="${Number(row.quantity_used || 1)}"/></label>
             <label class="small">Inventory use
@@ -189,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <label class="small" style="display:${String(row.consumption_mode || 'per_unit') === 'end_of_lot' ? 'block' : 'none'}">Products per lot / container <input class="input mobile-inline-input" data-resource-lot="${escapeHtml(row.key)}" type="number" min="1" step="1" value="${Math.max(1, Number(row.lot_size_units || 1) || 1)}"/></label>
           <div class="small" style="margin:4px 0 6px 0">${String(row.consumption_mode || 'per_unit') === 'end_of_lot' ? 'Good for wax, resin, clay, and other materials where one lot may cover many finished products.' : (String(row.consumption_mode || 'per_unit') === 'story_only' ? 'Story only keeps the item visible in the making record without touching inventory or cost math.' : 'Per product uses the quantity on every finished item and affects cost / buildable-unit math.')}</div>
+          <div class="small" style="margin:4px 0 6px 0">${(() => { const preview = calcUsagePreview(row); return `Current stock ≈ ${preview.totalUsageUnits} ${escapeHtml(preview.meta.usageLabel)} across ${preview.onHandStock} ${escapeHtml(preview.meta.stockLabel)} • cost ≈ ${escapeHtml(formatMoney(preview.costPerFinishedCents))} per finished product • buildable ≈ ${escapeHtml(String(Math.max(0, preview.buildable)))}`; })()}</div>
           <label class="small">Usage notes <input class="input" data-resource-notes="${escapeHtml(row.key)}" type="text" maxlength="180" value="${escapeHtml(row.usage_notes || '')}" placeholder="Optional note for story or workflow"/></label>
         </div>
         <div class="resource-linked-actions"><button class="btn" type="button" data-resource-remove="${escapeHtml(row.key)}">Remove</button></div>
@@ -247,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const reorderPoint = Number(row.reorder_point || 0);
       const incomingQty = Number(row.incoming_quantity || 0);
       const statusBits = [qty > 0 ? `On hand: ${qty}` : 'Out of stock'];
-      statusBits.push(`${Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1)} ${row.usage_unit_label || 'unit'} per stock unit`);
+      statusBits.push(`1 ${row.stock_unit_label || 'unit'} = ${Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1)} ${row.usage_unit_label || 'unit'}`);
       if (incomingQty > 0) statusBits.push(`Incoming: ${incomingQty}`);
       if (reorderPoint > 0) statusBits.push(`Reorder at ${reorderPoint}`);
       if (Number(row.is_on_reorder_list || 0) === 1) statusBits.push('On reorder list');
@@ -260,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!row) return;
       const key = `${resourceKind}:${sourceKey}`;
       if (selectedMap.has(key)) selectedMap.delete(key);
-      else selectedMap.set(key, { key, resource_kind: resourceKind, source_key: sourceKey, name: row.name, quantity_used: 1, usage_notes: '', consumption_mode: 'per_unit', lot_size_units: 1, usage_unit_label: row.usage_unit_label || 'unit', usage_units_per_stock_unit: Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1), sort_order: selectedMap.size });
+      else selectedMap.set(key, { key, resource_kind: resourceKind, source_key: sourceKey, name: row.name, quantity_used: 1, usage_notes: '', consumption_mode: 'per_unit', lot_size_units: 1, stock_unit_label: row.stock_unit_label || 'unit', usage_unit_label: row.usage_unit_label || 'unit', usage_units_per_stock_unit: Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1), unit_cost_cents: Number(row.unit_cost_cents || 0), on_hand_quantity: Number(row.on_hand_quantity || 0), sort_order: selectedMap.size });
       renderSelectedResources();
       renderResourceGrid();
       renderDraftReadiness(loadedDraft);
@@ -350,8 +383,11 @@ document.addEventListener('DOMContentLoaded', () => {
         source_key: row.source_key,
         name: resource?.name || row.source_key,
         quantity_used: Number(row.quantity_used || 1),
+        stock_unit_label: resource?.stock_unit_label || 'unit',
         usage_unit_label: resource?.usage_unit_label || 'unit',
         usage_units_per_stock_unit: Math.max(1, Number(resource?.usage_units_per_stock_unit || 1) || 1),
+        unit_cost_cents: Number(resource?.unit_cost_cents || 0),
+        on_hand_quantity: Number(resource?.on_hand_quantity || 0),
         usage_notes: row.usage_notes || '',
         consumption_mode: row.consumption_mode || 'per_unit',
         lot_size_units: Math.max(1, Number(row.lot_size_units || 1) || 1),
