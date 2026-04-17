@@ -107,6 +107,7 @@ export async function onRequestGet(context) {
       inventoryColumns.has('featured_image_url') ? 'sii.featured_image_url' : ''
     ], "''");
     const inventoryIdExpr = inventoryColumns.has('site_item_inventory_id') ? 'sii.site_item_inventory_id' : '0';
+    const inventoryStockUnitExpr = inventoryColumns.has('stock_unit_label') ? `COALESCE(NULLIF(sii.stock_unit_label,''),'unit')` : "'unit'";
     const inventoryUsageLabelExpr = inventoryColumns.has('usage_unit_label') ? `COALESCE(NULLIF(sii.usage_unit_label,''),'unit')` : "'unit'";
     const inventoryUsageUnitsExpr = inventoryColumns.has('usage_units_per_stock_unit') ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : '1';
 
@@ -155,8 +156,10 @@ export async function onRequestGet(context) {
           ${inventoryOnHandExpr} AS on_hand_quantity,
           ${inventoryReorderExpr} AS is_on_reorder_list,
           ${inventoryDoNotReuseExpr} AS do_not_reuse,
+          ${inventoryStockUnitExpr} AS stock_unit_label,
           ${inventoryUsageLabelExpr} AS usage_unit_label,
-          ${inventoryUsageUnitsExpr} AS usage_units_per_stock_unit
+          ${inventoryUsageUnitsExpr} AS usage_units_per_stock_unit,
+          COALESCE(sii.unit_cost_cents,0) AS unit_cost_cents
         FROM catalog_items ci
         ${catalogInventoryJoinSql}
         WHERE ci.item_kind IN ('tool', 'supply')
@@ -181,8 +184,10 @@ export async function onRequestGet(context) {
       on_hand_quantity: Number(row.on_hand_quantity || 0),
       is_on_reorder_list: Number(row.is_on_reorder_list || 0),
       do_not_reuse: Number(row.do_not_reuse || 0),
+      stock_unit_label: row.stock_unit_label || 'unit',
       usage_unit_label: row.usage_unit_label || 'unit',
-      usage_units_per_stock_unit: Number(row.usage_units_per_stock_unit || 1) || 1
+      usage_units_per_stock_unit: Number(row.usage_units_per_stock_unit || 1) || 1,
+      unit_cost_cents: Number(row.unit_cost_cents || 0)
     }));
 
     const canReadInventoryOnly =
@@ -203,8 +208,10 @@ export async function onRequestGet(context) {
           ${inventoryReorderExpr} AS is_on_reorder_list,
           ${inventoryDoNotReuseExpr} AS do_not_reuse,
           ${inventoryImageExpr} AS image_url,
+          ${inventoryStockUnitExpr} AS stock_unit_label,
           ${inventoryUsageLabelExpr} AS usage_unit_label,
-          ${inventoryUsageUnitsExpr} AS usage_units_per_stock_unit
+          ${inventoryUsageUnitsExpr} AS usage_units_per_stock_unit,
+          COALESCE(sii.unit_cost_cents,0) AS unit_cost_cents
         FROM site_item_inventory sii
         WHERE ${inventoryKindExpr} IN ('tool', 'supply')
           AND (
@@ -240,8 +247,10 @@ export async function onRequestGet(context) {
             on_hand_quantity: Number(row.on_hand_quantity || 0),
             is_on_reorder_list: Number(row.is_on_reorder_list || 0),
             do_not_reuse: Number(row.do_not_reuse || 0),
+            stock_unit_label: row.stock_unit_label || 'unit',
             usage_unit_label: row.usage_unit_label || 'unit',
-            usage_units_per_stock_unit: Number(row.usage_units_per_stock_unit || 1) || 1
+            usage_units_per_stock_unit: Number(row.usage_units_per_stock_unit || 1) || 1,
+      unit_cost_cents: Number(row.unit_cost_cents || 0)
           };
         })
       : [];
