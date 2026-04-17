@@ -14,7 +14,7 @@ function json(data, status = 200) {
 
 function getBearerToken(request) {
   const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\\s+(.+)$/i);
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
   return match ? String(match[1] || "").trim() : "";
 }
 
@@ -29,7 +29,12 @@ async function getMemberUserFromRequest(request, env) {
     return null;
   }
 
-  const session = await env.DB.prepare(`
+  const db = env.DB || env.DD_DB;
+  if (!db) {
+    return null;
+  }
+
+  const session = await db.prepare(`
     SELECT
       s.session_id,
       s.user_id,
@@ -71,6 +76,11 @@ async function getMemberUserFromRequest(request, env) {
 
 export async function onRequestGet(context) {
   const { request, env } = context;
+  const db = env.DB || env.DD_DB;
+
+  if (!db) {
+    return json({ ok: false, error: "Database binding is not configured." }, 500);
+  }
 
   const memberUser = await getMemberUserFromRequest(request, env);
 
@@ -184,7 +194,7 @@ export async function onRequestGet(context) {
     ORDER BY o.created_at DESC, o.order_id DESC
   `;
 
-  const result = await env.DB.prepare(sql)
+  const result = await db.prepare(sql)
     .bind(memberUser.user_id, memberUser.email)
     .all();
 
