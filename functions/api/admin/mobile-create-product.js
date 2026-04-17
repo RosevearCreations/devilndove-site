@@ -183,6 +183,9 @@ export async function onRequestPost(context) {
     const supportsReviewStatus = productColumns.has('review_status');
     const supportsReadyFlag = productColumns.has('is_ready_for_storefront');
     const supportsReadyNotes = productColumns.has('ready_check_notes');
+    const resourceColumns = await getTableColumnSet(db, 'product_resource_links');
+    const supportsConsumptionMode = resourceColumns.has('consumption_mode');
+    const supportsLotSizeUnits = resourceColumns.has('lot_size_units');
 
     let resolvedProductId = requestedProductId;
     let productNumber = 0;
@@ -481,18 +484,31 @@ export async function onRequestPost(context) {
         const sourceKey = normalizeText(row.source_key);
         if (!['tool', 'supply'].includes(resourceKind) || !sourceKey) continue;
 
-        await db.prepare(`
-          INSERT INTO product_resource_links (
-            product_id, resource_kind, source_key, quantity_used, usage_notes, sort_order, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        `).bind(
+        const insertCols = ['product_id', 'resource_kind', 'source_key', 'quantity_used', 'usage_notes', 'sort_order', 'created_at', 'updated_at'];
+        const insertVals = ['?', '?', '?', '?', '?', '?', 'CURRENT_TIMESTAMP', 'CURRENT_TIMESTAMP'];
+        const binds = [
           resolvedProductId,
           resourceKind,
           sourceKey,
           Math.max(1, Number(row.quantity_used || 1) || 1),
           normalizeText(row.usage_notes) || null,
           index
-        ).run();
+        ];
+        if (supportsConsumptionMode) {
+          insertCols.push('consumption_mode');
+          insertVals.push('?');
+          binds.push(['per_unit', 'end_of_lot', 'story_only'].includes(String(row.consumption_mode || '').trim()) ? String(row.consumption_mode).trim() : 'per_unit');
+        }
+        if (supportsLotSizeUnits) {
+          insertCols.push('lot_size_units');
+          insertVals.push('?');
+          binds.push(Math.max(1, Number(row.lot_size_units || 1) || 1));
+        }
+
+        await db.prepare(`
+          INSERT INTO product_resource_links (${insertCols.join(', ')})
+          VALUES (${insertVals.join(', ')})
+        `).bind(...binds).run();
       }
     } catch {}
 

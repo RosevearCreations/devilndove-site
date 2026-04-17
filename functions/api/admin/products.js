@@ -61,6 +61,8 @@ async function loadProducts(db, q) {
   const resourceLinkColumns = hasResourceLinks ? await getTableColumnSet(db, 'product_resource_links') : new Set();
   const hasConsumptionMode = resourceLinkColumns.has('consumption_mode');
   const hasLotSizeUnits = resourceLinkColumns.has('lot_size_units');
+  const inventoryColumns = hasInventory ? await getTableColumnSet(db, 'site_item_inventory') : new Set();
+  const usageUnitsExpr = hasInventory && inventoryColumns.has('usage_units_per_stock_unit') ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : `1`;
 
   const clauses = ["1=1"];
   const bindings = [];
@@ -90,16 +92,16 @@ async function loadProducts(db, q) {
     hasProductImages ? "COUNT(DISTINCT pi.product_image_id) AS image_count" : "0 AS image_count",
     hasResourceLinks ? "COUNT(DISTINCT prl.product_resource_link_id) AS linked_resource_count" : "0 AS linked_resource_count",
     hasResourceLinks && hasInventory
-      ? `COALESCE(SUM(CASE WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) / COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1) ELSE COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) END), 0) AS linked_resource_cost_cents`
+      ? `COALESCE(SUM(CASE WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) / ${usageUnitsExpr} / COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1) ELSE COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) / ${usageUnitsExpr} END), 0) AS linked_resource_cost_cents`
       : "0 AS linked_resource_cost_cents",
     hasResourceLinks && hasInventory
       ? "SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 1 ELSE 0 END) AS missing_cost_links"
       : "0 AS missing_cost_links",
     hasResourceLinks && hasInventory
-      ? `MIN(CASE WHEN sii.site_item_inventory_id IS NULL THEN NULL WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN NULL WHEN COALESCE(prl.quantity_used, 0) > 0 AND ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN CAST((MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) * COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1)) / COALESCE(NULLIF(prl.quantity_used,0),1) AS INTEGER) WHEN COALESCE(prl.quantity_used, 0) > 0 THEN CAST(MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) / prl.quantity_used AS INTEGER) ELSE NULL END) AS buildable_units_from_resources`
+      ? `MIN(CASE WHEN sii.site_item_inventory_id IS NULL THEN NULL WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN NULL WHEN COALESCE(prl.quantity_used, 0) > 0 AND ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN CAST((MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) * ${usageUnitsExpr} * COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1)) / COALESCE(NULLIF(prl.quantity_used,0),1) AS INTEGER) WHEN COALESCE(prl.quantity_used, 0) > 0 THEN CAST((MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) * ${usageUnitsExpr}) / prl.quantity_used AS INTEGER) ELSE NULL END) AS buildable_units_from_resources`
       : "NULL AS buildable_units_from_resources",
     hasResourceLinks && hasInventory
-      ? `SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' AND COALESCE(prl.quantity_used,0) > 0 AND (MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) * COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1)) < COALESCE(prl.quantity_used,0) THEN 1 WHEN COALESCE(prl.quantity_used,0) > 0 AND MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) < COALESCE(prl.quantity_used,0) THEN 1 ELSE 0 END) AS resource_shortage_links`
+      ? `SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' AND COALESCE(prl.quantity_used,0) > 0 AND (MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) * ${usageUnitsExpr} * COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1)) < COALESCE(prl.quantity_used,0) THEN 1 WHEN COALESCE(prl.quantity_used,0) > 0 AND (MAX(0, COALESCE(sii.on_hand_quantity,0) - COALESCE(sii.reserved_quantity,0)) * ${usageUnitsExpr}) < COALESCE(prl.quantity_used,0) THEN 1 ELSE 0 END) AS resource_shortage_links`
       : "0 AS resource_shortage_links",
     "CASE WHEN COALESCE(p.inventory_tracking,0)=1 AND COALESCE(p.inventory_quantity,0) <= 2 THEN 1 ELSE 0 END AS low_stock_flag",
   ];

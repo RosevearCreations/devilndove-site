@@ -56,19 +56,16 @@ function coalesceSql(expressions, fallback = "NULL") {
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = getDb(env);
-  if (!db) {
-    return json({ ok: false, error: 'Database binding is not configured.' }, 500);
-  }
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
 
   const adminUser = await getAdminUserFromRequest(request, env);
-  if (!adminUser) {
-    return json({ ok: false, error: 'Unauthorized.' }, 401);
-  }
+  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
   try {
-    const [inventoryColumns, catalogColumns] = await Promise.all([
+    const [inventoryColumns, catalogColumns, resourceColumns] = await Promise.all([
       getTableColumnSet(db, 'site_item_inventory'),
-      getTableColumnSet(db, 'catalog_items')
+      getTableColumnSet(db, 'catalog_items'),
+      getTableColumnSet(db, 'product_resource_links')
     ]);
 
     const url = new URL(request.url);
@@ -80,23 +77,19 @@ export async function onRequestGet(context) {
       inventoryColumns.has('item_kind') ? 'sii.item_kind' : '',
       inventoryColumns.has('source_type') ? 'sii.source_type' : ''
     ], "'supply'");
-
     const inventorySourceTypeExpr = coalesceSql([
       inventoryColumns.has('source_type') ? 'sii.source_type' : '',
       inventoryColumns.has('item_kind') ? 'sii.item_kind' : ''
     ], "'supply'");
-
     const inventoryExternalKeyExpr = coalesceSql([
       inventoryColumns.has('external_key') ? 'sii.external_key' : '',
       inventoryColumns.has('source_key') ? 'sii.source_key' : ''
-    ], "NULL");
-
+    ], 'NULL');
     const inventoryNameExpr = coalesceSql([
       inventoryColumns.has('item_name') ? 'sii.item_name' : '',
       inventoryColumns.has('name') ? 'sii.name' : '',
-      inventoryExternalKeyExpr !== "NULL" ? inventoryExternalKeyExpr : ''
+      inventoryExternalKeyExpr !== 'NULL' ? inventoryExternalKeyExpr : ''
     ], "''");
-
     const inventoryCategoryExpr = inventoryColumns.has('category') ? 'sii.category' : "''";
     const inventorySubcategoryExpr = inventoryColumns.has('subcategory') ? 'sii.subcategory' : "''";
     const inventoryOnHandExpr = coalesceSql([
@@ -114,6 +107,8 @@ export async function onRequestGet(context) {
       inventoryColumns.has('featured_image_url') ? 'sii.featured_image_url' : ''
     ], "''");
     const inventoryIdExpr = inventoryColumns.has('site_item_inventory_id') ? 'sii.site_item_inventory_id' : '0';
+    const inventoryUsageLabelExpr = inventoryColumns.has('usage_unit_label') ? `COALESCE(NULLIF(sii.usage_unit_label,''),'unit')` : "'unit'";
+    const inventoryUsageUnitsExpr = inventoryColumns.has('usage_units_per_stock_unit') ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : '1';
 
     const canJoinCatalogInventory =
       catalogColumns.has('item_kind') &&
@@ -159,7 +154,9 @@ export async function onRequestGet(context) {
           ${inventoryIdExpr} AS site_item_inventory_id,
           ${inventoryOnHandExpr} AS on_hand_quantity,
           ${inventoryReorderExpr} AS is_on_reorder_list,
-          ${inventoryDoNotReuseExpr} AS do_not_reuse
+          ${inventoryDoNotReuseExpr} AS do_not_reuse,
+          ${inventoryUsageLabelExpr} AS usage_unit_label,
+          ${inventoryUsageUnitsExpr} AS usage_units_per_stock_unit
         FROM catalog_items ci
         ${catalogInventoryJoinSql}
         WHERE ci.item_kind IN ('tool', 'supply')
@@ -183,7 +180,9 @@ export async function onRequestGet(context) {
       site_item_inventory_id: Number(row.site_item_inventory_id || 0),
       on_hand_quantity: Number(row.on_hand_quantity || 0),
       is_on_reorder_list: Number(row.is_on_reorder_list || 0),
-      do_not_reuse: Number(row.do_not_reuse || 0)
+      do_not_reuse: Number(row.do_not_reuse || 0),
+      usage_unit_label: row.usage_unit_label || 'unit',
+      usage_units_per_stock_unit: Number(row.usage_units_per_stock_unit || 1) || 1
     }));
 
     const canReadInventoryOnly =
@@ -203,7 +202,9 @@ export async function onRequestGet(context) {
           ${inventoryOnHandExpr} AS on_hand_quantity,
           ${inventoryReorderExpr} AS is_on_reorder_list,
           ${inventoryDoNotReuseExpr} AS do_not_reuse,
-          ${inventoryImageExpr} AS image_url
+          ${inventoryImageExpr} AS image_url,
+          ${inventoryUsageLabelExpr} AS usage_unit_label,
+          ${inventoryUsageUnitsExpr} AS usage_units_per_stock_unit
         FROM site_item_inventory sii
         WHERE ${inventoryKindExpr} IN ('tool', 'supply')
           AND (
@@ -225,9 +226,7 @@ export async function onRequestGet(context) {
       : null;
 
     const inventoryOnlyResources = inventoryOnlySql
-      ? normalizeResults(
-          await db.prepare(inventoryOnlySql).bind(query, like, like, like).all()
-        ).map((row) => {
+      ? normalizeResults(await db.prepare(inventoryOnlySql).bind(query, like, like, like).all()).map((row) => {
           const itemKind = row.item_kind || row.source_type || 'supply';
           const sourceKey = row.external_key || `inventory:${row.site_item_inventory_id}`;
           return {
@@ -240,7 +239,9 @@ export async function onRequestGet(context) {
             site_item_inventory_id: Number(row.site_item_inventory_id || 0),
             on_hand_quantity: Number(row.on_hand_quantity || 0),
             is_on_reorder_list: Number(row.is_on_reorder_list || 0),
-            do_not_reuse: Number(row.do_not_reuse || 0)
+            do_not_reuse: Number(row.do_not_reuse || 0),
+            usage_unit_label: row.usage_unit_label || 'unit',
+            usage_units_per_stock_unit: Number(row.usage_units_per_stock_unit || 1) || 1
           };
         })
       : [];
@@ -250,25 +251,24 @@ export async function onRequestGet(context) {
       const key = `${item.item_kind}::${item.source_key}`;
       if (!resourceMap.has(key)) resourceMap.set(key, item);
     });
-
     const resources = Array.from(resourceMap.values());
 
     const links = productId
-      ? normalizeResults(
-          await db.prepare(`
-            SELECT
-              product_resource_link_id,
-              product_id,
-              resource_kind,
-              source_key,
-              quantity_used,
-              usage_notes,
-              sort_order
-            FROM product_resource_links
-            WHERE product_id = ?
-            ORDER BY sort_order ASC, product_resource_link_id ASC
-          `).bind(productId).all()
-        )
+      ? normalizeResults(await db.prepare(`
+          SELECT
+            product_resource_link_id,
+            product_id,
+            resource_kind,
+            source_key,
+            quantity_used,
+            usage_notes,
+            sort_order,
+            ${resourceColumns.has('consumption_mode') ? `COALESCE(consumption_mode,'per_unit')` : `'per_unit'`} AS consumption_mode,
+            ${resourceColumns.has('lot_size_units') ? `COALESCE(lot_size_units,1)` : `1`} AS lot_size_units
+          FROM product_resource_links
+          WHERE product_id = ?
+          ORDER BY sort_order ASC, product_resource_link_id ASC
+        `).bind(productId).all())
       : [];
 
     return json({
@@ -282,52 +282,38 @@ export async function onRequestGet(context) {
         source_key: row.source_key || '',
         quantity_used: Number(row.quantity_used || 0),
         usage_notes: row.usage_notes || '',
-        sort_order: Number(row.sort_order || 0)
+        sort_order: Number(row.sort_order || 0),
+        consumption_mode: row.consumption_mode || 'per_unit',
+        lot_size_units: Math.max(1, Number(row.lot_size_units || 1) || 1)
       }))
     });
   } catch (error) {
-    return json({
-      ok: false,
-      error: error?.message || 'Failed to load product tools and supplies.'
-    }, 500);
+    return json({ ok: false, error: error?.message || 'Failed to load product tools and supplies.' }, 500);
   }
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
-  if (!db) {
-    return json({ ok: false, error: 'Database binding is not configured.' }, 500);
-  }
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
 
   const adminUser = await getAdminUserFromRequest(request, env);
-  if (!adminUser) {
-    return json({ ok: false, error: 'Unauthorized.' }, 401);
-  }
+  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
   let body = {};
-  try {
-    body = await request.json();
-  } catch {
-    return json({ ok: false, error: 'Invalid JSON body.' }, 400);
-  }
+  try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
 
   try {
     const productId = Number(body.product_id || 0);
     const links = Array.isArray(body.links) ? body.links : [];
+    if (!productId) return json({ ok: false, error: 'product_id is required.' }, 400);
 
-    if (!productId) {
-      return json({ ok: false, error: 'product_id is required.' }, 400);
-    }
+    const product = await db.prepare(`SELECT product_id FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
+    if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
 
-    const product = await db
-      .prepare(`SELECT product_id FROM products WHERE product_id = ? LIMIT 1`)
-      .bind(productId)
-      .first();
-
-    if (!product) {
-      return json({ ok: false, error: 'Product not found.' }, 404);
-    }
+    const resourceColumns = await getTableColumnSet(db, 'product_resource_links');
+    const supportsConsumptionMode = resourceColumns.has('consumption_mode');
+    const supportsLotSizeUnits = resourceColumns.has('lot_size_units');
 
     await db.prepare(`DELETE FROM product_resource_links WHERE product_id = ?`).bind(productId).run();
 
@@ -336,37 +322,37 @@ export async function onRequestPost(context) {
       const row = links[i] || {};
       const resourceKind = normalizeText(row.resource_kind).toLowerCase();
       const sourceKey = normalizeText(row.source_key);
-
       if (!['tool', 'supply'].includes(resourceKind) || !sourceKey) continue;
 
-      await db.prepare(`
-        INSERT INTO product_resource_links (
-          product_id,
-          resource_kind,
-          source_key,
-          quantity_used,
-          usage_notes,
-          sort_order,
-          created_at,
-          updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `).bind(
+      const insertCols = ['product_id','resource_kind','source_key','quantity_used','usage_notes','sort_order','created_at','updated_at'];
+      const insertVals = ['?','?','?','?','?','?','CURRENT_TIMESTAMP','CURRENT_TIMESTAMP'];
+      const binds = [
         productId,
         resourceKind,
         sourceKey,
         Math.max(1, Number(row.quantity_used || 1) || 1),
         normalizeText(row.usage_notes) || null,
         Number(row.sort_order ?? i)
-      ).run();
-
+      ];
+      if (supportsConsumptionMode) {
+        insertCols.push('consumption_mode');
+        insertVals.push('?');
+        binds.push(['per_unit','end_of_lot','story_only'].includes(String(row.consumption_mode || '').trim()) ? String(row.consumption_mode).trim() : 'per_unit');
+      }
+      if (supportsLotSizeUnits) {
+        insertCols.push('lot_size_units');
+        insertVals.push('?');
+        binds.push(Math.max(1, Number(row.lot_size_units || 1) || 1));
+      }
+      await db.prepare(`
+        INSERT INTO product_resource_links (${insertCols.join(', ')})
+        VALUES (${insertVals.join(', ')})
+      `).bind(...binds).run();
       saved += 1;
     }
 
     return json({ ok: true, saved_links: saved });
   } catch (error) {
-    return json({
-      ok: false,
-      error: error?.message || 'Failed to save product links.'
-    }, 500);
+    return json({ ok: false, error: error?.message || 'Failed to save product links.' }, 500);
   }
 }

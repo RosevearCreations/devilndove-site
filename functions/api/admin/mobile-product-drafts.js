@@ -59,6 +59,9 @@ export async function onRequestGet(context) {
   const supportsColorName = productColumns.has('color_name');
   const supportsShippingCode = productColumns.has('shipping_code');
   const supportsReviewStatus = productColumns.has('review_status');
+  const resourceColumns = await getTableColumnSet(db, 'product_resource_links');
+  const supportsConsumptionMode = resourceColumns.has('consumption_mode');
+  const supportsLotSizeUnits = resourceColumns.has('lot_size_units');
 
   const url = new URL(context.request.url);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
@@ -151,7 +154,9 @@ export async function onRequestGet(context) {
     });
 
     const resourceRows = normalizeResults(await db.prepare(`
-      SELECT product_id, resource_kind, source_key, quantity_used, usage_notes, sort_order
+      SELECT product_id, resource_kind, source_key, quantity_used, usage_notes, sort_order,
+             ${supportsConsumptionMode ? `COALESCE(consumption_mode,'per_unit')` : `'per_unit'`} AS consumption_mode,
+             ${supportsLotSizeUnits ? `COALESCE(lot_size_units,1)` : `1`} AS lot_size_units
       FROM product_resource_links
       WHERE product_id IN (${placeholders})
       ORDER BY product_id ASC, sort_order ASC, product_resource_link_id ASC
@@ -164,7 +169,9 @@ export async function onRequestGet(context) {
         source_key: row.source_key || '',
         quantity_used: Number(row.quantity_used || 1),
         usage_notes: row.usage_notes || '',
-        sort_order: Number(row.sort_order || 0)
+        sort_order: Number(row.sort_order || 0),
+        consumption_mode: row.consumption_mode || 'per_unit',
+        lot_size_units: Math.max(1, Number(row.lot_size_units || 1) || 1)
       });
       resourceMap.set(Number(row.product_id || 0), list);
     });

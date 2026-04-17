@@ -3,6 +3,11 @@ import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normali
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
 async function getTableColumnSet(db, tableName) { try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); const rows = Array.isArray(result?.results) ? result.results : []; return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean)); } catch { return new Set(); } }
+async function ensureUsageColumns(db) {
+  const cols = await getTableColumnSet(db, 'site_item_inventory');
+  if (!cols.has('usage_unit_label')) await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN usage_unit_label TEXT NOT NULL DEFAULT 'unit'`).run().catch(() => null);
+  if (!cols.has('usage_units_per_stock_unit')) await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT NULL DEFAULT 1`).run().catch(() => null);
+}
 
 function shape(row = {}) {
   const onHand = Number(row.on_hand_quantity || 0);
@@ -24,6 +29,8 @@ function shape(row = {}) {
     available_quantity: Math.max(0, onHand - reserved),
     reorder_level: reorder,
     unit_cost_cents: Number(row.unit_cost_cents || 0),
+    usage_unit_label: row.usage_unit_label || 'unit',
+    usage_units_per_stock_unit: Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1),
     supplier_name: row.supplier_name || '',
     supplier_sku: row.supplier_sku || '',
     supplier_contact: row.supplier_contact || '',
@@ -137,6 +144,9 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
   const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
   const supportsConsumptionMode = resourceLinkColumns.has('consumption_mode');
   const supportsLotSizeUnits = resourceLinkColumns.has('lot_size_units');
+  const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
+  const supportsUsageUnitsPerStockUnit = inventoryColumns.has('usage_units_per_stock_unit');
+  const supportsUsageUnitLabel = inventoryColumns.has('usage_unit_label');
   const links = normalizeResults(await db.prepare(`
     SELECT prl.product_resource_link_id, prl.resource_kind, prl.source_key, COALESCE(prl.quantity_used, 0) AS quantity_used,
            ${supportsConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit' AS consumption_mode`},
@@ -145,7 +155,9 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
            COALESCE(sii.on_hand_quantity, 0) AS on_hand_quantity,
            COALESCE(sii.reserved_quantity, 0) AS reserved_quantity,
            COALESCE(sii.incoming_quantity, 0) AS incoming_quantity,
-           COALESCE(sii.reservation_notes, '') AS reservation_notes
+           COALESCE(sii.reservation_notes, '') AS reservation_notes,
+           ${supportsUsageUnitLabel ? `COALESCE(NULLIF(sii.usage_unit_label,''),'unit')` : `'unit' AS usage_unit_label`},
+           ${supportsUsageUnitsPerStockUnit ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : `1 AS usage_units_per_stock_unit`}
     FROM product_resource_links prl
     LEFT JOIN site_item_inventory sii
       ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
@@ -179,20 +191,22 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
     const availableBefore = Math.max(0, previousOnHand - previousReserved);
     const reservationNote = [normalizeText(note), `product:${productId}`, release ? 'release_product_resources' : 'reserve_product_resources'].filter(Boolean).join(' | ');
 
-    if (consumptionMode === 'story_only') {
+    if (consumptionMode === 'story_only' || consumptionMode === 'end_of_lot' || Number(link.usage_units_per_stock_unit || 1) > 1) {
       results.push({
         resource_kind: link.resource_kind || '',
         source_key: link.source_key || '',
         item_name: link.item_name || link.source_key || '',
         consumption_mode: consumptionMode,
         lot_size_units: lotSizeUnits,
+        usage_unit_label: link.usage_unit_label || 'unit',
+        usage_units_per_stock_unit: Math.max(1, Number(link.usage_units_per_stock_unit || 1) || 1),
         required_quantity: requiredQty,
         applied_quantity: 0,
         available_before: availableBefore,
         shortage_quantity: 0,
         missing_inventory_link: 0,
-        skipped_automatic_inventory: 1,
-        site_item_inventory_id: Number(link.site_item_inventory_id || 0)
+        site_item_inventory_id: Number(link.site_item_inventory_id || 0),
+        skipped_reservation: 1
       });
       continue;
     }
@@ -252,6 +266,8 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
       item_name: link.item_name || link.source_key || '',
       consumption_mode: consumptionMode,
       lot_size_units: lotSizeUnits,
+      usage_unit_label: link.usage_unit_label || 'unit',
+      usage_units_per_stock_unit: Math.max(1, Number(link.usage_units_per_stock_unit || 1) || 1),
       required_quantity: requiredQty,
       applied_quantity: appliedQuantity,
       available_before: availableBefore,
@@ -287,8 +303,8 @@ async function syncCatalog(db, sourceTypes = []) {
       await db.prepare(`
         INSERT INTO site_item_inventory (
           source_type, external_key, item_name, category, image_url, amazon_url,
-          on_hand_quantity, reorder_level, is_active, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          on_hand_quantity, reorder_level, usage_unit_label, usage_units_per_stock_unit, is_active, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'unit', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `).bind(row.item_kind, row.source_key, row.name || row.source_key, row.category || null, row.image_url || null, row.amazon_url || null, Number(row.quantity_on_hand || 0), Number(row.reorder_point || 0)).run();
     }
     synced += 1;
@@ -301,6 +317,7 @@ export async function onRequestGet(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  await ensureUsageColumns(db);
   const url = new URL(request.url);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
   const stockView = normalizeText(url.searchParams.get('stock_view')).toLowerCase();
@@ -314,6 +331,7 @@ export async function onRequestPost(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  await ensureUsageColumns(db);
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
 
@@ -422,10 +440,11 @@ export async function onRequestPost(context) {
     INSERT INTO site_item_inventory (
       source_type, external_key, item_name, category, source_url, amazon_url, image_url,
       on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level, unit_cost_cents,
+      usage_unit_label, usage_units_per_stock_unit,
       supplier_name, supplier_sku, supplier_contact, reorder_notes, preferred_reorder_quantity,
       is_on_reorder_list, do_not_reorder, do_not_reuse, reuse_status, reservation_notes,
       is_active, last_counted_at, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   `).bind(
     sourceType,
     externalKey,
@@ -439,6 +458,8 @@ export async function onRequestPost(context) {
     Number(body.incoming_quantity || 0),
     Number(body.reorder_level || 0),
     Number(body.unit_cost_cents || 0),
+    normalizeText(body.usage_unit_label) || 'unit',
+    Math.max(1, Number(body.usage_units_per_stock_unit || 1) || 1),
     normalizeText(body.supplier_name) || null,
     normalizeText(body.supplier_sku) || null,
     normalizeText(body.supplier_contact) || null,
@@ -449,7 +470,8 @@ export async function onRequestPost(context) {
     Number(body.do_not_reuse) === 1 ? 1 : 0,
     normalizeText(body.reuse_status) || null,
     normalizeText(body.reservation_notes) || null,
-    Number(body.is_active) === 0 ? 0 : 1
+    Number(body.is_active) === 0 ? 0 : 1,
+    normalizeText(body.last_counted_at) || null
   ).run();
   const newId = Number(insert?.meta?.last_row_id || 0);
   const saved = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(newId).first();
@@ -463,6 +485,7 @@ export async function onRequestPatch(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  await ensureUsageColumns(db);
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
   const id = Number(body.site_item_inventory_id || 0);
@@ -483,11 +506,14 @@ export async function onRequestPatch(context) {
       supplier_contact: normalizeText(body.supplier_contact ?? existing.supplier_contact),
       reorder_notes: normalizeText(body.reorder_notes ?? existing.reorder_notes),
       reuse_status: normalizeText(body.reuse_status ?? existing.reuse_status),
-      reservation_notes: normalizeText(body.reservation_notes ?? existing.reservation_notes)
+      reservation_notes: normalizeText(body.reservation_notes ?? existing.reservation_notes),
+      usage_unit_label: normalizeText(body.usage_unit_label ?? existing.usage_unit_label) || 'unit',
+      usage_units_per_stock_unit: Math.max(1, Number(body.usage_units_per_stock_unit ?? existing.usage_units_per_stock_unit || 1) || 1)
     };
     await db.prepare(`
       UPDATE site_item_inventory
       SET item_name=?, category=?, source_url=?, amazon_url=?, image_url=?,
+          usage_unit_label=?, usage_units_per_stock_unit=?,
           on_hand_quantity=?, reserved_quantity=?, incoming_quantity=?, reorder_level=?, unit_cost_cents=?,
           supplier_name=?, supplier_sku=?, supplier_contact=?, reorder_notes=?,
           is_active=?, preferred_reorder_quantity=?, is_on_reorder_list=?, do_not_reorder=?,
@@ -499,6 +525,8 @@ export async function onRequestPatch(context) {
       merged.source_url || null,
       merged.amazon_url || null,
       merged.image_url || null,
+      merged.usage_unit_label || 'unit',
+      Math.max(1, Number(merged.usage_units_per_stock_unit || 1) || 1),
       Number(merged.on_hand_quantity || 0),
       Number(merged.reserved_quantity || 0),
       Number(merged.incoming_quantity || 0),
