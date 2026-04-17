@@ -489,3 +489,9 @@ ALTER TABLE product_resource_links ADD COLUMN lot_size_units INTEGER NOT NULL DE
 -- Added app_settings-backed dropdown master-data keys for product categories, colours, and shipping codes.
 -- Product resource links now support per-unit, end-of-lot, and story-only inventory usage modes.
 -- End-of-lot mode is intended for supplies such as wax/resin/clay where one lot may cover many finished products before inventory should be reduced.
+
+ALTER TABLE site_item_inventory ADD COLUMN usage_unit_label TEXT NOT NULL DEFAULT 'unit';
+ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT NULL DEFAULT 1;
+
+-- Current Pass Note — 2026-04-16
+-- Wired the catalog option manager into admin pages and added usage-unit / end-of-lot costing support for site inventory and product resource links.

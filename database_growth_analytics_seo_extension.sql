@@ -330,3 +330,7 @@ CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_
 -- Added app_settings-backed dropdown master-data keys for product categories, colours, and shipping codes.
 -- Product resource links now support per-unit, end-of-lot, and story-only inventory usage modes.
 -- End-of-lot mode is intended for supplies such as wax/resin/clay where one lot may cover many finished products before inventory should be reduced.
+
+-- Current Pass Note — 2026-04-16
+-- Admin dropdown master-data is now wired through app_settings and tax_classes in application code.
+-- Site inventory usage-unit support was added in application/runtime migration logic for cups, wicks, grams, spools, and end-of-lot costing.

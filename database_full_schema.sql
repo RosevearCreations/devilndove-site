@@ -691,6 +691,8 @@ CREATE TABLE IF NOT EXISTS site_item_inventory (
   incoming_quantity INTEGER NOT NULL DEFAULT 0,
   reorder_level INTEGER NOT NULL DEFAULT 0,
   unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  usage_unit_label TEXT NOT NULL DEFAULT 'unit',
+  usage_units_per_stock_unit REAL NOT NULL DEFAULT 1,
   supplier_name TEXT,
   supplier_sku TEXT,
   supplier_contact TEXT,
@@ -1086,3 +1088,7 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- Added app_settings-backed dropdown master-data keys for product categories, colours, and shipping codes.
 -- Product resource links now support per-unit, end-of-lot, and story-only inventory usage modes.
 -- End-of-lot mode is intended for supplies such as wax/resin/clay where one lot may cover many finished products before inventory should be reduced.
+
+
+-- Current Pass Note — 2026-04-16
+-- Inventory items now support usage-unit labeling and per-stock-unit usage counts so cost/buildable math can work for cups, wicks, grams, and similar partial-use materials.
