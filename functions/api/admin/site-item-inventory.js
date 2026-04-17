@@ -1,12 +1,25 @@
+// File: /functions/api/admin/site-item-inventory.js
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
-async function getTableColumnSet(db, tableName) { try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); const rows = Array.isArray(result?.results) ? result.results : []; return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean)); } catch { return new Set(); } }
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
 async function ensureUsageColumns(db) {
   const cols = await getTableColumnSet(db, 'site_item_inventory');
-  if (!cols.has('usage_unit_label')) await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN usage_unit_label TEXT NOT NULL DEFAULT 'unit'`).run().catch(() => null);
-  if (!cols.has('usage_units_per_stock_unit')) await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT NULL DEFAULT 1`).run().catch(() => null);
+  if (!cols.has('usage_unit_label')) {
+    await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN usage_unit_label TEXT NOT NULL DEFAULT 'unit'`).run().catch(() => null);
+  }
+  if (!cols.has('usage_units_per_stock_unit')) {
+    await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT NULL DEFAULT 1`).run().catch(() => null);
+  }
 }
 
 function shape(row = {}) {
@@ -14,6 +27,7 @@ function shape(row = {}) {
   const reserved = Number(row.reserved_quantity || 0);
   const incoming = Number(row.incoming_quantity || 0);
   const reorder = Number(row.reorder_level || 0);
+
   return {
     site_item_inventory_id: Number(row.site_item_inventory_id || 0),
     source_type: row.source_type || '',
@@ -80,26 +94,32 @@ async function logMovement(db, payload = {}) {
 
 async function getItems(db, { q = '', stockView = '', includeHistory = false } = {}) {
   const like = `%${q}%`;
+
   const items = normalizeResults(await db.prepare(`
-    SELECT sii.*, 
-           COUNT(DISTINCT prl.product_id) AS linked_product_count,
-           GROUP_CONCAT(DISTINCT p.name) AS linked_product_names
+    SELECT
+      sii.*,
+      COUNT(DISTINCT prl.product_id) AS linked_product_count,
+      GROUP_CONCAT(DISTINCT p.name) AS linked_product_names
     FROM site_item_inventory sii
     LEFT JOIN product_resource_links prl
-      ON prl.resource_kind = sii.source_type AND prl.source_key = sii.external_key
-    LEFT JOIN products p ON p.product_id = prl.product_id
-    WHERE (? = ''
-       OR LOWER(COALESCE(sii.item_name, '')) LIKE ?
-       OR LOWER(COALESCE(sii.category, '')) LIKE ?
-       OR LOWER(COALESCE(sii.supplier_name, '')) LIKE ?
-       OR LOWER(COALESCE(sii.supplier_sku, '')) LIKE ?)
-      AND (
-        ? = '' OR
-        (? = 'low' AND (COALESCE(sii.on_hand_quantity,0) + COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0)) OR
-        (? = 'reorder' AND COALESCE(sii.is_on_reorder_list,0) = 1) OR
-        (? = 'no_reuse' AND COALESCE(sii.do_not_reuse,0) = 1) OR
-        (? = 'inactive' AND COALESCE(sii.is_active,1) = 0)
-      )
+      ON prl.resource_kind = sii.source_type
+     AND prl.source_key = sii.external_key
+    LEFT JOIN products p
+      ON p.product_id = prl.product_id
+    WHERE (
+      ? = ''
+      OR LOWER(COALESCE(sii.item_name, '')) LIKE ?
+      OR LOWER(COALESCE(sii.category, '')) LIKE ?
+      OR LOWER(COALESCE(sii.supplier_name, '')) LIKE ?
+      OR LOWER(COALESCE(sii.supplier_sku, '')) LIKE ?
+    )
+    AND (
+      ? = ''
+      OR (? = 'low' AND (COALESCE(sii.on_hand_quantity, 0) + COALESCE(sii.incoming_quantity, 0)) <= COALESCE(sii.reorder_level, 0))
+      OR (? = 'reorder' AND COALESCE(sii.is_on_reorder_list, 0) = 1)
+      OR (? = 'no_reuse' AND COALESCE(sii.do_not_reuse, 0) = 1)
+      OR (? = 'inactive' AND COALESCE(sii.is_active, 1) = 0)
+    )
     GROUP BY sii.site_item_inventory_id
     ORDER BY LOWER(COALESCE(sii.item_name, '')) ASC
   `).bind(q, like, like, like, like, stockView, stockView, stockView, stockView, stockView).all().catch(() => ({ results: [] })));
@@ -113,328 +133,274 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
     reorder_list_items: items.filter((row) => Number(row.is_on_reorder_list || 0) === 1).length
   };
 
-  const movements = includeHistory ? normalizeResults(await db.prepare(`
-    SELECT site_inventory_movement_id, site_item_inventory_id, source_type, external_key, item_name, movement_type,
-           quantity_delta, previous_on_hand_quantity, new_on_hand_quantity,
-           previous_reserved_quantity, new_reserved_quantity,
-           previous_incoming_quantity, new_incoming_quantity, note, created_at
-    FROM site_inventory_movements
-    ORDER BY created_at DESC, site_inventory_movement_id DESC
-    LIMIT 50
-  `).all().catch(() => ({ results: [] }))) : [];
+  const movements = includeHistory
+    ? normalizeResults(await db.prepare(`
+        SELECT
+          site_inventory_movement_id,
+          site_item_inventory_id,
+          source_type,
+          external_key,
+          item_name,
+          movement_type,
+          quantity_delta,
+          previous_on_hand_quantity,
+          new_on_hand_quantity,
+          previous_reserved_quantity,
+          new_reserved_quantity,
+          previous_incoming_quantity,
+          new_incoming_quantity,
+          note,
+          created_at
+        FROM site_inventory_movements
+        ORDER BY created_at DESC, site_inventory_movement_id DESC
+        LIMIT 50
+      `).all().catch(() => ({ results: [] })))
+    : [];
 
   const supplier_reorder_groups = items
     .filter((row) => Number(row.do_not_reorder || 0) !== 1)
-    .filter((row) => Number(row.is_on_reorder_list || 0) === 1 || ((Number(row.on_hand_quantity || 0) + Number(row.incoming_quantity || 0)) <= Number(row.reorder_level || 0)))
+    .filter((row) =>
+      Number(row.is_on_reorder_list || 0) === 1 ||
+      ((Number(row.on_hand_quantity || 0) + Number(row.incoming_quantity || 0)) <= Number(row.reorder_level || 0))
+    )
     .reduce((acc, row) => {
       const key = normalizeText(row.supplier_name) || 'Unassigned Supplier';
-      if (!acc[key]) acc[key] = { supplier_name: key, supplier_contact: row.supplier_contact || '', item_count: 0, estimated_total_cents: 0, items: [] };
-      const suggested_quantity = Math.max(1, Number(row.preferred_reorder_quantity || 0) || Math.max(1, Number(row.reorder_level || 0) - (Number(row.on_hand_quantity || 0) + Number(row.incoming_quantity || 0))));
+      if (!acc[key]) {
+        acc[key] = {
+          supplier_name: key,
+          supplier_contact: row.supplier_contact || '',
+          item_count: 0,
+          estimated_total_cents: 0,
+          items: []
+        };
+      }
+
+      const suggested_quantity = Math.max(
+        1,
+        Number(row.preferred_reorder_quantity || 0) ||
+        Math.max(1, Number(row.reorder_level || 0) - (Number(row.on_hand_quantity || 0) + Number(row.incoming_quantity || 0)))
+      );
+
       acc[key].item_count += 1;
       acc[key].estimated_total_cents += suggested_quantity * Number(row.unit_cost_cents || 0);
-      acc[key].items.push({ site_item_inventory_id: Number(row.site_item_inventory_id || 0), item_name: row.item_name || '', suggested_quantity, unit_cost_cents: Number(row.unit_cost_cents || 0) });
+      acc[key].items.push({
+        site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+        item_name: row.item_name || '',
+        suggested_quantity,
+        unit_cost_cents: Number(row.unit_cost_cents || 0)
+      });
+
       return acc;
     }, {});
 
-  return { items: items.map(shape), summary, movements, supplier_reorder_groups: Object.values(supplier_reorder_groups) };
+  return {
+    items: items.map(shape),
+    summary,
+    movements,
+    supplier_reorder_groups: Object.values(supplier_reorder_groups)
+  };
 }
-
 
 async function adjustProductResourceReservations(db, { productId = 0, quantityMultiplier = 1, release = false, note = '', actorUserId = null } = {}) {
   const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
   const supportsConsumptionMode = resourceLinkColumns.has('consumption_mode');
   const supportsLotSizeUnits = resourceLinkColumns.has('lot_size_units');
+
   const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
   const supportsUsageUnitsPerStockUnit = inventoryColumns.has('usage_units_per_stock_unit');
   const supportsUsageUnitLabel = inventoryColumns.has('usage_unit_label');
+
   const links = normalizeResults(await db.prepare(`
-    SELECT prl.product_resource_link_id, prl.resource_kind, prl.source_key, COALESCE(prl.quantity_used, 0) AS quantity_used,
-           ${supportsConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit' AS consumption_mode`},
-           ${supportsLotSizeUnits ? `COALESCE(prl.lot_size_units,1)` : `1 AS lot_size_units`},
-           sii.site_item_inventory_id, sii.item_name, sii.source_type, sii.external_key,
-           COALESCE(sii.on_hand_quantity, 0) AS on_hand_quantity,
-           COALESCE(sii.reserved_quantity, 0) AS reserved_quantity,
-           COALESCE(sii.incoming_quantity, 0) AS incoming_quantity,
-           COALESCE(sii.reservation_notes, '') AS reservation_notes,
-           ${supportsUsageUnitLabel ? `COALESCE(NULLIF(sii.usage_unit_label,''),'unit')` : `'unit' AS usage_unit_label`},
-           ${supportsUsageUnitsPerStockUnit ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : `1 AS usage_units_per_stock_unit`}
+    SELECT
+      prl.product_resource_link_id,
+      prl.resource_kind,
+      prl.source_key,
+      COALESCE(prl.quantity_used, 0) AS quantity_used,
+      ${supportsConsumptionMode ? `COALESCE(prl.consumption_mode, 'per_unit')` : `'per_unit' AS consumption_mode`},
+      ${supportsLotSizeUnits ? `COALESCE(prl.lot_size_units, 1)` : `1 AS lot_size_units`},
+      sii.site_item_inventory_id,
+      sii.item_name,
+      sii.source_type,
+      sii.external_key,
+      COALESCE(sii.on_hand_quantity, 0) AS on_hand_quantity,
+      COALESCE(sii.reserved_quantity, 0) AS reserved_quantity,
+      COALESCE(sii.incoming_quantity, 0) AS incoming_quantity,
+      COALESCE(sii.reservation_notes, '') AS reservation_notes,
+      ${supportsUsageUnitLabel ? `COALESCE(NULLIF(sii.usage_unit_label, ''), 'unit')` : `'unit' AS usage_unit_label`},
+      ${supportsUsageUnitsPerStockUnit ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit, 0), 1)` : `1 AS usage_units_per_stock_unit`}
     FROM product_resource_links prl
     LEFT JOIN site_item_inventory sii
-      ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
+      ON sii.source_type = prl.resource_kind
+     AND sii.external_key = prl.source_key
     WHERE prl.product_id = ?
     ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
   `).bind(productId).all().catch(() => ({ results: [] })));
 
   const results = [];
+
   for (const link of links) {
     const requiredQty = Math.max(0, Number(link.quantity_used || 0) * Math.max(1, Number(quantityMultiplier || 1)));
-    const consumptionMode = String(link.consumption_mode || 'per_unit').trim().toLowerCase() || 'per_unit';
-    const lotSizeUnits = Math.max(1, Number(link.lot_size_units || 1) || 1);
-    if (!Number(link.site_item_inventory_id || 0) || requiredQty <= 0) {
+    const consumptionMode = String(link.consumption_mode || 'per_unit').toLowerCase();
+
+    if (!link.site_item_inventory_id) {
       results.push({
-        resource_kind: link.resource_kind || '',
-        source_key: link.source_key || '',
-        item_name: link.item_name || link.source_key || '',
-        consumption_mode: consumptionMode,
-        lot_size_units: lotSizeUnits,
+        ok: false,
+        missing_inventory: true,
+        resource_kind: link.resource_kind,
+        source_key: link.source_key,
         required_quantity: requiredQty,
-        applied_quantity: 0,
-        available_before: 0,
-        shortage_quantity: requiredQty,
-        missing_inventory_link: 1
+        note: 'Inventory item not linked.'
       });
       continue;
     }
-    const previousReserved = Number(link.reserved_quantity || 0);
-    const previousOnHand = Number(link.on_hand_quantity || 0);
-    const previousIncoming = Number(link.incoming_quantity || 0);
-    const availableBefore = Math.max(0, previousOnHand - previousReserved);
-    const reservationNote = [normalizeText(note), `product:${productId}`, release ? 'release_product_resources' : 'reserve_product_resources'].filter(Boolean).join(' | ');
 
     if (consumptionMode === 'story_only' || consumptionMode === 'end_of_lot' || Number(link.usage_units_per_stock_unit || 1) > 1) {
       results.push({
-        resource_kind: link.resource_kind || '',
-        source_key: link.source_key || '',
-        item_name: link.item_name || link.source_key || '',
-        consumption_mode: consumptionMode,
-        lot_size_units: lotSizeUnits,
+        ok: true,
+        skipped_reservation: true,
+        site_item_inventory_id: Number(link.site_item_inventory_id || 0),
+        source_type: link.source_type || link.resource_kind || '',
+        external_key: link.external_key || link.source_key || '',
+        item_name: link.item_name || '',
+        required_quantity: requiredQty,
         usage_unit_label: link.usage_unit_label || 'unit',
         usage_units_per_stock_unit: Math.max(1, Number(link.usage_units_per_stock_unit || 1) || 1),
-        required_quantity: requiredQty,
-        applied_quantity: 0,
-        available_before: availableBefore,
-        shortage_quantity: 0,
-        missing_inventory_link: 0,
-        site_item_inventory_id: Number(link.site_item_inventory_id || 0),
-        skipped_reservation: 1
+        consumption_mode: consumptionMode
       });
       continue;
     }
 
-    if (consumptionMode === 'end_of_lot') {
-      const availableProductUnits = Math.max(0, previousOnHand + previousIncoming) * lotSizeUnits;
-      const shortageQuantity = release ? 0 : Math.max(0, requiredQty - availableProductUnits);
-      results.push({
-        resource_kind: link.resource_kind || '',
-        source_key: link.source_key || '',
-        item_name: link.item_name || link.source_key || '',
-        consumption_mode: consumptionMode,
-        lot_size_units: lotSizeUnits,
-        required_quantity: requiredQty,
-        applied_quantity: 0,
-        available_before: availableProductUnits,
-        shortage_quantity: shortageQuantity,
-        missing_inventory_link: 0,
-        deferred_until_lot_end: 1,
-        site_item_inventory_id: Number(link.site_item_inventory_id || 0)
-      });
-      continue;
-    }
-
-    const appliedQuantity = release ? Math.min(previousReserved, requiredQty) : requiredQty;
-    const nextReserved = release ? Math.max(0, previousReserved - requiredQty) : previousReserved + requiredQty;
-    const shortageQuantity = release ? 0 : Math.max(0, requiredQty - availableBefore);
+    const previousReserved = Number(link.reserved_quantity || 0);
+    const newReserved = Math.max(0, previousReserved + (release ? -requiredQty : requiredQty));
 
     await db.prepare(`
       UPDATE site_item_inventory
-      SET reserved_quantity = ?,
-          reservation_notes = ?,
-          updated_at = CURRENT_TIMESTAMP
+      SET reserved_quantity = ?, updated_at = CURRENT_TIMESTAMP
       WHERE site_item_inventory_id = ?
-    `).bind(nextReserved, reservationNote || null, Number(link.site_item_inventory_id || 0)).run();
+    `).bind(newReserved, Number(link.site_item_inventory_id || 0)).run();
 
     await logMovement(db, {
       site_item_inventory_id: Number(link.site_item_inventory_id || 0),
       source_type: link.source_type || link.resource_kind || '',
       external_key: link.external_key || link.source_key || '',
-      item_name: link.item_name || link.source_key || '',
-      movement_type: release ? 'release' : 'reserve',
-      quantity_delta: release ? -appliedQuantity : appliedQuantity,
-      previous_on_hand_quantity: previousOnHand,
-      new_on_hand_quantity: previousOnHand,
+      item_name: link.item_name || '',
+      movement_type: release ? 'reservation_release' : 'reservation_add',
+      quantity_delta: 0,
+      previous_on_hand_quantity: Number(link.on_hand_quantity || 0),
+      new_on_hand_quantity: Number(link.on_hand_quantity || 0),
       previous_reserved_quantity: previousReserved,
-      new_reserved_quantity: nextReserved,
-      previous_incoming_quantity: previousIncoming,
-      new_incoming_quantity: previousIncoming,
-      note: reservationNote || (release ? 'Product resource release recorded.' : 'Product resource reservation recorded.'),
-      actor_user_id: actorUserId
+      new_reserved_quantity: newReserved,
+      previous_incoming_quantity: Number(link.incoming_quantity || 0),
+      new_incoming_quantity: Number(link.incoming_quantity || 0),
+      note: note || (release ? `Released reservation for product ${productId}.` : `Reserved for product ${productId}.`),
+      actor_user_id: actorUserId || null
     });
 
     results.push({
-      resource_kind: link.resource_kind || '',
-      source_key: link.source_key || '',
-      item_name: link.item_name || link.source_key || '',
-      consumption_mode: consumptionMode,
-      lot_size_units: lotSizeUnits,
-      usage_unit_label: link.usage_unit_label || 'unit',
-      usage_units_per_stock_unit: Math.max(1, Number(link.usage_units_per_stock_unit || 1) || 1),
+      ok: true,
+      skipped_reservation: false,
+      site_item_inventory_id: Number(link.site_item_inventory_id || 0),
+      source_type: link.source_type || link.resource_kind || '',
+      external_key: link.external_key || link.source_key || '',
+      item_name: link.item_name || '',
       required_quantity: requiredQty,
-      applied_quantity: appliedQuantity,
-      available_before: availableBefore,
-      shortage_quantity: shortageQuantity,
-      missing_inventory_link: 0,
-      site_item_inventory_id: Number(link.site_item_inventory_id || 0)
+      previous_reserved_quantity: previousReserved,
+      new_reserved_quantity: newReserved,
+      consumption_mode: consumptionMode
     });
   }
-  return results;
-}
 
-async function syncCatalog(db, sourceTypes = []) {
-  const rows = normalizeResults(await db.prepare(`
-    SELECT item_kind, source_key, name, category, image_url, notes, quantity_on_hand, reorder_point, amazon_url, source_record_json
-    FROM catalog_items
-    WHERE item_kind IN (${sourceTypes.map(() => '?').join(',')})
-  `).bind(...sourceTypes).all().catch(() => ({ results: [] })));
-  let synced = 0;
-  for (const row of rows) {
-    const existing = await db.prepare(`SELECT site_item_inventory_id FROM site_item_inventory WHERE source_type = ? AND external_key = ? LIMIT 1`).bind(row.item_kind, row.source_key).first();
-    if (existing) {
-      await db.prepare(`
-        UPDATE site_item_inventory
-        SET item_name = COALESCE(NULLIF(?, ''), item_name),
-            category = COALESCE(NULLIF(?, ''), category),
-            image_url = COALESCE(NULLIF(?, ''), image_url),
-            amazon_url = COALESCE(NULLIF(?, ''), amazon_url),
-            reorder_level = CASE WHEN COALESCE(reorder_level,0) = 0 THEN COALESCE(?, reorder_level) ELSE reorder_level END,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE site_item_inventory_id = ?
-      `).bind(row.name || '', row.category || '', row.image_url || '', row.amazon_url || '', Number(row.reorder_point || 0), Number(existing.site_item_inventory_id || 0)).run();
-    } else {
-      await db.prepare(`
-        INSERT INTO site_item_inventory (
-          source_type, external_key, item_name, category, image_url, amazon_url,
-          on_hand_quantity, reorder_level, usage_unit_label, usage_units_per_stock_unit, is_active, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'unit', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `).bind(row.item_kind, row.source_key, row.name || row.source_key, row.category || null, row.image_url || null, row.amazon_url || null, Number(row.quantity_on_hand || 0), Number(row.reorder_point || 0)).run();
-    }
-    synced += 1;
-  }
-  return synced;
+  return results;
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
+
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+
   await ensureUsageColumns(db);
+
   const url = new URL(request.url);
-  const q = normalizeText(url.searchParams.get('q')).toLowerCase();
-  const stockView = normalizeText(url.searchParams.get('stock_view')).toLowerCase();
-  const includeHistory = Number(url.searchParams.get('include_history') || 0) === 1;
-  const data = await getItems(db, { q, stockView, includeHistory });
-  return json({ ok: true, requested_by: adminUser, ...data });
+  const payload = await getItems(db, {
+    q: normalizeText(url.searchParams.get('q')).toLowerCase(),
+    stockView: normalizeText(url.searchParams.get('stock_view')).toLowerCase(),
+    includeHistory: ['1', 'true', 'yes'].includes(String(url.searchParams.get('include_history') || '').toLowerCase())
+  });
+
+  return json({ ok: true, ...payload });
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
+
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+
   await ensureUsageColumns(db);
+
   let body = {};
-  try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
+  try {
+    body = await request.json();
+  } catch {
+    return json({ ok: false, error: 'Invalid JSON body.' }, 400);
+  }
 
   const action = normalizeText(body.action).toLowerCase();
-  if (action === 'reserve_product_resources' || action === 'release_product_resources') {
+
+  if (action === 'reserve_product_resources') {
     const productId = Number(body.product_id || 0);
-    const quantityMultiplier = Math.max(1, Number(body.quantity_multiplier || 1));
-    if (!productId) return json({ ok: false, error: 'product_id is required for product resource reservations.' }, 400);
-    const product = await db.prepare(`SELECT product_id, slug, name FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
-    if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
-    const reservationRows = await adjustProductResourceReservations(db, {
+    if (!productId) return json({ ok: false, error: 'product_id is required.' }, 400);
+
+    const results = await adjustProductResourceReservations(db, {
       productId,
-      quantityMultiplier,
-      release: action === 'release_product_resources',
+      quantityMultiplier: Math.max(1, Number(body.quantity_multiplier || 1) || 1),
+      release: false,
       note: normalizeText(body.note) || '',
       actorUserId: adminUser.user_id
     });
+
     await auditAdminAction(env, request, adminUser, {
-      action_type: `inventory_${action}`,
+      action_type: 'inventory_reserve_product_resources',
       target_type: 'product',
       target_id: productId,
-      target_key: `${product.slug || product.name || productId}`,
-      details: {
-        quantity_multiplier: quantityMultiplier,
-        affected_items: reservationRows.length,
-        shortages: reservationRows.filter((row) => Number(row.shortage_quantity || 0) > 0).length
-      }
-    });
-    return json({
-      ok: true,
-      action,
-      product: { product_id: Number(product.product_id || 0), slug: product.slug || '', name: product.name || '' },
-      summary: {
-        affected_items: reservationRows.length,
-        total_required_quantity: reservationRows.reduce((sum, row) => sum + Number(row.required_quantity || 0), 0),
-        total_applied_quantity: reservationRows.reduce((sum, row) => sum + Number(row.applied_quantity || 0), 0),
-        shortage_item_count: reservationRows.filter((row) => Number(row.shortage_quantity || 0) > 0).length
-      },
-      reservations: reservationRows
-    });
-  }
-
-  if (action === 'sync_catalog') {
-    const sourceTypes = Array.isArray(body.source_types) && body.source_types.length ? body.source_types.map((value) => String(value || '').trim()).filter(Boolean) : ['tool', 'supply'];
-    const synced = await syncCatalog(db, sourceTypes);
-    await auditAdminAction(env, request, adminUser, { action_type: 'inventory_sync_catalog', target_type: 'inventory', target_key: sourceTypes.join(','), details: { synced } });
-    return json({ ok: true, synced, source_types: sourceTypes });
-  }
-
-  const inventoryId = Number(body.site_item_inventory_id || 0);
-  if (action && inventoryId > 0) {
-    const existing = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(inventoryId).first();
-    if (!existing) return json({ ok: false, error: 'Inventory item not found.' }, 404);
-    const qty = Math.max(0, Number(body.quantity || 0));
-    let nextOnHand = Number(existing.on_hand_quantity || 0);
-    let nextReserved = Number(existing.reserved_quantity || 0);
-    let nextIncoming = Number(existing.incoming_quantity || 0);
-    let movementType = 'adjustment';
-    if (action === 'reserve') { nextReserved += qty; movementType = 'reserve'; }
-    else if (action === 'release') { nextReserved = Math.max(0, nextReserved - qty); movementType = 'release'; }
-    else if (action === 'receive') { nextIncoming = Math.max(0, nextIncoming - qty); nextOnHand += qty; movementType = 'incoming'; }
-    else if (action === 'reorder_request') { movementType = 'adjustment'; }
-    else return json({ ok: false, error: 'Unsupported inventory action.' }, 400);
-
-    await db.prepare(`
-      UPDATE site_item_inventory
-      SET reserved_quantity = ?, incoming_quantity = ?, on_hand_quantity = ?,
-          is_on_reorder_list = CASE WHEN ? = 'reorder_request' THEN 1 ELSE is_on_reorder_list END,
-          last_reorder_requested_at = CASE WHEN ? = 'reorder_request' THEN CURRENT_TIMESTAMP ELSE last_reorder_requested_at END,
-          reservation_notes = CASE WHEN ? IN ('reserve','release') THEN ? ELSE reservation_notes END,
-          last_counted_at = CASE WHEN ? = 'receive' THEN CURRENT_TIMESTAMP ELSE last_counted_at END,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE site_item_inventory_id = ?
-    `).bind(nextReserved, nextIncoming, nextOnHand, action, action, action, normalizeText(body.note) || null, action, inventoryId).run();
-
-    await logMovement(db, {
-      site_item_inventory_id: inventoryId,
-      source_type: existing.source_type,
-      external_key: existing.external_key,
-      item_name: existing.item_name,
-      movement_type: movementType,
-      quantity_delta: action === 'release' ? -qty : qty,
-      previous_on_hand_quantity: Number(existing.on_hand_quantity || 0),
-      new_on_hand_quantity: nextOnHand,
-      previous_reserved_quantity: Number(existing.reserved_quantity || 0),
-      new_reserved_quantity: nextReserved,
-      previous_incoming_quantity: Number(existing.incoming_quantity || 0),
-      new_incoming_quantity: nextIncoming,
-      note: normalizeText(body.note) || `${action} recorded.`,
-      actor_user_id: adminUser.user_id
+      details: { results }
     });
 
-    await auditAdminAction(env, request, adminUser, { action_type: `inventory_${action}`, target_type: 'inventory_item', target_id: inventoryId, target_key: `${existing.source_type}:${existing.external_key}`, details: { quantity: qty } });
-    const saved = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(inventoryId).first();
-    return json({ ok: true, item: shape(saved || {}) });
+    return json({ ok: true, results });
   }
 
+  if (action === 'release_product_resources') {
+    const productId = Number(body.product_id || 0);
+    if (!productId) return json({ ok: false, error: 'product_id is required.' }, 400);
+
+    const results = await adjustProductResourceReservations(db, {
+      productId,
+      quantityMultiplier: Math.max(1, Number(body.quantity_multiplier || 1) || 1),
+      release: true,
+      note: normalizeText(body.note) || '',
+      actorUserId: adminUser.user_id
+    });
+
+    await auditAdminAction(env, request, adminUser, {
+      action_type: 'inventory_release_product_resources',
+      target_type: 'product',
+      target_id: productId,
+      details: { results }
+    });
+
+    return json({ ok: true, results });
+  }
+
+  const sourceType = normalizeText(body.source_type).toLowerCase();
+  const externalKey = normalizeText(body.external_key);
   const itemName = normalizeText(body.item_name);
-  const sourceType = normalizeText(body.source_type || 'other').toLowerCase();
-  const externalKey = normalizeText(body.external_key || crypto.randomUUID());
-  if (!itemName) return json({ ok: false, error: 'item_name is required.' }, 400);
-  const existing = await db.prepare(`SELECT site_item_inventory_id FROM site_item_inventory WHERE source_type = ? AND external_key = ? LIMIT 1`).bind(sourceType, externalKey).first();
-  if (existing) return json({ ok: false, error: 'That source type / external key already exists.' }, 409);
+
+  if (!sourceType || !externalKey || !itemName) {
+    return json({ ok: false, error: 'source_type, external_key, and item_name are required.' }, 400);
+  }
 
   const insert = await db.prepare(`
     INSERT INTO site_item_inventory (
@@ -473,10 +439,35 @@ export async function onRequestPost(context) {
     Number(body.is_active) === 0 ? 0 : 1,
     normalizeText(body.last_counted_at) || null
   ).run();
+
   const newId = Number(insert?.meta?.last_row_id || 0);
   const saved = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(newId).first();
-  await logMovement(db, { site_item_inventory_id: newId, source_type: sourceType, external_key: externalKey, item_name: itemName, movement_type: 'create', quantity_delta: Number(body.on_hand_quantity || 0), previous_on_hand_quantity: 0, new_on_hand_quantity: Number(body.on_hand_quantity || 0), previous_reserved_quantity: 0, new_reserved_quantity: Number(body.reserved_quantity || 0), previous_incoming_quantity: 0, new_incoming_quantity: Number(body.incoming_quantity || 0), note: normalizeText(body.movement_note) || 'Inventory item created.', actor_user_id: adminUser.user_id });
-  await auditAdminAction(env, request, adminUser, { action_type: 'inventory_create', target_type: 'inventory_item', target_id: newId, target_key: `${sourceType}:${externalKey}`, details: { item_name: itemName } });
+
+  await logMovement(db, {
+    site_item_inventory_id: newId,
+    source_type: sourceType,
+    external_key: externalKey,
+    item_name: itemName,
+    movement_type: 'create',
+    quantity_delta: Number(body.on_hand_quantity || 0),
+    previous_on_hand_quantity: 0,
+    new_on_hand_quantity: Number(body.on_hand_quantity || 0),
+    previous_reserved_quantity: 0,
+    new_reserved_quantity: Number(body.reserved_quantity || 0),
+    previous_incoming_quantity: 0,
+    new_incoming_quantity: Number(body.incoming_quantity || 0),
+    note: normalizeText(body.movement_note) || 'Inventory item created.',
+    actor_user_id: adminUser.user_id
+  });
+
+  await auditAdminAction(env, request, adminUser, {
+    action_type: 'inventory_create',
+    target_type: 'inventory_item',
+    target_id: newId,
+    target_key: `${sourceType}:${externalKey}`,
+    details: { item_name: itemName }
+  });
+
   return json({ ok: true, item: shape(saved || {}) }, 201);
 }
 
@@ -484,15 +475,31 @@ export async function onRequestPatch(context) {
   const { request, env } = context;
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
+
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+
   await ensureUsageColumns(db);
+
   let body = {};
-  try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
+  try {
+    body = await request.json();
+  } catch {
+    return json({ ok: false, error: 'Invalid JSON body.' }, 400);
+  }
+
   const id = Number(body.site_item_inventory_id || 0);
   if (!id) return json({ ok: false, error: 'site_item_inventory_id is required.' }, 400);
+
   try {
-    const existing = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(id).first();
+    const existing = await db.prepare(`
+      SELECT *
+      FROM site_item_inventory
+      WHERE site_item_inventory_id = ?
+      LIMIT 1
+    `).bind(id).first();
+
     if (!existing) return json({ ok: false, error: 'Inventory item not found.' }, 404);
+
     const merged = {
       ...existing,
       ...body,
@@ -508,17 +515,21 @@ export async function onRequestPatch(context) {
       reuse_status: normalizeText(body.reuse_status ?? existing.reuse_status),
       reservation_notes: normalizeText(body.reservation_notes ?? existing.reservation_notes),
       usage_unit_label: normalizeText(body.usage_unit_label ?? existing.usage_unit_label) || 'unit',
-      usage_units_per_stock_unit: Math.max(1, Number(body.usage_units_per_stock_unit ?? existing.usage_units_per_stock_unit || 1) || 1)
+      usage_units_per_stock_unit: Math.max(
+        1,
+        Number((body.usage_units_per_stock_unit ?? existing.usage_units_per_stock_unit) || 1) || 1
+      )
     };
+
     await db.prepare(`
       UPDATE site_item_inventory
-      SET item_name=?, category=?, source_url=?, amazon_url=?, image_url=?,
-          usage_unit_label=?, usage_units_per_stock_unit=?,
-          on_hand_quantity=?, reserved_quantity=?, incoming_quantity=?, reorder_level=?, unit_cost_cents=?,
-          supplier_name=?, supplier_sku=?, supplier_contact=?, reorder_notes=?,
-          is_active=?, preferred_reorder_quantity=?, is_on_reorder_list=?, do_not_reorder=?,
-          do_not_reuse=?, reuse_status=?, reservation_notes=?, last_counted_at=?, updated_at=CURRENT_TIMESTAMP
-      WHERE site_item_inventory_id=?
+      SET item_name = ?, category = ?, source_url = ?, amazon_url = ?, image_url = ?,
+          usage_unit_label = ?, usage_units_per_stock_unit = ?,
+          on_hand_quantity = ?, reserved_quantity = ?, incoming_quantity = ?, reorder_level = ?, unit_cost_cents = ?,
+          supplier_name = ?, supplier_sku = ?, supplier_contact = ?, reorder_notes = ?,
+          is_active = ?, preferred_reorder_quantity = ?, is_on_reorder_list = ?, do_not_reorder = ?,
+          do_not_reuse = ?, reuse_status = ?, reservation_notes = ?, last_counted_at = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE site_item_inventory_id = ?
     `).bind(
       merged.item_name,
       merged.category || null,
@@ -546,6 +557,7 @@ export async function onRequestPatch(context) {
       normalizeText(body.last_counted_at) || existing.last_counted_at || null,
       id
     ).run();
+
     await logMovement(db, {
       site_item_inventory_id: id,
       source_type: existing.source_type,
@@ -562,7 +574,14 @@ export async function onRequestPatch(context) {
       note: normalizeText(body.movement_note) || 'Inventory item updated.',
       actor_user_id: adminUser.user_id
     });
-    const saved = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(id).first();
+
+    const saved = await db.prepare(`
+      SELECT *
+      FROM site_item_inventory
+      WHERE site_item_inventory_id = ?
+      LIMIT 1
+    `).bind(id).first();
+
     await auditAdminAction(env, request, adminUser, {
       action_type: 'inventory_update',
       target_type: 'inventory_item',
@@ -578,6 +597,7 @@ export async function onRequestPatch(context) {
         new_incoming_quantity: Number(merged.incoming_quantity || 0)
       }
     });
+
     return json({ ok: true, item: shape(saved || {}) });
   } catch (e) {
     return json({ ok: false, error: e.message || 'Failed to update inventory item.' }, 500);
@@ -588,15 +608,55 @@ export async function onRequestDelete(context) {
   const { request, env } = context;
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
+
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+
   const id = Number(new URL(request.url).searchParams.get('site_item_inventory_id') || 0);
   if (!id) return json({ ok: false, error: 'site_item_inventory_id is required.' }, 400);
+
   try {
-    const existing = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(id).first();
+    const existing = await db.prepare(`
+      SELECT *
+      FROM site_item_inventory
+      WHERE site_item_inventory_id = ?
+      LIMIT 1
+    `).bind(id).first();
+
     if (!existing) return json({ ok: false, error: 'Inventory item not found.' }, 404);
-    await db.prepare(`DELETE FROM site_item_inventory WHERE site_item_inventory_id = ?`).bind(id).run();
-    await logMovement(db, { site_item_inventory_id: id, source_type: existing.source_type, external_key: existing.external_key, item_name: existing.item_name, movement_type: 'delete', quantity_delta: 0, previous_on_hand_quantity: Number(existing.on_hand_quantity || 0), new_on_hand_quantity: 0, previous_reserved_quantity: Number(existing.reserved_quantity || 0), new_reserved_quantity: 0, previous_incoming_quantity: Number(existing.incoming_quantity || 0), new_incoming_quantity: 0, note: 'Inventory item deleted.', actor_user_id: adminUser.user_id });
-    await auditAdminAction(env, request, adminUser, { action_type: 'inventory_delete', target_type: 'inventory_item', target_id: id, target_key: `${existing.source_type}:${existing.external_key}`, details: { item_name: existing.item_name, on_hand_quantity: Number(existing.on_hand_quantity || 0) } });
+
+    await db.prepare(`
+      DELETE FROM site_item_inventory
+      WHERE site_item_inventory_id = ?
+    `).bind(id).run();
+
+    await logMovement(db, {
+      site_item_inventory_id: id,
+      source_type: existing.source_type,
+      external_key: existing.external_key,
+      item_name: existing.item_name,
+      movement_type: 'delete',
+      quantity_delta: 0,
+      previous_on_hand_quantity: Number(existing.on_hand_quantity || 0),
+      new_on_hand_quantity: 0,
+      previous_reserved_quantity: Number(existing.reserved_quantity || 0),
+      new_reserved_quantity: 0,
+      previous_incoming_quantity: Number(existing.incoming_quantity || 0),
+      new_incoming_quantity: 0,
+      note: 'Inventory item deleted.',
+      actor_user_id: adminUser.user_id
+    });
+
+    await auditAdminAction(env, request, adminUser, {
+      action_type: 'inventory_delete',
+      target_type: 'inventory_item',
+      target_id: id,
+      target_key: `${existing.source_type}:${existing.external_key}`,
+      details: {
+        item_name: existing.item_name,
+        on_hand_quantity: Number(existing.on_hand_quantity || 0)
+      }
+    });
+
     return json({ ok: true, message: 'Inventory item removed.' });
   } catch (e) {
     return json({ ok: false, error: e.message || 'Failed to remove inventory item.' }, 500);
