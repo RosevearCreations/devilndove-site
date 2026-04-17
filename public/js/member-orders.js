@@ -188,7 +188,15 @@ document.addEventListener("DOMContentLoaded", () => {
       method: "GET"
     });
 
-    const data = await response.json();
+    const contentType = String(response.headers.get("content-type") || "").toLowerCase();
+    let data = null;
+
+    if (contentType.includes("application/json")) {
+      data = await response.json();
+    } else {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || "Failed to load your orders.");
+    }
 
     if (!response.ok || !data?.ok) {
       throw new Error(data?.error || "Failed to load your orders.");
