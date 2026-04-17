@@ -1,3 +1,4 @@
+-- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- File: /database_admin_seed_template.sql
 -- Brief description: Creates a starter admin account for the current users/sessions schema.
 -- Temporary password for this template hash: ChangeMe123!

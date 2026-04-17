@@ -1,3 +1,4 @@
+-- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- Current pass note: broad product repricing is now handled in code through the existing products table and admin bulk tooling; no new required schema tables were needed for this pass.
 -- File: /database_upgrade_current_pass.sql
@@ -495,3 +496,7 @@ ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT N
 
 -- Current Pass Note — 2026-04-16
 -- Wired the catalog option manager into admin pages and added usage-unit / end-of-lot costing support for site inventory and product resource links.
+
+-- Current Pass Note — 2026-04-16
+-- Inventory now distinguishes stock unit labels from usage-unit labels so batch materials are easier to understand in costing and planning.
+ALTER TABLE site_item_inventory ADD COLUMN stock_unit_label TEXT NOT NULL DEFAULT 'unit';

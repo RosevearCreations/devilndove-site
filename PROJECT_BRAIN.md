@@ -1,6 +1,15 @@
 # Project Brain
 
 
+
+## Current pass focus
+
+- Inventory and costing language was clarified:
+  - stock unit = what you buy/store/count
+  - usage unit = what a finished product actually consumes
+- Batch-material planning is now easier to read in the resource-link UI.
+- The next business-facing layer should be recommended prices, stronger trust blocks, reviews/social proof, and better shopper retention tools.
+
 ## Current pass update
 
 - Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.

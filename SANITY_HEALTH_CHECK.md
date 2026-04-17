@@ -1,6 +1,13 @@
 # Sanity / Health Check
 
 
+
+## Current pass check focus
+
+- Public HTML pages remain on the one-H1 rule.
+- Current pass schema/docs must reflect `stock_unit_label`, usage-unit math, and the stronger resource-link previews.
+- Admin inventory and resource editors should be checked with wax/wick/PLA examples after deploy.
+
 ## Current pass update
 
 - Repaired the phone product-capture save route so it resolves the shared D1 binding through `DB` or `DD_DB` instead of assuming one binding name.

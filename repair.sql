@@ -1,3 +1,4 @@
+-- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- MIGRATION: members/member_sessions -> users/sessions
 -- This preserves existing member IDs so related tables like user_profiles keep working.
 

@@ -1,3 +1,4 @@
+-- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- File: /database_profiles_extension.sql
 -- Brief description: Adds full customer/employee profile storage for contact details,
 -- verification flags, preferences, and future discount/employee management support.

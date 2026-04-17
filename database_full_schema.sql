@@ -1,3 +1,4 @@
+-- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- Current pass note: broad product repricing is now handled in code through the existing products table and admin bulk tooling; no new required schema tables were needed for this pass.
 -- Current pass note: admin write-path resilience now extends beyond read-only fallback. Order status updates, manual payment recording, and refund/dispute actions log server-side incidents more defensively, while the order-detail UI can preserve failed admin writes locally for manual retry. Composite payment/refund/dispute indexes were added to keep these health and follow-up queries fast as the fallback layer grows.
@@ -691,6 +692,7 @@ CREATE TABLE IF NOT EXISTS site_item_inventory (
   incoming_quantity INTEGER NOT NULL DEFAULT 0,
   reorder_level INTEGER NOT NULL DEFAULT 0,
   unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  stock_unit_label TEXT NOT NULL DEFAULT 'unit',
   usage_unit_label TEXT NOT NULL DEFAULT 'unit',
   usage_units_per_stock_unit REAL NOT NULL DEFAULT 1,
   supplier_name TEXT,

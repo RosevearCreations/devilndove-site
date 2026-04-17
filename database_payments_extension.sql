@@ -1,3 +1,4 @@
+-- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- File: /database_payments_extension.sql
 -- Brief description: Payments, webhook, and media-asset schema for the current Devil n Dove build.
 
