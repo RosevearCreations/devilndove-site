@@ -116,3 +116,13 @@ PRAGMA foreign_keys = ON;
 -- Added app_settings-backed dropdown master-data keys for product categories, colours, and shipping codes.
 -- Product resource links now support per-unit, end-of-lot, and story-only inventory usage modes.
 -- End-of-lot mode is intended for supplies such as wax/resin/clay where one lot may cover many finished products before inventory should be reduced.
+
+-- Current Pass Update — 2026-04-17
+-- This pass assumes/uses the following current-direction features in code:
+-- 1) member wishlist and product interest request review workflows
+-- 2) checkout recovery leads and recovery email notification outbox support
+-- 3) gift card validation / redemption support
+-- 4) product review / testimonial submission and approved review display
+-- 5) pricing suggestion load/apply actions in admin
+-- 6) continued schema-compatibility hardening for older D1 tables
+

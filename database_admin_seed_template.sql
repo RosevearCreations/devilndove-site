@@ -55,3 +55,13 @@ VALUES (
 -- Current Pass Note — 2026-04-16
 -- Admin dropdown master-data is now wired through app_settings and tax_classes in application code.
 -- Site inventory usage-unit support was added in application/runtime migration logic for cups, wicks, grams, spools, and end-of-lot costing.
+
+-- Current Pass Update — 2026-04-17
+-- This pass assumes/uses the following current-direction features in code:
+-- 1) member wishlist and product interest request review workflows
+-- 2) checkout recovery leads and recovery email notification outbox support
+-- 3) gift card validation / redemption support
+-- 4) product review / testimonial submission and approved review display
+-- 5) pricing suggestion load/apply actions in admin
+-- 6) continued schema-compatibility hardening for older D1 tables
+

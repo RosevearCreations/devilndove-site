@@ -1094,3 +1094,13 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 
 -- Current Pass Note — 2026-04-16
 -- Inventory items now support usage-unit labeling and per-stock-unit usage counts so cost/buildable math can work for cups, wicks, grams, and similar partial-use materials.
+
+-- Current Pass Update — 2026-04-17
+-- This pass assumes/uses the following current-direction features in code:
+-- 1) member wishlist and product interest request review workflows
+-- 2) checkout recovery leads and recovery email notification outbox support
+-- 3) gift card validation / redemption support
+-- 4) product review / testimonial submission and approved review display
+-- 5) pricing suggestion load/apply actions in admin
+-- 6) continued schema-compatibility hardening for older D1 tables
+

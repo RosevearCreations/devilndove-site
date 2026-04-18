@@ -376,3 +376,25 @@ When continuing from this build, treat the admin orders area as partially harden
 - Added member wishlist groundwork plus public back-in-stock request capture so retention can begin moving beyond basic account/order history.
 - Extended the public product page maker-story block so shoppers can see stronger build context, usage mode, stock-unit interpretation, and clearer trust signals.
 - Development roadmap and known-gap follow-up should continue from: inventory operator polish, wishlist/back-in-stock admin review tools, recommended-price write-back, and richer public trust/review layers.
+
+---
+
+## Current Pass Update — 2026-04-17
+
+This pass added and/or stabilized:
+- a modern mobile navigation drawer for phone layouts, replacing the plain stacked menu list with a toggle + panel pattern
+- an admin customer engagement dashboard for wishlist demand, back-in-stock requests, checkout recovery leads, gift cards, and reviews/testimonials
+- public/member review and testimonial collection flows, plus approved product review display on product pages
+- checkout recovery lead capture, gift-card validation during checkout, and notification outbox support for checkout recovery, gift card issue, and review request emails
+- recommended-price suggestion actions that can now load pricing into the product editor and apply pricing live
+
+Public-page verification completed this pass:
+- public `index.html` routes were rechecked and continue to return one H1 per exposed page
+
+Roadmap emphasis after this pass:
+- finish the admin side for processing engagement queues at larger scale
+- add storefront wishlist / favorites UI surfacing beyond the member area
+- expand testimonial display onto Home, Gallery, and About
+- continue pricing write-back and margin-warning refinement inside the main product edit workflow
+- keep schema compatibility hardening in place for older live D1 tables before assuming newer columns
+

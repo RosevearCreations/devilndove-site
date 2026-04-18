@@ -500,3 +500,13 @@ ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT N
 -- Current Pass Note — 2026-04-16
 -- Inventory now distinguishes stock unit labels from usage-unit labels so batch materials are easier to understand in costing and planning.
 ALTER TABLE site_item_inventory ADD COLUMN stock_unit_label TEXT NOT NULL DEFAULT 'unit';
+
+-- Current Pass Update — 2026-04-17
+-- This pass assumes/uses the following current-direction features in code:
+-- 1) member wishlist and product interest request review workflows
+-- 2) checkout recovery leads and recovery email notification outbox support
+-- 3) gift card validation / redemption support
+-- 4) product review / testimonial submission and approved review display
+-- 5) pricing suggestion load/apply actions in admin
+-- 6) continued schema-compatibility hardening for older D1 tables
+

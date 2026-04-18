@@ -202,3 +202,25 @@ This pass was mostly admin-resiliency work. Keep the usual one-H1, descriptive t
 - Product resource links now save inventory mode details consistently across desktop resource linking and phone capture drafts: per product, end of lot, and story only.
 - End-of-lot and cost/buildable calculations now use usage-unit math so supplies such as wax, wicks, resin, clay, and PLA can contribute to pricing and planning without forcing per-item depletion when the lot should be consumed manually.
 - Remaining next-step focus: surface these same usage-unit fields in every remaining desktop product edit path and keep tightening margin warnings / repricing suggestions from the new cost model.
+
+---
+
+## Current Pass Update — 2026-04-17
+
+This pass added and/or stabilized:
+- a modern mobile navigation drawer for phone layouts, replacing the plain stacked menu list with a toggle + panel pattern
+- an admin customer engagement dashboard for wishlist demand, back-in-stock requests, checkout recovery leads, gift cards, and reviews/testimonials
+- public/member review and testimonial collection flows, plus approved product review display on product pages
+- checkout recovery lead capture, gift-card validation during checkout, and notification outbox support for checkout recovery, gift card issue, and review request emails
+- recommended-price suggestion actions that can now load pricing into the product editor and apply pricing live
+
+Public-page verification completed this pass:
+- public `index.html` routes were rechecked and continue to return one H1 per exposed page
+
+Roadmap emphasis after this pass:
+- finish the admin side for processing engagement queues at larger scale
+- add storefront wishlist / favorites UI surfacing beyond the member area
+- expand testimonial display onto Home, Gallery, and About
+- continue pricing write-back and margin-warning refinement inside the main product edit workflow
+- keep schema compatibility hardening in place for older live D1 tables before assuming newer columns
+
