@@ -317,6 +317,107 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
   return results;
 }
 
+
+async function runInventoryItemAction(db, { siteItemInventoryId = 0, action = '', quantity = 0, note = '', actorUserId = null } = {}) {
+  const id = Number(siteItemInventoryId || 0);
+  const qty = Math.max(0, Number(quantity || 0));
+  if (!id) throw new Error('site_item_inventory_id is required.');
+  if (!qty) throw new Error('A quantity greater than zero is required.');
+
+  const existing = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(id).first();
+  if (!existing) throw new Error('Inventory item not found.');
+
+  const previousOnHand = Number(existing.on_hand_quantity || 0);
+  const previousReserved = Number(existing.reserved_quantity || 0);
+  const previousIncoming = Number(existing.incoming_quantity || 0);
+  let newOnHand = previousOnHand;
+  let newReserved = previousReserved;
+  let newIncoming = previousIncoming;
+  let movementType = action || 'adjustment';
+  let quantityDelta = 0;
+  let auditDetails = { quantity: qty };
+
+  switch (String(action || '').toLowerCase()) {
+    case 'receive':
+      newOnHand = previousOnHand + qty;
+      newIncoming = Math.max(0, previousIncoming - qty);
+      movementType = 'receive';
+      quantityDelta = qty;
+      break;
+    case 'reserve':
+      newReserved = previousReserved + qty;
+      movementType = 'reserve';
+      quantityDelta = 0;
+      break;
+    case 'release':
+      newReserved = Math.max(0, previousReserved - qty);
+      movementType = 'release';
+      quantityDelta = 0;
+      break;
+    case 'consume':
+      newOnHand = Math.max(0, previousOnHand - qty);
+      movementType = 'consume';
+      quantityDelta = -qty;
+      break;
+    case 'reorder_request':
+      newIncoming = previousIncoming + qty;
+      movementType = 'reorder_request';
+      quantityDelta = 0;
+      auditDetails.requested_incoming_quantity = qty;
+      break;
+    default:
+      throw new Error('Unsupported inventory action.');
+  }
+
+  await db.prepare(`
+    UPDATE site_item_inventory
+    SET on_hand_quantity = ?, reserved_quantity = ?, incoming_quantity = ?,
+        is_on_reorder_list = CASE WHEN ? = 'reorder_request' THEN 1 ELSE is_on_reorder_list END,
+        last_reorder_requested_at = CASE WHEN ? = 'reorder_request' THEN CURRENT_TIMESTAMP ELSE last_reorder_requested_at END,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE site_item_inventory_id = ?
+  `).bind(
+    newOnHand,
+    newReserved,
+    newIncoming,
+    String(action || '').toLowerCase(),
+    String(action || '').toLowerCase(),
+    id
+  ).run();
+
+  await logMovement(db, {
+    site_item_inventory_id: id,
+    source_type: existing.source_type || null,
+    external_key: existing.external_key || null,
+    item_name: existing.item_name || null,
+    movement_type: movementType,
+    quantity_delta: quantityDelta,
+    previous_on_hand_quantity: previousOnHand,
+    new_on_hand_quantity: newOnHand,
+    previous_reserved_quantity: previousReserved,
+    new_reserved_quantity: newReserved,
+    previous_incoming_quantity: previousIncoming,
+    new_incoming_quantity: newIncoming,
+    note: note || `Inventory ${movementType}.`,
+    actor_user_id: actorUserId || null
+  });
+
+  const saved = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(id).first();
+  return {
+    item: shape(saved || {}),
+    audit_details: {
+      ...auditDetails,
+      previous_on_hand_quantity: previousOnHand,
+      new_on_hand_quantity: newOnHand,
+      previous_reserved_quantity: previousReserved,
+      new_reserved_quantity: newReserved,
+      previous_incoming_quantity: previousIncoming,
+      new_incoming_quantity: newIncoming
+    },
+    existing
+  };
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = getDb(env);
@@ -396,6 +497,29 @@ export async function onRequestPost(context) {
     });
 
     return json({ ok: true, results });
+  }
+
+  if (['receive', 'reserve', 'release', 'consume', 'reorder_request'].includes(action)) {
+    const siteItemInventoryId = Number(body.site_item_inventory_id || 0);
+    const quantity = Math.max(0, Number(body.quantity || 0));
+    const note = normalizeText(body.note) || '';
+    const result = await runInventoryItemAction(db, {
+      siteItemInventoryId,
+      action,
+      quantity,
+      note,
+      actorUserId: adminUser.user_id
+    });
+
+    await auditAdminAction(env, request, adminUser, {
+      action_type: `inventory_${action}`,
+      target_type: 'inventory_item',
+      target_id: siteItemInventoryId,
+      target_key: `${result.existing?.source_type || ''}:${result.existing?.external_key || ''}`,
+      details: result.audit_details
+    });
+
+    return json({ ok: true, item: result.item, action, details: result.audit_details });
   }
 
   const sourceType = normalizeText(body.source_type).toLowerCase();
