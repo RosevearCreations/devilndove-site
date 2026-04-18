@@ -1,6 +1,6 @@
 // File: /public/js/product-detail.js
 // Brief description: Renders one storefront product with SEO-aware media handling,
-// gallery metadata, and add-to-cart support.
+// richer maker-story output, cart support, wishlist saving, and back-in-stock requests.
 
 document.addEventListener("DOMContentLoaded", async () => {
   const loadingEl = document.getElementById("productLoading");
@@ -26,7 +26,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productQuantityEl = document.getElementById("productQuantity");
   const addToCartButton = document.getElementById("addToCartButton");
   const addToCartMessageEl = document.getElementById("addToCartMessage");
+  const productWishlistButton = document.getElementById("productWishlistButton");
+  const productBackInStockButton = document.getElementById("productBackInStockButton");
+  const productInterestGuestWrap = document.getElementById("productInterestGuestWrap");
+  const productInterestEmail = document.getElementById("productInterestEmail");
+  const productInterestMessageEl = document.getElementById("productInterestMessage");
+  const productTrustListEl = document.getElementById("productTrustList");
+  const productTrustSummaryEl = document.getElementById("productTrustSummary");
   let currentProduct = null;
+  let currentTrustSummary = null;
 
   function show(el) { if (el) el.style.display = ""; }
   function hide(el) { if (el) el.style.display = "none"; }
@@ -37,6 +45,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     addToCartMessageEl.style.color = isError ? "#b00020" : "#0a7a2f";
   }
   function clearCartMessage() { if (addToCartMessageEl) { addToCartMessageEl.textContent = ""; addToCartMessageEl.style.display = "none"; } }
+  function setInterestMessage(message, isError = false) {
+    if (!productInterestMessageEl) return;
+    productInterestMessageEl.textContent = message;
+    productInterestMessageEl.style.display = message ? "block" : "none";
+    productInterestMessageEl.style.color = isError ? "#b00020" : "#0a7a2f";
+  }
   function escapeHtml(value) { return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
   function formatMoney(cents, currency = "CAD") { const amount = Number(cents || 0) / 100; try { return new Intl.NumberFormat(undefined, { style: "currency", currency: currency || "CAD" }).format(amount); } catch { return `${amount.toFixed(2)} ${currency || "CAD"}`; } }
   function yesNo(value) { return Number(value) === 1 ? "Yes" : "No"; }
@@ -70,7 +84,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       </figure>`).join("");
   }
 
-
   function renderResourceStory(resourceLinks, resourceSummary) {
     if (!productStoryCardEl || !productResourcesStoryEl || !productStorySummaryEl) return;
     const links = Array.isArray(resourceLinks) ? resourceLinks : [];
@@ -82,26 +95,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     show(productStoryCardEl);
     const summary = resourceSummary || {};
-    productStorySummaryEl.textContent = `${Number(summary.linked_tools || 0)} tools • ${Number(summary.linked_supplies || 0)} supplies${Number(summary.low_stock_items || 0) ? ` • ${Number(summary.low_stock_items)} linked items are low in stock` : ''}`;
+    productStorySummaryEl.textContent = `${Number(summary.linked_tools || 0)} tools • ${Number(summary.linked_supplies || 0)} supplies • Estimated materials per product ${formatMoney(Number(summary.estimated_cost_per_product_cents || 0), currentProduct?.currency || 'CAD')}${Number(summary.low_stock_items || 0) ? ` • ${Number(summary.low_stock_items)} linked items are low in stock` : ''}`;
     productResourcesStoryEl.innerHTML = links.map((link) => {
       const inv = link.inventory || null;
       const lowStock = !!(inv && ((Number(inv.on_hand_quantity || 0) - Number(inv.reserved_quantity || 0) + Number(inv.incoming_quantity || 0)) <= Number(inv.reorder_level || 0)));
+      const modeLabel = link.consumption_mode === 'end_of_lot' ? 'end of lot' : (link.consumption_mode === 'story_only' ? 'story only' : 'per product');
       return `
         <article class="resource-story-card">
           <div class="resource-story-media">${link.resource_image_url ? `<img src="${escapeHtml(link.resource_image_url)}" alt="${escapeHtml(link.resource_name || link.source_key)}" loading="lazy"/>` : `<div class="resource-story-placeholder">${escapeHtml(link.resource_kind || 'item')}</div>`}</div>
           <div class="resource-story-body">
             <div class="small resource-kind-pill">${escapeHtml(link.resource_kind || 'resource')}</div>
             <h4>${escapeHtml(link.resource_name || link.source_key || 'Workshop item')}</h4>
-            <div class="small">Used quantity: ${Number(link.quantity_used || 0) || 1}</div>
+            <div class="small">Use mode: ${escapeHtml(modeLabel)} • Quantity: ${Number(link.quantity_used || 0) || 1}</div>
             ${link.resource_category ? `<div class="small">${escapeHtml(link.resource_category)}${link.resource_subcategory ? ` • ${escapeHtml(link.resource_subcategory)}` : ''}</div>` : ''}
             ${link.usage_notes ? `<div class="small">${escapeHtml(link.usage_notes)}</div>` : ''}
-            ${inv ? `<div class="small">Inventory: on hand ${Number(inv.on_hand_quantity || 0)}, reserved ${Number(inv.reserved_quantity || 0)}, incoming ${Number(inv.incoming_quantity || 0)}${lowStock ? ' • low stock' : ''}</div>` : ''}
+            ${inv ? `<div class="small">Inventory: on hand ${Number(inv.on_hand_quantity || 0)} ${escapeHtml(inv.stock_unit_label || 'unit')} • 1 ${escapeHtml(inv.stock_unit_label || 'unit')} = ${Number(inv.usage_units_per_stock_unit || 1)} ${escapeHtml(inv.usage_unit_label || 'unit')}</div><div class="small">Estimated materials from this item per finished product: ${escapeHtml(formatMoney(inv.estimated_cost_per_product_cents || 0, currentProduct?.currency || 'CAD'))}${Number(inv.buildable_products || 0) ? ` • buildable from stock ≈ ${Number(inv.buildable_products || 0)}` : ''}${lowStock ? ' • low stock' : ''}</div>` : ''}
           </div>
         </article>`;
     }).join('');
   }
 
-  function renderProduct(product, images, resourceLinks, resourceSummary) {
+  function renderTrustSummary(product, trustSummary, images, resourceLinks) {
+    currentTrustSummary = trustSummary || null;
+    if (!productTrustListEl || !productTrustSummaryEl) return;
+    const points = [];
+    if ((trustSummary?.image_count || 0) > 1) points.push(`Multiple product photos are shown for this listing.`);
+    else if ((trustSummary?.image_count || 0) === 1) points.push(`At least one real product photo is shown for this listing.`);
+    if (resourceLinks?.length) points.push(`This item includes a maker-story block with the tools and supplies used.`);
+    if (Number(product.inventory_tracking || 0) === 1) points.push(`Inventory is tracked for this product so stock status is clearer.`);
+    if (Number(product.compare_at_price_cents || 0) > Number(product.price_cents || 0)) points.push(`A compare-at price is available for context.`);
+    productTrustSummaryEl.textContent = `Product trust signals: ${(trustSummary?.image_count || 0)} image(s), ${resourceLinks?.length || 0} linked making-story item(s), and ${trustSummary?.in_stock ? 'current stock available' : 'stock can be followed with alerts'}.`;
+    productTrustListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
+  }
+
+  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary) {
     currentProduct = product || null;
     if (productTypeEl) productTypeEl.textContent = product.product_type || "";
     if (productNameEl) productNameEl.textContent = product.name || "";
@@ -125,6 +152,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderMainImage(product, images);
     renderGallery(images, product.name || "Product");
     renderResourceStory(resourceLinks, resourceSummary);
+    renderTrustSummary(product, trustSummary, images, resourceLinks);
+    if (productInterestGuestWrap) productInterestGuestWrap.style.display = Number(product.inventory_quantity || 0) > 0 ? 'none' : 'block';
   }
 
   async function loadProduct() {
@@ -138,7 +167,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET" });
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {});
+      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {});
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;
@@ -172,6 +201,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  async function saveWishlist() {
+    if (!window.DDAuth?.isLoggedIn()) {
+      setInterestMessage('Please log in to save wishlist items.', true);
+      return;
+    }
+    if (!currentProduct?.product_id) return;
+    try {
+      const response = await window.DDAuth.apiFetch('/api/member/wishlist', { method: 'POST', body: JSON.stringify({ product_id: currentProduct.product_id }) });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save wishlist item.');
+      setInterestMessage(data.message || 'Saved to wishlist.');
+    } catch (error) {
+      setInterestMessage(error.message || 'Failed to save wishlist item.', true);
+    }
+  }
+
+  async function requestBackInStock() {
+    if (!currentProduct?.product_id) return;
+    const email = String(productInterestEmail?.value || '').trim();
+    if (!window.DDAuth?.isLoggedIn() && !email) {
+      setInterestMessage('Please enter an email address for stock alerts.', true);
+      return;
+    }
+    try {
+      const response = await window.DDAuth.apiFetch('/api/product-interest', { method: 'POST', body: JSON.stringify({ product_id: currentProduct.product_id, request_type: 'back_in_stock', email }) });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save stock alert.');
+      setInterestMessage(data.message || 'Back-in-stock request saved.');
+    } catch (error) {
+      setInterestMessage(error.message || 'Failed to save stock alert.', true);
+    }
+  }
+
   if (addToCartButton) {
     addToCartButton.addEventListener("click", () => {
       clearCartMessage();
@@ -188,6 +250,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
+  productWishlistButton?.addEventListener('click', saveWishlist);
+  productBackInStockButton?.addEventListener('click', requestBackInStock);
 
   await loadProduct();
 });

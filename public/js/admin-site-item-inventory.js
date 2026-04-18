@@ -471,6 +471,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function populateFormFromItem(item = {}) {
+    const mapping = {
+      siteInventoryId: item.site_item_inventory_id || '',
+      siteInventorySourceType: item.source_type || 'other',
+      siteInventoryExternalKey: item.external_key || '',
+      siteInventoryItemName: item.item_name || '',
+      siteInventoryCategory: item.category || '',
+      siteInventoryImageUrl: item.image_url || '',
+      siteInventorySourceUrl: item.source_url || '',
+      siteInventoryAmazonUrl: item.amazon_url || '',
+      siteInventoryOnHand: item.on_hand_quantity || 0,
+      siteInventoryReservedInput: item.reserved_quantity || 0,
+      siteInventoryIncomingInput: item.incoming_quantity || 0,
+      siteInventoryReorder: item.reorder_level || 0,
+      siteInventoryPreferredReorderQty: item.preferred_reorder_quantity || 0,
+      siteInventoryUnitCost: item.unit_cost_cents || 0,
+      siteInventoryStockUnitLabel: item.stock_unit_label || 'unit',
+      siteInventoryUsageUnitLabel: item.usage_unit_label || 'unit',
+      siteInventoryUsageUnitsPerStock: item.usage_units_per_stock_unit || 1,
+      siteInventorySupplierName: item.supplier_name || '',
+      siteInventorySupplierSku: item.supplier_sku || '',
+      siteInventorySupplierContact: item.supplier_contact || '',
+      siteInventoryReuseStatus: item.reuse_status || '',
+      siteInventoryNotes: item.reorder_notes || '',
+      siteInventoryMovementNote: ''
+    };
+    Object.entries(mapping).forEach(([id, value]) => { const el = document.getElementById(id); if (el) el.value = value; });
+    const isActiveEl = document.getElementById('siteInventoryIsActive'); if (isActiveEl) isActiveEl.value = String(Number(item.is_active) === 0 ? 0 : 1);
+    const reorderEl = document.getElementById('siteInventoryOnReorderList'); if (reorderEl) reorderEl.checked = Number(item.is_on_reorder_list || 0) === 1;
+    const dnrEl = document.getElementById('siteInventoryDoNotReorder'); if (dnrEl) dnrEl.checked = Number(item.do_not_reorder || 0) === 1;
+    const dnuEl = document.getElementById('siteInventoryDoNotReuse'); if (dnuEl) dnuEl.checked = Number(item.do_not_reuse || 0) === 1;
+  }
+
   async function loadList() {
     try {
       setMessage('Loading inventory list...');
@@ -506,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(x.supplier_name || '—')}<div class="small">${escapeHtml(x.supplier_sku || '')}</div><div class="small">${escapeHtml(x.supplier_contact || '')}</div></td>
             <td style="padding:8px;border-bottom:1px solid #ddd">${Number(x.linked_product_count || 0)}<div class="small">${escapeHtml(x.linked_product_names || '')}</div></td>
             <td style="padding:8px;border-bottom:1px solid #ddd">${fmtMoney(x.unit_cost_cents || 0)}<div class="small">per ${escapeHtml(x.stock_unit_label || 'unit')}</div><div class="small">≈ ${fmtMoney(Math.round((Number(x.unit_cost_cents || 0)) / Math.max(1, Number(x.usage_units_per_stock_unit || 1))))} per ${escapeHtml(x.usage_unit_label || 'unit')}</div></td>
-            <td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick Update</button> <button class="btn" type="button" data-adjust-action="reserve" data-id="${x.site_item_inventory_id}">Reserve</button> <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button> <button class="btn" type="button" data-adjust-action="reorder_request" data-id="${x.site_item_inventory_id}">Reorder</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td>
+            <td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick Update</button> <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Load Form</button> <button class="btn" type="button" data-adjust-action="reserve" data-id="${x.site_item_inventory_id}">Reserve</button> <button class="btn" type="button" data-adjust-action="release" data-id="${x.site_item_inventory_id}">Release</button> <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button> <button class="btn" type="button" data-adjust-action="consume" data-id="${x.site_item_inventory_id}">Consume</button> <button class="btn" type="button" data-adjust-action="reorder_request" data-id="${x.site_item_inventory_id}">Reorder</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td>
           </tr>
         `).join('');
       }
@@ -521,6 +554,19 @@ document.addEventListener('DOMContentLoaded', () => {
   async function onTableClick(event) {
     const editBtn = event.target.closest('[data-edit-id]');
     const deleteBtn = event.target.closest('[data-delete-id]');
+    const loadFormBtn = event.target.closest('[data-load-form-id]');
+
+
+    if (loadFormBtn) {
+      let item = null;
+      try { item = JSON.parse(loadFormBtn.getAttribute('data-item') || '{}'); } catch { item = null; }
+      if (item) {
+        populateFormFromItem(item);
+        setMessage(`Loaded ${item.item_name || 'inventory item'} into the form.`);
+        document.getElementById('siteInventoryForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
 
     if (editBtn) {
       let item = null;
@@ -584,7 +630,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (qtyRaw === null) return;
       const qty = Number(qtyRaw);
       if (!Number.isFinite(qty) || qty <= 0) return;
-      const note = String(window.prompt('Note?', action === 'reorder_request' ? 'Manual reorder request' : `Inventory ${action}`) || '').trim();
+      const defaultNotes = { reserve: 'Manual reservation', release: 'Manual reservation release', receive: 'Received stock', consume: 'Consumed in production', reorder_request: 'Manual reorder request' };
+      const note = String(window.prompt('Note?', defaultNotes[action] || `Inventory ${action}`) || '').trim();
       try {
         setMessage(`Running ${action}...`);
         const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', {

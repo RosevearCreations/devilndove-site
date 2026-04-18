@@ -368,3 +368,11 @@ When continuing from this build, treat the admin orders area as partially harden
 - Product resource links now save inventory mode details consistently across desktop resource linking and phone capture drafts: per product, end of lot, and story only.
 - End-of-lot and cost/buildable calculations now use usage-unit math so supplies such as wax, wicks, resin, clay, and PLA can contribute to pricing and planning without forcing per-item depletion when the lot should be consumed manually.
 - Remaining next-step focus: surface these same usage-unit fields in every remaining desktop product edit path and keep tightening margin warnings / repricing suggestions from the new cost model.
+
+## Current pass — inventory operations, pricing suggestions, and retention groundwork
+- Strengthened the tools and supplies inventory console so daily stock work can now be handled from the main table with receive, reserve, release, consume, reorder-request, delete, and load-into-form actions.
+- Kept the stock-unit / usage-unit model active for batch materials so wax, wicks, PLA, and similar inputs can be tracked as lots instead of only as one-item-per-finished-product deductions.
+- Added admin product price suggestions using linked resource cost, manual unit-cost snapshots, packaging pressure, shipping pressure, and overhead assumptions.
+- Added member wishlist groundwork plus public back-in-stock request capture so retention can begin moving beyond basic account/order history.
+- Extended the public product page maker-story block so shoppers can see stronger build context, usage mode, stock-unit interpretation, and clearer trust signals.
+- Development roadmap and known-gap follow-up should continue from: inventory operator polish, wishlist/back-in-stock admin review tools, recommended-price write-back, and richer public trust/review layers.
