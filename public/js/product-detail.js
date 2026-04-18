@@ -33,6 +33,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productInterestMessageEl = document.getElementById("productInterestMessage");
   const productTrustListEl = document.getElementById("productTrustList");
   const productTrustSummaryEl = document.getElementById("productTrustSummary");
+  const productReviewsCardEl = document.getElementById("productReviewsCard");
+  const productReviewsSummaryEl = document.getElementById("productReviewsSummary");
+  const productReviewsListEl = document.getElementById("productReviewsList");
   let currentProduct = null;
   let currentTrustSummary = null;
 
@@ -128,7 +131,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     productTrustListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
   }
 
-  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary) {
+  function renderReviews(reviews, reviewSummary) {
+    if (!productReviewsCardEl || !productReviewsSummaryEl || !productReviewsListEl) return;
+    const rows = Array.isArray(reviews) ? reviews : [];
+    if (!rows.length) {
+      hide(productReviewsCardEl);
+      productReviewsListEl.innerHTML = '';
+      productReviewsSummaryEl.textContent = '';
+      return;
+    }
+    show(productReviewsCardEl);
+    productReviewsSummaryEl.textContent = `${Number(reviewSummary?.review_count || rows.length)} approved review(s) • average rating ${Number(reviewSummary?.average_rating || 0).toFixed(2)} / 5`;
+    productReviewsListEl.innerHTML = rows.map((row) => `
+      <article class="card" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+          <strong>${escapeHtml(row.reviewer_name || 'Devil n Dove customer')}</strong>
+          <span class="small">${'★'.repeat(Math.max(1, Number(row.rating || 0)))}${Number(row.is_featured || 0) === 1 ? ' • Featured' : ''}</span>
+        </div>
+        <div class="small" style="margin-top:4px">${escapeHtml(row.review_kind || 'testimonial')} • ${escapeHtml(row.created_at || '')}</div>
+        <div style="margin-top:8px">${escapeHtml(row.review_text || '')}</div>
+      </article>`).join('');
+  }
+
+  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary) {
     currentProduct = product || null;
     if (productTypeEl) productTypeEl.textContent = product.product_type || "";
     if (productNameEl) productNameEl.textContent = product.name || "";
@@ -152,6 +177,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderMainImage(product, images);
     renderGallery(images, product.name || "Product");
     renderResourceStory(resourceLinks, resourceSummary);
+    renderReviews(reviews, reviewSummary);
     renderTrustSummary(product, trustSummary, images, resourceLinks);
     if (productInterestGuestWrap) productInterestGuestWrap.style.display = Number(product.inventory_quantity || 0) > 0 ? 'none' : 'block';
   }
@@ -167,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET" });
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {});
+      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {});
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;

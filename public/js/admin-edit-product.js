@@ -422,6 +422,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+
+  document.addEventListener('dd:product-price-suggestion-load', async (event) => {
+    const productId = Number(event?.detail?.product_id || 0);
+    if (!productId) return;
+    try {
+      clearMessage();
+      const data = await loadProduct(productId);
+      editingProductId = productId;
+      fillForm(data.product || {}, data.images || []);
+      const suggestedPriceCents = Number(event?.detail?.recommended_price_cents || 0);
+      const suggestedCompareCents = Number(event?.detail?.recommended_compare_at_cents || 0);
+      if (Number.isFinite(suggestedPriceCents) && suggestedPriceCents > 0) {
+        setField('price', centsToDollars(suggestedPriceCents));
+      }
+      if (Number.isFinite(suggestedCompareCents) && suggestedCompareCents > 0) {
+        setField('compare_at_price', centsToDollars(suggestedCompareCents));
+      }
+      setFormModeEdit();
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setMessage('Recommended pricing loaded into the product editor. Review and save when ready.');
+    } catch (error) {
+      setMessage(error.message || 'Failed to load price suggestion into editor.', true);
+    }
+  });
+
   document.addEventListener("dd:product-deleted", (event) => {
     const deletedProductId = Number(event?.detail?.product_id || 0);
     if (editingProductId && deletedProductId === editingProductId) {

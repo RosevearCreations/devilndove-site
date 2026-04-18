@@ -17,6 +17,26 @@
     return `https://www.amazon.ca/s?k=${encodeURIComponent(q)}`;
   }
 
+  function navLinksMarkup() {
+    return `
+      <a href="/index.html" data-nav="/">Home</a>
+      <a href="/about/index.html" data-nav="/about/">About</a>
+      <a href="/gallery/index.html" data-nav="/gallery/">Art</a>
+      <a href="/creations/index.html" data-nav="/creations/">Creations</a>
+      <a href="/tools/index.html" data-nav="/tools/">Tools</a>
+      <a href="/supplies/index.html" data-nav="/supplies/">Supplies</a>
+      <a href="/shop/index.html" data-nav="/shop/">Shop</a>
+      <a href="/search/index.html" data-nav="/search/">Search</a>
+      <a href="/movies/index.html" data-nav="/movies/">Movies</a>
+      <a href="/socials/index.html" data-nav="/socials/">Socials</a>
+      <a href="/contact/index.html" data-nav="/contact/">Contact</a>
+      <a href="/cart/index.html" data-nav="/cart/">Cart</a>
+      <a href="/login/index.html" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
+      <a href="/register/index.html" data-nav="/register/" data-show-when-logged-out style="display:none">Register</a>
+      <a href="/members/index.html" data-nav="/members/" data-show-when-logged-in style="display:none">Members</a>
+      <a href="/admin/index.html" data-nav="/admin/" data-show-when-admin style="display:none">Admin</a>`;
+  }
+
   function buildSharedNav() {
     return `
       <div class="brand">
@@ -26,23 +46,24 @@
           <div class="small">Workshop • Art • Tools • Movies</div>
         </div>
       </div>
-      <div class="links" aria-label="Primary navigation">
-        <a href="/index.html" data-nav="/">Home</a>
-        <a href="/about/index.html" data-nav="/about/">About</a>
-        <a href="/gallery/index.html" data-nav="/gallery/">Art</a>
-        <a href="/creations/index.html" data-nav="/creations/">Creations</a>
-        <a href="/tools/index.html" data-nav="/tools/">Tools</a>
-        <a href="/supplies/index.html" data-nav="/supplies/">Supplies</a>
-        <a href="/shop/index.html" data-nav="/shop/">Shop</a>
-        <a href="/search/index.html" data-nav="/search/">Search</a>
-        <a href="/movies/index.html" data-nav="/movies/">Movies</a>
-        <a href="/socials/index.html" data-nav="/socials/">Socials</a>
-        <a href="/contact/index.html" data-nav="/contact/">Contact</a>
-        <a href="/cart/index.html" data-nav="/cart/">Cart</a>
-        <a href="/login/index.html" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
-        <a href="/register/index.html" data-nav="/register/" data-show-when-logged-out style="display:none">Register</a>
-        <a href="/members/index.html" data-nav="/members/" data-show-when-logged-in style="display:none">Members</a>
-        <a href="/admin/index.html" data-nav="/admin/" data-show-when-admin style="display:none">Admin</a>
+      <button class="nav-mobile-toggle" type="button" aria-expanded="false" aria-controls="siteNavPanel">
+        <span class="nav-mobile-toggle-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>Menu</span>
+      </button>
+      <div class="links nav-links-desktop" aria-label="Primary navigation">
+        ${navLinksMarkup()}
+      </div>
+      <div class="nav-mobile-panel" id="siteNavPanel" hidden>
+        <div class="nav-mobile-panel-head">
+          <div>
+            <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Browse Devil n Dove</div>
+            <div class="small">Shop, creations, tools, supplies, movies, and more</div>
+          </div>
+          <button class="btn nav-mobile-close" type="button">Close</button>
+        </div>
+        <div class="nav-mobile-grid" aria-label="Mobile navigation">
+          ${navLinksMarkup()}
+        </div>
       </div>`;
   }
 
@@ -110,11 +131,42 @@
     if (best) best.classList.add("active");
   }
 
+  function wireMobileNav(nav) {
+    const toggle = nav.querySelector('.nav-mobile-toggle');
+    const panel = nav.querySelector('.nav-mobile-panel');
+    const closeBtn = nav.querySelector('.nav-mobile-close');
+    if (!toggle || !panel) return;
+
+    const open = () => {
+      panel.hidden = false;
+      nav.classList.add('nav-mobile-open');
+      toggle.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('nav-mobile-open');
+    };
+    const close = () => {
+      panel.hidden = true;
+      nav.classList.remove('nav-mobile-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('nav-mobile-open');
+    };
+
+    toggle.addEventListener('click', () => {
+      if (panel.hidden) open();
+      else close();
+    });
+    closeBtn?.addEventListener('click', close);
+    panel.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') close();
+    });
+  }
+
   function injectSharedNav() {
     const nav = document.querySelector('.nav');
     if (!nav || nav.hasAttribute('data-no-shared-nav')) return;
     nav.innerHTML = buildSharedNav();
     setActiveLink(nav);
+    wireMobileNav(nav);
   }
 
   async function hydrateFooterSocials() {
