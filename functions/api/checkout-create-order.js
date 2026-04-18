@@ -101,6 +101,7 @@ function calculateTaxCents(subtotalCents, shippingCents, taxRate = 0.13) {
   return Math.round(taxableBase * taxRate);
 }
 
+
 function validateShippingFields(fulfillmentType, shipping) {
   if (!["shipping", "mixed"].includes(String(fulfillmentType || "").toLowerCase())) {
     return "";
@@ -114,6 +115,32 @@ function validateShippingFields(fulfillmentType, shipping) {
   if (!shipping.shipping_country) return "Shipping country is required for physical orders.";
 
   return "";
+}
+
+async function ensureGiftCardTables(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_cards (
+    gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    currency TEXT NOT NULL DEFAULT 'CAD',
+    initial_amount_cents INTEGER NOT NULL DEFAULT 0,
+    remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
+    issued_to_email TEXT,
+    issued_to_name TEXT,
+    note TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    expires_at TEXT,
+    last_redeemed_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_redemptions (
+    gift_card_redemption_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gift_card_id INTEGER NOT NULL,
+    order_id INTEGER,
+    redeemed_amount_cents INTEGER NOT NULL DEFAULT 0,
+    redeemed_by_email TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
 }
 
 export async function onRequestPost(context) {
@@ -134,6 +161,8 @@ export async function onRequestPost(context) {
   const notes = normalizeText(body.notes);
   const payment_method = normalizeText(body.payment_method || "pending").toLowerCase() || "pending";
   const currency = normalizeText(body.currency || "CAD").toUpperCase() || "CAD";
+  const gift_card_code = normalizeText(body.gift_card_code).toUpperCase();
+  const requested_gift_card_discount_cents = Math.max(0, toInteger(body.gift_card_discount_cents, 0));
 
   const shipping_name = normalizeText(body.shipping_name || customer_name);
   const shipping_company = normalizeText(body.shipping_company);
@@ -261,9 +290,27 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: shippingError }, 400);
   }
 
-  const tax_cents = calculateTaxCents(subtotal_cents, shipping_cents, 0.13);
-  const discount_cents = 0;
-  const total_cents = subtotal_cents - discount_cents + shipping_cents + tax_cents;
+  let giftCard = null;
+  let discount_cents = 0;
+  if (gift_card_code) {
+    await ensureGiftCardTables(env.DB);
+    giftCard = await env.DB.prepare(`
+      SELECT gift_card_id, code, currency, remaining_amount_cents, status, expires_at
+      FROM gift_cards
+      WHERE UPPER(code) = ?
+      LIMIT 1
+    `).bind(gift_card_code).first();
+    if (!giftCard) return json({ ok: false, error: 'Gift card not found.' }, 404);
+    if (String(giftCard.status || 'active').toLowerCase() !== 'active') return json({ ok: false, error: 'Gift card is not active.' }, 400);
+    if (giftCard.expires_at && String(giftCard.expires_at) < new Date().toISOString().slice(0, 10)) return json({ ok: false, error: 'Gift card has expired.' }, 400);
+    if (String(giftCard.currency || 'CAD').toUpperCase() !== currency) return json({ ok: false, error: 'Gift card currency does not match this order.' }, 400);
+    const provisionalTax = calculateTaxCents(subtotal_cents, shipping_cents, 0.13);
+    const maxDiscount = Math.max(0, subtotal_cents + shipping_cents + provisionalTax);
+    discount_cents = Math.min(maxDiscount, Math.max(0, Number(giftCard.remaining_amount_cents || 0)), requested_gift_card_discount_cents || maxDiscount);
+  }
+
+  const tax_cents = calculateTaxCents(Math.max(0, subtotal_cents - discount_cents), shipping_cents, 0.13);
+  const total_cents = Math.max(0, subtotal_cents - discount_cents + shipping_cents + tax_cents);
   const order_number = generateOrderNumber();
   const user_id = sessionUser?.user_id || null;
 
@@ -405,6 +452,16 @@ export async function onRequestPost(context) {
       historyNote
     )
     .run();
+
+  if (giftCard && discount_cents > 0) {
+    const remaining = Math.max(0, Number(giftCard.remaining_amount_cents || 0) - discount_cents);
+    await env.DB.prepare(`UPDATE gift_cards SET remaining_amount_cents = ?, status = CASE WHEN ? <= 0 THEN 'redeemed' ELSE 'active' END, last_redeemed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE gift_card_id = ?`).bind(remaining, remaining, Number(giftCard.gift_card_id || 0)).run();
+    await env.DB.prepare(`INSERT INTO gift_card_redemptions (gift_card_id, order_id, redeemed_amount_cents, redeemed_by_email, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(Number(giftCard.gift_card_id || 0), order_id, discount_cents, customer_email || null).run().catch(() => null);
+  }
+
+  if (customer_email) {
+    await env.DB.prepare(`UPDATE checkout_recovery_leads SET status = 'converted', updated_at = CURRENT_TIMESTAMP WHERE LOWER(COALESCE(customer_email,'')) = LOWER(?) AND status != 'converted'`).bind(customer_email).run().catch(() => null);
+  }
 
   const createdOrder = await env.DB.prepare(`
     SELECT

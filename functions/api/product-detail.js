@@ -210,5 +210,34 @@ export async function onRequestGet(context) {
     image_count: storefront_images.length
   };
 
-  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary });
+  let reviews = [];
+  let review_summary = { review_count: 0, average_rating: 0 };
+  try {
+    const reviewsTable = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='product_reviews' LIMIT 1`).first();
+    if (reviewsTable) {
+      const reviewRows = normalizeResults(await db.prepare(`
+        SELECT product_review_id, product_id, reviewer_name, rating, review_text, review_kind, is_featured, created_at
+        FROM product_reviews
+        WHERE status = 'approved' AND product_id = ?
+        ORDER BY is_featured DESC, created_at DESC, product_review_id DESC
+        LIMIT 12
+      `).bind(product.product_id).all());
+      reviews = reviewRows.map((row) => ({
+        product_review_id: Number(row.product_review_id || 0),
+        product_id: Number(row.product_id || 0),
+        reviewer_name: row.reviewer_name || 'Devil n Dove customer',
+        rating: Number(row.rating || 0),
+        review_text: row.review_text || '',
+        review_kind: row.review_kind || 'testimonial',
+        is_featured: Number(row.is_featured || 0),
+        created_at: row.created_at || null
+      }));
+      review_summary = {
+        review_count: reviews.length,
+        average_rating: reviews.length ? Number((reviews.reduce((sum, row) => sum + Number(row.rating || 0), 0) / reviews.length).toFixed(2)) : 0
+      };
+    }
+  } catch {}
+
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, reviews, review_summary });
 }
