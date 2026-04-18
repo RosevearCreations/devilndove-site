@@ -1,3 +1,4 @@
+// File: /functions/api/admin/accounting-item-costing.js
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { computeMonthlyItemCosting } from './_costing.js';
 
@@ -26,6 +27,10 @@ export async function onRequestGet(context) {
   const range = monthRange(url.searchParams.get('month') || new Date().toISOString().slice(0, 7));
   if (!range) return jsonResponse({ ok: false, error: 'Please provide month in YYYY-MM format.' }, 400);
 
-  const report = await computeMonthlyItemCosting(db, range);
-  return jsonResponse({ ok: true, ...report });
+  try {
+    const report = await computeMonthlyItemCosting(db, range);
+    return jsonResponse({ ok: true, ...report });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error?.message || 'Failed to build monthly item costing.' }, 500);
+  }
 }
