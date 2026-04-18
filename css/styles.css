@@ -409,3 +409,23 @@ textarea {
 .mobile-required-field.is-missing .input{border-color:rgba(10,122,47,.32)}
 .mobile-required-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(10,122,47,.10);border:1px solid rgba(10,122,47,.24);font-size:.72rem;font-weight:600;vertical-align:middle}
 .mobile-readiness-chip.is-optional{background:rgba(67,97,238,.08);border-color:rgba(67,97,238,.18)}
+
+/* Current pass: modern mobile menu drawer */
+.nav-mobile-toggle{display:none;align-items:center;gap:10px;background:rgba(46,168,255,.10);border:1px solid rgba(46,168,255,.35);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer}
+.nav-mobile-toggle-icon{display:inline-grid;gap:4px}
+.nav-mobile-toggle-icon span{display:block;width:20px;height:2px;background:currentColor;border-radius:999px}
+.nav-mobile-panel{display:none}
+.nav-mobile-panel[hidden]{display:none!important}
+.nav-mobile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.nav-mobile-grid a{display:flex;align-items:center;justify-content:center;text-align:center;min-height:46px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03)}
+.nav-mobile-panel-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+body.nav-mobile-open{overflow:hidden}
+@media (max-width: 860px){
+  .nav{position:relative;align-items:center}
+  .nav .nav-links-desktop{display:none}
+  .nav-mobile-toggle{display:inline-flex;margin-left:auto}
+  .nav-mobile-panel{display:block;position:fixed;left:12px;right:12px;top:86px;max-height:calc(100vh - 110px);overflow:auto;padding:16px;border:1px solid var(--border);border-radius:18px;background:rgba(18,23,34,.98);box-shadow:var(--shadow);z-index:2200}
+}
+@media (max-width: 560px){
+  .nav-mobile-grid{grid-template-columns:1fr}
+}

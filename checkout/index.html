@@ -158,6 +158,14 @@ details, totals, and order submission all work against the current checkout/orde
 </select>
 </div>
 <div style="margin-top:12px">
+<label class="small" for="gift_card_code">Gift Card</label>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<input id="gift_card_code" name="gift_card_code" placeholder="Enter gift card code" type="text"/>
+<button class="btn" id="applyGiftCardButton" type="button">Apply Gift Card</button>
+</div>
+<div class="small" id="giftCardMessage" style="display:none;margin-top:8px"></div>
+</div>
+<div style="margin-top:12px">
 <label class="small" for="notes">Order Notes</label>
 <input id="notes" name="notes" placeholder="Optional notes for this order" type="text"/>
 </div>
@@ -180,6 +188,10 @@ details, totals, and order submission all work against the current checkout/orde
 <div style="display:flex;justify-content:space-between;gap:12px">
 <span>Shipping</span>
 <strong id="checkoutSummaryShipping">$0.00</strong>
+</div>
+<div style="display:flex;justify-content:space-between;gap:12px">
+<span>Gift Card</span>
+<strong id="checkoutSummaryDiscount">$0.00</strong>
 </div>
 <div style="display:flex;justify-content:space-between;gap:12px">
 <span>Tax</span>
