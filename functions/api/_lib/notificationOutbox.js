@@ -13,6 +13,14 @@ function centsToMoney(cents, currency = 'CAD') {
   return `${(Number(cents || 0) / 100).toFixed(2)} ${normalizeText(currency).toUpperCase() || 'CAD'}`;
 }
 
+function buildAbsoluteUrl(payloadUrl, env) {
+  const raw = normalizeText(payloadUrl);
+  if (!raw) return normalizeText(env.SITE_ORIGIN || 'https://devilndove.com');
+  if (/^https?:\/\//i.test(raw)) return raw;
+  const origin = normalizeText(env.SITE_ORIGIN || 'https://devilndove.com').replace(/\/$/, '');
+  return `${origin}/${raw.replace(/^\/+/, '')}`;
+}
+
 export async function queueNotification(db, payload = {}) {
   return db.prepare(`
     INSERT INTO notification_outbox (
@@ -31,7 +39,7 @@ export async function queueNotification(db, payload = {}) {
   ).run();
 }
 
-function buildEmailFromNotification(row) {
+function buildEmailFromNotification(row, env) {
   let payload = {};
   try { payload = row.payload_json ? JSON.parse(row.payload_json) : {}; } catch { payload = {}; }
   const kind = normalizeText(row.notification_kind).toLowerCase();
@@ -39,6 +47,7 @@ function buildEmailFromNotification(row) {
   const provider = normalizeText(payload.provider || payload.payment_provider).toUpperCase();
   const destination = normalizeText(row.destination || payload.contact_email || payload.email);
   const subjectBase = orderNumber ? `Order ${orderNumber}` : 'Devil n Dove notification';
+  const siteOrigin = normalizeText(env?.SITE_ORIGIN || 'https://devilndove.com');
 
   if (kind === 'refund_receipt') {
     return {
@@ -66,6 +75,35 @@ function buildEmailFromNotification(row) {
       to: destination,
       subject: `We received your account help request`,
       html: `<p>We received your request and logged it for review.</p><p><strong>Request type:</strong> ${jsonHtmlEscape(payload.request_type || 'account help')}</p><p>If a matching account can be safely reviewed, a follow-up will be handled by the site team.</p>`
+    };
+  }
+  if (kind === 'checkout_recovery') {
+    const cartSummary = `${Number(payload.cart_count || 0)} item(s) • ${centsToMoney(payload.cart_value_cents, payload.currency || 'CAD')}`;
+    const checkoutUrl = buildAbsoluteUrl(payload.checkout_url || '/checkout/', env);
+    return {
+      to: destination,
+      subject: payload.subject || 'Complete your Devil n Dove checkout',
+      html: `<p>You left something in your Devil n Dove cart, and we saved your checkout details for you.</p><p><strong>Cart summary:</strong> ${jsonHtmlEscape(cartSummary)}</p><p><strong>Name:</strong> ${jsonHtmlEscape(payload.customer_name || '')}</p><p><a href="${jsonHtmlEscape(checkoutUrl)}">Return to checkout</a></p><p>If you had any trouble finishing your order, just reply and we can help.</p>`
+    };
+  }
+  if (kind === 'gift_card_issued') {
+    const code = jsonHtmlEscape(payload.code || '');
+    const balance = jsonHtmlEscape(centsToMoney(payload.remaining_amount_cents ?? payload.initial_amount_cents, payload.currency || 'CAD'));
+    const expires = jsonHtmlEscape(payload.expires_at || 'No expiry listed');
+    const shopUrl = buildAbsoluteUrl('/shop/', env);
+    return {
+      to: destination,
+      subject: payload.subject || 'Your Devil n Dove gift card',
+      html: `<p>A Devil n Dove gift card has been created for you.</p><p><strong>Code:</strong> ${code}</p><p><strong>Value:</strong> ${balance}</p><p><strong>Expires:</strong> ${expires}</p><p>Use the code during checkout.</p><p><a href="${jsonHtmlEscape(shopUrl)}">Browse the shop</a></p>${payload.note ? `<p><strong>Note:</strong> ${jsonHtmlEscape(payload.note)}</p>` : ''}`
+    };
+  }
+  if (kind === 'review_request') {
+    const membersUrl = buildAbsoluteUrl('/members/', env);
+    const productNames = Array.isArray(payload.product_names) ? payload.product_names.filter(Boolean).join(', ') : '';
+    return {
+      to: destination,
+      subject: payload.subject || `${subjectBase} review request`,
+      html: `<p>Thank you for your order from Devil n Dove.</p><p>${productNames ? `<strong>Items:</strong> ${jsonHtmlEscape(productNames)}<br>` : ''}${orderNumber ? `<strong>Order:</strong> ${jsonHtmlEscape(orderNumber)}` : ''}</p><p>If you have a moment, we'd love a quick review or testimonial.</p><p><a href="${jsonHtmlEscape(membersUrl)}">Open the members area to leave your feedback</a></p>`
     };
   }
 
@@ -103,7 +141,7 @@ async function sendViaResend(env, email) {
 }
 
 export async function dispatchNotificationRow(env, row) {
-  const email = buildEmailFromNotification(row);
+  const email = buildEmailFromNotification(row, env);
   const sent = await sendViaResend(env, email);
   return { sent, email };
 }
