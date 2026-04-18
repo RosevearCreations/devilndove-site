@@ -1,3 +1,4 @@
+// File: /functions/api/admin/_costing.js
 function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
@@ -8,6 +9,15 @@ export async function tableExists(db, tableName) {
     return !!row;
   } catch {
     return false;
+  }
+}
+
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(normalizeResults(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
   }
 }
 
@@ -29,22 +39,22 @@ function buildAllocationMap(totalCents, rows, weightFn) {
   const amount = Math.max(0, Math.round(Number(totalCents || 0)));
   if (!amount || !Array.isArray(rows) || !rows.length) return allocations;
 
-  const weighted = rows.map((row, index) => {
-    const productId = Number(row.product_id || 0);
-    const rawWeight = Number(weightFn(row) || 0);
-    return {
-      productId,
-      index,
-      weight: Number.isFinite(rawWeight) && rawWeight > 0 ? rawWeight : 0,
-    };
-  }).filter((row) => row.productId > 0);
+  const weighted = rows
+    .map((row, index) => {
+      const productId = Number(row.product_id || 0);
+      const rawWeight = Number(weightFn(row) || 0);
+      return {
+        productId,
+        index,
+        weight: Number.isFinite(rawWeight) && rawWeight > 0 ? rawWeight : 0,
+      };
+    })
+    .filter((row) => row.productId > 0);
 
   if (!weighted.length) return allocations;
 
   const totalWeight = weighted.reduce((sum, row) => sum + row.weight, 0);
-  const effectiveWeighted = totalWeight > 0
-    ? weighted
-    : weighted.map((row) => ({ ...row, weight: 1 }));
+  const effectiveWeighted = totalWeight > 0 ? weighted : weighted.map((row) => ({ ...row, weight: 1 }));
   const effectiveTotalWeight = effectiveWeighted.reduce((sum, row) => sum + row.weight, 0);
 
   let allocated = 0;
@@ -107,6 +117,13 @@ function describeWeighting(basis, candidateRows) {
   };
 }
 
+function coalesceSql(expressions, fallback = '0') {
+  const usable = expressions.filter(Boolean);
+  if (!usable.length) return fallback;
+  if (usable.length === 1) return usable[0];
+  return `COALESCE(${usable.join(', ')})`;
+}
+
 export async function computeMonthlyItemCosting(db, range) {
   const hasProducts = await tableExists(db, 'products');
   if (!hasProducts) {
@@ -138,17 +155,130 @@ export async function computeMonthlyItemCosting(db, range) {
   const hasProductCosts = await tableExists(db, 'product_costs');
   const hasResourceLinks = await tableExists(db, 'product_resource_links');
   const hasInventory = await tableExists(db, 'site_item_inventory');
-  const resourceLinkColumns = hasResourceLinks ? await db.prepare(`PRAGMA table_info(product_resource_links)`).all().catch(() => ({ results: [] })) : { results: [] };
-  const resourceColumnSet = new Set((Array.isArray(resourceLinkColumns?.results) ? resourceLinkColumns.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
-  const hasConsumptionMode = resourceColumnSet.has('consumption_mode');
-  const hasLotSizeUnits = resourceColumnSet.has('lot_size_units');
-  const inventoryColumnSet = await getTableColumnSet(db, 'site_item_inventory');
-  const usageUnitsExpr = inventoryColumnSet.has('usage_units_per_stock_unit') ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : `1`;
   const hasOverhead = await tableExists(db, 'accounting_overhead_allocations');
   const hasOrders = await tableExists(db, 'orders');
   const hasOrderItems = await tableExists(db, 'order_items');
 
-  const salesBindings = hasOrders && hasOrderItems ? [range.start, range.end] : [];
+  const productCostColumns = hasProductCosts ? await getTableColumnSet(db, 'product_costs') : new Set();
+  const resourceColumnSet = hasResourceLinks ? await getTableColumnSet(db, 'product_resource_links') : new Set();
+  const inventoryColumnSet = hasInventory ? await getTableColumnSet(db, 'site_item_inventory') : new Set();
+  const orderColumns = hasOrders ? await getTableColumnSet(db, 'orders') : new Set();
+  const orderItemColumns = hasOrderItems ? await getTableColumnSet(db, 'order_items') : new Set();
+
+  const hasConsumptionMode = resourceColumnSet.has('consumption_mode');
+  const hasLotSizeUnits = resourceColumnSet.has('lot_size_units');
+
+  const usageUnitsExpr = inventoryColumnSet.size
+    ? coalesceSql([
+        inventoryColumnSet.has('usage_units_per_stock_unit') ? `NULLIF(sii.usage_units_per_stock_unit,0)` : ''
+      ], '1')
+    : '1';
+
+  const inventoryUnitCostExpr = inventoryColumnSet.size
+    ? coalesceSql([
+        inventoryColumnSet.has('unit_cost_cents') ? 'sii.unit_cost_cents' : '',
+        inventoryColumnSet.has('cost_cents') ? 'sii.cost_cents' : '',
+        inventoryColumnSet.has('unit_cost') ? 'ROUND(COALESCE(sii.unit_cost,0) * 100)' : ''
+      ], '0')
+    : '0';
+
+  const directCostExpr = productCostColumns.has('cost_per_unit')
+    ? 'COALESCE(pc.cost_per_unit,0)'
+    : productCostColumns.has('cost_per_unit_cents')
+      ? '(COALESCE(pc.cost_per_unit_cents,0) / 100.0)'
+      : '0';
+
+  const productCostOrderExpr = coalesceSql([
+    productCostColumns.has('effective_date') ? 'pc2.effective_date' : '',
+    productCostColumns.has('created_at') ? 'pc2.created_at' : '',
+  ], `'1970-01-01'`);
+
+  const directCostDateExpr = productCostColumns.size
+    ? coalesceSql([
+        productCostColumns.has('effective_date') ? 'pc.effective_date' : '',
+        productCostColumns.has('created_at') ? 'pc.created_at' : ''
+      ], `''`)
+    : `''`;
+
+  const productCostIdCol = productCostColumns.has('product_cost_id') ? 'product_cost_id' : 'rowid';
+  const productCostJoin = hasProductCosts && productCostColumns.has('product_number')
+    ? `
+      LEFT JOIN product_costs pc ON pc.${productCostIdCol} = (
+        SELECT pc2.${productCostIdCol}
+        FROM product_costs pc2
+        WHERE CAST(pc2.product_number AS TEXT) = CAST(p.product_number AS TEXT)
+        ORDER BY ${productCostOrderExpr} DESC, pc2.${productCostIdCol} DESC
+        LIMIT 1
+      )
+    `
+    : '';
+
+  const resourceJoin = hasResourceLinks && hasInventory
+    ? `
+      LEFT JOIN (
+        SELECT
+          prl.product_id,
+          COUNT(*) AS linked_resource_count,
+          SUM(
+            CASE
+              WHEN sii.site_item_inventory_id IS NULL THEN 0
+              WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0
+              WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot'
+                THEN COALESCE(prl.quantity_used,0) * (${inventoryUnitCostExpr}) / (${usageUnitsExpr}) / COALESCE(NULLIF(${hasLotSizeUnits ? 'prl.lot_size_units' : '1'},0),1)
+              ELSE COALESCE(prl.quantity_used,0) * (${inventoryUnitCostExpr}) / (${usageUnitsExpr})
+            END
+          ) AS linked_resource_cost_cents,
+          SUM(CASE WHEN sii.site_item_inventory_id IS NULL OR COALESCE((${inventoryUnitCostExpr}),0) <= 0 THEN 1 ELSE 0 END) AS missing_cost_links
+        FROM product_resource_links prl
+        LEFT JOIN site_item_inventory sii
+          ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
+        GROUP BY prl.product_id
+      ) resource_rollup ON resource_rollup.product_id = p.product_id
+    `
+    : '';
+
+  const orderCreatedExpr = coalesceSql([
+    orderColumns.has('created_at') ? 'o.created_at' : '',
+    orderItemColumns.has('created_at') ? 'oi.created_at' : ''
+  ], `datetime('now')`);
+
+  const qtyExpr = orderItemColumns.has('quantity') ? 'COALESCE(oi.quantity,0)' : '0';
+  const unitPriceExpr = orderItemColumns.has('unit_price_cents') ? 'COALESCE(oi.unit_price_cents,0)' : '0';
+  const subtotalExpr = orderItemColumns.has('line_subtotal_cents')
+    ? 'COALESCE(oi.line_subtotal_cents, COALESCE(oi.quantity,0) * COALESCE(oi.unit_price_cents,0))'
+    : `(${qtyExpr} * ${unitPriceExpr})`;
+  const paymentStatusExpr = orderColumns.has('payment_status') ? `LOWER(COALESCE(o.payment_status,''))` : `''`;
+  const orderStatusExpr = orderColumns.has('order_status') ? `LOWER(COALESCE(o.order_status,''))` : `''`;
+
+  const salesBindings =
+    hasOrders &&
+    hasOrderItems &&
+    orderItemColumns.has('product_id') &&
+    orderItemColumns.has('order_id')
+      ? [range.start, range.end]
+      : [];
+
+  const salesJoin = salesBindings.length
+    ? `
+      LEFT JOIN (
+        SELECT
+          oi.product_id,
+          COALESCE(SUM(${qtyExpr}),0) AS sold_quantity_in_period,
+          COUNT(DISTINCT oi.order_id) AS sold_order_count_in_period,
+          COALESCE(SUM(${subtotalExpr}),0) AS sold_revenue_cents_in_period
+        FROM order_items oi
+        INNER JOIN orders o ON o.order_id = oi.order_id
+        WHERE substr(COALESCE(${orderCreatedExpr}),1,10) >= ?
+          AND substr(COALESCE(${orderCreatedExpr}),1,10) < ?
+          AND (
+            ${paymentStatusExpr} IN ('paid','completed','captured','partially_refunded','refunded')
+            OR ${orderStatusExpr} IN ('paid','fulfilled','refunded')
+          )
+        GROUP BY oi.product_id
+      ) sales_rollup ON sales_rollup.product_id = p.product_id
+    `
+    : '';
+
   const rows = normalizeResults(await db.prepare(`
     SELECT
       p.product_id,
@@ -159,48 +289,18 @@ export async function computeMonthlyItemCosting(db, range) {
       p.review_status,
       p.currency,
       COALESCE(p.price_cents,0) AS price_cents,
-      COALESCE(pc.cost_per_unit,0) AS direct_unit_cost,
-      COALESCE(resource_rollup.linked_resource_cost_cents,0) AS linked_resource_cost_cents,
-      COALESCE(resource_rollup.linked_resource_count,0) AS linked_resource_count,
-      COALESCE(resource_rollup.missing_cost_links,0) AS missing_cost_links,
-      COALESCE(pc.effective_date, pc.created_at, '') AS direct_cost_effective_date,
-      COALESCE(sales_rollup.sold_quantity_in_period,0) AS sold_quantity_in_period,
-      COALESCE(sales_rollup.sold_order_count_in_period,0) AS sold_order_count_in_period,
-      COALESCE(sales_rollup.sold_revenue_cents_in_period,0) AS sold_revenue_cents_in_period
+      ${productCostJoin ? directCostExpr : '0'} AS direct_unit_cost,
+      ${resourceJoin ? 'COALESCE(resource_rollup.linked_resource_cost_cents,0)' : '0'} AS linked_resource_cost_cents,
+      ${resourceJoin ? 'COALESCE(resource_rollup.linked_resource_count,0)' : '0'} AS linked_resource_count,
+      ${resourceJoin ? 'COALESCE(resource_rollup.missing_cost_links,0)' : '0'} AS missing_cost_links,
+      ${productCostJoin ? directCostDateExpr : `''`} AS direct_cost_effective_date,
+      ${salesJoin ? 'COALESCE(sales_rollup.sold_quantity_in_period,0)' : '0'} AS sold_quantity_in_period,
+      ${salesJoin ? 'COALESCE(sales_rollup.sold_order_count_in_period,0)' : '0'} AS sold_order_count_in_period,
+      ${salesJoin ? 'COALESCE(sales_rollup.sold_revenue_cents_in_period,0)' : '0'} AS sold_revenue_cents_in_period
     FROM products p
-    LEFT JOIN product_costs pc ON pc.product_cost_id = (
-      SELECT pc2.product_cost_id
-      FROM product_costs pc2
-      WHERE CAST(pc2.product_number AS TEXT) = CAST(p.product_number AS TEXT)
-      ORDER BY COALESCE(pc2.effective_date, pc2.created_at, '1970-01-01') DESC, pc2.product_cost_id DESC
-      LIMIT 1
-    )
-    LEFT JOIN (
-      SELECT
-        prl.product_id,
-        COUNT(*) AS linked_resource_count,
-        SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN COALESCE(prl.quantity_used,0) * COALESCE(sii.unit_cost_cents,0) / ${usageUnitsExpr} / COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1) ELSE COALESCE(prl.quantity_used,0) * COALESCE(sii.unit_cost_cents,0) / ${usageUnitsExpr} END) AS linked_resource_cost_cents,
-        SUM(CASE WHEN sii.site_item_inventory_id IS NULL OR COALESCE(sii.unit_cost_cents,0) <= 0 THEN 1 ELSE 0 END) AS missing_cost_links
-      FROM product_resource_links prl
-      LEFT JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
-      GROUP BY prl.product_id
-    ) resource_rollup ON resource_rollup.product_id = p.product_id
-    LEFT JOIN (
-      SELECT
-        oi.product_id,
-        COALESCE(SUM(COALESCE(oi.quantity,0)),0) AS sold_quantity_in_period,
-        COUNT(DISTINCT oi.order_id) AS sold_order_count_in_period,
-        COALESCE(SUM(COALESCE(oi.line_subtotal_cents, COALESCE(oi.quantity,0) * COALESCE(oi.unit_price_cents,0))),0) AS sold_revenue_cents_in_period
-      FROM order_items oi
-      INNER JOIN orders o ON o.order_id = oi.order_id
-      WHERE substr(COALESCE(o.created_at, oi.created_at, datetime('now')),1,10) >= ?
-        AND substr(COALESCE(o.created_at, oi.created_at, datetime('now')),1,10) < ?
-        AND (
-          LOWER(COALESCE(o.payment_status,'')) IN ('paid','completed','captured','partially_refunded','refunded')
-          OR LOWER(COALESCE(o.order_status,'')) IN ('paid','fulfilled','refunded')
-        )
-      GROUP BY oi.product_id
-    ) sales_rollup ON sales_rollup.product_id = p.product_id
+    ${productCostJoin}
+    ${resourceJoin}
+    ${salesJoin}
     ORDER BY CASE WHEN LOWER(COALESCE(p.status,'draft'))='active' THEN 0 ELSE 1 END, LOWER(COALESCE(p.name,'')) ASC
   `).bind(...salesBindings).all().catch(() => ({ results: [] })));
 
@@ -256,6 +356,7 @@ export async function computeMonthlyItemCosting(db, range) {
     const allocationRows = candidateRows.filter((row) => !overriddenProductIds.has(Number(row.product_id || 0)));
     const weightMeta = describeWeighting(poolRow.allocation_basis, allocationRows);
     const poolAllocations = buildAllocationMap(distributableAmount, allocationRows, weightMeta.weightFn);
+
     for (const row of allocationRows) {
       const productId = Number(row.product_id || 0);
       if (!productId) continue;
@@ -274,6 +375,7 @@ export async function computeMonthlyItemCosting(db, range) {
       });
       allocationDetailsByProduct.set(productId, current);
     }
+
     overheadPoolSummaries.push({
       ledger_code: ledgerCode,
       allocation_basis: weightMeta.applied_basis,
@@ -295,6 +397,7 @@ export async function computeMonthlyItemCosting(db, range) {
     const allocatedOverheadPerUnit = allocationDetails.reduce((sum, detail) => sum + cents(detail.allocated_per_unit_cents), 0);
     const fullUnitCost = baseUnitCost + allocatedOverheadPerUnit;
     const basisSummary = allocationDetails.map((detail) => `${detail.allocation_basis}:${detail.weighting_mode}`).join(' • ') || 'none';
+
     return {
       product_id: Number(row.product_id || 0),
       product_number: Number(row.product_number || 0),
