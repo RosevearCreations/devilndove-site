@@ -5,6 +5,10 @@ function json(data, status = 200) { return jsonResponse(data, status); }
 function nr(result) { return Array.isArray(result?.results) ? result.results : []; }
 function cents(value) { return Math.max(0, Math.round(Number(value || 0))); }
 function safeEmail(value) { return normalizeText(value).toLowerCase(); }
+function asArray(value) { return Array.isArray(value) ? value : []; }
+function uniqueIds(value) {
+  return Array.from(new Set(asArray(value).map((row) => Number(row || 0)).filter((row) => Number.isInteger(row) && row > 0)));
+}
 
 async function tableExists(db, tableName) {
   try {
@@ -12,6 +16,22 @@ async function tableExists(db, tableName) {
     return !!row;
   } catch {
     return false;
+  }
+}
+
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(nr(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function ensureColumn(db, tableName, columnName, ddl) {
+  const cols = await getTableColumnSet(db, tableName);
+  if (!cols.has(columnName)) {
+    await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${ddl}`).run().catch(() => null);
   }
 }
 
@@ -75,6 +95,12 @@ async function ensureGiftCardTables(db) {
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`).run().catch(() => null);
+  await ensureColumn(db, 'gift_cards', 'purchaser_email', `purchaser_email TEXT`);
+  await ensureColumn(db, 'gift_cards', 'purchaser_name', `purchaser_name TEXT`);
+  await ensureColumn(db, 'gift_cards', 'recipient_email', `recipient_email TEXT`);
+  await ensureColumn(db, 'gift_cards', 'recipient_name', `recipient_name TEXT`);
+  await ensureColumn(db, 'gift_cards', 'recipient_note', `recipient_note TEXT`);
+  await ensureColumn(db, 'gift_cards', 'purchaser_user_id', `purchaser_user_id INTEGER`);
   await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_redemptions (
     gift_card_redemption_id INTEGER PRIMARY KEY AUTOINCREMENT,
     gift_card_id INTEGER NOT NULL,
@@ -108,6 +134,42 @@ function generateGiftCardCode() {
   return `DND-GIFT-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
 
+async function queueRecoveryEmail(db, lead) {
+  await queueNotification(db, {
+    notification_kind: 'checkout_recovery',
+    destination: safeEmail(lead.customer_email),
+    payload: {
+      customer_name: lead.customer_name || '',
+      cart_count: lead.cart_count || 0,
+      cart_value_cents: lead.cart_value_cents || 0,
+      currency: lead.currency || 'CAD',
+      checkout_url: lead.checkout_path || '/checkout/'
+    }
+  });
+}
+
+async function queueGiftCardNotice(db, cardRow) {
+  const recipientEmail = safeEmail(cardRow.recipient_email || cardRow.issued_to_email);
+  if (!recipientEmail) return;
+  await queueNotification(db, {
+    notification_kind: 'gift_card_issued',
+    destination: recipientEmail,
+    payload: {
+      code: cardRow.code || '',
+      currency: cardRow.currency || 'CAD',
+      initial_amount_cents: Number(cardRow.initial_amount_cents || 0),
+      remaining_amount_cents: Number(cardRow.remaining_amount_cents || 0),
+      expires_at: cardRow.expires_at || '',
+      note: cardRow.recipient_note || cardRow.note || '',
+      purchaser_name: cardRow.purchaser_name || '',
+      recipient_name: cardRow.recipient_name || cardRow.issued_to_name || '',
+      subject: (cardRow.purchaser_name || cardRow.recipient_name || cardRow.issued_to_name)
+        ? `A Devil n Dove gift card${cardRow.purchaser_name ? ` from ${cardRow.purchaser_name}` : ''}`
+        : 'Your Devil n Dove gift card'
+    }
+  });
+}
+
 async function listEngagementData(db) {
   await Promise.all([
     ensureWishlistTable(db),
@@ -117,36 +179,39 @@ async function listEngagementData(db) {
     ensureReviewTable(db)
   ]);
 
-  const [wishlistRows, interestRows, recoveryRows, giftCards, reviewRows] = await Promise.all([
+  const [wishlistRows, interestRows, recoveryRows, giftCards, reviewRows, recentOrders, outboxRows] = await Promise.all([
     db.prepare(`
       SELECT p.product_id, p.name, p.slug, p.featured_image_url, COUNT(*) AS saved_count, MAX(mw.created_at) AS last_saved_at
       FROM member_wishlists mw
       LEFT JOIN products p ON p.product_id = mw.product_id
       GROUP BY p.product_id, p.name, p.slug, p.featured_image_url
       ORDER BY saved_count DESC, last_saved_at DESC
-      LIMIT 25
+      LIMIT 50
     `).all().catch(() => ({ results: [] })),
     db.prepare(`
       SELECT pir.product_interest_request_id, pir.product_id, pir.request_type, pir.user_id, pir.email, pir.notes, pir.status, pir.created_at,
              p.name AS product_name, p.slug AS product_slug, p.featured_image_url
       FROM product_interest_requests pir
       LEFT JOIN products p ON p.product_id = pir.product_id
-      ORDER BY pir.created_at DESC, pir.product_interest_request_id DESC
-      LIMIT 50
+      ORDER BY CASE WHEN LOWER(COALESCE(pir.status,'open'))='open' THEN 0 ELSE 1 END, pir.created_at DESC, pir.product_interest_request_id DESC
+      LIMIT 200
     `).all().catch(() => ({ results: [] })),
     db.prepare(`
       SELECT checkout_recovery_lead_id, browser_session_token, visitor_token, customer_email, customer_name, cart_count, cart_value_cents,
              currency, checkout_path, status, last_recovery_email_at, created_at
       FROM checkout_recovery_leads
-      ORDER BY created_at DESC, checkout_recovery_lead_id DESC
-      LIMIT 50
+      ORDER BY CASE WHEN LOWER(COALESCE(status,'open'))='open' THEN 0 ELSE 1 END, created_at DESC, checkout_recovery_lead_id DESC
+      LIMIT 200
     `).all().catch(() => ({ results: [] })),
     db.prepare(`
-      SELECT gift_card_id, code, currency, initial_amount_cents, remaining_amount_cents, issued_to_email, issued_to_name,
-             note, status, expires_at, last_redeemed_at, created_at
+      SELECT gift_card_id, code, currency, initial_amount_cents, remaining_amount_cents,
+             COALESCE(recipient_email, issued_to_email) AS recipient_email,
+             COALESCE(recipient_name, issued_to_name) AS recipient_name,
+             purchaser_email, purchaser_name,
+             note, recipient_note, status, expires_at, last_redeemed_at, created_at
       FROM gift_cards
       ORDER BY created_at DESC, gift_card_id DESC
-      LIMIT 50
+      LIMIT 100
     `).all().catch(() => ({ results: [] })),
     db.prepare(`
       SELECT pr.product_review_id, pr.product_id, pr.order_id, pr.user_id, pr.reviewer_name, pr.reviewer_email, pr.rating,
@@ -154,11 +219,33 @@ async function listEngagementData(db) {
              p.name AS product_name, p.slug AS product_slug
       FROM product_reviews pr
       LEFT JOIN products p ON p.product_id = pr.product_id
-      ORDER BY pr.created_at DESC, pr.product_review_id DESC
+      ORDER BY CASE WHEN LOWER(COALESCE(pr.status,'pending_review'))='pending_review' THEN 0 ELSE 1 END, pr.created_at DESC, pr.product_review_id DESC
+      LIMIT 200
+    `).all().catch(() => ({ results: [] })),
+    tableExists(db, 'orders') && tableExists(db, 'order_items') ? db.prepare(`
+      SELECT o.order_id, o.order_number, o.customer_email, o.customer_name, o.created_at,
+             GROUP_CONCAT(oi.product_name, ', ') AS product_names,
+             COUNT(oi.order_item_id) AS item_count,
+             COALESCE(o.total_cents,0) AS total_cents,
+             COALESCE(o.currency,'CAD') AS currency
+      FROM orders o
+      LEFT JOIN order_items oi ON oi.order_id = o.order_id
+      WHERE LOWER(COALESCE(o.payment_status,'')) IN ('paid','completed','captured','partially_refunded')
+         OR LOWER(COALESCE(o.order_status,'')) IN ('paid','fulfilled','completed')
+      GROUP BY o.order_id, o.order_number, o.customer_email, o.customer_name, o.created_at, o.total_cents, o.currency
+      ORDER BY o.created_at DESC, o.order_id DESC
       LIMIT 50
-    `).all().catch(() => ({ results: [] }))
+    `).all().catch(() => ({ results: [] })) : ({ results: [] }),
+    tableExists(db, 'notification_outbox') ? db.prepare(`
+      SELECT notification_outbox_id, notification_kind, destination, status, error_text, created_at, last_attempt_at, related_order_id
+      FROM notification_outbox
+      WHERE notification_kind IN ('checkout_recovery','gift_card_issued','review_request')
+      ORDER BY created_at DESC, notification_outbox_id DESC
+      LIMIT 100
+    `).all().catch(() => ({ results: [] })) : ({ results: [] })
   ]);
 
+  const notificationRows = nr(outboxRows);
   const abandonedCartStats = await (async () => {
     if (!(await tableExists(db, 'cart_activity'))) return { open_abandoned_carts: 0 };
     const row = await db.prepare(`
@@ -176,6 +263,7 @@ async function listEngagementData(db) {
       checkout_recovery_open_count: nr(recoveryRows).filter((row) => String(row.status || 'open') === 'open').length,
       gift_card_active_count: nr(giftCards).filter((row) => String(row.status || 'active') === 'active' && Number(row.remaining_amount_cents || 0) > 0).length,
       pending_review_count: nr(reviewRows).filter((row) => String(row.status || '') === 'pending_review').length,
+      notification_queue_count: notificationRows.filter((row) => ['queued','retry'].includes(String(row.status || '').toLowerCase())).length,
       ...abandonedCartStats
     },
     wishlist_products: nr(wishlistRows).map((row) => ({
@@ -219,9 +307,12 @@ async function listEngagementData(db) {
       currency: row.currency || 'CAD',
       initial_amount_cents: Number(row.initial_amount_cents || 0),
       remaining_amount_cents: Number(row.remaining_amount_cents || 0),
-      issued_to_email: row.issued_to_email || '',
-      issued_to_name: row.issued_to_name || '',
+      recipient_email: row.recipient_email || '',
+      recipient_name: row.recipient_name || '',
+      purchaser_email: row.purchaser_email || '',
+      purchaser_name: row.purchaser_name || '',
       note: row.note || '',
+      recipient_note: row.recipient_note || '',
       status: row.status || 'active',
       expires_at: row.expires_at || null,
       last_redeemed_at: row.last_redeemed_at || null,
@@ -243,25 +334,29 @@ async function listEngagementData(db) {
       created_at: row.created_at || null,
       product_name: row.product_name || '',
       product_slug: row.product_slug || ''
+    })),
+    recent_review_orders: nr(recentOrders).map((row) => ({
+      order_id: Number(row.order_id || 0),
+      order_number: row.order_number || '',
+      customer_email: row.customer_email || '',
+      customer_name: row.customer_name || '',
+      created_at: row.created_at || null,
+      product_names: row.product_names || '',
+      item_count: Number(row.item_count || 0),
+      total_cents: Number(row.total_cents || 0),
+      currency: row.currency || 'CAD'
+    })),
+    notification_queue: notificationRows.map((row) => ({
+      notification_outbox_id: Number(row.notification_outbox_id || 0),
+      notification_kind: row.notification_kind || '',
+      destination: row.destination || '',
+      status: row.status || 'queued',
+      error_text: row.error_text || '',
+      created_at: row.created_at || null,
+      last_attempt_at: row.last_attempt_at || null,
+      related_order_id: Number(row.related_order_id || 0)
     }))
   };
-}
-
-async function queueRecoveryEmail(db, lead) {
-  const email = safeEmail(lead.customer_email);
-  if (!email) throw new Error('A recovery email address is required.');
-  await queueNotification(db, {
-    notification_kind: 'checkout_recovery',
-    destination: email,
-    payload: {
-      email,
-      customer_name: lead.customer_name || '',
-      cart_count: lead.cart_count || 0,
-      cart_value_cents: lead.cart_value_cents || 0,
-      currency: lead.currency || 'CAD',
-      checkout_url: lead.checkout_path || '/checkout/'
-    }
-  });
 }
 
 export async function onRequestGet(context) {
@@ -276,6 +371,23 @@ export async function onRequestGet(context) {
   } catch (error) {
     return json({ ok: false, error: error?.message || 'Failed to load customer engagement dashboard.' }, 500);
   }
+}
+
+async function loadRecoveryLead(db, leadId) {
+  return db.prepare(`SELECT * FROM checkout_recovery_leads WHERE checkout_recovery_lead_id = ? LIMIT 1`).bind(leadId).first();
+}
+
+async function queueReviewRequest(db, orderId) {
+  const order = await db.prepare(`SELECT order_id, order_number, customer_email FROM orders WHERE order_id = ? LIMIT 1`).bind(orderId).first();
+  if (!order) throw new Error('Order not found.');
+  const productNames = nr(await db.prepare(`SELECT product_name FROM order_items WHERE order_id = ? ORDER BY order_item_id ASC LIMIT 12`).bind(orderId).all()).map((row) => row.product_name || '').filter(Boolean);
+  await queueNotification(db, {
+    notification_kind: 'review_request',
+    destination: safeEmail(order.customer_email),
+    related_order_id: orderId,
+    payload: { order_number: order.order_number || '', product_names: productNames }
+  });
+  return { order, productNames };
 }
 
 export async function onRequestPost(context) {
@@ -298,73 +410,127 @@ export async function onRequestPost(context) {
       ensureReviewTable(db)
     ]);
 
-    if (action === 'set_interest_status') {
-      const id = Number(body.product_interest_request_id || 0);
+    if (action === 'set_interest_status' || action === 'bulk_set_interest_status') {
+      const ids = action === 'set_interest_status'
+        ? uniqueIds([body.product_interest_request_id])
+        : uniqueIds(body.product_interest_request_ids);
       const status = normalizeText(body.status).toLowerCase() || 'reviewed';
-      if (!id) return json({ ok: false, error: 'product_interest_request_id is required.' }, 400);
-      await db.prepare(`UPDATE product_interest_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE product_interest_request_id = ?`).bind(status, id).run();
-      await auditAdminAction(env, request, adminUser, { action_type: 'interest_request_status_update', target_type: 'product_interest_request', target_id: id, details: { status } });
-      return json({ ok: true, message: 'Interest request updated.' });
+      if (!ids.length) return json({ ok: false, error: 'At least one product_interest_request_id is required.' }, 400);
+      const placeholders = ids.map(() => '?').join(',');
+      await db.prepare(`UPDATE product_interest_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE product_interest_request_id IN (${placeholders})`).bind(status, ...ids).run();
+      await auditAdminAction(env, request, adminUser, { action_type: 'interest_request_status_update', target_type: 'product_interest_request', details: { ids, status } });
+      return json({ ok: true, message: `${ids.length} interest request(s) updated.` });
     }
 
-    if (action === 'queue_recovery_email') {
-      const leadId = Number(body.checkout_recovery_lead_id || 0);
-      if (!leadId) return json({ ok: false, error: 'checkout_recovery_lead_id is required.' }, 400);
-      const lead = await db.prepare(`SELECT * FROM checkout_recovery_leads WHERE checkout_recovery_lead_id = ? LIMIT 1`).bind(leadId).first();
-      if (!lead) return json({ ok: false, error: 'Recovery lead not found.' }, 404);
-      await queueRecoveryEmail(db, lead);
-      await db.prepare(`UPDATE checkout_recovery_leads SET status = 'emailed', last_recovery_email_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id = ?`).bind(leadId).run();
-      await auditAdminAction(env, request, adminUser, { action_type: 'checkout_recovery_email_queued', target_type: 'checkout_recovery_lead', target_id: leadId, details: { customer_email: lead.customer_email || '' } });
-      return json({ ok: true, message: 'Recovery email queued.' });
+    if (action === 'queue_recovery_email' || action === 'bulk_queue_recovery_emails') {
+      const ids = action === 'queue_recovery_email'
+        ? uniqueIds([body.checkout_recovery_lead_id])
+        : uniqueIds(body.checkout_recovery_lead_ids);
+      if (!ids.length) return json({ ok: false, error: 'At least one checkout_recovery_lead_id is required.' }, 400);
+      let queuedCount = 0;
+      for (const leadId of ids) {
+        const lead = await loadRecoveryLead(db, leadId);
+        if (!lead) continue;
+        await queueRecoveryEmail(db, lead);
+        await db.prepare(`UPDATE checkout_recovery_leads SET status = 'emailed', last_recovery_email_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id = ?`).bind(leadId).run();
+        queuedCount += 1;
+      }
+      await auditAdminAction(env, request, adminUser, { action_type: 'checkout_recovery_email_queued', target_type: 'checkout_recovery_lead', details: { ids, queuedCount } });
+      return json({ ok: true, message: `${queuedCount} recovery email(s) queued.` });
+    }
+
+    if (action === 'set_recovery_status') {
+      const ids = uniqueIds(body.checkout_recovery_lead_ids || [body.checkout_recovery_lead_id]);
+      const status = normalizeText(body.status).toLowerCase() || 'closed';
+      if (!ids.length) return json({ ok: false, error: 'At least one checkout_recovery_lead_id is required.' }, 400);
+      const placeholders = ids.map(() => '?').join(',');
+      await db.prepare(`UPDATE checkout_recovery_leads SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id IN (${placeholders})`).bind(status, ...ids).run();
+      await auditAdminAction(env, request, adminUser, { action_type: 'checkout_recovery_status_update', target_type: 'checkout_recovery_lead', details: { ids, status } });
+      return json({ ok: true, message: `${ids.length} recovery lead(s) updated.` });
     }
 
     if (action === 'issue_gift_card') {
       const amountCents = cents(body.amount_cents);
       const currency = normalizeText(body.currency || 'CAD').toUpperCase() || 'CAD';
-      const issuedToEmail = safeEmail(body.issued_to_email);
-      const issuedToName = normalizeText(body.issued_to_name);
+      const purchaserEmail = safeEmail(body.purchaser_email || adminUser.email || '');
+      const purchaserName = normalizeText(body.purchaser_name || adminUser.display_name || '');
+      const recipientEmail = safeEmail(body.recipient_email || body.issued_to_email);
+      const recipientName = normalizeText(body.recipient_name || body.issued_to_name);
       const expiresAt = normalizeText(body.expires_at);
       const note = normalizeText(body.note);
+      const recipientNote = normalizeText(body.recipient_note || body.note);
       const code = normalizeText(body.code).toUpperCase() || generateGiftCardCode();
-      if (!issuedToEmail || amountCents <= 0) return json({ ok: false, error: 'issued_to_email and amount_cents are required.' }, 400);
+      if (!recipientEmail || amountCents <= 0) return json({ ok: false, error: 'recipient_email and amount_cents are required.' }, 400);
       await db.prepare(`
-        INSERT INTO gift_cards (code, currency, initial_amount_cents, remaining_amount_cents, issued_to_email, issued_to_name, note, status, expires_at, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `).bind(code, currency, amountCents, amountCents, issuedToEmail, issuedToName || null, note || null, expiresAt || null).run();
-      await queueNotification(db, {
-        notification_kind: 'gift_card_issued',
-        destination: issuedToEmail,
-        payload: { code, currency, initial_amount_cents: amountCents, remaining_amount_cents: amountCents, expires_at: expiresAt || '', note }
-      });
-      await auditAdminAction(env, request, adminUser, { action_type: 'gift_card_issued', target_type: 'gift_card', target_key: code, details: { amount_cents: amountCents, issued_to_email: issuedToEmail } });
+        INSERT INTO gift_cards (
+          code, currency, initial_amount_cents, remaining_amount_cents,
+          issued_to_email, issued_to_name, recipient_email, recipient_name,
+          purchaser_email, purchaser_name, purchaser_user_id,
+          note, recipient_note, status, expires_at, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `).bind(
+        code,
+        currency,
+        amountCents,
+        amountCents,
+        recipientEmail,
+        recipientName || null,
+        recipientEmail,
+        recipientName || null,
+        purchaserEmail || null,
+        purchaserName || null,
+        Number(adminUser.user_id || 0) || null,
+        note || null,
+        recipientNote || null,
+        expiresAt || null
+      ).run();
+      const cardRow = await db.prepare(`SELECT * FROM gift_cards WHERE code = ? LIMIT 1`).bind(code).first();
+      await queueGiftCardNotice(db, cardRow || { code, currency, initial_amount_cents: amountCents, remaining_amount_cents: amountCents, recipient_email: recipientEmail, recipient_name: recipientName, purchaser_name: purchaserName, expires_at: expiresAt, recipient_note: recipientNote });
+      await auditAdminAction(env, request, adminUser, { action_type: 'gift_card_issued', target_type: 'gift_card', target_key: code, details: { amount_cents: amountCents, purchaser_email: purchaserEmail, recipient_email: recipientEmail } });
       return json({ ok: true, message: 'Gift card issued.', code });
     }
 
-    if (action === 'set_review_status') {
-      const reviewId = Number(body.product_review_id || 0);
+    if (action === 'resend_gift_card') {
+      const giftCardId = Number(body.gift_card_id || 0);
+      if (!giftCardId) return json({ ok: false, error: 'gift_card_id is required.' }, 400);
+      const cardRow = await db.prepare(`SELECT * FROM gift_cards WHERE gift_card_id = ? LIMIT 1`).bind(giftCardId).first();
+      if (!cardRow) return json({ ok: false, error: 'Gift card not found.' }, 404);
+      await queueGiftCardNotice(db, cardRow);
+      await auditAdminAction(env, request, adminUser, { action_type: 'gift_card_resend_queued', target_type: 'gift_card', target_id: giftCardId, target_key: cardRow.code || '', details: { recipient_email: cardRow.recipient_email || cardRow.issued_to_email || '' } });
+      return json({ ok: true, message: 'Gift card email queued again.' });
+    }
+
+    if (action === 'set_gift_card_status') {
+      const giftCardId = Number(body.gift_card_id || 0);
+      const status = normalizeText(body.status).toLowerCase() || 'inactive';
+      if (!giftCardId) return json({ ok: false, error: 'gift_card_id is required.' }, 400);
+      await db.prepare(`UPDATE gift_cards SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE gift_card_id = ?`).bind(status, giftCardId).run();
+      await auditAdminAction(env, request, adminUser, { action_type: 'gift_card_status_update', target_type: 'gift_card', target_id: giftCardId, details: { status } });
+      return json({ ok: true, message: 'Gift card status updated.' });
+    }
+
+    if (action === 'set_review_status' || action === 'bulk_set_review_status') {
+      const ids = action === 'set_review_status' ? uniqueIds([body.product_review_id]) : uniqueIds(body.product_review_ids);
       const status = normalizeText(body.status).toLowerCase() || 'approved';
       const isFeatured = Number(body.is_featured || 0) === 1 ? 1 : 0;
       const adminNotes = normalizeText(body.admin_notes);
-      if (!reviewId) return json({ ok: false, error: 'product_review_id is required.' }, 400);
-      await db.prepare(`UPDATE product_reviews SET status = ?, is_featured = ?, admin_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE product_review_id = ?`).bind(status, isFeatured, adminNotes || null, reviewId).run();
-      await auditAdminAction(env, request, adminUser, { action_type: 'review_status_update', target_type: 'product_review', target_id: reviewId, details: { status, is_featured: isFeatured } });
-      return json({ ok: true, message: 'Review updated.' });
+      if (!ids.length) return json({ ok: false, error: 'At least one product_review_id is required.' }, 400);
+      const placeholders = ids.map(() => '?').join(',');
+      await db.prepare(`UPDATE product_reviews SET status = ?, is_featured = ?, admin_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE product_review_id IN (${placeholders})`).bind(status, isFeatured, adminNotes || null, ...ids).run();
+      await auditAdminAction(env, request, adminUser, { action_type: 'review_status_update', target_type: 'product_review', details: { ids, status, is_featured: isFeatured } });
+      return json({ ok: true, message: `${ids.length} review(s) updated.` });
     }
 
-    if (action === 'queue_review_request') {
-      const orderId = Number(body.order_id || 0);
-      if (!orderId) return json({ ok: false, error: 'order_id is required.' }, 400);
-      const order = await db.prepare(`SELECT order_id, order_number, customer_email FROM orders WHERE order_id = ? LIMIT 1`).bind(orderId).first();
-      if (!order) return json({ ok: false, error: 'Order not found.' }, 404);
-      const productNames = nr(await db.prepare(`SELECT product_name FROM order_items WHERE order_id = ? ORDER BY order_item_id ASC LIMIT 12`).bind(orderId).all()).map((row) => row.product_name || '').filter(Boolean);
-      await queueNotification(db, {
-        notification_kind: 'review_request',
-        destination: safeEmail(order.customer_email),
-        related_order_id: orderId,
-        payload: { order_number: order.order_number || '', product_names: productNames }
-      });
-      await auditAdminAction(env, request, adminUser, { action_type: 'review_request_queued', target_type: 'order', target_id: orderId, target_key: order.order_number || String(orderId), details: { product_names: productNames } });
-      return json({ ok: true, message: 'Review request email queued.' });
+    if (action === 'queue_review_request' || action === 'bulk_queue_review_requests') {
+      const ids = action === 'queue_review_request' ? uniqueIds([body.order_id]) : uniqueIds(body.order_ids);
+      if (!ids.length) return json({ ok: false, error: 'At least one order_id is required.' }, 400);
+      let queuedCount = 0;
+      for (const orderId of ids) {
+        await queueReviewRequest(db, orderId);
+        queuedCount += 1;
+      }
+      await auditAdminAction(env, request, adminUser, { action_type: 'review_request_queued', target_type: 'order', details: { ids, queuedCount } });
+      return json({ ok: true, message: `${queuedCount} review request(s) queued.` });
     }
 
     return json({ ok: false, error: 'Unsupported action.' }, 400);

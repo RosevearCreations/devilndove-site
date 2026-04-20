@@ -91,10 +91,12 @@ function buildEmailFromNotification(row, env) {
     const balance = jsonHtmlEscape(centsToMoney(payload.remaining_amount_cents ?? payload.initial_amount_cents, payload.currency || 'CAD'));
     const expires = jsonHtmlEscape(payload.expires_at || 'No expiry listed');
     const shopUrl = buildAbsoluteUrl('/shop/', env);
+    const purchaserName = jsonHtmlEscape(payload.purchaser_name || 'Someone');
+    const recipientName = jsonHtmlEscape(payload.recipient_name || 'there');
     return {
       to: destination,
       subject: payload.subject || 'Your Devil n Dove gift card',
-      html: `<p>A Devil n Dove gift card has been created for you.</p><p><strong>Code:</strong> ${code}</p><p><strong>Value:</strong> ${balance}</p><p><strong>Expires:</strong> ${expires}</p><p>Use the code during checkout.</p><p><a href="${jsonHtmlEscape(shopUrl)}">Browse the shop</a></p>${payload.note ? `<p><strong>Note:</strong> ${jsonHtmlEscape(payload.note)}</p>` : ''}`
+      html: `<p>Hello ${recipientName},</p><p>${purchaserName} sent you a Devil n Dove gift card.</p><p><strong>Code:</strong> ${code}</p><p><strong>Value:</strong> ${balance}</p><p><strong>Expires:</strong> ${expires}</p><p>Use the code during checkout.</p><p><a href="${jsonHtmlEscape(shopUrl)}">Browse the shop</a></p>${payload.note ? `<p><strong>Message:</strong> ${jsonHtmlEscape(payload.note)}</p>` : ''}`
     };
   }
   if (kind === 'review_request') {
