@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3 style="margin:0">Customer engagement review board</h3>
             <p class="small" style="margin:6px 0 0 0">Review wishlist demand, back-in-stock requests, checkout recovery, gift cards, review requests, testimonials, and queued notifications in one place.</p>
           </div>
-          <button class="btn" type="button" id="refreshCustomerEngagementButton">Refresh Board</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="refreshCustomerEngagementButton">Refresh Board</button><button class="btn" type="button" id="runCustomerAutomationButton">Run automation</button></div>
         </div>
 
         <div class="grid cols-3" style="gap:12px;margin-top:12px">
@@ -177,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
 
     document.getElementById('refreshCustomerEngagementButton')?.addEventListener('click', load);
+    document.getElementById('runCustomerAutomationButton')?.addEventListener('click', onRunAutomation);
     document.getElementById('giftCardIssueForm')?.addEventListener('submit', onIssueGiftCard);
     document.getElementById('queueSelectedReviewOrdersButton')?.addEventListener('click', onBulkQueueReviewRequests);
     document.getElementById('retrySelectedNotificationsButton')?.addEventListener('click', onBulkRetryNotifications);
@@ -421,6 +422,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const ids = getCheckedValues('gift-card-select');
     if (!ids.length) return setMessage('Select one or more gift cards first.', true);
     await postAction({ action: 'bulk_set_gift_card_status', gift_card_ids: ids, status }, `${ids.length} gift card(s) updated.`);
+  }
+
+  async function onRunAutomation() {
+    await postAction({ action: 'auto_process_engagement' }, 'Automated engagement cycle finished.');
   }
 
   async function onClick(event) {

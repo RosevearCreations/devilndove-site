@@ -26,6 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let appliedGiftCard = null;
 
+  function getGiftCardPurchase() {
+    return window.DDGiftCardPurchase?.read ? (window.DDGiftCardPurchase.read() || null) : null;
+  }
+
+  function clearGiftCardPurchase() {
+    try { window.DDGiftCardPurchase?.clear?.(); } catch {}
+  }
+
   function setMessage(message, isError = false) {
     if (!messageEl) return;
     messageEl.textContent = message;
@@ -172,7 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function calculateCartSummary(cartItems) {
     const safeItems = Array.isArray(cartItems) ? cartItems : [];
-    const subtotal_cents = safeItems.reduce((sum, item) => sum + (Number(item.price_cents || 0) * Number(item.quantity || 0)), 0);
+    const giftCardPurchase = getGiftCardPurchase();
+    const giftCardPurchaseCents = Number(giftCardPurchase?.amount_cents || 0);
+    const subtotal_cents = safeItems.reduce((sum, item) => sum + (Number(item.price_cents || 0) * Number(item.quantity || 0)), 0) + giftCardPurchaseCents;
     const requiresShipping = safeItems.some((item) => Number(item.requires_shipping || 0) === 1);
     const shipping_cents = requiresShipping ? 1500 : 0;
     const gift_card_discount_cents = Math.min(Number(appliedGiftCard?.applicable_discount_cents || 0), subtotal_cents + shipping_cents);
@@ -201,13 +211,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderSummary() {
     const cartItems = getCartItems();
+    const giftCardPurchase = getGiftCardPurchase();
     const summary = calculateCartSummary(cartItems);
 
     if (summaryItemsEl) {
-      if (!cartItems.length) {
-        summaryItemsEl.innerHTML = `<div class="small">Your cart is empty.</div>`;
-      } else {
-        summaryItemsEl.innerHTML = cartItems.map((item) => {
+      const rows = [];
+      if (cartItems.length) {
+        rows.push(...cartItems.map((item) => {
           const qty = Number(item.quantity || 0);
           const unit = Number(item.price_cents || 0);
           const line = qty * unit;
@@ -219,8 +229,19 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
               <div>${escapeHtml(formatMoney(line, item.currency || "CAD"))}</div>
             </div>`;
-        }).join("");
+        }));
       }
+      if (giftCardPurchase?.amount_cents) {
+        rows.push(`
+          <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px">
+            <div>
+              <div>Storefront gift card</div>
+              <div class="small">For ${escapeHtml(giftCardPurchase.recipient_name || giftCardPurchase.recipient_email || 'recipient')}</div>
+            </div>
+            <div>${escapeHtml(formatMoney(giftCardPurchase.amount_cents, giftCardPurchase.currency || "CAD"))}</div>
+          </div>`);
+      }
+      summaryItemsEl.innerHTML = rows.length ? rows.join("") : `<div class="small">Your cart is empty.</div>`;
     }
 
     if (summarySubtotalEl) summarySubtotalEl.textContent = formatMoney(summary.subtotal_cents, "CAD");
@@ -324,7 +345,8 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
 
     const cartItems = getCartItems();
-    if (!cartItems.length) {
+    const giftCardPurchase = getGiftCardPurchase();
+    if (!cartItems.length && !giftCardPurchase) {
       setMessage("Your cart is empty.", true);
       return;
     }
@@ -363,7 +385,8 @@ document.addEventListener("DOMContentLoaded", () => {
         shipping_cents: summary.shipping_cents,
         currency: "CAD",
         gift_card_code: appliedGiftCard?.code || formData.gift_card_code || '',
-        gift_card_discount_cents: Number(summary.gift_card_discount_cents || 0)
+        gift_card_discount_cents: Number(summary.gift_card_discount_cents || 0),
+        gift_card_purchase: giftCardPurchase || null
       };
 
       const orderData = await createOrder(payload);
@@ -373,8 +396,9 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage("Order created. Preparing payment...");
       const paymentData = await preparePayment(order.order_id, formData.payment_method || "paypal");
 
-      saveConfirmationSnapshot({ order: orderData.order, order_items: orderData.order_items || [], payment: paymentData.payment || null, provider_payload: paymentData.provider_payload || null });
+      saveConfirmationSnapshot({ order: orderData.order, order_items: orderData.items || [], storefront_gift_card: orderData.storefront_gift_card || null, payment: paymentData.payment || null, provider_payload: paymentData.provider_payload || null });
       try { localStorage.removeItem(CART_KEY); } catch {}
+      clearGiftCardPurchase();
       if (window.DDCart?.clearCart) {
         try { window.DDCart.clearCart(); } catch {}
       }

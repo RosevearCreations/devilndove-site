@@ -127,6 +127,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const reviewStatusValue = String(product.review_status || "pending_review").toLowerCase();
       const reviewStatus = escapeHtml(product.review_status || "pending_review");
       const readyNotes = escapeHtml(product.ready_check_notes || "");
+      const publishScore = Number(product.publish_readiness_score || 0);
+      const imageScore = Number(product.image_quality_score || 0);
       const canApprove = ready;
       const canPublish = ready && ["approved", "published"].includes(reviewStatusValue);
       const approveTitle = canApprove ? 'Approve this draft for storefront review.' : `Finish required approval fields first${readyNotes ? `: ${readyNotes}` : '.'}`;
@@ -147,7 +149,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${status}<div class="small">Review: ${reviewStatus}</div><div class="small">${ready ? "Ready for storefront" : "Needs review"}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${price}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? "⚠️ low stock" : "healthy"}</div><div class="small">${ready ? "Storefront ready" : readyNotes || "Missing storefront fields"}</div><div class="small">Cost ${linkedResourceCost} • Margin ${grossMargin}</div><div class="small">${linkedResourceCount} linked resources${missingCostLinks ? ` • ${missingCostLinks} missing costs` : ""}</div><div class="small">${buildableUnits ? `Buildable units ${escapeHtml(buildableUnits)}` : "Buildable units unknown"}${shortageLinks ? ` • ${shortageLinks} shortages` : ""}</div></td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? "⚠️ low stock" : "healthy"}</div><div class="small">${ready ? "Storefront ready" : readyNotes || "Missing storefront fields"}</div><div class="small">Publish score ${escapeHtml(String(publishScore))}% • Image score ${escapeHtml(String(imageScore))}%</div><div class="small">Cost ${linkedResourceCost} • Margin ${grossMargin}</div><div class="small">${linkedResourceCount} linked resources${missingCostLinks ? ` • ${missingCostLinks} missing costs` : ""}</div><div class="small">${buildableUnits ? `Buildable units ${escapeHtml(buildableUnits)}` : "Buildable units unknown"}${shortageLinks ? ` • ${shortageLinks} shortages` : ""}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${shipping}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${taxClass}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">

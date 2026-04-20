@@ -223,7 +223,7 @@
 
   function shouldShowFeaturedTestimonials(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
-    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html'].includes(path);
+    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html'].includes(path);
   }
 
   async function injectFeaturedTestimonials() {

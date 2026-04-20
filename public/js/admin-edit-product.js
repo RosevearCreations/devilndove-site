@@ -160,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="btn" type="button" data-apply-price-preset="suggested">Use suggested</button>
         <button class="btn" type="button" data-apply-price-preset="stretch">Use stretch</button>
         <button class="btn" type="button" data-apply-price-preset="compare">Use compare-at</button>
+        <button class="btn" type="button" data-apply-price-preset="suggested-save">Use suggested and save</button>
       </div>`;
   }
 

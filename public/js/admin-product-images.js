@@ -59,6 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
   }
 
+  function renderQualityScore() {
+    const rows = collectRows();
+    const mount = document.getElementById("adminProductImagesQuality");
+    if (!mount) return;
+    const imageCount = rows.length;
+    const altCoverage = rows.filter((row) => String(row.alt_text || "").trim().length >= 5).length;
+    const score = imageCount >= 5 ? 100 : imageCount >= 3 ? 80 : imageCount > 0 ? 45 : 0;
+    mount.innerHTML = `<h4 style="margin-top:0">Photo completeness before publish</h4><div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • image score ${score}%</div><div class="small" style="margin-top:6px">Aim for at least 3 images, with the first image clearly chosen and alt text filled in for the first few photos.</div>`;
+  }
+
   function collectRows() {
     return Array.from(document.querySelectorAll('[data-product-image-row]')).map((row, index) => {
       const value = (field) => row.querySelector(`[data-field="${field}"]`)?.value ?? '';
@@ -96,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h4 style="margin:0">Uploaded Asset Library</h4><button class="btn" type="button" id="refreshMediaAssetsButton">Refresh Assets</button></div>
             <div id="adminMediaAssetsList" class="small" style="margin-top:12px">Load a product first to browse uploaded media.</div>
           </div>
-          <div id="productImagesRows"></div>
+          <div id="adminProductImagesQuality" class="card" style="margin-top:12px"></div><div id="productImagesRows"></div>
         </form>
       </div>`;
 
@@ -107,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('adminProductImagesForm')?.addEventListener('submit', saveImages);
     mountEl.addEventListener('click', onClick);
     addRow();
+    renderQualityScore();
   }
 
   function reindexRows() {
@@ -123,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!wrap) return;
     wrap.insertAdjacentHTML('beforeend', rowTemplate(row, wrap.children.length));
     reindexRows();
+    renderQualityScore();
   }
 
   async function loadImages() {
@@ -138,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const rows = Array.isArray(data.images) ? data.images : [];
       if (!rows.length) addRow();
       rows.forEach((row, index) => addRow({ ...row, sort_order: index }));
+      renderQualityScore();
       await loadAssetLibrary();
       setMessage('Product images loaded.');
     } catch (error) {
@@ -216,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save product images.');
       setMessage('Product images saved.');
       document.dispatchEvent(new CustomEvent('dd:product-updated', { detail: { product_id: productId } }));
+      renderQualityScore();
       await loadAssetLibrary();
     } catch (error) {
       setMessage(error.message || 'Failed to save product images.', true);
@@ -228,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
       row.remove();
       if (!document.querySelector('[data-product-image-row]')) addRow();
       reindexRows();
+      renderQualityScore();
       return;
     }
     const moveBtn = event.target.closest('[data-row-move]');
@@ -236,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (direction === 'up' && row.previousElementSibling) row.parentNode.insertBefore(row, row.previousElementSibling);
       if (direction === 'down' && row.nextElementSibling) row.parentNode.insertBefore(row.nextElementSibling, row);
       reindexRows();
+      renderQualityScore();
       return;
     }
     const addAssetBtn = event.target.closest('[data-add-asset-url]');
