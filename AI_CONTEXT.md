@@ -419,3 +419,11 @@ Roadmap emphasis after this pass:
 - Expanded featured testimonial placement onto more public templates.
 - Added automated engagement processing from the admin board for back-in-stock, recovery, review requests, and notification dispatch.
 - Added stronger publish-readiness and photo-completeness scoring before publish, including photo-count warnings and image scoring in admin.
+
+
+## Current pass update (Pass 31)
+- Added webhook-side gift card activation when Stripe or PayPal marks an order paid.
+- Tightened publish gating so low publish/image scores now need an explicit override publish path.
+- Added deeper customer engagement automation controls with cooldown rules, exclusions, and run logs.
+- Added upload-side listing image validation and stronger photo workflow warnings.
+- Extended featured testimonial output and synced schema/docs for this pass.

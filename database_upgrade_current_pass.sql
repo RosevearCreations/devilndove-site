@@ -544,3 +544,5 @@ ALTER TABLE gift_cards ADD COLUMN purchase_source TEXT;
 -- Runtime code also keeps gift_cards purchaser/recipient fields in sync and uses pending_activation for storefront-issued cards.
 
 -- Pass 30 schema note: storefront gift-card purchases may use gift_cards.order_id, purchase_source, and pending_activation status; publish scoring now expects image-count-aware readiness.
+
+-- Pass 31 note: gift card webhook activation, publish override gating, notification cooldown/exclusion support, and image validation workflow updates.
