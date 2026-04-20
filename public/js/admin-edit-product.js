@@ -124,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const suggested = Number(latestPriceSuggestion.suggested_price_cents || 0);
     const conservative = Number(latestPriceSuggestion.conservative_price_cents || 0);
     const stretch = Number(latestPriceSuggestion.stretch_price_cents || 0);
+    const suggestedCompareAt = Number(latestPriceSuggestion.suggested_compare_at_cents || 0);
     const marginRatio = currentPrice > 0 ? ((currentPrice - landed) / currentPrice) : 0;
     const targetMarginPercent = Number(latestPriceSuggestion.target_margin_percent || latestPriceSuggestion.assumptions?.target_margin_percent || 0);
     let tone = "product-pricing-insight-card";
@@ -142,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
         <div>
           <h3 style="margin:0">${escapeHtml(headline)}</h3>
-          <div class="small">Use this to write suggested prices back into the main editor and spot margin pressure before saving live.</div>
+          <div class="small">Use this to write suggested prices back into the main editor, compare price bands, and spot margin pressure before saving live.</div>
         </div>
         <div class="small">Target margin ${escapeHtml(String(targetMarginPercent || 0))}%</div>
       </div>
@@ -152,8 +153,14 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="card"><div class="small">Current margin</div><strong>${escapeHtml(((marginRatio || 0) * 100).toFixed(1))}%</strong></div>
         <div class="card"><div class="small">Suggested price</div><strong>${escapeHtml(centsToDollars(suggested))}</strong></div>
       </div>
-      <div class="small" style="margin-top:10px">Safe range ${escapeHtml(centsToDollars(conservative))} → ${escapeHtml(centsToDollars(stretch))}. Compare-at suggestion ${escapeHtml(centsToDollars(Number(latestPriceSuggestion.suggested_compare_at_cents || 0)))}. Current compare-at ${escapeHtml(centsToDollars(compareAt))}.</div>
-      ${(Array.isArray(latestPriceSuggestion.notes) && latestPriceSuggestion.notes.length) ? `<div class="small" style="margin-top:8px">${latestPriceSuggestion.notes.map((note) => escapeHtml(note)).join(" • ")}</div>` : ""}`;
+      <div class="small" style="margin-top:10px">Safe range ${escapeHtml(centsToDollars(conservative))} → ${escapeHtml(centsToDollars(stretch))}. Compare-at suggestion ${escapeHtml(centsToDollars(suggestedCompareAt))}. Current compare-at ${escapeHtml(centsToDollars(compareAt))}.</div>
+      ${(Array.isArray(latestPriceSuggestion.notes) && latestPriceSuggestion.notes.length) ? `<div class="small" style="margin-top:8px">${latestPriceSuggestion.notes.map((note) => escapeHtml(note)).join(" • ")}</div>` : ""}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn" type="button" data-apply-price-preset="conservative">Use conservative</button>
+        <button class="btn" type="button" data-apply-price-preset="suggested">Use suggested</button>
+        <button class="btn" type="button" data-apply-price-preset="stretch">Use stretch</button>
+        <button class="btn" type="button" data-apply-price-preset="compare">Use compare-at</button>
+      </div>`;
   }
 
   function ensurePendingMount() {
@@ -493,6 +500,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+
+  ensurePricingInsightMount().addEventListener("click", (event) => {
+    const action = event.target.closest('[data-apply-price-preset]');
+    if (!action || !latestPriceSuggestion) return;
+    const mode = String(action.getAttribute('data-apply-price-preset') || 'suggested');
+    if (mode === 'compare') {
+      const compareAt = Number(latestPriceSuggestion.suggested_compare_at_cents || 0);
+      if (compareAt > 0) setField('compare_at_price', centsToDollars(compareAt));
+      renderPricingInsight();
+      setMessage('Suggested compare-at price written into the editor. Save when ready.');
+      return;
+    }
+    const presets = {
+      conservative: Number(latestPriceSuggestion.conservative_price_cents || 0),
+      suggested: Number(latestPriceSuggestion.suggested_price_cents || 0),
+      stretch: Number(latestPriceSuggestion.stretch_price_cents || 0)
+    };
+    const selected = Number(presets[mode] || 0);
+    if (selected > 0) {
+      setField('price', centsToDollars(selected));
+      renderPricingInsight();
+      setMessage(`${mode.charAt(0).toUpperCase() + mode.slice(1)} price written into the editor. Save when ready.`);
+    }
+  });
 
   document.addEventListener('dd:product-price-suggestion-load', async (event) => {
     const productId = Number(event?.detail?.product_id || 0);

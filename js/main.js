@@ -17,6 +17,47 @@
     return `https://www.amazon.ca/s?k=${encodeURIComponent(q)}`;
   }
 
+  function getDefaultFooterSocialRows() {
+    return [
+      { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com/@devilndove345', handle: '@devilndove345' },
+      { key: 'instagram', label: 'Instagram', url: 'https://www.instagram.com/devilndove', handle: '@devilndove' },
+      { key: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/@devilanddove', handle: '@devilanddove' },
+      { key: 'facebook', label: 'Facebook', url: 'https://www.facebook.com/DevilnDoveOnline', handle: 'DevilnDoveOnline' },
+      { key: 'x', label: 'X', url: 'https://x.com/DevilnDove', handle: '@DevilnDove' },
+      { key: 'patreon', label: 'Patreon', url: 'https://patreon.com/DevilnDove', handle: 'patreon.com/DevilnDove' }
+    ];
+  }
+
+  function socialLinksMarkup(rows, { includeHub = true, includeStatus = false } = {}) {
+    const safeRows = Array.isArray(rows) ? rows.filter((row) => row && row.url) : [];
+    const parts = [];
+    if (includeHub) parts.push('<a href="/socials/index.html">Social hub</a>');
+    parts.push(...safeRows.map((row) => `<a href="${escapeHtml(row.url || '/socials/index.html')}" rel="noopener" target="_blank">${escapeHtml(row.label || row.handle || 'Social')}</a>`));
+    if (includeStatus && !safeRows.length) parts.push('<span class="small">Profile links are temporarily unavailable here.</span>');
+    return parts.join('');
+  }
+
+  async function fetchFooterSocialRows() {
+    const preferredOrder = ['youtube', 'instagram', 'tiktok', 'facebook', 'x', 'patreon'];
+    try {
+      const response = await fetch('/api/social-feed', { headers: { Accept: 'application/json' } });
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.ok && data?.profiles && typeof data.profiles === 'object') {
+        const rows = preferredOrder.map((key) => data.profiles[key]).filter(Boolean);
+        if (rows.length) return rows;
+      }
+    } catch {}
+    try {
+      const response = await fetch('/data/site/social-feed.json', { headers: { Accept: 'application/json' } });
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.profiles && typeof data.profiles === 'object') {
+        const rows = preferredOrder.map((key) => data.profiles[key]).filter(Boolean);
+        if (rows.length) return rows;
+      }
+    } catch {}
+    return getDefaultFooterSocialRows();
+  }
+
   function navLinksMarkup() {
     return `
       <a href="/index.html" data-nav="/">Home</a>
@@ -100,8 +141,7 @@
         <div>
           <div class="site-footer-heading">Follow</div>
           <div class="site-footer-links" id="siteFooterSocialLinks">
-            <a href="/socials/index.html">Social hub</a>
-            <span class="small">Loading profile links…</span>
+            ${socialLinksMarkup(getDefaultFooterSocialRows())}
           </div>
         </div>
         <div>
@@ -172,22 +212,14 @@
   async function hydrateFooterSocials() {
     const socialWrap = document.getElementById('siteFooterSocialLinks');
     if (!socialWrap) return;
-    socialWrap.innerHTML = '<a href="/socials/index.html">Social hub</a><span class="small">Loading profile links…</span>';
+    socialWrap.innerHTML = socialLinksMarkup(getDefaultFooterSocialRows());
     try {
-      const response = await fetch('/api/social-feed', { headers: { Accept: 'application/json' } });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load social links.');
-      const profiles = data && data.profiles && typeof data.profiles === 'object' ? data.profiles : {};
-      const preferredOrder = ['youtube', 'instagram', 'tiktok', 'facebook', 'x', 'patreon'];
-      const rows = preferredOrder.map((key) => profiles[key]).filter(Boolean);
-      socialWrap.innerHTML = ['<a href="/socials/index.html">Social hub</a>']
-        .concat(rows.map((row) => `<a href="${escapeHtml(row.url || '/socials/index.html')}" rel="noopener" target="_blank">${escapeHtml(row.label || row.handle || 'Social')}</a>`))
-        .join('');
+      const rows = await fetchFooterSocialRows();
+      socialWrap.innerHTML = socialLinksMarkup(rows, { includeHub: true, includeStatus: true });
     } catch (_error) {
-      socialWrap.innerHTML = '<a href="/socials/index.html">Social hub</a><span class="small">Profile links are temporarily unavailable here.</span>';
+      socialWrap.innerHTML = socialLinksMarkup(getDefaultFooterSocialRows(), { includeHub: true, includeStatus: true });
     }
   }
-
 
   function shouldShowFeaturedTestimonials(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
