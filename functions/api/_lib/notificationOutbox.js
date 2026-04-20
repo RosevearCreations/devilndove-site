@@ -13,6 +13,97 @@ function centsToMoney(cents, currency = 'CAD') {
   return `${(Number(cents || 0) / 100).toFixed(2)} ${normalizeText(currency).toUpperCase() || 'CAD'}`;
 }
 
+
+
+async function tableExists(db, tableName) {
+  try {
+    const row = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1`).bind(tableName).first();
+    return !!row;
+  } catch {
+    return false;
+  }
+}
+
+async function ensureColumn(db, tableName, columnName, ddl) {
+  try {
+    const info = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const cols = (Array.isArray(info?.results) ? info.results : []).map((row) => String(row?.name || '').trim());
+    if (!cols.includes(columnName)) {
+      await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${ddl}`).run().catch(() => null);
+    }
+  } catch {}
+}
+
+async function ensureNotificationSupportTables(db) {
+  if (!db) return;
+  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_dispatch_log (
+    notification_dispatch_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_outbox_id INTEGER,
+    notification_kind TEXT,
+    destination TEXT,
+    status TEXT NOT NULL DEFAULT 'queued',
+    provider_message_id TEXT,
+    error_text TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_exclusions (
+    notification_exclusion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_kind TEXT NOT NULL,
+    destination TEXT,
+    product_id INTEGER,
+    order_id INTEGER,
+    reason TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_cooldown_rules (
+    notification_cooldown_rule_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_kind TEXT NOT NULL UNIQUE,
+    cooldown_hours INTEGER NOT NULL DEFAULT 24,
+    is_enabled INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS customer_engagement_runs (
+    customer_engagement_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_type TEXT NOT NULL DEFAULT 'automation',
+    actor_user_id INTEGER,
+    summary_json TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await ensureColumn(db, 'notification_outbox', 'attempt_count', `attempt_count INTEGER NOT NULL DEFAULT 0`);
+  await ensureColumn(db, 'notification_outbox', 'last_attempt_at', `last_attempt_at TEXT`);
+  await ensureColumn(db, 'notification_outbox', 'provider_message_id', `provider_message_id TEXT`);
+  await ensureColumn(db, 'notification_outbox', 'error_text', `error_text TEXT`);
+  const defaults = [
+    ['checkout_recovery', 24],
+    ['review_request', 72],
+    ['back_in_stock', 24],
+    ['gift_card_issued', 1],
+  ];
+  for (const [kind, hours] of defaults) {
+    await db.prepare(`INSERT INTO notification_cooldown_rules (notification_kind, cooldown_hours, is_enabled, created_at, updated_at)
+      VALUES (?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(notification_kind) DO NOTHING`).bind(kind, hours).run().catch(() => null);
+  }
+}
+
+async function recordDispatchLog(db, row, status, providerMessageId = null, errorText = null) {
+  if (!db) return;
+  await ensureNotificationSupportTables(db);
+  await db.prepare(`INSERT INTO notification_dispatch_log (
+    notification_outbox_id, notification_kind, destination, status, provider_message_id, error_text, created_at
+  ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
+    Number(row?.notification_outbox_id || 0) || null,
+    normalizeText(row?.notification_kind) || null,
+    normalizeText(row?.destination) || null,
+    normalizeText(status) || 'queued',
+    providerMessageId || null,
+    errorText || null
+  ).run().catch(() => null);
+}
+
 function buildAbsoluteUrl(payloadUrl, env) {
   const raw = normalizeText(payloadUrl);
   if (!raw) return normalizeText(env.SITE_ORIGIN || 'https://devilndove.com');
@@ -22,6 +113,7 @@ function buildAbsoluteUrl(payloadUrl, env) {
 }
 
 export async function queueNotification(db, payload = {}) {
+  await ensureNotificationSupportTables(db);
   return db.prepare(`
     INSERT INTO notification_outbox (
       notification_kind, channel, destination, related_order_id, related_payment_id,
@@ -159,6 +251,7 @@ export async function dispatchNotificationRow(env, row) {
 
 export async function processNotificationOutbox(env, options = {}) {
   const db = getDb(env);
+  await ensureNotificationSupportTables(db);
   const limit = Math.max(1, Math.min(Number(options.limit || 10), 50));
   const rows = (await db.prepare(`
     SELECT notification_outbox_id, notification_kind, channel, destination, related_order_id, related_payment_id,
@@ -182,6 +275,7 @@ export async function processNotificationOutbox(env, options = {}) {
               provider_message_id = ?, error_text = NULL, updated_at = CURRENT_TIMESTAMP
           WHERE notification_outbox_id = ?
         `).bind(sent.provider_message_id || null, outboxId).run();
+        await recordDispatchLog(db, row, 'sent', sent.provider_message_id || null, null);
         results.push({ notification_outbox_id: outboxId, ok: true, destination: email.to || '', subject: email.subject || '', provider_message_id: sent.provider_message_id || null });
       } else {
         const attempts = Number(row.attempt_count || 0) + 1;
@@ -193,6 +287,7 @@ export async function processNotificationOutbox(env, options = {}) {
               attempt_count = ?, last_attempt_at = CURRENT_TIMESTAMP, next_attempt_at = ?, error_text = ?, updated_at = CURRENT_TIMESTAMP
           WHERE notification_outbox_id = ?
         `).bind(attempts, attempts, nextRetryAt, sent.error || 'Send failed.', outboxId).run();
+        await recordDispatchLog(db, row, attempts >= 5 ? 'failed' : 'retry', null, sent.error || 'Send failed.');
         results.push({ notification_outbox_id: outboxId, ok: false, error: sent.error || 'Send failed.' });
       }
     } catch (error) {
@@ -204,6 +299,7 @@ export async function processNotificationOutbox(env, options = {}) {
             attempt_count = ?, last_attempt_at = CURRENT_TIMESTAMP, next_attempt_at = ?, error_text = ?, updated_at = CURRENT_TIMESTAMP
         WHERE notification_outbox_id = ?
       `).bind(attempts, attempts, nextRetryAt, error?.message || 'Dispatch error.', outboxId).run().catch(() => null);
+      await recordDispatchLog(db, row, attempts >= 5 ? 'failed' : 'retry', null, error?.message || 'Dispatch error.');
       results.push({ notification_outbox_id: outboxId, ok: false, error: error?.message || 'Dispatch error.' });
     }
   }

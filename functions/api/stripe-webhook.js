@@ -1,3 +1,5 @@
+import { processNotificationOutbox, queueNotification } from './_lib/notificationOutbox.js';
+
 // File: /functions/api/stripe-webhook.js
 // Brief description: Receives Stripe webhook events, verifies the signature, records idempotent
 // webhook history, and reconciles local payment/order state for Checkout Session and refund events.
@@ -80,6 +82,84 @@ function deriveOrderStatus(existingOrderStatus, localPaymentStatus) {
   if (localPaymentStatus === "paid" && ["pending", "draft"].includes(current)) return "paid";
   if (["refunded", "partially_refunded"].includes(localPaymentStatus) && ["paid", "fulfilled"].includes(current)) return "refunded";
   return current;
+}
+
+
+async function ensureGiftCardWebhookColumns(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_cards (
+    gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    currency TEXT NOT NULL DEFAULT 'CAD',
+    initial_amount_cents INTEGER NOT NULL DEFAULT 0,
+    remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
+    issued_to_email TEXT,
+    issued_to_name TEXT,
+    note TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    expires_at TEXT,
+    last_redeemed_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  const additions = [
+    ['recipient_email', 'recipient_email TEXT'],
+    ['recipient_name', 'recipient_name TEXT'],
+    ['recipient_note', 'recipient_note TEXT'],
+    ['purchaser_email', 'purchaser_email TEXT'],
+    ['purchaser_name', 'purchaser_name TEXT'],
+    ['purchaser_user_id', 'purchaser_user_id INTEGER'],
+    ['order_id', 'order_id INTEGER'],
+    ['purchase_source', 'purchase_source TEXT']
+  ];
+  const info = await db.prepare(`PRAGMA table_info(gift_cards)`).all().catch(() => ({ results: [] }));
+  const cols = new Set((Array.isArray(info?.results) ? info.results : []).map((row) => String(row?.name || '').trim()));
+  for (const [name, ddl] of additions) {
+    if (!cols.has(name)) await db.prepare(`ALTER TABLE gift_cards ADD COLUMN ${ddl}`).run().catch(() => null);
+  }
+}
+
+async function activatePendingGiftCardsForOrder(env, order, payment, providerLabel) {
+  const db = getDb(env);
+  await ensureGiftCardWebhookColumns(db);
+  const pending = (await db.prepare(`
+    SELECT gift_card_id, code, currency, initial_amount_cents, remaining_amount_cents,
+           COALESCE(recipient_email, issued_to_email) AS recipient_email,
+           COALESCE(recipient_name, issued_to_name) AS recipient_name,
+           purchaser_email, purchaser_name, recipient_note, note, expires_at, status
+    FROM gift_cards
+    WHERE order_id = ?
+      AND LOWER(COALESCE(status,'')) = 'pending_activation'
+    ORDER BY gift_card_id ASC
+  `).bind(Number(order?.order_id || 0)).all().catch(() => ({ results: [] }))).results || [];
+  let activated_count = 0;
+  for (const row of pending) {
+    await db.prepare(`UPDATE gift_cards SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE gift_card_id = ?`).bind(Number(row.gift_card_id || 0)).run().catch(() => null);
+    activated_count += 1;
+    const destination = normalizeText(row.recipient_email || row.issued_to_email).toLowerCase();
+    if (destination) {
+      await queueNotification(db, {
+        notification_kind: 'gift_card_issued',
+        destination,
+        related_order_id: Number(order?.order_id || 0),
+        related_payment_id: Number(payment?.payment_id || 0),
+        payload: {
+          code: row.code || '',
+          currency: row.currency || order?.currency || 'CAD',
+          initial_amount_cents: Number(row.initial_amount_cents || 0),
+          remaining_amount_cents: Number(row.remaining_amount_cents || 0),
+          expires_at: row.expires_at || '',
+          note: row.recipient_note || row.note || '',
+          purchaser_name: row.purchaser_name || '',
+          recipient_name: row.recipient_name || '',
+          subject: row.purchaser_name ? `A Devil n Dove gift card from ${row.purchaser_name}` : 'Your Devil n Dove gift card'
+        }
+      }).catch(() => null);
+    }
+  }
+  if (activated_count > 0) {
+    await processNotificationOutbox(env, { limit: Math.max(activated_count, 3) }).catch(() => ({ ok: false }));
+  }
+  return activated_count;
 }
 
 
@@ -444,6 +524,10 @@ export async function onRequestPost(context) {
     `Stripe webhook reconciled event ${eventType || "UNKNOWN"} for payment ${paymentIntentId || sessionId || "unknown"}.`
   );
 
+  const giftCardActivationCount = localPaymentStatus === 'paid'
+    ? await activatePendingGiftCardsForOrder(env, order, payment, 'stripe')
+    : 0;
+
   if (['refunded', 'partially_refunded'].includes(localPaymentStatus) && normalizeText(order.customer_email)) {
     await queueProviderNotification(env, {
       notification_kind: 'refund_receipt',
@@ -478,6 +562,7 @@ export async function onRequestPost(context) {
       order_number: order.order_number || "",
       order_status: nextOrderStatus,
       payment_status: nextPaymentStatus
-    }
+    },
+    gift_card_activation_count: giftCardActivationCount
   });
 }

@@ -1,3 +1,5 @@
+import { processNotificationOutbox, queueNotification } from './_lib/notificationOutbox.js';
+
 // File: /functions/api/paypal-webhook.js
 // Brief description: Receives PayPal webhook events, verifies the signature, records idempotent
 // webhook history, and reconciles local payment/order state for payment and refund events.
@@ -287,6 +289,10 @@ export async function onRequestPost(context) {
     `PayPal webhook reconciled event ${eventType || "UNKNOWN"} for provider order ${providerOrderId}.`
   );
 
+  const giftCardActivationCount = localPaymentStatus === 'paid'
+    ? await activatePendingGiftCardsForOrder(env, order, payment, 'paypal')
+    : 0;
+
   await markWebhookEvent(env, webhookEvent.webhook_event_id, "processed", {
     related_order_id: Number(order.order_id || 0),
     related_payment_id: Number(payment.payment_id || 0)
@@ -304,6 +310,7 @@ export async function onRequestPost(context) {
       order_number: order.order_number || "",
       order_status: nextOrderStatus,
       payment_status: nextPaymentStatus
-    }
+    },
+    gift_card_activation_count: giftCardActivationCount
   });
 }
