@@ -99,6 +99,15 @@ function buildEmailFromNotification(row, env) {
       html: `<p>Hello ${recipientName},</p><p>${purchaserName} sent you a Devil n Dove gift card.</p><p><strong>Code:</strong> ${code}</p><p><strong>Value:</strong> ${balance}</p><p><strong>Expires:</strong> ${expires}</p><p>Use the code during checkout.</p><p><a href="${jsonHtmlEscape(shopUrl)}">Browse the shop</a></p>${payload.note ? `<p><strong>Message:</strong> ${jsonHtmlEscape(payload.note)}</p>` : ''}`
     };
   }
+  if (kind === 'back_in_stock') {
+    const shopUrl = buildAbsoluteUrl(payload.product_slug ? `/shop/product/?slug=${payload.product_slug}` : '/shop/', env);
+    return {
+      to: destination,
+      subject: payload.subject || 'A Devil n Dove item is back in stock',
+      html: `<p>Good news — an item you asked about is back in stock.</p><p><strong>Item:</strong> ${jsonHtmlEscape(payload.product_name || 'Devil n Dove item')}</p><p><a href="${jsonHtmlEscape(shopUrl)}">View the item now</a></p>`
+    };
+  }
+
   if (kind === 'review_request') {
     const membersUrl = buildAbsoluteUrl('/members/', env);
     const productNames = Array.isArray(payload.product_names) ? payload.product_names.filter(Boolean).join(', ') : '';
