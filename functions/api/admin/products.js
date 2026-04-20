@@ -32,22 +32,39 @@ async function getTableColumnSet(db, tableName) {
 }
 
 function buildReadiness(row = {}) {
+  const imageCount = Number(row.image_count || 0);
   const checks = {
     has_name: normalizeText(row.name).length > 0,
     has_slug: normalizeText(row.slug).length > 0,
     has_price: Number(row.price_cents || 0) > 0,
     has_featured_image: normalizeText(row.featured_image_url).length > 0,
     has_short_description: normalizeText(row.short_description).length >= 40,
+    has_description: normalizeText(row.description).length >= 120,
     has_meta_title: normalizeText(row.meta_title).length >= 10,
     has_meta_description: normalizeText(row.meta_description).length >= 50,
     has_category: normalizeText(row.product_category).length > 0,
+    has_photo_set: imageCount >= 3,
   };
-  const failedKeys = Object.entries(checks)
-    .filter(([, ok]) => !ok)
-    .map(([key]) => key);
+  const weights = {
+    has_name: 10,
+    has_slug: 8,
+    has_price: 12,
+    has_featured_image: 12,
+    has_short_description: 10,
+    has_description: 8,
+    has_meta_title: 8,
+    has_meta_description: 8,
+    has_category: 4,
+    has_photo_set: 20,
+  };
+  const failedKeys = Object.entries(checks).filter(([, ok]) => !ok).map(([key]) => key);
+  const earned = Object.entries(checks).reduce((sum, [key, ok]) => sum + (ok ? Number(weights[key] || 0) : 0), 0);
+  const total = Object.values(weights).reduce((sum, value) => sum + Number(value || 0), 0);
   return {
     is_ready_for_storefront: failedKeys.length === 0 ? 1 : 0,
     ready_check_notes: failedKeys.join(", "),
+    publish_readiness_score: total > 0 ? Math.round((earned / total) * 100) : 0,
+    image_quality_score: imageCount >= 5 ? 100 : imageCount >= 3 ? 80 : imageCount > 0 ? 45 : 0,
     readiness_checks: checks,
   };
 }
@@ -63,6 +80,7 @@ async function loadProducts(db, q) {
   const hasLotSizeUnits = resourceLinkColumns.has('lot_size_units');
   const inventoryColumns = hasInventory ? await getTableColumnSet(db, 'site_item_inventory') : new Set();
   const usageUnitsExpr = hasInventory && inventoryColumns.has('usage_units_per_stock_unit') ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : `1`;
+  const inventoryUnitCostExpr = hasInventory ? (inventoryColumns.has('unit_cost_cents') ? `COALESCE(sii.unit_cost_cents,0)` : (inventoryColumns.has('cost_cents') ? `COALESCE(sii.cost_cents,0)` : `0`)) : `0`;
 
   const clauses = ["1=1"];
   const bindings = [];
@@ -92,7 +110,7 @@ async function loadProducts(db, q) {
     hasProductImages ? "COUNT(DISTINCT pi.product_image_id) AS image_count" : "0 AS image_count",
     hasResourceLinks ? "COUNT(DISTINCT prl.product_resource_link_id) AS linked_resource_count" : "0 AS linked_resource_count",
     hasResourceLinks && hasInventory
-      ? `COALESCE(SUM(CASE WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) / ${usageUnitsExpr} / COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1) ELSE COALESCE(prl.quantity_used, 0) * COALESCE(sii.unit_cost_cents, 0) / ${usageUnitsExpr} END), 0) AS linked_resource_cost_cents`
+      ? `COALESCE(SUM(CASE WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN COALESCE(prl.quantity_used, 0) * ${inventoryUnitCostExpr} / ${usageUnitsExpr} / COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1) ELSE COALESCE(prl.quantity_used, 0) * ${inventoryUnitCostExpr} / ${usageUnitsExpr} END), 0) AS linked_resource_cost_cents`
       : "0 AS linked_resource_cost_cents",
     hasResourceLinks && hasInventory
       ? "SUM(CASE WHEN sii.site_item_inventory_id IS NULL THEN 1 ELSE 0 END) AS missing_cost_links"

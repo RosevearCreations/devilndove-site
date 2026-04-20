@@ -1,5 +1,5 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import { queueNotification } from '../_lib/notificationOutbox.js';
+import { processNotificationOutbox, queueNotification } from '../_lib/notificationOutbox.js';
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function nr(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -365,6 +365,109 @@ async function listEngagementData(db) {
   };
 }
 
+
+
+async function notificationExists(db, { notificationKind = '', destination = '', relatedOrderId = null } = {}) {
+  const hasOutbox = await tableExists(db, 'notification_outbox');
+  if (!hasOutbox) return false;
+  const row = await db.prepare(`
+    SELECT notification_outbox_id
+    FROM notification_outbox
+    WHERE notification_kind = ?
+      AND LOWER(COALESCE(destination,'')) = LOWER(?)
+      AND (? IS NULL OR related_order_id = ?)
+      AND status IN ('queued','retry','sent')
+    ORDER BY notification_outbox_id DESC
+    LIMIT 1
+  `).bind(notificationKind, safeEmail(destination), relatedOrderId == null ? null : Number(relatedOrderId || 0), relatedOrderId == null ? null : Number(relatedOrderId || 0)).first().catch(() => null);
+  return !!row;
+}
+
+async function queueBackInStockNotice(db, requestRow) {
+  const destination = safeEmail(requestRow.email);
+  if (!destination) return false;
+  const already = await notificationExists(db, { notificationKind: 'back_in_stock', destination });
+  if (already) return false;
+  await queueNotification(db, {
+    notification_kind: 'back_in_stock',
+    destination,
+    payload: {
+      product_name: requestRow.product_name || '',
+      product_slug: requestRow.product_slug || '',
+      subject: requestRow.product_name ? `${requestRow.product_name} is back in stock` : 'A Devil n Dove item is back in stock'
+    }
+  });
+  return true;
+}
+
+async function autoProcessEngagement(db, env) {
+  const results = { back_in_stock_queued: 0, back_in_stock_closed: 0, recovery_queued: 0, review_requests_queued: 0, notifications_processed: 0 };
+
+  const hasProducts = await tableExists(db, 'products');
+  const hasOrders = await tableExists(db, 'orders');
+  const hasOrderItems = await tableExists(db, 'order_items');
+
+  if (hasProducts) {
+    const backInStockRows = nr(await db.prepare(`
+      SELECT pir.product_interest_request_id, pir.email, pir.product_id, p.name AS product_name, p.slug AS product_slug
+      FROM product_interest_requests pir
+      INNER JOIN products p ON p.product_id = pir.product_id
+      WHERE LOWER(COALESCE(pir.request_type,'')) = 'back_in_stock'
+        AND LOWER(COALESCE(pir.status,'open')) = 'open'
+        AND COALESCE(p.inventory_quantity,0) > 0
+        AND COALESCE(p.status,'draft') IN ('active','published')
+      ORDER BY pir.created_at ASC, pir.product_interest_request_id ASC
+      LIMIT 50
+    `).all().catch(() => ({ results: [] })));
+
+    for (const row of backInStockRows) {
+      const queued = await queueBackInStockNotice(db, row);
+      if (queued) results.back_in_stock_queued += 1;
+      await db.prepare(`UPDATE product_interest_requests SET status = 'done', updated_at = CURRENT_TIMESTAMP WHERE product_interest_request_id = ?`).bind(Number(row.product_interest_request_id || 0)).run().catch(() => null);
+      results.back_in_stock_closed += 1;
+    }
+  }
+
+  const recoveryRows = nr(await db.prepare(`
+    SELECT checkout_recovery_lead_id, customer_email, customer_name, cart_count, cart_value_cents, currency, checkout_path
+    FROM checkout_recovery_leads
+    WHERE LOWER(COALESCE(status,'open')) = 'open'
+      AND LOWER(COALESCE(customer_email,'')) != ''
+      AND last_recovery_email_at IS NULL
+    ORDER BY created_at ASC, checkout_recovery_lead_id ASC
+    LIMIT 50
+  `).all().catch(() => ({ results: [] })));
+  for (const row of recoveryRows) {
+    const already = await notificationExists(db, { notificationKind: 'checkout_recovery', destination: row.customer_email });
+    if (already) continue;
+    await queueRecoveryEmail(db, row);
+    await db.prepare(`UPDATE checkout_recovery_leads SET status = 'emailed', last_recovery_email_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id = ?`).bind(Number(row.checkout_recovery_lead_id || 0)).run().catch(() => null);
+    results.recovery_queued += 1;
+  }
+
+  if (hasOrders && hasOrderItems) {
+    const orders = nr(await db.prepare(`
+      SELECT o.order_id, o.order_number, o.customer_email
+      FROM orders o
+      WHERE (LOWER(COALESCE(o.payment_status,'')) IN ('paid','completed','captured','partially_refunded')
+         OR LOWER(COALESCE(o.order_status,'')) IN ('paid','fulfilled','completed'))
+        AND substr(COALESCE(o.created_at,''),1,10) >= date('now','-45 days')
+      ORDER BY o.created_at DESC, o.order_id DESC
+      LIMIT 50
+    `).all().catch(() => ({ results: [] })));
+
+    for (const row of orders) {
+      const already = await notificationExists(db, { notificationKind: 'review_request', destination: row.customer_email, relatedOrderId: Number(row.order_id || 0) });
+      if (already) continue;
+      await queueReviewRequest(db, Number(row.order_id || 0));
+      results.review_requests_queued += 1;
+    }
+  }
+
+  const processed = await processNotificationOutbox(env, { limit: 30 }).catch(() => ({ processed_count: 0 }));
+  results.notifications_processed = Number(processed?.processed_count || 0);
+  return results;
+}
 export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
@@ -554,6 +657,13 @@ export async function onRequestPost(context) {
       }
       await auditAdminAction(env, request, adminUser, { action_type: 'review_request_queued', target_type: 'order', details: { ids, queuedCount } });
       return json({ ok: true, message: `${queuedCount} review request(s) queued.` });
+    }
+
+
+    if (action === 'auto_process_engagement') {
+      const automationResults = await autoProcessEngagement(db, env);
+      await auditAdminAction(env, request, adminUser, { action_type: 'customer_engagement_auto_process', target_type: 'customer_engagement', details: automationResults });
+      return json({ ok: true, message: 'Automated engagement cycle completed.', automation_results: automationResults });
     }
 
     if (action === 'retry_notification' || action === 'bulk_retry_notifications') {
