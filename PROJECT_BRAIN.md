@@ -410,3 +410,10 @@ Roadmap emphasis after this pass:
 - continue pricing write-back and margin-warning refinement inside the main product edit workflow
 - keep schema compatibility hardening in place for older live D1 tables before assuming newer columns
 
+## Current pass update: customer engagement workflow depth, gift-card recipient support, and storefront testimonial placement
+- Customer engagement admin now supports larger queue handling for back-in-stock requests, abandoned checkout recovery leads, review/testimonial moderation, and recent order review-request email queuing.
+- Gift cards now support purchaser and recipient as separate people in the data model and admin issuance flow.
+- The main product editor now accepts live price-suggestion write-back with clearer landed-cost and target-margin warnings before save.
+- Featured testimonials are now designed to surface beyond product detail pages so storefront trust signals can appear on broader public pages.
+- Current schema intent for this pass includes gift-card purchaser/recipient fields and no change to the one-H1 rule on public pages.
+

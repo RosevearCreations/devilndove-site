@@ -1,3 +1,4 @@
+-- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
 -- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- File: /database_profiles_extension.sql
 -- Brief description: Adds full customer/employee profile storage for contact details,

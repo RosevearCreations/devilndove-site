@@ -1,3 +1,4 @@
+-- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
 -- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- Current pass note: broad product repricing is now handled in code through the existing products table and admin bulk tooling; no new required schema tables were needed for this pass.
@@ -510,3 +511,26 @@ ALTER TABLE site_item_inventory ADD COLUMN stock_unit_label TEXT NOT NULL DEFAUL
 -- 5) pricing suggestion load/apply actions in admin
 -- 6) continued schema-compatibility hardening for older D1 tables
 
+-- Gift card purchaser versus recipient tracking for engagement workflows.
+CREATE TABLE IF NOT EXISTS gift_cards (
+  gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code TEXT NOT NULL UNIQUE,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  initial_amount_cents INTEGER NOT NULL DEFAULT 0,
+  remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
+  issued_to_email TEXT,
+  issued_to_name TEXT,
+  note TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  expires_at TEXT,
+  last_redeemed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE gift_cards ADD COLUMN purchaser_email TEXT;
+ALTER TABLE gift_cards ADD COLUMN purchaser_name TEXT;
+ALTER TABLE gift_cards ADD COLUMN recipient_email TEXT;
+ALTER TABLE gift_cards ADD COLUMN recipient_name TEXT;
+ALTER TABLE gift_cards ADD COLUMN recipient_note TEXT;
+ALTER TABLE gift_cards ADD COLUMN purchaser_user_id INTEGER;
