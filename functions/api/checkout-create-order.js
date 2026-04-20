@@ -133,6 +133,12 @@ async function ensureGiftCardTables(db) {
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchaser_email TEXT`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchaser_name TEXT`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN recipient_email TEXT`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN recipient_name TEXT`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN recipient_note TEXT`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchaser_user_id INTEGER`).run().catch(() => null);
   await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_redemptions (
     gift_card_redemption_id INTEGER PRIMARY KEY AUTOINCREMENT,
     gift_card_id INTEGER NOT NULL,
