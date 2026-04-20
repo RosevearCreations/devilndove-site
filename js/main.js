@@ -188,6 +188,47 @@
     }
   }
 
+
+  function shouldShowFeaturedTestimonials(pathname) {
+    const path = String(pathname || location.pathname || '/').toLowerCase();
+    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html'].includes(path);
+  }
+
+  async function injectFeaturedTestimonials() {
+    if (!shouldShowFeaturedTestimonials(location.pathname)) return;
+    const container = document.querySelector('.container') || document.body;
+    const footer = container.querySelector('footer.footer, .footer');
+    if (!container || !footer || document.getElementById('featuredTestimonialsBlock')) return;
+    try {
+      const response = await fetch('/api/product-reviews?featured_only=1&limit=3', { headers: { Accept: 'application/json' } });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load testimonials.');
+      const reviews = Array.isArray(data.reviews) ? data.reviews : [];
+      if (!reviews.length) return;
+      const section = document.createElement('section');
+      section.id = 'featuredTestimonialsBlock';
+      section.className = 'card featured-testimonials-block';
+      section.style.marginTop = '18px';
+      section.innerHTML = `
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+          <div>
+            <h2 style="margin:0">What buyers say</h2>
+            <p class="small" style="margin:6px 0 0 0">Featured testimonials and approved buyer feedback from the Devil n Dove storefront.</p>
+          </div>
+          <a class="btn" href="/members/">Leave feedback</a>
+        </div>
+        <div class="featured-testimonials-grid" style="margin-top:12px">
+          ${reviews.map((row) => `
+            <article class="featured-testimonial-card">
+              <div class="small">${escapeHtml('★'.repeat(Math.max(1, Number(row.rating || 0))))}</div>
+              <p style="margin:10px 0">${escapeHtml(row.review_text || '')}</p>
+              <div class="small"><strong>${escapeHtml(row.reviewer_name || 'Devil n Dove customer')}</strong>${row.product_slug ? ` • <a href="/shop/product/?slug=${encodeURIComponent(row.product_slug)}">${escapeHtml(row.product_name || 'Product')}</a>` : ''}</div>
+            </article>`).join('')}
+        </div>`;
+      container.insertBefore(section, footer);
+    } catch (_error) {}
+  }
+
   function injectSharedFooter() {
     const container = document.querySelector('.container') || document.body;
     let footer = document.querySelector('footer.footer, .footer');
@@ -222,6 +263,7 @@
     injectSharedNav();
     injectSharedFooter();
     hydrateFooterSocials();
+    injectFeaturedTestimonials();
     ensureGlobalScript('/public/js/auth.js');
     ensureGlobalScript('/public/js/site-auth-ui.js');
     ensureGlobalScript('/public/js/site-analytics.js');

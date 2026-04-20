@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let editingProductId = null;
   let currentSharedPendingActions = [];
   let pendingMount = null;
+  let latestPriceSuggestion = null;
 
   function setMessage(message, isError = false) {
     if (!messageEl) return;
@@ -66,10 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
     resetImageUrlFields();
     editingProductId = null;
+    latestPriceSuggestion = null;
     form.dataset.mode = "create";
     if (submitButton) { submitButton.textContent = "Create Product"; submitButton.disabled = false; }
     const cancelButton = document.getElementById("cancelProductEdit");
     if (cancelButton) cancelButton.style.display = "none";
+    renderPricingInsight();
   }
 
   function ensureCancelButton() {
@@ -84,6 +87,73 @@ document.addEventListener("DOMContentLoaded", () => {
     if (submitButton && submitButton.parentNode) submitButton.parentNode.appendChild(cancelButton);
     cancelButton.addEventListener("click", () => { clearMessage(); resetFormState(); });
     return cancelButton;
+  }
+
+
+  function ensurePricingInsightMount() {
+    let mount = document.getElementById("productPricingInsightMount");
+    if (mount) return mount;
+    mount = document.createElement("div");
+    mount.id = "productPricingInsightMount";
+    mount.className = "card product-pricing-insight-card";
+    mount.style.display = "none";
+    form.parentNode?.insertBefore(mount, form.nextSibling);
+    return mount;
+  }
+
+  function parseDollarField(name) {
+    const field = form.elements.namedItem(name);
+    if (!field) return 0;
+    const raw = String(field.value || "").trim();
+    if (!raw) return 0;
+    const amount = Number(raw);
+    return Number.isFinite(amount) ? Math.round(amount * 100) : 0;
+  }
+
+  function renderPricingInsight() {
+    const mount = ensurePricingInsightMount();
+    if (!latestPriceSuggestion || !editingProductId || Number(latestPriceSuggestion.product_id || 0) !== Number(editingProductId || 0)) {
+      mount.style.display = "none";
+      mount.innerHTML = "";
+      return;
+    }
+
+    const currentPrice = parseDollarField("price");
+    const compareAt = parseDollarField("compare_at_price");
+    const landed = Number(latestPriceSuggestion.landed_cost_cents || 0);
+    const suggested = Number(latestPriceSuggestion.suggested_price_cents || 0);
+    const conservative = Number(latestPriceSuggestion.conservative_price_cents || 0);
+    const stretch = Number(latestPriceSuggestion.stretch_price_cents || 0);
+    const marginRatio = currentPrice > 0 ? ((currentPrice - landed) / currentPrice) : 0;
+    const targetMarginPercent = Number(latestPriceSuggestion.target_margin_percent || latestPriceSuggestion.assumptions?.target_margin_percent || 0);
+    let tone = "product-pricing-insight-card";
+    let headline = "Pricing guidance loaded";
+    if (currentPrice <= landed) {
+      tone += " danger";
+      headline = "Current price is below landed cost";
+    } else if ((marginRatio * 100) < targetMarginPercent) {
+      tone += " warning";
+      headline = "Current price is below the target margin";
+    }
+
+    mount.className = tone;
+    mount.style.display = "";
+    mount.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+        <div>
+          <h3 style="margin:0">${escapeHtml(headline)}</h3>
+          <div class="small">Use this to write suggested prices back into the main editor and spot margin pressure before saving live.</div>
+        </div>
+        <div class="small">Target margin ${escapeHtml(String(targetMarginPercent || 0))}%</div>
+      </div>
+      <div class="product-pricing-insight-metrics">
+        <div class="card"><div class="small">Current price</div><strong>${escapeHtml(centsToDollars(currentPrice))}</strong></div>
+        <div class="card"><div class="small">Landed cost</div><strong>${escapeHtml(centsToDollars(landed))}</strong></div>
+        <div class="card"><div class="small">Current margin</div><strong>${escapeHtml(((marginRatio || 0) * 100).toFixed(1))}%</strong></div>
+        <div class="card"><div class="small">Suggested price</div><strong>${escapeHtml(centsToDollars(suggested))}</strong></div>
+      </div>
+      <div class="small" style="margin-top:10px">Safe range ${escapeHtml(centsToDollars(conservative))} → ${escapeHtml(centsToDollars(stretch))}. Compare-at suggestion ${escapeHtml(centsToDollars(Number(latestPriceSuggestion.suggested_compare_at_cents || 0)))}. Current compare-at ${escapeHtml(centsToDollars(compareAt))}.</div>
+      ${(Array.isArray(latestPriceSuggestion.notes) && latestPriceSuggestion.notes.length) ? `<div class="small" style="margin-top:8px">${latestPriceSuggestion.notes.map((note) => escapeHtml(note)).join(" • ")}</div>` : ""}`;
   }
 
   function ensurePendingMount() {
@@ -312,6 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await loadProduct(productId);
       editingProductId = productId;
       fillForm(data.product || {}, data.images || []);
+      renderPricingInsight();
       setFormModeEdit();
       form.scrollIntoView({ behavior: "smooth", block: "start" });
       setMessage("Product loaded for editing.");
@@ -431,19 +502,28 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await loadProduct(productId);
       editingProductId = productId;
       fillForm(data.product || {}, data.images || []);
-      const suggestedPriceCents = Number(event?.detail?.recommended_price_cents || 0);
-      const suggestedCompareCents = Number(event?.detail?.recommended_compare_at_cents || 0);
-      if (Number.isFinite(suggestedPriceCents) && suggestedPriceCents > 0) {
-        setField('price', centsToDollars(suggestedPriceCents));
+      const safeSuggestedPrice = Number(event?.detail?.suggested_price_cents || event?.detail?.recommended_price_cents || 0);
+      const safeSuggestedCompare = Number(event?.detail?.suggested_compare_at_cents || event?.detail?.recommended_compare_at_cents || 0);
+      latestPriceSuggestion = { ...(event?.detail || {}), suggested_price_cents: safeSuggestedPrice, suggested_compare_at_cents: safeSuggestedCompare };
+      if (Number.isFinite(safeSuggestedPrice) && safeSuggestedPrice > 0) {
+        setField('price', centsToDollars(safeSuggestedPrice));
       }
-      if (Number.isFinite(suggestedCompareCents) && suggestedCompareCents > 0) {
-        setField('compare_at_price', centsToDollars(suggestedCompareCents));
+      if (Number.isFinite(safeSuggestedCompare) && safeSuggestedCompare > 0) {
+        setField('compare_at_price', centsToDollars(safeSuggestedCompare));
       }
+      renderPricingInsight();
       setFormModeEdit();
       form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setMessage('Recommended pricing loaded into the product editor. Review and save when ready.');
+      setMessage('Recommended pricing loaded into the product editor. Review the margin warning box and save when ready.');
     } catch (error) {
       setMessage(error.message || 'Failed to load price suggestion into editor.', true);
+    }
+  });
+
+  form.addEventListener("input", (event) => {
+    const fieldName = event?.target?.name || "";
+    if (["price", "compare_at_price"].includes(fieldName)) {
+      renderPricingInsight();
     }
   });
 
