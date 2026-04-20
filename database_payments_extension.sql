@@ -189,3 +189,5 @@ CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification
 -- 6) continued schema-compatibility hardening for older D1 tables
 -- Pass 29 - footer socials, engagement depth, and editor price write-back
 -- Notes: live code now expects footer social fallback behavior, deeper engagement admin actions, and editor-side price preset write-back.
+
+-- Pass 30 schema note: storefront gift-card purchases may use gift_cards.order_id, purchase_source, and pending_activation status; publish scoring now expects image-count-aware readiness.

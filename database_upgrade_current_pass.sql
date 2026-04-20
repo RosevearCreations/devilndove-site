@@ -536,3 +536,11 @@ ALTER TABLE gift_cards ADD COLUMN recipient_note TEXT;
 ALTER TABLE gift_cards ADD COLUMN purchaser_user_id INTEGER;
 -- Pass 29 - footer socials, engagement depth, and editor price write-back
 -- Notes: live code now expects footer social fallback behavior, deeper engagement admin actions, and editor-side price preset write-back.
+
+
+-- Pass 30 upgrade notes
+ALTER TABLE gift_cards ADD COLUMN order_id INTEGER;
+ALTER TABLE gift_cards ADD COLUMN purchase_source TEXT;
+-- Runtime code also keeps gift_cards purchaser/recipient fields in sync and uses pending_activation for storefront-issued cards.
+
+-- Pass 30 schema note: storefront gift-card purchases may use gift_cards.order_id, purchase_source, and pending_activation status; publish scoring now expects image-count-aware readiness.

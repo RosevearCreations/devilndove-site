@@ -294,3 +294,11 @@ Roadmap emphasis after this pass:
 - Added direct price-preset write-back buttons inside the main product editor pricing insight card.
 - Gift cards continue to support purchaser and recipient as separate people, with stronger admin resend/activate/deactivate workflow.
 - Next recommended direction after this pass: storefront gift-card purchase flow, richer testimonial placement, and engagement queue automation polish.
+
+
+## Current pass note (Pass 30)
+- Added storefront gift-card purchase UX from the shop into checkout with purchaser and recipient fields.
+- Storefront gift-card purchases now create `pending_activation` gift cards tied to the order so purchaser and recipient can be different people without auto-issuing unpaid cards.
+- Expanded featured testimonial placement onto more public templates.
+- Added automated engagement processing from the admin board for back-in-stock, recovery, review requests, and notification dispatch.
+- Added stronger publish-readiness and photo-completeness scoring before publish, including photo-count warnings and image scoring in admin.
