@@ -130,7 +130,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const publishScore = Number(product.publish_readiness_score || 0);
       const imageScore = Number(product.image_quality_score || 0);
       const canApprove = ready;
-      const canPublish = ready && ["approved", "published"].includes(reviewStatusValue);
+      const lowScorePublish = publishScore < 85 || imageScore < 70 || !ready;
+      const canPublish = ready && ["approved", "published"].includes(reviewStatusValue) && !lowScorePublish;
       const approveTitle = canApprove ? 'Approve this draft for storefront review.' : `Finish required approval fields first${readyNotes ? `: ${readyNotes}` : '.'}`;
       const publishTitle = canPublish ? 'Publish this product to the storefront.' : (!ready ? `Finish required approval fields first${readyNotes ? `: ${readyNotes}` : '.'}` : 'Approve this product before publishing.');
       const linkedResourceCount = Number(product.linked_resource_count || 0);
@@ -158,6 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <button class="btn" type="button" data-review-action="approve" data-product-id="${productId}" ${canApprove ? '' : 'disabled'} title="${escapeHtml(approveTitle)}">Approve</button>
               <button class="btn" type="button" data-review-action="request_changes" data-product-id="${productId}">Needs Changes</button>
               <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}" ${canPublish ? '' : 'disabled'} title="${escapeHtml(publishTitle)}">Publish</button>
+              ${(!canPublish && ["approved", "published"].includes(reviewStatusValue)) ? `<button class="btn" type="button" data-review-action="publish_override" data-product-id="${productId}" title="Override low publish score and push live anyway.">Override Publish</button>` : ''}
               <button class="btn" type="button" data-resource-action="reserve" data-product-id="${productId}">Reserve Resources</button>
               <button class="btn" type="button" data-resource-action="release" data-product-id="${productId}">Release Resources</button>
               <button class="btn" type="button" data-archive-product-id="${productId}" ${isArchived ? "disabled" : ""}>Archive</button>

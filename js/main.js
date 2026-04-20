@@ -232,7 +232,7 @@
     const footer = container.querySelector('footer.footer, .footer');
     if (!container || !footer || document.getElementById('featuredTestimonialsBlock')) return;
     try {
-      const response = await fetch('/api/product-reviews?featured_only=1&limit=3', { headers: { Accept: 'application/json' } });
+      const response = await fetch(`/api/product-reviews?featured_only=1&limit=${location.pathname.startsWith('/shop/') ? 4 : 3}`, { headers: { Accept: 'application/json' } });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load testimonials.');
       const reviews = Array.isArray(data.reviews) ? data.reviews : [];
@@ -254,7 +254,7 @@
             <article class="featured-testimonial-card">
               <div class="small">${escapeHtml('★'.repeat(Math.max(1, Number(row.rating || 0))))}</div>
               <p style="margin:10px 0">${escapeHtml(row.review_text || '')}</p>
-              <div class="small"><strong>${escapeHtml(row.reviewer_name || 'Devil n Dove customer')}</strong>${row.product_slug ? ` • <a href="/shop/product/?slug=${encodeURIComponent(row.product_slug)}">${escapeHtml(row.product_name || 'Product')}</a>` : ''}</div>
+              <div class="small"><strong>${escapeHtml(row.reviewer_name || 'Devil n Dove customer')}</strong>${row.product_slug ? ` • <a href="/shop/product/?slug=${encodeURIComponent(row.product_slug)}">${escapeHtml(row.product_name || 'Product')}</a>` : ''}</div><div class="small" style="margin-top:4px">${escapeHtml(row.review_kind || 'testimonial')}</div>
             </article>`).join('')}
         </div>`;
       container.insertBefore(section, footer);

@@ -25,6 +25,30 @@ document.addEventListener('DOMContentLoaded', () => {
       .replaceAll("'", '&#039;');
   }
 
+  async function inspectLocalImageFile(file) {
+    return new Promise((resolve) => {
+      try {
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          const width = Number(img.naturalWidth || 0);
+          const height = Number(img.naturalHeight || 0);
+          URL.revokeObjectURL(objectUrl);
+          const ratio = height > 0 ? (width / height) : 0;
+          const orientation = ratio >= 0.95 ? 'square_or_landscape' : 'portrait';
+          resolve({ width, height, ratio, orientation, ok: width >= 800 && height >= 800 && orientation === 'square_or_landscape' });
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve({ width: 0, height: 0, ratio: 0, orientation: 'unknown', ok: false });
+        };
+        img.src = objectUrl;
+      } catch {
+        resolve({ width: 0, height: 0, ratio: 0, orientation: 'unknown', ok: false });
+      }
+    });
+  }
+
   function rowTemplate(row = {}, index = 0) {
     return `
       <div class="card" data-product-image-row style="margin-top:12px">
@@ -66,7 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageCount = rows.length;
     const altCoverage = rows.filter((row) => String(row.alt_text || "").trim().length >= 5).length;
     const score = imageCount >= 5 ? 100 : imageCount >= 3 ? 80 : imageCount > 0 ? 45 : 0;
-    mount.innerHTML = `<h4 style="margin-top:0">Photo completeness before publish</h4><div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • image score ${score}%</div><div class="small" style="margin-top:6px">Aim for at least 3 images, with the first image clearly chosen and alt text filled in for the first few photos.</div>`;
+    const firstImage = rows[0] || null;
+    const firstImageWarning = firstImage ? '' : 'Choose a first image before publish.';
+    mount.innerHTML = `<h4 style="margin-top:0">Photo completeness before publish</h4><div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • image score ${score}%</div><div class="small" style="margin-top:6px">Aim for at least 3 images, with the first image clearly chosen and alt text filled in for the first few photos. Etsy-style best practice still favors a square or landscape first image.</div>${firstImageWarning ? `<div class="small" style="margin-top:6px;color:#b00020">${firstImageWarning}</div>` : ''}`;
   }
 
   function collectRows() {
@@ -113,6 +139,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loadProductImagesButton')?.addEventListener('click', loadImages);
     document.getElementById('addProductImageRowButton')?.addEventListener('click', () => addRow());
     document.getElementById('uploadProductImageButton')?.addEventListener('click', uploadImage);
+    document.getElementById('productImageUploadInput')?.addEventListener('change', async (event) => {
+      const file = event.target?.files?.[0];
+      if (!file) return;
+      const info = await inspectLocalImageFile(file);
+      if (!info.ok) setMessage(`Image warning: use a square or landscape image at least 800x800. Current file is ${info.width}x${info.height}.`, true);
+      else setMessage(`Image looks good for listing use: ${info.width}x${info.height}.`, false);
+    });
     document.getElementById('refreshMediaAssetsButton')?.addEventListener('click', loadAssetLibrary);
     document.getElementById('adminProductImagesForm')?.addEventListener('submit', saveImages);
     mountEl.addEventListener('click', onClick);
@@ -164,8 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('productImageUploadInput');
     const file = fileInput?.files?.[0];
     if (!file) return setMessage('Choose an image file first.', true);
+    const localInfo = await inspectLocalImageFile(file);
+    if (!localInfo.ok) {
+      return setMessage(`Use a square or landscape image at least 800x800. Current file is ${localInfo.width}x${localInfo.height}.`, true);
+    }
     try {
-      setMessage('Uploading image...');
+      setMessage(`Uploading image ${localInfo.width}x${localInfo.height} (${localInfo.orientation.replace('_',' ')}).`);
       const formData = new FormData();
       formData.append('file', file);
       formData.append('product_id', String(productId));

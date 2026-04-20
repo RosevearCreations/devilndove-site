@@ -174,11 +174,42 @@ document.addEventListener('DOMContentLoaded', () => {
             <div id="customerEngagementNotifications" class="small">Loading…</div>
           </div>
         </div>
+
+
+        <div class="grid cols-2" style="gap:18px;margin-top:18px">
+          <div class="card">
+            <h4 style="margin-top:0">Automation cooldowns & exclusions</h4>
+            <form id="engagementCooldownForm" class="grid" style="gap:10px;margin-bottom:10px">
+              <div class="grid cols-3" style="gap:10px">
+                <select id="engagementCooldownKind"><option value="checkout_recovery">Checkout recovery</option><option value="review_request">Review request</option><option value="back_in_stock">Back in stock</option><option value="gift_card_issued">Gift card issued</option></select>
+                <input id="engagementCooldownHours" type="number" min="0" step="1" placeholder="Cooldown hours" />
+                <label style="display:flex;gap:8px;align-items:center"><input id="engagementCooldownEnabled" type="checkbox" checked /> <span class="small">Enabled</span></label>
+              </div>
+              <button class="btn" type="submit">Save cooldown</button>
+            </form>
+            <form id="engagementExclusionForm" class="grid" style="gap:10px;margin-bottom:10px">
+              <div class="grid cols-2" style="gap:10px">
+                <select id="engagementExclusionKind"><option value="checkout_recovery">Checkout recovery</option><option value="review_request">Review request</option><option value="back_in_stock">Back in stock</option><option value="gift_card_issued">Gift card issued</option></select>
+                <input id="engagementExclusionDestination" type="email" placeholder="Email to exclude" />
+              </div>
+              <input id="engagementExclusionReason" type="text" placeholder="Reason / note" />
+              <button class="btn" type="submit">Add exclusion</button>
+            </form>
+            <div id="customerEngagementAutomation" class="small">Loading…</div>
+          </div>
+          <div class="card">
+            <h4 style="margin-top:0">Automation run log</h4>
+            <div id="customerEngagementRunLog" class="small">Loading…</div>
+          </div>
+        </div>
+
       </div>`;
 
     document.getElementById('refreshCustomerEngagementButton')?.addEventListener('click', load);
     document.getElementById('runCustomerAutomationButton')?.addEventListener('click', onRunAutomation);
     document.getElementById('giftCardIssueForm')?.addEventListener('submit', onIssueGiftCard);
+    document.getElementById('engagementCooldownForm')?.addEventListener('submit', onSaveCooldown);
+    document.getElementById('engagementExclusionForm')?.addEventListener('submit', onAddExclusion);
     document.getElementById('queueSelectedReviewOrdersButton')?.addEventListener('click', onBulkQueueReviewRequests);
     document.getElementById('retrySelectedNotificationsButton')?.addEventListener('click', onBulkRetryNotifications);
     document.getElementById('retrySelectedNotificationsInlineButton')?.addEventListener('click', onBulkRetryNotifications);
@@ -375,6 +406,39 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`).join(''), 'No queued customer notifications right now.');
   }
 
+
+  function renderAutomation(data) {
+    renderList('customerEngagementAutomation', `
+      <div><strong>Cooldown rules</strong></div>
+      ${(data.automation_rules || []).map((row) => `<div class="card" style="margin:8px 0;padding:10px"><strong>${esc(row.notification_kind)}</strong><div class="small">${esc(String(row.cooldown_hours))} hour cooldown • ${Number(row.is_enabled || 0) === 1 ? 'enabled' : 'disabled'}</div></div>`).join('') || '<div class="small">No cooldown rules yet.</div>'}
+      <div style="margin-top:12px"><strong>Active exclusions</strong></div>
+      ${(data.exclusions || []).map((row) => `<div class="card" style="margin:8px 0;padding:10px"><strong>${esc(row.notification_kind)}</strong><div class="small">${esc(row.destination || 'All destinations')} ${row.reason ? `• ${esc(row.reason)}` : ''}</div><div style="margin-top:8px"><button class="btn" type="button" data-remove-exclusion="${esc(row.notification_exclusion_id)}">Remove</button></div></div>`).join('') || '<div class="small">No exclusions yet.</div>'}
+    `, 'No automation controls available yet.');
+    renderList('customerEngagementRunLog', (data.automation_runs || []).map((row) => {
+      let summary = {};
+      try { summary = JSON.parse(row.summary_json || '{}'); } catch {}
+      return `<div class="card" style="margin-bottom:10px"><strong>${esc(row.run_type || 'automation')}</strong><div class="small">${esc(fmtDate(row.created_at))}</div><div class="small" style="margin-top:6px">${Object.entries(summary).map(([k,v]) => `${esc(k)}: ${esc(String(v))}`).join(' • ') || 'No summary recorded.'}</div></div>`;
+    }).join(''), 'No automation runs recorded yet.');
+  }
+
+  async function onSaveCooldown(event) {
+    event.preventDefault();
+    const notification_kind = String(document.getElementById('engagementCooldownKind')?.value || '').trim();
+    const cooldown_hours = Number(document.getElementById('engagementCooldownHours')?.value || 0);
+    const is_enabled = document.getElementById('engagementCooldownEnabled')?.checked ? 1 : 0;
+    await postAction({ action: 'set_notification_cooldown', notification_kind, cooldown_hours, is_enabled }, 'Cooldown rule saved.');
+  }
+
+  async function onAddExclusion(event) {
+    event.preventDefault();
+    const notification_kind = String(document.getElementById('engagementExclusionKind')?.value || '').trim();
+    const destination = String(document.getElementById('engagementExclusionDestination')?.value || '').trim();
+    const reason = String(document.getElementById('engagementExclusionReason')?.value || '').trim();
+    if (!notification_kind) return setMessage('Choose a notification type first.', true);
+    await postAction({ action: 'add_notification_exclusion', notification_kind, destination, reason }, 'Exclusion added.');
+    event.target.reset();
+  }
+
   async function postAction(payload, successMessage) {
     const response = await window.DDAuth.apiFetch('/api/admin/customer-engagement', { method: 'POST', body: JSON.stringify(payload) });
     await readJson(response, 'Customer engagement action failed.');
@@ -441,6 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const singleReview = event.target.closest('[data-review-status]');
     const singleReviewOrder = event.target.closest('[data-review-order-id]');
     const retryNotification = event.target.closest('[data-retry-notification]');
+    const removeExclusion = event.target.closest('[data-remove-exclusion]');
     const copyGiftCardCode = event.target.closest('[data-copy-gift-card-code]');
 
     if (copyGiftCardCode) {
@@ -511,6 +576,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (retryNotification) {
       await postAction({ action: 'retry_notification', notification_outbox_id: Number(retryNotification.getAttribute('data-retry-notification') || 0) }, 'Notification re-queued.');
+      return;
+    }
+    if (removeExclusion) {
+      await postAction({ action: 'remove_notification_exclusion', notification_exclusion_id: Number(removeExclusion.getAttribute('data-remove-exclusion') || 0) }, 'Exclusion removed.');
     }
   }
 
@@ -521,6 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await readJson(response, 'Failed to load customer engagement board.');
       payloadState = data;
       renderLists(data);
+      renderAutomation(data);
       setMessage('Customer engagement board updated.');
     } catch (error) {
       setMessage(error.message || 'Failed to load customer engagement board.', true);
