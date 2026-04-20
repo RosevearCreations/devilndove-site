@@ -350,3 +350,9 @@ Roadmap emphasis after this pass:
 - Featured testimonials are now designed to surface beyond product detail pages so storefront trust signals can appear on broader public pages.
 - Current schema intent for this pass includes gift-card purchaser/recipient fields and no change to the one-H1 rule on public pages.
 
+## Pass 29 - footer socials, engagement depth, and editor price write-back
+- Restored footer social visibility with static links plus live social-feed hydration and local JSON fallback.
+- Deepened the admin customer engagement board with filters, bulk gift card actions, and notification retry controls.
+- Added direct price-preset write-back buttons inside the main product editor pricing insight card.
+- Gift cards continue to support purchaser and recipient as separate people, with stronger admin resend/activate/deactivate workflow.
+- Next recommended direction after this pass: storefront gift-card purchase flow, richer testimonial placement, and engagement queue automation polish.

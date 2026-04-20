@@ -431,4 +431,5 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- 4) product review / testimonial submission and approved review display
 -- 5) pricing suggestion load/apply actions in admin
 -- 6) continued schema-compatibility hardening for older D1 tables
-
+-- Pass 29 - footer socials, engagement depth, and editor price write-back
+-- Notes: live code now expects footer social fallback behavior, deeper engagement admin actions, and editor-side price preset write-back.

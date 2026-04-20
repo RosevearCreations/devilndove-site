@@ -534,3 +534,5 @@ ALTER TABLE gift_cards ADD COLUMN recipient_email TEXT;
 ALTER TABLE gift_cards ADD COLUMN recipient_name TEXT;
 ALTER TABLE gift_cards ADD COLUMN recipient_note TEXT;
 ALTER TABLE gift_cards ADD COLUMN purchaser_user_id INTEGER;
+-- Pass 29 - footer socials, engagement depth, and editor price write-back
+-- Notes: live code now expects footer social fallback behavior, deeper engagement admin actions, and editor-side price preset write-back.
