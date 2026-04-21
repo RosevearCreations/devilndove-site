@@ -155,6 +155,23 @@ async function activatePendingGiftCardsForOrder(env, order, payment, providerLab
         }
       }).catch(() => null);
     }
+    const purchaserDestination = normalizeText(row.purchaser_email).toLowerCase();
+    if (purchaserDestination) {
+      await queueNotification(db, {
+        notification_kind: 'gift_card_purchase_confirmation',
+        destination: purchaserDestination,
+        related_order_id: Number(order?.order_id || 0),
+        related_payment_id: Number(payment?.payment_id || 0),
+        payload: {
+          code: row.code || '',
+          currency: row.currency || order?.currency || 'CAD',
+          initial_amount_cents: Number(row.initial_amount_cents || 0),
+          purchaser_name: row.purchaser_name || '',
+          recipient_name: row.recipient_name || '',
+          subject: 'Your Devil n Dove gift card purchase is confirmed'
+        }
+      }).catch(() => null);
+    }
   }
   if (activated_count > 0) {
     await processNotificationOutbox(env, { limit: Math.max(activated_count, 3) }).catch(() => ({ ok: false }));

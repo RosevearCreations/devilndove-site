@@ -13,8 +13,6 @@ function centsToMoney(cents, currency = 'CAD') {
   return `${(Number(cents || 0) / 100).toFixed(2)} ${normalizeText(currency).toUpperCase() || 'CAD'}`;
 }
 
-
-
 async function tableExists(db, tableName) {
   try {
     const row = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1`).bind(tableName).first();
@@ -72,15 +70,20 @@ async function ensureNotificationSupportTables(db) {
     summary_json TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`).run().catch(() => null);
+
   await ensureColumn(db, 'notification_outbox', 'attempt_count', `attempt_count INTEGER NOT NULL DEFAULT 0`);
   await ensureColumn(db, 'notification_outbox', 'last_attempt_at', `last_attempt_at TEXT`);
   await ensureColumn(db, 'notification_outbox', 'provider_message_id', `provider_message_id TEXT`);
   await ensureColumn(db, 'notification_outbox', 'error_text', `error_text TEXT`);
+  await ensureColumn(db, 'notification_outbox', 'related_product_id', `related_product_id INTEGER`);
+  await ensureColumn(db, 'notification_outbox', 'metadata_json', `metadata_json TEXT`);
+
   const defaults = [
     ['checkout_recovery', 24],
     ['review_request', 72],
     ['back_in_stock', 24],
     ['gift_card_issued', 1],
+    ['gift_card_purchase_confirmation', 1],
   ];
   for (const [kind, hours] of defaults) {
     await db.prepare(`INSERT INTO notification_cooldown_rules (notification_kind, cooldown_hours, is_enabled, created_at, updated_at)
@@ -112,23 +115,98 @@ function buildAbsoluteUrl(payloadUrl, env) {
   return `${origin}/${raw.replace(/^\/+/, '')}`;
 }
 
+async function getCooldownRule(db, notificationKind) {
+  if (!(await tableExists(db, 'notification_cooldown_rules'))) return null;
+  return db.prepare(`
+    SELECT notification_kind, cooldown_hours, is_enabled
+    FROM notification_cooldown_rules
+    WHERE notification_kind = ?
+    LIMIT 1
+  `).bind(normalizeText(notificationKind)).first().catch(() => null);
+}
+
+async function getActiveExclusion(db, payload = {}) {
+  if (!(await tableExists(db, 'notification_exclusions'))) return null;
+  const kind = normalizeText(payload.notification_kind);
+  const destination = normalizeText(payload.destination).toLowerCase();
+  const productId = payload.related_product_id == null ? null : Number(payload.related_product_id || 0);
+  const orderId = payload.related_order_id == null ? null : Number(payload.related_order_id || 0);
+  return db.prepare(`
+    SELECT notification_exclusion_id, reason
+    FROM notification_exclusions
+    WHERE is_active = 1
+      AND notification_kind = ?
+      AND (destination IS NULL OR destination = '' OR LOWER(destination) = ?)
+      AND (product_id IS NULL OR product_id = ?)
+      AND (order_id IS NULL OR order_id = ?)
+    ORDER BY notification_exclusion_id DESC
+    LIMIT 1
+  `).bind(kind, destination, productId, orderId).first().catch(() => null);
+}
+
+async function isInCooldown(db, payload = {}) {
+  const kind = normalizeText(payload.notification_kind);
+  const destination = normalizeText(payload.destination).toLowerCase();
+  if (!kind || !destination) return null;
+  const rule = await getCooldownRule(db, kind);
+  if (!rule || Number(rule.is_enabled || 0) !== 1 || Number(rule.cooldown_hours || 0) <= 0) return null;
+  const hours = Math.max(1, Number(rule.cooldown_hours || 0));
+  const row = await db.prepare(`
+    SELECT notification_outbox_id, created_at, status
+    FROM notification_outbox
+    WHERE notification_kind = ?
+      AND LOWER(COALESCE(destination,'')) = ?
+      AND status IN ('queued','retry','sent','suppressed')
+      AND created_at >= datetime('now', ?)
+    ORDER BY notification_outbox_id DESC
+    LIMIT 1
+  `).bind(kind, destination, `-${hours} hours`).first().catch(() => null);
+  return row ? { hours, row } : null;
+}
+
+async function evaluateSuppression(db, payload = {}) {
+  const exclusion = await getActiveExclusion(db, payload);
+  if (exclusion) {
+    return { suppressed: true, status: 'suppressed', reason: exclusion.reason || 'Excluded by notification rule.' };
+  }
+  const cooldown = await isInCooldown(db, payload);
+  if (cooldown) {
+    return { suppressed: true, status: 'suppressed', reason: `Cooling down for ${cooldown.hours} hour(s).` };
+  }
+  return { suppressed: false, status: 'queued', reason: '' };
+}
+
 export async function queueNotification(db, payload = {}) {
   await ensureNotificationSupportTables(db);
-  return db.prepare(`
+  const suppression = await evaluateSuppression(db, payload);
+  const insert = await db.prepare(`
     INSERT INTO notification_outbox (
-      notification_kind, channel, destination, related_order_id, related_payment_id,
-      payload_json, status, next_attempt_at, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      notification_kind, channel, destination, related_order_id, related_payment_id, related_product_id,
+      payload_json, metadata_json, status, next_attempt_at, error_text, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   `).bind(
     normalizeText(payload.notification_kind) || 'generic_notice',
     normalizeText(payload.channel) || 'email',
     normalizeText(payload.destination) || null,
     payload.related_order_id == null ? null : Number(payload.related_order_id || 0),
     payload.related_payment_id == null ? null : Number(payload.related_payment_id || 0),
+    payload.related_product_id == null ? null : Number(payload.related_product_id || 0),
     JSON.stringify(payload.payload || {}),
-    normalizeText(payload.status) || 'queued',
-    payload.next_attempt_at || null
+    JSON.stringify(payload.metadata || {}),
+    suppression.status,
+    suppression.suppressed ? null : (payload.next_attempt_at || null),
+    suppression.suppressed ? suppression.reason : null
   ).run();
+
+  const row = {
+    notification_outbox_id: Number(insert?.meta?.last_row_id || 0),
+    notification_kind: normalizeText(payload.notification_kind),
+    destination: normalizeText(payload.destination),
+  };
+  if (suppression.suppressed) {
+    await recordDispatchLog(db, row, 'suppressed', null, suppression.reason);
+  }
+  return { ok: true, queued: !suppression.suppressed, suppressed: suppression.suppressed, reason: suppression.reason, notification_outbox_id: row.notification_outbox_id };
 }
 
 function buildEmailFromNotification(row, env) {
@@ -139,7 +217,6 @@ function buildEmailFromNotification(row, env) {
   const provider = normalizeText(payload.provider || payload.payment_provider).toUpperCase();
   const destination = normalizeText(row.destination || payload.contact_email || payload.email);
   const subjectBase = orderNumber ? `Order ${orderNumber}` : 'Devil n Dove notification';
-  const siteOrigin = normalizeText(env?.SITE_ORIGIN || 'https://devilndove.com');
 
   if (kind === 'refund_receipt') {
     return {
@@ -191,6 +268,17 @@ function buildEmailFromNotification(row, env) {
       html: `<p>Hello ${recipientName},</p><p>${purchaserName} sent you a Devil n Dove gift card.</p><p><strong>Code:</strong> ${code}</p><p><strong>Value:</strong> ${balance}</p><p><strong>Expires:</strong> ${expires}</p><p>Use the code during checkout.</p><p><a href="${jsonHtmlEscape(shopUrl)}">Browse the shop</a></p>${payload.note ? `<p><strong>Message:</strong> ${jsonHtmlEscape(payload.note)}</p>` : ''}`
     };
   }
+  if (kind === 'gift_card_purchase_confirmation') {
+    const recipientName = jsonHtmlEscape(payload.recipient_name || 'your recipient');
+    const purchaserName = jsonHtmlEscape(payload.purchaser_name || 'there');
+    const code = jsonHtmlEscape(payload.code || '');
+    const balance = jsonHtmlEscape(centsToMoney(payload.initial_amount_cents, payload.currency || 'CAD'));
+    return {
+      to: destination,
+      subject: payload.subject || 'Your Devil n Dove gift card purchase is confirmed',
+      html: `<p>Hello ${purchaserName},</p><p>Your gift card purchase has been confirmed.</p><p><strong>Recipient:</strong> ${recipientName}</p><p><strong>Code:</strong> ${code}</p><p><strong>Value:</strong> ${balance}</p><p>We have now delivered the gift card to the recipient email on file.</p>`
+    };
+  }
   if (kind === 'back_in_stock') {
     const shopUrl = buildAbsoluteUrl(payload.product_slug ? `/shop/product/?slug=${payload.product_slug}` : '/shop/', env);
     return {
@@ -199,7 +287,6 @@ function buildEmailFromNotification(row, env) {
       html: `<p>Good news — an item you asked about is back in stock.</p><p><strong>Item:</strong> ${jsonHtmlEscape(payload.product_name || 'Devil n Dove item')}</p><p><a href="${jsonHtmlEscape(shopUrl)}">View the item now</a></p>`
     };
   }
-
   if (kind === 'review_request') {
     const membersUrl = buildAbsoluteUrl('/members/', env);
     const productNames = Array.isArray(payload.product_names) ? payload.product_names.filter(Boolean).join(', ') : '';
@@ -209,7 +296,6 @@ function buildEmailFromNotification(row, env) {
       html: `<p>Thank you for your order from Devil n Dove.</p><p>${productNames ? `<strong>Items:</strong> ${jsonHtmlEscape(productNames)}<br>` : ''}${orderNumber ? `<strong>Order:</strong> ${jsonHtmlEscape(orderNumber)}` : ''}</p><p>If you have a moment, we'd love a quick review or testimonial.</p><p><a href="${jsonHtmlEscape(membersUrl)}">Open the members area to leave your feedback</a></p>`
     };
   }
-
   return {
     to: destination,
     subject: payload.subject || 'Devil n Dove update',
@@ -255,7 +341,7 @@ export async function processNotificationOutbox(env, options = {}) {
   const limit = Math.max(1, Math.min(Number(options.limit || 10), 50));
   const rows = (await db.prepare(`
     SELECT notification_outbox_id, notification_kind, channel, destination, related_order_id, related_payment_id,
-           payload_json, status, attempt_count, next_attempt_at
+           related_product_id, payload_json, status, attempt_count, next_attempt_at
     FROM notification_outbox
     WHERE status IN ('queued','retry')
       AND (next_attempt_at IS NULL OR next_attempt_at <= CURRENT_TIMESTAMP)
@@ -267,6 +353,22 @@ export async function processNotificationOutbox(env, options = {}) {
   for (const row of rows) {
     const outboxId = Number(row.notification_outbox_id || 0);
     try {
+      const suppression = await evaluateSuppression(db, {
+        notification_kind: row.notification_kind,
+        destination: row.destination,
+        related_order_id: row.related_order_id,
+        related_product_id: row.related_product_id
+      });
+      if (suppression.suppressed) {
+        await db.prepare(`
+          UPDATE notification_outbox
+          SET status = 'suppressed', error_text = ?, updated_at = CURRENT_TIMESTAMP
+          WHERE notification_outbox_id = ?
+        `).bind(suppression.reason || 'Suppressed.', outboxId).run();
+        await recordDispatchLog(db, row, 'suppressed', null, suppression.reason || 'Suppressed.');
+        results.push({ notification_outbox_id: outboxId, ok: false, suppressed: true, error: suppression.reason || 'Suppressed.' });
+        continue;
+      }
       const { sent, email } = await dispatchNotificationRow(env, row);
       if (sent.ok) {
         await db.prepare(`
