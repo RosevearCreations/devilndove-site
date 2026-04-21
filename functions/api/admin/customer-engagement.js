@@ -6,9 +6,7 @@ function nr(result) { return Array.isArray(result?.results) ? result.results : [
 function cents(value) { return Math.max(0, Math.round(Number(value || 0))); }
 function safeEmail(value) { return normalizeText(value).toLowerCase(); }
 function asArray(value) { return Array.isArray(value) ? value : []; }
-function uniqueIds(value) {
-  return Array.from(new Set(asArray(value).map((row) => Number(row || 0)).filter((row) => Number.isInteger(row) && row > 0)));
-}
+function uniqueIds(value) { return Array.from(new Set(asArray(value).map((row) => Number(row || 0)).filter((row) => Number.isInteger(row) && row > 0))); }
 
 async function tableExists(db, tableName) {
   try {
@@ -101,6 +99,8 @@ async function ensureGiftCardTables(db) {
   await ensureColumn(db, 'gift_cards', 'recipient_name', `recipient_name TEXT`);
   await ensureColumn(db, 'gift_cards', 'recipient_note', `recipient_note TEXT`);
   await ensureColumn(db, 'gift_cards', 'purchaser_user_id', `purchaser_user_id INTEGER`);
+  await ensureColumn(db, 'gift_cards', 'order_id', `order_id INTEGER`);
+  await ensureColumn(db, 'gift_cards', 'purchase_source', `purchase_source TEXT`);
   await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_redemptions (
     gift_card_redemption_id INTEGER PRIMARY KEY AUTOINCREMENT,
     gift_card_id INTEGER NOT NULL,
@@ -130,12 +130,68 @@ async function ensureReviewTable(db) {
   )`).run().catch(() => null);
 }
 
+async function ensureNotificationTables(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_dispatch_log (
+    notification_dispatch_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_outbox_id INTEGER,
+    notification_kind TEXT,
+    destination TEXT,
+    status TEXT NOT NULL DEFAULT 'queued',
+    provider_message_id TEXT,
+    error_text TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_exclusions (
+    notification_exclusion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_kind TEXT NOT NULL,
+    destination TEXT,
+    product_id INTEGER,
+    order_id INTEGER,
+    reason TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_cooldown_rules (
+    notification_cooldown_rule_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_kind TEXT NOT NULL UNIQUE,
+    cooldown_hours INTEGER NOT NULL DEFAULT 24,
+    is_enabled INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS customer_engagement_runs (
+    customer_engagement_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_type TEXT NOT NULL DEFAULT 'automation',
+    actor_user_id INTEGER,
+    summary_json TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await ensureColumn(db, 'notification_outbox', 'attempt_count', `attempt_count INTEGER NOT NULL DEFAULT 0`);
+  await ensureColumn(db, 'notification_outbox', 'last_attempt_at', `last_attempt_at TEXT`);
+  await ensureColumn(db, 'notification_outbox', 'provider_message_id', `provider_message_id TEXT`);
+  await ensureColumn(db, 'notification_outbox', 'error_text', `error_text TEXT`);
+  await ensureColumn(db, 'notification_outbox', 'related_product_id', `related_product_id INTEGER`);
+  const defaults = [
+    ['checkout_recovery', 24],
+    ['review_request', 72],
+    ['back_in_stock', 24],
+    ['gift_card_issued', 1],
+    ['gift_card_purchase_confirmation', 1]
+  ];
+  for (const [kind, hours] of defaults) {
+    await db.prepare(`INSERT INTO notification_cooldown_rules (notification_kind, cooldown_hours, is_enabled, created_at, updated_at)
+      VALUES (?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(notification_kind) DO NOTHING`).bind(kind, hours).run().catch(() => null);
+  }
+}
+
 function generateGiftCardCode() {
   return `DND-GIFT-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
 
 async function queueRecoveryEmail(db, lead) {
-  await queueNotification(db, {
+  return queueNotification(db, {
     notification_kind: 'checkout_recovery',
     destination: safeEmail(lead.customer_email),
     payload: {
@@ -150,10 +206,11 @@ async function queueRecoveryEmail(db, lead) {
 
 async function queueGiftCardNotice(db, cardRow) {
   const recipientEmail = safeEmail(cardRow.recipient_email || cardRow.issued_to_email);
-  if (!recipientEmail) return;
-  await queueNotification(db, {
+  if (!recipientEmail) return { queued: false };
+  return queueNotification(db, {
     notification_kind: 'gift_card_issued',
     destination: recipientEmail,
+    related_order_id: Number(cardRow.order_id || 0) || null,
     payload: {
       code: cardRow.code || '',
       currency: cardRow.currency || 'CAD',
@@ -170,13 +227,188 @@ async function queueGiftCardNotice(db, cardRow) {
   });
 }
 
+async function queueGiftCardPurchaseConfirmation(db, cardRow) {
+  const purchaserEmail = safeEmail(cardRow.purchaser_email);
+  if (!purchaserEmail) return { queued: false };
+  return queueNotification(db, {
+    notification_kind: 'gift_card_purchase_confirmation',
+    destination: purchaserEmail,
+    related_order_id: Number(cardRow.order_id || 0) || null,
+    payload: {
+      code: cardRow.code || '',
+      currency: cardRow.currency || 'CAD',
+      initial_amount_cents: Number(cardRow.initial_amount_cents || 0),
+      purchaser_name: cardRow.purchaser_name || '',
+      recipient_name: cardRow.recipient_name || '',
+      subject: 'Your Devil n Dove gift card purchase is confirmed'
+    }
+  });
+}
+
+async function notificationExists(db, { notificationKind = '', destination = '', relatedOrderId = null } = {}) {
+  const hasOutbox = await tableExists(db, 'notification_outbox');
+  if (!hasOutbox) return false;
+  const row = await db.prepare(`
+    SELECT notification_outbox_id
+    FROM notification_outbox
+    WHERE notification_kind = ?
+      AND LOWER(COALESCE(destination,'')) = LOWER(?)
+      AND (? IS NULL OR related_order_id = ?)
+      AND status IN ('queued','retry','sent','suppressed')
+    ORDER BY notification_outbox_id DESC
+    LIMIT 1
+  `).bind(notificationKind, safeEmail(destination), relatedOrderId == null ? null : Number(relatedOrderId || 0), relatedOrderId == null ? null : Number(relatedOrderId || 0)).first().catch(() => null);
+  return !!row;
+}
+
+async function queueBackInStockNotice(db, requestRow) {
+  const destination = safeEmail(requestRow.email);
+  if (!destination) return false;
+  const already = await notificationExists(db, { notificationKind: 'back_in_stock', destination, relatedOrderId: null });
+  if (already) return false;
+  const result = await queueNotification(db, {
+    notification_kind: 'back_in_stock',
+    destination,
+    related_product_id: Number(requestRow.product_id || 0) || null,
+    payload: {
+      product_name: requestRow.product_name || '',
+      product_slug: requestRow.product_slug || '',
+      subject: requestRow.product_name ? `${requestRow.product_name} is back in stock` : 'A Devil n Dove item is back in stock'
+    }
+  });
+  return !!result?.queued;
+}
+
+async function queueReviewRequest(db, orderId) {
+  const order = await db.prepare(`
+    SELECT o.order_id, o.order_number, o.customer_email, o.customer_name, o.currency, o.total_cents,
+           GROUP_CONCAT(oi.product_name, ', ') AS product_names
+    FROM orders o
+    LEFT JOIN order_items oi ON oi.order_id = o.order_id
+    WHERE o.order_id = ?
+    GROUP BY o.order_id, o.order_number, o.customer_email, o.customer_name, o.currency, o.total_cents
+    LIMIT 1
+  `).bind(orderId).first().catch(() => null);
+  if (!order || !safeEmail(order.customer_email)) return { queued: false };
+  return queueNotification(db, {
+    notification_kind: 'review_request',
+    destination: safeEmail(order.customer_email),
+    related_order_id: Number(order.order_id || 0),
+    payload: {
+      order_number: order.order_number || '',
+      customer_name: order.customer_name || '',
+      customer_email: order.customer_email || '',
+      product_names: String(order.product_names || '').split(',').map((part) => normalizeText(part)).filter(Boolean),
+      subject: order.order_number ? `How was your Devil n Dove order ${order.order_number}?` : 'How was your Devil n Dove order?'
+    }
+  });
+}
+
+async function retryNotificationRows(db, ids = []) {
+  if (!ids.length) return 0;
+  const placeholders = ids.map(() => '?').join(',');
+  await db.prepare(`
+    UPDATE notification_outbox
+    SET status = 'retry', next_attempt_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+    WHERE notification_outbox_id IN (${placeholders})
+  `).bind(...ids).run().catch(() => null);
+  return ids.length;
+}
+
+async function cancelNotificationRows(db, ids = []) {
+  if (!ids.length) return 0;
+  await ensureNotificationTables(db);
+  const placeholders = ids.map(() => '?').join(',');
+  const rows = nr(await db.prepare(`SELECT notification_outbox_id, notification_kind, destination FROM notification_outbox WHERE notification_outbox_id IN (${placeholders})`).bind(...ids).all().catch(() => ({ results: [] })));
+  await db.prepare(`UPDATE notification_outbox SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE notification_outbox_id IN (${placeholders})`).bind(...ids).run().catch(() => null);
+  for (const row of rows) {
+    await db.prepare(`INSERT INTO notification_dispatch_log (notification_outbox_id, notification_kind, destination, status, error_text, created_at) VALUES (?, ?, ?, 'cancelled', 'Cancelled by admin.', CURRENT_TIMESTAMP)`).bind(Number(row.notification_outbox_id || 0), row.notification_kind || '', row.destination || '').run().catch(() => null);
+  }
+  return ids.length;
+}
+
+async function recordAutomationRun(db, runType, actorUserId, summary) {
+  await ensureNotificationTables(db);
+  await db.prepare(`INSERT INTO customer_engagement_runs (run_type, actor_user_id, summary_json, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`).bind(runType || 'automation', actorUserId || null, JSON.stringify(summary || {})).run().catch(() => null);
+}
+
+async function autoProcessEngagement(db, env, actorUserId = null) {
+  const results = { back_in_stock_queued: 0, back_in_stock_closed: 0, recovery_queued: 0, review_requests_queued: 0, notifications_processed: 0 };
+  const hasProducts = await tableExists(db, 'products');
+  const hasOrders = await tableExists(db, 'orders');
+  const hasOrderItems = await tableExists(db, 'order_items');
+
+  if (hasProducts) {
+    const backInStockRows = nr(await db.prepare(`
+      SELECT pir.product_interest_request_id, pir.email, pir.product_id, p.name AS product_name, p.slug AS product_slug
+      FROM product_interest_requests pir
+      INNER JOIN products p ON p.product_id = pir.product_id
+      WHERE LOWER(COALESCE(pir.request_type,'')) = 'back_in_stock'
+        AND LOWER(COALESCE(pir.status,'open')) = 'open'
+        AND COALESCE(p.inventory_quantity,0) > 0
+        AND COALESCE(p.status,'draft') IN ('active','published')
+      ORDER BY pir.created_at ASC, pir.product_interest_request_id ASC
+      LIMIT 50
+    `).all().catch(() => ({ results: [] })));
+    for (const row of backInStockRows) {
+      const queued = await queueBackInStockNotice(db, row);
+      if (queued) results.back_in_stock_queued += 1;
+      await db.prepare(`UPDATE product_interest_requests SET status = 'done', updated_at = CURRENT_TIMESTAMP WHERE product_interest_request_id = ?`).bind(Number(row.product_interest_request_id || 0)).run().catch(() => null);
+      results.back_in_stock_closed += 1;
+    }
+  }
+
+  const recoveryRows = nr(await db.prepare(`
+    SELECT checkout_recovery_lead_id, customer_email, customer_name, cart_count, cart_value_cents, currency, checkout_path
+    FROM checkout_recovery_leads
+    WHERE LOWER(COALESCE(status,'open')) = 'open'
+      AND LOWER(COALESCE(customer_email,'')) != ''
+      AND last_recovery_email_at IS NULL
+    ORDER BY created_at ASC, checkout_recovery_lead_id ASC
+    LIMIT 50
+  `).all().catch(() => ({ results: [] })));
+  for (const row of recoveryRows) {
+    const already = await notificationExists(db, { notificationKind: 'checkout_recovery', destination: row.customer_email });
+    if (already) continue;
+    const queued = await queueRecoveryEmail(db, row);
+    if (queued?.queued) {
+      await db.prepare(`UPDATE checkout_recovery_leads SET status = 'emailed', last_recovery_email_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id = ?`).bind(Number(row.checkout_recovery_lead_id || 0)).run().catch(() => null);
+      results.recovery_queued += 1;
+    }
+  }
+
+  if (hasOrders && hasOrderItems) {
+    const orders = nr(await db.prepare(`
+      SELECT o.order_id, o.order_number, o.customer_email
+      FROM orders o
+      WHERE (LOWER(COALESCE(o.payment_status,'')) IN ('paid','completed','captured','partially_refunded')
+         OR LOWER(COALESCE(o.order_status,'')) IN ('paid','fulfilled','completed'))
+        AND substr(COALESCE(o.created_at,''),1,10) >= date('now','-45 days')
+      ORDER BY o.created_at DESC, o.order_id DESC
+      LIMIT 50
+    `).all().catch(() => ({ results: [] })));
+    for (const row of orders) {
+      const already = await notificationExists(db, { notificationKind: 'review_request', destination: row.customer_email, relatedOrderId: Number(row.order_id || 0) });
+      if (already) continue;
+      const queued = await queueReviewRequest(db, Number(row.order_id || 0));
+      if (queued?.queued) results.review_requests_queued += 1;
+    }
+  }
+
+  const processed = await processNotificationOutbox(env, { limit: 30 }).catch(() => ({ processed_count: 0 }));
+  results.notifications_processed = Number(processed?.processed_count || 0);
+  await recordAutomationRun(db, 'automation', actorUserId, results);
+  return results;
+}
+
 async function listEngagementData(db) {
   await Promise.all([
     ensureWishlistTable(db),
     ensureInterestTable(db),
     ensureCheckoutRecoveryTable(db),
     ensureGiftCardTables(db),
-    ensureReviewTable(db)
+    ensureReviewTable(db),
+    ensureNotificationTables(db)
   ]);
 
   const [hasOrders, hasOrderItems, hasNotificationOutbox, hasCartActivity] = await Promise.all([
@@ -186,7 +418,7 @@ async function listEngagementData(db) {
     tableExists(db, 'cart_activity')
   ]);
 
-  const [wishlistRows, interestRows, recoveryRows, giftCards, reviewRows, recentOrders, outboxRows] = await Promise.all([
+  const [wishlistRows, interestRows, recoveryRows, giftCards, reviewRows, recentOrders, outboxRows, cooldownRows, exclusionRows, runRows, dispatchRows] = await Promise.all([
     db.prepare(`
       SELECT p.product_id, p.name, p.slug, p.featured_image_url, COUNT(*) AS saved_count, MAX(mw.created_at) AS last_saved_at
       FROM member_wishlists mw
@@ -215,7 +447,8 @@ async function listEngagementData(db) {
              COALESCE(recipient_email, issued_to_email) AS recipient_email,
              COALESCE(recipient_name, issued_to_name) AS recipient_name,
              purchaser_email, purchaser_name,
-             note, recipient_note, status, expires_at, last_redeemed_at, created_at
+             note, recipient_note, status, expires_at, last_redeemed_at, created_at,
+             order_id, purchase_source
       FROM gift_cards
       ORDER BY created_at DESC, gift_card_id DESC
       LIMIT 150
@@ -244,15 +477,40 @@ async function listEngagementData(db) {
       LIMIT 50
     `).all().catch(() => ({ results: [] })) : ({ results: [] }),
     hasNotificationOutbox ? db.prepare(`
-      SELECT notification_outbox_id, notification_kind, destination, status, error_text, created_at, last_attempt_at, related_order_id
+      SELECT notification_outbox_id, notification_kind, destination, related_order_id, related_product_id, status, error_text, attempt_count, created_at, last_attempt_at
       FROM notification_outbox
-      WHERE notification_kind IN ('checkout_recovery','gift_card_issued','review_request','back_in_stock')
+      WHERE notification_kind IN ('checkout_recovery','gift_card_issued','gift_card_purchase_confirmation','review_request','back_in_stock')
       ORDER BY created_at DESC, notification_outbox_id DESC
-      LIMIT 150
-    `).all().catch(() => ({ results: [] })) : ({ results: [] })
+      LIMIT 200
+    `).all().catch(() => ({ results: [] })) : ({ results: [] }),
+    db.prepare(`SELECT notification_cooldown_rule_id, notification_kind, cooldown_hours, is_enabled, created_at, updated_at FROM notification_cooldown_rules ORDER BY notification_kind ASC`).all().catch(() => ({ results: [] })),
+    db.prepare(`SELECT notification_exclusion_id, notification_kind, destination, product_id, order_id, reason, is_active, created_at, updated_at FROM notification_exclusions WHERE is_active = 1 ORDER BY created_at DESC, notification_exclusion_id DESC LIMIT 100`).all().catch(() => ({ results: [] })),
+    db.prepare(`SELECT customer_engagement_run_id, run_type, actor_user_id, summary_json, created_at FROM customer_engagement_runs ORDER BY created_at DESC, customer_engagement_run_id DESC LIMIT 50`).all().catch(() => ({ results: [] })),
+    db.prepare(`SELECT notification_dispatch_log_id, notification_outbox_id, notification_kind, destination, status, provider_message_id, error_text, created_at FROM notification_dispatch_log ORDER BY created_at DESC, notification_dispatch_log_id DESC LIMIT 200`).all().catch(() => ({ results: [] }))
   ]);
 
   const notificationRows = nr(outboxRows);
+  const dispatchLogRows = nr(dispatchRows);
+  const giftCardHistoryMap = new Map();
+  for (const row of dispatchLogRows) {
+    const key = `${safeEmail(row.destination)}::gift_card`;
+    const current = giftCardHistoryMap.get(key) || { send_count: 0, last_status: '', last_created_at: null, history: [] };
+    if (String(row.notification_kind || '').startsWith('gift_card_')) {
+      current.send_count += 1;
+      current.last_status = row.status || current.last_status;
+      current.last_created_at = row.created_at || current.last_created_at;
+      if (current.history.length < 8) current.history.push({
+        notification_dispatch_log_id: Number(row.notification_dispatch_log_id || 0),
+        status: row.status || '',
+        created_at: row.created_at || null,
+        error_text: row.error_text || '',
+        provider_message_id: row.provider_message_id || '',
+        notification_kind: row.notification_kind || ''
+      });
+      giftCardHistoryMap.set(key, current);
+    }
+  }
+
   const abandonedCartStats = hasCartActivity ? await (async () => {
     const row = await db.prepare(`
       SELECT COUNT(*) AS open_abandoned_carts
@@ -273,342 +531,85 @@ async function listEngagementData(db) {
       ...abandonedCartStats
     },
     wishlist_products: nr(wishlistRows).map((row) => ({
-      product_id: Number(row.product_id || 0),
-      name: row.name || '',
-      slug: row.slug || '',
-      featured_image_url: row.featured_image_url || '',
-      saved_count: Number(row.saved_count || 0),
-      last_saved_at: row.last_saved_at || null
+      product_id: Number(row.product_id || 0), name: row.name || '', slug: row.slug || '', featured_image_url: row.featured_image_url || '', saved_count: Number(row.saved_count || 0), last_saved_at: row.last_saved_at || null
     })),
     interest_requests: nr(interestRows).map((row) => ({
-      product_interest_request_id: Number(row.product_interest_request_id || 0),
-      product_id: Number(row.product_id || 0),
-      request_type: row.request_type || '',
-      user_id: Number(row.user_id || 0),
-      email: row.email || '',
-      notes: row.notes || '',
-      status: row.status || 'open',
-      created_at: row.created_at || null,
-      product_name: row.product_name || '',
-      product_slug: row.product_slug || '',
-      featured_image_url: row.featured_image_url || ''
+      product_interest_request_id: Number(row.product_interest_request_id || 0), product_id: Number(row.product_id || 0), request_type: row.request_type || '', user_id: Number(row.user_id || 0), email: row.email || '', notes: row.notes || '', status: row.status || 'open', created_at: row.created_at || null, product_name: row.product_name || '', product_slug: row.product_slug || '', featured_image_url: row.featured_image_url || ''
     })),
     checkout_recovery_leads: nr(recoveryRows).map((row) => ({
-      checkout_recovery_lead_id: Number(row.checkout_recovery_lead_id || 0),
-      browser_session_token: row.browser_session_token || '',
-      visitor_token: row.visitor_token || '',
-      customer_email: row.customer_email || '',
-      customer_name: row.customer_name || '',
-      cart_count: Number(row.cart_count || 0),
-      cart_value_cents: Number(row.cart_value_cents || 0),
-      currency: row.currency || 'CAD',
-      checkout_path: row.checkout_path || '/checkout/',
-      status: row.status || 'open',
-      last_recovery_email_at: row.last_recovery_email_at || null,
-      created_at: row.created_at || null
+      checkout_recovery_lead_id: Number(row.checkout_recovery_lead_id || 0), browser_session_token: row.browser_session_token || '', visitor_token: row.visitor_token || '', customer_email: row.customer_email || '', customer_name: row.customer_name || '', cart_count: Number(row.cart_count || 0), cart_value_cents: Number(row.cart_value_cents || 0), currency: row.currency || 'CAD', checkout_path: row.checkout_path || '/checkout/', status: row.status || 'open', last_recovery_email_at: row.last_recovery_email_at || null, created_at: row.created_at || null
     })),
-    gift_cards: nr(giftCards).map((row) => ({
-      gift_card_id: Number(row.gift_card_id || 0),
-      code: row.code || '',
-      currency: row.currency || 'CAD',
-      initial_amount_cents: Number(row.initial_amount_cents || 0),
-      remaining_amount_cents: Number(row.remaining_amount_cents || 0),
-      recipient_email: row.recipient_email || '',
-      recipient_name: row.recipient_name || '',
-      purchaser_email: row.purchaser_email || '',
-      purchaser_name: row.purchaser_name || '',
-      note: row.note || '',
-      recipient_note: row.recipient_note || '',
-      status: row.status || 'active',
-      expires_at: row.expires_at || null,
-      last_redeemed_at: row.last_redeemed_at || null,
-      created_at: row.created_at || null
-    })),
+    gift_cards: nr(giftCards).map((row) => {
+      const recipientKey = `${safeEmail(row.recipient_email || row.issued_to_email)}::gift_card`;
+      const purchaserKey = `${safeEmail(row.purchaser_email)}::gift_card`;
+      const recipientHistory = giftCardHistoryMap.get(recipientKey) || { send_count: 0, last_status: '', last_created_at: null, history: [] };
+      const purchaserHistory = giftCardHistoryMap.get(purchaserKey) || { send_count: 0, last_status: '', last_created_at: null, history: [] };
+      return {
+        gift_card_id: Number(row.gift_card_id || 0), code: row.code || '', currency: row.currency || 'CAD', initial_amount_cents: Number(row.initial_amount_cents || 0), remaining_amount_cents: Number(row.remaining_amount_cents || 0), recipient_email: row.recipient_email || '', recipient_name: row.recipient_name || '', purchaser_email: row.purchaser_email || '', purchaser_name: row.purchaser_name || '', note: row.note || '', recipient_note: row.recipient_note || '', status: row.status || 'active', expires_at: row.expires_at || null, last_redeemed_at: row.last_redeemed_at || null, created_at: row.created_at || null, order_id: Number(row.order_id || 0), purchase_source: row.purchase_source || '', recipient_send_count: Number(recipientHistory.send_count || 0), recipient_last_status: recipientHistory.last_status || '', recipient_last_sent_at: recipientHistory.last_created_at || null, recipient_send_history: recipientHistory.history || [], purchaser_send_count: Number(purchaserHistory.send_count || 0), purchaser_last_status: purchaserHistory.last_status || '', purchaser_last_sent_at: purchaserHistory.last_created_at || null, purchaser_send_history: purchaserHistory.history || []
+      };
+    }),
     reviews: nr(reviewRows).map((row) => ({
-      product_review_id: Number(row.product_review_id || 0),
-      product_id: Number(row.product_id || 0),
-      order_id: Number(row.order_id || 0),
-      user_id: Number(row.user_id || 0),
-      reviewer_name: row.reviewer_name || '',
-      reviewer_email: row.reviewer_email || '',
-      rating: Number(row.rating || 0),
-      review_text: row.review_text || '',
-      review_kind: row.review_kind || 'testimonial',
-      status: row.status || 'pending_review',
-      is_featured: Number(row.is_featured || 0),
-      admin_notes: row.admin_notes || '',
-      created_at: row.created_at || null,
-      product_name: row.product_name || '',
-      product_slug: row.product_slug || ''
+      product_review_id: Number(row.product_review_id || 0), product_id: Number(row.product_id || 0), order_id: Number(row.order_id || 0), user_id: Number(row.user_id || 0), reviewer_name: row.reviewer_name || '', reviewer_email: row.reviewer_email || '', rating: Number(row.rating || 0), review_text: row.review_text || '', review_kind: row.review_kind || 'testimonial', status: row.status || 'pending_review', is_featured: Number(row.is_featured || 0), admin_notes: row.admin_notes || '', created_at: row.created_at || null, product_name: row.product_name || '', product_slug: row.product_slug || ''
     })),
     recent_review_orders: nr(recentOrders).map((row) => ({
-      order_id: Number(row.order_id || 0),
-      order_number: row.order_number || '',
-      customer_email: row.customer_email || '',
-      customer_name: row.customer_name || '',
-      created_at: row.created_at || null,
-      product_names: row.product_names || '',
-      item_count: Number(row.item_count || 0),
-      total_cents: Number(row.total_cents || 0),
-      currency: row.currency || 'CAD'
+      order_id: Number(row.order_id || 0), order_number: row.order_number || '', customer_email: row.customer_email || '', customer_name: row.customer_name || '', created_at: row.created_at || null, product_names: row.product_names || '', item_count: Number(row.item_count || 0), total_cents: Number(row.total_cents || 0), currency: row.currency || 'CAD'
     })),
     notification_queue: notificationRows.map((row) => ({
-      notification_outbox_id: Number(row.notification_outbox_id || 0),
-      notification_kind: row.notification_kind || '',
-      destination: row.destination || '',
-      status: row.status || 'queued',
-      error_text: row.error_text || '',
-      created_at: row.created_at || null,
-      last_attempt_at: row.last_attempt_at || null,
-      related_order_id: Number(row.related_order_id || 0)
-    }))
+      notification_outbox_id: Number(row.notification_outbox_id || 0), notification_kind: row.notification_kind || '', destination: row.destination || '', related_order_id: Number(row.related_order_id || 0), related_product_id: Number(row.related_product_id || 0), status: row.status || 'queued', error_text: row.error_text || '', attempt_count: Number(row.attempt_count || 0), created_at: row.created_at || null, last_attempt_at: row.last_attempt_at || null
+    })),
+    automation_rules: nr(cooldownRows).map((row) => ({ notification_cooldown_rule_id: Number(row.notification_cooldown_rule_id || 0), notification_kind: row.notification_kind || '', cooldown_hours: Number(row.cooldown_hours || 0), is_enabled: Number(row.is_enabled || 0), created_at: row.created_at || null, updated_at: row.updated_at || null })),
+    exclusions: nr(exclusionRows).map((row) => ({ notification_exclusion_id: Number(row.notification_exclusion_id || 0), notification_kind: row.notification_kind || '', destination: row.destination || '', product_id: Number(row.product_id || 0), order_id: Number(row.order_id || 0), reason: row.reason || '', is_active: Number(row.is_active || 0), created_at: row.created_at || null, updated_at: row.updated_at || null })),
+    automation_runs: nr(runRows).map((row) => ({ customer_engagement_run_id: Number(row.customer_engagement_run_id || 0), run_type: row.run_type || 'automation', actor_user_id: Number(row.actor_user_id || 0), summary_json: row.summary_json || '{}', created_at: row.created_at || null })),
+    notification_dispatch_log: dispatchLogRows.map((row) => ({ notification_dispatch_log_id: Number(row.notification_dispatch_log_id || 0), notification_outbox_id: Number(row.notification_outbox_id || 0), notification_kind: row.notification_kind || '', destination: row.destination || '', status: row.status || '', provider_message_id: row.provider_message_id || '', error_text: row.error_text || '', created_at: row.created_at || null }))
   };
 }
 
-
-
-async function notificationExists(db, { notificationKind = '', destination = '', relatedOrderId = null } = {}) {
-  const hasOutbox = await tableExists(db, 'notification_outbox');
-  if (!hasOutbox) return false;
-  const row = await db.prepare(`
-    SELECT notification_outbox_id
-    FROM notification_outbox
-    WHERE notification_kind = ?
-      AND LOWER(COALESCE(destination,'')) = LOWER(?)
-      AND (? IS NULL OR related_order_id = ?)
-      AND status IN ('queued','retry','sent')
-    ORDER BY notification_outbox_id DESC
-    LIMIT 1
-  `).bind(notificationKind, safeEmail(destination), relatedOrderId == null ? null : Number(relatedOrderId || 0), relatedOrderId == null ? null : Number(relatedOrderId || 0)).first().catch(() => null);
-  return !!row;
-}
-
-async function queueBackInStockNotice(db, requestRow) {
-  const destination = safeEmail(requestRow.email);
-  if (!destination) return false;
-  const already = await notificationExists(db, { notificationKind: 'back_in_stock', destination });
-  if (already) return false;
-  await queueNotification(db, {
-    notification_kind: 'back_in_stock',
-    destination,
-    payload: {
-      product_name: requestRow.product_name || '',
-      product_slug: requestRow.product_slug || '',
-      subject: requestRow.product_name ? `${requestRow.product_name} is back in stock` : 'A Devil n Dove item is back in stock'
-    }
-  });
-  return true;
-}
-
-async function autoProcessEngagement(db, env) {
-  const results = { back_in_stock_queued: 0, back_in_stock_closed: 0, recovery_queued: 0, review_requests_queued: 0, notifications_processed: 0 };
-
-  const hasProducts = await tableExists(db, 'products');
-  const hasOrders = await tableExists(db, 'orders');
-  const hasOrderItems = await tableExists(db, 'order_items');
-
-  if (hasProducts) {
-    const backInStockRows = nr(await db.prepare(`
-      SELECT pir.product_interest_request_id, pir.email, pir.product_id, p.name AS product_name, p.slug AS product_slug
-      FROM product_interest_requests pir
-      INNER JOIN products p ON p.product_id = pir.product_id
-      WHERE LOWER(COALESCE(pir.request_type,'')) = 'back_in_stock'
-        AND LOWER(COALESCE(pir.status,'open')) = 'open'
-        AND COALESCE(p.inventory_quantity,0) > 0
-        AND COALESCE(p.status,'draft') IN ('active','published')
-      ORDER BY pir.created_at ASC, pir.product_interest_request_id ASC
-      LIMIT 50
-    `).all().catch(() => ({ results: [] })));
-
-    for (const row of backInStockRows) {
-      const queued = await queueBackInStockNotice(db, row);
-      if (queued) results.back_in_stock_queued += 1;
-      await db.prepare(`UPDATE product_interest_requests SET status = 'done', updated_at = CURRENT_TIMESTAMP WHERE product_interest_request_id = ?`).bind(Number(row.product_interest_request_id || 0)).run().catch(() => null);
-      results.back_in_stock_closed += 1;
-    }
-  }
-
-  const recoveryRows = nr(await db.prepare(`
-    SELECT checkout_recovery_lead_id, customer_email, customer_name, cart_count, cart_value_cents, currency, checkout_path
-    FROM checkout_recovery_leads
-    WHERE LOWER(COALESCE(status,'open')) = 'open'
-      AND LOWER(COALESCE(customer_email,'')) != ''
-      AND last_recovery_email_at IS NULL
-    ORDER BY created_at ASC, checkout_recovery_lead_id ASC
-    LIMIT 50
-  `).all().catch(() => ({ results: [] })));
-  for (const row of recoveryRows) {
-    const already = await notificationExists(db, { notificationKind: 'checkout_recovery', destination: row.customer_email });
-    if (already) continue;
-    await queueRecoveryEmail(db, row);
-    await db.prepare(`UPDATE checkout_recovery_leads SET status = 'emailed', last_recovery_email_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id = ?`).bind(Number(row.checkout_recovery_lead_id || 0)).run().catch(() => null);
-    results.recovery_queued += 1;
-  }
-
-  if (hasOrders && hasOrderItems) {
-    const orders = nr(await db.prepare(`
-      SELECT o.order_id, o.order_number, o.customer_email
-      FROM orders o
-      WHERE (LOWER(COALESCE(o.payment_status,'')) IN ('paid','completed','captured','partially_refunded')
-         OR LOWER(COALESCE(o.order_status,'')) IN ('paid','fulfilled','completed'))
-        AND substr(COALESCE(o.created_at,''),1,10) >= date('now','-45 days')
-      ORDER BY o.created_at DESC, o.order_id DESC
-      LIMIT 50
-    `).all().catch(() => ({ results: [] })));
-
-    for (const row of orders) {
-      const already = await notificationExists(db, { notificationKind: 'review_request', destination: row.customer_email, relatedOrderId: Number(row.order_id || 0) });
-      if (already) continue;
-      await queueReviewRequest(db, Number(row.order_id || 0));
-      results.review_requests_queued += 1;
-    }
-  }
-
-  const processed = await processNotificationOutbox(env, { limit: 30 }).catch(() => ({ processed_count: 0 }));
-  results.notifications_processed = Number(processed?.processed_count || 0);
-  return results;
-}
 export async function onRequestGet(context) {
-  const db = getDb(context.env);
-  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
-  const adminUser = await getAdminUserFromRequest(context.request, context.env);
-  if (!adminUser) return json({ ok: false, error: 'Admin access required.' }, 401);
-
-  try {
-    const payload = await listEngagementData(db);
-    return json({ ok: true, ...payload });
-  } catch (error) {
-    return json({ ok: false, error: error?.message || 'Failed to load customer engagement dashboard.' }, 500);
-  }
-}
-
-async function loadRecoveryLead(db, leadId) {
-  return db.prepare(`SELECT * FROM checkout_recovery_leads WHERE checkout_recovery_lead_id = ? LIMIT 1`).bind(leadId).first();
-}
-
-async function queueReviewRequest(db, orderId) {
-  const order = await db.prepare(`SELECT order_id, order_number, customer_email FROM orders WHERE order_id = ? LIMIT 1`).bind(orderId).first();
-  if (!order) throw new Error('Order not found.');
-  const productNames = nr(await db.prepare(`SELECT product_name FROM order_items WHERE order_id = ? ORDER BY order_item_id ASC LIMIT 12`).bind(orderId).all()).map((row) => row.product_name || '').filter(Boolean);
-  await queueNotification(db, {
-    notification_kind: 'review_request',
-    destination: safeEmail(order.customer_email),
-    related_order_id: orderId,
-    payload: { order_number: order.order_number || '', product_names: productNames }
-  });
-  return { order, productNames };
-}
-
-async function retryNotificationRows(db, ids = []) {
-  const normalizedIds = uniqueIds(ids);
-  if (!normalizedIds.length) return 0;
-  const placeholders = normalizedIds.map(() => '?').join(',');
-  await db.prepare(`
-    UPDATE notification_outbox
-    SET status = 'queued', next_attempt_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-    WHERE notification_outbox_id IN (${placeholders})
-  `).bind(...normalizedIds).run();
-  return normalizedIds.length;
+  const { request, env } = context;
+  const db = getDb(env);
+  const adminUser = await getAdminUserFromRequest(request, env);
+  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  const payload = await listEngagementData(db);
+  return json({ ok: true, ...payload });
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
-  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const adminUser = await getAdminUserFromRequest(request, env);
-  if (!adminUser) return json({ ok: false, error: 'Admin access required.' }, 401);
+  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  await Promise.all([ensureWishlistTable(db), ensureInterestTable(db), ensureCheckoutRecoveryTable(db), ensureGiftCardTables(db), ensureReviewTable(db), ensureNotificationTables(db)]);
 
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
-  const action = normalizeText(body.action).toLowerCase();
 
   try {
-    await Promise.all([
-      ensureWishlistTable(db),
-      ensureInterestTable(db),
-      ensureCheckoutRecoveryTable(db),
-      ensureGiftCardTables(db),
-      ensureReviewTable(db)
-    ]);
-
-    if (action === 'set_interest_status' || action === 'bulk_set_interest_status') {
-      const ids = action === 'set_interest_status'
-        ? uniqueIds([body.product_interest_request_id])
-        : uniqueIds(body.product_interest_request_ids);
-      const status = normalizeText(body.status).toLowerCase() || 'reviewed';
-      if (!ids.length) return json({ ok: false, error: 'At least one product_interest_request_id is required.' }, 400);
-      const placeholders = ids.map(() => '?').join(',');
-      await db.prepare(`UPDATE product_interest_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE product_interest_request_id IN (${placeholders})`).bind(status, ...ids).run();
-      await auditAdminAction(env, request, adminUser, { action_type: 'interest_request_status_update', target_type: 'product_interest_request', details: { ids, status } });
-      return json({ ok: true, message: `${ids.length} interest request(s) updated.` });
-    }
-
-    if (action === 'queue_recovery_email' || action === 'bulk_queue_recovery_emails') {
-      const ids = action === 'queue_recovery_email'
-        ? uniqueIds([body.checkout_recovery_lead_id])
-        : uniqueIds(body.checkout_recovery_lead_ids);
-      if (!ids.length) return json({ ok: false, error: 'At least one checkout_recovery_lead_id is required.' }, 400);
-      let queuedCount = 0;
-      for (const leadId of ids) {
-        const lead = await loadRecoveryLead(db, leadId);
-        if (!lead) continue;
-        await queueRecoveryEmail(db, lead);
-        await db.prepare(`UPDATE checkout_recovery_leads SET status = 'emailed', last_recovery_email_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id = ?`).bind(leadId).run();
-        queuedCount += 1;
-      }
-      await auditAdminAction(env, request, adminUser, { action_type: 'checkout_recovery_email_queued', target_type: 'checkout_recovery_lead', details: { ids, queuedCount } });
-      return json({ ok: true, message: `${queuedCount} recovery email(s) queued.` });
-    }
-
-    if (action === 'set_recovery_status') {
-      const ids = uniqueIds(body.checkout_recovery_lead_ids || [body.checkout_recovery_lead_id]);
-      const status = normalizeText(body.status).toLowerCase() || 'closed';
-      if (!ids.length) return json({ ok: false, error: 'At least one checkout_recovery_lead_id is required.' }, 400);
-      const placeholders = ids.map(() => '?').join(',');
-      await db.prepare(`UPDATE checkout_recovery_leads SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id IN (${placeholders})`).bind(status, ...ids).run();
-      await auditAdminAction(env, request, adminUser, { action_type: 'checkout_recovery_status_update', target_type: 'checkout_recovery_lead', details: { ids, status } });
-      return json({ ok: true, message: `${ids.length} recovery lead(s) updated.` });
-    }
+    const action = normalizeText(body.action).toLowerCase();
 
     if (action === 'issue_gift_card') {
-      const amountCents = cents(body.amount_cents);
-      const currency = normalizeText(body.currency || 'CAD').toUpperCase() || 'CAD';
-      const purchaserEmail = safeEmail(body.purchaser_email || adminUser.email || '');
-      const purchaserName = normalizeText(body.purchaser_name || adminUser.display_name || '');
-      const recipientEmail = safeEmail(body.recipient_email || body.issued_to_email);
-      const recipientName = normalizeText(body.recipient_name || body.issued_to_name);
-      const expiresAt = normalizeText(body.expires_at);
+      const purchaserEmail = safeEmail(body.purchaser_email);
+      const purchaserName = normalizeText(body.purchaser_name);
+      const recipientEmail = safeEmail(body.recipient_email);
+      const recipientName = normalizeText(body.recipient_name);
+      const recipientNote = normalizeText(body.recipient_note);
       const note = normalizeText(body.note);
-      const recipientNote = normalizeText(body.recipient_note || body.note);
-      const code = normalizeText(body.code).toUpperCase() || generateGiftCardCode();
-      if (!recipientEmail || amountCents <= 0) return json({ ok: false, error: 'recipient_email and amount_cents are required.' }, 400);
+      const expiresAt = normalizeText(body.expires_at) || null;
+      const amountCents = cents(body.amount_cents);
+      if (!recipientEmail || amountCents <= 0) return json({ ok: false, error: 'Recipient email and amount are required.' }, 400);
+      const code = generateGiftCardCode();
       await db.prepare(`
         INSERT INTO gift_cards (
           code, currency, initial_amount_cents, remaining_amount_cents,
           issued_to_email, issued_to_name, recipient_email, recipient_name,
-          purchaser_email, purchaser_name, purchaser_user_id,
-          note, recipient_note, status, expires_at, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      `).bind(
-        code,
-        currency,
-        amountCents,
-        amountCents,
-        recipientEmail,
-        recipientName || null,
-        recipientEmail,
-        recipientName || null,
-        purchaserEmail || null,
-        purchaserName || null,
-        Number(adminUser.user_id || 0) || null,
-        note || null,
-        recipientNote || null,
-        expiresAt || null
-      ).run();
+          purchaser_email, purchaser_name, recipient_note, note, status, expires_at,
+          purchaser_user_id, created_at, updated_at
+        ) VALUES (?, 'CAD', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `).bind(code, amountCents, amountCents, recipientEmail, recipientName || null, recipientEmail, recipientName || null, purchaserEmail || null, purchaserName || null, recipientNote || null, note || null, expiresAt, Number(adminUser.user_id || 0)).run();
       const cardRow = await db.prepare(`SELECT * FROM gift_cards WHERE code = ? LIMIT 1`).bind(code).first();
-      await queueGiftCardNotice(db, cardRow || { code, currency, initial_amount_cents: amountCents, remaining_amount_cents: amountCents, recipient_email: recipientEmail, recipient_name: recipientName, purchaser_name: purchaserName, expires_at: expiresAt, recipient_note: recipientNote });
+      await queueGiftCardNotice(db, cardRow || {});
+      if (purchaserEmail) await queueGiftCardPurchaseConfirmation(db, cardRow || {});
       await auditAdminAction(env, request, adminUser, { action_type: 'gift_card_issued', target_type: 'gift_card', target_key: code, details: { amount_cents: amountCents, purchaser_email: purchaserEmail, recipient_email: recipientEmail } });
-      return json({ ok: true, message: 'Gift card issued.', code });
+      return json({ ok: true, message: 'Gift card issued and email(s) queued.' });
     }
 
     if (action === 'resend_gift_card' || action === 'bulk_resend_gift_cards') {
@@ -618,11 +619,12 @@ export async function onRequestPost(context) {
       for (const giftCardId of ids) {
         const cardRow = await db.prepare(`SELECT * FROM gift_cards WHERE gift_card_id = ? LIMIT 1`).bind(giftCardId).first();
         if (!cardRow) continue;
-        await queueGiftCardNotice(db, cardRow);
-        queuedCount += 1;
+        const a = await queueGiftCardNotice(db, cardRow);
+        const b = await queueGiftCardPurchaseConfirmation(db, cardRow);
+        queuedCount += Number(!!a?.queued) + Number(!!b?.queued);
       }
       await auditAdminAction(env, request, adminUser, { action_type: 'gift_card_resend_queued', target_type: 'gift_card', details: { ids, queuedCount } });
-      return json({ ok: true, message: `${queuedCount} gift card email(s) queued again.` });
+      return json({ ok: true, message: `${queuedCount} gift card email(s) queued.` });
     }
 
     if (action === 'set_gift_card_status' || action === 'bulk_set_gift_card_status') {
@@ -633,6 +635,42 @@ export async function onRequestPost(context) {
       await db.prepare(`UPDATE gift_cards SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE gift_card_id IN (${placeholders})`).bind(status, ...ids).run();
       await auditAdminAction(env, request, adminUser, { action_type: 'gift_card_status_update', target_type: 'gift_card', details: { ids, status } });
       return json({ ok: true, message: `${ids.length} gift card(s) updated.` });
+    }
+
+    if (action === 'set_interest_status' || action === 'bulk_set_interest_status') {
+      const ids = action === 'set_interest_status' ? uniqueIds([body.product_interest_request_id]) : uniqueIds(body.product_interest_request_ids);
+      const status = normalizeText(body.status).toLowerCase() || 'reviewed';
+      if (!ids.length) return json({ ok: false, error: 'At least one product_interest_request_id is required.' }, 400);
+      const placeholders = ids.map(() => '?').join(',');
+      await db.prepare(`UPDATE product_interest_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE product_interest_request_id IN (${placeholders})`).bind(status, ...ids).run();
+      await auditAdminAction(env, request, adminUser, { action_type: 'interest_status_update', target_type: 'product_interest_request', details: { ids, status } });
+      return json({ ok: true, message: `${ids.length} interest request(s) updated.` });
+    }
+
+    if (action === 'queue_recovery_email' || action === 'bulk_queue_recovery_emails') {
+      const ids = action === 'queue_recovery_email' ? uniqueIds([body.checkout_recovery_lead_id]) : uniqueIds(body.checkout_recovery_lead_ids);
+      if (!ids.length) return json({ ok: false, error: 'At least one checkout_recovery_lead_id is required.' }, 400);
+      let queuedCount = 0;
+      for (const id of ids) {
+        const lead = await db.prepare(`SELECT * FROM checkout_recovery_leads WHERE checkout_recovery_lead_id = ? LIMIT 1`).bind(id).first();
+        if (!lead) continue;
+        const queued = await queueRecoveryEmail(db, lead);
+        if (queued?.queued) {
+          await db.prepare(`UPDATE checkout_recovery_leads SET status = 'emailed', last_recovery_email_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id = ?`).bind(id).run().catch(() => null);
+          queuedCount += 1;
+        }
+      }
+      await auditAdminAction(env, request, adminUser, { action_type: 'checkout_recovery_queued', target_type: 'checkout_recovery_lead', details: { ids, queuedCount } });
+      return json({ ok: true, message: `${queuedCount} recovery email(s) queued.` });
+    }
+
+    if (action === 'set_recovery_status') {
+      const ids = uniqueIds(body.checkout_recovery_lead_ids || [body.checkout_recovery_lead_id]);
+      const status = normalizeText(body.status).toLowerCase() || 'closed';
+      if (!ids.length) return json({ ok: false, error: 'At least one checkout_recovery_lead_id is required.' }, 400);
+      const placeholders = ids.map(() => '?').join(',');
+      await db.prepare(`UPDATE checkout_recovery_leads SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE checkout_recovery_lead_id IN (${placeholders})`).bind(status, ...ids).run();
+      return json({ ok: true, message: `${ids.length} recovery lead(s) updated.` });
     }
 
     if (action === 'set_review_status' || action === 'bulk_set_review_status') {
@@ -652,18 +690,41 @@ export async function onRequestPost(context) {
       if (!ids.length) return json({ ok: false, error: 'At least one order_id is required.' }, 400);
       let queuedCount = 0;
       for (const orderId of ids) {
-        await queueReviewRequest(db, orderId);
-        queuedCount += 1;
+        const queued = await queueReviewRequest(db, orderId);
+        if (queued?.queued) queuedCount += 1;
       }
       await auditAdminAction(env, request, adminUser, { action_type: 'review_request_queued', target_type: 'order', details: { ids, queuedCount } });
       return json({ ok: true, message: `${queuedCount} review request(s) queued.` });
     }
 
+    if (action === 'set_notification_cooldown') {
+      const notificationKind = normalizeText(body.notification_kind);
+      const cooldownHours = Math.max(0, Number(body.cooldown_hours || 0));
+      const isEnabled = Number(body.is_enabled || 0) === 1 ? 1 : 0;
+      if (!notificationKind) return json({ ok: false, error: 'notification_kind is required.' }, 400);
+      await db.prepare(`INSERT INTO notification_cooldown_rules (notification_kind, cooldown_hours, is_enabled, created_at, updated_at)
+        VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT(notification_kind) DO UPDATE SET cooldown_hours = excluded.cooldown_hours, is_enabled = excluded.is_enabled, updated_at = CURRENT_TIMESTAMP`).bind(notificationKind, cooldownHours, isEnabled).run();
+      return json({ ok: true, message: 'Cooldown rule saved.' });
+    }
 
-    if (action === 'auto_process_engagement') {
-      const automationResults = await autoProcessEngagement(db, env);
-      await auditAdminAction(env, request, adminUser, { action_type: 'customer_engagement_auto_process', target_type: 'customer_engagement', details: automationResults });
-      return json({ ok: true, message: 'Automated engagement cycle completed.', automation_results: automationResults });
+    if (action === 'add_notification_exclusion') {
+      const notificationKind = normalizeText(body.notification_kind);
+      const destination = safeEmail(body.destination);
+      const productId = Number(body.product_id || 0) || null;
+      const orderId = Number(body.order_id || 0) || null;
+      const reason = normalizeText(body.reason);
+      if (!notificationKind) return json({ ok: false, error: 'notification_kind is required.' }, 400);
+      await db.prepare(`INSERT INTO notification_exclusions (notification_kind, destination, product_id, order_id, reason, is_active, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(notificationKind, destination || null, productId, orderId, reason || null).run();
+      return json({ ok: true, message: 'Exclusion added.' });
+    }
+
+    if (action === 'remove_notification_exclusion') {
+      const id = Number(body.notification_exclusion_id || 0);
+      if (!id) return json({ ok: false, error: 'notification_exclusion_id is required.' }, 400);
+      await db.prepare(`UPDATE notification_exclusions SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE notification_exclusion_id = ?`).bind(id).run();
+      return json({ ok: true, message: 'Exclusion removed.' });
     }
 
     if (action === 'retry_notification' || action === 'bulk_retry_notifications') {
@@ -672,6 +733,19 @@ export async function onRequestPost(context) {
       const retried = await retryNotificationRows(db, ids);
       await auditAdminAction(env, request, adminUser, { action_type: 'notification_retry_queued', target_type: 'notification_outbox', details: { ids, retried } });
       return json({ ok: true, message: `${retried} notification(s) re-queued.` });
+    }
+
+    if (action === 'cancel_notification' || action === 'bulk_cancel_notifications') {
+      const ids = action === 'cancel_notification' ? uniqueIds([body.notification_outbox_id]) : uniqueIds(body.notification_outbox_ids);
+      if (!ids.length) return json({ ok: false, error: 'At least one notification_outbox_id is required.' }, 400);
+      const cancelled = await cancelNotificationRows(db, ids);
+      return json({ ok: true, message: `${cancelled} notification(s) cancelled.` });
+    }
+
+    if (action === 'auto_process_engagement') {
+      const automationResults = await autoProcessEngagement(db, env, Number(adminUser.user_id || 0));
+      await auditAdminAction(env, request, adminUser, { action_type: 'customer_engagement_auto_process', target_type: 'customer_engagement', details: automationResults });
+      return json({ ok: true, message: 'Automated engagement cycle completed.', automation_results: automationResults });
     }
 
     return json({ ok: false, error: 'Unsupported action.' }, 400);

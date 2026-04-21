@@ -42,11 +42,21 @@ function parseFlag(value, fallback = 0) {
   return fallback;
 }
 
+async function ensureDimensionColumns(db) {
+  await db.prepare(`ALTER TABLE media_assets ADD COLUMN width_px INTEGER`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE media_assets ADD COLUMN height_px INTEGER`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE media_assets ADD COLUMN image_orientation TEXT`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN width_px INTEGER`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN height_px INTEGER`).run().catch(() => null);
+  await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN image_orientation TEXT`).run().catch(() => null);
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  await ensureDimensionColumns(db);
 
   const bucket = env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
   if (!bucket || typeof bucket.put !== 'function') {
@@ -145,10 +155,13 @@ export async function onRequestPost(context) {
         file_size_bytes,
         variant_role,
         annotation_notes,
+        width_px,
+        height_px,
+        image_orientation,
         created_by_user_id,
         created_at,
         updated_at
-      ) VALUES (?, 'r2', ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, 'r2', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       safeProductId,
       normalizeText(env.PRODUCT_MEDIA_BUCKET_NAME || env.R2_BUCKET_NAME || 'product-media'),
@@ -159,6 +172,9 @@ export async function onRequestPost(context) {
       fileSize,
       variantRole || null,
       annotationNotes || null,
+      widthPx,
+      heightPx,
+      imageOrientation || null,
       adminUser.user_id
     ).run();
     mediaAssetId = Number(insert?.meta?.last_row_id || 0) || null;
@@ -181,8 +197,8 @@ export async function onRequestPost(context) {
     if (productImageId) {
       await db.prepare(`
         INSERT INTO product_image_annotations (
-          product_id, product_image_id, image_url, alt_text, image_title, caption, annotation_notes, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+          product_id, product_image_id, image_url, alt_text, image_title, caption, annotation_notes, width_px, height_px, image_orientation, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       `).bind(
         safeProductId,
         productImageId,
@@ -190,7 +206,10 @@ export async function onRequestPost(context) {
         altText,
         imageTitle || null,
         caption || null,
-        annotationNotes || null
+        annotationNotes || null,
+        widthPx,
+        heightPx,
+        imageOrientation || null
       ).run().catch(() => null);
     }
 
@@ -245,7 +264,10 @@ export async function onRequestPost(context) {
       set_featured: setFeatured,
       variant_role: variantRole || null,
       upload_scope: uploadScope || null,
-      asset_tag: assetTag || null
+      asset_tag: assetTag || null,
+      width_px: widthPx,
+      height_px: heightPx,
+      image_orientation: imageOrientation || null
     }
   });
 }

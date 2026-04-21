@@ -27,6 +27,8 @@ export async function onRequestGet(context) {
   const shippingPressureCents = cents(url.searchParams.get('shipping_pressure_cents') || 0);
   const overheadPercent = Math.max(0, percent(url.searchParams.get('overhead_percent'), 12));
   const targetMarginPercent = Math.min(95, Math.max(5, percent(url.searchParams.get('target_margin_percent'), 65)));
+  const markupPercent = Math.max(5, percent(url.searchParams.get('markup_percent'), 120));
+  const transactionFeePercent = Math.max(0, percent(url.searchParams.get('transaction_fee_percent'), 0));
 
   const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
   const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
@@ -98,12 +100,15 @@ export async function onRequestGet(context) {
     const manualCostCents = cents(Number(row.manual_cost_per_unit || 0) * 100);
     const resourceCostCents = cents(row.resource_cost_cents || 0);
     const baseKnownCostCents = Math.max(resourceCostCents, manualCostCents);
+    const receivingChangeCents = Math.max(0, manualCostCents - resourceCostCents);
     const overheadCents = cents(baseKnownCostCents * safeDivide(overheadPercent, 100));
-    const landedCostCents = baseKnownCostCents + packagingCents + shippingPressureCents + overheadCents;
+    const transactionFeeCents = cents((baseKnownCostCents + packagingCents + shippingPressureCents + overheadCents) * safeDivide(transactionFeePercent, 100));
+    const landedCostCents = baseKnownCostCents + packagingCents + shippingPressureCents + overheadCents + transactionFeeCents;
     const makeSuggested = (marginPct) => {
       const marginRatio = safeDivide(marginPct, 100);
       return marginRatio < 1 ? cents(safeDivide(landedCostCents, 1 - marginRatio)) : landedCostCents;
     };
+    const markupSuggested = cents(landedCostCents * (1 + safeDivide(markupPercent, 100)));
     const targetSuggested = makeSuggested(targetMarginPercent);
     return {
       product_id: Number(row.product_id || 0),
@@ -121,18 +126,26 @@ export async function onRequestGet(context) {
       shipping_pressure_cents: shippingPressureCents,
       overhead_percent: overheadPercent,
       overhead_cents: overheadCents,
+      transaction_fee_percent: transactionFeePercent,
+      transaction_fee_cents: transactionFeeCents,
+      markup_percent: markupPercent,
       landed_cost_cents: landedCostCents,
+      receiving_change_cents: receivingChangeCents,
       target_margin_percent: targetMarginPercent,
       suggested_price_cents: targetSuggested,
+      markup_price_cents: markupSuggested,
       suggested_compare_at_cents: cents(targetSuggested * 1.15),
       conservative_price_cents: makeSuggested(Math.max(45, targetMarginPercent - 10)),
       stretch_price_cents: makeSuggested(Math.min(85, targetMarginPercent + 10)),
       missing_cost_links: Number(row.missing_cost_links || 0),
       current_margin_cents: cents(row.price_cents || 0) - landedCostCents,
       current_margin_ratio: Number(row.price_cents || 0) > 0 ? Number(((Number(row.price_cents || 0) - landedCostCents) / Number(row.price_cents || 0)).toFixed(4)) : 0,
+      planned_price_increase_cents: Math.max(0, targetSuggested - cents(row.price_cents || 0)),
+      planned_price_increase_percent: Number(row.price_cents || 0) > 0 ? Number((((Math.max(0, targetSuggested - cents(row.price_cents || 0))) / Number(row.price_cents || 1)) * 100).toFixed(2)) : 0,
       notes: [
         manualCostCents > resourceCostCents ? 'Using latest manual unit-cost snapshot as the stronger base cost.' : '',
         resourceCostCents > 0 ? 'Linked resource costs are included.' : 'No linked resource cost found yet.',
+        receivingChangeCents > 0 ? `Receiving-cost pressure adds ${receivingChangeCents} cents over linked resource cost.` : '',
         Number(row.missing_cost_links || 0) > 0 ? `${Number(row.missing_cost_links || 0)} linked item(s) still have no cost.` : ''
       ].filter(Boolean)
     };
@@ -145,7 +158,9 @@ export async function onRequestGet(context) {
       packaging_cents: packagingCents,
       shipping_pressure_cents: shippingPressureCents,
       overhead_percent: overheadPercent,
-      target_margin_percent: targetMarginPercent
+      target_margin_percent: targetMarginPercent,
+      markup_percent: markupPercent,
+      transaction_fee_percent: transactionFeePercent
     },
     items,
     summary: {

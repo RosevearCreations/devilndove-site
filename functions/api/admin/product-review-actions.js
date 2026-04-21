@@ -2,22 +2,71 @@ import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getD
 import { requireAdminStepUp } from "../_lib/adminStepUp.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
+function nr(result) { return Array.isArray(result?.results) ? result.results : []; }
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(nr(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch { return new Set(); }
+}
+async function ensurePublishOverrideTable(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS product_publish_overrides (
+    product_publish_override_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    actor_user_id INTEGER,
+    override_note TEXT,
+    publish_readiness_score INTEGER,
+    image_quality_score INTEGER,
+    ready_check_notes TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+}
+
+async function ensureProductReadinessColumns(db) {
+  const cols = await getTableColumnSet(db, "products");
+  if (!cols.has('publish_readiness_score')) await db.prepare(`ALTER TABLE products ADD COLUMN publish_readiness_score INTEGER`).run().catch(() => null);
+  if (!cols.has('image_quality_score')) await db.prepare(`ALTER TABLE products ADD COLUMN image_quality_score INTEGER`).run().catch(() => null);
+  if (!cols.has('is_ready_for_storefront')) await db.prepare(`ALTER TABLE products ADD COLUMN is_ready_for_storefront INTEGER NOT NULL DEFAULT 0`).run().catch(() => null);
+  if (!cols.has('ready_check_notes')) await db.prepare(`ALTER TABLE products ADD COLUMN ready_check_notes TEXT`).run().catch(() => null);
+}
 
 function buildReadiness(row = {}) {
+  const imageCount = Number(row.image_count || 0);
+  const altCoverage = Number(row.alt_coverage_count || 0);
+  const firstOrientation = String(row.first_image_orientation || '').toLowerCase();
+  const firstWidth = Number(row.first_width_px || 0);
+  const firstHeight = Number(row.first_height_px || 0);
+  const knowsDims = firstWidth > 0 && firstHeight > 0;
   const checks = {
     has_name: normalizeText(row.name).length > 0,
     has_slug: normalizeText(row.slug).length > 0,
     has_price: Number(row.price_cents || 0) > 0,
     has_featured_image: normalizeText(row.featured_image_url).length > 0,
+    has_image_count: imageCount >= 3,
+    has_image_alt: imageCount > 0 && altCoverage >= Math.min(3, imageCount),
     has_short_description: normalizeText(row.short_description).length >= 40,
     has_meta_title: normalizeText(row.meta_title).length >= 10,
     has_meta_description: normalizeText(row.meta_description).length >= 50,
-    has_category: normalizeText(row.product_category).length > 0
+    has_category: normalizeText(row.product_category).length > 0,
+    first_image_shape: !knowsDims || ['square', 'landscape'].includes(firstOrientation),
+    first_image_size: !knowsDims || (firstWidth >= 800 && firstHeight >= 800)
   };
+  const weights = { has_name:10, has_slug:8, has_price:12, has_featured_image:12, has_image_count:12, has_image_alt:8, has_short_description:10, has_meta_title:8, has_meta_description:8, has_category:4, first_image_shape:4, first_image_size:4 };
+  const total = Object.values(weights).reduce((sum, value) => sum + value, 0);
+  const earned = Object.entries(checks).reduce((sum, [key, ok]) => sum + (ok ? Number(weights[key] || 0) : 0), 0);
   const failedKeys = Object.entries(checks).filter(([, ok]) => !ok).map(([key]) => key);
+  const publishScore = total > 0 ? Math.round((earned / total) * 100) : 0;
+  const imageScore = Math.round(([
+    normalizeText(row.featured_image_url).length > 0 ? 1 : 0,
+    Math.min(imageCount, 5) / 5,
+    imageCount > 0 ? Math.min(altCoverage / imageCount, 1) : 0,
+    !knowsDims ? 0.75 : ((['square', 'landscape'].includes(firstOrientation) && firstWidth >= 800 && firstHeight >= 800) ? 1 : 0.35)
+  ].reduce((sum, v) => sum + v, 0) / 4) * 100);
   return {
     is_ready_for_storefront: failedKeys.length === 0 ? 1 : 0,
     ready_check_notes: failedKeys.join(", "),
+    publish_readiness_score: publishScore,
+    image_quality_score: imageScore,
     readiness_checks: checks
   };
 }
@@ -27,32 +76,39 @@ export async function onRequestPost(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
+  await ensurePublishOverrideTable(db);
+  await ensureProductReadinessColumns(db);
 
   let body = {};
-  try {
-    body = await request.json();
-  } catch {
-    return json({ ok: false, error: "Invalid JSON body." }, 400);
-  }
+  try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON body." }, 400); }
 
   const productId = Number(body.product_id || 0);
   const action = normalizeText(body.action).toLowerCase();
   const note = normalizeText(body.note).slice(0, 1000);
   if (!productId) return json({ ok: false, error: "product_id is required." }, 400);
-  if (!["approve", "request_changes", "publish", "unpublish"].includes(action)) {
-    return json({ ok: false, error: "action must be approve, request_changes, publish, or unpublish." }, 400);
+  if (!["approve", "request_changes", "publish", "publish_override", "unpublish"].includes(action)) {
+    return json({ ok: false, error: "action must be approve, request_changes, publish, publish_override, or unpublish." }, 400);
   }
 
-  if (["publish", "unpublish"].includes(action)) {
+  if (["publish", "publish_override", "unpublish"].includes(action)) {
     const stepUp = await requireAdminStepUp(request, env, adminUser, body, `${action} action`);
     if (!stepUp.ok) return stepUp.response;
   }
 
+  const annotationCols = await getTableColumnSet(db, 'product_image_annotations');
   const row = await db.prepare(`
-    SELECT p.*, ps.meta_title, ps.meta_description
+    SELECT p.*, ps.meta_title, ps.meta_description,
+           COUNT(DISTINCT pi.product_image_id) AS image_count,
+           SUM(CASE WHEN LENGTH(TRIM(COALESCE(pi.alt_text,''))) >= 5 THEN 1 ELSE 0 END) AS alt_coverage_count,
+           MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has('image_orientation') ? 'pia.image_orientation' : 'NULL'} ELSE NULL END) AS first_image_orientation,
+           MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has('width_px') ? 'pia.width_px' : 'NULL'} ELSE NULL END) AS first_width_px,
+           MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has('height_px') ? 'pia.height_px' : 'NULL'} ELSE NULL END) AS first_height_px
     FROM products p
     LEFT JOIN product_seo ps ON ps.product_id = p.product_id
+    LEFT JOIN product_images pi ON pi.product_id = p.product_id
+    LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
     WHERE p.product_id = ?
+    GROUP BY p.product_id
     LIMIT 1
   `).bind(productId).first();
   if (!row) return json({ ok: false, error: "Product not found." }, 404);
@@ -60,6 +116,8 @@ export async function onRequestPost(context) {
   const readiness = buildReadiness(row);
   let nextReviewStatus = String(row.review_status || "pending_review").toLowerCase();
   let nextStatus = String(row.status || "draft").toLowerCase();
+  const lowScorePublish = Number(readiness.publish_readiness_score || 0) < 85 || Number(readiness.image_quality_score || 0) < 70 || Number(readiness.is_ready_for_storefront || 0) !== 1;
+
   if (action === "approve") {
     if (Number(readiness.is_ready_for_storefront || 0) !== 1) {
       return json({ ok: false, error: `Product is not ready to approve yet: ${readiness.ready_check_notes || "missing required fields"}.` }, 400);
@@ -74,8 +132,21 @@ export async function onRequestPost(context) {
     if (Number(readiness.is_ready_for_storefront || 0) !== 1) {
       return json({ ok: false, error: `Product is not storefront-ready yet: ${readiness.ready_check_notes || "missing required fields"}.` }, 400);
     }
+    if (lowScorePublish) {
+      return json({ ok: false, error: `Publish blocked by listing-quality gate. Publish score ${readiness.publish_readiness_score}% • image score ${readiness.image_quality_score}%. Use Override Publish with an explicit note if you still need to go live.` }, 400);
+    }
     if (!["approved", "published"].includes(nextReviewStatus)) {
       return json({ ok: false, error: "Product must be approved before publishing." }, 400);
+    }
+    nextReviewStatus = "published";
+    nextStatus = "active";
+  }
+  if (action === "publish_override") {
+    if (!["approved", "published"].includes(nextReviewStatus)) {
+      return json({ ok: false, error: "Product must be approved before override publishing." }, 400);
+    }
+    if (!note) {
+      return json({ ok: false, error: "Override Publish requires an explicit note explaining why the low-score listing is being published." }, 400);
     }
     nextReviewStatus = "published";
     nextStatus = "active";
@@ -92,25 +163,26 @@ export async function onRequestPost(context) {
           status = ?,
           is_ready_for_storefront = ?,
           ready_check_notes = ?,
+          publish_readiness_score = ?,
+          image_quality_score = ?,
           updated_at = CURRENT_TIMESTAMP
       WHERE product_id = ?
-    `).bind(nextReviewStatus, nextStatus, Number(readiness.is_ready_for_storefront || 0), readiness.ready_check_notes || null, productId).run();
+    `).bind(nextReviewStatus, nextStatus, Number(readiness.is_ready_for_storefront || 0), readiness.ready_check_notes || null, Number(readiness.publish_readiness_score || 0), Number(readiness.image_quality_score || 0), productId).run();
 
     await db.prepare(`
       INSERT INTO product_review_actions (
         product_id, action_type, previous_review_status, new_review_status,
         previous_status, new_status, actor_user_id, note, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `).bind(
-      productId,
-      action,
-      normalizeText(row.review_status) || "pending_review",
-      nextReviewStatus,
-      normalizeText(row.status) || "draft",
-      nextStatus,
-      Number(adminUser.user_id || 0),
-      note || null
-    ).run().catch(() => null);
+    `).bind(productId, action, normalizeText(row.review_status) || "pending_review", nextReviewStatus, normalizeText(row.status) || "draft", nextStatus, Number(adminUser.user_id || 0), note || null).run().catch(() => null);
+
+    if (action === 'publish_override') {
+      await db.prepare(`
+        INSERT INTO product_publish_overrides (
+          product_id, actor_user_id, override_note, publish_readiness_score, image_quality_score, ready_check_notes, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).bind(productId, Number(adminUser.user_id || 0), note, Number(readiness.publish_readiness_score || 0), Number(readiness.image_quality_score || 0), readiness.ready_check_notes || null).run().catch(() => null);
+    }
   } catch (error) {
     await captureRuntimeIncident(env, request, {
       incident_scope: "admin_product_review_actions",
@@ -118,11 +190,7 @@ export async function onRequestPost(context) {
       severity: "warning",
       message: "Product review action failed during write.",
       related_user_id: Number(adminUser.user_id || 0),
-      details: {
-        product_id: productId,
-        action,
-        error: String(error?.message || error || "Unknown product review write error")
-      }
+      details: { product_id: productId, action, error: String(error?.message || error || "Unknown product review write error") }
     });
     return json({ ok: false, error: `Failed to ${action.replace(/_/g, " ")} product right now.` }, 500);
   }
@@ -138,10 +206,12 @@ export async function onRequestPost(context) {
       previous_status: normalizeText(row.status) || "draft",
       new_status: nextStatus,
       note: note || null,
-      ready_check_notes: readiness.ready_check_notes || null
+      ready_check_notes: readiness.ready_check_notes || null,
+      publish_readiness_score: Number(readiness.publish_readiness_score || 0),
+      image_quality_score: Number(readiness.image_quality_score || 0)
     }
   });
 
-  const updated = await db.prepare(`SELECT product_id, slug, name, review_status, status, is_ready_for_storefront, ready_check_notes, updated_at FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
+  const updated = await db.prepare(`SELECT product_id, slug, name, review_status, status, is_ready_for_storefront, ready_check_notes, publish_readiness_score, image_quality_score, updated_at FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
   return json({ ok: true, message: `Product ${action.replace("_", " ")} complete.`, product: updated });
 }
