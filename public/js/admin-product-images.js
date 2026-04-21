@@ -80,7 +80,33 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><label class="small">Focal Y</label><input type="number" data-field="focal_point_y" min="0" max="1" step="0.01" value="${escapeHtml(row.focal_point_y ?? '')}" /></div>
           <div><label class="small">Notes</label><input type="text" data-field="annotation_notes" value="${escapeHtml(row.annotation_notes || '')}" /></div>
         </div>
+        <div class="grid cols-5" style="gap:12px;margin-top:12px">
+          <div><label class="small">Width px</label><input type="number" data-field="width_px" min="0" step="1" value="${escapeHtml(row.width_px ?? '')}" /></div>
+          <div><label class="small">Height px</label><input type="number" data-field="height_px" min="0" step="1" value="${escapeHtml(row.height_px ?? '')}" /></div>
+          <div><label class="small">Orientation</label><input type="text" data-field="image_orientation" value="${escapeHtml(row.image_orientation || '')}" placeholder="square / landscape / portrait" /></div>
+          <div><label class="small">Crop X / Y</label><input type="text" data-field="crop_pair" value="${escapeHtml(((row.crop_x ?? '') !== '' || (row.crop_y ?? '') !== '') ? `${row.crop_x ?? ''},${row.crop_y ?? ''}` : '')}" placeholder="0.05,0.10" /></div>
+          <div><label class="small">Crop W / H</label><input type="text" data-field="crop_size" value="${escapeHtml(((row.crop_width ?? '') !== '' || (row.crop_height ?? '') !== '') ? `${row.crop_width ?? ''},${row.crop_height ?? ''}` : '')}" placeholder="0.90,0.80" /></div>
+        </div>
       </div>`;
+  }
+
+  function computeRowScore(row = {}, index = 0) {
+    const width = Number(row.width_px || 0);
+    const height = Number(row.height_px || 0);
+    const orientation = String(row.image_orientation || '').toLowerCase();
+    const altOk = String(row.alt_text || '').trim().length >= 5;
+    const hasCrop = row.crop_x != null && row.crop_y != null && row.crop_width != null && row.crop_height != null;
+    let score = 0;
+    if (String(row.image_url || '').trim()) score += 20;
+    if (altOk) score += 15;
+    if (width >= 1200 && height >= 1200) score += 20;
+    else if (width >= 800 && height >= 800) score += 12;
+    if (index === 0 && ['square', 'landscape'].includes(orientation)) score += 20;
+    else if (index > 0 && ['square', 'landscape', 'portrait'].includes(orientation)) score += 10;
+    if (hasCrop) score += 15;
+    if (String(row.caption || '').trim()) score += 5;
+    if (String(row.image_title || '').trim()) score += 5;
+    return Math.min(100, score);
   }
 
   function renderQualityScore() {
@@ -89,10 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!mount) return;
     const imageCount = rows.length;
     const altCoverage = rows.filter((row) => String(row.alt_text || "").trim().length >= 5).length;
-    const score = imageCount >= 5 ? 100 : imageCount >= 3 ? 80 : imageCount > 0 ? 45 : 0;
     const firstImage = rows[0] || null;
-    const firstImageWarning = firstImage ? '' : 'Choose a first image before publish.';
-    mount.innerHTML = `<h4 style="margin-top:0">Photo completeness before publish</h4><div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • image score ${score}%</div><div class="small" style="margin-top:6px">Aim for at least 3 images, with the first image clearly chosen and alt text filled in for the first few photos. Etsy-style best practice still favors a square or landscape first image.</div>${firstImageWarning ? `<div class="small" style="margin-top:6px;color:#b00020">${firstImageWarning}</div>` : ''}`;
+    const firstImageScore = firstImage ? computeRowScore(firstImage, 0) : 0;
+    const overallScore = rows.length ? Math.round(rows.reduce((sum, row, index) => sum + computeRowScore(row, index), 0) / rows.length) : 0;
+    const firstOrientation = String(firstImage?.image_orientation || '').toLowerCase();
+    const firstWarning = !firstImage ? 'Choose a first image before publish.' : (['square','landscape'].includes(firstOrientation) ? '' : 'First image should be square or landscape.');
+    const cropWarning = firstImage && !(firstImage.crop_x != null && firstImage.crop_y != null && firstImage.crop_width != null && firstImage.crop_height != null) ? 'Add crop history to the first image for stronger merchandising control.' : '';
+    mount.innerHTML = `<h4 style="margin-top:0">Photo completeness before publish</h4><div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • image score ${overallScore}% • first-image score ${firstImageScore}%</div><div class="small" style="margin-top:6px">Aim for at least 3 images. Use a square or landscape first image, record image dimensions, and store crop history on the lead image.</div>${firstWarning ? `<div class="small" style="margin-top:6px;color:#b00020">${firstWarning}</div>` : ''}${cropWarning ? `<div class="small" style="margin-top:6px;color:#b00020">${cropWarning}</div>` : ''}`;
   }
 
   function collectRows() {
@@ -106,7 +135,15 @@ document.addEventListener('DOMContentLoaded', () => {
         sort_order: index,
         focal_point_x: String(value('focal_point_x') || '').trim() === '' ? null : Number(value('focal_point_x')),
         focal_point_y: String(value('focal_point_y') || '').trim() === '' ? null : Number(value('focal_point_y')),
-        annotation_notes: String(value('annotation_notes') || '').trim()
+        annotation_notes: String(value('annotation_notes') || '').trim(),
+        width_px: String(value('width_px') || '').trim() === '' ? null : Number(value('width_px')),
+        height_px: String(value('height_px') || '').trim() === '' ? null : Number(value('height_px')),
+        image_orientation: String(value('image_orientation') || '').trim(),
+        crop_x: String((value('crop_pair') || '').split(',')[0] || '').trim() === '' ? null : Number(String((value('crop_pair') || '').split(',')[0] || '').trim()),
+        crop_y: String((value('crop_pair') || '').split(',')[1] || '').trim() === '' ? null : Number(String((value('crop_pair') || '').split(',')[1] || '').trim()),
+        crop_width: String((value('crop_size') || '').split(',')[0] || '').trim() === '' ? null : Number(String((value('crop_size') || '').split(',')[0] || '').trim()),
+        crop_height: String((value('crop_size') || '').split(',')[1] || '').trim() === '' ? null : Number(String((value('crop_size') || '').split(',')[1] || '').trim()),
+        first_image_score: computeRowScore({ image_url: String(value('image_url') || '').trim(), alt_text: String(value('alt_text') || '').trim(), image_title: String(value('image_title') || '').trim(), caption: String(value('caption') || '').trim(), width_px: String(value('width_px') || '').trim() === '' ? null : Number(value('width_px')), height_px: String(value('height_px') || '').trim() === '' ? null : Number(value('height_px')), image_orientation: String(value('image_orientation') || '').trim(), crop_x: String((value('crop_pair') || '').split(',')[0] || '').trim() === '' ? null : Number(String((value('crop_pair') || '').split(',')[0] || '').trim()), crop_y: String((value('crop_pair') || '').split(',')[1] || '').trim() === '' ? null : Number(String((value('crop_pair') || '').split(',')[1] || '').trim()), crop_width: String((value('crop_size') || '').split(',')[0] || '').trim() === '' ? null : Number(String((value('crop_size') || '').split(',')[0] || '').trim()), crop_height: String((value('crop_size') || '').split(',')[1] || '').trim() === '' ? null : Number(String((value('crop_size') || '').split(',')[1] || '').trim()) }, index)
       };
     }).filter((row) => row.image_url);
   }
@@ -212,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await window.DDAuth.apiFetch('/api/admin/media-upload', { method: 'POST', body: formData, headers: {} });
       const data = await response.json();
       if (!response.ok || !data?.ok || !data?.asset?.public_url) throw new Error(data?.error || 'Failed to upload image.');
-      addRow({ image_url: data.asset.public_url, alt_text: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '), sort_order: document.querySelectorAll('[data-product-image-row]').length });
+      addRow({ image_url: data.asset.public_url, alt_text: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '), sort_order: document.querySelectorAll('[data-product-image-row]').length, width_px: localInfo.width, height_px: localInfo.height, image_orientation: (localInfo.orientation === 'square_or_landscape' ? (localInfo.width === localInfo.height ? 'square' : 'landscape') : 'portrait') });
       if (fileInput) fileInput.value = '';
       await loadAssetLibrary();
       setMessage('Image uploaded and added to the list. Save images to attach it to the product.');

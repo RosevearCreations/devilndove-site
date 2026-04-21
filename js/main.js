@@ -232,7 +232,7 @@
 
   function shouldShowFeaturedTestimonials(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
-    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html'].includes(path);
+    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html', '/movies/', '/movies/index.html'].includes(path);
   }
 
   function featuredTestimonialMeta(pathname) {
@@ -240,8 +240,9 @@
     if (path.startsWith('/shop/')) return { heading: 'Shopper feedback', intro: 'Featured testimonials and approved buyer feedback to support purchase decisions.', limit: 4, insertAfterSelector: '#shopGiftCardStorefrontMount, .customer-welcome, .hero' };
     if (path.startsWith('/tools/')) return { heading: 'Workshop notes from buyers', intro: 'Feedback from people following the tools, supplies, and maker side of Devil n Dove.', limit: 3, insertAfterSelector: '.hero' };
     if (path.startsWith('/supplies/')) return { heading: 'Maker feedback', intro: 'Testimonials that help show how people use and enjoy the shop and workshop content.', limit: 3, insertAfterSelector: '.hero' };
-    if (path.startsWith('/gallery/') || path.startsWith('/creations/')) return { heading: 'What people say about our creations', intro: 'Featured testimonials and approved buyer feedback from the Devil n Dove storefront.', limit: 3, insertAfterSelector: '.hero' };
-    return { heading: 'What buyers say', intro: 'Featured testimonials and approved buyer feedback from the Devil n Dove storefront.', limit: 3, insertAfterSelector: '.hero' };
+    if (path.startsWith('/gallery/') || path.startsWith('/creations/')) return { heading: 'What people say about our creations', intro: 'Featured testimonials and approved buyer feedback from the Devil n Dove storefront.', limit: 3, insertAfterSelector: '.hero, .collections, .cards' };
+    if (path.startsWith('/movies/')) return { heading: 'Supporter feedback', intro: 'Featured testimonials and supporter notes from people following Devil n Dove across the storefront, media, and workshop projects.', limit: 3, insertAfterSelector: '.hero' };
+    return { heading: 'What buyers say', intro: 'Featured testimonials and approved buyer feedback from the Devil n Dove storefront.', limit: 3, insertAfterSelector: '.hero, .cards, .card-grid' };
   }
 
   async function injectFeaturedTestimonials() {
@@ -266,7 +267,7 @@
             <h2 style="margin:0">${escapeHtml(meta.heading)}</h2>
             <p class="small" style="margin:6px 0 0 0">${escapeHtml(meta.intro)}</p>
           </div>
-          <a class="btn" href="/members/">Leave feedback</a>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="/members/">Leave feedback</a><a class="btn" href="https://buymeacoffee.com/devilndovel" rel="noopener" target="_blank">Support our work</a></div>
         </div>
         <div class="featured-testimonials-grid" style="margin-top:12px">
           ${reviews.map((row) => `
@@ -275,7 +276,7 @@
               <p style="margin:10px 0">${escapeHtml(row.review_text || '')}</p>
               <div class="small"><strong>${escapeHtml(row.reviewer_name || 'Devil n Dove customer')}</strong>${row.product_slug ? ` • <a href="/shop/product/?slug=${encodeURIComponent(row.product_slug)}">${escapeHtml(row.product_name || 'Product')}</a>` : ''}</div><div class="small" style="margin-top:4px">${escapeHtml(row.review_kind || 'testimonial')}</div>
             </article>`).join('')}
-        </div>`;
+        </div><div class="small" style="margin-top:10px">Featured reviews are used across the shop and public sections to build trust, show real buyer reactions, and support local discovery.</div>`;
       const anchor = container.querySelector(meta.insertAfterSelector);
       if (anchor && anchor.parentNode === container) container.insertBefore(section, anchor.nextSibling);
       else container.insertBefore(section, footer);

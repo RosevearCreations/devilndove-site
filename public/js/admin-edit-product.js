@@ -72,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (submitButton) { submitButton.textContent = "Create Product"; submitButton.disabled = false; }
     const cancelButton = document.getElementById("cancelProductEdit");
     if (cancelButton) cancelButton.style.display = "none";
+    ensurePricingControlsMount();
     renderPricingInsight();
   }
 
@@ -99,6 +100,91 @@ document.addEventListener("DOMContentLoaded", () => {
     mount.style.display = "none";
     form.parentNode?.insertBefore(mount, form.nextSibling);
     return mount;
+  }
+
+
+  function ensurePricingControlsMount() {
+    let mount = document.getElementById("productPricingControlsMount");
+    if (mount) return mount;
+    mount = document.createElement("div");
+    mount.id = "productPricingControlsMount";
+    mount.className = "card";
+    mount.style.marginTop = "16px";
+    mount.innerHTML = `
+      <h3 style="margin-top:0">Pricing operating console</h3>
+      <div class="small">Use these assumptions to calculate suggested pricing, planned increases, and landed-cost pressure before saving.</div>
+      <div class="grid cols-5" style="gap:10px;margin-top:12px">
+        <div><label class="small">Packaging $</label><input id="pricingPackaging" type="number" min="0" step="0.01" value="0.00" /></div>
+        <div><label class="small">Shipping pressure $</label><input id="pricingShippingPressure" type="number" min="0" step="0.01" value="0.00" /></div>
+        <div><label class="small">Overhead %</label><input id="pricingOverheadPercent" type="number" min="0" step="0.1" value="12" /></div>
+        <div><label class="small">Target margin %</label><input id="pricingTargetMargin" type="number" min="5" step="0.1" value="65" /></div>
+        <div><label class="small">Markup %</label><input id="pricingMarkupPercent" type="number" min="5" step="0.1" value="120" /></div>
+      </div>
+      <div class="grid cols-3" style="gap:10px;margin-top:12px">
+        <div><label class="small">Transaction fee %</label><input id="pricingTransactionFee" type="number" min="0" step="0.1" value="0" /></div>
+        <div><label class="small">Receiving change $</label><input id="pricingReceivingChange" type="number" min="0" step="0.01" value="0.00" /></div>
+        <div style="display:flex;align-items:end;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="recalculatePricingButton">Recalculate pricing</button></div>
+      </div>`;
+    ensurePricingInsightMount().parentNode?.insertBefore(mount, ensurePricingInsightMount());
+    mount.querySelector('#recalculatePricingButton')?.addEventListener('click', async () => {
+      if (!editingProductId) return setMessage('Load a product first before recalculating pricing.', true);
+      try {
+        const data = await fetchPriceSuggestion(editingProductId);
+        latestPriceSuggestion = data?.item || null;
+        renderPricingInsight();
+        setMessage('Pricing guidance recalculated. Review the pricing panel below.');
+      } catch (error) {
+        setMessage(error.message || 'Failed to recalculate pricing guidance.', true);
+      }
+    });
+    return mount;
+  }
+
+  function getPricingControls() {
+    ensurePricingControlsMount();
+    const num = (id, fallback) => {
+      const value = Number(document.getElementById(id)?.value || fallback);
+      return Number.isFinite(value) ? value : fallback;
+    };
+    return {
+      packaging_cents: Math.round(num('pricingPackaging', 0) * 100),
+      shipping_pressure_cents: Math.round(num('pricingShippingPressure', 0) * 100),
+      overhead_percent: num('pricingOverheadPercent', 12),
+      target_margin_percent: num('pricingTargetMargin', 65),
+      markup_percent: num('pricingMarkupPercent', 120),
+      transaction_fee_percent: num('pricingTransactionFee', 0),
+      receiving_change_cents: Math.round(num('pricingReceivingChange', 0) * 100)
+    };
+  }
+
+  async function fetchPriceSuggestion(productId) {
+    const controls = getPricingControls();
+    const query = new URLSearchParams({
+      product_id: String(productId || 0),
+      packaging_cents: String(controls.packaging_cents || 0),
+      shipping_pressure_cents: String(controls.shipping_pressure_cents || 0),
+      overhead_percent: String(controls.overhead_percent || 0),
+      target_margin_percent: String(controls.target_margin_percent || 0),
+      markup_percent: String(controls.markup_percent || 0),
+      transaction_fee_percent: String(controls.transaction_fee_percent || 0)
+    });
+    const response = await window.DDAuth.apiFetch(`/api/admin/product-price-suggestions?${query.toString()}`, { method: 'GET' });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load price suggestions.');
+    const item = Array.isArray(data.items) ? data.items.find((row) => Number(row.product_id || 0) === Number(productId || 0)) : null;
+    if (!item) throw new Error('Price suggestion for this product was not returned.');
+    const receivingChangeCents = controls.receiving_change_cents || 0;
+    item.receiving_change_cents = Number(item.receiving_change_cents || 0) + receivingChangeCents;
+    item.landed_cost_cents = Number(item.landed_cost_cents || 0) + receivingChangeCents;
+    item.suggested_price_cents = Number(item.suggested_price_cents || 0) + receivingChangeCents;
+    item.conservative_price_cents = Number(item.conservative_price_cents || 0) + receivingChangeCents;
+    item.stretch_price_cents = Number(item.stretch_price_cents || 0) + receivingChangeCents;
+    item.markup_price_cents = Number(item.markup_price_cents || 0) + receivingChangeCents;
+    item.suggested_compare_at_cents = Number(item.suggested_compare_at_cents || 0) + receivingChangeCents;
+    item.planned_price_increase_cents = Math.max(0, Number(item.suggested_price_cents || 0) - parseDollarField('price'));
+    item.planned_price_increase_percent = parseDollarField('price') > 0 ? Number((((Math.max(0, Number(item.suggested_price_cents || 0) - parseDollarField('price'))) / parseDollarField('price')) * 100).toFixed(2)) : 0;
+    item.assumptions = { ...(data.assumptions || {}), ...controls };
+    return { item };
   }
 
   function parseDollarField(name) {
@@ -129,6 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const plannedIncrease = Number(latestPriceSuggestion.planned_price_increase_cents || 0);
     const plannedIncreasePercent = Number(latestPriceSuggestion.planned_price_increase_percent || 0);
     const transactionFee = Number(latestPriceSuggestion.transaction_fee_cents || 0);
+    const receivingChange = Number(latestPriceSuggestion.receiving_change_cents || 0);
     const packaging = Number(latestPriceSuggestion.packaging_cents || 0);
     const shippingPressure = Number(latestPriceSuggestion.shipping_pressure_cents || 0);
     const marginRatio = currentPrice > 0 ? ((currentPrice - landed) / currentPrice) : 0;
@@ -162,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="card"><div class="small">Markup price</div><strong>${escapeHtml(centsToDollars(markupPrice))}</strong></div>
         <div class="card"><div class="small">Planned increase</div><strong>${escapeHtml(centsToDollars(plannedIncrease))}</strong><div class="small">${escapeHtml(plannedIncreasePercent.toFixed(1))}%</div></div>
       </div>
-      <div class="small" style="margin-top:10px">Safe range ${escapeHtml(centsToDollars(conservative))} → ${escapeHtml(centsToDollars(stretch))}. Compare-at suggestion ${escapeHtml(centsToDollars(suggestedCompareAt))}. Current compare-at ${escapeHtml(centsToDollars(compareAt))}. Packaging ${escapeHtml(centsToDollars(packaging))} • shipping pressure ${escapeHtml(centsToDollars(shippingPressure))} • fees ${escapeHtml(centsToDollars(transactionFee))}.</div>
+      <div class="small" style="margin-top:10px">Safe range ${escapeHtml(centsToDollars(conservative))} → ${escapeHtml(centsToDollars(stretch))}. Compare-at suggestion ${escapeHtml(centsToDollars(suggestedCompareAt))}. Current compare-at ${escapeHtml(centsToDollars(compareAt))}. Packaging ${escapeHtml(centsToDollars(packaging))} • shipping pressure ${escapeHtml(centsToDollars(shippingPressure))} • receiving change ${escapeHtml(centsToDollars(receivingChange))} • fees ${escapeHtml(centsToDollars(transactionFee))}.</div>
       ${(Array.isArray(latestPriceSuggestion.notes) && latestPriceSuggestion.notes.length) ? `<div class="small" style="margin-top:8px">${latestPriceSuggestion.notes.map((note) => escapeHtml(note)).join(" • ")}</div>` : ""}
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
         <button class="btn" type="button" data-apply-price-preset="conservative">Use conservative</button>
@@ -399,6 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await loadProduct(productId);
       editingProductId = productId;
       fillForm(data.product || {}, data.images || []);
+      try { const suggestion = await fetchPriceSuggestion(productId); latestPriceSuggestion = suggestion.item; } catch {}
       renderPricingInsight();
       setFormModeEdit();
       form.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -458,6 +546,14 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
+      const currentSuggestion = editingProductId ? await fetchPriceSuggestion(editingProductId).catch(() => null) : null;
+      if (currentSuggestion?.item) {
+        latestPriceSuggestion = currentSuggestion.item;
+        renderPricingInsight();
+        const landed = Number(latestPriceSuggestion.landed_cost_cents || 0);
+        if (price_cents <= landed && !window.confirm('This price is at or below landed cost. Save anyway?')) return;
+        if (Number(latestPriceSuggestion.planned_price_increase_percent || 0) >= 20 && !window.confirm('This recommendation suggests a price increase of 20% or more. Continue saving this price?')) return;
+      }
       if (submitButton) { submitButton.disabled = true; submitButton.textContent = "Updating..."; }
       const data = await liveUpdateProduct(payload);
       setMessage(data.message || "Product updated successfully.");
