@@ -111,6 +111,40 @@ async function ensureGiftCardTables(db) {
   )`).run().catch(() => null);
 }
 
+async function ensureGiftCardAuditTable(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_delivery_audit (
+    gift_card_delivery_audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gift_card_id INTEGER,
+    audience TEXT NOT NULL DEFAULT 'recipient',
+    notification_kind TEXT NOT NULL,
+    destination TEXT,
+    notification_outbox_id INTEGER,
+    notification_dispatch_log_id INTEGER,
+    actor_user_id INTEGER,
+    action_type TEXT NOT NULL DEFAULT 'queued',
+    details_json TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+}
+
+async function logGiftCardAudit(db, payload = {}) {
+  await ensureGiftCardAuditTable(db);
+  await db.prepare(`INSERT INTO gift_card_delivery_audit (
+    gift_card_id, audience, notification_kind, destination, notification_outbox_id,
+    notification_dispatch_log_id, actor_user_id, action_type, details_json, created_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
+    Number(payload.gift_card_id || 0) || null,
+    normalizeText(payload.audience) || 'recipient',
+    normalizeText(payload.notification_kind) || 'gift_card_issued',
+    safeEmail(payload.destination) || null,
+    Number(payload.notification_outbox_id || 0) || null,
+    Number(payload.notification_dispatch_log_id || 0) || null,
+    Number(payload.actor_user_id || 0) || null,
+    normalizeText(payload.action_type) || 'queued',
+    payload.details_json ? JSON.stringify(payload.details_json) : null
+  ).run().catch(() => null);
+}
+
 async function ensureReviewTable(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS product_reviews (
     product_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -204,10 +238,10 @@ async function queueRecoveryEmail(db, lead) {
   });
 }
 
-async function queueGiftCardNotice(db, cardRow) {
+async function queueGiftCardNotice(db, cardRow, actorUserId = null) {
   const recipientEmail = safeEmail(cardRow.recipient_email || cardRow.issued_to_email);
   if (!recipientEmail) return { queued: false };
-  return queueNotification(db, {
+  const result = await queueNotification(db, {
     notification_kind: 'gift_card_issued',
     destination: recipientEmail,
     related_order_id: Number(cardRow.order_id || 0) || null,
@@ -219,18 +253,29 @@ async function queueGiftCardNotice(db, cardRow) {
       expires_at: cardRow.expires_at || '',
       note: cardRow.recipient_note || cardRow.note || '',
       purchaser_name: cardRow.purchaser_name || '',
-      recipient_name: cardRow.recipient_name || cardRow.issued_to_name || '',
-      subject: (cardRow.purchaser_name || cardRow.recipient_name || cardRow.issued_to_name)
-        ? `A Devil n Dove gift card${cardRow.purchaser_name ? ` from ${cardRow.purchaser_name}` : ''}`
-        : 'Your Devil n Dove gift card'
+      recipient_name: cardRow.recipient_name || '',
+      subject: cardRow.purchaser_name ? `A Devil n Dove gift card from ${cardRow.purchaser_name}` : 'Your Devil n Dove gift card'
     }
   });
+  if (result?.queued) {
+    await logGiftCardAudit(db, {
+      gift_card_id: Number(cardRow.gift_card_id || 0),
+      audience: 'recipient',
+      notification_kind: 'gift_card_issued',
+      destination: recipientEmail,
+      notification_outbox_id: Number(result.notification_outbox_id || 0) || null,
+      actor_user_id: actorUserId || null,
+      action_type: 'queued',
+      details_json: { source: cardRow.purchase_source || 'manual', code: cardRow.code || '' }
+    });
+  }
+  return result;
 }
 
-async function queueGiftCardPurchaseConfirmation(db, cardRow) {
+async function queueGiftCardPurchaseConfirmation(db, cardRow, actorUserId = null) {
   const purchaserEmail = safeEmail(cardRow.purchaser_email);
   if (!purchaserEmail) return { queued: false };
-  return queueNotification(db, {
+  const result = await queueNotification(db, {
     notification_kind: 'gift_card_purchase_confirmation',
     destination: purchaserEmail,
     related_order_id: Number(cardRow.order_id || 0) || null,
@@ -240,9 +285,23 @@ async function queueGiftCardPurchaseConfirmation(db, cardRow) {
       initial_amount_cents: Number(cardRow.initial_amount_cents || 0),
       purchaser_name: cardRow.purchaser_name || '',
       recipient_name: cardRow.recipient_name || '',
+      recipient_email: cardRow.recipient_email || cardRow.issued_to_email || '',
       subject: 'Your Devil n Dove gift card purchase is confirmed'
     }
   });
+  if (result?.queued) {
+    await logGiftCardAudit(db, {
+      gift_card_id: Number(cardRow.gift_card_id || 0),
+      audience: 'purchaser',
+      notification_kind: 'gift_card_purchase_confirmation',
+      destination: purchaserEmail,
+      notification_outbox_id: Number(result.notification_outbox_id || 0) || null,
+      actor_user_id: actorUserId || null,
+      action_type: 'queued',
+      details_json: { source: cardRow.purchase_source || 'manual', code: cardRow.code || '' }
+    });
+  }
+  return result;
 }
 
 async function notificationExists(db, { notificationKind = '', destination = '', relatedOrderId = null } = {}) {
@@ -418,7 +477,7 @@ async function listEngagementData(db) {
     tableExists(db, 'cart_activity')
   ]);
 
-  const [wishlistRows, interestRows, recoveryRows, giftCards, reviewRows, recentOrders, outboxRows, cooldownRows, exclusionRows, runRows, dispatchRows] = await Promise.all([
+  const [wishlistRows, interestRows, recoveryRows, giftCards, reviewRows, recentOrders, outboxRows, cooldownRows, exclusionRows, runRows, dispatchRows, giftAuditRows] = await Promise.all([
     db.prepare(`
       SELECT p.product_id, p.name, p.slug, p.featured_image_url, COUNT(*) AS saved_count, MAX(mw.created_at) AS last_saved_at
       FROM member_wishlists mw
@@ -578,7 +637,7 @@ export async function onRequestPost(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  await Promise.all([ensureWishlistTable(db), ensureInterestTable(db), ensureCheckoutRecoveryTable(db), ensureGiftCardTables(db), ensureReviewTable(db), ensureNotificationTables(db)]);
+  await Promise.all([ensureWishlistTable(db), ensureInterestTable(db), ensureCheckoutRecoveryTable(db), ensureGiftCardTables(db), ensureGiftCardAuditTable(db), ensureReviewTable(db), ensureNotificationTables(db)]);
 
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
@@ -606,8 +665,8 @@ export async function onRequestPost(context) {
         ) VALUES (?, 'CAD', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `).bind(code, amountCents, amountCents, recipientEmail, recipientName || null, recipientEmail, recipientName || null, purchaserEmail || null, purchaserName || null, recipientNote || null, note || null, expiresAt, Number(adminUser.user_id || 0)).run();
       const cardRow = await db.prepare(`SELECT * FROM gift_cards WHERE code = ? LIMIT 1`).bind(code).first();
-      await queueGiftCardNotice(db, cardRow || {});
-      if (purchaserEmail) await queueGiftCardPurchaseConfirmation(db, cardRow || {});
+      await queueGiftCardNotice(db, cardRow || {}, Number(adminUser.user_id || 0));
+      if (purchaserEmail) await queueGiftCardPurchaseConfirmation(db, cardRow || {}, Number(adminUser.user_id || 0));
       await auditAdminAction(env, request, adminUser, { action_type: 'gift_card_issued', target_type: 'gift_card', target_key: code, details: { amount_cents: amountCents, purchaser_email: purchaserEmail, recipient_email: recipientEmail } });
       return json({ ok: true, message: 'Gift card issued and email(s) queued.' });
     }
@@ -619,12 +678,25 @@ export async function onRequestPost(context) {
       for (const giftCardId of ids) {
         const cardRow = await db.prepare(`SELECT * FROM gift_cards WHERE gift_card_id = ? LIMIT 1`).bind(giftCardId).first();
         if (!cardRow) continue;
-        const a = await queueGiftCardNotice(db, cardRow);
-        const b = await queueGiftCardPurchaseConfirmation(db, cardRow);
+        const audience = normalizeText(body.audience).toLowerCase();
+        const a = audience && audience !== 'purchaser' ? await queueGiftCardNotice(db, cardRow, Number(adminUser.user_id || 0)) : { queued: false };
+        const b = audience && audience !== 'recipient' ? await queueGiftCardPurchaseConfirmation(db, cardRow, Number(adminUser.user_id || 0)) : { queued: false };
         queuedCount += Number(!!a?.queued) + Number(!!b?.queued);
       }
       await auditAdminAction(env, request, adminUser, { action_type: 'gift_card_resend_queued', target_type: 'gift_card', details: { ids, queuedCount } });
       return json({ ok: true, message: `${queuedCount} gift card email(s) queued.` });
+    }
+
+    if (action === 'resend_gift_card_recipient' || action === 'resend_gift_card_purchaser') {
+      const giftCardId = Number(body.gift_card_id || 0);
+      if (!giftCardId) return json({ ok: false, error: 'gift_card_id is required.' }, 400);
+      const cardRow = await db.prepare(`SELECT * FROM gift_cards WHERE gift_card_id = ? LIMIT 1`).bind(giftCardId).first();
+      if (!cardRow) return json({ ok: false, error: 'Gift card not found.' }, 404);
+      const result = action === 'resend_gift_card_recipient'
+        ? await queueGiftCardNotice(db, cardRow, Number(adminUser.user_id || 0))
+        : await queueGiftCardPurchaseConfirmation(db, cardRow, Number(adminUser.user_id || 0));
+      await auditAdminAction(env, request, adminUser, { action_type: action, target_type: 'gift_card', target_id: giftCardId, details: { queued: !!result?.queued } });
+      return json({ ok: true, message: result?.queued ? 'Gift card email queued.' : 'No email was queued for this audience.' });
     }
 
     if (action === 'set_gift_card_status' || action === 'bulk_set_gift_card_status') {

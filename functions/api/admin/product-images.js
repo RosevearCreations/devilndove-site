@@ -63,15 +63,14 @@ async function getTableColumnSet(db, tableName) {
 
 async function ensureDimensionColumns(db) {
   const annotationCols = await getTableColumnSet(db, 'product_image_annotations');
-  if (!annotationCols.has('width_px')) {
-    await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN width_px INTEGER`).run().catch(() => null);
-  }
-  if (!annotationCols.has('height_px')) {
-    await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN height_px INTEGER`).run().catch(() => null);
-  }
-  if (!annotationCols.has('image_orientation')) {
-    await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN image_orientation TEXT`).run().catch(() => null);
-  }
+  if (!annotationCols.has('width_px')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN width_px INTEGER`).run().catch(() => null);
+  if (!annotationCols.has('height_px')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN height_px INTEGER`).run().catch(() => null);
+  if (!annotationCols.has('image_orientation')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN image_orientation TEXT`).run().catch(() => null);
+  if (!annotationCols.has('crop_x')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN crop_x REAL`).run().catch(() => null);
+  if (!annotationCols.has('crop_y')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN crop_y REAL`).run().catch(() => null);
+  if (!annotationCols.has('crop_width')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN crop_width REAL`).run().catch(() => null);
+  if (!annotationCols.has('crop_height')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN crop_height REAL`).run().catch(() => null);
+  if (!annotationCols.has('first_image_score')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN first_image_score INTEGER`).run().catch(() => null);
 }
 
 export async function onRequestGet(context) {
@@ -93,7 +92,12 @@ export async function onRequestGet(context) {
            pia.image_title, pia.caption, pia.focal_point_x, pia.focal_point_y, pia.annotation_notes,
            ${annotationCols.has('width_px') ? 'pia.width_px' : 'NULL AS width_px'},
            ${annotationCols.has('height_px') ? 'pia.height_px' : 'NULL AS height_px'},
-           ${annotationCols.has('image_orientation') ? 'pia.image_orientation' : 'NULL AS image_orientation'}
+           ${annotationCols.has('image_orientation') ? 'pia.image_orientation' : 'NULL AS image_orientation'},
+           ${annotationCols.has('crop_x') ? 'pia.crop_x' : 'NULL AS crop_x'},
+           ${annotationCols.has('crop_y') ? 'pia.crop_y' : 'NULL AS crop_y'},
+           ${annotationCols.has('crop_width') ? 'pia.crop_width' : 'NULL AS crop_width'},
+           ${annotationCols.has('crop_height') ? 'pia.crop_height' : 'NULL AS crop_height'},
+           ${annotationCols.has('first_image_score') ? 'pia.first_image_score' : 'NULL AS first_image_score'}
     FROM product_images pi
     LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
     WHERE pi.product_id = ?
@@ -114,7 +118,12 @@ export async function onRequestGet(context) {
     annotation_notes: row.annotation_notes || '',
     width_px: row.width_px == null ? null : Number(row.width_px || 0),
     height_px: row.height_px == null ? null : Number(row.height_px || 0),
-    image_orientation: row.image_orientation || ''
+    image_orientation: row.image_orientation || '',
+    crop_x: row.crop_x == null ? null : Number(row.crop_x || 0),
+    crop_y: row.crop_y == null ? null : Number(row.crop_y || 0),
+    crop_width: row.crop_width == null ? null : Number(row.crop_width || 0),
+    crop_height: row.crop_height == null ? null : Number(row.crop_height || 0),
+    first_image_score: row.first_image_score == null ? null : Number(row.first_image_score || 0)
   })) });
 }
 
@@ -158,8 +167,8 @@ export async function onRequestPost(context) {
     await db.prepare(`
       INSERT INTO product_image_annotations (
         product_id, product_image_id, image_url, alt_text, image_title, caption,
-        focal_point_x, focal_point_y, annotation_notes, width_px, height_px, image_orientation, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        focal_point_x, focal_point_y, annotation_notes, width_px, height_px, image_orientation, crop_x, crop_y, crop_width, crop_height, first_image_score, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `).bind(
       product_id,
       productImageId || null,
@@ -172,7 +181,12 @@ export async function onRequestPost(context) {
       normalizeText(row.annotation_notes) || null,
       row.width_px == null ? null : Number(row.width_px),
       row.height_px == null ? null : Number(row.height_px),
-      normalizeText(row.image_orientation) || null
+      normalizeText(row.image_orientation) || null,
+      row.crop_x == null ? null : Number(row.crop_x),
+      row.crop_y == null ? null : Number(row.crop_y),
+      row.crop_width == null ? null : Number(row.crop_width),
+      row.crop_height == null ? null : Number(row.crop_height),
+      row.first_image_score == null ? null : Number(row.first_image_score)
     ).run();
 
     if (featuredImageUrl == null || Number(sortOrder) === 0) {
