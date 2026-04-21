@@ -1,15 +1,17 @@
 // File: /functions/api/member/order-detail.js
 // Brief description: Returns one order for the logged-in member. It validates the active
 // bearer-token session, ensures the requested order belongs to the current user, and returns
-// the order, items, status history, and lightweight payment summary for the member order-detail modal.
+// the order, items, status history, payment summary, and any gift-card delivery history.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json"
-    }
+    headers: { "Content-Type": "application/json" }
   });
+}
+
+function getDb(env) {
+  return env.DB || env.DD_DB || null;
 }
 
 function getBearerToken(request) {
@@ -22,14 +24,22 @@ function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+async function tableExists(db, tableName) {
+  try {
+    const row = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1`).bind(tableName).first();
+    return !!row;
+  } catch {
+    return false;
+  }
+}
+
 async function getMemberUserFromRequest(request, env) {
   const token = getBearerToken(request);
+  if (!token) return null;
+  const db = getDb(env);
+  if (!db) return null;
 
-  if (!token) {
-    return null;
-  }
-
-  const session = await env.DB.prepare(`
+  const session = await db.prepare(`
     SELECT
       s.session_id,
       s.user_id,
@@ -42,21 +52,14 @@ async function getMemberUserFromRequest(request, env) {
       u.role,
       u.is_active
     FROM sessions s
-    INNER JOIN users u
-      ON u.user_id = s.user_id
-    WHERE (
-      s.session_token = ?
-      OR s.token = ?
-    )
+    INNER JOIN users u ON u.user_id = s.user_id
+    WHERE (s.session_token = ? OR s.token = ?)
       AND s.expires_at > datetime('now')
     LIMIT 1
-  `)
-    .bind(token, token)
-    .first();
+  `).bind(token, token).first();
 
   if (!session) return null;
   if (Number(session.is_active || 0) !== 1) return null;
-
   const role = String(session.role || "").toLowerCase();
   if (!["member", "admin"].includes(role)) return null;
 
@@ -72,7 +75,6 @@ async function getMemberUserFromRequest(request, env) {
 function summarizePayments(order, payments) {
   const safePayments = Array.isArray(payments) ? payments : [];
   const orderTotalCents = Number(order?.total_cents || 0);
-
   let paid_total_cents = 0;
   let refunded_total_cents = 0;
   let pending_total_cents = 0;
@@ -80,42 +82,19 @@ function summarizePayments(order, payments) {
   for (const payment of safePayments) {
     const status = String(payment?.payment_status || "").toLowerCase();
     const amount = Number(payment?.amount_cents || 0);
-
-    if (["paid", "completed", "captured"].includes(status)) {
-      paid_total_cents += amount;
-    }
-
-    if (["refunded", "partially_refunded"].includes(status)) {
-      refunded_total_cents += amount;
-    }
-
-    if (["pending", "authorized"].includes(status)) {
-      pending_total_cents += amount;
-    }
+    if (["paid", "completed", "captured"].includes(status)) paid_total_cents += amount;
+    if (["refunded", "partially_refunded"].includes(status)) refunded_total_cents += amount;
+    if (["pending", "authorized"].includes(status)) pending_total_cents += amount;
   }
 
   let derived_payment_status = "pending";
-
-  if (safePayments.length === 0) {
-    derived_payment_status = String(order?.payment_status || "pending").toLowerCase();
-  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "refunded")) {
-    derived_payment_status = "refunded";
-  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "partially_refunded")) {
-    derived_payment_status = "partially_refunded";
-  } else if (paid_total_cents >= orderTotalCents && orderTotalCents > 0) {
-    derived_payment_status = "paid";
-  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "authorized")) {
-    derived_payment_status = "authorized";
-  } else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "pending")) {
-    derived_payment_status = "pending";
-  } else if (
-    safePayments.every((payment) => {
-      const status = String(payment?.payment_status || "").toLowerCase();
-      return ["failed", "cancelled"].includes(status);
-    })
-  ) {
-    derived_payment_status = "failed";
-  }
+  if (safePayments.length === 0) derived_payment_status = String(order?.payment_status || "pending").toLowerCase();
+  else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "refunded")) derived_payment_status = "refunded";
+  else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "partially_refunded")) derived_payment_status = "partially_refunded";
+  else if (paid_total_cents >= orderTotalCents && orderTotalCents > 0) derived_payment_status = "paid";
+  else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "authorized")) derived_payment_status = "authorized";
+  else if (safePayments.some((payment) => String(payment?.payment_status || "").toLowerCase() === "pending")) derived_payment_status = "pending";
+  else if (safePayments.every((payment) => ["failed", "cancelled"].includes(String(payment?.payment_status || "").toLowerCase()))) derived_payment_status = "failed";
 
   return {
     payment_count: safePayments.length,
@@ -129,120 +108,53 @@ function summarizePayments(order, payments) {
 
 export async function onRequestGet(context) {
   const { request, env } = context;
+  const db = getDb(env);
+  if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
 
   const memberUser = await getMemberUserFromRequest(request, env);
-
-  if (!memberUser) {
-    return json({ ok: false, error: "Unauthorized." }, 401);
-  }
+  if (!memberUser) return json({ ok: false, error: "Unauthorized." }, 401);
 
   const url = new URL(request.url);
   const order_id = Number(url.searchParams.get("order_id"));
+  if (!Number.isInteger(order_id) || order_id <= 0) return json({ ok: false, error: "A valid order_id is required." }, 400);
 
-  if (!Number.isInteger(order_id) || order_id <= 0) {
-    return json({ ok: false, error: "A valid order_id is required." }, 400);
-  }
-
-  const order = await env.DB.prepare(`
+  const order = await db.prepare(`
     SELECT
-      order_id,
-      order_number,
-      user_id,
-      customer_email,
-      customer_name,
-      order_status,
-      payment_status,
-      payment_method,
-      fulfillment_type,
-      currency,
-      subtotal_cents,
-      COALESCE(discount_cents, 0) AS discount_cents,
-      shipping_cents,
-      tax_cents,
-      total_cents,
-      shipping_name,
-      shipping_company,
-      shipping_address1,
-      shipping_address2,
-      shipping_city,
-      shipping_province,
-      shipping_postal_code,
-      shipping_country,
-      billing_name,
-      billing_company,
-      billing_address1,
-      billing_address2,
-      billing_city,
-      billing_province,
-      billing_postal_code,
-      billing_country,
-      notes,
-      created_at,
-      updated_at
+      order_id, order_number, user_id, customer_email, customer_name,
+      order_status, payment_status, payment_method, fulfillment_type, currency,
+      subtotal_cents, COALESCE(discount_cents, 0) AS discount_cents, shipping_cents, tax_cents, total_cents,
+      shipping_name, shipping_company, shipping_address1, shipping_address2, shipping_city, shipping_province, shipping_postal_code, shipping_country,
+      billing_name, billing_company, billing_address1, billing_address2, billing_city, billing_province, billing_postal_code, billing_country,
+      notes, created_at, updated_at
     FROM orders
     WHERE order_id = ?
-      AND (
-        user_id = ?
-        OR LOWER(COALESCE(customer_email, '')) = LOWER(?)
-      )
+      AND (user_id = ? OR LOWER(COALESCE(customer_email, '')) = LOWER(?))
     LIMIT 1
-  `)
-    .bind(order_id, memberUser.user_id, memberUser.email)
-    .first();
+  `).bind(order_id, memberUser.user_id, memberUser.email).first();
 
-  if (!order) {
-    return json({ ok: false, error: "Order not found." }, 404);
-  }
+  if (!order) return json({ ok: false, error: "Order not found." }, 404);
 
-  const itemsResult = await env.DB.prepare(`
-    SELECT
-      order_item_id,
-      order_id,
-      product_id,
-      sku,
-      product_name,
-      product_type,
-      unit_price_cents,
-      quantity,
-      line_subtotal_cents,
-      taxable,
-      tax_class_code,
-      requires_shipping,
-      digital_file_url,
-      created_at
-    FROM order_items
-    WHERE order_id = ?
-    ORDER BY order_item_id ASC
-  `)
-    .bind(order_id)
-    .all();
-
-  const historyResult = await env.DB.prepare(`
-    SELECT
-      order_status_history_id,
-      order_id,
-      old_status,
-      new_status,
-      note,
-      created_at
-    FROM order_status_history
-    WHERE order_id = ?
-    ORDER BY created_at ASC, order_status_history_id ASC
-  `)
-    .bind(order_id)
-    .all();
-
-  const paymentsResult = await env.DB.prepare(`
-    SELECT
-      payment_id,
-      payment_status,
-      amount_cents
-    FROM payments
-    WHERE order_id = ?
-    ORDER BY payment_id DESC
-  `)
-    .bind(order_id)
-    .all();
+  const [itemsResult, historyResult, paymentsResult] = await Promise.all([
+    db.prepare(`
+      SELECT order_item_id, order_id, product_id, sku, product_name, product_type, unit_price_cents,
+             quantity, line_subtotal_cents, taxable, tax_class_code, requires_shipping, digital_file_url, created_at
+      FROM order_items
+      WHERE order_id = ?
+      ORDER BY order_item_id ASC
+    `).bind(order_id).all(),
+    db.prepare(`
+      SELECT order_status_history_id, order_id, old_status, new_status, note, created_at
+      FROM order_status_history
+      WHERE order_id = ?
+      ORDER BY created_at ASC, order_status_history_id ASC
+    `).bind(order_id).all(),
+    db.prepare(`
+      SELECT payment_id, payment_status, amount_cents
+      FROM payments
+      WHERE order_id = ?
+      ORDER BY payment_id DESC
+    `).bind(order_id).all()
+  ]);
 
   const items = normalizeResults(itemsResult).map((item) => ({
     order_item_id: Number(item.order_item_id || 0),
@@ -271,6 +183,67 @@ export async function onRequestGet(context) {
   }));
 
   const payment_summary = summarizePayments(order, normalizeResults(paymentsResult));
+
+  let gift_cards = [];
+  let gift_card_delivery_audit = [];
+  if (await tableExists(db, 'gift_cards')) {
+    gift_cards = normalizeResults(await db.prepare(`
+      SELECT
+        gift_card_id, code, currency, initial_amount_cents, remaining_amount_cents,
+        purchaser_email, purchaser_name, recipient_email, recipient_name, recipient_note,
+        issued_to_email, issued_to_name, note, status, expires_at, created_at, updated_at
+      FROM gift_cards
+      WHERE order_id = ?
+      ORDER BY gift_card_id DESC
+    `).bind(order_id).all().catch(() => ({ results: [] }))).map((row) => ({
+      gift_card_id: Number(row.gift_card_id || 0),
+      code: row.code || '',
+      currency: row.currency || 'CAD',
+      initial_amount_cents: Number(row.initial_amount_cents || 0),
+      remaining_amount_cents: Number(row.remaining_amount_cents || 0),
+      purchaser_email: row.purchaser_email || '',
+      purchaser_name: row.purchaser_name || '',
+      recipient_email: row.recipient_email || row.issued_to_email || '',
+      recipient_name: row.recipient_name || row.issued_to_name || '',
+      recipient_note: row.recipient_note || row.note || '',
+      status: row.status || 'pending_activation',
+      expires_at: row.expires_at || null,
+      created_at: row.created_at || null,
+      updated_at: row.updated_at || null
+    }));
+
+    if (gift_cards.length && await tableExists(db, 'gift_card_delivery_audit')) {
+      const ids = gift_cards.map((row) => Number(row.gift_card_id || 0)).filter((row) => row > 0);
+      const placeholders = ids.map(() => '?').join(',');
+      gift_card_delivery_audit = normalizeResults(await db.prepare(`
+        SELECT
+          gift_card_delivery_audit_id,
+          gift_card_id,
+          audience,
+          notification_kind,
+          destination,
+          action_type,
+          details_json,
+          created_at
+        FROM gift_card_delivery_audit
+        WHERE gift_card_id IN (${placeholders})
+        ORDER BY created_at DESC, gift_card_delivery_audit_id DESC
+      `).bind(...ids).all().catch(() => ({ results: [] }))).map((row) => {
+        let details = null;
+        try { details = row.details_json ? JSON.parse(row.details_json) : null; } catch { details = null; }
+        return {
+          gift_card_delivery_audit_id: Number(row.gift_card_delivery_audit_id || 0),
+          gift_card_id: Number(row.gift_card_id || 0),
+          audience: row.audience || 'recipient',
+          notification_kind: row.notification_kind || '',
+          destination: row.destination || '',
+          action_type: row.action_type || '',
+          created_at: row.created_at || null,
+          details
+        };
+      });
+    }
+  }
 
   return json({
     ok: true,
@@ -318,6 +291,8 @@ export async function onRequestGet(context) {
     },
     items,
     status_history,
-    payment_summary
+    payment_summary,
+    gift_cards,
+    gift_card_delivery_audit
   });
 }
