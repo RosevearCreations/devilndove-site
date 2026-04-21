@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-03",
+  "updated_at": "2026-04-20",
   "profiles": {
     "youtube": {
       "label": "YouTube",
@@ -30,6 +30,11 @@
       "label": "Patreon",
       "url": "https://patreon.com/DevilnDove",
       "handle": "patreon.com/DevilnDove"
+    },
+    "buymeacoffee": {
+      "label": "Buy Me a Coffee",
+      "url": "https://buymeacoffee.com/devilndovel",
+      "handle": "buymeacoffee.com/devilndovel"
     }
   },
   "youtube_videos": [
