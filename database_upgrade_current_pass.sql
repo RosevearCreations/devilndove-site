@@ -555,3 +555,30 @@ ALTER TABLE gift_cards ADD COLUMN purchase_source TEXT;
 -- 4) gift_cards purchaser/recipient/order/purchase_source friendly fulfillment support
 -- 5) inventory and pricing decision support to continue using landed-cost, markup, packaging, shipping, and increase-planning signals
 
+-- Pass 33 update
+-- Deepened gift card delivery history and resend controls with recipient/purchaser audit support.
+-- Strengthened listing-photo readiness with crop history, first-image scoring, and richer media-quality checks.
+-- Expanded public trust/testimonial placement and support CTA coverage.
+-- Pushed pricing toward a fuller operating console with receiving/packaging/shipping assumptions and save-time warnings.
+
+
+
+CREATE TABLE IF NOT EXISTS gift_card_delivery_audit (
+  gift_card_delivery_audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  gift_card_id INTEGER,
+  audience TEXT NOT NULL DEFAULT 'recipient',
+  notification_kind TEXT NOT NULL,
+  destination TEXT,
+  notification_outbox_id INTEGER,
+  notification_dispatch_log_id INTEGER,
+  actor_user_id INTEGER,
+  action_type TEXT NOT NULL DEFAULT 'queued',
+  details_json TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE product_image_annotations ADD COLUMN crop_x REAL;
+ALTER TABLE product_image_annotations ADD COLUMN crop_y REAL;
+ALTER TABLE product_image_annotations ADD COLUMN crop_width REAL;
+ALTER TABLE product_image_annotations ADD COLUMN crop_height REAL;
+ALTER TABLE product_image_annotations ADD COLUMN first_image_score INTEGER;

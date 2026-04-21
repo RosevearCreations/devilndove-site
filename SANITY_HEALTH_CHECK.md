@@ -390,3 +390,9 @@ Recommended next direction after this pass:
 - expand testimonial placement and merchandised trust blocks
 - continue pricing decision support into receiving, shipping, and margin planning
 
+## Pass 33 update
+- Deepened gift card delivery history and resend controls with recipient/purchaser audit support.
+- Strengthened listing-photo readiness with crop history, first-image scoring, and richer media-quality checks.
+- Expanded public trust/testimonial placement and support CTA coverage.
+- Pushed pricing toward a fuller operating console with receiving/packaging/shipping assumptions and save-time warnings.
+

@@ -106,3 +106,9 @@ VALUES
 -- 4) gift_cards purchaser/recipient/order/purchase_source friendly fulfillment support
 -- 5) inventory and pricing decision support to continue using landed-cost, markup, packaging, shipping, and increase-planning signals
 
+-- Pass 33 update
+-- Deepened gift card delivery history and resend controls with recipient/purchaser audit support.
+-- Strengthened listing-photo readiness with crop history, first-image scoring, and richer media-quality checks.
+-- Expanded public trust/testimonial placement and support CTA coverage.
+-- Pushed pricing toward a fuller operating console with receiving/packaging/shipping assumptions and save-time warnings.
+
