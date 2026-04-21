@@ -146,6 +146,12 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             </div>
 
+            <div class="card" id="memberGiftCardsCard" style="margin-top:18px;display:none">
+              <h3 style="margin-top:0">Gift Cards</h3>
+              <div class="small" id="memberGiftCardsSummary"></div>
+              <div id="memberGiftCardsList" style="margin-top:12px"></div>
+            </div>
+
             <div class="card" style="margin-top:18px">
               <h3 style="margin-top:0">Status History</h3>
               <div style="overflow:auto">
@@ -267,6 +273,45 @@ document.addEventListener("DOMContentLoaded", () => {
     `).join("");
   }
 
+
+  function renderGiftCards(giftCards, auditRows, currency) {
+    const cardEl = document.getElementById("memberGiftCardsCard");
+    const summaryEl = document.getElementById("memberGiftCardsSummary");
+    const listEl = document.getElementById("memberGiftCardsList");
+    if (!cardEl || !summaryEl || !listEl) return;
+
+    const safeCards = Array.isArray(giftCards) ? giftCards : [];
+    const safeAudit = Array.isArray(auditRows) ? auditRows : [];
+    if (!safeCards.length) {
+      cardEl.style.display = "none";
+      summaryEl.textContent = "";
+      listEl.innerHTML = "";
+      return;
+    }
+
+    cardEl.style.display = "block";
+    summaryEl.textContent = `${safeCards.length} gift card(s) were created from this order.`;
+    listEl.innerHTML = safeCards.map((card) => {
+      const rows = safeAudit.filter((row) => Number(row.gift_card_id || 0) === Number(card.gift_card_id || 0));
+      const auditHtml = rows.length ? `
+        <div class="small" style="margin-top:10px"><strong>Delivery history</strong></div>
+        <div class="small" style="margin-top:6px;display:grid;gap:6px">${rows.map((row) => `<div><strong>${escapeHtml(titleCase(row.audience || 'recipient'))}</strong> • ${escapeHtml(titleCase(row.action_type || 'queued'))} • ${escapeHtml(row.destination || '—')} • ${escapeHtml(formatDate(row.created_at))}</div>`).join('')}</div>
+      ` : `<div class="small" style="margin-top:10px">No delivery history has been logged yet for this card.</div>`;
+      return `
+        <div class="card" style="margin-top:10px">
+          <div class="small"><strong>Code:</strong> ${escapeHtml(card.code || '—')}</div>
+          <div class="small"><strong>Status:</strong> ${escapeHtml(titleCase(card.status || 'pending_activation'))}</div>
+          <div class="small"><strong>Value:</strong> ${escapeHtml(formatMoney(card.initial_amount_cents || 0, card.currency || currency || 'CAD'))} • <strong>Remaining:</strong> ${escapeHtml(formatMoney(card.remaining_amount_cents || 0, card.currency || currency || 'CAD'))}</div>
+          <div class="small"><strong>Recipient:</strong> ${escapeHtml(card.recipient_name || '—')} ${card.recipient_email ? `&lt;${escapeHtml(card.recipient_email)}&gt;` : ''}</div>
+          <div class="small"><strong>Purchaser:</strong> ${escapeHtml(card.purchaser_name || '—')} ${card.purchaser_email ? `&lt;${escapeHtml(card.purchaser_email)}&gt;` : ''}</div>
+          ${card.recipient_note ? `<div class="small"><strong>Message:</strong> ${escapeHtml(card.recipient_note)}</div>` : ''}
+          ${card.expires_at ? `<div class="small"><strong>Expires:</strong> ${escapeHtml(formatDate(card.expires_at))}</div>` : ''}
+          ${auditHtml}
+        </div>
+      `;
+    }).join('');
+  }
+
   function renderHistory(history) {
     const body = document.getElementById("memberOrderHistoryBody");
     if (!body) return;
@@ -293,6 +338,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const items = Array.isArray(payload?.items) ? payload.items : [];
     const history = Array.isArray(payload?.status_history) ? payload.status_history : [];
     const paymentSummary = payload?.payment_summary || payload?.payment_snapshot || {};
+    const giftCards = Array.isArray(payload?.gift_cards) ? payload.gift_cards : [];
+    const giftCardAudit = Array.isArray(payload?.gift_card_delivery_audit) ? payload.gift_card_delivery_audit : [];
     const currency = order.currency || "CAD";
 
     setText("memberDetailOrderNumber", order.order_number || "—");
@@ -342,6 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     renderItems(items, currency);
+    renderGiftCards(giftCards, giftCardAudit, currency);
     renderHistory(history);
   }
 

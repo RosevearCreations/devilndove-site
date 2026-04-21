@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!form || !productsTableBody || !window.DDAuth) return;
 
   const LOCAL_PENDING_KEY = 'dd_admin_product_update_pending_actions_v1';
+  const PRICING_CONSOLE_KEY = 'dd_admin_pricing_console_v2';
   let editingProductId = null;
   let currentSharedPendingActions = [];
   let pendingMount = null;
@@ -26,6 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
     messageEl.textContent = "";
     messageEl.style.display = "none";
   }
+
+  function loadPricingConsoleState() { try { const raw = JSON.parse(localStorage.getItem(PRICING_CONSOLE_KEY) || '{}'); return raw && typeof raw === 'object' ? raw : {}; } catch { return {}; } }
+
+  function savePricingConsoleState(payload) { try { localStorage.setItem(PRICING_CONSOLE_KEY, JSON.stringify(payload || {})); } catch {} }
 
   function centsToDollars(value) {
     const cents = Number(value || 0);
@@ -126,6 +131,18 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="display:flex;align-items:end;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="recalculatePricingButton">Recalculate pricing</button></div>
       </div>`;
     ensurePricingInsightMount().parentNode?.insertBefore(mount, ensurePricingInsightMount());
+    const savedConsole = loadPricingConsoleState();
+    ['pricingPackaging','pricingShippingPressure','pricingOverheadPercent','pricingTargetMargin','pricingMarkupPercent','pricingTransactionFee','pricingReceivingChange'].forEach((id) => {
+      const field = mount.querySelector('#' + id);
+      if (!field) return;
+      if (savedConsole[id] !== undefined && savedConsole[id] !== null && savedConsole[id] !== '') field.value = String(savedConsole[id]);
+      field.addEventListener('input', () => {
+        const state = loadPricingConsoleState();
+        state[id] = field.value;
+        savePricingConsoleState(state);
+        if (editingProductId) renderPricingInsight();
+      });
+    });
     mount.querySelector('#recalculatePricingButton')?.addEventListener('click', async () => {
       if (!editingProductId) return setMessage('Load a product first before recalculating pricing.', true);
       try {
@@ -250,6 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="card"><div class="small">Planned increase</div><strong>${escapeHtml(centsToDollars(plannedIncrease))}</strong><div class="small">${escapeHtml(plannedIncreasePercent.toFixed(1))}%</div></div>
       </div>
       <div class="small" style="margin-top:10px">Safe range ${escapeHtml(centsToDollars(conservative))} → ${escapeHtml(centsToDollars(stretch))}. Compare-at suggestion ${escapeHtml(centsToDollars(suggestedCompareAt))}. Current compare-at ${escapeHtml(centsToDollars(compareAt))}. Packaging ${escapeHtml(centsToDollars(packaging))} • shipping pressure ${escapeHtml(centsToDollars(shippingPressure))} • receiving change ${escapeHtml(centsToDollars(receivingChange))} • fees ${escapeHtml(centsToDollars(transactionFee))}.</div>
+      <div class="small" style="margin-top:6px">Save-time planning: current price ${currentPrice > suggested ? 'is above' : 'is below'} the suggested target by ${escapeHtml(centsToDollars(Math.abs(currentPrice - suggested)))}. Planned increase from the current stored price is ${escapeHtml(plannedIncreasePercent.toFixed(1))}%.</div>
       ${(Array.isArray(latestPriceSuggestion.notes) && latestPriceSuggestion.notes.length) ? `<div class="small" style="margin-top:8px">${latestPriceSuggestion.notes.map((note) => escapeHtml(note)).join(" • ")}</div>` : ""}
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
         <button class="btn" type="button" data-apply-price-preset="conservative">Use conservative</button>
@@ -551,8 +569,15 @@ document.addEventListener("DOMContentLoaded", () => {
         latestPriceSuggestion = currentSuggestion.item;
         renderPricingInsight();
         const landed = Number(latestPriceSuggestion.landed_cost_cents || 0);
-        if (price_cents <= landed && !window.confirm('This price is at or below landed cost. Save anyway?')) return;
-        if (Number(latestPriceSuggestion.planned_price_increase_percent || 0) >= 20 && !window.confirm('This recommendation suggests a price increase of 20% or more. Continue saving this price?')) return;
+        const suggested = Number(latestPriceSuggestion.suggested_price_cents || 0);
+        const receivingChange = Number(latestPriceSuggestion.receiving_change_cents || 0);
+        const plannedIncreasePercent = Number(latestPriceSuggestion.planned_price_increase_percent || 0);
+        const warnings = [];
+        if (price_cents <= landed) warnings.push('This price is at or below landed cost.');
+        if (receivingChange > 0) warnings.push(`Receiving-cost pressure is ${centsToDollars(receivingChange)} higher than the linked resource baseline.`);
+        if (suggested > 0 && price_cents < suggested) warnings.push(`This save is below the suggested target by ${centsToDollars(suggested - price_cents)}.`);
+        if (plannedIncreasePercent >= 20) warnings.push(`The current planning model suggests a price increase of ${plannedIncreasePercent.toFixed(1)}% from the stored price.`);
+        if (warnings.length && !window.confirm(`${warnings.join(' ')} Save anyway?`)) return;
       }
       if (submitButton) { submitButton.disabled = true; submitButton.textContent = "Updating..."; }
       const data = await liveUpdateProduct(payload);

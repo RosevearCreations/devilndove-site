@@ -232,7 +232,7 @@
 
   function shouldShowFeaturedTestimonials(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
-    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html', '/movies/', '/movies/index.html'].includes(path);
+    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html', '/movies/', '/movies/index.html', '/search/', '/search/index.html', '/socials/', '/socials/index.html'].includes(path);
   }
 
   function featuredTestimonialMeta(pathname) {
@@ -242,7 +242,37 @@
     if (path.startsWith('/supplies/')) return { heading: 'Maker feedback', intro: 'Testimonials that help show how people use and enjoy the shop and workshop content.', limit: 3, insertAfterSelector: '.hero' };
     if (path.startsWith('/gallery/') || path.startsWith('/creations/')) return { heading: 'What people say about our creations', intro: 'Featured testimonials and approved buyer feedback from the Devil n Dove storefront.', limit: 3, insertAfterSelector: '.hero, .collections, .cards' };
     if (path.startsWith('/movies/')) return { heading: 'Supporter feedback', intro: 'Featured testimonials and supporter notes from people following Devil n Dove across the storefront, media, and workshop projects.', limit: 3, insertAfterSelector: '.hero' };
+    if (path.startsWith('/search/')) return { heading: 'Trust signals while you browse', intro: 'Featured buyer feedback and supporter notes to help while you compare products and creative work.', limit: 3, insertAfterSelector: '.hero, .card, .cards' };
+    if (path.startsWith('/socials/')) return { heading: 'Supporter trust', intro: 'A quick look at the feedback and support behind the Devil n Dove storefront, workshop, and content projects.', limit: 3, insertAfterSelector: '.hero, .card' };
     return { heading: 'What buyers say', intro: 'Featured testimonials and approved buyer feedback from the Devil n Dove storefront.', limit: 3, insertAfterSelector: '.hero, .cards, .card-grid' };
+  }
+
+
+  function shouldShowTrustSupportBlock(pathname) {
+    const path = String(pathname || location.pathname || '/').toLowerCase();
+    return ['/', '/index.html', '/shop/', '/shop/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/search/', '/search/index.html'].includes(path);
+  }
+
+  function trustSupportMeta(pathname) {
+    const path = String(pathname || location.pathname || '/').toLowerCase();
+    if (path.startsWith('/shop/')) return { heading: 'Shop with more confidence', bullets: ['Saved wishlists and member tools help shoppers come back later.', 'Gift cards, buyer feedback, and clearer product details reduce guesswork.', 'Support links help people back the workshop even when they are not buying a product today.'] };
+    if (path.startsWith('/gallery/') || path.startsWith('/creations/')) return { heading: 'Trust behind the creations', bullets: ['Featured buyer feedback supports the story behind the work.', 'Support links and member tools help visitors follow along beyond a single purchase.', 'Maker-story and product detail links help connect gallery pieces back to the storefront.'] };
+    if (path.startsWith('/search/')) return { heading: 'Browse with stronger trust signals', bullets: ['Featured testimonials stay visible while people compare products.', 'Gift cards and member tools make it easier to save, return, and buy later.', 'Support links help followers back the workshop beyond a single order.'] };
+    return { heading: 'Support, trust, and shopper clarity', bullets: ['Member tools, wishlists, and order history keep the storefront easier to use over time.', 'Featured testimonials and product detail blocks help new visitors trust what they see.', 'Support links make it easy for followers to back the workshop, videos, and storefront experiments.'] };
+  }
+
+  function injectTrustSupportBlock() {
+    if (!shouldShowTrustSupportBlock(location.pathname)) return;
+    const container = document.querySelector('.container') || document.body;
+    const footer = container.querySelector('footer.footer, .footer');
+    if (!container || !footer || document.getElementById('siteTrustSupportBlock')) return;
+    const meta = trustSupportMeta(location.pathname);
+    const section = document.createElement('section');
+    section.id = 'siteTrustSupportBlock';
+    section.className = 'card site-trust-support-block';
+    section.style.marginTop = '18px';
+    section.innerHTML = `<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin:0">${escapeHtml(meta.heading)}</h2><p class="small" style="margin:6px 0 0 0">We keep trust signals visible across the storefront so shoppers can browse, save, support, and come back later with more confidence.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="/members/">Members</a><a class="btn" href="/shop/">Shop</a><a class="btn" href="https://buymeacoffee.com/devilndovel" rel="noopener" target="_blank">Support our work</a></div></div><ul class="small" style="margin-top:10px;padding-left:18px">${meta.bullets.map((row) => `<li>${escapeHtml(row)}</li>`).join('')}</ul>`;
+    footer.parentNode.insertBefore(section, footer);
   }
 
   async function injectFeaturedTestimonials() {
@@ -318,6 +348,7 @@
     injectSharedFooter();
     hydrateFooterSocials();
     injectFeaturedTestimonials();
+    injectTrustSupportBlock();
     ensureGlobalScript('/public/js/auth.js');
     ensureGlobalScript('/public/js/site-auth-ui.js');
     ensureGlobalScript('/public/js/site-analytics.js');

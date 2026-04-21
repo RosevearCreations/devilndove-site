@@ -74,6 +74,40 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch { return null; }
   }
 
+
+  function ensureGiftCardBlock() {
+    let block = document.getElementById("confirmationGiftCardBlock");
+    if (block) return block;
+    const target = document.querySelector('.container .card:nth-of-type(3)') || document.querySelector('.container');
+    if (!target) return null;
+    block = document.createElement('div');
+    block.id = 'confirmationGiftCardBlock';
+    block.className = 'card';
+    block.style.marginTop = '18px';
+    block.style.display = 'none';
+    block.innerHTML = '<h2 style="margin-top:0">Gift Card Delivery</h2><div id="confirmationGiftCardSummary" class="small"></div><div id="confirmationGiftCardList" style="margin-top:12px"></div>';
+    target.parentNode.insertBefore(block, target.nextSibling);
+    return block;
+  }
+  function renderGiftCardsBlock(giftCards, auditRows) {
+    const block = ensureGiftCardBlock();
+    if (!block) return;
+    const summaryEl = document.getElementById("confirmationGiftCardSummary");
+    const listEl = document.getElementById("confirmationGiftCardList");
+    const safeCards = Array.isArray(giftCards) ? giftCards : [];
+    const safeAudit = Array.isArray(auditRows) ? auditRows : [];
+    if (!safeCards.length) {
+      block.style.display = 'none';
+      return;
+    }
+    block.style.display = '';
+    summaryEl.textContent = 'This order includes gift card delivery details for the buyer and recipient.';
+    listEl.innerHTML = safeCards.map((card) => {
+      const rows = safeAudit.filter((row) => Number(row.gift_card_id || 0) === Number(card.gift_card_id || 0));
+      return `<div class="card" style="margin-top:10px"><div class="small"><strong>Code:</strong> ${card.code || '—'}</div><div class="small"><strong>Status:</strong> ${titleCase(card.status || 'pending_activation')}</div><div class="small"><strong>Recipient:</strong> ${card.recipient_name || '—'} ${card.recipient_email ? `&lt;${card.recipient_email}&gt;` : ''}</div><div class="small"><strong>Purchaser:</strong> ${card.purchaser_name || '—'} ${card.purchaser_email ? `&lt;${card.purchaser_email}&gt;` : ''}</div>${rows.length ? `<div class="small" style="margin-top:8px"><strong>Delivery history</strong></div><div class="small" style="display:grid;gap:6px;margin-top:6px">${rows.map((row) => `<div>${titleCase(row.audience || 'recipient')} • ${titleCase(row.action_type || 'queued')} • ${row.destination || '—'} • ${formatDate(row.created_at)}</div>`).join('')}</div>` : ''}</div>`;
+    }).join('');
+  }
+
   async function finalizeStripeReturn(state) {
     if (!state.order_id || !state.stripe_session_id) return null;
     try {
@@ -126,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setText(totalEl, formatMoney(order.total_cents || paymentStub.amount_cents || 0, order.currency || paymentStub.currency || "CAD"));
     setText(createdAtEl, formatDate(order.created_at || saved?.saved_at));
     if (nextStepEl) nextStepEl.textContent = "Your order has been created and saved locally for confirmation. Payment is still pending until the payment flow is completed or a manual payment is recorded.";
+    renderGiftCardsBlock(saved?.gift_cards || (saved?.storefront_gift_card ? [saved.storefront_gift_card] : []), []);
   }
   function renderFromOrderPayload(payload, fallbackState) {
     const order = payload?.order || {};
@@ -139,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setText(customerEmailEl, order.customer_email || "—");
     setText(totalEl, formatMoney(order.total_cents || 0, order.currency || "CAD"));
     setText(createdAtEl, formatDate(order.created_at));
+    renderGiftCardsBlock(payload?.gift_cards || [], payload?.gift_card_delivery_audit || []);
     if (nextStepEl) {
       const paymentState = String(paymentSummary.derived_payment_status || order.payment_status || "pending").toLowerCase();
       if (paymentState === "paid") nextStepEl.textContent = "Payment has been recorded and your order is now marked as paid.";

@@ -36,15 +36,17 @@ document.addEventListener('DOMContentLoaded', () => {
           URL.revokeObjectURL(objectUrl);
           const ratio = height > 0 ? (width / height) : 0;
           const orientation = ratio >= 0.95 ? 'square_or_landscape' : 'portrait';
-          resolve({ width, height, ratio, orientation, ok: width >= 800 && height >= 800 && orientation === 'square_or_landscape' });
+          const baseOk = width >= 800 && height >= 800 && orientation === 'square_or_landscape';
+          const firstImageOk = width >= 1200 && height >= 1200 && orientation === 'square_or_landscape';
+          resolve({ width, height, ratio, orientation, ok: baseOk, first_image_ok: firstImageOk });
         };
         img.onerror = () => {
           URL.revokeObjectURL(objectUrl);
-          resolve({ width: 0, height: 0, ratio: 0, orientation: 'unknown', ok: false });
+          resolve({ width: 0, height: 0, ratio: 0, orientation: 'unknown', ok: false, first_image_ok: false });
         };
         img.src = objectUrl;
       } catch {
-        resolve({ width: 0, height: 0, ratio: 0, orientation: 'unknown', ok: false });
+        resolve({ width: 0, height: 0, ratio: 0, orientation: 'unknown', ok: false, first_image_ok: false });
       }
     });
   }
@@ -180,7 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const file = event.target?.files?.[0];
       if (!file) return;
       const info = await inspectLocalImageFile(file);
+      const hasExistingRows = Array.from(document.querySelectorAll('[data-product-image-row]')).some((row) => String(row.querySelector('[data-field="image_url"]')?.value || '').trim());
       if (!info.ok) setMessage(`Image warning: use a square or landscape image at least 800x800. Current file is ${info.width}x${info.height}.`, true);
+      else if (!hasExistingRows && !info.first_image_ok) setMessage(`First image warning: aim for at least 1200x1200 and square or landscape. Current file is ${info.width}x${info.height}.`, true);
       else setMessage(`Image looks good for listing use: ${info.width}x${info.height}.`, false);
     });
     document.getElementById('refreshMediaAssetsButton')?.addEventListener('click', loadAssetLibrary);
@@ -238,6 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!localInfo.ok) {
       return setMessage(`Use a square or landscape image at least 800x800. Current file is ${localInfo.width}x${localInfo.height}.`, true);
     }
+    const isFirstImageUpload = !Array.from(document.querySelectorAll('[data-product-image-row]')).some((row) => String(row.querySelector('[data-field="image_url"]')?.value || '').trim());
+    if (isFirstImageUpload && !localInfo.first_image_ok) {
+      return setMessage(`First listing image must be at least 1200x1200 and square or landscape. Current file is ${localInfo.width}x${localInfo.height}.`, true);
+    }
     try {
       setMessage(`Uploading image ${localInfo.width}x${localInfo.height} (${localInfo.orientation.replace('_',' ')}).`);
       const formData = new FormData();
@@ -294,6 +302,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function validateFirstImageForSave(rows) {
+    const first = Array.isArray(rows) ? rows.find((row) => String(row.image_url || '').trim()) : null;
+    if (!first) return { ok: false, message: 'Add a first image before saving product media.' };
+    const orientation = String(first.image_orientation || '').trim().toLowerCase();
+    const width = Number(first.width_px || 0);
+    const height = Number(first.height_px || 0);
+    const altText = String(first.alt_text || '').trim();
+    const score = Number(first.first_image_score || 0);
+    if (!['square', 'landscape'].includes(orientation)) return { ok: false, message: 'First image should be square or landscape before saving.' };
+    if (width < 1200 || height < 1200) return { ok: false, message: `First image should be at least 1200x1200. Current first image is ${width || 0}x${height || 0}.` };
+    if (altText.length < 12) return { ok: false, message: 'First image needs stronger alt text before saving.' };
+    if (score < 70) return { ok: false, message: `First image score is only ${score}%. Improve crop, dimensions, or alt text before saving.` };
+    return { ok: true };
+  }
+
   async function saveImages(event) {
     event.preventDefault();
     const productId = Number(document.getElementById('productImagesProductId')?.value || 0);
@@ -301,6 +324,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       setMessage('Saving product images...');
       const payload = { product_id: productId, images: collectRows() };
+      const firstImageCheck = validateFirstImageForSave(payload.images);
+      if (!firstImageCheck.ok) throw new Error(firstImageCheck.message);
       const response = await window.DDAuth.apiFetch('/api/admin/product-images', { method: 'POST', body: JSON.stringify(payload) });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save product images.');

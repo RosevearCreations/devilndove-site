@@ -108,9 +108,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    body.innerHTML = safeOrders.map((order) => `
+    body.innerHTML = safeOrders.map((order) => {
+      const giftCardCount = Number(order.gift_card_count || 0);
+      const giftCardMeta = giftCardCount > 0
+        ? `<div class="small" style="margin-top:4px">Gift cards ${giftCardCount} • active ${Number(order.gift_card_active_count || 0)} • pending ${Number(order.gift_card_pending_count || 0)}${order.gift_card_last_recipient_delivery_at ? ` • last recipient delivery ${escapeHtml(formatDate(order.gift_card_last_recipient_delivery_at))}` : ''}</div>`
+        : '';
+      return `
       <tr>
-        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(order.order_number || "—")}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd"><div><strong>${escapeHtml(order.order_number || "—")}</strong></div>${giftCardMeta}</td>
         <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(order.order_status || "pending"))}</td>
         <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(order.derived_payment_status || order.payment_status || "pending"))}</td>
         <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(titleCase(order.fulfillment_type || "shipping"))}</td>
@@ -122,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </button>
         </td>
       </tr>
-    `).join("");
+    `;}).join("");
   }
 
   function renderUi() {
