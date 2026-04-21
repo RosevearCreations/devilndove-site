@@ -395,9 +395,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function runReviewAction(productId, action, options = {}) {
     const payload = options.payload ? { ...options.payload } : { product_id: Number(productId || 0), action };
     if (!options.payload) {
-      const note = window.prompt("Optional note for this review action:", "");
+      const promptLabel = action === 'publish_override'
+        ? 'Override Publish note (required): explain why this low-score listing should go live now.'
+        : 'Optional note for this review action:';
+      const note = window.prompt(promptLabel, "");
       payload.note = String(note || "").trim();
-      if (action === "publish" || action === "unpublish") {
+      if (action === 'publish_override' && !payload.note) {
+        window.alert('Override Publish requires a note.');
+        return { cancelled: true };
+      }
+      if (action === "publish" || action === "publish_override" || action === "unpublish") {
         const password = window.prompt("Confirm your admin password to continue:");
         if (!password) return { cancelled: true };
         payload.confirm_password = password;

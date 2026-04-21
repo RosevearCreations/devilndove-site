@@ -125,8 +125,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const conservative = Number(latestPriceSuggestion.conservative_price_cents || 0);
     const stretch = Number(latestPriceSuggestion.stretch_price_cents || 0);
     const suggestedCompareAt = Number(latestPriceSuggestion.suggested_compare_at_cents || 0);
+    const markupPrice = Number(latestPriceSuggestion.markup_price_cents || 0);
+    const plannedIncrease = Number(latestPriceSuggestion.planned_price_increase_cents || 0);
+    const plannedIncreasePercent = Number(latestPriceSuggestion.planned_price_increase_percent || 0);
+    const transactionFee = Number(latestPriceSuggestion.transaction_fee_cents || 0);
+    const packaging = Number(latestPriceSuggestion.packaging_cents || 0);
+    const shippingPressure = Number(latestPriceSuggestion.shipping_pressure_cents || 0);
     const marginRatio = currentPrice > 0 ? ((currentPrice - landed) / currentPrice) : 0;
     const targetMarginPercent = Number(latestPriceSuggestion.target_margin_percent || latestPriceSuggestion.assumptions?.target_margin_percent || 0);
+    const markupPercent = Number(latestPriceSuggestion.markup_percent || latestPriceSuggestion.assumptions?.markup_percent || 0);
     let tone = "product-pricing-insight-card";
     let headline = "Pricing guidance loaded";
     if (currentPrice <= landed) {
@@ -145,15 +152,17 @@ document.addEventListener("DOMContentLoaded", () => {
           <h3 style="margin:0">${escapeHtml(headline)}</h3>
           <div class="small">Use this to write suggested prices back into the main editor, compare price bands, and spot margin pressure before saving live.</div>
         </div>
-        <div class="small">Target margin ${escapeHtml(String(targetMarginPercent || 0))}%</div>
+        <div class="small">Target margin ${escapeHtml(String(targetMarginPercent || 0))}% • Markup ${escapeHtml(String(markupPercent || 0))}%</div>
       </div>
       <div class="product-pricing-insight-metrics">
         <div class="card"><div class="small">Current price</div><strong>${escapeHtml(centsToDollars(currentPrice))}</strong></div>
         <div class="card"><div class="small">Landed cost</div><strong>${escapeHtml(centsToDollars(landed))}</strong></div>
         <div class="card"><div class="small">Current margin</div><strong>${escapeHtml(((marginRatio || 0) * 100).toFixed(1))}%</strong></div>
         <div class="card"><div class="small">Suggested price</div><strong>${escapeHtml(centsToDollars(suggested))}</strong></div>
+        <div class="card"><div class="small">Markup price</div><strong>${escapeHtml(centsToDollars(markupPrice))}</strong></div>
+        <div class="card"><div class="small">Planned increase</div><strong>${escapeHtml(centsToDollars(plannedIncrease))}</strong><div class="small">${escapeHtml(plannedIncreasePercent.toFixed(1))}%</div></div>
       </div>
-      <div class="small" style="margin-top:10px">Safe range ${escapeHtml(centsToDollars(conservative))} → ${escapeHtml(centsToDollars(stretch))}. Compare-at suggestion ${escapeHtml(centsToDollars(suggestedCompareAt))}. Current compare-at ${escapeHtml(centsToDollars(compareAt))}.</div>
+      <div class="small" style="margin-top:10px">Safe range ${escapeHtml(centsToDollars(conservative))} → ${escapeHtml(centsToDollars(stretch))}. Compare-at suggestion ${escapeHtml(centsToDollars(suggestedCompareAt))}. Current compare-at ${escapeHtml(centsToDollars(compareAt))}. Packaging ${escapeHtml(centsToDollars(packaging))} • shipping pressure ${escapeHtml(centsToDollars(shippingPressure))} • fees ${escapeHtml(centsToDollars(transactionFee))}.</div>
       ${(Array.isArray(latestPriceSuggestion.notes) && latestPriceSuggestion.notes.length) ? `<div class="small" style="margin-top:8px">${latestPriceSuggestion.notes.map((note) => escapeHtml(note)).join(" • ")}</div>` : ""}
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
         <button class="btn" type="button" data-apply-price-preset="conservative">Use conservative</button>

@@ -24,7 +24,8 @@
       { key: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/@devilanddove', handle: '@devilanddove' },
       { key: 'facebook', label: 'Facebook', url: 'https://www.facebook.com/DevilnDoveOnline', handle: 'DevilnDoveOnline' },
       { key: 'x', label: 'X', url: 'https://x.com/DevilnDove', handle: '@DevilnDove' },
-      { key: 'patreon', label: 'Patreon', url: 'https://patreon.com/DevilnDove', handle: 'patreon.com/DevilnDove' }
+      { key: 'patreon', label: 'Patreon', url: 'https://patreon.com/DevilnDove', handle: 'patreon.com/DevilnDove' },
+      { key: 'buymeacoffee', label: 'Buy Me a Coffee', url: 'https://buymeacoffee.com/devilndovel', handle: 'buymeacoffee.com/devilndovel' }
     ];
   }
 
@@ -38,7 +39,7 @@
   }
 
   async function fetchFooterSocialRows() {
-    const preferredOrder = ['youtube', 'instagram', 'tiktok', 'facebook', 'x', 'patreon'];
+    const preferredOrder = ['youtube', 'instagram', 'tiktok', 'facebook', 'x', 'patreon', 'buymeacoffee'];
     try {
       const response = await fetch('/api/social-feed', { headers: { Accept: 'application/json' } });
       const data = await response.json().catch(() => null);
@@ -139,10 +140,18 @@
           </div>
         </div>
         <div>
-          <div class="site-footer-heading">Follow</div>
+          <div class="site-footer-heading">Follow & support</div>
           <div class="site-footer-links" id="siteFooterSocialLinks">
             ${socialLinksMarkup(getDefaultFooterSocialRows())}
           </div>
+        </div>
+        <div>
+          <div class="site-footer-heading">Support our work</div>
+          <div class="site-footer-links">
+            <a href="https://buymeacoffee.com/devilndovel" rel="noopener" target="_blank">Buy Me a Coffee</a>
+            <a href="/socials/index.html">More ways to follow</a>
+          </div>
+          <p class="small">Support helps keep the workshop, videos, and storefront experiments moving.</p>
         </div>
         <div>
           <div class="site-footer-heading">Search the site</div>
@@ -226,13 +235,23 @@
     return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html'].includes(path);
   }
 
+  function featuredTestimonialMeta(pathname) {
+    const path = String(pathname || location.pathname || '/').toLowerCase();
+    if (path.startsWith('/shop/')) return { heading: 'Shopper feedback', intro: 'Featured testimonials and approved buyer feedback to support purchase decisions.', limit: 4, insertAfterSelector: '#shopGiftCardStorefrontMount, .customer-welcome, .hero' };
+    if (path.startsWith('/tools/')) return { heading: 'Workshop notes from buyers', intro: 'Feedback from people following the tools, supplies, and maker side of Devil n Dove.', limit: 3, insertAfterSelector: '.hero' };
+    if (path.startsWith('/supplies/')) return { heading: 'Maker feedback', intro: 'Testimonials that help show how people use and enjoy the shop and workshop content.', limit: 3, insertAfterSelector: '.hero' };
+    if (path.startsWith('/gallery/') || path.startsWith('/creations/')) return { heading: 'What people say about our creations', intro: 'Featured testimonials and approved buyer feedback from the Devil n Dove storefront.', limit: 3, insertAfterSelector: '.hero' };
+    return { heading: 'What buyers say', intro: 'Featured testimonials and approved buyer feedback from the Devil n Dove storefront.', limit: 3, insertAfterSelector: '.hero' };
+  }
+
   async function injectFeaturedTestimonials() {
     if (!shouldShowFeaturedTestimonials(location.pathname)) return;
     const container = document.querySelector('.container') || document.body;
     const footer = container.querySelector('footer.footer, .footer');
     if (!container || !footer || document.getElementById('featuredTestimonialsBlock')) return;
     try {
-      const response = await fetch(`/api/product-reviews?featured_only=1&limit=${location.pathname.startsWith('/shop/') ? 4 : 3}`, { headers: { Accept: 'application/json' } });
+      const meta = featuredTestimonialMeta(location.pathname);
+      const response = await fetch(`/api/product-reviews?featured_only=1&limit=${meta.limit}`, { headers: { Accept: 'application/json' } });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load testimonials.');
       const reviews = Array.isArray(data.reviews) ? data.reviews : [];
@@ -244,8 +263,8 @@
       section.innerHTML = `
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
           <div>
-            <h2 style="margin:0">What buyers say</h2>
-            <p class="small" style="margin:6px 0 0 0">Featured testimonials and approved buyer feedback from the Devil n Dove storefront.</p>
+            <h2 style="margin:0">${escapeHtml(meta.heading)}</h2>
+            <p class="small" style="margin:6px 0 0 0">${escapeHtml(meta.intro)}</p>
           </div>
           <a class="btn" href="/members/">Leave feedback</a>
         </div>
@@ -257,7 +276,9 @@
               <div class="small"><strong>${escapeHtml(row.reviewer_name || 'Devil n Dove customer')}</strong>${row.product_slug ? ` • <a href="/shop/product/?slug=${encodeURIComponent(row.product_slug)}">${escapeHtml(row.product_name || 'Product')}</a>` : ''}</div><div class="small" style="margin-top:4px">${escapeHtml(row.review_kind || 'testimonial')}</div>
             </article>`).join('')}
         </div>`;
-      container.insertBefore(section, footer);
+      const anchor = container.querySelector(meta.insertAfterSelector);
+      if (anchor && anchor.parentNode === container) container.insertBefore(section, anchor.nextSibling);
+      else container.insertBefore(section, footer);
     } catch (_error) {}
   }
 

@@ -206,6 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('product_id', String(productId));
+      formData.append('width_px', String(localInfo.width || ''));
+      formData.append('height_px', String(localInfo.height || ''));
+      formData.append('image_orientation', String(localInfo.orientation === 'square_or_landscape' ? (localInfo.width === localInfo.height ? 'square' : 'landscape') : 'portrait'));
       const response = await window.DDAuth.apiFetch('/api/admin/media-upload', { method: 'POST', body: formData, headers: {} });
       const data = await response.json();
       if (!response.ok || !data?.ok || !data?.asset?.public_url) throw new Error(data?.error || 'Failed to upload image.');
