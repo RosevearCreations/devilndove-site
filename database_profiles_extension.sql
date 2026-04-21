@@ -157,3 +157,10 @@ CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification
 -- Expanded public trust/testimonial placement and support CTA coverage.
 -- Pushed pricing toward a fuller operating console with receiving/packaging/shipping assumptions and save-time warnings.
 
+-- Current Pass Update
+-- Added/expected usage this pass:
+-- 1) Member/storefront order-history views can read gift_cards by order_id.
+-- 2) Member/storefront order-history views can read gift_card_delivery_audit by gift_card_id.
+-- 3) product_image_annotations should continue to support width/height/orientation/crop/first_image_score.
+-- 4) No destructive schema changes were introduced in this pass; this is a documentation sync note.
+

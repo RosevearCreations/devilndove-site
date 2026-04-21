@@ -137,3 +137,10 @@ PRAGMA foreign_keys = ON;
 -- 4) gift_cards purchaser/recipient/order/purchase_source friendly fulfillment support
 -- 5) inventory and pricing decision support to continue using landed-cost, markup, packaging, shipping, and increase-planning signals
 
+-- Current Pass Update
+-- Added/expected usage this pass:
+-- 1) Member/storefront order-history views can read gift_cards by order_id.
+-- 2) Member/storefront order-history views can read gift_card_delivery_audit by gift_card_id.
+-- 3) product_image_annotations should continue to support width/height/orientation/crop/first_image_score.
+-- 4) No destructive schema changes were introduced in this pass; this is a documentation sync note.
+

@@ -582,3 +582,10 @@ ALTER TABLE product_image_annotations ADD COLUMN crop_y REAL;
 ALTER TABLE product_image_annotations ADD COLUMN crop_width REAL;
 ALTER TABLE product_image_annotations ADD COLUMN crop_height REAL;
 ALTER TABLE product_image_annotations ADD COLUMN first_image_score INTEGER;
+
+-- Current pass concrete schema note
+-- Runtime code will safely create/use gift_card_delivery_audit when needed.
+-- Runtime code will also safely add/expect these product_image_annotations fields when needed:
+-- crop_x, crop_y, crop_width, crop_height, first_image_score, image_orientation, width_px, height_px
+-- Keep database upgrade execution cautious on older live databases where some columns may already exist.
+

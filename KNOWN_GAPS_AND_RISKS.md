@@ -760,3 +760,22 @@ Recommended next direction after this pass:
 - Expanded public trust/testimonial placement and support CTA coverage.
 - Pushed pricing toward a fuller operating console with receiving/packaging/shipping assumptions and save-time warnings.
 
+---
+
+## Current Pass Update — Gift Card History, Upload Validation, Trust Blocks, and Save-Time Pricing
+
+This pass moved four areas forward together:
+
+- Gift card delivery audit now reaches clearer order-history views for members and storefront confirmation paths.
+- First-image validation is stronger at upload/save time, not just later during review.
+- Featured testimonials/trust messaging were expanded into more merchandised public browsing flows.
+- Save-time pricing guidance was tightened in the main product editor so receiving-cost pressure, planned increases, and below-target pricing are more visible before save.
+
+Key implementation notes:
+- Member order history now surfaces gift-card counts and delivery timing summary where available.
+- Member order detail now includes purchased gift cards and delivery audit history for buyer/recipient communication.
+- Order confirmation now shows gift-card delivery details when present.
+- Product media save now blocks weak first-listing images when orientation, dimensions, alt text, or first-image score are too weak.
+- Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
+- Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
+
