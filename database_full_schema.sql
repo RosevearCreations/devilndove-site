@@ -1110,3 +1110,12 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- Pass 30 schema note: storefront gift-card purchases may use gift_cards.order_id, purchase_source, and pending_activation status; publish scoring now expects image-count-aware readiness.
 
 -- Pass 31 note: gift card webhook activation, publish override gating, notification cooldown/exclusion support, and image validation workflow updates.
+
+-- Pass 32 update (2026-04-20)
+-- Current pass expects/supports these schema capabilities where applicable:
+-- 1) notification_exclusions, notification_cooldown_rules, customer_engagement_runs, notification_dispatch_log
+-- 2) product_publish_overrides plus product publish_readiness_score / image_quality_score / ready_check_notes support
+-- 3) media_assets and product_image_annotations dimension/orientation tracking for listing-quality checks
+-- 4) gift_cards purchaser/recipient/order/purchase_source friendly fulfillment support
+-- 5) inventory and pricing decision support to continue using landed-cost, markup, packaging, shipping, and increase-planning signals
+

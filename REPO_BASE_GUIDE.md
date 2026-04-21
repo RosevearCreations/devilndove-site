@@ -421,3 +421,21 @@ Roadmap emphasis after this pass:
 - Added deeper customer engagement automation controls with cooldown rules, exclusions, and run logs.
 - Added upload-side listing image validation and stronger photo workflow warnings.
 - Extended featured testimonial output and synced schema/docs for this pass.
+
+## Pass 32 update - support, quality gate, and engagement depth (2026-04-20)
+
+This pass moved the store further into provider-confirmed fulfillment, listing-quality control, and customer engagement operations.
+
+What changed in code this pass:
+- Gift cards now continue through provider-confirmed fulfillment more cleanly, including purchaser and recipient notification timing and admin resend/history visibility.
+- Listing-quality control is stricter with stronger publish gating, explicit override notes, image-dimension history support, and stronger media completeness scoring.
+- Customer engagement automation now supports cooldown rules, exclusions, suppression, run logging, retry/cancel controls, and richer queue visibility.
+- Pricing decision support now goes further into receiving-cost pressure, packaging/shipping pressure, markup targets, and planned increase guidance.
+- Footer/social support paths now include the live Buy Me a Coffee link: https://buymeacoffee.com/devilndovel
+
+Recommended next direction after this pass:
+- tighten provider-confirmed gift-card delivery and resend auditing further
+- deepen listing photo validation and first-image scoring
+- expand testimonial placement and merchandised trust blocks
+- continue pricing decision support into receiving, shipping, and margin planning
+
