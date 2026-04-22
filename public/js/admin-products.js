@@ -47,6 +47,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     return Number(value) === 1 ? "Yes" : "No";
   }
 
+
+  function formatTrendDelta(current, previous) {
+    const currentValue = Number(current);
+    const previousValue = Number(previous);
+    if (!Number.isFinite(currentValue) || !Number.isFinite(previousValue)) return '';
+    const delta = currentValue - previousValue;
+    if (delta === 0) return 'flat';
+    return `${delta > 0 ? '+' : ''}${delta}`;
+  }
+
   function parseSafeJson(value, fallback) {
     try {
       return JSON.parse(value);
@@ -130,7 +140,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       const publishScore = Number(product.publish_readiness_score || 0);
       const imageScore = Number(product.image_quality_score || 0);
       const merchandisingScore = Number(product.merchandising_score || 0);
+      const effectiveGalleryMerchandisingScore = Number(product.effective_gallery_merchandising_score || merchandisingScore || 0);
       const leadMerchandisingScore = Number(product.lead_image_merchandising_score || 0);
+      const previousLeadMerchandisingScore = product.previous_lead_image_merchandising_score == null ? null : Number(product.previous_lead_image_merchandising_score || 0);
+      const previousGalleryMerchandisingScore = product.previous_gallery_merchandising_score == null ? null : Number(product.previous_gallery_merchandising_score || 0);
+      const overriddenGalleryImageCount = Number(product.overridden_gallery_image_count || 0);
+      const weakUnapprovedGalleryImageCount = Number(product.weak_unapproved_gallery_image_count || 0);
+      const leadTrend = formatTrendDelta(leadMerchandisingScore, previousLeadMerchandisingScore);
+      const galleryTrend = formatTrendDelta(effectiveGalleryMerchandisingScore, previousGalleryMerchandisingScore);
       const canApprove = ready;
       const lowScorePublish = publishScore < 85 || imageScore < 70 || !ready;
       const canPublish = ready && ["approved", "published"].includes(reviewStatusValue) && !lowScorePublish;
@@ -152,7 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${status}<div class="small">Review: ${reviewStatus}</div><div class="small">${ready ? "Ready for storefront" : "Needs review"}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${price}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? "⚠️ low stock" : "healthy"}</div><div class="small">${ready ? "Storefront ready" : readyNotes || "Missing storefront fields"}</div><div class="small">Publish score ${escapeHtml(String(publishScore))}% • Image score ${escapeHtml(String(imageScore))}%</div><div class="small">Gallery merch ${escapeHtml(String(merchandisingScore))}% • Lead merch ${escapeHtml(String(leadMerchandisingScore))}%</div><div class="small">Cost ${linkedResourceCost} • Margin ${grossMargin}</div><div class="small">${linkedResourceCount} linked resources${missingCostLinks ? ` • ${missingCostLinks} missing costs` : ""}</div><div class="small">${buildableUnits ? `Buildable units ${escapeHtml(buildableUnits)}` : "Buildable units unknown"}${shortageLinks ? ` • ${shortageLinks} shortages` : ""}</div></td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}<div class="small">${lowStock ? "⚠️ low stock" : "healthy"}</div><div class="small">${ready ? "Storefront ready" : readyNotes || "Missing storefront fields"}</div><div class="small">Publish score ${escapeHtml(String(publishScore))}% • Image score ${escapeHtml(String(imageScore))}%</div><div class="small">Gallery merch ${escapeHtml(String(merchandisingScore))}% • Effective gallery ${escapeHtml(String(effectiveGalleryMerchandisingScore))}% • Lead merch ${escapeHtml(String(leadMerchandisingScore))}%</div><div class="small">Trend ${escapeHtml(galleryTrend || 'new')} gallery • ${escapeHtml(leadTrend || 'new')} lead${product.merchandising_history_recorded_at ? ` • saved ${escapeHtml(product.merchandising_history_recorded_at)}` : ''}</div><div class="small">${overriddenGalleryImageCount ? `${escapeHtml(String(overriddenGalleryImageCount))} overridden story/gallery images` : 'No documented gallery overrides'}${weakUnapprovedGalleryImageCount ? ` • ${escapeHtml(String(weakUnapprovedGalleryImageCount))} weak images still unapproved` : ''}</div><div class="small">Cost ${linkedResourceCost} • Margin ${grossMargin}</div><div class="small">${linkedResourceCount} linked resources${missingCostLinks ? ` • ${missingCostLinks} missing costs` : ""}</div><div class="small">${buildableUnits ? `Buildable units ${escapeHtml(buildableUnits)}` : "Buildable units unknown"}${shortageLinks ? ` • ${shortageLinks} shortages` : ""}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${shipping}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${taxClass}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">

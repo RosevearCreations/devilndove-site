@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!mountEl || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
 
   let rendered = false;
+  let currentScoreHistory = [];
+  let latestSavedSummary = null;
 
   function setMessage(message, isError = false) {
     const el = document.getElementById('adminProductImagesMessage');
@@ -350,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><label class="small">Brightness</label><input type="number" data-field="brightness_score" min="0" max="100" step="1" value="${escapeHtml(row.brightness_score ?? '')}" placeholder="0-100" /></div>
           <div><label class="small">Contrast</label><input type="number" data-field="contrast_score" min="0" max="100" step="1" value="${escapeHtml(row.contrast_score ?? '')}" placeholder="0-100" /></div>
         </div>
-        <div class="grid cols-4" style="gap:12px;margin-top:12px">
+        <div class="grid cols-6" style="gap:12px;margin-top:12px">
           <div>
             <label class="small">Angle Group</label>
             <input type="text" data-field="angle_group" value="${escapeHtml(row.angle_group || '')}" placeholder="front / side / detail / overhead" />
@@ -368,6 +370,18 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div><label class="small">Merchandising Score</label><input type="number" data-field="merchandising_score_display" value="${escapeHtml(String(row.merchandising_score ?? row.first_image_score ?? ''))}" readonly /></div>
           <div><label class="small">Lead Image Gate</label><input type="text" data-field="lead_gate_hint" value="${escapeHtml(index === 0 ? 'Lead candidate' : 'Gallery/support image')}" readonly /></div>
+          <div>
+            <label class="small">Low-score override reason</label>
+            <select data-field="merchandising_override_reason">
+              <option value="" ${!row.merchandising_override_reason ? 'selected' : ''}>None</option>
+              <option value="storytelling" ${row.merchandising_override_reason === 'storytelling' ? 'selected' : ''}>Storytelling</option>
+              <option value="process_context" ${row.merchandising_override_reason === 'process_context' ? 'selected' : ''}>Process context</option>
+              <option value="lifestyle_context" ${row.merchandising_override_reason === 'lifestyle_context' ? 'selected' : ''}>Lifestyle context</option>
+              <option value="packaging_reference" ${row.merchandising_override_reason === 'packaging_reference' ? 'selected' : ''}>Packaging reference</option>
+              <option value="scale_reference" ${row.merchandising_override_reason === 'scale_reference' ? 'selected' : ''}>Scale reference</option>
+            </select>
+          </div>
+          <div><label class="small">Override note</label><input type="text" data-field="merchandising_override_note" value="${escapeHtml(row.merchandising_override_note || '')}" placeholder="Why keep this weaker image?" /></div>
         </div>
       </div>`;
   }
@@ -397,7 +411,9 @@ document.addEventListener('DOMContentLoaded', () => {
         brightness_score: toOptionalPercent(value('brightness_score')),
         contrast_score: toOptionalPercent(value('contrast_score')),
         angle_group: normalizeText(value('angle_group')),
-        shot_style: normalizeText(value('shot_style')) || 'record'
+        shot_style: normalizeText(value('shot_style')) || 'record',
+        merchandising_override_reason: normalizeText(value('merchandising_override_reason')),
+        merchandising_override_note: normalizeText(value('merchandising_override_note'))
       };
     });
   }
@@ -434,6 +450,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function formatTrendDelta(current, previous) {
+    const currentValue = Number(current);
+    const previousValue = Number(previous);
+    if (!Number.isFinite(currentValue) || !Number.isFinite(previousValue)) return '';
+    const delta = currentValue - previousValue;
+    if (delta === 0) return 'flat';
+    return `${delta > 0 ? '+' : ''}${delta}`;
+  }
+
   function renderQualityScore() {
     syncRowComputedScores();
     const rows = collectRows();
@@ -445,8 +470,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const firstImageScore = firstImage ? Number(firstImage.merchandising_score || firstImage.first_image_score || 0) : 0;
     const overallScore = rows.length ? Math.round(rows.reduce((sum, row) => sum + Number(row.merchandising_score || 0), 0) / rows.length) : 0;
     const duplicateAngleGroups = rows.reduce((sum, row, index) => sum + (computeDuplicatePenalty(rows, index, row.angle_group) > 0 ? 1 : 0), 0);
+    const overriddenGalleryImages = rows.filter((row, index) => index > 0 && normalizeText(row.merchandising_override_reason)).length;
+    const weakUnapprovedGalleryImages = rows.filter((row, index) => index > 0 && Number(row.merchandising_score || row.first_image_score || 0) < 64 && !normalizeText(row.merchandising_override_reason)).length;
     const firstOrientation = String(firstImage?.image_orientation || '').toLowerCase();
     const firstWarnings = firstImage ? summarizeImageGuidance(firstImage, true) : ['Choose a first image before publish.'];
+    const lastSaved = latestSavedSummary || currentScoreHistory[0] || null;
+    const priorSaved = currentScoreHistory[1] || null;
+    const draftLeadTrend = lastSaved ? formatTrendDelta(firstImageScore, Number(lastSaved.lead_image_score || 0)) : '';
+    const draftGalleryTrend = lastSaved ? formatTrendDelta(overallScore, Number(lastSaved.gallery_merchandising_score || 0)) : '';
+    const savedLeadTrend = lastSaved && priorSaved ? formatTrendDelta(Number(lastSaved.lead_image_score || 0), Number(priorSaved.lead_image_score || 0)) : '';
+    const savedGalleryTrend = lastSaved && priorSaved ? formatTrendDelta(Number(lastSaved.gallery_merchandising_score || 0), Number(priorSaved.gallery_merchandising_score || 0)) : '';
     const guidance = [
       'Aim for at least 3 images.',
       'Use a square or landscape first image.',
@@ -457,6 +490,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <h4 style="margin-top:0">Photo merchandising before publish</h4>
       <div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • average merchandising score ${overallScore}% • lead image score ${firstImageScore}% • duplicate-angle rows ${duplicateAngleGroups}</div>
       <div class="small" style="margin-top:6px">${guidance.join(' ')}</div>
+      <div class="small" style="margin-top:6px">${overriddenGalleryImages ? `${escapeHtml(String(overriddenGalleryImages))} gallery image(s) are being kept by documented override reason.` : 'No gallery overrides are documented right now.'}${weakUnapprovedGalleryImages ? ` ${escapeHtml(String(weakUnapprovedGalleryImages))} low-scoring gallery image(s) still need an override reason or replacement.` : ''}</div>
+      ${(draftLeadTrend || draftGalleryTrend) ? `<div class="small" style="margin-top:6px">Draft vs last saved: ${escapeHtml(draftGalleryTrend || 'flat')} gallery • ${escapeHtml(draftLeadTrend || 'flat')} lead${lastSaved?.created_at ? ` • last saved ${escapeHtml(lastSaved.created_at)}` : ''}</div>` : ''}
+      ${(savedLeadTrend || savedGalleryTrend) ? `<div class="small" style="margin-top:6px">Last saved trend: ${escapeHtml(savedGalleryTrend || 'flat')} gallery • ${escapeHtml(savedLeadTrend || 'flat')} lead</div>` : ''}
       ${firstImage ? `<div class="small" style="margin-top:6px">Lead image: ${escapeHtml(String(firstImage.width_px || 0))}×${escapeHtml(String(firstImage.height_px || 0))} • ${escapeHtml(firstOrientation || 'unknown')} • background ${escapeHtml(String(firstImage.background_consistency_score ?? 'n/a'))} • fill ${escapeHtml(String(firstImage.subject_fill_score ?? 'n/a'))} • sharpness ${escapeHtml(String(firstImage.sharpness_score ?? 'n/a'))} • brightness ${escapeHtml(String(firstImage.brightness_score ?? 'n/a'))} • contrast ${escapeHtml(String(firstImage.contrast_score ?? 'n/a'))}</div>` : ''}
       ${firstWarnings.map((warning) => `<div class="small" style="margin-top:6px;color:#b00020">${escapeHtml(warning)}</div>`).join('')}`;
   }
@@ -543,6 +579,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await window.DDAuth.apiFetch(`/api/admin/product-images?product_id=${encodeURIComponent(productId)}`);
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load product images.');
+      currentScoreHistory = Array.isArray(data.score_history) ? data.score_history : [];
+      latestSavedSummary = data.current_summary && typeof data.current_summary === 'object' ? data.current_summary : null;
       const wrap = document.getElementById('productImagesRows');
       if (wrap) wrap.innerHTML = '';
       const rows = Array.isArray(data.images) ? data.images : [];
@@ -706,10 +744,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await window.DDAuth.apiFetch('/api/admin/product-images', { method: 'POST', body: JSON.stringify(payload) });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save product images.');
+      latestSavedSummary = data.current_summary && typeof data.current_summary === 'object' ? data.current_summary : null;
+      await loadImages();
       setMessage('Product images saved.');
       document.dispatchEvent(new CustomEvent('dd:product-updated', { detail: { product_id: productId } }));
-      renderQualityScore();
-      await loadAssetLibrary();
     } catch (error) {
       setMessage(error.message || 'Failed to save product images.', true);
     }
