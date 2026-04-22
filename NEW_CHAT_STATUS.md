@@ -1,5 +1,11 @@
 # New Chat Status
 
+## Current pass update — 2026-04-22
+- Upgraded product-image scoring into a fuller merchandising score that now weights background consistency, subject fill, sharpness, brightness/contrast, duplicate-angle penalties, and shot-style bonuses.
+- Pushed upload and asset-selection guidance earlier so weak featured-image candidates are warned about before save/publish instead of only later in review.
+- Fixed admin media-upload metric persistence so upload-time image analysis survives into the asset library, saved gallery rows, and publish gating.
+- Rechecked the current outward-facing HTML set for the one-H1 rule during this pass; no exposed page in the current build showed more than one H1.
+
 
 ## Current pass update
 
@@ -353,3 +359,15 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Latest handoff note — 2026-04-22
+Completed this pass:
+- strengthened image scoring into a merchandising score with lead-image/gallery weighting
+- persisted upload-time metrics into `media_assets` and `product_image_annotations`
+- improved upload and asset-selection guidance before save/publish
+- fixed the media-upload metric-persistence bug that previously dropped width/height/orientation-derived values
+- re-synced markdown and schema reference files for the current image-scoring direction
+
+Best next continuation point:
+- test old products with older uploads and decide whether to bulk backfill missing merchandising fields or only refresh them as images are touched
+- then continue the pricing-history/admin-note tightening and broader storefront trust/SEO passes

@@ -1,5 +1,11 @@
 # Known Gaps and Risks
 
+## Current pass update — 2026-04-22
+- Upgraded product-image scoring into a fuller merchandising score that now weights background consistency, subject fill, sharpness, brightness/contrast, duplicate-angle penalties, and shot-style bonuses.
+- Pushed upload and asset-selection guidance earlier so weak featured-image candidates are warned about before save/publish instead of only later in review.
+- Fixed admin media-upload metric persistence so upload-time image analysis survives into the asset library, saved gallery rows, and publish gating.
+- Rechecked the current outward-facing HTML set for the one-H1 rule during this pass; no exposed page in the current build showed more than one H1.
+
 
 ## Current pass update
 
@@ -779,3 +785,9 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Current pass risk note: image merchandising score
+- The new merchandising score is stronger than the previous completeness score, but some of it is still heuristic. Background cleanliness, brightness, contrast, and sharpness are estimated during upload; subject fill can still benefit from manual correction when the crop or framing is unusual.
+- Duplicate-angle control now relies on operator tagging (`angle_group`) to work well. If operators skip angle labels, the duplicate-angle penalty becomes less useful.
+- Asset-library guidance is much earlier now, but old uploads may not have the newer scoring fields until they are re-uploaded or edited/saved through the current admin flow.
+- Lead-image gating is intentionally stricter now, which improves storefront quality but can frustrate emergency publish workflows unless the override path stays documented and usable.
