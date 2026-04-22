@@ -33,6 +33,9 @@ async function getTableColumnSet(db, tableName) {
 
 function buildReadiness(row = {}) {
   const imageCount = Number(row.image_count || 0);
+  const altCoverage = Number(row.alt_coverage_count || 0);
+  const firstMerchandisingScore = Number(row.first_merchandising_score || 0);
+  const averageMerchandisingScore = Number(row.average_merchandising_score || 0);
   const checks = {
     has_name: normalizeText(row.name).length > 0,
     has_slug: normalizeText(row.slug).length > 0,
@@ -44,6 +47,9 @@ function buildReadiness(row = {}) {
     has_meta_description: normalizeText(row.meta_description).length >= 50,
     has_category: normalizeText(row.product_category).length > 0,
     has_photo_set: imageCount >= 3,
+    has_photo_alt: imageCount > 0 && altCoverage >= Math.min(3, imageCount),
+    has_lead_merch_score: imageCount === 0 || firstMerchandisingScore >= 72,
+    has_gallery_merch_score: imageCount === 0 || averageMerchandisingScore >= 64,
   };
   const weights = {
     has_name: 10,
@@ -55,7 +61,10 @@ function buildReadiness(row = {}) {
     has_meta_title: 8,
     has_meta_description: 8,
     has_category: 4,
-    has_photo_set: 20,
+    has_photo_set: 10,
+    has_photo_alt: 4,
+    has_lead_merch_score: 4,
+    has_gallery_merch_score: 2,
   };
   const failedKeys = Object.entries(checks).filter(([, ok]) => !ok).map(([key]) => key);
   const earned = Object.entries(checks).reduce((sum, [key, ok]) => sum + (ok ? Number(weights[key] || 0) : 0), 0);
@@ -64,7 +73,14 @@ function buildReadiness(row = {}) {
     is_ready_for_storefront: failedKeys.length === 0 ? 1 : 0,
     ready_check_notes: failedKeys.join(", "),
     publish_readiness_score: total > 0 ? Math.round((earned / total) * 100) : 0,
-    image_quality_score: imageCount >= 5 ? 100 : imageCount >= 3 ? 80 : imageCount > 0 ? 45 : 0,
+    image_quality_score: Math.round(([
+      imageCount >= 5 ? 1 : imageCount >= 3 ? 0.8 : imageCount > 0 ? 0.45 : 0,
+      imageCount > 0 ? Math.min(altCoverage / imageCount, 1) : 0,
+      firstMerchandisingScore / 100,
+      averageMerchandisingScore / 100
+    ].reduce((sum, value) => sum + value, 0) / 4) * 100),
+    merchandising_score: averageMerchandisingScore,
+    lead_image_merchandising_score: firstMerchandisingScore,
     readiness_checks: checks,
   };
 }
@@ -73,6 +89,7 @@ async function loadProducts(db, q) {
   const hasTaxClasses = await tableExists(db, "tax_classes");
   const hasProductSeo = await tableExists(db, "product_seo");
   const hasProductImages = await tableExists(db, "product_images");
+  const annotationCols = hasProductImages ? await getTableColumnSet(db, 'product_image_annotations') : new Set();
   const hasResourceLinks = await tableExists(db, "product_resource_links");
   const hasInventory = await tableExists(db, "site_item_inventory");
   const resourceLinkColumns = hasResourceLinks ? await getTableColumnSet(db, 'product_resource_links') : new Set();
@@ -108,6 +125,9 @@ async function loadProducts(db, q) {
     hasProductSeo ? "ps.keywords" : "NULL AS keywords",
     hasProductSeo ? "ps.h1_override" : "NULL AS h1_override",
     hasProductImages ? "COUNT(DISTINCT pi.product_image_id) AS image_count" : "0 AS image_count",
+    hasProductImages ? "COUNT(DISTINCT CASE WHEN LENGTH(TRIM(COALESCE(pi.alt_text,''))) >= 5 THEN pi.product_image_id ELSE NULL END) AS alt_coverage_count" : "0 AS alt_coverage_count",
+    hasProductImages ? `MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has('merchandising_score') ? 'COALESCE(pia.merchandising_score, pia.first_image_score)' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : '0')} ELSE NULL END) AS first_merchandising_score` : "0 AS first_merchandising_score",
+    hasProductImages ? `AVG(COALESCE(${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : '0')}, 0)) AS average_merchandising_score` : "0 AS average_merchandising_score",
     hasResourceLinks ? "COUNT(DISTINCT prl.product_resource_link_id) AS linked_resource_count" : "0 AS linked_resource_count",
     hasResourceLinks && hasInventory
       ? `COALESCE(SUM(CASE WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN COALESCE(prl.quantity_used, 0) * ${inventoryUnitCostExpr} / ${usageUnitsExpr} / COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1) ELSE COALESCE(prl.quantity_used, 0) * ${inventoryUnitCostExpr} / ${usageUnitsExpr} END), 0) AS linked_resource_cost_cents`
@@ -128,6 +148,7 @@ async function loadProducts(db, q) {
   if (hasTaxClasses) joinParts.push("LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id");
   if (hasProductSeo) joinParts.push("LEFT JOIN product_seo ps ON ps.product_id = p.product_id");
   if (hasProductImages) joinParts.push("LEFT JOIN product_images pi ON pi.product_id = p.product_id");
+  if (hasProductImages) joinParts.push("LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id");
   if (hasResourceLinks) joinParts.push("LEFT JOIN product_resource_links prl ON prl.product_id = p.product_id");
   if (hasResourceLinks && hasInventory) {
     joinParts.push(
@@ -180,6 +201,9 @@ async function loadProductsFallback(db, q) {
       NULL AS keywords,
       NULL AS h1_override,
       0 AS image_count,
+      0 AS alt_coverage_count,
+      0 AS first_merchandising_score,
+      0 AS average_merchandising_score,
       0 AS linked_resource_count,
       0 AS linked_resource_cost_cents,
       0 AS missing_cost_links,

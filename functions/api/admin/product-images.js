@@ -61,16 +61,42 @@ async function getTableColumnSet(db, tableName) {
   }
 }
 
-async function ensureDimensionColumns(db) {
+async function ensureAnnotationColumns(db) {
   const annotationCols = await getTableColumnSet(db, 'product_image_annotations');
-  if (!annotationCols.has('width_px')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN width_px INTEGER`).run().catch(() => null);
-  if (!annotationCols.has('height_px')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN height_px INTEGER`).run().catch(() => null);
-  if (!annotationCols.has('image_orientation')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN image_orientation TEXT`).run().catch(() => null);
-  if (!annotationCols.has('crop_x')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN crop_x REAL`).run().catch(() => null);
-  if (!annotationCols.has('crop_y')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN crop_y REAL`).run().catch(() => null);
-  if (!annotationCols.has('crop_width')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN crop_width REAL`).run().catch(() => null);
-  if (!annotationCols.has('crop_height')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN crop_height REAL`).run().catch(() => null);
-  if (!annotationCols.has('first_image_score')) await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN first_image_score INTEGER`).run().catch(() => null);
+  const statements = [
+    ['width_px', 'ALTER TABLE product_image_annotations ADD COLUMN width_px INTEGER'],
+    ['height_px', 'ALTER TABLE product_image_annotations ADD COLUMN height_px INTEGER'],
+    ['image_orientation', 'ALTER TABLE product_image_annotations ADD COLUMN image_orientation TEXT'],
+    ['crop_x', 'ALTER TABLE product_image_annotations ADD COLUMN crop_x REAL'],
+    ['crop_y', 'ALTER TABLE product_image_annotations ADD COLUMN crop_y REAL'],
+    ['crop_width', 'ALTER TABLE product_image_annotations ADD COLUMN crop_width REAL'],
+    ['crop_height', 'ALTER TABLE product_image_annotations ADD COLUMN crop_height REAL'],
+    ['first_image_score', 'ALTER TABLE product_image_annotations ADD COLUMN first_image_score INTEGER'],
+    ['background_consistency_score', 'ALTER TABLE product_image_annotations ADD COLUMN background_consistency_score INTEGER'],
+    ['subject_fill_score', 'ALTER TABLE product_image_annotations ADD COLUMN subject_fill_score INTEGER'],
+    ['sharpness_score', 'ALTER TABLE product_image_annotations ADD COLUMN sharpness_score INTEGER'],
+    ['brightness_score', 'ALTER TABLE product_image_annotations ADD COLUMN brightness_score INTEGER'],
+    ['contrast_score', 'ALTER TABLE product_image_annotations ADD COLUMN contrast_score INTEGER'],
+    ['angle_group', 'ALTER TABLE product_image_annotations ADD COLUMN angle_group TEXT'],
+    ['shot_style', 'ALTER TABLE product_image_annotations ADD COLUMN shot_style TEXT'],
+    ['merchandising_score', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_score INTEGER']
+  ];
+  for (const [name, sql] of statements) {
+    if (!annotationCols.has(name)) await db.prepare(sql).run().catch(() => null);
+  }
+  return await getTableColumnSet(db, 'product_image_annotations');
+}
+
+function parseOptionalNumber(value) {
+  if (value == null || value === '') return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function parseOptionalPercent(value) {
+  const numeric = parseOptionalNumber(value);
+  if (numeric == null) return null;
+  return Math.max(0, Math.min(100, Math.round(numeric)));
 }
 
 export async function onRequestGet(context) {
@@ -81,9 +107,7 @@ export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
-  await ensureDimensionColumns(db);
-  const annotationCols = await getTableColumnSet(db, 'product_image_annotations');
-
+  const annotationCols = await ensureAnnotationColumns(db);
   const product_id = Number(new URL(request.url).searchParams.get('product_id'));
   if (!Number.isInteger(product_id) || product_id <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
 
@@ -97,7 +121,15 @@ export async function onRequestGet(context) {
            ${annotationCols.has('crop_y') ? 'pia.crop_y' : 'NULL AS crop_y'},
            ${annotationCols.has('crop_width') ? 'pia.crop_width' : 'NULL AS crop_width'},
            ${annotationCols.has('crop_height') ? 'pia.crop_height' : 'NULL AS crop_height'},
-           ${annotationCols.has('first_image_score') ? 'pia.first_image_score' : 'NULL AS first_image_score'}
+           ${annotationCols.has('first_image_score') ? 'pia.first_image_score' : 'NULL AS first_image_score'},
+           ${annotationCols.has('background_consistency_score') ? 'pia.background_consistency_score' : 'NULL AS background_consistency_score'},
+           ${annotationCols.has('subject_fill_score') ? 'pia.subject_fill_score' : 'NULL AS subject_fill_score'},
+           ${annotationCols.has('sharpness_score') ? 'pia.sharpness_score' : 'NULL AS sharpness_score'},
+           ${annotationCols.has('brightness_score') ? 'pia.brightness_score' : 'NULL AS brightness_score'},
+           ${annotationCols.has('contrast_score') ? 'pia.contrast_score' : 'NULL AS contrast_score'},
+           ${annotationCols.has('angle_group') ? 'pia.angle_group' : 'NULL AS angle_group'},
+           ${annotationCols.has('shot_style') ? 'pia.shot_style' : 'NULL AS shot_style'},
+           ${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : 'NULL AS merchandising_score'}
     FROM product_images pi
     LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
     WHERE pi.product_id = ?
@@ -123,7 +155,15 @@ export async function onRequestGet(context) {
     crop_y: row.crop_y == null ? null : Number(row.crop_y || 0),
     crop_width: row.crop_width == null ? null : Number(row.crop_width || 0),
     crop_height: row.crop_height == null ? null : Number(row.crop_height || 0),
-    first_image_score: row.first_image_score == null ? null : Number(row.first_image_score || 0)
+    first_image_score: row.first_image_score == null ? null : Number(row.first_image_score || 0),
+    background_consistency_score: row.background_consistency_score == null ? null : Number(row.background_consistency_score || 0),
+    subject_fill_score: row.subject_fill_score == null ? null : Number(row.subject_fill_score || 0),
+    sharpness_score: row.sharpness_score == null ? null : Number(row.sharpness_score || 0),
+    brightness_score: row.brightness_score == null ? null : Number(row.brightness_score || 0),
+    contrast_score: row.contrast_score == null ? null : Number(row.contrast_score || 0),
+    angle_group: row.angle_group || '',
+    shot_style: row.shot_style || '',
+    merchandising_score: row.merchandising_score == null ? null : Number(row.merchandising_score || 0)
   })) });
 }
 
@@ -135,7 +175,7 @@ export async function onRequestPost(context) {
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
-  await ensureDimensionColumns(db);
+  await ensureAnnotationColumns(db);
 
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
@@ -157,6 +197,7 @@ export async function onRequestPost(context) {
     if (!imageUrl) continue;
     const altText = normalizeText(row.alt_text) || product.name || null;
     const sortOrder = Number.isInteger(Number(row.sort_order)) ? Number(row.sort_order) : i;
+    const merchandisingScore = parseOptionalPercent(row.merchandising_score ?? row.first_image_score);
 
     const insert = await db.prepare(`
       INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
@@ -167,8 +208,14 @@ export async function onRequestPost(context) {
     await db.prepare(`
       INSERT INTO product_image_annotations (
         product_id, product_image_id, image_url, alt_text, image_title, caption,
-        focal_point_x, focal_point_y, annotation_notes, width_px, height_px, image_orientation, crop_x, crop_y, crop_width, crop_height, first_image_score, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        focal_point_x, focal_point_y, annotation_notes,
+        width_px, height_px, image_orientation,
+        crop_x, crop_y, crop_width, crop_height,
+        first_image_score,
+        background_consistency_score, subject_fill_score, sharpness_score, brightness_score, contrast_score,
+        angle_group, shot_style, merchandising_score,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `).bind(
       product_id,
       productImageId || null,
@@ -179,14 +226,22 @@ export async function onRequestPost(context) {
       row.focal_point_x == null ? null : Number(row.focal_point_x),
       row.focal_point_y == null ? null : Number(row.focal_point_y),
       normalizeText(row.annotation_notes) || null,
-      row.width_px == null ? null : Number(row.width_px),
-      row.height_px == null ? null : Number(row.height_px),
+      parseOptionalNumber(row.width_px),
+      parseOptionalNumber(row.height_px),
       normalizeText(row.image_orientation) || null,
-      row.crop_x == null ? null : Number(row.crop_x),
-      row.crop_y == null ? null : Number(row.crop_y),
-      row.crop_width == null ? null : Number(row.crop_width),
-      row.crop_height == null ? null : Number(row.crop_height),
-      row.first_image_score == null ? null : Number(row.first_image_score)
+      parseOptionalNumber(row.crop_x),
+      parseOptionalNumber(row.crop_y),
+      parseOptionalNumber(row.crop_width),
+      parseOptionalNumber(row.crop_height),
+      merchandisingScore,
+      parseOptionalPercent(row.background_consistency_score),
+      parseOptionalPercent(row.subject_fill_score),
+      parseOptionalPercent(row.sharpness_score),
+      parseOptionalPercent(row.brightness_score),
+      parseOptionalPercent(row.contrast_score),
+      normalizeText(row.angle_group) || null,
+      normalizeText(row.shot_style) || null,
+      merchandisingScore
     ).run();
 
     if (featuredImageUrl == null || Number(sortOrder) === 0) {

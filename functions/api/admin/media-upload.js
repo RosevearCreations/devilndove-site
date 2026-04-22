@@ -3,7 +3,8 @@ import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normali
 // File: /functions/api/admin/media-upload.js
 // Brief description: Accepts admin-authenticated image uploads and stores them in the configured
 // R2 bucket so product media can be uploaded directly instead of only pasting URLs.
-// This pass also allows one-step attachment to product_images/product_image_annotations.
+// This pass also allows one-step attachment to product_images/product_image_annotations and stores
+// upload-time merchandising guidance metrics for later asset-library selection.
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 
@@ -42,21 +43,86 @@ function parseFlag(value, fallback = 0) {
   return fallback;
 }
 
-async function ensureDimensionColumns(db) {
-  await db.prepare(`ALTER TABLE media_assets ADD COLUMN width_px INTEGER`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE media_assets ADD COLUMN height_px INTEGER`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE media_assets ADD COLUMN image_orientation TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN width_px INTEGER`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN height_px INTEGER`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE product_image_annotations ADD COLUMN image_orientation TEXT`).run().catch(() => null);
+function parseOptionalNumber(value) {
+  if (value == null || value === '') return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function parseOptionalPercent(value) {
+  const numeric = parseOptionalNumber(value);
+  if (numeric == null) return null;
+  return Math.max(0, Math.min(100, Math.round(numeric)));
+}
+
+function normalizeOrientation(value, widthPx, heightPx) {
+  const explicit = normalizeText(value).toLowerCase();
+  if (['square', 'landscape', 'portrait'].includes(explicit)) return explicit;
+  if (widthPx == null || heightPx == null || widthPx <= 0 || heightPx <= 0) return null;
+  if (Math.abs(widthPx - heightPx) <= Math.max(24, widthPx * 0.03)) return 'square';
+  return widthPx > heightPx ? 'landscape' : 'portrait';
+}
+
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function ensureMediaMetricColumns(db) {
+  const mediaCols = await getTableColumnSet(db, 'media_assets');
+  const annotationCols = await getTableColumnSet(db, 'product_image_annotations');
+
+  const mediaStatements = [
+    ['width_px', 'ALTER TABLE media_assets ADD COLUMN width_px INTEGER'],
+    ['height_px', 'ALTER TABLE media_assets ADD COLUMN height_px INTEGER'],
+    ['image_orientation', 'ALTER TABLE media_assets ADD COLUMN image_orientation TEXT'],
+    ['background_consistency_score', 'ALTER TABLE media_assets ADD COLUMN background_consistency_score INTEGER'],
+    ['subject_fill_score', 'ALTER TABLE media_assets ADD COLUMN subject_fill_score INTEGER'],
+    ['sharpness_score', 'ALTER TABLE media_assets ADD COLUMN sharpness_score INTEGER'],
+    ['brightness_score', 'ALTER TABLE media_assets ADD COLUMN brightness_score INTEGER'],
+    ['contrast_score', 'ALTER TABLE media_assets ADD COLUMN contrast_score INTEGER'],
+    ['angle_group', 'ALTER TABLE media_assets ADD COLUMN angle_group TEXT'],
+    ['shot_style', 'ALTER TABLE media_assets ADD COLUMN shot_style TEXT'],
+    ['merchandising_score', 'ALTER TABLE media_assets ADD COLUMN merchandising_score INTEGER']
+  ];
+  for (const [name, sql] of mediaStatements) {
+    if (!mediaCols.has(name)) await db.prepare(sql).run().catch(() => null);
+  }
+
+  const annotationStatements = [
+    ['width_px', 'ALTER TABLE product_image_annotations ADD COLUMN width_px INTEGER'],
+    ['height_px', 'ALTER TABLE product_image_annotations ADD COLUMN height_px INTEGER'],
+    ['image_orientation', 'ALTER TABLE product_image_annotations ADD COLUMN image_orientation TEXT'],
+    ['crop_x', 'ALTER TABLE product_image_annotations ADD COLUMN crop_x REAL'],
+    ['crop_y', 'ALTER TABLE product_image_annotations ADD COLUMN crop_y REAL'],
+    ['crop_width', 'ALTER TABLE product_image_annotations ADD COLUMN crop_width REAL'],
+    ['crop_height', 'ALTER TABLE product_image_annotations ADD COLUMN crop_height REAL'],
+    ['first_image_score', 'ALTER TABLE product_image_annotations ADD COLUMN first_image_score INTEGER'],
+    ['background_consistency_score', 'ALTER TABLE product_image_annotations ADD COLUMN background_consistency_score INTEGER'],
+    ['subject_fill_score', 'ALTER TABLE product_image_annotations ADD COLUMN subject_fill_score INTEGER'],
+    ['sharpness_score', 'ALTER TABLE product_image_annotations ADD COLUMN sharpness_score INTEGER'],
+    ['brightness_score', 'ALTER TABLE product_image_annotations ADD COLUMN brightness_score INTEGER'],
+    ['contrast_score', 'ALTER TABLE product_image_annotations ADD COLUMN contrast_score INTEGER'],
+    ['angle_group', 'ALTER TABLE product_image_annotations ADD COLUMN angle_group TEXT'],
+    ['shot_style', 'ALTER TABLE product_image_annotations ADD COLUMN shot_style TEXT'],
+    ['merchandising_score', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_score INTEGER']
+  ];
+  for (const [name, sql] of annotationStatements) {
+    if (!annotationCols.has(name)) await db.prepare(sql).run().catch(() => null);
+  }
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  await ensureDimensionColumns(db);
+  await ensureMediaMetricColumns(db);
 
   const bucket = env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
   if (!bucket || typeof bucket.put !== 'function') {
@@ -101,7 +167,23 @@ export async function onRequestPost(context) {
   const uploadScopeRaw = normalizeText(form.get('upload_scope') || (safeProductId ? 'product' : 'brand')).toLowerCase();
   const uploadScope = ['product', 'brand', 'creation', 'social', 'general'].includes(uploadScopeRaw) ? uploadScopeRaw : (safeProductId ? 'product' : 'general');
   const assetTag = normalizeText(form.get('asset_tag'));
-  const annotationNotes = normalizeText(form.get('annotation_notes')) || [assetTag, uploadScope !== 'product' ? `${uploadScope}_asset` : '', variantRole ? `variant_role:${variantRole}` : ''].filter(Boolean).join(' | ');
+  const widthPx = parseOptionalNumber(form.get('width_px'));
+  const heightPx = parseOptionalNumber(form.get('height_px'));
+  const imageOrientation = normalizeOrientation(form.get('image_orientation'), widthPx, heightPx);
+  const backgroundConsistencyScore = parseOptionalPercent(form.get('background_consistency_score'));
+  const subjectFillScore = parseOptionalPercent(form.get('subject_fill_score'));
+  const sharpnessScore = parseOptionalPercent(form.get('sharpness_score'));
+  const brightnessScore = parseOptionalPercent(form.get('brightness_score'));
+  const contrastScore = parseOptionalPercent(form.get('contrast_score'));
+  const angleGroup = normalizeText(form.get('angle_group')) || null;
+  const shotStyle = normalizeText(form.get('shot_style')) || 'record';
+  const merchandisingScore = parseOptionalPercent(form.get('merchandising_score'));
+  const annotationNotes = normalizeText(form.get('annotation_notes')) || [
+    assetTag,
+    uploadScope !== 'product' ? `${uploadScope}_asset` : '',
+    variantRole ? `variant_role:${variantRole}` : '',
+    merchandisingScore != null ? `merch_score:${merchandisingScore}` : ''
+  ].filter(Boolean).join(' | ');
 
   let product = null;
   if (safeProductId) {
@@ -134,7 +216,8 @@ export async function onRequestPost(context) {
       product_id: safeProductId ? String(safeProductId) : '',
       uploaded_by_user_id: String(adminUser.user_id || ''),
       variant_role: variantRole || '',
-      upload_scope: uploadScope || ''
+      upload_scope: uploadScope || '',
+      merchandising_score: merchandisingScore == null ? '' : String(merchandisingScore)
     }
   });
 
@@ -158,10 +241,18 @@ export async function onRequestPost(context) {
         width_px,
         height_px,
         image_orientation,
+        background_consistency_score,
+        subject_fill_score,
+        sharpness_score,
+        brightness_score,
+        contrast_score,
+        angle_group,
+        shot_style,
+        merchandising_score,
         created_by_user_id,
         created_at,
         updated_at
-      ) VALUES (?, 'r2', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, 'r2', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       safeProductId,
       normalizeText(env.PRODUCT_MEDIA_BUCKET_NAME || env.R2_BUCKET_NAME || 'product-media'),
@@ -175,6 +266,14 @@ export async function onRequestPost(context) {
       widthPx,
       heightPx,
       imageOrientation || null,
+      backgroundConsistencyScore,
+      subjectFillScore,
+      sharpnessScore,
+      brightnessScore,
+      contrastScore,
+      angleGroup,
+      shotStyle || null,
+      merchandisingScore,
       adminUser.user_id
     ).run();
     mediaAssetId = Number(insert?.meta?.last_row_id || 0) || null;
@@ -197,8 +296,12 @@ export async function onRequestPost(context) {
     if (productImageId) {
       await db.prepare(`
         INSERT INTO product_image_annotations (
-          product_id, product_image_id, image_url, alt_text, image_title, caption, annotation_notes, width_px, height_px, image_orientation, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+          product_id, product_image_id, image_url, alt_text, image_title, caption, annotation_notes,
+          width_px, height_px, image_orientation,
+          background_consistency_score, subject_fill_score, sharpness_score, brightness_score, contrast_score,
+          angle_group, shot_style, merchandising_score, first_image_score,
+          updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       `).bind(
         safeProductId,
         productImageId,
@@ -209,7 +312,16 @@ export async function onRequestPost(context) {
         annotationNotes || null,
         widthPx,
         heightPx,
-        imageOrientation || null
+        imageOrientation || null,
+        backgroundConsistencyScore,
+        subjectFillScore,
+        sharpnessScore,
+        brightnessScore,
+        contrastScore,
+        angleGroup,
+        shotStyle || null,
+        merchandisingScore,
+        merchandisingScore
       ).run().catch(() => null);
     }
 
@@ -244,7 +356,18 @@ export async function onRequestPost(context) {
       upload_scope: uploadScope || null,
       asset_tag: assetTag || null,
       media_asset_id: mediaAssetId,
-      product_image_id: productImageId
+      product_image_id: productImageId,
+      width_px: widthPx,
+      height_px: heightPx,
+      image_orientation: imageOrientation || null,
+      merchandising_score: merchandisingScore,
+      background_consistency_score: backgroundConsistencyScore,
+      subject_fill_score: subjectFillScore,
+      sharpness_score: sharpnessScore,
+      brightness_score: brightnessScore,
+      contrast_score: contrastScore,
+      shot_style: shotStyle || null,
+      angle_group: angleGroup
     }
   });
 
@@ -267,7 +390,15 @@ export async function onRequestPost(context) {
       asset_tag: assetTag || null,
       width_px: widthPx,
       height_px: heightPx,
-      image_orientation: imageOrientation || null
+      image_orientation: imageOrientation || null,
+      merchandising_score: merchandisingScore,
+      background_consistency_score: backgroundConsistencyScore,
+      subject_fill_score: subjectFillScore,
+      sharpness_score: sharpnessScore,
+      brightness_score: brightnessScore,
+      contrast_score: contrastScore,
+      shot_style: shotStyle || null,
+      angle_group: angleGroup
     }
   });
 }

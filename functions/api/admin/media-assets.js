@@ -16,11 +16,43 @@ function deriveVariantUrls(publicUrl = '') {
   }));
 }
 
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(normalizeResults(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function ensureMediaMetricColumns(db) {
+  const cols = await getTableColumnSet(db, 'media_assets');
+  const statements = [
+    ['width_px', 'ALTER TABLE media_assets ADD COLUMN width_px INTEGER'],
+    ['height_px', 'ALTER TABLE media_assets ADD COLUMN height_px INTEGER'],
+    ['image_orientation', 'ALTER TABLE media_assets ADD COLUMN image_orientation TEXT'],
+    ['background_consistency_score', 'ALTER TABLE media_assets ADD COLUMN background_consistency_score INTEGER'],
+    ['subject_fill_score', 'ALTER TABLE media_assets ADD COLUMN subject_fill_score INTEGER'],
+    ['sharpness_score', 'ALTER TABLE media_assets ADD COLUMN sharpness_score INTEGER'],
+    ['brightness_score', 'ALTER TABLE media_assets ADD COLUMN brightness_score INTEGER'],
+    ['contrast_score', 'ALTER TABLE media_assets ADD COLUMN contrast_score INTEGER'],
+    ['angle_group', 'ALTER TABLE media_assets ADD COLUMN angle_group TEXT'],
+    ['shot_style', 'ALTER TABLE media_assets ADD COLUMN shot_style TEXT'],
+    ['merchandising_score', 'ALTER TABLE media_assets ADD COLUMN merchandising_score INTEGER']
+  ];
+  for (const [name, sql] of statements) {
+    if (!cols.has(name)) await db.prepare(sql).run().catch(() => null);
+  }
+  return await getTableColumnSet(db, 'media_assets');
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = getDb(env);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  const mediaCols = await ensureMediaMetricColumns(db);
   const url = new URL(request.url);
   const productId = Number(url.searchParams.get('product_id') || 0);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
@@ -30,6 +62,17 @@ export async function onRequestGet(context) {
     SELECT ma.media_asset_id, ma.product_id, ma.storage_provider, ma.bucket_name, ma.object_key, ma.public_url,
            ma.original_filename, ma.mime_type, ma.file_size_bytes, ma.variant_role, ma.sort_order,
            ma.annotation_notes, ma.created_at, ma.updated_at, ma.deleted_at,
+           ${mediaCols.has('width_px') ? 'ma.width_px' : 'NULL AS width_px'},
+           ${mediaCols.has('height_px') ? 'ma.height_px' : 'NULL AS height_px'},
+           ${mediaCols.has('image_orientation') ? 'ma.image_orientation' : 'NULL AS image_orientation'},
+           ${mediaCols.has('background_consistency_score') ? 'ma.background_consistency_score' : 'NULL AS background_consistency_score'},
+           ${mediaCols.has('subject_fill_score') ? 'ma.subject_fill_score' : 'NULL AS subject_fill_score'},
+           ${mediaCols.has('sharpness_score') ? 'ma.sharpness_score' : 'NULL AS sharpness_score'},
+           ${mediaCols.has('brightness_score') ? 'ma.brightness_score' : 'NULL AS brightness_score'},
+           ${mediaCols.has('contrast_score') ? 'ma.contrast_score' : 'NULL AS contrast_score'},
+           ${mediaCols.has('angle_group') ? 'ma.angle_group' : 'NULL AS angle_group'},
+           ${mediaCols.has('shot_style') ? 'ma.shot_style' : 'NULL AS shot_style'},
+           ${mediaCols.has('merchandising_score') ? 'ma.merchandising_score' : 'NULL AS merchandising_score'},
            p.name AS product_name,
            (SELECT COUNT(*) FROM media_assets ma2 WHERE ma2.deleted_at IS NULL AND COALESCE(ma2.public_url,'') = COALESCE(ma.public_url,'')) AS duplicate_public_url_count
     FROM media_assets ma
@@ -60,6 +103,17 @@ export async function onRequestGet(context) {
     variant_role: row.variant_role || null,
     sort_order: Number(row.sort_order || 0),
     annotation_notes: row.annotation_notes || null,
+    width_px: row.width_px == null ? null : Number(row.width_px || 0),
+    height_px: row.height_px == null ? null : Number(row.height_px || 0),
+    image_orientation: row.image_orientation || null,
+    background_consistency_score: row.background_consistency_score == null ? null : Number(row.background_consistency_score || 0),
+    subject_fill_score: row.subject_fill_score == null ? null : Number(row.subject_fill_score || 0),
+    sharpness_score: row.sharpness_score == null ? null : Number(row.sharpness_score || 0),
+    brightness_score: row.brightness_score == null ? null : Number(row.brightness_score || 0),
+    contrast_score: row.contrast_score == null ? null : Number(row.contrast_score || 0),
+    angle_group: row.angle_group || null,
+    shot_style: row.shot_style || null,
+    merchandising_score: row.merchandising_score == null ? null : Number(row.merchandising_score || 0),
     duplicate_public_url_count: Number(row.duplicate_public_url_count || 0),
     created_at: row.created_at || null,
     updated_at: row.updated_at || null,
@@ -71,6 +125,7 @@ export async function onRequestGet(context) {
 export async function onRequestPatch(context) {
   const { request, env } = context;
   const db = getDb(env);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
   let body = {};
@@ -143,8 +198,10 @@ export async function onRequestPatch(context) {
 export async function onRequestDelete(context) {
   const { request, env } = context;
   const db = getDb(env);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  const mediaCols = await ensureMediaMetricColumns(db);
   const url = new URL(request.url);
   const mediaAssetId = Number(url.searchParams.get('media_asset_id') || 0);
   const confirmPassword = normalizeText(url.searchParams.get('confirm_password') || request.headers.get('x-confirm-password'));

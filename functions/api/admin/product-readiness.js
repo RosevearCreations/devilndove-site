@@ -9,6 +9,11 @@ async function getTableColumnSet(db, tableName) {
   } catch { return new Set(); }
 }
 
+function metricOrDefault(value, fallback = 0) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : fallback;
+}
+
 function buildChecks(row = {}, imageHistory = []) {
   const imageCount = Number(row.image_count || 0);
   const altCoverage = Number(row.alt_coverage_count || 0);
@@ -16,7 +21,10 @@ function buildChecks(row = {}, imageHistory = []) {
   const firstOrientation = String(firstImage?.image_orientation || '').toLowerCase();
   const firstWidth = Number(firstImage?.width_px || 0);
   const firstHeight = Number(firstImage?.height_px || 0);
-  const firstImageScore = Number(firstImage?.first_image_score || 0);
+  const firstImageScore = Number(firstImage?.merchandising_score ?? firstImage?.first_image_score ?? 0);
+  const averageMerchandisingScore = imageHistory.length
+    ? Math.round(imageHistory.reduce((sum, item) => sum + Number(item?.merchandising_score ?? item?.first_image_score ?? 0), 0) / imageHistory.length)
+    : 0;
   const hasCropHistory = firstImage && firstImage.crop_x != null && firstImage.crop_y != null && firstImage.crop_width != null && firstImage.crop_height != null;
   const knowsFirstDimensions = firstWidth > 0 && firstHeight > 0;
   const checks = [];
@@ -34,7 +42,8 @@ function buildChecks(row = {}, imageHistory = []) {
   checks.push({ key: 'first_image_shape', ok: !knowsFirstDimensions || ['square', 'landscape'].includes(firstOrientation), label: 'First image is square or landscape', weight: 6 });
   checks.push({ key: 'first_image_size', ok: !knowsFirstDimensions || (firstWidth >= 800 && firstHeight >= 800), label: 'First image is at least 800×800', weight: 6 });
   checks.push({ key: 'first_image_crop_history', ok: !normalizeText(row.featured_image_url) || hasCropHistory, label: 'First image crop history saved', weight: 4 });
-  checks.push({ key: 'first_image_score', ok: !normalizeText(row.featured_image_url) || firstImageScore >= 70, label: 'First image quality score is strong enough', weight: 4 });
+  checks.push({ key: 'first_image_score', ok: !normalizeText(row.featured_image_url) || firstImageScore >= 72, label: 'First image merchandising score is strong enough', weight: 6 });
+  checks.push({ key: 'gallery_score', ok: imageCount === 0 || averageMerchandisingScore >= 64, label: 'Gallery merchandising score is strong enough', weight: 4 });
 
   const totalWeight = checks.reduce((sum, item) => sum + item.weight, 0);
   const earnedWeight = checks.reduce((sum, item) => sum + (item.ok ? item.weight : 0), 0);
@@ -44,21 +53,30 @@ function buildChecks(row = {}, imageHistory = []) {
     normalizeText(row.featured_image_url).length > 0 ? 1 : 0,
     Math.min(imageCount, 5) / 5,
     imageCount > 0 ? Math.min(altCoverage / imageCount, 1) : 0,
-    !knowsFirstDimensions ? 0.75 : ((['square', 'landscape'].includes(firstOrientation) && firstWidth >= 800 && firstHeight >= 800) ? 1 : 0.35)
+    firstImageScore / 100,
+    averageMerchandisingScore / 100
   ];
   const imageQualityScore = Math.round((imageQualityBase.reduce((sum, value) => sum + value, 0) / imageQualityBase.length) * 100);
+
+  const leadWarnings = [];
+  if (!normalizeText(row.featured_image_url)) leadWarnings.push('Choose a first image before publishing.');
+  else {
+    if (knowsFirstDimensions && !['square', 'landscape'].includes(firstOrientation)) leadWarnings.push('The first image is portrait. Use a square or landscape first image for stronger listing quality.');
+    if (!hasCropHistory) leadWarnings.push('Save crop history on the first image for stronger merchandising control.');
+    if (firstImageScore < 72) leadWarnings.push('Improve the first image merchandising score before publishing.');
+  }
 
   return {
     checks,
     publish_readiness_score: score,
     image_quality_score: imageQualityScore,
+    merchandising_score: averageMerchandisingScore,
+    lead_image_merchandising_score: firstImageScore,
     media_completeness_score: Math.round((((imageCount >= 3 ? 1 : imageCount / 3) + (imageCount > 0 ? Math.min(altCoverage / Math.max(imageCount, 1), 1) : 0) + (knowsFirstDimensions ? 1 : 0.5) + (hasCropHistory ? 1 : 0.4)) / 4) * 100),
     is_ready_for_storefront: failed.length === 0 ? 1 : 0,
     ready_check_notes: failed.map((item) => item.label).join('; '),
     photo_completeness_warning: imageCount >= 3 ? '' : 'Add more product photos before publishing.',
-    first_image_warning: normalizeText(row.featured_image_url).length > 0
-      ? (knowsFirstDimensions && !['square', 'landscape'].includes(firstOrientation) ? 'The first image is portrait. Use a square or landscape first image for stronger listing quality.' : (!hasCropHistory ? 'Save crop history on the first image for stronger merchandising control.' : (firstImageScore < 70 ? 'Improve the first image quality score before publishing.' : '')))
-      : 'Choose a first image before publishing.'
+    first_image_warning: leadWarnings.join(' ')
   };
 }
 
@@ -95,7 +113,15 @@ export async function onRequestGet(context) {
            ${annotationCols.has('crop_y') ? 'pia.crop_y' : 'NULL AS crop_y'},
            ${annotationCols.has('crop_width') ? 'pia.crop_width' : 'NULL AS crop_width'},
            ${annotationCols.has('crop_height') ? 'pia.crop_height' : 'NULL AS crop_height'},
-           ${annotationCols.has('first_image_score') ? 'pia.first_image_score' : 'NULL AS first_image_score'}
+           ${annotationCols.has('first_image_score') ? 'pia.first_image_score' : 'NULL AS first_image_score'},
+           ${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : 'NULL AS merchandising_score'},
+           ${annotationCols.has('background_consistency_score') ? 'pia.background_consistency_score' : 'NULL AS background_consistency_score'},
+           ${annotationCols.has('subject_fill_score') ? 'pia.subject_fill_score' : 'NULL AS subject_fill_score'},
+           ${annotationCols.has('sharpness_score') ? 'pia.sharpness_score' : 'NULL AS sharpness_score'},
+           ${annotationCols.has('brightness_score') ? 'pia.brightness_score' : 'NULL AS brightness_score'},
+           ${annotationCols.has('contrast_score') ? 'pia.contrast_score' : 'NULL AS contrast_score'},
+           ${annotationCols.has('angle_group') ? 'pia.angle_group' : 'NULL AS angle_group'},
+           ${annotationCols.has('shot_style') ? 'pia.shot_style' : 'NULL AS shot_style'}
     FROM product_images pi
     LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
     WHERE pi.product_id = ?
@@ -114,7 +140,15 @@ export async function onRequestGet(context) {
     crop_y: row.crop_y == null ? null : Number(row.crop_y || 0),
     crop_width: row.crop_width == null ? null : Number(row.crop_width || 0),
     crop_height: row.crop_height == null ? null : Number(row.crop_height || 0),
-    first_image_score: row.first_image_score == null ? null : Number(row.first_image_score || 0)
+    first_image_score: row.first_image_score == null ? null : Number(row.first_image_score || 0),
+    merchandising_score: row.merchandising_score == null ? null : Number(row.merchandising_score || 0),
+    background_consistency_score: row.background_consistency_score == null ? null : Number(row.background_consistency_score || 0),
+    subject_fill_score: row.subject_fill_score == null ? null : Number(row.subject_fill_score || 0),
+    sharpness_score: row.sharpness_score == null ? null : Number(row.sharpness_score || 0),
+    brightness_score: row.brightness_score == null ? null : Number(row.brightness_score || 0),
+    contrast_score: row.contrast_score == null ? null : Number(row.contrast_score || 0),
+    angle_group: row.angle_group || '',
+    shot_style: row.shot_style || ''
   }));
 
   const readiness = buildChecks(row, imageHistory);
