@@ -1,5 +1,11 @@
 # Development Roadmap
 
+## Current pass update — 2026-04-22
+- Upgraded product-image scoring into a fuller merchandising score that now weights background consistency, subject fill, sharpness, brightness/contrast, duplicate-angle penalties, and shot-style bonuses.
+- Pushed upload and asset-selection guidance earlier so weak featured-image candidates are warned about before save/publish instead of only later in review.
+- Fixed admin media-upload metric persistence so upload-time image analysis survives into the asset library, saved gallery rows, and publish gating.
+- Rechecked the current outward-facing HTML set for the one-H1 rule during this pass; no exposed page in the current build showed more than one H1.
+
 
 ## Current pass update
 
@@ -506,3 +512,15 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Current pass update: merchandising-score workflow, earlier image guidance, and schema sync
+- Product media scoring now goes beyond simple completeness and treats listing strength more like merchandising: clean-background consistency, subject fill, sharpness, brightness/contrast, angle duplication, and shot style all affect the score.
+- Upload-time image analysis now feeds the asset library and saved gallery rows so operators can see earlier whether an image is weak for the featured slot.
+- Publish/readiness logic now reads the stronger lead-image/gallery merchandising scores instead of leaning almost entirely on photo count.
+- Schema/docs were synced so both `media_assets` and `product_image_annotations` describe the same scoring model.
+
+### Next recommended steps
+1. Add server-side thumbnail/variant generation so background/crop guidance can be paired with real derived storefront image sizes.
+2. Add optional manual override reasons when a weak but story-important process/lifestyle image should stay in the gallery.
+3. Surface merchandising-score trends in admin product lists and product detail so operators can see score drift after image swaps.
+4. Continue the pricing-history/admin-note work by linking image-score changes to conversion/review outcomes once more storefront analytics are wired.

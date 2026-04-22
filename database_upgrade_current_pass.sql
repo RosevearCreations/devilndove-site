@@ -589,3 +589,39 @@ ALTER TABLE product_image_annotations ADD COLUMN first_image_score INTEGER;
 -- crop_x, crop_y, crop_width, crop_height, first_image_score, image_orientation, width_px, height_px
 -- Keep database upgrade execution cautious on older live databases where some columns may already exist.
 
+
+
+-- Pass 34 update
+-- Media upload and product image annotations now track a fuller merchandising score model.
+-- This supports cleaner lead-image guidance, upload-time analysis, asset-library selection hints,
+-- and publish/readiness scoring based on more than image count alone.
+
+ALTER TABLE media_assets ADD COLUMN width_px INTEGER;
+ALTER TABLE media_assets ADD COLUMN height_px INTEGER;
+ALTER TABLE media_assets ADD COLUMN image_orientation TEXT;
+ALTER TABLE media_assets ADD COLUMN background_consistency_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN subject_fill_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN sharpness_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN brightness_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN contrast_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN angle_group TEXT;
+ALTER TABLE media_assets ADD COLUMN shot_style TEXT;
+ALTER TABLE media_assets ADD COLUMN merchandising_score INTEGER;
+
+ALTER TABLE product_image_annotations ADD COLUMN background_consistency_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN subject_fill_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN sharpness_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN brightness_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN contrast_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN angle_group TEXT;
+ALTER TABLE product_image_annotations ADD COLUMN shot_style TEXT;
+ALTER TABLE product_image_annotations ADD COLUMN merchandising_score INTEGER;
+
+-- Current pass concrete schema note
+-- Runtime code will safely add/use these media scoring fields when they are absent on older live databases.
+-- Preferred live shape now includes:
+-- media_assets.width_px, media_assets.height_px, media_assets.image_orientation,
+-- media_assets.background_consistency_score, media_assets.subject_fill_score, media_assets.sharpness_score,
+-- media_assets.brightness_score, media_assets.contrast_score, media_assets.angle_group,
+-- media_assets.shot_style, media_assets.merchandising_score
+-- plus matching product_image_annotations scoring fields for saved gallery rows.

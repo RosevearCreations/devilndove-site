@@ -641,3 +641,9 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- 3) product_image_annotations should continue to support width/height/orientation/crop/first_image_score.
 -- 4) No destructive schema changes were introduced in this pass; this is a documentation sync note.
 
+
+-- Current Pass Update
+-- Merchandising-score image guidance now expects/supports the following where available:
+-- 1) media_assets.width_px, height_px, image_orientation, background_consistency_score, subject_fill_score, sharpness_score, brightness_score, contrast_score, angle_group, shot_style, merchandising_score
+-- 2) product_image_annotations keeps the prior width/height/orientation/crop/first_image_score fields and now also supports matching merchandising-score fields
+-- 3) public upload/admin selection guidance uses these fields to warn earlier about soft, dark, low-fill, duplicate-angle, or portrait lead images

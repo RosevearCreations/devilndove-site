@@ -1,5 +1,11 @@
 # Database Schema Reference
 
+## Current pass update — 2026-04-22
+- Upgraded product-image scoring into a fuller merchandising score that now weights background consistency, subject fill, sharpness, brightness/contrast, duplicate-angle penalties, and shot-style bonuses.
+- Pushed upload and asset-selection guidance earlier so weak featured-image candidates are warned about before save/publish instead of only later in review.
+- Fixed admin media-upload metric persistence so upload-time image analysis survives into the asset library, saved gallery rows, and publish gating.
+- Rechecked the current outward-facing HTML set for the one-H1 rule during this pass; no exposed page in the current build showed more than one H1.
+
 
 ## Current pass update
 
@@ -91,10 +97,14 @@ Queued notification and dispatch tracking.
 Meta title, description, keywords, H1, canonical, and Open Graph fields.
 
 ### product_image_annotations
-Alt text, title, caption, focal points, and notes.
+Alt text, title, caption, focal points, crop history, first-image score, and the newer merchandising fields used by upload-time guidance and publish gating.
+
+Preferred current-direction fields now include `width_px`, `height_px`, `image_orientation`, `crop_x`, `crop_y`, `crop_width`, `crop_height`, `first_image_score`, `background_consistency_score`, `subject_fill_score`, `sharpness_score`, `brightness_score`, `contrast_score`, `angle_group`, `shot_style`, and `merchandising_score`.
 
 ### media_assets
-Uploaded R2-backed assets with product linkage, object key, sort order, optional variant role, and soft delete support.
+Uploaded R2-backed assets with product linkage, object key, sort order, optional variant role, soft delete support, and upload-time image-analysis metrics for asset-library guidance.
+
+Preferred current-direction fields now include `width_px`, `height_px`, `image_orientation`, `background_consistency_score`, `subject_fill_score`, `sharpness_score`, `brightness_score`, `contrast_score`, `angle_group`, `shot_style`, and `merchandising_score`.
 
 ### webhook_events
 Provider event log with idempotency, status, replay request metadata, retry attempt fields, and dispatch notes.
