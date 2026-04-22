@@ -1,10 +1,11 @@
 # Development Roadmap
 
+
 ## Current pass update — 2026-04-22
-- Upgraded product-image scoring into a fuller merchandising score that now weights background consistency, subject fill, sharpness, brightness/contrast, duplicate-angle penalties, and shot-style bonuses.
-- Pushed upload and asset-selection guidance earlier so weak featured-image candidates are warned about before save/publish instead of only later in review.
-- Fixed admin media-upload metric persistence so upload-time image analysis survives into the asset library, saved gallery rows, and publish gating.
-- Rechecked the current outward-facing HTML set for the one-H1 rule during this pass; no exposed page in the current build showed more than one H1.
+- Added documented low-score gallery-image override reasons so story, process, lifestyle, packaging, and scale-reference shots can stay intentionally without silently weakening review decisions.
+- Added `product_media_score_history` so product media saves now leave a score trail that can be compared after image swaps.
+- Surfaced merchandising trend signals in the admin product list and the media editor so draft-vs-saved and saved-vs-prior score drift is easier to spot.
+- Kept the one-H1 public-page rule checked for this pass and continued aligning image/readiness work with stronger storefront quality control.
 
 
 ## Current pass update

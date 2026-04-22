@@ -155,10 +155,29 @@ CREATE TABLE IF NOT EXISTS product_image_annotations (
   focal_point_x REAL,
   focal_point_y REAL,
   annotation_notes TEXT,
+  merchandising_override_reason TEXT,
+  merchandising_override_note TEXT,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
   FOREIGN KEY (product_image_id) REFERENCES product_images(product_image_id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS product_media_score_history (
+  product_media_score_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  actor_user_id INTEGER,
+  image_count INTEGER NOT NULL DEFAULT 0,
+  lead_image_score INTEGER,
+  gallery_merchandising_score INTEGER,
+  weak_image_count INTEGER NOT NULL DEFAULT 0,
+  weak_unapproved_image_count INTEGER NOT NULL DEFAULT 0,
+  overridden_image_count INTEGER NOT NULL DEFAULT 0,
+  override_reasons_json TEXT,
+  source TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_product_media_score_history_product_id_created_at ON product_media_score_history(product_id, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS site_item_inventory (
   site_item_inventory_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -371,3 +390,5 @@ CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_
 -- 3) product_image_annotations should continue to support width/height/orientation/crop/first_image_score.
 -- 4) No destructive schema changes were introduced in this pass; this is a documentation sync note.
 
+
+-- Current pass note: product image review now also supports merchandising_override_reason / merchandising_override_note and product_media_score_history trend snapshots.

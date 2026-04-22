@@ -625,3 +625,23 @@ ALTER TABLE product_image_annotations ADD COLUMN merchandising_score INTEGER;
 -- media_assets.brightness_score, media_assets.contrast_score, media_assets.angle_group,
 -- media_assets.shot_style, media_assets.merchandising_score
 -- plus matching product_image_annotations scoring fields for saved gallery rows.
+
+ALTER TABLE product_image_annotations ADD COLUMN merchandising_override_reason TEXT;
+ALTER TABLE product_image_annotations ADD COLUMN merchandising_override_note TEXT;
+
+CREATE TABLE IF NOT EXISTS product_media_score_history (
+  product_media_score_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  actor_user_id INTEGER,
+  image_count INTEGER NOT NULL DEFAULT 0,
+  lead_image_score INTEGER,
+  gallery_merchandising_score INTEGER,
+  weak_image_count INTEGER NOT NULL DEFAULT 0,
+  weak_unapproved_image_count INTEGER NOT NULL DEFAULT 0,
+  overridden_image_count INTEGER NOT NULL DEFAULT 0,
+  override_reasons_json TEXT,
+  source TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_product_media_score_history_product_id_created_at ON product_media_score_history(product_id, created_at DESC);

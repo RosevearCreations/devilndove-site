@@ -259,6 +259,25 @@ CREATE INDEX IF NOT EXISTS idx_runtime_incidents_code_path ON runtime_incidents(
 -- ---------------------------------------------------------
 -- UNIFIED CATALOG MIGRATION
 -- ---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS product_media_score_history (
+  product_media_score_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  actor_user_id INTEGER,
+  image_count INTEGER NOT NULL DEFAULT 0,
+  lead_image_score INTEGER,
+  gallery_merchandising_score INTEGER,
+  weak_image_count INTEGER NOT NULL DEFAULT 0,
+  weak_unapproved_image_count INTEGER NOT NULL DEFAULT 0,
+  overridden_image_count INTEGER NOT NULL DEFAULT 0,
+  override_reasons_json TEXT,
+  source TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_product_media_score_history_product_id_created_at ON product_media_score_history(product_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS catalog_items (
   catalog_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
   item_kind TEXT NOT NULL CHECK (item_kind IN ('tool','supply','creation','other')),
@@ -647,3 +666,6 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- 1) media_assets.width_px, height_px, image_orientation, background_consistency_score, subject_fill_score, sharpness_score, brightness_score, contrast_score, angle_group, shot_style, merchandising_score
 -- 2) product_image_annotations keeps the prior width/height/orientation/crop/first_image_score fields and now also supports matching merchandising-score fields
 -- 3) public upload/admin selection guidance uses these fields to warn earlier about soft, dark, low-fill, duplicate-angle, or portrait lead images
+
+
+-- Current pass note: product image review now also supports merchandising_override_reason / merchandising_override_note and product_media_score_history trend snapshots for admin drift review.
