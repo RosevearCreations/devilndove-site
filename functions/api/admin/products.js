@@ -36,6 +36,8 @@ function buildReadiness(row = {}) {
   const altCoverage = Number(row.alt_coverage_count || 0);
   const firstMerchandisingScore = Number(row.first_merchandising_score || 0);
   const averageMerchandisingScore = Number(row.average_merchandising_score || 0);
+  const effectiveGalleryMerchandisingScore = Number(row.effective_gallery_merchandising_score || averageMerchandisingScore || 0);
+  const weakUnapprovedGalleryImageCount = Number(row.weak_unapproved_gallery_image_count || 0);
   const checks = {
     has_name: normalizeText(row.name).length > 0,
     has_slug: normalizeText(row.slug).length > 0,
@@ -49,7 +51,7 @@ function buildReadiness(row = {}) {
     has_photo_set: imageCount >= 3,
     has_photo_alt: imageCount > 0 && altCoverage >= Math.min(3, imageCount),
     has_lead_merch_score: imageCount === 0 || firstMerchandisingScore >= 72,
-    has_gallery_merch_score: imageCount === 0 || averageMerchandisingScore >= 64,
+    has_gallery_merch_score: imageCount === 0 || (effectiveGalleryMerchandisingScore >= 64 && weakUnapprovedGalleryImageCount === 0),
   };
   const weights = {
     has_name: 10,
@@ -77,10 +79,16 @@ function buildReadiness(row = {}) {
       imageCount >= 5 ? 1 : imageCount >= 3 ? 0.8 : imageCount > 0 ? 0.45 : 0,
       imageCount > 0 ? Math.min(altCoverage / imageCount, 1) : 0,
       firstMerchandisingScore / 100,
-      averageMerchandisingScore / 100
+      effectiveGalleryMerchandisingScore / 100
     ].reduce((sum, value) => sum + value, 0) / 4) * 100),
     merchandising_score: averageMerchandisingScore,
+    effective_gallery_merchandising_score: effectiveGalleryMerchandisingScore,
     lead_image_merchandising_score: firstMerchandisingScore,
+    previous_lead_image_merchandising_score: row.previous_lead_image_merchandising_score == null ? null : Number(row.previous_lead_image_merchandising_score || 0),
+    previous_gallery_merchandising_score: row.previous_gallery_merchandising_score == null ? null : Number(row.previous_gallery_merchandising_score || 0),
+    merchandising_history_recorded_at: row.merchandising_history_recorded_at || null,
+    overridden_gallery_image_count: Number(row.overridden_gallery_image_count || 0),
+    weak_unapproved_gallery_image_count: weakUnapprovedGalleryImageCount,
     readiness_checks: checks,
   };
 }
@@ -92,6 +100,7 @@ async function loadProducts(db, q) {
   const annotationCols = hasProductImages ? await getTableColumnSet(db, 'product_image_annotations') : new Set();
   const hasResourceLinks = await tableExists(db, "product_resource_links");
   const hasInventory = await tableExists(db, "site_item_inventory");
+  const hasMediaScoreHistory = await tableExists(db, "product_media_score_history");
   const resourceLinkColumns = hasResourceLinks ? await getTableColumnSet(db, 'product_resource_links') : new Set();
   const hasConsumptionMode = resourceLinkColumns.has('consumption_mode');
   const hasLotSizeUnits = resourceLinkColumns.has('lot_size_units');
@@ -128,6 +137,12 @@ async function loadProducts(db, q) {
     hasProductImages ? "COUNT(DISTINCT CASE WHEN LENGTH(TRIM(COALESCE(pi.alt_text,''))) >= 5 THEN pi.product_image_id ELSE NULL END) AS alt_coverage_count" : "0 AS alt_coverage_count",
     hasProductImages ? `MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has('merchandising_score') ? 'COALESCE(pia.merchandising_score, pia.first_image_score)' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : '0')} ELSE NULL END) AS first_merchandising_score` : "0 AS first_merchandising_score",
     hasProductImages ? `AVG(COALESCE(${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : '0')}, 0)) AS average_merchandising_score` : "0 AS average_merchandising_score",
+    hasProductImages ? `AVG(CASE WHEN ${annotationCols.has('merchandising_score') ? 'COALESCE(pia.merchandising_score, pia.first_image_score, 0)' : (annotationCols.has('first_image_score') ? 'COALESCE(pia.first_image_score, 0)' : '0')} < 64 AND COALESCE(pi.sort_order,0) > 0 AND LENGTH(TRIM(COALESCE(${annotationCols.has('merchandising_override_reason') ? 'pia.merchandising_override_reason' : "''"},''))) > 0 THEN 64 ELSE COALESCE(${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : '0')}, 0) END) AS effective_gallery_merchandising_score` : "0 AS effective_gallery_merchandising_score",
+    hasProductImages ? `SUM(CASE WHEN COALESCE(pi.sort_order,0) > 0 AND LENGTH(TRIM(COALESCE(${annotationCols.has('merchandising_override_reason') ? 'pia.merchandising_override_reason' : "''"},''))) > 0 THEN 1 ELSE 0 END) AS overridden_gallery_image_count` : "0 AS overridden_gallery_image_count",
+    hasProductImages ? `SUM(CASE WHEN COALESCE(pi.sort_order,0) > 0 AND COALESCE(${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : '0')}, 0) < 64 AND LENGTH(TRIM(COALESCE(${annotationCols.has('merchandising_override_reason') ? 'pia.merchandising_override_reason' : "''"},''))) = 0 THEN 1 ELSE 0 END) AS weak_unapproved_gallery_image_count` : "0 AS weak_unapproved_gallery_image_count",
+    hasMediaScoreHistory ? `(SELECT h.lead_image_score FROM product_media_score_history h WHERE h.product_id = p.product_id ORDER BY h.created_at DESC, h.product_media_score_history_id DESC LIMIT 1 OFFSET 1) AS previous_lead_image_merchandising_score` : "NULL AS previous_lead_image_merchandising_score",
+    hasMediaScoreHistory ? `(SELECT h.gallery_merchandising_score FROM product_media_score_history h WHERE h.product_id = p.product_id ORDER BY h.created_at DESC, h.product_media_score_history_id DESC LIMIT 1 OFFSET 1) AS previous_gallery_merchandising_score` : "NULL AS previous_gallery_merchandising_score",
+    hasMediaScoreHistory ? `(SELECT h.created_at FROM product_media_score_history h WHERE h.product_id = p.product_id ORDER BY h.created_at DESC, h.product_media_score_history_id DESC LIMIT 1) AS merchandising_history_recorded_at` : "NULL AS merchandising_history_recorded_at",
     hasResourceLinks ? "COUNT(DISTINCT prl.product_resource_link_id) AS linked_resource_count" : "0 AS linked_resource_count",
     hasResourceLinks && hasInventory
       ? `COALESCE(SUM(CASE WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'story_only' THEN 0 WHEN ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} = 'end_of_lot' THEN COALESCE(prl.quantity_used, 0) * ${inventoryUnitCostExpr} / ${usageUnitsExpr} / COALESCE(NULLIF(${hasLotSizeUnits ? `prl.lot_size_units` : `1`},0),1) ELSE COALESCE(prl.quantity_used, 0) * ${inventoryUnitCostExpr} / ${usageUnitsExpr} END), 0) AS linked_resource_cost_cents`
@@ -177,6 +192,7 @@ async function loadProducts(db, q) {
       hasProductImages,
       hasResourceLinks,
       hasInventory,
+      hasMediaScoreHistory,
     },
   };
 }

@@ -79,12 +79,36 @@ async function ensureAnnotationColumns(db) {
     ['contrast_score', 'ALTER TABLE product_image_annotations ADD COLUMN contrast_score INTEGER'],
     ['angle_group', 'ALTER TABLE product_image_annotations ADD COLUMN angle_group TEXT'],
     ['shot_style', 'ALTER TABLE product_image_annotations ADD COLUMN shot_style TEXT'],
-    ['merchandising_score', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_score INTEGER']
+    ['merchandising_score', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_score INTEGER'],
+    ['merchandising_override_reason', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_override_reason TEXT'],
+    ['merchandising_override_note', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_override_note TEXT']
   ];
   for (const [name, sql] of statements) {
     if (!annotationCols.has(name)) await db.prepare(sql).run().catch(() => null);
   }
   return await getTableColumnSet(db, 'product_image_annotations');
+}
+
+async function ensureMediaScoreHistoryTable(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS product_media_score_history (
+      product_media_score_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      product_id INTEGER NOT NULL,
+      actor_user_id INTEGER,
+      image_count INTEGER NOT NULL DEFAULT 0,
+      lead_image_score INTEGER,
+      gallery_merchandising_score INTEGER,
+      weak_image_count INTEGER NOT NULL DEFAULT 0,
+      weak_unapproved_image_count INTEGER NOT NULL DEFAULT 0,
+      overridden_image_count INTEGER NOT NULL DEFAULT 0,
+      override_reasons_json TEXT,
+      source TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+      FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+    )
+  `).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_product_media_score_history_product_id_created_at ON product_media_score_history(product_id, created_at DESC)`).run().catch(() => null);
 }
 
 function parseOptionalNumber(value) {
@@ -99,6 +123,44 @@ function parseOptionalPercent(value) {
   return Math.max(0, Math.min(100, Math.round(numeric)));
 }
 
+function scoreForRow(row = {}) {
+  const score = parseOptionalPercent(row.merchandising_score ?? row.first_image_score);
+  return score == null ? 0 : score;
+}
+
+function hasOverrideReason(row = {}) {
+  return normalizeText(row.merchandising_override_reason).length > 0;
+}
+
+function summarizeRows(rows = []) {
+  const leadRow = rows[0] || null;
+  const leadImageScore = leadRow ? scoreForRow(leadRow) : 0;
+  const imageCount = rows.length;
+  const galleryMerchandisingScore = imageCount
+    ? Math.round(rows.reduce((sum, row) => sum + scoreForRow(row), 0) / imageCount)
+    : 0;
+  const weakRows = rows.filter((row) => scoreForRow(row) < 64);
+  const overriddenRows = rows.filter((row) => hasOverrideReason(row));
+  const weakUnapprovedRows = rows.filter((row, index) => {
+    if (index === 0) return scoreForRow(row) < 72;
+    return scoreForRow(row) < 64 && !hasOverrideReason(row);
+  });
+  const overrideReasonCounts = {};
+  for (const row of overriddenRows) {
+    const key = normalizeText(row.merchandising_override_reason).toLowerCase() || 'other';
+    overrideReasonCounts[key] = Number(overrideReasonCounts[key] || 0) + 1;
+  }
+  return {
+    image_count: imageCount,
+    lead_image_score: leadImageScore,
+    gallery_merchandising_score: galleryMerchandisingScore,
+    weak_image_count: weakRows.length,
+    weak_unapproved_image_count: weakUnapprovedRows.length,
+    overridden_image_count: overriddenRows.length,
+    override_reasons: overrideReasonCounts
+  };
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = getDb(env);
@@ -108,10 +170,12 @@ export async function onRequestGet(context) {
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
   const annotationCols = await ensureAnnotationColumns(db);
+  await ensureMediaScoreHistoryTable(db);
+
   const product_id = Number(new URL(request.url).searchParams.get('product_id'));
   if (!Number.isInteger(product_id) || product_id <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
 
-  const images = normalizeResults(await db.prepare(`
+  const rawImages = normalizeResults(await db.prepare(`
     SELECT pi.product_image_id, pi.product_id, pi.image_url, pi.alt_text, pi.sort_order, pi.created_at,
            pia.image_title, pia.caption, pia.focal_point_x, pia.focal_point_y, pia.annotation_notes,
            ${annotationCols.has('width_px') ? 'pia.width_px' : 'NULL AS width_px'},
@@ -129,14 +193,16 @@ export async function onRequestGet(context) {
            ${annotationCols.has('contrast_score') ? 'pia.contrast_score' : 'NULL AS contrast_score'},
            ${annotationCols.has('angle_group') ? 'pia.angle_group' : 'NULL AS angle_group'},
            ${annotationCols.has('shot_style') ? 'pia.shot_style' : 'NULL AS shot_style'},
-           ${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : 'NULL AS merchandising_score'}
+           ${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : 'NULL AS merchandising_score'},
+           ${annotationCols.has('merchandising_override_reason') ? 'pia.merchandising_override_reason' : 'NULL AS merchandising_override_reason'},
+           ${annotationCols.has('merchandising_override_note') ? 'pia.merchandising_override_note' : 'NULL AS merchandising_override_note'}
     FROM product_images pi
     LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
     WHERE pi.product_id = ?
     ORDER BY pi.sort_order ASC, pi.product_image_id ASC
   `).bind(product_id).all());
 
-  return json({ ok: true, images: images.map((row) => ({
+  const images = rawImages.map((row) => ({
     product_image_id: Number(row.product_image_id || 0),
     product_id: Number(row.product_id || 0),
     image_url: row.image_url || '',
@@ -163,8 +229,40 @@ export async function onRequestGet(context) {
     contrast_score: row.contrast_score == null ? null : Number(row.contrast_score || 0),
     angle_group: row.angle_group || '',
     shot_style: row.shot_style || '',
-    merchandising_score: row.merchandising_score == null ? null : Number(row.merchandising_score || 0)
-  })) });
+    merchandising_score: row.merchandising_score == null ? null : Number(row.merchandising_score || 0),
+    merchandising_override_reason: row.merchandising_override_reason || '',
+    merchandising_override_note: row.merchandising_override_note || ''
+  }));
+
+  const scoreHistory = normalizeResults(await db.prepare(`
+    SELECT product_media_score_history_id, product_id, actor_user_id, image_count, lead_image_score,
+           gallery_merchandising_score, weak_image_count, weak_unapproved_image_count, overridden_image_count,
+           override_reasons_json, source, created_at
+    FROM product_media_score_history
+    WHERE product_id = ?
+    ORDER BY created_at DESC, product_media_score_history_id DESC
+    LIMIT 6
+  `).bind(product_id).all().catch(() => ({ results: [] }))).map((row) => ({
+    product_media_score_history_id: Number(row.product_media_score_history_id || 0),
+    product_id: Number(row.product_id || 0),
+    actor_user_id: row.actor_user_id == null ? null : Number(row.actor_user_id || 0),
+    image_count: Number(row.image_count || 0),
+    lead_image_score: row.lead_image_score == null ? null : Number(row.lead_image_score || 0),
+    gallery_merchandising_score: row.gallery_merchandising_score == null ? null : Number(row.gallery_merchandising_score || 0),
+    weak_image_count: Number(row.weak_image_count || 0),
+    weak_unapproved_image_count: Number(row.weak_unapproved_image_count || 0),
+    overridden_image_count: Number(row.overridden_image_count || 0),
+    override_reasons: (() => { try { return JSON.parse(row.override_reasons_json || '{}') || {}; } catch { return {}; } })(),
+    source: row.source || '',
+    created_at: row.created_at || null
+  }));
+
+  return json({
+    ok: true,
+    images,
+    current_summary: summarizeRows(images),
+    score_history: scoreHistory
+  });
 }
 
 export async function onRequestPost(context) {
@@ -176,6 +274,7 @@ export async function onRequestPost(context) {
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
   await ensureAnnotationColumns(db);
+  await ensureMediaScoreHistoryTable(db);
 
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
@@ -191,6 +290,7 @@ export async function onRequestPost(context) {
   await db.prepare(`DELETE FROM product_images WHERE product_id = ?`).bind(product_id).run();
 
   let featuredImageUrl = null;
+  const savedRows = [];
   for (let i = 0; i < images.length; i += 1) {
     const row = images[i] || {};
     const imageUrl = normalizeText(row.image_url);
@@ -198,6 +298,8 @@ export async function onRequestPost(context) {
     const altText = normalizeText(row.alt_text) || product.name || null;
     const sortOrder = Number.isInteger(Number(row.sort_order)) ? Number(row.sort_order) : i;
     const merchandisingScore = parseOptionalPercent(row.merchandising_score ?? row.first_image_score);
+    const merchandisingOverrideReason = normalizeText(row.merchandising_override_reason);
+    const merchandisingOverrideNote = normalizeText(row.merchandising_override_note);
 
     const insert = await db.prepare(`
       INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
@@ -214,8 +316,9 @@ export async function onRequestPost(context) {
         first_image_score,
         background_consistency_score, subject_fill_score, sharpness_score, brightness_score, contrast_score,
         angle_group, shot_style, merchandising_score,
+        merchandising_override_reason, merchandising_override_note,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `).bind(
       product_id,
       productImageId || null,
@@ -241,8 +344,20 @@ export async function onRequestPost(context) {
       parseOptionalPercent(row.contrast_score),
       normalizeText(row.angle_group) || null,
       normalizeText(row.shot_style) || null,
-      merchandisingScore
+      merchandisingScore,
+      merchandisingOverrideReason || null,
+      merchandisingOverrideNote || null
     ).run();
+
+    savedRows.push({
+      ...row,
+      sort_order: sortOrder,
+      image_url: imageUrl,
+      alt_text: altText,
+      merchandising_score: merchandisingScore,
+      merchandising_override_reason: merchandisingOverrideReason,
+      merchandising_override_note: merchandisingOverrideNote
+    });
 
     if (featuredImageUrl == null || Number(sortOrder) === 0) {
       featuredImageUrl = imageUrl;
@@ -257,5 +372,29 @@ export async function onRequestPost(context) {
     `).bind(featuredImageUrl, product_id).run();
   }
 
-  return json({ ok: true, message: 'Product images saved.', featured_image_url: featuredImageUrl || product.featured_image_url || null });
+  const summary = summarizeRows(savedRows.sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0)));
+  await db.prepare(`
+    INSERT INTO product_media_score_history (
+      product_id, actor_user_id, image_count, lead_image_score, gallery_merchandising_score,
+      weak_image_count, weak_unapproved_image_count, overridden_image_count, override_reasons_json, source, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+  `).bind(
+    product_id,
+    Number(adminUser.user_id || 0) || null,
+    summary.image_count,
+    summary.lead_image_score,
+    summary.gallery_merchandising_score,
+    summary.weak_image_count,
+    summary.weak_unapproved_image_count,
+    summary.overridden_image_count,
+    JSON.stringify(summary.override_reasons || {}),
+    'admin_product_images_save'
+  ).run().catch(() => null);
+
+  return json({
+    ok: true,
+    message: 'Product images saved.',
+    featured_image_url: featuredImageUrl || product.featured_image_url || null,
+    current_summary: summary
+  });
 }

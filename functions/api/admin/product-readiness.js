@@ -14,6 +14,10 @@ function metricOrDefault(value, fallback = 0) {
   return Number.isFinite(numeric) ? numeric : fallback;
 }
 
+function hasOverrideReason(row = {}) {
+  return normalizeText(row.merchandising_override_reason).length > 0;
+}
+
 function buildChecks(row = {}, imageHistory = []) {
   const imageCount = Number(row.image_count || 0);
   const altCoverage = Number(row.alt_coverage_count || 0);
@@ -25,6 +29,15 @@ function buildChecks(row = {}, imageHistory = []) {
   const averageMerchandisingScore = imageHistory.length
     ? Math.round(imageHistory.reduce((sum, item) => sum + Number(item?.merchandising_score ?? item?.first_image_score ?? 0), 0) / imageHistory.length)
     : 0;
+  const effectiveGalleryMerchandisingScore = imageHistory.length
+    ? Math.round(imageHistory.reduce((sum, item, index) => {
+        const score = Number(item?.merchandising_score ?? item?.first_image_score ?? 0);
+        if (index > 0 && score < 64 && hasOverrideReason(item)) return sum + 64;
+        return sum + score;
+      }, 0) / imageHistory.length)
+    : 0;
+  const overriddenGalleryImageCount = imageHistory.filter((item, index) => index > 0 && hasOverrideReason(item)).length;
+  const weakUnapprovedGalleryImageCount = imageHistory.filter((item, index) => index > 0 && Number(item?.merchandising_score ?? item?.first_image_score ?? 0) < 64 && !hasOverrideReason(item)).length;
   const hasCropHistory = firstImage && firstImage.crop_x != null && firstImage.crop_y != null && firstImage.crop_width != null && firstImage.crop_height != null;
   const knowsFirstDimensions = firstWidth > 0 && firstHeight > 0;
   const checks = [];
@@ -43,7 +56,7 @@ function buildChecks(row = {}, imageHistory = []) {
   checks.push({ key: 'first_image_size', ok: !knowsFirstDimensions || (firstWidth >= 800 && firstHeight >= 800), label: 'First image is at least 800×800', weight: 6 });
   checks.push({ key: 'first_image_crop_history', ok: !normalizeText(row.featured_image_url) || hasCropHistory, label: 'First image crop history saved', weight: 4 });
   checks.push({ key: 'first_image_score', ok: !normalizeText(row.featured_image_url) || firstImageScore >= 72, label: 'First image merchandising score is strong enough', weight: 6 });
-  checks.push({ key: 'gallery_score', ok: imageCount === 0 || averageMerchandisingScore >= 64, label: 'Gallery merchandising score is strong enough', weight: 4 });
+  checks.push({ key: 'gallery_score', ok: imageCount === 0 || (effectiveGalleryMerchandisingScore >= 64 && weakUnapprovedGalleryImageCount === 0), label: 'Gallery merchandising score is strong enough', weight: 4 });
 
   const totalWeight = checks.reduce((sum, item) => sum + item.weight, 0);
   const earnedWeight = checks.reduce((sum, item) => sum + (item.ok ? item.weight : 0), 0);
@@ -54,7 +67,7 @@ function buildChecks(row = {}, imageHistory = []) {
     Math.min(imageCount, 5) / 5,
     imageCount > 0 ? Math.min(altCoverage / imageCount, 1) : 0,
     firstImageScore / 100,
-    averageMerchandisingScore / 100
+    effectiveGalleryMerchandisingScore / 100
   ];
   const imageQualityScore = Math.round((imageQualityBase.reduce((sum, value) => sum + value, 0) / imageQualityBase.length) * 100);
 
@@ -65,13 +78,18 @@ function buildChecks(row = {}, imageHistory = []) {
     if (!hasCropHistory) leadWarnings.push('Save crop history on the first image for stronger merchandising control.');
     if (firstImageScore < 72) leadWarnings.push('Improve the first image merchandising score before publishing.');
   }
+  if (overriddenGalleryImageCount > 0) leadWarnings.push(`${overriddenGalleryImageCount} gallery image(s) are being kept by documented override reason.`);
+  if (weakUnapprovedGalleryImageCount > 0) leadWarnings.push(`${weakUnapprovedGalleryImageCount} gallery image(s) are still weak without an override reason.`);
 
   return {
     checks,
     publish_readiness_score: score,
     image_quality_score: imageQualityScore,
     merchandising_score: averageMerchandisingScore,
+    effective_gallery_merchandising_score: effectiveGalleryMerchandisingScore,
     lead_image_merchandising_score: firstImageScore,
+    overridden_gallery_image_count: overriddenGalleryImageCount,
+    weak_unapproved_gallery_image_count: weakUnapprovedGalleryImageCount,
     media_completeness_score: Math.round((((imageCount >= 3 ? 1 : imageCount / 3) + (imageCount > 0 ? Math.min(altCoverage / Math.max(imageCount, 1), 1) : 0) + (knowsFirstDimensions ? 1 : 0.5) + (hasCropHistory ? 1 : 0.4)) / 4) * 100),
     is_ready_for_storefront: failed.length === 0 ? 1 : 0,
     ready_check_notes: failed.map((item) => item.label).join('; '),
@@ -121,7 +139,9 @@ export async function onRequestGet(context) {
            ${annotationCols.has('brightness_score') ? 'pia.brightness_score' : 'NULL AS brightness_score'},
            ${annotationCols.has('contrast_score') ? 'pia.contrast_score' : 'NULL AS contrast_score'},
            ${annotationCols.has('angle_group') ? 'pia.angle_group' : 'NULL AS angle_group'},
-           ${annotationCols.has('shot_style') ? 'pia.shot_style' : 'NULL AS shot_style'}
+           ${annotationCols.has('shot_style') ? 'pia.shot_style' : 'NULL AS shot_style'},
+           ${annotationCols.has('merchandising_override_reason') ? 'pia.merchandising_override_reason' : 'NULL AS merchandising_override_reason'},
+           ${annotationCols.has('merchandising_override_note') ? 'pia.merchandising_override_note' : 'NULL AS merchandising_override_note'}
     FROM product_images pi
     LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
     WHERE pi.product_id = ?
@@ -148,7 +168,9 @@ export async function onRequestGet(context) {
     brightness_score: row.brightness_score == null ? null : Number(row.brightness_score || 0),
     contrast_score: row.contrast_score == null ? null : Number(row.contrast_score || 0),
     angle_group: row.angle_group || '',
-    shot_style: row.shot_style || ''
+    shot_style: row.shot_style || '',
+    merchandising_override_reason: row.merchandising_override_reason || '',
+    merchandising_override_note: row.merchandising_override_note || ''
   }));
 
   const readiness = buildChecks(row, imageHistory);
