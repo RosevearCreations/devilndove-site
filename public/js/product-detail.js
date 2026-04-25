@@ -33,6 +33,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productInterestMessageEl = document.getElementById("productInterestMessage");
   const productTrustListEl = document.getElementById("productTrustList");
   const productTrustSummaryEl = document.getElementById("productTrustSummary");
+  const productPolicySummaryEl = document.getElementById("productPolicySummary");
+  const productPolicyListEl = document.getElementById("productPolicyList");
+  const productProcessSummaryEl = document.getElementById("productProcessSummary");
+  const productProcessLinksEl = document.getElementById("productProcessLinks");
   const productReviewsCardEl = document.getElementById("productReviewsCard");
   const productReviewsSummaryEl = document.getElementById("productReviewsSummary");
   const productReviewsListEl = document.getElementById("productReviewsList");
@@ -118,6 +122,43 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).join('');
   }
 
+  function renderPolicySupport(product, trustSummary, resourceLinks) {
+    if (!productPolicySummaryEl || !productPolicyListEl) return;
+    const requiresShipping = Number(product?.requires_shipping || 0) === 1;
+    const inventoryQty = Number(product?.inventory_quantity || 0);
+    const reviewCount = Number(trustSummary?.review_count || 0);
+    const points = [];
+    points.push(requiresShipping
+      ? 'Shipping-required pieces show shipping status before checkout so buyers can compare physical items against no-shipping listings sooner.'
+      : 'This listing is marked as a no-shipping or digital-style item so buyers do not have to wait until checkout to understand fulfillment style.');
+    points.push(inventoryQty > 0
+      ? `Current tracked stock shows ${inventoryQty} available right now, which helps set expectation before checkout.`
+      : 'If stock is low or unavailable, buyers can use wishlist and back-in-stock tools instead of guessing.');
+    points.push('Custom, personalized, or made-to-order timing should be confirmed before payment so one-off workshop projects are not mistaken for ready-to-ship stock.');
+    points.push('Questions about fit, finish, delivery, pickup, or workshop-specific details can be routed through Contact quickly if a listing needs clarification.');
+    if (reviewCount > 0) points.push(`This item also has buyer feedback on the page, which gives shoppers another trust signal before they commit.`);
+    if ((resourceLinks?.length || 0) > 0) points.push('The making-story section shows workshop context, tools, and supplies instead of presenting the product as a faceless catalog item.');
+    productPolicySummaryEl.textContent = requiresShipping
+      ? 'Key policy notes stay closer to the product so shipped pieces, custom timing, and support expectations are clearer before checkout.'
+      : 'Key policy notes stay closer to the product so delivery style, custom timing, and support expectations are clearer before checkout.';
+    productPolicyListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
+  }
+
+  function renderProcessLinks(product, resourceLinks) {
+    if (!productProcessSummaryEl || !productProcessLinksEl) return;
+    const hasStory = (resourceLinks?.length || 0) > 0;
+    productProcessSummaryEl.textContent = hasStory
+      ? 'This listing already includes workshop-story details. These links help shoppers move from a single product into the wider maker/process story.'
+      : 'Not every listing has full process links yet, so these shortcuts help buyers see the broader workshop story, gallery, and maker pages.';
+    const links = [
+      { href: '/gallery/', label: 'Gallery & media' },
+      { href: '/about/', label: 'About the workshop' },
+      { href: '/creations/', label: 'Creations overview' },
+      { href: '/contact/', label: 'Ask about custom timing' },
+    ];
+    productProcessLinksEl.innerHTML = links.map((link) => `<a class="btn" href="${link.href}">${escapeHtml(link.label)}</a>`).join('');
+  }
+
   function renderTrustSummary(product, trustSummary, images, resourceLinks) {
     currentTrustSummary = trustSummary || null;
     if (!productTrustListEl || !productTrustSummaryEl) return;
@@ -179,6 +220,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderResourceStory(resourceLinks, resourceSummary);
     renderReviews(reviews, reviewSummary);
     renderTrustSummary(product, trustSummary, images, resourceLinks);
+    renderPolicySupport(product, trustSummary, resourceLinks);
+    renderProcessLinks(product, resourceLinks);
     if (productInterestGuestWrap) productInterestGuestWrap.style.display = Number(product.inventory_quantity || 0) > 0 ? 'none' : 'block';
   }
 

@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cartItemCountEl = document.getElementById("cartItemCount");
   const cartSubtotalEl = document.getElementById("cartSubtotal");
   const clearCartButton = document.getElementById("clearCartButton");
+  const cartPolicyTrustMount = document.getElementById("cartPolicyTrustMount");
 
   function show(el) {
     if (el) el.style.display = "";
@@ -36,6 +37,26 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {
       return `${amount.toFixed(2)} ${currency || "CAD"}`;
     }
+  }
+
+
+  function renderCartTrust() {
+    if (!cartPolicyTrustMount) return;
+    cartPolicyTrustMount.innerHTML = `
+      <h2 style="margin-top:0">Shipping, timing, and support before checkout</h2>
+      <div class="small">We keep a few trust reminders near the cart so buyers do not have to backtrack across product pages to remember the basics.</div>
+      <ul class="small" style="margin-top:12px;padding-left:18px">
+        <li>Shipping-required items will need address details during checkout, while no-shipping or digital-style items are identified earlier in the browse flow.</li>
+        <li>Custom, personalized, or made-to-order timing should be confirmed before payment so one-off craft work is not confused with ready-to-ship stock.</li>
+        <li>Questions about delivery, pickup, fit, finish, or a specific item can be sent through the contact page before checkout if anything needs clarifying.</li>
+        <li>Gallery, About, and Creations pages provide more workshop context for shoppers who want process and trust details before placing an order.</li>
+      </ul>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <a class="btn" href="/contact/">Contact</a>
+        <a class="btn" href="/about/">About</a>
+        <a class="btn" href="/gallery/">Gallery</a>
+      </div>
+    `;
   }
 
   function getCartItemsSafe() {
@@ -180,5 +201,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCart();
   });
 
+  renderCartTrust();
   renderCart();
 });

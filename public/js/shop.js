@@ -1,6 +1,6 @@
 // File: /public/js/shop.js
 // Brief description: Loads storefront products with advanced search, pricing filters,
-// and client-side snapshot fallback so the shop stays usable when the live endpoint drifts.
+// collection landing cards, and client-side snapshot fallback so the shop stays usable when the live endpoint drifts.
 
 document.addEventListener("DOMContentLoaded", async () => {
   const loadingEl = document.getElementById("shopLoading");
@@ -9,11 +9,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productsEl = document.getElementById("shopProducts");
   const summaryEl = document.getElementById("shopSummary");
   const statusEl = document.getElementById("shopStatus");
-  const SNAPSHOT_KEY = 'dd_shop_snapshot_v2';
+  const collectionsEl = document.getElementById('shopCollectionsMount');
+  const policyEl = document.getElementById('shopPolicyFaqMount');
+  const SNAPSHOT_KEY = 'dd_shop_snapshot_v3';
 
   function show(el) { if (el) el.style.display = ""; }
   function hide(el) { if (el) el.style.display = "none"; }
-  function escapeHtml(value) { return String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
+  function escapeHtml(value) { return String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\"','&quot;').replaceAll("'",'&#039;'); }
   function formatMoney(cents, currency='CAD') {
     const amount = Number(cents || 0) / 100;
     try { return new Intl.NumberFormat(undefined, { style:'currency', currency }).format(amount); }
@@ -33,12 +35,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch {}
   }
   function loadSnapshot(key) {
-    try {
-      const current = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '{}');
-      return current[key] || null;
-    } catch {
-      return null;
-    }
+    try { return (JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '{}') || {})[key] || null; }
+    catch { return null; }
   }
   function readFilters() {
     return {
@@ -54,6 +52,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     const url = new URL('/api/products', window.location.origin);
     Object.entries(filters).forEach(([key, value]) => { if (value !== '') url.searchParams.set(key, value); });
     return url.pathname + url.search;
+  }
+  function renderCollectionLanding(filterGroups = {}) {
+    if (!collectionsEl) return;
+    const categories = Array.isArray(filterGroups.categories) ? filterGroups.categories.slice(0, 6) : [];
+    const colors = Array.isArray(filterGroups.colors) ? filterGroups.colors.slice(0, 6) : [];
+    const types = Array.isArray(filterGroups.product_types) ? filterGroups.product_types.slice(0, 3) : [];
+    if (!categories.length && !colors.length && !types.length) {
+      collectionsEl.innerHTML = '';
+      return;
+    }
+    collectionsEl.innerHTML = `
+      <section class="card">
+        <h2 style="margin-top:0">Browse by collection direction</h2>
+        <p class="small" style="margin-top:0">This helps move the shop toward better collection-style landing sections by material, style, theme, colour, and item type instead of making every visit start with a blank search.</p>
+        <div class="customer-welcome-grid" style="margin-top:12px">
+          <div><strong>Categories</strong><div class="small" style="margin-top:8px">${categories.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No categories yet.'}</div></div>
+          <div><strong>Colours / themes</strong><div class="small" style="margin-top:8px">${colors.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No colour groups yet.'}</div></div>
+          <div><strong>Product types</strong><div class="small" style="margin-top:8px">${types.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No product-type groups yet.'}</div></div>
+        </div>
+      </section>`;
+  }
+  function renderPolicyFaq() {
+    if (!policyEl) return;
+    policyEl.innerHTML = `
+      <section class="card">
+        <h2 style="margin-top:0">Shipping, custom order timing, and quick FAQ</h2>
+        <div class="customer-welcome-grid">
+          <div><strong>Shipping clarity</strong><p class="small">Product pages and the cart now keep shipping-required information visible sooner so shoppers know whether an item is a shipped piece or a digital / no-shipping listing.</p></div>
+          <div><strong>Custom timing</strong><p class="small">Custom, personalized, or made-to-order timing should be confirmed before payment. This is especially important for one-off craft work and workshop-led experiments.</p></div>
+          <div><strong>Returns & support</strong><p class="small">Questions, delivery issues, or custom-order fit concerns should route through the contact flow quickly so shoppers do not need to hunt for help after comparing items.</p></div><div><strong>Process & workshop story</strong><p class="small">Gallery, About, and Creations pages help buyers move from a single listing into the broader maker story, workshop context, and future process-video content.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/gallery/">Gallery</a><a class="btn" href="/about/">About</a><a class="btn" href="/creations/">Creations</a></div></div>
+        </div>
+      </section>`;
   }
   function renderProducts(products) {
     if (!productsEl) return;
@@ -77,6 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div style="font-weight:700;margin-bottom:10px">${price}</div>
           ${keywordBadge}
           <p class="small" style="min-height:48px">${shortDescription || 'No description available yet.'}</p>
+          <div class="small" style="margin-top:8px">${product.requires_shipping ? 'Shipping / pickup item' : 'Digital or no-shipping item'}${product.product_category ? ` • ${escapeHtml(product.product_category)}` : ''}</div>
           <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
             <a class="btn" href="/shop/product/?slug=${slug}">View</a>
             <button class="btn" type="button" data-add-shop-cart-id="${productId}">Add to Cart</button>
@@ -104,6 +135,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const categoryCount = Array.isArray(data?.filter_groups?.categories) ? data.filter_groups.categories.length : 0;
     const colorCount = Array.isArray(data?.filter_groups?.colors) ? data.filter_groups.colors.length : 0;
     if (summaryEl) summaryEl.textContent = `${products.length} product(s) found.${categoryCount || colorCount ? ` ${categoryCount} categor${categoryCount === 1 ? 'y' : 'ies'} and ${colorCount} colour option${colorCount === 1 ? '' : 's'} in this result set.` : ''}`;
+    renderCollectionLanding(data?.filter_groups || {});
+    renderPolicyFaq();
     if (!products.length) {
       hide(productsEl);
       show(emptyEl);
