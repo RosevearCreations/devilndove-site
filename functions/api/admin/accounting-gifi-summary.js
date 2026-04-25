@@ -38,6 +38,13 @@ async function getTableColumnSet(db, tableName) {
   }
 }
 
+function firstExisting(cols, names, fallback = "0") {
+  for (const name of names) {
+    if (cols.has(name)) return name;
+  }
+  return fallback;
+}
+
 async function ensureGlSchema(db) {
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS general_ledger_accounts (
@@ -51,6 +58,10 @@ async function ensureGlSchema(db) {
       gifi_code TEXT,
       gifi_label TEXT,
       gifi_section TEXT,
+      gifi_review_state TEXT NOT NULL DEFAULT 'draft',
+      gifi_review_note TEXT,
+      gifi_reviewed_by_user_id INTEGER,
+      gifi_reviewed_at TEXT,
       tax_deductibility_percent INTEGER NOT NULL DEFAULT 100,
       is_active INTEGER NOT NULL DEFAULT 1,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -66,6 +77,10 @@ async function ensureGlSchema(db) {
     ['gifi_code', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_code TEXT`],
     ['gifi_label', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_label TEXT`],
     ['gifi_section', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_section TEXT`],
+    ['gifi_review_state', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_state TEXT NOT NULL DEFAULT 'draft'`],
+    ['gifi_review_note', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_note TEXT`],
+    ['gifi_reviewed_by_user_id', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_by_user_id INTEGER`],
+    ['gifi_reviewed_at', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_at TEXT`],
     ['tax_deductibility_percent', `ALTER TABLE general_ledger_accounts ADD COLUMN tax_deductibility_percent INTEGER NOT NULL DEFAULT 100`],
   ];
 
@@ -86,6 +101,7 @@ async function buildFallbackSummary(db, range) {
   const hasExpenses = await tableExists(db, 'accounting_expenses');
   const hasWriteoffs = await tableExists(db, 'accounting_writeoffs');
   const hasOrders = await tableExists(db, 'orders');
+  const orderCols = hasOrders ? await getTableColumnSet(db, 'orders') : new Set();
   const rows = [];
 
   if (hasExpenses) {
@@ -136,6 +152,9 @@ async function buildFallbackSummary(db, range) {
   }
 
   if (hasOrders) {
+    const totalExpr = orderCols.has('total_cents') ? 'COALESCE(o.total_cents,0)' : (orderCols.has('total_amount') ? 'CAST(ROUND(COALESCE(o.total_amount,0) * 100.0) AS INTEGER)' : (orderCols.has('total') ? 'CAST(ROUND(COALESCE(o.total,0) * 100.0) AS INTEGER)' : '0'));
+    const statusCol = firstExisting(orderCols, ['order_status','status'], "''");
+    const createdCol = firstExisting(orderCols, ['created_at'], "datetime('now')");
     const orderRows = normalizeResults(
       await db.prepare(`
         SELECT
@@ -145,14 +164,14 @@ async function buildFallbackSummary(db, range) {
           COALESCE(NULLIF(g.gifi_label,''), '') AS gifi_label,
           COALESCE(NULLIF(g.gifi_section,''), 'income_statement') AS gifi_section,
           COALESCE(g.tax_deductibility_percent, 100) AS tax_deductibility_percent,
-          COALESCE(SUM(CAST(ROUND(COALESCE(o.total_amount, o.total, 0) * 100.0) AS INTEGER)),0) AS net_cents,
+          COALESCE(SUM(${totalExpr}),0) AS net_cents,
           COUNT(*) AS source_count
         FROM orders o
         LEFT JOIN general_ledger_accounts g ON g.code = '4000'
-        WHERE substr(COALESCE(o.created_at, datetime('now')), 1, 10) >= ?
-          AND substr(COALESCE(o.created_at, datetime('now')), 1, 10) < ?
-          AND LOWER(COALESCE(o.status,'')) IN ('paid','fulfilled')
-      `).bind(range.start, range.end).all()
+        WHERE substr(COALESCE(${createdCol}, datetime('now')), 1, 10) >= ?
+          AND substr(COALESCE(${createdCol}, datetime('now')), 1, 10) < ?
+          AND LOWER(COALESCE(${statusCol},'')) IN ('paid','fulfilled')
+      `).bind(range.start, range.end).all().catch(() => ({ results: [] }))
     );
     rows.push(
       ...orderRows
@@ -346,6 +365,22 @@ export async function onRequestGet(context) {
   const unmappedCount = unmapped.length;
   const readinessPercent = totalCount ? Math.round((mappedCount / totalCount) * 100) : 0;
 
+  const glReviewRows = normalizeResults(await db.prepare(`
+    SELECT gifi_review_state, COUNT(*) AS line_count,
+           SUM(CASE WHEN COALESCE(gifi_code,'') = '' THEN 1 ELSE 0 END) AS unmapped_count
+    FROM general_ledger_accounts
+    WHERE COALESCE(is_active,1) = 1
+    GROUP BY gifi_review_state
+    ORDER BY gifi_review_state ASC
+  `).all().catch(() => ({ results: [] })));
+  const glReviewSummary = {
+    active_account_count: glReviewRows.reduce((sum, row) => sum + Number(row.line_count || 0), 0),
+    reviewed_account_count: glReviewRows.filter((row) => ['reviewed','finalized'].includes(String(row.gifi_review_state || ''))).reduce((sum, row) => sum + Number(row.line_count || 0), 0),
+    finalized_account_count: glReviewRows.filter((row) => String(row.gifi_review_state || '') === 'finalized').reduce((sum, row) => sum + Number(row.line_count || 0), 0),
+    active_unmapped_account_count: glReviewRows.reduce((sum, row) => sum + Number(row.unmapped_count || 0), 0),
+    review_states: glReviewRows.map((row) => ({ review_state: row.gifi_review_state || 'draft', line_count: Number(row.line_count || 0), unmapped_count: Number(row.unmapped_count || 0) })),
+  };
+
   if ((url.searchParams.get('format') || '').toLowerCase() === 'csv') {
     const lines = [
       'gifi_section,gifi_code,gifi_label,ledger_codes,debit_cents,credit_cents,net_cents,deductible_cents,source_count',
@@ -385,6 +420,7 @@ export async function onRequestGet(context) {
       unmapped_line_count: unmappedCount,
       readiness_percent: readinessPercent,
     },
+    gl_review_summary: glReviewSummary,
     gifi_rows: summaryRows,
     unmapped_accounts: unmapped,
     notes: [

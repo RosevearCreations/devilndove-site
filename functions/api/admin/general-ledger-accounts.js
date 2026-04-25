@@ -26,6 +26,10 @@ async function ensureTable(db){
     gifi_code TEXT,
     gifi_label TEXT,
     gifi_section TEXT,
+    gifi_review_state TEXT NOT NULL DEFAULT 'draft',
+    gifi_review_note TEXT,
+    gifi_reviewed_by_user_id INTEGER,
+    gifi_reviewed_at TEXT,
     tax_deductibility_percent INTEGER NOT NULL DEFAULT 100,
     is_active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -39,9 +43,11 @@ async function ensureTable(db){
     ['gifi_code', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_code TEXT`],
     ['gifi_label', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_label TEXT`],
     ['gifi_section', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_section TEXT`],
-    ['tax_deductibility_percent', `ALTER TABLE general_ledger_accounts ADD COLUMN tax_deductibility_percent INTEGER NOT NULL DEFAULT 100`],
     ['gifi_review_state', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_state TEXT NOT NULL DEFAULT 'draft'`],
     ['gifi_review_note', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_note TEXT`],
+    ['gifi_reviewed_by_user_id', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_by_user_id INTEGER`],
+    ['gifi_reviewed_at', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_at TEXT`],
+    ['tax_deductibility_percent', `ALTER TABLE general_ledger_accounts ADD COLUMN tax_deductibility_percent INTEGER NOT NULL DEFAULT 100`],
     ['is_active', `ALTER TABLE general_ledger_accounts ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1`],
     ['created_at', `ALTER TABLE general_ledger_accounts ADD COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
     ['updated_at', `ALTER TABLE general_ledger_accounts ADD COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
@@ -63,6 +69,7 @@ export async function onRequestGet(context){
   const result = await db.prepare(`
     SELECT gl_account_id, code, name, category, parent_group, normal_balance, sort_order,
            gifi_code, gifi_label, gifi_section, tax_deductibility_percent, gifi_review_state, gifi_review_note,
+           gifi_reviewed_by_user_id, gifi_reviewed_at,
            is_active, created_at, updated_at
     FROM general_ledger_accounts
     ORDER BY category ASC, sort_order ASC, code ASC
@@ -89,12 +96,15 @@ export async function onRequestPost(context){
   const gifi_review_state = ['draft','reviewed','needs_accountant','finalized'].includes(String(body.gifi_review_state || '').trim().toLowerCase()) ? String(body.gifi_review_state || '').trim().toLowerCase() : 'draft';
   const gifi_review_note = normalizeText(body.gifi_review_note);
   const is_active = Number(body.is_active == null || body.is_active === '' ? 1 : body.is_active) === 0 ? 0 : 1;
+  const reviewActorId = ['reviewed', 'finalized'].includes(gifi_review_state) ? Number(adminUser.user_id || 0) : null;
+  const reviewedAt = reviewActorId ? new Date().toISOString() : null;
   if(!code || !name) return jsonResponse({ok:false,error:"Code and name are required."},400);
   await db.prepare(`
     INSERT INTO general_ledger_accounts (
       code,name,category,parent_group,normal_balance,sort_order,
-      gifi_code,gifi_label,gifi_section,tax_deductibility_percent,gifi_review_state,gifi_review_note,is_active,updated_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+      gifi_code,gifi_label,gifi_section,gifi_review_state,gifi_review_note,gifi_reviewed_by_user_id,gifi_reviewed_at,
+      tax_deductibility_percent,is_active,updated_at
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
     ON CONFLICT(code) DO UPDATE SET
       name=excluded.name,
       category=excluded.category,
@@ -104,12 +114,14 @@ export async function onRequestPost(context){
       gifi_code=excluded.gifi_code,
       gifi_label=excluded.gifi_label,
       gifi_section=excluded.gifi_section,
-      tax_deductibility_percent=excluded.tax_deductibility_percent,
       gifi_review_state=excluded.gifi_review_state,
       gifi_review_note=excluded.gifi_review_note,
+      gifi_reviewed_by_user_id=excluded.gifi_reviewed_by_user_id,
+      gifi_reviewed_at=excluded.gifi_reviewed_at,
+      tax_deductibility_percent=excluded.tax_deductibility_percent,
       is_active=excluded.is_active,
       updated_at=CURRENT_TIMESTAMP
-  `).bind(code,name,category,parent_group || null,normal_balance,sort_order,gifi_code || null,gifi_label || null,gifi_section || null,tax_deductibility_percent,gifi_review_state,gifi_review_note || null,is_active).run();
+  `).bind(code,name,category,parent_group || null,normal_balance,sort_order,gifi_code || null,gifi_label || null,gifi_section || null,gifi_review_state,gifi_review_note || null,reviewActorId,reviewedAt,tax_deductibility_percent,is_active).run();
   await auditAdminAction(context.env, context.request, adminUser, {
     action_type:"save_gl_account", target_type:"general_ledger_account", target_key:code,
     details:{ name, category, parent_group, normal_balance, sort_order, gifi_code, gifi_label, gifi_section, tax_deductibility_percent, gifi_review_state, gifi_review_note, is_active }
