@@ -1,0 +1,39 @@
+{
+  "platforms": [
+    {
+      "key": "youtube",
+      "label": "YouTube",
+      "profile_url": "https://www.youtube.com/@rosiedazzlers/videos",
+      "intro": "Add the latest five YouTube uploads in App Management so the site always reflects your newest long-form videos.",
+      "items": []
+    },
+    {
+      "key": "instagram",
+      "label": "Instagram",
+      "profile_url": "https://www.instagram.com/rosiedazzlers/",
+      "intro": "Add the latest five Instagram posts or reels in App Management for the public social strip.",
+      "items": []
+    },
+    {
+      "key": "facebook",
+      "label": "Facebook",
+      "profile_url": "https://www.facebook.com/rosiedazzlers",
+      "intro": "Add the latest five Facebook posts in App Management.",
+      "items": []
+    },
+    {
+      "key": "tiktok",
+      "label": "TikTok",
+      "profile_url": "https://www.tiktok.com/@rosiedazzler",
+      "intro": "Add the latest five TikTok clips in App Management.",
+      "items": []
+    },
+    {
+      "key": "x",
+      "label": "X",
+      "profile_url": "https://x.com/RosieDazzlers",
+      "intro": "Add the latest five X posts in App Management.",
+      "items": []
+    }
+  ]
+}

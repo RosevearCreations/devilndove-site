@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "title": "Interior refresh",
+      "location": "Tillsonburg, ON",
+      "before_kind": "image",
+      "before_url": "https://assets.rosiedazzlers.ca/brand/CarPrice2025.PNG",
+      "after_kind": "image",
+      "after_url": "https://assets.rosiedazzlers.ca/brand/CarPriceDetails2025.PNG",
+      "note": "Replace these sample images with real customer-approved before/after work."
+    },
+    {
+      "title": "Exterior wash and gloss",
+      "location": "Woodstock, ON",
+      "before_kind": "image",
+      "before_url": "https://assets.rosiedazzlers.ca/brand/CarSizeChart.PNG",
+      "after_kind": "image",
+      "after_url": "https://assets.rosiedazzlers.ca/brand/CarPrice2025.PNG",
+      "note": "Use paired images of the same angle for the best slider effect."
+    }
+  ]
+}
