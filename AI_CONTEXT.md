@@ -1,3 +1,7 @@
+# Current pass note — 2026-04-25
+
+Newest accounting direction implemented in code: reviewed GIFI mapping support, vendor directory, recurring expenses, reconciliation reviews, year-end close bundle foundation, and richer expense linkage fields.
+
 # Current pass update — 2026-04-24
 
 - Accounting has moved one small step closer to T2/GIFI readiness: ledger mappings are now explicit, exportable, and sanity-checkable.
