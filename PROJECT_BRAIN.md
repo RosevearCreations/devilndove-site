@@ -1,3 +1,8 @@
+# Current pass update — 2026-04-24
+
+- Most important new accounting facts for a fresh chat: `general_ledger_accounts` now has GIFI staging fields, `/api/admin/accounting-gifi-summary` exists, and `/api/admin/db-sanity` checks the live D1 table/column shape.
+- Current caution: older databases may still need a controlled migration for the journal table shape if they were created before this pass.
+
 # Project Brain
 
 

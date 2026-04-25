@@ -1,3 +1,7 @@
+# Current pass update — 2026-04-24
+
+- New admin/API touchpoints: `/api/admin/accounting-gifi-summary`, `/api/admin/db-sanity`, and the expanded `general-ledger-accounts` payload with GIFI fields.
+
 # Repo Base Guide
 
 

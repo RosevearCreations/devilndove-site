@@ -1,3 +1,8 @@
+## Current pass update — 2026-04-24
+
+- Keep accounting/reporting/schema changes aligned before UI claims them. This pass fixed real drift in `general_ledger_accounts` and the documented accounting journal tables.
+- Keep T2/GIFI language careful: call it staging, mapping, accountant export, or readiness — not finished tax filing.
+
 # Repo Rules
 
 

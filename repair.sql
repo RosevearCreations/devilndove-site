@@ -1,3 +1,4 @@
+-- Current pass verification — 2026-04-24: reviewed during the accounting/GIFI/schema sanity pass; no structural change required in this file.
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
 -- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- MIGRATION: members/member_sessions -> users/sessions

@@ -1,3 +1,7 @@
+# Current pass update — 2026-04-24
+
+- This pass adds craft-commerce next steps drawn from Etsy/Shopify/Google guidance into the benchmark stack: clearer policy visibility, stronger first image + lifestyle mix, better About/process trust, and clearer accountant-facing operations support.
+
 # Craft Commerce Benchmarks
 
 
@@ -158,3 +162,12 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Craft-site benchmark additions for this pass
+
+- Keep the first product image extremely clear and use additional image slots for detail + lifestyle/context, not only repeated record shots.
+- Put shipping, returns, custom-order timing, and FAQ answers closer to the product and cart flow instead of leaving them buried in standalone pages.
+- Keep the About/process/workspace story current, with real photos of the makers, process, and workspace, because handmade shoppers use that to judge trust and authenticity.
+- Use cohesive collections/category pages that tell a style story instead of only a flat catalog grid.
+- Treat reviews, testimonials, and repeat-customer reassurance as merchandising blocks, not only as a single reviews page.
+- Keep year-end accounting exports and mapping review visible inside admin so bookkeeping cleanup is not left to memory at tax time.

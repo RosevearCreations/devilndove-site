@@ -1,3 +1,9 @@
+# Current pass update — 2026-04-24
+
+- Accounting is still a staging layer, not finished tax software. GIFI mapping is now visible and exportable, but accountant review, year-end adjustments, and full Schedule 100/125/141 completeness still remain open work.
+- Older databases may still have the previous `accounting_journal_entries` / `accounting_journal_lines` column shape. The new DB sanity route will flag that drift, but a controlled table-rebuild migration is still needed where those older tables exist.
+- The new GIFI summary is honest about unmapped ledger codes and fallback data sources so weak mappings are visible instead of silently hidden.
+
 # Known Gaps and Risks
 
 

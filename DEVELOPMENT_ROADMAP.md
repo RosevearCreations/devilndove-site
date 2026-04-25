@@ -1,3 +1,9 @@
+# Current pass update — 2026-04-24
+
+- Moved accounting one deliberate step closer to T2/GIFI readiness by adding explicit GIFI mapping fields to `general_ledger_accounts`, a year-level GIFI staging summary route, and a live DB sanity route.
+- Fixed an accounting schema drift where reporting code already expected `parent_group`, `normal_balance`, and `sort_order` on `general_ledger_accounts` but the SQL files did not define them.
+- Fixed schema drift between the documented `accounting_journal_entries` / `accounting_journal_lines` tables and the runtime code shape, then marked the next safe steps as: controlled migration of older journal tables, broader accountant review fields, and staged Schedule 100/125 notes support.
+
 # Development Roadmap
 
 

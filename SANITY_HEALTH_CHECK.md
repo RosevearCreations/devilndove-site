@@ -1,3 +1,8 @@
+# Current pass update — 2026-04-24
+
+- Added a live `/api/admin/db-sanity` route so the deployed database can now report missing or stale tables/columns against the current build expectations.
+- Static repo sanity in this pass also fixed two accounting drifts: `general_ledger_accounts` missing reporting columns, and the documented journal table shape not matching runtime code.
+
 # Sanity / Health Check
 
 

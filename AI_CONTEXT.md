@@ -1,3 +1,8 @@
+# Current pass update — 2026-04-24
+
+- Accounting has moved one small step closer to T2/GIFI readiness: ledger mappings are now explicit, exportable, and sanity-checkable.
+- Do not describe the current build as full tax software. It is a staging/accountant-support layer with visible unmapped ledgers and DB sanity reporting.
+
 # AI Context
 
 

@@ -1,3 +1,9 @@
+# Current pass update — 2026-04-24
+
+- Accounting admin now includes GIFI staging and a live DB sanity check in addition to expenses, write-offs, product costs, and monthly exports.
+- The current build uses explicit GIFI mapping fields on `general_ledger_accounts` so year-end accountant review can happen against visible mappings instead of only loose ledger names.
+- Public-page one-H1 expectations remain unchanged in this pass.
+
 # Devil n Dove Website
 
 

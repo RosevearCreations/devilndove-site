@@ -1,3 +1,7 @@
+# Current pass update — 2026-04-24
+
+- SEO direction remains unchanged: one clear public H1, locally relevant wording, and straightforward titles/meta continue to be the baseline. This pass did not add public heading complexity.
+
 # Local SEO Playbook (Devil n Dove)
 
 

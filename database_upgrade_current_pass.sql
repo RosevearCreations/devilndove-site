@@ -1,3 +1,4 @@
+-- Current pass note: accounting now adds explicit GIFI staging fields on general_ledger_accounts, a live DB sanity route, and schema alignment for accounting_journal_entries/accounting_journal_lines.
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
 -- Current pass note: phone-first finished-product entry now supports a lightweight wizard mode plus capture metadata for same-day draft review and safer bulk cleanup.
 -- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
@@ -315,6 +316,13 @@ CREATE TABLE IF NOT EXISTS general_ledger_accounts (
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   category TEXT NOT NULL DEFAULT 'expense',
+  parent_group TEXT,
+  normal_balance TEXT NOT NULL DEFAULT 'debit',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  gifi_code TEXT,
+  gifi_label TEXT,
+  gifi_section TEXT,
+  tax_deductibility_percent INTEGER NOT NULL DEFAULT 100,
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -397,34 +405,36 @@ CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_month ON 
 CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_product ON accounting_overhead_product_allocations(product_id, period_month DESC);
 
 CREATE TABLE IF NOT EXISTS accounting_journal_entries (
-  accounting_journal_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  journal_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
   period_month TEXT NOT NULL,
-  entry_date TEXT,
+  entry_date TEXT NOT NULL,
   source_type TEXT NOT NULL,
-  source_id TEXT,
-  source_reference TEXT,
-  memo TEXT,
-  is_balanced INTEGER NOT NULL DEFAULT 1,
+  source_key TEXT NOT NULL,
+  reference_code TEXT,
+  description TEXT,
+  status TEXT NOT NULL DEFAULT 'draft',
   total_debit_cents INTEGER NOT NULL DEFAULT 0,
   total_credit_cents INTEGER NOT NULL DEFAULT 0,
+  imbalance_cents INTEGER NOT NULL DEFAULT 0,
+  notes TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(period_month, source_type, source_id)
+  UNIQUE (period_month, source_type, source_key)
 );
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_period ON accounting_journal_entries(period_month, entry_date DESC, accounting_journal_entry_id DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_id, period_month);
+CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_period ON accounting_journal_entries(period_month, entry_date DESC, journal_entry_id DESC);
+CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_key, period_month);
 
 CREATE TABLE IF NOT EXISTS accounting_journal_lines (
-  accounting_journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  accounting_journal_entry_id INTEGER NOT NULL,
-  line_order INTEGER NOT NULL DEFAULT 0,
+  journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  journal_entry_id INTEGER NOT NULL,
+  line_number INTEGER NOT NULL DEFAULT 0,
   ledger_code TEXT NOT NULL,
   ledger_name TEXT NOT NULL,
   entry_side TEXT NOT NULL CHECK(entry_side IN ('debit','credit')),
   amount_cents INTEGER NOT NULL DEFAULT 0,
   memo TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (accounting_journal_entry_id) REFERENCES accounting_journal_entries(accounting_journal_entry_id) ON DELETE CASCADE
+  FOREIGN KEY (journal_entry_id) REFERENCES accounting_journal_entries(journal_entry_id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(accounting_journal_entry_id, line_order ASC);
 CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_ledger ON accounting_journal_lines(ledger_code, entry_side, created_at DESC);
@@ -653,3 +663,22 @@ CREATE TABLE IF NOT EXISTS product_media_score_history (
 );
 
 CREATE INDEX IF NOT EXISTS idx_product_media_score_history_product_id_created_at ON product_media_score_history(product_id, created_at DESC);
+
+
+CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_category_sort ON general_ledger_accounts(category, sort_order, code);
+CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_gifi ON general_ledger_accounts(gifi_section, gifi_code, code);
+
+
+-- Current pass accounting schema alignment: general ledger GIFI staging fields.
+ALTER TABLE general_ledger_accounts ADD COLUMN parent_group TEXT;
+ALTER TABLE general_ledger_accounts ADD COLUMN normal_balance TEXT NOT NULL DEFAULT 'debit';
+ALTER TABLE general_ledger_accounts ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_code TEXT;
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_label TEXT;
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_section TEXT;
+ALTER TABLE general_ledger_accounts ADD COLUMN tax_deductibility_percent INTEGER NOT NULL DEFAULT 100;
+CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_category_sort ON general_ledger_accounts(category, sort_order, code);
+CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_gifi ON general_ledger_accounts(gifi_section, gifi_code, code);
+
+-- Journal table shape in runtime code uses journal_entry_id/journal_line_id and source_key/description/status/imbalance fields.
+-- Older databases with the previous accounting_journal_* shape should be migrated with a table rebuild during a controlled maintenance window.

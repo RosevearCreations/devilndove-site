@@ -1,3 +1,10 @@
+# Current pass update — 2026-04-24
+
+- Added live DB sanity checking at `/api/admin/db-sanity`.
+- Added year-level GIFI staging at `/api/admin/accounting-gifi-summary` and surfaced it on the accounting admin page.
+- General ledger rows now support grouping, normal balance, sort order, GIFI code/label/section, and deductibility percent.
+- Schema files were aligned with the runtime accounting journal table shape.
+
 # New Chat Status
 
 
