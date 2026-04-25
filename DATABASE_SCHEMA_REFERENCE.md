@@ -1,15 +1,23 @@
 # Database Schema Reference
 
+## Current pass update — 2026-04-23
+- Extended product-media review beyond raw scores by saving shot-mix and duplicate-angle diagnostics alongside gallery/lead merchandising history.
+- Fixed the admin product-images history query so media trend views load cleanly again.
+- Surfaced record-vs-context image balance and repeated-angle warnings in the admin media editor and products list.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
+
 
 
 ### Product image merchandising override and trend history
 - `product_image_annotations.merchandising_override_reason` stores the operator's reason for keeping a lower-scoring gallery image.
 - `product_image_annotations.merchandising_override_note` stores the free-text note explaining that decision.
-- `product_media_score_history` stores per-save gallery/lead score snapshots so admin tools can show score drift after image swaps.
+- `product_media_score_history` stores per-save gallery/lead score snapshots plus shot-mix and duplicate-angle diagnostics so admin tools can show richer media drift after image swaps.
 
 ## Current pass update — 2026-04-22
 - Added documented low-score gallery-image override reasons so story, process, lifestyle, packaging, and scale-reference shots can stay intentionally without silently weakening review decisions.
 - Added `product_media_score_history` so product media saves now leave a score trail that can be compared after image swaps.
+- Extended `product_media_score_history` with saved shot-mix and duplicate-angle diagnostics so media drift is visible as more than one score.
 - Surfaced merchandising trend signals in the admin product list and the media editor so draft-vs-saved and saved-vs-prior score drift is easier to spot.
 - Kept the one-H1 public-page rule checked for this pass and continued aligning image/readiness work with stronger storefront quality control.
 

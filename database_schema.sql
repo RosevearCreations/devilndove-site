@@ -467,4 +467,4 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- 3) public upload/admin selection guidance uses these fields to warn earlier about soft, dark, low-fill, duplicate-angle, or portrait lead images
 
 
--- Current pass note: product image review now also supports merchandising_override_reason / merchandising_override_note and product_media_score_history trend snapshots for admin drift review.
+-- Current pass note: product image review now also supports merchandising_override_reason / merchandising_override_note, saved shot-mix and duplicate-angle diagnostics, and product_media_score_history trend snapshots for admin drift review.

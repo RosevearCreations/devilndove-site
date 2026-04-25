@@ -1,5 +1,12 @@
 # Project Brain
 
+## Current pass update — 2026-04-23
+- Extended product-media review beyond raw scores by saving shot-mix and duplicate-angle diagnostics alongside gallery/lead merchandising history.
+- Fixed the admin product-images history query so media trend views load cleanly again.
+- Surfaced record-vs-context image balance and repeated-angle warnings in the admin media editor and products list.
+- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
+
+
 
 ## Current pass update — 2026-04-22
 - Added documented low-score gallery-image override reasons so story, process, lifestyle, packaging, and scale-reference shots can stay intentionally without silently weakening review decisions.
