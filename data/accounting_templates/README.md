@@ -1,3 +1,8 @@
+# Current pass update — 2026-04-24
+
+- `general_ledger_accounts.csv` now includes starter GIFI staging columns: `parent_group`, `normal_balance`, `sort_order`, `gifi_code`, `gifi_label`, `gifi_section`, and `tax_deductibility_percent`.
+- These starter mappings are for accountant review and T2/GIFI staging, not a claim that the site is now full tax software.
+
 # Accounting Templates
 
 Use these starter templates to seed the accounting backend with general ledger accounts, expenses, write-offs, and product unit costs.
