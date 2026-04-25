@@ -6,7 +6,7 @@
   <link href="/css/styles.css" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
   <title>Accounting Department — Devil n Dove</title>
-  <meta content="Capture operating expenses, monthly overhead such as electricity, gas, rent, and internet, review GIFI mapping readiness, save accountant and Schedule 141 notes, lock closed months, run DB sanity checks, and prepare accountant-friendly exports from a dedicated accounting interface." name="description"/>
+  <meta content="Capture operating expenses, recurring bills, vendor defaults, GIFI review progress, monthly reconciliation notes, year-end close checklist bundles, and accountant-friendly exports from a dedicated accounting interface." name="description"/>
 </head>
 <body>
   <div class="container admin-shell">
@@ -24,7 +24,7 @@
       </div>
     </div>
     <div class="hero">
-      <div><h1>Accounting &amp; General Ledger</h1><p>Capture operating expenses, item costs, write-offs, general ledger categories, GIFI mapping readiness, and accountant-friendly exports from a dedicated accounting interface.</p></div>
+      <div><h1>Accounting &amp; General Ledger</h1><p>Capture operating expenses, recurring bills, vendor defaults, reconciliation reviews, GIFI mapping readiness, and accountant-friendly exports from a dedicated accounting interface.</p></div>
     </div>
     <div class="admin-department-links card">
       <a class="btn" href="/admin/">Dashboard</a>
@@ -38,7 +38,7 @@
       <a class="btn" href="/admin/mobile/">Phone Dashboard</a>
     </div>
 
-    <div class="card" style="margin-top:18px"><h2 style="margin-top:0">Quick accounting actions</h2><div class="admin-dashboard-grid"><a class="btn primary" href="#gl-accounts">General Ledger</a><a class="btn primary" href="#expense-entry">Expense Entry</a><a class="btn primary" href="#writeoff-entry">Write-Off Entry</a><a class="btn primary" href="#product-costs">Product Costs</a><a class="btn" href="#gifi-staging">GIFI Staging</a><a class="btn" href="#gifi-review-notes">GIFI Notes</a><a class="btn" href="#period-locks">Month Locks</a><a class="btn" href="#db-sanity">DB Sanity</a><a class="btn" href="#item-costing">Item Costing</a><a class="btn" href="#export-presets">Export Presets</a></div></div>
+    <div class="card" style="margin-top:18px"><h2 style="margin-top:0">Quick accounting actions</h2><div class="admin-dashboard-grid"><a class="btn primary" href="#gl-accounts">General Ledger</a><a class="btn primary" href="#expense-entry">Expense Entry</a><a class="btn primary" href="#writeoff-entry">Write-Off Entry</a><a class="btn primary" href="#product-costs">Product Costs</a><a class="btn" href="#gifi-staging">GIFI Staging</a><a class="btn" href="#gifi-review-notes">GIFI Notes</a><a class="btn" href="#accountingVendorsCard">Vendors</a><a class="btn" href="#accountingRecurringRulesCard">Recurring Rules</a><a class="btn" href="#accountingReconciliationCard">Reconciliation</a><a class="btn" href="#yearEndCloseCard">Year-End Close</a><a class="btn" href="#period-locks">Month Locks</a><a class="btn" href="#db-sanity">DB Sanity</a><a class="btn" href="#item-costing">Item Costing</a><a class="btn" href="#export-presets">Export Presets</a></div></div>
 
     <div class="card" style="margin-top:18px"><h2 style="margin-top:0">Friendly workflow</h2><p class="small">Start with your month, record the real bills and losses you had, then allocate shared overhead so your rough profit picture is closer to reality before full double-entry accounting arrives.</p></div><div id="adminAccountingReportMount" style="margin-top:18px"></div><div id="accountingBackendMount" style="margin-top:18px"></div>
     <div class="footer card" style="margin-top:18px"></div>
@@ -52,6 +52,7 @@
   <script src="/public/js/admin-accounting-report.js"></script>
   <script src="/public/js/admin-accounting-backend.js"></script>
   <script src="/public/js/admin-accounting-t2-presets.js"></script>
+  <script src="/public/js/admin-accounting-advanced.js"></script>
 
 </body>
 </html>
