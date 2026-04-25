@@ -1,4 +1,5 @@
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
+-- Current pass note: phone-first finished-product entry now supports a lightweight wizard mode plus capture metadata for same-day draft review and safer bulk cleanup.
 -- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- File: /database_access_tiers.sql
 

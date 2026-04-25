@@ -1,4 +1,5 @@
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
+-- Current pass note: phone-first finished-product entry now supports a lightweight wizard mode plus capture metadata for same-day draft review and safer bulk cleanup.
 -- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- Current pass note: broad product repricing is now handled in code through the existing products table and admin bulk tooling; no new required schema tables were needed for this pass.
@@ -180,10 +181,19 @@ CREATE TABLE IF NOT EXISTS products (
   digital_file_url TEXT,
   featured_image_url TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
+  capture_entry_mode TEXT NOT NULL DEFAULT 'full' CHECK (capture_entry_mode IN ('full','wizard')),
+  capture_created_by_user_id INTEGER,
+  capture_updated_by_user_id INTEGER,
+  capture_entry_started_at TEXT,
+  capture_last_saved_at TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (tax_class_id) REFERENCES tax_classes(tax_class_id)
+  FOREIGN KEY (tax_class_id) REFERENCES tax_classes(tax_class_id),
+  FOREIGN KEY (capture_created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+  FOREIGN KEY (capture_updated_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
+CREATE INDEX IF NOT EXISTS idx_products_capture_last_saved_at ON products(capture_last_saved_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_capture_updated_by ON products(capture_updated_by_user_id, capture_last_saved_at DESC);
 
 CREATE TABLE IF NOT EXISTS product_images (
   product_image_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -642,13 +652,7 @@ CREATE TABLE IF NOT EXISTS product_media_score_history (
   weak_image_count INTEGER NOT NULL DEFAULT 0,
   weak_unapproved_image_count INTEGER NOT NULL DEFAULT 0,
   overridden_image_count INTEGER NOT NULL DEFAULT 0,
-  record_image_count INTEGER NOT NULL DEFAULT 0,
-  context_image_count INTEGER NOT NULL DEFAULT 0,
-  duplicate_angle_group_count INTEGER NOT NULL DEFAULT 0,
-  duplicate_image_count INTEGER NOT NULL DEFAULT 0,
   override_reasons_json TEXT,
-  shot_mix_json TEXT,
-  angle_mix_json TEXT,
   source TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,

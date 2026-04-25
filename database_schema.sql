@@ -1,4 +1,5 @@
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
+-- Current pass note: phone-first finished-product entry now supports a lightweight wizard mode plus capture metadata for same-day draft review and safer bulk cleanup.
 -- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- Current pass note: broad product repricing is now handled in code through the existing products table and admin bulk tooling; no new required schema tables were needed for this pass.
@@ -467,4 +468,4 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- 3) public upload/admin selection guidance uses these fields to warn earlier about soft, dark, low-fill, duplicate-angle, or portrait lead images
 
 
--- Current pass note: product image review now also supports merchandising_override_reason / merchandising_override_note, saved shot-mix and duplicate-angle diagnostics, and product_media_score_history trend snapshots for admin drift review.
+-- Current pass note: product image review now also supports merchandising_override_reason / merchandising_override_note and product_media_score_history trend snapshots for admin drift review.

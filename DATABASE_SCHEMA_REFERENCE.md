@@ -1,23 +1,21 @@
 # Database Schema Reference
 
-## Current pass update — 2026-04-23
-- Extended product-media review beyond raw scores by saving shot-mix and duplicate-angle diagnostics alongside gallery/lead merchandising history.
-- Fixed the admin product-images history query so media trend views load cleanly again.
-- Surfaced record-vs-context image balance and repeated-angle warnings in the admin media editor and products list.
-- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
-
+## Current pass update — 2026-04-24
+- Added a real phone-first basic draft wizard to `/admin/mobile-product/` so quick entries can be saved with just name, short description, price, quantity, and 1 to 5 pictures.
+- Added a same-day draft review table on the phone capture screen so today’s entries can be reopened individually or updated in bulk before the desktop cleanup pass.
+- Added mobile-capture metadata on `products` (`capture_entry_mode`, capture actor ids, start/save timestamps) so today filtering and phone workflow history are less dependent on loose `updated_at` guesses.
+- Kept SEO/local-search hygiene in the pass by preserving one clear public H1 per page, keeping prominent title/main-heading wording aligned, and tightening docs/schema sync around the new phone/accounting workflow.
 
 
 
 ### Product image merchandising override and trend history
 - `product_image_annotations.merchandising_override_reason` stores the operator's reason for keeping a lower-scoring gallery image.
 - `product_image_annotations.merchandising_override_note` stores the free-text note explaining that decision.
-- `product_media_score_history` stores per-save gallery/lead score snapshots plus shot-mix and duplicate-angle diagnostics so admin tools can show richer media drift after image swaps.
+- `product_media_score_history` stores per-save gallery/lead score snapshots so admin tools can show score drift after image swaps.
 
 ## Current pass update — 2026-04-22
 - Added documented low-score gallery-image override reasons so story, process, lifestyle, packaging, and scale-reference shots can stay intentionally without silently weakening review decisions.
 - Added `product_media_score_history` so product media saves now leave a score trail that can be compared after image swaps.
-- Extended `product_media_score_history` with saved shot-mix and duplicate-angle diagnostics so media drift is visible as more than one score.
 - Surfaced merchandising trend signals in the admin product list and the media editor so draft-vs-saved and saved-vs-prior score drift is easier to spot.
 - Kept the one-H1 public-page rule checked for this pass and continued aligning image/readiness work with stronger storefront quality control.
 
@@ -575,3 +573,10 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+
+### Phone capture wizard draft tracking
+- `products.capture_entry_mode` stores whether the phone draft was saved from the full form or the basic wizard.
+- `products.capture_created_by_user_id` and `products.capture_updated_by_user_id` keep the latest phone-draft actor trail tied to admin users when available.
+- `products.capture_entry_started_at` and `products.capture_last_saved_at` make same-day phone draft review less dependent on generic product timestamps.
+- `idx_products_capture_last_saved_at` and `idx_products_capture_updated_by` support faster “today’s entries” filtering from the phone workflow.

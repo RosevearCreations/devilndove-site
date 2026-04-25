@@ -1,18 +1,11 @@
 # Development Roadmap
 
-## Current pass update — 2026-04-23
-- Extended product-media review beyond raw scores by saving shot-mix and duplicate-angle diagnostics alongside gallery/lead merchandising history.
-- Fixed the admin product-images history query so media trend views load cleanly again.
-- Surfaced record-vs-context image balance and repeated-angle warnings in the admin media editor and products list.
-- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
 
-
-
-## Current pass update — 2026-04-22
-- Added documented low-score gallery-image override reasons so story, process, lifestyle, packaging, and scale-reference shots can stay intentionally without silently weakening review decisions.
-- Added `product_media_score_history` so product media saves now leave a score trail that can be compared after image swaps.
-- Surfaced merchandising trend signals in the admin product list and the media editor so draft-vs-saved and saved-vs-prior score drift is easier to spot.
-- Kept the one-H1 public-page rule checked for this pass and continued aligning image/readiness work with stronger storefront quality control.
+## Current pass update — 2026-04-24
+- Added a real phone-first basic draft wizard to `/admin/mobile-product/` so quick entries can be saved with just name, short description, price, quantity, and 1 to 5 pictures.
+- Added a same-day draft review table on the phone capture screen so today’s entries can be reopened individually or updated in bulk before the desktop cleanup pass.
+- Added mobile-capture metadata on `products` (`capture_entry_mode`, capture actor ids, start/save timestamps) so today filtering and phone workflow history are less dependent on loose `updated_at` guesses.
+- Kept SEO/local-search hygiene in the pass by preserving one clear public H1 per page, keeping prominent title/main-heading wording aligned, and tightening docs/schema sync around the new phone/accounting workflow.
 
 
 ## Current pass update
@@ -532,3 +525,9 @@ Key implementation notes:
 2. Add optional manual override reasons when a weak but story-important process/lifestyle image should stay in the gallery.
 3. Surface merchandising-score trends in admin product lists and product detail so operators can see score drift after image swaps.
 4. Continue the pricing-history/admin-note work by linking image-score changes to conversion/review outcomes once more storefront analytics are wired.
+
+
+## Next pass priorities from this update
+1. Expand the phone end-of-day table from category/price/qty/status edits into stronger inline batch editing for descriptions, shipping, and category presets.
+2. Add image-crop/orientation guidance directly into the phone wizard after capture so weak first-image choices can be corrected before save.
+3. Deepen accounting from recurring-expense shortcuts into clearer T2/GIFI-style reporting views and accountant export notes without pretending the current layer is final tax software.

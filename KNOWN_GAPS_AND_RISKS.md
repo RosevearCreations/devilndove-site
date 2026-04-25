@@ -1,18 +1,11 @@
 # Known Gaps and Risks
 
-## Current pass update — 2026-04-23
-- Extended product-media review beyond raw scores by saving shot-mix and duplicate-angle diagnostics alongside gallery/lead merchandising history.
-- Fixed the admin product-images history query so media trend views load cleanly again.
-- Surfaced record-vs-context image balance and repeated-angle warnings in the admin media editor and products list.
-- Rechecked outward-facing HTML pages and the one-H1 rule remains intact across the current public page set.
 
-
-
-## Current pass update — 2026-04-22
-- Added documented low-score gallery-image override reasons so story, process, lifestyle, packaging, and scale-reference shots can stay intentionally without silently weakening review decisions.
-- Added `product_media_score_history` so product media saves now leave a score trail that can be compared after image swaps.
-- Surfaced merchandising trend signals in the admin product list and the media editor so draft-vs-saved and saved-vs-prior score drift is easier to spot.
-- Kept the one-H1 public-page rule checked for this pass and continued aligning image/readiness work with stronger storefront quality control.
+## Current pass update — 2026-04-24
+- Added a real phone-first basic draft wizard to `/admin/mobile-product/` so quick entries can be saved with just name, short description, price, quantity, and 1 to 5 pictures.
+- Added a same-day draft review table on the phone capture screen so today’s entries can be reopened individually or updated in bulk before the desktop cleanup pass.
+- Added mobile-capture metadata on `products` (`capture_entry_mode`, capture actor ids, start/save timestamps) so today filtering and phone workflow history are less dependent on loose `updated_at` guesses.
+- Kept SEO/local-search hygiene in the pass by preserving one clear public H1 per page, keeping prominent title/main-heading wording aligned, and tightening docs/schema sync around the new phone/accounting workflow.
 
 
 ## Current pass update
@@ -799,3 +792,9 @@ Key implementation notes:
 - Duplicate-angle control now relies on operator tagging (`angle_group`) to work well. If operators skip angle labels, the duplicate-angle penalty becomes less useful.
 - Asset-library guidance is much earlier now, but old uploads may not have the newer scoring fields until they are re-uploaded or edited/saved through the current admin flow.
 - Lead-image gating is intentionally stricter now, which improves storefront quality but can frustrate emergency publish workflows unless the override path stays documented and usable.
+
+
+## Open gaps carried forward from this pass
+- The new phone wizard intentionally keeps the first save lightweight; category, shipping, SEO, and resource linking still require either full-mode completion or later admin review.
+- The same-day draft table currently supports safe bulk edits for category, price, quantity, and status, but not every storefront field yet.
+- Accounting now captures recurring overhead more consistently, but final T2/GIFI authority, accountant mapping, and deeper double-entry controls still remain future work.
