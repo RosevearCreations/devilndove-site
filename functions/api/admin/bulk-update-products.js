@@ -178,6 +178,7 @@ function summarizeRequestedChanges(updates = {}, selectionLabel = "") {
   if (selectionLabel) pieces.push(`Scope: ${selectionLabel}`);
   if (updates.status !== undefined) pieces.push(`Status → ${normalizeText(updates.status) || "unchanged"}`);
   if (updates.inventory_quantity !== undefined) pieces.push(`Inventory quantity → ${updates.inventory_quantity}`);
+  if (updates.product_category !== undefined) pieces.push(`Category → ${normalizeText(updates.product_category) || 'cleared'}`);
   if (updates.inventory_tracking !== undefined) pieces.push(`Inventory tracking → ${Number(updates.inventory_tracking) === 1 ? "on" : "off"}`);
   if (updates.requires_shipping !== undefined) pieces.push(`Requires shipping → ${Number(updates.requires_shipping) === 1 ? "yes" : "no"}`);
   if (updates.taxable !== undefined) pieces.push(`Taxable → ${Number(updates.taxable) === 0 ? "no" : "yes"}`);
@@ -246,6 +247,12 @@ export async function onRequestPost(context) {
     }
     setParts.push("inventory_quantity = ?");
     bindings.push(inventory);
+  }
+
+  if (updates.product_category !== undefined) {
+    const productCategory = normalizeText(updates.product_category);
+    setParts.push("product_category = ?");
+    bindings.push(productCategory || null);
   }
 
   if (updates.inventory_tracking !== undefined) {

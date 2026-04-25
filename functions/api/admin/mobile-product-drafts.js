@@ -59,6 +59,11 @@ export async function onRequestGet(context) {
   const supportsColorName = productColumns.has('color_name');
   const supportsShippingCode = productColumns.has('shipping_code');
   const supportsReviewStatus = productColumns.has('review_status');
+  const supportsCaptureEntryMode = productColumns.has('capture_entry_mode');
+  const supportsCaptureCreatedBy = productColumns.has('capture_created_by_user_id');
+  const supportsCaptureUpdatedBy = productColumns.has('capture_updated_by_user_id');
+  const supportsCaptureStartedAt = productColumns.has('capture_entry_started_at');
+  const supportsCaptureLastSavedAt = productColumns.has('capture_last_saved_at');
   const resourceColumns = await getTableColumnSet(db, 'product_resource_links');
   const supportsConsumptionMode = resourceColumns.has('consumption_mode');
   const supportsLotSizeUnits = resourceColumns.has('lot_size_units');
@@ -66,7 +71,8 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
   const status = normalizeText(url.searchParams.get('status') || 'draft').toLowerCase();
-  const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit') || 20)));
+  const scope = normalizeText(url.searchParams.get('scope') || '').toLowerCase();
+  const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit') || 20)));
 
   const bindings = [];
   const where = [];
@@ -87,6 +93,18 @@ export async function onRequestGet(context) {
     where.push(`(${searchParts.join(' OR ')})`);
     const like = `%${q}%`;
     bindings.push(like, like, like, like, like);
+  }
+
+  if (scope === 'today') {
+    const todaySource = supportsCaptureLastSavedAt ? `COALESCE(p.capture_last_saved_at, p.updated_at, p.created_at)` : `COALESCE(p.updated_at, p.created_at)`;
+    where.push(`date(${todaySource}, 'localtime') = date('now', 'localtime')`);
+    if (supportsCaptureUpdatedBy || supportsCaptureCreatedBy) {
+      const actorColumn = supportsCaptureUpdatedBy
+        ? `COALESCE(p.capture_updated_by_user_id, ${supportsCaptureCreatedBy ? `p.capture_created_by_user_id` : `NULL`})`
+        : `p.capture_created_by_user_id`;
+      where.push(`${actorColumn} = ?`);
+      bindings.push(Number(adminUser.user_id || 0));
+    }
   }
 
   bindings.push(limit);
@@ -110,9 +128,15 @@ export async function onRequestGet(context) {
       p.featured_image_url,
       p.inventory_quantity,
       ${selectColumnSql(productColumns, 'review_status')},
+      ${supportsCaptureEntryMode ? `p.capture_entry_mode` : `'full' AS capture_entry_mode`},
+      ${supportsCaptureCreatedBy ? `p.capture_created_by_user_id` : `NULL AS capture_created_by_user_id`},
+      ${supportsCaptureUpdatedBy ? `p.capture_updated_by_user_id` : `NULL AS capture_updated_by_user_id`},
+      ${supportsCaptureStartedAt ? `p.capture_entry_started_at` : `NULL AS capture_entry_started_at`},
+      ${supportsCaptureLastSavedAt ? `p.capture_last_saved_at` : `NULL AS capture_last_saved_at`},
       p.status,
       p.tax_class_id,
       p.weight_grams,
+      p.created_at,
       p.updated_at,
       COALESCE(ps.meta_title,'') AS meta_title,
       COALESCE(ps.meta_description,'') AS meta_description,
@@ -177,9 +201,7 @@ export async function onRequestGet(context) {
     });
   }
 
-  return jsonResponse({
-    ok: true,
-    drafts: rows.map((row) => ({
+  const mappedDrafts = rows.map((row) => ({
       product_id: Number(row.product_id || 0),
       product_number: Number(row.product_number || 0),
       slug: row.slug || '',
@@ -203,11 +225,32 @@ export async function onRequestGet(context) {
       status: row.status || 'draft',
       tax_class_id: Number(row.tax_class_id || 0) || '',
       weight_grams: Number(row.weight_grams || 0) || '',
+      capture_entry_mode: row.capture_entry_mode || 'full',
+      capture_created_by_user_id: Number(row.capture_created_by_user_id || 0) || null,
+      capture_updated_by_user_id: Number(row.capture_updated_by_user_id || 0) || null,
+      capture_entry_started_at: row.capture_entry_started_at || null,
+      capture_last_saved_at: row.capture_last_saved_at || null,
+      created_at: row.created_at || null,
       updated_at: row.updated_at || null,
       image_count: Number(row.image_count || 0),
       linked_resource_count: Number(row.linked_resource_count || 0),
       images: imageMap.get(Number(row.product_id || 0)) || [],
       resource_links: resourceMap.get(Number(row.product_id || 0)) || []
-    }))
+    }));
+
+  const daySummary = scope === 'today'
+    ? {
+        draft_count: mappedDrafts.length,
+        image_count: mappedDrafts.reduce((sum, row) => sum + Number(row.image_count || 0), 0),
+        inventory_quantity_total: mappedDrafts.reduce((sum, row) => sum + Number(row.inventory_quantity || 0), 0),
+        wizard_count: mappedDrafts.filter((row) => String(row.capture_entry_mode || 'full') === 'wizard').length
+      }
+    : null;
+
+  return jsonResponse({
+    ok: true,
+    scope: scope || 'default',
+    drafts: mappedDrafts,
+    day_summary: daySummary
   });
 }

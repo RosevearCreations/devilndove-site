@@ -156,6 +156,9 @@ export async function onRequestPost(context) {
     const weightGramsRaw = normalizeText(form.get('weight_grams'));
     const weightGrams = weightGramsRaw ? Number(weightGramsRaw) : null;
     const resourceLinksRaw = normalizeText(form.get('resource_links_json'));
+    const captureEntryMode = ['full', 'wizard'].includes(normalizeText(form.get('capture_entry_mode')).toLowerCase())
+      ? normalizeText(form.get('capture_entry_mode')).toLowerCase()
+      : 'full';
 
     if (!Number.isInteger(priceCents) || priceCents < 0) {
       return json({ ok: false, error: 'price_cents must be a valid whole number.' }, 400);
@@ -183,6 +186,11 @@ export async function onRequestPost(context) {
     const supportsReviewStatus = productColumns.has('review_status');
     const supportsReadyFlag = productColumns.has('is_ready_for_storefront');
     const supportsReadyNotes = productColumns.has('ready_check_notes');
+    const supportsCaptureEntryMode = productColumns.has('capture_entry_mode');
+    const supportsCaptureCreatedBy = productColumns.has('capture_created_by_user_id');
+    const supportsCaptureUpdatedBy = productColumns.has('capture_updated_by_user_id');
+    const supportsCaptureStartedAt = productColumns.has('capture_entry_started_at');
+    const supportsCaptureLastSavedAt = productColumns.has('capture_last_saved_at');
     const resourceColumns = await getTableColumnSet(db, 'product_resource_links');
     const supportsConsumptionMode = resourceColumns.has('consumption_mode');
     const supportsLotSizeUnits = resourceColumns.has('lot_size_units');
@@ -242,6 +250,16 @@ export async function onRequestPost(context) {
         updateAssignments.push('ready_check_notes = ?');
         updateBindings.push(readyNotes || null);
       }
+      if (supportsCaptureEntryMode) {
+        updateAssignments.push('capture_entry_mode = ?');
+        updateBindings.push(captureEntryMode);
+      }
+      if (supportsCaptureUpdatedBy) {
+        updateAssignments.push('capture_updated_by_user_id = ?');
+        updateBindings.push(Number(adminUser.user_id || 0) || null);
+      }
+      if (supportsCaptureStartedAt) updateAssignments.push('capture_entry_started_at = COALESCE(capture_entry_started_at, CURRENT_TIMESTAMP)');
+      if (supportsCaptureLastSavedAt) updateAssignments.push('capture_last_saved_at = CURRENT_TIMESTAMP');
 
       updateAssignments.push(
         'short_description = ?',
@@ -325,6 +343,29 @@ export async function onRequestPost(context) {
         insertColumns.push('ready_check_notes');
         insertPlaceholders.push('?');
         insertBindings.push(readyNotes || null);
+      }
+      if (supportsCaptureEntryMode) {
+        insertColumns.push('capture_entry_mode');
+        insertPlaceholders.push('?');
+        insertBindings.push(captureEntryMode);
+      }
+      if (supportsCaptureCreatedBy) {
+        insertColumns.push('capture_created_by_user_id');
+        insertPlaceholders.push('?');
+        insertBindings.push(Number(adminUser.user_id || 0) || null);
+      }
+      if (supportsCaptureUpdatedBy) {
+        insertColumns.push('capture_updated_by_user_id');
+        insertPlaceholders.push('?');
+        insertBindings.push(Number(adminUser.user_id || 0) || null);
+      }
+      if (supportsCaptureStartedAt) {
+        insertColumns.push('capture_entry_started_at');
+        insertPlaceholders.push('CURRENT_TIMESTAMP');
+      }
+      if (supportsCaptureLastSavedAt) {
+        insertColumns.push('capture_last_saved_at');
+        insertPlaceholders.push('CURRENT_TIMESTAMP');
       }
 
       insertColumns.push(

@@ -101,33 +101,14 @@ async function ensureMediaScoreHistoryTable(db) {
       weak_image_count INTEGER NOT NULL DEFAULT 0,
       weak_unapproved_image_count INTEGER NOT NULL DEFAULT 0,
       overridden_image_count INTEGER NOT NULL DEFAULT 0,
-      record_image_count INTEGER NOT NULL DEFAULT 0,
-      context_image_count INTEGER NOT NULL DEFAULT 0,
-      duplicate_angle_group_count INTEGER NOT NULL DEFAULT 0,
-      duplicate_image_count INTEGER NOT NULL DEFAULT 0,
       override_reasons_json TEXT,
-      shot_mix_json TEXT,
-      angle_mix_json TEXT,
       source TEXT,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
       FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
     )
   `).run().catch(() => null);
-  const historyCols = await getTableColumnSet(db, 'product_media_score_history');
-  const statements = [
-    ['record_image_count', 'ALTER TABLE product_media_score_history ADD COLUMN record_image_count INTEGER NOT NULL DEFAULT 0'],
-    ['context_image_count', 'ALTER TABLE product_media_score_history ADD COLUMN context_image_count INTEGER NOT NULL DEFAULT 0'],
-    ['duplicate_angle_group_count', 'ALTER TABLE product_media_score_history ADD COLUMN duplicate_angle_group_count INTEGER NOT NULL DEFAULT 0'],
-    ['duplicate_image_count', 'ALTER TABLE product_media_score_history ADD COLUMN duplicate_image_count INTEGER NOT NULL DEFAULT 0'],
-    ['shot_mix_json', 'ALTER TABLE product_media_score_history ADD COLUMN shot_mix_json TEXT'],
-    ['angle_mix_json', 'ALTER TABLE product_media_score_history ADD COLUMN angle_mix_json TEXT']
-  ];
-  for (const [name, sql] of statements) {
-    if (!historyCols.has(name)) await db.prepare(sql).run().catch(() => null);
-  }
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_product_media_score_history_product_id_created_at ON product_media_score_history(product_id, created_at DESC)`).run().catch(() => null);
-  return await getTableColumnSet(db, 'product_media_score_history');
 }
 
 function parseOptionalNumber(value) {
@@ -151,65 +132,24 @@ function hasOverrideReason(row = {}) {
   return normalizeText(row.merchandising_override_reason).length > 0;
 }
 
-function normalizeShotStyle(style) {
-  const value = normalizeText(style).toLowerCase();
-  return value || 'record';
-}
-
-function isContextShotStyle(style) {
-  return ['lifestyle', 'process', 'packaging', 'scale_reference'].includes(normalizeShotStyle(style));
-}
-
 function summarizeRows(rows = []) {
-  const orderedRows = Array.isArray(rows) ? rows : [];
-  const leadRow = orderedRows[0] || null;
+  const leadRow = rows[0] || null;
   const leadImageScore = leadRow ? scoreForRow(leadRow) : 0;
-  const imageCount = orderedRows.length;
+  const imageCount = rows.length;
   const galleryMerchandisingScore = imageCount
-    ? Math.round(orderedRows.reduce((sum, row) => sum + scoreForRow(row), 0) / imageCount)
+    ? Math.round(rows.reduce((sum, row) => sum + scoreForRow(row), 0) / imageCount)
     : 0;
-  const weakRows = orderedRows.filter((row) => scoreForRow(row) < 64);
-  const overriddenRows = orderedRows.filter((row) => hasOverrideReason(row));
-  const weakUnapprovedRows = orderedRows.filter((row, index) => {
+  const weakRows = rows.filter((row) => scoreForRow(row) < 64);
+  const overriddenRows = rows.filter((row) => hasOverrideReason(row));
+  const weakUnapprovedRows = rows.filter((row, index) => {
     if (index === 0) return scoreForRow(row) < 72;
     return scoreForRow(row) < 64 && !hasOverrideReason(row);
   });
   const overrideReasonCounts = {};
-  const shotMix = {};
-  const angleMix = {};
-  let recordImageCount = 0;
-  let contextImageCount = 0;
-  for (const row of orderedRows) {
-    const shotStyle = normalizeShotStyle(row.shot_style);
-    shotMix[shotStyle] = Number(shotMix[shotStyle] || 0) + 1;
-    if (isContextShotStyle(shotStyle)) contextImageCount += 1;
-    else recordImageCount += 1;
-
-    const angleGroup = normalizeText(row.angle_group).toLowerCase();
-    if (angleGroup) angleMix[angleGroup] = Number(angleMix[angleGroup] || 0) + 1;
-
-    if (hasOverrideReason(row)) {
-      const key = normalizeText(row.merchandising_override_reason).toLowerCase() || 'other';
-      overrideReasonCounts[key] = Number(overrideReasonCounts[key] || 0) + 1;
-    }
+  for (const row of overriddenRows) {
+    const key = normalizeText(row.merchandising_override_reason).toLowerCase() || 'other';
+    overrideReasonCounts[key] = Number(overrideReasonCounts[key] || 0) + 1;
   }
-  const duplicateGroups = Object.entries(angleMix).filter(([, count]) => Number(count || 0) > 1);
-  const duplicateAngleGroupCount = duplicateGroups.length;
-  const duplicateImageCount = duplicateGroups.reduce((sum, [, count]) => sum + Math.max(0, Number(count || 0) - 1), 0);
-  const topDuplicateAngles = duplicateGroups
-    .sort((a, b) => Number(b[1] || 0) - Number(a[1] || 0) || String(a[0]).localeCompare(String(b[0])))
-    .slice(0, 3)
-    .map(([group, count]) => ({ group, count: Number(count || 0) }));
-
-  const guidance = [];
-  if (imageCount < 3) guidance.push('Add at least three images for stronger storefront coverage.');
-  if (leadImageScore < 72 && leadRow) guidance.push('Improve the first image before publish by tightening crop, sharpness, or background cleanup.');
-  if (recordImageCount === 0 && imageCount > 0) guidance.push('Keep at least one clean record-style product shot for the storefront lead image.');
-  if (contextImageCount === 0 && imageCount >= 3) guidance.push('Consider one process or lifestyle shot to support trust and storytelling.');
-  if (contextImageCount > Math.max(1, Math.floor(imageCount / 2))) guidance.push('The gallery is context-heavy; keep the majority of shots product-focused.');
-  if (duplicateAngleGroupCount > 0) guidance.push(`Trim repeated angles. ${duplicateImageCount} image(s) repeat ${duplicateAngleGroupCount} angle group(s).`);
-  if (weakUnapprovedRows.length > 0) guidance.push(`${weakUnapprovedRows.length} low-scoring image(s) still need replacement or a documented override.`);
-
   return {
     image_count: imageCount,
     lead_image_score: leadImageScore,
@@ -217,15 +157,7 @@ function summarizeRows(rows = []) {
     weak_image_count: weakRows.length,
     weak_unapproved_image_count: weakUnapprovedRows.length,
     overridden_image_count: overriddenRows.length,
-    record_image_count: recordImageCount,
-    context_image_count: contextImageCount,
-    duplicate_angle_group_count: duplicateAngleGroupCount,
-    duplicate_image_count: duplicateImageCount,
-    top_duplicate_angles: topDuplicateAngles,
-    override_reasons: overrideReasonCounts,
-    shot_mix: shotMix,
-    angle_mix: angleMix,
-    guidance
+    override_reasons: overrideReasonCounts
   };
 }
 
@@ -238,7 +170,7 @@ export async function onRequestGet(context) {
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
   const annotationCols = await ensureAnnotationColumns(db);
-  const historyCols = await ensureMediaScoreHistoryTable(db);
+  await ensureMediaScoreHistoryTable(db);
 
   const product_id = Number(new URL(request.url).searchParams.get('product_id'));
   if (!Number.isInteger(product_id) || product_id <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
@@ -320,13 +252,7 @@ export async function onRequestGet(context) {
     weak_image_count: Number(row.weak_image_count || 0),
     weak_unapproved_image_count: Number(row.weak_unapproved_image_count || 0),
     overridden_image_count: Number(row.overridden_image_count || 0),
-    record_image_count: Number(row.record_image_count || 0),
-    context_image_count: Number(row.context_image_count || 0),
-    duplicate_angle_group_count: Number(row.duplicate_angle_group_count || 0),
-    duplicate_image_count: Number(row.duplicate_image_count || 0),
     override_reasons: (() => { try { return JSON.parse(row.override_reasons_json || '{}') || {}; } catch { return {}; } })(),
-    shot_mix: (() => { try { return JSON.parse(row.shot_mix_json || '{}') || {}; } catch { return {}; } })(),
-    angle_mix: (() => { try { return JSON.parse(row.angle_mix_json || '{}') || {}; } catch { return {}; } })(),
     source: row.source || '',
     created_at: row.created_at || null
   }));
@@ -450,10 +376,8 @@ export async function onRequestPost(context) {
   await db.prepare(`
     INSERT INTO product_media_score_history (
       product_id, actor_user_id, image_count, lead_image_score, gallery_merchandising_score,
-      weak_image_count, weak_unapproved_image_count, overridden_image_count,
-      record_image_count, context_image_count, duplicate_angle_group_count, duplicate_image_count,
-      override_reasons_json, shot_mix_json, angle_mix_json, source, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      weak_image_count, weak_unapproved_image_count, overridden_image_count, override_reasons_json, source, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
   `).bind(
     product_id,
     Number(adminUser.user_id || 0) || null,
@@ -463,13 +387,7 @@ export async function onRequestPost(context) {
     summary.weak_image_count,
     summary.weak_unapproved_image_count,
     summary.overridden_image_count,
-    summary.record_image_count,
-    summary.context_image_count,
-    summary.duplicate_angle_group_count,
-    summary.duplicate_image_count,
     JSON.stringify(summary.override_reasons || {}),
-    JSON.stringify(summary.shot_mix || {}),
-    JSON.stringify(summary.angle_mix || {}),
     'admin_product_images_save'
   ).run().catch(() => null);
 
