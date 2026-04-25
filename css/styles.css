@@ -443,3 +443,11 @@ body.nav-mobile-open{overflow:hidden}
 .gift-card-amount-grid{display:flex;gap:8px;flex-wrap:wrap}
 .storefront-gift-card-card{border:1px solid rgba(67,97,238,.15);background:rgba(67,97,238,.04)}
 .featured-testimonials-block{border:1px solid rgba(67,97,238,.12)}
+.mobile-wizard-card,.mobile-today-card{display:grid;gap:12px}
+.mobile-wizard-head,.mobile-today-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.mobile-mode-toggle,.mobile-wizard-actions{display:flex;gap:10px;flex-wrap:wrap}
+.mobile-today-bulk{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end;margin-top:8px}
+.mobile-today-bulk label{display:grid;gap:6px}
+.mobile-today-table input,.mobile-today-table select{min-width:90px}
+.mobile-today-table td{vertical-align:top}
+@media (max-width:720px){.mobile-mode-toggle .btn,.mobile-wizard-actions .btn,.mobile-today-bulk .btn{width:100%;justify-content:center}.mobile-today-bulk{grid-template-columns:1fr}.mobile-today-table input,.mobile-today-table select{min-width:unset;width:100%}}
