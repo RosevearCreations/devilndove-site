@@ -1,7 +1,4 @@
 // File: /functions/api/auth/login.js
-// Brief description: Logs an existing user in, validates the stored password hash,
-// creates a fresh session token, and returns the user plus session data expected
-// by the shared public/js/auth.js helper.
 
 function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
@@ -38,9 +35,11 @@ async function sha256Hex(input) {
 async function verifyStoredPasswordHash(password, storedHash) {
   const normalizedStoredHash = String(storedHash || "").trim();
   if (!normalizedStoredHash) return false;
+
   if (normalizedStoredHash.startsWith("sha256$")) {
     return (await sha256Hex(password)) === normalizedStoredHash.slice("sha256$".length);
   }
+
   return false;
 }
 
@@ -50,17 +49,21 @@ function makeSessionToken() {
 
 function parseCookies(request) {
   const raw = request.headers.get("Cookie") || "";
+
   return raw.split(/;\s*/).reduce((acc, part) => {
     if (!part) return acc;
     const eq = part.indexOf("=");
     if (eq === -1) return acc;
+
     const key = part.slice(0, eq).trim();
     const value = part.slice(eq + 1).trim();
+
     try {
       acc[key] = decodeURIComponent(value);
     } catch {
       acc[key] = value;
     }
+
     return acc;
   }, {});
 }
@@ -74,6 +77,7 @@ function getBearerToken(request) {
 function getRequestToken(request) {
   const bearer = getBearerToken(request);
   if (bearer) return bearer;
+
   const cookies = parseCookies(request);
   return String(cookies.dd_auth_token || "").trim();
 }
@@ -82,6 +86,7 @@ function buildSessionCookie(request, token, maxAgeSeconds = 60 * 60 * 24 * 30) {
   const url = new URL(request.url);
   const secure = url.protocol === "https:";
   const host = String(url.hostname || "").toLowerCase();
+
   const parts = [
     `dd_auth_token=${encodeURIComponent(String(token || ""))}`,
     "Path=/",
@@ -89,10 +94,12 @@ function buildSessionCookie(request, token, maxAgeSeconds = 60 * 60 * 24 * 30) {
     "HttpOnly",
     "SameSite=Lax"
   ];
+
   if (secure) parts.push("Secure");
   if (host === "devilndove.com" || host.endsWith(".devilndove.com")) {
     parts.push("Domain=.devilndove.com");
   }
+
   return parts.join("; ");
 }
 
@@ -103,6 +110,7 @@ function clearSessionCookie(request) {
 function corsHeaders(request) {
   const origin = request.headers.get("Origin") || "";
   const url = new URL(request.url);
+
   const allowedOrigin =
     origin && (origin === url.origin || origin.endsWith(".devilndove.com"))
       ? origin
@@ -112,7 +120,7 @@ function corsHeaders(request) {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Vary": "Origin"
   };
 }
@@ -130,7 +138,7 @@ export async function onRequestGet(context) {
       ok: false,
       error: "Use POST to log in."
     },
-    405,
+    200,
     corsHeaders(context.request)
   );
 }
