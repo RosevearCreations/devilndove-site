@@ -1,3 +1,12 @@
+# Current pass note — 2026-04-25
+
+New admin accounting runtime pieces added in this pass:
+- `/functions/api/admin/accounting-vendors.js`
+- `/functions/api/admin/accounting-recurring-expense-rules.js`
+- `/functions/api/admin/accounting-reconciliation.js`
+- `/functions/api/admin/accounting-year-end-close.js`
+- `/public/js/admin-accounting-advanced.js`
+
 # Current pass update — 2026-04-24
 
 - New admin/API touchpoints: `/api/admin/accounting-gifi-summary`, `/api/admin/db-sanity`, and the expanded `general-ledger-accounts` payload with GIFI fields.

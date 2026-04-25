@@ -1,3 +1,7 @@
+# Current pass note — 2026-04-25
+
+No broad public-page SEO rewrite happened in this accounting-heavy pass, but the one-H1 rule and clear title/main-heading habit remain part of the standing checklist.
+
 # Current pass update — 2026-04-24
 
 - SEO direction remains unchanged: one clear public H1, locally relevant wording, and straightforward titles/meta continue to be the baseline. This pass did not add public heading complexity.

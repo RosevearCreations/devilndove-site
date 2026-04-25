@@ -1,3 +1,14 @@
+# Current pass snapshot — 2026-04-25
+
+Accounting focus moved one slow layer deeper:
+- vendor directory
+- recurring expense rules
+- monthly reconciliation review storage
+- year-end close bundle foundation
+- GIFI review actor/timestamp tracking
+
+This is intentionally still a staged internal-accounting system, not a finished accountant export.
+
 # Current pass update — 2026-04-24
 
 - Most important new accounting facts for a fresh chat: `general_ledger_accounts` now has GIFI staging fields, `/api/admin/accounting-gifi-summary` exists, and `/api/admin/db-sanity` checks the live D1 table/column shape.

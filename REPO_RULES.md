@@ -1,3 +1,7 @@
+# Current pass note — 2026-04-25
+
+Reminder preserved in this pass: every code update must be reflected in schema references, upgrade SQL, and root markdown handoff/status docs.
+
 ## Current pass update — 2026-04-24
 
 - Keep accounting/reporting/schema changes aligned before UI claims them. This pass fixed real drift in `general_ledger_accounts` and the documented accounting journal tables.

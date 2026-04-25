@@ -1,3 +1,17 @@
+# Current pass sanity note — 2026-04-25
+
+This pass expands the expected DB sanity surface to include:
+- `accounting_vendors`
+- `accounting_recurring_expense_rules`
+- `accounting_reconciliation_reviews`
+- richer required columns on `accounting_expenses`
+- richer required review columns on `general_ledger_accounts`
+
+Operational sanity focus in this pass:
+- recurring expense generation should survive into `accounting_expenses`
+- vendor defaults should flow into expense entry
+- reconciliation reviews should remain period/type/scope keyed and durable
+
 # Current pass update — 2026-04-24
 
 - Added a live `/api/admin/db-sanity` route so the deployed database can now report missing or stale tables/columns against the current build expectations.

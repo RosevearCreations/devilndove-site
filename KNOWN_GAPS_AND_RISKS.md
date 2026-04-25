@@ -1,3 +1,12 @@
+# Current pass update — 2026-04-25
+
+- The backend now has a real vendor/recurring/reconciliation layer, but it is still a review-first system and not yet a complete T2/GIFI accountant export.
+- Processor-fee reconciliation is currently volume-versus-booked-fees review, not a provider-rate-perfect reconciliation engine.
+- Sales-tax reconciliation is still a practical monthly review summary and not a final tax-filing module.
+- Shipping reconciliation currently compares fulfilled-order shipping charged versus booked shipping/admin expense signals; deeper carrier-cost linkage is still open.
+- Receipt / bill / statement attachments, recurring rule auto-draft governance, and vendor-to-attachment workflows still need another pass.
+- Legacy schema drift still needs continued cleanup, but this pass kept the broad merge risk low by only adding the tables and columns already used by the current runtime/accounting UI.
+
 # Current pass update — 2026-04-24
 
 - Accounting is still a staging layer, not finished tax software. GIFI mapping is now visible and exportable, but accountant review, year-end adjustments, and full Schedule 100/125/141 completeness still remain open work.

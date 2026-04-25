@@ -1,3 +1,19 @@
+# Current pass status — 2026-04-25
+
+This repo now includes:
+- accounting vendor directory support
+- recurring expense rule support
+- monthly reconciliation review storage for sales tax, processor fees, and shipping
+- a year-end close bundle endpoint/UI foundation
+- richer expense linkage fields (`vendor_id`, `recurring_expense_rule_id`, `source_mode`, `reference_number`)
+- stronger GIFI review tracking (`gifi_reviewed_by_user_id`, `gifi_reviewed_at`)
+
+Safest next pass from here:
+1. finish reviewed GIFI mapping coverage for every active account
+2. add receipt/bill/statement attachment handling
+3. deepen reconciliation logic and filing support
+4. expand the year-end close bundle into a more accountant-handoff-ready package
+
 # Current pass update — 2026-04-24
 
 - Added live DB sanity checking at `/api/admin/db-sanity`.

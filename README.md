@@ -1,3 +1,7 @@
+# Current pass note — 2026-04-25
+
+The accounting area now includes vendor defaults, recurring expense rules, monthly reconciliation reviews, and a year-end close bundle foundation in addition to the existing GL/expense/GIFI/month-lock tooling.
+
 # Current pass update — 2026-04-24
 
 - Accounting admin now includes GIFI staging and a live DB sanity check in addition to expenses, write-offs, product costs, and monthly exports.

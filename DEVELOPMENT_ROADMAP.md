@@ -1,3 +1,11 @@
+# Current pass update — 2026-04-25
+
+- Began the safest next accounting coding pass by adding a vendor directory, recurring expense rules, monthly reconciliation review storage, and a year-end close bundle screen/export foundation instead of jumping straight to a fake full accountant export.
+- Tightened the GIFI review path by adding reviewer identity/timestamp fields on `general_ledger_accounts` and surfacing active-account review coverage in the GIFI staging summary.
+- Extended `accounting_expenses` so vendor linkage, recurring-rule linkage, source mode, and invoice/reference numbers can survive into the database instead of being loose notes only.
+- Added admin accounting UI sections for Vendors, Recurring Rules, Reconciliation Review, and Year-End Close Bundle while keeping the existing GL, expense, overhead, GIFI, month-lock, and DB-sanity sections intact.
+- The strongest next safe steps remain: finish final reviewed GIFI mapping for every active GL line, add receipt/bill attachments, deepen sales-tax and processor reconciliation logic, and move toward a controlled accountant handoff/export set one layer at a time.
+
 # Current pass update — 2026-04-24
 
 - Moved accounting one deliberate step closer to T2/GIFI readiness by adding explicit GIFI mapping fields to `general_ledger_accounts`, a year-level GIFI staging summary route, and a live DB sanity route.

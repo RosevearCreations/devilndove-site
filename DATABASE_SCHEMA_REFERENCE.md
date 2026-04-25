@@ -1,3 +1,22 @@
+# Current pass schema note — 2026-04-25
+
+This pass adds or extends the following accounting structures:
+- `accounting_vendors`
+- `accounting_recurring_expense_rules`
+- `accounting_reconciliation_reviews`
+- `general_ledger_accounts.gifi_reviewed_by_user_id`
+- `general_ledger_accounts.gifi_reviewed_at`
+- `accounting_expenses.vendor_id`
+- `accounting_expenses.recurring_expense_rule_id`
+- `accounting_expenses.source_mode`
+- `accounting_expenses.reference_number`
+
+Purpose of this pass:
+- move slowly toward final GIFI-reviewed accounting
+- reduce repeat data entry for recurring monthly costs
+- keep reconciliation notes in durable DB-backed records
+- give year-end close work a review/export foundation before any full accountant export claims
+
 # Database Schema Reference
 
 ## Current pass update — 2026-04-24

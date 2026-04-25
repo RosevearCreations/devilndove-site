@@ -611,3 +611,76 @@ CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_gifi ON general_ledger_ac
 
 -- Journal table shape in runtime code uses journal_entry_id/journal_line_id and source_key/description/status/imbalance fields.
 -- Older databases with the previous accounting_journal_* shape should be migrated with a table rebuild during a controlled maintenance window.
+
+-- Current pass note: accounting now adds vendor defaults, recurring expense rules, reconciliation reviews, richer expense linkage, and a year-end close bundle foundation.
+
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_by_user_id INTEGER;
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_at TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_review_state ON general_ledger_accounts(gifi_review_state, is_active, code);
+
+CREATE TABLE IF NOT EXISTS accounting_vendors (
+  accounting_vendor_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  vendor_name TEXT NOT NULL UNIQUE,
+  default_ledger_code TEXT,
+  default_tax_percent REAL NOT NULL DEFAULT 0,
+  payment_terms TEXT,
+  contact_name TEXT,
+  contact_email TEXT,
+  contact_phone TEXT,
+  website_url TEXT,
+  notes TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_vendors_active_name ON accounting_vendors(is_active, vendor_name);
+
+ALTER TABLE accounting_expenses ADD COLUMN vendor_id INTEGER;
+ALTER TABLE accounting_expenses ADD COLUMN recurring_expense_rule_id INTEGER;
+ALTER TABLE accounting_expenses ADD COLUMN source_mode TEXT;
+ALTER TABLE accounting_expenses ADD COLUMN reference_number TEXT;
+CREATE INDEX IF NOT EXISTS idx_accounting_expenses_vendor ON accounting_expenses(vendor_id, vendor_name, expense_date DESC);
+CREATE INDEX IF NOT EXISTS idx_accounting_expenses_recurring ON accounting_expenses(recurring_expense_rule_id, expense_date DESC);
+
+CREATE TABLE IF NOT EXISTS accounting_recurring_expense_rules (
+  recurring_expense_rule_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  vendor_id INTEGER,
+  vendor_name TEXT,
+  rule_name TEXT NOT NULL,
+  ledger_code TEXT,
+  ledger_name TEXT,
+  amount REAL NOT NULL DEFAULT 0,
+  tax_amount REAL NOT NULL DEFAULT 0,
+  frequency TEXT NOT NULL DEFAULT 'monthly',
+  due_day INTEGER,
+  next_due_date TEXT,
+  auto_create_mode TEXT NOT NULL DEFAULT 'manual',
+  notes TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  last_generated_at TEXT,
+  last_generated_expense_id INTEGER,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_recurring_expense_rules_due ON accounting_recurring_expense_rules(is_active, next_due_date, frequency);
+
+CREATE TABLE IF NOT EXISTS accounting_reconciliation_reviews (
+  accounting_reconciliation_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  reconciliation_type TEXT NOT NULL,
+  period_month TEXT NOT NULL,
+  scope_key TEXT NOT NULL DEFAULT 'all',
+  review_status TEXT NOT NULL DEFAULT 'draft',
+  note TEXT,
+  reference_amount_cents INTEGER NOT NULL DEFAULT 0,
+  compared_amount_cents INTEGER NOT NULL DEFAULT 0,
+  difference_cents INTEGER NOT NULL DEFAULT 0,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(reconciliation_type, period_month, scope_key)
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_reviews_type_period ON accounting_reconciliation_reviews(reconciliation_type, period_month DESC, review_status);

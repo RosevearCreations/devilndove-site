@@ -1,3 +1,7 @@
+# Current pass note — 2026-04-25
+
+The roadmap continues to favor trust, policy clarity, image quality, and slow accounting hardening. This pass focused mainly on the accounting hardening layer so the next public-commerce pass can build on a cleaner backend.
+
 # Current pass update — 2026-04-24
 
 - This pass adds craft-commerce next steps drawn from Etsy/Shopify/Google guidance into the benchmark stack: clearer policy visibility, stronger first image + lifestyle mix, better About/process trust, and clearer accountant-facing operations support.
