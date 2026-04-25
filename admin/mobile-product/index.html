@@ -44,6 +44,28 @@
       </div>
       <div id="mobileProductMessage" class="small" style="display:none;margin-bottom:12px"></div>
 
+      <div class="card mobile-wizard-card" style="margin:0;padding:14px;border:1px solid rgba(67,97,238,.18)">
+        <div class="mobile-wizard-head">
+          <div>
+            <strong>Phone capture modes</strong>
+            <div class="small" id="mobileWizardSummary">Use the basic wizard for fast end-of-day draft intake, or switch back to the full form for category, SEO, resources, and inventory detail.</div>
+          </div>
+          <div class="mobile-mode-toggle">
+            <button type="button" class="btn primary" id="mobileWizardModeButton">Basic wizard</button>
+            <button type="button" class="btn" id="mobileFullModeButton">Full form</button>
+          </div>
+        </div>
+        <div class="mobile-readiness-chip-row" id="mobileWizardStepChips">
+          <span class="mobile-readiness-chip is-done">1. Name + short description</span>
+          <span class="mobile-readiness-chip">2. Price + quantity</span>
+          <span class="mobile-readiness-chip">3. 1 to 5 pictures</span>
+        </div>
+        <div class="mobile-wizard-actions" id="mobileWizardActions">
+          <button type="button" class="btn" id="mobileWizardPrevButton">Back</button>
+          <button type="button" class="btn" id="mobileWizardNextButton">Next step</button>
+        </div>
+      </div>
+
       <div class="card" style="margin:0 0 14px 0;padding:14px;border:1px solid rgba(0,0,0,.08)">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap">
           <div>
@@ -73,6 +95,7 @@
 
       <form id="mobileProductForm" class="mobile-product-form">
         <input type="hidden" name="product_id" id="mobileDraftProductId" value=""/>
+        <input type="hidden" name="capture_entry_mode" id="mobileCaptureEntryMode" value="wizard"/>
         <div class="mobile-form-grid">
           <label class="mobile-required-field" data-ready-key="name">
             <span>Product name <span class="mobile-required-badge">Needed to approve</span></span>
@@ -147,7 +170,7 @@
         <label class="mobile-required-field" data-ready-key="photos">
           <span>Photos <span class="mobile-required-badge">First photo needed to approve</span></span>
           <input class="input" type="file" name="images" id="mobileProductImages" accept="image/*" capture="environment" multiple/>
-          <div class="small">Upload phone photos directly. The first image becomes the featured image.</div>
+          <div class="small" id="mobilePhotoHelp">Upload phone photos directly. The first image becomes the featured image. Basic wizard mode expects 1 to 5 pictures.</div>
         </label>
         <div id="mobileImagePreview" class="mobile-image-preview-grid"></div>
 
@@ -176,6 +199,31 @@
           <button class="btn" type="button" id="mobileResetForNextButton">Clear for next product</button>
         </div>
       </form>
+
+      <div class="card mobile-today-card" style="margin:0;padding:14px;border:1px solid rgba(0,0,0,.08)">
+        <div class="mobile-today-head">
+          <div>
+            <strong>Today's draft entries</strong>
+            <div class="small">Review the entries saved today, reopen one item, or update selected draft rows in bulk before you do the full desktop pass.</div>
+          </div>
+          <button type="button" class="btn" id="mobileTodayRefreshButton">Refresh today</button>
+        </div>
+        <div class="small" id="mobileTodaySummary" style="margin-top:8px">Loading today's drafts…</div>
+        <div class="mobile-today-bulk" id="mobileTodayBulkTools">
+          <label><span class="small">Set category</span><input class="input" type="text" id="mobileTodayBulkCategory" placeholder="rings, pendants, etc."/></label>
+          <label><span class="small">Set exact price</span><input class="input" type="number" id="mobileTodayBulkPrice" min="0" step="0.01" placeholder="24.95"/></label>
+          <label><span class="small">Set quantity</span><input class="input" type="number" id="mobileTodayBulkQty" min="0" step="1" placeholder="1"/></label>
+          <label><span class="small">Set status</span><select class="input" id="mobileTodayBulkStatus"><option value="">No change</option><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></label>
+          <button type="button" class="btn primary" id="mobileTodayBulkApplyButton">Apply to selected</button>
+        </div>
+        <div class="small" id="mobileTodayMessage" style="display:none;margin-top:8px"></div>
+        <div class="admin-table-wrap" style="margin-top:12px">
+          <table class="mobile-today-table">
+            <thead><tr><th><input type="checkbox" id="mobileTodaySelectAll"/></th><th>Draft</th><th>Category</th><th>Price</th><th>Qty</th><th>Status</th><th>Pictures</th><th>Updated</th><th>Actions</th></tr></thead>
+            <tbody id="mobileTodayTableBody"><tr><td colspan="9" style="padding:12px">Loading today's drafts…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -183,5 +231,6 @@
   <script src="/public/js/auth.js"></script>
   <script src="/public/js/site-auth-ui.js"></script>
   <script src="/public/js/admin-mobile-product.js"></script>
+  <script src="/public/js/admin-mobile-product-augment.js"></script>
 </body>
 </html>
