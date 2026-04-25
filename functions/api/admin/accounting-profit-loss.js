@@ -43,6 +43,16 @@ function centsFromDollars(value) {
   return Math.round(Number(value || 0) * 100);
 }
 
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
 export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok:false, error:'Database binding is not configured.' }, 500);
@@ -123,8 +133,16 @@ export async function onRequestGet(context) {
     ORDER BY total_cents DESC, ledger_name ASC
   `, [range.raw]) : [];
 
+  const glColumns = hasGl ? await getTableColumnSet(db, 'general_ledger_accounts') : new Set();
   const glAccounts = hasGl ? await safeAll(db, `
-    SELECT code, name, category, parent_group, normal_balance, sort_order
+    SELECT code, name, category,
+           ${glColumns.has('parent_group') ? 'parent_group' : "'' AS parent_group"},
+           ${glColumns.has('normal_balance') ? 'normal_balance' : "'' AS normal_balance"},
+           ${glColumns.has('sort_order') ? 'sort_order' : '0 AS sort_order'},
+           ${glColumns.has('gifi_code') ? 'gifi_code' : "'' AS gifi_code"},
+           ${glColumns.has('gifi_label') ? 'gifi_label' : "'' AS gifi_label"},
+           ${glColumns.has('gifi_section') ? 'gifi_section' : "'' AS gifi_section"},
+           ${glColumns.has('tax_deductibility_percent') ? 'tax_deductibility_percent' : '100 AS tax_deductibility_percent'}
     FROM general_ledger_accounts
     ORDER BY category ASC, sort_order ASC, code ASC
     LIMIT 250
@@ -176,7 +194,11 @@ export async function onRequestGet(context) {
       category: row.category || '',
       parent_group: row.parent_group || '',
       normal_balance: row.normal_balance || '',
-      sort_order: Number(row.sort_order || 0)
+      sort_order: Number(row.sort_order || 0),
+      gifi_code: row.gifi_code || '',
+      gifi_label: row.gifi_label || '',
+      gifi_section: row.gifi_section || '',
+      tax_deductibility_percent: Number(row.tax_deductibility_percent == null ? 100 : row.tax_deductibility_percent)
     }))
   });
 }
