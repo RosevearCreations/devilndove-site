@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Accounting | Rosie Dazzlers</title>
+  <meta name="description" content="Internal accounting ledger for Rosie Dazzlers payables, tax remittance, statements, exports, and inventory cost coverage." />
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="stylesheet" href="/assets/site.css" />
+  <style>
+    .admin-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .admin-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+    .summary-cards .panel{min-height:112px}
+    .hero-stat{font-size:1.8rem;font-weight:800;line-height:1.1}
+    .table-lite{display:grid;gap:8px}
+    .table-lite__row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+    .table-lite__row span:last-child{font-weight:700;text-align:right}
+    .payable-card{border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;background:rgba(255,255,255,.03)}
+    .settlement-list{display:grid;gap:6px;margin-top:10px}
+    .settlement-item{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    .report-scroll{max-height:420px;overflow:auto;padding-right:4px}
+    .tag{display:inline-flex;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);font-size:12px}
+    .danger-note{color:#fecaca}
+    .checklist-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .checklist-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.03)}
+    .checklist-item input{margin-top:3px}
+    .checklist-meta{font-size:.9rem;color:rgba(234,242,255,.68)}
+    .pricing-window{display:grid;gap:12px}
+    .pricing-window__summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+    .pricing-window__summary .panel{min-height:auto}
+    .pricing-window__tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+    .pricing-tier{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+    .pricing-tier strong{display:block;font-size:1.2rem;margin-top:6px}
+    #filterForm,
+    #entryForm .admin-grid-3,
+    #entryForm .admin-grid-2,
+    #remitForm .admin-grid-3{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:12px;
+      align-items:end;
+    }
+    #entryForm .row.wrap,
+    #remitForm .row.wrap,
+    #monthEndChecklistForm .row.wrap{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    #entryForm .row.wrap .mini,
+    #remitForm .row.wrap .mini,
+    #monthEndChecklistForm .row.wrap .mini{
+      flex:1 1 220px;
+      min-width:0;
+    }
+    #filterForm label,
+    #entryForm label,
+    #remitForm label,
+    #monthEndChecklistForm label{
+      display:grid;
+      gap:6px;
+      min-width:0;
+      align-content:start;
+    }
+    #filterForm > label{flex:1 1 170px;min-width:170px}
+    #filterForm > label[style]{min-width:240px;flex:1 1 280px}
+    #filterForm input,
+    #filterForm select,
+    #entryForm input,
+    #entryForm select,
+    #entryForm textarea,
+    #remitForm input,
+    #remitForm select,
+    #remitForm textarea,
+    #monthEndChecklistForm input,
+    #monthEndChecklistForm select,
+    #monthEndChecklistForm textarea{
+      width:100%;
+      max-width:none;
+      min-width:0;
+    }
+    @media (max-width: 980px){
+      .admin-grid-2,.admin-grid-3{grid-template-columns:1fr}
+      #filterForm,
+      #entryForm .admin-grid-3,
+      #entryForm .admin-grid-2,
+      #remitForm .admin-grid-3{grid-template-columns:1fr}
+      #filterForm > label,
+      #filterForm > label[style]{min-width:0;flex:1 1 100%}
+    }
+  </style>
+</head>
+<body data-page="admin-accounting">
+  <main class="container shell">
+    <section class="section" data-admin-shell-loading>
+      <div class="notice">Loading accounting workspace…</div>
+    </section>
+
+    <section class="section" data-admin-shell-ready hidden>
+      <div class="grid cards" style="grid-template-columns:minmax(240px,320px) minmax(0,1fr)">
+        <div data-admin-menu-mount></div>
+
+        <div class="stack">
+          <div class="hero">
+            <div>
+              <div class="badge">Accounting</div>
+              <h1>Operational accounting ledger</h1>
+              <p>Run payables, remittance, statements, exports, inventory-cost cleanup, and payroll posting from one office-side workflow.</p>
+            </div>
+            <div class="panel">
+              <div class="kicker">Signed in as</div>
+              <strong data-actor-name>—</strong>
+              <div class="mini" data-actor-role></div>
+            </div>
+          </div>
+
+          <div class="notice" data-admin-shell-status hidden></div>
+
+          <article class="panel">
+            <form id="filterForm" class="row wrap" style="gap:12px;align-items:end">
+              <label>
+                Month
+                <select id="monthSelect"></select>
+              </label>
+              <label>
+                Year
+                <select id="yearSelect"></select>
+              </label>
+              <label>
+                Payables
+                <select id="payableStatusFilter">
+                  <option value="open">Open only</option>
+                  <option value="partial">Partial only</option>
+                  <option value="paid">Paid only</option>
+                  <option value="all">All</option>
+                </select>
+              </label>
+              <label style="min-width:240px;flex:1 1 280px">
+                Search booking records
+                <input id="searchQ" type="search" placeholder="Customer name, email, or package" />
+              </label>
+              <button class="btn primary" type="submit">Refresh</button>
+            </form>
+            <p class="mini" style="margin-top:10px">Use the month selector for P&amp;L, balance-sheet, cash-flow, and tax reporting. Booking accounting records still refresh from the live operational ledger.</p>
+          </article>
+
+          <section class="summary-cards">
+            <article class="panel"><div class="kicker">Open receivables</div><div id="sumOpen" class="hero-stat">$0.00</div><div class="mini" id="sumOpenMeta">0 booking records with balance due</div></article>
+            <article class="panel"><div class="kicker">Outstanding payables</div><div id="sumPayables" class="hero-stat">$0.00</div><div class="mini" id="sumPayablesCount">0 open vendor bills</div></article>
+            <article class="panel"><div class="kicker">Suggested remittance</div><div id="sumTaxDue" class="hero-stat">$0.00</div><div class="mini">Current month sales-tax payable activity</div></article>
+            <article class="panel"><div class="kicker">Net income</div><div id="sumNetIncome" class="hero-stat">$0.00</div><div class="mini">Month selected above</div></article>
+            <article class="panel"><div class="kicker">Closing cash</div><div id="sumClosingCash" class="hero-stat">$0.00</div><div class="mini">Cash balance at month end</div></article>
+            <article class="panel"><div class="kicker">Missing item costs</div><div id="sumMissingCosts" class="hero-stat">0</div><div class="mini" id="sumCostCoverage">0% coverage</div></article>
+          </section>
+
+          <article class="panel pricing-window">
+            <div class="row wrap" style="justify-content:space-between;align-items:flex-start;gap:12px">
+              <div>
+                <h2 style="margin:0 0 6px">Pricing control window</h2>
+                <p class="mini" style="margin:0">Read the current canonical pricing scope here, then open App Management for all price, package, add-on, service-area, and travel-charge edits from one entry point.</p>
+              </div>
+              <a class="btn" href="/admin-app">Open pricing control center</a>
+            </div>
+            <div id="pricingWindowSummary" class="pricing-window__summary"></div>
+            <div id="pricingWindowTiers" class="pricing-window__tiers"></div>
+            <div class="mini" id="pricingWindowNotes">Travel pricing is loaded from the canonical pricing catalog.</div>
+          </article>
+
+          <section class="admin-grid-2">
+            <article class="panel stack">
+              <div>
+                <h2 style="margin:0 0 6px">Manual expense or payable</h2>
+                <p class="mini" style="margin:0">Post cash expenses immediately or open a vendor bill into Accounts Payable.</p>
+              </div>
+              <form id="entryForm" class="stack">
+                <div class="admin-grid-3">
+                  <label>
+                    Mode
+                    <select id="entryMode">
+                      <option value="cash">Paid now</option>
+                      <option value="payable">Vendor bill / payable</option>
+                    </select>
+                  </label>
+                  <label>
+                    Entry date
+                    <input id="entryDate" type="date" />
+                  </label>
+                  <label>
+                    Due date
+                    <input id="entryDueDate" type="date" />
+                  </label>
+                </div>
+                <div class="admin-grid-3">
+                  <label>
+                    Vendor / payee
+                    <input id="entryVendor" placeholder="Vendor name" />
+                  </label>
+                  <label>
+                    Amount before tax
+                    <input id="entryAmount" type="number" step="0.01" min="0.01" value="0.00" />
+                  </label>
+                  <label>
+                    Tax amount
+                    <input id="entryTax" type="number" step="0.01" min="0" value="0.00" />
+                  </label>
+                </div>
+                <div class="admin-grid-2">
+                  <label>
+                    Expense account
+                    <select id="entryExpenseAccount" data-account-role="expense"></select>
+                  </label>
+                  <label>
+                    Payment account
+                    <select id="entryPaymentAccount" data-account-role="payment"></select>
+                  </label>
+                </div>
+                <label>
+                  Memo
+                  <textarea id="entryMemo" rows="3" placeholder="Optional note for this entry"></textarea>
+                </label>
+                <div class="row wrap">
+                  <button class="btn primary" type="submit">Post entry</button>
+                  <span class="mini">Vendor-bill mode credits Accounts Payable until you settle it below.</span>
+                </div>
+              </form>
+            </article>
+
+            <article class="panel stack">
+              <div>
+                <h2 style="margin:0 0 6px">Tax remittance</h2>
+                <p class="mini" style="margin:0">Post a remittance entry that reduces Sales Tax Payable and credits the payment account.</p>
+              </div>
+              <form id="remitForm" class="stack">
+                <div class="admin-grid-3">
+                  <label>
+                    Payment date
+                    <input id="remitDate" type="date" />
+                  </label>
+                  <label>
+                    Amount
+                    <input id="remitAmount" type="number" step="0.01" min="0" value="0.00" />
+                  </label>
+                  <label>
+                    Payment account
+                    <select id="remitPaymentAccount" data-account-role="payment"></select>
+                  </label>
+                </div>
+                <label>
+                  Memo
+                  <textarea id="remitMemo" rows="3" placeholder="Optional remittance note"></textarea>
+                </label>
+                <div class="row wrap">
+                  <button class="btn primary" type="submit">Post remittance</button>
+                  <button class="btn ghost" type="button" id="fillSuggestedRemitBtn">Use suggested amount</button>
+                </div>
+                <div class="mini">Suggested amount updates from the month currently selected above.</div>
+              </form>
+            </article>
+          </section>
+
+          <section class="admin-grid-2">
+            <article class="panel stack">
+              <div class="row wrap" style="justify-content:space-between">
+                <div>
+                  <h2 style="margin:0 0 6px">Profit &amp; loss</h2>
+                  <p class="mini" style="margin:0">Revenue and expenses for the selected month.</p>
+                </div>
+                <div class="tag" id="profitLossPeriod">—</div>
+              </div>
+              <div class="table-lite" id="profitLossSummary"></div>
+              <div class="report-scroll">
+                <div class="table-lite" id="profitLossAccounts"></div>
+              </div>
+            </article>
+
+            <article class="panel stack">
+              <div class="row wrap" style="justify-content:space-between">
+                <div>
+                  <h2 style="margin:0 0 6px">Balance sheet</h2>
+                  <p class="mini" style="margin:0">Ending balances through the selected month.</p>
+                </div>
+                <div class="tag" id="balanceSheetDate">—</div>
+              </div>
+              <div class="report-scroll stack" id="balanceSheetWrap"></div>
+            </article>
+          </section>
+
+          <section class="admin-grid-2">
+            <article class="panel stack">
+              <div class="row wrap" style="justify-content:space-between">
+                <div>
+                  <h2 style="margin:0 0 6px">Cash flow</h2>
+                  <p class="mini" style="margin:0">Direct cash movement grouped into operating, investing, and financing.</p>
+                </div>
+                <div class="tag" id="cashFlowPeriod">—</div>
+              </div>
+              <div class="table-lite" id="cashFlowTotals"></div>
+              <div class="report-scroll">
+                <div class="table-lite" id="cashFlowEntries"></div>
+              </div>
+            </article>
+
+            <article class="panel stack">
+              <div>
+                <h2 style="margin:0 0 6px">Inventory cost completeness</h2>
+                <p class="mini" style="margin:0">Find active items that still lack `cost_cents`, which blocks cleaner COGS posting.</p>
+              </div>
+              <div class="table-lite" id="inventoryCostSummary"></div>
+              <div class="report-scroll">
+                <div class="table-lite" id="inventoryCostMissing"></div>
+              </div>
+            </article>
+          </section>
+
+          <section class="admin-grid-2">
+            <article class="panel stack">
+              <div class="row wrap" style="justify-content:space-between">
+                <div>
+                  <h2 style="margin:0 0 6px">Receivables aging</h2>
+                  <p class="mini" style="margin:0">Outstanding booking balances bucketed by age so follow-up and reconciliation are easier.</p>
+                </div>
+                <div class="tag" id="receivablesAsOf">—</div>
+              </div>
+              <div class="table-lite" id="receivablesSummary"></div>
+              <div class="report-scroll">
+                <div class="table-lite" id="receivablesRows"></div>
+              </div>
+            </article>
+
+            <article class="panel stack">
+              <div class="row wrap" style="justify-content:space-between">
+                <div>
+                  <h2 style="margin:0 0 6px">Estimated booking profitability</h2>
+                  <p class="mini" style="margin:0">Rough booking-level profitability using recognized revenue, direct inventory COGS, and allocated overhead.</p>
+                </div>
+                <div class="tag" id="profitabilityPeriod">—</div>
+              </div>
+              <div class="mini" id="profitabilityMethodNote"></div>
+              <div class="table-lite" id="profitabilitySummary"></div>
+              <div class="report-scroll">
+                <div class="table-lite" id="profitabilityRows"></div>
+              </div>
+            </article>
+          </section>
+
+          <article class="panel stack">
+            <div>
+              <h2 style="margin:0 0 6px">Exports</h2>
+              <p class="mini" style="margin:0">Download CSV files for accountant handoff, month-end review, or cleanup work.</p>
+            </div>
+            <div class="row wrap" style="gap:10px">
+              <button class="btn ghost" type="button" data-export="general_ledger">General ledger</button>
+              <button class="btn ghost" type="button" data-export="profit_and_loss">Profit &amp; loss</button>
+              <button class="btn ghost" type="button" data-export="balance_sheet">Balance sheet</button>
+              <button class="btn ghost" type="button" data-export="cash_flow">Cash flow</button>
+              <button class="btn ghost" type="button" data-export="payables">Payables</button>
+              <button class="btn ghost" type="button" data-export="inventory_missing_costs">Missing item costs</button>
+              <button class="btn ghost" type="button" data-export="receivables_aging">Receivables aging</button>
+              <button class="btn ghost" type="button" data-export="operational_profitability">Profitability</button>
+            </div>
+          </article>
+
+          <article class="panel stack">
+            <div class="row wrap" style="justify-content:space-between;align-items:end">
+              <div>
+                <h2 style="margin:0 0 6px">Month-end checklist</h2>
+                <p class="mini" style="margin:0">Track whether the month’s core accounting review steps are actually finished, not only reported.</p>
+              </div>
+              <div class="tag" id="monthEndChecklistPeriod">—</div>
+            </div>
+            <form id="monthEndChecklistForm" class="stack">
+              <div class="checklist-grid">
+                <label class="checklist-item"><input type="checkbox" id="checkRemittance" /><span><strong>Tax remittance reviewed</strong><br><span class="checklist-meta">Confirm the suggested remittance and post it when ready.</span></span></label>
+                <label class="checklist-item"><input type="checkbox" id="checkPayables" /><span><strong>Payables reviewed</strong><br><span class="checklist-meta">Check open vendor balances and settlement history.</span></span></label>
+                <label class="checklist-item"><input type="checkbox" id="checkReceivables" /><span><strong>Receivables reviewed</strong><br><span class="checklist-meta">Review aging and collect or reconcile balances due.</span></span></label>
+                <label class="checklist-item"><input type="checkbox" id="checkStatements" /><span><strong>Statements exported</strong><br><span class="checklist-meta">Export P&amp;L, balance sheet, cash flow, or general ledger for handoff.</span></span></label>
+                <label class="checklist-item"><input type="checkbox" id="checkInventoryCosts" /><span><strong>Inventory costs reviewed</strong><br><span class="checklist-meta">Clean up active items still missing cost coverage.</span></span></label>
+                <label class="checklist-item"><input type="checkbox" id="checkProfitability" /><span><strong>Profitability reviewed</strong><br><span class="checklist-meta">Review rough booking profitability and overhead assumptions.</span></span></label>
+              </div>
+              <label>
+                Month-end notes
+                <textarea id="monthEndChecklistNotes" rows="3" placeholder="Optional notes for settlement, remittance, exceptions, or accountant handoff."></textarea>
+              </label>
+              <div class="row wrap" style="justify-content:space-between;align-items:center">
+                <div class="mini" id="monthEndChecklistMeta">No month-end checklist saved yet.</div>
+                <button class="btn primary" type="submit">Save checklist</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="panel stack">
+            <div class="row wrap" style="justify-content:space-between;align-items:end">
+              <div>
+                <h2 style="margin:0 0 6px">Payables and settlement history</h2>
+                <p class="mini" style="margin:0">Each vendor bill shows current balance and any partial/full settlements already posted.</p>
+              </div>
+              <div class="tag" id="payablesMeta">—</div>
+            </div>
+            <div id="payablesWrap" class="stack">
+              <div class="mini">No payables loaded yet.</div>
+            </div>
+          </article>
+
+          <article class="panel stack">
+            <div>
+              <h2 style="margin:0 0 6px">Booking accounting records</h2>
+              <p class="mini" style="margin:0">Operational records remain tied to live booking totals, payment events, and balance due.</p>
+            </div>
+            <div id="recordsWrap" class="stack">
+              <div class="mini">No accounting records loaded yet.</div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/assets/admin-auth.js"></script>
+  <script src="/assets/admin-shell.js"></script>
+  <script src="/assets/admin-menu.js"></script>
+  <script>
+    (function () {
+      var state = {
+        accounts: [],
+        reports: null,
+        tax: null,
+        owner: null,
+        recordSummary: null,
+        payables: [],
+        monthEndChecklist: null
+      };
+
+      function qs(selector, root) { return (root || document).querySelector(selector); }
+      function qsa(selector, root) { return Array.prototype.slice.call((root || document).querySelectorAll(selector)); }
+      function money(n) {
+        return new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD" }).format(Number(n || 0));
+      }
+      function esc(v) {
+        return String(v == null ? "" : v).replace(/[&<>"']/g, function (m) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+        });
+      }
+      function setStatus(message, type) {
+        qsa("[data-admin-shell-status]").forEach(function (node) {
+          node.hidden = !message;
+          node.textContent = message || "";
+          node.dataset.state = type || "";
+        });
+      }
+      function todayIso() { return new Date().toISOString().slice(0, 10); }
+      function selectedMonth() { return Number(qs("#monthSelect").value || new Date().getMonth() + 1); }
+      function selectedYear() { return Number(qs("#yearSelect").value || new Date().getFullYear()); }
+      function selectedPayableStatus() { return String(qs("#payableStatusFilter").value || "open"); }
+      function apiJson(url, options) {
+        return fetch(url, Object.assign({ credentials: "include" }, options || {})).then(function (res) {
+          return res.json().catch(function () { return null; }).then(function (out) {
+            if (!res.ok || !(out && out.ok)) {
+              throw new Error((out && out.error) || "Request failed.");
+            }
+            return out;
+          });
+        });
+      }
+      function buildYears() {
+        var now = new Date().getFullYear();
+        var years = [];
+        for (var year = now - 3; year <= now + 1; year += 1) years.push(year);
+        return years;
+      }
+      function bootFilters() {
+        var monthNode = qs("#monthSelect");
+        var yearNode = qs("#yearSelect");
+        var now = new Date();
+        monthNode.innerHTML = Array.prototype.map.call(Array.from({ length: 12 }), function (_, idx) {
+          var value = idx + 1;
+          return '<option value="' + value + '">' + new Date(2000, idx, 1).toLocaleString("en-CA", { month: "long" }) + '</option>';
+        }).join("");
+        yearNode.innerHTML = buildYears().map(function (year) {
+          return '<option value="' + year + '">' + year + '</option>';
+        }).join("");
+        monthNode.value = String(now.getMonth() + 1);
+        yearNode.value = String(now.getFullYear());
+        qs("#entryDate").value = todayIso();
+        qs("#entryDueDate").value = todayIso();
+        qs("#remitDate").value = todayIso();
+      }
+      function accountOptions(filterFn, selectedValue) {
+        return state.accounts.filter(filterFn).map(function (account) {
+          var selected = String(account.code) === String(selectedValue || "") ? ' selected' : '';
+          return '<option value="' + esc(account.code) + '"' + selected + '>' + esc(account.label + ' (' + account.code + ')') + '</option>';
+        }).join("");
+      }
+      function fillAccountSelects() {
+        var expenseHtml = accountOptions(function (account) { return String(account.account_type) === 'expense'; }, 'shop_supplies');
+        var paymentHtml = accountOptions(function (account) { return ['asset', 'liability', 'equity'].includes(String(account.account_type)); }, 'cash');
+        qsa('select[data-account-role="expense"]').forEach(function (node) { node.innerHTML = expenseHtml; if (!node.value) node.value = 'shop_supplies'; });
+        qsa('select[data-account-role="payment"]').forEach(function (node) {
+          node.innerHTML = paymentHtml;
+          if (!node.value) node.value = 'cash';
+        });
+        applyEntryMode();
+      }
+      function applyEntryMode() {
+        var mode = String(qs('#entryMode').value || 'cash');
+        var due = qs('#entryDueDate');
+        var payment = qs('#entryPaymentAccount');
+        due.disabled = mode !== 'payable';
+        if (mode === 'payable') {
+          payment.value = 'accounts_payable';
+        } else if (!payment.value || payment.value === 'accounts_payable') {
+          payment.value = 'cash';
+        }
+      }
+      function renderRecordRows(rows) {
+        var wrap = qs('#recordsWrap');
+        rows = Array.isArray(rows) ? rows : [];
+        if (!rows.length) {
+          wrap.innerHTML = '<div class="mini">No accounting records found.</div>';
+          return;
+        }
+        wrap.innerHTML = rows.map(function (row) {
+          return (
+            '<article class="card">' +
+              '<div class="row wrap" style="justify-content:space-between;gap:10px">' +
+                '<div>' +
+                  '<div class="kicker">' + esc(row.order_status || 'open') + ' · ' + esc(row.accounting_stage || 'open') + '</div>' +
+                  '<h3 style="margin:6px 0">' + esc(row.customer_name || 'Unknown customer') + '</h3>' +
+                  '<div class="mini">' + esc(row.customer_email || '') + (row.customer_phone ? ' · ' + esc(row.customer_phone) : '') + '</div>' +
+                '</div>' +
+                '<div class="mini">' + esc(row.service_date || '') + (row.package_code ? ' · ' + esc(row.package_code) : '') + '</div>' +
+              '</div>' +
+              '<div class="admin-grid-3" style="margin-top:12px">' +
+                '<div><strong>Total</strong><div>' + money(row.total_cad || 0) + '</div></div>' +
+                '<div><strong>Collected</strong><div>' + money(row.collected_total_cad || 0) + '</div></div>' +
+                '<div><strong>Balance</strong><div>' + money(row.balance_due_cad || 0) + '</div></div>' +
+              '</div>' +
+              '<div class="mini" style="margin-top:10px">Booking ' + esc(row.booking_id || '') + ' · Updated ' + esc(new Date(row.updated_at || row.created_at || Date.now()).toLocaleString()) + '</div>' +
+            '</article>'
+          );
+        }).join('');
+      }
+      function renderProfitLoss(report) {
+        var summary = qs('#profitLossSummary');
+        var accounts = qs('#profitLossAccounts');
+        if (!report) {
+          summary.innerHTML = '<div class="mini">No report loaded.</div>';
+          accounts.innerHTML = '';
+          return;
+        }
+        qs('#profitLossPeriod').textContent = (report.period_start || '') + ' to ' + ((report.period_end_exclusive || '').replace(/-01$/, ' month end'));
+        summary.innerHTML = [
+          ['Revenue', money(report.totals && report.totals.revenue || 0)],
+          ['Expenses', money(report.totals && report.totals.expense || 0)],
+          ['Net income', money(report.totals && report.totals.net_income || 0)]
+        ].map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row[0]) + '</span><span>' + esc(row[1]) + '</span></div>';
+        }).join('');
+        accounts.innerHTML = (report.by_account || []).filter(function (row) {
+          return ['revenue', 'expense'].includes(String(row.account_type || '')) && Number(row.amount_cad || 0) !== 0;
+        }).map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row.label || row.account_code) + '</span><span>' + esc(money(row.amount_cad || 0)) + '</span></div>';
+        }).join('') || '<div class="mini">No revenue or expense rows for this month.</div>';
+      }
+      function renderBalanceSheet(report) {
+        var wrap = qs('#balanceSheetWrap');
+        if (!report) {
+          wrap.innerHTML = '<div class="mini">No balance sheet loaded.</div>';
+          return;
+        }
+        qs('#balanceSheetDate').textContent = report.as_of || '—';
+        function section(title, rows, extraRows) {
+          var html = '<article><h3 style="margin:0 0 8px">' + esc(title) + '</h3><div class="table-lite">';
+          html += (rows || []).map(function (row) {
+            return '<div class="table-lite__row"><span>' + esc(row.label || row.account_code) + '</span><span>' + esc(money(row.amount_cad || 0)) + '</span></div>';
+          }).join('') || '<div class="mini">No rows.</div>';
+          html += (extraRows || []).map(function (row) {
+            return '<div class="table-lite__row"><span>' + esc(row.label) + '</span><span>' + esc(money(row.amount_cad || 0)) + '</span></div>';
+          }).join('');
+          html += '</div></article>';
+          return html;
+        }
+        wrap.innerHTML =
+          section('Assets', report.sections && report.sections.assets, []) +
+          section('Liabilities', report.sections && report.sections.liabilities, []) +
+          section('Equity', report.sections && report.sections.equity, [{ label: 'Retained earnings / net income to date', amount_cad: report.totals && report.totals.retained_earnings_cad || 0 }]) +
+          '<article class="table-lite">' +
+            '<div class="table-lite__row"><span>Total assets</span><span>' + esc(money(report.totals && report.totals.assets_cad || 0)) + '</span></div>' +
+            '<div class="table-lite__row"><span>Liabilities and equity</span><span>' + esc(money(report.totals && report.totals.liabilities_and_equity_cad || 0)) + '</span></div>' +
+            '<div class="table-lite__row"><span>Balance delta</span><span class="' + ((report.totals && Math.abs(Number(report.totals.balance_delta_cad || 0)) > 0.01) ? 'danger-note' : '') + '">' + esc(money(report.totals && report.totals.balance_delta_cad || 0)) + '</span></div>' +
+          '</article>';
+      }
+      function renderCashFlow(report) {
+        var totals = qs('#cashFlowTotals');
+        var entries = qs('#cashFlowEntries');
+        if (!report) {
+          totals.innerHTML = '<div class="mini">No cash-flow report loaded.</div>';
+          entries.innerHTML = '';
+          return;
+        }
+        qs('#cashFlowPeriod').textContent = report.period_start + ' to ' + report.period_end_exclusive;
+        totals.innerHTML = [
+          ['Opening cash', report.totals && report.totals.opening_cash_cad || 0],
+          ['Operating', report.totals && report.totals.operating_cad || 0],
+          ['Investing', report.totals && report.totals.investing_cad || 0],
+          ['Financing', report.totals && report.totals.financing_cad || 0],
+          ['Net change', report.totals && report.totals.net_change_cad || 0],
+          ['Closing cash', report.totals && report.totals.closing_cash_cad || 0]
+        ].map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row[0]) + '</span><span>' + esc(money(row[1])) + '</span></div>';
+        }).join('');
+        entries.innerHTML = (report.entries || []).slice(-60).reverse().map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row.entry_date || '') + ' · ' + esc(row.category || '') + '<div class="mini">' + esc(row.entry_type || '') + (row.memo ? ' · ' + esc(row.memo) : '') + '</div></span><span>' + esc(money(row.cash_delta_cad || 0)) + '</span></div>';
+        }).join('') || '<div class="mini">No cash entries found in this month.</div>';
+      }
+      function renderReceivables(report) {
+        var summary = qs('#receivablesSummary');
+        var rowsWrap = qs('#receivablesRows');
+        if (!report) {
+          summary.innerHTML = '<div class="mini">No receivables-aging report loaded.</div>';
+          rowsWrap.innerHTML = '';
+          return;
+        }
+        qs('#receivablesAsOf').textContent = report.as_of || '—';
+        summary.innerHTML = [
+          ['Current', money(report.totals && report.totals.current_cad || 0)],
+          ['1-30 days', money(report.totals && report.totals.due_1_30_cad || 0)],
+          ['31-60 days', money(report.totals && report.totals.due_31_60_cad || 0)],
+          ['61-90 days', money(report.totals && report.totals.due_61_90_cad || 0)],
+          ['91+ days', money(report.totals && report.totals.due_91_plus_cad || 0)],
+          ['Total', money(report.totals && report.totals.total_balance_cad || 0)]
+        ].map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row[0]) + '</span><span>' + esc(row[1]) + '</span></div>';
+        }).join('');
+        rowsWrap.innerHTML = (report.rows || []).slice(0, 40).map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row.customer_name || 'Customer') + '<div class="mini">' + esc(row.service_date || '') + (row.package_code ? ' · ' + esc(row.package_code) : '') + (row.customer_email ? ' · ' + esc(row.customer_email) : '') + '</div></span><span>' + esc(money(row.balance_due_cad || 0)) + '<div class="mini">' + esc(String(row.days_outstanding || 0)) + ' days · ' + esc(row.aging_bucket || '') + '</div></span></div>';
+        }).join('') || '<div class="mini">No open receivables found.</div>';
+      }
+      function renderProfitability(report) {
+        var summary = qs('#profitabilitySummary');
+        var rowsWrap = qs('#profitabilityRows');
+        if (!report) {
+          summary.innerHTML = '<div class="mini">No profitability report loaded.</div>';
+          rowsWrap.innerHTML = '';
+          return;
+        }
+        qs('#profitabilityPeriod').textContent = (report.period_start || '') + ' to ' + (report.period_end_exclusive || '');
+        qs('#profitabilityMethodNote').textContent = report.method_note || '';
+        summary.innerHTML = [
+          ['Recognized revenue', money(report.totals && report.totals.recognized_revenue_cad || 0)],
+          ['Collected revenue', money(report.totals && report.totals.collected_revenue_cad || 0)],
+          ['Direct COGS', money(report.totals && report.totals.direct_cogs_cad || 0)],
+          ['Estimated direct labor', money(report.totals && report.totals.estimated_direct_labor_cad || 0)],
+          ['Contribution after labor', money(report.totals && report.totals.estimated_contribution_after_labor_cad || 0)],
+          ['Allocated overhead pool', money(report.totals && report.totals.overhead_pool_cad || 0)],
+          ['Estimated net', money(report.totals && report.totals.estimated_net_after_overhead_cad || 0)]
+        ].map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row[0]) + '</span><span>' + esc(row[1]) + '</span></div>';
+        }).join('');
+        rowsWrap.innerHTML = (report.rows || []).slice(0, 40).map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row.customer_name || 'Customer') + '<div class="mini">' + esc(row.service_date || '') + (row.package_code ? ' · ' + esc(row.package_code) : '') + (row.booking_id ? ' · ' + esc(row.booking_id) : '') + '</div></span><span>' + esc(money(row.estimated_contribution_after_labor_cad || row.estimated_net_after_overhead_cad || 0)) + '<div class="mini">Revenue ' + esc(money(row.recognized_revenue_cad || 0)) + ' · COGS ' + esc(money(row.direct_cogs_cad || 0)) + ' · Labor ' + esc(money(row.estimated_direct_labor_cad || 0)) + ' · Overhead ' + esc(money(row.allocated_overhead_cad || 0)) + ' · Net ' + esc(money(row.estimated_net_after_overhead_cad || 0)) + '</div></span></div>';
+        }).join('') || '<div class="mini">No booking profitability rows found for this month.</div>';
+      }
+      function renderInventoryCosts(report) {
+        var summary = qs('#inventoryCostSummary');
+        var missing = qs('#inventoryCostMissing');
+        if (!report) {
+          summary.innerHTML = '<div class="mini">No inventory-cost report loaded.</div>';
+          missing.innerHTML = '';
+          return;
+        }
+        summary.innerHTML = [
+          ['Active items', report.totals && report.totals.active_items || 0],
+          ['Costed items', report.totals && report.totals.costed_items || 0],
+          ['Missing cost items', report.totals && report.totals.missing_cost_items || 0],
+          ['Missing cost with stock on hand', report.totals && report.totals.missing_cost_on_hand_items || 0],
+          ['Coverage', String(report.totals && report.totals.cost_coverage_pct || 0) + '%'],
+          ['Costed inventory value', money(report.totals && report.totals.costed_inventory_value_cad || 0)]
+        ].map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row[0]) + '</span><span>' + esc(row[1]) + '</span></div>';
+        }).join('');
+        missing.innerHTML = (report.items_missing_cost || []).map(function (row) {
+          return '<div class="table-lite__row"><span>' + esc(row.name || row.item_key) + '<div class="mini">' + esc((row.item_key || '') + (row.preferred_vendor ? ' · ' + row.preferred_vendor : '')) + '</div></span><span>' + esc(String(row.qty_on_hand || 0) + ' ' + (row.unit_label || '')) + '</span></div>';
+        }).join('') || '<div class="mini">All active inventory items currently have cost data.</div>';
+      }
+      function renderPayables(payables) {
+        var wrap = qs('#payablesWrap');
+        payables = Array.isArray(payables) ? payables : [];
+        qs('#payablesMeta').textContent = payables.length + ' records';
+        if (!payables.length) {
+          wrap.innerHTML = '<div class="mini">No payables found for this filter.</div>';
+          return;
+        }
+        var paymentOptions = accountOptions(function (account) { return ['asset', 'liability', 'equity'].includes(String(account.account_type)); }, 'cash');
+        wrap.innerHTML = payables.map(function (row) {
+          var settlements = Array.isArray(row.settlements) ? row.settlements : [];
+          var settlementHtml = settlements.length
+            ? settlements.map(function (item) {
+                return '<div class="settlement-item"><strong>' + esc(item.entry_date || '') + '</strong> · ' + esc(money(item.total_cad || 0)) + '<div class="mini">' + esc(item.entry_type || '') + (item.memo ? ' · ' + esc(item.memo) : '') + ((item.last_recorded_by_name || item.created_by_name) ? ' · by ' + esc(item.last_recorded_by_name || item.created_by_name) : '') + '</div></div>';
+              }).join('')
+            : '<div class="mini">No settlements posted yet.</div>';
+          var settleForm = Number(row.balance_due_cad || 0) > 0 ? (
+            '<form class="stack payable-settle-form" data-entry-id="' + esc(row.id) + '">' +
+              '<div class="admin-grid-3">' +
+                '<label>Amount<input name="amount_cad" type="number" min="0.01" step="0.01" value="' + esc(Number(row.balance_due_cad || 0).toFixed(2)) + '" /></label>' +
+                '<label>Payment date<input name="payment_date" type="date" value="' + esc(todayIso()) + '" /></label>' +
+                '<label>Payment account<select name="payment_account">' + paymentOptions + '</select></label>' +
+              '</div>' +
+              '<label>Memo<textarea name="memo" rows="2" placeholder="Optional settlement note"></textarea></label>' +
+              '<div class="row wrap"><button class="btn ghost" type="submit">Post settlement</button></div>' +
+            '</form>'
+          ) : '<div class="tag">Paid in full</div>';
+          return (
+            '<article class="payable-card">' +
+              '<div class="row wrap" style="justify-content:space-between;gap:10px">' +
+                '<div>' +
+                  '<div class="kicker">' + esc(row.payment_status || 'open') + '</div>' +
+                  '<h3 style="margin:6px 0">' + esc(row.vendor_name || row.payee_name || 'Vendor bill') + '</h3>' +
+                  '<div class="mini">Entry ' + esc(row.id || '') + (row.due_date ? ' · Due ' + esc(row.due_date) : '') + '</div>' +
+                '</div>' +
+                '<div class="mini">' + esc(row.entry_date || '') + '</div>' +
+              '</div>' +
+              '<div class="admin-grid-3" style="margin-top:12px">' +
+                '<div><strong>Total</strong><div>' + money(row.total_cad || 0) + '</div></div>' +
+                '<div><strong>Settled</strong><div>' + money(row.settled_amount_cad || 0) + '</div></div>' +
+                '<div><strong>Balance</strong><div>' + money(row.balance_due_cad || 0) + '</div></div>' +
+              '</div>' +
+              (row.memo ? '<div class="mini" style="margin-top:10px">' + esc(row.memo) + '</div>' : '') +
+              '<div class="hr"></div>' +
+              '<div><strong>Settlement history</strong><div class="settlement-list">' + settlementHtml + '</div></div>' +
+              '<div class="hr"></div>' + settleForm +
+            '</article>'
+          );
+        }).join('');
+
+        qsa('.payable-settle-form', wrap).forEach(function (form) {
+          form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            var entryId = form.getAttribute('data-entry-id');
+            var payload = {
+              entry_id: entryId,
+              amount_cad: Number(form.elements.amount_cad.value || 0),
+              payment_date: form.elements.payment_date.value || todayIso(),
+              payment_account: form.elements.payment_account.value || 'cash',
+              memo: form.elements.memo.value.trim()
+            };
+            try {
+              setStatus('Posting settlement…');
+              await apiJson('/api/admin/accounting_payable_settle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              setStatus('Settlement posted.', 'success');
+              await refreshAll();
+            } catch (err) {
+              setStatus(err && err.message ? err.message : 'Could not post settlement.', 'error');
+            }
+          });
+        });
+      }
+      function renderMonthEndChecklist(checklist) {
+        state.monthEndChecklist = checklist || null;
+        qs('#monthEndChecklistPeriod').textContent = selectedYear() + '-' + String(selectedMonth()).padStart(2, '0');
+        qs('#checkRemittance').checked = !!(checklist && checklist.remittance_reviewed);
+        qs('#checkPayables').checked = !!(checklist && checklist.payables_reviewed);
+        qs('#checkReceivables').checked = !!(checklist && checklist.receivables_reviewed);
+        qs('#checkStatements').checked = !!(checklist && checklist.statements_exported);
+        qs('#checkInventoryCosts').checked = !!(checklist && checklist.inventory_costs_reviewed);
+        qs('#checkProfitability').checked = !!(checklist && checklist.profitability_reviewed);
+        qs('#monthEndChecklistNotes').value = checklist && checklist.notes ? checklist.notes : '';
+        var meta = 'No month-end checklist saved yet.';
+        if (checklist && checklist.updated_at) {
+          meta = 'Last saved ' + new Date(checklist.updated_at).toLocaleString() + (checklist.updated_by_name ? ' by ' + checklist.updated_by_name : '');
+        }
+        qs('#monthEndChecklistMeta').textContent = meta;
+      }
+      async function loadMonthEndChecklist() {
+        var out = await apiJson('/api/admin/accounting_month_end_checklist?month=' + selectedMonth() + '&year=' + selectedYear());
+        renderMonthEndChecklist(out.checklist || null);
+      }
+      async function saveMonthEndChecklist() {
+        var payload = {
+          month: selectedMonth(),
+          year: selectedYear(),
+          remittance_reviewed: qs('#checkRemittance').checked,
+          payables_reviewed: qs('#checkPayables').checked,
+          receivables_reviewed: qs('#checkReceivables').checked,
+          statements_exported: qs('#checkStatements').checked,
+          inventory_costs_reviewed: qs('#checkInventoryCosts').checked,
+          profitability_reviewed: qs('#checkProfitability').checked,
+          notes: qs('#monthEndChecklistNotes').value.trim()
+        };
+        var out = await apiJson('/api/admin/accounting_month_end_checklist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        renderMonthEndChecklist(out.checklist || null);
+      }
+      async function loadPricingWindow() {
+        try {
+          var res = await fetch('/api/pricing_catalog_public', { credentials: 'include', cache: 'no-store' });
+          var out = await res.json().catch(function () { return null; });
+          if (!res.ok || !out) throw new Error(out && out.error || 'Could not load pricing window.');
+          state.pricingCatalog = out;
+          renderPricingWindow();
+        } catch (err) {
+          qs('#pricingWindowSummary').innerHTML = '<div class="mini danger-note">' + esc(err && err.message ? err.message : 'Could not load pricing window.') + '</div>';
+          qs('#pricingWindowTiers').innerHTML = '';
+        }
+      }
+      function renderPricingWindow() {
+        var catalog = state.pricingCatalog || {};
+        var bookingRules = catalog.booking_rules || {};
+        var travel = bookingRules.travel_pricing || {};
+        qs('#pricingWindowSummary').innerHTML = [
+          ['Packages', String((catalog.packages || []).length)],
+          ['Add-ons', String((catalog.addons || []).length)],
+          ['Service areas', String((catalog.service_areas || []).length)],
+          ['Default area', esc(bookingRules.default_service_area || '—')],
+          ['Availability window', String(bookingRules.availability_window_days || 21) + ' days']
+        ].map(function (row) {
+          return '<div class="panel"><div class="kicker">' + row[0] + '</div><div class="hero-stat">' + row[1] + '</div></div>';
+        }).join('');
+        var tiers = ['urban','township','hamlet','coastal','rural','out_of_zone'];
+        qs('#pricingWindowTiers').innerHTML = tiers.map(function (tier) {
+          return '<div class="pricing-tier"><div class="kicker">' + esc(tier.replace(/_/g, ' ')) + '</div><strong>' + money(Number(travel[tier] || 0)) + '</strong></div>';
+        }).join('');
+        qs('#pricingWindowNotes').textContent = travel.notes || 'Travel pricing is loaded from the canonical pricing catalog.';
+      }
+      function renderSummaryCards() {
+        var recordSummary = state.recordSummary || {};
+        var tax = state.tax || {};
+        var pnl = state.reports && state.reports.profit_loss || {};
+        var statements = state.reports && state.reports.statements || {};
+        var inventory = statements.inventory_costs || {};
+        var receivables = statements.receivables_aging || {};
+        var payables = state.payables || [];
+        var outstanding = payables.reduce(function (sum, row) { return sum + Number(row.balance_due_cad || 0); }, 0);
+        var openCount = payables.filter(function (row) { return ['open', 'partial'].includes(String(row.payment_status || '')); }).length;
+        qs('#sumOpen').textContent = money(receivables.totals && receivables.totals.total_balance_cad || 0);
+        qs('#sumOpenMeta').textContent = String(receivables.totals && receivables.totals.record_count || recordSummary.open || 0) + ' booking records with balance due';
+        qs('#sumPayables').textContent = money(outstanding);
+        qs('#sumPayablesCount').textContent = openCount + ' vendor bills with balance due';
+        qs('#sumTaxDue').textContent = money(tax.suggested_remittance_cad || 0);
+        qs('#sumNetIncome').textContent = money(pnl.totals && pnl.totals.net_income || 0);
+        qs('#sumClosingCash').textContent = money(statements.cash_flow && statements.cash_flow.totals && statements.cash_flow.totals.closing_cash_cad || 0);
+        qs('#sumMissingCosts').textContent = String(inventory.totals && inventory.totals.missing_cost_items || 0);
+        qs('#sumCostCoverage').textContent = String(inventory.totals && inventory.totals.cost_coverage_pct || 0) + '% coverage';
+      }
+      async function loadAccounts() {
+        var out = await apiJson('/api/admin/accounting_accounts_list');
+        state.accounts = Array.isArray(out.accounts) ? out.accounts : [];
+        fillAccountSelects();
+      }
+      async function loadRecords() {
+        var q = qs('#searchQ').value.trim();
+        var out = await apiJson('/api/admin/accounting_list' + (q ? ('?q=' + encodeURIComponent(q)) : ''));
+        state.recordSummary = out.summary || {};
+        renderRecordRows(out.records || []);
+      }
+      async function loadPayables() {
+        var status = selectedPayableStatus();
+        var out = await apiJson('/api/admin/accounting_payables_list?status=' + encodeURIComponent(status));
+        state.payables = Array.isArray(out.payables) ? out.payables : [];
+        renderPayables(state.payables);
+      }
+      async function loadReports() {
+        var month = selectedMonth();
+        var year = selectedYear();
+        var results = await Promise.all([
+          apiJson('/api/admin/accounting_report?month=' + month + '&year=' + year),
+          apiJson('/api/admin/accounting_statement_report?month=' + month + '&year=' + year),
+          apiJson('/api/admin/accounting_tax_report?month=' + month + '&year=' + year),
+          apiJson('/api/admin/accounting_owner_report?month=' + month + '&year=' + year)
+        ]);
+        state.reports = {
+          profit_loss: results[0].report || null,
+          statements: {
+            balance_sheet: results[1].balance_sheet || null,
+            cash_flow: results[1].cash_flow || null,
+            inventory_costs: results[1].inventory_costs || null,
+            receivables_aging: results[1].receivables_aging || null,
+            operational_profitability: results[1].operational_profitability || null
+          }
+        };
+        state.tax = results[2].report || null;
+        state.owner = results[3].report || null;
+        renderProfitLoss(state.reports.profit_loss);
+        renderBalanceSheet(state.reports.statements.balance_sheet);
+        renderCashFlow(state.reports.statements.cash_flow);
+        renderInventoryCosts(state.reports.statements.inventory_costs);
+        renderReceivables(state.reports.statements.receivables_aging);
+        renderProfitability(state.reports.statements.operational_profitability);
+        qs('#remitAmount').value = Number(state.tax && state.tax.suggested_remittance_cad || 0).toFixed(2);
+      }
+      async function refreshAll() {
+        setStatus('Refreshing accounting workspace…');
+        await Promise.all([loadRecords(), loadPayables(), loadReports(), loadMonthEndChecklist(), loadPricingWindow()]);
+        renderSummaryCards();
+        setStatus('Accounting workspace refreshed.', 'success');
+      }
+      function bindActions() {
+        qs('#filterForm').addEventListener('submit', async function (event) {
+          event.preventDefault();
+          try {
+            await refreshAll();
+          } catch (err) {
+            setStatus(err && err.message ? err.message : 'Could not refresh accounting workspace.', 'error');
+          }
+        });
+
+        qs('#entryMode').addEventListener('change', applyEntryMode);
+
+        qs('#entryForm').addEventListener('submit', async function (event) {
+          event.preventDefault();
+          var payload = {
+            mode: qs('#entryMode').value,
+            entry_date: qs('#entryDate').value || todayIso(),
+            due_date: qs('#entryDueDate').value || null,
+            vendor_name: qs('#entryVendor').value.trim(),
+            amount_cad: Number(qs('#entryAmount').value || 0),
+            tax_cad: Number(qs('#entryTax').value || 0),
+            expense_account: qs('#entryExpenseAccount').value,
+            payment_account: qs('#entryPaymentAccount').value,
+            memo: qs('#entryMemo').value.trim()
+          };
+          try {
+            setStatus('Posting accounting entry…');
+            await apiJson('/api/admin/accounting_entry_save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            qs('#entryAmount').value = '0.00';
+            qs('#entryTax').value = '0.00';
+            qs('#entryMemo').value = '';
+            setStatus('Accounting entry posted.', 'success');
+            await refreshAll();
+          } catch (err) {
+            setStatus(err && err.message ? err.message : 'Could not post accounting entry.', 'error');
+          }
+        });
+
+        qs('#fillSuggestedRemitBtn').addEventListener('click', function () {
+          qs('#remitAmount').value = Number(state.tax && state.tax.suggested_remittance_cad || 0).toFixed(2);
+        });
+
+        qs('#remitForm').addEventListener('submit', async function (event) {
+          event.preventDefault();
+          var payload = {
+            month: selectedMonth(),
+            year: selectedYear(),
+            payment_date: qs('#remitDate').value || todayIso(),
+            amount_cad: Number(qs('#remitAmount').value || 0),
+            payment_account: qs('#remitPaymentAccount').value || 'cash',
+            memo: qs('#remitMemo').value.trim()
+          };
+          try {
+            setStatus('Posting tax remittance…');
+            await apiJson('/api/admin/accounting_remittance_post', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            qs('#remitMemo').value = '';
+            setStatus('Tax remittance posted.', 'success');
+            await refreshAll();
+          } catch (err) {
+            setStatus(err && err.message ? err.message : 'Could not post remittance.', 'error');
+          }
+        });
+
+        qsa('[data-export]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            var type = button.getAttribute('data-export');
+            var url = '/api/admin/accounting_export?type=' + encodeURIComponent(type) + '&month=' + selectedMonth() + '&year=' + selectedYear();
+            if (type === 'payables') url += '&status=' + encodeURIComponent(selectedPayableStatus());
+            window.location.href = url;
+          });
+        });
+
+        qs('#monthEndChecklistForm').addEventListener('submit', async function (event) {
+          event.preventDefault();
+          try {
+            setStatus('Saving month-end checklist…');
+            await saveMonthEndChecklist();
+            setStatus('Month-end checklist saved.', 'success');
+          } catch (err) {
+            setStatus(err && err.message ? err.message : 'Could not save month-end checklist.', 'error');
+          }
+        });
+      }
+
+      window.AdminShell.boot({
+        pageKey: 'admin-accounting',
+        onReady: async function () {
+          if (window.AdminMenu && typeof window.AdminMenu.render === 'function') {
+            window.AdminMenu.render({ currentPage: 'admin-accounting' });
+          }
+          bootFilters();
+          bindActions();
+          await loadAccounts();
+          await refreshAll();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

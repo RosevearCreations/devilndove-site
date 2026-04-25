@@ -1,0 +1,563 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Blocks | Rosie Dazzlers</title>
+  <meta name="description" content="Admin availability blocks for Rosie Dazzlers." />
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="stylesheet" href="/assets/site.css" />
+</head>
+<body data-page="admin-blocks">
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/admin.html">
+        <img data-logo alt="Rosie Dazzlers logo" />
+        <strong>Rosie Dazzlers Admin</strong>
+      </a>
+
+      <button id="navToggle" class="btn small ghost nav-toggle" type="button" aria-expanded="false" aria-controls="navLinks">
+        Menu
+      </button>
+
+      <nav id="navLinks" class="nav-links">
+        <a href="/admin.html">Dashboard</a>
+        <a href="/admin-booking.html">Bookings</a>
+        <a href="/admin-blocks.html">Blocks</a>
+        <a href="/admin-progress.html">Progress</a>
+        <a href="/admin-promos.html">Promos</a>
+        <a href="/book.html">Public Site</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container app-shell">
+    <aside class="app-shell__menu" data-admin-menu-mount></aside>
+
+    <div class="app-shell__content">
+      <section class="section">
+        <div class="panel">
+          <img data-banner alt="Rosie Dazzlers banner" style="display:block;width:100%;height:auto;object-fit:contain" />
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="hero">
+          <div>
+            <div class="badge">Admin Blocks</div>
+            <h1>Control booking availability</h1>
+            <p>Block full dates, AM / PM slots, or an entire date range so customers cannot book unavailable times.</p>
+          </div>
+          <div class="panel">
+            <div class="kicker">Current view</div>
+            <h3 style="margin:6px 0 8px">Availability blocks</h3>
+            <div class="kicker">The calendar below marks available dates in green, full blocked dates in red, and partial slot blocks in amber.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div id="pageNotice" class="notice">Ready.</div>
+      </section>
+
+      <section class="section">
+        <div class="grid cards">
+          <div class="panel">
+            <h2>Staff session</h2>
+            <div class="kicker" id="sessionMeta">Checking signed-in staff session…</div>
+            <form id="adminForm" class="form">
+              <label>
+                Signed-in staff session
+                <input id="adminPassword" name="adminPassword" type="password" autocomplete="off" placeholder="Optional legacy fallback" />
+              </label>
+
+              <div>
+                <button class="btn primary" type="submit">Load blocks</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h2>Quick note</h2>
+            <div class="kicker">
+              Full-date blocks prevent all booking for that day.
+              Slot blocks only prevent AM or PM.
+              Range blocks save repeated closures all at once.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid cards">
+          <div class="panel">
+            <h2>Block full date</h2>
+            <form id="blockDateForm" class="form">
+              <label>
+                Date
+                <input id="blockDate" name="blockDate" type="date" required />
+              </label>
+
+              <label>
+                Reason
+                <input id="blockDateReason" name="blockDateReason" type="text" placeholder="Optional reason" />
+              </label>
+
+              <div>
+                <button id="blockDateBtn" class="btn primary" type="submit" disabled>Block date</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h2>Block slot</h2>
+            <form id="blockSlotForm" class="form">
+              <label>
+                Date
+                <input id="blockSlotDate" name="blockSlotDate" type="date" required />
+              </label>
+
+              <label>
+                Slot
+                <select id="blockSlotValue" name="blockSlotValue">
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </label>
+
+              <label>
+                Reason
+                <input id="blockSlotReason" name="blockSlotReason" type="text" placeholder="Optional reason" />
+              </label>
+
+              <div>
+                <button id="blockSlotBtn" class="btn primary" type="submit" disabled>Block slot</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h2>Block time frame</h2>
+            <form id="blockRangeForm" class="form">
+              <div class="grid block-range-grid">
+                <label>
+                  From date
+                  <input id="rangeStartDate" name="rangeStartDate" type="date" required />
+                </label>
+                <label>
+                  To date
+                  <input id="rangeEndDate" name="rangeEndDate" type="date" required />
+                </label>
+              </div>
+
+              <div class="grid block-range-grid">
+                <label>
+                  Apply as
+                  <select id="rangeMode" name="rangeMode">
+                    <option value="date">Full day</option>
+                    <option value="slot">AM / PM slot</option>
+                  </select>
+                </label>
+                <label>
+                  Slot selection
+                  <select id="rangeSlotValue" name="rangeSlotValue">
+                    <option value="BOTH">AM and PM</option>
+                    <option value="AM">AM only</option>
+                    <option value="PM">PM only</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                Reason
+                <input id="rangeReason" name="rangeReason" type="text" placeholder="Optional reason for the whole range" />
+              </label>
+
+              <div class="cta-row">
+                <button id="blockRangeBtn" class="btn primary" type="submit" disabled>Block time frame</button>
+                <span class="kicker">Use this when you need to block several consecutive dates at once.</span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="panel">
+          <div class="block-calendar-toolbar">
+            <div>
+              <h2 style="margin:0">Block calendar</h2>
+              <div class="kicker">Click a date to prefill the single-date block forms.</div>
+            </div>
+            <div class="cta-row">
+              <button id="calendarPrevBtn" class="btn small ghost" type="button">Previous month</button>
+              <strong id="calendarMonthLabel">Calendar</strong>
+              <button id="calendarNextBtn" class="btn small ghost" type="button">Next month</button>
+            </div>
+          </div>
+          <div class="calendar-legend" style="margin-top:12px">
+            <span class="calendar-legend-chip is-open">Available</span>
+            <span class="calendar-legend-chip is-closed">Blocked date</span>
+            <span class="calendar-legend-chip is-partial">AM / PM blocked</span>
+          </div>
+          <div id="blockCalendarMount" class="block-calendar" style="margin-top:12px">
+            <div class="notice">Load blocks to view the calendar.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid cards">
+          <div class="panel">
+            <div class="block-list-head">
+              <h2>Blocked dates</h2>
+              <div class="kicker" id="dateBlocksCount">0 items</div>
+            </div>
+            <div id="dateBlocksList" class="grid blocks-list-scroll" style="margin-top:12px">
+              <div class="notice">Blocks not loaded yet.</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="block-list-head">
+              <h2>Blocked slots</h2>
+              <div class="kicker" id="slotBlocksCount">0 items</div>
+            </div>
+            <div id="slotBlocksList" class="grid blocks-list-scroll" style="margin-top:12px">
+              <div class="notice">Blocks not loaded yet.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer container" data-footer></footer>
+
+  <script src="/assets/admin-runtime.js"></script>
+  <script src="/assets/admin-auth.js"></script>
+  <script src="/assets/admin-shell.js"></script>
+  <script src="/assets/admin-menu.js"></script>
+  <script src="/assets/admin-page-init.js"></script>
+  <script src="/assets/chrome.js"></script>
+  <script type="module">
+    import { setBrandImages, setFooter } from "/assets/site.js";
+
+    const runtime = window.AdminRuntime;
+    let currentPassword = "";
+    let currentData = { date_blocks: [], slot_blocks: [] };
+    let calendarMonth = startOfMonth(new Date());
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function setNotice(message, kind = "") {
+      const el = document.querySelector("#pageNotice");
+      if (!el) return;
+      el.className = kind ? `notice ${kind}` : "notice";
+      el.textContent = message;
+    }
+
+    async function apiPost(url, password, body) {
+      const result = await runtime.requestJson(url, { method: "POST", body: body || {}, password: password || undefined });
+      if (!result.ok) throw new Error(runtime.normalizeError(result, `Request failed for ${url}`));
+      return result.data || {};
+    }
+
+    function startOfMonth(input) {
+      const d = new Date(input);
+      d.setHours(12,0,0,0);
+      d.setDate(1);
+      return d;
+    }
+
+    function formatMonthLabel(date) {
+      return new Intl.DateTimeFormat('en-CA', { month: 'long', year: 'numeric' }).format(date);
+    }
+
+    function buildBlockMaps(data) {
+      const dateSet = new Set();
+      const slotMap = new Map();
+      (Array.isArray(data.date_blocks) ? data.date_blocks : []).forEach((item) => {
+        if (item?.blocked_date) dateSet.add(item.blocked_date);
+      });
+      (Array.isArray(data.slot_blocks) ? data.slot_blocks : []).forEach((item) => {
+        const date = item?.blocked_date;
+        const slot = String(item?.slot || '').toUpperCase();
+        if (!date || !slot) return;
+        const list = slotMap.get(date) || [];
+        list.push(slot);
+        slotMap.set(date, list);
+      });
+      return { dateSet, slotMap };
+    }
+
+    function prefillDate(date) {
+      const selectors = ['#blockDate', '#blockSlotDate', '#rangeStartDate', '#rangeEndDate'];
+      selectors.forEach((sel) => {
+        const el = document.querySelector(sel);
+        if (el && !el.value) el.value = date;
+      });
+      const singleDate = document.querySelector('#blockDate');
+      if (singleDate) singleDate.value = date;
+      const slotDate = document.querySelector('#blockSlotDate');
+      if (slotDate) slotDate.value = date;
+    }
+
+    function renderCalendar(data) {
+      const wrap = document.querySelector('#blockCalendarMount');
+      const label = document.querySelector('#calendarMonthLabel');
+      if (!wrap || !label) return;
+      label.textContent = formatMonthLabel(calendarMonth);
+      const { dateSet, slotMap } = buildBlockMaps(data);
+      const monthStart = startOfMonth(calendarMonth);
+      const firstWeekday = monthStart.getDay();
+      const gridStart = new Date(monthStart);
+      gridStart.setDate(gridStart.getDate() - firstWeekday);
+      const monthIndex = monthStart.getMonth();
+      const weekdayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const cells = [];
+
+      for (let i = 0; i < 42; i += 1) {
+        const current = new Date(gridStart);
+        current.setDate(gridStart.getDate() + i);
+        const iso = current.toISOString().slice(0, 10);
+        const inMonth = current.getMonth() === monthIndex;
+        const isClosed = dateSet.has(iso);
+        const slots = slotMap.get(iso) || [];
+        const partialText = slots.length ? Array.from(new Set(slots)).join(' / ') : '';
+        const stateClass = isClosed ? 'is-closed' : partialText ? 'is-partial' : 'is-open';
+        const helper = isClosed ? 'Blocked all day' : partialText ? `Blocked: ${partialText}` : 'Available';
+        cells.push(`
+          <button class="block-day ${stateClass}${inMonth ? '' : ' is-other-month'}" type="button" data-calendar-date="${escapeHtml(iso)}">
+            <span class="block-day__num">${current.getDate()}</span>
+            <span class="block-day__state">${escapeHtml(helper)}</span>
+          </button>
+        `);
+      }
+
+      wrap.innerHTML = `
+        <div class="block-calendar-grid block-calendar-grid--head">${weekdayNames.map((name) => `<div class="block-day-header">${name}</div>`).join('')}</div>
+        <div class="block-calendar-grid">${cells.join('')}</div>
+      `;
+
+      wrap.querySelectorAll('[data-calendar-date]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const date = btn.getAttribute('data-calendar-date');
+          prefillDate(date);
+          setNotice(`Prefilled ${date} into the block forms.`, 'ok');
+        });
+      });
+    }
+
+    function renderDateBlocks(data) {
+      const wrap = document.querySelector("#dateBlocksList");
+      const count = document.querySelector('#dateBlocksCount');
+      if (!wrap) return;
+
+      const items = Array.isArray(data.date_blocks) ? data.date_blocks : [];
+      if (count) count.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
+      if (!items.length) {
+        wrap.innerHTML = `<div class="notice">No blocked dates.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = items.map((item) => `
+        <article class="card compact-card">
+          <h3>${escapeHtml(item.blocked_date || "—")}</h3>
+          <p>${escapeHtml(item.reason || "No reason provided")}</p>
+          <div class="hr"></div>
+          <button class="btn small ghost" type="button" data-unblock-date="${escapeHtml(item.blocked_date || "")}">Unblock date</button>
+        </article>
+      `).join("");
+
+      wrap.querySelectorAll("[data-unblock-date]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          try {
+            setNotice("Removing date block…");
+            await apiPost("/api/admin/unblock_date", currentPassword, {
+              blocked_date: btn.getAttribute("data-unblock-date")
+            });
+            await refreshBlocks();
+            setNotice("Date block removed.", "ok");
+          } catch (err) {
+            setNotice(err.message || "Could not remove date block.", "bad");
+          }
+        });
+      });
+    }
+
+    function renderSlotBlocks(data) {
+      const wrap = document.querySelector("#slotBlocksList");
+      const count = document.querySelector('#slotBlocksCount');
+      if (!wrap) return;
+
+      const items = Array.isArray(data.slot_blocks) ? data.slot_blocks : [];
+      if (count) count.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
+      if (!items.length) {
+        wrap.innerHTML = `<div class="notice">No blocked slots.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = items.map((item) => `
+        <article class="card compact-card">
+          <h3>${escapeHtml(item.blocked_date || "—")} · ${escapeHtml(item.slot || "—")}</h3>
+          <p>${escapeHtml(item.reason || "No reason provided")}</p>
+          <div class="hr"></div>
+          <button
+            class="btn small ghost"
+            type="button"
+            data-unblock-slot-date="${escapeHtml(item.blocked_date || "")}"
+            data-unblock-slot-value="${escapeHtml(item.slot || "")}"
+          >Unblock slot</button>
+        </article>
+      `).join("");
+
+      wrap.querySelectorAll("[data-unblock-slot-date]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          try {
+            setNotice("Removing slot block…");
+            await apiPost("/api/admin/unblock_slot", currentPassword, {
+              blocked_date: btn.getAttribute("data-unblock-slot-date"),
+              slot: btn.getAttribute("data-unblock-slot-value")
+            });
+            await refreshBlocks();
+            setNotice("Slot block removed.", "ok");
+          } catch (err) {
+            setNotice(err.message || "Could not remove slot block.", "bad");
+          }
+        });
+      });
+    }
+
+    function syncSessionMeta(actor) {
+      var meta = document.querySelector("#sessionMeta");
+      if (!meta) return;
+      meta.textContent = runtime.bridgeLabel(actor || window.AdminAuth.getActor(), currentPassword);
+    }
+
+    async function refreshBlocks() {
+      syncSessionMeta();
+      const data = await apiPost("/api/admin/blocks", currentPassword, {});
+      currentData = data || { date_blocks: [], slot_blocks: [] };
+      renderDateBlocks(currentData);
+      renderSlotBlocks(currentData);
+      renderCalendar(currentData);
+      syncSessionMeta(data && data.actor ? data.actor : null);
+
+      document.querySelector("#blockDateBtn").disabled = false;
+      document.querySelector("#blockSlotBtn").disabled = false;
+      document.querySelector("#blockRangeBtn").disabled = false;
+    }
+
+    async function boot() {
+      setBrandImages();
+      setFooter();
+      syncSessionMeta();
+
+      document.querySelector("#adminForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        currentPassword = document.querySelector("#adminPassword").value.trim();
+        try {
+          setNotice("Loading blocks…");
+          await refreshBlocks();
+          setNotice("Blocks loaded.", "ok");
+        } catch (err) {
+          setNotice(err.message || "Could not load blocks.", "bad");
+        }
+      });
+
+      document.querySelector("#blockDateForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          setNotice("Blocking date…");
+          await apiPost("/api/admin/block_date", currentPassword, {
+            blocked_date: document.querySelector("#blockDate").value,
+            reason: document.querySelector("#blockDateReason").value.trim()
+          });
+          document.querySelector("#blockDateReason").value = "";
+          await refreshBlocks();
+          setNotice("Date blocked.", "ok");
+        } catch (err) {
+          setNotice(err.message || "Could not block date.", "bad");
+        }
+      });
+
+      document.querySelector("#blockSlotForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          setNotice("Blocking slot…");
+          await apiPost("/api/admin/block_slot", currentPassword, {
+            blocked_date: document.querySelector("#blockSlotDate").value,
+            slot: document.querySelector("#blockSlotValue").value,
+            reason: document.querySelector("#blockSlotReason").value.trim()
+          });
+          document.querySelector("#blockSlotReason").value = "";
+          await refreshBlocks();
+          setNotice("Slot blocked.", "ok");
+        } catch (err) {
+          setNotice(err.message || "Could not block slot.", "bad");
+        }
+      });
+
+      document.querySelector('#rangeMode').addEventListener('change', (event) => {
+        const showSlot = String(event.target.value || 'date') === 'slot';
+        document.querySelector('#rangeSlotValue').closest('label').style.display = showSlot ? '' : 'none';
+      });
+      document.querySelector('#rangeMode').dispatchEvent(new Event('change'));
+
+      document.querySelector('#blockRangeForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const mode = document.querySelector('#rangeMode').value;
+        const startDate = document.querySelector('#rangeStartDate').value;
+        const endDate = document.querySelector('#rangeEndDate').value;
+        const slot = document.querySelector('#rangeSlotValue').value;
+        const reason = document.querySelector('#rangeReason').value.trim();
+        try {
+          setNotice('Blocking time frame…');
+          const result = await apiPost('/api/admin/blocks_range_save', currentPassword, {
+            mode,
+            start_date: startDate,
+            end_date: endDate,
+            slot,
+            reason
+          });
+          await refreshBlocks();
+          document.querySelector('#rangeReason').value = '';
+          const count = Number(result?.count || 0);
+          setNotice(`Time frame blocked. ${count} block item${count === 1 ? '' : 's'} saved.`, 'ok');
+        } catch (err) {
+          setNotice(err.message || 'Could not block time frame.', 'bad');
+        }
+      });
+
+      document.querySelector('#calendarPrevBtn').addEventListener('click', () => {
+        calendarMonth.setMonth(calendarMonth.getMonth() - 1);
+        renderCalendar(currentData);
+      });
+      document.querySelector('#calendarNextBtn').addEventListener('click', () => {
+        calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+        renderCalendar(currentData);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await boot();
+      await window.AdminPageInit.init({
+        pageKey: "admin-blocks",
+        onReady: async ({ actor }) => {
+          syncSessionMeta(actor);
+          document.querySelector("#adminForm").requestSubmit();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

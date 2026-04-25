@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Crew Time & Payroll | Rosie Dazzlers</title>
+  <meta name="description" content="Track crew time, payroll, staff availability, and service-duration insights for Rosie Dazzlers." />
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="stylesheet" href="/assets/site.css" />
+  <style>
+    .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+    .metric{padding:14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+    .metric .value{font-size:1.35rem;font-weight:800}
+    .stack{display:grid;gap:14px}
+    .table-wrap{overflow:auto;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.03)}
+    table.admin-table{width:100%;border-collapse:collapse;min-width:980px}
+    .admin-table th,.admin-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top}
+    .admin-table th{font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;color:#93c5fd;background:rgba(15,23,42,.72)}
+    .admin-table .num{text-align:right;white-space:nowrap}
+    .flag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:.75rem;font-weight:700;background:rgba(249,115,22,.18);color:#fdba74}
+    .flag.ok{background:rgba(34,197,94,.16);color:#bbf7d0}
+    .mini-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .block-card{padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04)}
+    .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .split{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+    .kicker strong{color:#e2e8f0}
+    @media (max-width: 980px){ .split{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body data-page="admin-payroll">
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/admin.html">
+        <img data-logo alt="Rosie Dazzlers logo" />
+        <strong>Rosie Dazzlers Admin</strong>
+      </a>
+      <button id="navToggle" class="btn small ghost nav-toggle" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
+      <nav id="navLinks" class="nav-links">
+        <a href="/admin.html">Dashboard</a>
+        <a href="/admin-booking.html">Bookings</a>
+        <a href="/admin-assign.html">Assign Crew</a>
+        <a href="/admin-staff.html">Staff</a>
+        <a href="/admin-payroll.html">Crew Time &amp; Payroll</a>
+        <a href="/admin-accounting.html">Accounting</a>
+        <a href="/book.html">Public Site</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div data-admin-shell-status class="notice" hidden></div>
+    <div data-admin-shell-loading class="section"><div class="panel">Loading crew time and payroll…</div></div>
+    <div data-admin-shell-ready hidden>
+      <section class="section panel">
+        <div class="badge">Crew Time &amp; Payroll</div>
+        <h1 style="margin:10px 0 6px">Crew availability, hours, and payroll</h1>
+        <p class="kicker" style="margin:0">Tie staff availability, logged hours, booking workload, payroll estimates, and service-duration trends together from one internal screen. Logged job usage stays operational, while payroll runs can optionally post a payroll journal into accounting.</p>
+        <div class="toolbar" style="margin-top:14px">
+          <a class="btn ghost" href="/admin-staff.html">Open staff records</a>
+          <a class="btn ghost" href="/admin-accounting.html">Open accounting</a>
+        </div>
+      </section>
+
+      <section class="section panel stack">
+        <div class="filters">
+          <label>Period start<input id="startDate" type="date" /></label>
+          <label>Period end<input id="endDate" type="date" /></label>
+          <label>Payroll note<textarea id="payrollNote" rows="2" placeholder="Optional payroll memo for this run"></textarea></label>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" id="refreshBtn" type="button">Refresh summary</button>
+          <button class="btn ghost" id="saveDraftBtn" type="button">Save payroll draft</button>
+          <button class="btn ghost" id="postPayrollBtn" type="button">Post payroll run to accounting</button>
+        </div>
+      </section>
+
+      <section class="section metrics" id="metricGrid"></section>
+
+      <section class="section split">
+        <div class="panel stack">
+          <div>
+            <h2 style="margin:0 0 6px">Staff hours and workload</h2>
+            <p class="mini" style="margin:0">Logged hours combine stopwatch-style job-state history plus manual time entries. Scheduled hours are estimated from assigned booking slots so you can spot overloads earlier.</p>
+          </div>
+          <div class="table-wrap"><table class="admin-table"><thead><tr><th>Staff</th><th>Role</th><th class="num">Logged hrs</th><th class="num">Scheduled hrs</th><th class="num">Gross pay</th><th>Availability</th><th>Review</th></tr></thead><tbody id="staffHoursBody"><tr><td colspan="7">No data yet.</td></tr></tbody></table></div>
+        </div>
+        <div class="panel stack">
+          <div>
+            <h2 style="margin:0 0 6px">Availability blocks</h2>
+            <p class="mini" style="margin:0">Use blocks for vacation, sick days, training, or light-duty periods. These do not remove staff from the system; they flag scheduling conflicts and crew availability.</p>
+          </div>
+          <div class="mini-grid">
+            <label>Staff<select id="availStaff"></select></label>
+            <label>Type<select id="availType"><option value="unavailable">Unavailable</option><option value="vacation">Vacation</option><option value="sick">Sick</option><option value="training">Training</option><option value="light_duty">Light duty</option></select></label>
+            <label>Start<input id="availStart" type="datetime-local" /></label>
+            <label>End<input id="availEnd" type="datetime-local" /></label>
+          </div>
+          <label>Reason / note<textarea id="availNote" rows="2" placeholder="Why is this block needed?"></textarea></label>
+          <div class="toolbar"><button class="btn primary" id="saveAvailBtn" type="button">Save block</button><button class="btn ghost" id="refreshAvailBtn" type="button">Reload blocks</button></div>
+          <div id="availabilityList" class="stack"><div class="mini">No availability blocks loaded.</div></div>
+        </div>
+      </section>
+
+      <section class="section grid cards">
+        <article class="card">
+          <h2 style="margin-top:0">Average site time by package</h2>
+          <div id="packageInsights" class="table-lite"><div class="mini">No package insight yet.</div></div>
+        </article>
+        <article class="card">
+          <h2 style="margin-top:0">Average job time when add-on is present</h2>
+          <div id="addonInsights" class="table-lite"><div class="mini">No add-on insight yet.</div></div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer container" data-footer></footer>
+
+  <script src="/assets/admin-runtime.js"></script>
+  <script src="/assets/admin-auth.js"></script>
+  <script src="/assets/admin-shell.js"></script>
+  <script src="/assets/admin-menu.js"></script>
+  <script src="/assets/admin-page-init.js"></script>
+  <script src="/assets/chrome.js"></script>
+  <script type="module">
+    import { setBrandImages, setFooter } from "/assets/site.js";
+
+    const runtime = window.AdminRuntime;
+    const state = { summary: null, staff: [], availabilityBlocks: [] };
+    const byId = (id) => document.getElementById(id);
+    const qs = (s) => document.querySelector(s);
+
+    function esc(value) {
+      return String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'", '&#39;');
+    }
+    function money(value) {
+      const n = Number(value || 0);
+      return new Intl.NumberFormat('en-CA', { style:'currency', currency:'CAD' }).format(Number.isFinite(n) ? n : 0);
+    }
+    function hours(value) {
+      const n = Number(value || 0);
+      return `${n.toFixed(2)}h`;
+    }
+    function notice(message, kind='') {
+      const node = qs('[data-admin-shell-status]');
+      node.hidden = !message;
+      node.textContent = message || '';
+      node.dataset.state = kind || '';
+    }
+    function defaultRange() {
+      const now = new Date();
+      const end = now.toISOString().slice(0,10);
+      const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+      const start = `${startDate.getUTCFullYear()}-${String(startDate.getUTCMonth()+1).padStart(2,'0')}-${String(startDate.getUTCDate()).padStart(2,'0')}`;
+      return { start, end };
+    }
+    async function apiPost(url, body) {
+      const result = await runtime.requestJson(url, { method:'POST', body: body || {} });
+      if (!result.ok) throw new Error(runtime.normalizeError(result, `Request failed for ${url}`));
+      return result.data || {};
+    }
+    function renderMetrics(summary) {
+      const totals = summary?.totals || {};
+      byId('metricGrid').innerHTML = [
+        ['Staff in range', totals.staff_count || 0, 'Crew members with payroll rows in this period'],
+        ['Logged hours', hours(totals.logged_hours || 0), 'Minute entries + work-state timers'],
+        ['Scheduled hours', hours(totals.scheduled_hours || 0), 'Crew slot estimate from assigned bookings'],
+        ['Estimated gross payroll', money(totals.estimated_gross_pay_cad || 0), 'Hours × hourly rate'],
+        ['Overworked staff', totals.overworked_staff_count || 0, 'Exceeded daily or weekly hour cap'],
+        ['Average site time', hours(totals.average_site_hours || 0), 'Average logged site time per booking']
+      ].map((row)=>`<article class="metric"><div class="kicker">${esc(row[0])}</div><div class="value">${esc(String(row[1]))}</div><div class="mini">${esc(row[2])}</div></article>`).join('');
+    }
+    function renderStaffRows(summary) {
+      const rows = Array.isArray(summary?.staff_rows) ? summary.staff_rows : [];
+      state.staff = rows;
+      byId('staffHoursBody').innerHTML = rows.length ? rows.map((row)=>{
+        const availability = row.availability_conflicts > 0
+          ? `<span class="flag">${esc(String(row.availability_conflicts))} conflict${row.availability_conflicts === 1 ? '' : 's'}</span>`
+          : `<span class="flag ok">available</span>`;
+        const reviewBits = [];
+        if (row.is_overworked) reviewBits.push(`<div class="mini">Over cap: ${esc(String(row.overworked_daily_flags.length + row.overworked_weekly_flags.length))} flag(s)</div>`);
+        if (row.next_unavailable_at) reviewBits.push(`<div class="mini">Next block: ${esc(String(row.next_unavailable_at).replace('T',' ').slice(0,16))}</div>`);
+        if (!reviewBits.length) reviewBits.push('<div class="mini">No workload warnings in this period.</div>');
+        return `<tr>
+          <td><strong>${esc(row.full_name || 'Staff')}</strong><div class="mini">${esc(row.email || '')}${row.employee_code ? ' · ' + esc(row.employee_code) : ''}</div></td>
+          <td>${esc(row.position_title || row.role_code || 'staff')}<div class="mini">${esc(row.pay_schedule || 'schedule not set')}</div></td>
+          <td class="num">${esc(hours(row.logged_hours || 0))}</td>
+          <td class="num">${esc(hours(row.scheduled_hours || 0))}</td>
+          <td class="num">${esc(money(row.gross_pay_cad || 0))}<div class="mini">${esc(money(row.hourly_rate_cad || 0))}/hr</div></td>
+          <td>${availability}<div class="mini">${esc(String(row.active_availability_blocks || 0))} active blocks</div></td>
+          <td>${reviewBits.join('')}</td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="7">No crew rows found for this period.</td></tr>';
+      renderStaffOptions();
+    }
+    function renderStaffOptions() {
+      const select = byId('availStaff');
+      select.innerHTML = state.staff.length ? state.staff.map((row)=>`<option value="${esc(row.staff_user_id)}">${esc(row.full_name || row.email || 'Staff')}</option>`).join('') : '<option value="">No staff loaded</option>';
+    }
+    function renderInsights(summary) {
+      const packageRows = summary?.service_time_insights?.by_package || [];
+      const addonRows = summary?.service_time_insights?.by_addon_presence || [];
+      byId('packageInsights').innerHTML = packageRows.length ? packageRows.slice(0,10).map((row)=>`<div class="table-lite__row"><span>${esc(row.label || row.key)}<div class="mini">${esc(String(row.booking_count || 0))} booking(s)</div></span><span>${esc(hours(row.average_hours || 0))}</span></div>`).join('') : '<div class="mini">No package insight yet.</div>';
+      byId('addonInsights').innerHTML = addonRows.length ? addonRows.slice(0,12).map((row)=>`<div class="table-lite__row"><span>${esc(row.label || row.key)}<div class="mini">${esc(String(row.booking_count || 0))} booking(s) with this add-on</div></span><span>${esc(hours(row.average_hours || 0))}</span></div>`).join('') : '<div class="mini">No add-on insight yet.</div>';
+    }
+    function renderAvailabilityBlocks(blocks) {
+      state.availabilityBlocks = Array.isArray(blocks) ? blocks : [];
+      const wrap = byId('availabilityList');
+      wrap.innerHTML = state.availabilityBlocks.length ? state.availabilityBlocks.map((row)=>`<article class="block-card"><div class="kicker">${esc(row.availability_type || 'unavailable')}</div><strong>${esc(findStaffName(row.staff_user_id))}</strong><div class="mini">${esc(String(row.start_at || '').replace('T',' ').slice(0,16))} → ${esc(String(row.end_at || '').replace('T',' ').slice(0,16))}</div><div class="mini">${esc(row.note || '')}</div><div class="toolbar" style="margin-top:8px"><button class="btn ghost" type="button" data-delete-block="${esc(row.id)}">Delete</button></div></article>`).join('') : '<div class="mini">No availability blocks loaded for this period.</div>';
+      wrap.querySelectorAll('[data-delete-block]').forEach((btn)=>btn.addEventListener('click', async ()=>{
+        try {
+          notice('Deleting availability block…');
+          await apiPost('/api/admin/staff_availability_delete', { id: btn.getAttribute('data-delete-block') });
+          await loadAvailability();
+          notice('Availability block deleted.', 'ok');
+        } catch (err) {
+          notice(err?.message || 'Could not delete availability block.', 'error');
+        }
+      }));
+    }
+    function findStaffName(staffUserId) {
+      const row = state.staff.find((item)=>String(item.staff_user_id||'') === String(staffUserId||''));
+      return row?.full_name || row?.email || 'Staff';
+    }
+    async function loadSummary() {
+      notice('Loading crew time and payroll summary…');
+      const out = await apiPost('/api/admin/payroll_summary', { start_date: byId('startDate').value, end_date: byId('endDate').value });
+      state.summary = out;
+      renderMetrics(out);
+      renderStaffRows(out);
+      renderInsights(out);
+      notice('Crew time and payroll summary loaded.', 'ok');
+    }
+    async function loadAvailability() {
+      const out = await apiPost('/api/admin/staff_availability_list', { start_date: byId('startDate').value, end_date: byId('endDate').value });
+      renderAvailabilityBlocks(out.availability_blocks || []);
+    }
+    function currentRunBody(status, postToAccounting) {
+      return {
+        start_date: byId('startDate').value,
+        end_date: byId('endDate').value,
+        note: byId('payrollNote').value.trim() || null,
+        status,
+        post_to_accounting: postToAccounting === true
+      };
+    }
+
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      setBrandImages();
+      setFooter();
+      const range = defaultRange();
+      byId('startDate').value = range.start;
+      byId('endDate').value = range.end;
+
+      byId('refreshBtn').addEventListener('click', async ()=>{ try { await loadSummary(); await loadAvailability(); } catch (err) { notice(err?.message || 'Could not refresh payroll summary.', 'error'); } });
+      byId('saveDraftBtn').addEventListener('click', async ()=>{ try { notice('Saving payroll draft…'); const out = await apiPost('/api/admin/payroll_run_save', currentRunBody('draft', false)); notice(`Payroll draft saved for ${out.run?.period_start || ''} to ${out.run?.period_end || ''}.`, 'ok'); } catch (err) { notice(err?.message || 'Could not save payroll draft.', 'error'); } });
+      byId('postPayrollBtn').addEventListener('click', async ()=>{ try { notice('Posting payroll run…'); const out = await apiPost('/api/admin/payroll_run_save', currentRunBody('posted', true)); const warning = out.accounting_post?.warning ? ` ${out.accounting_post.warning}` : ''; notice(`Payroll run posted.${warning}`, out.accounting_post?.warning ? '' : 'ok'); } catch (err) { notice(err?.message || 'Could not post payroll run.', 'error'); } });
+      byId('saveAvailBtn').addEventListener('click', async ()=>{ try { notice('Saving availability block…'); await apiPost('/api/admin/staff_availability_save', { staff_user_id: byId('availStaff').value, availability_type: byId('availType').value, start_at: byId('availStart').value, end_at: byId('availEnd').value, note: byId('availNote').value.trim() || null }); await loadAvailability(); await loadSummary(); notice('Availability block saved.', 'ok'); } catch (err) { notice(err?.message || 'Could not save availability block.', 'error'); } });
+      byId('refreshAvailBtn').addEventListener('click', async ()=>{ try { await loadAvailability(); notice('Availability blocks reloaded.', 'ok'); } catch (err) { notice(err?.message || 'Could not reload availability blocks.', 'error'); } });
+
+      await window.AdminPageInit.init({
+        pageKey: 'admin-payroll',
+        onReady: async () => {
+          try {
+            window.AdminMenu.render({ currentPage: 'admin-payroll' });
+            await loadSummary();
+            await loadAvailability();
+          } catch (err) {
+            notice(err?.message || 'Could not initialize crew time and payroll screen.', 'error');
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

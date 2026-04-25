@@ -1,0 +1,1083 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin App Management | Rosie Dazzlers</title>
+  <link rel="stylesheet" href="/assets/site.css" />
+  <style>
+    body{background:#08111f;color:#e6eef8;font-family:Inter,Arial,sans-serif}
+    .shell{max-width:1280px;margin:0 auto;padding:20px}.topbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
+    .titleblock h1{margin:0 0 6px}.titleblock p{margin:0;color:#9fb0c8}.actorcard{min-width:260px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+    .actorline{display:flex;gap:8px;margin:4px 0}.actorlabel{font-weight:700;color:#9fb0c8}.logout-btn,.btn{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#f8fbff;border-radius:12px;padding:10px 14px;cursor:pointer}
+    .btn.primary{background:#7c3aed;border-color:#7c3aed}.status{padding:12px 14px;border-radius:12px;margin-bottom:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+    .status[data-state="success"]{border-color:rgba(34,197,94,.35)} .status[data-state="error"]{border-color:rgba(248,113,113,.35)}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{grid-column:span 12;padding:18px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+    .card h2,.card h3{margin:0 0 12px}.field{display:grid;gap:6px;margin-bottom:10px}.field input,.field textarea,.field select{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:11px 12px;background:rgba(255,255,255,.04);color:#f8fafc}
+    .field textarea{min-height:110px;resize:vertical}.checkrow{display:grid;grid-template-columns:40px minmax(0,1fr);gap:10px;align-items:start;margin:8px 0}.checkrow input{justify-self:end;margin-top:2px}.checkrow label,.checkrow span{display:block;text-align:left;line-height:1.45}.checkrow.inline-check{display:flex;gap:10px;align-items:center}.checkrow.inline-check input{justify-self:auto;margin-top:0}.actions{display:flex;gap:10px;flex-wrap:wrap}.muted{color:#9fb0c8;font-size:.94rem}
+    .preview{white-space:pre-wrap;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);min-height:82px}
+    .subgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.note{font-size:.92rem;color:#9fb0c8}.panel-lite{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}.stack-sm{display:grid;gap:10px}.section-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.section-head h3{margin:0}.section-label{font-size:.82rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9fb0c8}.pricing-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}.pricing-summary .stat{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}.pricing-summary .stat strong{display:block;font-size:1.35rem;margin-top:6px}.pricing-grid-4,.pricing-grid-5{display:grid;gap:10px}.pricing-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.pricing-grid-5{grid-template-columns:repeat(5,minmax(0,1fr))}.field.compact span{font-size:.82rem;color:#9fb0c8}.catalog-section{margin-top:18px}.catalog-table-wrap{overflow:auto}.catalog-table{display:grid;gap:8px}.catalog-row{display:grid;gap:8px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);align-items:end}.catalog-row.package{grid-template-columns:1.1fr 1.2fr 1fr .8fr .8fr .8fr .8fr auto}.catalog-row.addon{grid-template-columns:1fr 1.2fr .9fr .9fr .8fr .8fr .8fr .8fr auto}.catalog-row.service-area{grid-template-columns:1fr 1.1fr 1.1fr .9fr .9fr .8fr auto}.catalog-row.requirement{grid-template-columns:minmax(0,1fr) auto}.catalog-row__head{font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#9fb0c8}.catalog-row .field{margin-bottom:0}.catalog-row button{align-self:center}.catalog-empty{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.12);color:#9fb0c8}
+    .app-layout{display:grid;grid-template-columns:minmax(250px,300px) minmax(0,1fr);gap:18px;align-items:start}
+    .menu-col{position:sticky;top:18px;display:grid;gap:14px}
+    .content-col{display:grid;gap:18px}
+    .nav-links-inline{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .intro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .intro-card{padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+    .intro-card h3{margin:0 0 8px;font-size:1rem}
+    .intro-card p{margin:0;color:#9fb0c8;font-size:.95rem}
+    .card > .muted + .feature-note,.card > h2 + .feature-note{margin-top:-2px}
+    .feature-note{margin:0 0 14px;color:#9fb0c8;font-size:.95rem;line-height:1.5}
+    .feature-list{margin:0;padding-left:18px;color:#c3d2e6;display:grid;gap:6px}
+    .admin-menu-slot:empty{display:none}.chart-helper-preview{padding:10px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);overflow:auto}.chart-helper-preview img{display:block;max-width:100%;height:auto;border-radius:12px}
+    @media(max-width:1200px){.catalog-row.package,.catalog-row.addon,.catalog-row.service-area,.pricing-grid-4,.pricing-grid-5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:980px){.span-6,.span-4,.span-8{grid-column:span 12}.app-layout{grid-template-columns:1fr}.menu-col{position:static}}
+    @media(max-width:720px){.catalog-row.package,.catalog-row.addon,.catalog-row.service-area,.catalog-row.requirement,.pricing-grid-4,.pricing-grid-5{grid-template-columns:1fr}}
+    @media(max-width:900px){.subgrid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<main class="shell">
+  <div class="loading" data-admin-shell-loading>Loading app management...</div>
+  <div data-admin-shell-ready hidden>
+    <header class="topbar">
+      <div class="titleblock"><h1>App Management</h1><p>Control feature flags, recovery messaging, provider rules, moderation defaults, and the single pricing catalog used by booking, services, pricing, checkout, service-area rules, public requirements, and booking time windows.</p></div>
+      <section class="actorcard" aria-label="Signed in staff">
+        <div class="actorline"><span class="actorlabel">Name:</span><span data-actor-name></span></div>
+        <div class="actorline"><span class="actorlabel">Role:</span><span data-actor-role></span></div>
+        <div class="actorline"><span class="actorlabel">Email:</span><span data-actor-email></span></div>
+        <button class="logout-btn" type="button" data-admin-logout>Sign Out</button>
+      </section>
+    </header>
+    <div class="status" data-admin-shell-status hidden></div>
+
+    <div class="app-layout">
+      <aside class="menu-col">
+        <div class="panel-lite admin-menu-slot" data-admin-menu-mount></div>
+        <div class="panel-lite">
+          <div class="section-label">What this screen controls</div>
+          <ul class="feature-list">
+            <li>Feature visibility and moderation defaults</li>
+            <li>The single shared pricing and package catalog</li>
+            <li>Travel charges, surcharges, and tax controls</li>
+            <li>Document wording for confirmations, invoices, and gift certificates</li>
+            <li>The latest social links shown on the public site</li>
+            <li>Recovery message templates and provider rules</li>
+          </ul>
+          <div class="nav-links-inline">
+            <a class="btn" href="/admin.html">Dashboard</a>
+            <a class="btn" href="/admin-accounting.html">Accounting</a>
+            <a class="btn" href="/admin-catalog.html">Inventory</a>
+          </div>
+        </div>
+      </aside>
+      <div class="content-col">
+        <section class="intro-grid" aria-label="App management overview">
+          <article class="intro-card"><h3>Operations rules</h3><p>Control who can see notes, when manual scheduling stays admin-only, and which workflow flags are on by default.</p></article>
+          <article class="intro-card"><h3>Pricing source of truth</h3><p>Manage packages, add-ons, service areas, travel tiers, and price controls from one place used by booking, pricing, services, and checkout.</p></article>
+          <article class="intro-card"><h3>Customer documents</h3><p>Set the wording used in order confirmations, invoices, and printable gift certificates so the office output stays consistent.</p></article>
+          <article class="intro-card"><h3>Public social blocks</h3><p>Store the latest five social links per platform so the home and videos pages stay current without hand-editing those pages.</p></article>
+          <article class="intro-card"><h3>Next growth layer</h3><p>Use this screen to shape booking-led self-serve flows, scheduled e-gift delivery, and recurring maintenance-plan offers before they are pushed deeper into checkout and follow-up flows.</p></article>
+        </section>
+
+    <section class="grid">
+      <article class="card span-6">
+        <h2>Visibility Matrix</h2>
+        <p class="feature-note">Use these switches to decide which internal note types remain staff-only and which can be shown safely in shared customer workflows.</p>
+        <div class="checkrow"><input id="vis_customer_detailer_notes" type="checkbox"><label for="vis_customer_detailer_notes">Customer/detailer notes visible when allowed</label></div>
+        <div class="checkrow"><input id="vis_customer_admin_notes" type="checkbox"><label for="vis_customer_admin_notes">Customer/admin notes stay admin only</label></div>
+        <div class="checkrow"><input id="vis_detailer_admin_notes" type="checkbox"><label for="vis_detailer_admin_notes">Detailer/admin notes stay admin only</label></div>
+        <div class="actions"><button class="btn" type="button" id="saveVisibilityBtn">Save visibility</button></div>
+      </article>
+
+      <article class="card span-6">
+        <h2>Scheduling Policy</h2>
+        <p class="feature-note">These controls keep manual scheduling, blocking, and override notes tied to one office-managed policy instead of being scattered across pages.</p>
+        <div class="checkrow"><input id="manual_schedule_admin_only" type="checkbox"><label for="manual_schedule_admin_only">Manual scheduling remains admin only</label></div>
+        <div class="checkrow"><input id="blocking_admin_only" type="checkbox"><label for="blocking_admin_only">Blocking and blackout controls remain admin only</label></div>
+        <div class="field"><label for="manual_schedule_notes">Notes</label><textarea id="manual_schedule_notes"></textarea></div>
+        <div class="actions"><button class="btn" type="button" id="saveSchedulingBtn">Save scheduling policy</button></div>
+      </article>
+
+      <article class="card span-6">
+        <h2>Feature Flags</h2>
+        <p class="feature-note">Feature flags let you turn workflow behavior on and off without editing code, so you can test or pause operational features safely.</p>
+        <div class="checkrow"><input id="flag_live_updates_default" type="checkbox"><label for="flag_live_updates_default">Live updates enabled by default</label></div>
+        <div class="checkrow"><input id="flag_customer_chat_enabled" type="checkbox"><label for="flag_customer_chat_enabled">Customer chat enabled</label></div>
+        <div class="checkrow"><input id="flag_picture_first_observations" type="checkbox"><label for="flag_picture_first_observations">Picture-first observations enabled</label></div>
+        <div class="checkrow"><input id="flag_tier_discount_badges" type="checkbox"><label for="flag_tier_discount_badges">Tier discount badges enabled</label></div>
+        <div class="checkrow"><input id="flag_annotation_moderation_enabled" type="checkbox"><label for="flag_annotation_moderation_enabled">Annotation moderation enabled</label></div>
+        <div class="checkrow"><input id="flag_two_sided_thread_controls_enabled" type="checkbox"><label for="flag_two_sided_thread_controls_enabled">Two-sided thread controls enabled</label></div>
+        <div class="checkrow"><input id="flag_low_stock_alerts_enabled" type="checkbox"><label for="flag_low_stock_alerts_enabled">Low-stock alerts enabled</label></div>
+        <div class="actions"><button class="btn" type="button" id="saveFlagsBtn">Save feature flags</button></div>
+      </article>
+
+
+      <article class="card span-6">
+        <h2>Booking-Led Self-Serve &amp; Booking</h2>
+        <p class="feature-note">Make the quote result more prominent so customers can move from vehicle details to an exact or near-exact booking total with less back-and-forth.</p>
+        <div class="checkrow"><input id="quote_prominent_cta" type="checkbox"><label for="quote_prominent_cta">Show a stronger “Build my quote” call to action on public pages</label></div>
+        <div class="checkrow"><input id="quote_show_exact_total" type="checkbox"><label for="quote_show_exact_total">Show package + add-on total early once the vehicle and service choices are known</label></div>
+        <div class="checkrow"><input id="quote_show_time_expectation" type="checkbox"><label for="quote_show_time_expectation">Show estimated site-time ranges beside package choices</label></div>
+        <div class="field"><label for="quote_teaser_text">Quote teaser text</label><textarea id="quote_teaser_text" placeholder="Choose your vehicle, package, and add-ons to see your expected total before checkout."></textarea></div>
+        <div class="actions"><button class="btn" type="button" id="saveQuoteSettingsBtn">Save quote settings</button></div>
+      </article>
+
+      <article class="card span-6">
+        <h2>Scheduled E-Gift Delivery</h2>
+        <p class="feature-note">Prepare the gift workflow for scheduled delivery, recipient naming, and office review instead of one-time plain printable gifts only.</p>
+        <div class="checkrow"><input id="gift_delivery_enabled" type="checkbox"><label for="gift_delivery_enabled">Enable recipient name and scheduled delivery fields on gift checkout</label></div>
+        <div class="checkrow"><input id="gift_delivery_automation_enabled" type="checkbox"><label for="gift_delivery_automation_enabled">Automatically send due e-gifts when their scheduled date arrives</label></div>
+        <div class="checkrow"><input id="gift_delivery_manual_review" type="checkbox"><label for="gift_delivery_manual_review">Hold scheduled gifts for office review before send</label></div>
+        <div class="checkrow"><input id="gift_delivery_send_copy_to_purchaser" type="checkbox"><label for="gift_delivery_send_copy_to_purchaser">Send a delivery confirmation copy to the purchaser</label></div>
+        <div class="subgrid">
+          <div class="field"><label for="gift_delivery_send_hour">Default send hour (24h)</label><input id="gift_delivery_send_hour" type="number" min="0" max="23" step="1"></div>
+          <div class="field"><label for="gift_delivery_timezone">Time zone label</label><input id="gift_delivery_timezone" placeholder="America/Toronto"></div>
+        </div>
+        <div class="field"><label for="gift_delivery_default_message">Default e-gift helper text</label><textarea id="gift_delivery_default_message" placeholder="Choose a recipient, add a message, and pick the day you want us to send the gift."></textarea></div>
+        <div class="actions"><button class="btn" type="button" id="saveGiftDeliverySettingsBtn">Save e-gift settings</button><button class="btn ghost" type="button" id="runGiftDeliveryProcessBtn">Run due gift deliveries now</button></div>
+      </article>
+
+      <article class="card span-12">
+        <h2>Maintenance &amp; Membership Plans</h2>
+        <p class="feature-note">Use this section to shape recurring-clean offers that support repeat local customers, smoother scheduling, and predictable follow-up revenue.</p>
+        <div class="subgrid">
+          <div class="checkrow"><input id="membership_enabled" type="checkbox"><label for="membership_enabled">Show a maintenance-plan teaser on public pages</label></div>
+          <div class="checkrow"><input id="membership_waitlist_enabled" type="checkbox"><label for="membership_waitlist_enabled">Use a waitlist / interest CTA before taking recurring plan orders</label></div>
+          <div class="checkrow"><input id="membership_reminder_enabled" type="checkbox"><label for="membership_reminder_enabled">Send reminder-first recurring maintenance nudges</label></div>
+        </div>
+        <div class="subgrid">
+          <div class="field"><label for="membership_name">Plan name</label><input id="membership_name" placeholder="Maintain Your Shine Plan"></div>
+          <div class="field"><label for="membership_cycle">Cycle label</label><input id="membership_cycle" placeholder="Every 4 or 8 weeks"></div>
+        </div>
+        <div class="field"><label for="membership_teaser">Public teaser</label><textarea id="membership_teaser" placeholder="Keep your vehicle on a repeating clean schedule with priority reminders and simpler rebooking."></textarea></div>
+        <div class="field"><label for="membership_benefits">Benefits (one per line)</label><textarea id="membership_benefits" placeholder="Priority reminder before your preferred date&#10;Faster rebooking using your saved vehicle&#10;Cleaner predictable maintenance cycle"></textarea></div>
+        <div class="subgrid">
+          <div class="field"><label for="membership_reminder_subject">Reminder email subject</label><input id="membership_reminder_subject" placeholder="It may be time to book your next Rosie Dazzlers clean"></div>
+          <div class="field"><label for="membership_reminder_intro">Reminder intro</label><textarea id="membership_reminder_intro" placeholder="Use the booking-led planner to pick your next clean while your preferred timing is still open."></textarea></div>
+        </div>
+        <div class="actions"><button class="btn" type="button" id="saveMembershipSettingsBtn">Save maintenance plan settings</button><button class="btn ghost" type="button" id="runMembershipReminderProcessBtn">Run due reminders now</button><a class="btn" href="/maintenance-plan" target="_blank" rel="noopener">Open the public maintenance page</a></div>
+      </article>
+
+      <article class="card span-12">
+        <h2>Recurring reminder candidates</h2>
+        <p class="feature-note">These rows are now built from real completed booking history, not only the public interest list. Use them to see who is due for a reminder based on the last completed clean, the inferred repeat cycle, and the current reminder status.</p>
+        <div class="actions" style="margin-bottom:12px"><button class="btn" type="button" id="reloadMembershipInterestBtn">Reload reminder candidates</button></div>
+        <div id="membershipInterestList" class="stack-sm"></div>
+      </article>
+
+      <article class="card span-12">
+        <h2>Pricing Control Center</h2>
+        <p class="feature-note">This is the single entry point for price changes, travel charges, package edits, add-ons, and service-area pricing logic. The booking screen is stable and should stay untouched.</p>
+        <p class="muted">This is now the one working entry point for package pricing, add-ons, service-area travel tiers, travel charges, and booking pricing controls. The public booking screen is stable and should not be altered here; booking, services, pricing, and checkout consume this catalog.</p>
+
+        <div class="pricing-summary" id="pricingCatalogSummary"></div>
+
+        <div class="subgrid" style="margin-top:14px">
+          <section class="panel-lite stack-sm">
+            <div class="section-label">Travel charge controls</div>
+            <div class="pricing-grid-5">
+              <label class="field compact"><span>Urban</span><input id="travel_charge_urban" type="number" step="0.01" min="0" /></label>
+              <label class="field compact"><span>Township</span><input id="travel_charge_township" type="number" step="0.01" min="0" /></label>
+              <label class="field compact"><span>Hamlet</span><input id="travel_charge_hamlet" type="number" step="0.01" min="0" /></label>
+              <label class="field compact"><span>Coastal</span><input id="travel_charge_coastal" type="number" step="0.01" min="0" /></label>
+              <label class="field compact"><span>Rural</span><input id="travel_charge_rural" type="number" step="0.01" min="0" /></label>
+              <label class="field compact"><span>Remote</span><input id="travel_charge_remote" type="number" step="0.01" min="0" /></label>
+              <label class="field compact"><span>Out of zone</span><input id="travel_charge_out_of_zone" type="number" step="0.01" min="0" /></label>
+            </div>
+            <label class="field"><span>Travel pricing notes</span><textarea id="travel_charge_notes" placeholder="Office note for dispatch or future customer-facing travel logic."></textarea></label>
+          </section>
+
+          <section class="panel-lite stack-sm">
+            <div class="section-label">Pricing controls</div>
+            <div class="pricing-grid-4">
+              <label class="field compact"><span>Fuel surcharge</span><input id="price_control_fuel" type="number" step="0.01" /></label>
+              <label class="field compact"><span>Material surcharge</span><input id="price_control_material" type="number" step="0.01" /></label>
+              <label class="field compact"><span>Minimum callout</span><input id="price_control_minimum" type="number" step="0.01" /></label>
+              <label class="field compact"><span>Tax rate %</span><input id="price_control_tax" type="number" step="0.01" min="0" /></label>
+            </div>
+            <div class="note">These controls are stored in the canonical pricing catalog so future checkout and reporting passes can consume them from one place.</div>
+          </section>
+        </div>
+
+        <div class="catalog-section" style="margin-top:16px">
+          <div class="section-head"><h3>Packages and size pricing</h3><div class="actions"><button class="btn" type="button" id="addPackageBtn">Add package</button></div></div>
+          <p class="feature-note" id="packageSectionNote">Packages are stored as package families with separate size-price columns so one catalog controls booking, services, pricing, and checkout.</p>
+          <div class="catalog-table-wrap"><div id="packageTable" class="catalog-table"></div></div>
+        </div>
+
+        <div class="catalog-section">
+          <div class="section-head"><h3>Add-ons</h3><div class="actions"><button class="btn" type="button" id="addAddonBtn">Add add-on</button></div></div>
+          <div class="catalog-table-wrap"><div id="addonTable" class="catalog-table"></div></div>
+        </div>
+
+        <div class="catalog-section">
+          <div class="section-head"><h3>Service areas and travel tiers</h3><div class="actions"><button class="btn" type="button" id="addServiceAreaBtn">Add service area</button></div></div>
+          <div class="catalog-table-wrap"><div id="serviceAreaTable" class="catalog-table"></div></div>
+        </div>
+
+        <div class="catalog-section">
+          <div class="section-head"><h3>Public requirements</h3><div class="actions"><button class="btn" type="button" id="addRequirementBtn">Add requirement</button></div></div>
+          <div id="requirementList" class="stack-sm"></div>
+        </div>
+
+        <details class="catalog-section">
+          <summary><strong>Advanced raw catalog JSON</strong> <span class="note">Use this for charts, included services, richer notes, and deep edits that are not yet surfaced above.</span></summary>
+          <div class="field" style="margin-top:12px"><label for="pricing_catalog_json">Pricing catalog JSON</label><textarea id="pricing_catalog_json" spellcheck="false" placeholder='{"packages":[],"addons":[],"service_areas":[]}'></textarea></div>
+          <div class="actions">
+            <button class="btn" type="button" id="applyPricingJsonBtn">Apply JSON to editor</button>
+            <button class="btn" type="button" id="syncPricingJsonBtn">Refresh JSON from editor</button>
+          </div>
+          <div class="panel-lite stack-sm" style="margin-top:12px">
+            <div class="section-label">Live chart helper</div>
+            <p class="note">Preview or download live SVG chart files from the catalog currently shown in this editor. Use Refresh JSON from editor first when you have changed form fields but have not saved yet.</p>
+            <div class="actions">
+              <select id="liveChartType" aria-label="Live chart type">
+                <option value="prices">Vehicle price chart</option>
+                <option value="details">Package service details chart</option>
+                <option value="sizes">Vehicle size guide</option>
+              </select>
+              <button class="btn" type="button" id="liveChartPreviewBtn">Preview chart</button>
+              <button class="btn" type="button" id="liveChartDownloadBtn">Download SVG</button>
+            </div>
+            <div id="liveChartPreviewWrap" class="chart-helper-preview" hidden><img id="liveChartPreviewImg" alt="Live chart preview" /></div>
+          </div>
+        </details>
+
+        <div class="actions" style="margin-top:14px">
+          <button class="btn" type="button" id="reloadPricingCatalogBtn">Reload catalog</button>
+          <button class="btn primary" type="button" id="savePricingCatalogBtn">Save pricing catalog</button>
+        </div>
+        <div class="note">The structured editor above is the preferred entry point. The raw JSON area remains available for chart links, included-service detail, and advanced maintenance until every pricing field has its own dedicated form.</div>
+      </article>
+
+      
+
+      <article class="card span-6">
+        <h2>Document templates</h2>
+        <p class="feature-note">These values feed the customer-facing documents and confirmation messages. Keep them plain, clear, and office-approved.</p>
+        <p class="muted">Control the public wording used by the order confirmation, invoice / summary, and printable gift certificate pages.</p>
+        <div class="field"><label for="doc_confirmation_intro">Order confirmation intro</label><textarea id="doc_confirmation_intro" placeholder="Thank you for booking Rosie Dazzlers. Your booking details are below."></textarea></div>
+        <div class="field"><label for="doc_invoice_footer">Invoice footer</label><textarea id="doc_invoice_footer" placeholder="Please review your service summary before arrival."></textarea></div>
+        <div class="field"><label for="doc_gift_footer">Gift certificate footer</label><textarea id="doc_gift_footer" placeholder="Gift certificates are valid for one year from purchase and are non-refundable."></textarea></div>
+        <div class="actions"><button class="btn" type="button" id="saveDocumentTemplatesBtn">Save document templates</button></div>
+      </article>
+
+      <article class="card span-6">
+        <h2>Social feed manager</h2>
+        <p class="feature-note">Paste the newest public links here. The site trims each platform to the latest five items automatically.</p>
+        <p class="muted">Store the latest 5 links for each social platform here. The home page and video page can then show the newest five items per platform without hard-coding every post into the page.</p>
+        <div class="field"><label for="social_feeds_json">Social feed JSON</label><textarea id="social_feeds_json" spellcheck="false" placeholder='{"platforms":[{"platform":"youtube","items":[]}]}'></textarea></div>
+        <div class="actions">
+          <button class="btn" type="button" id="reloadSocialFeedsBtn">Reload social feed JSON</button>
+          <button class="btn" type="button" id="resetSocialFeedsBtn">Reset to template</button>
+          <button class="btn primary" type="button" id="saveSocialFeedsBtn">Save social feeds</button>
+        </div>
+      </article>
+
+      <article class="card span-6">
+        <h2>Before / after gallery manager</h2>
+        <p class="feature-note">Maintain the public before/after slider gallery here instead of editing a sample JSON file.</p>
+        <p class="muted">Each row can use paired images or paired videos. Only customer-approved media should be published here.</p>
+        <div class="field"><label for="before_after_gallery_json">Gallery JSON</label><textarea id="before_after_gallery_json" spellcheck="false" placeholder='{"items":[{"title":"Interior refresh","before_url":"","after_url":""}]}'></textarea></div>
+        <div class="actions">
+          <button class="btn" type="button" id="reloadBeforeAfterGalleryBtn">Reload gallery JSON</button>
+          <button class="btn" type="button" id="resetBeforeAfterGalleryBtn">Reset to template</button>
+          <button class="btn primary" type="button" id="saveBeforeAfterGalleryBtn">Save gallery</button>
+        </div>
+      </article>
+
+      <article class="card span-6">
+        <h2>Moderation Defaults</h2>
+        <p class="feature-note">These defaults shape how notes, annotations, and replies behave before staff make any one-off exceptions on a job.</p>
+        <div class="checkrow"><input id="mod_annotation_customer_visibility_default" type="checkbox"><label for="mod_annotation_customer_visibility_default">Customer-visible annotations by default</label></div>
+        <div class="checkrow"><input id="mod_comment_customer_visibility_default" type="checkbox"><label for="mod_comment_customer_visibility_default">Customer-visible staff comments by default</label></div>
+        <div class="field"><label for="mod_client_reply_depth_limit">Client reply depth limit</label><input id="mod_client_reply_depth_limit" type="number" min="1" value="4"></div>
+        <div class="field"><label for="mod_staff_reply_depth_limit">Staff reply depth limit</label><input id="mod_staff_reply_depth_limit" type="number" min="1" value="8"></div>
+        <div class="checkrow"><input id="mod_allow_client_annotation_replies" type="checkbox"><label for="mod_allow_client_annotation_replies">Allow client replies directly on annotations</label></div>
+        <div class="checkrow"><input id="mod_allow_staff_hide_without_delete" type="checkbox"><label for="mod_allow_staff_hide_without_delete">Allow staff to hide instead of delete</label></div>
+        <div class="actions"><button class="btn" type="button" id="saveModerationBtn">Save moderation defaults</button></div>
+      </article>
+
+      <article class="card span-8">
+        <h2>Recovery Templates & Rules</h2>
+        <p class="feature-note">Configure the wording and send rules used when the site tries to recover abandoned bookings or unfinished customer actions.</p>
+        <div class="field"><label for="recovery_subject">Recovery subject</label><input id="recovery_subject" placeholder="Complete your Rosie Dazzlers booking"></div>
+        <div class="field"><label for="recovery_body_text">Recovery body (text)</label><textarea id="recovery_body_text" placeholder="Use tokens like {{customer_name}} and {{recovery_url}}"></textarea></div>
+        <div class="field"><label for="recovery_body_html">Recovery body (HTML)</label><textarea id="recovery_body_html" placeholder="Optional HTML version"></textarea></div>
+        <div class="subgrid">
+          <div>
+            <div class="checkrow"><input id="recovery_enabled" type="checkbox"><label for="recovery_enabled">Enable abandoned-order recovery</label></div>
+            <div class="field"><label for="recovery_min_events">Minimum tracked events</label><input id="recovery_min_events" type="number" min="0" value="2"></div>
+            <div class="field"><label for="recovery_cooldown_hours">Cooldown hours</label><input id="recovery_cooldown_hours" type="number" min="0" value="24"></div>
+            <div class="field"><label for="recovery_default_channel">Default recovery channel</label><select id="recovery_default_channel"><option value="email">Email</option><option value="sms">SMS</option></select></div>
+          </div>
+          <div>
+            <div class="note">Tokens supported: <code>{{customer_name}}</code>, <code>{{recovery_url}}</code>, <code>{{service_date}}</code>, <code>{{package_name}}</code>, <code>{{gift_code}}</code></div>
+            <div class="actions" style="margin-top:10px"><button class="btn" type="button" id="saveRecoveryBtn">Save recovery settings</button></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card span-4">
+        <h2>Provider-Specific Recovery Rules</h2>
+        <p class="feature-note">Keep channel-level test destinations and provider overrides here so recovery behavior stays documented and repeatable.</p>
+        <h3>Email</h3>
+        <div class="checkrow"><input id="provider_email_enabled" type="checkbox"><label for="provider_email_enabled">Email recovery enabled</label></div>
+        <div class="field"><label for="provider_email_key">Provider label</label><input id="provider_email_key"></div>
+        <div class="field"><label for="provider_email_webhook">Recovery webhook URL override</label><input id="provider_email_webhook"></div>
+        <div class="field"><label for="provider_email_test_to">Default test recipient</label><input id="provider_email_test_to"></div>
+        <h3>SMS</h3>
+        <div class="checkrow"><input id="provider_sms_enabled" type="checkbox"><label for="provider_sms_enabled">SMS recovery enabled</label></div>
+        <div class="field"><label for="provider_sms_key">Provider label</label><input id="provider_sms_key"></div>
+        <div class="field"><label for="provider_sms_webhook">Recovery webhook URL override</label><input id="provider_sms_webhook"></div>
+        <div class="field"><label for="provider_sms_test_to">Default test recipient</label><input id="provider_sms_test_to"></div>
+        <div class="actions"><button class="btn" type="button" id="saveProviderRulesBtn">Save provider rules</button></div>
+      </article>
+
+      <article class="card span-12">
+        <h2>Recovery Preview & Testing</h2>
+        <p class="feature-note">Generate a preview before sending a live test so the office can verify subject lines, wording, and merge tokens.</p>
+        <div class="subgrid">
+          <div>
+            <div class="field"><label for="preview_channel">Channel</label><select id="preview_channel"><option value="email">Email</option><option value="sms">SMS</option></select></div>
+            <div class="field"><label for="preview_customer_name">Customer name</label><input id="preview_customer_name" value="Valued Customer"></div>
+            <div class="field"><label for="preview_customer_email">Customer email</label><input id="preview_customer_email"></div>
+            <div class="field"><label for="preview_recipient_phone">Recipient phone</label><input id="preview_recipient_phone"></div>
+            <div class="field"><label for="preview_test_recipient">Test recipient override</label><input id="preview_test_recipient" placeholder="Optional test email or SMS number"></div>
+            <div class="field"><label for="preview_recovery_url">Recovery URL</label><input id="preview_recovery_url" placeholder="https://.../book"></div>
+            <div class="actions"><button class="btn" type="button" id="previewRecoveryBtn">Generate preview</button><button class="btn primary" type="button" id="sendTestRecoveryBtn">Send test</button></div>
+          </div>
+          <div>
+            <div class="field"><label>Preview subject</label><div id="previewSubject" class="preview"></div></div>
+            <div class="field"><label>Preview text</label><div id="previewText" class="preview"></div></div>
+            <div class="field"><label>Preview HTML</label><div id="previewHtml" class="preview"></div></div>
+          </div>
+        </div>
+      </article>
+    </section>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="/assets/admin-auth.js"></script>
+<script src="/assets/admin-shell.js"></script>
+<script src="/assets/admin-menu.js"></script>
+<script src="/assets/admin-page-init.js"></script>
+<script>
+(function(){
+  function setShellStatus(message, type) {
+    const node = document.querySelector('[data-admin-shell-status]');
+    if (!node) return;
+    node.hidden = !message;
+    node.textContent = message || '';
+    node.dataset.state = type || '';
+  }
+  async function saveSetting(key, value, successText) {
+    const res = await fetch('/api/admin/app_settings_save', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ key, value }) });
+    const out = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(out?.error || 'Could not save settings.');
+    setShellStatus(successText, 'success');
+    return out;
+  }
+  function applySetting(setting, fallback={}){ return setting && typeof setting.value === 'object' ? setting.value : fallback; }
+
+  function qsa(selector, root){ return Array.from((root || document).querySelectorAll(selector)); }
+  function escapeHtml(value){ return String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  function documentTemplatesDefaults(){
+    return {
+      confirmation_intro: 'Thank you for booking Rosie Dazzlers. Your booking details are below.',
+      invoice_footer: 'Please review your service summary before arrival. On-site discounts, weather adjustments, and refunds should be documented through the office workflow.',
+      gift_footer: 'Gift certificates are valid for one year from purchase and are non-refundable.'
+    };
+  }
+  function readDocumentTemplates(){
+    return {
+      confirmation_intro: byId('doc_confirmation_intro').value || documentTemplatesDefaults().confirmation_intro,
+      invoice_footer: byId('doc_invoice_footer').value || documentTemplatesDefaults().invoice_footer,
+      gift_footer: byId('doc_gift_footer').value || documentTemplatesDefaults().gift_footer
+    };
+  }
+  function socialFeedsDefaults(){
+    return {
+      platforms: [
+        { platform: 'youtube', title: 'YouTube', intro: 'Latest videos and shorts.', items: [] },
+        { platform: 'facebook', title: 'Facebook', intro: 'Latest Facebook posts.', items: [] },
+        { platform: 'instagram', title: 'Instagram', intro: 'Latest Instagram posts.', items: [] },
+        { platform: 'tiktok', title: 'TikTok', intro: 'Latest TikTok posts.', items: [] },
+        { platform: 'x', title: 'X', intro: 'Latest X posts.', items: [] }
+      ]
+    };
+  }
+  function normalizeSocialFeeds(value){
+    var defaults = socialFeedsDefaults();
+    var src = value && typeof value === 'object' ? cloneValue(value) : cloneValue(defaults);
+    var rows = Array.isArray(src.platforms) ? src.platforms : [];
+    if (!rows.length) rows = defaults.platforms;
+    src.platforms = rows.map(function(platform, index){
+      var fallback = defaults.platforms[index] || { platform: 'platform_' + (index + 1), title: 'Platform ' + (index + 1), intro: '', items: [] };
+      var items = Array.isArray(platform && platform.items) ? platform.items : [];
+      return {
+        platform: (platform && platform.platform) || fallback.platform,
+        title: (platform && platform.title) || fallback.title,
+        intro: (platform && platform.intro) || fallback.intro,
+        items: items.slice(0, 5).map(function(item){
+          return {
+            title: item && item.title ? String(item.title) : '',
+            url: item && item.url ? String(item.url) : '',
+            published_at: item && item.published_at ? String(item.published_at) : '',
+            note: item && item.note ? String(item.note) : ''
+          };
+        })
+      };
+    });
+    return src;
+  }
+  function setSocialFeedsEditor(value){
+    byId('social_feeds_json').value = JSON.stringify(normalizeSocialFeeds(value), null, 2);
+  }
+  function readSocialFeedsEditor(){
+    var raw = byId('social_feeds_json').value || '{}';
+    var parsed;
+    try { parsed = JSON.parse(raw); } catch { throw new Error('Social feed JSON is invalid.'); }
+    if (!parsed || typeof parsed !== 'object') throw new Error('Social feed JSON must be a JSON object.');
+    return normalizeSocialFeeds(parsed);
+  }
+  function beforeAfterGalleryDefaults(){
+    return {
+      items: [
+        {
+          title: 'Interior refresh',
+          location: 'Tillsonburg, ON',
+          before_kind: 'image',
+          before_url: 'https://assets.rosiedazzlers.ca/brand/CarPrice2025.PNG',
+          after_kind: 'image',
+          after_url: 'https://assets.rosiedazzlers.ca/brand/CarPriceDetails2025.PNG',
+          note: 'Replace this sample pair with customer-approved work.',
+          consent_status: 'sample'
+        }
+      ]
+    };
+  }
+  function normalizeBeforeAfterGallery(value){
+    var src = value && typeof value === 'object' ? cloneValue(value) : cloneValue(beforeAfterGalleryDefaults());
+    var items = Array.isArray(src.items) ? src.items : [];
+    src.items = items.map(function(item){
+      return {
+        title: String(item && item.title || 'Detail result'),
+        location: String(item && item.location || 'Oxford / Norfolk Counties'),
+        before_kind: String(item && item.before_kind || 'image').toLowerCase() === 'video' ? 'video' : 'image',
+        before_url: String(item && item.before_url || ''),
+        after_kind: String(item && item.after_kind || 'image').toLowerCase() === 'video' ? 'video' : 'image',
+        after_url: String(item && item.after_url || ''),
+        note: String(item && item.note || ''),
+        consent_status: String(item && item.consent_status || ''),
+        customer_name: String(item && item.customer_name || ''),
+        vehicle_label: String(item && item.vehicle_label || '')
+      };
+    }).filter(function(item){ return item.before_url || item.after_url || item.title; });
+    if (!src.items.length) src.items = cloneValue(beforeAfterGalleryDefaults().items);
+    return src;
+  }
+  function setBeforeAfterGalleryEditor(value){
+    byId('before_after_gallery_json').value = JSON.stringify(normalizeBeforeAfterGallery(value), null, 2);
+  }
+  function readBeforeAfterGalleryEditor(){
+    var raw = byId('before_after_gallery_json').value || '{}';
+    var parsed;
+    try { parsed = JSON.parse(raw); } catch { throw new Error('Before / after gallery JSON is invalid.'); }
+    if (!parsed || typeof parsed !== 'object') throw new Error('Before / after gallery JSON must be a JSON object.');
+    return normalizeBeforeAfterGallery(parsed);
+  }
+  function readVisibility(){ return { customer_detailer_notes: byId('vis_customer_detailer_notes').checked, customer_admin_notes_admin_only: byId('vis_customer_admin_notes').checked, detailer_admin_notes_admin_only: byId('vis_detailer_admin_notes').checked }; }
+  function readScheduling(){ return { manual_schedule_admin_only: byId('manual_schedule_admin_only').checked, blocking_admin_only: byId('blocking_admin_only').checked, notes: byId('manual_schedule_notes').value || '' }; }
+  function readFlags(){ return { live_updates_default: byId('flag_live_updates_default').checked, customer_chat_enabled: byId('flag_customer_chat_enabled').checked, picture_first_observations: byId('flag_picture_first_observations').checked, tier_discount_badges: byId('flag_tier_discount_badges').checked, annotation_moderation_enabled: byId('flag_annotation_moderation_enabled').checked, two_sided_thread_controls_enabled: byId('flag_two_sided_thread_controls_enabled').checked, low_stock_alerts_enabled: byId('flag_low_stock_alerts_enabled').checked }; }
+  function quoteSettingsDefaults(){ return { prominent_cta: true, show_exact_total: true, show_time_expectation: true, teaser_text: 'Choose your vehicle, package, and add-ons to see your expected total before checkout.' }; }
+  function readQuoteSettings(){ return { prominent_cta: byId('quote_prominent_cta').checked, show_exact_total: byId('quote_show_exact_total').checked, show_time_expectation: byId('quote_show_time_expectation').checked, teaser_text: byId('quote_teaser_text').value || quoteSettingsDefaults().teaser_text }; }
+  function giftDeliveryDefaults(){ return { enabled: true, manual_review: false, automation_enabled: true, default_message: 'Choose a recipient, add a message, and pick the day you want us to send the gift.', default_send_hour_local: 9, timezone_label: 'America/Toronto', send_copy_to_purchaser: true }; }
+  function readGiftDeliverySettings(){ return { enabled: byId('gift_delivery_enabled').checked, manual_review: byId('gift_delivery_manual_review').checked, automation_enabled: byId('gift_delivery_automation_enabled').checked, send_copy_to_purchaser: byId('gift_delivery_send_copy_to_purchaser').checked, default_send_hour_local: Number(byId('gift_delivery_send_hour').value || giftDeliveryDefaults().default_send_hour_local), timezone_label: byId('gift_delivery_timezone').value || giftDeliveryDefaults().timezone_label, default_message: byId('gift_delivery_default_message').value || giftDeliveryDefaults().default_message }; }
+  function membershipPlanDefaults(){ return { enabled: false, waitlist_enabled: true, plan_name: 'Maintain Your Shine Plan', cycle_label: 'Every 4 or 8 weeks', teaser: 'Keep your vehicle on a repeating clean schedule with priority reminders and simpler rebooking.', benefits: ['Priority reminder before your preferred date','Faster rebooking using your saved vehicle','Cleaner predictable maintenance cycle'], reminder_enabled: true, reminder_channel: 'email', reminder_subject: 'It may be time to book your next Rosie Dazzlers clean', reminder_intro: 'Use the booking-led planner to pick your next clean while your preferred timing is still open.', reminder_send_hour_local: 9, timezone_label: 'America/Toronto' }; }
+  function readMembershipPlanSettings(){ return { enabled: byId('membership_enabled').checked, waitlist_enabled: byId('membership_waitlist_enabled').checked, reminder_enabled: byId('membership_reminder_enabled').checked, plan_name: byId('membership_name').value || membershipPlanDefaults().plan_name, cycle_label: byId('membership_cycle').value || membershipPlanDefaults().cycle_label, teaser: byId('membership_teaser').value || membershipPlanDefaults().teaser, benefits: (byId('membership_benefits').value || '').split(/\n+/).map(function (row) { return row.trim(); }).filter(Boolean), reminder_subject: byId('membership_reminder_subject').value || membershipPlanDefaults().reminder_subject, reminder_intro: byId('membership_reminder_intro').value || membershipPlanDefaults().reminder_intro, reminder_channel: 'email', reminder_send_hour_local: membershipPlanDefaults().reminder_send_hour_local, timezone_label: membershipPlanDefaults().timezone_label }; }
+  function renderMembershipInterestList(rows){
+    var host = byId('membershipInterestList');
+    if (!host) return;
+    var list = Array.isArray(rows) ? rows : [];
+    if (!list.length) { host.innerHTML = '<div class="catalog-empty">No recurring reminder candidates yet.</div>'; return; }
+    host.innerHTML = list.map(function (row) {
+      var lastService = row && row.last_service_at ? new Date(row.last_service_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }) : 'Unknown';
+      var nextReminder = row && row.next_reminder_at ? new Date(row.next_reminder_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }) : 'TBD';
+      var dueBadge = row && row.due ? '<span class="tag warn">Due now</span>' : '<span class="tag ok">Waiting</span>';
+      var bookingLink = row && row.booking_url ? '<div style="margin-top:10px"><a class="btn ghost small" href="' + escapeHtml(row.booking_url) + '" target="_blank" rel="noopener">Open booking path</a></div>' : '';
+      return '<div class="panel-lite"><div class="section-head"><strong>' + escapeHtml(row.full_name || 'Recurring reminder candidate') + '</strong><span class="note">' + dueBadge + '</span></div><div class="subgrid"><div class="stack-sm"><div><strong>Email:</strong> ' + escapeHtml(row.email || '—') + '</div><div><strong>Phone:</strong> ' + escapeHtml(row.phone || '—') + '</div><div><strong>Last service:</strong> ' + escapeHtml(lastService) + '</div></div><div class="stack-sm"><div><strong>Cycle:</strong> ' + escapeHtml(row.cycle_label || '—') + '</div><div><strong>Completed bookings:</strong> ' + escapeHtml(row.booking_count == null ? '—' : row.booking_count) + '</div><div><strong>Next reminder:</strong> ' + escapeHtml(nextReminder) + '</div></div></div><div class="subgrid" style="margin-top:10px"><div class="stack-sm"><div><strong>Last package:</strong> ' + escapeHtml(row.latest_package_code || '—') + '</div><div><strong>Last area:</strong> ' + escapeHtml(row.latest_service_area || '—') + '</div></div><div class="stack-sm"><div><strong>Reminder status:</strong> ' + escapeHtml(row.reminder_status || row.due_reason || 'pending') + '</div><div><strong>Last reminder:</strong> ' + escapeHtml(row.last_reminder_at ? new Date(row.last_reminder_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }) : '—') + '</div></div></div>' + bookingLink + '</div>';
+    }).join('');
+  }
+  async function loadMembershipInterest(){
+    var res = await fetch('/api/admin/membership_interest_list', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ limit: 10 }) });
+    var out = await res.json().catch(function(){ return null; });
+    if (!res.ok) throw new Error(out?.error || 'Could not load recurring reminder candidates.');
+    renderMembershipInterestList(out?.requests || []);
+  }
+  function readModeration(){ return { annotation_customer_visibility_default: byId('mod_annotation_customer_visibility_default').checked, comment_customer_visibility_default: byId('mod_comment_customer_visibility_default').checked, client_reply_depth_limit: Number(byId('mod_client_reply_depth_limit').value || 4), staff_reply_depth_limit: Number(byId('mod_staff_reply_depth_limit').value || 8), allow_client_annotation_replies: byId('mod_allow_client_annotation_replies').checked, allow_staff_hide_without_delete: byId('mod_allow_staff_hide_without_delete').checked }; }
+  function readRecoveryTemplates(){ return { abandoned_checkout_subject: byId('recovery_subject').value || '', abandoned_checkout_body_text: byId('recovery_body_text').value || '', abandoned_checkout_body_html: byId('recovery_body_html').value || '' }; }
+  function readRecoveryRules(){ return { abandoned_recovery_enabled: byId('recovery_enabled').checked, minimum_page_events: Number(byId('recovery_min_events').value || 0), require_email: true, cooldown_hours: Number(byId('recovery_cooldown_hours').value || 24), default_recovery_channel: byId('recovery_default_channel').value || 'email' }; }
+  function readProviderRules(){ return { email: { enabled: byId('provider_email_enabled').checked, provider_key: byId('provider_email_key').value || 'default_email', recovery_webhook_url: byId('provider_email_webhook').value || '', send_test_to: byId('provider_email_test_to').value || '' }, sms: { enabled: byId('provider_sms_enabled').checked, provider_key: byId('provider_sms_key').value || 'default_sms', recovery_webhook_url: byId('provider_sms_webhook').value || '', send_test_to: byId('provider_sms_test_to').value || '' } }; }
+  function pricingCatalogDefaults(){
+    return {
+      charts: [],
+      packages: [],
+      service_matrix: [],
+      addons: [],
+      service_areas: [],
+      booking_rules: {
+        availability_window_days: 21,
+        default_service_area: 'Tillsonburg, Oxford County',
+        hold_minutes: 30,
+        slot_labels: { AM: 'AM half day', PM: 'PM half day', FULL: 'Full day' },
+        public_requirements: [
+          'Driveway required',
+          'Customer provides power and water or additional fees may apply',
+          'One vehicle per day unless half-day jobs are confirmed'
+        ],
+        travel_pricing: { urban: 0, township: 0, hamlet: 10, coastal: 20, rural: 20, out_of_zone: 50, notes: '' },
+        price_controls: { fuel_surcharge_cad: 0, material_surcharge_cad: 0, minimum_callout_cad: 0, tax_rate_percent: 13 }
+      },
+      public_requirements: [
+        'Driveway required',
+        'Customer provides power and water or additional fees may apply',
+        'One vehicle per day unless half-day jobs are confirmed'
+      ]
+    };
+  }
+  function cloneValue(value){ return JSON.parse(JSON.stringify(value)); }
+  function moneyNum(value, fallback){
+    var n = Number(value);
+    return Number.isFinite(n) ? n : (fallback == null ? 0 : fallback);
+  }
+  function ensurePricingCatalogShape(value){
+    var defaults = pricingCatalogDefaults();
+    var catalog = value && typeof value === 'object' ? cloneValue(value) : cloneValue(defaults);
+    catalog.charts = Array.isArray(catalog.charts) ? catalog.charts : [];
+    catalog.service_matrix = Array.isArray(catalog.service_matrix) ? catalog.service_matrix : [];
+    catalog.packages = Array.isArray(catalog.packages) ? catalog.packages : [];
+    catalog.addons = Array.isArray(catalog.addons) ? catalog.addons : [];
+    catalog.service_areas = Array.isArray(catalog.service_areas) ? catalog.service_areas : [];
+    catalog.booking_rules = catalog.booking_rules && typeof catalog.booking_rules === 'object' ? catalog.booking_rules : {};
+    catalog.booking_rules.slot_labels = catalog.booking_rules.slot_labels && typeof catalog.booking_rules.slot_labels === 'object' ? catalog.booking_rules.slot_labels : {};
+    catalog.booking_rules.travel_pricing = catalog.booking_rules.travel_pricing && typeof catalog.booking_rules.travel_pricing === 'object' ? catalog.booking_rules.travel_pricing : {};
+    catalog.booking_rules.price_controls = catalog.booking_rules.price_controls && typeof catalog.booking_rules.price_controls === 'object' ? catalog.booking_rules.price_controls : {};
+    catalog.booking_rules.availability_window_days = Number(catalog.booking_rules.availability_window_days || defaults.booking_rules.availability_window_days);
+    catalog.booking_rules.hold_minutes = Number(catalog.booking_rules.hold_minutes || defaults.booking_rules.hold_minutes);
+    catalog.booking_rules.default_service_area = catalog.booking_rules.default_service_area || defaults.booking_rules.default_service_area;
+    catalog.booking_rules.slot_labels = Object.assign({}, defaults.booking_rules.slot_labels, catalog.booking_rules.slot_labels || {});
+    catalog.booking_rules.travel_pricing = {
+      urban: moneyNum(catalog.booking_rules.travel_pricing.urban, defaults.booking_rules.travel_pricing.urban),
+      township: moneyNum(catalog.booking_rules.travel_pricing.township, defaults.booking_rules.travel_pricing.township),
+      hamlet: moneyNum(catalog.booking_rules.travel_pricing.hamlet, defaults.booking_rules.travel_pricing.hamlet),
+      coastal: moneyNum(catalog.booking_rules.travel_pricing.coastal, defaults.booking_rules.travel_pricing.coastal),
+      rural: moneyNum(catalog.booking_rules.travel_pricing.rural, defaults.booking_rules.travel_pricing.rural),
+      remote: moneyNum(catalog.booking_rules.travel_pricing.remote, defaults.booking_rules.travel_pricing.remote),
+      out_of_zone: moneyNum(catalog.booking_rules.travel_pricing.out_of_zone, defaults.booking_rules.travel_pricing.out_of_zone),
+      notes: catalog.booking_rules.travel_pricing.notes || defaults.booking_rules.travel_pricing.notes
+    };
+    catalog.booking_rules.price_controls = {
+      fuel_surcharge_cad: moneyNum(catalog.booking_rules.price_controls.fuel_surcharge_cad, defaults.booking_rules.price_controls.fuel_surcharge_cad),
+      material_surcharge_cad: moneyNum(catalog.booking_rules.price_controls.material_surcharge_cad, defaults.booking_rules.price_controls.material_surcharge_cad),
+      minimum_callout_cad: moneyNum(catalog.booking_rules.price_controls.minimum_callout_cad, defaults.booking_rules.price_controls.minimum_callout_cad),
+      tax_rate_percent: moneyNum(catalog.booking_rules.price_controls.tax_rate_percent, defaults.booking_rules.price_controls.tax_rate_percent)
+    };
+    catalog.public_requirements = Array.isArray(catalog.public_requirements) ? catalog.public_requirements.slice() : [];
+    if (!catalog.public_requirements.length) catalog.public_requirements = (Array.isArray(catalog.booking_rules.public_requirements) ? catalog.booking_rules.public_requirements.slice() : defaults.public_requirements.slice());
+    catalog.booking_rules.public_requirements = catalog.public_requirements.slice();
+    catalog.packages = catalog.packages.map(function (pkg, index) {
+      return {
+        code: pkg && pkg.code || ('package_' + (index + 1)),
+        name: pkg && pkg.name || ('Package ' + (index + 1)),
+        subtitle: pkg && pkg.subtitle || '',
+        prices_cad: {
+          small: moneyNum(pkg && pkg.prices_cad && pkg.prices_cad.small, 0),
+          mid: moneyNum(pkg && pkg.prices_cad && pkg.prices_cad.mid, 0),
+          oversize: moneyNum(pkg && pkg.prices_cad && pkg.prices_cad.oversize, 0)
+        },
+        deposit_cad: moneyNum(pkg && pkg.deposit_cad, 0),
+        images_by_size: pkg && pkg.images_by_size && typeof pkg.images_by_size === 'object' ? pkg.images_by_size : {},
+        included_services: Array.isArray(pkg && pkg.included_services) ? pkg.included_services : [],
+        notes: Array.isArray(pkg && pkg.notes) ? pkg.notes : []
+      };
+    });
+    catalog.addons = catalog.addons.map(function (addon, index) {
+      return {
+        code: addon && addon.code || ('addon_' + (index + 1)),
+        name: addon && addon.name || ('Add-on ' + (index + 1)),
+        category: addon && addon.category || '',
+        type: addon && addon.type || '',
+        prices_cad: {
+          small: moneyNum(addon && addon.prices_cad && addon.prices_cad.small, addon && addon.price_cad),
+          mid: moneyNum(addon && addon.prices_cad && addon.prices_cad.mid, addon && addon.price_cad),
+          oversize: moneyNum(addon && addon.prices_cad && addon.prices_cad.oversize, addon && addon.price_cad)
+        },
+        price_cad: moneyNum(addon && addon.price_cad, 0),
+        quote_required: addon && addon.quote_required === true,
+        image_url: addon && addon.image_url || '',
+        image_fallback_url: addon && addon.image_fallback_url || '',
+        notes: Array.isArray(addon && addon.notes) ? addon.notes : []
+      };
+    });
+    catalog.service_areas = catalog.service_areas.map(function (row, index) {
+      return {
+        county: row && row.county || '',
+        label: row && row.label || ('Service Area ' + (index + 1)),
+        value: row && row.value || row && row.label || ('Service Area ' + (index + 1)),
+        municipality: row && row.municipality || '',
+        zone: row && row.zone || '',
+        travel_tier: row && row.travel_tier || 'standard',
+        area_type: row && row.area_type || '',
+        bylaw_note: row && row.bylaw_note || '',
+        parking_rule: row && row.parking_rule || '',
+        noise_rule: row && row.noise_rule || '',
+        water_rule: row && row.water_rule || '',
+        access_rule: row && row.access_rule || '',
+        official_links: Array.isArray(row && row.official_links) ? row.official_links : []
+      };
+    });
+    return catalog;
+  }
+  var pricingCatalogState = pricingCatalogDefaults();
+  function setPricingCatalogEditor(value){ byId('pricing_catalog_json').value = JSON.stringify(ensurePricingCatalogShape(value), null, 2); }
+  function setPricingCatalogState(value){ pricingCatalogState = ensurePricingCatalogShape(value); setPricingCatalogEditor(pricingCatalogState); renderPricingDashboard(); }
+  function readPricingCatalog(){
+    const raw = byId('pricing_catalog_json').value || '{}';
+    let parsed = null;
+    try { parsed = JSON.parse(raw); } catch { throw new Error('Pricing catalog JSON is invalid.'); }
+    if (!parsed || typeof parsed !== 'object') throw new Error('Pricing catalog must be a JSON object.');
+    return ensurePricingCatalogShape(parsed);
+  }
+  function syncPricingEditorToJson(){ setPricingCatalogEditor(pricingCatalogState); }
+  function updatePricingPath(path, value){
+    var parts = String(path || '').split('.');
+    var target = pricingCatalogState;
+    while (parts.length > 1) {
+      var key = parts.shift();
+      if (!target[key] || typeof target[key] !== 'object') target[key] = {};
+      target = target[key];
+    }
+    target[parts[0]] = value;
+    if (parts[0] === 'public_requirements') pricingCatalogState.public_requirements = value;
+    pricingCatalogState.booking_rules.public_requirements = pricingCatalogState.public_requirements.slice();
+    syncPricingEditorToJson();
+    renderPricingDashboard();
+  }
+  function renderPricingDashboard(){
+    var catalog = pricingCatalogState;
+    byId('pricingCatalogSummary').innerHTML = [
+      ['Package families', catalog.packages.length],
+      ['Package price points', packagePricePointCount(catalog.packages)],
+      ['Add-ons', catalog.addons.length],
+      ['Priced catalog lines', packagePricePointCount(catalog.packages) + catalog.addons.length],
+      ['Service areas', catalog.service_areas.length],
+      ['Public requirements', catalog.public_requirements.length],
+      ['Default service area', catalog.booking_rules.default_service_area || '—']
+    ].map(function (row) { return '<div class="stat"><div class="note">' + row[0] + '</div><strong>' + row[1] + '</strong></div>'; }).join('');
+
+    var packagePointCount = packagePricePointCount(catalog.packages);
+    byId('packageSectionNote').textContent = catalog.packages.length + ' package families with ' + packagePointCount + ' editable size-price entries. Small, mid, and oversize / exotic pricing stay together here so the whole site reads one source of truth.';
+
+    byId('travel_charge_urban').value = Number(catalog.booking_rules.travel_pricing.urban || 0).toFixed(2);
+    byId('travel_charge_township').value = Number(catalog.booking_rules.travel_pricing.township || 0).toFixed(2);
+    byId('travel_charge_hamlet').value = Number(catalog.booking_rules.travel_pricing.hamlet || 0).toFixed(2);
+    byId('travel_charge_coastal').value = Number(catalog.booking_rules.travel_pricing.coastal || 0).toFixed(2);
+    byId('travel_charge_rural').value = Number(catalog.booking_rules.travel_pricing.rural || 0).toFixed(2);
+    byId('travel_charge_remote').value = Number(catalog.booking_rules.travel_pricing.remote || 0).toFixed(2);
+    byId('travel_charge_out_of_zone').value = Number(catalog.booking_rules.travel_pricing.out_of_zone || 0).toFixed(2);
+    byId('travel_charge_notes').value = catalog.booking_rules.travel_pricing.notes || '';
+    byId('price_control_fuel').value = Number(catalog.booking_rules.price_controls.fuel_surcharge_cad || 0).toFixed(2);
+    byId('price_control_material').value = Number(catalog.booking_rules.price_controls.material_surcharge_cad || 0).toFixed(2);
+    byId('price_control_minimum').value = Number(catalog.booking_rules.price_controls.minimum_callout_cad || 0).toFixed(2);
+    byId('price_control_tax').value = Number(catalog.booking_rules.price_controls.tax_rate_percent || 0).toFixed(2);
+
+    byId('packageTable').innerHTML = renderPackageRows(catalog.packages);
+    byId('addonTable').innerHTML = renderAddonRows(catalog.addons);
+    byId('serviceAreaTable').innerHTML = renderServiceAreaRows(catalog.service_areas);
+    byId('requirementList').innerHTML = renderRequirementRows(catalog.public_requirements);
+    bindPricingCatalogRowInputs();
+  }
+  function packagePricePointCount(rows){
+    return (Array.isArray(rows) ? rows : []).reduce(function (sum, pkg) {
+      var prices = pkg && pkg.prices_cad && typeof pkg.prices_cad === 'object' ? pkg.prices_cad : {};
+      return sum + ['small','mid','oversize'].filter(function (key) { return prices[key] !== undefined && prices[key] !== null && prices[key] !== ''; }).length;
+    }, 0);
+  }
+  function renderPackageRows(rows){
+    if (!rows.length) return '<div class="catalog-empty">No packages yet.</div>';
+    return rows.map(function (pkg, index) {
+      return '<div class="catalog-row package">' +
+        '<div class="catalog-row__head">Code</div><div class="catalog-row__head">Name</div><div class="catalog-row__head">Subtitle</div><div class="catalog-row__head">Small</div><div class="catalog-row__head">Mid</div><div class="catalog-row__head">Oversize / exotic</div><div class="catalog-row__head">Deposit</div><div></div>' +
+        '<label class="field"><input data-pkg-field="code" data-pkg-index="' + index + '" value="' + escapeHtml(pkg.code || '') + '"></label>' +
+        '<label class="field"><input data-pkg-field="name" data-pkg-index="' + index + '" value="' + escapeHtml(pkg.name || '') + '"></label>' +
+        '<label class="field"><input data-pkg-field="subtitle" data-pkg-index="' + index + '" value="' + escapeHtml(pkg.subtitle || '') + '"></label>' +
+        '<label class="field"><input type="number" step="0.01" data-pkg-field="prices_cad.small" data-pkg-index="' + index + '" value="' + escapeHtml(String(pkg.prices_cad.small ?? 0)) + '"></label>' +
+        '<label class="field"><input type="number" step="0.01" data-pkg-field="prices_cad.mid" data-pkg-index="' + index + '" value="' + escapeHtml(String(pkg.prices_cad.mid ?? 0)) + '"></label>' +
+        '<label class="field"><input type="number" step="0.01" data-pkg-field="prices_cad.oversize" data-pkg-index="' + index + '" value="' + escapeHtml(String(pkg.prices_cad.oversize ?? 0)) + '"></label>' +
+        '<label class="field"><input type="number" step="0.01" data-pkg-field="deposit_cad" data-pkg-index="' + index + '" value="' + escapeHtml(String(pkg.deposit_cad ?? 0)) + '"></label>' +
+        '<button class="btn" type="button" data-delete-package="' + index + '">Delete</button>' +
+      '</div>';
+    }).join('');
+  }
+  function renderAddonRows(rows){
+    if (!rows.length) return '<div class="catalog-empty">No add-ons yet.</div>';
+    return rows.map(function (addon, index) {
+      return '<div class="catalog-row addon">' +
+        '<div class="catalog-row__head">Code</div><div class="catalog-row__head">Name</div><div class="catalog-row__head">Category</div><div class="catalog-row__head">Type</div><div class="catalog-row__head">Small</div><div class="catalog-row__head">Mid</div><div class="catalog-row__head">Oversize / exotic</div><div class="catalog-row__head">Quote?</div><div></div>' +
+        '<label class="field"><input data-addon-field="code" data-addon-index="' + index + '" value="' + escapeHtml(addon.code || '') + '"></label>' +
+        '<label class="field"><input data-addon-field="name" data-addon-index="' + index + '" value="' + escapeHtml(addon.name || '') + '"></label>' +
+        '<label class="field"><input data-addon-field="category" data-addon-index="' + index + '" value="' + escapeHtml(addon.category || '') + '"></label>' +
+        '<label class="field"><input data-addon-field="type" data-addon-index="' + index + '" value="' + escapeHtml(addon.type || '') + '"></label>' +
+        '<label class="field"><input type="number" step="0.01" data-addon-field="prices_cad.small" data-addon-index="' + index + '" value="' + escapeHtml(String(addon.prices_cad.small ?? 0)) + '"></label>' +
+        '<label class="field"><input type="number" step="0.01" data-addon-field="prices_cad.mid" data-addon-index="' + index + '" value="' + escapeHtml(String(addon.prices_cad.mid ?? 0)) + '"></label>' +
+        '<label class="field"><input type="number" step="0.01" data-addon-field="prices_cad.oversize" data-addon-index="' + index + '" value="' + escapeHtml(String(addon.prices_cad.oversize ?? 0)) + '"></label>' +
+        '<label class="checkrow inline-check"><input type="checkbox" data-addon-field="quote_required" data-addon-index="' + index + '" ' + (addon.quote_required ? 'checked' : '') + '><span>Quote</span></label>' +
+        '<button class="btn" type="button" data-delete-addon="' + index + '">Delete</button>' +
+      '</div>';
+    }).join('');
+  }
+  function renderServiceAreaRows(rows){
+    if (!rows.length) return '<div class="catalog-empty">No service areas yet.</div>';
+    return rows.map(function (row, index) {
+      return '<div class="catalog-row service-area">' +
+        '<div class="catalog-row__head">County</div><div class="catalog-row__head">Label</div><div class="catalog-row__head">Value</div><div class="catalog-row__head">Municipality</div><div class="catalog-row__head">Zone</div><div class="catalog-row__head">Tier</div><div></div>' +
+        '<label class="field"><input data-area-field="county" data-area-index="' + index + '" value="' + escapeHtml(row.county || '') + '"></label>' +
+        '<label class="field"><input data-area-field="label" data-area-index="' + index + '" value="' + escapeHtml(row.label || '') + '"></label>' +
+        '<label class="field"><input data-area-field="value" data-area-index="' + index + '" value="' + escapeHtml(row.value || '') + '"></label>' +
+        '<label class="field"><input data-area-field="municipality" data-area-index="' + index + '" value="' + escapeHtml(row.municipality || '') + '"></label>' +
+        '<label class="field"><input data-area-field="zone" data-area-index="' + index + '" value="' + escapeHtml(row.zone || '') + '"></label>' +
+        '<label class="field"><select data-area-field="travel_tier" data-area-index="' + index + '"><option value="urban" ' + (row.travel_tier==='urban'?'selected':'') + '>urban</option><option value="township" ' + (row.travel_tier==='township'?'selected':'') + '>township</option><option value="hamlet" ' + (row.travel_tier==='hamlet'?'selected':'') + '>hamlet</option><option value="coastal" ' + (row.travel_tier==='coastal'?'selected':'') + '>coastal</option><option value="rural" ' + (row.travel_tier==='rural'?'selected':'') + '>rural</option><option value="out_of_zone" ' + (row.travel_tier==='out_of_zone'?'selected':'') + '>out_of_zone</option></select></label>' +
+        '<button class="btn" type="button" data-delete-area="' + index + '">Delete</button>' +
+      '</div>';
+    }).join('');
+  }
+  function renderRequirementRows(rows){
+    if (!rows.length) return '<div class="catalog-empty">No public requirements yet.</div>';
+    return rows.map(function (row, index) {
+      return '<div class="catalog-row requirement"><label class="field"><input data-requirement-index="' + index + '" value="' + escapeHtml(row || '') + '"></label><button class="btn" type="button" data-delete-requirement="' + index + '">Delete</button></div>';
+    }).join('');
+  }
+  function setNestedValue(target, path, value){
+    var parts = String(path || '').split('.');
+    while (parts.length > 1) {
+      var key = parts.shift();
+      if (!target[key] || typeof target[key] !== 'object') target[key] = {};
+      target = target[key];
+    }
+    target[parts[0]] = value;
+  }
+  function bindPricingCatalogRowInputs(){
+    qsa('[data-pkg-index]').forEach(function (input) {
+      input.addEventListener('input', function () {
+        var index = Number(input.getAttribute('data-pkg-index'));
+        var field = input.getAttribute('data-pkg-field');
+        var value = input.type === 'number' ? moneyNum(input.value, 0) : input.value;
+        setNestedValue(pricingCatalogState.packages[index], field, value);
+        syncPricingEditorToJson();
+        renderPricingDashboard();
+      });
+    });
+    qsa('[data-addon-index]').forEach(function (input) {
+      var eventName = input.type === 'checkbox' ? 'change' : 'input';
+      input.addEventListener(eventName, function () {
+        var index = Number(input.getAttribute('data-addon-index'));
+        var field = input.getAttribute('data-addon-field');
+        var value = input.type === 'checkbox' ? input.checked : (input.type === 'number' ? moneyNum(input.value, 0) : input.value);
+        setNestedValue(pricingCatalogState.addons[index], field, value);
+        syncPricingEditorToJson();
+        renderPricingDashboard();
+      });
+    });
+    qsa('[data-area-index]').forEach(function (input) {
+      input.addEventListener('input', function () {
+        var index = Number(input.getAttribute('data-area-index'));
+        var field = input.getAttribute('data-area-field');
+        setNestedValue(pricingCatalogState.service_areas[index], field, input.value);
+        syncPricingEditorToJson();
+        renderPricingDashboard();
+      });
+      input.addEventListener('change', function () {
+        var index = Number(input.getAttribute('data-area-index'));
+        var field = input.getAttribute('data-area-field');
+        setNestedValue(pricingCatalogState.service_areas[index], field, input.value);
+        syncPricingEditorToJson();
+        renderPricingDashboard();
+      });
+    });
+    qsa('[data-requirement-index]').forEach(function (input) {
+      input.addEventListener('input', function () {
+        var index = Number(input.getAttribute('data-requirement-index'));
+        pricingCatalogState.public_requirements[index] = input.value;
+        pricingCatalogState.booking_rules.public_requirements = pricingCatalogState.public_requirements.slice();
+        syncPricingEditorToJson();
+      });
+    });
+    qsa('[data-delete-package]').forEach(function (button) {
+      button.addEventListener('click', function () { pricingCatalogState.packages.splice(Number(button.getAttribute('data-delete-package')), 1); syncPricingEditorToJson(); renderPricingDashboard(); });
+    });
+    qsa('[data-delete-addon]').forEach(function (button) {
+      button.addEventListener('click', function () { pricingCatalogState.addons.splice(Number(button.getAttribute('data-delete-addon')), 1); syncPricingEditorToJson(); renderPricingDashboard(); });
+    });
+    qsa('[data-delete-area]').forEach(function (button) {
+      button.addEventListener('click', function () { pricingCatalogState.service_areas.splice(Number(button.getAttribute('data-delete-area')), 1); syncPricingEditorToJson(); renderPricingDashboard(); });
+    });
+    qsa('[data-delete-requirement]').forEach(function (button) {
+      button.addEventListener('click', function () { pricingCatalogState.public_requirements.splice(Number(button.getAttribute('data-delete-requirement')), 1); pricingCatalogState.booking_rules.public_requirements = pricingCatalogState.public_requirements.slice(); syncPricingEditorToJson(); renderPricingDashboard(); });
+    });
+  }
+  async function loadPricingCatalogEditor(savedSetting){
+    if (savedSetting && typeof savedSetting === 'object') { setPricingCatalogState(savedSetting); return; }
+    const res = await fetch('/api/pricing_catalog_public', { credentials:'include', cache:'no-store' });
+    const out = await res.json().catch(() => null);
+    if (!res.ok || !out) throw new Error(out?.error || 'Could not load pricing catalog.');
+    setPricingCatalogState(out);
+  }
+  async function loadSettings(){
+    const res = await fetch('/api/admin/app_settings_get', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({}) });
+    const out = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(out?.error || 'Could not load settings.');
+    const s = out?.settings || {};
+    const visibility = applySetting(s.visibility_matrix);
+    const scheduling = applySetting(s.manual_scheduling_rules);
+    const flags = applySetting(s.feature_flags);
+    const quoteSettings = applySetting(s.quote_booking_settings, quoteSettingsDefaults());
+    const giftDeliverySettings = applySetting(s.gift_delivery_settings, giftDeliveryDefaults());
+    const membershipPlanSettings = applySetting(s.membership_plan_settings, membershipPlanDefaults());
+    const moderation = applySetting(s.moderation_rules);
+    const recoveryTemplates = applySetting(s.recovery_templates);
+    const recoveryRules = applySetting(s.recovery_rules);
+    const providerRules = applySetting(s.recovery_provider_rules);
+    const pricingCatalog = applySetting(s.pricing_catalog, null);
+    const documentTemplates = applySetting(s.document_templates, documentTemplatesDefaults());
+    const socialFeeds = applySetting(s.social_feeds, socialFeedsDefaults());
+    const beforeAfterGallery = applySetting(s.before_after_gallery, beforeAfterGalleryDefaults());
+
+    byId('vis_customer_detailer_notes').checked = !!visibility.customer_detailer_notes;
+    byId('vis_customer_admin_notes').checked = visibility.customer_admin_notes_admin_only !== false;
+    byId('vis_detailer_admin_notes').checked = visibility.detailer_admin_notes_admin_only !== false;
+    byId('manual_schedule_admin_only').checked = scheduling.manual_schedule_admin_only !== false;
+    byId('blocking_admin_only').checked = scheduling.blocking_admin_only !== false;
+    byId('manual_schedule_notes').value = scheduling.notes || '';
+
+    byId('flag_live_updates_default').checked = !!flags.live_updates_default;
+    byId('flag_customer_chat_enabled').checked = flags.customer_chat_enabled !== false;
+    byId('flag_picture_first_observations').checked = flags.picture_first_observations !== false;
+    byId('flag_tier_discount_badges').checked = flags.tier_discount_badges !== false;
+    byId('flag_annotation_moderation_enabled').checked = flags.annotation_moderation_enabled !== false;
+    byId('flag_two_sided_thread_controls_enabled').checked = flags.two_sided_thread_controls_enabled !== false;
+    byId('flag_low_stock_alerts_enabled').checked = flags.low_stock_alerts_enabled !== false;
+
+    byId('quote_prominent_cta').checked = quoteSettings.prominent_cta !== false;
+    byId('quote_show_exact_total').checked = quoteSettings.show_exact_total !== false;
+    byId('quote_show_time_expectation').checked = quoteSettings.show_time_expectation !== false;
+    byId('quote_teaser_text').value = quoteSettings.teaser_text || quoteSettingsDefaults().teaser_text;
+
+    byId('gift_delivery_enabled').checked = giftDeliverySettings.enabled !== false;
+    byId('gift_delivery_manual_review').checked = giftDeliverySettings.manual_review !== false;
+    byId('gift_delivery_automation_enabled').checked = giftDeliverySettings.automation_enabled !== false;
+    byId('gift_delivery_send_copy_to_purchaser').checked = giftDeliverySettings.send_copy_to_purchaser !== false;
+    byId('gift_delivery_send_hour').value = Number(giftDeliverySettings.default_send_hour_local || giftDeliveryDefaults().default_send_hour_local);
+    byId('gift_delivery_timezone').value = giftDeliverySettings.timezone_label || giftDeliveryDefaults().timezone_label;
+    byId('gift_delivery_default_message').value = giftDeliverySettings.default_message || giftDeliveryDefaults().default_message;
+
+    byId('membership_enabled').checked = !!membershipPlanSettings.enabled;
+    byId('membership_waitlist_enabled').checked = membershipPlanSettings.waitlist_enabled !== false;
+    byId('membership_reminder_enabled').checked = membershipPlanSettings.reminder_enabled !== false;
+    byId('membership_name').value = membershipPlanSettings.plan_name || membershipPlanDefaults().plan_name;
+    byId('membership_cycle').value = membershipPlanSettings.cycle_label || membershipPlanDefaults().cycle_label;
+    byId('membership_teaser').value = membershipPlanSettings.teaser || membershipPlanDefaults().teaser;
+    byId('membership_benefits').value = Array.isArray(membershipPlanSettings.benefits) ? membershipPlanSettings.benefits.join('\n') : membershipPlanDefaults().benefits.join('\n');
+    byId('membership_reminder_subject').value = membershipPlanSettings.reminder_subject || membershipPlanDefaults().reminder_subject;
+    byId('membership_reminder_intro').value = membershipPlanSettings.reminder_intro || membershipPlanDefaults().reminder_intro;
+
+    byId('mod_annotation_customer_visibility_default').checked = moderation.annotation_customer_visibility_default !== false;
+    byId('mod_comment_customer_visibility_default').checked = moderation.comment_customer_visibility_default !== false;
+    byId('mod_client_reply_depth_limit').value = moderation.client_reply_depth_limit ?? 4;
+    byId('mod_staff_reply_depth_limit').value = moderation.staff_reply_depth_limit ?? 8;
+    byId('mod_allow_client_annotation_replies').checked = moderation.allow_client_annotation_replies !== false;
+    byId('mod_allow_staff_hide_without_delete').checked = moderation.allow_staff_hide_without_delete !== false;
+
+    byId('recovery_subject').value = recoveryTemplates.abandoned_checkout_subject || '';
+    byId('recovery_body_text').value = recoveryTemplates.abandoned_checkout_body_text || '';
+    byId('recovery_body_html').value = recoveryTemplates.abandoned_checkout_body_html || '';
+    byId('recovery_enabled').checked = recoveryRules.abandoned_recovery_enabled !== false;
+    byId('recovery_min_events').value = recoveryRules.minimum_page_events ?? 2;
+    byId('recovery_cooldown_hours').value = recoveryRules.cooldown_hours ?? 24;
+    byId('recovery_default_channel').value = recoveryRules.default_recovery_channel || 'email';
+
+    byId('provider_email_enabled').checked = providerRules?.email?.enabled !== false;
+    byId('provider_email_key').value = providerRules?.email?.provider_key || 'default_email';
+    byId('provider_email_webhook').value = providerRules?.email?.recovery_webhook_url || '';
+    byId('provider_email_test_to').value = providerRules?.email?.send_test_to || '';
+    byId('provider_sms_enabled').checked = providerRules?.sms?.enabled === true;
+    byId('provider_sms_key').value = providerRules?.sms?.provider_key || 'default_sms';
+    byId('provider_sms_webhook').value = providerRules?.sms?.recovery_webhook_url || '';
+    byId('provider_sms_test_to').value = providerRules?.sms?.send_test_to || '';
+    byId('doc_confirmation_intro').value = documentTemplates.confirmation_intro || '';
+    byId('doc_invoice_footer').value = documentTemplates.invoice_footer || '';
+    byId('doc_gift_footer').value = documentTemplates.gift_footer || '';
+    setSocialFeedsEditor(socialFeeds);
+    setBeforeAfterGalleryEditor(beforeAfterGallery);
+    await loadPricingCatalogEditor(pricingCatalog);
+    await loadMembershipInterest().catch(function(){ renderMembershipInterestList([]); });
+  }
+  function byId(id){ return document.getElementById(id); }
+  function bindById(id, eventName, handler){
+    const node = byId(id);
+    if (!node) {
+      console.warn('admin-app missing element for event binding:', id, eventName);
+      return null;
+    }
+    node.addEventListener(eventName, handler);
+    return node;
+  }
+  async function previewRecovery(sendTest){
+    const res = await fetch('/api/admin/recovery_message_preview', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ channel: byId('preview_channel').value, customer_name: byId('preview_customer_name').value, customer_email: byId('preview_customer_email').value, recipient_phone: byId('preview_recipient_phone').value, test_recipient: byId('preview_test_recipient').value, recovery_url: byId('preview_recovery_url').value, send_test: sendTest === true }) });
+    const out = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(out?.error || 'Could not build recovery preview.');
+    byId('previewSubject').textContent = out?.preview?.subject || '';
+    byId('previewText').textContent = out?.preview?.body_text || '';
+    byId('previewHtml').textContent = out?.preview?.body_html || '';
+    if (sendTest) {
+      if (out?.dispatch?.ok) setShellStatus('Recovery test sent successfully.', 'success');
+      else throw new Error(out?.dispatch?.error || 'Preview generated but the test send failed.');
+    }
+  }
+
+  ['travel_charge_urban','travel_charge_township','travel_charge_hamlet','travel_charge_coastal','travel_charge_rural','travel_charge_out_of_zone'].forEach(function (id) {
+    bindById(id, 'input', function () {
+      var key = id.replace('travel_charge_', '');
+      pricingCatalogState.booking_rules.travel_pricing[key] = moneyNum(byId(id).value, 0);
+      syncPricingEditorToJson();
+    });
+  });
+  bindById('travel_charge_notes', 'input', function () {
+    pricingCatalogState.booking_rules.travel_pricing.notes = byId('travel_charge_notes').value || '';
+    syncPricingEditorToJson();
+  });
+  bindById('price_control_fuel', 'input', function () { pricingCatalogState.booking_rules.price_controls.fuel_surcharge_cad = moneyNum(byId('price_control_fuel').value, 0); syncPricingEditorToJson(); });
+  bindById('price_control_material', 'input', function () { pricingCatalogState.booking_rules.price_controls.material_surcharge_cad = moneyNum(byId('price_control_material').value, 0); syncPricingEditorToJson(); });
+  bindById('price_control_minimum', 'input', function () { pricingCatalogState.booking_rules.price_controls.minimum_callout_cad = moneyNum(byId('price_control_minimum').value, 0); syncPricingEditorToJson(); });
+  bindById('price_control_tax', 'input', function () { pricingCatalogState.booking_rules.price_controls.tax_rate_percent = moneyNum(byId('price_control_tax').value, 0); syncPricingEditorToJson(); });
+  bindById('addPackageBtn', 'click', function () {
+    pricingCatalogState.packages.push({ code: 'new_package', name: 'New Package', subtitle: '', prices_cad: { small: 0, mid: 0, oversize: 0 }, deposit_cad: 0, images_by_size: {}, included_services: [], notes: [] });
+    syncPricingEditorToJson(); renderPricingDashboard();
+  });
+  bindById('addAddonBtn', 'click', function () {
+    pricingCatalogState.addons.push({ code: 'new_addon', name: 'New Add-on', category: '', type: '', prices_cad: { small: 0, mid: 0, oversize: 0 }, price_cad: 0, quote_required: false, image_url: '', image_fallback_url: '', notes: [] });
+    syncPricingEditorToJson(); renderPricingDashboard();
+  });
+  bindById('addServiceAreaBtn', 'click', function () {
+    pricingCatalogState.service_areas.push({ county: '', label: 'New Service Area', value: 'New Service Area', municipality: '', zone: '', travel_tier: 'township', area_type: '', bylaw_note: '', parking_rule: '', noise_rule: '', water_rule: '', access_rule: '', official_links: [] });
+    syncPricingEditorToJson(); renderPricingDashboard();
+  });
+  bindById('addRequirementBtn', 'click', function () {
+    pricingCatalogState.public_requirements.push('New public requirement');
+    pricingCatalogState.booking_rules.public_requirements = pricingCatalogState.public_requirements.slice();
+    syncPricingEditorToJson(); renderPricingDashboard();
+  });
+  bindById('applyPricingJsonBtn', 'click', function () { try { setPricingCatalogState(readPricingCatalog()); setShellStatus('Pricing JSON applied to the structured editor.', 'success'); } catch (err) { setShellStatus(err?.message || 'Could not apply pricing JSON.', 'error'); } });
+  bindById('syncPricingJsonBtn', 'click', function () { syncPricingEditorToJson(); setShellStatus('Raw pricing JSON refreshed from the structured editor.', 'success'); });
+  bindById('saveVisibilityBtn', 'click', async ()=>{ try{ await saveSetting('visibility_matrix', readVisibility(), 'Visibility settings saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save visibility settings.', 'error'); } });
+  bindById('saveSchedulingBtn', 'click', async ()=>{ try{ await saveSetting('manual_scheduling_rules', readScheduling(), 'Scheduling policy saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save scheduling policy.', 'error'); } });
+  bindById('saveFlagsBtn', 'click', async ()=>{ try{ await saveSetting('feature_flags', readFlags(), 'Feature flags saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save feature flags.', 'error'); } });
+  bindById('saveQuoteSettingsBtn', 'click', async ()=>{ try{ await saveSetting('quote_booking_settings', readQuoteSettings(), 'Booking-led self-serve settings saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save booking-led self-serve settings.', 'error'); } });
+  bindById('saveGiftDeliverySettingsBtn', 'click', async ()=>{ try{ await saveSetting('gift_delivery_settings', readGiftDeliverySettings(), 'E-gift delivery settings saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save e-gift settings.', 'error'); } });
+  bindById('runGiftDeliveryProcessBtn', 'click', async ()=>{ try{ const res = await fetch('/api/gifts/scheduled_delivery_process', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ limit: 50 }) }); const out = await res.json().catch(()=>null); if(!res.ok) throw new Error(out?.error || 'Could not run gift delivery automation.'); setShellStatus('Gift delivery automation scanned ' + (out?.scanned || 0) + ' gifts and processed ' + (out?.processed || 0) + '.', 'success'); } catch(err){ setShellStatus(err?.message || 'Could not run gift delivery automation.', 'error'); } });
+  bindById('saveMembershipSettingsBtn', 'click', async ()=>{ try{ await saveSetting('membership_plan_settings', readMembershipPlanSettings(), 'Maintenance plan settings saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save maintenance plan settings.', 'error'); } });
+  bindById('runMembershipReminderProcessBtn', 'click', async ()=>{ try{ const res = await fetch('/api/membership_reminders_process', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ limit: 50 }) }); const out = await res.json().catch(()=>null); if(!res.ok) throw new Error(out?.error || 'Could not run maintenance reminders.'); await loadMembershipInterest().catch(function(){}); setShellStatus('Maintenance reminders scanned ' + (out?.scanned || 0) + ' customers and processed ' + (out?.processed || 0) + '.', 'success'); } catch(err){ setShellStatus(err?.message || 'Could not run maintenance reminders.', 'error'); } });
+  bindById('reloadMembershipInterestBtn', 'click', async ()=>{ try{ await loadMembershipInterest(); setShellStatus('Recurring reminder candidates reloaded.', 'success'); } catch(err){ setShellStatus(err?.message || 'Could not reload recurring reminder candidates.', 'error'); } });
+  bindById('saveModerationBtn', 'click', async ()=>{ try{ await saveSetting('moderation_rules', readModeration(), 'Moderation defaults saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save moderation defaults.', 'error'); } });
+  bindById('saveRecoveryBtn', 'click', async ()=>{ try{ await saveSetting('recovery_templates', readRecoveryTemplates(), 'Recovery templates saved.'); await saveSetting('recovery_rules', readRecoveryRules(), 'Recovery rules saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save recovery settings.', 'error'); } });
+  bindById('saveProviderRulesBtn', 'click', async ()=>{ try{ await saveSetting('recovery_provider_rules', readProviderRules(), 'Recovery provider rules saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save provider rules.', 'error'); } });
+  bindById('saveDocumentTemplatesBtn', 'click', async ()=>{ try{ await saveSetting('document_templates', readDocumentTemplates(), 'Document templates saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save document templates.', 'error'); } });
+  bindById('reloadSocialFeedsBtn', 'click', async ()=>{ try{ const res = await fetch('/api/social_feed_public', { credentials:'include', cache:'no-store' }); const out = await res.json().catch(()=>null); if (!res.ok) throw new Error(out?.error || 'Could not load social feed JSON.'); setSocialFeedsEditor(out?.social_feeds || socialFeedsDefaults()); setShellStatus(out?.warning ? `Social feed JSON reloaded with fallback defaults. ${out.warning}` : 'Social feed JSON reloaded.', out?.warning ? 'warning' : 'success'); } catch(err){ setShellStatus(err?.message || 'Could not reload social feed JSON.', 'error'); } });
+  bindById('resetSocialFeedsBtn', 'click', ()=>{ setSocialFeedsEditor(socialFeedsDefaults()); setShellStatus('Social feed editor reset to the template structure.', 'success'); });
+  bindById('saveSocialFeedsBtn', 'click', async ()=>{ try{ await saveSetting('social_feeds', readSocialFeedsEditor(), 'Social feeds saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save social feeds.', 'error'); } });
+  bindById('reloadBeforeAfterGalleryBtn', 'click', async ()=>{ try{ const res = await fetch('/api/before_after_gallery_public', { credentials:'include', cache:'no-store' }); const out = await res.json().catch(()=>null); if (!res.ok) throw new Error(out?.error || 'Could not load before / after gallery JSON.'); setBeforeAfterGalleryEditor(out || beforeAfterGalleryDefaults()); setShellStatus(out?.warning ? `Before / after gallery reloaded with fallback defaults. ${out.warning}` : 'Before / after gallery reloaded.', out?.warning ? 'warning' : 'success'); } catch(err){ setShellStatus(err?.message || 'Could not reload before / after gallery JSON.', 'error'); } });
+  bindById('resetBeforeAfterGalleryBtn', 'click', ()=>{ setBeforeAfterGalleryEditor(beforeAfterGalleryDefaults()); setShellStatus('Before / after gallery editor reset to the template structure.', 'success'); });
+  bindById('saveBeforeAfterGalleryBtn', 'click', async ()=>{ try{ await saveSetting('before_after_gallery', readBeforeAfterGalleryEditor(), 'Before / after gallery saved.'); } catch(err){ setShellStatus(err?.message || 'Could not save before / after gallery.', 'error'); } });
+  bindById('reloadPricingCatalogBtn', 'click', async ()=>{ try{ await loadPricingCatalogEditor(null); setShellStatus('Pricing catalog reloaded.', 'success'); } catch(err){ setShellStatus(err?.message || 'Could not reload pricing catalog.', 'error'); } });
+  bindById('savePricingCatalogBtn', 'click', async ()=>{ try{ syncPricingEditorToJson(); await saveSetting('pricing_catalog', pricingCatalogState, 'Pricing catalog saved. Booking, pricing, services, checkout, and pricing controls now share this source.'); } catch(err){ setShellStatus(err?.message || 'Could not save pricing catalog.', 'error'); } });
+  bindById('previewRecoveryBtn', 'click', async ()=>{ try{ await previewRecovery(false); setShellStatus('Recovery preview generated.', 'success'); } catch(err){ setShellStatus(err?.message || 'Could not build recovery preview.', 'error'); } });
+  bindById('sendTestRecoveryBtn', 'click', async ()=>{ try{ await previewRecovery(true); } catch(err){ setShellStatus(err?.message || 'Could not send recovery test.', 'error'); } });
+
+  window.AdminPageInit.init({ pageKey:'admin-app', onReady: async ()=>{ try { await loadSettings(); } catch(err){ setShellStatus(err?.message || 'Could not initialize app management.', 'error'); } } });
+})();
+</script>
+
+<script type="module">
+  import {
+    buildLivePricingChartSvg,
+    buildLiveServiceDetailsChartSvg,
+    buildLiveVehicleSizeChartSvg
+  } from "/assets/pricing-catalog-client.js?v=20260423livecharts2";
+
+  const chartBuilders = {
+    prices: { filename: 'rosie-vehicle-price-chart.svg', build: buildLivePricingChartSvg },
+    details: { filename: 'rosie-package-service-details-chart.svg', build: buildLiveServiceDetailsChartSvg },
+    sizes: { filename: 'rosie-vehicle-size-guide.svg', build: buildLiveVehicleSizeChartSvg }
+  };
+
+  function currentCatalogForChart(){
+    const raw = document.getElementById('pricing_catalog_json')?.value || '{}';
+    try { return JSON.parse(raw); }
+    catch (err) { throw new Error('Pricing catalog JSON is not valid yet. Refresh JSON from editor or fix the raw JSON before generating charts.'); }
+  }
+
+  function chartSelection(){
+    const key = document.getElementById('liveChartType')?.value || 'prices';
+    return chartBuilders[key] || chartBuilders.prices;
+  }
+
+  function setLocalChartStatus(message, state){
+    const box = document.querySelector('[data-admin-shell-status]');
+    if (!box) return;
+    box.hidden = false;
+    box.textContent = message;
+    if (state) box.dataset.state = state;
+  }
+
+  function makeSvgBlobUrl(svg){
+    return URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+  }
+
+  document.getElementById('liveChartPreviewBtn')?.addEventListener('click', () => {
+    try {
+      const selected = chartSelection();
+      const svg = selected.build(currentCatalogForChart());
+      const img = document.getElementById('liveChartPreviewImg');
+      const wrap = document.getElementById('liveChartPreviewWrap');
+      if (img.dataset.objectUrl) URL.revokeObjectURL(img.dataset.objectUrl);
+      const url = makeSvgBlobUrl(svg);
+      img.dataset.objectUrl = url;
+      img.src = url;
+      wrap.hidden = false;
+      setLocalChartStatus('Live chart preview generated from the current editor JSON.', 'success');
+    } catch (err) {
+      setLocalChartStatus(err?.message || 'Could not generate live chart preview.', 'error');
+    }
+  });
+
+  document.getElementById('liveChartDownloadBtn')?.addEventListener('click', () => {
+    try {
+      const selected = chartSelection();
+      const svg = selected.build(currentCatalogForChart());
+      const url = makeSvgBlobUrl(svg);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = selected.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setLocalChartStatus('Live SVG chart downloaded from the current editor JSON.', 'success');
+    } catch (err) {
+      setLocalChartStatus(err?.message || 'Could not download live chart.', 'error');
+    }
+  });
+</script>
+</body>
+</html>
