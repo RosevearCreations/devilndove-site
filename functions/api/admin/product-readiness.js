@@ -18,6 +18,42 @@ function hasOverrideReason(row = {}) {
   return normalizeText(row.merchandising_override_reason).length > 0;
 }
 
+function normalizeShotStyle(style) {
+  return normalizeText(style).toLowerCase() || 'record';
+}
+
+function summarizeImageMix(imageHistory = []) {
+  const shotMix = {};
+  const angleMix = {};
+  let recordImageCount = 0;
+  let contextImageCount = 0;
+  for (const item of imageHistory) {
+    const shotStyle = normalizeShotStyle(item?.shot_style);
+    shotMix[shotStyle] = Number(shotMix[shotStyle] || 0) + 1;
+    if (['lifestyle', 'process', 'packaging', 'scale_reference'].includes(shotStyle)) contextImageCount += 1;
+    else recordImageCount += 1;
+    const angle = normalizeText(item?.angle_group).toLowerCase();
+    if (angle) angleMix[angle] = Number(angleMix[angle] || 0) + 1;
+  }
+  const duplicateGroups = Object.entries(angleMix).filter(([, count]) => Number(count || 0) > 1);
+  const duplicateAngleGroupCount = duplicateGroups.length;
+  const duplicateImageCount = duplicateGroups.reduce((sum, [, count]) => sum + Math.max(0, Number(count || 0) - 1), 0);
+  const guidance = [];
+  if (recordImageCount === 0 && imageHistory.length > 0) guidance.push('Keep at least one clean record shot for the storefront lead image.');
+  if (contextImageCount === 0 && imageHistory.length >= 3) guidance.push('Consider adding one process or lifestyle image for trust and storytelling.');
+  if (contextImageCount > Math.max(1, Math.floor(imageHistory.length / 2))) guidance.push('The gallery is context-heavy; keep the majority of images product-focused.');
+  if (duplicateAngleGroupCount > 0) guidance.push(`${duplicateImageCount} gallery image(s) repeat ${duplicateAngleGroupCount} angle group(s).`);
+  return {
+    record_image_count: recordImageCount,
+    context_image_count: contextImageCount,
+    duplicate_angle_group_count: duplicateAngleGroupCount,
+    duplicate_image_count: duplicateImageCount,
+    shot_mix: shotMix,
+    angle_mix: angleMix,
+    guidance
+  };
+}
+
 function buildChecks(row = {}, imageHistory = []) {
   const imageCount = Number(row.image_count || 0);
   const altCoverage = Number(row.alt_coverage_count || 0);
@@ -39,6 +75,7 @@ function buildChecks(row = {}, imageHistory = []) {
   const overriddenGalleryImageCount = imageHistory.filter((item, index) => index > 0 && hasOverrideReason(item)).length;
   const weakUnapprovedGalleryImageCount = imageHistory.filter((item, index) => index > 0 && Number(item?.merchandising_score ?? item?.first_image_score ?? 0) < 64 && !hasOverrideReason(item)).length;
   const hasCropHistory = firstImage && firstImage.crop_x != null && firstImage.crop_y != null && firstImage.crop_width != null && firstImage.crop_height != null;
+  const mixSummary = summarizeImageMix(imageHistory);
   const knowsFirstDimensions = firstWidth > 0 && firstHeight > 0;
   const checks = [];
   checks.push({ key: 'name', ok: normalizeText(row.name).length > 0, label: 'Product name present', weight: 10 });
@@ -80,6 +117,8 @@ function buildChecks(row = {}, imageHistory = []) {
   }
   if (overriddenGalleryImageCount > 0) leadWarnings.push(`${overriddenGalleryImageCount} gallery image(s) are being kept by documented override reason.`);
   if (weakUnapprovedGalleryImageCount > 0) leadWarnings.push(`${weakUnapprovedGalleryImageCount} gallery image(s) are still weak without an override reason.`);
+  if (mixSummary.duplicate_angle_group_count > 0) leadWarnings.push(`${mixSummary.duplicate_image_count} image(s) repeat ${mixSummary.duplicate_angle_group_count} angle group(s).`);
+  if (mixSummary.context_image_count === 0 && imageCount >= 3) leadWarnings.push('Consider adding one process or lifestyle image for trust and storytelling.');
 
   return {
     checks,
@@ -90,6 +129,13 @@ function buildChecks(row = {}, imageHistory = []) {
     lead_image_merchandising_score: firstImageScore,
     overridden_gallery_image_count: overriddenGalleryImageCount,
     weak_unapproved_gallery_image_count: weakUnapprovedGalleryImageCount,
+    record_image_count: mixSummary.record_image_count,
+    context_image_count: mixSummary.context_image_count,
+    duplicate_angle_group_count: mixSummary.duplicate_angle_group_count,
+    duplicate_image_count: mixSummary.duplicate_image_count,
+    shot_mix: mixSummary.shot_mix,
+    angle_mix: mixSummary.angle_mix,
+    gallery_mix_warning: mixSummary.guidance.join(' '),
     media_completeness_score: Math.round((((imageCount >= 3 ? 1 : imageCount / 3) + (imageCount > 0 ? Math.min(altCoverage / Math.max(imageCount, 1), 1) : 0) + (knowsFirstDimensions ? 1 : 0.5) + (hasCropHistory ? 1 : 0.4)) / 4) * 100),
     is_ready_for_storefront: failed.length === 0 ? 1 : 0,
     ready_check_notes: failed.map((item) => item.label).join('; '),

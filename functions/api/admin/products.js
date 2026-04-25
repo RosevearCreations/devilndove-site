@@ -89,6 +89,10 @@ function buildReadiness(row = {}) {
     merchandising_history_recorded_at: row.merchandising_history_recorded_at || null,
     overridden_gallery_image_count: Number(row.overridden_gallery_image_count || 0),
     weak_unapproved_gallery_image_count: weakUnapprovedGalleryImageCount,
+    context_image_count: Number(row.context_image_count || 0),
+    record_image_count: Number(row.record_image_count || 0),
+    duplicate_angle_group_count: Number(row.duplicate_angle_group_count || 0),
+    duplicate_image_count: Number(row.duplicate_image_count || 0),
     readiness_checks: checks,
   };
 }
@@ -101,6 +105,7 @@ async function loadProducts(db, q) {
   const hasResourceLinks = await tableExists(db, "product_resource_links");
   const hasInventory = await tableExists(db, "site_item_inventory");
   const hasMediaScoreHistory = await tableExists(db, "product_media_score_history");
+  const historyCols = hasMediaScoreHistory ? await getTableColumnSet(db, 'product_media_score_history') : new Set();
   const resourceLinkColumns = hasResourceLinks ? await getTableColumnSet(db, 'product_resource_links') : new Set();
   const hasConsumptionMode = resourceLinkColumns.has('consumption_mode');
   const hasLotSizeUnits = resourceLinkColumns.has('lot_size_units');
@@ -140,6 +145,10 @@ async function loadProducts(db, q) {
     hasProductImages ? `AVG(CASE WHEN ${annotationCols.has('merchandising_score') ? 'COALESCE(pia.merchandising_score, pia.first_image_score, 0)' : (annotationCols.has('first_image_score') ? 'COALESCE(pia.first_image_score, 0)' : '0')} < 64 AND COALESCE(pi.sort_order,0) > 0 AND LENGTH(TRIM(COALESCE(${annotationCols.has('merchandising_override_reason') ? 'pia.merchandising_override_reason' : "''"},''))) > 0 THEN 64 ELSE COALESCE(${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : '0')}, 0) END) AS effective_gallery_merchandising_score` : "0 AS effective_gallery_merchandising_score",
     hasProductImages ? `SUM(CASE WHEN COALESCE(pi.sort_order,0) > 0 AND LENGTH(TRIM(COALESCE(${annotationCols.has('merchandising_override_reason') ? 'pia.merchandising_override_reason' : "''"},''))) > 0 THEN 1 ELSE 0 END) AS overridden_gallery_image_count` : "0 AS overridden_gallery_image_count",
     hasProductImages ? `SUM(CASE WHEN COALESCE(pi.sort_order,0) > 0 AND COALESCE(${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : '0')}, 0) < 64 AND LENGTH(TRIM(COALESCE(${annotationCols.has('merchandising_override_reason') ? 'pia.merchandising_override_reason' : "''"},''))) = 0 THEN 1 ELSE 0 END) AS weak_unapproved_gallery_image_count` : "0 AS weak_unapproved_gallery_image_count",
+    hasProductImages && annotationCols.has('shot_style') ? `(SELECT COUNT(*) FROM product_images pi2 LEFT JOIN product_image_annotations pia2 ON pia2.product_image_id = pi2.product_image_id WHERE pi2.product_id = p.product_id AND LOWER(TRIM(COALESCE(pia2.shot_style,'record'))) IN ('lifestyle','process','packaging','scale_reference')) AS context_image_count` : "0 AS context_image_count",
+    hasProductImages ? `(SELECT COUNT(*) FROM product_images pi2 LEFT JOIN product_image_annotations pia2 ON pia2.product_image_id = pi2.product_image_id WHERE pi2.product_id = p.product_id AND LOWER(TRIM(COALESCE(${annotationCols.has('shot_style') ? 'pia2.shot_style' : "'record'"},'record'))) NOT IN ('lifestyle','process','packaging','scale_reference')) AS record_image_count` : "0 AS record_image_count",
+    hasProductImages && annotationCols.has('angle_group') ? `(SELECT COUNT(*) FROM (SELECT LOWER(TRIM(COALESCE(pia2.angle_group,''))) AS grp FROM product_images pi2 LEFT JOIN product_image_annotations pia2 ON pia2.product_image_id = pi2.product_image_id WHERE pi2.product_id = p.product_id AND LENGTH(TRIM(COALESCE(pia2.angle_group,''))) > 0 GROUP BY LOWER(TRIM(COALESCE(pia2.angle_group,''))) HAVING COUNT(*) > 1)) AS duplicate_angle_group_count` : "0 AS duplicate_angle_group_count",
+    hasProductImages && annotationCols.has('angle_group') ? `COALESCE((SELECT SUM(group_count - 1) FROM (SELECT COUNT(*) AS group_count FROM product_images pi2 LEFT JOIN product_image_annotations pia2 ON pia2.product_image_id = pi2.product_image_id WHERE pi2.product_id = p.product_id AND LENGTH(TRIM(COALESCE(pia2.angle_group,''))) > 0 GROUP BY LOWER(TRIM(COALESCE(pia2.angle_group,''))) HAVING COUNT(*) > 1)), 0) AS duplicate_image_count` : "0 AS duplicate_image_count",
     hasMediaScoreHistory ? `(SELECT h.lead_image_score FROM product_media_score_history h WHERE h.product_id = p.product_id ORDER BY h.created_at DESC, h.product_media_score_history_id DESC LIMIT 1 OFFSET 1) AS previous_lead_image_merchandising_score` : "NULL AS previous_lead_image_merchandising_score",
     hasMediaScoreHistory ? `(SELECT h.gallery_merchandising_score FROM product_media_score_history h WHERE h.product_id = p.product_id ORDER BY h.created_at DESC, h.product_media_score_history_id DESC LIMIT 1 OFFSET 1) AS previous_gallery_merchandising_score` : "NULL AS previous_gallery_merchandising_score",
     hasMediaScoreHistory ? `(SELECT h.created_at FROM product_media_score_history h WHERE h.product_id = p.product_id ORDER BY h.created_at DESC, h.product_media_score_history_id DESC LIMIT 1) AS merchandising_history_recorded_at` : "NULL AS merchandising_history_recorded_at",
@@ -193,6 +202,7 @@ async function loadProducts(db, q) {
       hasResourceLinks,
       hasInventory,
       hasMediaScoreHistory,
+      hasMediaMixHistory: historyCols.has('shot_mix_json') || historyCols.has('angle_mix_json'),
     },
   };
 }
@@ -316,6 +326,8 @@ export async function onRequestGet(context) {
       products_with_cost_rollups: products.filter((row) => Number(row.linked_resource_count || 0) > 0).length,
       products_missing_cost_links: products.filter((row) => Number(row.missing_cost_links || 0) > 0).length,
       products_with_resource_shortages: products.filter((row) => Number(row.resource_shortage_links || 0) > 0).length,
+      products_with_duplicate_angle_groups: products.filter((row) => Number(row.duplicate_angle_group_count || 0) > 0).length,
+      products_missing_context_shots: products.filter((row) => Number(row.image_count || 0) >= 3 && Number(row.context_image_count || 0) === 0).length,
     },
   });
 }
