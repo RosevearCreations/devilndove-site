@@ -307,3 +307,7 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Pass 99 local SEO alignment
+
+This pass keeps the one-H1 rule intact on exposed pages and continues moving trust/support language closer to product and cart decision points. For local relevance, the next content pass should keep adding Ontario-facing wording where appropriate, plus pickup/event/market pages and clearer service-area / workshop-story context.

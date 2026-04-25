@@ -493,3 +493,7 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Pass 99 quick brain note
+
+The current accounting direction is intentionally gradual: add GIFI review structure, Schedule 141 notes, and month locking first; then add reconciliation, attachments, recurring rules, and export packaging later. Storefront trust work now places policy/support/process context closer to buyer decisions instead of leaving it buried in isolated pages.

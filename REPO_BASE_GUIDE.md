@@ -475,3 +475,14 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Pass 99 repo note
+
+Key new backend routes in this pass:
+- `/api/admin/accounting-gifi-notes`
+- `/api/admin/accounting-period-locks`
+
+Key storefront files touched in this pass:
+- `/public/js/shop.js`
+- `/public/js/product-detail.js`
+- `/public/js/cart-page.js`

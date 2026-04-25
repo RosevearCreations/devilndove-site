@@ -579,3 +579,7 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Pass 99 update
+
+This pass extends the accounting backend toward T2/GIFI preparation with review-note and period-lock controls, while also strengthening storefront trust placement on shop, product, and cart pages. Schema references were refreshed to match runtime accounting tables more closely.

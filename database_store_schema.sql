@@ -461,6 +461,8 @@ CREATE TABLE IF NOT EXISTS general_ledger_accounts (
   gifi_code TEXT,
   gifi_label TEXT,
   gifi_section TEXT,
+  gifi_review_state TEXT NOT NULL DEFAULT 'draft',
+  gifi_review_note TEXT,
   tax_deductibility_percent INTEGER NOT NULL DEFAULT 100,
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -562,17 +564,53 @@ CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_j
 CREATE TABLE IF NOT EXISTS accounting_journal_lines (
   journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
   journal_entry_id INTEGER NOT NULL,
-  line_number INTEGER NOT NULL DEFAULT 0,
-  ledger_code TEXT NOT NULL,
-  ledger_name TEXT NOT NULL,
-  entry_side TEXT NOT NULL CHECK(entry_side IN ('debit','credit')),
-  amount_cents INTEGER NOT NULL DEFAULT 0,
-  memo TEXT,
+  line_number INTEGER NOT NULL,
+  ledger_code TEXT,
+  ledger_name TEXT,
+  line_description TEXT,
+  debit_cents INTEGER NOT NULL DEFAULT 0,
+  credit_cents INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (journal_entry_id, line_number),
   FOREIGN KEY (journal_entry_id) REFERENCES accounting_journal_entries(journal_entry_id) ON DELETE CASCADE
 );
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(accounting_journal_entry_id, line_order ASC);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_ledger ON accounting_journal_lines(ledger_code, entry_side, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(journal_entry_id, line_number ASC);
+CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_ledger ON accounting_journal_lines(ledger_code, created_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS accounting_gifi_review_notes (
+  accounting_gifi_review_note_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tax_year INTEGER NOT NULL,
+  gifi_code TEXT NOT NULL,
+  gifi_label TEXT,
+  gifi_section TEXT,
+  accountant_note TEXT,
+  schedule_141_note TEXT,
+  supporting_details TEXT,
+  review_status TEXT NOT NULL DEFAULT 'draft',
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (tax_year, gifi_code)
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_gifi_review_notes_year ON accounting_gifi_review_notes(tax_year, gifi_code);
+
+CREATE TABLE IF NOT EXISTS accounting_period_closures (
+  accounting_period_closure_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_month TEXT NOT NULL UNIQUE,
+  lock_state TEXT NOT NULL DEFAULT 'open',
+  close_checklist_json TEXT,
+  close_notes TEXT,
+  locked_by_user_id INTEGER,
+  locked_at TEXT,
+  reopened_by_user_id INTEGER,
+  reopened_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_period_closures_period ON accounting_period_closures(period_month, lock_state, updated_at DESC);
 
 CREATE TABLE IF NOT EXISTS admin_pending_actions (
   admin_pending_action_id INTEGER PRIMARY KEY AUTOINCREMENT,

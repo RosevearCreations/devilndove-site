@@ -322,122 +322,51 @@ CREATE TABLE IF NOT EXISTS general_ledger_accounts (
   gifi_code TEXT,
   gifi_label TEXT,
   gifi_section TEXT,
+  gifi_review_state TEXT NOT NULL DEFAULT 'draft',
+  gifi_review_note TEXT,
   tax_deductibility_percent INTEGER NOT NULL DEFAULT 100,
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS accounting_expenses (
-  expense_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  expense_date TEXT,
-  vendor_name TEXT,
-  amount REAL NOT NULL DEFAULT 0,
-  tax_amount REAL NOT NULL DEFAULT 0,
-  ledger_code TEXT,
-  ledger_name TEXT,
-  notes TEXT,
+
+-- GIFI review columns for older databases.
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_state TEXT NOT NULL DEFAULT 'draft';
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_note TEXT;
+
+CREATE TABLE IF NOT EXISTS accounting_gifi_review_notes (
+  accounting_gifi_review_note_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tax_year INTEGER NOT NULL,
+  gifi_code TEXT NOT NULL,
+  gifi_label TEXT,
+  gifi_section TEXT,
+  accountant_note TEXT,
+  schedule_141_note TEXT,
+  supporting_details TEXT,
+  review_status TEXT NOT NULL DEFAULT 'draft',
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (tax_year, gifi_code)
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_gifi_review_notes_year ON accounting_gifi_review_notes(tax_year, gifi_code);
+
+CREATE TABLE IF NOT EXISTS accounting_period_closures (
+  accounting_period_closure_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_month TEXT NOT NULL UNIQUE,
+  lock_state TEXT NOT NULL DEFAULT 'open',
+  close_checklist_json TEXT,
+  close_notes TEXT,
+  locked_by_user_id INTEGER,
+  locked_at TEXT,
+  reopened_by_user_id INTEGER,
+  reopened_at TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE TABLE IF NOT EXISTS accounting_writeoffs (
-  writeoff_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  writeoff_date TEXT,
-  item_name TEXT NOT NULL,
-  amount REAL NOT NULL DEFAULT 0,
-  reason_code TEXT NOT NULL DEFAULT 'other',
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS product_costs (
-  product_cost_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_number TEXT NOT NULL,
-  cost_per_unit REAL NOT NULL DEFAULT 0,
-  effective_date TEXT,
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS accounting_overhead_allocations (
-  allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  period_month TEXT NOT NULL,
-  ledger_code TEXT NOT NULL DEFAULT '',
-  ledger_name TEXT NOT NULL DEFAULT '',
-  allocation_basis TEXT NOT NULL DEFAULT 'manual',
-  amount_cents INTEGER NOT NULL DEFAULT 0,
-  notes TEXT NOT NULL DEFAULT '',
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(period_month, ledger_code)
-);
-
--- Current pass: indexes to support phone dashboard, accounting overview, and item-costing reads.
-
-CREATE INDEX IF NOT EXISTS idx_accounting_expenses_date ON accounting_expenses(expense_date, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_writeoffs_date ON accounting_writeoffs(writeoff_date, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_product_costs_product_number_effective ON product_costs(product_number, effective_date DESC, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_overhead_allocations_month ON accounting_overhead_allocations(period_month, ledger_code);
--- Current pass note: admin write-path resilience now extends beyond read-only fallback. Order status updates, manual payment recording, and refund/dispute actions log server-side incidents more defensively, while the order-detail UI can preserve failed admin writes locally for manual retry. Composite payment/refund/dispute indexes were added to keep these health and follow-up queries fast as the fallback layer grows.
-
-CREATE INDEX IF NOT EXISTS idx_payments_order_status_created_at ON payments(order_id, payment_status, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_payment_refunds_sync_status ON payment_refunds(provider_sync_status, refund_status, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_payment_disputes_status_provider ON payment_disputes(dispute_status, provider_sync_status, created_at DESC);
-
-
-
-CREATE TABLE IF NOT EXISTS accounting_overhead_product_allocations (
-  overhead_product_allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  period_month TEXT NOT NULL,
-  ledger_code TEXT NOT NULL DEFAULT '',
-  product_id INTEGER NOT NULL,
-  amount_cents INTEGER NOT NULL DEFAULT 0,
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(period_month, ledger_code, product_id)
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_month ON accounting_overhead_product_allocations(period_month, ledger_code, product_id);
-CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_product ON accounting_overhead_product_allocations(product_id, period_month DESC);
-
-CREATE TABLE IF NOT EXISTS accounting_journal_entries (
-  journal_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  period_month TEXT NOT NULL,
-  entry_date TEXT NOT NULL,
-  source_type TEXT NOT NULL,
-  source_key TEXT NOT NULL,
-  reference_code TEXT,
-  description TEXT,
-  status TEXT NOT NULL DEFAULT 'draft',
-  total_debit_cents INTEGER NOT NULL DEFAULT 0,
-  total_credit_cents INTEGER NOT NULL DEFAULT 0,
-  imbalance_cents INTEGER NOT NULL DEFAULT 0,
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (period_month, source_type, source_key)
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_period ON accounting_journal_entries(period_month, entry_date DESC, journal_entry_id DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_key, period_month);
-
-CREATE TABLE IF NOT EXISTS accounting_journal_lines (
-  journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  journal_entry_id INTEGER NOT NULL,
-  line_number INTEGER NOT NULL DEFAULT 0,
-  ledger_code TEXT NOT NULL,
-  ledger_name TEXT NOT NULL,
-  entry_side TEXT NOT NULL CHECK(entry_side IN ('debit','credit')),
-  amount_cents INTEGER NOT NULL DEFAULT 0,
-  memo TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (journal_entry_id) REFERENCES accounting_journal_entries(journal_entry_id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(accounting_journal_entry_id, line_order ASC);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_ledger ON accounting_journal_lines(ledger_code, entry_side, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_accounting_period_closures_period ON accounting_period_closures(period_month, lock_state, updated_at DESC);
 
 CREATE TABLE IF NOT EXISTS admin_pending_actions (
   admin_pending_action_id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -426,3 +426,15 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Pass 99 sanity note
+
+Sanity focus in this pass:
+- keep schema files aligned with runtime accounting expectations
+- add explicit DB sanity coverage for accounting review/lock tables
+- maintain one-H1 public-page discipline
+- keep storefront trust and fallback messaging improving instead of regressing
+
+
+### Legacy schema drift still noted
+A broader repo-level sanity sweep also found older bootstrap/runtime tables that still appear in legacy setup code but are not yet fully represented in the core schema reference set, including legacy/member/content tables such as `members`, `member_sessions`, `newsletter_subscribers`, `blog_posts`, `blog_comments`, `creations`, `project_updates`, `comments`, `inventory_items`, `inventory_usage`, `store_products`, and several customer-engagement tables. These were noted for a slower follow-up normalization pass rather than being forced into the accounting-focused schema update in this pass.

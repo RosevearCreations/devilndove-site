@@ -171,3 +171,12 @@ Key implementation notes:
 - Use cohesive collections/category pages that tell a style story instead of only a flat catalog grid.
 - Treat reviews, testimonials, and repeat-customer reassurance as merchandising blocks, not only as a single reviews page.
 - Keep year-end accounting exports and mapping review visible inside admin so bookkeeping cleanup is not left to memory at tax time.
+
+
+## Pass 99 benchmark note
+
+Patterns now being implemented from handmade/crafter commerce review:
+- keep shipping, returns/support, and custom-order timing closer to product and cart decisions
+- keep maker/process/workshop context visible instead of only using generic catalog copy
+- keep first-image quality strong while requiring at least one contextual/detail/process shot in fuller galleries
+- keep collection/style/theme browsing visible so shoppers do not start from a blank grid every visit

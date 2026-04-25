@@ -379,3 +379,25 @@ Completed this pass:
 Best next continuation point:
 - test old products with older uploads and decide whether to bulk backfill missing merchandising fields or only refresh them as images are touched
 - then continue the pricing-history/admin-note tightening and broader storefront trust/SEO passes
+
+
+## Pass 99 handoff
+
+Implemented now:
+- accountant/GIFI review notes and Schedule 141 note capture
+- accounting month lock + reopen controls
+- locked-period enforcement on core accounting write routes
+- stronger storefront trust/policy placement on shop, product, and cart
+- contextual-shot visibility in admin product merchandising status
+- schema files synced to runtime for `accounting_journal_lines` and new accounting review/lock tables
+
+Carry forward next:
+- reviewed GIFI mapping for every active ledger account
+- recurring expenses, vendors, sales tax reconciliation, processor fee reconciliation
+- shipping-cost reconciliation versus orders
+- attachments for bills/statements
+- fuller public process-video management and more trust blocks on collection/about pages
+
+
+### Legacy schema drift still noted
+A broader repo-level sanity sweep also found older bootstrap/runtime tables that still appear in legacy setup code but are not yet fully represented in the core schema reference set, including legacy/member/content tables such as `members`, `member_sessions`, `newsletter_subscribers`, `blog_posts`, `blog_comments`, `creations`, `project_updates`, `comments`, `inventory_items`, `inventory_usage`, `store_products`, and several customer-engagement tables. These were noted for a slower follow-up normalization pass rather than being forced into the accounting-focused schema update in this pass.

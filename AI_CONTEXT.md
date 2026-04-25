@@ -481,3 +481,9 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Pass 99 update — accounting controls + storefront trust
+
+This pass adds early accountant-review and close-control groundwork without pretending the system is fully T2/GIFI complete yet. The build now includes year-level GIFI review notes, Schedule 141 support notes, month lock and reopen controls, and locked-period enforcement on expense, write-off, product-cost, and overhead allocation saves.
+
+Storefront work in the same pass keeps trust and policy notes closer to shop, product, and cart views while product readiness continues to require stronger image mix quality.

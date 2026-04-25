@@ -804,3 +804,16 @@ Key implementation notes:
 - The new phone wizard intentionally keeps the first save lightweight; category, shipping, SEO, and resource linking still require either full-mode completion or later admin review.
 - The same-day draft table currently supports safe bulk edits for category, price, quantity, and status, but not every storefront field yet.
 - Accounting now captures recurring overhead more consistently, but final T2/GIFI authority, accountant mapping, and deeper double-entry controls still remain future work.
+
+
+## Pass 99 new or remaining gaps
+
+- GIFI mapping is now note-ready, but not every live ledger account is fully reviewed/finalized yet.
+- Month locking exists, but there is no full close package, no year-end roll-forward, and no reopen approval workflow yet.
+- The app now stores Schedule 141 notes, but it still does not generate a final accountant-ready T2/GIFI export package on its own.
+- Product/cart/shop trust placement is improved, but returns/support/custom timing should still become more product-specific over time.
+- Process-video placement is currently link/CTA based rather than a full admin-managed public video block system.
+
+
+### Legacy schema drift still noted
+A broader repo-level sanity sweep also found older bootstrap/runtime tables that still appear in legacy setup code but are not yet fully represented in the core schema reference set, including legacy/member/content tables such as `members`, `member_sessions`, `newsletter_subscribers`, `blog_posts`, `blog_comments`, `creations`, `project_updates`, `comments`, `inventory_items`, `inventory_usage`, `store_products`, and several customer-engagement tables. These were noted for a slower follow-up normalization pass rather than being forced into the accounting-focused schema update in this pass.

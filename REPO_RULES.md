@@ -365,3 +365,7 @@ Key implementation notes:
 - Pricing console assumptions persist locally in-browser and the save path now warns more clearly when current price is below target or under landed cost.
 - Public trust/support blocks were broadened so testimonials and support cues are visible in more browsing flows.
 
+
+## Pass 99 rule reminder
+
+Continue treating schema drift as a blocking issue whenever runtime accounting code and SQL reference files disagree. In this pass, `accounting_journal_lines` and `general_ledger_accounts` were brought closer to the live code expectations, and all root markdown files were refreshed again for handoff continuity.

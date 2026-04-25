@@ -537,3 +537,26 @@ Key implementation notes:
 1. Expand the phone end-of-day table from category/price/qty/status edits into stronger inline batch editing for descriptions, shipping, and category presets.
 2. Add image-crop/orientation guidance directly into the phone wizard after capture so weak first-image choices can be corrected before save.
 3. Deepen accounting from recurring-expense shortcuts into clearer T2/GIFI-style reporting views and accountant export notes without pretending the current layer is final tax software.
+
+
+## Pass 99 completed items
+
+Completed in this pass:
+- add accountant notes per GIFI line
+- add Schedule 141 notes capture inside admin
+- add month lock / reopen groundwork with checklist storage
+- enforce locked accounting periods on expense-style write APIs
+- move shipping / support / custom-order timing closer to shop, product, and cart views
+- keep strengthening image-mix readiness with contextual shot tracking and admin visibility
+
+Best next steps from here:
+1. finish reviewed GIFI mapping for every active ledger account
+2. add recurring-expense rules and vendor directory links
+3. add sales-tax reconciliation and bank/processor fee reconciliation
+4. add shipping-cost reconciliation against fulfilled orders
+5. add attachment upload for bills and statements
+6. add year-end close checklist progress and export package screens
+7. extend trust/testimonial/process-video blocks onto more collection and About surfaces
+8. add local pickup / event / market pages and storefront messaging
+9. add review request automation rules after fulfilled orders
+10. keep tightening publish gates for image mix, price, SEO, and trust content

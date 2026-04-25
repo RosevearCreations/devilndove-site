@@ -580,3 +580,21 @@ Key implementation notes:
 - `products.capture_created_by_user_id` and `products.capture_updated_by_user_id` keep the latest phone-draft actor trail tied to admin users when available.
 - `products.capture_entry_started_at` and `products.capture_last_saved_at` make same-day phone draft review less dependent on generic product timestamps.
 - `idx_products_capture_last_saved_at` and `idx_products_capture_updated_by` support faster “today’s entries” filtering from the phone workflow.
+
+
+## Pass 99 schema additions
+
+New accounting tables added to the reference set:
+- `accounting_gifi_review_notes` — year + GIFI code review notes, accountant notes, Schedule 141 notes, supporting details, and review status
+- `accounting_period_closures` — period lock state, close checklist payload, close notes, lock user/time, and reopen user/time
+
+General ledger updates:
+- `general_ledger_accounts.gifi_review_state`
+- `general_ledger_accounts.gifi_review_note`
+
+Journal schema correction:
+- `accounting_journal_lines` is documented with `journal_entry_id`, `line_number`, `line_description`, `debit_cents`, and `credit_cents` to match runtime code
+
+
+### Legacy schema drift still noted
+A broader repo-level sanity sweep also found older bootstrap/runtime tables that still appear in legacy setup code but are not yet fully represented in the core schema reference set, including legacy/member/content tables such as `members`, `member_sessions`, `newsletter_subscribers`, `blog_posts`, `blog_comments`, `creations`, `project_updates`, `comments`, `inventory_items`, `inventory_usage`, `store_products`, and several customer-engagement tables. These were noted for a slower follow-up normalization pass rather than being forced into the accounting-focused schema update in this pass.
