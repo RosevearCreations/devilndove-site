@@ -97,31 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.min(16, priorDuplicates * 8);
   }
 
-  function summarizeGalleryMix(rows = []) {
-    const shotMix = {};
-    const angleMix = {};
-    let contextImageCount = 0;
-    let recordImageCount = 0;
-    rows.forEach((row) => {
-      const shotStyle = normalizeText(row.shot_style || 'record').toLowerCase() || 'record';
-      shotMix[shotStyle] = Number(shotMix[shotStyle] || 0) + 1;
-      if (['lifestyle', 'process', 'packaging', 'scale_reference'].includes(shotStyle)) contextImageCount += 1;
-      else recordImageCount += 1;
-      const angleGroup = normalizeText(row.angle_group).toLowerCase();
-      if (angleGroup) angleMix[angleGroup] = Number(angleMix[angleGroup] || 0) + 1;
-    });
-    const duplicateGroups = Object.entries(angleMix).filter(([, count]) => Number(count || 0) > 1);
-    return {
-      shotMix,
-      angleMix,
-      recordImageCount,
-      contextImageCount,
-      duplicateAngleGroupCount: duplicateGroups.length,
-      duplicateImageCount: duplicateGroups.reduce((sum, [, count]) => sum + Math.max(0, Number(count || 0) - 1), 0),
-      duplicateGroups: duplicateGroups.sort((a, b) => Number(b[1] || 0) - Number(a[1] || 0)),
-    };
-  }
-
   function computeRowScore(row = {}, index = 0, rows = []) {
     const width = Number(row.width_px || 0);
     const height = Number(row.height_px || 0);
@@ -470,10 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const hintInput = rowEl.querySelector('[data-field="lead_gate_hint"]');
       if (hintInput) {
         const warnings = summarizeImageGuidance(rows[index] || {}, index === 0);
-        const duplicatePenalty = computeDuplicatePenalty(rows, index, rows[index]?.angle_group);
-        const duplicateNote = duplicatePenalty > 0 ? `duplicate angle penalty ${duplicatePenalty}` : '';
-        const baseHint = index === 0 ? (warnings[0] || 'Lead image looks usable') : (warnings[0] || 'Support image looks usable');
-        hintInput.value = duplicateNote ? `${baseHint} • ${duplicateNote}` : baseHint;
+        hintInput.value = index === 0 ? (warnings[0] || 'Lead image looks usable') : (warnings[0] || 'Support image looks usable');
       }
     });
   }
@@ -497,9 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const firstImage = rows[0] || null;
     const firstImageScore = firstImage ? Number(firstImage.merchandising_score || firstImage.first_image_score || 0) : 0;
     const overallScore = rows.length ? Math.round(rows.reduce((sum, row) => sum + Number(row.merchandising_score || 0), 0) / rows.length) : 0;
-    const mixSummary = summarizeGalleryMix(rows);
-    const duplicateAngleGroups = mixSummary.duplicateAngleGroupCount;
-    const duplicateImageCount = mixSummary.duplicateImageCount;
+    const duplicateAngleGroups = rows.reduce((sum, row, index) => sum + (computeDuplicatePenalty(rows, index, row.angle_group) > 0 ? 1 : 0), 0);
     const overriddenGalleryImages = rows.filter((row, index) => index > 0 && normalizeText(row.merchandising_override_reason)).length;
     const weakUnapprovedGalleryImages = rows.filter((row, index) => index > 0 && Number(row.merchandising_score || row.first_image_score || 0) < 64 && !normalizeText(row.merchandising_override_reason)).length;
     const firstOrientation = String(firstImage?.image_orientation || '').toLowerCase();
@@ -516,14 +486,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'Keep the first image bright, sharp, and clean around the edges.',
       'Spread angle groups so the gallery is not mostly duplicates.'
     ];
-    if (mixSummary.recordImageCount === 0 && imageCount > 0) guidance.push('Keep at least one clean record shot for the storefront lead image.');
-    if (mixSummary.contextImageCount === 0 && imageCount >= 3) guidance.push('Consider one process or lifestyle shot for trust and storytelling.');
-    if (mixSummary.contextImageCount > Math.max(1, Math.floor(imageCount / 2))) guidance.push('The gallery is context-heavy; keep the majority of shots product-focused.');
     mount.innerHTML = `
       <h4 style="margin-top:0">Photo merchandising before publish</h4>
-      <div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • average merchandising score ${overallScore}% • lead image score ${firstImageScore}% • duplicate-angle groups ${duplicateAngleGroups}</div>
-      <div class="small" style="margin-top:6px">Mix: ${escapeHtml(String(mixSummary.recordImageCount))} record/detail • ${escapeHtml(String(mixSummary.contextImageCount))} context/story • ${escapeHtml(String(duplicateImageCount))} repeated-angle image(s)</div>
-      <div class="small" style="margin-top:6px">Shot mix ${escapeHtml(Object.entries(mixSummary.shotMix).map(([key, count]) => `${key}:${count}`).join(' • ') || 'none')} ${mixSummary.duplicateGroups.length ? `• Duplicates ${escapeHtml(mixSummary.duplicateGroups.slice(0, 3).map(([group, count]) => `${group}:${count}`).join(' • '))}` : ''}</div>
+      <div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • average merchandising score ${overallScore}% • lead image score ${firstImageScore}% • duplicate-angle rows ${duplicateAngleGroups}</div>
       <div class="small" style="margin-top:6px">${guidance.join(' ')}</div>
       <div class="small" style="margin-top:6px">${overriddenGalleryImages ? `${escapeHtml(String(overriddenGalleryImages))} gallery image(s) are being kept by documented override reason.` : 'No gallery overrides are documented right now.'}${weakUnapprovedGalleryImages ? ` ${escapeHtml(String(weakUnapprovedGalleryImages))} low-scoring gallery image(s) still need an override reason or replacement.` : ''}</div>
       ${(draftLeadTrend || draftGalleryTrend) ? `<div class="small" style="margin-top:6px">Draft vs last saved: ${escapeHtml(draftGalleryTrend || 'flat')} gallery • ${escapeHtml(draftLeadTrend || 'flat')} lead${lastSaved?.created_at ? ` • last saved ${escapeHtml(lastSaved.created_at)}` : ''}</div>` : ''}

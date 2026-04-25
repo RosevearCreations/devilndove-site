@@ -509,9 +509,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedProductId = String(data.product?.product_id || existingProductId || '');
         if (existingProductId) {
           setMessage(`Updated draft product ${formatProductNumber(data.product?.product_number)} and kept it open for continued editing.`);
+          document.dispatchEvent(new CustomEvent('dd:mobile-product-saved', { detail: { product: data.product || null, capture_entry_mode: String(formData.get('capture_entry_mode') || 'full') } }));
           await loadBootstrap(savedProductId);
         } else {
           setMessage(`Saved draft ${formatProductNumber(data.product?.product_number)}. Fill the green approval fields before approve / publish.`);
+          document.dispatchEvent(new CustomEvent('dd:mobile-product-saved', { detail: { product: data.product || null, capture_entry_mode: String(formData.get('capture_entry_mode') || 'full') } }));
           resetFormState('Ready for the next product.');
           if (draftSearchInput) draftSearchInput.value = '';
           await loadBootstrap();
