@@ -37,6 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <button type="button" class="btn" data-expense-preset='{"vendor_name":"Phone provider","ledger_code":"6310","notes":"Monthly business phone","tax_amount":""}'>Phone</button>
         <button type="button" class="btn" data-expense-preset='{"vendor_name":"Insurance provider","ledger_code":"6600","notes":"Monthly insurance","tax_amount":""}'>Insurance</button>
         <button type="button" class="btn" data-expense-preset='{"vendor_name":"Software vendor","ledger_code":"6500","notes":"Monthly software subscription","tax_amount":""}'>Software</button>
+        <button type="button" class="btn" data-expense-preset='{"vendor_name":"Landlord / Workshop","ledger_code":"6200","notes":"Monthly workshop or storage rent","tax_amount":""}'>Rent</button>
+        <button type="button" class="btn" data-expense-preset='{"vendor_name":"Bank / Processor","ledger_code":"6715","notes":"Monthly bank and merchant charges","tax_amount":""}'>Bank fees</button>
+        <button type="button" class="btn" data-expense-preset='{"vendor_name":"Accountant / Bookkeeper","ledger_code":"6862","notes":"Accounting and bookkeeping fees","tax_amount":""}'>Accounting fees</button>
+        <button type="button" class="btn" data-expense-preset='{"vendor_name":"Post / Courier","ledger_code":"9270","notes":"Shipping, postage, or mailing costs not captured elsewhere","tax_amount":""}'>Shipping admin</button>
         <button type="button" class="btn" data-overhead-preset='{"ledger_code":"6200","ledger_name":"Rent allocation","allocation_basis":"manual","notes":"Monthly workshop rent allocation"}'>Rent allocation</button>
         <button type="button" class="btn" data-overhead-preset='{"ledger_code":"6100","ledger_name":"Electricity allocation","allocation_basis":"manual","notes":"Monthly electricity overhead allocation"}'>Electricity allocation</button>
       </div>`;
