@@ -42,7 +42,7 @@ const EXPECTED_TABLES = {
   membership_tier_policies: ['membership_tier_policy_id'],
   gift_cards: ['gift_card_id'],
   gift_card_delivery_audit: ['gift_card_delivery_audit_id'],
-  general_ledger_accounts: ['gl_account_id', 'code', 'name', 'category', 'parent_group', 'normal_balance', 'sort_order', 'gifi_code', 'gifi_label', 'gifi_section', 'tax_deductibility_percent'],
+  general_ledger_accounts: ['gl_account_id', 'code', 'name', 'category', 'parent_group', 'normal_balance', 'sort_order', 'gifi_code', 'gifi_label', 'gifi_section', 'tax_deductibility_percent', 'gifi_review_state', 'gifi_review_note'],
   accounting_expenses: ['expense_id', 'expense_date', 'amount', 'ledger_code'],
   accounting_writeoffs: ['writeoff_id', 'writeoff_date', 'amount'],
   product_costs: ['product_cost_id', 'product_number', 'cost_per_unit'],
@@ -50,6 +50,8 @@ const EXPECTED_TABLES = {
   accounting_overhead_product_allocations: ['overhead_product_allocation_id', 'period_month', 'ledger_code', 'product_id', 'amount_cents'],
   accounting_journal_entries: ['journal_entry_id', 'period_month', 'source_type', 'source_key', 'status', 'total_debit_cents', 'total_credit_cents', 'imbalance_cents'],
   accounting_journal_lines: ['journal_line_id', 'journal_entry_id', 'line_number', 'ledger_code', 'debit_cents', 'credit_cents'],
+  accounting_gifi_review_notes: ['accounting_gifi_review_note_id', 'tax_year', 'gifi_code', 'review_status'],
+  accounting_period_closures: ['accounting_period_closure_id', 'period_month', 'lock_state'],
   admin_pending_actions: ['admin_pending_action_id'],
   cart_activity: ['cart_activity_id'],
 };

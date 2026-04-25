@@ -2,6 +2,7 @@
 // Brief description: Manage monthly overhead allocations so operating costs can flow into rough P&L and later product costing.
 
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction, normalizeText } from "../_lib/adminAudit.js";
+import { assertAccountingPeriodOpen } from './_accountingPeriods.js';
 
 function rows(result) {
   return Array.isArray(result?.results) ? result.results : [];
@@ -89,42 +90,46 @@ export async function onRequestPost(context) {
     return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400);
   }
 
-  const periodMonth = monthValue(body.period_month);
-  const ledgerCode = normalizeText(body.ledger_code).toUpperCase();
-  const ledgerName = normalizeText(body.ledger_name);
-  const allocationBasis = validBasis(body.allocation_basis);
-  const amountCents = centsFromAmount(body.amount);
-  const notes = normalizeText(body.notes);
+  try {
+    const periodMonth = await assertAccountingPeriodOpen(db, monthValue(body.period_month), 'Accounting overhead');
+    const ledgerCode = normalizeText(body.ledger_code).toUpperCase();
+    const ledgerName = normalizeText(body.ledger_name);
+    const allocationBasis = validBasis(body.allocation_basis);
+    const amountCents = centsFromAmount(body.amount);
+    const notes = normalizeText(body.notes);
 
-  if (!ledgerCode || !ledgerName) {
-    return jsonResponse({ ok: false, error: 'Ledger code and ledger name are required.' }, 400);
+    if (!ledgerCode || !ledgerName) {
+      return jsonResponse({ ok: false, error: 'Ledger code and ledger name are required.' }, 400);
+    }
+
+    await db.prepare(`
+      INSERT INTO accounting_overhead_allocations (
+        period_month, ledger_code, ledger_name, allocation_basis, amount_cents, notes, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(period_month, ledger_code) DO UPDATE SET
+        ledger_name = excluded.ledger_name,
+        allocation_basis = excluded.allocation_basis,
+        amount_cents = excluded.amount_cents,
+        notes = excluded.notes,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(periodMonth, ledgerCode, ledgerName, allocationBasis, amountCents, notes).run();
+
+    await auditAdminAction(context.env, context.request, adminUser, {
+      action_type: 'save_accounting_overhead_allocation',
+      target_type: 'accounting_overhead_allocation',
+      target_key: `${periodMonth}:${ledgerCode}`,
+      details: { period_month: periodMonth, ledger_code: ledgerCode, ledger_name: ledgerName, allocation_basis: allocationBasis, amount_cents: amountCents },
+    });
+
+    const row = await db.prepare(`
+      SELECT allocation_id, period_month, ledger_code, ledger_name, allocation_basis, amount_cents, notes, created_at, updated_at
+      FROM accounting_overhead_allocations
+      WHERE period_month = ? AND ledger_code = ?
+      LIMIT 1
+    `).bind(periodMonth, ledgerCode).first();
+
+    return jsonResponse({ ok: true, allocation: mapRow(row, periodMonth) });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error?.message || 'Failed to save overhead allocation.' }, 500);
   }
-
-  await db.prepare(`
-    INSERT INTO accounting_overhead_allocations (
-      period_month, ledger_code, ledger_name, allocation_basis, amount_cents, notes, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(period_month, ledger_code) DO UPDATE SET
-      ledger_name = excluded.ledger_name,
-      allocation_basis = excluded.allocation_basis,
-      amount_cents = excluded.amount_cents,
-      notes = excluded.notes,
-      updated_at = CURRENT_TIMESTAMP
-  `).bind(periodMonth, ledgerCode, ledgerName, allocationBasis, amountCents, notes).run();
-
-  await auditAdminAction(context.env, context.request, adminUser, {
-    action_type: 'save_accounting_overhead_allocation',
-    target_type: 'accounting_overhead_allocation',
-    target_key: `${periodMonth}:${ledgerCode}`,
-    details: { period_month: periodMonth, ledger_code: ledgerCode, ledger_name: ledgerName, allocation_basis: allocationBasis, amount_cents: amountCents },
-  });
-
-  const row = await db.prepare(`
-    SELECT allocation_id, period_month, ledger_code, ledger_name, allocation_basis, amount_cents, notes, created_at, updated_at
-    FROM accounting_overhead_allocations
-    WHERE period_month = ? AND ledger_code = ?
-    LIMIT 1
-  `).bind(periodMonth, ledgerCode).first();
-
-  return jsonResponse({ ok: true, allocation: mapRow(row, periodMonth) });
 }

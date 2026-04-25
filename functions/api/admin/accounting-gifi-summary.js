@@ -1,5 +1,6 @@
 
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
+import { ensureAccountingGifiNotesTable, listAccountingGifiNotes, mapAccountingGifiNotesByCode, cleanGifiCode } from './_accountingGifi.js';
 
 function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
@@ -172,6 +173,7 @@ export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   await ensureGlSchema(db);
+  await ensureAccountingGifiNotesTable(db);
 
   const url = new URL(context.request.url);
   const range = yearRange(url.searchParams.get('year') || String(new Date().getFullYear()));
@@ -266,17 +268,30 @@ export async function onRequestGet(context) {
     source_count: row.source_count,
   })).sort((a, b) => String(a.gifi_section || '').localeCompare(String(b.gifi_section || '')) || String(a.gifi_code || 'ZZZZ').localeCompare(String(b.gifi_code || 'ZZZZ')) || String(a.ledger_codes || '').localeCompare(String(b.ledger_codes || '')));
 
-  const mappedCount = summaryRows.filter((row) => String(row.gifi_code || '').trim()).length;
-  const totalCount = summaryRows.length;
+  const notesByCode = mapAccountingGifiNotesByCode(await listAccountingGifiNotes(db, range.year));
+  const mergedRows = summaryRows.map((row) => {
+    const note = notesByCode.get(cleanGifiCode(row.gifi_code)) || null;
+    return {
+      ...row,
+      accountant_note: note?.accountant_note || '',
+      schedule_141_note: note?.schedule_141_note || '',
+      supporting_details: note?.supporting_details || '',
+      review_status: note?.review_status || '',
+    };
+  });
+
+  const mappedCount = mergedRows.filter((row) => String(row.gifi_code || '').trim()).length;
+  const totalCount = mergedRows.length;
   const unmappedCount = unmapped.length;
   const readinessPercent = totalCount ? Math.round((mappedCount / totalCount) * 100) : 0;
 
   if ((url.searchParams.get('format') || '').toLowerCase() === 'csv') {
-    const lines = ['gifi_section,gifi_code,gifi_label,ledger_codes,debit_cents,credit_cents,net_cents,deductible_cents,source_count'];
-    for (const row of summaryRows) {
+    const lines = ['gifi_section,gifi_code,gifi_label,ledger_codes,debit_cents,credit_cents,net_cents,deductible_cents,source_count,review_status,accountant_note,schedule_141_note,supporting_details'];
+    for (const row of mergedRows) {
       lines.push([
         row.gifi_section, row.gifi_code, row.gifi_label, row.ledger_codes,
         row.debit_cents, row.credit_cents, row.net_cents, row.deductible_cents, row.source_count,
+        row.review_status, row.accountant_note, row.schedule_141_note, row.supporting_details,
       ].map(csvEscape).join(','));
     }
     return new Response(lines.join('
@@ -298,11 +313,12 @@ export async function onRequestGet(context) {
       unmapped_line_count: unmappedCount,
       readiness_percent: readinessPercent,
     },
-    gifi_rows: summaryRows,
+    gifi_rows: mergedRows,
     unmapped_accounts: unmapped,
     notes: [
       'This is a staging summary for accountant review, not a filed T2 return.',
       sourceUsed === 'journal' ? 'Rows are grouped from accounting_journal_lines joined to general_ledger_accounts GIFI fields.' : 'Journal tables were incomplete or unavailable, so this summary fell back to orders, expenses, and write-offs.',
+      'Accountant notes and Schedule 141 notes can now be saved per GIFI line inside admin for year-end staging.',
     ],
   });
 }

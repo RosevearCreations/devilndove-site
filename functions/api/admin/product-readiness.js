@@ -39,6 +39,7 @@ function buildChecks(row = {}, imageHistory = []) {
   const overriddenGalleryImageCount = imageHistory.filter((item, index) => index > 0 && hasOverrideReason(item)).length;
   const weakUnapprovedGalleryImageCount = imageHistory.filter((item, index) => index > 0 && Number(item?.merchandising_score ?? item?.first_image_score ?? 0) < 64 && !hasOverrideReason(item)).length;
   const hasCropHistory = firstImage && firstImage.crop_x != null && firstImage.crop_y != null && firstImage.crop_width != null && firstImage.crop_height != null;
+  const contextualShotCount = imageHistory.filter((item) => ['detail','lifestyle','process','packaging','scale_reference'].includes(String(item?.shot_style || '').toLowerCase())).length;
   const knowsFirstDimensions = firstWidth > 0 && firstHeight > 0;
   const checks = [];
   checks.push({ key: 'name', ok: normalizeText(row.name).length > 0, label: 'Product name present', weight: 10 });
@@ -57,6 +58,7 @@ function buildChecks(row = {}, imageHistory = []) {
   checks.push({ key: 'first_image_crop_history', ok: !normalizeText(row.featured_image_url) || hasCropHistory, label: 'First image crop history saved', weight: 4 });
   checks.push({ key: 'first_image_score', ok: !normalizeText(row.featured_image_url) || firstImageScore >= 72, label: 'First image merchandising score is strong enough', weight: 6 });
   checks.push({ key: 'gallery_score', ok: imageCount === 0 || (effectiveGalleryMerchandisingScore >= 64 && weakUnapprovedGalleryImageCount === 0), label: 'Gallery merchandising score is strong enough', weight: 4 });
+  checks.push({ key: 'shot_mix', ok: imageCount < 4 || contextualShotCount >= 1, label: 'Gallery includes at least one detail, lifestyle, process, packaging, or scale shot', weight: 4 });
 
   const totalWeight = checks.reduce((sum, item) => sum + item.weight, 0);
   const earnedWeight = checks.reduce((sum, item) => sum + (item.ok ? item.weight : 0), 0);
@@ -80,6 +82,7 @@ function buildChecks(row = {}, imageHistory = []) {
   }
   if (overriddenGalleryImageCount > 0) leadWarnings.push(`${overriddenGalleryImageCount} gallery image(s) are being kept by documented override reason.`);
   if (weakUnapprovedGalleryImageCount > 0) leadWarnings.push(`${weakUnapprovedGalleryImageCount} gallery image(s) are still weak without an override reason.`);
+  if (imageCount >= 4 && contextualShotCount < 1) leadWarnings.push('Add at least one detail, lifestyle, process, packaging, or scale-reference image to improve the gallery mix.');
 
   return {
     checks,
@@ -90,6 +93,7 @@ function buildChecks(row = {}, imageHistory = []) {
     lead_image_merchandising_score: firstImageScore,
     overridden_gallery_image_count: overriddenGalleryImageCount,
     weak_unapproved_gallery_image_count: weakUnapprovedGalleryImageCount,
+    contextual_shot_count: contextualShotCount,
     media_completeness_score: Math.round((((imageCount >= 3 ? 1 : imageCount / 3) + (imageCount > 0 ? Math.min(altCoverage / Math.max(imageCount, 1), 1) : 0) + (knowsFirstDimensions ? 1 : 0.5) + (hasCropHistory ? 1 : 0.4)) / 4) * 100),
     is_ready_for_storefront: failed.length === 0 ? 1 : 0,
     ready_check_notes: failed.map((item) => item.label).join('; '),

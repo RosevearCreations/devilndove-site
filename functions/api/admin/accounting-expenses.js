@@ -1,5 +1,6 @@
 // File: /functions/api/admin/accounting-expenses.js
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction, normalizeText } from "../_lib/adminAudit.js";
+import { assertAccountingPeriodOpen, monthFromDateish } from './_accountingPeriods.js';
 
 function nr(result) {
   return Array.isArray(result?.results) ? result.results : [];
@@ -120,6 +121,7 @@ export async function onRequestPost(context) {
 
   try {
     const cols = await ensureTable(db);
+    await assertAccountingPeriodOpen(db, monthFromDateish(expense_date || new Date().toISOString().slice(0, 10)), 'Accounting expenses');
     const ledger_name = await lookupLedgerName(db, ledger_code);
     const insertCols = [];
     const insertVals = [];

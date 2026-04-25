@@ -40,6 +40,8 @@ async function ensureTable(db){
     ['gifi_label', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_label TEXT`],
     ['gifi_section', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_section TEXT`],
     ['tax_deductibility_percent', `ALTER TABLE general_ledger_accounts ADD COLUMN tax_deductibility_percent INTEGER NOT NULL DEFAULT 100`],
+    ['gifi_review_state', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_state TEXT NOT NULL DEFAULT 'draft'`],
+    ['gifi_review_note', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_note TEXT`],
     ['is_active', `ALTER TABLE general_ledger_accounts ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1`],
     ['created_at', `ALTER TABLE general_ledger_accounts ADD COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
     ['updated_at', `ALTER TABLE general_ledger_accounts ADD COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
@@ -60,7 +62,7 @@ export async function onRequestGet(context){
   await ensureTable(db);
   const result = await db.prepare(`
     SELECT gl_account_id, code, name, category, parent_group, normal_balance, sort_order,
-           gifi_code, gifi_label, gifi_section, tax_deductibility_percent,
+           gifi_code, gifi_label, gifi_section, tax_deductibility_percent, gifi_review_state, gifi_review_note,
            is_active, created_at, updated_at
     FROM general_ledger_accounts
     ORDER BY category ASC, sort_order ASC, code ASC
@@ -84,13 +86,15 @@ export async function onRequestPost(context){
   const gifi_label = normalizeText(body.gifi_label);
   const gifi_section = cleanSection(body.gifi_section) || (category === 'income' || category === 'expense' ? 'income_statement' : (category === 'asset' || category === 'liability' || category === 'equity' ? 'balance_sheet' : 'other'));
   const tax_deductibility_percent = Math.max(0, Math.min(100, Math.round(Number(body.tax_deductibility_percent == null || body.tax_deductibility_percent === '' ? 100 : body.tax_deductibility_percent))));
+  const gifi_review_state = ['draft','reviewed','needs_accountant','finalized'].includes(String(body.gifi_review_state || '').trim().toLowerCase()) ? String(body.gifi_review_state || '').trim().toLowerCase() : 'draft';
+  const gifi_review_note = normalizeText(body.gifi_review_note);
   const is_active = Number(body.is_active == null || body.is_active === '' ? 1 : body.is_active) === 0 ? 0 : 1;
   if(!code || !name) return jsonResponse({ok:false,error:"Code and name are required."},400);
   await db.prepare(`
     INSERT INTO general_ledger_accounts (
       code,name,category,parent_group,normal_balance,sort_order,
-      gifi_code,gifi_label,gifi_section,tax_deductibility_percent,is_active,updated_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+      gifi_code,gifi_label,gifi_section,tax_deductibility_percent,gifi_review_state,gifi_review_note,is_active,updated_at
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
     ON CONFLICT(code) DO UPDATE SET
       name=excluded.name,
       category=excluded.category,
@@ -101,12 +105,14 @@ export async function onRequestPost(context){
       gifi_label=excluded.gifi_label,
       gifi_section=excluded.gifi_section,
       tax_deductibility_percent=excluded.tax_deductibility_percent,
+      gifi_review_state=excluded.gifi_review_state,
+      gifi_review_note=excluded.gifi_review_note,
       is_active=excluded.is_active,
       updated_at=CURRENT_TIMESTAMP
-  `).bind(code,name,category,parent_group || null,normal_balance,sort_order,gifi_code || null,gifi_label || null,gifi_section || null,tax_deductibility_percent,is_active).run();
+  `).bind(code,name,category,parent_group || null,normal_balance,sort_order,gifi_code || null,gifi_label || null,gifi_section || null,tax_deductibility_percent,gifi_review_state,gifi_review_note || null,is_active).run();
   await auditAdminAction(context.env, context.request, adminUser, {
     action_type:"save_gl_account", target_type:"general_ledger_account", target_key:code,
-    details:{ name, category, parent_group, normal_balance, sort_order, gifi_code, gifi_label, gifi_section, tax_deductibility_percent, is_active }
+    details:{ name, category, parent_group, normal_balance, sort_order, gifi_code, gifi_label, gifi_section, tax_deductibility_percent, gifi_review_state, gifi_review_note, is_active }
   });
   return jsonResponse({ ok:true });
 }
