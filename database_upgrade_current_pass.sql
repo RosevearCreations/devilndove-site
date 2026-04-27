@@ -1,3 +1,4 @@
+-- Current pass note: accounting review now adds starter GL finalize helpers, richer attachment metadata, deeper reconciliation review detail, and a more accountant-ready year-end close bundle.
 -- Current pass note: accounting now adds explicit GIFI staging fields on general_ledger_accounts, a live DB sanity route, and schema alignment for accounting_journal_entries/accounting_journal_lines.
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
 -- Current pass note: phone-first finished-product entry now supports a lightweight wizard mode plus capture metadata for same-day draft review and safer bulk cleanup.
@@ -715,3 +716,17 @@ ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_reference TEX
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN difference_reason TEXT;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN detail_json TEXT;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN attachment_count INTEGER NOT NULL DEFAULT 0;
+
+
+-- Accounting handoff pass: richer accounting attachment metadata and reconciliation review detail.
+ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded';
+ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT;
+ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT;
+CREATE INDEX IF NOT EXISTS idx_accounting_attachments_scope ON accounting_attachments(reconciliation_type, period_month, scope_key, attachment_kind);
+
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_amount_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN book_amount_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN tolerance_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN expected_rate_basis_points INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN observed_rate_basis_points INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN unresolved_item_count INTEGER NOT NULL DEFAULT 0;

@@ -1318,6 +1318,9 @@ CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_review_state ON general_l
 CREATE TABLE IF NOT EXISTS accounting_attachments (
   accounting_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT,
   attachment_kind TEXT NOT NULL DEFAULT 'other',
+  attachment_status TEXT NOT NULL DEFAULT 'uploaded',
+  document_date TEXT,
+  scope_key TEXT,
   storage_provider TEXT NOT NULL DEFAULT 'r2',
   bucket_name TEXT,
   object_key TEXT NOT NULL UNIQUE,
@@ -1339,8 +1342,18 @@ CREATE TABLE IF NOT EXISTS accounting_attachments (
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_expense ON accounting_attachments(expense_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_vendor ON accounting_attachments(vendor_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_period ON accounting_attachments(period_month, tax_year, reconciliation_type, attachment_kind);
+ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded';
+ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT;
+ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT;
+CREATE INDEX IF NOT EXISTS idx_accounting_attachments_scope ON accounting_attachments(reconciliation_type, period_month, scope_key, attachment_kind);
 
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_reference TEXT;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN difference_reason TEXT;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN detail_json TEXT;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN attachment_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_amount_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN book_amount_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN tolerance_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN expected_rate_basis_points INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN observed_rate_basis_points INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN unresolved_item_count INTEGER NOT NULL DEFAULT 0;
