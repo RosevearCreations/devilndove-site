@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <button class="btn primary" type="submit">Save GL account</button>
         </form>
-        <div id="glAccountsSummary" class="small" style="margin-top:10px"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" type="button" id="bulkReviewMappedAccountsButton">Mark mapped as reviewed</button><button class="btn" type="button" id="bulkFinalizeMappedAccountsButton">Finalize mapped accounts</button></div><div id="glAccountsList" class="small" style="margin-top:10px"></div>
+        <div id="glAccountsSummary" class="small" style="margin-top:10px"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" type="button" id="applyStarterGifiMappingsButton">Apply starter GIFI mappings</button><button class="btn" type="button" id="bulkReviewMappedAccountsButton">Mark mapped as reviewed</button><button class="btn" type="button" id="bulkFinalizeReviewedAccountsButton">Finalize reviewed accounts</button><button class="btn" type="button" id="bulkFinalizeMappedAccountsButton">Finalize all mapped accounts</button></div><div id="glAccountsBlockers" class="small" style="margin-top:10px"></div><div id="glAccountsList" class="small" style="margin-top:10px"></div>
       </div>
       <div class="card" id="expense-entry">
         <h3 style="margin-top:0">Expense entry</h3>
@@ -461,11 +461,25 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   mount.querySelector('#loadGifiButton')?.addEventListener('click', () => { loadGifiNotes().then(loadGifiSummary).catch((error) => setMessage(String(error?.message || error), true)); });
   mount.querySelector('#runDbSanityButton')?.addEventListener('click', () => { loadDbSanity().catch((error) => setMessage(String(error?.message || error), true)); });
+  mount.querySelector('#applyStarterGifiMappingsButton')?.addEventListener('click', async () => {
+    const response = await window.DDAuth.apiFetch('/api/admin/general-ledger-accounts', { method: 'POST', body: JSON.stringify({ action: 'apply_starter_gifi_mappings' }) });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) return setMessage(data?.error || 'Failed applying starter GIFI mappings.', true);
+    setMessage(`Starter GIFI mappings applied (${Number(data.changed_rows || 0)} rows touched).`);
+    refreshAll().catch((error) => setMessage(String(error?.message || error), true));
+  });
   mount.querySelector('#bulkReviewMappedAccountsButton')?.addEventListener('click', async () => {
     const response = await window.DDAuth.apiFetch('/api/admin/general-ledger-accounts', { method: 'POST', body: JSON.stringify({ action: 'bulk_mark_reviewed' }) });
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) return setMessage(data?.error || 'Failed bulk review update.', true);
     setMessage(`Mapped GL accounts marked reviewed (${Number(data.changed_rows || 0)} rows).`);
+    refreshAll().catch((error) => setMessage(String(error?.message || error), true));
+  });
+  mount.querySelector('#bulkFinalizeReviewedAccountsButton')?.addEventListener('click', async () => {
+    const response = await window.DDAuth.apiFetch('/api/admin/general-ledger-accounts', { method: 'POST', body: JSON.stringify({ action: 'bulk_finalize_reviewed' }) });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) return setMessage(data?.error || 'Failed finalizing reviewed GL accounts.', true);
+    setMessage(`Reviewed GL accounts finalized (${Number(data.changed_rows || 0)} rows).`);
     refreshAll().catch((error) => setMessage(String(error?.message || error), true));
   });
   mount.querySelector('#bulkFinalizeMappedAccountsButton')?.addEventListener('click', async () => {

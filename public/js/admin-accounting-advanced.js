@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="grid cols-2" style="gap:8px"><input name="file" type="file" /><select name="attachment_kind"><option value="bill">Bill</option><option value="receipt">Receipt</option><option value="statement">Statement</option><option value="workpaper">Workpaper</option><option value="other">Other</option></select></div>
           <div class="grid cols-2" style="gap:8px"><select name="vendor_id" id="attachmentVendorSelect">${vendorOptions()}</select><input name="expense_id" type="number" min="0" step="1" placeholder="Expense ID (optional)" /></div>
           <div class="grid cols-3" style="gap:8px"><select name="reconciliation_type"><option value="">No reconciliation link</option><option value="sales_tax">Sales tax</option><option value="processor_fees">Processor fees</option><option value="shipping">Shipping</option></select><input name="period_month" type="month" value="${esc(state.reconciliation.period_month)}" /><input name="tax_year" type="number" min="2000" max="2100" value="${new Date().getFullYear()}" /></div>
+          <div class="grid cols-3" style="gap:8px"><input name="scope_key" type="text" placeholder="Scope key (all, stripe, paypal)" /><input name="document_date" type="date" /><select name="attachment_status"><option value="uploaded">Uploaded</option><option value="reviewed">Reviewed</option><option value="needs_followup">Needs follow-up</option><option value="linked">Linked / filed</option></select></div>
           <input name="statement_reference" type="text" placeholder="Statement reference / report name" />
           <textarea name="notes" rows="2" placeholder="Why this attachment matters"></textarea>
           <button class="btn primary" type="submit">Upload attachment</button>
@@ -245,10 +246,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById('accountingAttachmentsList');
     if (!el) return;
     if (!state.attachments.length) { el.innerHTML = '<div>No recent accounting attachments yet.</div>'; return; }
-    el.innerHTML = state.attachments.map((row) => `
+    const byKind = state.attachments.reduce((acc, row) => { acc[row.attachment_kind || 'other'] = Number(acc[row.attachment_kind || 'other'] || 0) + 1; return acc; }, {});
+    el.innerHTML = `<div class="small" style="margin-bottom:8px">Kinds ${esc(JSON.stringify(byKind))}</div>` + state.attachments.map((row) => `
       <div style="padding:8px 0;border-bottom:1px solid #eee">
         <strong>${esc(row.original_filename || 'attachment')}</strong>
-        <div class="small">${esc(row.attachment_kind || 'other')} • ${esc(row.period_month || row.tax_year || '')}${row.statement_reference ? ` • ${esc(row.statement_reference)}` : ''}</div>
+        <div class="small">${esc(row.attachment_kind || 'other')} • ${esc(row.attachment_status || 'uploaded')}${row.document_date ? ` • ${esc(row.document_date)}` : ''}${row.scope_key ? ` • scope ${esc(row.scope_key)}` : ''}</div>
+        <div class="small">${esc(row.period_month || row.tax_year || '')}${row.statement_reference ? ` • ${esc(row.statement_reference)}` : ''}</div>
         <div class="small">${row.public_url ? `<a href="${esc(row.public_url)}" target="_blank" rel="noopener">Open file</a>` : esc(row.object_key || '')}</div>
       </div>
     `).join('');
@@ -274,10 +277,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="hidden" name="detail_json" value='${esc(row.detail_json || review.detail_json || "{}")}' />
             <div><strong>${esc(row.label || row.scope_key || '')}</strong></div>
             <div class="small">Reference ${esc(centsToMoney(row.reference_amount_cents || 0))} • Compared ${esc(centsToMoney(row.compared_amount_cents || 0))} • Difference ${esc(centsToMoney(row.difference_cents || 0))}</div>
+            <div class="small">Statement ${esc(centsToMoney((review.statement_amount_cents != null ? review.statement_amount_cents : row.statement_amount_cents) || 0))} • Book ${esc(centsToMoney((review.book_amount_cents != null ? review.book_amount_cents : row.book_amount_cents) || 0))} • tolerance ${esc(centsToMoney((review.tolerance_cents != null ? review.tolerance_cents : row.tolerance_cents) || 0))}</div>
+            <div class="small">Attachments ${esc(String(Number(row.attachment_count || review.attachment_count || 0)))} • statements ${esc(String(Number(row.statement_count || 0)))} • unresolved ${esc(String(Number((review.unresolved_item_count != null ? review.unresolved_item_count : row.unresolved_item_count) || 0)))}</div>
             ${row.gross_sales_cents != null ? `<div class="small">Gross sales ${esc(centsToMoney(row.gross_sales_cents || 0))} • shipping ${esc(centsToMoney(row.shipping_cents || 0))} • discount ${esc(centsToMoney(row.discount_cents || 0))}</div>` : ''}
-            ${row.fee_ratio_basis_points != null ? `<div class="small">Fee ratio ${(Number(row.fee_ratio_basis_points || 0) / 100).toFixed(2)}% • refunds ${esc(centsToMoney(row.refund_cents || 0))}</div>` : ''}
+            ${row.expected_rate_basis_points != null || row.observed_rate_basis_points != null ? `<div class="small">Expected rate ${(Number((review.expected_rate_basis_points != null ? review.expected_rate_basis_points : row.expected_rate_basis_points) || 0) / 100).toFixed(2)}% • observed rate ${(Number((review.observed_rate_basis_points != null ? review.observed_rate_basis_points : row.observed_rate_basis_points) || 0) / 100).toFixed(2)}%</div>` : ''}
             ${row.fulfilled_order_count != null ? `<div class="small">Fulfilled orders ${esc(String(Number(row.fulfilled_order_count || 0)))} • shipping expense rows ${esc(String(Number(row.shipping_expense_count || 0)))} </div>` : ''}
             <div class="grid cols-2" style="gap:8px"><input name="statement_reference" type="text" value="${esc(review.statement_reference || '')}" placeholder="Statement reference" /><select name="review_status"><option value="draft" ${review.review_status === 'draft' ? 'selected' : ''}>Draft</option><option value="reviewed" ${review.review_status === 'reviewed' ? 'selected' : ''}>Reviewed</option><option value="needs_accountant" ${review.review_status === 'needs_accountant' ? 'selected' : ''}>Needs accountant</option><option value="finalized" ${review.review_status === 'finalized' ? 'selected' : ''}>Finalized</option></select></div>
+            <div class="grid cols-3" style="gap:8px"><input name="statement_amount_cents" type="number" step="1" value="${esc((review.statement_amount_cents != null ? review.statement_amount_cents : row.statement_amount_cents) || 0)}" placeholder="Statement cents" /><input name="book_amount_cents" type="number" step="1" value="${esc((review.book_amount_cents != null ? review.book_amount_cents : row.book_amount_cents) || 0)}" placeholder="Book cents" /><input name="tolerance_cents" type="number" step="1" value="${esc((review.tolerance_cents != null ? review.tolerance_cents : row.tolerance_cents) || 0)}" placeholder="Tolerance cents" /></div>
+            <div class="grid cols-2" style="gap:8px"><input name="expected_rate_basis_points" type="number" step="1" value="${esc((review.expected_rate_basis_points != null ? review.expected_rate_basis_points : row.expected_rate_basis_points) || 0)}" placeholder="Expected rate bps" /><input name="observed_rate_basis_points" type="number" step="1" value="${esc((review.observed_rate_basis_points != null ? review.observed_rate_basis_points : row.observed_rate_basis_points) || 0)}" placeholder="Observed rate bps" /></div>
+            <input name="unresolved_item_count" type="number" min="0" step="1" value="${esc((review.unresolved_item_count != null ? review.unresolved_item_count : row.unresolved_item_count) || 0)}" placeholder="Unresolved item count" />
             <input name="difference_reason" type="text" value="${esc(review.difference_reason || '')}" placeholder="Why there is a difference / what still needs follow-up" />
             <textarea name="note" rows="2" placeholder="Reconciliation note">${esc(review.note || '')}</textarea>
             <button class="btn primary" type="submit">Save review</button>
@@ -293,10 +301,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const handoff = state.yearEnd.accountant_handoff || {};
     const gl = handoff.gl_review_summary || {};
     el.innerHTML = `
-      <div class="small" style="margin-bottom:8px">Locked months <strong>${esc(String(Number(checklist.locked_month_count || 0)))}</strong> • attachments <strong>${esc(String(Number(checklist.attachment_count || 0)))}</strong> • GIFI finalized <strong>${esc(String(Number(checklist.gifi_finalized_count || 0)))}</strong></div>
-      <div class="small">GL active ${esc(String(Number(gl.active_account_count || 0)))} • mapped ${esc(String(Number(gl.mapped_account_count || 0)))} • finalized ${esc(String(Number(gl.finalized_account_count || 0)))} • unmapped ${esc(String(Number(gl.unmapped_account_count || 0)))}</div>
-      <div class="small" style="margin-top:8px">Attachment coverage: ${esc(JSON.stringify(handoff.attachment_summary?.by_kind || {}))}</div>
-      <div class="small" style="margin-top:8px">Reconciliation coverage: ${esc(JSON.stringify(handoff.reconciliation_summary?.by_type || {}))}</div>
+      <div class="small" style="margin-bottom:8px">Locked months <strong>${esc(String(Number(checklist.locked_month_count || 0)))}</strong> • attachments <strong>${esc(String(Number(checklist.attachment_count || 0)))}</strong> • statements <strong>${esc(String(Number(checklist.statement_attachment_count || 0)))}</strong> • workpapers <strong>${esc(String(Number(checklist.workpaper_attachment_count || 0)))}</strong> • GIFI finalized <strong>${esc(String(Number(checklist.gifi_finalized_count || 0)))}</strong></div>
+      <div class="small">GL active ${esc(String(Number(gl.active_account_count || 0)))} • mapped ${esc(String(Number(gl.mapped_account_count || 0)))} • finalized ${esc(String(Number(gl.finalized_account_count || 0)))} • needs accountant ${esc(String(Number(gl.needs_accountant_count || 0)))} • unmapped ${esc(String(Number(gl.unmapped_account_count || 0)))}</div>
+      <div class="small" style="margin-top:8px">Attachment coverage by kind: ${esc(JSON.stringify(handoff.attachment_summary?.by_kind || {}))}</div>
+      <div class="small" style="margin-top:8px">Attachment coverage by month: ${esc(JSON.stringify(handoff.attachment_summary?.by_month || {}))}</div>
+      <div class="small" style="margin-top:8px">Reconciliation coverage: ${esc(JSON.stringify(handoff.reconciliation_summary?.by_type || {}))} • status ${esc(JSON.stringify(handoff.reconciliation_summary?.by_status || {}))}</div>
+      ${(handoff.gl_final_blockers || []).length ? `<div class="small" style="margin-top:8px"><strong>GL blockers:</strong><br>${handoff.gl_final_blockers.slice(0, 8).map((row) => `${esc(row.code || '')} — ${esc(row.blocker_type || 'needs review')}`).join('<br>')}</div>` : ''}
+      ${(handoff.attachment_summary?.coverage_gaps || []).length ? `<div class="small" style="margin-top:8px"><strong>Attachment gaps:</strong><br>${handoff.attachment_summary.coverage_gaps.slice(0, 8).map((row) => esc(row)).join('<br>')}</div>` : ''}
       ${(handoff.recommended_missing_items || []).length ? `<div class="small" style="margin-top:8px"><strong>Still needed:</strong><br>${handoff.recommended_missing_items.map((row) => esc(row)).join('<br>')}</div>` : ''}
     `;
   }
