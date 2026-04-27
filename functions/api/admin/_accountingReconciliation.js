@@ -35,6 +35,12 @@ export async function ensureAccountingReconciliationReviewsTable(db) {
       difference_reason TEXT,
       detail_json TEXT,
       attachment_count INTEGER NOT NULL DEFAULT 0,
+      statement_amount_cents INTEGER NOT NULL DEFAULT 0,
+      book_amount_cents INTEGER NOT NULL DEFAULT 0,
+      tolerance_cents INTEGER NOT NULL DEFAULT 0,
+      expected_rate_basis_points INTEGER NOT NULL DEFAULT 0,
+      observed_rate_basis_points INTEGER NOT NULL DEFAULT 0,
+      unresolved_item_count INTEGER NOT NULL DEFAULT 0,
       reference_amount_cents INTEGER NOT NULL DEFAULT 0,
       compared_amount_cents INTEGER NOT NULL DEFAULT 0,
       difference_cents INTEGER NOT NULL DEFAULT 0,
@@ -49,6 +55,12 @@ export async function ensureAccountingReconciliationReviewsTable(db) {
   try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN difference_reason TEXT`).run(); } catch {}
   try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN detail_json TEXT`).run(); } catch {}
   try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN attachment_count INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_amount_cents INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN book_amount_cents INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN tolerance_cents INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN expected_rate_basis_points INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN observed_rate_basis_points INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN unresolved_item_count INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_reviews_type_period ON accounting_reconciliation_reviews(reconciliation_type, period_month DESC, review_status)`).run(); } catch {}
 }
 
@@ -59,6 +71,8 @@ export async function listAccountingReconciliationReviews(db, { reconciliationTy
   const result = await db.prepare(`
     SELECT accounting_reconciliation_review_id, reconciliation_type, period_month, scope_key, review_status,
            note, statement_reference, difference_reason, detail_json, attachment_count,
+           statement_amount_cents, book_amount_cents, tolerance_cents,
+           expected_rate_basis_points, observed_rate_basis_points, unresolved_item_count,
            reference_amount_cents, compared_amount_cents, difference_cents,
            created_by_user_id, updated_by_user_id, created_at, updated_at
     FROM accounting_reconciliation_reviews
@@ -77,6 +91,12 @@ export async function listAccountingReconciliationReviews(db, { reconciliationTy
     difference_reason: row.difference_reason || '',
     detail_json: row.detail_json || '',
     attachment_count: Number(row.attachment_count || 0),
+    statement_amount_cents: Number(row.statement_amount_cents || 0),
+    book_amount_cents: Number(row.book_amount_cents || 0),
+    tolerance_cents: Number(row.tolerance_cents || 0),
+    expected_rate_basis_points: Number(row.expected_rate_basis_points || 0),
+    observed_rate_basis_points: Number(row.observed_rate_basis_points || 0),
+    unresolved_item_count: Number(row.unresolved_item_count || 0),
     reference_amount_cents: Number(row.reference_amount_cents || 0),
     compared_amount_cents: Number(row.compared_amount_cents || 0),
     difference_cents: Number(row.difference_cents || 0),

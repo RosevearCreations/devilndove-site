@@ -9,6 +9,18 @@ export function cleanAttachmentKind(value) {
   return ['bill', 'receipt', 'statement', 'workpaper', 'other'].includes(raw) ? raw : 'other';
 }
 
+export function cleanAttachmentStatus(value) {
+  const raw = normalizeText(value).toLowerCase();
+  return ['uploaded', 'reviewed', 'needs_followup', 'linked'].includes(raw) ? raw : 'uploaded';
+}
+
+export function cleanDocumentDate(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  return '';
+}
+
 export function buildAccountingAttachmentPublicUrl(env, objectKey) {
   const base = normalizeText(env.ACCOUNTING_ATTACHMENTS_PUBLIC_BASE_URL || env.PRODUCT_MEDIA_PUBLIC_BASE_URL || env.R2_PUBLIC_BASE_URL || env.PUBLIC_R2_BASE_URL);
   if (!base) return null;
@@ -20,6 +32,9 @@ export async function ensureAccountingAttachmentsTable(db) {
     CREATE TABLE IF NOT EXISTS accounting_attachments (
       accounting_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT,
       attachment_kind TEXT NOT NULL DEFAULT 'other',
+      attachment_status TEXT NOT NULL DEFAULT 'uploaded',
+      document_date TEXT,
+      scope_key TEXT,
       storage_provider TEXT NOT NULL DEFAULT 'r2',
       bucket_name TEXT,
       object_key TEXT NOT NULL UNIQUE,
@@ -39,17 +54,24 @@ export async function ensureAccountingAttachmentsTable(db) {
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
+  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded'`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_attachments_expense ON accounting_attachments(expense_id, created_at DESC)`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_attachments_vendor ON accounting_attachments(vendor_id, created_at DESC)`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_attachments_period ON accounting_attachments(period_month, tax_year, reconciliation_type, attachment_kind)`).run(); } catch {}
+  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_attachments_scope ON accounting_attachments(reconciliation_type, period_month, scope_key, attachment_kind)`).run(); } catch {}
 }
 
-export async function listAccountingAttachments(db, { expenseId = 0, vendorId = 0, reconciliationType = '', periodMonth = '', taxYear = '', limit = 50 } = {}) {
+export async function listAccountingAttachments(db, { expenseId = 0, vendorId = 0, reconciliationType = '', periodMonth = '', taxYear = '', scopeKey = '', attachmentKind = '', limit = 50 } = {}) {
   await ensureAccountingAttachmentsTable(db);
-  const safeLimit = Math.max(1, Math.min(200, Number(limit || 50) || 50));
+  const safeLimit = Math.max(1, Math.min(500, Number(limit || 50) || 50));
   const type = normalizeText(reconciliationType).toLowerCase();
+  const kind = cleanAttachmentKind(attachmentKind || 'other');
+  const useKind = normalizeText(attachmentKind) ? kind : '';
   const result = await db.prepare(`
-    SELECT accounting_attachment_id, attachment_kind, storage_provider, bucket_name, object_key, public_url,
+    SELECT accounting_attachment_id, attachment_kind, attachment_status, document_date, scope_key,
+           storage_provider, bucket_name, object_key, public_url,
            original_filename, mime_type, file_size_bytes, expense_id, vendor_id,
            reconciliation_type, period_month, tax_year, statement_reference, notes,
            created_by_user_id, created_at, updated_at
@@ -59,7 +81,9 @@ export async function listAccountingAttachments(db, { expenseId = 0, vendorId = 
       AND (? = '' OR reconciliation_type = ?)
       AND (? = '' OR period_month = ?)
       AND (? = '' OR tax_year = ?)
-    ORDER BY created_at DESC, accounting_attachment_id DESC
+      AND (? = '' OR scope_key = ?)
+      AND (? = '' OR attachment_kind = ?)
+    ORDER BY COALESCE(document_date, created_at) DESC, accounting_attachment_id DESC
     LIMIT ?
   `).bind(
     Number(expenseId || 0), Number(expenseId || 0),
@@ -67,12 +91,17 @@ export async function listAccountingAttachments(db, { expenseId = 0, vendorId = 
     type, type,
     String(periodMonth || '').trim(), String(periodMonth || '').trim(),
     String(taxYear || '').trim(), String(taxYear || '').trim(),
+    String(scopeKey || '').trim(), String(scopeKey || '').trim(),
+    useKind, useKind,
     safeLimit
   ).all().catch(() => ({ results: [] }));
 
   return rows(result).map((row) => ({
     accounting_attachment_id: Number(row.accounting_attachment_id || 0),
     attachment_kind: row.attachment_kind || 'other',
+    attachment_status: row.attachment_status || 'uploaded',
+    document_date: row.document_date || '',
+    scope_key: row.scope_key || '',
     storage_provider: row.storage_provider || 'r2',
     bucket_name: row.bucket_name || '',
     object_key: row.object_key || '',

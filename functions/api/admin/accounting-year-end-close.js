@@ -7,11 +7,7 @@ import { ensureAccountingAttachmentsTable, listAccountingAttachments } from './_
 function yearRange(yearValue) {
   const raw = String(yearValue || '').trim();
   if (!/^\d{4}$/.test(raw)) return null;
-  return { year: raw, start: `${raw}-01`, end: `${raw}-12` };
-}
-
-function rows(result) {
-  return Array.isArray(result?.results) ? result.results : [];
+  return { year: raw };
 }
 
 async function ensureGlSchema(db) {
@@ -39,6 +35,15 @@ async function ensureGlSchema(db) {
   `).run();
 }
 
+function summarizeBy(items, keyFn) {
+  const out = {};
+  for (const item of items) {
+    const key = String(keyFn(item) || 'unknown');
+    out[key] = Number(out[key] || 0) + 1;
+  }
+  return out;
+}
+
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
@@ -61,7 +66,7 @@ export async function onRequestGet(context) {
     ...(await listAccountingReconciliationReviews(db, { reconciliationType: 'processor_fees', includeAllPeriods: true })),
     ...(await listAccountingReconciliationReviews(db, { reconciliationType: 'shipping', includeAllPeriods: true })),
   ].filter((row) => String(row.period_month || '').startsWith(`${range.year}-`));
-  const attachments = await listAccountingAttachments(db, { taxYear: range.year, limit: 500 });
+  const attachments = await listAccountingAttachments(db, { taxYear: range.year, limit: 1000 });
 
   const glReviewRow = await db.prepare(`
     SELECT
@@ -69,35 +74,85 @@ export async function onRequestGet(context) {
       SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_code,'') <> '' AND COALESCE(gifi_label,'') <> '' AND COALESCE(gifi_section,'') <> '' THEN 1 ELSE 0 END) AS mapped_account_count,
       SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_review_state,'draft') IN ('reviewed','finalized') THEN 1 ELSE 0 END) AS reviewed_account_count,
       SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_review_state,'draft')='finalized' THEN 1 ELSE 0 END) AS finalized_account_count,
-      SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_code,'')='' THEN 1 ELSE 0 END) AS unmapped_account_count
+      SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_code,'')='' THEN 1 ELSE 0 END) AS unmapped_account_count,
+      SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_review_state,'draft')='needs_accountant' THEN 1 ELSE 0 END) AS needs_accountant_count
     FROM general_ledger_accounts
   `).first().catch(() => null);
 
-  const attachmentKinds = attachments.reduce((acc, row) => {
-    const key = row.attachment_kind || 'other';
-    acc[key] = Number(acc[key] || 0) + 1;
-    return acc;
-  }, {});
-  const reconciliationByType = reconciliationReviews.reduce((acc, row) => {
-    const key = row.reconciliation_type || 'other';
-    acc[key] = Number(acc[key] || 0) + 1;
-    return acc;
-  }, {});
+  const glFinalBlockers = (await db.prepare(`
+    SELECT code, name, category, gifi_code, gifi_label, gifi_section, gifi_review_state, gifi_review_note,
+           CASE
+             WHEN COALESCE(gifi_code,'')='' OR COALESCE(gifi_label,'')='' OR COALESCE(gifi_section,'')='' THEN 'missing_mapping'
+             WHEN COALESCE(gifi_review_state,'draft')='needs_accountant' THEN 'needs_accountant'
+             WHEN COALESCE(gifi_review_state,'draft')!='finalized' THEN 'not_finalized'
+             ELSE 'ok'
+           END AS blocker_type
+    FROM general_ledger_accounts
+    WHERE COALESCE(is_active,1)=1
+      AND (
+        COALESCE(gifi_code,'')='' OR COALESCE(gifi_label,'')='' OR COALESCE(gifi_section,'')=''
+        OR COALESCE(gifi_review_state,'draft')!='finalized'
+      )
+    ORDER BY blocker_type ASC, code ASC
+    LIMIT 100
+  `).all().catch(() => ({ results: [] })))?.results || [];
+
+  const attachmentKinds = summarizeBy(attachments, (row) => row.attachment_kind || 'other');
+  const attachmentStatus = summarizeBy(attachments, (row) => row.attachment_status || 'uploaded');
+  const attachmentByMonth = summarizeBy(attachments, (row) => row.period_month || (row.document_date || '').slice(0, 7) || 'unassigned');
+  const attachmentGaps = [];
+  for (let month = 1; month <= 12; month += 1) {
+    const label = `${range.year}-${String(month).padStart(2, '0')}`;
+    const monthItems = attachments.filter((row) => (row.period_month || '').startsWith(label) || (row.document_date || '').startsWith(label));
+    const kindCounts = summarizeBy(monthItems, (row) => row.attachment_kind || 'other');
+    if (!kindCounts.statement) attachmentGaps.push(`${label}: missing statement attachment`);
+    if (!kindCounts.workpaper) attachmentGaps.push(`${label}: missing workpaper attachment`);
+  }
+
+  const reconciliationByType = summarizeBy(reconciliationReviews, (row) => row.reconciliation_type || 'other');
+  const reconciliationByStatus = summarizeBy(reconciliationReviews, (row) => row.review_status || 'draft');
+  const reconciliationMatrix = {};
+  for (const row of reconciliationReviews) {
+    const month = row.period_month || 'unassigned';
+    reconciliationMatrix[month] = reconciliationMatrix[month] || {};
+    reconciliationMatrix[month][row.reconciliation_type || 'other'] = {
+      review_status: row.review_status || 'draft',
+      statement_reference: row.statement_reference || '',
+      difference_cents: Number(row.difference_cents || 0),
+      unresolved_item_count: Number(row.unresolved_item_count || 0),
+      attachment_count: Number(row.attachment_count || 0),
+      note: row.note || '',
+    };
+  }
+
   const monthsLocked = closures.filter((row) => row.lock_state === 'locked').map((row) => row.period_month);
-  const closeChecklistOpenMonths = closures.filter((row) => row.lock_state !== 'locked').map((row) => row.period_month);
+  const openMonths = closures.filter((row) => row.lock_state !== 'locked').map((row) => row.period_month);
+  const checklist = {
+    locked_month_count: monthsLocked.length,
+    reopened_month_count: closures.filter((row) => row.reopened_at).length,
+    gifi_finalized_count: gifiNotes.filter((row) => row.review_status === 'finalized').length,
+    gifi_needs_accountant_count: gifiNotes.filter((row) => row.review_status === 'needs_accountant').length,
+    reconciliation_finalized_count: reconciliationReviews.filter((row) => row.review_status === 'finalized').length,
+    reconciliation_needs_accountant_count: reconciliationReviews.filter((row) => row.review_status === 'needs_accountant').length,
+    attachment_count: attachments.length,
+    statement_attachment_count: Number(attachmentKinds.statement || 0),
+    workpaper_attachment_count: Number(attachmentKinds.workpaper || 0),
+  };
+
+  const recommendedMissingItems = [
+    Number(glReviewRow?.unmapped_account_count || 0) > 0 ? 'Finish unmapped active GL accounts before final accountant export.' : null,
+    Number(glReviewRow?.needs_accountant_count || 0) > 0 ? 'Resolve active GL accounts still marked needs_accountant.' : null,
+    openMonths.length ? `Finish lock review for open months: ${openMonths.join(', ')}` : null,
+    Number(attachmentKinds.statement || 0) === 0 ? 'Attach statements for the year-end handoff package.' : null,
+    Number(attachmentKinds.workpaper || 0) === 0 ? 'Attach workpapers or close-checklists for the year-end handoff package.' : null,
+    attachmentGaps.length ? `Attachment coverage gaps remain: ${attachmentGaps.slice(0, 6).join('; ')}` : null,
+    reconciliationReviews.some((row) => Number(row.unresolved_item_count || 0) > 0) ? 'Reconciliation reviews still show unresolved items that should be explained or cleared.' : null,
+  ].filter(Boolean);
 
   const bundle = {
     ok: true,
     tax_year: range.year,
-    checklist: {
-      locked_month_count: monthsLocked.length,
-      reopened_month_count: closures.filter((row) => row.reopened_at).length,
-      gifi_finalized_count: gifiNotes.filter((row) => row.review_status === 'finalized').length,
-      gifi_needs_accountant_count: gifiNotes.filter((row) => row.review_status === 'needs_accountant').length,
-      reconciliation_finalized_count: reconciliationReviews.filter((row) => row.review_status === 'finalized').length,
-      reconciliation_needs_accountant_count: reconciliationReviews.filter((row) => row.review_status === 'needs_accountant').length,
-      attachment_count: attachments.length,
-    },
+    checklist,
     accountant_handoff: {
       gl_review_summary: {
         active_account_count: Number(glReviewRow?.active_account_count || 0),
@@ -105,20 +160,30 @@ export async function onRequestGet(context) {
         reviewed_account_count: Number(glReviewRow?.reviewed_account_count || 0),
         finalized_account_count: Number(glReviewRow?.finalized_account_count || 0),
         unmapped_account_count: Number(glReviewRow?.unmapped_account_count || 0),
+        needs_accountant_count: Number(glReviewRow?.needs_accountant_count || 0),
       },
+      gl_final_blockers: glFinalBlockers,
       attachment_summary: {
         total_attachment_count: attachments.length,
         by_kind: attachmentKinds,
+        by_status: attachmentStatus,
+        by_month: attachmentByMonth,
+        coverage_gaps: attachmentGaps,
       },
       reconciliation_summary: {
         total_review_count: reconciliationReviews.length,
         by_type: reconciliationByType,
+        by_status: reconciliationByStatus,
+        matrix_by_month: reconciliationMatrix,
       },
-      recommended_missing_items: [
-        Number(glReviewRow?.unmapped_account_count || 0) > 0 ? 'Finish unmapped active GL accounts before final accountant export.' : null,
-        attachments.length === 0 ? 'Attach bills, receipts, statements, and workpapers before year-end handoff.' : null,
-        closeChecklistOpenMonths.length ? `Finish lock review for open months: ${closeChecklistOpenMonths.join(', ')}` : null,
-      ].filter(Boolean),
+      recommended_missing_items: recommendedMissingItems,
+      handoff_export_checklist: [
+        'GIFI staging CSV',
+        'Year-end close JSON bundle',
+        'Monthly / yearly accounting exports',
+        'Statements, bills, receipts, and workpapers',
+        'Notes for unresolved differences or accountant follow-up',
+      ],
     },
     months: closures,
     gifi_notes: gifiNotes,

@@ -39,18 +39,40 @@ function providerScopeFromText(text) {
   if (raw.includes('paypal')) return 'paypal';
   if (raw.includes('stripe')) return 'stripe';
   if (raw.includes('square')) return 'square';
+  if (raw.includes('etsy')) return 'etsy';
   if (raw.includes('bank')) return 'bank';
   return 'other';
+}
+
+function defaultExpectedRateBps(scopeKey) {
+  const scope = String(scopeKey || '').toLowerCase();
+  if (scope === 'paypal') return 349;
+  if (scope === 'stripe') return 290;
+  if (scope === 'square') return 265;
+  if (scope === 'etsy') return 650;
+  return 0;
 }
 
 function toJson(value) {
   try { return JSON.stringify(value || {}); } catch { return '{}'; }
 }
 
-async function attachmentCountByScope(db, { reconciliationType, periodMonth }) {
+function safeParseJson(text, fallback = {}) {
+  try { return JSON.parse(String(text || '')); } catch { return fallback; }
+}
+
+async function attachmentInfoByScope(db, { reconciliationType, periodMonth }) {
   const attachments = await listAccountingAttachments(db, { reconciliationType, periodMonth, limit: 500 });
-  const count = attachments.length;
-  return { count, items: attachments.slice(0, 40) };
+  const byScope = {};
+  for (const row of attachments) {
+    const scopeKey = String(row.scope_key || 'all').trim() || 'all';
+    const item = byScope[scopeKey] || { count: 0, statement_count: 0, files: [] };
+    item.count += 1;
+    if ((row.attachment_kind || '') === 'statement') item.statement_count += 1;
+    if (item.files.length < 5) item.files.push(row);
+    byScope[scopeKey] = item;
+  }
+  return { count: attachments.length, items: attachments.slice(0, 40), by_scope: byScope };
 }
 
 async function loadSalesTaxSummary(db, periodMonth) {
@@ -104,6 +126,11 @@ async function loadSalesTaxSummary(db, periodMonth) {
     expenseCount = Number(row?.expense_count || 0);
   }
 
+  const taxableBaseCents = Math.max(0, grossSalesCents + shippingCents - discountCents);
+  const observedRateBps = taxableBaseCents > 0 ? Math.round((collected / taxableBaseCents) * 10000) : 0;
+  const netTaxPayableCents = collected - inputTax;
+  const unresolvedItemCount = netTaxPayableCents === 0 ? 0 : 1;
+
   return {
     period_month: periodMonth,
     rows: [{
@@ -111,13 +138,20 @@ async function loadSalesTaxSummary(db, periodMonth) {
       label: 'Sales tax collected vs input tax credits',
       reference_amount_cents: collected,
       compared_amount_cents: inputTax,
-      difference_cents: collected - inputTax,
+      statement_amount_cents: collected,
+      book_amount_cents: inputTax,
+      difference_cents: netTaxPayableCents,
       order_count: orderCount,
       expense_count: expenseCount,
       gross_sales_cents: grossSalesCents,
       shipping_cents: shippingCents,
       discount_cents: discountCents,
-      detail_json: toJson({ gross_sales_cents: grossSalesCents, shipping_cents: shippingCents, discount_cents: discountCents, tax_collected_cents: collected, input_tax_cents: inputTax, order_count: orderCount, expense_count: expenseCount }),
+      net_tax_payable_cents: netTaxPayableCents,
+      expected_rate_basis_points: 0,
+      observed_rate_basis_points: observedRateBps,
+      tolerance_cents: 500,
+      unresolved_item_count: unresolvedItemCount,
+      detail_json: toJson({ gross_sales_cents: grossSalesCents, shipping_cents: shippingCents, discount_cents: discountCents, tax_collected_cents: collected, input_tax_cents: inputTax, net_tax_payable_cents: netTaxPayableCents, order_count: orderCount, expense_count: expenseCount, observed_rate_basis_points: observedRateBps }),
     }],
   };
 }
@@ -133,7 +167,7 @@ async function loadProcessorFeeSummary(db, periodMonth) {
 
   if (hasPayments) {
     const amountExpr = paymentCols.has('amount_cents') ? 'COALESCE(amount_cents,0)' : (paymentCols.has('amount') ? 'CAST(ROUND(COALESCE(amount,0) * 100.0) AS INTEGER)' : '0');
-    const paidAtCol = firstExisting(paymentCols, ['paid_at','created_at'], "datetime('now')");
+    const paidAtCol = firstExisting(paymentCols, ['paid_at', 'created_at'], "datetime('now')");
     const paymentStatusCol = firstExisting(paymentCols, ['payment_status'], "''");
     const paymentRows = rows(await db.prepare(`
       SELECT LOWER(COALESCE(provider,'other')) AS provider,
@@ -148,13 +182,17 @@ async function loadProcessorFeeSummary(db, periodMonth) {
     `).bind(start, end).all().catch(() => ({ results: [] })));
     providerRows.push(...paymentRows.map((row) => ({
       scope_key: row.provider || 'other',
-      label: `${row.provider || 'other'} paid volume vs booked fees`,
-      reference_amount_cents: Number(row.gross_paid_cents || 0),
+      label: `${row.provider || 'other'} expected fees vs booked fees`,
+      gross_paid_cents: Number(row.gross_paid_cents || 0),
+      reference_amount_cents: 0,
+      statement_amount_cents: 0,
       compared_amount_cents: 0,
+      book_amount_cents: 0,
       difference_cents: 0,
       payment_count: Number(row.payment_count || 0),
       booked_expense_count: 0,
       refund_cents: 0,
+      unresolved_item_count: 0,
       detail_json: '{}'
     })));
   }
@@ -174,7 +212,7 @@ async function loadProcessorFeeSummary(db, periodMonth) {
       const scope = refund.provider || 'other';
       let row = providerRows.find((item) => item.scope_key === scope);
       if (!row) {
-        row = { scope_key: scope, label: `${scope} paid volume vs booked fees`, reference_amount_cents: 0, compared_amount_cents: 0, difference_cents: 0, payment_count: 0, booked_expense_count: 0, refund_cents: 0, detail_json: '{}' };
+        row = { scope_key: scope, label: `${scope} expected fees vs booked fees`, gross_paid_cents: 0, reference_amount_cents: 0, statement_amount_cents: 0, compared_amount_cents: 0, book_amount_cents: 0, difference_cents: 0, payment_count: 0, booked_expense_count: 0, refund_cents: 0, unresolved_item_count: 0, detail_json: '{}' };
         providerRows.push(row);
       }
       row.refund_cents += Number(refund.refund_cents || 0);
@@ -196,6 +234,7 @@ async function loadProcessorFeeSummary(db, periodMonth) {
           OR LOWER(COALESCE(vendor_name,'')) LIKE '%paypal%'
           OR LOWER(COALESCE(vendor_name,'')) LIKE '%stripe%'
           OR LOWER(COALESCE(vendor_name,'')) LIKE '%square%'
+          OR LOWER(COALESCE(vendor_name,'')) LIKE '%etsy%'
           OR LOWER(COALESCE(vendor_name,'')) LIKE '%bank%'
           OR LOWER(COALESCE(notes,'')) LIKE '%merchant%'
           OR LOWER(COALESCE(notes,'')) LIKE '%processor%'
@@ -206,18 +245,27 @@ async function loadProcessorFeeSummary(db, periodMonth) {
       const scope = providerScopeFromText(`${fee.vendor_name} ${fee.notes}`);
       let row = providerRows.find((item) => item.scope_key === scope);
       if (!row) {
-        row = { scope_key: scope, label: `${scope} paid volume vs booked fees`, reference_amount_cents: 0, compared_amount_cents: 0, difference_cents: 0, payment_count: 0, booked_expense_count: 0, refund_cents: 0, detail_json: '{}' };
+        row = { scope_key: scope, label: `${scope} expected fees vs booked fees`, gross_paid_cents: 0, reference_amount_cents: 0, statement_amount_cents: 0, compared_amount_cents: 0, book_amount_cents: 0, difference_cents: 0, payment_count: 0, booked_expense_count: 0, refund_cents: 0, unresolved_item_count: 0, detail_json: '{}' };
         providerRows.push(row);
       }
       row.compared_amount_cents += Number(fee.booked_fee_cents || 0);
+      row.book_amount_cents = row.compared_amount_cents;
       row.booked_expense_count += Number(fee.expense_count || 0);
     }
   }
 
   for (const row of providerRows) {
-    row.difference_cents = Number(row.reference_amount_cents || 0) - Number(row.compared_amount_cents || 0);
-    row.fee_ratio_basis_points = row.reference_amount_cents > 0 ? Math.round((Number(row.compared_amount_cents || 0) / Number(row.reference_amount_cents || 0)) * 10000) : 0;
-    row.detail_json = toJson({ gross_paid_cents: row.reference_amount_cents, booked_fee_cents: row.compared_amount_cents, refund_cents: Number(row.refund_cents || 0), payment_count: Number(row.payment_count || 0), booked_expense_count: Number(row.booked_expense_count || 0), fee_ratio_basis_points: Number(row.fee_ratio_basis_points || 0) });
+    const expectedRateBps = defaultExpectedRateBps(row.scope_key);
+    const observedRateBps = row.gross_paid_cents > 0 ? Math.round((Number(row.compared_amount_cents || 0) / Number(row.gross_paid_cents || 0)) * 10000) : 0;
+    const expectedFeeCents = expectedRateBps > 0 ? Math.round((Number(row.gross_paid_cents || 0) * expectedRateBps) / 10000) : 0;
+    row.reference_amount_cents = expectedFeeCents;
+    row.statement_amount_cents = expectedFeeCents;
+    row.difference_cents = expectedFeeCents - Number(row.compared_amount_cents || 0);
+    row.expected_rate_basis_points = expectedRateBps;
+    row.observed_rate_basis_points = observedRateBps;
+    row.tolerance_cents = 500;
+    row.unresolved_item_count = Math.abs(row.difference_cents) > row.tolerance_cents ? 1 : 0;
+    row.detail_json = toJson({ gross_paid_cents: row.gross_paid_cents, expected_fee_cents: expectedFeeCents, booked_fee_cents: row.compared_amount_cents, refund_cents: Number(row.refund_cents || 0), payment_count: Number(row.payment_count || 0), booked_expense_count: Number(row.booked_expense_count || 0), expected_rate_basis_points: expectedRateBps, observed_rate_basis_points: observedRateBps });
   }
   providerRows.sort((a, b) => String(a.scope_key).localeCompare(String(b.scope_key)));
   return { period_month: periodMonth, rows: providerRows };
@@ -236,7 +284,7 @@ async function loadShippingSummary(db, periodMonth) {
 
   if (hasOrders) {
     const shippingExpr = orderCols.has('shipping_cents') ? 'COALESCE(shipping_cents,0)' : (orderCols.has('shipping_amount') ? 'CAST(ROUND(COALESCE(shipping_amount,0) * 100.0) AS INTEGER)' : '0');
-    const statusCol = firstExisting(orderCols, ['order_status','status'], "''");
+    const statusCol = firstExisting(orderCols, ['order_status', 'status'], "''");
     const createdCol = firstExisting(orderCols, ['created_at'], "datetime('now')");
     const row = await db.prepare(`
       SELECT COALESCE(SUM(${shippingExpr}),0) AS shipping_charged_cents,
@@ -278,9 +326,13 @@ async function loadShippingSummary(db, periodMonth) {
       label: 'Shipping charged vs booked shipping costs',
       reference_amount_cents: charged,
       compared_amount_cents: booked,
+      statement_amount_cents: charged,
+      book_amount_cents: booked,
       difference_cents: charged - booked,
       fulfilled_order_count: fulfilledCount,
       shipping_expense_count: expenseCount,
+      tolerance_cents: 1000,
+      unresolved_item_count: Math.abs(charged - booked) > 1000 ? 1 : 0,
       detail_json: toJson({ shipping_charged_cents: charged, shipping_cost_cents: booked, fulfilled_order_count: fulfilledCount, shipping_expense_count: expenseCount }),
     }],
   };
@@ -308,8 +360,24 @@ export async function onRequestGet(context) {
   const computed = await loadSummaryByType(db, reconciliationType, periodMonth);
   const reviews = await listAccountingReconciliationReviews(db, { reconciliationType, periodMonth, includeAllPeriods: url.searchParams.get('all_periods') === '1' });
   const reviewMap = new Map(reviews.map((row) => [`${row.period_month}|${row.scope_key}`, row]));
-  const attachmentInfo = await attachmentCountByScope(db, { reconciliationType, periodMonth });
-  const rowsWithReviews = computed.rows.map((row) => ({ ...row, review: reviewMap.get(`${periodMonth}|${row.scope_key}`) || null }));
+  const attachmentInfo = await attachmentInfoByScope(db, { reconciliationType, periodMonth });
+  const rowsWithReviews = computed.rows.map((row) => {
+    const review = reviewMap.get(`${periodMonth}|${row.scope_key}`) || null;
+    const attachmentScope = attachmentInfo.by_scope[String(row.scope_key || 'all')] || attachmentInfo.by_scope.all || { count: 0, statement_count: 0, files: [] };
+    const detail = safeParseJson(review?.detail_json || row.detail_json || '{}', {});
+    return {
+      ...row,
+      review,
+      attachment_count: Number(review?.attachment_count || attachmentScope.count || 0),
+      statement_count: Number(attachmentScope.statement_count || 0),
+      expected_rate_basis_points: Number(review?.expected_rate_basis_points || row.expected_rate_basis_points || detail.expected_rate_basis_points || 0),
+      observed_rate_basis_points: Number(review?.observed_rate_basis_points || row.observed_rate_basis_points || detail.observed_rate_basis_points || 0),
+      statement_amount_cents: Number(review?.statement_amount_cents || row.statement_amount_cents || row.reference_amount_cents || 0),
+      book_amount_cents: Number(review?.book_amount_cents || row.book_amount_cents || row.compared_amount_cents || 0),
+      tolerance_cents: Number(review?.tolerance_cents || row.tolerance_cents || 0),
+      unresolved_item_count: Number(review?.unresolved_item_count || row.unresolved_item_count || 0),
+    };
+  });
   return jsonResponse({
     ok: true,
     type: reconciliationType,
@@ -322,6 +390,8 @@ export async function onRequestGet(context) {
       finalized_count: reviews.filter((row) => row.review_status === 'finalized').length,
       reviewed_count: reviews.filter((row) => row.review_status === 'reviewed' || row.review_status === 'finalized').length,
       attachment_count: attachmentInfo.count,
+      statement_reference_count: reviews.filter((row) => String(row.statement_reference || '').trim()).length,
+      unresolved_row_count: rowsWithReviews.filter((row) => Number(row.unresolved_item_count || 0) > 0 || Math.abs(Number(row.difference_cents || 0)) > Number(row.tolerance_cents || 0)).length,
     },
   });
 }
@@ -346,16 +416,24 @@ export async function onRequestPost(context) {
   const referenceAmountCents = Math.round(Number(body.reference_amount_cents || 0));
   const comparedAmountCents = Math.round(Number(body.compared_amount_cents || 0));
   const differenceCents = Math.round(Number(body.difference_cents || 0));
+  const statementAmountCents = Math.round(Number(body.statement_amount_cents || referenceAmountCents || 0));
+  const bookAmountCents = Math.round(Number(body.book_amount_cents || comparedAmountCents || 0));
+  const toleranceCents = Math.max(0, Math.round(Number(body.tolerance_cents || 0)));
+  const expectedRateBasisPoints = Math.max(0, Math.round(Number(body.expected_rate_basis_points || 0)));
+  const observedRateBasisPoints = Math.max(0, Math.round(Number(body.observed_rate_basis_points || 0)));
+  const unresolvedItemCount = Math.max(0, Math.round(Number(body.unresolved_item_count || 0)));
   const detailJson = typeof body.detail_json === 'string' ? body.detail_json : toJson(body.detail_json || {});
-  const attachmentCount = Number((await listAccountingAttachments(db, { reconciliationType, periodMonth, limit: 500 })).length || 0);
+  const attachmentCount = Number((await listAccountingAttachments(db, { reconciliationType, periodMonth, scopeKey, limit: 500 })).length || 0);
 
   await db.prepare(`
     INSERT INTO accounting_reconciliation_reviews (
       reconciliation_type, period_month, scope_key, review_status, note,
       statement_reference, difference_reason, detail_json, attachment_count,
+      statement_amount_cents, book_amount_cents, tolerance_cents,
+      expected_rate_basis_points, observed_rate_basis_points, unresolved_item_count,
       reference_amount_cents, compared_amount_cents, difference_cents,
       created_by_user_id, updated_by_user_id, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     ON CONFLICT(reconciliation_type, period_month, scope_key) DO UPDATE SET
       review_status = excluded.review_status,
       note = excluded.note,
@@ -363,6 +441,12 @@ export async function onRequestPost(context) {
       difference_reason = excluded.difference_reason,
       detail_json = excluded.detail_json,
       attachment_count = excluded.attachment_count,
+      statement_amount_cents = excluded.statement_amount_cents,
+      book_amount_cents = excluded.book_amount_cents,
+      tolerance_cents = excluded.tolerance_cents,
+      expected_rate_basis_points = excluded.expected_rate_basis_points,
+      observed_rate_basis_points = excluded.observed_rate_basis_points,
+      unresolved_item_count = excluded.unresolved_item_count,
       reference_amount_cents = excluded.reference_amount_cents,
       compared_amount_cents = excluded.compared_amount_cents,
       difference_cents = excluded.difference_cents,
@@ -371,6 +455,8 @@ export async function onRequestPost(context) {
   `).bind(
     reconciliationType, periodMonth, scopeKey, reviewStatus, note || null,
     statementReference || null, differenceReason || null, detailJson || null, attachmentCount,
+    statementAmountCents, bookAmountCents, toleranceCents,
+    expectedRateBasisPoints, observedRateBasisPoints, unresolvedItemCount,
     referenceAmountCents, comparedAmountCents, differenceCents,
     Number(adminUser.user_id || 0), Number(adminUser.user_id || 0)
   ).run();
@@ -379,7 +465,21 @@ export async function onRequestPost(context) {
     action_type: 'save_accounting_reconciliation_review',
     target_type: 'accounting_reconciliation_review',
     target_key: `${reconciliationType}:${periodMonth}:${scopeKey}`,
-    details: { reconciliation_type: reconciliationType, period_month: periodMonth, scope_key: scopeKey, review_status: reviewStatus, statement_reference: statementReference || null, difference_reason: differenceReason || null, attachment_count: attachmentCount },
+    details: {
+      reconciliation_type: reconciliationType,
+      period_month: periodMonth,
+      scope_key: scopeKey,
+      review_status: reviewStatus,
+      statement_reference: statementReference || null,
+      difference_reason: differenceReason || null,
+      attachment_count: attachmentCount,
+      statement_amount_cents: statementAmountCents,
+      book_amount_cents: bookAmountCents,
+      tolerance_cents: toleranceCents,
+      expected_rate_basis_points: expectedRateBasisPoints,
+      observed_rate_basis_points: observedRateBasisPoints,
+      unresolved_item_count: unresolvedItemCount,
+    },
   });
 
   return jsonResponse({ ok: true, reconciliation_type: reconciliationType, period_month: periodMonth, scope_key: scopeKey, attachment_count: attachmentCount });
