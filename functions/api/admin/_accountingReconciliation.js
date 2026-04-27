@@ -31,6 +31,10 @@ export async function ensureAccountingReconciliationReviewsTable(db) {
       scope_key TEXT NOT NULL DEFAULT 'all',
       review_status TEXT NOT NULL DEFAULT 'draft',
       note TEXT,
+      statement_reference TEXT,
+      difference_reason TEXT,
+      detail_json TEXT,
+      attachment_count INTEGER NOT NULL DEFAULT 0,
       reference_amount_cents INTEGER NOT NULL DEFAULT 0,
       compared_amount_cents INTEGER NOT NULL DEFAULT 0,
       difference_cents INTEGER NOT NULL DEFAULT 0,
@@ -41,6 +45,10 @@ export async function ensureAccountingReconciliationReviewsTable(db) {
       UNIQUE(reconciliation_type, period_month, scope_key)
     )
   `).run();
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_reference TEXT`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN difference_reason TEXT`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN detail_json TEXT`).run(); } catch {}
+  try { await db.prepare(`ALTER TABLE accounting_reconciliation_reviews ADD COLUMN attachment_count INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_reviews_type_period ON accounting_reconciliation_reviews(reconciliation_type, period_month DESC, review_status)`).run(); } catch {}
 }
 
@@ -50,7 +58,8 @@ export async function listAccountingReconciliationReviews(db, { reconciliationTy
   const period = periodMonth ? cleanPeriodMonth(periodMonth) : '';
   const result = await db.prepare(`
     SELECT accounting_reconciliation_review_id, reconciliation_type, period_month, scope_key, review_status,
-           note, reference_amount_cents, compared_amount_cents, difference_cents,
+           note, statement_reference, difference_reason, detail_json, attachment_count,
+           reference_amount_cents, compared_amount_cents, difference_cents,
            created_by_user_id, updated_by_user_id, created_at, updated_at
     FROM accounting_reconciliation_reviews
     WHERE reconciliation_type = ?
@@ -64,6 +73,10 @@ export async function listAccountingReconciliationReviews(db, { reconciliationTy
     scope_key: row.scope_key || 'all',
     review_status: cleanReconciliationStatus(row.review_status),
     note: row.note || '',
+    statement_reference: row.statement_reference || '',
+    difference_reason: row.difference_reason || '',
+    detail_json: row.detail_json || '',
+    attachment_count: Number(row.attachment_count || 0),
     reference_amount_cents: Number(row.reference_amount_cents || 0),
     compared_amount_cents: Number(row.compared_amount_cents || 0),
     difference_cents: Number(row.difference_cents || 0),

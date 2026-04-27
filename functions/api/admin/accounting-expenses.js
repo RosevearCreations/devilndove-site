@@ -2,6 +2,7 @@
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction, normalizeText } from "../_lib/adminAudit.js";
 import { assertAccountingPeriodOpen, monthFromDateish } from './_accountingPeriods.js';
 import { ensureAccountingVendorsTable, getAccountingVendorById } from './_accountingVendors.js';
+import { ensureAccountingAttachmentsTable } from './_accountingAttachments.js';
 
 function nr(result) {
   return Array.isArray(result?.results) ? result.results : [];
@@ -89,7 +90,11 @@ export async function onRequestGet(context) {
 
   try {
     await ensureAccountingVendorsTable(db);
+    await ensureAccountingAttachmentsTable(db);
     const cols = await ensureTable(db);
+    const attachmentExists = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='accounting_attachments' LIMIT 1`).first().catch(() => null);
+    const attachmentJoin = attachmentExists ? `LEFT JOIN (SELECT expense_id, COUNT(*) AS attachment_count FROM accounting_attachments GROUP BY expense_id) aa ON aa.expense_id = accounting_expenses.expense_id` : '';
+    const attachmentSelect = attachmentExists ? `COALESCE(aa.attachment_count,0) AS attachment_count,` : `0 AS attachment_count,`;
     const result = await db.prepare(`
       SELECT
         ${colExpr(cols, 'expense_id')},
@@ -104,9 +109,11 @@ export async function onRequestGet(context) {
         ${colExpr(cols, 'source_mode')},
         ${colExpr(cols, 'reference_number')},
         ${colExpr(cols, 'notes')},
+        ${attachmentSelect}
         ${colExpr(cols, 'created_at')},
         ${colExpr(cols, 'updated_at')}
       FROM accounting_expenses
+      ${attachmentJoin}
       ORDER BY COALESCE(expense_date, created_at, '1970-01-01') DESC, COALESCE(expense_id, 0) DESC
     `).all();
 

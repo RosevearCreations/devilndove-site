@@ -4,6 +4,8 @@ function normResults(result){ return Array.isArray(result?.results) ? result.res
 function cleanCategory(value){ const v=normalizeText(value).toLowerCase(); return ["income","expense","asset","liability","equity"].includes(v) ? v : "expense"; }
 function cleanBalance(value, fallback = 'debit'){ const v = normalizeText(value).toLowerCase(); return ['debit','credit'].includes(v) ? v : fallback; }
 function cleanSection(value){ const v = normalizeText(value).toLowerCase(); return ['income_statement','balance_sheet','retained_earnings','other'].includes(v) ? v : ''; }
+function cleanReviewState(value){ const v = normalizeText(value).toLowerCase(); return ['draft','reviewed','needs_accountant','finalized'].includes(v) ? v : 'draft'; }
+
 async function getTableColumnSet(db, tableName) {
   try {
     const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
@@ -59,6 +61,30 @@ async function ensureTable(db){
   }
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_category_sort ON general_ledger_accounts(category, sort_order, code)`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_gifi ON general_ledger_accounts(gifi_section, gifi_code, code)`).run(); } catch {}
+  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_review_state ON general_ledger_accounts(gifi_review_state, is_active, code)`).run(); } catch {}
+}
+
+async function loadSummary(db) {
+  const row = await db.prepare(`
+    SELECT
+      COUNT(*) AS total_count,
+      SUM(CASE WHEN COALESCE(is_active,1)=1 THEN 1 ELSE 0 END) AS active_count,
+      SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_code,'') <> '' AND COALESCE(gifi_label,'') <> '' AND COALESCE(gifi_section,'') <> '' THEN 1 ELSE 0 END) AS mapped_count,
+      SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_review_state,'draft') IN ('reviewed','finalized') THEN 1 ELSE 0 END) AS reviewed_count,
+      SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_review_state,'draft') = 'finalized' THEN 1 ELSE 0 END) AS finalized_count,
+      SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_code,'') = '' THEN 1 ELSE 0 END) AS unmapped_count,
+      SUM(CASE WHEN COALESCE(is_active,1)=1 AND COALESCE(gifi_review_state,'draft') = 'needs_accountant' THEN 1 ELSE 0 END) AS needs_accountant_count
+    FROM general_ledger_accounts
+  `).first().catch(() => null);
+  return {
+    total_count: Number(row?.total_count || 0),
+    active_count: Number(row?.active_count || 0),
+    mapped_count: Number(row?.mapped_count || 0),
+    reviewed_count: Number(row?.reviewed_count || 0),
+    finalized_count: Number(row?.finalized_count || 0),
+    unmapped_count: Number(row?.unmapped_count || 0),
+    needs_accountant_count: Number(row?.needs_accountant_count || 0),
+  };
 }
 
 export async function onRequestGet(context){
@@ -72,9 +98,9 @@ export async function onRequestGet(context){
            gifi_reviewed_by_user_id, gifi_reviewed_at,
            is_active, created_at, updated_at
     FROM general_ledger_accounts
-    ORDER BY category ASC, sort_order ASC, code ASC
+    ORDER BY COALESCE(is_active,1) DESC, category ASC, sort_order ASC, code ASC
   `).all();
-  return jsonResponse({ ok:true, accounts:normResults(result) });
+  return jsonResponse({ ok:true, accounts:normResults(result), summary: await loadSummary(db) });
 }
 
 export async function onRequestPost(context){
@@ -83,6 +109,32 @@ export async function onRequestPost(context){
   const db = getDb(context.env); if(!db) return jsonResponse({ok:false,error:"Database binding is not configured."},500);
   await ensureTable(db);
   let body={}; try{ body=await context.request.json(); }catch{}
+
+  const action = normalizeText(body.action).toLowerCase();
+  if (action === 'bulk_finalize_mapped' || action === 'bulk_mark_reviewed') {
+    const nextState = action === 'bulk_finalize_mapped' ? 'finalized' : 'reviewed';
+    const notePrefix = normalizeText(body.gifi_review_note) || (nextState === 'finalized' ? 'Reviewed mapping finalized in admin bulk pass.' : 'Reviewed mapping updated in admin bulk pass.');
+    const result = await db.prepare(`
+      UPDATE general_ledger_accounts
+      SET gifi_review_state = ?,
+          gifi_review_note = COALESCE(NULLIF(gifi_review_note,''), ?),
+          gifi_reviewed_by_user_id = ?,
+          gifi_reviewed_at = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE COALESCE(is_active,1) = 1
+        AND COALESCE(gifi_code,'') <> ''
+        AND COALESCE(gifi_label,'') <> ''
+        AND COALESCE(gifi_section,'') <> ''
+        AND COALESCE(gifi_review_state,'draft') != 'needs_accountant'
+    `).bind(nextState, notePrefix, Number(adminUser.user_id || 0)).run();
+    await auditAdminAction(context.env, context.request, adminUser, {
+      action_type: action,
+      target_type: 'general_ledger_account',
+      details: { review_state: nextState, changed_rows: Number(result?.meta?.changes || 0) }
+    });
+    return jsonResponse({ ok: true, action, changed_rows: Number(result?.meta?.changes || 0), summary: await loadSummary(db) });
+  }
+
   const code = normalizeText(body.code).toUpperCase();
   const name = normalizeText(body.name);
   const category = cleanCategory(body.category);
@@ -93,7 +145,7 @@ export async function onRequestPost(context){
   const gifi_label = normalizeText(body.gifi_label);
   const gifi_section = cleanSection(body.gifi_section) || (category === 'income' || category === 'expense' ? 'income_statement' : (category === 'asset' || category === 'liability' || category === 'equity' ? 'balance_sheet' : 'other'));
   const tax_deductibility_percent = Math.max(0, Math.min(100, Math.round(Number(body.tax_deductibility_percent == null || body.tax_deductibility_percent === '' ? 100 : body.tax_deductibility_percent))));
-  const gifi_review_state = ['draft','reviewed','needs_accountant','finalized'].includes(String(body.gifi_review_state || '').trim().toLowerCase()) ? String(body.gifi_review_state || '').trim().toLowerCase() : 'draft';
+  const gifi_review_state = cleanReviewState(body.gifi_review_state);
   const gifi_review_note = normalizeText(body.gifi_review_note);
   const is_active = Number(body.is_active == null || body.is_active === '' ? 1 : body.is_active) === 0 ? 0 : 1;
   const reviewActorId = ['reviewed', 'finalized'].includes(gifi_review_state) ? Number(adminUser.user_id || 0) : null;
@@ -126,5 +178,5 @@ export async function onRequestPost(context){
     action_type:"save_gl_account", target_type:"general_ledger_account", target_key:code,
     details:{ name, category, parent_group, normal_balance, sort_order, gifi_code, gifi_label, gifi_section, tax_deductibility_percent, gifi_review_state, gifi_review_note, is_active }
   });
-  return jsonResponse({ ok:true });
+  return jsonResponse({ ok:true, summary: await loadSummary(db) });
 }
