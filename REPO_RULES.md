@@ -373,3 +373,9 @@ Key implementation notes:
 ## Pass 99 rule reminder
 
 Continue treating schema drift as a blocking issue whenever runtime accounting code and SQL reference files disagree. In this pass, `accounting_journal_lines` and `general_ledger_accounts` were brought closer to the live code expectations, and all root markdown files were refreshed again for handoff continuity.
+
+## Pass note — 2026-04-25 accounting handoff step
+- Extended the slow T2/GIFI path with stronger GL review completion support, including reviewed/finalized starter mappings and bulk review/finalize actions for mapped active accounts.
+- Added accounting attachments for bills, receipts, statements, and workpapers so files can be tied to vendors, expenses, reconciliation periods, and year-end handoff bundles.
+- Deepened reconciliation storage with statement references, difference reasons, detail JSON, and attachment counts for sales tax, processor fees, and shipping reviews.
+- Expanded the year-end close bundle so the accountant handoff now includes GL review summary, attachment coverage, reconciliation coverage, and missing-item prompts.

@@ -184,3 +184,9 @@ Patterns now being implemented from handmade/crafter commerce review:
 - keep maker/process/workshop context visible instead of only using generic catalog copy
 - keep first-image quality strong while requiring at least one contextual/detail/process shot in fuller galleries
 - keep collection/style/theme browsing visible so shoppers do not start from a blank grid every visit
+
+## Pass note — 2026-04-25 accounting handoff step
+- Extended the slow T2/GIFI path with stronger GL review completion support, including reviewed/finalized starter mappings and bulk review/finalize actions for mapped active accounts.
+- Added accounting attachments for bills, receipts, statements, and workpapers so files can be tied to vendors, expenses, reconciliation periods, and year-end handoff bundles.
+- Deepened reconciliation storage with statement references, difference reasons, detail JSON, and attachment counts for sales tax, processor fees, and shipping reviews.
+- Expanded the year-end close bundle so the accountant handoff now includes GL review summary, attachment coverage, reconciliation coverage, and missing-item prompts.

@@ -684,3 +684,34 @@ CREATE TABLE IF NOT EXISTS accounting_reconciliation_reviews (
   UNIQUE(reconciliation_type, period_month, scope_key)
 );
 CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_reviews_type_period ON accounting_reconciliation_reviews(reconciliation_type, period_month DESC, review_status);
+
+
+-- Current pass: accounting attachments and reconciliation detail metadata
+CREATE TABLE IF NOT EXISTS accounting_attachments (
+  accounting_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  attachment_kind TEXT NOT NULL DEFAULT 'other',
+  storage_provider TEXT NOT NULL DEFAULT 'r2',
+  bucket_name TEXT,
+  object_key TEXT NOT NULL UNIQUE,
+  public_url TEXT,
+  original_filename TEXT,
+  mime_type TEXT,
+  file_size_bytes INTEGER NOT NULL DEFAULT 0,
+  expense_id INTEGER,
+  vendor_id INTEGER,
+  reconciliation_type TEXT,
+  period_month TEXT,
+  tax_year TEXT,
+  statement_reference TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_attachments_expense ON accounting_attachments(expense_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_accounting_attachments_vendor ON accounting_attachments(vendor_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_accounting_attachments_period ON accounting_attachments(period_month, tax_year, reconciliation_type, attachment_kind);
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_reference TEXT;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN difference_reason TEXT;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN detail_json TEXT;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN attachment_count INTEGER NOT NULL DEFAULT 0;

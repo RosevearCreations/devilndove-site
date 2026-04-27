@@ -495,3 +495,9 @@ Key storefront files touched in this pass:
 - `/public/js/shop.js`
 - `/public/js/product-detail.js`
 - `/public/js/cart-page.js`
+
+## Pass note — 2026-04-25 accounting handoff step
+- Extended the slow T2/GIFI path with stronger GL review completion support, including reviewed/finalized starter mappings and bulk review/finalize actions for mapped active accounts.
+- Added accounting attachments for bills, receipts, statements, and workpapers so files can be tied to vendors, expenses, reconciliation periods, and year-end handoff bundles.
+- Deepened reconciliation storage with statement references, difference reasons, detail JSON, and attachment counts for sales tax, processor fees, and shipping reviews.
+- Expanded the year-end close bundle so the accountant handoff now includes GL review summary, attachment coverage, reconciliation coverage, and missing-item prompts.

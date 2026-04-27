@@ -491,3 +491,9 @@ Key implementation notes:
 This pass adds early accountant-review and close-control groundwork without pretending the system is fully T2/GIFI complete yet. The build now includes year-level GIFI review notes, Schedule 141 support notes, month lock and reopen controls, and locked-period enforcement on expense, write-off, product-cost, and overhead allocation saves.
 
 Storefront work in the same pass keeps trust and policy notes closer to shop, product, and cart views while product readiness continues to require stronger image mix quality.
+
+## Pass note — 2026-04-25 accounting handoff step
+- Extended the slow T2/GIFI path with stronger GL review completion support, including reviewed/finalized starter mappings and bulk review/finalize actions for mapped active accounts.
+- Added accounting attachments for bills, receipts, statements, and workpapers so files can be tied to vendors, expenses, reconciliation periods, and year-end handoff bundles.
+- Deepened reconciliation storage with statement references, difference reasons, detail JSON, and attachment counts for sales tax, processor fees, and shipping reviews.
+- Expanded the year-end close bundle so the accountant handoff now includes GL review summary, attachment coverage, reconciliation coverage, and missing-item prompts.

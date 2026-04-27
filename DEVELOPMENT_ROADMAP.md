@@ -568,3 +568,9 @@ Best next steps from here:
 8. add local pickup / event / market pages and storefront messaging
 9. add review request automation rules after fulfilled orders
 10. keep tightening publish gates for image mix, price, SEO, and trust content
+
+## Pass note — 2026-04-25 accounting handoff step
+- Extended the slow T2/GIFI path with stronger GL review completion support, including reviewed/finalized starter mappings and bulk review/finalize actions for mapped active accounts.
+- Added accounting attachments for bills, receipts, statements, and workpapers so files can be tied to vendors, expenses, reconciliation periods, and year-end handoff bundles.
+- Deepened reconciliation storage with statement references, difference reasons, detail JSON, and attachment counts for sales tax, processor fees, and shipping reviews.
+- Expanded the year-end close bundle so the accountant handoff now includes GL review summary, attachment coverage, reconciliation coverage, and missing-item prompts.

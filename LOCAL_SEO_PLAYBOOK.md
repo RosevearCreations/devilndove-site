@@ -315,3 +315,9 @@ Key implementation notes:
 ## Pass 99 local SEO alignment
 
 This pass keeps the one-H1 rule intact on exposed pages and continues moving trust/support language closer to product and cart decision points. For local relevance, the next content pass should keep adding Ontario-facing wording where appropriate, plus pickup/event/market pages and clearer service-area / workshop-story context.
+
+## Pass note — 2026-04-25 accounting handoff step
+- Extended the slow T2/GIFI path with stronger GL review completion support, including reviewed/finalized starter mappings and bulk review/finalize actions for mapped active accounts.
+- Added accounting attachments for bills, receipts, statements, and workpapers so files can be tied to vendors, expenses, reconciliation periods, and year-end handoff bundles.
+- Deepened reconciliation storage with statement references, difference reasons, detail JSON, and attachment counts for sales tax, processor fees, and shipping reviews.
+- Expanded the year-end close bundle so the accountant handoff now includes GL review summary, attachment coverage, reconciliation coverage, and missing-item prompts.

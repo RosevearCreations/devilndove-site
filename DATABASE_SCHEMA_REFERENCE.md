@@ -617,3 +617,9 @@ Journal schema correction:
 
 ### Legacy schema drift still noted
 A broader repo-level sanity sweep also found older bootstrap/runtime tables that still appear in legacy setup code but are not yet fully represented in the core schema reference set, including legacy/member/content tables such as `members`, `member_sessions`, `newsletter_subscribers`, `blog_posts`, `blog_comments`, `creations`, `project_updates`, `comments`, `inventory_items`, `inventory_usage`, `store_products`, and several customer-engagement tables. These were noted for a slower follow-up normalization pass rather than being forced into the accounting-focused schema update in this pass.
+
+## Pass note — 2026-04-25 accounting handoff step
+- Extended the slow T2/GIFI path with stronger GL review completion support, including reviewed/finalized starter mappings and bulk review/finalize actions for mapped active accounts.
+- Added accounting attachments for bills, receipts, statements, and workpapers so files can be tied to vendors, expenses, reconciliation periods, and year-end handoff bundles.
+- Deepened reconciliation storage with statement references, difference reasons, detail JSON, and attachment counts for sales tax, processor fees, and shipping reviews.
+- Expanded the year-end close bundle so the accountant handoff now includes GL review summary, attachment coverage, reconciliation coverage, and missing-item prompts.
