@@ -9,3 +9,5 @@ Use these starter templates to seed the accounting backend with general ledger a
 
 - `accounting_overhead_allocations.csv` — starter monthly overhead allocations used for rough P&L and later product-cost allocation.
 - The current pass also treats electricity, gas, internet, phone, insurance, software, and rent allocation as first-class monthly shortcuts in the admin accounting UI so recurring T2-style overhead capture is faster.
+
+- `general_ledger_accounts.csv` now also carries starter review fields: `gifi_review_state` and `gifi_review_note`, including a reviewed/finalized starter mapping for common Devil n Dove accounts.
