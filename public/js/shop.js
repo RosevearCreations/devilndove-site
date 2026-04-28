@@ -38,6 +38,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     try { return (JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '{}') || {})[key] || null; }
     catch { return null; }
   }
+  function applyFiltersFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const map = [
+      ['origin', 'shopOriginFilter'], ['merchandise_origin', 'shopOriginFilter'],
+      ['channel', 'shopChannelFilter'], ['sale_channel', 'shopChannelFilter'],
+      ['type', 'shopTypeFilter'], ['product_type', 'shopTypeFilter'],
+      ['q', 'shopSearchInput'], ['min_price_cents', 'shopMinPrice'], ['max_price_cents', 'shopMaxPrice']
+    ];
+    map.forEach(([param, id]) => {
+      const value = params.get(param);
+      const el = document.getElementById(id);
+      if (value != null && el) el.value = value;
+    });
+    const shipping = params.get('requires_shipping');
+    const shipEl = document.getElementById('shopShippingOnly');
+    if (shipEl && shipping) shipEl.checked = shipping === '1' || shipping === 'true';
+  }
+
+  function writeFiltersToUrl() {
+    const params = new URLSearchParams();
+    const filters = readFilters();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    const next = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+    window.history.replaceState({}, '', next);
+  }
+
   function readFilters() {
     return {
       q: String(document.getElementById('shopSearchInput')?.value || '').trim(),
@@ -66,10 +92,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       collectionsEl.innerHTML = '';
       return;
     }
+    const originCards = [
+      { key: 'handmade', title: 'Handmade collection', copy: 'Finished jewelry, artwork, and workshop-made pieces that come directly from the Devil n Dove bench.' },
+      { key: 'vintage', title: 'Vintage & antique finds', copy: 'Older pieces, found items, and aged stock where provenance, wear, and condition notes matter.' },
+      { key: 'collectible', title: 'Collectibles & oddities', copy: 'Curious objects, tools, display pieces, and unusual stock that may also link out to marketplace listings.' },
+      { key: 'prebuilt', title: 'Pre-built / found items', copy: 'Not workshop-made, but still part of the Devil n Dove catalog when they fit the shop story.' },
+    ];
     collectionsEl.innerHTML = `
       <section class="card">
         <h2 style="margin-top:0">Browse by collection direction</h2>
-        <p class="small" style="margin-top:0">This helps move the shop toward better collection-style landing sections by material, style, theme, colour, and item type instead of making every visit start with a blank search.</p>
+        <p class="small" style="margin-top:0">This helps move the shop toward clearer collection-style landing sections for handmade work, vintage stock, collectibles, oddities, and external-listing inventory instead of making every visit start with a blank search.</p>
+        <div class="customer-welcome-grid" style="margin-top:12px">
+          ${originCards.map((card) => `<div class="card" style="margin:0;background:#fffaf6"><strong>${escapeHtml(card.title)}</strong><p class="small" style="margin:8px 0">${escapeHtml(card.copy)}</p><button class="btn" type="button" data-origin-collection="${escapeHtml(card.key)}">Browse ${escapeHtml(card.key)}</button></div>`).join('')}
+        </div>
         <div class="customer-welcome-grid" style="margin-top:12px">
           <div><strong>Categories</strong><div class="small" style="margin-top:8px">${categories.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No categories yet.'}</div></div>
           <div><strong>Colours / themes</strong><div class="small" style="margin-top:8px">${colors.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No colour groups yet.'}</div></div>
@@ -78,6 +113,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div><strong>Sale channels</strong><div class="small" style="margin-top:8px">${channels.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No channel groups yet.'}</div></div>
         </div>
       </section>`;
+    collectionsEl.querySelectorAll('[data-origin-collection]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const value = String(button.getAttribute('data-origin-collection') || '');
+        const originEl = document.getElementById('shopOriginFilter');
+        if (originEl) originEl.value = value;
+        loadProducts();
+      });
+    });
   }
   function renderPolicyFaq() {
     if (!policyEl) return;
@@ -110,6 +153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const originBadge = `<div class="small" style="margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill">${origin}</span><span class="pill">${saleChannel}</span>${product.era_label ? `<span class="pill">${escapeHtml(product.era_label)}</span>` : ''}</div>`;
       const imageMarkup = imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${imageAlt}" style="width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:12px;margin-bottom:12px" />`
         : `<div style="width:100%;aspect-ratio:1 / 1;border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd" class="small">No Image</div>`;
+      const originLink = `/shop/?merchandise_origin=${encodeURIComponent(product.merchandise_origin || '')}`;
       const ctaMarkup = externalUrl
         ? `<a class="btn" href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">${externalLabel}</a>${product.sale_channel === 'hybrid' ? `<button class="btn" type="button" data-add-shop-cart-id="${productId}">Add to Cart</button>` : ''}`
         : `<button class="btn" type="button" data-add-shop-cart-id="${productId}">Add to Cart</button>`;
@@ -125,6 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="small" style="margin-top:8px">${product.requires_shipping ? 'Shipping / pickup item' : 'Digital or no-shipping item'}${product.product_category ? ` • ${escapeHtml(product.product_category)}` : ''}${product.condition_summary ? ` • ${escapeHtml(product.condition_summary)}` : ''}</div>
           <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
             <a class="btn" href="/shop/product/?slug=${slug}">View</a>
+            <a class="btn" href="${originLink}">More like this</a>
             ${ctaMarkup}
           </div>
         </article>`;
@@ -175,6 +220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       try { data = JSON.parse(rawText); } catch { throw new Error('Store data returned invalid JSON.'); }
       if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load products.');
       renderPayload(data);
+      writeFiltersToUrl();
       saveSnapshot(url, { data });
     } catch (error) {
       const cached = loadSnapshot(url);
@@ -192,5 +238,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     ['shopSearchInput','shopTypeFilter','shopOriginFilter','shopChannelFilter','shopMinPrice','shopMaxPrice'].forEach((id) => { const el=document.getElementById(id); if (el) el.value=''; });
     const ship=document.getElementById('shopShippingOnly'); if (ship) ship.checked=false; loadProducts();
   });
+  applyFiltersFromUrl();
   await loadProducts();
 });
