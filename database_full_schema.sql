@@ -1327,8 +1327,10 @@ CREATE TABLE IF NOT EXISTS accounting_attachments (
   accounting_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT,
   attachment_kind TEXT NOT NULL DEFAULT 'other',
   attachment_status TEXT NOT NULL DEFAULT 'uploaded',
+  attachment_scope TEXT NOT NULL DEFAULT 'other',
   document_date TEXT,
   scope_key TEXT,
+  provider_scope TEXT,
   storage_provider TEXT NOT NULL DEFAULT 'r2',
   bucket_name TEXT,
   object_key TEXT NOT NULL UNIQUE,
@@ -1342,6 +1344,15 @@ CREATE TABLE IF NOT EXISTS accounting_attachments (
   period_month TEXT,
   tax_year TEXT,
   statement_reference TEXT,
+  statement_gross_cents INTEGER NOT NULL DEFAULT 0,
+  statement_fee_cents INTEGER NOT NULL DEFAULT 0,
+  statement_net_cents INTEGER NOT NULL DEFAULT 0,
+  statement_tax_cents INTEGER NOT NULL DEFAULT 0,
+  statement_shipping_cents INTEGER NOT NULL DEFAULT 0,
+  statement_txn_count INTEGER NOT NULL DEFAULT 0,
+  statement_period_start TEXT,
+  statement_period_end TEXT,
+  statement_detail_json TEXT,
   notes TEXT,
   created_by_user_id INTEGER,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1365,3 +1376,16 @@ ALTER TABLE accounting_reconciliation_reviews ADD COLUMN tolerance_cents INTEGER
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN expected_rate_basis_points INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN observed_rate_basis_points INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN unresolved_item_count INTEGER NOT NULL DEFAULT 0;
+
+-- Current pass additions for statement-backed accounting attachments
+ALTER TABLE accounting_attachments ADD COLUMN attachment_scope TEXT NOT NULL DEFAULT 'other';
+ALTER TABLE accounting_attachments ADD COLUMN provider_scope TEXT;
+ALTER TABLE accounting_attachments ADD COLUMN statement_gross_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_attachments ADD COLUMN statement_fee_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_attachments ADD COLUMN statement_net_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_attachments ADD COLUMN statement_tax_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_attachments ADD COLUMN statement_shipping_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_attachments ADD COLUMN statement_txn_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_attachments ADD COLUMN statement_period_start TEXT;
+ALTER TABLE accounting_attachments ADD COLUMN statement_period_end TEXT;
+ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT;

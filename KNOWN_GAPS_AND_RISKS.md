@@ -845,3 +845,8 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 - The year-end close bundle is now more accountant-handoff-friendly and supports CSV export, but it is still not a final T2 filing export.
 - External marketplace-linked items still rely on staff to keep price, availability, and condition notes synchronized across channels.
 - Existing databases need the current-pass product column migration for merchandise origin / sale channel / external listing metadata before every admin/storefront view can use the new collectible workflow cleanly.
+
+
+## Fresh pass notes
+- attachment uploads now support statement metrics, but existing older attachments will not have those fields until re-uploaded or updated
+- deeper provider-statement reconciliation still depends on real monthly statement files being uploaded with provider scope and totals

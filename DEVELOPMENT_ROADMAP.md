@@ -588,3 +588,10 @@ Best next steps from here:
 - Added sale-channel support so a product can stay on-site, be external-only, or be hybrid with a Facebook Marketplace or other external listing link.
 - Best next step after this pass: add dedicated collection landing sections for handmade vs vintage/collectible stock and extend the About / Creations trust story with sourcing, provenance, and condition guidance.
 - Accounting next step still remains receipts / statements / workpaper coverage refinement plus deeper reconciliation against real provider statements before any claim of full T2-ready export.
+
+
+## Current pass added
+- statement-backed accounting attachments with gross/fee/net/tax/shipping/txn fields
+- reconciliation rows now compare booked amounts against actual statement attachment totals where available
+- more visible collection-direction browse sections for handmade vs vintage/collectible stock
+- stronger About and Creations trust copy around sourcing, provenance, condition, and sales-channel clarity

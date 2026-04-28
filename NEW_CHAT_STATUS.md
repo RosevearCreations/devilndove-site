@@ -437,3 +437,7 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 - Added sale-channel handling for on-site, hybrid, and external-only listings, including external listing URL/label support for Facebook Marketplace or similar channels.
 - Storefront shop and product views now surface origin/channel/provenance-style details and suppress on-site cart checkout for external-only items.
 - Year-end close bundle now supports CSV export and scope-aware attachment/reconciliation summaries for accountant handoff.
+
+
+## Latest pass summary
+This pass refined receipt/statement/workpaper coverage, added statement-backed reconciliation detail, made the shop browse path more visibly split between handmade and vintage/collectible stock, and expanded About/Creations trust copy around provenance, condition, and sales channels.
