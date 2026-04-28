@@ -581,3 +581,10 @@ Best next steps from here:
 - deepened reconciliation storage for statement/book amounts, tolerances, expected versus observed rates, and unresolved item counts
 - expanded the year-end close bundle so accountant handoff now summarizes GL blockers, reconciliation coverage, attachment coverage by kind/month, and missing support items
 
+
+
+## Current pass addition: handmade + vintage + collectible catalog split
+- Added a safer product path for handmade work, vintage finds, collectibles, antiquities, oddities, and other pre-built stock.
+- Added sale-channel support so a product can stay on-site, be external-only, or be hybrid with a Facebook Marketplace or other external listing link.
+- Best next step after this pass: add dedicated collection landing sections for handmade vs vintage/collectible stock and extend the About / Creations trust story with sourcing, provenance, and condition guidance.
+- Accounting next step still remains receipts / statements / workpaper coverage refinement plus deeper reconciliation against real provider statements before any claim of full T2-ready export.

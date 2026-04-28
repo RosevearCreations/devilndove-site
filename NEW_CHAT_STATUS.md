@@ -430,3 +430,10 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 - deepened reconciliation storage for statement/book amounts, tolerances, expected versus observed rates, and unresolved item counts
 - expanded the year-end close bundle so accountant handoff now summarizes GL blockers, reconciliation coverage, attachment coverage by kind/month, and missing support items
 
+
+
+## Latest pass summary
+- Added collectible / vintage / antique / oddity / pre-built product support alongside handmade catalog entries.
+- Added sale-channel handling for on-site, hybrid, and external-only listings, including external listing URL/label support for Facebook Marketplace or similar channels.
+- Storefront shop and product views now surface origin/channel/provenance-style details and suppress on-site cart checkout for external-only items.
+- Year-end close bundle now supports CSV export and scope-aware attachment/reconciliation summaries for accountant handoff.

@@ -600,3 +600,7 @@ This pass extends the accounting backend toward T2/GIFI preparation with review-
 - deepened reconciliation storage for statement/book amounts, tolerances, expected versus observed rates, and unresolved item counts
 - expanded the year-end close bundle so accountant handoff now summarizes GL blockers, reconciliation coverage, attachment coverage by kind/month, and missing support items
 
+
+
+## Current pass highlight
+Devil n Dove now supports both workshop-made products and pre-built collectible/vintage stock in the same catalog, with optional external marketplace links for hybrid or external-only listings. The accounting year-end close bundle also now supports CSV export for a cleaner accountant handoff.

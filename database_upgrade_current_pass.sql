@@ -1,3 +1,5 @@
+-- Current pass note: collectible / vintage / external-listing catalog support now lets Devil n Dove sell handmade work alongside pre-built finds, antiquities, oddities, and marketplace-linked items.
+-- Current pass note: year-end close export now includes CSV output plus scope-aware attachment and reconciliation summaries for accountant handoff.
 -- Current pass note: accounting review now adds starter GL finalize helpers, richer attachment metadata, deeper reconciliation review detail, and a more accountant-ready year-end close bundle.
 -- Current pass note: accounting now adds explicit GIFI staging fields on general_ledger_accounts, a live DB sanity route, and schema alignment for accounting_journal_entries/accounting_journal_lines.
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
@@ -137,10 +139,18 @@ ALTER TABLE products ADD COLUMN capture_created_by_user_id INTEGER;
 ALTER TABLE products ADD COLUMN capture_updated_by_user_id INTEGER;
 ALTER TABLE products ADD COLUMN capture_entry_started_at TEXT;
 ALTER TABLE products ADD COLUMN capture_last_saved_at TEXT;
+ALTER TABLE products ADD COLUMN merchandise_origin TEXT NOT NULL DEFAULT 'handmade';
+ALTER TABLE products ADD COLUMN sale_channel TEXT NOT NULL DEFAULT 'onsite';
+ALTER TABLE products ADD COLUMN external_listing_url TEXT;
+ALTER TABLE products ADD COLUMN external_listing_label TEXT;
+ALTER TABLE products ADD COLUMN condition_summary TEXT;
+ALTER TABLE products ADD COLUMN era_label TEXT;
+ALTER TABLE products ADD COLUMN sourcing_notes TEXT;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_products_product_number ON products(product_number);
 CREATE INDEX IF NOT EXISTS idx_products_capture_last_saved_at ON products(capture_last_saved_at DESC);
 CREATE INDEX IF NOT EXISTS idx_products_capture_updated_by ON products(capture_updated_by_user_id, capture_last_saved_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_origin_channel ON products(merchandise_origin, sale_channel, status, review_status);
 
 UPDATE products
 SET review_status = CASE

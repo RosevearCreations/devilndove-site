@@ -839,3 +839,9 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 - deepened reconciliation storage for statement/book amounts, tolerances, expected versus observed rates, and unresolved item counts
 - expanded the year-end close bundle so accountant handoff now summarizes GL blockers, reconciliation coverage, attachment coverage by kind/month, and missing support items
 
+
+
+## Current pass known gaps
+- The year-end close bundle is now more accountant-handoff-friendly and supports CSV export, but it is still not a final T2 filing export.
+- External marketplace-linked items still rely on staff to keep price, availability, and condition notes synchronized across channels.
+- Existing databases need the current-pass product column migration for merchandise origin / sale channel / external listing metadata before every admin/storefront view can use the new collectible workflow cleanly.

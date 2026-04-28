@@ -465,3 +465,9 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 - deepened reconciliation storage for statement/book amounts, tolerances, expected versus observed rates, and unresolved item counts
 - expanded the year-end close bundle so accountant handoff now summarizes GL blockers, reconciliation coverage, attachment coverage by kind/month, and missing support items
 
+
+
+## Current pass sanity note
+- Product catalog code now expects merchandise origin / sale channel / external listing metadata on products.
+- Year-end close API now supports both JSON and CSV export.
+- Live DB sanity should confirm the new product columns exist before relying on collectible / marketplace-linked listings in production.

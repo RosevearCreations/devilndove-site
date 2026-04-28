@@ -180,6 +180,13 @@ CREATE TABLE IF NOT EXISTS products (
   inventory_quantity INTEGER NOT NULL DEFAULT 0,
   digital_file_url TEXT,
   featured_image_url TEXT,
+  merchandise_origin TEXT NOT NULL DEFAULT 'handmade' CHECK (merchandise_origin IN ('handmade','vintage','collectible','antique','oddity','prebuilt')),
+  sale_channel TEXT NOT NULL DEFAULT 'onsite' CHECK (sale_channel IN ('onsite','external_only','hybrid')),
+  external_listing_url TEXT,
+  external_listing_label TEXT,
+  condition_summary TEXT,
+  era_label TEXT,
+  sourcing_notes TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
   capture_entry_mode TEXT NOT NULL DEFAULT 'full' CHECK (capture_entry_mode IN ('full','wizard')),
   capture_created_by_user_id INTEGER,
@@ -194,6 +201,7 @@ CREATE TABLE IF NOT EXISTS products (
 );
 CREATE INDEX IF NOT EXISTS idx_products_capture_last_saved_at ON products(capture_last_saved_at DESC);
 CREATE INDEX IF NOT EXISTS idx_products_capture_updated_by ON products(capture_updated_by_user_id, capture_last_saved_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_origin_channel ON products(merchandise_origin, sale_channel, status, review_status);
 
 CREATE TABLE IF NOT EXISTS product_images (
   product_image_id INTEGER PRIMARY KEY AUTOINCREMENT,

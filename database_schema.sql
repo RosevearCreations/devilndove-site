@@ -1,3 +1,5 @@
+
+-- Current pass reference note: products now also support merchandise_origin, sale_channel, external_listing_url, external_listing_label, condition_summary, era_label, and sourcing_notes so handmade, vintage, collectible, antique, oddity, and pre-built items can share the same catalog safely.
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
 -- Current pass note: phone-first finished-product entry now supports a lightweight wizard mode plus capture metadata for same-day draft review and safer bulk cleanup.
 -- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.

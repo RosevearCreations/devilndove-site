@@ -630,3 +630,16 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 - deepened reconciliation storage for statement/book amounts, tolerances, expected versus observed rates, and unresolved item counts
 - expanded the year-end close bundle so accountant handoff now summarizes GL blockers, reconciliation coverage, attachment coverage by kind/month, and missing support items
 
+
+
+## Current pass schema additions
+### products
+- `merchandise_origin` — handmade / vintage / collectible / antique / oddity / prebuilt
+- `sale_channel` — onsite / external_only / hybrid
+- `external_listing_url`
+- `external_listing_label`
+- `condition_summary`
+- `era_label`
+- `sourcing_notes`
+
+These fields support Devil n Dove selling both handmade work and pre-built collectible/vintage stock from the same catalog while allowing external marketplace links.
