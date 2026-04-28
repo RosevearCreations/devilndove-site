@@ -44,6 +44,52 @@ function summarizeBy(items, keyFn) {
   return out;
 }
 
+function csvEscape(value) {
+  const text = String(value == null ? '' : value);
+  if (/["\n,]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+  return text;
+}
+
+function flattenYearEndCsvRows(bundle) {
+  const rows = [];
+  const push = (section, groupKey, itemKey, value, notes = '') => rows.push({ section, group_key: groupKey, item_key: itemKey, value, notes });
+  const checklist = bundle?.checklist || {};
+  Object.entries(checklist).forEach(([key, value]) => push('checklist', 'summary', key, value));
+
+  const handoff = bundle?.accountant_handoff || {};
+  const gl = handoff.gl_review_summary || {};
+  Object.entries(gl).forEach(([key, value]) => push('gl_review_summary', 'gl', key, value));
+
+  const attachmentSummary = handoff.attachment_summary || {};
+  for (const [group, values] of Object.entries({
+    by_kind: attachmentSummary.by_kind || {},
+    by_status: attachmentSummary.by_status || {},
+    by_month: attachmentSummary.by_month || {},
+    by_scope: attachmentSummary.by_scope || {}
+  })) {
+    Object.entries(values).forEach(([key, value]) => push('attachment_summary', group, key, value));
+  }
+  (attachmentSummary.coverage_gaps || []).forEach((item, index) => push('attachment_gaps', 'gap', String(index + 1), item));
+
+  const reconciliationSummary = handoff.reconciliation_summary || {};
+  for (const [group, values] of Object.entries({
+    by_type: reconciliationSummary.by_type || {},
+    by_status: reconciliationSummary.by_status || {},
+    by_scope: reconciliationSummary.by_scope || {}
+  })) {
+    Object.entries(values).forEach(([key, value]) => push('reconciliation_summary', group, key, value));
+  }
+  Object.entries(reconciliationSummary.matrix_by_month || {}).forEach(([month, monthRows]) => {
+    Object.entries(monthRows || {}).forEach(([kind, detail]) => push('reconciliation_matrix', month, kind, detail?.difference_cents ?? '', JSON.stringify(detail || {})));
+  });
+
+  (handoff.gl_final_blockers || []).forEach((row) => push('gl_blockers', row.blocker_type || 'needs_review', row.code || '', row.gifi_review_state || '', row.name || ''));
+  (handoff.recommended_missing_items || []).forEach((item, index) => push('recommended_missing_items', 'missing', String(index + 1), item));
+  (handoff.handoff_export_checklist || []).forEach((item, index) => push('handoff_export_checklist', 'export', String(index + 1), item));
+  (bundle.notes || []).forEach((item, index) => push('notes', 'bundle', String(index + 1), item));
+  return rows;
+}
+
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
@@ -100,6 +146,7 @@ export async function onRequestGet(context) {
   const attachmentKinds = summarizeBy(attachments, (row) => row.attachment_kind || 'other');
   const attachmentStatus = summarizeBy(attachments, (row) => row.attachment_status || 'uploaded');
   const attachmentByMonth = summarizeBy(attachments, (row) => row.period_month || (row.document_date || '').slice(0, 7) || 'unassigned');
+  const attachmentByScope = summarizeBy(attachments, (row) => row.scope_key || 'all');
   const attachmentGaps = [];
   for (let month = 1; month <= 12; month += 1) {
     const label = `${range.year}-${String(month).padStart(2, '0')}`;
@@ -111,6 +158,7 @@ export async function onRequestGet(context) {
 
   const reconciliationByType = summarizeBy(reconciliationReviews, (row) => row.reconciliation_type || 'other');
   const reconciliationByStatus = summarizeBy(reconciliationReviews, (row) => row.review_status || 'draft');
+  const reconciliationByScope = summarizeBy(reconciliationReviews, (row) => row.scope_key || 'all');
   const reconciliationMatrix = {};
   for (const row of reconciliationReviews) {
     const month = row.period_month || 'unassigned';
@@ -168,12 +216,14 @@ export async function onRequestGet(context) {
         by_kind: attachmentKinds,
         by_status: attachmentStatus,
         by_month: attachmentByMonth,
+        by_scope: attachmentByScope,
         coverage_gaps: attachmentGaps,
       },
       reconciliation_summary: {
         total_review_count: reconciliationReviews.length,
         by_type: reconciliationByType,
         by_status: reconciliationByStatus,
+        by_scope: reconciliationByScope,
         matrix_by_month: reconciliationMatrix,
       },
       recommended_missing_items: recommendedMissingItems,
@@ -196,11 +246,27 @@ export async function onRequestGet(context) {
     ],
   };
 
-  if ((url.searchParams.get('format') || '').toLowerCase() === 'json') {
+  const format = (url.searchParams.get('format') || '').toLowerCase();
+
+  if (format === 'json') {
     return new Response(JSON.stringify(bundle, null, 2), {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         'Content-Disposition': `attachment; filename="devilndove-year-end-close-${range.year}.json"`,
+      },
+    });
+  }
+
+  if (format === 'csv') {
+    const rows = flattenYearEndCsvRows(bundle);
+    const lines = ['section,group_key,item_key,value,notes'];
+    for (const row of rows) {
+      lines.push([row.section, row.group_key, row.item_key, row.value, row.notes].map(csvEscape).join(','));
+    }
+    return new Response(lines.join('\n'), {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="devilndove-year-end-close-${range.year}.csv"`,
       },
     });
   }
