@@ -59,6 +59,13 @@ export async function onRequestGet(context) {
   const supportsColorName = productColumns.has('color_name');
   const supportsShippingCode = productColumns.has('shipping_code');
   const supportsReviewStatus = productColumns.has('review_status');
+  const supportsMerchandiseOrigin = productColumns.has('merchandise_origin');
+  const supportsSaleChannel = productColumns.has('sale_channel');
+  const supportsExternalListingUrl = productColumns.has('external_listing_url');
+  const supportsExternalListingLabel = productColumns.has('external_listing_label');
+  const supportsConditionSummary = productColumns.has('condition_summary');
+  const supportsEraLabel = productColumns.has('era_label');
+  const supportsSourcingNotes = productColumns.has('sourcing_notes');
   const resourceColumns = await getTableColumnSet(db, 'product_resource_links');
   const supportsConsumptionMode = resourceColumns.has('consumption_mode');
   const supportsLotSizeUnits = resourceColumns.has('lot_size_units');
@@ -102,6 +109,13 @@ export async function onRequestGet(context) {
       ${selectColumnSql(productColumns, 'product_category')},
       ${selectColumnSql(productColumns, 'color_name')},
       ${selectColumnSql(productColumns, 'shipping_code')},
+      ${selectColumnSql(productColumns, 'merchandise_origin')},
+      ${selectColumnSql(productColumns, 'sale_channel')},
+      ${selectColumnSql(productColumns, 'external_listing_url')},
+      ${selectColumnSql(productColumns, 'external_listing_label')},
+      ${selectColumnSql(productColumns, 'condition_summary')},
+      ${selectColumnSql(productColumns, 'era_label')},
+      ${selectColumnSql(productColumns, 'sourcing_notes')},
       p.price_cents,
       p.compare_at_price_cents,
       p.currency,
@@ -189,6 +203,13 @@ export async function onRequestGet(context) {
       product_category: row.product_category || '',
       color_name: row.color_name || '',
       shipping_code: row.shipping_code || '',
+      merchandise_origin: row.merchandise_origin || 'handmade',
+      sale_channel: row.sale_channel || 'onsite',
+      external_listing_url: row.external_listing_url || '',
+      external_listing_label: row.external_listing_label || '',
+      condition_summary: row.condition_summary || '',
+      era_label: row.era_label || '',
+      sourcing_notes: row.sourcing_notes || '',
       price_cents: moneyCents(row.price_cents),
       compare_at_price_cents: moneyCents(row.compare_at_price_cents),
       currency: row.currency || 'CAD',

@@ -1,8 +1,6 @@
 import { getNextProductNumber } from './_product-numbering.js';
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 
-// File: /functions/api/admin/create-product.js
-
 function json(data, status = 200) { return jsonResponse(data, status); }
 
 async function requireAdmin(request, env) {
@@ -37,6 +35,37 @@ function computeReadiness(fields = {}) {
   return { is_ready_for_storefront: failures.length === 0 ? 1 : 0, ready_check_notes: failures.join(', ') };
 }
 
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+function cleanMerchandiseOrigin(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  return ['handmade', 'vintage', 'collectible', 'antique', 'oddity', 'prebuilt'].includes(raw) ? raw : 'handmade';
+}
+
+function cleanSaleChannel(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  return ['onsite', 'external_only', 'hybrid'].includes(raw) ? raw : 'onsite';
+}
+
+function cleanExternalUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+  return /^https?:\/\//i.test(raw) ? raw : null;
+}
+
+function cleanText(value, max = 255) {
+  const raw = String(value || '').trim();
+  return raw ? raw.slice(0, max) : null;
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -51,6 +80,7 @@ export async function onRequestPost(context) {
   }
 
   const db = getDb(env);
+  const productColumns = await getTableColumnSet(db, 'products');
 
   const requested_product_number = body.product_number == null || body.product_number === "" ? null : Number(body.product_number);
   const name = String(body.name || "").trim();
@@ -85,15 +115,20 @@ export async function onRequestPost(context) {
   const og_title = String(body.og_title || '').trim() || null;
   const og_description = String(body.og_description || '').trim() || null;
   const og_image_url = String(body.og_image_url || '').trim() || null;
+  const merchandise_origin = cleanMerchandiseOrigin(body.merchandise_origin);
+  const sale_channel = cleanSaleChannel(body.sale_channel);
+  const external_listing_url = cleanExternalUrl(body.external_listing_url);
+  const external_listing_label = cleanText(body.external_listing_label, 120);
+  const condition_summary = cleanText(body.condition_summary, 255);
+  const era_label = cleanText(body.era_label, 120);
+  const sourcing_notes = cleanText(body.sourcing_notes, 2000);
   const readiness = computeReadiness({ name, slug, price_cents, featured_image_url, product_category, meta_title, meta_description });
 
   if (requested_product_number !== null && (!Number.isInteger(requested_product_number) || requested_product_number <= 0)) {
     return json({ ok: false, error: "product_number must be a valid whole number." }, 400);
   }
 
-  const product_number = requested_product_number === null
-    ? await getNextProductNumber(db)
-    : requested_product_number;
+  const product_number = requested_product_number === null ? await getNextProductNumber(db) : requested_product_number;
   if (!name) return json({ ok: false, error: "Product name is required." }, 400);
   if (!slug) return json({ ok: false, error: "A valid slug is required." }, 400);
   if (!['physical', 'digital'].includes(product_type)) return json({ ok: false, error: "Product type must be physical or digital." }, 400);
@@ -105,6 +140,7 @@ export async function onRequestPost(context) {
   if (weight_grams !== null && (!Number.isInteger(weight_grams) || weight_grams < 0)) return json({ ok: false, error: "weight_grams must be a valid whole number." }, 400);
   if (!Number.isInteger(inventory_quantity) || inventory_quantity < 0) return json({ ok: false, error: "inventory_quantity must be a valid whole number." }, 400);
   if (!Number.isInteger(sort_order)) return json({ ok: false, error: "sort_order must be a valid whole number." }, 400);
+  if (sale_channel !== 'onsite' && !external_listing_url) return json({ ok: false, error: 'Add an external listing URL when sale_channel is external_only or hybrid.' }, 400);
 
   const existingProductNumber = await db.prepare(`SELECT product_id FROM products WHERE product_number = ? LIMIT 1`).bind(product_number).first();
   if (existingProductNumber) return json({ ok: false, error: "That product number already exists." }, 409);
@@ -122,41 +158,40 @@ export async function onRequestPost(context) {
     if (!taxClass) return json({ ok: false, error: "Selected tax class was not found." }, 400);
   }
 
+  const columns = [
+    'product_number', 'slug', 'sku', 'name', 'product_category', 'color_name', 'shipping_code', 'review_status',
+    'is_ready_for_storefront', 'ready_check_notes', 'short_description', 'description', 'product_type', 'status',
+    'price_cents', 'compare_at_price_cents', 'currency', 'taxable', 'tax_class_id', 'requires_shipping',
+    'weight_grams', 'inventory_tracking', 'inventory_quantity', 'digital_file_url', 'featured_image_url', 'sort_order'
+  ];
+  const values = [
+    product_number, slug, sku, name, product_category, color_name, shipping_code, review_status,
+    readiness.is_ready_for_storefront, readiness.ready_check_notes || null, short_description, description, product_type, status,
+    price_cents, compare_at_price_cents, currency, taxable, tax_class_id, requires_shipping,
+    weight_grams, inventory_tracking, inventory_quantity, digital_file_url, featured_image_url, sort_order
+  ];
+  const optionalPairs = [
+    ['merchandise_origin', merchandise_origin],
+    ['sale_channel', sale_channel],
+    ['external_listing_url', external_listing_url],
+    ['external_listing_label', external_listing_label],
+    ['condition_summary', condition_summary],
+    ['era_label', era_label],
+    ['sourcing_notes', sourcing_notes],
+  ];
+  optionalPairs.forEach(([column, value]) => {
+    if (productColumns.has(column)) {
+      columns.push(column);
+      values.push(value);
+    }
+  });
+  columns.push('created_at', 'updated_at');
+  const placeholders = columns.map((column) => column === 'created_at' || column === 'updated_at' ? 'CURRENT_TIMESTAMP' : '?');
+
   const insertResult = await db.prepare(`
-    INSERT INTO products (
-      product_number, slug, sku, name, product_category, color_name, shipping_code, review_status,
-      is_ready_for_storefront, ready_check_notes, short_description, description, product_type, status, price_cents, compare_at_price_cents,
-      currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking,
-      inventory_quantity, digital_file_url, featured_image_url, sort_order, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).bind(
-    product_number,
-    slug,
-    sku,
-    name,
-    product_category,
-    color_name,
-    shipping_code,
-    review_status,
-    readiness.is_ready_for_storefront,
-    readiness.ready_check_notes || null,
-    short_description,
-    description,
-    product_type,
-    status,
-    price_cents,
-    compare_at_price_cents,
-    currency,
-    taxable,
-    tax_class_id,
-    requires_shipping,
-    weight_grams,
-    inventory_tracking,
-    inventory_quantity,
-    digital_file_url,
-    featured_image_url,
-    sort_order
-  ).run();
+    INSERT INTO products (${columns.join(', ')})
+    VALUES (${placeholders.join(', ')})
+  `).bind(...values).run();
 
   const newProductId = insertResult?.meta?.last_row_id;
 
@@ -185,6 +220,14 @@ export async function onRequestPost(context) {
 
   const createdProduct = await db.prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`).bind(newProductId).first();
   const createdImagesResult = await db.prepare(`SELECT product_image_id, product_id, image_url, alt_text, sort_order, created_at FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, product_image_id ASC`).bind(newProductId).all();
+
+  await auditAdminAction(env, request, authCheck.sessionUser, {
+    action_type: 'product_create',
+    target_type: 'product',
+    target_id: Number(createdProduct?.product_id || newProductId || 0),
+    target_key: createdProduct?.slug || slug,
+    details: { name, status, review_status, merchandise_origin, sale_channel, has_external_listing: !!external_listing_url }
+  });
 
   return json({ ok: true, message: "Product created successfully.", product: createdProduct, images: createdImagesResult.results || [] }, 201);
 }

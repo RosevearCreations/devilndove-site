@@ -126,6 +126,14 @@
             <select class="input" name="shipping_code" id="mobileShippingCode"></select>
           </label>
           <label>
+            <span>Merchandise origin</span>
+            <select class="input" name="merchandise_origin" id="mobileMerchandiseOrigin"><option value="handmade">Handmade</option><option value="vintage">Vintage</option><option value="collectible">Collectible</option><option value="antique">Antique</option><option value="oddity">Oddity / curiosity</option><option value="prebuilt">Pre-built / found item</option></select>
+          </label>
+          <label>
+            <span>Sale channel</span>
+            <select class="input" name="sale_channel" id="mobileSaleChannel"><option value="onsite">Sell on Devil n Dove</option><option value="hybrid">Sell here + external listing</option><option value="external_only">External listing only</option></select>
+          </label>
+          <label>
             <span>Tax code</span>
             <select class="input" name="tax_class_id" id="mobileTaxClassId"><option value="">No tax class</option></select>
           </label>
@@ -150,6 +158,28 @@
         <label>
           <span>Long description / story</span>
           <textarea class="input" name="description" rows="5" placeholder="How it was made, materials, inspiration, finish, size, or care notes."></textarea>
+        </label>
+        <div class="mobile-form-grid">
+          <label>
+            <span>External listing label</span>
+            <input class="input" type="text" name="external_listing_label" maxlength="120" placeholder="Facebook Marketplace"/>
+          </label>
+          <label>
+            <span>External listing URL</span>
+            <input class="input" type="url" name="external_listing_url" placeholder="https://www.facebook.com/marketplace/..."/>
+          </label>
+          <label>
+            <span>Era / period</span>
+            <input class="input" type="text" name="era_label" maxlength="120" placeholder="1960s, Victorian, mid-century"/>
+          </label>
+          <label>
+            <span>Condition summary</span>
+            <input class="input" type="text" name="condition_summary" maxlength="255" placeholder="Patina, wear, tested, original case"/>
+          </label>
+        </div>
+        <label>
+          <span>Sourcing notes</span>
+          <textarea class="input" name="sourcing_notes" rows="3" placeholder="Estate sale, antique mall, workshop rescue, oddity shelf"></textarea>
         </label>
 
         <div class="mobile-form-grid">

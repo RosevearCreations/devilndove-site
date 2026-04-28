@@ -66,6 +66,22 @@ function normalizeStoredImageUrl(env, value) {
   return buildPublicUrl(env, cleanValue) || cleanValue;
 }
 
+function cleanMerchandiseOrigin(value) {
+  const raw = normalizeText(value).toLowerCase();
+  return ['handmade', 'vintage', 'collectible', 'antique', 'oddity', 'prebuilt'].includes(raw) ? raw : 'handmade';
+}
+
+function cleanSaleChannel(value) {
+  const raw = normalizeText(value).toLowerCase();
+  return ['onsite', 'external_only', 'hybrid'].includes(raw) ? raw : 'onsite';
+}
+
+function cleanExternalUrl(value) {
+  const raw = normalizeText(value);
+  if (!raw) return null;
+  return /^https?:\/\//i.test(raw) ? raw : null;
+}
+
 function formatProductNumberLabel(value) {
   const parsed = Number(value || 0);
   if (!Number.isInteger(parsed) || parsed <= 0) return 'DD1000';
@@ -143,6 +159,13 @@ export async function onRequestPost(context) {
     const metaDescription = normalizeText(form.get('meta_description'));
     const keywords = normalizeText(form.get('keywords'));
     const shippingCode = normalizeText(form.get('shipping_code'));
+    const merchandiseOrigin = cleanMerchandiseOrigin(form.get('merchandise_origin'));
+    const saleChannel = cleanSaleChannel(form.get('sale_channel'));
+    const externalListingUrl = cleanExternalUrl(form.get('external_listing_url'));
+    const externalListingLabel = normalizeText(form.get('external_listing_label'));
+    const conditionSummary = normalizeText(form.get('condition_summary'));
+    const eraLabel = normalizeText(form.get('era_label'));
+    const sourcingNotes = normalizeText(form.get('sourcing_notes'));
     const currency = normalizeText(form.get('currency') || 'CAD').toUpperCase() || 'CAD';
     const skuOverride = normalizeText(form.get('sku'));
     const taxClassIdRaw = normalizeText(form.get('tax_class_id'));
@@ -169,6 +192,9 @@ export async function onRequestPost(context) {
     if (taxClassId !== null && (!Number.isInteger(taxClassId) || taxClassId <= 0)) {
       return json({ ok: false, error: 'tax_class_id must be a valid id.' }, 400);
     }
+    if (saleChannel !== 'onsite' && !externalListingUrl) {
+      return json({ ok: false, error: 'Add an external listing URL when using hybrid or external-only selling.' }, 400);
+    }
 
     const files = form.getAll('images').filter((file) => file && typeof file.arrayBuffer === 'function');
     if (!name && !captureReference && !files.length && !requestedProductId) {
@@ -183,6 +209,13 @@ export async function onRequestPost(context) {
     const supportsReviewStatus = productColumns.has('review_status');
     const supportsReadyFlag = productColumns.has('is_ready_for_storefront');
     const supportsReadyNotes = productColumns.has('ready_check_notes');
+    const supportsMerchandiseOrigin = productColumns.has('merchandise_origin');
+    const supportsSaleChannel = productColumns.has('sale_channel');
+    const supportsExternalListingUrl = productColumns.has('external_listing_url');
+    const supportsExternalListingLabel = productColumns.has('external_listing_label');
+    const supportsConditionSummary = productColumns.has('condition_summary');
+    const supportsEraLabel = productColumns.has('era_label');
+    const supportsSourcingNotes = productColumns.has('sourcing_notes');
     const resourceColumns = await getTableColumnSet(db, 'product_resource_links');
     const supportsConsumptionMode = resourceColumns.has('consumption_mode');
     const supportsLotSizeUnits = resourceColumns.has('lot_size_units');
@@ -235,6 +268,34 @@ export async function onRequestPost(context) {
       if (supportsShippingCode) {
         updateAssignments.push('shipping_code = ?');
         updateBindings.push(shippingCode || null);
+      }
+      if (supportsMerchandiseOrigin) {
+        updateAssignments.push('merchandise_origin = ?');
+        updateBindings.push(merchandiseOrigin);
+      }
+      if (supportsSaleChannel) {
+        updateAssignments.push('sale_channel = ?');
+        updateBindings.push(saleChannel);
+      }
+      if (supportsExternalListingUrl) {
+        updateAssignments.push('external_listing_url = ?');
+        updateBindings.push(externalListingUrl || null);
+      }
+      if (supportsExternalListingLabel) {
+        updateAssignments.push('external_listing_label = ?');
+        updateBindings.push(externalListingLabel || null);
+      }
+      if (supportsConditionSummary) {
+        updateAssignments.push('condition_summary = ?');
+        updateBindings.push(conditionSummary || null);
+      }
+      if (supportsEraLabel) {
+        updateAssignments.push('era_label = ?');
+        updateBindings.push(eraLabel || null);
+      }
+      if (supportsSourcingNotes) {
+        updateAssignments.push('sourcing_notes = ?');
+        updateBindings.push(sourcingNotes || null);
       }
       if (supportsReviewStatus) updateAssignments.push(`review_status = 'pending_review'`);
       if (supportsReadyFlag) updateAssignments.push('is_ready_for_storefront = 0');
@@ -310,6 +371,41 @@ export async function onRequestPost(context) {
         insertColumns.push('shipping_code');
         insertPlaceholders.push('?');
         insertBindings.push(shippingCode || null);
+      }
+      if (supportsMerchandiseOrigin) {
+        insertColumns.push('merchandise_origin');
+        insertPlaceholders.push('?');
+        insertBindings.push(merchandiseOrigin);
+      }
+      if (supportsSaleChannel) {
+        insertColumns.push('sale_channel');
+        insertPlaceholders.push('?');
+        insertBindings.push(saleChannel);
+      }
+      if (supportsExternalListingUrl) {
+        insertColumns.push('external_listing_url');
+        insertPlaceholders.push('?');
+        insertBindings.push(externalListingUrl || null);
+      }
+      if (supportsExternalListingLabel) {
+        insertColumns.push('external_listing_label');
+        insertPlaceholders.push('?');
+        insertBindings.push(externalListingLabel || null);
+      }
+      if (supportsConditionSummary) {
+        insertColumns.push('condition_summary');
+        insertPlaceholders.push('?');
+        insertBindings.push(conditionSummary || null);
+      }
+      if (supportsEraLabel) {
+        insertColumns.push('era_label');
+        insertPlaceholders.push('?');
+        insertBindings.push(eraLabel || null);
+      }
+      if (supportsSourcingNotes) {
+        insertColumns.push('sourcing_notes');
+        insertPlaceholders.push('?');
+        insertBindings.push(sourcingNotes || null);
       }
       if (supportsReviewStatus) {
         insertColumns.push('review_status');
