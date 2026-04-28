@@ -35,18 +35,26 @@ function buildFilterGroups(products) {
   const categories = {};
   const colors = {};
   const productTypes = {};
+  const origins = {};
+  const saleChannels = {};
   products.forEach((product) => {
     const category = normalizeText(product.product_category);
     const color = normalizeText(product.color_name);
     const productType = normalizeText(product.product_type);
+    const origin = normalizeText(product.merchandise_origin);
+    const channel = normalizeText(product.sale_channel);
     if (category) categories[category] = (categories[category] || 0) + 1;
     if (color) colors[color] = (colors[color] || 0) + 1;
     if (productType) productTypes[productType] = (productTypes[productType] || 0) + 1;
+    if (origin) origins[origin] = (origins[origin] || 0) + 1;
+    if (channel) saleChannels[channel] = (saleChannels[channel] || 0) + 1;
   });
   return {
     categories: group(categories),
     colors: group(colors),
-    product_types: group(productTypes)
+    product_types: group(productTypes),
+    merchandise_origins: group(origins),
+    sale_channels: group(saleChannels)
   };
 }
 
@@ -56,6 +64,8 @@ export async function onRequestGet(context) {
   const url = new URL(request.url);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
   const product_type = normalizeText(url.searchParams.get('product_type')).toLowerCase();
+  const merchandise_origin = normalizeText(url.searchParams.get('merchandise_origin')).toLowerCase();
+  const sale_channel = normalizeText(url.searchParams.get('sale_channel')).toLowerCase();
   const min_price_cents = Number.isInteger(Number(url.searchParams.get('min_price_cents'))) ? Number(url.searchParams.get('min_price_cents')) : null;
   const max_price_cents = Number.isInteger(Number(url.searchParams.get('max_price_cents'))) ? Number(url.searchParams.get('max_price_cents')) : null;
   const requires_shipping = normalizeText(url.searchParams.get('requires_shipping'));
@@ -69,7 +79,7 @@ export async function onRequestGet(context) {
       warning: 'Product database is unavailable right now. Showing an empty live result.',
       summary: { total_products: 0, authority: 'binding_unavailable' },
       filter_groups: { categories: [], colors: [], product_types: [] },
-      diagnostics: { warnings, query: q, product_type, min_price_cents, max_price_cents, requires_shipping }
+      diagnostics: { warnings, query: q, product_type, merchandise_origin, sale_channel, min_price_cents, max_price_cents, requires_shipping }
     });
   }
 
@@ -92,6 +102,14 @@ export async function onRequestGet(context) {
     clauses.push(`p.product_type = ?`);
     bindings.push(product_type);
   }
+  if (['handmade', 'vintage', 'collectible', 'antique', 'oddity', 'prebuilt'].includes(merchandise_origin)) {
+    clauses.push(`COALESCE(p.merchandise_origin, 'handmade') = ?`);
+    bindings.push(merchandise_origin);
+  }
+  if (['onsite', 'external_only', 'hybrid'].includes(sale_channel)) {
+    clauses.push(`COALESCE(p.sale_channel, 'onsite') = ?`);
+    bindings.push(sale_channel);
+  }
   if (min_price_cents != null) { clauses.push(`p.price_cents >= ?`); bindings.push(min_price_cents); }
   if (max_price_cents != null) { clauses.push(`p.price_cents <= ?`); bindings.push(max_price_cents); }
   if (requires_shipping === '1' || requires_shipping === '0') { clauses.push(`p.requires_shipping = ?`); bindings.push(Number(requires_shipping)); }
@@ -99,6 +117,8 @@ export async function onRequestGet(context) {
   const primarySql = `
     SELECT
       p.product_id, p.product_number, p.slug, p.sku, p.name, p.product_category, p.color_name, p.shipping_code, p.review_status, p.short_description, p.description, p.product_type, p.status,
+      COALESCE(p.merchandise_origin, 'handmade') AS merchandise_origin, COALESCE(p.sale_channel, 'onsite') AS sale_channel,
+      p.external_listing_url, p.external_listing_label, p.condition_summary, p.era_label, p.sourcing_notes,
       p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
       p.weight_grams, p.inventory_tracking, COALESCE(p.inventory_quantity, 0) AS inventory_quantity, p.digital_file_url, p.featured_image_url,
       p.sort_order, p.created_at, p.updated_at,
@@ -116,6 +136,8 @@ export async function onRequestGet(context) {
   const fallbackSql = `
     SELECT
       p.product_id, p.product_number, p.slug, p.sku, p.name, p.product_category, p.color_name, p.shipping_code, p.review_status, p.short_description, p.description, p.product_type, p.status,
+      COALESCE(p.merchandise_origin, 'handmade') AS merchandise_origin, COALESCE(p.sale_channel, 'onsite') AS sale_channel,
+      p.external_listing_url, p.external_listing_label, p.condition_summary, p.era_label, p.sourcing_notes,
       p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
       p.weight_grams, p.inventory_tracking, COALESCE(p.inventory_quantity, 0) AS inventory_quantity, p.digital_file_url, p.featured_image_url,
       p.sort_order, p.created_at, p.updated_at,
@@ -135,7 +157,7 @@ export async function onRequestGet(context) {
       products,
       summary: { total_products: products.length, authority: 'd1_primary_query' },
       filter_groups: buildFilterGroups(products),
-      diagnostics: { warnings, query: q, product_type, min_price_cents, max_price_cents, requires_shipping }
+      diagnostics: { warnings, query: q, product_type, merchandise_origin, sale_channel, min_price_cents, max_price_cents, requires_shipping }
     });
   } catch (primaryError) {
     warnings.push('primary_query_failed');
@@ -162,7 +184,7 @@ export async function onRequestGet(context) {
         warning: 'Fallback product query used while the richer storefront query recovers.',
         summary: { total_products: products.length, authority: 'd1_fallback_query' },
         filter_groups: buildFilterGroups(products),
-        diagnostics: { warnings, query: q, product_type, min_price_cents, max_price_cents, requires_shipping }
+        diagnostics: { warnings, query: q, product_type, merchandise_origin, sale_channel, min_price_cents, max_price_cents, requires_shipping }
       });
     } catch (fallbackError) {
       warnings.push('fallback_query_failed');
@@ -188,7 +210,7 @@ export async function onRequestGet(context) {
         error_detail: String(fallbackError?.message || primaryError?.message || 'Unknown error'),
         summary: { total_products: 0, authority: 'error' },
         filter_groups: { categories: [], colors: [], product_types: [] },
-        diagnostics: { warnings, query: q, product_type, min_price_cents, max_price_cents, requires_shipping }
+        diagnostics: { warnings, query: q, product_type, merchandise_origin, sale_channel, min_price_cents, max_price_cents, requires_shipping }
       });
     }
   }

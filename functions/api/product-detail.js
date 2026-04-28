@@ -35,6 +35,8 @@ export async function onRequestGet(context) {
   const product = await db.prepare(`
     SELECT
       p.product_id, p.slug, p.sku, p.name, p.short_description, p.description, p.product_type, p.status,
+      COALESCE(p.merchandise_origin, 'handmade') AS merchandise_origin, COALESCE(p.sale_channel, 'onsite') AS sale_channel,
+      p.external_listing_url, p.external_listing_label, p.condition_summary, p.era_label, p.sourcing_notes,
       p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
       p.weight_grams, p.inventory_tracking, COALESCE(p.inventory_quantity, p.on_hand_quantity, 0) AS inventory_quantity,
       p.digital_file_url, p.featured_image_url, p.sort_order, p.created_at, p.updated_at,
