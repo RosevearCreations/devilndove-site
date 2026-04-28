@@ -1,5 +1,5 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import { buildAccountingAttachmentPublicUrl, cleanAttachmentKind, cleanAttachmentStatus, cleanDocumentDate, ensureAccountingAttachmentsTable, listAccountingAttachments } from './_accountingAttachments.js';
+import { buildAccountingAttachmentPublicUrl, cleanAttachmentKind, cleanAttachmentScope, cleanAttachmentStatus, cleanDocumentDate, ensureAccountingAttachmentsTable, listAccountingAttachments } from './_accountingAttachments.js';
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 
@@ -44,11 +44,13 @@ function isAllowedMime(mimeType) {
 function summarizeAttachments(attachments) {
   const byKind = {};
   const byStatus = {};
+  const byScope = {};
   for (const row of attachments) {
     byKind[row.attachment_kind || 'other'] = Number(byKind[row.attachment_kind || 'other'] || 0) + 1;
     byStatus[row.attachment_status || 'uploaded'] = Number(byStatus[row.attachment_status || 'uploaded'] || 0) + 1;
+    byScope[row.attachment_scope || 'other'] = Number(byScope[row.attachment_scope || 'other'] || 0) + 1;
   }
-  return { attachment_count: attachments.length, by_kind: byKind, by_status: byStatus };
+  return { attachment_count: attachments.length, by_kind: byKind, by_status: byStatus, by_scope: byScope };
 }
 
 export async function onRequestGet(context) {
@@ -66,6 +68,8 @@ export async function onRequestGet(context) {
     taxYear: url.searchParams.get('tax_year') || '',
     scopeKey: url.searchParams.get('scope_key') || '',
     attachmentKind: url.searchParams.get('attachment_kind') || '',
+    attachmentScope: url.searchParams.get('attachment_scope') || '',
+    providerScope: url.searchParams.get('provider_scope') || '',
     limit: Number(url.searchParams.get('limit') || 50),
   });
   return json({ ok: true, attachments, summary: summarizeAttachments(attachments) });
@@ -98,6 +102,7 @@ export async function onRequestPost(context) {
 
   const attachmentKind = cleanAttachmentKind(form.get('attachment_kind'));
   const attachmentStatus = cleanAttachmentStatus(form.get('attachment_status'));
+  const attachmentScope = cleanAttachmentScope(form.get('attachment_scope'));
   const documentDate = cleanDocumentDate(form.get('document_date'));
   const expenseId = Number(form.get('expense_id') || 0) || null;
   const vendorId = Number(form.get('vendor_id') || 0) || null;
@@ -107,6 +112,16 @@ export async function onRequestPost(context) {
   const scopeKey = normalizeText(form.get('scope_key')) || 'all';
   const statementReference = normalizeText(form.get('statement_reference'));
   const notes = normalizeText(form.get('notes'));
+  const providerScope = normalizeText(form.get('provider_scope')).toLowerCase();
+  const statementGrossCents = Math.round(Number(form.get('statement_gross_cents') || 0) || 0);
+  const statementFeeCents = Math.round(Number(form.get('statement_fee_cents') || 0) || 0);
+  const statementNetCents = Math.round(Number(form.get('statement_net_cents') || 0) || 0);
+  const statementTaxCents = Math.round(Number(form.get('statement_tax_cents') || 0) || 0);
+  const statementShippingCents = Math.round(Number(form.get('statement_shipping_cents') || 0) || 0);
+  const statementTxnCount = Math.max(0, Math.round(Number(form.get('statement_txn_count') || 0) || 0));
+  const statementPeriodStart = cleanDocumentDate(form.get('statement_period_start'));
+  const statementPeriodEnd = cleanDocumentDate(form.get('statement_period_end'));
+  const statementDetailJson = normalizeText(form.get('statement_detail_json')) || '';
   const originalName = sanitizeFilename(file.name || 'attachment');
   const extension = inferExtension(originalName, mimeType);
   const objectKey = `accounting/${taxYear || periodMonth || new Date().toISOString().slice(0,7)}/${attachmentKind}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
@@ -121,6 +136,7 @@ export async function onRequestPost(context) {
       original_name: originalName,
       attachment_kind: attachmentKind,
       attachment_status: attachmentStatus,
+      attachment_scope: attachmentScope,
       document_date: documentDate || '',
       expense_id: expenseId == null ? '' : String(expenseId),
       vendor_id: vendorId == null ? '' : String(vendorId),
@@ -128,6 +144,15 @@ export async function onRequestPost(context) {
       period_month: periodMonth || '',
       tax_year: taxYear || '',
       scope_key: scopeKey || '',
+      provider_scope: providerScope || '',
+      statement_gross_cents: String(statementGrossCents),
+      statement_fee_cents: String(statementFeeCents),
+      statement_net_cents: String(statementNetCents),
+      statement_tax_cents: String(statementTaxCents),
+      statement_shipping_cents: String(statementShippingCents),
+      statement_txn_count: String(statementTxnCount),
+      statement_period_start: statementPeriodStart || '',
+      statement_period_end: statementPeriodEnd || '',
       uploaded_by_user_id: String(adminUser.user_id || '')
     }
   });
@@ -135,17 +160,21 @@ export async function onRequestPost(context) {
   const publicUrl = buildAccountingAttachmentPublicUrl(env, objectKey);
   const result = await db.prepare(`
     INSERT INTO accounting_attachments (
-      attachment_kind, attachment_status, document_date, scope_key,
+      attachment_kind, attachment_status, attachment_scope, document_date, scope_key, provider_scope,
       storage_provider, bucket_name, object_key, public_url,
       original_filename, mime_type, file_size_bytes, expense_id, vendor_id,
-      reconciliation_type, period_month, tax_year, statement_reference, notes,
+      reconciliation_type, period_month, tax_year, statement_reference,
+      statement_gross_cents, statement_fee_cents, statement_net_cents, statement_tax_cents, statement_shipping_cents, statement_txn_count,
+      statement_period_start, statement_period_end, statement_detail_json, notes,
       created_by_user_id, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, 'r2', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ) VALUES (?, ?, ?, ?, ?, ?, 'r2', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   `).bind(
     attachmentKind,
     attachmentStatus,
+    attachmentScope,
     documentDate || null,
     scopeKey || null,
+    providerScope || null,
     normalizeText(env.ACCOUNTING_ATTACHMENTS_BUCKET_NAME || env.PRODUCT_MEDIA_BUCKET_NAME || env.R2_BUCKET_NAME || 'product-media'),
     objectKey,
     publicUrl || null,
@@ -158,6 +187,15 @@ export async function onRequestPost(context) {
     periodMonth || null,
     taxYear || null,
     statementReference || null,
+    statementGrossCents,
+    statementFeeCents,
+    statementNetCents,
+    statementTaxCents,
+    statementShippingCents,
+    statementTxnCount,
+    statementPeriodStart || null,
+    statementPeriodEnd || null,
+    statementDetailJson || null,
     notes || null,
     Number(adminUser.user_id || 0)
   ).run();
@@ -172,6 +210,7 @@ export async function onRequestPost(context) {
     details: {
       attachment_kind: attachmentKind,
       attachment_status: attachmentStatus,
+      attachment_scope: attachmentScope,
       document_date: documentDate || null,
       expense_id: expenseId,
       vendor_id: vendorId,
@@ -179,7 +218,16 @@ export async function onRequestPost(context) {
       period_month: periodMonth || null,
       tax_year: taxYear || null,
       scope_key: scopeKey || null,
+      provider_scope: providerScope || null,
       statement_reference: statementReference || null,
+      statement_gross_cents: statementGrossCents,
+      statement_fee_cents: statementFeeCents,
+      statement_net_cents: statementNetCents,
+      statement_tax_cents: statementTaxCents,
+      statement_shipping_cents: statementShippingCents,
+      statement_txn_count: statementTxnCount,
+      statement_period_start: statementPeriodStart || null,
+      statement_period_end: statementPeriodEnd || null,
       original_filename: originalName,
       mime_type: mimeType,
       file_size_bytes: fileSize,
@@ -193,6 +241,7 @@ export async function onRequestPost(context) {
       accounting_attachment_id: attachmentId,
       attachment_kind: attachmentKind,
       attachment_status: attachmentStatus,
+      attachment_scope: attachmentScope,
       document_date: documentDate || '',
       scope_key: scopeKey || '',
       object_key: objectKey,
@@ -206,6 +255,15 @@ export async function onRequestPost(context) {
       period_month: periodMonth || '',
       tax_year: taxYear || '',
       statement_reference: statementReference || '',
+      statement_gross_cents: statementGrossCents,
+      statement_fee_cents: statementFeeCents,
+      statement_net_cents: statementNetCents,
+      statement_tax_cents: statementTaxCents,
+      statement_shipping_cents: statementShippingCents,
+      statement_txn_count: statementTxnCount,
+      statement_period_start: statementPeriodStart || '',
+      statement_period_end: statementPeriodEnd || '',
+      statement_detail_json: statementDetailJson || '',
       notes: notes || '',
     }
   });

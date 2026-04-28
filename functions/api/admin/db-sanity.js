@@ -47,7 +47,7 @@ const EXPECTED_TABLES = {
   accounting_vendors: ['accounting_vendor_id', 'vendor_name', 'default_ledger_code'],
   accounting_recurring_expense_rules: ['recurring_expense_rule_id', 'vendor_name', 'rule_name', 'ledger_code', 'amount', 'frequency', 'next_due_date'],
   accounting_reconciliation_reviews: ['accounting_reconciliation_review_id', 'reconciliation_type', 'period_month', 'scope_key', 'review_status', 'statement_reference', 'difference_reason', 'detail_json', 'attachment_count', 'statement_amount_cents', 'book_amount_cents', 'tolerance_cents', 'expected_rate_basis_points', 'observed_rate_basis_points', 'unresolved_item_count'],
-  accounting_attachments: ['accounting_attachment_id', 'attachment_kind', 'attachment_status', 'document_date', 'scope_key', 'object_key', 'mime_type', 'file_size_bytes'],
+  accounting_attachments: ['accounting_attachment_id', 'attachment_kind', 'attachment_status', 'attachment_scope', 'document_date', 'scope_key', 'provider_scope', 'object_key', 'mime_type', 'file_size_bytes', 'statement_gross_cents', 'statement_fee_cents', 'statement_net_cents', 'statement_tax_cents', 'statement_shipping_cents', 'statement_txn_count'],
   accounting_writeoffs: ['writeoff_id', 'writeoff_date', 'amount'],
   product_costs: ['product_cost_id', 'product_number', 'cost_per_unit'],
   accounting_overhead_allocations: ['allocation_id', 'period_month', 'ledger_code', 'amount_cents'],

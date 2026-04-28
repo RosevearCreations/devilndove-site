@@ -65,11 +65,14 @@ function flattenYearEndCsvRows(bundle) {
     by_kind: attachmentSummary.by_kind || {},
     by_status: attachmentSummary.by_status || {},
     by_month: attachmentSummary.by_month || {},
-    by_scope: attachmentSummary.by_scope || {}
+    by_scope: attachmentSummary.by_scope || {},
+    by_attachment_scope: attachmentSummary.by_attachment_scope || {}
   })) {
     Object.entries(values).forEach(([key, value]) => push('attachment_summary', group, key, value));
   }
   (attachmentSummary.coverage_gaps || []).forEach((item, index) => push('attachment_gaps', 'gap', String(index + 1), item));
+  Object.entries(attachmentSummary.statement_metrics || {}).forEach(([key, value]) => push('attachment_statement_metrics', 'statements', key, typeof value === 'object' ? JSON.stringify(value) : value));
+  Object.entries(attachmentSummary.coverage_matrix || {}).forEach(([month, values]) => push('attachment_coverage_matrix', month, 'matrix', JSON.stringify(values || {})));
 
   const reconciliationSummary = handoff.reconciliation_summary || {};
   for (const [group, values] of Object.entries({
@@ -147,13 +150,28 @@ export async function onRequestGet(context) {
   const attachmentStatus = summarizeBy(attachments, (row) => row.attachment_status || 'uploaded');
   const attachmentByMonth = summarizeBy(attachments, (row) => row.period_month || (row.document_date || '').slice(0, 7) || 'unassigned');
   const attachmentByScope = summarizeBy(attachments, (row) => row.scope_key || 'all');
+  const attachmentByAttachmentScope = summarizeBy(attachments, (row) => row.attachment_scope || 'other');
+  const attachmentStatementMetrics = attachments.filter((row) => (row.attachment_kind || '') === 'statement').reduce((acc, row) => {
+    acc.statement_gross_cents += Number(row.statement_gross_cents || 0);
+    acc.statement_fee_cents += Number(row.statement_fee_cents || 0);
+    acc.statement_net_cents += Number(row.statement_net_cents || 0);
+    acc.statement_tax_cents += Number(row.statement_tax_cents || 0);
+    acc.statement_shipping_cents += Number(row.statement_shipping_cents || 0);
+    acc.statement_txn_count += Number(row.statement_txn_count || 0);
+    return acc;
+  }, { statement_gross_cents: 0, statement_fee_cents: 0, statement_net_cents: 0, statement_tax_cents: 0, statement_shipping_cents: 0, statement_txn_count: 0 });
+  const attachmentCoverageMatrix = {};
   const attachmentGaps = [];
   for (let month = 1; month <= 12; month += 1) {
     const label = `${range.year}-${String(month).padStart(2, '0')}`;
     const monthItems = attachments.filter((row) => (row.period_month || '').startsWith(label) || (row.document_date || '').startsWith(label));
     const kindCounts = summarizeBy(monthItems, (row) => row.attachment_kind || 'other');
+    const scopeCounts = summarizeBy(monthItems, (row) => row.attachment_scope || 'other');
+    attachmentCoverageMatrix[label] = { by_kind: kindCounts, by_scope: scopeCounts, attachment_count: monthItems.length };
     if (!kindCounts.statement) attachmentGaps.push(`${label}: missing statement attachment`);
     if (!kindCounts.workpaper) attachmentGaps.push(`${label}: missing workpaper attachment`);
+    if (!scopeCounts.bill_support) attachmentGaps.push(`${label}: no bill-support attachments linked`);
+    if (!scopeCounts.receipt_support) attachmentGaps.push(`${label}: no receipt-support attachments linked`);
   }
 
   const reconciliationByType = summarizeBy(reconciliationReviews, (row) => row.reconciliation_type || 'other');
@@ -217,6 +235,9 @@ export async function onRequestGet(context) {
         by_status: attachmentStatus,
         by_month: attachmentByMonth,
         by_scope: attachmentByScope,
+        by_attachment_scope: attachmentByAttachmentScope,
+        statement_metrics: attachmentStatementMetrics,
+        coverage_matrix: attachmentCoverageMatrix,
         coverage_gaps: attachmentGaps,
       },
       reconciliation_summary: {

@@ -72,10 +72,30 @@ async function attachmentInfoByScope(db, { reconciliationType, periodMonth }) {
     if (item.files.length < 5) item.files.push(row);
     byScope[scopeKey] = item;
   }
-  return { count: attachments.length, items: attachments.slice(0, 40), by_scope: byScope };
+  return { count: attachments.length, items: attachments.slice(0, 40), all_items: attachments, by_scope: byScope };
 }
 
-async function loadSalesTaxSummary(db, periodMonth) {
+
+function sumAttachmentStatements(attachments = [], scopeKey = 'all') {
+  const normalizedScope = String(scopeKey || 'all').toLowerCase();
+  const matches = attachments.filter((row) => {
+    const scope = String(row.scope_key || 'all').toLowerCase();
+    const provider = String(row.provider_scope || '').toLowerCase();
+    return scope === normalizedScope || provider === normalizedScope || (normalizedScope === 'all' && !provider);
+  });
+  return matches.reduce((acc, row) => {
+    acc.attachment_count += 1;
+    if ((row.attachment_kind || '') === 'statement') acc.statement_count += 1;
+    acc.statement_gross_cents += Number(row.statement_gross_cents || 0);
+    acc.statement_fee_cents += Number(row.statement_fee_cents || 0);
+    acc.statement_net_cents += Number(row.statement_net_cents || 0);
+    acc.statement_tax_cents += Number(row.statement_tax_cents || 0);
+    acc.statement_shipping_cents += Number(row.statement_shipping_cents || 0);
+    acc.statement_txn_count += Number(row.statement_txn_count || 0);
+    return acc;
+  }, { attachment_count: 0, statement_count: 0, statement_gross_cents: 0, statement_fee_cents: 0, statement_net_cents: 0, statement_tax_cents: 0, statement_shipping_cents: 0, statement_txn_count: 0 });
+}
+async function loadSalesTaxSummary(db, periodMonth, statementAttachments = []) {
   const start = `${periodMonth}-01`;
   const end = new Date(Date.UTC(Number(periodMonth.slice(0, 4)), Number(periodMonth.slice(5, 7)), 1)).toISOString().slice(0, 10);
   const hasOrders = await tableExists(db, 'orders');
@@ -129,8 +149,11 @@ async function loadSalesTaxSummary(db, periodMonth) {
   const taxableBaseCents = Math.max(0, grossSalesCents + shippingCents - discountCents);
   const observedRateBps = taxableBaseCents > 0 ? Math.round((collected / taxableBaseCents) * 10000) : 0;
   const netTaxPayableCents = collected - inputTax;
-  const unresolvedItemCount = netTaxPayableCents === 0 ? 0 : 1;
+  const statementTotals = sumAttachmentStatements(statementAttachments, 'all');
+  const statementTaxCents = Number(statementTotals.statement_tax_cents || statementTotals.statement_gross_cents || 0);
+  const unresolvedItemCount = Math.abs(statementTaxCents || netTaxPayableCents) > 500 ? 1 : (netTaxPayableCents === 0 ? 0 : 1);
 
+  const statementTotals = sumAttachmentStatements(statementAttachments, 'all');
   return {
     period_month: periodMonth,
     rows: [{
@@ -138,9 +161,9 @@ async function loadSalesTaxSummary(db, periodMonth) {
       label: 'Sales tax collected vs input tax credits',
       reference_amount_cents: collected,
       compared_amount_cents: inputTax,
-      statement_amount_cents: collected,
-      book_amount_cents: inputTax,
-      difference_cents: netTaxPayableCents,
+      statement_amount_cents: statementTaxCents || netTaxPayableCents,
+      book_amount_cents: netTaxPayableCents,
+      difference_cents: (statementTaxCents || netTaxPayableCents) - netTaxPayableCents,
       order_count: orderCount,
       expense_count: expenseCount,
       gross_sales_cents: grossSalesCents,
@@ -150,13 +173,15 @@ async function loadSalesTaxSummary(db, periodMonth) {
       expected_rate_basis_points: 0,
       observed_rate_basis_points: observedRateBps,
       tolerance_cents: 500,
+      attachment_count: statementTotals.attachment_count,
+      statement_count: statementTotals.statement_count,
       unresolved_item_count: unresolvedItemCount,
-      detail_json: toJson({ gross_sales_cents: grossSalesCents, shipping_cents: shippingCents, discount_cents: discountCents, tax_collected_cents: collected, input_tax_cents: inputTax, net_tax_payable_cents: netTaxPayableCents, order_count: orderCount, expense_count: expenseCount, observed_rate_basis_points: observedRateBps }),
+      detail_json: toJson({ gross_sales_cents: grossSalesCents, shipping_cents: shippingCents, discount_cents: discountCents, tax_collected_cents: collected, input_tax_cents: inputTax, net_tax_payable_cents: netTaxPayableCents, statement_tax_cents: statementTaxCents, statement_attachment_count: statementTotals.attachment_count, statement_count: statementTotals.statement_count, order_count: orderCount, expense_count: expenseCount, observed_rate_basis_points: observedRateBps }),
     }],
   };
 }
 
-async function loadProcessorFeeSummary(db, periodMonth) {
+async function loadProcessorFeeSummary(db, periodMonth, statementAttachments = []) {
   const start = `${periodMonth}-01`;
   const end = new Date(Date.UTC(Number(periodMonth.slice(0, 4)), Number(periodMonth.slice(5, 7)), 1)).toISOString().slice(0, 10);
   const hasPayments = await tableExists(db, 'payments');
@@ -255,23 +280,30 @@ async function loadProcessorFeeSummary(db, periodMonth) {
   }
 
   for (const row of providerRows) {
+    const statementTotals = sumAttachmentStatements(statementAttachments, row.scope_key);
     const expectedRateBps = defaultExpectedRateBps(row.scope_key);
     const observedRateBps = row.gross_paid_cents > 0 ? Math.round((Number(row.compared_amount_cents || 0) / Number(row.gross_paid_cents || 0)) * 10000) : 0;
     const expectedFeeCents = expectedRateBps > 0 ? Math.round((Number(row.gross_paid_cents || 0) * expectedRateBps) / 10000) : 0;
     row.reference_amount_cents = expectedFeeCents;
-    row.statement_amount_cents = expectedFeeCents;
-    row.difference_cents = expectedFeeCents - Number(row.compared_amount_cents || 0);
+    row.statement_amount_cents = Number(statementTotals.statement_fee_cents || 0) || expectedFeeCents;
+    row.book_amount_cents = Number(row.compared_amount_cents || 0);
+    row.difference_cents = row.statement_amount_cents - Number(row.compared_amount_cents || 0);
     row.expected_rate_basis_points = expectedRateBps;
     row.observed_rate_basis_points = observedRateBps;
     row.tolerance_cents = 500;
+    row.attachment_count = statementTotals.attachment_count;
+    row.statement_count = statementTotals.statement_count;
+    row.statement_gross_cents = statementTotals.statement_gross_cents;
+    row.statement_net_cents = statementTotals.statement_net_cents;
+    row.statement_txn_count = statementTotals.statement_txn_count;
     row.unresolved_item_count = Math.abs(row.difference_cents) > row.tolerance_cents ? 1 : 0;
-    row.detail_json = toJson({ gross_paid_cents: row.gross_paid_cents, expected_fee_cents: expectedFeeCents, booked_fee_cents: row.compared_amount_cents, refund_cents: Number(row.refund_cents || 0), payment_count: Number(row.payment_count || 0), booked_expense_count: Number(row.booked_expense_count || 0), expected_rate_basis_points: expectedRateBps, observed_rate_basis_points: observedRateBps });
+    row.detail_json = toJson({ gross_paid_cents: row.gross_paid_cents, expected_fee_cents: expectedFeeCents, booked_fee_cents: row.compared_amount_cents, statement_fee_cents: row.statement_amount_cents, statement_gross_cents: statementTotals.statement_gross_cents, statement_net_cents: statementTotals.statement_net_cents, statement_txn_count: statementTotals.statement_txn_count, refund_cents: Number(row.refund_cents || 0), payment_count: Number(row.payment_count || 0), booked_expense_count: Number(row.booked_expense_count || 0), expected_rate_basis_points: expectedRateBps, observed_rate_basis_points: observedRateBps });
   }
   providerRows.sort((a, b) => String(a.scope_key).localeCompare(String(b.scope_key)));
   return { period_month: periodMonth, rows: providerRows };
 }
 
-async function loadShippingSummary(db, periodMonth) {
+async function loadShippingSummary(db, periodMonth, statementAttachments = []) {
   const start = `${periodMonth}-01`;
   const end = new Date(Date.UTC(Number(periodMonth.slice(0, 4)), Number(periodMonth.slice(5, 7)), 1)).toISOString().slice(0, 10);
   const hasOrders = await tableExists(db, 'orders');
@@ -319,6 +351,7 @@ async function loadShippingSummary(db, periodMonth) {
     expenseCount = Number(row?.expense_count || 0);
   }
 
+  const statementTotals = sumAttachmentStatements(statementAttachments, 'all');
   return {
     period_month: periodMonth,
     rows: [{
@@ -326,22 +359,24 @@ async function loadShippingSummary(db, periodMonth) {
       label: 'Shipping charged vs booked shipping costs',
       reference_amount_cents: charged,
       compared_amount_cents: booked,
-      statement_amount_cents: charged,
+      statement_amount_cents: Number(statementTotals.statement_shipping_cents || statementTotals.statement_gross_cents || charged),
       book_amount_cents: booked,
-      difference_cents: charged - booked,
+      difference_cents: Number(statementTotals.statement_shipping_cents || statementTotals.statement_gross_cents || charged) - booked,
       fulfilled_order_count: fulfilledCount,
       shipping_expense_count: expenseCount,
       tolerance_cents: 1000,
-      unresolved_item_count: Math.abs(charged - booked) > 1000 ? 1 : 0,
-      detail_json: toJson({ shipping_charged_cents: charged, shipping_cost_cents: booked, fulfilled_order_count: fulfilledCount, shipping_expense_count: expenseCount }),
+      attachment_count: statementTotals.attachment_count,
+      statement_count: statementTotals.statement_count,
+      unresolved_item_count: Math.abs((Number(statementTotals.statement_shipping_cents || statementTotals.statement_gross_cents || charged) - booked)) > 1000 ? 1 : 0,
+      detail_json: toJson({ shipping_charged_cents: charged, shipping_cost_cents: booked, statement_shipping_cents: statementTotals.statement_shipping_cents, statement_gross_cents: statementTotals.statement_gross_cents, fulfilled_order_count: fulfilledCount, shipping_expense_count: expenseCount, statement_count: statementTotals.statement_count }),
     }],
   };
 }
 
-async function loadSummaryByType(db, reconciliationType, periodMonth) {
-  if (reconciliationType === 'processor_fees') return loadProcessorFeeSummary(db, periodMonth);
-  if (reconciliationType === 'shipping') return loadShippingSummary(db, periodMonth);
-  return loadSalesTaxSummary(db, periodMonth);
+async function loadSummaryByType(db, reconciliationType, periodMonth, statementAttachments = []) {
+  if (reconciliationType === 'processor_fees') return loadProcessorFeeSummary(db, periodMonth, statementAttachments);
+  if (reconciliationType === 'shipping') return loadShippingSummary(db, periodMonth, statementAttachments);
+  return loadSalesTaxSummary(db, periodMonth, statementAttachments);
 }
 
 export async function onRequestGet(context) {
@@ -357,10 +392,11 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const reconciliationType = cleanReconciliationType(url.searchParams.get('type'));
   const periodMonth = cleanPeriodMonth(url.searchParams.get('period_month'));
-  const computed = await loadSummaryByType(db, reconciliationType, periodMonth);
+  const attachmentInfo = await attachmentInfoByScope(db, { reconciliationType, periodMonth });
+  const statementAttachments = (attachmentInfo.all_items || []).filter((row) => (row.attachment_kind || '') === 'statement');
+  const computed = await loadSummaryByType(db, reconciliationType, periodMonth, statementAttachments);
   const reviews = await listAccountingReconciliationReviews(db, { reconciliationType, periodMonth, includeAllPeriods: url.searchParams.get('all_periods') === '1' });
   const reviewMap = new Map(reviews.map((row) => [`${row.period_month}|${row.scope_key}`, row]));
-  const attachmentInfo = await attachmentInfoByScope(db, { reconciliationType, periodMonth });
   const rowsWithReviews = computed.rows.map((row) => {
     const review = reviewMap.get(`${periodMonth}|${row.scope_key}`) || null;
     const attachmentScope = attachmentInfo.by_scope[String(row.scope_key || 'all')] || attachmentInfo.by_scope.all || { count: 0, statement_count: 0, files: [] };
