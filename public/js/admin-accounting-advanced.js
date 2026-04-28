@@ -173,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><label class="small" for="yearEndCloseYearInput">Tax year</label><input id="yearEndCloseYearInput" type="number" min="2000" max="2100" value="${new Date().getFullYear()}" /></div>
           <div><button class="btn primary" type="button" id="loadYearEndCloseButton">Refresh close bundle</button></div>
           <div><button class="btn" type="button" id="downloadYearEndCloseButton">Download JSON bundle</button></div>
+          <div><button class="btn" type="button" id="downloadYearEndCloseCsvButton">Download CSV checklist</button></div>
         </div>
         <div id="yearEndCloseList" class="small" style="margin-top:10px"></div>
       </div>
@@ -305,7 +306,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="small">GL active ${esc(String(Number(gl.active_account_count || 0)))} • mapped ${esc(String(Number(gl.mapped_account_count || 0)))} • finalized ${esc(String(Number(gl.finalized_account_count || 0)))} • needs accountant ${esc(String(Number(gl.needs_accountant_count || 0)))} • unmapped ${esc(String(Number(gl.unmapped_account_count || 0)))}</div>
       <div class="small" style="margin-top:8px">Attachment coverage by kind: ${esc(JSON.stringify(handoff.attachment_summary?.by_kind || {}))}</div>
       <div class="small" style="margin-top:8px">Attachment coverage by month: ${esc(JSON.stringify(handoff.attachment_summary?.by_month || {}))}</div>
+      <div class="small" style="margin-top:8px">Attachment coverage by scope: ${esc(JSON.stringify(handoff.attachment_summary?.by_scope || {}))}</div>
       <div class="small" style="margin-top:8px">Reconciliation coverage: ${esc(JSON.stringify(handoff.reconciliation_summary?.by_type || {}))} • status ${esc(JSON.stringify(handoff.reconciliation_summary?.by_status || {}))}</div>
+      <div class="small" style="margin-top:8px">Reconciliation by scope: ${esc(JSON.stringify(handoff.reconciliation_summary?.by_scope || {}))}</div>
       ${(handoff.gl_final_blockers || []).length ? `<div class="small" style="margin-top:8px"><strong>GL blockers:</strong><br>${handoff.gl_final_blockers.slice(0, 8).map((row) => `${esc(row.code || '')} — ${esc(row.blocker_type || 'needs review')}`).join('<br>')}</div>` : ''}
       ${(handoff.attachment_summary?.coverage_gaps || []).length ? `<div class="small" style="margin-top:8px"><strong>Attachment gaps:</strong><br>${handoff.attachment_summary.coverage_gaps.slice(0, 8).map((row) => esc(row)).join('<br>')}</div>` : ''}
       ${(handoff.recommended_missing_items || []).length ? `<div class="small" style="margin-top:8px"><strong>Still needed:</strong><br>${handoff.recommended_missing_items.map((row) => esc(row)).join('<br>')}</div>` : ''}
@@ -439,6 +442,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (event.target.id === 'downloadYearEndCloseButton') {
       const year = document.getElementById('yearEndCloseYearInput')?.value || new Date().getFullYear();
       window.open(`/api/admin/accounting-year-end-close?year=${encodeURIComponent(year)}&format=json`, '_blank');
+      return;
+    }
+    if (event.target.id === 'downloadYearEndCloseCsvButton') {
+      const year = document.getElementById('yearEndCloseYearInput')?.value || new Date().getFullYear();
+      window.open(`/api/admin/accounting-year-end-close?year=${encodeURIComponent(year)}&format=csv`, '_blank');
     }
   });
 

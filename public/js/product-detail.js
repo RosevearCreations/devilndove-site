@@ -35,6 +35,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productTrustSummaryEl = document.getElementById("productTrustSummary");
   const productPolicySummaryEl = document.getElementById("productPolicySummary");
   const productPolicyListEl = document.getElementById("productPolicyList");
+  const productMarketplaceCardEl = document.getElementById("productMarketplaceCard");
+  const productMarketplaceSummaryEl = document.getElementById("productMarketplaceSummary");
+  const productMarketplaceLinksEl = document.getElementById("productMarketplaceLinks");
   const productProcessSummaryEl = document.getElementById("productProcessSummary");
   const productProcessLinksEl = document.getElementById("productProcessLinks");
   const productReviewsCardEl = document.getElementById("productReviewsCard");
@@ -135,6 +138,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       ? `Current tracked stock shows ${inventoryQty} available right now, which helps set expectation before checkout.`
       : 'If stock is low or unavailable, buyers can use wishlist and back-in-stock tools instead of guessing.');
     points.push('Custom, personalized, or made-to-order timing should be confirmed before payment so one-off workshop projects are not mistaken for ready-to-ship stock.');
+    if (String(product?.merchandise_origin || 'handmade').toLowerCase() !== 'handmade') points.push('Vintage, collectible, antique, or found items should be described with plain condition notes so wear, patina, or age are visible before purchase.');
+    if (String(product?.sale_channel || 'onsite').toLowerCase() === 'external_only') points.push('This item is routed to an external listing instead of direct on-site checkout.');
     points.push('Questions about fit, finish, delivery, pickup, or workshop-specific details can be routed through Contact quickly if a listing needs clarification.');
     if (reviewCount > 0) points.push(`This item also has buyer feedback on the page, which gives shoppers another trust signal before they commit.`);
     if ((resourceLinks?.length || 0) > 0) points.push('The making-story section shows workshop context, tools, and supplies instead of presenting the product as a faceless catalog item.');
@@ -159,6 +164,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     productProcessLinksEl.innerHTML = links.map((link) => `<a class="btn" href="${link.href}">${escapeHtml(link.label)}</a>`).join('');
   }
 
+  function renderMarketplaceSupport(product) {
+    if (!productMarketplaceCardEl || !productMarketplaceSummaryEl || !productMarketplaceLinksEl) return;
+    const origin = String(product?.merchandise_origin || 'handmade').trim().toLowerCase();
+    const saleChannel = String(product?.sale_channel || 'onsite').trim().toLowerCase();
+    const externalUrl = String(product?.external_listing_url || '').trim();
+    const externalLabel = String(product?.external_listing_label || 'External listing').trim() || 'External listing';
+    const notes = [];
+    if (origin && origin !== 'handmade') notes.push(`This is listed as a ${origin} or pre-built item rather than a workshop-made piece.`);
+    if (product?.era_label) notes.push(`Era / period: ${product.era_label}.`);
+    if (product?.condition_summary) notes.push(`Condition: ${product.condition_summary}.`);
+    if (product?.sourcing_notes) notes.push(product.sourcing_notes);
+    if (saleChannel === 'external_only') notes.push('This item is currently being sold through an external listing channel instead of direct Devil n Dove checkout.');
+    if (saleChannel === 'hybrid') notes.push('This item can stay visible on Devil n Dove while also linking out to an external marketplace listing.');
+    if (!notes.length && !externalUrl) {
+      hide(productMarketplaceCardEl);
+      productMarketplaceLinksEl.innerHTML = '';
+      productMarketplaceSummaryEl.textContent = '';
+      return;
+    }
+    show(productMarketplaceCardEl);
+    productMarketplaceSummaryEl.textContent = notes.join(' ');
+    const links = [];
+    if (externalUrl) links.push(`<a class="btn" href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(externalLabel)}</a>`);
+    if (saleChannel !== 'external_only') links.push(`<a class="btn" href="/contact/">Ask about pickup / availability</a>`);
+    productMarketplaceLinksEl.innerHTML = links.join('');
+  }
+
   function renderTrustSummary(product, trustSummary, images, resourceLinks) {
     currentTrustSummary = trustSummary || null;
     if (!productTrustListEl || !productTrustSummaryEl) return;
@@ -168,7 +200,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (resourceLinks?.length) points.push(`This item includes a maker-story block with the tools and supplies used.`);
     if (Number(product.inventory_tracking || 0) === 1) points.push(`Inventory is tracked for this product so stock status is clearer.`);
     if (Number(product.compare_at_price_cents || 0) > Number(product.price_cents || 0)) points.push(`A compare-at price is available for context.`);
-    productTrustSummaryEl.textContent = `Product trust signals: ${(trustSummary?.image_count || 0)} image(s), ${resourceLinks?.length || 0} linked making-story item(s), and ${trustSummary?.in_stock ? 'current stock available' : 'stock can be followed with alerts'}.`;
+    const origin = String(product?.merchandise_origin || 'handmade').toLowerCase();
+    productTrustSummaryEl.textContent = `Product trust signals: ${(trustSummary?.image_count || 0)} image(s), ${resourceLinks?.length || 0} linked making-story item(s), and ${trustSummary?.in_stock ? 'current stock available' : 'stock can be followed with alerts'}${origin !== 'handmade' ? ' with provenance-style notes for a non-handmade item' : ''}.`;
     productTrustListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
   }
 
@@ -196,7 +229,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary) {
     currentProduct = product || null;
-    if (productTypeEl) productTypeEl.textContent = product.product_type || "";
+    if (productTypeEl) {
+      const badges = [product.product_type || ''];
+      if (product.merchandise_origin) badges.push(product.merchandise_origin);
+      if (product.sale_channel && product.sale_channel !== 'onsite') badges.push(product.sale_channel.replace('_', ' '));
+      productTypeEl.textContent = badges.filter(Boolean).join(' • ');
+    }
     if (productNameEl) productNameEl.textContent = product.name || "";
     if (pageH1El) pageH1El.textContent = product.h1_override || product.name || 'Product Details';
     if (pageIntroEl) pageIntroEl.textContent = product.meta_description || product.short_description || 'View the full details for this Devil n Dove item.';
@@ -221,7 +259,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderReviews(reviews, reviewSummary);
     renderTrustSummary(product, trustSummary, images, resourceLinks);
     renderPolicySupport(product, trustSummary, resourceLinks);
+    renderMarketplaceSupport(product);
     renderProcessLinks(product, resourceLinks);
+    if (addToCartButton) {
+      const externalOnly = String(product.sale_channel || 'onsite').toLowerCase() === 'external_only';
+      addToCartButton.style.display = externalOnly ? 'none' : '';
+    }
+    if (productQuantityEl) {
+      productQuantityEl.style.display = String(product.sale_channel || 'onsite').toLowerCase() === 'external_only' ? 'none' : '';
+    }
     if (productInterestGuestWrap) productInterestGuestWrap.style.display = Number(product.inventory_quantity || 0) > 0 ? 'none' : 'block';
   }
 
@@ -255,7 +301,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           description: data.product.meta_description || data.product.short_description || data.product.description || '',
           sku: data.product.sku || undefined,
           image: (data.images || []).map((row) => row.image_url).filter(Boolean),
-          offers: { '@type': 'Offer', priceCurrency: data.product.currency || 'CAD', price: (Number(data.product.price_cents || 0) / 100).toFixed(2), availability: Number(data.product.inventory_quantity || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: resolvedCanonical }
+          offers: { '@type': 'Offer', priceCurrency: data.product.currency || 'CAD', price: (Number(data.product.price_cents || 0) / 100).toFixed(2), availability: Number(data.product.inventory_quantity || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: String(data.product.sale_channel || 'onsite').toLowerCase() === 'external_only' && data.product.external_listing_url ? data.product.external_listing_url : resolvedCanonical }
         };
         let script = document.getElementById('productStructuredData');
         if (!script) { script = document.createElement('script'); script.type = 'application/ld+json'; script.id = 'productStructuredData'; document.head.appendChild(script); }
@@ -308,6 +354,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       clearCartMessage();
       if (!window.DDCart) return setCartMessage("Cart is not available right now.", true);
       if (!currentProduct || !currentProduct.product_id) return setCartMessage("Product is not ready to add to cart.", true);
+      if (String(currentProduct.sale_channel || 'onsite').toLowerCase() === 'external_only') {
+        return setCartMessage('This item currently routes to an external listing instead of on-site checkout.', true);
+      }
       const quantity = Number(productQuantityEl?.value || 1);
       if (!Number.isInteger(quantity) || quantity <= 0) return setCartMessage("Please enter a valid quantity.", true);
       try {

@@ -42,6 +42,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return {
       q: String(document.getElementById('shopSearchInput')?.value || '').trim(),
       product_type: String(document.getElementById('shopTypeFilter')?.value || '').trim(),
+      merchandise_origin: String(document.getElementById('shopOriginFilter')?.value || '').trim(),
+      sale_channel: String(document.getElementById('shopChannelFilter')?.value || '').trim(),
       min_price_cents: String(document.getElementById('shopMinPrice')?.value || '').trim(),
       max_price_cents: String(document.getElementById('shopMaxPrice')?.value || '').trim(),
       requires_shipping: document.getElementById('shopShippingOnly')?.checked ? '1' : ''
@@ -58,7 +60,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const categories = Array.isArray(filterGroups.categories) ? filterGroups.categories.slice(0, 6) : [];
     const colors = Array.isArray(filterGroups.colors) ? filterGroups.colors.slice(0, 6) : [];
     const types = Array.isArray(filterGroups.product_types) ? filterGroups.product_types.slice(0, 3) : [];
-    if (!categories.length && !colors.length && !types.length) {
+    const origins = Array.isArray(filterGroups.merchandise_origins) ? filterGroups.merchandise_origins.slice(0, 6) : [];
+    const channels = Array.isArray(filterGroups.sale_channels) ? filterGroups.sale_channels.slice(0, 3) : [];
+    if (!categories.length && !colors.length && !types.length && !origins.length && !channels.length) {
       collectionsEl.innerHTML = '';
       return;
     }
@@ -70,6 +74,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div><strong>Categories</strong><div class="small" style="margin-top:8px">${categories.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No categories yet.'}</div></div>
           <div><strong>Colours / themes</strong><div class="small" style="margin-top:8px">${colors.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No colour groups yet.'}</div></div>
           <div><strong>Product types</strong><div class="small" style="margin-top:8px">${types.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No product-type groups yet.'}</div></div>
+          <div><strong>Origins</strong><div class="small" style="margin-top:8px">${origins.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No origin groups yet.'}</div></div>
+          <div><strong>Sale channels</strong><div class="small" style="margin-top:8px">${channels.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No channel groups yet.'}</div></div>
         </div>
       </section>`;
   }
@@ -79,9 +85,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       <section class="card">
         <h2 style="margin-top:0">Shipping, custom order timing, and quick FAQ</h2>
         <div class="customer-welcome-grid">
-          <div><strong>Shipping clarity</strong><p class="small">Product pages and the cart now keep shipping-required information visible sooner so shoppers know whether an item is a shipped piece or a digital / no-shipping listing.</p></div>
+          <div><strong>Shipping clarity</strong><p class="small">Product pages and the cart now keep shipping-required information visible sooner so shoppers know whether an item is shipped from Devil n Dove directly or linked out to an external marketplace listing.</p></div>
           <div><strong>Custom timing</strong><p class="small">Custom, personalized, or made-to-order timing should be confirmed before payment. This is especially important for one-off craft work and workshop-led experiments.</p></div>
-          <div><strong>Returns & support</strong><p class="small">Questions, delivery issues, or custom-order fit concerns should route through the contact flow quickly so shoppers do not need to hunt for help after comparing items.</p></div><div><strong>Process & workshop story</strong><p class="small">Gallery, About, and Creations pages help buyers move from a single listing into the broader maker story, workshop context, and future process-video content.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/gallery/">Gallery</a><a class="btn" href="/about/">About</a><a class="btn" href="/creations/">Creations</a></div></div>
+          <div><strong>Returns & support</strong><p class="small">Questions, delivery issues, collectible-condition questions, or custom-order fit concerns should route through the contact flow quickly so shoppers do not need to hunt for help after comparing items.</p></div><div><strong>Process, provenance & workshop story</strong><p class="small">Gallery, About, and Creations pages help buyers move from a single listing into the broader maker story, workshop context, provenance notes for vintage/collectible stock, and future process-video content.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/gallery/">Gallery</a><a class="btn" href="/about/">About</a><a class="btn" href="/creations/">Creations</a></div></div>
         </div>
       </section>`;
   }
@@ -97,20 +103,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       const imageUrl = String(product.featured_image_url || product.og_image_url || '').trim();
       const imageAlt = escapeHtml(product.seo_h1 || product.h1_override || product.meta_title || product.name || 'Product image');
       const keywordBadge = product.keywords ? `<div class="small" style="opacity:.8">${escapeHtml(product.keywords.split(',').slice(0,3).join(' • '))}</div>` : '';
+      const origin = escapeHtml(product.merchandise_origin || 'handmade');
+      const saleChannel = escapeHtml(product.sale_channel || 'onsite');
+      const externalUrl = String(product.external_listing_url || '').trim();
+      const externalLabel = escapeHtml(product.external_listing_label || 'External listing');
+      const originBadge = `<div class="small" style="margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill">${origin}</span><span class="pill">${saleChannel}</span>${product.era_label ? `<span class="pill">${escapeHtml(product.era_label)}</span>` : ''}</div>`;
       const imageMarkup = imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${imageAlt}" style="width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:12px;margin-bottom:12px" />`
         : `<div style="width:100%;aspect-ratio:1 / 1;border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd" class="small">No Image</div>`;
+      const ctaMarkup = externalUrl
+        ? `<a class="btn" href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">${externalLabel}</a>${product.sale_channel === 'hybrid' ? `<button class="btn" type="button" data-add-shop-cart-id="${productId}">Add to Cart</button>` : ''}`
+        : `<button class="btn" type="button" data-add-shop-cart-id="${productId}">Add to Cart</button>`;
       return `
         <article class="card">
           ${imageMarkup}
+          ${originBadge}
           <div class="small" style="text-transform:capitalize;opacity:.8">${productType}</div>
           <h3 style="margin:8px 0 6px 0">${name}</h3>
           <div style="font-weight:700;margin-bottom:10px">${price}</div>
           ${keywordBadge}
           <p class="small" style="min-height:48px">${shortDescription || 'No description available yet.'}</p>
-          <div class="small" style="margin-top:8px">${product.requires_shipping ? 'Shipping / pickup item' : 'Digital or no-shipping item'}${product.product_category ? ` • ${escapeHtml(product.product_category)}` : ''}</div>
+          <div class="small" style="margin-top:8px">${product.requires_shipping ? 'Shipping / pickup item' : 'Digital or no-shipping item'}${product.product_category ? ` • ${escapeHtml(product.product_category)}` : ''}${product.condition_summary ? ` • ${escapeHtml(product.condition_summary)}` : ''}</div>
           <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
             <a class="btn" href="/shop/product/?slug=${slug}">View</a>
-            <button class="btn" type="button" data-add-shop-cart-id="${productId}">Add to Cart</button>
+            ${ctaMarkup}
           </div>
         </article>`;
     }).join('');
@@ -174,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   document.getElementById('shopSearchButton')?.addEventListener('click', loadProducts);
   document.getElementById('shopResetButton')?.addEventListener('click', () => {
-    ['shopSearchInput','shopTypeFilter','shopMinPrice','shopMaxPrice'].forEach((id) => { const el=document.getElementById(id); if (el) el.value=''; });
+    ['shopSearchInput','shopTypeFilter','shopOriginFilter','shopChannelFilter','shopMinPrice','shopMaxPrice'].forEach((id) => { const el=document.getElementById(id); if (el) el.value=''; });
     const ship=document.getElementById('shopShippingOnly'); if (ship) ship.checked=false; loadProducts();
   });
   await loadProducts();

@@ -360,6 +360,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setField('name', draft.name);
     setField('product_category', draft.product_category);
     setField('color_name', draft.color_name);
+    setField('merchandise_origin', draft.merchandise_origin || 'handmade');
+    setField('sale_channel', draft.sale_channel || 'onsite');
+    setField('external_listing_url', draft.external_listing_url || '');
+    setField('external_listing_label', draft.external_listing_label || '');
+    setField('condition_summary', draft.condition_summary || '');
+    setField('era_label', draft.era_label || '');
+    setField('sourcing_notes', draft.sourcing_notes || '');
     setField('price', centsToDollars(draft.price_cents));
     setField('compare_at_price', centsToDollars(draft.compare_at_price_cents));
     setField('inventory_quantity', draft.inventory_quantity || 1);

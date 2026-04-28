@@ -18,6 +18,32 @@ document.addEventListener("DOMContentLoaded", () => {
     messageEl.style.display = "none";
   }
 
+
+  function ensureMarketplaceFields() {
+    if (!form || form.querySelector('[data-dd-collectibles-fields="1"]')) return;
+    const mount = document.createElement('div');
+    mount.className = 'card';
+    mount.dataset.ddCollectiblesFields = '1';
+    mount.style.marginTop = '14px';
+    mount.innerHTML = `
+      <h3 style="margin-top:0">Handmade, vintage, and external listing details</h3>
+      <div class="small">Use this for collectibles, antiquities, oddities, old tools, and other pre-built stock that is not workshop-made. Hybrid and external-only listings can point to Facebook Marketplace or another selling location.</div>
+      <div class="grid cols-3" style="gap:10px;margin-top:12px">
+        <label><span class="small">Merchandise origin</span><select name="merchandise_origin"><option value="handmade">Handmade</option><option value="vintage">Vintage</option><option value="collectible">Collectible</option><option value="antique">Antique</option><option value="oddity">Oddity / curiosity</option><option value="prebuilt">Pre-built / found item</option></select></label>
+        <label><span class="small">Sale channel</span><select name="sale_channel"><option value="onsite">Sell on Devil n Dove</option><option value="hybrid">Sell here + external listing</option><option value="external_only">External listing only</option></select></label>
+        <label><span class="small">External listing label</span><input type="text" name="external_listing_label" maxlength="120" placeholder="Facebook Marketplace" /></label>
+      </div>
+      <div class="grid cols-2" style="gap:10px;margin-top:12px">
+        <label><span class="small">External listing URL</span><input type="url" name="external_listing_url" placeholder="https://www.facebook.com/marketplace/..." /></label>
+        <label><span class="small">Era / period</span><input type="text" name="era_label" maxlength="120" placeholder="1960s, Edwardian, mid-century" /></label>
+      </div>
+      <div class="grid cols-2" style="gap:10px;margin-top:12px">
+        <label><span class="small">Condition summary</span><input type="text" name="condition_summary" maxlength="255" placeholder="Patina, wear, tested, cleaned, original box" /></label>
+        <label><span class="small">Sourcing notes</span><textarea name="sourcing_notes" rows="3" placeholder="Estate find, antique mall, workshop rescue, oddity shelf note"></textarea></label>
+      </div>`;
+    form.appendChild(mount);
+  }
+
   function dollarsToCents(value) {
     const normalized = String(value || "").trim();
     if (!normalized) return 0;
@@ -67,6 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loadTaxClasses();
     return;
   }
+
+  ensureMarketplaceFields();
 
   if (!form.dataset.mode) {
     form.dataset.mode = "create";
@@ -127,6 +155,13 @@ document.addEventListener("DOMContentLoaded", () => {
       digital_file_url: String(formData.get("digital_file_url") || "").trim(),
       featured_image_url: String(formData.get("featured_image_url") || "").trim(),
       sort_order: String(formData.get("sort_order") || "").trim() || 0,
+      merchandise_origin: String(formData.get("merchandise_origin") || "handmade").trim(),
+      sale_channel: String(formData.get("sale_channel") || "onsite").trim(),
+      external_listing_url: String(formData.get("external_listing_url") || "").trim(),
+      external_listing_label: String(formData.get("external_listing_label") || "").trim(),
+      condition_summary: String(formData.get("condition_summary") || "").trim(),
+      era_label: String(formData.get("era_label") || "").trim(),
+      sourcing_notes: String(formData.get("sourcing_notes") || "").trim(),
       image_urls: imageUrls
     };
 
@@ -137,6 +172,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!payload.product_type) {
       setMessage("Product type is required.", true);
+      return;
+    }
+
+    if (["hybrid", "external_only"].includes(payload.sale_channel) && !payload.external_listing_url) {
+      setMessage("Add an external listing URL for hybrid or external-only items.", true);
       return;
     }
 

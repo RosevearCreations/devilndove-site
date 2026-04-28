@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!form || !productsTableBody || !window.DDAuth) return;
 
+  ensureMarketplaceFields();
+
   const LOCAL_PENDING_KEY = 'dd_admin_product_update_pending_actions_v1';
   const PRICING_CONSOLE_KEY = 'dd_admin_pricing_console_v2';
   let editingProductId = null;
@@ -60,6 +62,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const field = form.elements.namedItem(name);
     if (!field) return;
     field.value = value == null ? "" : String(value);
+  }
+
+
+  function ensureMarketplaceFields() {
+    if (!form || form.querySelector('[data-dd-collectibles-fields="1"]')) return;
+    const mount = document.createElement('div');
+    mount.className = 'card';
+    mount.dataset.ddCollectiblesFields = '1';
+    mount.style.marginTop = '16px';
+    mount.innerHTML = `
+      <h3 style="margin-top:0">Handmade, vintage, and external listing details</h3>
+      <div class="small">Use this when the item is a vintage find, collectible, antiquity, oddity, or old tool rather than a handmade Devil n Dove piece.</div>
+      <div class="grid cols-3" style="gap:10px;margin-top:12px">
+        <label><span class="small">Merchandise origin</span><select name="merchandise_origin"><option value="handmade">Handmade</option><option value="vintage">Vintage</option><option value="collectible">Collectible</option><option value="antique">Antique</option><option value="oddity">Oddity / curiosity</option><option value="prebuilt">Pre-built / found item</option></select></label>
+        <label><span class="small">Sale channel</span><select name="sale_channel"><option value="onsite">Sell on Devil n Dove</option><option value="hybrid">Sell here + external listing</option><option value="external_only">External listing only</option></select></label>
+        <label><span class="small">External listing label</span><input type="text" name="external_listing_label" maxlength="120" placeholder="Facebook Marketplace" /></label>
+      </div>
+      <div class="grid cols-2" style="gap:10px;margin-top:12px">
+        <label><span class="small">External listing URL</span><input type="url" name="external_listing_url" placeholder="https://www.facebook.com/marketplace/..." /></label>
+        <label><span class="small">Era / period</span><input type="text" name="era_label" maxlength="120" placeholder="1960s, Edwardian, mid-century" /></label>
+      </div>
+      <div class="grid cols-2" style="gap:10px;margin-top:12px">
+        <label><span class="small">Condition summary</span><input type="text" name="condition_summary" maxlength="255" placeholder="Patina, wear, tested, cleaned, original box" /></label>
+        <label><span class="small">Sourcing notes</span><textarea name="sourcing_notes" rows="3" placeholder="Estate find, antique mall, workshop rescue, oddity shelf note"></textarea></label>
+      </div>`;
+    form.appendChild(mount);
   }
 
   function getImageUrlFields() {
@@ -316,6 +344,13 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("digital_file_url", product.digital_file_url || "");
     setField("featured_image_url", product.featured_image_url || "");
     setField("sort_order", product.sort_order == null ? "0" : product.sort_order);
+    setField("merchandise_origin", product.merchandise_origin || "handmade");
+    setField("sale_channel", product.sale_channel || "onsite");
+    setField("external_listing_url", product.external_listing_url || "");
+    setField("external_listing_label", product.external_listing_label || "");
+    setField("condition_summary", product.condition_summary || "");
+    setField("era_label", product.era_label || "");
+    setField("sourcing_notes", product.sourcing_notes || "");
     resetImageUrlFields();
     const imageFields = getImageUrlFields();
     const safeImages = Array.isArray(images) ? images.slice(0, 5) : [];
