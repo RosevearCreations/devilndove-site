@@ -75,7 +75,6 @@ async function attachmentInfoByScope(db, { reconciliationType, periodMonth }) {
   return { count: attachments.length, items: attachments.slice(0, 40), all_items: attachments, by_scope: byScope };
 }
 
-
 function sumAttachmentStatements(attachments = [], scopeKey = 'all') {
   const normalizedScope = String(scopeKey || 'all').toLowerCase();
   const matches = attachments.filter((row) => {
@@ -95,6 +94,7 @@ function sumAttachmentStatements(attachments = [], scopeKey = 'all') {
     return acc;
   }, { attachment_count: 0, statement_count: 0, statement_gross_cents: 0, statement_fee_cents: 0, statement_net_cents: 0, statement_tax_cents: 0, statement_shipping_cents: 0, statement_txn_count: 0 });
 }
+
 async function loadSalesTaxSummary(db, periodMonth, statementAttachments = []) {
   const start = `${periodMonth}-01`;
   const end = new Date(Date.UTC(Number(periodMonth.slice(0, 4)), Number(periodMonth.slice(5, 7)), 1)).toISOString().slice(0, 10);
@@ -153,7 +153,6 @@ async function loadSalesTaxSummary(db, periodMonth, statementAttachments = []) {
   const statementTaxCents = Number(statementTotals.statement_tax_cents || statementTotals.statement_gross_cents || 0);
   const unresolvedItemCount = Math.abs(statementTaxCents || netTaxPayableCents) > 500 ? 1 : (netTaxPayableCents === 0 ? 0 : 1);
 
-  const statementTotals = sumAttachmentStatements(statementAttachments, 'all');
   return {
     period_month: periodMonth,
     rows: [{
@@ -203,11 +202,10 @@ async function loadProcessorFeeSummary(db, periodMonth, statementAttachments = [
         AND substr(COALESCE(${paidAtCol}, datetime('now')),1,10) < ?
         AND LOWER(COALESCE(${paymentStatusCol},'')) IN ('paid','partially_refunded','refunded')
       GROUP BY provider
-      ORDER BY provider ASC
     `).bind(start, end).all().catch(() => ({ results: [] })));
     providerRows.push(...paymentRows.map((row) => ({
-      scope_key: row.provider || 'other',
-      label: `${row.provider || 'other'} expected fees vs booked fees`,
+      scope_key: providerScopeFromText(row.provider),
+      label: `${row.provider || 'Other'} expected fees vs booked fees`,
       gross_paid_cents: Number(row.gross_paid_cents || 0),
       reference_amount_cents: 0,
       statement_amount_cents: 0,
@@ -218,89 +216,119 @@ async function loadProcessorFeeSummary(db, periodMonth, statementAttachments = [
       booked_expense_count: 0,
       refund_cents: 0,
       unresolved_item_count: 0,
-      detail_json: '{}'
+      expected_rate_basis_points: defaultExpectedRateBps(providerScopeFromText(row.provider)),
+      observed_rate_basis_points: 0,
+      tolerance_cents: 500,
     })));
+  }
+
+  if (hasExpenses) {
+    const expenseRows = rows(await db.prepare(`
+      SELECT LOWER(COALESCE(v.vendor_name, e.vendor_name, e.ledger_name, 'other')) AS vendor_name,
+             COALESCE(SUM(CAST(ROUND((COALESCE(e.amount,0) + COALESCE(e.tax_amount,0)) * 100.0) AS INTEGER)),0) AS expense_cents,
+             COUNT(*) AS expense_count
+      FROM accounting_expenses e
+      LEFT JOIN accounting_vendors v ON v.vendor_id = e.vendor_id
+      WHERE substr(COALESCE(e.expense_date, e.created_at, datetime('now')),1,10) >= ?
+        AND substr(COALESCE(e.expense_date, e.created_at, datetime('now')),1,10) < ?
+      GROUP BY vendor_name
+    `).bind(start, end).all().catch(() => ({ results: [] })));
+    for (const row of expenseRows) {
+      const scopeKey = providerScopeFromText(row.vendor_name);
+      const existing = providerRows.find((item) => item.scope_key === scopeKey);
+      if (existing) {
+        existing.compared_amount_cents = Number(row.expense_cents || 0);
+        existing.book_amount_cents = Number(row.expense_cents || 0);
+        existing.booked_expense_count = Number(row.expense_count || 0);
+      } else {
+        providerRows.push({
+          scope_key: scopeKey,
+          label: `${scopeKey} expected fees vs booked fees`,
+          gross_paid_cents: 0,
+          reference_amount_cents: 0,
+          statement_amount_cents: 0,
+          compared_amount_cents: Number(row.expense_cents || 0),
+          book_amount_cents: Number(row.expense_cents || 0),
+          difference_cents: 0,
+          payment_count: 0,
+          booked_expense_count: Number(row.expense_count || 0),
+          refund_cents: 0,
+          unresolved_item_count: 0,
+          expected_rate_basis_points: defaultExpectedRateBps(scopeKey),
+          observed_rate_basis_points: 0,
+          tolerance_cents: 500,
+        });
+      }
+    }
   }
 
   if (hasRefunds) {
     const refundRows = rows(await db.prepare(`
-      SELECT LOWER(COALESCE(p.provider,'other')) AS provider,
-             COALESCE(SUM(COALESCE(r.amount_cents,0)),0) AS refund_cents,
-             COUNT(*) AS refund_count
-      FROM payment_refunds r
-      LEFT JOIN payments p ON p.payment_id = r.payment_id
-      WHERE substr(COALESCE(r.created_at, datetime('now')),1,10) >= ?
-        AND substr(COALESCE(r.created_at, datetime('now')),1,10) < ?
+      SELECT LOWER(COALESCE(provider,'other')) AS provider,
+             COALESCE(SUM(CAST(ROUND(COALESCE(amount,0) * 100.0) AS INTEGER)),0) AS refund_cents
+      FROM payment_refunds
+      WHERE substr(COALESCE(created_at, datetime('now')),1,10) >= ?
+        AND substr(COALESCE(created_at, datetime('now')),1,10) < ?
       GROUP BY provider
     `).bind(start, end).all().catch(() => ({ results: [] })));
-    for (const refund of refundRows) {
-      const scope = refund.provider || 'other';
-      let row = providerRows.find((item) => item.scope_key === scope);
-      if (!row) {
-        row = { scope_key: scope, label: `${scope} expected fees vs booked fees`, gross_paid_cents: 0, reference_amount_cents: 0, statement_amount_cents: 0, compared_amount_cents: 0, book_amount_cents: 0, difference_cents: 0, payment_count: 0, booked_expense_count: 0, refund_cents: 0, unresolved_item_count: 0, detail_json: '{}' };
-        providerRows.push(row);
+    for (const row of refundRows) {
+      const scopeKey = providerScopeFromText(row.provider);
+      const existing = providerRows.find((item) => item.scope_key === scopeKey);
+      if (existing) {
+        existing.refund_cents = Number(row.refund_cents || 0);
+      } else {
+        providerRows.push({
+          scope_key: scopeKey,
+          label: `${scopeKey} expected fees vs booked fees`,
+          gross_paid_cents: 0,
+          reference_amount_cents: 0,
+          statement_amount_cents: 0,
+          compared_amount_cents: 0,
+          book_amount_cents: 0,
+          difference_cents: 0,
+          payment_count: 0,
+          booked_expense_count: 0,
+          refund_cents: Number(row.refund_cents || 0),
+          unresolved_item_count: 0,
+          expected_rate_basis_points: defaultExpectedRateBps(scopeKey),
+          observed_rate_basis_points: 0,
+          tolerance_cents: 500,
+        });
       }
-      row.refund_cents += Number(refund.refund_cents || 0);
-      row.refund_count = Number(refund.refund_count || 0);
     }
   }
 
-  if (hasExpenses) {
-    const feeRows = rows(await db.prepare(`
-      SELECT LOWER(COALESCE(vendor_name,'')) AS vendor_name,
-             LOWER(COALESCE(notes,'')) AS notes,
-             COALESCE(SUM(CAST(ROUND((COALESCE(amount,0) + COALESCE(tax_amount,0)) * 100.0) AS INTEGER)),0) AS booked_fee_cents,
-             COUNT(*) AS expense_count
-      FROM accounting_expenses
-      WHERE substr(COALESCE(expense_date, created_at, datetime('now')),1,10) >= ?
-        AND substr(COALESCE(expense_date, created_at, datetime('now')),1,10) < ?
-        AND (
-          COALESCE(ledger_code,'') IN ('6715','6720')
-          OR LOWER(COALESCE(vendor_name,'')) LIKE '%paypal%'
-          OR LOWER(COALESCE(vendor_name,'')) LIKE '%stripe%'
-          OR LOWER(COALESCE(vendor_name,'')) LIKE '%square%'
-          OR LOWER(COALESCE(vendor_name,'')) LIKE '%etsy%'
-          OR LOWER(COALESCE(vendor_name,'')) LIKE '%bank%'
-          OR LOWER(COALESCE(notes,'')) LIKE '%merchant%'
-          OR LOWER(COALESCE(notes,'')) LIKE '%processor%'
-        )
-      GROUP BY vendor_name, notes
-    `).bind(start, end).all().catch(() => ({ results: [] })));
-    for (const fee of feeRows) {
-      const scope = providerScopeFromText(`${fee.vendor_name} ${fee.notes}`);
-      let row = providerRows.find((item) => item.scope_key === scope);
-      if (!row) {
-        row = { scope_key: scope, label: `${scope} expected fees vs booked fees`, gross_paid_cents: 0, reference_amount_cents: 0, statement_amount_cents: 0, compared_amount_cents: 0, book_amount_cents: 0, difference_cents: 0, payment_count: 0, booked_expense_count: 0, refund_cents: 0, unresolved_item_count: 0, detail_json: '{}' };
-        providerRows.push(row);
-      }
-      row.compared_amount_cents += Number(fee.booked_fee_cents || 0);
-      row.book_amount_cents = row.compared_amount_cents;
-      row.booked_expense_count += Number(fee.expense_count || 0);
-    }
-  }
-
-  for (const row of providerRows) {
+  const rowsOut = providerRows.map((row) => {
+    const netPaidCents = Math.max(0, Number(row.gross_paid_cents || 0) - Number(row.refund_cents || 0));
+    const expectedRateBps = Number(row.expected_rate_basis_points || 0);
+    const expectedFeeCents = expectedRateBps > 0 ? Math.round((netPaidCents * expectedRateBps) / 10000) : 0;
     const statementTotals = sumAttachmentStatements(statementAttachments, row.scope_key);
-    const expectedRateBps = defaultExpectedRateBps(row.scope_key);
-    const observedRateBps = row.gross_paid_cents > 0 ? Math.round((Number(row.compared_amount_cents || 0) / Number(row.gross_paid_cents || 0)) * 10000) : 0;
-    const expectedFeeCents = expectedRateBps > 0 ? Math.round((Number(row.gross_paid_cents || 0) * expectedRateBps) / 10000) : 0;
+    const statementFeeCents = Number(statementTotals.statement_fee_cents || 0);
+    const statementGrossCents = Number(statementTotals.statement_gross_cents || 0);
     row.reference_amount_cents = expectedFeeCents;
-    row.statement_amount_cents = Number(statementTotals.statement_fee_cents || 0) || expectedFeeCents;
-    row.book_amount_cents = Number(row.compared_amount_cents || 0);
-    row.difference_cents = row.statement_amount_cents - Number(row.compared_amount_cents || 0);
+    row.statement_amount_cents = statementFeeCents || expectedFeeCents;
+    row.difference_cents = (statementFeeCents || expectedFeeCents) - Number(row.compared_amount_cents || 0);
     row.expected_rate_basis_points = expectedRateBps;
-    row.observed_rate_basis_points = observedRateBps;
-    row.tolerance_cents = 500;
+    row.observed_rate_basis_points = netPaidCents > 0 ? Math.round((Number(row.compared_amount_cents || 0) / netPaidCents) * 10000) : 0;
     row.attachment_count = statementTotals.attachment_count;
     row.statement_count = statementTotals.statement_count;
-    row.statement_gross_cents = statementTotals.statement_gross_cents;
-    row.statement_net_cents = statementTotals.statement_net_cents;
-    row.statement_txn_count = statementTotals.statement_txn_count;
-    row.unresolved_item_count = Math.abs(row.difference_cents) > row.tolerance_cents ? 1 : 0;
-    row.detail_json = toJson({ gross_paid_cents: row.gross_paid_cents, expected_fee_cents: expectedFeeCents, booked_fee_cents: row.compared_amount_cents, statement_fee_cents: row.statement_amount_cents, statement_gross_cents: statementTotals.statement_gross_cents, statement_net_cents: statementTotals.statement_net_cents, statement_txn_count: statementTotals.statement_txn_count, refund_cents: Number(row.refund_cents || 0), payment_count: Number(row.payment_count || 0), booked_expense_count: Number(row.booked_expense_count || 0), expected_rate_basis_points: expectedRateBps, observed_rate_basis_points: observedRateBps });
-  }
-  providerRows.sort((a, b) => String(a.scope_key).localeCompare(String(b.scope_key)));
-  return { period_month: periodMonth, rows: providerRows };
+    row.unresolved_item_count = Math.abs(row.difference_cents) > 500 ? 1 : 0;
+    row.detail_json = toJson({
+      gross_paid_cents: Number(row.gross_paid_cents || 0),
+      refund_cents: Number(row.refund_cents || 0),
+      net_paid_cents: netPaidCents,
+      expected_fee_cents: expectedFeeCents,
+      booked_fee_cents: Number(row.compared_amount_cents || 0),
+      statement_fee_cents: statementFeeCents,
+      statement_gross_cents: statementGrossCents,
+      payment_count: Number(row.payment_count || 0),
+      booked_expense_count: Number(row.booked_expense_count || 0),
+      statement_count: statementTotals.statement_count,
+    });
+    return row;
+  });
+
+  return { period_month: periodMonth, rows: rowsOut.sort((a, b) => String(a.scope_key).localeCompare(String(b.scope_key))) };
 }
 
 async function loadShippingSummary(db, periodMonth, statementAttachments = []) {
@@ -324,7 +352,7 @@ async function loadShippingSummary(db, periodMonth, statementAttachments = []) {
       FROM orders
       WHERE substr(COALESCE(${createdCol}, datetime('now')),1,10) >= ?
         AND substr(COALESCE(${createdCol}, datetime('now')),1,10) < ?
-        AND LOWER(COALESCE(${statusCol}, '')) IN ('fulfilled','paid')
+        AND LOWER(COALESCE(${statusCol},'')) IN ('fulfilled','paid')
     `).bind(start, end).first().catch(() => null);
     charged = Number(row?.shipping_charged_cents || 0);
     fulfilledCount = Number(row?.fulfilled_count || 0);
@@ -332,31 +360,23 @@ async function loadShippingSummary(db, periodMonth, statementAttachments = []) {
 
   if (hasExpenses) {
     const row = await db.prepare(`
-      SELECT COALESCE(SUM(CAST(ROUND((COALESCE(amount,0) + COALESCE(tax_amount,0)) * 100.0) AS INTEGER)),0) AS shipping_expense_cents,
+      SELECT COALESCE(SUM(CAST(ROUND((COALESCE(amount,0) + COALESCE(tax_amount,0)) * 100.0) AS INTEGER)),0) AS shipping_cost_cents,
              COUNT(*) AS expense_count
       FROM accounting_expenses
       WHERE substr(COALESCE(expense_date, created_at, datetime('now')),1,10) >= ?
         AND substr(COALESCE(expense_date, created_at, datetime('now')),1,10) < ?
-        AND (
-          COALESCE(ledger_code,'') IN ('9270','9205')
-          OR LOWER(COALESCE(vendor_name,'')) LIKE '%canada post%'
-          OR LOWER(COALESCE(vendor_name,'')) LIKE '%courier%'
-          OR LOWER(COALESCE(vendor_name,'')) LIKE '%ups%'
-          OR LOWER(COALESCE(vendor_name,'')) LIKE '%fedex%'
-          OR LOWER(COALESCE(notes,'')) LIKE '%shipping%'
-          OR LOWER(COALESCE(notes,'')) LIKE '%postage%'
-        )
+          AND (LOWER(COALESCE(ledger_name,'')) LIKE '%shipping%' OR LOWER(COALESCE(vendor_name,'')) LIKE '%post%' OR LOWER(COALESCE(vendor_name,'')) LIKE '%ups%' OR LOWER(COALESCE(vendor_name,'')) LIKE '%fedex%')
     `).bind(start, end).first().catch(() => null);
-    booked = Number(row?.shipping_expense_cents || 0);
+    booked = Number(row?.shipping_cost_cents || 0);
     expenseCount = Number(row?.expense_count || 0);
   }
 
-  const statementTotals = sumAttachmentStatements(statementAttachments, 'all');
+  const statementTotals = sumAttachmentStatements(statementAttachments, 'shipping');
   return {
     period_month: periodMonth,
     rows: [{
-      scope_key: 'all',
-      label: 'Shipping charged vs booked shipping costs',
+      scope_key: 'shipping',
+      label: 'Shipping charged vs booked shipping cost',
       reference_amount_cents: charged,
       compared_amount_cents: booked,
       statement_amount_cents: Number(statementTotals.statement_shipping_cents || statementTotals.statement_gross_cents || charged),
