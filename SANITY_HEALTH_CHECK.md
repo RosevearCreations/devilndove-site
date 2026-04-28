@@ -471,3 +471,9 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 - Product catalog code now expects merchandise origin / sale channel / external listing metadata on products.
 - Year-end close API now supports both JSON and CSV export.
 - Live DB sanity should confirm the new product columns exist before relying on collectible / marketplace-linked listings in production.
+
+
+### Pass check
+- Added schema expectations for statement-backed accounting attachments
+- Reconciliation now reads actual statement attachment totals when present
+- Public trust copy expanded on About/Creations and shop collection browsing

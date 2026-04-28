@@ -604,3 +604,7 @@ This pass extends the accounting backend toward T2/GIFI preparation with review-
 
 ## Current pass highlight
 Devil n Dove now supports both workshop-made products and pre-built collectible/vintage stock in the same catalog, with optional external marketplace links for hybrid or external-only listings. The accounting year-end close bundle also now supports CSV export for a cleaner accountant handoff.
+
+
+### Latest storefront/accounting direction
+The shop now separates handmade work from vintage/collectible/pre-built stock more visibly, and accounting attachments can carry statement totals that feed reconciliation and year-end handoff views.
