@@ -68,6 +68,8 @@
       <a href="/tools/index.html" data-nav="/tools/">Tools</a>
       <a href="/supplies/index.html" data-nav="/supplies/">Supplies</a>
       <a href="/shop/index.html" data-nav="/shop/">Shop</a>
+      <a href="/collections/index.html" data-nav="/collections/">Collections</a>
+      <a href="/marketplaces/index.html" data-nav="/marketplaces/">Marketplaces</a>
       <a href="/search/index.html" data-nav="/search/">Search</a>
       <a href="/movies/index.html" data-nav="/movies/">Movies</a>
       <a href="/socials/index.html" data-nav="/socials/">Socials</a>
@@ -121,6 +123,8 @@
           <div class="site-footer-heading">Explore</div>
           <div class="site-footer-links">
             <a href="/shop/index.html">Shop</a>
+            <a href="/collections/index.html">Collections</a>
+            <a href="/marketplaces/index.html">Marketplaces</a>
             <a href="/gallery/index.html">Gallery</a>
             <a href="/creations/index.html">Creations</a>
             <a href="/tools/index.html">Tools</a>
@@ -232,12 +236,14 @@
 
   function shouldShowFeaturedTestimonials(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
-    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html', '/movies/', '/movies/index.html', '/search/', '/search/index.html', '/socials/', '/socials/index.html'].includes(path);
+    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/collections/', '/collections/index.html', '/marketplaces/', '/marketplaces/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html', '/movies/', '/movies/index.html', '/search/', '/search/index.html', '/socials/', '/socials/index.html'].includes(path);
   }
 
   function featuredTestimonialMeta(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
     if (path.startsWith('/shop/')) return { heading: 'Shopper feedback', intro: 'Featured testimonials and approved buyer feedback to support purchase decisions.', limit: 4, insertAfterSelector: '#shopGiftCardStorefrontMount, .customer-welcome, .hero' };
+    if (path.startsWith('/collections/')) return { heading: 'Collection trust signals', intro: 'Featured testimonials and buyer notes that help explain how people browse handmade work, vintage stock, and collectible finds across Devil n Dove.', limit: 3, insertAfterSelector: '.hero, .card, .customer-welcome' };
+    if (path.startsWith('/marketplaces/')) return { heading: 'Marketplace trust signals', intro: 'Feedback and support notes that help explain external listing links, pickup conversations, and condition-first buying decisions.', limit: 3, insertAfterSelector: '.hero, .card, .customer-welcome' };
     if (path.startsWith('/tools/')) return { heading: 'Workshop notes from buyers', intro: 'Feedback from people following the tools, supplies, and maker side of Devil n Dove.', limit: 3, insertAfterSelector: '.hero' };
     if (path.startsWith('/supplies/')) return { heading: 'Maker feedback', intro: 'Testimonials that help show how people use and enjoy the shop and workshop content.', limit: 3, insertAfterSelector: '.hero' };
     if (path.startsWith('/gallery/') || path.startsWith('/creations/')) return { heading: 'What people say about our creations', intro: 'Featured testimonials and approved buyer feedback from the Devil n Dove storefront.', limit: 3, insertAfterSelector: '.hero, .collections, .cards' };
@@ -250,12 +256,14 @@
 
   function shouldShowTrustSupportBlock(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
-    return ['/', '/index.html', '/shop/', '/shop/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/search/', '/search/index.html'].includes(path);
+    return ['/', '/index.html', '/shop/', '/shop/index.html', '/collections/', '/collections/index.html', '/marketplaces/', '/marketplaces/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/search/', '/search/index.html'].includes(path);
   }
 
   function trustSupportMeta(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
     if (path.startsWith('/shop/')) return { heading: 'Shop with more confidence', bullets: ['Saved wishlists and member tools help shoppers come back later.', 'Gift cards, buyer feedback, and clearer product details reduce guesswork.', 'Support links help people back the workshop even when they are not buying a product today.'] };
+    if (path.startsWith('/collections/')) return { heading: 'Collections with clearer context', bullets: ['Collection landing pages help shoppers separate handmade work from vintage, collectible, antique, and found-item stock.', 'Origin, condition, era, and sale-channel wording stay visible sooner so buyers know what they are opening.', 'Local Southern Ontario wording keeps the browsing path clearer for nearby shoppers and pickup conversations.'] };
+    if (path.startsWith('/marketplaces/')) return { heading: 'External marketplace clarity', bullets: ['Marketplace pages explain when an item is sold on Devil n Dove, hybrid-listed, or external-only.', 'Condition, provenance, and pickup/support questions stay visible before a shopper follows an outside link.', 'Local and regional buyer questions can move to contact quickly without leaving uncertainty around channel or availability.'] };
     if (path.startsWith('/gallery/') || path.startsWith('/creations/')) return { heading: 'Trust behind the creations', bullets: ['Featured buyer feedback supports the story behind the work.', 'Support links and member tools help visitors follow along beyond a single purchase.', 'Maker-story and product detail links help connect gallery pieces back to the storefront.'] };
     if (path.startsWith('/search/')) return { heading: 'Browse with stronger trust signals', bullets: ['Featured testimonials stay visible while people compare products.', 'Gift cards and member tools make it easier to save, return, and buy later.', 'Support links help followers back the workshop beyond a single order.'] };
     return { heading: 'Support, trust, and shopper clarity', bullets: ['Member tools, wishlists, and order history keep the storefront easier to use over time.', 'Featured testimonials and product detail blocks help new visitors trust what they see.', 'Support links make it easy for followers to back the workshop, videos, and storefront experiments.'] };

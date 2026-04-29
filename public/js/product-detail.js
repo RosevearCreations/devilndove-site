@@ -188,6 +188,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const links = [];
     if (externalUrl) links.push(`<a class="btn" href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(externalLabel)}</a>`);
     if (saleChannel !== 'external_only') links.push(`<a class="btn" href="/contact/">Ask about pickup / availability</a>`);
+    links.push(`<a class="btn" href="/collections/">Collections guide</a>`);
+    if (origin !== 'handmade' || saleChannel !== 'onsite') links.push(`<a class="btn" href="/marketplaces/">Marketplace guide</a>`);
     productMarketplaceLinksEl.innerHTML = links.join('');
   }
 
