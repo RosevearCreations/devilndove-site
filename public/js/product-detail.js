@@ -159,6 +159,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       { href: '/gallery/', label: 'Gallery & media' },
       { href: '/about/', label: 'About the workshop' },
       { href: '/creations/', label: 'Creations overview' },
+      { href: '/events/', label: 'Events & markets' },
+      { href: '/pickup/', label: 'Local pickup' },
       { href: '/contact/', label: 'Ask about custom timing' },
     ];
     productProcessLinksEl.innerHTML = links.map((link) => `<a class="btn" href="${link.href}">${escapeHtml(link.label)}</a>`).join('');
@@ -189,7 +191,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (externalUrl) links.push(`<a class="btn" href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(externalLabel)}</a>`);
     if (saleChannel !== 'external_only') links.push(`<a class="btn" href="/contact/">Ask about pickup / availability</a>`);
     links.push(`<a class="btn" href="/collections/">Collections guide</a>`);
+    links.push(`<a class="btn" href="/pickup/">Local pickup</a>`);
     if (origin !== 'handmade' || saleChannel !== 'onsite') links.push(`<a class="btn" href="/marketplaces/">Marketplace guide</a>`);
+    if (origin !== 'handmade' || saleChannel !== 'onsite') links.push(`<a class="btn" href="/events/">Events & markets</a>`);
     productMarketplaceLinksEl.innerHTML = links.join('');
   }
 

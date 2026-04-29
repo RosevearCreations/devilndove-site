@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="customer-welcome-grid">
           <div><strong>Shipping clarity</strong><p class="small">Product pages and the cart now keep shipping-required information visible sooner so shoppers know whether an item is shipped from Devil n Dove directly or linked out to an external marketplace listing.</p></div>
           <div><strong>Custom timing</strong><p class="small">Custom, personalized, or made-to-order timing should be confirmed before payment. This is especially important for one-off craft work and workshop-led experiments.</p></div>
-          <div><strong>Returns & support</strong><p class="small">Questions, delivery issues, collectible-condition questions, or custom-order fit concerns should route through the contact flow quickly so shoppers do not need to hunt for help after comparing items.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/contact/">Contact</a><a class="btn" href="/marketplaces/">Marketplace guide</a></div></div><div><strong>Process, provenance & workshop story</strong><p class="small">Gallery, About, Creations, Collections, and the marketplace guide help buyers move from a single listing into the broader maker story, workshop context, provenance notes for vintage/collectible stock, and future process-video content.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/gallery/">Gallery</a><a class="btn" href="/about/">About</a><a class="btn" href="/creations/">Creations</a><a class="btn" href="/collections/">Collections</a></div></div>
+          <div><strong>Returns, pickup & support</strong><p class="small">Questions about delivery, pickup timing, collectible-condition notes, or custom-order fit should route through the contact flow quickly so shoppers do not need to hunt for help after comparing items.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/contact/">Contact</a><a class="btn" href="/marketplaces/">Marketplace guide</a><a class="btn" href="/pickup/">Local pickup</a></div></div><div><strong>Process, provenance & workshop story</strong><p class="small">Gallery, About, Creations, Collections, the marketplace guide, and the events page help buyers move from one listing into the wider maker story, local market context, provenance notes for vintage/collectible stock, and future process-video content.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/gallery/">Gallery</a><a class="btn" href="/about/">About</a><a class="btn" href="/creations/">Creations</a><a class="btn" href="/collections/">Collections</a><a class="btn" href="/events/">Events</a></div></div>
         </div>
       </section>`;
   }
@@ -170,6 +170,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
             <a class="btn" href="/shop/product/?slug=${slug}">View</a>
             <a class="btn" href="${originLink}">More like this</a>
+            ${product.requires_shipping ? `<a class="btn" href="/pickup/">Pickup info</a>` : ``}
             ${ctaMarkup}
           </div>
         </article>`;

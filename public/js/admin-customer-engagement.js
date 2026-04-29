@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!mountEl || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
 
   let rendered = false;
+  let latestBoardData = null;
   const filterState = { search: '', openOnly: false, giftCardSearch: '', giftCardStatus: 'all', notificationStatus: 'all', giftCardAudience: 'all' };
 
   function esc(value) {
@@ -150,13 +151,34 @@ document.addEventListener('DOMContentLoaded', () => {
     renderList('customerEngagementNotifications', filterNotifications(data.notification_queue || []).map((row) => `<div class="card" style="margin-bottom:10px"><label style="display:flex;gap:10px;align-items:flex-start"><input type="checkbox" name="notification-select" value="${esc(row.notification_outbox_id)}"/><span><strong>${esc(row.notification_kind || '')}</strong><div class="small">${esc(row.destination || '')}</div><div class="small">${esc(row.status || '')} • attempts ${esc(String(row.attempt_count || 0))} • created ${esc(fmtDate(row.created_at))}${row.last_attempt_at ? ` • last ${esc(fmtDate(row.last_attempt_at))}` : ''}</div>${row.error_text ? `<div class="small">${esc(row.error_text)}</div>` : ''}</span></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn" type="button" data-retry-notification="${esc(row.notification_outbox_id)}">Retry</button><button class="btn" type="button" data-cancel-notification="${esc(row.notification_outbox_id)}">Cancel</button></div></div>`).join(''), 'No queued customer notifications right now.');
   }
 
+  function syncAutomationInputs(kind) {
+    const currentKind = String(kind || document.getElementById('engagementAutomationKind')?.value || 'review_request').trim();
+    const settings = (latestBoardData?.automation_settings || []).find((row) => String(row.notification_kind || '') === currentKind) || null;
+    const delayEl = document.getElementById('engagementAutomationDelay');
+    const ageEl = document.getElementById('engagementAutomationMaxAge');
+    const orderEl = document.getElementById('engagementAutomationOrderStatuses');
+    const paymentEl = document.getElementById('engagementAutomationPaymentStatuses');
+    const enabledEl = document.getElementById('engagementAutomationEnabled');
+    const notesEl = document.getElementById('engagementAutomationNotes');
+    if (delayEl) delayEl.value = String(settings?.send_after_hours ?? (currentKind === 'review_request' ? 72 : 1));
+    if (ageEl) ageEl.value = String(settings?.max_age_days ?? (currentKind === 'review_request' ? 45 : 7));
+    if (orderEl) orderEl.value = Array.isArray(settings?.order_statuses) ? settings.order_statuses.join(', ') : '';
+    if (paymentEl) paymentEl.value = Array.isArray(settings?.payment_statuses) ? settings.payment_statuses.join(', ') : '';
+    if (enabledEl) enabledEl.checked = Number(settings?.is_enabled ?? 1) === 1;
+    if (notesEl) notesEl.value = settings?.notes || '';
+  }
+
   function renderAutomation(data) {
+    latestBoardData = data || null;
     renderList('customerEngagementAutomation', `
       <div><strong>Cooldown rules</strong></div>
       ${(data.automation_rules || []).map((row) => `<div class="card" style="margin:8px 0;padding:10px"><strong>${esc(row.notification_kind)}</strong><div class="small">${esc(String(row.cooldown_hours))} hour cooldown • ${Number(row.is_enabled || 0) === 1 ? 'enabled' : 'disabled'}</div></div>`).join('') || '<div class="small">No cooldown rules yet.</div>'}
+      <div style="margin-top:12px"><strong>Automation timing rules</strong></div>
+      ${(data.automation_settings || []).map((row) => `<div class="card" style="margin:8px 0;padding:10px"><strong>${esc(row.notification_kind)}</strong><div class="small">${Number(row.is_enabled || 0) === 1 ? 'enabled' : 'disabled'} • send after ${esc(String(row.send_after_hours || 0))} hour(s) • max age ${esc(String(row.max_age_days || 0))} day(s)</div>${Array.isArray(row.order_statuses) && row.order_statuses.length ? `<div class="small">order statuses: ${esc(row.order_statuses.join(', '))}</div>` : ''}${Array.isArray(row.payment_statuses) && row.payment_statuses.length ? `<div class="small">payment statuses: ${esc(row.payment_statuses.join(', '))}</div>` : ''}${row.notes ? `<div class="small">${esc(row.notes)}</div>` : ''}</div>`).join('') || '<div class="small">No automation timing rules yet.</div>'}
       <div style="margin-top:12px"><strong>Active exclusions</strong></div>
       ${(data.exclusions || []).map((row) => `<div class="card" style="margin:8px 0;padding:10px"><strong>${esc(row.notification_kind)}</strong><div class="small">${esc(row.destination || 'Any email')}${row.product_id ? ` • Product ${esc(String(row.product_id))}` : ''}${row.order_id ? ` • Order ${esc(String(row.order_id))}` : ''}${row.reason ? ` • ${esc(row.reason)}` : ''}</div><div style="margin-top:8px"><button class="btn" type="button" data-remove-exclusion="${esc(row.notification_exclusion_id)}">Remove</button></div></div>`).join('') || '<div class="small">No exclusions yet.</div>'}
     `, 'No automation controls available yet.');
+    syncAutomationInputs();
 
     const runHtml = [
       ...(data.automation_runs || []).map((row) => {
@@ -170,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function postAction(payload, successMessage) { const response = await window.DDAuth.apiFetch('/api/admin/customer-engagement', { method: 'POST', body: JSON.stringify(payload) }); await readJson(response, 'Customer engagement action failed.'); setMessage(successMessage || 'Saved.'); await load(); }
   async function onSaveCooldown(event) { event.preventDefault(); await postAction({ action: 'set_notification_cooldown', notification_kind: String(document.getElementById('engagementCooldownKind')?.value || '').trim(), cooldown_hours: Number(document.getElementById('engagementCooldownHours')?.value || 0), is_enabled: document.getElementById('engagementCooldownEnabled')?.checked ? 1 : 0 }, 'Cooldown rule saved.'); }
+  async function onSaveAutomation(event) { event.preventDefault(); await postAction({ action: 'set_notification_automation', notification_kind: String(document.getElementById('engagementAutomationKind')?.value || '').trim(), send_after_hours: Number(document.getElementById('engagementAutomationDelay')?.value || 0), max_age_days: Number(document.getElementById('engagementAutomationMaxAge')?.value || 1), order_statuses: String(document.getElementById('engagementAutomationOrderStatuses')?.value || '').trim(), payment_statuses: String(document.getElementById('engagementAutomationPaymentStatuses')?.value || '').trim(), notes: String(document.getElementById('engagementAutomationNotes')?.value || '').trim(), is_enabled: document.getElementById('engagementAutomationEnabled')?.checked ? 1 : 0 }, 'Automation rule saved.'); }
   async function onAddExclusion(event) { event.preventDefault(); await postAction({ action: 'add_notification_exclusion', notification_kind: String(document.getElementById('engagementExclusionKind')?.value || '').trim(), destination: String(document.getElementById('engagementExclusionDestination')?.value || '').trim(), product_id: Number(document.getElementById('engagementExclusionProductId')?.value || 0) || null, order_id: Number(document.getElementById('engagementExclusionOrderId')?.value || 0) || null, reason: String(document.getElementById('engagementExclusionReason')?.value || '').trim() }, 'Exclusion added.'); event.target.reset(); }
   async function onIssueGiftCard(event) { event.preventDefault(); const purchaser_email = String(document.getElementById('giftCardPurchaserEmail')?.value || '').trim(); const purchaser_name = String(document.getElementById('giftCardPurchaserName')?.value || '').trim(); const recipient_email = String(document.getElementById('giftCardRecipientEmail')?.value || '').trim(); const recipient_name = String(document.getElementById('giftCardRecipientName')?.value || '').trim(); const amount = Number(document.getElementById('giftCardAmount')?.value || 0); const expires_at = String(document.getElementById('giftCardExpires')?.value || '').trim(); const note = String(document.getElementById('giftCardNote')?.value || '').trim(); const recipient_note = String(document.getElementById('giftCardRecipientNote')?.value || '').trim(); if (!recipient_email || !amount) return setMessage('Recipient email and amount are required.', true); await postAction({ action: 'issue_gift_card', purchaser_email, purchaser_name, recipient_email, recipient_name, amount_cents: Math.round(amount * 100), expires_at, note, recipient_note }, 'Gift card issued and email(s) queued.'); event.target.reset(); }
   async function onBulkQueueReviewRequests() { const orderIds = getCheckedValues('review-order-select'); if (!orderIds.length) return setMessage('Select one or more orders first.', true); await postAction({ action: 'bulk_queue_review_requests', order_ids: orderIds }, `Queued ${orderIds.length} review request email(s).`); }
@@ -213,6 +236,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) { setMessage(error.message || 'Failed to load customer engagement board.', true); }
   }
 
+  mountEl.addEventListener('change', (event) => {
+    if (event.target?.id === 'engagementAutomationKind') syncAutomationInputs(event.target.value);
+  });
+  mountEl.addEventListener('submit', (event) => {
+    if (event.target?.id === 'engagementAutomationForm') return onSaveAutomation(event);
+  });
   document.addEventListener('dd:admin-ready', (event) => { if (!event?.detail?.ok) return; render(); load(); });
   render(); load();
 });

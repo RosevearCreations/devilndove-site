@@ -70,6 +70,8 @@
       <a href="/shop/index.html" data-nav="/shop/">Shop</a>
       <a href="/collections/index.html" data-nav="/collections/">Collections</a>
       <a href="/marketplaces/index.html" data-nav="/marketplaces/">Marketplaces</a>
+      <a href="/events/index.html" data-nav="/events/">Events</a>
+      <a href="/pickup/index.html" data-nav="/pickup/">Pickup</a>
       <a href="/search/index.html" data-nav="/search/">Search</a>
       <a href="/movies/index.html" data-nav="/movies/">Movies</a>
       <a href="/socials/index.html" data-nav="/socials/">Socials</a>
@@ -125,6 +127,8 @@
             <a href="/shop/index.html">Shop</a>
             <a href="/collections/index.html">Collections</a>
             <a href="/marketplaces/index.html">Marketplaces</a>
+            <a href="/events/index.html">Events</a>
+            <a href="/pickup/index.html">Pickup</a>
             <a href="/gallery/index.html">Gallery</a>
             <a href="/creations/index.html">Creations</a>
             <a href="/tools/index.html">Tools</a>
@@ -236,7 +240,7 @@
 
   function shouldShowFeaturedTestimonials(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
-    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/collections/', '/collections/index.html', '/marketplaces/', '/marketplaces/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html', '/movies/', '/movies/index.html', '/search/', '/search/index.html', '/socials/', '/socials/index.html'].includes(path);
+    return ['/', '/index.html', '/about/', '/about/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/shop/', '/shop/index.html', '/collections/', '/collections/index.html', '/marketplaces/', '/marketplaces/index.html', '/events/', '/events/index.html', '/pickup/', '/pickup/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/contact/', '/contact/index.html', '/movies/', '/movies/index.html', '/search/', '/search/index.html', '/socials/', '/socials/index.html'].includes(path);
   }
 
   function featuredTestimonialMeta(pathname) {
@@ -256,7 +260,7 @@
 
   function shouldShowTrustSupportBlock(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
-    return ['/', '/index.html', '/shop/', '/shop/index.html', '/collections/', '/collections/index.html', '/marketplaces/', '/marketplaces/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/search/', '/search/index.html'].includes(path);
+    return ['/', '/index.html', '/shop/', '/shop/index.html', '/collections/', '/collections/index.html', '/marketplaces/', '/marketplaces/index.html', '/events/', '/events/index.html', '/pickup/', '/pickup/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/search/', '/search/index.html'].includes(path);
   }
 
   function trustSupportMeta(pathname) {
