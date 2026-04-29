@@ -7,6 +7,7 @@ function cents(value) { return Math.max(0, Math.round(Number(value || 0))); }
 function safeEmail(value) { return normalizeText(value).toLowerCase(); }
 function asArray(value) { return Array.isArray(value) ? value : []; }
 function uniqueIds(value) { return Array.from(new Set(asArray(value).map((row) => Number(row || 0)).filter((row) => Number.isInteger(row) && row > 0))); }
+function safeJsonStringify(value, fallback = '[]') { try { return JSON.stringify(value ?? []); } catch { return fallback; } }
 
 async function tableExists(db, tableName) {
   try {
@@ -220,6 +221,68 @@ async function ensureNotificationTables(db) {
   }
 }
 
+
+
+async function ensureAutomationSettingsTable(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_automation_settings (
+    notification_automation_setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_kind TEXT NOT NULL UNIQUE,
+    is_enabled INTEGER NOT NULL DEFAULT 1,
+    send_after_hours INTEGER NOT NULL DEFAULT 24,
+    max_age_days INTEGER NOT NULL DEFAULT 30,
+    order_statuses_json TEXT,
+    payment_statuses_json TEXT,
+    notes TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  const defaults = [
+    ['checkout_recovery', 1, 7, null, null, 'Queue first recovery email after the cart has been abandoned for at least this many hours.'],
+    ['review_request', 72, 45, JSON.stringify(['paid','fulfilled','completed']), JSON.stringify(['paid','completed','captured','partially_refunded']), 'Queue review-request emails only after the order has aged past this threshold.'],
+    ['back_in_stock', 1, 30, null, null, 'Queue back-in-stock notifications when matching inventory returns and the row is still open.'],
+    ['gift_card_issued', 1, 30, null, null, 'Gift card delivery stays near-instant but can still be disabled here if needed.'],
+    ['gift_card_purchase_confirmation', 1, 30, null, null, 'Purchaser confirmations stay near-instant but can still be disabled here if needed.']
+  ];
+  for (const [kind, sendAfterHours, maxAgeDays, orderStatusesJson, paymentStatusesJson, notes] of defaults) {
+    await db.prepare(`INSERT INTO notification_automation_settings (
+      notification_kind, is_enabled, send_after_hours, max_age_days, order_statuses_json, payment_statuses_json, notes, created_at, updated_at
+    ) VALUES (?, 1, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(notification_kind) DO NOTHING`).bind(kind, sendAfterHours, maxAgeDays, orderStatusesJson, paymentStatusesJson, notes).run().catch(() => null);
+  }
+}
+
+function parseStatusList(value, fallback = []) {
+  if (Array.isArray(value)) return value.map((row) => normalizeText(row).toLowerCase()).filter(Boolean);
+  const text = normalizeText(value);
+  if (!text) return fallback;
+  try {
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed)) return parsed.map((row) => normalizeText(row).toLowerCase()).filter(Boolean);
+  } catch {}
+  return text.split(',').map((row) => normalizeText(row).toLowerCase()).filter(Boolean);
+}
+
+async function getAutomationSettings(db) {
+  await ensureAutomationSettingsTable(db);
+  const rows = nr(await db.prepare(`SELECT notification_automation_setting_id, notification_kind, is_enabled, send_after_hours, max_age_days, order_statuses_json, payment_statuses_json, notes, created_at, updated_at FROM notification_automation_settings ORDER BY notification_kind ASC`).all().catch(() => ({ results: [] })));
+  const map = new Map();
+  for (const row of rows) {
+    map.set(String(row.notification_kind || '').toLowerCase(), {
+      notification_automation_setting_id: Number(row.notification_automation_setting_id || 0),
+      notification_kind: row.notification_kind || '',
+      is_enabled: Number(row.is_enabled || 0),
+      send_after_hours: Number(row.send_after_hours || 0),
+      max_age_days: Number(row.max_age_days || 0),
+      order_statuses: parseStatusList(row.order_statuses_json),
+      payment_statuses: parseStatusList(row.payment_statuses_json),
+      notes: row.notes || '',
+      created_at: row.created_at || null,
+      updated_at: row.updated_at || null
+    });
+  }
+  return map;
+}
+
 function generateGiftCardCode() {
   return `DND-GIFT-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
@@ -396,8 +459,12 @@ async function autoProcessEngagement(db, env, actorUserId = null) {
   const hasProducts = await tableExists(db, 'products');
   const hasOrders = await tableExists(db, 'orders');
   const hasOrderItems = await tableExists(db, 'order_items');
+  const automationSettings = await getAutomationSettings(db);
+  const backInStockSettings = automationSettings.get('back_in_stock') || { is_enabled: 1 };
+  const recoverySettings = automationSettings.get('checkout_recovery') || { is_enabled: 1, send_after_hours: 1, max_age_days: 7 };
+  const reviewSettings = automationSettings.get('review_request') || { is_enabled: 1, send_after_hours: 72, max_age_days: 45, payment_statuses: ['paid','completed','captured','partially_refunded'], order_statuses: ['paid','fulfilled','completed'] };
 
-  if (hasProducts) {
+  if (hasProducts && Number(backInStockSettings.is_enabled || 0) === 1) {
     const backInStockRows = nr(await db.prepare(`
       SELECT pir.product_interest_request_id, pir.email, pir.product_id, p.name AS product_name, p.slug AS product_slug
       FROM product_interest_requests pir
@@ -417,15 +484,17 @@ async function autoProcessEngagement(db, env, actorUserId = null) {
     }
   }
 
-  const recoveryRows = nr(await db.prepare(`
+  const recoveryRows = Number(recoverySettings.is_enabled || 0) === 1 ? nr(await db.prepare(`
     SELECT checkout_recovery_lead_id, customer_email, customer_name, cart_count, cart_value_cents, currency, checkout_path
     FROM checkout_recovery_leads
     WHERE LOWER(COALESCE(status,'open')) = 'open'
       AND LOWER(COALESCE(customer_email,'')) != ''
       AND last_recovery_email_at IS NULL
+      AND created_at <= datetime('now', printf('-%d hours', ?))
+      AND created_at >= datetime('now', printf('-%d days', ?))
     ORDER BY created_at ASC, checkout_recovery_lead_id ASC
     LIMIT 50
-  `).all().catch(() => ({ results: [] })));
+  `).bind(Math.max(0, Number(recoverySettings.send_after_hours || 1)), Math.max(1, Number(recoverySettings.max_age_days || 7))).all().catch(() => ({ results: [] }))) : [];
   for (const row of recoveryRows) {
     const already = await notificationExists(db, { notificationKind: 'checkout_recovery', destination: row.customer_email });
     if (already) continue;
@@ -436,16 +505,21 @@ async function autoProcessEngagement(db, env, actorUserId = null) {
     }
   }
 
-  if (hasOrders && hasOrderItems) {
+  if (hasOrders && hasOrderItems && Number(reviewSettings.is_enabled || 0) === 1) {
+    const paymentStatuses = parseStatusList(reviewSettings.payment_statuses, ['paid','completed','captured','partially_refunded']);
+    const orderStatuses = parseStatusList(reviewSettings.order_statuses, ['paid','fulfilled','completed']);
+    const paymentPlaceholders = paymentStatuses.map(() => '?').join(',') || "''";
+    const orderPlaceholders = orderStatuses.map(() => '?').join(',') || "''";
     const orders = nr(await db.prepare(`
       SELECT o.order_id, o.order_number, o.customer_email
       FROM orders o
-      WHERE (LOWER(COALESCE(o.payment_status,'')) IN ('paid','completed','captured','partially_refunded')
-         OR LOWER(COALESCE(o.order_status,'')) IN ('paid','fulfilled','completed'))
-        AND substr(COALESCE(o.created_at,''),1,10) >= date('now','-45 days')
+      WHERE (LOWER(COALESCE(o.payment_status,'')) IN (${paymentPlaceholders})
+         OR LOWER(COALESCE(o.order_status,'')) IN (${orderPlaceholders}))
+        AND o.created_at <= datetime('now', printf('-%d hours', ?))
+        AND substr(COALESCE(o.created_at,''),1,10) >= date('now', printf('-%d days', ?))
       ORDER BY o.created_at DESC, o.order_id DESC
       LIMIT 50
-    `).all().catch(() => ({ results: [] })));
+    `).bind(...paymentStatuses, ...orderStatuses, Math.max(0, Number(reviewSettings.send_after_hours || 72)), Math.max(1, Number(reviewSettings.max_age_days || 45))).all().catch(() => ({ results: [] })));
     for (const row of orders) {
       const already = await notificationExists(db, { notificationKind: 'review_request', destination: row.customer_email, relatedOrderId: Number(row.order_id || 0) });
       if (already) continue;
@@ -467,7 +541,8 @@ async function listEngagementData(db) {
     ensureCheckoutRecoveryTable(db),
     ensureGiftCardTables(db),
     ensureReviewTable(db),
-    ensureNotificationTables(db)
+    ensureNotificationTables(db),
+    ensureAutomationSettingsTable(db)
   ]);
 
   const [hasOrders, hasOrderItems, hasNotificationOutbox, hasCartActivity] = await Promise.all([
@@ -477,7 +552,7 @@ async function listEngagementData(db) {
     tableExists(db, 'cart_activity')
   ]);
 
-  const [wishlistRows, interestRows, recoveryRows, giftCards, reviewRows, recentOrders, outboxRows, cooldownRows, exclusionRows, runRows, dispatchRows, giftAuditRows] = await Promise.all([
+  const [wishlistRows, interestRows, recoveryRows, giftCards, reviewRows, recentOrders, outboxRows, cooldownRows, automationSettingRows, exclusionRows, runRows, dispatchRows, giftAuditRows] = await Promise.all([
     db.prepare(`
       SELECT p.product_id, p.name, p.slug, p.featured_image_url, COUNT(*) AS saved_count, MAX(mw.created_at) AS last_saved_at
       FROM member_wishlists mw
@@ -543,6 +618,7 @@ async function listEngagementData(db) {
       LIMIT 200
     `).all().catch(() => ({ results: [] })) : ({ results: [] }),
     db.prepare(`SELECT notification_cooldown_rule_id, notification_kind, cooldown_hours, is_enabled, created_at, updated_at FROM notification_cooldown_rules ORDER BY notification_kind ASC`).all().catch(() => ({ results: [] })),
+    db.prepare(`SELECT notification_automation_setting_id, notification_kind, is_enabled, send_after_hours, max_age_days, order_statuses_json, payment_statuses_json, notes, created_at, updated_at FROM notification_automation_settings ORDER BY notification_kind ASC`).all().catch(() => ({ results: [] })),
     db.prepare(`SELECT notification_exclusion_id, notification_kind, destination, product_id, order_id, reason, is_active, created_at, updated_at FROM notification_exclusions WHERE is_active = 1 ORDER BY created_at DESC, notification_exclusion_id DESC LIMIT 100`).all().catch(() => ({ results: [] })),
     db.prepare(`SELECT customer_engagement_run_id, run_type, actor_user_id, summary_json, created_at FROM customer_engagement_runs ORDER BY created_at DESC, customer_engagement_run_id DESC LIMIT 50`).all().catch(() => ({ results: [] })),
     db.prepare(`SELECT notification_dispatch_log_id, notification_outbox_id, notification_kind, destination, status, provider_message_id, error_text, created_at FROM notification_dispatch_log ORDER BY created_at DESC, notification_dispatch_log_id DESC LIMIT 200`).all().catch(() => ({ results: [] }))
@@ -617,6 +693,7 @@ async function listEngagementData(db) {
       notification_outbox_id: Number(row.notification_outbox_id || 0), notification_kind: row.notification_kind || '', destination: row.destination || '', related_order_id: Number(row.related_order_id || 0), related_product_id: Number(row.related_product_id || 0), status: row.status || 'queued', error_text: row.error_text || '', attempt_count: Number(row.attempt_count || 0), created_at: row.created_at || null, last_attempt_at: row.last_attempt_at || null
     })),
     automation_rules: nr(cooldownRows).map((row) => ({ notification_cooldown_rule_id: Number(row.notification_cooldown_rule_id || 0), notification_kind: row.notification_kind || '', cooldown_hours: Number(row.cooldown_hours || 0), is_enabled: Number(row.is_enabled || 0), created_at: row.created_at || null, updated_at: row.updated_at || null })),
+    automation_settings: nr(automationSettingRows).map((row) => ({ notification_automation_setting_id: Number(row.notification_automation_setting_id || 0), notification_kind: row.notification_kind || '', is_enabled: Number(row.is_enabled || 0), send_after_hours: Number(row.send_after_hours || 0), max_age_days: Number(row.max_age_days || 0), order_statuses: parseStatusList(row.order_statuses_json), payment_statuses: parseStatusList(row.payment_statuses_json), notes: row.notes || '', created_at: row.created_at || null, updated_at: row.updated_at || null })),
     exclusions: nr(exclusionRows).map((row) => ({ notification_exclusion_id: Number(row.notification_exclusion_id || 0), notification_kind: row.notification_kind || '', destination: row.destination || '', product_id: Number(row.product_id || 0), order_id: Number(row.order_id || 0), reason: row.reason || '', is_active: Number(row.is_active || 0), created_at: row.created_at || null, updated_at: row.updated_at || null })),
     automation_runs: nr(runRows).map((row) => ({ customer_engagement_run_id: Number(row.customer_engagement_run_id || 0), run_type: row.run_type || 'automation', actor_user_id: Number(row.actor_user_id || 0), summary_json: row.summary_json || '{}', created_at: row.created_at || null })),
     notification_dispatch_log: dispatchLogRows.map((row) => ({ notification_dispatch_log_id: Number(row.notification_dispatch_log_id || 0), notification_outbox_id: Number(row.notification_outbox_id || 0), notification_kind: row.notification_kind || '', destination: row.destination || '', status: row.status || '', provider_message_id: row.provider_message_id || '', error_text: row.error_text || '', created_at: row.created_at || null }))
@@ -637,7 +714,7 @@ export async function onRequestPost(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  await Promise.all([ensureWishlistTable(db), ensureInterestTable(db), ensureCheckoutRecoveryTable(db), ensureGiftCardTables(db), ensureGiftCardAuditTable(db), ensureReviewTable(db), ensureNotificationTables(db)]);
+  await Promise.all([ensureWishlistTable(db), ensureInterestTable(db), ensureCheckoutRecoveryTable(db), ensureGiftCardTables(db), ensureGiftCardAuditTable(db), ensureReviewTable(db), ensureNotificationTables(db), ensureAutomationSettingsTable(db)]);
 
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
@@ -778,6 +855,29 @@ export async function onRequestPost(context) {
         VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ON CONFLICT(notification_kind) DO UPDATE SET cooldown_hours = excluded.cooldown_hours, is_enabled = excluded.is_enabled, updated_at = CURRENT_TIMESTAMP`).bind(notificationKind, cooldownHours, isEnabled).run();
       return json({ ok: true, message: 'Cooldown rule saved.' });
+    }
+
+    if (action === 'set_notification_automation') {
+      const notificationKind = normalizeText(body.notification_kind);
+      const isEnabled = Number(body.is_enabled || 0) === 1 ? 1 : 0;
+      const sendAfterHours = Math.max(0, Number(body.send_after_hours || 0));
+      const maxAgeDays = Math.max(1, Number(body.max_age_days || 1));
+      const orderStatusesJson = safeJsonStringify(parseStatusList(body.order_statuses || body.order_statuses_json));
+      const paymentStatusesJson = safeJsonStringify(parseStatusList(body.payment_statuses || body.payment_statuses_json));
+      const notes = normalizeText(body.notes);
+      if (!notificationKind) return json({ ok: false, error: 'notification_kind is required.' }, 400);
+      await db.prepare(`INSERT INTO notification_automation_settings (
+        notification_kind, is_enabled, send_after_hours, max_age_days, order_statuses_json, payment_statuses_json, notes, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(notification_kind) DO UPDATE SET
+        is_enabled = excluded.is_enabled,
+        send_after_hours = excluded.send_after_hours,
+        max_age_days = excluded.max_age_days,
+        order_statuses_json = excluded.order_statuses_json,
+        payment_statuses_json = excluded.payment_statuses_json,
+        notes = excluded.notes,
+        updated_at = CURRENT_TIMESTAMP`).bind(notificationKind, isEnabled, sendAfterHours, maxAgeDays, orderStatusesJson, paymentStatusesJson, notes || null).run();
+      return json({ ok: true, message: 'Automation rule saved.' });
     }
 
     if (action === 'add_notification_exclusion') {
