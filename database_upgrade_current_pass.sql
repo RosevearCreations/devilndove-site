@@ -763,3 +763,19 @@ ALTER TABLE accounting_attachments ADD COLUMN statement_txn_count INTEGER NOT NU
 ALTER TABLE accounting_attachments ADD COLUMN statement_period_start TEXT;
 ALTER TABLE accounting_attachments ADD COLUMN statement_period_end TEXT;
 ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT;
+
+
+-- Current pass update: customer engagement automation timing rules
+CREATE TABLE IF NOT EXISTS notification_automation_settings (
+  notification_automation_setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notification_kind TEXT NOT NULL UNIQUE,
+  is_enabled INTEGER NOT NULL DEFAULT 1,
+  send_after_hours INTEGER NOT NULL DEFAULT 24,
+  max_age_days INTEGER NOT NULL DEFAULT 30,
+  order_statuses_json TEXT,
+  payment_statuses_json TEXT,
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notification_automation_settings_kind ON notification_automation_settings(notification_kind);

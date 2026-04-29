@@ -1,3 +1,7 @@
+## Current pass update — 2026-04-29
+- Added `notification_automation_settings` so customer-engagement automation can store send-after timing, max-age windows, and status filters for review requests, checkout recovery, and related workflows.
+- Added public `events` and `pickup` pages for local-discovery/trust content; these are storefront/content additions and do not require a new table beyond the automation settings above.
+
 # Current pass schema note — 2026-04-25
 
 ## Current pass update — 2026-04-28
