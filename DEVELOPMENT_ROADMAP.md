@@ -1,5 +1,10 @@
 # Current pass update — 2026-04-25
 
+## Current pass update — 2026-04-28
+- Added dedicated public `Collections` and `Marketplaces` pages so handmade work, vintage/collectible stock, hybrid/external listings, and pickup/support questions are easier to understand before a shopper opens one product.
+- Expanded shared navigation/footer plus Home, Shop, About, Creations, and product-detail trust links so collection paths, provenance/condition guidance, and sale-channel explanations stay visible earlier in the browse flow.
+- Kept this pass schema-light on purpose: no new required tables were added, but the schema reference files were refreshed to record that this pass is a discovery/trust/local-SEO storefront pass rather than a DB-shape change pass.
+
 - Began the safest next accounting coding pass by adding a vendor directory, recurring expense rules, monthly reconciliation review storage, and a year-end close bundle screen/export foundation instead of jumping straight to a fake full accountant export.
 - Tightened the GIFI review path by adding reviewer identity/timestamp fields on `general_ledger_accounts` and surfacing active-account review coverage in the GIFI staging summary.
 - Extended `accounting_expenses` so vendor linkage, recurring-rule linkage, source mode, and invoice/reference numbers can survive into the database instead of being loose notes only.

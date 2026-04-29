@@ -1,5 +1,10 @@
 # Current pass update — 2026-04-25
 
+## Current pass update — 2026-04-28
+- Added dedicated public `Collections` and `Marketplaces` pages so handmade work, vintage/collectible stock, hybrid/external listings, and pickup/support questions are easier to understand before a shopper opens one product.
+- Expanded shared navigation/footer plus Home, Shop, About, Creations, and product-detail trust links so collection paths, provenance/condition guidance, and sale-channel explanations stay visible earlier in the browse flow.
+- Kept this pass schema-light on purpose: no new required tables were added, but the schema reference files were refreshed to record that this pass is a discovery/trust/local-SEO storefront pass rather than a DB-shape change pass.
+
 - The backend now has a real vendor/recurring/reconciliation layer, but it is still a review-first system and not yet a complete T2/GIFI accountant export.
 - Processor-fee reconciliation is currently volume-versus-booked-fees review, not a provider-rate-perfect reconciliation engine.
 - Sales-tax reconciliation is still a practical monthly review summary and not a final tax-filing module.

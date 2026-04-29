@@ -1,3 +1,4 @@
+-- Current pass note: this storefront/discovery pass adds dedicated public Collections and Marketplaces pages, stronger sale-channel/provenance guidance, and broader internal linking without requiring new database tables.
 -- Current pass note: collectible / vintage / external-listing catalog support now lets Devil n Dove sell handmade work alongside pre-built finds, antiquities, oddities, and marketplace-linked items.
 -- Current pass note: year-end close export now includes CSV output plus scope-aware attachment and reconciliation summaries for accountant handoff.
 -- Current pass note: accounting review now adds starter GL finalize helpers, richer attachment metadata, deeper reconciliation review detail, and a more accountant-ready year-end close bundle.

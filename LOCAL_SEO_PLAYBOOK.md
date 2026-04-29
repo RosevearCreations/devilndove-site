@@ -1,5 +1,10 @@
 # Current pass note — 2026-04-25
 
+## Current pass update — 2026-04-28
+- Added dedicated public `Collections` and `Marketplaces` pages so handmade work, vintage/collectible stock, hybrid/external listings, and pickup/support questions are easier to understand before a shopper opens one product.
+- Expanded shared navigation/footer plus Home, Shop, About, Creations, and product-detail trust links so collection paths, provenance/condition guidance, and sale-channel explanations stay visible earlier in the browse flow.
+- Kept this pass schema-light on purpose: no new required tables were added, but the schema reference files were refreshed to record that this pass is a discovery/trust/local-SEO storefront pass rather than a DB-shape change pass.
+
 No broad public-page SEO rewrite happened in this accounting-heavy pass, but the one-H1 rule and clear title/main-heading habit remain part of the standing checklist.
 
 # Current pass update — 2026-04-24
