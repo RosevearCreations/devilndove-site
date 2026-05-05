@@ -22,6 +22,8 @@ const EXPECTED_TABLES = {
   app_settings: ['setting_key'],
   movie_catalog: ['movie_id'],
   notification_outbox: ['notification_outbox_id'],
+  community_events: ['community_event_id', 'title', 'event_type', 'event_status', 'starts_at', 'city', 'region_label'],
+  pickup_profiles: ['pickup_profile_id', 'label', 'pickup_mode', 'city', 'region_label', 'appointment_only', 'lead_time_hours'],
   supplier_purchase_orders: ['supplier_purchase_order_id'],
   supplier_purchase_order_items: ['supplier_purchase_order_item_id'],
   catalog_items: ['catalog_item_id'],
