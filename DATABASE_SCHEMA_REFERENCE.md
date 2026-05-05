@@ -1,3 +1,8 @@
+## Current pass update — 2026-05-03
+- Added a DB-backed/admin-managed community-content layer for public `Events` and `Pickup` pages so local-market dates, pickup guidance, and sales-channel notes are no longer limited to hard-coded page copy.
+- Added `community_events` and `pickup_profiles` plus admin operations controls, a public `/api/community-content` endpoint, and runtime-safe fallbacks when the DB is unavailable.
+- Kept this pass aligned with local-search trust/discovery work by surfacing Southern Ontario / Tillsonburg / Oxford County pickup and market language through admin-managed public content while preserving one public H1 per page.
+
 ## Current pass update — 2026-04-29
 - Added `notification_automation_settings` so customer-engagement automation can store send-after timing, max-age windows, and status filters for review requests, checkout recovery, and related workflows.
 - Added public `events` and `pickup` pages for local-discovery/trust content; these are storefront/content additions and do not require a new table beyond the automation settings above.

@@ -892,3 +892,45 @@ CREATE TABLE IF NOT EXISTS notification_automation_settings (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_notification_automation_settings_kind ON notification_automation_settings(notification_kind);
+
+CREATE TABLE IF NOT EXISTS community_events (
+  community_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  event_type TEXT NOT NULL DEFAULT 'market',
+  event_status TEXT NOT NULL DEFAULT 'planned',
+  starts_at TEXT,
+  ends_at TEXT,
+  venue_name TEXT,
+  city TEXT,
+  region_label TEXT,
+  event_url TEXT,
+  public_note TEXT,
+  sale_channel_note TEXT,
+  pickup_supported INTEGER NOT NULL DEFAULT 0,
+  is_featured INTEGER NOT NULL DEFAULT 0,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_community_events_active_start ON community_events(is_active, starts_at, sort_order);
+
+CREATE TABLE IF NOT EXISTS pickup_profiles (
+  pickup_profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  label TEXT NOT NULL,
+  pickup_mode TEXT NOT NULL DEFAULT 'appointment',
+  city TEXT,
+  region_label TEXT,
+  appointment_only INTEGER NOT NULL DEFAULT 1,
+  lead_time_hours INTEGER NOT NULL DEFAULT 24,
+  public_note TEXT,
+  availability_note TEXT,
+  map_url TEXT,
+  contact_hint TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_pickup_profiles_active_sort ON pickup_profiles(is_active, sort_order, label);
+
