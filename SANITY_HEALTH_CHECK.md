@@ -492,3 +492,8 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 - Added schema expectations for statement-backed accounting attachments
 - Reconciliation now reads actual statement attachment totals when present
 - Public trust copy expanded on About/Creations and shop collection browsing
+
+
+## Current pass sync — 2026-05-05
+- Added recurring-event and vendor-application tables/columns to the DB sanity expectations.
+- Public/community runtime now has a safer split between base event rows and generated upcoming occurrences.

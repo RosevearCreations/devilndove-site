@@ -1,3 +1,8 @@
+## Current pass update — 2026-05-05
+- Added recurring event schedule fields, event-image support, and vendor-application capture/review to the community-content layer.
+- `/api/community-content` now returns both base events and upcoming occurrences, and admin Operations can review vendor-interest submissions.
+- Next safest steps after this pass: exception dates for recurring events, richer event-image/gallery support, and deeper vendor-management/admin acceptance workflows.
+
 ## Current pass update — 2026-05-03
 - Added a DB-backed/admin-managed community-content layer for public `Events` and `Pickup` pages so local-market dates, pickup guidance, and sales-channel notes are no longer limited to hard-coded page copy.
 - Added `community_events` and `pickup_profiles` plus admin operations controls, a public `/api/community-content` endpoint, and runtime-safe fallbacks when the DB is unavailable.

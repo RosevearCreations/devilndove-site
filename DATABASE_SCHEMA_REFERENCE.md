@@ -657,3 +657,8 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 - `sourcing_notes`
 
 These fields support Devil n Dove selling both handmade work and pre-built collectible/vintage stock from the same catalog while allowing external marketplace links.
+
+
+## Current pass sync — 2026-05-05
+- `community_events` now also includes recurrence, event-image, and vendor-application fields (`recurrence_rule`, `recurrence_interval`, `recurrence_count`, `recurrence_until`, `recurrence_label`, `image_url`, `image_alt`, `application_mode`, `application_url`, `vendor_capacity`, `vendor_note`).
+- New table: `event_vendor_applications` for public vendor-interest capture and admin review.

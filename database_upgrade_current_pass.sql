@@ -821,3 +821,38 @@ CREATE TABLE IF NOT EXISTS pickup_profiles (
 );
 CREATE INDEX IF NOT EXISTS idx_pickup_profiles_active_sort ON pickup_profiles(is_active, sort_order, label);
 
+
+
+-- Current pass note: community content now includes recurring schedules, vendor-application capture, and event-image support through the existing media upload flow.
+ALTER TABLE community_events ADD COLUMN recurrence_rule TEXT NOT NULL DEFAULT 'none';
+ALTER TABLE community_events ADD COLUMN recurrence_interval INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE community_events ADD COLUMN recurrence_count INTEGER;
+ALTER TABLE community_events ADD COLUMN recurrence_until TEXT;
+ALTER TABLE community_events ADD COLUMN recurrence_label TEXT;
+ALTER TABLE community_events ADD COLUMN image_url TEXT;
+ALTER TABLE community_events ADD COLUMN image_alt TEXT;
+ALTER TABLE community_events ADD COLUMN application_mode TEXT NOT NULL DEFAULT 'closed';
+ALTER TABLE community_events ADD COLUMN application_url TEXT;
+ALTER TABLE community_events ADD COLUMN vendor_capacity INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE community_events ADD COLUMN vendor_note TEXT;
+CREATE TABLE IF NOT EXISTS event_vendor_applications (
+  event_vendor_application_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  community_event_id INTEGER,
+  event_title_snapshot TEXT,
+  vendor_name TEXT NOT NULL,
+  contact_name TEXT,
+  contact_email TEXT NOT NULL,
+  contact_phone TEXT,
+  city TEXT,
+  offered_items TEXT,
+  website_url TEXT,
+  marketplace_url TEXT,
+  instagram_url TEXT,
+  setup_notes TEXT,
+  application_status TEXT NOT NULL DEFAULT 'submitted',
+  internal_note TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (community_event_id) REFERENCES community_events(community_event_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_event_vendor_applications_event_status ON event_vendor_applications(community_event_id, application_status, created_at DESC);

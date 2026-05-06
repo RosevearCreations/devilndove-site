@@ -1,3 +1,8 @@
+## Current pass update — 2026-05-05
+- Expanded the community-content layer into a richer events system with recurring schedules, vendor-application capture, and event-image support using the existing admin media-upload flow.
+- Public `/events/` now reads upcoming occurrences from D1-backed rows instead of only base event rows, and the admin Operations screen can now manage recurring rules, application mode, and vendor-interest review state.
+- Added `event_vendor_applications` plus richer `community_events` fields so future market/event work can move forward from real DB-backed content instead of placeholder page copy.
+
 ## Current pass update — 2026-05-03
 - Added a DB-backed/admin-managed community-content layer for public `Events` and `Pickup` pages so local-market dates, pickup guidance, and sales-channel notes are no longer limited to hard-coded page copy.
 - Added `community_events` and `pickup_profiles` plus admin operations controls, a public `/api/community-content` endpoint, and runtime-safe fallbacks when the DB is unavailable.

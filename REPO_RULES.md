@@ -401,3 +401,4 @@ Continue treating schema drift as a blocking issue whenever runtime accounting c
 - deepened reconciliation storage for statement/book amounts, tolerances, expected versus observed rates, and unresolved item counts
 - expanded the year-end close bundle so accountant handoff now summarizes GL blockers, reconciliation coverage, attachment coverage by kind/month, and missing support items
 
+> Current pass sync: 2026-05-05 recurring events, vendor applications, and event-image support were reviewed against this document.

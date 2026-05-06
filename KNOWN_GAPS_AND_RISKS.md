@@ -1,3 +1,8 @@
+## Current pass update — 2026-05-05
+- The events/community layer is now stronger than page-only placeholder text: recurring schedules, event images, and vendor-interest capture are DB-backed.
+- Still open: richer calendar views, image galleries per event, recurring-series exceptions, and fuller vendor acceptance workflows such as contracts, deposits, and table-assignment logistics.
+- Remaining risk: event data is now more structured, but it is not yet a complete promoter-grade event-management system.
+
 ## Current pass update — 2026-05-03
 - Added a DB-backed/admin-managed community-content layer for public `Events` and `Pickup` pages so local-market dates, pickup guidance, and sales-channel notes are no longer limited to hard-coded page copy.
 - Added `community_events` and `pickup_profiles` plus admin operations controls, a public `/api/community-content` endpoint, and runtime-safe fallbacks when the DB is unavailable.

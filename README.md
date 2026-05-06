@@ -623,3 +623,7 @@ Devil n Dove now supports both workshop-made products and pre-built collectible/
 
 ### Latest storefront/accounting direction
 The shop now separates handmade work from vintage/collectible/pre-built stock more visibly, and accounting attachments can carry statement totals that feed reconciliation and year-end handoff views.
+
+
+## Current pass sync — 2026-05-05
+- Community events now support recurring schedules, vendor-interest capture, and event-image support on top of the DB-backed Events/Pickup foundation.

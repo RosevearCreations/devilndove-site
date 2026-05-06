@@ -694,10 +694,43 @@ CREATE TABLE IF NOT EXISTS community_events (
   is_featured INTEGER NOT NULL DEFAULT 0,
   is_active INTEGER NOT NULL DEFAULT 1,
   sort_order INTEGER NOT NULL DEFAULT 0,
+  recurrence_rule TEXT NOT NULL DEFAULT 'none',
+  recurrence_interval INTEGER NOT NULL DEFAULT 1,
+  recurrence_count INTEGER,
+  recurrence_until TEXT,
+  recurrence_label TEXT,
+  image_url TEXT,
+  image_alt TEXT,
+  application_mode TEXT NOT NULL DEFAULT 'closed',
+  application_url TEXT,
+  vendor_capacity INTEGER NOT NULL DEFAULT 0,
+  vendor_note TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_community_events_active_start ON community_events(is_active, starts_at, sort_order);
+
+CREATE TABLE IF NOT EXISTS event_vendor_applications (
+  event_vendor_application_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  community_event_id INTEGER,
+  event_title_snapshot TEXT,
+  vendor_name TEXT NOT NULL,
+  contact_name TEXT,
+  contact_email TEXT NOT NULL,
+  contact_phone TEXT,
+  city TEXT,
+  offered_items TEXT,
+  website_url TEXT,
+  marketplace_url TEXT,
+  instagram_url TEXT,
+  setup_notes TEXT,
+  application_status TEXT NOT NULL DEFAULT 'submitted',
+  internal_note TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (community_event_id) REFERENCES community_events(community_event_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_event_vendor_applications_event_status ON event_vendor_applications(community_event_id, application_status, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS pickup_profiles (
   pickup_profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
