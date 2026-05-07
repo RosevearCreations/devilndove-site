@@ -1,3 +1,11 @@
+> Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
+
+## Current pass update — 2026-05-06
+- Added `accounting_statement_imports`, `accounting_statement_import_rows`, `accounting_reconciliation_exceptions`, and `accounting_fixed_assets`.
+- Added admin accounting import/review tools for statement import, exception handling, sales-tax worksheet review, fixed-asset groundwork, and vendor-statement review.
+- Added public shop colour filter/swatch support plus admin catalog table preferences and dashboard counts for low stock, drafts, stale drafts, external listings, and missing lead images.
+- Next safest pass: deeper provider-specific import mapping and exception tooling, stronger accountant export packaging, and full product-variant structures.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 ## Current pass update — 2026-05-05

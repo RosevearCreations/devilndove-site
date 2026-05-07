@@ -1,3 +1,5 @@
+> Current pass update — continue treating statement-import/exceptions/fixed-asset tables as part of the required accounting surface, and keep the accountant-first implementation order documented before claiming broader export readiness.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 ## Current pass update — 2026-05-03

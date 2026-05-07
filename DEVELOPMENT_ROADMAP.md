@@ -1,3 +1,18 @@
+> Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
+
+Safest remaining order after this pass:
+1. refine provider-specific statement CSV mappings and exception tooling
+2. expand accountant export bundle v2 packaging and unresolved-item review
+3. deepen processor-fee and shipping reconciliation against live statements
+4. add fuller sales-tax filing/reporting support
+5. move into full product variants after the accountant-first block is steadier
+
+## Current pass update — 2026-05-06
+- Implemented the first block of the recommended accountant-first sequence: statement import, auto-match staging, reconciliation exceptions, attachment-required close checks, and export bundle v2 groundwork.
+- Added supporting accounting surfaces for a sales-tax filing worksheet, fixed-asset / CCA groundwork, and vendor statement review so later accountant-export work has better supporting records.
+- Added public colour filters/badges plus catalog table preferences and dashboard counts so the later full-variant/catalog cleanup pass starts from a cleaner base.
+- Next safest steps after this pass: provider-specific CSV mapping refinement, statement-line exception tooling, richer export packaging, processor/shipping reconciliation depth, then full product variant structures.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 ## Current pass update — 2026-05-05

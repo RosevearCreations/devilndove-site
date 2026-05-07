@@ -1,3 +1,10 @@
+> Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
+
+## Current pass update — 2026-05-06
+- Added statement CSV import support for bank, PayPal, Stripe, Etsy, Square, and other provider-style files, with normalized import rows, provider/period summaries, and admin import review.
+- Added auto-match staging into reconciliation reviews plus a new reconciliation-exceptions queue so unresolved statement-vs-book differences stay visible before period lock and year-end accountant handoff.
+- Added attachment-required close rules, export bundle v2 groundwork, sales-tax worksheet support, fixed-asset/CCA groundwork, vendor-statement review, public colour swatches/filters, and catalog table preference controls.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 ## Current pass update — 2026-05-03

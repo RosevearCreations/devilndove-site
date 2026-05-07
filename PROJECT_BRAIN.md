@@ -1,3 +1,5 @@
+> Current pass update — current focus is accountant handoff quality first: statement imports, auto-match, exceptions, lock rules, export bundle v2, sales-tax worksheet, fixed assets, vendor statements, then later full variants/catalog depth.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 ## Current pass update — 2026-05-03

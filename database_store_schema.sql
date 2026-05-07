@@ -1,3 +1,4 @@
+-- Current pass note: accounting now adds statement-import tables, reconciliation exceptions, fixed-asset groundwork, attachment-required month-close checks, export bundle v2 groundwork, and public colour-filter/catalog-preference support.
 -- Current pass note: this storefront/discovery pass adds dedicated public Collections and Marketplaces pages, stronger sale-channel/provenance guidance, and broader internal linking without requiring new database tables.
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
 -- Current pass note: phone-first finished-product entry now supports a lightweight wizard mode plus capture metadata for same-day draft review and safer bulk cleanup.
@@ -880,6 +881,101 @@ ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT;
 
 
 -- Current pass update: customer engagement automation timing rules
+
+
+-- Current pass update: statement imports, reconciliation exceptions, and fixed-asset groundwork
+CREATE TABLE IF NOT EXISTS accounting_statement_imports (
+  accounting_statement_import_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  provider_scope TEXT NOT NULL DEFAULT 'other',
+  import_status TEXT NOT NULL DEFAULT 'imported',
+  source_filename TEXT,
+  source_format TEXT NOT NULL DEFAULT 'csv',
+  period_month TEXT,
+  period_start TEXT,
+  period_end TEXT,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  row_count INTEGER NOT NULL DEFAULT 0,
+  gross_cents INTEGER NOT NULL DEFAULT 0,
+  fee_cents INTEGER NOT NULL DEFAULT 0,
+  net_cents INTEGER NOT NULL DEFAULT 0,
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  shipping_cents INTEGER NOT NULL DEFAULT 0,
+  deposit_cents INTEGER NOT NULL DEFAULT 0,
+  withdrawal_cents INTEGER NOT NULL DEFAULT 0,
+  txn_count INTEGER NOT NULL DEFAULT 0,
+  statement_reference TEXT,
+  detail_json TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_statement_imports_period ON accounting_statement_imports(provider_scope, period_month DESC, import_status);
+
+CREATE TABLE IF NOT EXISTS accounting_statement_import_rows (
+  accounting_statement_import_row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  accounting_statement_import_id INTEGER NOT NULL,
+  provider_scope TEXT NOT NULL DEFAULT 'other',
+  txn_date TEXT,
+  txn_type TEXT,
+  description TEXT,
+  reference_number TEXT,
+  gross_cents INTEGER NOT NULL DEFAULT 0,
+  fee_cents INTEGER NOT NULL DEFAULT 0,
+  net_cents INTEGER NOT NULL DEFAULT 0,
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  shipping_cents INTEGER NOT NULL DEFAULT 0,
+  debit_cents INTEGER NOT NULL DEFAULT 0,
+  credit_cents INTEGER NOT NULL DEFAULT 0,
+  running_balance_cents INTEGER NOT NULL DEFAULT 0,
+  raw_json TEXT,
+  matched_scope_key TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (accounting_statement_import_id) REFERENCES accounting_statement_imports(accounting_statement_import_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_import ON accounting_statement_import_rows(accounting_statement_import_id, txn_date);
+
+CREATE TABLE IF NOT EXISTS accounting_reconciliation_exceptions (
+  accounting_reconciliation_exception_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  reconciliation_type TEXT NOT NULL,
+  period_month TEXT NOT NULL,
+  scope_key TEXT NOT NULL DEFAULT 'all',
+  provider_scope TEXT,
+  exception_status TEXT NOT NULL DEFAULT 'open',
+  severity TEXT NOT NULL DEFAULT 'warning',
+  reference_label TEXT,
+  statement_amount_cents INTEGER NOT NULL DEFAULT 0,
+  book_amount_cents INTEGER NOT NULL DEFAULT 0,
+  difference_cents INTEGER NOT NULL DEFAULT 0,
+  tolerance_cents INTEGER NOT NULL DEFAULT 0,
+  notes TEXT,
+  detail_json TEXT,
+  source_import_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (source_import_id) REFERENCES accounting_statement_imports(accounting_statement_import_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_exceptions_period ON accounting_reconciliation_exceptions(reconciliation_type, period_month DESC, exception_status);
+
+CREATE TABLE IF NOT EXISTS accounting_fixed_assets (
+  accounting_fixed_asset_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  asset_label TEXT NOT NULL,
+  asset_category TEXT,
+  cca_class TEXT,
+  acquisition_date TEXT,
+  cost_cents INTEGER NOT NULL DEFAULT 0,
+  salvage_cents INTEGER NOT NULL DEFAULT 0,
+  business_use_percent INTEGER NOT NULL DEFAULT 100,
+  vendor_name TEXT,
+  related_expense_id INTEGER,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_fixed_assets_category ON accounting_fixed_assets(asset_category, cca_class, acquisition_date DESC);
+
 CREATE TABLE IF NOT EXISTS notification_automation_settings (
   notification_automation_setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
   notification_kind TEXT NOT NULL UNIQUE,

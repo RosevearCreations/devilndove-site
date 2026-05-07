@@ -1,3 +1,5 @@
+> Current pass update — this pass preserved the one-H1 rule and kept discovery/local trust moving with cleaner shop browse paths, public colour filtering, and the existing handmade/vintage/marketplace collection split.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 ## Current pass update — 2026-05-03

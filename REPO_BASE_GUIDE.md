@@ -1,3 +1,5 @@
+> Current pass update — repository now includes statement-import/exceptions/fixed-asset accounting endpoints plus catalog/admin enhancement scripts for colour filters and table preferences; schema/docs were refreshed to match.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 ## Current pass update — 2026-05-03

@@ -1,3 +1,12 @@
+> Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
+
+> Current pass schema note — added `accounting_statement_imports`, `accounting_statement_import_rows`, `accounting_reconciliation_exceptions`, and `accounting_fixed_assets`; product records continue using `color_names_json` for multi-colour storage while `color_name` remains the simpler compatibility field.
+
+## Current pass update — 2026-05-06
+- Added accounting statement-import structures for provider/period summaries and normalized import rows.
+- Added reconciliation exception storage so unresolved statement-vs-book differences stay reviewable before month lock and year-end close.
+- Added fixed-asset groundwork for future CCA / depreciation handling and kept product multi-colour compatibility centered on `color_names_json`.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 > Current pass update — product records now support multi-colour storage via `color_names_json`, while `color_name` remains the primary/filter colour for older flows.
@@ -36,6 +45,23 @@ Purpose of this pass:
 - give year-end close work a review/export foundation before any full accountant export claims
 
 # Database Schema Reference
+
+
+This pass adds or extends the following structures:
+- `accounting_statement_imports`
+- `accounting_statement_import_rows`
+- `accounting_reconciliation_exceptions`
+- `accounting_fixed_assets`
+- attachment-required month-close checks in the period-lock workflow
+- export-bundle-v2 summaries in the year-end close workflow
+- continued product multi-colour compatibility through `color_names_json`
+
+Purpose of this pass:
+- import provider statements into normalized DB-backed records
+- auto-stage reconciliation review details from imported statement totals
+- surface unresolved statement-vs-book differences before lock/finalize work
+- add fixed-asset groundwork for later CCA / depreciation handling
+- keep public colour filtering and catalog cleanup moving while the accounting-first sequence is underway
 
 ## Current pass update — 2026-04-24
 - Added a real phone-first basic draft wizard to `/admin/mobile-product/` so quick entries can be saved with just name, short description, price, quantity, and 1 to 5 pictures.

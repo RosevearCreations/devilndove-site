@@ -1,3 +1,15 @@
+> Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
+
+Checks completed in this pass:
+- changed Functions/admin/storefront scripts passed syntax checks
+- public H1 audit found no exposed page with more than one H1
+- schema/reference docs were refreshed for statement-import, exceptions, and fixed-asset tables
+
+## Current pass update — 2026-05-06
+- Syntax checks passed on the changed Functions/admin/storefront scripts for statement import, reconciliation exceptions, period-lock guardrails, export bundle v2 groundwork, colour filters, and catalog table preferences.
+- DB sanity expectations now include statement-import tables, reconciliation exceptions, and fixed-asset groundwork.
+- Public HTML H1 audit remains clean: no exposed public page currently has more than one H1.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 ## Current pass update — 2026-05-03

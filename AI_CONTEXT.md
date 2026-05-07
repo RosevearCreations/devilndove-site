@@ -1,3 +1,5 @@
+> Current pass update — the active implementation order is still accountant-first: statement import, auto-match, exceptions, close rules, export bundle v2, then deeper reconciliation and later full variants/catalog work.
+
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
 
 ## Current pass update — 2026-05-03
