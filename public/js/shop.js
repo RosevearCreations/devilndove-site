@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ['origin', 'shopOriginFilter'], ['merchandise_origin', 'shopOriginFilter'],
       ['channel', 'shopChannelFilter'], ['sale_channel', 'shopChannelFilter'],
       ['type', 'shopTypeFilter'], ['product_type', 'shopTypeFilter'],
+      ['color', 'shopColorFilter'], ['color_name', 'shopColorFilter'],
       ['q', 'shopSearchInput'], ['min_price_cents', 'shopMinPrice'], ['max_price_cents', 'shopMaxPrice']
     ];
     map.forEach(([param, id]) => {
@@ -70,6 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       product_type: String(document.getElementById('shopTypeFilter')?.value || '').trim(),
       merchandise_origin: String(document.getElementById('shopOriginFilter')?.value || '').trim(),
       sale_channel: String(document.getElementById('shopChannelFilter')?.value || '').trim(),
+      color_name: String(document.getElementById('shopColorFilter')?.value || '').trim(),
       min_price_cents: String(document.getElementById('shopMinPrice')?.value || '').trim(),
       max_price_cents: String(document.getElementById('shopMaxPrice')?.value || '').trim(),
       requires_shipping: document.getElementById('shopShippingOnly')?.checked ? '1' : ''
@@ -134,6 +136,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       </section>`;
   }
+  function swatch(color) {
+    const map = { red:'#d22', blue:'#2b6cb0', green:'#2f855a', black:'#111', white:'#f8f8f8', silver:'#c0c0c0', gold:'#d4af37', purple:'#805ad5', pink:'#d53f8c', orange:'#dd6b20', yellow:'#d69e2e', brown:'#8b5e3c', grey:'#718096', gray:'#718096' };
+    const key = String(color || '').trim().toLowerCase();
+    return map[key] || '#cbd5e1';
+  }
+  function renderColorFilter(filterGroups = {}) {
+    const select = document.getElementById('shopColorFilter');
+    if (!select) return;
+    const current = select.value || '';
+    const colors = Array.isArray(filterGroups.colors) ? filterGroups.colors : [];
+    select.innerHTML = `<option value="">All</option>${colors.map((row) => `<option value="${escapeHtml(row.label)}">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</option>`).join('')}`;
+    select.value = current;
+  }
   function renderProducts(products) {
     if (!productsEl) return;
     productsEl.innerHTML = products.map(product => {
@@ -150,7 +165,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const saleChannel = escapeHtml(product.sale_channel || 'onsite');
       const externalUrl = String(product.external_listing_url || '').trim();
       const externalLabel = escapeHtml(product.external_listing_label || 'External listing');
+      const colorNames = Array.isArray(product.color_names) ? product.color_names : [];
       const originBadge = `<div class="small" style="margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill">${origin}</span><span class="pill">${saleChannel}</span>${product.era_label ? `<span class="pill">${escapeHtml(product.era_label)}</span>` : ''}</div>`;
+      const swatchMarkup = colorNames.length ? `<div class="small" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0">${colorNames.slice(0,5).map((color) => `<span class="pill" title="${escapeHtml(color)}" style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:999px;border:1px solid #cbd5e1;background:${swatch(color)}"></span>${escapeHtml(color)}</span>`).join('')}</div>` : '';
       const imageMarkup = imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${imageAlt}" style="width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:12px;margin-bottom:12px" />`
         : `<div style="width:100%;aspect-ratio:1 / 1;border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd" class="small">No Image</div>`;
       const originLink = `/shop/?merchandise_origin=${encodeURIComponent(product.merchandise_origin || '')}`;
@@ -165,6 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <h3 style="margin:8px 0 6px 0">${name}</h3>
           <div style="font-weight:700;margin-bottom:10px">${price}</div>
           ${keywordBadge}
+          ${swatchMarkup}
           <p class="small" style="min-height:48px">${shortDescription || 'No description available yet.'}</p>
           <div class="small" style="margin-top:8px">${product.requires_shipping ? 'Shipping / pickup item' : 'Digital or no-shipping item'}${product.product_category ? ` • ${escapeHtml(product.product_category)}` : ''}${product.condition_summary ? ` • ${escapeHtml(product.condition_summary)}` : ''}</div>
           <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
@@ -197,6 +215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const colorCount = Array.isArray(data?.filter_groups?.colors) ? data.filter_groups.colors.length : 0;
     if (summaryEl) summaryEl.textContent = `${products.length} product(s) found.${categoryCount || colorCount ? ` ${categoryCount} categor${categoryCount === 1 ? 'y' : 'ies'} and ${colorCount} colour option${colorCount === 1 ? '' : 's'} in this result set.` : ''}`;
     renderCollectionLanding(data?.filter_groups || {});
+    renderColorFilter(data?.filter_groups || {});
     renderPolicyFaq();
     if (!products.length) {
       hide(productsEl);
@@ -236,7 +255,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   document.getElementById('shopSearchButton')?.addEventListener('click', loadProducts);
   document.getElementById('shopResetButton')?.addEventListener('click', () => {
-    ['shopSearchInput','shopTypeFilter','shopOriginFilter','shopChannelFilter','shopMinPrice','shopMaxPrice'].forEach((id) => { const el=document.getElementById(id); if (el) el.value=''; });
+    ['shopSearchInput','shopTypeFilter','shopOriginFilter','shopChannelFilter','shopColorFilter','shopMinPrice','shopMaxPrice'].forEach((id) => { const el=document.getElementById(id); if (el) el.value=''; });
     const ship=document.getElementById('shopShippingOnly'); if (ship) ship.checked=false; loadProducts();
   });
   applyFiltersFromUrl();

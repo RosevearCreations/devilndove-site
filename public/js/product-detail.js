@@ -239,6 +239,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const badges = [product.product_type || ''];
       if (product.merchandise_origin) badges.push(product.merchandise_origin);
       if (product.sale_channel && product.sale_channel !== 'onsite') badges.push(product.sale_channel.replace('_', ' '));
+      if (Array.isArray(product.color_names) && product.color_names.length) badges.push(`Colours: ${product.color_names.join(', ')}`);
       productTypeEl.textContent = badges.filter(Boolean).join(' • ');
     }
     if (productNameEl) productNameEl.textContent = product.name || "";
