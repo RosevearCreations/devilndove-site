@@ -10,6 +10,17 @@ function moneyCents(value) {
   return Number.isFinite(amount) ? amount : 0;
 }
 
+function parseColorNamesJson(value, fallbackColor = '') {
+  let parsed = [];
+  try {
+    const raw = JSON.parse(String(value || '[]'));
+    parsed = Array.isArray(raw) ? raw : [];
+  } catch {}
+  const values = parsed.map((item) => String(item || '').trim()).filter(Boolean);
+  if (fallbackColor && !values.some((entry) => entry.toLowerCase() === String(fallbackColor).trim().toLowerCase())) values.unshift(String(fallbackColor).trim());
+  return values;
+}
+
 async function getTableColumnSet(db, tableName) {
   try {
     const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
@@ -57,6 +68,7 @@ export async function onRequestGet(context) {
   const supportsCaptureReference = productColumns.has('capture_reference');
   const supportsProductCategory = productColumns.has('product_category');
   const supportsColorName = productColumns.has('color_name');
+  const supportsColorNamesJson = productColumns.has('color_names_json');
   const supportsShippingCode = productColumns.has('shipping_code');
   const supportsReviewStatus = productColumns.has('review_status');
   const supportsCaptureEntryMode = productColumns.has('capture_entry_mode');
@@ -119,6 +131,7 @@ export async function onRequestGet(context) {
       ${selectColumnSql(productColumns, 'capture_reference')},
       ${selectColumnSql(productColumns, 'product_category')},
       ${selectColumnSql(productColumns, 'color_name')},
+      ${selectColumnSql(productColumns, 'color_names_json')},
       ${selectColumnSql(productColumns, 'shipping_code')},
       p.price_cents,
       p.compare_at_price_cents,
@@ -210,6 +223,8 @@ export async function onRequestGet(context) {
       capture_reference: row.capture_reference || '',
       product_category: row.product_category || '',
       color_name: row.color_name || '',
+      color_names: parseColorNamesJson(row.color_names_json, row.color_name || ''),
+      color_names_text: parseColorNamesJson(row.color_names_json, row.color_name || '').join(', '),
       shipping_code: row.shipping_code || '',
       price_cents: moneyCents(row.price_cents),
       compare_at_price_cents: moneyCents(row.compare_at_price_cents),

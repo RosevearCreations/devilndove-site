@@ -31,6 +31,17 @@ async function getTableColumnSet(db, tableName) {
   }
 }
 
+function parseColorNamesJson(value, fallbackColor = '') {
+  let parsed = [];
+  try {
+    const raw = JSON.parse(String(value || '[]'));
+    parsed = Array.isArray(raw) ? raw : [];
+  } catch {}
+  const values = parsed.map((item) => String(item || '').trim()).filter(Boolean);
+  if (fallbackColor && !values.some((entry) => entry.toLowerCase() === String(fallbackColor).trim().toLowerCase())) values.unshift(String(fallbackColor).trim());
+  return values;
+}
+
 function buildReadiness(row = {}) {
   const imageCount = Number(row.image_count || 0);
   const altCoverage = Number(row.alt_coverage_count || 0);
@@ -105,6 +116,8 @@ async function loadProducts(db, q) {
   const hasResourceLinks = await tableExists(db, "product_resource_links");
   const hasInventory = await tableExists(db, "site_item_inventory");
   const hasMediaScoreHistory = await tableExists(db, "product_media_score_history");
+  const productColumns = await getTableColumnSet(db, 'products');
+  const hasColorNamesJson = productColumns.has('color_names_json');
   const resourceLinkColumns = hasResourceLinks ? await getTableColumnSet(db, 'product_resource_links') : new Set();
   const hasConsumptionMode = resourceLinkColumns.has('consumption_mode');
   const hasLotSizeUnits = resourceLinkColumns.has('lot_size_units');
@@ -120,11 +133,14 @@ async function loadProducts(db, q) {
       "LOWER(COALESCE(p.name, '')) LIKE ?",
       "LOWER(COALESCE(p.slug, '')) LIKE ?",
       "LOWER(COALESCE(p.sku, '')) LIKE ?",
+      hasColorNamesJson ? "LOWER(COALESCE(p.color_names_json, '')) LIKE ?" : '',
     ];
-    if (hasProductSeo) searchable.push("LOWER(COALESCE(ps.keywords, '')) LIKE ?");
-    clauses.push(`(${searchable.join(" OR ")})`);
+    if (hasProductSeo) if (hasProductSeo) searchable.push("LOWER(COALESCE(ps.keywords, '')) LIKE ?");
+    const cleanSearchable = searchable.filter(Boolean);
+    clauses.push(`(${cleanSearchable.join(" OR ")})`);
     const like = `%${q}%`;
     bindings.push(like, like, like);
+    if (hasColorNamesJson) bindings.push(like);
     if (hasProductSeo) bindings.push(like);
   }
 
@@ -291,8 +307,11 @@ export async function onRequestGet(context) {
   const products = loaded.rawProducts.map((row) => {
     const linkedResourceCost = Number(row.linked_resource_cost_cents || 0);
     const priceCents = Number(row.price_cents || 0);
+    const colorNames = parseColorNamesJson(row.color_names_json, row.color_name || '');
     return {
       ...row,
+      color_names: colorNames,
+      color_names_text: colorNames.join(', '),
       low_stock_flag: Number(row.low_stock_flag || 0),
       image_count: Number(row.image_count || 0),
       linked_resource_count: Number(row.linked_resource_count || 0),

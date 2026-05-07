@@ -54,6 +54,24 @@ function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+function parseColorNamesJson(value, fallbackColor = '') {
+  const parsed = [];
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const json = JSON.parse(value);
+      if (Array.isArray(json)) {
+        for (const item of json) {
+          const cleaned = normalizeText(item);
+          if (cleaned && !parsed.includes(cleaned)) parsed.push(cleaned);
+        }
+      }
+    } catch {}
+  }
+  const fallback = normalizeText(fallbackColor);
+  if (fallback && !parsed.includes(fallback)) parsed.unshift(fallback);
+  return parsed;
+}
+
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -74,6 +92,9 @@ export async function onRequestGet(context) {
   `).bind(product_id).first();
 
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
+
+  product.color_names = parseColorNamesJson(product.color_names_json, product.color_name || '');
+  product.color_names_text = product.color_names.join(', ');
 
   const images = normalizeResults(await env.DB.prepare(`
     SELECT product_image_id, product_id, image_url, alt_text, sort_order, created_at

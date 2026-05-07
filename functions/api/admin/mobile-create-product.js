@@ -136,7 +136,8 @@ export async function onRequestPost(context) {
     const name = normalizeText(form.get('name'));
     const captureReference = normalizeText(form.get('capture_reference'));
     const productCategory = normalizeText(form.get('product_category'));
-    const colorName = normalizeText(form.get('color_name'));
+    const colorNames = normalizeColorNames(form.get('color_names_text') || '', form.get('color_name'));
+    const colorName = colorNames[0] || '';
     const shortDescription = normalizeText(form.get('short_description'));
     const description = normalizeText(form.get('description'));
     const metaTitle = normalizeText(form.get('meta_title'));
@@ -182,6 +183,7 @@ export async function onRequestPost(context) {
     const supportsCaptureReference = productColumns.has('capture_reference');
     const supportsProductCategory = productColumns.has('product_category');
     const supportsColorName = productColumns.has('color_name');
+    const supportsColorNamesJson = productColumns.has('color_names_json');
     const supportsShippingCode = productColumns.has('shipping_code');
     const supportsReviewStatus = productColumns.has('review_status');
     const supportsReadyFlag = productColumns.has('is_ready_for_storefront');
@@ -239,6 +241,10 @@ export async function onRequestPost(context) {
       if (supportsColorName) {
         updateAssignments.push('color_name = ?');
         updateBindings.push(colorName || null);
+      }
+      if (supportsColorNamesJson) {
+        updateAssignments.push('color_names_json = ?');
+        updateBindings.push(JSON.stringify(colorNames));
       }
       if (supportsShippingCode) {
         updateAssignments.push('shipping_code = ?');
@@ -323,6 +329,11 @@ export async function onRequestPost(context) {
         insertColumns.push('color_name');
         insertPlaceholders.push('?');
         insertBindings.push(colorName || null);
+      }
+      if (supportsColorNamesJson) {
+        insertColumns.push('color_names_json');
+        insertPlaceholders.push('?');
+        insertBindings.push(JSON.stringify(colorNames));
       }
       if (supportsShippingCode) {
         insertColumns.push('shipping_code');
@@ -504,7 +515,7 @@ export async function onRequestPost(context) {
         product_id: resolvedProductId,
         meta_title: seoTitle,
         meta_description: seoDescription,
-        keywords: keywords || [resolvedName, captureReference, productCategory, colorName, 'handmade', 'Devil n Dove', 'Ontario'].filter(Boolean).join(', '),
+        keywords: keywords || [resolvedName, captureReference, productCategory, ...colorNames, 'handmade', 'Devil n Dove', 'Ontario'].filter(Boolean).join(', '),
         h1_override: resolvedName,
         canonical_url: `/shop/product/?slug=${slug}`,
         og_title: seoTitle,

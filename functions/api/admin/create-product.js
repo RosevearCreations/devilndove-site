@@ -25,6 +25,28 @@ function normalizeImageUrls(imageUrls) {
   return imageUrls.map((url) => String(url || "").trim()).filter(Boolean).slice(0, 5);
 }
 
+function normalizeColorNames(input, fallbackColor = '') {
+  const rawValues = Array.isArray(input)
+    ? input
+    : typeof input === 'string'
+      ? input.split(/[,
+]/)
+      : [];
+  const values = rawValues
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (fallbackColor) values.unshift(String(fallbackColor).trim());
+  const deduped = [];
+  const seen = new Set();
+  for (const value of values) {
+    const key = value.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(value);
+  }
+  return deduped.slice(0, 12);
+}
+
 function computeReadiness(fields = {}) {
   const failures = [];
   if (!String(fields.name || '').trim()) failures.push('name');
@@ -51,13 +73,17 @@ export async function onRequestPost(context) {
   }
 
   const db = getDb(env);
+  const productColumnsResult = await db.prepare(`PRAGMA table_info(products)`).all().catch(() => ({ results: [] }));
+  const productColumns = new Set((Array.isArray(productColumnsResult?.results) ? productColumnsResult.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  const supportsColorNamesJson = productColumns.has('color_names_json');
 
   const requested_product_number = body.product_number == null || body.product_number === "" ? null : Number(body.product_number);
   const name = String(body.name || "").trim();
   const slug = normalizeSlug(body.slug || body.name || "");
   const sku = String(body.sku || "").trim() || null;
   const product_category = String(body.product_category || "").trim() || null;
-  const color_name = String(body.color_name || "").trim() || null;
+  const color_names = normalizeColorNames(body.color_names || body.color_names_text || [], body.color_name || '');
+  const color_name = color_names[0] || null;
   const shipping_code = String(body.shipping_code || "").trim() || null;
   const review_status = String(body.review_status || "pending_review").trim().toLowerCase();
   const short_description = String(body.short_description || "").trim() || null;
@@ -127,8 +153,8 @@ export async function onRequestPost(context) {
       product_number, slug, sku, name, product_category, color_name, shipping_code, review_status,
       is_ready_for_storefront, ready_check_notes, short_description, description, product_type, status, price_cents, compare_at_price_cents,
       currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking,
-      inventory_quantity, digital_file_url, featured_image_url, sort_order, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      inventory_quantity, digital_file_url, featured_image_url, sort_order${supportsColorNamesJson ? ', color_names_json' : ''}, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?${supportsColorNamesJson ? ', ?' : ''}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   `).bind(
     product_number,
     slug,
@@ -155,7 +181,8 @@ export async function onRequestPost(context) {
     inventory_quantity,
     digital_file_url,
     featured_image_url,
-    sort_order
+    sort_order,
+    ...(supportsColorNamesJson ? [JSON.stringify(color_names)] : [])
   ).run();
 
   const newProductId = insertResult?.meta?.last_row_id;

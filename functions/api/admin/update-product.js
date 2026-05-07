@@ -16,6 +16,28 @@ function normalizeImageUrls(imageUrls) {
   return imageUrls.map((url) => String(url || "").trim()).filter(Boolean).slice(0, 5);
 }
 
+function normalizeColorNames(input, fallbackColor = '') {
+  const rawValues = Array.isArray(input)
+    ? input
+    : typeof input === 'string'
+      ? input.split(/[,
+]/)
+      : [];
+  const values = rawValues
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (fallbackColor) values.unshift(String(fallbackColor).trim());
+  const deduped = [];
+  const seen = new Set();
+  for (const value of values) {
+    const key = value.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(value);
+  }
+  return deduped.slice(0, 12);
+}
+
 function computeReadiness(fields = {}) {
   const failures = [];
   if (!String(fields.name || '').trim()) failures.push('name');
@@ -45,7 +67,8 @@ export async function onRequestPost(context) {
     const slug = normalizeSlug(body.slug || body.name || "");
     const sku = String(body.sku || "").trim() || null;
     const product_category = String(body.product_category || "").trim() || null;
-    const color_name = String(body.color_name || "").trim() || null;
+    const color_names = normalizeColorNames(body.color_names || body.color_names_text || [], body.color_name || '');
+    const color_name = color_names[0] || null;
     const shipping_code = String(body.shipping_code || "").trim() || null;
     const review_status = String(body.review_status || "pending_review").trim().toLowerCase();
     const short_description = String(body.short_description || "").trim() || null;
@@ -89,6 +112,10 @@ export async function onRequestPost(context) {
     if (!Number.isInteger(inventory_quantity) || inventory_quantity < 0) return json({ ok: false, error: "inventory_quantity must be a valid whole number." }, 400);
     if (!Number.isInteger(sort_order)) return json({ ok: false, error: "sort_order must be a valid whole number." }, 400);
 
+    const productColumnsResult = await db.prepare(`PRAGMA table_info(products)`).all().catch(() => ({ results: [] }));
+    const productColumns = new Set((Array.isArray(productColumnsResult?.results) ? productColumnsResult.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+    const supportsColorNamesJson = productColumns.has('color_names_json');
+
     const existingProduct = await db.prepare(`SELECT product_id, slug, sku FROM products WHERE product_id = ? LIMIT 1`).bind(product_id).first();
     if (!existingProduct) return json({ ok: false, error: "Product not found." }, 404);
 
@@ -110,16 +137,17 @@ export async function onRequestPost(context) {
       if (!taxClass) return json({ ok: false, error: "Selected tax class was not found." }, 400);
     }
 
-    await db.prepare(`
+    const updateSql = `
       UPDATE products
       SET
         product_number = ?, slug = ?, sku = ?, name = ?, product_category = ?, color_name = ?, shipping_code = ?,
         review_status = ?, is_ready_for_storefront = ?, ready_check_notes = ?, short_description = ?, description = ?,
         product_type = ?, status = ?, price_cents = ?, compare_at_price_cents = ?, currency = ?, taxable = ?, tax_class_id = ?,
         requires_shipping = ?, weight_grams = ?, inventory_tracking = ?, inventory_quantity = ?, digital_file_url = ?,
-        featured_image_url = ?, sort_order = ?, updated_at = CURRENT_TIMESTAMP
+        featured_image_url = ?, sort_order = ?${supportsColorNamesJson ? ', color_names_json = ?' : ''}, updated_at = CURRENT_TIMESTAMP
       WHERE product_id = ?
-    `).bind(product_number, slug, sku, name, product_category, color_name, shipping_code, review_status, readiness.is_ready_for_storefront, readiness.ready_check_notes || null, short_description, description, product_type, status, price_cents, compare_at_price_cents, currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking, inventory_quantity, digital_file_url, featured_image_url, sort_order, product_id).run();
+    `;
+    await db.prepare(updateSql).bind(product_number, slug, sku, name, product_category, color_name, shipping_code, review_status, readiness.is_ready_for_storefront, readiness.ready_check_notes || null, short_description, description, product_type, status, price_cents, compare_at_price_cents, currency, taxable, tax_class_id, requires_shipping, weight_grams, inventory_tracking, inventory_quantity, digital_file_url, featured_image_url, sort_order, ...(supportsColorNamesJson ? [JSON.stringify(color_names)] : []), product_id).run();
 
     try {
       await db.prepare(`
@@ -153,7 +181,7 @@ export async function onRequestPost(context) {
       target_type: "product",
       target_id: Number(updatedProduct?.product_id || product_id),
       target_key: updatedProduct?.slug || slug,
-      details: { name, status, review_status, inventory_quantity, has_images: image_urls.length > 0 }
+      details: { name, status, review_status, inventory_quantity, has_images: image_urls.length > 0, color_name, color_count: color_names.length }
     });
 
     return json({ ok: true, message: "Product updated successfully.", product: updatedProduct, images: updatedImagesResult.results || [] });
