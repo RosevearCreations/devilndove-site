@@ -86,6 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="grid cols-2" style="gap:10px;margin-top:12px">
         <label><span class="small">Condition summary</span><input type="text" name="condition_summary" maxlength="255" placeholder="Patina, wear, tested, cleaned, original box" /></label>
         <label><span class="small">Sourcing notes</span><textarea name="sourcing_notes" rows="3" placeholder="Estate find, antique mall, workshop rescue, oddity shelf note"></textarea></label>
+      </div>
+      <div class="grid cols-2" style="gap:10px;margin-top:12px">
+        <label><span class="small">Primary colour</span><input type="text" name="color_name" maxlength="80" placeholder="Silver" /></label>
+        <label><span class="small">Additional colours</span><input type="text" name="color_names_text" maxlength="255" placeholder="Black, turquoise, bronze" /></label>
       </div>`;
     form.appendChild(mount);
   }
@@ -344,6 +348,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("digital_file_url", product.digital_file_url || "");
     setField("featured_image_url", product.featured_image_url || "");
     setField("sort_order", product.sort_order == null ? "0" : product.sort_order);
+    setField("color_name", product.color_name || "");
+    setField("color_names_text", product.color_names_text || "");
     setField("merchandise_origin", product.merchandise_origin || "handmade");
     setField("sale_channel", product.sale_channel || "onsite");
     setField("external_listing_url", product.external_listing_url || "");
@@ -580,6 +586,8 @@ document.addEventListener("DOMContentLoaded", () => {
       slug: String(formData.get("slug") || "").trim(),
       sku: String(formData.get("sku") || "").trim(),
       short_description: String(formData.get("short_description") || "").trim(),
+      color_name: String(formData.get("color_name") || "").trim(),
+      color_names_text: String(formData.get("color_names_text") || "").trim(),
       description: String(formData.get("description") || "").trim(),
       product_type: String(formData.get("product_type") || "physical").trim(),
       status: String(formData.get("status") || "draft").trim(),

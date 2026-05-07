@@ -124,6 +124,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const name = escapeHtml(product.name || "");
       const slug = escapeHtml(product.slug || "");
       const sku = escapeHtml(product.sku || "");
+      const colorSummary = escapeHtml(product.color_names_text || product.color_name || '');
       const type = escapeHtml(product.product_type || "");
       const status = escapeHtml(product.status || "");
       const price = escapeHtml(formatMoney(product.price_cents, product.currency));
@@ -164,7 +165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `
         <tr>
           <td style="padding:8px;border-bottom:1px solid #ddd">${productId}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${name}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${name}${colorSummary ? `<div class="small">Colours: ${colorSummary}</div>` : ''}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${slug}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${sku}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>

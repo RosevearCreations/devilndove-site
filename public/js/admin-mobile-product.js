@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextNumberEl = document.getElementById('mobileNextProductNumber');
   const categorySelect = document.getElementById('mobileProductCategory');
   const colorSelect = document.getElementById('mobileColorName');
+  const colorNamesTextInput = document.getElementById('mobileColorNamesText');
   const shippingSelect = document.getElementById('mobileShippingCode');
   const taxSelect = document.getElementById('mobileTaxClassId');
   const imageInput = document.getElementById('mobileProductImages');
@@ -85,6 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
       updated_at: source.updated_at || null,
       name: normalizeText(form?.elements?.name?.value || source.name || ''),
       product_category: normalizeText(form?.elements?.product_category?.value || source.product_category || ''),
+      color_name: normalizeText(form?.elements?.color_name?.value || source.color_name || ''),
+      color_names_text: normalizeText(form?.elements?.color_names_text?.value || source.color_names_text || ''),
       price_cents: Number.isFinite(Number(form?.elements?.price?.value)) && normalizeText(form?.elements?.price?.value) ? dollarsToCents(form?.elements?.price?.value) : Number(source.price_cents || 0),
       short_description: normalizeText(form?.elements?.short_description?.value || source.short_description || ''),
       description: normalizeText(form?.elements?.description?.value || source.description || ''),
