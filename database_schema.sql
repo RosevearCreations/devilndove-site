@@ -1,3 +1,4 @@
+-- Current pass note: product records now support multi-colour storage using color_names_json while keeping color_name as the primary/filter field.
 -- Current pass note: this storefront/discovery pass adds dedicated public Collections and Marketplaces pages, stronger sale-channel/provenance guidance, and broader internal linking without requiring new database tables.
 
 -- Current pass reference note: products now also support merchandise_origin, sale_channel, external_listing_url, external_listing_label, condition_summary, era_label, and sourcing_notes so handmade, vintage, collectible, antique, oddity, and pre-built items can share the same catalog safely.

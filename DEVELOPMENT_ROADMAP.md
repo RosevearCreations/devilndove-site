@@ -1,3 +1,5 @@
+> Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
+
 ## Current pass update — 2026-05-05
 - Expanded the community-content layer into a richer events system with recurring schedules, vendor-application capture, and event-image support using the existing admin media-upload flow.
 - Public `/events/` now reads upcoming occurrences from D1-backed rows instead of only base event rows, and the admin Operations screen can now manage recurring rules, application mode, and vendor-interest review state.

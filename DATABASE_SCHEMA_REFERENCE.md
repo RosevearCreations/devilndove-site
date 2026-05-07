@@ -1,3 +1,7 @@
+> Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.
+
+> Current pass update — product records now support multi-colour storage via `color_names_json`, while `color_name` remains the primary/filter colour for older flows.
+
 ## Current pass update — 2026-05-03
 - Added a DB-backed/admin-managed community-content layer for public `Events` and `Pickup` pages so local-market dates, pickup guidance, and sales-channel notes are no longer limited to hard-coded page copy.
 - Added `community_events` and `pickup_profiles` plus admin operations controls, a public `/api/community-content` endpoint, and runtime-safe fallbacks when the DB is unavailable.
@@ -240,7 +244,7 @@ No brand-new core tables were required for this pass. The largest work was defen
 - Mobile finished-product capture page added at `/admin/mobile-product/` for phone-first product entry.
 - The phone workflow now assigns the next available product number, supports category, colour, shipping code, tax code, SEO title/meta description, direct image upload to R2, and optional tool/supply links.
 - Products created from the phone workflow are saved as draft items with `review_status = pending_review` so they can be reviewed before publishing.
-- Product records now support `product_number`, `product_category`, `color_name`, `shipping_code`, and `review_status`.
+- Product records now support `product_number`, `product_category`, `color_name`, `color_names_json`, `shipping_code`, and `review_status`.
 - Storefront/admin product search can now match category and colour more directly.
 - SEO guidance remains aligned with Google Search Central: one clear H1 per outward-facing page, descriptive title links, page-specific meta descriptions, crawlable internal links, and structured data that matches visible content.
 

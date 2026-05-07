@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS products (
   capture_reference TEXT,
   product_category TEXT,
   color_name TEXT,
+  color_names_json TEXT,
   shipping_code TEXT,
   review_status TEXT NOT NULL DEFAULT 'pending_review' CHECK (review_status IN ('pending_review','approved','needs_changes','published')),
   is_ready_for_storefront INTEGER NOT NULL DEFAULT 0,

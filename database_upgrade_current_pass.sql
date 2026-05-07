@@ -1,3 +1,4 @@
+-- Current pass note: products now support multi-colour storage through color_names_json while keeping color_name as the primary/filter colour.
 -- Current pass note: this storefront/discovery pass adds dedicated public Collections and Marketplaces pages, stronger sale-channel/provenance guidance, and broader internal linking without requiring new database tables.
 -- Current pass note: collectible / vintage / external-listing catalog support now lets Devil n Dove sell handmade work alongside pre-built finds, antiquities, oddities, and marketplace-linked items.
 -- Current pass note: year-end close export now includes CSV output plus scope-aware attachment and reconciliation summaries for accountant handoff.
@@ -131,6 +132,7 @@ ALTER TABLE products ADD COLUMN product_number INTEGER;
 ALTER TABLE products ADD COLUMN capture_reference TEXT;
 ALTER TABLE products ADD COLUMN product_category TEXT;
 ALTER TABLE products ADD COLUMN color_name TEXT;
+ALTER TABLE products ADD COLUMN color_names_json TEXT;
 ALTER TABLE products ADD COLUMN shipping_code TEXT;
 ALTER TABLE products ADD COLUMN review_status TEXT NOT NULL DEFAULT 'pending_review';
 ALTER TABLE products ADD COLUMN is_ready_for_storefront INTEGER NOT NULL DEFAULT 0;
