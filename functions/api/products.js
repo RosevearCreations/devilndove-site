@@ -116,6 +116,7 @@ export async function onRequestGet(context) {
   const product_type = normalizeText(url.searchParams.get("product_type")).toLowerCase();
   const merchandise_origin = normalizeText(url.searchParams.get("merchandise_origin")).toLowerCase();
   const sale_channel = normalizeText(url.searchParams.get("sale_channel")).toLowerCase();
+  const color_name = normalizeText(url.searchParams.get("color_name")).toLowerCase();
   const min_price_cents = Number.isInteger(Number(url.searchParams.get("min_price_cents")))
     ? Number(url.searchParams.get("min_price_cents"))
     : null;
@@ -145,6 +146,7 @@ export async function onRequestGet(context) {
         product_type,
         merchandise_origin,
         sale_channel,
+        color_name,
         min_price_cents,
         max_price_cents,
         requires_shipping
@@ -195,6 +197,13 @@ export async function onRequestGet(context) {
   if (["onsite", "external_only", "hybrid"].includes(sale_channel)) {
     clauses.push(`COALESCE(p.sale_channel, 'onsite') = ?`);
     bindings.push(sale_channel);
+  }
+
+  if (color_name) {
+    if (hasColorNamesJson) clauses.push(`(LOWER(COALESCE(p.color_name, '')) = ? OR LOWER(COALESCE(p.color_names_json, '')) LIKE ?)`);
+    else clauses.push(`LOWER(COALESCE(p.color_name, '')) = ?`);
+    bindings.push(color_name);
+    if (hasColorNamesJson) bindings.push(`%${color_name}%`);
   }
 
   if (min_price_cents != null) {
@@ -352,6 +361,7 @@ export async function onRequestGet(context) {
         product_type,
         merchandise_origin,
         sale_channel,
+        color_name,
         min_price_cents,
         max_price_cents,
         requires_shipping
@@ -371,6 +381,7 @@ export async function onRequestGet(context) {
         product_type,
         merchandise_origin,
         sale_channel,
+        color_name,
         min_price_cents,
         max_price_cents,
         requires_shipping
@@ -390,6 +401,10 @@ export async function onRequestGet(context) {
       }
       if (["onsite", "external_only", "hybrid"].includes(sale_channel)) {
         fbBindings.push(sale_channel);
+      }
+      if (color_name) {
+        fbBindings.push(color_name);
+        if (hasColorNamesJson) fbBindings.push(`%${color_name}%`);
       }
       if (min_price_cents != null) fbBindings.push(min_price_cents);
       if (max_price_cents != null) fbBindings.push(max_price_cents);
@@ -411,6 +426,7 @@ export async function onRequestGet(context) {
           product_type,
           merchandise_origin,
           sale_channel,
+          color_name,
           min_price_cents,
           max_price_cents,
           requires_shipping
@@ -431,6 +447,7 @@ export async function onRequestGet(context) {
           product_type,
           merchandise_origin,
           sale_channel,
+          color_name,
           min_price_cents,
           max_price_cents,
           requires_shipping
@@ -456,6 +473,7 @@ export async function onRequestGet(context) {
           product_type,
           merchandise_origin,
           sale_channel,
+          color_name,
           min_price_cents,
           max_price_cents,
           requires_shipping
