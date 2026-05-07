@@ -1,5 +1,7 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { ensureAccountingPeriodClosuresTable, listAccountingPeriodClosures, getAccountingPeriodClosure, monthValue, normalizeChecklistPayload } from './_accountingPeriods.js';
+import { ensureAccountingAttachmentsTable, listAccountingAttachments } from './_accountingAttachments.js';
+import { ensureAccountingStatementImportsTables, listAccountingReconciliationExceptions, listAccountingStatementImports } from './_accountingStatementImports.js';
 
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
@@ -7,6 +9,8 @@ export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   await ensureAccountingPeriodClosuresTable(db);
+  await ensureAccountingAttachmentsTable(db);
+  await ensureAccountingStatementImportsTables(db);
   const url = new URL(context.request.url);
   const period = normalizeText(url.searchParams.get('period_month'));
   if (period) {
@@ -23,6 +27,8 @@ export async function onRequestPost(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   await ensureAccountingPeriodClosuresTable(db);
+  await ensureAccountingAttachmentsTable(db);
+  await ensureAccountingStatementImportsTables(db);
   let body = {};
   try { body = await context.request.json(); } catch { return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400); }
 
@@ -31,6 +37,25 @@ export async function onRequestPost(context) {
   const lockState = action === 'lock' ? 'locked' : 'open';
   const closeNotes = normalizeText(body.close_notes || body.notes);
   const checklist = normalizeChecklistPayload(body.close_checklist || body.checklist || {});
+
+  if (lockState === 'locked') {
+    const attachments = await listAccountingAttachments(db, { periodMonth, limit: 1000 });
+    const statements = attachments.filter((row) => (row.attachment_kind || '') === 'statement');
+    const receipts = attachments.filter((row) => ['receipt', 'bill'].includes(String(row.attachment_kind || '')));
+    const workpapers = attachments.filter((row) => (row.attachment_kind || '') === 'workpaper');
+    const imports = await listAccountingStatementImports(db, { periodMonth, limit: 100 });
+    const exceptions = await listAccountingReconciliationExceptions(db, { periodMonth, status: 'open', limit: 500 });
+    const requiredKinds = Array.isArray(body.required_attachment_kinds) ? body.required_attachment_kinds : ['statement', 'workpaper'];
+    const missing = [];
+    if (requiredKinds.includes('statement') && !statements.length) missing.push('statement attachment');
+    if (requiredKinds.includes('workpaper') && !workpapers.length) missing.push('workpaper attachment');
+    if (requiredKinds.includes('receipt') && !receipts.length) missing.push('bill or receipt support');
+    if (!imports.length) missing.push('statement import');
+    if (exceptions.length) missing.push(`${exceptions.length} unresolved reconciliation exception(s)`);
+    if (missing.length) {
+      return jsonResponse({ ok: false, error: `Cannot lock ${periodMonth} yet. Still needed: ${missing.join(', ')}.` , missing_requirements: missing }, 400);
+    }
+  }
 
   await db.prepare(`
     INSERT INTO accounting_period_closures (

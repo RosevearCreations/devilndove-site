@@ -3,6 +3,7 @@ import { ensureAccountingReconciliationReviewsTable, listAccountingReconciliatio
 import { ensureAccountingGifiNotesTable, listAccountingGifiNotes } from './_accountingGifi.js';
 import { ensureAccountingPeriodClosuresTable, listAccountingPeriodClosures } from './_accountingPeriods.js';
 import { ensureAccountingAttachmentsTable, listAccountingAttachments } from './_accountingAttachments.js';
+import { ensureAccountingStatementImportsTables, listAccountingReconciliationExceptions, listAccountingStatementImports } from './_accountingStatementImports.js';
 
 function yearRange(yearValue) {
   const raw = String(yearValue || '').trim();
@@ -89,6 +90,15 @@ function flattenYearEndCsvRows(bundle) {
   (handoff.gl_final_blockers || []).forEach((row) => push('gl_blockers', row.blocker_type || 'needs_review', row.code || '', row.gifi_review_state || '', row.name || ''));
   (handoff.recommended_missing_items || []).forEach((item, index) => push('recommended_missing_items', 'missing', String(index + 1), item));
   (handoff.handoff_export_checklist || []).forEach((item, index) => push('handoff_export_checklist', 'export', String(index + 1), item));
+  const statementImportSummary = handoff.statement_import_summary || {};
+  Object.entries(statementImportSummary.by_provider || {}).forEach(([key, value]) => push('statement_import_summary', 'by_provider', key, value));
+  Object.entries(statementImportSummary.by_month || {}).forEach(([key, value]) => push('statement_import_summary', 'by_month', key, value));
+  (handoff.statement_import_rows || []).forEach((row, index) => push('statement_import_rows', row.provider_scope || 'other', String(index + 1), row.row_count || 0, JSON.stringify(row || {})));
+  const exceptionSummary = handoff.exception_summary || {};
+  Object.entries(exceptionSummary.by_type || {}).forEach(([key, value]) => push('exception_summary', 'by_type', key, value));
+  Object.entries(exceptionSummary.by_status || {}).forEach(([key, value]) => push('exception_summary', 'by_status', key, value));
+  (handoff.unresolved_items_summary || []).forEach((row, index) => push('unresolved_items_summary', row.reconciliation_type || 'other', String(index + 1), row.difference_cents || 0, JSON.stringify(row || {})));
+  (handoff.attachment_index || []).forEach((row, index) => push('attachment_index', row.attachment_kind || 'other', String(index + 1), row.original_filename || row.statement_reference || '', JSON.stringify({ period_month: row.period_month, scope_key: row.scope_key, provider_scope: row.provider_scope, public_url: row.public_url })));
   (bundle.notes || []).forEach((item, index) => push('notes', 'bundle', String(index + 1), item));
   return rows;
 }
@@ -102,6 +112,7 @@ export async function onRequestGet(context) {
   await ensureAccountingGifiNotesTable(db);
   await ensureAccountingReconciliationReviewsTable(db);
   await ensureAccountingAttachmentsTable(db);
+  await ensureAccountingStatementImportsTables(db);
   await ensureGlSchema(db);
 
   const url = new URL(context.request.url);
@@ -116,6 +127,9 @@ export async function onRequestGet(context) {
     ...(await listAccountingReconciliationReviews(db, { reconciliationType: 'shipping', includeAllPeriods: true })),
   ].filter((row) => String(row.period_month || '').startsWith(`${range.year}-`));
   const attachments = await listAccountingAttachments(db, { taxYear: range.year, limit: 1000 });
+  const statementImports = await listAccountingStatementImports(db, { limit: 500 });
+  const yearStatementImports = statementImports.filter((row) => String(row.period_month || '').startsWith(`${range.year}-`));
+  const reconciliationExceptions = (await listAccountingReconciliationExceptions(db, { limit: 1000 })).filter((row) => String(row.period_month || '').startsWith(`${range.year}-`));
 
   const glReviewRow = await db.prepare(`
     SELECT
@@ -191,6 +205,11 @@ export async function onRequestGet(context) {
     };
   }
 
+  const statementImportByProvider = summarizeBy(yearStatementImports, (row) => row.provider_scope || 'other');
+  const statementImportByMonth = summarizeBy(yearStatementImports, (row) => row.period_month || 'unassigned');
+  const exceptionByType = summarizeBy(reconciliationExceptions, (row) => row.reconciliation_type || 'other');
+  const exceptionByStatus = summarizeBy(reconciliationExceptions, (row) => row.exception_status || 'open');
+
   const monthsLocked = closures.filter((row) => row.lock_state === 'locked').map((row) => row.period_month);
   const openMonths = closures.filter((row) => row.lock_state !== 'locked').map((row) => row.period_month);
   const checklist = {
@@ -211,6 +230,8 @@ export async function onRequestGet(context) {
     openMonths.length ? `Finish lock review for open months: ${openMonths.join(', ')}` : null,
     Number(attachmentKinds.statement || 0) === 0 ? 'Attach statements for the year-end handoff package.' : null,
     Number(attachmentKinds.workpaper || 0) === 0 ? 'Attach workpapers or close-checklists for the year-end handoff package.' : null,
+    yearStatementImports.length === 0 ? 'No statement imports were found for this tax year.' : null,
+    reconciliationExceptions.length ? `Resolve reconciliation exceptions: ${reconciliationExceptions.slice(0, 5).map((row) => `${row.reconciliation_type}/${row.scope_key}`).join(', ')}` : null,
     attachmentGaps.length ? `Attachment coverage gaps remain: ${attachmentGaps.slice(0, 6).join('; ')}` : null,
     reconciliationReviews.some((row) => Number(row.unresolved_item_count || 0) > 0) ? 'Reconciliation reviews still show unresolved items that should be explained or cleared.' : null,
   ].filter(Boolean);
@@ -247,11 +268,30 @@ export async function onRequestGet(context) {
         by_scope: reconciliationByScope,
         matrix_by_month: reconciliationMatrix,
       },
+      statement_import_summary: {
+        total_import_count: yearStatementImports.length,
+        by_provider: statementImportByProvider,
+        by_month: statementImportByMonth,
+      },
+      statement_import_rows: yearStatementImports,
+      exception_summary: {
+        total_exception_count: reconciliationExceptions.length,
+        by_type: exceptionByType,
+        by_status: exceptionByStatus,
+      },
+      unresolved_items_summary: reconciliationExceptions.slice(0, 200),
+      attachment_index: attachments.slice(0, 500),
+      export_bundle_v2: {
+        formats: ['json', 'csv', 'csv_pack'],
+        includes: ['gifi_summary', 'reconciliation_summary', 'statement_imports', 'attachment_index', 'unresolved_items'],
+      },
       recommended_missing_items: recommendedMissingItems,
       handoff_export_checklist: [
         'GIFI staging CSV',
         'Year-end close JSON bundle',
-        'Monthly / yearly accounting exports',
+        'CSV pack export',
+        'Attachment index',
+        'Unresolved-items summary',
         'Statements, bills, receipts, and workpapers',
         'Notes for unresolved differences or accountant follow-up',
       ],
@@ -274,6 +314,44 @@ export async function onRequestGet(context) {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         'Content-Disposition': `attachment; filename="devilndove-year-end-close-${range.year}.json"`,
+      },
+    });
+  }
+
+  if (format === 'csv_pack') {
+    const attachmentIndexLines = ['attachment_kind,attachment_status,period_month,scope_key,provider_scope,original_filename,public_url'];
+    for (const row of attachments) {
+      attachmentIndexLines.push([row.attachment_kind, row.attachment_status, row.period_month, row.scope_key, row.provider_scope, row.original_filename, row.public_url].map(csvEscape).join(','));
+    }
+    const unresolvedLines = ['reconciliation_type,period_month,scope_key,status,difference_cents,tolerance_cents,notes'];
+    for (const row of reconciliationExceptions) {
+      unresolvedLines.push([row.reconciliation_type, row.period_month, row.scope_key, row.exception_status, row.difference_cents, row.tolerance_cents, row.notes].map(csvEscape).join(','));
+    }
+    const importLines = ['provider_scope,period_month,row_count,gross_cents,fee_cents,net_cents,tax_cents,shipping_cents,statement_reference'];
+    for (const row of yearStatementImports) {
+      importLines.push([row.provider_scope, row.period_month, row.row_count, row.gross_cents, row.fee_cents, row.net_cents, row.tax_cents, row.shipping_cents, row.statement_reference].map(csvEscape).join(','));
+    }
+    const summaryLines = ['section,group_key,item_key,value,notes'];
+    for (const row of flattenYearEndCsvRows(bundle)) {
+      summaryLines.push([row.section, row.group_key, row.item_key, row.value, row.notes].map(csvEscape).join(','));
+    }
+    const payload = [
+      '# devilndove-year-end-summary.csv',
+      ...summaryLines,
+      '',
+      '# devilndove-attachment-index.csv',
+      ...attachmentIndexLines,
+      '',
+      '# devilndove-unresolved-items.csv',
+      ...unresolvedLines,
+      '',
+      '# devilndove-statement-imports.csv',
+      ...importLines,
+    ].join('\n');
+    return new Response(payload, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Content-Disposition': `attachment; filename="devilndove-year-end-close-${range.year}-csv-pack.txt"`,
       },
     });
   }
