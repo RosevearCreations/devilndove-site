@@ -20,6 +20,27 @@ function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+async function getTableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+function parseColorNamesJson(value, fallbackColor = '') {
+  let parsed = [];
+  try {
+    const raw = JSON.parse(String(value || '[]'));
+    parsed = Array.isArray(raw) ? raw : [];
+  } catch {}
+  const values = parsed.map((item) => String(item || '').trim()).filter(Boolean);
+  if (fallbackColor && !values.some((entry) => entry.toLowerCase() === String(fallbackColor).trim().toLowerCase())) values.unshift(String(fallbackColor).trim());
+  return values;
+}
+
 async function runProductQuery(db, sql, bindings = []) {
   const stmt = db.prepare(sql);
   const result = bindings.length ? await stmt.bind(...bindings).all() : await stmt.all();
@@ -27,7 +48,10 @@ async function runProductQuery(db, sql, bindings = []) {
 }
 
 function shapeProducts(rows) {
-  return rows.map((row) => ({ ...row, seo_h1: row.h1_override || row.name || "" }));
+  return rows.map((row) => {
+    const colorNames = parseColorNamesJson(row.color_names_json, row.color_name || '');
+    return { ...row, color_names: colorNames, color_names_text: colorNames.join(', '), seo_h1: row.h1_override || row.name || "" };
+  });
 }
 
 function buildFilterGroups(products) {
@@ -39,12 +63,12 @@ function buildFilterGroups(products) {
   const saleChannels = {};
   products.forEach((product) => {
     const category = normalizeText(product.product_category);
-    const color = normalizeText(product.color_name);
+    const colorsForProduct = Array.isArray(product.color_names) && product.color_names.length ? product.color_names : (normalizeText(product.color_name) ? [normalizeText(product.color_name)] : []);
     const productType = normalizeText(product.product_type);
     const origin = normalizeText(product.merchandise_origin);
     const channel = normalizeText(product.sale_channel);
     if (category) categories[category] = (categories[category] || 0) + 1;
-    if (color) colors[color] = (colors[color] || 0) + 1;
+    colorsForProduct.forEach((color) => { colors[color] = (colors[color] || 0) + 1; });
     if (productType) productTypes[productType] = (productTypes[productType] || 0) + 1;
     if (origin) origins[origin] = (origins[origin] || 0) + 1;
     if (channel) saleChannels[channel] = (saleChannels[channel] || 0) + 1;
@@ -70,6 +94,8 @@ export async function onRequestGet(context) {
   const max_price_cents = Number.isInteger(Number(url.searchParams.get('max_price_cents'))) ? Number(url.searchParams.get('max_price_cents')) : null;
   const requires_shipping = normalizeText(url.searchParams.get('requires_shipping'));
   const warnings = [];
+  const productColumns = db ? await getTableColumnSet(db, 'products') : new Set();
+  const hasColorNamesJson = productColumns.has('color_names_json');
 
   if (!db) {
     warnings.push('db_binding_unavailable');
@@ -93,10 +119,11 @@ export async function onRequestGet(context) {
       LOWER(COALESCE(p.sku, '')) LIKE ? OR
       LOWER(COALESCE(p.product_category, '')) LIKE ? OR
       LOWER(COALESCE(p.color_name, '')) LIKE ? OR
+      ${hasColorNamesJson ? "LOWER(COALESCE(p.color_names_json, '')) LIKE ? OR" : ''}
       LOWER(COALESCE(ps.keywords, '')) LIKE ?
     )`);
     const like = `%${q}%`;
-    bindings.push(like, like, like, like, like, like, like);
+    bindings.push(like, like, like, like, like, like${hasColorNamesJson ? ', like' : ''}, like);
   }
   if (['physical', 'digital'].includes(product_type)) {
     clauses.push(`p.product_type = ?`);
@@ -116,7 +143,7 @@ export async function onRequestGet(context) {
 
   const primarySql = `
     SELECT
-      p.product_id, p.product_number, p.slug, p.sku, p.name, p.product_category, p.color_name, p.shipping_code, p.review_status, p.short_description, p.description, p.product_type, p.status,
+      p.product_id, p.product_number, p.slug, p.sku, p.name, p.product_category, p.color_name, ${hasColorNamesJson ? 'p.color_names_json,' : '"" AS color_names_json,'} p.shipping_code, p.review_status, p.short_description, p.description, p.product_type, p.status,
       COALESCE(p.merchandise_origin, 'handmade') AS merchandise_origin, COALESCE(p.sale_channel, 'onsite') AS sale_channel,
       p.external_listing_url, p.external_listing_label, p.condition_summary, p.era_label, p.sourcing_notes,
       p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
@@ -135,7 +162,7 @@ export async function onRequestGet(context) {
   const fallbackClauses = clauses.map((clause) => clause.replace(/\s+OR\s+LOWER\(COALESCE\(ps\.keywords, ''\)\) LIKE \?/g, ''));
   const fallbackSql = `
     SELECT
-      p.product_id, p.product_number, p.slug, p.sku, p.name, p.product_category, p.color_name, p.shipping_code, p.review_status, p.short_description, p.description, p.product_type, p.status,
+      p.product_id, p.product_number, p.slug, p.sku, p.name, p.product_category, p.color_name, ${hasColorNamesJson ? 'p.color_names_json,' : '"" AS color_names_json,'} p.shipping_code, p.review_status, p.short_description, p.description, p.product_type, p.status,
       COALESCE(p.merchandise_origin, 'handmade') AS merchandise_origin, COALESCE(p.sale_channel, 'onsite') AS sale_channel,
       p.external_listing_url, p.external_listing_label, p.condition_summary, p.era_label, p.sourcing_notes,
       p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,

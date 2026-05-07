@@ -13,6 +13,17 @@ function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+function parseColorNamesJson(value, fallbackColor = '') {
+  let parsed = [];
+  try {
+    const raw = JSON.parse(String(value || '[]'));
+    parsed = Array.isArray(raw) ? raw : [];
+  } catch {}
+  const values = parsed.map((item) => String(item || '').trim()).filter(Boolean);
+  if (fallbackColor && !values.some((entry) => entry.toLowerCase() === String(fallbackColor).trim().toLowerCase())) values.unshift(String(fallbackColor).trim());
+  return values;
+}
+
 async function getTableColumnSet(db, tableName) {
   try {
     const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
@@ -32,9 +43,13 @@ export async function onRequestGet(context) {
   if (!slug) return json({ ok: false, error: 'A valid slug is required.' }, 400);
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
 
+  const productColumns = await getTableColumnSet(db, 'products');
+  const hasColorNamesJson = productColumns.has('color_names_json');
+
   const product = await db.prepare(`
     SELECT
       p.product_id, p.slug, p.sku, p.name, p.short_description, p.description, p.product_type, p.status,
+      p.color_name, ${'${hasColorNamesJson ? `p.color_names_json,` : `"" AS color_names_json,`}'}
       COALESCE(p.merchandise_origin, 'handmade') AS merchandise_origin, COALESCE(p.sale_channel, 'onsite') AS sale_channel,
       p.external_listing_url, p.external_listing_label, p.condition_summary, p.era_label, p.sourcing_notes,
       p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
@@ -51,6 +66,8 @@ export async function onRequestGet(context) {
   `).bind(slug).first();
 
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
+  product.color_names = parseColorNamesJson(product.color_names_json, product.color_name || '');
+  product.color_names_text = product.color_names.join(', ');
 
   const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
   const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
