@@ -885,3 +885,9 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 ## Fresh pass notes
 - attachment uploads now support statement metrics, but existing older attachments will not have those fields until re-uploaded or updated
 - deeper provider-statement reconciliation still depends on real monthly statement files being uploaded with provider scope and totals
+
+
+## 2026-05-09 admin products follow-up
+- Fixed admin/products inventory operations so site-item inventory can auto-sync from catalog items and product records when the inventory table is empty, and added explicit sync_catalog support for tool/supply/product rows.
+- Updated the Product SEO Editor to use a populated Product ID dropdown backed by live products instead of a plain numeric field.
+- Tied the Tools & Supplies Used editor to the current product editor record so loading, creating, or updating a product can immediately continue into resource linking and tracking.

@@ -471,3 +471,9 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 
 ## Latest pass summary
 This pass refined receipt/statement/workpaper coverage, added statement-backed reconciliation detail, made the shop browse path more visibly split between handmade and vintage/collectible stock, and expanded About/Creations trust copy around provenance, condition, and sales channels.
+
+
+## 2026-05-09 admin products follow-up
+- Fixed admin/products inventory operations so site-item inventory can auto-sync from catalog items and product records when the inventory table is empty, and added explicit sync_catalog support for tool/supply/product rows.
+- Updated the Product SEO Editor to use a populated Product ID dropdown backed by live products instead of a plain numeric field.
+- Tied the Tools & Supplies Used editor to the current product editor record so loading, creating, or updating a product can immediately continue into resource linking and tracking.

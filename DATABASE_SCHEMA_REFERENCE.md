@@ -692,3 +692,9 @@ These fields support Devil n Dove selling both handmade work and pre-built colle
 ## Current pass sync — 2026-05-05
 - `community_events` now also includes recurrence, event-image, and vendor-application fields (`recurrence_rule`, `recurrence_interval`, `recurrence_count`, `recurrence_until`, `recurrence_label`, `image_url`, `image_alt`, `application_mode`, `application_url`, `vendor_capacity`, `vendor_note`).
 - New table: `event_vendor_applications` for public vendor-interest capture and admin review.
+
+
+## 2026-05-09 admin products follow-up
+- Fixed admin/products inventory operations so site-item inventory can auto-sync from catalog items and product records when the inventory table is empty, and added explicit sync_catalog support for tool/supply/product rows.
+- Updated the Product SEO Editor to use a populated Product ID dropdown backed by live products instead of a plain numeric field.
+- Tied the Tools & Supplies Used editor to the current product editor record so loading, creating, or updating a product can immediately continue into resource linking and tracking.
