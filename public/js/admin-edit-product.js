@@ -180,6 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ensurePricingControlsMount();
     renderPricingInsight();
     resetProductPicker();
+    if (window.DDProductEditorRequiredState?.sync) window.DDProductEditorRequiredState.sync();
   }
 
   function ensureCancelButton() {
@@ -446,6 +447,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const imageFields = getImageUrlFields();
     const safeImages = Array.isArray(images) ? images.slice(0, 5) : [];
     for (let i = 0; i < imageFields.length; i += 1) imageFields[i].value = safeImages[i]?.image_url || "";
+    if (window.DDProductEditorRequiredState?.sync) window.DDProductEditorRequiredState.sync();
   }
 
   async function loadProduct(productId) {
@@ -852,5 +854,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   resetFormState();
+  if (window.DDProductEditorRequiredState?.sync) window.DDProductEditorRequiredState.sync();
   loadPendingActions();
 });

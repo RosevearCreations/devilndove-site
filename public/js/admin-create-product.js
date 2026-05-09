@@ -18,6 +18,66 @@ document.addEventListener("DOMContentLoaded", () => {
     messageEl.style.display = "none";
   }
 
+  const REQUIRED_FIELD_CONFIG = [
+    { name: "name", label: "Name" },
+    { name: "product_category", label: "Category" },
+    { name: "product_type", label: "Product type" },
+    { name: "price", label: "Price" },
+    { name: "featured_image_url", label: "Featured image" },
+    { name: "meta_title", label: "SEO title" },
+    { name: "meta_description", label: "SEO meta description" },
+    {
+      name: "external_listing_url",
+      label: "External listing URL",
+      when: () => ["hybrid", "external_only"].includes(String(form?.elements?.namedItem("sale_channel")?.value || "").trim())
+    }
+  ];
+
+  function isFieldMissing(field) {
+    if (!field) return false;
+    if (field.type === "checkbox" || field.type === "radio") return !field.checked;
+    return !String(field.value || "").trim();
+  }
+
+  function ensureRequiredFieldBadge(container) {
+    if (!container || container.querySelector('.dd-required-badge')) return;
+    const target = container.querySelector('.small') || container.firstElementChild || container;
+    const badge = document.createElement('span');
+    badge.className = 'dd-required-badge';
+    badge.textContent = 'Required';
+    target.appendChild(badge);
+  }
+
+  function setRequiredFieldState(field, shouldMark) {
+    if (!field) return;
+    const container = field.closest('label') || field.parentElement;
+    if (container) {
+      container.classList.add('dd-required-field');
+      ensureRequiredFieldBadge(container);
+      container.classList.toggle('is-required-empty', !!shouldMark);
+    }
+    field.classList.toggle('dd-required-outline', !!shouldMark);
+    field.setAttribute('aria-invalid', shouldMark ? 'true' : 'false');
+  }
+
+  function syncRequiredFieldOutlines() {
+    if (!form) return;
+    REQUIRED_FIELD_CONFIG.forEach((config) => {
+      const field = form.elements.namedItem(config.name);
+      if (!field) return;
+      const shouldApply = typeof config.when === 'function' ? !!config.when() : true;
+      if (!shouldApply) {
+        setRequiredFieldState(field, false);
+        return;
+      }
+      setRequiredFieldState(field, isFieldMissing(field));
+    });
+  }
+
+  window.DDProductEditorRequiredState = {
+    sync: syncRequiredFieldOutlines
+  };
+
 
   function ensureMarketplaceFields() {
     if (!form || form.querySelector('[data-dd-collectibles-fields="1"]') || form.elements.namedItem('merchandise_origin')) return;
@@ -109,9 +169,13 @@ document.addEventListener("DOMContentLoaded", () => {
     form.dataset.mode = "create";
   }
 
-  loadTaxClasses();
+  loadTaxClasses().finally(() => { syncRequiredFieldOutlines(); });
+
+  form.addEventListener("input", () => { syncRequiredFieldOutlines(); });
+  form.addEventListener("change", () => { syncRequiredFieldOutlines(); });
 
   form.addEventListener("submit", async (event) => {
+    syncRequiredFieldOutlines();
     if (form.dataset.mode === "edit") {
       return;
     }
@@ -225,6 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
       form.reset();
       form.dataset.mode = "create";
       await loadTaxClasses();
+      syncRequiredFieldOutlines();
 
       document.dispatchEvent(new CustomEvent("dd:product-created", {
         detail: {
