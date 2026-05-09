@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   function ensureMarketplaceFields() {
-    if (!form || form.querySelector('[data-dd-collectibles-fields="1"]')) return;
+    if (!form || form.querySelector('[data-dd-collectibles-fields="1"]') || form.elements.namedItem('merchandise_origin')) return;
     const mount = document.createElement('div');
     mount.className = 'card';
     mount.dataset.ddCollectiblesFields = '1';
@@ -48,6 +48,44 @@ document.addEventListener("DOMContentLoaded", () => {
     form.appendChild(mount);
   }
 
+  function setSelectOptions(select, items, valueKey = null, labelBuilder = null, placeholder = 'Select an option') {
+    if (!select) return;
+    const rows = Array.isArray(items) ? items : [];
+    const currentValue = String(select.value || '').trim();
+    select.innerHTML = `<option value="">${placeholder}</option>` + rows.map((item) => {
+      const rawValue = valueKey ? item?.[valueKey] : item;
+      const value = String(rawValue == null ? '' : rawValue).trim();
+      const label = labelBuilder ? labelBuilder(item) : value;
+      return `<option value="${value.replace(/"/g, '&quot;')}">${String(label || value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</option>`;
+    }).join('');
+    if (currentValue) select.value = currentValue;
+  }
+
+  async function loadEditorBootstrap() {
+    if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/product-mobile-bootstrap', { method: 'GET' });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load product editor options.');
+      setSelectOptions(document.getElementById('create_product_category'), data.category_options || [], null, null, 'Select category');
+      setSelectOptions(document.getElementById('create_product_color_name'), data.color_options || [], null, null, 'Select primary colour');
+      setSelectOptions(document.getElementById('create_product_shipping_code'), data.shipping_code_options || [], null, null, 'Select shipping code');
+      if (taxClassSelect) {
+        const currentValue = String(taxClassSelect.value || '').trim();
+        taxClassSelect.innerHTML = `<option value="">Select tax class</option>` + (Array.isArray(data.tax_classes) ? data.tax_classes : []).map((taxClass) => {
+          const ratePercent = Number(taxClass.tax_rate || 0);
+          const friendlyRate = ratePercent > 1 ? ratePercent : Math.round(ratePercent * 100);
+          return `<option value="${Number(taxClass.tax_class_id || 0)}">${String(taxClass.name || '')} (${friendlyRate}%)</option>`;
+        }).join('');
+        if (currentValue) taxClassSelect.value = currentValue;
+      }
+      return data;
+    } catch (error) {
+      setMessage(error.message || 'Failed to load product editor options.', true);
+      return null;
+    }
+  }
+
   function dollarsToCents(value) {
     const normalized = String(value || "").trim();
     if (!normalized) return 0;
@@ -57,40 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadTaxClasses() {
-    if (!taxClassSelect || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
-
-    const currentValue = String(taxClassSelect.value || "").trim();
-    taxClassSelect.innerHTML = `<option value="">Loading tax classes...</option>`;
-
-    try {
-      const response = await window.DDAuth.apiFetch("/api/admin/tax-classes", {
-        method: "GET"
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Failed to load tax classes.");
-      }
-
-      const taxClasses = Array.isArray(data.tax_classes) ? data.tax_classes : [];
-
-      taxClassSelect.innerHTML = `
-        <option value="">Select tax class</option>
-        ${taxClasses.map(taxClass => `
-          <option value="${taxClass.tax_class_id}">
-            ${taxClass.name} (${Math.round(Number(taxClass.tax_rate || 0) * 100)}%)
-          </option>
-        `).join("")}
-      `;
-
-      if (currentValue) {
-        taxClassSelect.value = currentValue;
-      }
-    } catch (error) {
-      taxClassSelect.innerHTML = `<option value="">Unable to load tax classes</option>`;
-      setMessage(error.message || "Failed to load tax classes.", true);
-    }
+    await loadEditorBootstrap();
   }
 
   if (!form) {
@@ -144,8 +149,11 @@ document.addEventListener("DOMContentLoaded", () => {
       slug: String(formData.get("slug") || "").trim(),
       sku: String(formData.get("sku") || "").trim(),
       short_description: String(formData.get("short_description") || "").trim(),
+      product_category: String(formData.get("product_category") || "").trim(),
       color_name: String(formData.get("color_name") || "").trim(),
       color_names_text: String(formData.get("color_names_text") || "").trim(),
+      shipping_code: String(formData.get("shipping_code") || "").trim(),
+      review_status: String(formData.get("review_status") || "pending_review").trim(),
       description: String(formData.get("description") || "").trim(),
       product_type: String(formData.get("product_type") || "physical").trim(),
       status: String(formData.get("status") || "draft").trim(),
@@ -161,6 +169,14 @@ document.addEventListener("DOMContentLoaded", () => {
       digital_file_url: String(formData.get("digital_file_url") || "").trim(),
       featured_image_url: String(formData.get("featured_image_url") || "").trim(),
       sort_order: String(formData.get("sort_order") || "").trim() || 0,
+      meta_title: String(formData.get("meta_title") || "").trim(),
+      meta_description: String(formData.get("meta_description") || "").trim(),
+      keywords: String(formData.get("keywords") || "").trim(),
+      h1_override: String(formData.get("h1_override") || "").trim(),
+      canonical_url: String(formData.get("canonical_url") || "").trim(),
+      og_title: String(formData.get("og_title") || "").trim(),
+      og_description: String(formData.get("og_description") || "").trim(),
+      og_image_url: String(formData.get("og_image_url") || "").trim(),
       merchandise_origin: String(formData.get("merchandise_origin") || "handmade").trim(),
       sale_channel: String(formData.get("sale_channel") || "onsite").trim(),
       external_listing_url: String(formData.get("external_listing_url") || "").trim(),

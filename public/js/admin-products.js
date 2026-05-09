@@ -116,6 +116,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     else hide(errorEl);
   }
 
+  function renderProductPicker(products) {
+    const select = document.getElementById("existingProductSelect");
+    if (!select) return;
+    const rows = Array.isArray(products) ? products : [];
+    select.innerHTML = `<option value="">Choose an existing product...</option>` + rows.map((product) => {
+      const productId = Number(product.product_id || 0);
+      const name = escapeHtml(product.name || `Product #${productId}`);
+      const slug = escapeHtml(product.slug || '');
+      const sku = escapeHtml(product.sku || '');
+      const colour = escapeHtml(product.color_names_text || product.color_name || '');
+      const suffix = [slug, sku, colour].filter(Boolean).join(' • ');
+      return `<option value="${productId}">${name}${suffix ? ` — ${suffix}` : ''}</option>`;
+    }).join('');
+  }
+
   function renderRows(products) {
     if (!tableBody) return;
 
@@ -337,10 +352,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
+      renderProductPicker(products);
       renderRows(products);
     } catch (error) {
       const cached = loadSnapshot();
       if (cached?.products?.length) {
+        renderProductPicker(cached.products);
         renderRows(cached.products);
         setStatus(`Live product list is unavailable. Showing the last saved snapshot from ${cached.cached_at || "an earlier visit"}.`, "warning");
       } else {
@@ -574,6 +591,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (error) {
       setStatus(error.message || `Failed to ${action} product resources.`, "error");
     }
+  });
+
+  document.getElementById("clearExistingProductButton")?.addEventListener("click", () => {
+    const select = document.getElementById("existingProductSelect");
+    if (select) select.value = "";
   });
 
   if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {

@@ -5,10 +5,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const messageEl = document.getElementById("createProductMessage");
   const submitButton = form ? form.querySelector('button[type="submit"]') : null;
   const productsTableBody = document.getElementById("productsTableBody");
+  const existingProductSelect = document.getElementById("existingProductSelect");
+  const loadExistingProductButton = document.getElementById("loadExistingProductButton");
+  const clearExistingProductButton = document.getElementById("clearExistingProductButton");
 
   if (!form || !productsTableBody || !window.DDAuth) return;
 
   ensureMarketplaceFields();
+  loadEditorBootstrap().catch(() => {});
 
   const LOCAL_PENDING_KEY = 'dd_admin_product_update_pending_actions_v1';
   const PRICING_CONSOLE_KEY = 'dd_admin_pricing_console_v2';
@@ -64,9 +68,72 @@ document.addEventListener("DOMContentLoaded", () => {
     field.value = value == null ? "" : String(value);
   }
 
+  function setSelectOptions(select, items, valueKey = null, labelBuilder = null, placeholder = 'Select an option') {
+    if (!select) return;
+    const rows = Array.isArray(items) ? items : [];
+    const currentValue = String(select.value || '').trim();
+    select.innerHTML = `<option value="">${placeholder}</option>` + rows.map((item) => {
+      const rawValue = valueKey ? item?.[valueKey] : item;
+      const value = String(rawValue == null ? '' : rawValue).trim();
+      const label = labelBuilder ? labelBuilder(item) : value;
+      return `<option value="${value.replace(/"/g, '&quot;')}">${String(label || value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</option>`;
+    }).join('');
+    if (currentValue) select.value = currentValue;
+  }
+
+  async function loadEditorBootstrap() {
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/product-mobile-bootstrap', { method: 'GET' });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load product editor options.');
+      setSelectOptions(document.getElementById('create_product_category'), data.category_options || [], null, null, 'Select category');
+      setSelectOptions(document.getElementById('create_product_color_name'), data.color_options || [], null, null, 'Select primary colour');
+      setSelectOptions(document.getElementById('create_product_shipping_code'), data.shipping_code_options || [], null, null, 'Select shipping code');
+      const taxSelect = document.getElementById('create_product_tax_class_id');
+      if (taxSelect) {
+        const currentValue = String(taxSelect.value || '').trim();
+        taxSelect.innerHTML = `<option value="">Select tax class</option>` + (Array.isArray(data.tax_classes) ? data.tax_classes : []).map((taxClass) => {
+          const ratePercent = Number(taxClass.tax_rate || 0);
+          const friendlyRate = ratePercent > 1 ? ratePercent : Math.round(ratePercent * 100);
+          return `<option value="${Number(taxClass.tax_class_id || 0)}">${escapeHtml(taxClass.name || '')} (${escapeHtml(String(friendlyRate))}%)</option>`;
+        }).join('');
+        if (currentValue) taxSelect.value = currentValue;
+      }
+      return data;
+    } catch (error) {
+      setMessage(error.message || 'Failed to load product editor options.', true);
+      return null;
+    }
+  }
+
+  function startExistingProductLoad(productId) {
+    const safeProductId = Number(productId || 0);
+    if (!safeProductId) {
+      setMessage('Choose an existing product first.', true);
+      return;
+    }
+    const rowButton = productsTableBody.querySelector(`[data-edit-product-id="${safeProductId}"]`);
+    if (rowButton) {
+      rowButton.click();
+      return;
+    }
+    loadProduct(safeProductId).then(async (data) => {
+      editingProductId = safeProductId;
+      fillForm(data.product || {}, data.images || []);
+      try { const suggestion = await fetchPriceSuggestion(safeProductId); latestPriceSuggestion = suggestion.item; } catch {}
+      renderPricingInsight();
+      setFormModeEdit();
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setMessage('Product loaded for editing.');
+    }).catch((error) => setMessage(error.message || 'Failed to load product.', true));
+  }
+
+  function resetProductPicker() {
+    if (existingProductSelect) existingProductSelect.value = '';
+  }
 
   function ensureMarketplaceFields() {
-    if (!form || form.querySelector('[data-dd-collectibles-fields="1"]')) return;
+    if (!form || form.querySelector('[data-dd-collectibles-fields="1"]') || form.elements.namedItem('merchandise_origin')) return;
     const mount = document.createElement('div');
     mount.className = 'card';
     mount.dataset.ddCollectiblesFields = '1';
@@ -102,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resetFormState() {
     form.reset();
+    if (existingProductSelect) existingProductSelect.value = String(product.product_id || '');
     resetImageUrlFields();
     editingProductId = null;
     latestPriceSuggestion = null;
@@ -111,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cancelButton) cancelButton.style.display = "none";
     ensurePricingControlsMount();
     renderPricingInsight();
+    resetProductPicker();
   }
 
   function ensureCancelButton() {
@@ -333,6 +402,9 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("slug", product.slug || "");
     setField("sku", product.sku || "");
     setField("short_description", product.short_description || "");
+    setField("product_category", product.product_category || "");
+    setField("shipping_code", product.shipping_code || "");
+    setField("review_status", product.review_status || "pending_review");
     setField("description", product.description || "");
     setField("product_type", product.product_type || "physical");
     setField("status", product.status || "draft");
@@ -348,6 +420,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("digital_file_url", product.digital_file_url || "");
     setField("featured_image_url", product.featured_image_url || "");
     setField("sort_order", product.sort_order == null ? "0" : product.sort_order);
+    setField("meta_title", product.meta_title || "");
+    setField("meta_description", product.meta_description || "");
+    setField("keywords", product.keywords || "");
+    setField("h1_override", product.h1_override || "");
+    setField("canonical_url", product.canonical_url || "");
+    setField("og_title", product.og_title || "");
+    setField("og_description", product.og_description || "");
+    setField("og_image_url", product.og_image_url || "");
     setField("color_name", product.color_name || "");
     setField("color_names_text", product.color_names_text || "");
     setField("merchandise_origin", product.merchandise_origin || "handmade");
@@ -357,6 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("condition_summary", product.condition_summary || "");
     setField("era_label", product.era_label || "");
     setField("sourcing_notes", product.sourcing_notes || "");
+    if (existingProductSelect) existingProductSelect.value = String(product.product_id || '');
     resetImageUrlFields();
     const imageFields = getImageUrlFields();
     const safeImages = Array.isArray(images) ? images.slice(0, 5) : [];
@@ -532,6 +613,20 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPendingActions();
   }
 
+  loadExistingProductButton?.addEventListener('click', () => {
+    startExistingProductLoad(existingProductSelect?.value || 0);
+  });
+
+  existingProductSelect?.addEventListener('change', () => {
+    const help = document.getElementById('existingProductHelp');
+    if (help) help.textContent = existingProductSelect.value ? 'Ready to load this record into the editor.' : 'Use this picker when the product table is long or you already know which record you want to edit.';
+  });
+
+  clearExistingProductButton?.addEventListener('click', () => {
+    clearMessage();
+    resetFormState();
+  });
+
   productsTableBody.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-edit-product-id]");
     if (!button) return;
@@ -586,8 +681,11 @@ document.addEventListener("DOMContentLoaded", () => {
       slug: String(formData.get("slug") || "").trim(),
       sku: String(formData.get("sku") || "").trim(),
       short_description: String(formData.get("short_description") || "").trim(),
+      product_category: String(formData.get("product_category") || "").trim(),
       color_name: String(formData.get("color_name") || "").trim(),
       color_names_text: String(formData.get("color_names_text") || "").trim(),
+      shipping_code: String(formData.get("shipping_code") || "").trim(),
+      review_status: String(formData.get("review_status") || "pending_review").trim(),
       description: String(formData.get("description") || "").trim(),
       product_type: String(formData.get("product_type") || "physical").trim(),
       status: String(formData.get("status") || "draft").trim(),
@@ -603,6 +701,14 @@ document.addEventListener("DOMContentLoaded", () => {
       digital_file_url: String(formData.get("digital_file_url") || "").trim(),
       featured_image_url: String(formData.get("featured_image_url") || "").trim(),
       sort_order: String(formData.get("sort_order") || "").trim() || 0,
+      meta_title: String(formData.get("meta_title") || "").trim(),
+      meta_description: String(formData.get("meta_description") || "").trim(),
+      keywords: String(formData.get("keywords") || "").trim(),
+      h1_override: String(formData.get("h1_override") || "").trim(),
+      canonical_url: String(formData.get("canonical_url") || "").trim(),
+      og_title: String(formData.get("og_title") || "").trim(),
+      og_description: String(formData.get("og_description") || "").trim(),
+      og_image_url: String(formData.get("og_image_url") || "").trim(),
       image_urls
     };
 
