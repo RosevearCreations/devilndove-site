@@ -3,6 +3,15 @@ import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normali
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
+
+async function tableExists(db, tableName) {
+  try {
+    const row = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`).bind(tableName).first();
+    return !!row;
+  } catch {
+    return false;
+  }
+}
 async function getTableColumnSet(db, tableName) {
   try {
     const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
@@ -203,6 +212,200 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
     movements,
     supplier_reorder_groups: Object.values(supplier_reorder_groups)
   };
+}
+
+
+
+async function fetchJsonArrayFromPaths(request, paths = []) {
+  for (const path of paths) {
+    try {
+      const response = await fetch(new URL(path, request.url).toString(), { cf: { cacheTtl: 0, cacheEverything: false } });
+      if (!response.ok) continue;
+      const data = await response.json().catch(() => null);
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.items)) return data.items;
+    } catch {}
+  }
+  return [];
+}
+
+function mapToolInventoryRow(row = {}, index = 0) {
+  return {
+    source_type: 'tool',
+    external_key: normalizeText(row.item_group_key_strict || row.r2_object_key || row.example_image_file || row.name || `tool-${index + 1}`),
+    item_name: normalizeText(row.item_name_suggested || row.name || row.example_image_file || `Tool ${index + 1}`),
+    category: normalizeText(row.category || row.area || 'Workshop'),
+    amazon_url: normalizeText(row.amazon_url || row.amazon_search || row.amazon_search_url) || null,
+    image_url: normalizeText(row.image || row.r2_object_key || row.example_image_file) || null,
+    on_hand_quantity: Number(row.quantity_owned || row.on_hand_qty || 0) || 0,
+    reorder_level: Number(row.reorder_point || 0) || 0,
+    is_active: 1
+  };
+}
+
+function mapSupplyInventoryRow(row = {}, index = 0) {
+  return {
+    source_type: 'supply',
+    external_key: normalizeText(row.item_group_key_strict || row.r2_object_key || row.example_image_file || row.name || `supply-${index + 1}`),
+    item_name: normalizeText(row.item_name_suggested || row.name || row.example_image_file || `Supply ${index + 1}`),
+    category: normalizeText(row.consumable_type || row.category || row.primary_area || 'Supply'),
+    amazon_url: normalizeText(row.amazon_url || row.amazon_search || row.amazon_search_url) || null,
+    image_url: normalizeText(row.image || row.r2_object_key || row.example_image_file) || null,
+    on_hand_quantity: Number(row.on_hand_qty || row.quantity_owned || 0) || 0,
+    reorder_level: Number(row.reorder_point || 0) || 0,
+    is_active: 1
+  };
+}
+
+async function syncSiteInventoryFromCatalog(db, request, { sourceTypes = ['tool', 'supply', 'product'] } = {}) {
+  const allowed = new Set(['tool', 'supply', 'product', 'other']);
+  const wanted = (Array.isArray(sourceTypes) ? sourceTypes : [])
+    .map((value) => normalizeText(value).toLowerCase())
+    .filter((value) => allowed.has(value));
+  const selected = wanted.length ? wanted : ['tool', 'supply', 'product'];
+  const syncedItems = [];
+  const warnings = [];
+
+  const hasCatalogItems = await tableExists(db, 'catalog_items');
+  if (hasCatalogItems) {
+    const placeholders = selected.map(() => '?').join(', ');
+    const catalogRows = normalizeResults(await db.prepare(`
+      SELECT
+        item_kind,
+        source_key,
+        name,
+        category,
+        image_url,
+        amazon_url,
+        quantity_on_hand,
+        reorder_point,
+        status
+      FROM catalog_items
+      WHERE item_kind IN (${placeholders})
+    `).bind(...selected).all().catch(() => ({ results: [] })));
+
+    for (const row of catalogRows) {
+      const sourceType = normalizeText(row.item_kind).toLowerCase() || 'other';
+      if (!allowed.has(sourceType)) continue;
+      const externalKey = normalizeText(row.source_key || row.name || `${sourceType}:${Math.random()}`);
+      if (!externalKey) continue;
+      const itemName = normalizeText(row.name || row.source_key || 'Catalog item');
+      await db.prepare(`
+        INSERT INTO site_item_inventory (
+          source_type, external_key, item_name, category, amazon_url, image_url,
+          on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level,
+          unit_cost_cents, stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
+          is_active, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, 0, 'unit', 'unit', 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT(source_type, external_key) DO UPDATE SET
+          item_name = excluded.item_name,
+          category = excluded.category,
+          amazon_url = COALESCE(NULLIF(excluded.amazon_url, ''), site_item_inventory.amazon_url),
+          image_url = COALESCE(NULLIF(excluded.image_url, ''), site_item_inventory.image_url),
+          reorder_level = MAX(COALESCE(site_item_inventory.reorder_level, 0), COALESCE(excluded.reorder_level, 0)),
+          is_active = excluded.is_active,
+          updated_at = CURRENT_TIMESTAMP
+      `).bind(
+        sourceType,
+        externalKey,
+        itemName,
+        normalizeText(row.category) || null,
+        normalizeText(row.amazon_url) || null,
+        normalizeText(row.image_url) || null,
+        Number(row.quantity_on_hand || 0),
+        Number(row.reorder_point || 0),
+        String(row.status || 'active').toLowerCase() === 'inactive' ? 0 : 1
+      ).run().catch((error) => warnings.push(`Catalog sync skipped ${externalKey}: ${String(error?.message || error)}`));
+      syncedItems.push(`${sourceType}:${externalKey}`);
+    }
+  }
+
+  if ((!hasCatalogItems || syncedItems.length === 0) && request) {
+    if (selected.includes('tool')) {
+      const toolRows = await fetchJsonArrayFromPaths(request, ['/data/toolshed/toolshed_items_master.json', '/data/data/toolshed/toolshed_items_master.json', '/data/tools.json', '/data/data/tools.json']);
+      for (let index = 0; index < toolRows.length; index += 1) {
+        const row = mapToolInventoryRow(toolRows[index], index);
+        if (!row.external_key || !row.item_name) continue;
+        await db.prepare(`
+          INSERT INTO site_item_inventory (
+            source_type, external_key, item_name, category, amazon_url, image_url,
+            on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level,
+            unit_cost_cents, stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
+            is_active, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, 0, 'unit', 'unit', 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ON CONFLICT(source_type, external_key) DO UPDATE SET
+            item_name = excluded.item_name,
+            category = excluded.category,
+            amazon_url = COALESCE(NULLIF(excluded.amazon_url, ''), site_item_inventory.amazon_url),
+            image_url = COALESCE(NULLIF(excluded.image_url, ''), site_item_inventory.image_url),
+            reorder_level = MAX(COALESCE(site_item_inventory.reorder_level, 0), COALESCE(excluded.reorder_level, 0)),
+            is_active = excluded.is_active,
+            updated_at = CURRENT_TIMESTAMP
+        `).bind(row.source_type, row.external_key, row.item_name, row.category || null, row.amazon_url, row.image_url, row.on_hand_quantity, row.reorder_level, row.is_active).run().catch((error) => warnings.push(`Tool sync skipped ${row.external_key}: ${String(error?.message || error)}`));
+        syncedItems.push(`${row.source_type}:${row.external_key}`);
+      }
+    }
+    if (selected.includes('supply')) {
+      const supplyRows = await fetchJsonArrayFromPaths(request, ['/data/supplies/supplies_items_master.json', '/data/data/supplies/supplies_items_master.json']);
+      for (let index = 0; index < supplyRows.length; index += 1) {
+        const row = mapSupplyInventoryRow(supplyRows[index], index);
+        if (!row.external_key || !row.item_name) continue;
+        await db.prepare(`
+          INSERT INTO site_item_inventory (
+            source_type, external_key, item_name, category, amazon_url, image_url,
+            on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level,
+            unit_cost_cents, stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
+            is_active, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, 0, 'unit', 'unit', 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ON CONFLICT(source_type, external_key) DO UPDATE SET
+            item_name = excluded.item_name,
+            category = excluded.category,
+            amazon_url = COALESCE(NULLIF(excluded.amazon_url, ''), site_item_inventory.amazon_url),
+            image_url = COALESCE(NULLIF(excluded.image_url, ''), site_item_inventory.image_url),
+            reorder_level = MAX(COALESCE(site_item_inventory.reorder_level, 0), COALESCE(excluded.reorder_level, 0)),
+            is_active = excluded.is_active,
+            updated_at = CURRENT_TIMESTAMP
+        `).bind(row.source_type, row.external_key, row.item_name, row.category || null, row.amazon_url, row.image_url, row.on_hand_quantity, row.reorder_level, row.is_active).run().catch((error) => warnings.push(`Supply sync skipped ${row.external_key}: ${String(error?.message || error)}`));
+        syncedItems.push(`${row.source_type}:${row.external_key}`);
+      }
+    }
+  }
+
+  if (selected.includes('product') && await tableExists(db, 'products')) {
+    const productRows = normalizeResults(await db.prepare(`
+      SELECT product_id, slug, name, product_category, featured_image_url, inventory_quantity, status
+      FROM products
+    `).all().catch(() => ({ results: [] })));
+
+    for (const row of productRows) {
+      const externalKey = String(Number(row.product_id || 0));
+      if (!externalKey || externalKey === '0') continue;
+      await db.prepare(`
+        INSERT INTO site_item_inventory (
+          source_type, external_key, item_name, category, image_url,
+          on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level,
+          unit_cost_cents, stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
+          is_active, created_at, updated_at
+        ) VALUES ('product', ?, ?, ?, ?, ?, 0, 0, 0, 0, 'unit', 'unit', 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT(source_type, external_key) DO UPDATE SET
+          item_name = excluded.item_name,
+          category = excluded.category,
+          image_url = COALESCE(NULLIF(excluded.image_url, ''), site_item_inventory.image_url),
+          is_active = excluded.is_active,
+          updated_at = CURRENT_TIMESTAMP
+      `).bind(
+        externalKey,
+        normalizeText(row.name || row.slug || `Product ${externalKey}`),
+        normalizeText(row.product_category) || null,
+        normalizeText(row.featured_image_url) || null,
+        Number(row.inventory_quantity || 0),
+        String(row.status || 'active').toLowerCase() === 'archived' ? 0 : 1
+      ).run().catch((error) => warnings.push(`Product sync skipped ${externalKey}: ${String(error?.message || error)}`));
+      syncedItems.push(`product:${externalKey}`);
+    }
+  }
+
+  return { synced: syncedItems.length, warnings };
 }
 
 async function adjustProductResourceReservations(db, { productId = 0, quantityMultiplier = 1, release = false, note = '', actorUserId = null } = {}) {
@@ -428,11 +631,16 @@ export async function onRequestGet(context) {
   await ensureUsageColumns(db);
 
   const url = new URL(request.url);
-  const payload = await getItems(db, {
-    q: normalizeText(url.searchParams.get('q')).toLowerCase(),
-    stockView: normalizeText(url.searchParams.get('stock_view')).toLowerCase(),
-    includeHistory: ['1', 'true', 'yes'].includes(String(url.searchParams.get('include_history') || '').toLowerCase())
-  });
+  const q = normalizeText(url.searchParams.get('q')).toLowerCase();
+  const stockView = normalizeText(url.searchParams.get('stock_view')).toLowerCase();
+  const includeHistory = ['1', 'true', 'yes'].includes(String(url.searchParams.get('include_history') || '').toLowerCase());
+
+  let payload = await getItems(db, { q, stockView, includeHistory });
+  if (!q && !stockView && Number(payload?.summary?.total_items || 0) === 0) {
+    const syncResult = await syncSiteInventoryFromCatalog(db, request, { sourceTypes: ['tool', 'supply', 'product'] });
+    payload = await getItems(db, { q, stockView, includeHistory });
+    payload.auto_sync = syncResult;
+  }
 
   return json({ ok: true, ...payload });
 }
@@ -454,6 +662,17 @@ export async function onRequestPost(context) {
   }
 
   const action = normalizeText(body.action).toLowerCase();
+
+  if (action === 'sync_catalog') {
+    const requestedTypes = Array.isArray(body.source_types) ? body.source_types : [];
+    const result = await syncSiteInventoryFromCatalog(db, request, { sourceTypes: requestedTypes });
+    await auditAdminAction(env, request, adminUser, {
+      action_type: 'inventory_sync_catalog',
+      target_type: 'inventory_catalog',
+      details: { source_types: requestedTypes, synced: result.synced, warnings: result.warnings }
+    });
+    return json({ ok: true, synced: result.synced, warnings: result.warnings });
+  }
 
   if (action === 'reserve_product_resources') {
     const productId = Number(body.product_id || 0);
