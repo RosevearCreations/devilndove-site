@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!form || !productsTableBody || !window.DDAuth) return;
 
   ensureMarketplaceFields();
-  loadEditorBootstrap().catch(() => {});
+  const editorBootstrapPromise = loadEditorBootstrap().catch(() => null);
 
   const LOCAL_PENDING_KEY = 'dd_admin_product_update_pending_actions_v1';
   const PRICING_CONSOLE_KEY = 'dd_admin_pricing_console_v2';
@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     loadProduct(safeProductId).then(async (data) => {
       editingProductId = safeProductId;
-      fillForm(data.product || {}, data.images || []);
+      await fillForm(data.product || {}, data.images || []);
       try { const suggestion = await fetchPriceSuggestion(safeProductId); latestPriceSuggestion = suggestion.item; } catch {}
       renderPricingInsight();
       setFormModeEdit();
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resetFormState() {
     form.reset();
-    if (existingProductSelect) existingProductSelect.value = String(product.product_id || '');
+    if (existingProductSelect) existingProductSelect.value = '';
     resetImageUrlFields();
     editingProductId = null;
     latestPriceSuggestion = null;
@@ -397,25 +397,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ensureCancelButton().style.display = "";
   }
 
-  function fillForm(product, images) {
+  async function fillForm(product, images) {
     setField("name", product.name || "");
     setField("slug", product.slug || "");
     setField("sku", product.sku || "");
     setField("short_description", product.short_description || "");
-    setField("product_category", product.product_category || "");
-    setField("shipping_code", product.shipping_code || "");
-    setField("review_status", product.review_status || "pending_review");
     setField("description", product.description || "");
-    setField("product_type", product.product_type || "physical");
-    setField("status", product.status || "draft");
-    setField("currency", product.currency || "CAD");
     setField("price", centsToDollars(product.price_cents));
     setField("compare_at_price", product.compare_at_price_cents == null ? "" : centsToDollars(product.compare_at_price_cents));
-    setField("taxable", Number(product.taxable) === 0 ? "0" : "1");
-    setField("tax_class_id", product.tax_class_id == null ? "" : product.tax_class_id);
-    setField("requires_shipping", Number(product.requires_shipping) === 1 ? "1" : "0");
     setField("weight_grams", product.weight_grams == null ? "" : product.weight_grams);
-    setField("inventory_tracking", Number(product.inventory_tracking) === 1 ? "1" : "0");
     setField("inventory_quantity", product.inventory_quantity == null ? "0" : product.inventory_quantity);
     setField("digital_file_url", product.digital_file_url || "");
     setField("featured_image_url", product.featured_image_url || "");
@@ -428,15 +418,29 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("og_title", product.og_title || "");
     setField("og_description", product.og_description || "");
     setField("og_image_url", product.og_image_url || "");
-    setField("color_name", product.color_name || "");
     setField("color_names_text", product.color_names_text || "");
-    setField("merchandise_origin", product.merchandise_origin || "handmade");
-    setField("sale_channel", product.sale_channel || "onsite");
     setField("external_listing_url", product.external_listing_url || "");
     setField("external_listing_label", product.external_listing_label || "");
     setField("condition_summary", product.condition_summary || "");
     setField("era_label", product.era_label || "");
     setField("sourcing_notes", product.sourcing_notes || "");
+
+    await editorBootstrapPromise;
+
+    setField("product_category", product.product_category || "");
+    setField("shipping_code", product.shipping_code || "");
+    setField("review_status", product.review_status || "pending_review");
+    setField("product_type", product.product_type || "physical");
+    setField("status", product.status || "draft");
+    setField("currency", product.currency || "CAD");
+    setField("taxable", Number(product.taxable) === 0 ? "0" : "1");
+    setField("tax_class_id", product.tax_class_id == null ? "" : product.tax_class_id);
+    setField("requires_shipping", Number(product.requires_shipping) === 1 ? "1" : "0");
+    setField("inventory_tracking", Number(product.inventory_tracking) === 1 ? "1" : "0");
+    setField("color_name", product.color_name || "");
+    setField("merchandise_origin", product.merchandise_origin || "handmade");
+    setField("sale_channel", product.sale_channel || "onsite");
+
     if (existingProductSelect) existingProductSelect.value = String(product.product_id || '');
     resetImageUrlFields();
     const imageFields = getImageUrlFields();
@@ -639,7 +643,7 @@ document.addEventListener("DOMContentLoaded", () => {
       button.textContent = "Loading...";
       const data = await loadProduct(productId);
       editingProductId = productId;
-      fillForm(data.product || {}, data.images || []);
+      await fillForm(data.product || {}, data.images || []);
       try { const suggestion = await fetchPriceSuggestion(productId); latestPriceSuggestion = suggestion.item; } catch {}
       renderPricingInsight();
       setFormModeEdit();
@@ -812,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clearMessage();
       const data = await loadProduct(productId);
       editingProductId = productId;
-      fillForm(data.product || {}, data.images || []);
+      await fillForm(data.product || {}, data.images || []);
       const safeSuggestedPrice = Number(event?.detail?.suggested_price_cents || event?.detail?.recommended_price_cents || 0);
       const safeSuggestedCompare = Number(event?.detail?.suggested_compare_at_cents || event?.detail?.recommended_compare_at_cents || 0);
       latestPriceSuggestion = { ...(event?.detail || {}), suggested_price_cents: safeSuggestedPrice, suggested_compare_at_cents: safeSuggestedCompare };
