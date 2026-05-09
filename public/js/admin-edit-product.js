@@ -123,6 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try { const suggestion = await fetchPriceSuggestion(safeProductId); latestPriceSuggestion = suggestion.item; } catch {}
       renderPricingInsight();
       setFormModeEdit();
+      document.dispatchEvent(new CustomEvent('dd:product-editor-target', { detail: { product: data.product || null, product_id: Number(data?.product?.product_id || safeProductId || 0) } }));
       form.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setMessage('Product loaded for editing.');
     }).catch((error) => setMessage(error.message || 'Failed to load product.', true));
@@ -649,6 +650,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try { const suggestion = await fetchPriceSuggestion(productId); latestPriceSuggestion = suggestion.item; } catch {}
       renderPricingInsight();
       setFormModeEdit();
+      document.dispatchEvent(new CustomEvent('dd:product-editor-target', { detail: { product: data.product || null, product_id: Number(data?.product?.product_id || productId || 0) } }));
       form.scrollIntoView({ behavior: "smooth", block: "start" });
       setMessage("Product loaded for editing.");
     } catch (error) {
@@ -739,6 +741,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage(data.message || "Product updated successfully.");
       resetFormState();
       document.dispatchEvent(new CustomEvent("dd:product-updated", { detail: { product: data.product || null } }));
+      document.dispatchEvent(new CustomEvent('dd:product-editor-target', { detail: { product: data.product || null, product_id: Number(data?.product?.product_id || 0) } }));
       await loadPendingActions();
     } catch (error) {
       const queued = await queueProductUpdate(payload, error.message || 'Failed to update product.');

@@ -296,6 +296,9 @@ document.addEventListener("DOMContentLoaded", () => {
           product: data.product || null
         }
       }));
+      document.dispatchEvent(new CustomEvent("dd:product-editor-target", {
+        detail: { product: data.product || null, product_id: Number(data?.product?.product_id || 0) }
+      }));
     } catch (error) {
       setMessage(error.message || "Failed to create product.", true);
     } finally {

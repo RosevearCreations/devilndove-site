@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mountEl.innerHTML = `
       <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Product Tools & Supplies Used</h3>
-        <p class="small" style="margin-top:0">Visually link the tools and supplies used to create a finished product. This stores a reusable making-story in D1 so each finished piece can explain what materials and tools shaped it.</p>
+        <p class="small" style="margin-top:0">Visually link the tools and supplies used to create a finished product. This stores a reusable making-story in D1 so each finished piece can explain what materials and tools shaped it.</p><div class="small" id="productResourcesEditorHint" style="margin-bottom:12px">This section follows the current product editor record when you load, create, or update a product.</div>
         <div id="productResourcesMessage" class="small" style="display:none;margin-bottom:12px"></div>
         <div class="grid cols-2" style="gap:12px;margin-bottom:12px">
           <div>
@@ -109,6 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
     mountEl.addEventListener('click', onClick);
     mountEl.addEventListener('change', onInputChange);
     mountEl.addEventListener('input', onInputChange);
+  }
+
+
+
+  function syncSelectedProduct(productId, { autoLoad = true } = {}) {
+    const safeProductId = Number(productId || 0);
+    if (!safeProductId) return;
+    state.selectedProductId = safeProductId;
+    const select = document.getElementById('productResourcesProduct');
+    if (select) select.value = String(safeProductId);
+    if (autoLoad && window.DDAuth?.isLoggedIn()) loadData();
   }
 
   function renderProducts() {
@@ -318,6 +329,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('dd:catalog-options-updated', () => { if (window.DDAuth?.isLoggedIn()) loadData(); });
+  document.addEventListener('dd:product-editor-target', (event) => {
+    const productId = Number(event?.detail?.product_id || event?.detail?.product?.product_id || 0);
+    if (productId) syncSelectedProduct(productId, { autoLoad: true });
+  });
+  document.addEventListener('dd:product-created', (event) => {
+    const productId = Number(event?.detail?.product?.product_id || 0);
+    if (productId) syncSelectedProduct(productId, { autoLoad: true });
+  });
+  document.addEventListener('dd:product-updated', (event) => {
+    const productId = Number(event?.detail?.product?.product_id || event?.detail?.product_id || 0);
+    if (productId) syncSelectedProduct(productId, { autoLoad: true });
+  });
   document.addEventListener('dd:admin-ready', (event) => { if (!event?.detail?.ok) return; render(); loadData(); });
   render();
   if (window.DDAuth?.isLoggedIn()) loadData();
