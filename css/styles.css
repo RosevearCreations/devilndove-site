@@ -472,3 +472,10 @@ body.nav-mobile-open{overflow:hidden}
 .product-inventory-details{margin-top:6px}
 .product-inventory-details summary{cursor:pointer;color:var(--muted);font-size:.86rem}
 .product-inventory-details[open] summary{margin-bottom:6px}
+
+
+/* Current pass: admin product required-field outlines */
+.dd-required-field{display:grid;gap:6px}
+.dd-required-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(10,122,47,.10);border:1px solid rgba(10,122,47,.30);color:#9ef0b4;font-size:.72rem;font-weight:700;vertical-align:middle}
+.dd-required-field.is-required-empty > .small{color:#9ef0b4}
+.dd-required-outline{border:2px solid rgba(10,122,47,.55)!important;box-shadow:0 0 0 2px rgba(10,122,47,.14)!important;background:rgba(10,122,47,.04)!important}
