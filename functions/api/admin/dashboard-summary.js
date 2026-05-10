@@ -48,7 +48,7 @@ export async function onRequestGet(context) {
     outstanding_orders_count: await safeCount(db, `SELECT COUNT(*) AS count FROM orders WHERE LOWER(COALESCE(payment_status,'')) IN ('pending','authorized','partially_refunded') OR LOWER(COALESCE(order_status,'')) IN ('pending','paid')`),
     payment_sync_failures_count: await safeCount(db, `SELECT COUNT(*) AS count FROM payment_refunds WHERE provider_sync_status = 'failed'`),
     journal_entry_count: await safeCount(db, `SELECT COUNT(*) AS count FROM accounting_journal_entries`),
-    journal_imbalance_count: await safeCount(db, `SELECT COUNT(*) AS count FROM accounting_journal_entries WHERE is_balanced = 0`),
+    journal_imbalance_count: await safeCount(db, `SELECT COUNT(*) AS count FROM accounting_journal_entries WHERE COALESCE(imbalance_cents,0) != 0`),
     overhead_product_override_count: await safeCount(db, `SELECT COUNT(*) AS count FROM accounting_overhead_product_allocations`),
     movie_catalog_rows_count: await safeCount(db, `SELECT COUNT(*) AS count FROM movie_catalog WHERE COALESCE(status,'active') != 'archived'`),
   };

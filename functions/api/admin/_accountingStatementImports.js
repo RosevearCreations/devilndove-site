@@ -89,13 +89,99 @@ export async function ensureAccountingStatementImportsTables(db) {
   `).run();
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_imports_period ON accounting_statement_imports(provider_scope, period_month DESC, import_status)`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_import ON accounting_statement_import_rows(accounting_statement_import_id, txn_date)`).run(); } catch {}
+  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_provider_ref ON accounting_statement_import_rows(provider_scope, txn_date, reference_number)`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_exceptions_period ON accounting_reconciliation_exceptions(reconciliation_type, period_month DESC, exception_status)`).run(); } catch {}
 }
 
-export function splitCsvLine(line) {
+const HEADER_ALIASES = new Map([
+  ['created utc', 'created'],
+  ['created (utc)', 'created'],
+  ['created date', 'created'],
+  ['date/time', 'date'],
+  ['posted date', 'date'],
+  ['processed date', 'date'],
+  ['transaction date', 'transaction date'],
+  ['transaction id', 'transaction id'],
+  ['transaction number', 'transaction id'],
+  ['source id', 'source id'],
+  ['payment id', 'payment id'],
+  ['payout id', 'payout id'],
+  ['order number', 'order id'],
+  ['orderid', 'order id'],
+  ['activity type', 'activity type'],
+  ['reporting category', 'reporting category'],
+  ['balance impact', 'balance impact'],
+  ['item title', 'item name'],
+  ['item total', 'item total'],
+  ['customer facing amount', 'customer facing amount'],
+  ['net amount', 'net amount'],
+  ['payout amount', 'payout amount'],
+  ['net deposit', 'net deposit'],
+  ['processing fee', 'processing fee'],
+  ['transaction fee', 'transaction fee'],
+  ['platform fee', 'platform fee'],
+  ['fees & taxes', 'fees taxes'],
+  ['fees and taxes', 'fees taxes'],
+  ['sales tax', 'sales tax'],
+  ['tax collected', 'tax collected'],
+  ['tax amount', 'tax amount'],
+  ['shipping amount', 'shipping amount'],
+  ['shipping revenue', 'shipping revenue'],
+  ['postage amount', 'postage'],
+  ['money in', 'money in'],
+  ['money out', 'money out'],
+  ['running balance', 'running balance'],
+  ['ending balance', 'running balance'],
+]);
+
+function normalizeHeader(header) {
+  const normalized = normalizeText(header)
+    .toLowerCase()
+    .replace(/^\uFEFF/, '')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/[\s_\-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const simple = normalized.replace(/[^a-z0-9 ()/&.]/g, '').trim();
+  return HEADER_ALIASES.get(simple) || simple;
+}
+
+function countDelimiter(line, delimiter) {
+  let count = 0;
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') i += 1;
+      else inQuotes = !inQuotes;
+    } else if (char === delimiter && !inQuotes) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+function detectDelimiter(headerLine) {
+  const candidates = [',', ';', '\t', '|'];
+  let best = ',';
+  let bestCount = 0;
+  for (const candidate of candidates) {
+    const sep = candidate === '\t' ? '\t' : candidate;
+    const count = countDelimiter(headerLine, sep);
+    if (count > bestCount) {
+      best = sep;
+      bestCount = count;
+    }
+  }
+  return best;
+}
+
+export function splitCsvLine(line, delimiter = ',') {
   const values = [];
   let current = '';
   let inQuotes = false;
+  const sep = delimiter || ',';
   for (let i = 0; i < line.length; i += 1) {
     const char = line[i];
     if (char === '"') {
@@ -105,7 +191,7 @@ export function splitCsvLine(line) {
       } else {
         inQuotes = !inQuotes;
       }
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === sep && !inQuotes) {
       values.push(current);
       current = '';
     } else {
@@ -119,29 +205,36 @@ export function splitCsvLine(line) {
 export function parseCsv(text) {
   const raw = String(text || '').replace(/^\uFEFF/, '');
   const lines = raw.split(/\r?\n/).filter((line) => String(line || '').trim());
-  if (!lines.length) return { headers: [], rows: [] };
-  const headers = splitCsvLine(lines[0]).map((header) => normalizeText(header).toLowerCase());
+  if (!lines.length) return { headers: [], rows: [], delimiter: ',' };
+  const delimiter = detectDelimiter(lines[0]);
+  const headers = splitCsvLine(lines[0], delimiter).map((header) => normalizeHeader(header));
   const out = [];
   for (const line of lines.slice(1)) {
-    const parts = splitCsvLine(line);
+    const parts = splitCsvLine(line, delimiter);
     const row = {};
     headers.forEach((header, idx) => {
       row[header] = parts[idx] == null ? '' : String(parts[idx]);
     });
     out.push(row);
   }
-  return { headers, rows: out };
+  return { headers, rows: out, delimiter };
 }
 
 function parseMoneyToCents(value) {
-  const raw = String(value ?? '').replace(/[$,\s]/g, '').trim();
-  if (!raw) return 0;
-  const normalized = raw.replace(/[()]/g, '');
-  const negative = raw.includes('(') || /^-/.test(raw);
-  const num = Number(normalized);
+  const original = String(value ?? '').trim();
+  if (!original) return 0;
+  const negative = /\([^)]*\)/.test(original) || /^\s*-/.test(original) || /\bdebit\b/i.test(original);
+  const cleaned = original
+    .replace(/[\u2212\u2013\u2014]/g, '-')
+    .replace(/[A-Z]{3}/gi, '')
+    .replace(/[$€£¥,\s]/g, '')
+    .replace(/[()]/g, '')
+    .replace(/[^0-9.\-]/g, '');
+  if (!cleaned || cleaned === '-' || cleaned === '.') return 0;
+  const num = Number(cleaned);
   if (!Number.isFinite(num)) return 0;
-  const cents = Math.round(num * 100);
-  return negative ? -Math.abs(cents) : cents;
+  const cents = Math.round(Math.abs(num) * 100);
+  return negative || num < 0 ? -cents : cents;
 }
 
 function firstValue(row, names = []) {
@@ -181,31 +274,34 @@ function summarizeImportRows(provider, parsedRows) {
   let periodEnd = '';
 
   for (const row of parsedRows) {
-    const txnDate = cleanDate(firstValue(row, ['date', 'transaction date', 'created', 'available on', 'payout date']));
-    const txnType = firstValue(row, ['type', 'transaction type', 'balance impact', 'activity type']).toLowerCase();
-    const description = firstValue(row, ['description', 'name', 'details', 'memo', 'item name']);
-    const referenceNumber = firstValue(row, ['id', 'transaction id', 'reference', 'order id', 'payout id']);
-    const gross = parseMoneyToCents(firstValue(row, ['gross', 'amount', 'sale amount', 'item total', 'credit']));
-    const fee = parseMoneyToCents(firstValue(row, ['fee', 'fees', 'processing fee', 'transaction fee']));
-    const net = parseMoneyToCents(firstValue(row, ['net', 'net amount', 'payout amount']));
-    const tax = parseMoneyToCents(firstValue(row, ['tax', 'sales tax', 'vat', 'gst', 'hst']));
-    const shipping = parseMoneyToCents(firstValue(row, ['shipping', 'shipping amount', 'postage', 'shipping revenue']));
-    const debit = parseMoneyToCents(firstValue(row, ['debit', 'withdrawal', 'money out']));
-    const credit = parseMoneyToCents(firstValue(row, ['credit', 'deposit', 'money in']));
+    const txnDate = cleanDate(firstValue(row, ['date', 'transaction date', 'created', 'available on', 'payout date', 'posted date', 'processed date']));
+    const txnType = firstValue(row, ['type', 'transaction type', 'balance impact', 'activity type', 'reporting category', 'record type']).toLowerCase();
+    const description = firstValue(row, ['description', 'name', 'details', 'memo', 'item name', 'title', 'info', 'note']);
+    const referenceNumber = firstValue(row, ['id', 'transaction id', 'reference', 'order id', 'payout id', 'source id', 'payment id', 'invoice id']);
+    const gross = parseMoneyToCents(firstValue(row, ['gross', 'amount', 'total', 'sale amount', 'item total', 'customer facing amount', 'payments', 'paid']));
+    const fee = parseMoneyToCents(firstValue(row, ['fee', 'fees', 'processing fee', 'transaction fee', 'platform fee', 'fees taxes']));
+    const net = parseMoneyToCents(firstValue(row, ['net', 'net amount', 'payout amount', 'net deposit', 'payment amount', 'balance impact']));
+    const tax = parseMoneyToCents(firstValue(row, ['tax', 'sales tax', 'vat', 'gst', 'hst', 'tax collected', 'tax amount']));
+    const shipping = parseMoneyToCents(firstValue(row, ['shipping', 'shipping amount', 'postage', 'shipping revenue', 'delivery']));
+    const debit = Math.abs(parseMoneyToCents(firstValue(row, ['debit', 'withdrawal', 'money out', 'charge', 'spent'])));
+    const credit = Math.abs(parseMoneyToCents(firstValue(row, ['credit', 'deposit', 'money in', 'received', 'income'])));
     const runningBalance = parseMoneyToCents(firstValue(row, ['balance', 'running balance']));
-    const fallbackNet = net || (gross - Math.abs(fee));
+    const displayAmount = gross || (credit - debit);
+    const derivedDebit = debit || (displayAmount < 0 ? Math.abs(displayAmount) : 0);
+    const derivedCredit = credit || (displayAmount > 0 ? Math.abs(displayAmount) : 0);
+    const fallbackNet = net || (displayAmount - Math.abs(fee));
 
     if (txnDate) {
       periodStart = !periodStart || txnDate < periodStart ? txnDate : periodStart;
       periodEnd = !periodEnd || txnDate > periodEnd ? txnDate : periodEnd;
     }
-    grossCents += gross;
+    grossCents += displayAmount;
     feeCents += Math.abs(fee);
     netCents += fallbackNet;
     taxCents += tax;
     shippingCents += shipping;
-    debitCents += Math.abs(debit < 0 ? debit : debit);
-    creditCents += Math.abs(credit);
+    debitCents += derivedDebit;
+    creditCents += derivedCredit;
     txnCount += 1;
 
     rowsOut.push({
@@ -214,13 +310,13 @@ function summarizeImportRows(provider, parsedRows) {
       txn_type: txnType || normalizedProvider,
       description,
       reference_number: referenceNumber,
-      gross_cents: gross,
+      gross_cents: displayAmount,
       fee_cents: Math.abs(fee),
       net_cents: fallbackNet,
       tax_cents: tax,
       shipping_cents: shipping,
-      debit_cents: Math.abs(debit),
-      credit_cents: Math.abs(credit),
+      debit_cents: derivedDebit,
+      credit_cents: derivedCredit,
       running_balance_cents: runningBalance,
       raw_json: JSON.stringify(row),
       matched_scope_key: normalizedProvider,
@@ -247,6 +343,9 @@ function summarizeImportRows(provider, parsedRows) {
 
 export async function listAccountingStatementImports(db, { providerScope = '', periodMonth = '', limit = 50 } = {}) {
   await ensureAccountingStatementImportsTables(db);
+  const rawProviderFilter = normalizeText(providerScope).toLowerCase();
+  const providerFilter = rawProviderFilter ? cleanStatementProvider(rawProviderFilter) : '';
+  const monthFilter = String(periodMonth || '').trim();
   const result = await db.prepare(`
     SELECT accounting_statement_import_id, provider_scope, import_status, source_filename, source_format,
            period_month, period_start, period_end, currency, row_count, gross_cents, fee_cents, net_cents,
@@ -257,7 +356,7 @@ export async function listAccountingStatementImports(db, { providerScope = '', p
       AND (? = '' OR period_month = ?)
     ORDER BY created_at DESC, accounting_statement_import_id DESC
     LIMIT ?
-  `).bind(cleanStatementProvider(providerScope || ''), cleanStatementProvider(providerScope || ''), String(periodMonth || '').trim(), String(periodMonth || '').trim(), Math.max(1, Math.min(200, Number(limit || 50) || 50))).all().catch(() => ({ results: [] }));
+  `).bind(providerFilter, providerFilter, monthFilter, monthFilter, Math.max(1, Math.min(200, Number(limit || 50) || 50))).all().catch(() => ({ results: [] }));
   return rows(result).map((row) => ({ ...row, accounting_statement_import_id: Number(row.accounting_statement_import_id || 0), row_count: Number(row.row_count || 0), gross_cents: Number(row.gross_cents || 0), fee_cents: Number(row.fee_cents || 0), net_cents: Number(row.net_cents || 0), tax_cents: Number(row.tax_cents || 0), shipping_cents: Number(row.shipping_cents || 0), deposit_cents: Number(row.deposit_cents || 0), withdrawal_cents: Number(row.withdrawal_cents || 0), txn_count: Number(row.txn_count || 0) }));
 }
 
@@ -445,7 +544,7 @@ export async function createStatementImportFromCsv(db, { providerScope, sourceFi
     Number(summary.withdrawal_cents || 0),
     Number(summary.txn_count || 0),
     statementReference || sourceFilename || null,
-    JSON.stringify({ headers: parsed.headers, sample_rows: summary.rows.slice(0, 5) }),
+    JSON.stringify({ headers: parsed.headers, delimiter: parsed.delimiter || ',', sample_rows: summary.rows.slice(0, 5) }),
     createdByUserId == null ? null : Number(createdByUserId || 0)
   ).run();
   const importId = Number(result?.meta?.last_row_id || 0);
