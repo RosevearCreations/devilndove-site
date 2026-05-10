@@ -1,3 +1,5 @@
+> Current benchmark sync — 2026-05-09: accounting import/reconciliation support moved closer to a small-shop bookkeeping handoff pattern, but provider-specific statement mapping and manual exception workflows remain the next benchmark gaps.
+
 > Current pass update — storefront/catalog work in this pass adds public colour badges/filters and stronger catalog cleanup controls while the main implementation effort stayed on accountant-facing reconciliation/import work.
 
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.

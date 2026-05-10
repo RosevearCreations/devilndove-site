@@ -1448,6 +1448,7 @@ CREATE TABLE IF NOT EXISTS accounting_statement_import_rows (
   FOREIGN KEY (accounting_statement_import_id) REFERENCES accounting_statement_imports(accounting_statement_import_id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_import ON accounting_statement_import_rows(accounting_statement_import_id, txn_date);
+CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_provider_ref ON accounting_statement_import_rows(provider_scope, txn_date, reference_number);
 
 CREATE TABLE IF NOT EXISTS accounting_reconciliation_exceptions (
   accounting_reconciliation_exception_id INTEGER PRIMARY KEY AUTOINCREMENT,

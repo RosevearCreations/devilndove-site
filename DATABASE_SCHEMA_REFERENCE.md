@@ -1,3 +1,5 @@
+> Current schema sync — 2026-05-09: the main schema files now include `idx_accounting_statement_import_rows_provider_ref` on statement import rows for faster provider/date/reference review and better import filtering. No required table rebuild was added in this pass.
+
 > Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
 
 > Current pass schema note — added `accounting_statement_imports`, `accounting_statement_import_rows`, `accounting_reconciliation_exceptions`, and `accounting_fixed_assets`; product records continue using `color_names_json` for multi-colour storage while `color_name` remains the simpler compatibility field.

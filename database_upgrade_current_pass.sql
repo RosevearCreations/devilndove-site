@@ -1,3 +1,4 @@
+-- Current pass note: statement-import refinement now adds provider/date/reference indexing for faster review and more reliable admin import filtering.
 -- Current pass note: accounting now adds statement-import tables, reconciliation exceptions, fixed-asset groundwork, attachment-required month-close checks, export bundle v2 groundwork, and public colour-filter/catalog-preference support.
 -- Current pass note: products now support multi-colour storage through color_names_json while keeping color_name as the primary/filter colour.
 -- Current pass note: this storefront/discovery pass adds dedicated public Collections and Marketplaces pages, stronger sale-channel/provenance guidance, and broader internal linking without requiring new database tables.
@@ -821,6 +822,7 @@ CREATE TABLE IF NOT EXISTS accounting_statement_import_rows (
   FOREIGN KEY (accounting_statement_import_id) REFERENCES accounting_statement_imports(accounting_statement_import_id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_import ON accounting_statement_import_rows(accounting_statement_import_id, txn_date);
+CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_provider_ref ON accounting_statement_import_rows(provider_scope, txn_date, reference_number);
 
 CREATE TABLE IF NOT EXISTS accounting_reconciliation_exceptions (
   accounting_reconciliation_exception_id INTEGER PRIMARY KEY AUTOINCREMENT,
