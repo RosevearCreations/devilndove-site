@@ -479,3 +479,15 @@ body.nav-mobile-open{overflow:hidden}
 .dd-required-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(10,122,47,.10);border:1px solid rgba(10,122,47,.30);color:#9ef0b4;font-size:.72rem;font-weight:700;vertical-align:middle}
 .dd-required-field.is-required-empty > .small{color:#9ef0b4}
 .dd-required-outline{border:2px solid rgba(10,122,47,.55)!important;box-shadow:0 0 0 2px rgba(10,122,47,.14)!important;background:rgba(10,122,47,.04)!important}
+
+/* Current pass: darker product resources editor + selector driven adjustments */
+.resource-editor-dark{background:#191424;color:#f4efff;border:1px solid rgba(164,132,255,.18)}
+.resource-editor-dark .small{color:#cfc2f3}
+.resource-editor-dark .input,.resource-editor-dark select,.resource-editor-dark textarea{background:#271f38;color:#f8f5ff;border:1px solid rgba(164,132,255,.28)}
+.resource-editor-dark .btn{border-color:rgba(164,132,255,.28)}
+.resource-editor-dark .resource-tile{background:#221a31;border-color:rgba(164,132,255,.18);color:#f8f5ff}
+.resource-editor-dark .resource-tile-media{background:#130f1d}
+.resource-editor-dark .resource-tile-placeholder{color:#cabcf2}
+.resource-linked-card-dark{background:#221a31;border-color:rgba(164,132,255,.18);color:#f8f5ff}
+.resource-linked-card-dark .small{color:#cfc2f3}
+.resource-linked-card-dark textarea{background:#271f38;color:#f8f5ff}
