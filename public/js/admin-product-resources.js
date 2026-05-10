@@ -1,13 +1,18 @@
 // File: /public/js/admin-product-resources.js
+// Brief description: Admin editor for linking tools and supplies to a product as
+// a reusable making-story with quantity, cost, and inventory handling notes.
+
 document.addEventListener('DOMContentLoaded', () => {
   const mountEl = document.getElementById('productResourcesAdminMount');
   if (!mountEl) return;
 
-  let state = {
+  const state = {
     products: [],
     resources: [],
     links: [],
-    selectedProductId: 0
+    selectedProductId: 0,
+    selectedLinkIndex: -1,
+    selectedAvailableKey: ''
   };
 
   function escapeHtml(v) {
@@ -24,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!el) return;
     el.textContent = msg || '';
     el.style.display = msg ? 'block' : 'none';
-    el.style.color = err ? '#b00020' : '#0a7a2f';
+    el.style.color = err ? '#ff9c9c' : '#8cf0b3';
   }
 
   async function readJsonResponse(response, fallbackMessage) {
@@ -71,30 +76,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function ensureValidSelections() {
+    if (!state.links.length) {
+      state.selectedLinkIndex = -1;
+      return;
+    }
+    if (!Number.isInteger(state.selectedLinkIndex) || state.selectedLinkIndex < 0 || state.selectedLinkIndex >= state.links.length) {
+      state.selectedLinkIndex = 0;
+    }
+  }
+
+  function selectedLink() {
+    ensureValidSelections();
+    return state.selectedLinkIndex >= 0 ? state.links[state.selectedLinkIndex] : null;
+  }
+
+  function resourceOptionLabel(item) {
+    const usage = describeUsageUnit(item);
+    return `${item.name || item.source_key} (${item.item_kind || 'item'} • ${Number(item.on_hand_quantity || 0)} ${usage.stockLabel})`;
+  }
+
   function render() {
     mountEl.innerHTML = `
-      <div class="card" style="margin-top:18px">
-        <h3 style="margin-top:0">Product Tools & Supplies Used</h3>
-        <p class="small" style="margin-top:0">Visually link the tools and supplies used to create a finished product. This stores a reusable making-story in D1 so each finished piece can explain what materials and tools shaped it.</p><div class="small" id="productResourcesEditorHint" style="margin-bottom:12px">This section follows the current product editor record when you load, create, or update a product.</div>
+      <div class="card resource-editor-dark" style="margin-top:18px">
+        <h3 style="margin-top:0">Product Tools &amp; Supplies Used</h3>
+        <p class="small" style="margin-top:0">Link the exact supplies and tools used to make a product. Add items from the dropdown, then select one linked item at a time to adjust how much was used.</p>
+        <div class="small" id="productResourcesEditorHint" style="margin-bottom:12px">This section follows the current product editor record when you load, create, or update a product.</div>
         <div id="productResourcesMessage" class="small" style="display:none;margin-bottom:12px"></div>
+
         <div class="grid cols-2" style="gap:12px;margin-bottom:12px">
           <div>
             <label class="small" for="productResourcesProduct">Product</label>
-            <select id="productResourcesProduct"></select>
+            <select class="input" id="productResourcesProduct"></select>
           </div>
           <div>
             <label class="small" for="productResourcesSearch">Search tools/supplies</label>
-            <input id="productResourcesSearch" type="search" placeholder="wax, pliers, resin, clay, file..." />
+            <input class="input" id="productResourcesSearch" type="search" placeholder="wax, pliers, resin, clay, file..." />
           </div>
         </div>
-        <div class="grid cols-2" style="gap:16px">
+
+        <div class="grid cols-2" style="gap:16px;align-items:start">
           <div>
             <h4 style="margin-top:0">Available Items</h4>
+            <div class="grid cols-2" style="gap:10px;margin-bottom:10px">
+              <div>
+                <label class="small" for="productResourcesAvailableSelect">Choose item to add</label>
+                <select class="input" id="productResourcesAvailableSelect"></select>
+              </div>
+              <div style="display:flex;align-items:end;gap:8px;flex-wrap:wrap">
+                <button class="btn" type="button" id="productResourcesAddSelectedButton">Add selected item</button>
+              </div>
+            </div>
             <div id="productResourcesGrid" class="resource-tile-grid"></div>
           </div>
+
           <div>
             <h4 style="margin-top:0">Linked To Product</h4>
-            <div id="productResourcesLinked" class="resource-linked-list"></div>
+            <div class="grid cols-2" style="gap:10px;margin-bottom:10px">
+              <div>
+                <label class="small" for="productResourcesLinkedSelect">Selected linked item</label>
+                <select class="input" id="productResourcesLinkedSelect"></select>
+              </div>
+              <div style="display:flex;align-items:end;gap:8px;flex-wrap:wrap">
+                <button class="btn" type="button" id="productResourcesRemoveSelectedButton">Remove selected item</button>
+              </div>
+            </div>
+            <div id="productResourcesLinkedSummary" class="small" style="margin-bottom:8px"></div>
+            <div id="productResourcesLinkedEditor" class="resource-linked-list"></div>
             <div style="margin-top:12px">
               <button class="btn" type="button" id="productResourcesSaveButton">Save Product Links</button>
             </div>
@@ -106,12 +154,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('productResourcesProduct')?.addEventListener('change', onProductChange);
     document.getElementById('productResourcesSearch')?.addEventListener('input', loadData);
     document.getElementById('productResourcesSaveButton')?.addEventListener('click', saveLinks);
+    document.getElementById('productResourcesAvailableSelect')?.addEventListener('change', (event) => {
+      state.selectedAvailableKey = String(event.target.value || '');
+    });
+    document.getElementById('productResourcesLinkedSelect')?.addEventListener('change', (event) => {
+      const index = Number(event.target.value || -1);
+      state.selectedLinkIndex = Number.isInteger(index) ? index : -1;
+      renderLinks();
+    });
+    document.getElementById('productResourcesAddSelectedButton')?.addEventListener('click', addSelectedAvailableItem);
+    document.getElementById('productResourcesRemoveSelectedButton')?.addEventListener('click', removeSelectedLinkedItem);
     mountEl.addEventListener('click', onClick);
     mountEl.addEventListener('change', onInputChange);
     mountEl.addEventListener('input', onInputChange);
   }
-
-
 
   function syncSelectedProduct(productId, { autoLoad = true } = {}) {
     const safeProductId = Number(productId || 0);
@@ -133,15 +189,36 @@ document.addEventListener('DOMContentLoaded', () => {
       `).join('');
   }
 
+  function renderAvailableSelect() {
+    const sel = document.getElementById('productResourcesAvailableSelect');
+    if (!sel) return;
+    const linkedKeys = new Set(state.links.map((x) => `${x.resource_kind}::${x.source_key}`));
+    const available = state.resources.filter((item) => !linkedKeys.has(`${item.item_kind}::${item.source_key}`));
+    if (!available.length) {
+      sel.innerHTML = `<option value="">No unlinked tools or supplies available</option>`;
+      state.selectedAvailableKey = '';
+      return;
+    }
+    if (!state.selectedAvailableKey || !available.find((item) => `${item.item_kind}::${item.source_key}` === state.selectedAvailableKey)) {
+      state.selectedAvailableKey = `${available[0].item_kind}::${available[0].source_key}`;
+    }
+    sel.innerHTML = available.map((item) => {
+      const key = `${item.item_kind}::${item.source_key}`;
+      return `<option value="${escapeHtml(key)}" ${key === state.selectedAvailableKey ? 'selected' : ''}>${escapeHtml(resourceOptionLabel(item))}</option>`;
+    }).join('');
+  }
+
   function renderResources() {
     const el = document.getElementById('productResourcesGrid');
     if (!el) return;
     if (!state.resources.length) {
       el.innerHTML = `<div class="small">No matching tools or supplies were found.</div>`;
+      renderAvailableSelect();
       return;
     }
+    const linkedKeys = new Set(state.links.map((x) => `${x.resource_kind}::${x.source_key}`));
     el.innerHTML = state.resources.map((item) => {
-      const linked = state.links.find((x) => x.resource_kind === item.item_kind && x.source_key === item.source_key);
+      const linked = linkedKeys.has(`${item.item_kind}::${item.source_key}`);
       const usageMeta = describeUsageUnit(item);
       return `
         <button type="button" class="resource-tile ${linked ? 'is-linked' : ''}" data-add-resource="1" data-kind="${escapeHtml(item.item_kind)}" data-key="${escapeHtml(item.source_key)}">
@@ -156,46 +233,67 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </button>`;
     }).join('');
+    renderAvailableSelect();
+  }
+
+  function renderLinkedSelect() {
+    const sel = document.getElementById('productResourcesLinkedSelect');
+    const summary = document.getElementById('productResourcesLinkedSummary');
+    if (!sel) return;
+    if (!state.links.length) {
+      sel.innerHTML = `<option value="">No linked items yet</option>`;
+      if (summary) summary.textContent = 'Add tools or supplies to build the making-story for this product.';
+      state.selectedLinkIndex = -1;
+      return;
+    }
+    ensureValidSelections();
+    sel.innerHTML = state.links.map((link, idx) => {
+      const usagePreview = buildUsagePreview(link);
+      return `<option value="${idx}" ${idx === state.selectedLinkIndex ? 'selected' : ''}>${escapeHtml(link.name || link.source_key)} • ${escapeHtml(link.resource_kind)} • ${escapeHtml(String(usagePreview.qtyUsed))} ${escapeHtml(usagePreview.usage.label)}</option>`;
+    }).join('');
+    if (summary) summary.textContent = `${state.links.length} linked item(s). Select one to adjust quantity, usage mode, notes, and lot behavior.`;
   }
 
   function renderLinks() {
-    const el = document.getElementById('productResourcesLinked');
+    const el = document.getElementById('productResourcesLinkedEditor');
     if (!el) return;
-    if (!state.links.length) {
+    renderLinkedSelect();
+    const link = selectedLink();
+    if (!link) {
       el.innerHTML = '<div class="small">No tools or supplies linked yet.</div>';
       return;
     }
-    el.innerHTML = state.links.map((link, idx) => {
-      const usagePreview = buildUsagePreview(link);
-      const usageMeta = usagePreview.usage;
-      const mode = String(link.consumption_mode || 'per_unit');
-      return `
-        <div class="resource-linked-card">
-          <div class="resource-linked-summary">
-            <strong>${escapeHtml(link.name || link.source_key)}</strong>
-            <div class="small">${escapeHtml(link.resource_kind)} • 1 ${escapeHtml(usageMeta.stockLabel)} holds ${escapeHtml(String(usageMeta.perStock))} ${escapeHtml(usageMeta.label)}</div>
-            <label class="small" style="display:block;margin-top:6px">How much per use / batch <input class="input" data-link-qty="${idx}" type="number" min="1" step="1" value="${Math.max(1, Number(link.quantity_used || 1) || 1)}" /></label>
-            <div class="small">Enter how many ${escapeHtml(usageMeta.label)} this product uses${mode === 'end_of_lot' ? ' per batch/lot' : ' per finished item'}.</div>
-            <div class="small" style="margin-top:4px">Current stock ≈ ${escapeHtml(String(usagePreview.totalUsageUnits))} ${escapeHtml(usageMeta.label)} across ${escapeHtml(String(usagePreview.onHandStock))} ${escapeHtml(usageMeta.stockLabel)}.</div>
-            <label class="small" style="display:block;margin-top:6px">Inventory handling
-              <select class="input" data-link-mode="${idx}">
-                <option value="per_unit" ${mode === 'per_unit' ? 'selected' : ''}>Per product</option>
-                <option value="end_of_lot" ${mode === 'end_of_lot' ? 'selected' : ''}>End of lot</option>
-                <option value="story_only" ${mode === 'story_only' ? 'selected' : ''}>Story only</option>
-              </select>
-            </label>
-            <label class="small" style="display:${mode === 'end_of_lot' ? 'block' : 'none'};margin-top:6px" data-link-lot-wrap="${idx}">Products per lot / container
-              <input class="input" data-link-lot="${idx}" type="number" min="1" step="1" value="${Math.max(1, Number(link.lot_size_units || 1) || 1)}" />
-            </label>
-            <div class="small" style="margin-top:4px">${mode === 'end_of_lot' ? `End-of-lot spreads ${escapeHtml(usageMeta.label)} usage across multiple finished products without per-item reservation.` : (mode === 'story_only' ? 'Story only keeps this item in the making record without touching cost or stock math.' : `Per product treats the quantity as ${escapeHtml(usageMeta.label)} used on every finished item.`)}</div>
-            <div class="small">Estimated cost ${escapeHtml(formatMoney(usagePreview.costPerFinishedCents))} per finished product${mode === 'end_of_lot' ? ` • lot covers about ${escapeHtml(String(usagePreview.lotSize))} finished products` : ''} • buildable now ≈ ${escapeHtml(String(Math.max(0, usagePreview.buildable)))}.</div>
-            <textarea class="input" data-link-note="${idx}" rows="2" placeholder="How was this item used for the story of this product?">${escapeHtml(link.usage_notes || '')}</textarea>
-          </div>
-          <div class="resource-linked-actions">
-            <button class="btn" type="button" data-remove-link="${idx}">Remove</button>
-          </div>
-        </div>`;
-    }).join('');
+    const usagePreview = buildUsagePreview(link);
+    const usageMeta = usagePreview.usage;
+    const mode = String(link.consumption_mode || 'per_unit');
+    el.innerHTML = `
+      <div class="resource-linked-card resource-linked-card-dark">
+        <div class="resource-linked-summary">
+          <strong>${escapeHtml(link.name || link.source_key)}</strong>
+          <div class="small">${escapeHtml(link.resource_kind)} • 1 ${escapeHtml(usageMeta.stockLabel)} holds ${escapeHtml(String(usageMeta.perStock))} ${escapeHtml(usageMeta.label)}</div>
+          <label class="small" style="display:block;margin-top:6px">How much per use / batch
+            <input class="input" data-link-qty="${state.selectedLinkIndex}" type="number" min="1" step="1" value="${Math.max(1, Number(link.quantity_used || 1) || 1)}" />
+          </label>
+          <div class="small">Enter how many ${escapeHtml(usageMeta.label)} this product uses${mode === 'end_of_lot' ? ' per batch/lot' : ' per finished item'}.</div>
+          <div class="small" style="margin-top:4px">Current stock ≈ ${escapeHtml(String(usagePreview.totalUsageUnits))} ${escapeHtml(usageMeta.label)} across ${escapeHtml(String(usagePreview.onHandStock))} ${escapeHtml(usageMeta.stockLabel)}.</div>
+          <label class="small" style="display:block;margin-top:6px">Inventory handling
+            <select class="input" data-link-mode="${state.selectedLinkIndex}">
+              <option value="per_unit" ${mode === 'per_unit' ? 'selected' : ''}>Per product</option>
+              <option value="end_of_lot" ${mode === 'end_of_lot' ? 'selected' : ''}>End of lot</option>
+              <option value="story_only" ${mode === 'story_only' ? 'selected' : ''}>Story only</option>
+            </select>
+          </label>
+          <label class="small" style="display:${mode === 'end_of_lot' ? 'block' : 'none'};margin-top:6px" data-link-lot-wrap="${state.selectedLinkIndex}">Products per lot / container
+            <input class="input" data-link-lot="${state.selectedLinkIndex}" type="number" min="1" step="1" value="${Math.max(1, Number(link.lot_size_units || 1) || 1)}" />
+          </label>
+          <div class="small" style="margin-top:4px">${mode === 'end_of_lot' ? `End-of-lot spreads ${escapeHtml(usageMeta.label)} usage across multiple finished products without per-item reservation.` : (mode === 'story_only' ? 'Story only keeps this item in the making record without touching cost or stock math.' : `Per product treats the quantity as ${escapeHtml(usageMeta.label)} used on every finished item.`)}</div>
+          <div class="small">Estimated cost ${escapeHtml(formatMoney(usagePreview.costPerFinishedCents))} per finished product${mode === 'end_of_lot' ? ` • lot covers about ${escapeHtml(String(usagePreview.lotSize))} finished products` : ''} • buildable now ≈ ${escapeHtml(String(Math.max(0, usagePreview.buildable)))}.</div>
+          <textarea class="input" data-link-note="${state.selectedLinkIndex}" rows="2" placeholder="How was this item used for the story of this product?">${escapeHtml(link.usage_notes || '')}</textarea>
+        </div>
+        <div class="resource-linked-actions">
+          <button class="btn" type="button" data-remove-link="${state.selectedLinkIndex}">Remove</button>
+        </div>
+      </div>`;
   }
 
   async function loadData() {
@@ -219,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
           quantity_used: Math.max(1, Number(x.quantity_used || 1) || 1)
         };
       });
+      ensureValidSelections();
       renderProducts();
       renderResources();
       renderLinks();
@@ -238,6 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (qtyIndex != null) {
       const row = state.links[Number(qtyIndex)];
       if (row) row.quantity_used = Math.max(1, Number(event.target.value || 1) || 1);
+      renderLinkedSelect();
       return;
     }
     const noteIndex = event.target.getAttribute('data-link-note');
@@ -263,6 +363,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function addResourceToLinks(item) {
+    if (!item) return;
+    const key = `${item.item_kind}::${item.source_key}`;
+    const existingIndex = state.links.findIndex((x) => `${x.resource_kind}::${x.source_key}` === key);
+    if (existingIndex === -1) {
+      state.links.push({
+        resource_kind: item.item_kind,
+        source_key: item.source_key,
+        quantity_used: 1,
+        usage_notes: '',
+        sort_order: state.links.length,
+        name: item.name,
+        resource: item,
+        consumption_mode: 'per_unit',
+        lot_size_units: 1
+      });
+      state.selectedLinkIndex = state.links.length - 1;
+    } else {
+      state.selectedLinkIndex = existingIndex;
+    }
+    renderResources();
+    renderLinks();
+  }
+
+  function addSelectedAvailableItem() {
+    const [kind, sourceKey] = String(state.selectedAvailableKey || '').split('::');
+    if (!kind || !sourceKey) return;
+    const item = state.resources.find((x) => x.item_kind === kind && x.source_key === sourceKey);
+    addResourceToLinks(item);
+  }
+
+  function removeSelectedLinkedItem() {
+    ensureValidSelections();
+    if (state.selectedLinkIndex < 0) return;
+    state.links.splice(state.selectedLinkIndex, 1);
+    if (state.selectedLinkIndex >= state.links.length) state.selectedLinkIndex = state.links.length - 1;
+    renderResources();
+    renderLinks();
+  }
+
   function onClick(event) {
     const add = event.target.closest('[data-add-resource]');
     const remove = event.target.closest('[data-remove-link]');
@@ -270,28 +410,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const kind = add.getAttribute('data-kind') || '';
       const key = add.getAttribute('data-key') || '';
       const item = state.resources.find((x) => x.item_kind === kind && x.source_key === key);
-      if (!item) return;
-      if (!state.links.find((x) => x.resource_kind === kind && x.source_key === key)) {
-        state.links.push({
-          resource_kind: kind,
-          source_key: key,
-          quantity_used: 1,
-          usage_notes: '',
-          sort_order: state.links.length,
-          name: item.name,
-          resource: item,
-          consumption_mode: 'per_unit',
-          lot_size_units: 1
-        });
-      }
-      renderResources();
-      renderLinks();
+      addResourceToLinks(item);
       return;
     }
     if (remove) {
       const idx = Number(remove.getAttribute('data-remove-link') || -1);
       if (idx >= 0) {
         state.links.splice(idx, 1);
+        if (state.selectedLinkIndex >= state.links.length) state.selectedLinkIndex = state.links.length - 1;
         renderResources();
         renderLinks();
       }

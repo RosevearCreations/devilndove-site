@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!mountEl) return;
 
   let rendered = false;
+  let catalogSeedOptions = [];
+  let categorySeedOptions = [];
 
   function setMessage(message, isError = false) {
     const el = document.getElementById('siteInventoryMessage');
@@ -47,6 +49,94 @@ document.addEventListener('DOMContentLoaded', () => {
   function setValue(id, value) {
     const el = document.getElementById(id);
     if (el) el.textContent = String(value ?? '—');
+  }
+
+  function setInputValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value == null ? '' : String(value);
+  }
+
+  function syncCategoryPresetSelection(value) {
+    const select = document.getElementById('siteInventoryCategoryPreset');
+    if (!select) return;
+    const normalized = String(value || '').trim().toLowerCase();
+    const match = Array.from(select.options).find((option) => String(option.value || '').trim().toLowerCase() === normalized);
+    select.value = match ? match.value : '';
+  }
+
+  function resourceSeedLabel(item = {}) {
+    const stockLabel = String(item.stock_unit_label || 'unit').trim() || 'unit';
+    return `${item.item_name || item.name || item.external_key || 'Item'} (${item.source_type || 'other'} • ${Number(item.on_hand_quantity || 0)} ${stockLabel})`;
+  }
+
+  function renderSeedDropdowns() {
+    const typeSelect = document.getElementById('siteInventorySourceType');
+    const itemSelect = document.getElementById('siteInventorySeedItem');
+    const categorySelect = document.getElementById('siteInventoryCategoryPreset');
+    if (categorySelect) {
+      categorySelect.innerHTML = '<option value="">Choose an existing category…</option>' + categorySeedOptions.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+    }
+    if (!itemSelect) return;
+    const sourceType = String(typeSelect?.value || 'tool').trim();
+    const filtered = catalogSeedOptions.filter((item) => !sourceType || item.source_type === sourceType);
+    if (!filtered.length) {
+      itemSelect.innerHTML = '<option value="">No matching tool/supply records found yet</option>';
+      return;
+    }
+    itemSelect.innerHTML = '<option value="">Choose an existing tool or supply…</option>' + filtered.map((item) => `<option value="${escapeHtml(item.external_key)}">${escapeHtml(resourceSeedLabel(item))}</option>`).join('');
+  }
+
+  function applySeedItemByKey(externalKey) {
+    const key = String(externalKey || '').trim();
+    if (!key) return;
+    const type = String(document.getElementById('siteInventorySourceType')?.value || '').trim();
+    const item = catalogSeedOptions.find((entry) => entry.external_key === key && (!type || entry.source_type === type)) || catalogSeedOptions.find((entry) => entry.external_key === key);
+    if (!item) return;
+    setInputValue('siteInventoryExternalKey', item.external_key || '');
+    setInputValue('siteInventoryItemName', item.item_name || '');
+    setInputValue('siteInventoryCategory', item.category || '');
+    setInputValue('siteInventoryImageUrl', item.image_url || '');
+    setInputValue('siteInventoryStockUnitLabel', item.stock_unit_label || 'unit');
+    setInputValue('siteInventoryUsageUnitLabel', item.usage_unit_label || 'unit');
+    setInputValue('siteInventoryUsageUnitsPerStock', Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1));
+    const seedSelect = document.getElementById('siteInventorySeedItem');
+    if (seedSelect) seedSelect.value = item.external_key || '';
+    syncCategoryPresetSelection(item.category || '');
+  }
+
+  async function readSeedJson(response) {
+    const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+    if (!contentType.includes('application/json')) {
+      const text = await response.text().catch(() => '');
+      throw new Error(text ? 'Inventory source dropdowns returned HTML instead of JSON.' : 'Failed to load inventory source dropdowns.');
+    }
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load inventory source dropdowns.');
+    return data;
+  }
+
+  async function loadSeedOptions() {
+    if (!window.DDAuth?.isLoggedIn()) return;
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/product-resources?product_id=0&q=');
+      const data = await readSeedJson(response);
+      const rawResources = Array.isArray(data?.resources) ? data.resources : [];
+      catalogSeedOptions = rawResources.map((item) => ({
+        source_type: String(item.item_kind || item.source_type || 'other').trim() || 'other',
+        external_key: String(item.source_key || item.external_key || '').trim(),
+        item_name: String(item.name || item.item_name || '').trim(),
+        category: String(item.category || item.subcategory || '').trim(),
+        image_url: String(item.image_url || '').trim(),
+        on_hand_quantity: Number(item.on_hand_quantity || 0),
+        stock_unit_label: String(item.stock_unit_label || 'unit').trim() || 'unit',
+        usage_unit_label: String(item.usage_unit_label || 'unit').trim() || 'unit',
+        usage_units_per_stock_unit: Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1)
+      })).filter((item) => item.external_key && item.item_name);
+      categorySeedOptions = [...new Set(catalogSeedOptions.map((item) => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+      renderSeedDropdowns();
+    } catch (error) {
+      setMessage(error.message || 'Failed to load inventory source dropdowns.', true);
+    }
   }
 
   function parseInventoryIds(text) {
@@ -260,15 +350,20 @@ document.addEventListener('DOMContentLoaded', () => {
         <form id="siteInventoryForm" class="grid" style="gap:12px">
           <div class="grid cols-4" style="gap:12px">
             <div><label class="small" for="siteInventorySourceType">Source Type</label><select id="siteInventorySourceType"><option value="tool">Tool</option><option value="supply">Supply</option><option value="product">Product</option><option value="other">Other</option></select></div>
+            <div><label class="small" for="siteInventorySeedItem">Existing tool / supply</label><select id="siteInventorySeedItem"><option value="">Loading existing tool &amp; supply records…</option></select></div>
             <div><label class="small" for="siteInventoryExternalKey">External Key</label><input id="siteInventoryExternalKey" type="text" placeholder="sku, source key, item id" /></div>
             <div><label class="small" for="siteInventoryItemName">Item Name</label><input id="siteInventoryItemName" type="text" /></div>
-            <div><label class="small" for="siteInventoryCategory">Category</label><input id="siteInventoryCategory" type="text" /></div>
           </div>
           <div class="grid cols-4" style="gap:12px">
+            <div><label class="small" for="siteInventoryCategoryPreset">Existing category</label><select id="siteInventoryCategoryPreset"><option value="">Loading categories…</option></select></div>
+            <div><label class="small" for="siteInventoryCategory">Category</label><input id="siteInventoryCategory" type="text" /></div>
             <div><label class="small" for="siteInventoryImageUrl">Image URL</label><input id="siteInventoryImageUrl" type="url" placeholder="https://..." /></div>
+            <div><label class="small" for="siteInventoryIsActive">Status</label><select id="siteInventoryIsActive"><option value="1">Active</option><option value="0">Inactive</option></select></div>
+          </div>
+          <div class="grid cols-3" style="gap:12px">
             <div><label class="small" for="siteInventorySourceUrl">Source URL</label><input id="siteInventorySourceUrl" type="url" placeholder="https://..." /></div>
             <div><label class="small" for="siteInventoryAmazonUrl">Amazon URL</label><input id="siteInventoryAmazonUrl" type="url" placeholder="https://..." /></div>
-            <div><label class="small" for="siteInventoryIsActive">Status</label><select id="siteInventoryIsActive"><option value="1">Active</option><option value="0">Inactive</option></select></div>
+            <div class="small" style="align-self:end">Choose an existing tool or supply above to prefill the form, then adjust stock, supplier, and cost details.</div>
           </div>
           <div class="grid cols-5" style="gap:12px">
             <div><label class="small" for="siteInventoryOnHand">On Hand</label><input id="siteInventoryOnHand" type="number" min="0" step="1" value="0" /></div>
@@ -380,6 +475,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryForm')?.addEventListener('submit', saveItem);
     document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', loadList);
     document.getElementById('siteInventoryStockView')?.addEventListener('change', loadList);
+    document.getElementById('siteInventorySourceType')?.addEventListener('change', () => { renderSeedDropdowns(); });
+    document.getElementById('siteInventorySeedItem')?.addEventListener('change', (event) => { applySeedItemByKey(event.target.value || ''); });
+    document.getElementById('siteInventoryCategoryPreset')?.addEventListener('change', (event) => { if (event.target.value) setInputValue('siteInventoryCategory', event.target.value); });
     document.getElementById('siteInventorySyncToolsButton')?.addEventListener('click', () => syncCatalog(['tool']));
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
     document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(loadList, 250));
@@ -462,6 +560,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save inventory item.');
       setMessage('Inventory item saved.');
       document.getElementById('siteInventoryForm')?.reset();
+      const seedEl = document.getElementById('siteInventorySeedItem'); if (seedEl) seedEl.value = '';
+      const categoryPresetEl = document.getElementById('siteInventoryCategoryPreset'); if (categoryPresetEl) categoryPresetEl.value = '';
       const stockUnitEl = document.getElementById('siteInventoryStockUnitLabel'); if (stockUnitEl) stockUnitEl.value = 'unit';
       const usageUnitEl = document.getElementById('siteInventoryUsageUnitLabel'); if (usageUnitEl) usageUnitEl.value = 'unit';
       const usageUnitsEl = document.getElementById('siteInventoryUsageUnitsPerStock'); if (usageUnitsEl) usageUnitsEl.value = '1';
@@ -502,6 +602,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const reorderEl = document.getElementById('siteInventoryOnReorderList'); if (reorderEl) reorderEl.checked = Number(item.is_on_reorder_list || 0) === 1;
     const dnrEl = document.getElementById('siteInventoryDoNotReorder'); if (dnrEl) dnrEl.checked = Number(item.do_not_reorder || 0) === 1;
     const dnuEl = document.getElementById('siteInventoryDoNotReuse'); if (dnuEl) dnuEl.checked = Number(item.do_not_reuse || 0) === 1;
+    syncCategoryPresetSelection(item.category || '');
+    const seedEl = document.getElementById('siteInventorySeedItem');
+    if (seedEl) seedEl.value = item.external_key || '';
   }
 
   async function loadList() {
@@ -521,6 +624,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setValue('siteInventoryReorderListCount', summary.reorder_list_items || 0);
 
       const items = Array.isArray(data.items) ? data.items : [];
+      if (!catalogSeedOptions.length) await loadSeedOptions();
+      renderSeedDropdowns();
       const body = document.getElementById('siteInventoryList');
       if (!body) return;
 
@@ -669,5 +774,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   render();
-  if (window.DDAuth?.isLoggedIn()) loadList();
+  if (window.DDAuth?.isLoggedIn()) { loadSeedOptions(); loadList(); }
 });
