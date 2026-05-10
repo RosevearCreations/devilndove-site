@@ -491,3 +491,45 @@ body.nav-mobile-open{overflow:hidden}
 .resource-linked-card-dark{background:#221a31;border-color:rgba(164,132,255,.18);color:#f8f5ff}
 .resource-linked-card-dark .small{color:#cfc2f3}
 .resource-linked-card-dark textarea{background:#271f38;color:#f8f5ff}
+
+/* Current pass: accounting statement import / reconciliation review polish. */
+#statementImportCard,
+#reconciliationExceptionsCard,
+#salesTaxWorksheetCard,
+#fixedAssetsCard,
+#vendorStatementsCard{
+  scroll-margin-top:88px;
+}
+.accounting-import-grid{
+  align-items:start;
+}
+.accounting-import-row{
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.accounting-import-row:last-child{
+  border-bottom:0;
+}
+.accounting-import-preview{
+  margin-top:12px;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:rgba(255,255,255,.02);
+}
+.accounting-import-preview table{
+  min-width:680px;
+  margin:0;
+}
+.accounting-import-preview th,
+.accounting-import-preview td{
+  white-space:nowrap;
+}
+@media (max-width:720px){
+  .accounting-import-grid.grid.cols-2{
+    grid-template-columns:1fr;
+  }
+  .accounting-import-preview table{
+    min-width:560px;
+  }
+}

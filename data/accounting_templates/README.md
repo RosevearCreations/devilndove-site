@@ -1,3 +1,5 @@
+> Current accounting-template sync — 2026-05-09: admin statement imports now support broader bank/processor CSV aliases and preview/error handling; template examples should keep matching real exported provider files as they are collected.
+
 > Current pass update — accounting templates now live alongside statement-import, reconciliation-exception, fixed-asset, and vendor-statement review groundwork in the main app workflow.
 
 # Current pass update — 2026-04-24
