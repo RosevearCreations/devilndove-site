@@ -477,3 +477,8 @@ This pass refined receipt/statement/workpaper coverage, added statement-backed r
 - Fixed admin/products inventory operations so site-item inventory can auto-sync from catalog items and product records when the inventory table is empty, and added explicit sync_catalog support for tool/supply/product rows.
 - Updated the Product SEO Editor to use a populated Product ID dropdown backed by live products instead of a plain numeric field.
 - Tied the Tools & Supplies Used editor to the current product editor record so loading, creating, or updating a product can immediately continue into resource linking and tracking.
+
+## 2026-05-09 admin products resource-selector follow-up
+- Added selector-backed tool/supply seed dropdowns in Tools & Supplies Inventory Operations so existing tool and supply records can prefill inventory forms instead of leaving the operator on blank text inputs.
+- Restyled Product Tools & Supplies Used with a darker editor shell and converted the linked-item adjustment flow into a selected-item dropdown so one linked item can be adjusted at a time for quantity, lot mode, and notes.
+- No DB shape change was required for this pass; this was an admin UX/fallback pass that keeps future work moving toward stronger catalog, costing, and materials tracking.

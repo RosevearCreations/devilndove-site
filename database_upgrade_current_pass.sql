@@ -954,3 +954,7 @@ CREATE TABLE IF NOT EXISTS event_vendor_applications (
   FOREIGN KEY (community_event_id) REFERENCES community_events(community_event_id) ON DELETE SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_event_vendor_applications_event_status ON event_vendor_applications(community_event_id, application_status, created_at DESC);
+
+-- 2026-05-09 admin products resource-selector follow-up
+-- No schema change was required for this pass.
+-- The changes were admin UX/fallback improvements for inventory seed selectors and product resource-link editing.

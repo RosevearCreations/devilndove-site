@@ -1064,3 +1064,6 @@ CREATE TABLE IF NOT EXISTS pickup_profiles (
 );
 CREATE INDEX IF NOT EXISTS idx_pickup_profiles_active_sort ON pickup_profiles(is_active, sort_order, label);
 
+-- 2026-05-09 admin products resource-selector follow-up
+-- No schema change was required for this pass.
+-- The changes were admin UX/fallback improvements for inventory seed selectors and product resource-link editing.

@@ -636,3 +636,8 @@ The shop now separates handmade work from vintage/collectible/pre-built stock mo
 
 ## Current pass sync — 2026-05-05
 - Community events now support recurring schedules, vendor-interest capture, and event-image support on top of the DB-backed Events/Pickup foundation.
+
+## 2026-05-09 admin products resource-selector follow-up
+- Added selector-backed tool/supply seed dropdowns in Tools & Supplies Inventory Operations so existing tool and supply records can prefill inventory forms instead of leaving the operator on blank text inputs.
+- Restyled Product Tools & Supplies Used with a darker editor shell and converted the linked-item adjustment flow into a selected-item dropdown so one linked item can be adjusted at a time for quantity, lot mode, and notes.
+- No DB shape change was required for this pass; this was an admin UX/fallback pass that keeps future work moving toward stronger catalog, costing, and materials tracking.

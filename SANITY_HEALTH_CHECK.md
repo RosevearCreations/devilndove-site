@@ -511,3 +511,8 @@ A broader repo-level sanity sweep also found older bootstrap/runtime tables that
 ## Current pass sync — 2026-05-05
 - Added recurring-event and vendor-application tables/columns to the DB sanity expectations.
 - Public/community runtime now has a safer split between base event rows and generated upcoming occurrences.
+
+## 2026-05-09 admin products resource-selector follow-up
+- Added selector-backed tool/supply seed dropdowns in Tools & Supplies Inventory Operations so existing tool and supply records can prefill inventory forms instead of leaving the operator on blank text inputs.
+- Restyled Product Tools & Supplies Used with a darker editor shell and converted the linked-item adjustment flow into a selected-item dropdown so one linked item can be adjusted at a time for quantity, lot mode, and notes.
+- No DB shape change was required for this pass; this was an admin UX/fallback pass that keeps future work moving toward stronger catalog, costing, and materials tracking.
