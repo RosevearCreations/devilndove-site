@@ -1,3 +1,5 @@
+> Current build sync — 2026-05-09: accounting statement imports are now linked into the admin accounting dashboard, CSV import parsing is more tolerant, dashboard imbalance counts were fixed, schema indexes were refreshed, and the public-page one-H1 rule was rechecked.
+
 > Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
 
 ## Current pass update — 2026-05-06

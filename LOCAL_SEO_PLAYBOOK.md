@@ -1,3 +1,5 @@
+> Current SEO sync — 2026-05-09: exposed HTML pages were rechecked for a single H1, and this pass kept titles/main headings/local wording aligned with the ongoing Tillsonburg/Southern Ontario discovery strategy while the accounting/admin work continued.
+
 > Current pass update — this pass preserved the one-H1 rule and kept discovery/local trust moving with cleaner shop browse paths, public colour filtering, and the existing handmade/vintage/marketplace collection split.
 
 > Current pass update — sanity pass focused on product-creation multi-colour support, a compact catalog inventory column, and clearer next-step prioritization around accountant handoff, reconciliation depth, catalog UX, and local-search discovery.

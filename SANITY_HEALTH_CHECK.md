@@ -1,3 +1,5 @@
+> Current sanity sync — 2026-05-09: HTML H1 count, JavaScript syntax, accounting dashboard query drift, statement-import visibility, schema index coverage, and CSS/admin mobile polish were reviewed for this build.
+
 > Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
 
 Checks completed in this pass:

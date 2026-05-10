@@ -1,3 +1,12 @@
+> Current pass update — 2026-05-09: the next safest accounting-roadmap step was completed by making statement imports visible from the Accounting dashboard, broadening bank/PayPal/Stripe/Etsy-style CSV header support, fixing all-import filtering, adding row-preview/error handling in the admin UI, and correcting dashboard imbalance counts to use `imbalance_cents`.
+
+Safest next value steps after this pass:
+1. add provider preset profiles for real exported CSVs we collect from the shop accounts
+2. add manual match/split controls for unresolved statement rows and reconciliation exceptions
+3. expand accountant export bundle v2 with statement import summaries, unresolved exceptions, sales-tax worksheets, and fixed-asset review notes
+4. deepen processor-fee, payout, shipping, and tax remittance reconciliation against imported statements
+5. add phone-first receipt capture tied to vendors, expenses, fixed assets, and statement rows
+
 > Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
 
 Safest remaining order after this pass:

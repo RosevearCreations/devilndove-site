@@ -1,3 +1,5 @@
+> Current handoff sync — 2026-05-09: latest build pass focused on Devil n Dove accounting import refinement. Key files touched: `admin/accounting/index.html`, `public/js/admin-accounting-imports.js`, `functions/api/admin/_accountingStatementImports.js`, `functions/api/admin/dashboard-summary.js`, `admin/dashboard-summary.js`, `css/styles.css`, main schema SQL files, and all Markdown handoff docs.
+
 > Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
 
 ## Current pass update — 2026-05-06

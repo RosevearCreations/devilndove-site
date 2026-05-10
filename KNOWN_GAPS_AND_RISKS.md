@@ -1,3 +1,11 @@
+> Current pass update — 2026-05-09: accounting import visibility and reliability improved, but imported CSV formats remain provider-specific and still need review before they can be treated as accountant-grade reconciliation. The build now surfaces better admin errors, row previews, exception lists, and schema indexing, but it is still review-first accounting support rather than tax-filing software.
+
+Remaining risks to keep visible:
+- real bank/PayPal/Stripe/Etsy CSV headers can still differ from our current aliases
+- statement rows can be staged and reviewed, but manual split/match posting is not complete yet
+- accountant export bundle v2 still needs final unresolved-exception and filing/remittance packaging
+- first-page local search placement cannot be guaranteed; we can only keep strengthening relevance, prominence signals, clean headings, and useful local content
+
 > Current pass update — accounting workflow now adds statement CSV import, auto-match staging, a reconciliation exceptions queue, attachment-required month-close guardrails, accountant export bundle v2 groundwork, public colour filters/badges, and catalog table preference controls.
 
 Largest remaining accounting gaps after this pass:
