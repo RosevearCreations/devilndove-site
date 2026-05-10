@@ -1,3 +1,7 @@
+// File: /public/js/admin-accounting-imports.js
+// Brief description: Accounting import UI for statement CSV intake, row preview,
+// reconciliation exception review, sales-tax worksheet checks, fixed assets, and vendor statements.
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
   const mount = document.getElementById('accountingBackendMount');
@@ -11,24 +15,35 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
+
   function money(cents) {
     return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format((Number(cents || 0) || 0) / 100);
   }
+
+  function setMessage(text, isError = false) {
+    const box = document.getElementById('accountingBackendMessage');
+    if (!box) return;
+    box.style.display = text ? 'block' : 'none';
+    box.style.color = isError ? '#b00020' : '#14532d';
+    box.textContent = text || '';
+  }
+
   async function readJson(response, fallbackMessage) {
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) throw new Error(data?.error || fallbackMessage || 'Request failed.');
     return data;
   }
+
   function ensureCard() {
     if (document.getElementById('statementImportCard')) return;
     const wrap = document.createElement('div');
-    wrap.className = 'grid cols-2';
+    wrap.className = 'grid cols-2 accounting-import-grid';
     wrap.style.gap = '18px';
     wrap.style.marginTop = '18px';
     wrap.innerHTML = `
       <div class="card" id="statementImportCard">
-        <h3 style="margin-top:0">Statement import & auto-match</h3>
-        <p class="small">Import bank, PayPal, Stripe, and Etsy CSVs, then auto-stage statement totals into reconciliation reviews and surface unresolved differences.</p>
+        <h3 style="margin-top:0">Statement import &amp; auto-match</h3>
+        <p class="small">Import bank, PayPal, Stripe, Square, and Etsy CSVs, then stage statement totals into reconciliation reviews and surface unresolved differences.</p>
         <form id="statementImportForm" class="grid" style="gap:8px" enctype="multipart/form-data">
           <div class="grid cols-2" style="gap:8px"><select name="provider_scope"><option value="bank">Bank</option><option value="paypal">PayPal</option><option value="stripe">Stripe</option><option value="etsy">Etsy</option><option value="square">Square</option><option value="other">Other</option></select><input name="period_month" type="month" value="${new Date().toISOString().slice(0,7)}" /></div>
           <div class="grid cols-2" style="gap:8px"><input name="statement_reference" type="text" placeholder="Statement reference / payout batch" /><input name="currency" type="text" value="CAD" maxlength="3" /></div>
@@ -36,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn primary" type="submit">Import CSV</button>
         </form>
         <div id="statementImportList" class="small" style="margin-top:10px"></div>
+        <div id="statementImportRowsPreview" class="small accounting-import-preview" style="margin-top:12px"></div>
       </div>
       <div class="card" id="reconciliationExceptionsCard">
         <h3 style="margin-top:0">Reconciliation exceptions queue</h3>
@@ -62,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="fixedAssetsList" class="small" style="margin-top:10px"></div>
       </div>
       <div class="card" id="vendorStatementsCard">
-        <h3 style="margin-top:0">Vendor statements & payable-style review</h3>
+        <h3 style="margin-top:0">Vendor statements &amp; payable-style review</h3>
         <p class="small">See which vendors already have statement support uploaded for the month and which still need statement-backed review.</p>
         <div class="grid cols-2" style="gap:8px;align-items:end"><input id="vendorStatementsMonth" type="month" value="${new Date().toISOString().slice(0,7)}" /><button class="btn" type="button" id="loadVendorStatementsButton">Load vendor statement view</button></div>
         <div id="vendorStatementsList" class="small" style="margin-top:10px"></div>
@@ -75,14 +91,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const data = await readJson(await window.DDAuth.apiFetch(`/api/admin/accounting-statement-imports?period_month=${encodeURIComponent(periodMonth || '')}`), 'Statement import endpoint is unavailable.');
     const listEl = document.getElementById('statementImportList');
     if (!listEl) return;
-    listEl.innerHTML = data.imports?.length ? data.imports.map((row) => `<div style="padding:8px 0;border-bottom:1px solid #eee"><strong>${esc(row.provider_scope)}</strong> • ${esc(row.period_month || '')} • ${esc(row.source_filename || row.statement_reference || '')}<div class="small">Rows ${esc(String(row.row_count || 0))} • Gross ${esc(money(row.gross_cents || 0))} • Fees ${esc(money(row.fee_cents || 0))} • Tax ${esc(money(row.tax_cents || 0))} • Shipping ${esc(money(row.shipping_cents || 0))}</div><div class="small">Status ${esc(row.import_status || 'imported')}</div></div>`).join('') : '<div class="small">No statement imports yet.</div>';
+    listEl.innerHTML = data.imports?.length ? data.imports.map((row) => `
+      <div class="accounting-import-row">
+        <strong>${esc(row.provider_scope)}</strong> • ${esc(row.period_month || '')} • ${esc(row.source_filename || row.statement_reference || '')}
+        <div class="small">Rows ${esc(String(row.row_count || 0))} • Gross ${esc(money(row.gross_cents || 0))} • Fees ${esc(money(row.fee_cents || 0))} • Tax ${esc(money(row.tax_cents || 0))} • Shipping ${esc(money(row.shipping_cents || 0))}</div>
+        <div class="small">Deposits ${esc(money(row.deposit_cents || 0))} • Withdrawals ${esc(money(row.withdrawal_cents || 0))} • Status ${esc(row.import_status || 'imported')}</div>
+        <div style="margin-top:8px"><button class="btn" type="button" data-view-import-rows="${esc(String(row.accounting_statement_import_id || 0))}">View first rows</button></div>
+      </div>
+    `).join('') : '<div class="small">No statement imports yet.</div>';
+    return data;
+  }
+
+  async function loadImportRows(importId) {
+    const previewEl = document.getElementById('statementImportRowsPreview');
+    if (!previewEl) return;
+    previewEl.innerHTML = '<div class="small">Loading imported rows…</div>';
+    const data = await readJson(await window.DDAuth.apiFetch(`/api/admin/accounting-statement-imports?accounting_statement_import_id=${encodeURIComponent(importId)}&limit=12`), 'Statement row preview is unavailable.');
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    previewEl.innerHTML = rows.length ? `
+      <div class="small" style="margin-bottom:8px"><strong>Imported row preview</strong> — ${esc(String(rows.length))} rows shown</div>
+      <div class="table-wrap"><table style="width:100%;border-collapse:collapse">
+        <thead><tr><th style="text-align:left;padding:6px;border-bottom:1px solid #ddd">Date</th><th style="text-align:left;padding:6px;border-bottom:1px solid #ddd">Type</th><th style="text-align:left;padding:6px;border-bottom:1px solid #ddd">Reference</th><th style="text-align:left;padding:6px;border-bottom:1px solid #ddd">Description</th><th style="text-align:right;padding:6px;border-bottom:1px solid #ddd">Net</th></tr></thead>
+        <tbody>${rows.map((row) => `<tr><td style="padding:6px;border-bottom:1px solid #eee">${esc(row.txn_date || '')}</td><td style="padding:6px;border-bottom:1px solid #eee">${esc(row.txn_type || '')}</td><td style="padding:6px;border-bottom:1px solid #eee">${esc(row.reference_number || '')}</td><td style="padding:6px;border-bottom:1px solid #eee">${esc(row.description || '')}</td><td style="padding:6px;border-bottom:1px solid #eee;text-align:right">${esc(money(row.net_cents || 0))}</td></tr>`).join('')}</tbody>
+      </table></div>
+    ` : '<div class="small">No row preview was returned for this import.</div>';
   }
 
   async function loadExceptions(periodMonth = '') {
     const data = await readJson(await window.DDAuth.apiFetch(`/api/admin/accounting-reconciliation-exceptions?period_month=${encodeURIComponent(periodMonth || '')}`), 'Exceptions endpoint is unavailable.');
     const listEl = document.getElementById('reconciliationExceptionsList');
     if (!listEl) return;
-    listEl.innerHTML = data.exceptions?.length ? data.exceptions.map((row) => `<div style="padding:8px 0;border-bottom:1px solid #eee"><strong>${esc(row.reconciliation_type || '')}</strong> • ${esc(row.scope_key || 'all')} • ${esc(row.period_month || '')}<div class="small">Difference ${esc(money(row.difference_cents || 0))} • tolerance ${esc(money(row.tolerance_cents || 0))} • ${esc(row.exception_status || 'open')}</div><div class="small">${esc(row.notes || row.reference_label || '')}</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-resolve-exception="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Resolve</button><button class="btn" type="button" data-ignore-exception="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Ignore</button></div></div>`).join('') : '<div class="small">No reconciliation exceptions for this period.</div>';
+    listEl.innerHTML = data.exceptions?.length ? data.exceptions.map((row) => `
+      <div style="padding:8px 0;border-bottom:1px solid #eee">
+        <strong>${esc(row.reconciliation_type || '')}</strong> • ${esc(row.scope_key || 'all')} • ${esc(row.period_month || '')}
+        <div class="small">Difference ${esc(money(row.difference_cents || 0))} • tolerance ${esc(money(row.tolerance_cents || 0))} • ${esc(row.exception_status || 'open')} • ${esc(row.severity || 'warning')}</div>
+        <div class="small">${esc(row.notes || row.reference_label || '')}</div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-resolve-exception="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Resolve</button><button class="btn" type="button" data-ignore-exception="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Ignore</button></div>
+      </div>
+    `).join('') : '<div class="small">No reconciliation exceptions for this period.</div>';
   }
 
   async function loadWorksheet(periodMonth = '') {
@@ -112,47 +158,72 @@ document.addEventListener('DOMContentLoaded', () => {
     if (importForm) {
       event.preventDefault();
       const formData = new FormData(importForm);
-      const response = await window.DDAuth.apiFetch('/api/admin/accounting-statement-imports', { method: 'POST', body: formData, headers: {} });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) return;
-      await loadImports(importForm.elements?.period_month?.value || '');
-      await loadExceptions(importForm.elements?.period_month?.value || '');
-      await loadWorksheet(importForm.elements?.period_month?.value || '');
+      try {
+        const data = await readJson(await window.DDAuth.apiFetch('/api/admin/accounting-statement-imports', { method: 'POST', body: formData, headers: {} }), 'Failed importing statement CSV.');
+        const month = importForm.elements?.period_month?.value || '';
+        setMessage(`Statement imported. Rows: ${Number(data.import?.row_count || 0)}. Auto-matches: ${Number(data.matches?.length || 0)}.`);
+        await loadImports(month);
+        await loadExceptions(month);
+        await loadWorksheet(month);
+      } catch (error) {
+        setMessage(error.message || 'Failed importing statement CSV.', true);
+      }
       return;
     }
+
     const assetForm = event.target.closest('#fixedAssetForm');
     if (assetForm) {
       event.preventDefault();
-      const payload = Object.fromEntries(new FormData(assetForm).entries());
-      await readJson(await window.DDAuth.apiFetch('/api/admin/accounting-fixed-assets', { method: 'POST', body: JSON.stringify(payload) }), 'Failed saving fixed asset.');
-      assetForm.reset();
-      await loadFixedAssets();
+      try {
+        const payload = Object.fromEntries(new FormData(assetForm).entries());
+        await readJson(await window.DDAuth.apiFetch('/api/admin/accounting-fixed-assets', { method: 'POST', body: JSON.stringify(payload) }), 'Failed saving fixed asset.');
+        assetForm.reset();
+        setMessage('Fixed asset saved for year-end review.');
+        await loadFixedAssets();
+      } catch (error) {
+        setMessage(error.message || 'Failed saving fixed asset.', true);
+      }
     }
   });
 
   mount.addEventListener('click', async (event) => {
     if (event.target.id === 'loadExceptionsButton') {
-      await loadExceptions(document.getElementById('exceptionMonthFilter')?.value || '');
+      try { await loadExceptions(document.getElementById('exceptionMonthFilter')?.value || ''); }
+      catch (error) { setMessage(error.message || 'Failed loading exceptions.', true); }
       return;
     }
     if (event.target.id === 'loadSalesTaxWorksheetButton') {
-      await loadWorksheet(document.getElementById('salesTaxWorksheetMonth')?.value || '');
+      try { await loadWorksheet(document.getElementById('salesTaxWorksheetMonth')?.value || ''); }
+      catch (error) { setMessage(error.message || 'Failed loading sales-tax worksheet.', true); }
       return;
     }
     if (event.target.id === 'loadVendorStatementsButton') {
-      await loadVendorStatements(document.getElementById('vendorStatementsMonth')?.value || '');
+      try { await loadVendorStatements(document.getElementById('vendorStatementsMonth')?.value || ''); }
+      catch (error) { setMessage(error.message || 'Failed loading vendor statement view.', true); }
+      return;
+    }
+    const importRowsButton = event.target.closest('[data-view-import-rows]');
+    if (importRowsButton) {
+      try { await loadImportRows(importRowsButton.getAttribute('data-view-import-rows') || '0'); }
+      catch (error) { setMessage(error.message || 'Failed loading statement row preview.', true); }
       return;
     }
     const resolveBtn = event.target.closest('[data-resolve-exception]');
     if (resolveBtn) {
-      await readJson(await window.DDAuth.apiFetch('/api/admin/accounting-reconciliation-exceptions', { method: 'POST', body: JSON.stringify({ accounting_reconciliation_exception_id: Number(resolveBtn.getAttribute('data-resolve-exception') || 0), exception_status: 'resolved' }) }), 'Failed resolving exception.');
-      await loadExceptions(document.getElementById('exceptionMonthFilter')?.value || '');
+      try {
+        await readJson(await window.DDAuth.apiFetch('/api/admin/accounting-reconciliation-exceptions', { method: 'POST', body: JSON.stringify({ accounting_reconciliation_exception_id: Number(resolveBtn.getAttribute('data-resolve-exception') || 0), exception_status: 'resolved' }) }), 'Failed resolving exception.');
+        setMessage('Reconciliation exception resolved.');
+        await loadExceptions(document.getElementById('exceptionMonthFilter')?.value || '');
+      } catch (error) { setMessage(error.message || 'Failed resolving exception.', true); }
       return;
     }
     const ignoreBtn = event.target.closest('[data-ignore-exception]');
     if (ignoreBtn) {
-      await readJson(await window.DDAuth.apiFetch('/api/admin/accounting-reconciliation-exceptions', { method: 'POST', body: JSON.stringify({ accounting_reconciliation_exception_id: Number(ignoreBtn.getAttribute('data-ignore-exception') || 0), exception_status: 'ignored' }) }), 'Failed updating exception.');
-      await loadExceptions(document.getElementById('exceptionMonthFilter')?.value || '');
+      try {
+        await readJson(await window.DDAuth.apiFetch('/api/admin/accounting-reconciliation-exceptions', { method: 'POST', body: JSON.stringify({ accounting_reconciliation_exception_id: Number(ignoreBtn.getAttribute('data-ignore-exception') || 0), exception_status: 'ignored' }) }), 'Failed updating exception.');
+        setMessage('Reconciliation exception marked ignored.');
+        await loadExceptions(document.getElementById('exceptionMonthFilter')?.value || '');
+      } catch (error) { setMessage(error.message || 'Failed updating exception.', true); }
     }
   });
 
