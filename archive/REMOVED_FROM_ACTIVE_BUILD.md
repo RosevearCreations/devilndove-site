@@ -1,41 +1,9 @@
-# Devil n Dove Site — Current Clean Build
+# Removed From Active Build
 
-Current sync: 2026-05-10 cleanup and refoundation pass.
+Date: 2026-05-10
 
-## Active purpose
-This repository powers the Devil n Dove public storefront, admin app, member area, catalog tools, accounting workflow, and Cloudflare Pages Functions backend.
+These files/directories were removed from the active build because they were duplicate, stale, or superseded by current paths.
 
-## Current active structure
-- `/functions/api/` is the active Cloudflare Pages Functions API surface.
-- `/public/js/` holds browser-side admin/member/storefront scripts.
-- `/admin/*/index.html` holds admin department pages.
-- `/data/` holds approved JSON fallbacks/import sources that have not yet fully moved to D1.
-- `/database_schema.sql`, `/database_store_schema.sql`, and `/database_full_schema.sql` are the main schema references.
-- `/database_upgrade_current_pass.sql` is now a clean staging file for the next migration batch.
-- `/archive/` holds retired Markdown snapshots and the archived current-pass SQL from the previous build.
-
-## Cleanup completed in this pass
-- Archived all previous Markdown before rewriting the active docs.
-- Archived the previous `database_upgrade_current_pass.sql` and reset the active file to a clean staging file.
-- Retired older root-level Markdown into `/archive/retired-markdown/`.
-- Removed duplicate/stale API files outside `/functions/api/`.
-- Removed duplicate nested `/data/data/` exports.
-- Removed duplicate movie JSON under `/assets/movies/`; active movie JSON stays under `/data/movies/`.
-- Removed duplicate supply inventory files from `/supplies/`; active supply data stays under `/data/supplies/`.
-- Fixed the supplies duplicate-report health page to point to the active duplicate report paths.
-- Fixed malformed footer markup on the admin Movies department page.
-
-## Important active docs
-- `DEVELOPMENT_ROADMAP.md` — next 20 logical steps.
-- `KNOWN_GAPS_AND_RISKS.md` — current gaps and risks.
-- `SANITY_HEALTH_CHECK.md` — checks for each build.
-- `DATABASE_SCHEMA_REFERENCE.md` — schema and migration notes.
-- `REPO_BASE_GUIDE.md` — current repo map.
-- `REPO_RULES.md` — rules for future passes.
-- `LOCAL_SEO_PLAYBOOK.md` — search/local visibility guidance.
-- `AI_CONTEXT.md` and `NEW_CHAT_STATUS.md` — handoff notes for a fresh chat.
-
-## Removed from active build
 - `_lib`
 - `auth`
 - `member`
@@ -154,3 +122,11 @@ This repository powers the Devil n Dove public storefront, admin app, member are
 - `supplies/supplies_items_master.csv`
 - `supplies/supplies_items_master.json`
 - `supplies/supplies_metadata.zip`
+
+## Current replacements
+- API handlers: `/functions/api/`
+- Browser scripts: `/public/js/`
+- Movie JSON: `/data/movies/`
+- Supply JSON: `/data/supplies/`
+- Tool JSON: `/data/toolshed/`
+- Featured items JSON: `/data/site/`

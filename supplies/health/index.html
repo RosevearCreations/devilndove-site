@@ -74,9 +74,8 @@
 <h3>Exact Duplicate Photos</h3>
 <div class="small">Loads the first duplicate report it can find:</div>
 <ul class="small">
-<li class="mono">/data/supplies/supplies_exact_duplicate_report.json</li>
-<li class="mono">/data/supplies/supplies_exact_duplicate_report.json</li>
-<li class="mono">/data/supplies/supplies_exact_duplicate_report.json</li>
+<li class="mono">/data/supplies/exact_duplicate_report.json</li>
+<li class="mono">/data/toolshed/exact_duplicate_report.json</li>
 </ul>
 <div class="small" id="dupMsg"></div>
 <div style="overflow:auto;margin-top:10px">
@@ -180,9 +179,8 @@
 
     async function loadDupReport(){
       const candidates = [
-        "/data/supplies/supplies_exact_duplicate_report.json",
-        "/data/exact_duplicate_report.json",
-        "/exact_duplicate_report.json"
+        "/data/supplies/exact_duplicate_report.json",
+        "/data/toolshed/exact_duplicate_report.json"
       ];
 
       for (const url of candidates){

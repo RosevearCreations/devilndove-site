@@ -30,9 +30,7 @@ async function fetchJsonFromSite(request, path) {
 async function fetchMovieJsonBase(request) {
   const paths = [
     "/data/movies/movie_catalog_enriched.v2.json",
-    "/assets/movies/movie_catalog_enriched.v2.json",
-    "/data/movies/movie_catalog_enriched.json",
-    "/assets/movies/movie_catalog_enriched.json"
+    "/data/movies/movie_catalog_enriched.json"
   ];
 
   for (const path of paths) {

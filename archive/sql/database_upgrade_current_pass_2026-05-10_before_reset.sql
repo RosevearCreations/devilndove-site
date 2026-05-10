@@ -1,68 +1,225 @@
--- Current cleanup sync 2026-05-10: active schema retained; database_upgrade_current_pass.sql was archived and reset for the next migration batch.
+-- Current pass note: statement-import refinement now adds provider/date/reference indexing for faster review and more reliable admin import filtering.
 -- Current pass note: accounting now adds statement-import tables, reconciliation exceptions, fixed-asset groundwork, attachment-required month-close checks, export bundle v2 groundwork, and public colour-filter/catalog-preference support.
--- Current pass note: product records now support multi-colour storage using color_names_json while keeping color_name as the primary/filter field.
+-- Current pass note: products now support multi-colour storage through color_names_json while keeping color_name as the primary/filter colour.
 -- Current pass note: this storefront/discovery pass adds dedicated public Collections and Marketplaces pages, stronger sale-channel/provenance guidance, and broader internal linking without requiring new database tables.
-
--- Current pass reference note: products now also support merchandise_origin, sale_channel, external_listing_url, external_listing_label, condition_summary, era_label, and sourcing_notes so handmade, vintage, collectible, antique, oddity, and pre-built items can share the same catalog safely.
+-- Current pass note: collectible / vintage / external-listing catalog support now lets Devil n Dove sell handmade work alongside pre-built finds, antiquities, oddities, and marketplace-linked items.
+-- Current pass note: year-end close export now includes CSV output plus scope-aware attachment and reconciliation summaries for accountant handoff.
+-- Current pass note: accounting review now adds starter GL finalize helpers, richer attachment metadata, deeper reconciliation review detail, and a more accountant-ready year-end close bundle.
+-- Current pass note: accounting now adds explicit GIFI staging fields on general_ledger_accounts, a live DB sanity route, and schema alignment for accounting_journal_entries/accounting_journal_lines.
 -- Current pass note: customer engagement workflow depth now includes purchaser-versus-recipient gift-card support, broader engagement queues, and storefront featured-testimonial placement.
 -- Current pass note: phone-first finished-product entry now supports a lightweight wizard mode plus capture metadata for same-day draft review and safer bulk cleanup.
 -- Current pass note: stock-unit versus usage-unit inventory handling was expanded for clearer craft-material costing and planning.
 -- Current pass note: DD finished-product numbering now has a configurable start value in app_settings, defaulting to 1000 when older databases have not seeded the setting yet.
 -- Current pass note: broad product repricing is now handled in code through the existing products table and admin bulk tooling; no new required schema tables were needed for this pass.
--- Current pass note: admin write-path resilience now extends beyond read-only fallback. Order status updates, manual payment recording, and refund/dispute actions log server-side incidents more defensively, while the order-detail UI can preserve failed admin writes locally for manual retry. Composite payment/refund/dispute indexes were added where those tables exist so health and follow-up queries stay responsive.
--- File: /database_schema.sql
--- Brief description: Core application auth and admin schema for the current Devil n Dove build.
+-- File: /database_upgrade_current_pass.sql
+-- Brief description: Incremental upgrade SQL for older Devil n Dove D1/SQLite databases.
+-- This pass focuses on movie overlay compatibility, phone-first product capture fields,
+-- and governance tables that are already used by current admin flows.
+--
+-- SQLite / D1 does not support ADD COLUMN IF NOT EXISTS.
+-- If a statement fails with a duplicate-column error, skip that one and continue.
 
 -- Current pass note: phone product capture now resolves the shared D1 binding through DB or DD_DB and returns structured JSON failures instead of HTML parser breaks.
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS users (
-  user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  email TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
-  display_name TEXT,
-  role TEXT NOT NULL DEFAULT 'member',
-  is_active INTEGER NOT NULL DEFAULT 1,
+CREATE TABLE IF NOT EXISTS app_settings (
+  app_setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  setting_key TEXT NOT NULL UNIQUE,
+  setting_value TEXT,
+  is_public INTEGER NOT NULL DEFAULT 0,
+  updated_by_user_id INTEGER,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (updated_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
+INSERT OR IGNORE INTO app_settings (setting_key, setting_value, is_public)
+VALUES ('site.catalog.product_number_start', '1000', 0),
+       ('site.catalog.product_category_options', '[]', 0),
+       ('site.catalog.color_options', '[]', 0),
+       ('site.catalog.shipping_code_options', '[]', 0);
+
+
+-- Movie overlay compatibility for JSON-first + D1-override workflow.
+CREATE TABLE IF NOT EXISTS movie_catalog (
+  movie_catalog_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  upc TEXT NOT NULL UNIQUE,
+  slug TEXT,
+  title TEXT,
+  original_title TEXT,
+  sort_title TEXT,
+  summary TEXT,
+  release_year INTEGER,
+  media_format TEXT,
+  genre TEXT,
+  director_names TEXT,
+  actor_names TEXT,
+  front_image_url TEXT,
+  back_image_url TEXT,
+  runtime_minutes INTEGER,
+  studio_name TEXT,
+  trailer_url TEXT,
+  imdb_id TEXT,
+  alternate_identifier TEXT,
+  metadata_status TEXT NOT NULL DEFAULT 'pending',
+  metadata_source TEXT,
+  estimated_value_low_cents INTEGER,
+  estimated_value_high_cents INTEGER,
+  estimated_value_currency TEXT,
+  rarity_notes TEXT,
+  collection_notes TEXT,
+  value_search_url TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  featured_rank INTEGER,
+  source_record_json TEXT,
+  source_json_path TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE movie_catalog ADD COLUMN original_title TEXT;
+ALTER TABLE movie_catalog ADD COLUMN trailer_url TEXT;
+ALTER TABLE movie_catalog ADD COLUMN imdb_id TEXT;
+ALTER TABLE movie_catalog ADD COLUMN alternate_identifier TEXT;
+ALTER TABLE movie_catalog ADD COLUMN metadata_status TEXT NOT NULL DEFAULT 'pending';
+ALTER TABLE movie_catalog ADD COLUMN metadata_source TEXT;
+ALTER TABLE movie_catalog ADD COLUMN estimated_value_low_cents INTEGER;
+ALTER TABLE movie_catalog ADD COLUMN estimated_value_high_cents INTEGER;
+ALTER TABLE movie_catalog ADD COLUMN estimated_value_currency TEXT;
+ALTER TABLE movie_catalog ADD COLUMN rarity_notes TEXT;
+ALTER TABLE movie_catalog ADD COLUMN collection_notes TEXT;
+ALTER TABLE movie_catalog ADD COLUMN value_search_url TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_imdb_id ON movie_catalog(imdb_id);
+
+
+-- UNIFIED CATALOG SUPPORT (for environments that have not created it yet).
+CREATE TABLE IF NOT EXISTS catalog_items (
+  catalog_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  item_kind TEXT NOT NULL CHECK (item_kind IN ('tool','supply','creation','other')),
+  source_key TEXT NOT NULL,
+  slug TEXT,
+  name TEXT NOT NULL,
+  brand TEXT,
+  category TEXT,
+  subcategory TEXT,
+  item_type TEXT,
+  short_description TEXT,
+  notes TEXT,
+  image_url TEXT,
+  r2_object_key TEXT,
+  amazon_url TEXT,
+  storage_location TEXT,
+  quantity_on_hand INTEGER NOT NULL DEFAULT 0,
+  reorder_point INTEGER NOT NULL DEFAULT 0,
+  visible_public INTEGER NOT NULL DEFAULT 1,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived','draft')),
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  source_record_json TEXT,
+  source_json_path TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  last_login_at TEXT
+  UNIQUE(item_kind, source_key)
 );
+CREATE INDEX IF NOT EXISTS idx_catalog_items_kind ON catalog_items(item_kind);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_slug ON catalog_items(slug);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_status_public ON catalog_items(status, visible_public);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_public_sort ON catalog_items(item_kind, status, visible_public, sort_order, name);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_grouping ON catalog_items(item_kind, category, subcategory, item_type);
 
-CREATE TABLE IF NOT EXISTS sessions (
-  session_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
-  session_token TEXT NOT NULL UNIQUE,
-  token TEXT NOT NULL UNIQUE,
+-- Phone-first product capture and review governance.
+ALTER TABLE products ADD COLUMN product_number INTEGER;
+ALTER TABLE products ADD COLUMN capture_reference TEXT;
+ALTER TABLE products ADD COLUMN product_category TEXT;
+ALTER TABLE products ADD COLUMN color_name TEXT;
+ALTER TABLE products ADD COLUMN color_names_json TEXT;
+ALTER TABLE products ADD COLUMN shipping_code TEXT;
+ALTER TABLE products ADD COLUMN review_status TEXT NOT NULL DEFAULT 'pending_review';
+ALTER TABLE products ADD COLUMN is_ready_for_storefront INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE products ADD COLUMN ready_check_notes TEXT;
+ALTER TABLE products ADD COLUMN capture_entry_mode TEXT NOT NULL DEFAULT 'full';
+ALTER TABLE products ADD COLUMN capture_created_by_user_id INTEGER;
+ALTER TABLE products ADD COLUMN capture_updated_by_user_id INTEGER;
+ALTER TABLE products ADD COLUMN capture_entry_started_at TEXT;
+ALTER TABLE products ADD COLUMN capture_last_saved_at TEXT;
+ALTER TABLE products ADD COLUMN merchandise_origin TEXT NOT NULL DEFAULT 'handmade';
+ALTER TABLE products ADD COLUMN sale_channel TEXT NOT NULL DEFAULT 'onsite';
+ALTER TABLE products ADD COLUMN external_listing_url TEXT;
+ALTER TABLE products ADD COLUMN external_listing_label TEXT;
+ALTER TABLE products ADD COLUMN condition_summary TEXT;
+ALTER TABLE products ADD COLUMN era_label TEXT;
+ALTER TABLE products ADD COLUMN sourcing_notes TEXT;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_product_number ON products(product_number);
+CREATE INDEX IF NOT EXISTS idx_products_capture_last_saved_at ON products(capture_last_saved_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_capture_updated_by ON products(capture_updated_by_user_id, capture_last_saved_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_origin_channel ON products(merchandise_origin, sale_channel, status, review_status);
+
+UPDATE products
+SET review_status = CASE
+  WHEN COALESCE(status, 'draft') = 'active' THEN 'published'
+  ELSE 'pending_review'
+END
+WHERE review_status IS NULL OR review_status = '';
+
+CREATE TABLE IF NOT EXISTS product_review_actions (
+  product_review_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  action_type TEXT NOT NULL CHECK (action_type IN ('approve','request_changes','publish','unpublish')),
+  previous_review_status TEXT,
+  new_review_status TEXT,
+  previous_status TEXT,
+  new_status TEXT,
+  actor_user_id INTEGER,
+  note TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  expires_at TEXT NOT NULL,
-  ip_address TEXT,
-  user_agent TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
+CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_actions(product_id, created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
-CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_session_token ON sessions(session_token);
-CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
-CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
-
-CREATE TABLE IF NOT EXISTS admin_logs (
-  log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  admin_user_id INTEGER,
-  action TEXT,
-  target_user_id INTEGER,
-  target_type TEXT,
-  meta_json TEXT,
+-- Product storytelling links used by storefront/admin detail views.
+CREATE TABLE IF NOT EXISTS product_resource_links (
+  product_resource_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  resource_kind TEXT NOT NULL CHECK (resource_kind IN ('tool','supply')),
+  source_key TEXT NOT NULL,
+  quantity_used INTEGER NOT NULL DEFAULT 1,
+  usage_notes TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (admin_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
-  FOREIGN KEY (target_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  consumption_mode TEXT NOT NULL DEFAULT 'per_unit' CHECK (consumption_mode IN ('per_unit','end_of_lot','story_only')),
+  lot_size_units INTEGER NOT NULL DEFAULT 1,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  UNIQUE(product_id, resource_kind, source_key)
 );
+CREATE INDEX IF NOT EXISTS idx_product_resource_links_product ON product_resource_links(product_id, sort_order);
 
-CREATE INDEX IF NOT EXISTS idx_admin_logs_created_at ON admin_logs(created_at);
-CREATE INDEX IF NOT EXISTS idx_admin_logs_admin_user_id ON admin_logs(admin_user_id);
+-- Durable local notification queue used by admin/payment flows.
+CREATE TABLE IF NOT EXISTS notification_outbox (
+  notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notification_kind TEXT NOT NULL,
+  channel TEXT NOT NULL DEFAULT 'email',
+  destination TEXT,
+  related_order_id INTEGER,
+  related_payment_id INTEGER,
+  payload_json TEXT,
+  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','retry','sent','failed','cancelled')),
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at TEXT,
+  next_attempt_at TEXT,
+  provider_message_id TEXT,
+  error_text TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);
 
-
+-- Recovery and audit hardening used by the admin/auth flows.
 CREATE TABLE IF NOT EXISTS auth_recovery_requests (
   auth_recovery_request_id INTEGER PRIMARY KEY AUTOINCREMENT,
   request_type TEXT NOT NULL CHECK (request_type IN ('forgot_password','forgot_email')),
@@ -76,6 +233,8 @@ CREATE TABLE IF NOT EXISTS auth_recovery_requests (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE auth_recovery_requests ADD COLUMN ip_address TEXT;
+ALTER TABLE auth_recovery_requests ADD COLUMN user_agent TEXT;
 CREATE INDEX IF NOT EXISTS idx_auth_recovery_requests_status_created_at ON auth_recovery_requests(status, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS admin_action_audit (
@@ -117,87 +276,7 @@ CREATE INDEX IF NOT EXISTS idx_runtime_incidents_scope ON runtime_incidents(inci
 CREATE INDEX IF NOT EXISTS idx_runtime_incidents_code_path ON runtime_incidents(incident_code, endpoint_path, created_at DESC);
 
 
-
-
-CREATE TABLE IF NOT EXISTS app_settings (
-  app_setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  setting_key TEXT NOT NULL UNIQUE,
-  setting_value TEXT,
-  is_public INTEGER NOT NULL DEFAULT 0,
-  updated_by_user_id INTEGER,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (updated_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
-);
-
-INSERT OR IGNORE INTO app_settings (setting_key, setting_value, is_public)
-VALUES ('site.catalog.product_number_start', '1000', 0);
-
-
-CREATE TABLE IF NOT EXISTS movie_catalog (
-  movie_catalog_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  upc TEXT NOT NULL UNIQUE,
-  slug TEXT,
-  title TEXT,
-  original_title TEXT,
-  sort_title TEXT,
-  summary TEXT,
-  release_year INTEGER,
-  media_format TEXT,
-  genre TEXT,
-  director_names TEXT,
-  actor_names TEXT,
-  front_image_url TEXT,
-  back_image_url TEXT,
-  runtime_minutes INTEGER,
-  studio_name TEXT,
-  trailer_url TEXT,
-  imdb_id TEXT,
-  alternate_identifier TEXT,
-  metadata_status TEXT NOT NULL DEFAULT 'pending',
-  metadata_source TEXT,
-  estimated_value_low_cents INTEGER,
-  estimated_value_high_cents INTEGER,
-  estimated_value_currency TEXT,
-  rarity_notes TEXT,
-  collection_notes TEXT,
-  value_search_url TEXT,
-  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','draft','archived')),
-  featured_rank INTEGER,
-  source_record_json TEXT,
-  source_json_path TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title);
-CREATE INDEX IF NOT EXISTS idx_movie_catalog_year ON movie_catalog(release_year);
-CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status);
-CREATE INDEX IF NOT EXISTS idx_movie_catalog_imdb_id ON movie_catalog(imdb_id);
-
-
--- Current pass note: the public movies page uses front_image_url/back_image_url from data/movies/movie_catalog_enriched.v2.json and can derive a trailer search URL at runtime when trailer_url is blank.
-
-
-CREATE TABLE IF NOT EXISTS notification_outbox (
-  notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  notification_kind TEXT NOT NULL,
-  channel TEXT NOT NULL DEFAULT 'email',
-  destination TEXT,
-  related_order_id INTEGER,
-  related_payment_id INTEGER,
-  payload_json TEXT,
-  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','retry','sent','failed','cancelled')),
-  attempt_count INTEGER NOT NULL DEFAULT 0,
-  last_attempt_at TEXT,
-  next_attempt_at TEXT,
-  provider_message_id TEXT,
-  error_text TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
-CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);
-
-
+-- Supplier reorder draft records now used by the inventory workflow.
 CREATE TABLE IF NOT EXISTS supplier_purchase_orders (
   supplier_purchase_order_id INTEGER PRIMARY KEY AUTOINCREMENT,
   supplier_name TEXT NOT NULL,
@@ -214,21 +293,23 @@ CREATE TABLE IF NOT EXISTS supplier_purchase_orders (
 );
 CREATE INDEX IF NOT EXISTS idx_supplier_purchase_orders_status ON supplier_purchase_orders(status, created_at DESC);
 
-CREATE TABLE IF NOT EXISTS product_review_actions (
-  product_review_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_id INTEGER NOT NULL,
-  action_type TEXT NOT NULL CHECK (action_type IN ('approve','request_changes','publish','unpublish')),
-  previous_review_status TEXT,
-  new_review_status TEXT,
-  previous_status TEXT,
-  new_status TEXT,
-  actor_user_id INTEGER,
-  note TEXT,
+CREATE TABLE IF NOT EXISTS supplier_purchase_order_items (
+  supplier_purchase_order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  supplier_purchase_order_id INTEGER NOT NULL,
+  site_item_inventory_id INTEGER,
+  item_name TEXT NOT NULL,
+  source_type TEXT,
+  external_key TEXT,
+  quantity_ordered INTEGER NOT NULL DEFAULT 1,
+  quantity_received INTEGER NOT NULL DEFAULT 0,
+  incoming_applied_at TEXT,
+  received_at TEXT,
+  unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  line_total_cents INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+  FOREIGN KEY (supplier_purchase_order_id) REFERENCES supplier_purchase_orders(supplier_purchase_order_id) ON DELETE CASCADE
 );
-CREATE INDEX IF NOT EXISTS idx_product_review_actions_product ON product_review_actions(product_id, created_at DESC);
-
+CREATE INDEX IF NOT EXISTS idx_supplier_purchase_order_items_po ON supplier_purchase_order_items(supplier_purchase_order_id);
 
 
 -- Pass 16: departmental accounting + membership policy foundation
@@ -259,188 +340,16 @@ CREATE TABLE IF NOT EXISTS general_ledger_accounts (
   gifi_section TEXT,
   gifi_review_state TEXT NOT NULL DEFAULT 'draft',
   gifi_review_note TEXT,
-  gifi_reviewed_by_user_id INTEGER,
-  gifi_reviewed_at TEXT,
   tax_deductibility_percent INTEGER NOT NULL DEFAULT 100,
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS accounting_vendors (
-  accounting_vendor_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  vendor_name TEXT NOT NULL UNIQUE,
-  default_ledger_code TEXT,
-  default_tax_percent REAL NOT NULL DEFAULT 0,
-  payment_terms TEXT,
-  contact_name TEXT,
-  contact_email TEXT,
-  contact_phone TEXT,
-  website_url TEXT,
-  notes TEXT,
-  is_active INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_vendors_active_name ON accounting_vendors(is_active, vendor_name);
 
-CREATE TABLE IF NOT EXISTS accounting_expenses (
-  expense_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  expense_date TEXT,
-  vendor_id INTEGER,
-  vendor_name TEXT,
-  amount REAL NOT NULL DEFAULT 0,
-  tax_amount REAL NOT NULL DEFAULT 0,
-  ledger_code TEXT,
-  ledger_name TEXT,
-  recurring_expense_rule_id INTEGER,
-  source_mode TEXT,
-  reference_number TEXT,
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_expenses_vendor ON accounting_expenses(vendor_id, vendor_name, expense_date DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_expenses_recurring ON accounting_expenses(recurring_expense_rule_id, expense_date DESC);
-
-CREATE TABLE IF NOT EXISTS accounting_recurring_expense_rules (
-  recurring_expense_rule_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  vendor_id INTEGER,
-  vendor_name TEXT,
-  rule_name TEXT NOT NULL,
-  ledger_code TEXT,
-  ledger_name TEXT,
-  amount REAL NOT NULL DEFAULT 0,
-  tax_amount REAL NOT NULL DEFAULT 0,
-  frequency TEXT NOT NULL DEFAULT 'monthly',
-  due_day INTEGER,
-  next_due_date TEXT,
-  auto_create_mode TEXT NOT NULL DEFAULT 'manual',
-  notes TEXT,
-  is_active INTEGER NOT NULL DEFAULT 1,
-  last_generated_at TEXT,
-  last_generated_expense_id INTEGER,
-  created_by_user_id INTEGER,
-  updated_by_user_id INTEGER,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_recurring_expense_rules_due ON accounting_recurring_expense_rules(is_active, next_due_date, frequency);
-
-CREATE TABLE IF NOT EXISTS accounting_reconciliation_reviews (
-  accounting_reconciliation_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  reconciliation_type TEXT NOT NULL,
-  period_month TEXT NOT NULL,
-  scope_key TEXT NOT NULL DEFAULT 'all',
-  review_status TEXT NOT NULL DEFAULT 'draft',
-  note TEXT,
-  reference_amount_cents INTEGER NOT NULL DEFAULT 0,
-  compared_amount_cents INTEGER NOT NULL DEFAULT 0,
-  difference_cents INTEGER NOT NULL DEFAULT 0,
-  created_by_user_id INTEGER,
-  updated_by_user_id INTEGER,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(reconciliation_type, period_month, scope_key)
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_reviews_type_period ON accounting_reconciliation_reviews(reconciliation_type, period_month DESC, review_status);
-
-CREATE TABLE IF NOT EXISTS accounting_writeoffs (
-  writeoff_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  writeoff_date TEXT,
-  item_name TEXT NOT NULL,
-  amount REAL NOT NULL DEFAULT 0,
-  reason_code TEXT NOT NULL DEFAULT 'other',
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS product_costs (
-  product_cost_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_number TEXT NOT NULL,
-  cost_per_unit REAL NOT NULL DEFAULT 0,
-  effective_date TEXT,
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS accounting_overhead_allocations (
-  allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  period_month TEXT NOT NULL,
-  ledger_code TEXT NOT NULL DEFAULT '',
-  ledger_name TEXT NOT NULL DEFAULT '',
-  allocation_basis TEXT NOT NULL DEFAULT 'manual',
-  amount_cents INTEGER NOT NULL DEFAULT 0,
-  notes TEXT NOT NULL DEFAULT '',
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(period_month, ledger_code)
-);
-
--- Current pass: indexes to support phone dashboard, accounting overview, and item-costing reads.
-
-CREATE INDEX IF NOT EXISTS idx_accounting_expenses_date ON accounting_expenses(expense_date, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_writeoffs_date ON accounting_writeoffs(writeoff_date, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_product_costs_product_number_effective ON product_costs(product_number, effective_date DESC, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_overhead_allocations_month ON accounting_overhead_allocations(period_month, ledger_code);
--- Current pass note: runtime_incidents remains the server-side fallback/error log table, and `/api/admin/runtime-incidents` now reads from it for admin review while client pages keep last-good snapshot fallbacks in the browser. This pass also adds order/payment-focused partial fallbacks plus a code/path index so admin incident review can stay fast as more endpoint warnings are recorded.
-
-
-
-CREATE TABLE IF NOT EXISTS accounting_overhead_product_allocations (
-  overhead_product_allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  period_month TEXT NOT NULL,
-  ledger_code TEXT NOT NULL DEFAULT '',
-  product_id INTEGER NOT NULL,
-  amount_cents INTEGER NOT NULL DEFAULT 0,
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(period_month, ledger_code, product_id)
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_month ON accounting_overhead_product_allocations(period_month, ledger_code, product_id);
-CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_product ON accounting_overhead_product_allocations(product_id, period_month DESC);
-
-CREATE TABLE IF NOT EXISTS accounting_journal_entries (
-  journal_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  period_month TEXT NOT NULL,
-  entry_date TEXT NOT NULL,
-  source_type TEXT NOT NULL,
-  source_key TEXT NOT NULL,
-  reference_code TEXT,
-  description TEXT,
-  status TEXT NOT NULL DEFAULT 'draft',
-  total_debit_cents INTEGER NOT NULL DEFAULT 0,
-  total_credit_cents INTEGER NOT NULL DEFAULT 0,
-  imbalance_cents INTEGER NOT NULL DEFAULT 0,
-  notes TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (period_month, source_type, source_key)
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_period ON accounting_journal_entries(period_month, entry_date DESC, journal_entry_id DESC);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_key, period_month);
-
-CREATE TABLE IF NOT EXISTS accounting_journal_lines (
-  journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  journal_entry_id INTEGER NOT NULL,
-  line_number INTEGER NOT NULL,
-  ledger_code TEXT,
-  ledger_name TEXT,
-  line_description TEXT,
-  debit_cents INTEGER NOT NULL DEFAULT 0,
-  credit_cents INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (journal_entry_id, line_number),
-  FOREIGN KEY (journal_entry_id) REFERENCES accounting_journal_entries(journal_entry_id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(journal_entry_id, line_number ASC);
-CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_ledger ON accounting_journal_lines(ledger_code, created_at DESC);
-
+-- GIFI review columns for older databases.
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_state TEXT NOT NULL DEFAULT 'draft';
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_note TEXT;
 
 CREATE TABLE IF NOT EXISTS accounting_gifi_review_notes (
   accounting_gifi_review_note_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -535,14 +444,26 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- Approval-required storefront fields are now surfaced in the mobile capture UI and approval is blocked until readiness checks pass.
 
 
+ALTER TABLE product_resource_links ADD COLUMN consumption_mode TEXT NOT NULL DEFAULT 'per_unit';
+ALTER TABLE product_resource_links ADD COLUMN lot_size_units INTEGER NOT NULL DEFAULT 1;
+
+-- Current pass note: dropdown master-data now uses app_settings, and resource links support per-product, end-of-lot, or story-only inventory usage.
+
+
 -- Current Pass Note — 2026-04-15
 -- Added app_settings-backed dropdown master-data keys for product categories, colours, and shipping codes.
 -- Product resource links now support per-unit, end-of-lot, and story-only inventory usage modes.
 -- End-of-lot mode is intended for supplies such as wax/resin/clay where one lot may cover many finished products before inventory should be reduced.
 
+ALTER TABLE site_item_inventory ADD COLUMN usage_unit_label TEXT NOT NULL DEFAULT 'unit';
+ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT NULL DEFAULT 1;
+
 -- Current Pass Note — 2026-04-16
--- Admin dropdown master-data is now wired through app_settings and tax_classes in application code.
--- Site inventory usage-unit support was added in application/runtime migration logic for cups, wicks, grams, spools, and end-of-lot costing.
+-- Wired the catalog option manager into admin pages and added usage-unit / end-of-lot costing support for site inventory and product resource links.
+
+-- Current Pass Note — 2026-04-16
+-- Inventory now distinguishes stock unit labels from usage-unit labels so batch materials are easier to understand in costing and planning.
+ALTER TABLE site_item_inventory ADD COLUMN stock_unit_label TEXT NOT NULL DEFAULT 'unit';
 
 -- Current Pass Update — 2026-04-17
 -- This pass assumes/uses the following current-direction features in code:
@@ -552,8 +473,38 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- 4) product review / testimonial submission and approved review display
 -- 5) pricing suggestion load/apply actions in admin
 -- 6) continued schema-compatibility hardening for older D1 tables
+
+-- Gift card purchaser versus recipient tracking for engagement workflows.
+CREATE TABLE IF NOT EXISTS gift_cards (
+  gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code TEXT NOT NULL UNIQUE,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  initial_amount_cents INTEGER NOT NULL DEFAULT 0,
+  remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
+  issued_to_email TEXT,
+  issued_to_name TEXT,
+  note TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  expires_at TEXT,
+  last_redeemed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE gift_cards ADD COLUMN purchaser_email TEXT;
+ALTER TABLE gift_cards ADD COLUMN purchaser_name TEXT;
+ALTER TABLE gift_cards ADD COLUMN recipient_email TEXT;
+ALTER TABLE gift_cards ADD COLUMN recipient_name TEXT;
+ALTER TABLE gift_cards ADD COLUMN recipient_note TEXT;
+ALTER TABLE gift_cards ADD COLUMN purchaser_user_id INTEGER;
 -- Pass 29 - footer socials, engagement depth, and editor price write-back
 -- Notes: live code now expects footer social fallback behavior, deeper engagement admin actions, and editor-side price preset write-back.
+
+
+-- Pass 30 upgrade notes
+ALTER TABLE gift_cards ADD COLUMN order_id INTEGER;
+ALTER TABLE gift_cards ADD COLUMN purchase_source TEXT;
+-- Runtime code also keeps gift_cards purchaser/recipient fields in sync and uses pending_activation for storefront-issued cards.
 
 -- Pass 30 schema note: storefront gift-card purchases may use gift_cards.order_id, purchase_source, and pending_activation status; publish scoring now expects image-count-aware readiness.
 
@@ -573,38 +524,188 @@ CREATE INDEX IF NOT EXISTS idx_admin_pending_actions_scope_status ON admin_pendi
 -- Expanded public trust/testimonial placement and support CTA coverage.
 -- Pushed pricing toward a fuller operating console with receiving/packaging/shipping assumptions and save-time warnings.
 
--- Current Pass Update
--- Added/expected usage this pass:
--- 1) Member/storefront order-history views can read gift_cards by order_id.
--- 2) Member/storefront order-history views can read gift_card_delivery_audit by gift_card_id.
--- 3) product_image_annotations should continue to support width/height/orientation/crop/first_image_score.
--- 4) No destructive schema changes were introduced in this pass; this is a documentation sync note.
 
 
--- Current Pass Update
--- Merchandising-score image guidance now expects/supports the following where available:
--- 1) media_assets.width_px, height_px, image_orientation, background_consistency_score, subject_fill_score, sharpness_score, brightness_score, contrast_score, angle_group, shot_style, merchandising_score
--- 2) product_image_annotations keeps the prior width/height/orientation/crop/first_image_score fields and now also supports matching merchandising-score fields
--- 3) public upload/admin selection guidance uses these fields to warn earlier about soft, dark, low-fill, duplicate-angle, or portrait lead images
+CREATE TABLE IF NOT EXISTS gift_card_delivery_audit (
+  gift_card_delivery_audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  gift_card_id INTEGER,
+  audience TEXT NOT NULL DEFAULT 'recipient',
+  notification_kind TEXT NOT NULL,
+  destination TEXT,
+  notification_outbox_id INTEGER,
+  notification_dispatch_log_id INTEGER,
+  actor_user_id INTEGER,
+  action_type TEXT NOT NULL DEFAULT 'queued',
+  details_json TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE product_image_annotations ADD COLUMN crop_x REAL;
+ALTER TABLE product_image_annotations ADD COLUMN crop_y REAL;
+ALTER TABLE product_image_annotations ADD COLUMN crop_width REAL;
+ALTER TABLE product_image_annotations ADD COLUMN crop_height REAL;
+ALTER TABLE product_image_annotations ADD COLUMN first_image_score INTEGER;
+
+-- Current pass concrete schema note
+-- Runtime code will safely create/use gift_card_delivery_audit when needed.
+-- Runtime code will also safely add/expect these product_image_annotations fields when needed:
+-- crop_x, crop_y, crop_width, crop_height, first_image_score, image_orientation, width_px, height_px
+-- Keep database upgrade execution cautious on older live databases where some columns may already exist.
 
 
--- Current pass note: product image review now also supports merchandising_override_reason / merchandising_override_note and product_media_score_history trend snapshots for admin drift review.
+
+-- Pass 34 update
+-- Media upload and product image annotations now track a fuller merchandising score model.
+-- This supports cleaner lead-image guidance, upload-time analysis, asset-library selection hints,
+-- and publish/readiness scoring based on more than image count alone.
+
+ALTER TABLE media_assets ADD COLUMN width_px INTEGER;
+ALTER TABLE media_assets ADD COLUMN height_px INTEGER;
+ALTER TABLE media_assets ADD COLUMN image_orientation TEXT;
+ALTER TABLE media_assets ADD COLUMN background_consistency_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN subject_fill_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN sharpness_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN brightness_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN contrast_score INTEGER;
+ALTER TABLE media_assets ADD COLUMN angle_group TEXT;
+ALTER TABLE media_assets ADD COLUMN shot_style TEXT;
+ALTER TABLE media_assets ADD COLUMN merchandising_score INTEGER;
+
+ALTER TABLE product_image_annotations ADD COLUMN background_consistency_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN subject_fill_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN sharpness_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN brightness_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN contrast_score INTEGER;
+ALTER TABLE product_image_annotations ADD COLUMN angle_group TEXT;
+ALTER TABLE product_image_annotations ADD COLUMN shot_style TEXT;
+ALTER TABLE product_image_annotations ADD COLUMN merchandising_score INTEGER;
+
+-- Current pass concrete schema note
+-- Runtime code will safely add/use these media scoring fields when they are absent on older live databases.
+-- Preferred live shape now includes:
+-- media_assets.width_px, media_assets.height_px, media_assets.image_orientation,
+-- media_assets.background_consistency_score, media_assets.subject_fill_score, media_assets.sharpness_score,
+-- media_assets.brightness_score, media_assets.contrast_score, media_assets.angle_group,
+-- media_assets.shot_style, media_assets.merchandising_score
+-- plus matching product_image_annotations scoring fields for saved gallery rows.
+
+ALTER TABLE product_image_annotations ADD COLUMN merchandising_override_reason TEXT;
+ALTER TABLE product_image_annotations ADD COLUMN merchandising_override_note TEXT;
+
+CREATE TABLE IF NOT EXISTS product_media_score_history (
+  product_media_score_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  actor_user_id INTEGER,
+  image_count INTEGER NOT NULL DEFAULT 0,
+  lead_image_score INTEGER,
+  gallery_merchandising_score INTEGER,
+  weak_image_count INTEGER NOT NULL DEFAULT 0,
+  weak_unapproved_image_count INTEGER NOT NULL DEFAULT 0,
+  overridden_image_count INTEGER NOT NULL DEFAULT 0,
+  override_reasons_json TEXT,
+  source TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_product_media_score_history_product_id_created_at ON product_media_score_history(product_id, created_at DESC);
 
 
 CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_category_sort ON general_ledger_accounts(category, sort_order, code);
 CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_gifi ON general_ledger_accounts(gifi_section, gifi_code, code);
+
+
+-- Current pass accounting schema alignment: general ledger GIFI staging fields.
+ALTER TABLE general_ledger_accounts ADD COLUMN parent_group TEXT;
+ALTER TABLE general_ledger_accounts ADD COLUMN normal_balance TEXT NOT NULL DEFAULT 'debit';
+ALTER TABLE general_ledger_accounts ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_code TEXT;
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_label TEXT;
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_section TEXT;
+ALTER TABLE general_ledger_accounts ADD COLUMN tax_deductibility_percent INTEGER NOT NULL DEFAULT 100;
+CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_category_sort ON general_ledger_accounts(category, sort_order, code);
+CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_gifi ON general_ledger_accounts(gifi_section, gifi_code, code);
+
+-- Journal table shape in runtime code uses journal_entry_id/journal_line_id and source_key/description/status/imbalance fields.
+-- Older databases with the previous accounting_journal_* shape should be migrated with a table rebuild during a controlled maintenance window.
+
+-- Current pass note: accounting now adds vendor defaults, recurring expense rules, reconciliation reviews, richer expense linkage, and a year-end close bundle foundation.
+
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_by_user_id INTEGER;
+ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_at TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_review_state ON general_ledger_accounts(gifi_review_state, is_active, code);
 
+CREATE TABLE IF NOT EXISTS accounting_vendors (
+  accounting_vendor_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  vendor_name TEXT NOT NULL UNIQUE,
+  default_ledger_code TEXT,
+  default_tax_percent REAL NOT NULL DEFAULT 0,
+  payment_terms TEXT,
+  contact_name TEXT,
+  contact_email TEXT,
+  contact_phone TEXT,
+  website_url TEXT,
+  notes TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_vendors_active_name ON accounting_vendors(is_active, vendor_name);
 
--- Pass update: accounting attachments and deeper reconciliation metadata
+ALTER TABLE accounting_expenses ADD COLUMN vendor_id INTEGER;
+ALTER TABLE accounting_expenses ADD COLUMN recurring_expense_rule_id INTEGER;
+ALTER TABLE accounting_expenses ADD COLUMN source_mode TEXT;
+ALTER TABLE accounting_expenses ADD COLUMN reference_number TEXT;
+CREATE INDEX IF NOT EXISTS idx_accounting_expenses_vendor ON accounting_expenses(vendor_id, vendor_name, expense_date DESC);
+CREATE INDEX IF NOT EXISTS idx_accounting_expenses_recurring ON accounting_expenses(recurring_expense_rule_id, expense_date DESC);
+
+CREATE TABLE IF NOT EXISTS accounting_recurring_expense_rules (
+  recurring_expense_rule_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  vendor_id INTEGER,
+  vendor_name TEXT,
+  rule_name TEXT NOT NULL,
+  ledger_code TEXT,
+  ledger_name TEXT,
+  amount REAL NOT NULL DEFAULT 0,
+  tax_amount REAL NOT NULL DEFAULT 0,
+  frequency TEXT NOT NULL DEFAULT 'monthly',
+  due_day INTEGER,
+  next_due_date TEXT,
+  auto_create_mode TEXT NOT NULL DEFAULT 'manual',
+  notes TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  last_generated_at TEXT,
+  last_generated_expense_id INTEGER,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_recurring_expense_rules_due ON accounting_recurring_expense_rules(is_active, next_due_date, frequency);
+
+CREATE TABLE IF NOT EXISTS accounting_reconciliation_reviews (
+  accounting_reconciliation_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  reconciliation_type TEXT NOT NULL,
+  period_month TEXT NOT NULL,
+  scope_key TEXT NOT NULL DEFAULT 'all',
+  review_status TEXT NOT NULL DEFAULT 'draft',
+  note TEXT,
+  reference_amount_cents INTEGER NOT NULL DEFAULT 0,
+  compared_amount_cents INTEGER NOT NULL DEFAULT 0,
+  difference_cents INTEGER NOT NULL DEFAULT 0,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(reconciliation_type, period_month, scope_key)
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_reviews_type_period ON accounting_reconciliation_reviews(reconciliation_type, period_month DESC, review_status);
+
+
+-- Current pass: accounting attachments and reconciliation detail metadata
 CREATE TABLE IF NOT EXISTS accounting_attachments (
   accounting_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT,
   attachment_kind TEXT NOT NULL DEFAULT 'other',
-  attachment_status TEXT NOT NULL DEFAULT 'uploaded',
-  attachment_scope TEXT NOT NULL DEFAULT 'other',
-  document_date TEXT,
-  scope_key TEXT,
-  provider_scope TEXT,
   storage_provider TEXT NOT NULL DEFAULT 'r2',
   bucket_name TEXT,
   object_key TEXT NOT NULL UNIQUE,
@@ -635,15 +736,18 @@ CREATE TABLE IF NOT EXISTS accounting_attachments (
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_expense ON accounting_attachments(expense_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_vendor ON accounting_attachments(vendor_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_period ON accounting_attachments(period_month, tax_year, reconciliation_type, attachment_kind);
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_reference TEXT;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN difference_reason TEXT;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN detail_json TEXT;
+ALTER TABLE accounting_reconciliation_reviews ADD COLUMN attachment_count INTEGER NOT NULL DEFAULT 0;
+
+
+-- Accounting handoff pass: richer accounting attachment metadata and reconciliation review detail.
 ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded';
 ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT;
 ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT;
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_scope ON accounting_attachments(reconciliation_type, period_month, scope_key, attachment_kind);
 
-ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_reference TEXT;
-ALTER TABLE accounting_reconciliation_reviews ADD COLUMN difference_reason TEXT;
-ALTER TABLE accounting_reconciliation_reviews ADD COLUMN detail_json TEXT;
-ALTER TABLE accounting_reconciliation_reviews ADD COLUMN attachment_count INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_amount_cents INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN book_amount_cents INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN tolerance_cents INTEGER NOT NULL DEFAULT 0;
@@ -665,7 +769,6 @@ ALTER TABLE accounting_attachments ADD COLUMN statement_period_end TEXT;
 ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT;
 
 
--- Current pass update: customer engagement automation timing rules
 
 
 -- Current pass update: statement imports, reconciliation exceptions, and fixed-asset groundwork
@@ -762,6 +865,7 @@ CREATE TABLE IF NOT EXISTS accounting_fixed_assets (
 );
 CREATE INDEX IF NOT EXISTS idx_accounting_fixed_assets_category ON accounting_fixed_assets(asset_category, cca_class, acquisition_date DESC);
 
+-- Current pass update: customer engagement automation timing rules
 CREATE TABLE IF NOT EXISTS notification_automation_settings (
   notification_automation_setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
   notification_kind TEXT NOT NULL UNIQUE,
@@ -793,22 +897,44 @@ CREATE TABLE IF NOT EXISTS community_events (
   is_featured INTEGER NOT NULL DEFAULT 0,
   is_active INTEGER NOT NULL DEFAULT 1,
   sort_order INTEGER NOT NULL DEFAULT 0,
-  recurrence_rule TEXT NOT NULL DEFAULT 'none',
-  recurrence_interval INTEGER NOT NULL DEFAULT 1,
-  recurrence_count INTEGER,
-  recurrence_until TEXT,
-  recurrence_label TEXT,
-  image_url TEXT,
-  image_alt TEXT,
-  application_mode TEXT NOT NULL DEFAULT 'closed',
-  application_url TEXT,
-  vendor_capacity INTEGER NOT NULL DEFAULT 0,
-  vendor_note TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_community_events_active_start ON community_events(is_active, starts_at, sort_order);
 
+CREATE TABLE IF NOT EXISTS pickup_profiles (
+  pickup_profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  label TEXT NOT NULL,
+  pickup_mode TEXT NOT NULL DEFAULT 'appointment',
+  city TEXT,
+  region_label TEXT,
+  appointment_only INTEGER NOT NULL DEFAULT 1,
+  lead_time_hours INTEGER NOT NULL DEFAULT 24,
+  public_note TEXT,
+  availability_note TEXT,
+  map_url TEXT,
+  contact_hint TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_pickup_profiles_active_sort ON pickup_profiles(is_active, sort_order, label);
+
+
+
+-- Current pass note: community content now includes recurring schedules, vendor-application capture, and event-image support through the existing media upload flow.
+ALTER TABLE community_events ADD COLUMN recurrence_rule TEXT NOT NULL DEFAULT 'none';
+ALTER TABLE community_events ADD COLUMN recurrence_interval INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE community_events ADD COLUMN recurrence_count INTEGER;
+ALTER TABLE community_events ADD COLUMN recurrence_until TEXT;
+ALTER TABLE community_events ADD COLUMN recurrence_label TEXT;
+ALTER TABLE community_events ADD COLUMN image_url TEXT;
+ALTER TABLE community_events ADD COLUMN image_alt TEXT;
+ALTER TABLE community_events ADD COLUMN application_mode TEXT NOT NULL DEFAULT 'closed';
+ALTER TABLE community_events ADD COLUMN application_url TEXT;
+ALTER TABLE community_events ADD COLUMN vendor_capacity INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE community_events ADD COLUMN vendor_note TEXT;
 CREATE TABLE IF NOT EXISTS event_vendor_applications (
   event_vendor_application_id INTEGER PRIMARY KEY AUTOINCREMENT,
   community_event_id INTEGER,
@@ -830,25 +956,6 @@ CREATE TABLE IF NOT EXISTS event_vendor_applications (
   FOREIGN KEY (community_event_id) REFERENCES community_events(community_event_id) ON DELETE SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_event_vendor_applications_event_status ON event_vendor_applications(community_event_id, application_status, created_at DESC);
-
-CREATE TABLE IF NOT EXISTS pickup_profiles (
-  pickup_profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  label TEXT NOT NULL,
-  pickup_mode TEXT NOT NULL DEFAULT 'appointment',
-  city TEXT,
-  region_label TEXT,
-  appointment_only INTEGER NOT NULL DEFAULT 1,
-  lead_time_hours INTEGER NOT NULL DEFAULT 24,
-  public_note TEXT,
-  availability_note TEXT,
-  map_url TEXT,
-  contact_hint TEXT,
-  is_active INTEGER NOT NULL DEFAULT 1,
-  sort_order INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_pickup_profiles_active_sort ON pickup_profiles(is_active, sort_order, label);
 
 -- 2026-05-09 admin products resource-selector follow-up
 -- No schema change was required for this pass.

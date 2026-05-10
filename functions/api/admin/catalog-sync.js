@@ -445,14 +445,14 @@ export async function onRequestPost(context) {
     const collections = normalizeCollections(body);
     const definitions = {
       tools: {
-        fetch_paths: ['/data/toolshed/toolshed_items_master.json', '/data/data/toolshed/toolshed_items_master.json'],
+        fetch_paths: ['/data/toolshed/toolshed_items_master.json'],
         target_table: 'catalog_items',
         item_kind: 'tool',
         mapper: mapToolRow,
         upsert: upsertCatalogRows,
       },
       supplies: {
-        fetch_paths: ['/data/supplies/supplies_items_master.json', '/data/data/supplies/supplies_items_master.json'],
+        fetch_paths: ['/data/supplies/supplies_items_master.json'],
         target_table: 'catalog_items',
         item_kind: 'supply',
         mapper: mapSupplyRow,
@@ -466,7 +466,7 @@ export async function onRequestPost(context) {
         upsert: upsertMovieRows,
       },
       featured: {
-        fetch_paths: ['/data/site/featured-items.json', '/data/data/site/featured-items.json'],
+        fetch_paths: ['/data/site/featured-items.json'],
         target_table: 'catalog_items',
         item_kind: 'creation',
         mapper: mapCreationRow,
