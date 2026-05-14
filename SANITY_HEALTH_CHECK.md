@@ -24,3 +24,29 @@ Current sync: 2026-05-10 cleanup pass.
 - Home, Shop, Gallery, Creations, Tools, Supplies, Movies, Members, Cart, Login, Register.
 - Admin dashboard, Accounting, Catalog, Orders, Members, Analytics, Operations, Movies, Mobile admin.
 - Statement import, reconciliation exceptions, journal entry review, product creation, product image review, and member login.
+
+
+## Amazon Import Sanity Check — 2026-05-11
+
+Checked source files:
+- Amazon CSV rows: 1352
+- Tools inventory rows: 399
+- Supplies inventory rows: 498
+
+Match results:
+- High: 263
+- Medium: 208
+- Review: 194
+- Unmatched: 687
+
+Output package:
+- `PRIVATE IMPORT PACKAGE: amazon_inventory_import_package.zip`
+- `database_amazon_purchase_import_staging.sql`
+- `database_upgrade_current_pass.sql`
+
+No production inventory data was overwritten.
+
+
+## Private Import Data Safety Note — 2026-05-11
+
+Amazon transaction CSVs and review spreadsheets are **not** stored inside the deployable website tree because `/data/` assets may become publicly reachable after Cloudflare Pages deployment. Keep the generated Amazon import package private and load approved rows into the database through an admin/import workflow instead.

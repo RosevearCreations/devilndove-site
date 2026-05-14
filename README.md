@@ -154,3 +154,18 @@ This repository powers the Devil n Dove public storefront, admin app, member are
 - `supplies/supplies_items_master.csv`
 - `supplies/supplies_items_master.json`
 - `supplies/supplies_metadata.zip`
+
+
+## Amazon Purchase Import Package — Added 2026-05-11
+
+This build includes a staged Amazon purchase-history matching package for Toolshed and Supplies inventory.
+
+Location:
+`PRIVATE IMPORT PACKAGE: amazon_inventory_import_package.zip`
+
+It includes review CSVs, summary totals, and a staging SQL file. The import package is intentionally review-first and does not automatically overwrite inventory.
+
+
+## Private Import Data Safety Note — 2026-05-11
+
+Amazon transaction CSVs and review spreadsheets are **not** stored inside the deployable website tree because `/data/` assets may become publicly reachable after Cloudflare Pages deployment. Keep the generated Amazon import package private and load approved rows into the database through an admin/import workflow instead.

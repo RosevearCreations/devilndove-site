@@ -21,3 +21,24 @@ Start with the D1 migration ledger/admin runner and DB sanity dashboard, then mo
 
 ## Cleanup reminder
 Archived docs are history only. Active docs are now intentionally shorter and clearer.
+
+
+## Latest Amazon Import Status — 2026-05-11
+
+A review-first Amazon purchase import package has been generated from the uploaded Amazon Business CSV.
+
+Important files:
+- `README_AMAZON_INVENTORY_IMPORT.md` inside the private import package
+- `amazon_inventory_purchase_matches_all.csv` inside the private import package
+- `amazon_inventory_high_confidence_stage_candidates.csv` inside the private import package
+- `amazon_inventory_purchase_summary_by_item.csv` inside the private import package
+- `database_amazon_purchase_import_staging.sql`
+
+Current rule:
+- Stage and review first.
+- Approve rows before applying them to live inventory or accounting.
+
+
+## Private Import Data Safety Note — 2026-05-11
+
+Amazon transaction CSVs and review spreadsheets are **not** stored inside the deployable website tree because `/data/` assets may become publicly reachable after Cloudflare Pages deployment. Keep the generated Amazon import package private and load approved rows into the database through an admin/import workflow instead.

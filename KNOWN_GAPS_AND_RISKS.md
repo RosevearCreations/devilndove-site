@@ -26,3 +26,17 @@ Current sync: 2026-05-10 cleanup pass.
 - Prefer D1 for authoritative operational data.
 - Keep JSON only as fallback, seed, export, or static catalog bridge until migrated.
 - Do not promise accountant/tax filing readiness until reconciliation, close, tax review, and export validation are complete.
+
+
+## Amazon Purchase Import Risks — Added 2026-05-11
+
+- Amazon order history contains mixed household/business purchases, so rows must not be auto-posted.
+- Fuzzy matching can produce plausible but wrong results when item names are generic.
+- High-confidence rows are still marked for review before production database updates.
+- The import package intentionally excludes account user email, receiver email, and seller address.
+- Production update logic still needs an admin review workflow and approval gate.
+
+
+## Private Import Data Safety Note — 2026-05-11
+
+Amazon transaction CSVs and review spreadsheets are **not** stored inside the deployable website tree because `/data/` assets may become publicly reachable after Cloudflare Pages deployment. Keep the generated Amazon import package private and load approved rows into the database through an admin/import workflow instead.

@@ -26,3 +26,24 @@ JSON should remain only for:
 
 ## Current cleanup note
 No intentional table-shape change was added in this pass. The schema files were touched only to note that the previous current-pass SQL was archived and the active upgrade file was reset.
+
+
+## Amazon Purchase Import Staging — 2026-05-11
+
+Added a safe staging design for Amazon purchase history imports.
+
+Files added:
+- `database_amazon_purchase_import_staging.sql`
+- Private CSV review/import files are supplied separately and must not be deployed publicly.
+
+Main staging table:
+- `amazon_purchase_import_staging`
+
+Purpose:
+- Stage Amazon purchase rows after review.
+- Link candidate rows to existing `tool` or `supply` inventory records by `inventory_type` and `inventory_key`.
+- Preserve accounting values in cents.
+- Avoid storing account user email, receiver email, or seller address.
+
+Import rule:
+- Do not update production inventory/accounting tables until `review_decision = 'approved'`.

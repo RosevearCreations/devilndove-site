@@ -36,3 +36,25 @@ Current sync: 2026-05-10 cleanup and next-step planning pass.
 
 ## Working order recommendation
 Start with steps 1, 2, 4, 6, 8, and 19 first. Those make the backend safer and easier to trust. Then move into period close, tax review, accountant export, and catalog/media D1 migration.
+
+
+## Amazon Purchase Import Workflow — Added 2026-05-11
+
+A review-first Amazon purchase import package was added under:
+
+`PRIVATE IMPORT PACKAGE: amazon_inventory_import_package.zip`
+
+Next logical implementation steps:
+1. Build an admin Import Review screen for `amazon_purchase_import_staging`.
+2. Add approve/hold/reject controls for each Amazon purchase row.
+3. Add an inventory match picker so medium-confidence rows can be manually attached to tools/supplies.
+4. Add an “apply approved imports” function that updates ASIN/cost/date references only after review.
+5. Add accounting posting rules for approved purchases by category.
+6. Add receipt/document attachment support for each order line.
+7. Add duplicate detection by `amazon_order_id + asin + item_net_total_cents`.
+8. Add inventory-cost history instead of overwriting the latest inventory item record.
+
+
+## Private Import Data Safety Note — 2026-05-11
+
+Amazon transaction CSVs and review spreadsheets are **not** stored inside the deployable website tree because `/data/` assets may become publicly reachable after Cloudflare Pages deployment. Keep the generated Amazon import package private and load approved rows into the database through an admin/import workflow instead.
