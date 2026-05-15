@@ -47,3 +47,10 @@ Purpose:
 
 Import rule:
 - Do not update production inventory/accounting tables until `review_decision = 'approved'`.
+
+
+## Site inventory sync fields — 2026-05-14
+
+`site_item_inventory` is the admin working table for Tools/Supplies stock, cost, reorder, and product-resource usage. The admin API now guards/creates these fields when missing: source type/key, item name/category, source/Amazon/image URLs, on-hand/reserved/incoming quantities, reorder level, unit cost cents, stock unit label, usage unit label, usage units per stock unit, supplier/seller fields, reorder notes, reuse flags, active flag, last-seen timestamp, created timestamp, and updated timestamp.
+
+`catalog_items` remains the catalog/source snapshot. Use `/api/admin/catalog-sync` first, then `/api/admin/site-item-inventory` with `action: sync_catalog` to copy the catalog snapshot into working inventory.

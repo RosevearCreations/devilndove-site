@@ -47,5 +47,20 @@ Amazon transaction CSVs and review spreadsheets are **not** stored inside the de
 
 - Rechecked Amazon Business order CSV against Toolshed and Supplies by cleaned product title instead of exact filename/ID matching.
 - Patched 572 conservative safe matches into inventory JSON Amazon fields.
-- Added `data/imports/amazon_inventory_match_report.csv`, `data/imports/amazon_purchase_import_candidates.csv`, and `AMAZON_MATCHING_NOTES.md` for review and database import planning.
+- Generated private Amazon match reports for review and database import planning. The public-safe build does not keep those reports under `/data/imports`.
 - Rows marked `needs_review` or `weak_candidate` were not written into live JSON fields because the best candidate was ambiguous or too weak.
+
+
+## Tools/Supplies inventory sync repair — 2026-05-14
+
+Fixed the split between `catalog_items` and `site_item_inventory`:
+- `catalog_items` had 399 tools and 498 supplies, but the Inventory Operations screen was reading `site_item_inventory`, which could show only previously copied rows.
+- Added a working `sync_catalog` action to `/api/admin/site-item-inventory` so Tools/Supplies can be copied from `catalog_items` into `site_item_inventory`.
+- Raised the product resource picker limit from 500 to 1200 so 498 supplies no longer crowd out the 399 tools.
+- Added searchable tool/supply seed filtering in the Inventory Operations form.
+- Added private admin-side Amazon CSV match data module at `functions/api/admin/_amazonInventoryMatches.js` so admin sync can fill Amazon URL, ASIN, supplier, latest purchase notes, unit cost, stock unit, usage unit, and usage-units-per-stock without putting the full Amazon CSV/report under public `/data/`.
+
+Next action after deploy:
+1. Open `/admin/catalog/`.
+2. In Tools & Supplies Inventory Operations, click **Sync all tools + supplies**.
+3. Verify D1 `site_item_inventory` has about 897 rows and that unit-cost counts increased.

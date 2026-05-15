@@ -78,3 +78,16 @@ CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_review
 -- 2. Review medium/review rows in the spreadsheet before changing review_decision.
 -- 3. Only rows with review_decision = 'approved' should be applied to production inventory/accounting records.
 -- 4. Use amazon_inventory_purchase_summary_by_item.csv to compare totals before posting journal lines.
+
+
+-- Current build guardrail, 2026-05-14:
+-- The admin site-item-inventory API now auto-creates/backfills these columns when missing,
+-- then syncs catalog_items into site_item_inventory for searchable Tools/Supplies inventory.
+-- Keep this reference here so the schema expectation is visible even when the API does the safe migration.
+-- Required site_item_inventory columns include:
+-- source_type, external_key, item_name, category, source_url, amazon_url, image_url,
+-- on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level, unit_cost_cents,
+-- stock_unit_label, usage_unit_label, usage_units_per_stock_unit, supplier_name, supplier_sku,
+-- supplier_contact, reorder_notes, preferred_reorder_quantity, is_on_reorder_list,
+-- do_not_reorder, do_not_reuse, reuse_status, reservation_notes, last_reorder_requested_at,
+-- last_counted_at, is_active, last_seen_at, created_at, updated_at.

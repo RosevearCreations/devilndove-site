@@ -780,6 +780,7 @@ CREATE TABLE IF NOT EXISTS site_item_inventory (
   last_counted_at TEXT,
   is_active INTEGER NOT NULL DEFAULT 1,
   last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(source_type, external_key)
 );

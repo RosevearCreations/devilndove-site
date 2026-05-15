@@ -50,3 +50,19 @@ No production inventory data was overwritten.
 ## Private Import Data Safety Note — 2026-05-11
 
 Amazon transaction CSVs and review spreadsheets are **not** stored inside the deployable website tree because `/data/` assets may become publicly reachable after Cloudflare Pages deployment. Keep the generated Amazon import package private and load approved rows into the database through an admin/import workflow instead.
+
+
+## Tools/Supplies inventory sync sanity — 2026-05-14
+
+After deploying this build and running Sync all tools + supplies, check D1:
+
+```sql
+SELECT source_type, COUNT(*) AS total,
+       SUM(CASE WHEN amazon_url IS NOT NULL AND TRIM(amazon_url) <> '' THEN 1 ELSE 0 END) AS with_amazon_url,
+       SUM(CASE WHEN unit_cost_cents > 0 THEN 1 ELSE 0 END) AS with_unit_cost
+FROM site_item_inventory
+WHERE source_type IN ('tool','supply')
+GROUP BY source_type;
+```
+
+Expected row totals should be close to 399 tools and 498 supplies. Unit-cost counts should increase after the admin sync because Amazon CSV match details are now available to the admin-side sync process.
