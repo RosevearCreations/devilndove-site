@@ -533,3 +533,13 @@ body.nav-mobile-open{overflow:hidden}
     min-width:560px;
   }
 }
+
+/* Current pass: operations release/migration sanity cards */
+.admin-status-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:.78rem;font-weight:700;text-transform:capitalize;white-space:nowrap}
+.admin-status-pill.ok{background:rgba(10,122,47,.12);border-color:rgba(10,122,47,.32);color:#9ef0b4}
+.admin-status-pill.warn{background:rgba(194,147,0,.12);border-color:rgba(194,147,0,.38);color:#ffe39a}
+.admin-status-pill.danger{background:rgba(176,0,32,.12);border-color:rgba(176,0,32,.38);color:#ffb4c1}
+.admin-status-pill.muted{background:rgba(255,255,255,.05);color:var(--muted)}
+.release-sanity-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03)}
+#migration-ledger-card textarea,#release-sanity-card textarea{min-height:68px}
+@media (max-width:760px){#migrationLedgerForm.grid.cols-2{grid-template-columns:1fr}.release-sanity-summary{align-items:flex-start}}

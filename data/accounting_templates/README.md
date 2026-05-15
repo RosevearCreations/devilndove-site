@@ -1,17 +1,22 @@
-> Current accounting-template sync — 2026-05-09: admin statement imports now support broader bank/processor CSV aliases and preview/error handling; template examples should keep matching real exported provider files as they are collected.
-
-> Current pass update — accounting templates now live alongside statement-import, reconciliation-exception, fixed-asset, and vendor-statement review groundwork in the main app workflow.
-
-# Current pass update — 2026-04-24
-
-- `general_ledger_accounts.csv` now includes starter GIFI staging columns: `parent_group`, `normal_balance`, `sort_order`, `gifi_code`, `gifi_label`, `gifi_section`, and `tax_deductibility_percent`.
-- These starter mappings are for accountant review and T2/GIFI staging, not a claim that the site is now full tax software.
-
 # Accounting Templates
 
-Use these starter templates to seed the accounting backend with general ledger accounts, expenses, write-offs, and product unit costs.
+Current sync: 2026-05-14 — Build 124.
 
-- `accounting_overhead_allocations.csv` — starter monthly overhead allocations used for rough P&L and later product-cost allocation.
-- The current pass also treats electricity, gas, internet, phone, insurance, software, and rent allocation as first-class monthly shortcuts in the admin accounting UI so recurring T2-style overhead capture is faster.
+## Purpose
+This folder holds safe accounting template/reference files. Private statement exports, Amazon CSVs, accountant packages, and receipts should not be deployed publicly.
 
-- `general_ledger_accounts.csv` now also carries starter review fields: `gifi_review_state` and `gifi_review_note`, including a reviewed/finalized starter mapping for common Devil n Dove accounts.
+## Current statement provider profile support
+The admin app now has saved provider profiles for:
+- bank CSV
+- PayPal activity
+- Stripe balance transactions
+- Square transactions
+- Etsy payment account
+- manual CSV
+
+These profiles are stored in D1 table `accounting_statement_provider_profiles` and surfaced in `/admin/accounting/`.
+
+## Next template work
+- Add sanitized sample headers for each provider.
+- Add manual CSV templates for expenses, payouts, refunds, fees, and HST review.
+- Add accountant export manifest templates once the export package is complete.
