@@ -73,6 +73,9 @@ async function ensureJournalSchema(db) {
       total_credit_cents INTEGER NOT NULL DEFAULT 0,
       imbalance_cents INTEGER NOT NULL DEFAULT 0,
       notes TEXT,
+      posted_by_user_id INTEGER,
+      posted_at TEXT,
+      validation_message TEXT,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       UNIQUE (period_month, source_type, source_key)
@@ -102,6 +105,14 @@ async function ensureJournalSchema(db) {
   await db.prepare(
     "CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_key)"
   ).run();
+  const colsResult = await db.prepare(`PRAGMA table_info(accounting_journal_entries)`).all().catch(() => ({ results: [] }));
+  const cols = new Set(normalizeResults(colsResult).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  const migrations = [
+    ['posted_by_user_id', `ALTER TABLE accounting_journal_entries ADD COLUMN posted_by_user_id INTEGER`],
+    ['posted_at', `ALTER TABLE accounting_journal_entries ADD COLUMN posted_at TEXT`],
+    ['validation_message', `ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT`]
+  ];
+  for (const [name, sql] of migrations) { if (!cols.has(name)) await db.prepare(sql).run().catch(() => null); }
   await db.prepare(
     "CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(journal_entry_id, line_number ASC)"
   ).run();
@@ -603,6 +614,37 @@ async function fetchJournal(db, periodMonth) {
   };
 }
 
+
+async function validateJournalPeriod(db, periodMonth) {
+  await ensureJournalSchema(db);
+  const journal = await fetchJournal(db, periodMonth);
+  const invalidEntries = journal.entries.filter((entry) => Number(entry.imbalance_cents || 0) !== 0 || !Array.isArray(entry.lines) || entry.lines.length < 2);
+  const emptyLedgerLines = journal.entries.flatMap((entry) => (entry.lines || [])
+    .filter((line) => !normalizeText(line.ledger_code))
+    .map((line) => ({ journal_entry_id: entry.journal_entry_id, line_number: line.line_number }))
+  );
+  return {
+    ok_to_post: invalidEntries.length === 0 && emptyLedgerLines.length === 0 && journal.entries.length > 0,
+    invalid_entry_count: invalidEntries.length,
+    missing_ledger_line_count: emptyLedgerLines.length,
+    entry_count: journal.entries.length,
+    invalid_entries: invalidEntries.map((entry) => ({ journal_entry_id: entry.journal_entry_id, reference_code: entry.reference_code, imbalance_cents: entry.imbalance_cents, line_count: entry.lines.length })),
+    missing_ledger_lines: emptyLedgerLines,
+    summary: journal.summary
+  };
+}
+
+async function postJournalPeriod(db, periodMonth, adminUser) {
+  const validation = await validateJournalPeriod(db, periodMonth);
+  if (!validation.ok_to_post) return { posted_count: 0, validation };
+  const result = await db.prepare(`
+    UPDATE accounting_journal_entries
+    SET status = 'posted', posted_by_user_id = ?, posted_at = CURRENT_TIMESTAMP, validation_message = 'Posted after balance validation.', updated_at = CURRENT_TIMESTAMP
+    WHERE period_month = ? AND COALESCE(status,'draft') != 'posted'
+  `).bind(adminUser.user_id, periodMonth).run();
+  return { posted_count: Number(result?.meta?.changes || 0), validation };
+}
+
 async function readJsonBody(request) {
   try {
     return await request.json();
@@ -634,20 +676,35 @@ async function handlePost(context, db, adminUser) {
   }
 
   try {
+    const action = normalizeText(body.action || 'sync_month').toLowerCase();
+    if (action === 'validate_month') {
+      const validation = await validateJournalPeriod(db, range.raw);
+      await auditAdminAction(context.env, context.request, adminUser, { action_type: 'accounting_journal_validate', target_type: 'accounting_journal', target_key: range.raw, details: validation });
+      return jsonResponse({ ok: true, period: range.raw, validation, ...(await fetchJournal(db, range.raw)) });
+    }
+    if (action === 'post_month') {
+      const postResult = await postJournalPeriod(db, range.raw, adminUser);
+      await auditAdminAction(context.env, context.request, adminUser, { action_type: 'accounting_journal_post', target_type: 'accounting_journal', target_key: range.raw, details: postResult });
+      if (!postResult.validation.ok_to_post) return jsonResponse({ ok: false, error: 'Journal has validation blockers and was not posted.', period: range.raw, ...postResult }, 409);
+      return jsonResponse({ ok: true, period: range.raw, post_result: postResult, ...(await fetchJournal(db, range.raw)) });
+    }
+
     const syncResult = await syncJournal(db, range);
+    const validation = await validateJournalPeriod(db, range.raw);
     const journal = await fetchJournal(db, range.raw);
 
     await auditAdminAction(context.env, context.request, adminUser, {
       action_type: "accounting_journal_sync",
       target_type: "accounting_journal",
       target_key: range.raw,
-      details: syncResult,
+      details: { ...syncResult, validation },
     });
 
     return jsonResponse({
       ok: true,
       period: range.raw,
       sync_result: syncResult,
+      validation,
       ...journal,
     });
   } catch (error) {

@@ -1,6 +1,7 @@
 // File: /functions/api/admin/site-item-inventory.js
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { buildAmazonInventoryNote, extractAmazonInventoryFields, getAmazonInventoryMatch } from "./_amazonInventoryMatches.js";
+import { ensureInventoryCostHistoryTable, recordInventoryCostHistory } from "./_inventoryCostHistory.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -99,6 +100,7 @@ async function ensureSiteInventorySchema(db) {
 
   await db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_site_item_inventory_source_key_unique ON site_item_inventory(source_type, external_key)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_site_item_inventory_source ON site_item_inventory(source_type, category)`).run().catch(() => null);
+  await ensureInventoryCostHistoryTable(db).catch(() => null);
 }
 
 function shape(row = {}) {
@@ -580,10 +582,16 @@ async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
     requested_types: requestedTypes,
     scanned: rows.length,
     synced: 0,
+    inserted: 0,
+    updated: 0,
+    skipped: 0,
+    failed: 0,
     with_amazon_url: 0,
     with_unit_cost: 0,
+    cost_history_added: 0,
     defaulted_on_hand_to_one: 0,
-    match_status_counts: {}
+    match_status_counts: {},
+    errors: []
   };
 
   for (const row of rows) {
@@ -612,67 +620,102 @@ async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
     if (amazonUrl) summary.with_amazon_url += 1;
     if (unitCostCents > 0) summary.with_unit_cost += 1;
 
-    await db.prepare(`
-      INSERT INTO site_item_inventory (
-        source_type, external_key, item_name, category, source_url, amazon_url, image_url,
-        on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level, unit_cost_cents,
-        stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
-        supplier_name, supplier_sku, supplier_contact, reorder_notes, preferred_reorder_quantity,
-        is_on_reorder_list, do_not_reorder, do_not_reuse, reuse_status, reservation_notes,
-        is_active, last_seen_at, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, NULL, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      ON CONFLICT(source_type, external_key) DO UPDATE SET
-        item_name = excluded.item_name,
-        category = excluded.category,
-        source_url = COALESCE(NULLIF(excluded.source_url, ''), site_item_inventory.source_url),
-        amazon_url = COALESCE(NULLIF(excluded.amazon_url, ''), site_item_inventory.amazon_url),
-        image_url = COALESCE(NULLIF(excluded.image_url, ''), site_item_inventory.image_url),
-        on_hand_quantity = CASE
-          WHEN COALESCE(site_item_inventory.on_hand_quantity, 0) < 1 THEN excluded.on_hand_quantity
-          ELSE site_item_inventory.on_hand_quantity
-        END,
-        reorder_level = CASE
-          WHEN COALESCE(site_item_inventory.reorder_level, 0) = 0 THEN excluded.reorder_level
-          ELSE site_item_inventory.reorder_level
-        END,
-        unit_cost_cents = CASE
-          WHEN COALESCE(excluded.unit_cost_cents, 0) > 0 THEN excluded.unit_cost_cents
-          ELSE site_item_inventory.unit_cost_cents
-        END,
-        stock_unit_label = COALESCE(NULLIF(excluded.stock_unit_label, ''), site_item_inventory.stock_unit_label),
-        usage_unit_label = COALESCE(NULLIF(excluded.usage_unit_label, ''), site_item_inventory.usage_unit_label),
-        usage_units_per_stock_unit = CASE
-          WHEN COALESCE(excluded.usage_units_per_stock_unit, 0) > 0 THEN excluded.usage_units_per_stock_unit
-          ELSE site_item_inventory.usage_units_per_stock_unit
-        END,
-        supplier_name = COALESCE(NULLIF(excluded.supplier_name, ''), site_item_inventory.supplier_name),
-        supplier_sku = COALESCE(NULLIF(excluded.supplier_sku, ''), site_item_inventory.supplier_sku),
-        supplier_contact = COALESCE(NULLIF(excluded.supplier_contact, ''), site_item_inventory.supplier_contact),
-        reorder_notes = COALESCE(NULLIF(excluded.reorder_notes, ''), site_item_inventory.reorder_notes),
-        is_active = 1,
-        last_seen_at = CURRENT_TIMESTAMP,
-        updated_at = CURRENT_TIMESTAMP
-    `).bind(
-      sourceType,
-      externalKey,
-      itemName,
-      normalizeText(row.category || row.subcategory) || null,
-      amazonUrl || null,
-      amazonUrl || null,
-      normalizeText(row.image_url) || null,
-      onHandQuantity,
-      reorderPoint,
-      unitCostCents,
-      stockUnitLabel,
-      usageUnitLabel,
-      usageUnitsPerStockUnit,
-      supplierName || null,
-      supplierSku || null,
-      amazonUrl ? 'Amazon.ca' : null,
-      reorderNotes || null
-    ).run();
+    try {
+      const existing = await db.prepare(`
+        SELECT site_item_inventory_id, unit_cost_cents, on_hand_quantity
+        FROM site_item_inventory
+        WHERE source_type = ? AND external_key = ?
+        LIMIT 1
+      `).bind(sourceType, externalKey).first().catch(() => null);
 
-    summary.synced += 1;
+      await db.prepare(`
+        INSERT INTO site_item_inventory (
+          source_type, external_key, item_name, category, source_url, amazon_url, image_url,
+          on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level, unit_cost_cents,
+          stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
+          supplier_name, supplier_sku, supplier_contact, reorder_notes, preferred_reorder_quantity,
+          is_on_reorder_list, do_not_reorder, do_not_reuse, reuse_status, reservation_notes,
+          is_active, last_seen_at, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, NULL, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT(source_type, external_key) DO UPDATE SET
+          item_name = excluded.item_name,
+          category = excluded.category,
+          source_url = COALESCE(NULLIF(excluded.source_url, ''), site_item_inventory.source_url),
+          amazon_url = COALESCE(NULLIF(excluded.amazon_url, ''), site_item_inventory.amazon_url),
+          image_url = COALESCE(NULLIF(excluded.image_url, ''), site_item_inventory.image_url),
+          on_hand_quantity = CASE
+            WHEN COALESCE(site_item_inventory.on_hand_quantity, 0) < 1 THEN excluded.on_hand_quantity
+            ELSE site_item_inventory.on_hand_quantity
+          END,
+          reorder_level = CASE
+            WHEN COALESCE(site_item_inventory.reorder_level, 0) = 0 THEN excluded.reorder_level
+            ELSE site_item_inventory.reorder_level
+          END,
+          unit_cost_cents = CASE
+            WHEN COALESCE(excluded.unit_cost_cents, 0) > 0 THEN excluded.unit_cost_cents
+            ELSE site_item_inventory.unit_cost_cents
+          END,
+          stock_unit_label = COALESCE(NULLIF(excluded.stock_unit_label, ''), site_item_inventory.stock_unit_label),
+          usage_unit_label = COALESCE(NULLIF(excluded.usage_unit_label, ''), site_item_inventory.usage_unit_label),
+          usage_units_per_stock_unit = CASE
+            WHEN COALESCE(excluded.usage_units_per_stock_unit, 0) > 0 THEN excluded.usage_units_per_stock_unit
+            ELSE site_item_inventory.usage_units_per_stock_unit
+          END,
+          supplier_name = COALESCE(NULLIF(excluded.supplier_name, ''), site_item_inventory.supplier_name),
+          supplier_sku = COALESCE(NULLIF(excluded.supplier_sku, ''), site_item_inventory.supplier_sku),
+          supplier_contact = COALESCE(NULLIF(excluded.supplier_contact, ''), site_item_inventory.supplier_contact),
+          reorder_notes = COALESCE(NULLIF(excluded.reorder_notes, ''), site_item_inventory.reorder_notes),
+          is_active = 1,
+          last_seen_at = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+      `).bind(
+        sourceType,
+        externalKey,
+        itemName,
+        normalizeText(row.category || row.subcategory) || null,
+        amazonUrl || null,
+        amazonUrl || null,
+        normalizeText(row.image_url) || null,
+        onHandQuantity,
+        reorderPoint,
+        unitCostCents,
+        stockUnitLabel,
+        usageUnitLabel,
+        usageUnitsPerStockUnit,
+        supplierName || null,
+        supplierSku || null,
+        amazonUrl ? 'Amazon.ca' : null,
+        reorderNotes || null
+      ).run();
+
+      const saved = await db.prepare(`
+        SELECT site_item_inventory_id, unit_cost_cents, on_hand_quantity
+        FROM site_item_inventory
+        WHERE source_type = ? AND external_key = ?
+        LIMIT 1
+      `).bind(sourceType, externalKey).first().catch(() => null);
+
+      const costHistoryId = await recordInventoryCostHistory(db, {
+        site_item_inventory_id: saved?.site_item_inventory_id || existing?.site_item_inventory_id || null,
+        source_type: sourceType,
+        external_key: externalKey,
+        item_name: itemName,
+        previous_unit_cost_cents: Number(existing?.unit_cost_cents || 0),
+        new_unit_cost_cents: unitCostCents,
+        source_kind: 'catalog_sync',
+        source_id: `${sourceType}:${externalKey}`,
+        source_reference: supplierSku || amazonUrl || null,
+        reason_note: matchStatus === 'unmatched' ? 'Catalog inventory sync' : `Catalog inventory sync from Amazon CSV ${matchStatus}`
+      }).catch(() => null);
+      if (costHistoryId) summary.cost_history_added += 1;
+
+      summary.synced += 1;
+      if (existing?.site_item_inventory_id) summary.updated += 1;
+      else summary.inserted += 1;
+    } catch (error) {
+      summary.failed += 1;
+      summary.errors.push({ source_type: sourceType, external_key: externalKey, item_name: itemName, error: String(error?.message || error || 'Sync failed') });
+    }
   }
 
   return summary;
@@ -826,6 +869,19 @@ export async function onRequestPost(context) {
   const newId = Number(insert?.meta?.last_row_id || 0);
   const saved = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(newId).first();
 
+  await recordInventoryCostHistory(db, {
+    site_item_inventory_id: newId,
+    source_type: sourceType,
+    external_key: externalKey,
+    item_name: itemName,
+    previous_unit_cost_cents: 0,
+    new_unit_cost_cents: Number(body.unit_cost_cents || 0),
+    source_kind: 'manual_inventory_create',
+    source_id: `${sourceType}:${externalKey}`,
+    reason_note: normalizeText(body.movement_note) || 'Inventory item created with unit cost.',
+    changed_by_user_id: adminUser.user_id
+  }).catch(() => null);
+
   await logMovement(db, {
     site_item_inventory_id: newId,
     source_type: sourceType,
@@ -966,6 +1022,19 @@ export async function onRequestPatch(context) {
       WHERE site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
+
+    await recordInventoryCostHistory(db, {
+      site_item_inventory_id: id,
+      source_type: existing.source_type,
+      external_key: existing.external_key,
+      item_name: merged.item_name,
+      previous_unit_cost_cents: Number(existing.unit_cost_cents || 0),
+      new_unit_cost_cents: Number(merged.unit_cost_cents || 0),
+      source_kind: 'manual_inventory_update',
+      source_id: `${existing.source_type || ''}:${existing.external_key || ''}`,
+      reason_note: normalizeText(body.movement_note) || 'Manual inventory cost update.',
+      changed_by_user_id: adminUser.user_id
+    }).catch(() => null);
 
     await auditAdminAction(env, request, adminUser, {
       action_type: 'inventory_update',

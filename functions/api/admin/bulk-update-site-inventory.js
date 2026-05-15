@@ -10,6 +10,7 @@ import {
   auditAdminAction,
   captureRuntimeIncident
 } from "../_lib/adminAudit.js";
+import { ensureInventoryCostHistoryTable, recordInventoryCostHistory } from "./_inventoryCostHistory.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -217,6 +218,20 @@ async function logCostUpdateMovements(db, rows = [], adminUser, note = "", calcu
       baseNote
     ].filter(Boolean).join(" | ");
 
+    await recordInventoryCostHistory(db, {
+      site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+      source_type: row.source_type || null,
+      external_key: row.external_key || null,
+      item_name: row.item_name || null,
+      previous_unit_cost_cents: previousCost,
+      new_unit_cost_cents: nextCost,
+      source_kind: 'bulk_inventory_cost_update',
+      source_id: String(row.site_item_inventory_id || ''),
+      source_reference: row.supplier_name || null,
+      reason_note: baseNote || 'Bulk inventory cost update.',
+      changed_by_user_id: adminUser?.user_id || null
+    }).catch(() => null);
+
     await db.prepare(`
       INSERT INTO site_inventory_movements (
         site_item_inventory_id, source_type, external_key, item_name, movement_type,
@@ -224,7 +239,7 @@ async function logCostUpdateMovements(db, rows = [], adminUser, note = "", calcu
         previous_reserved_quantity, new_reserved_quantity,
         previous_incoming_quantity, new_incoming_quantity,
         note, actor_user_id, created_at
-      ) VALUES (?, ?, ?, ?, 'cost_update', 0, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, 'adjustment', 0, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `).bind(
       Number(row.site_item_inventory_id || 0),
       row.source_type || null,
@@ -256,6 +271,8 @@ export async function onRequestPost(context) {
   } catch {
     return json({ ok: false, error: "Invalid JSON body." }, 400);
   }
+
+  await ensureInventoryCostHistoryTable(db).catch(() => null);
 
   const updates = body && typeof body.updates === "object" ? body.updates : {};
   const selection = buildSelection(body || {});

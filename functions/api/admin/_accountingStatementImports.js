@@ -81,6 +81,12 @@ export async function ensureAccountingStatementImportsTables(db) {
       difference_cents INTEGER NOT NULL DEFAULT 0,
       tolerance_cents INTEGER NOT NULL DEFAULT 0,
       notes TEXT,
+      assigned_to_user_id INTEGER,
+      accountant_review_flag INTEGER NOT NULL DEFAULT 0,
+      resolved_by_user_id INTEGER,
+      resolved_at TEXT,
+      reopened_by_user_id INTEGER,
+      reopened_at TEXT,
       detail_json TEXT,
       source_import_id INTEGER,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -90,7 +96,18 @@ export async function ensureAccountingStatementImportsTables(db) {
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_imports_period ON accounting_statement_imports(provider_scope, period_month DESC, import_status)`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_import ON accounting_statement_import_rows(accounting_statement_import_id, txn_date)`).run(); } catch {}
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_provider_ref ON accounting_statement_import_rows(provider_scope, txn_date, reference_number)`).run(); } catch {}
+  const exceptionCols = await (async () => { try { const result = await db.prepare(`PRAGMA table_info(accounting_reconciliation_exceptions)`).all(); return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean)); } catch { return new Set(); } })();
+  const exceptionMigrations = [
+    ['assigned_to_user_id', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN assigned_to_user_id INTEGER`],
+    ['accountant_review_flag', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN accountant_review_flag INTEGER NOT NULL DEFAULT 0`],
+    ['resolved_by_user_id', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN resolved_by_user_id INTEGER`],
+    ['resolved_at', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN resolved_at TEXT`],
+    ['reopened_by_user_id', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN reopened_by_user_id INTEGER`],
+    ['reopened_at', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN reopened_at TEXT`]
+  ];
+  for (const [name, sql] of exceptionMigrations) { if (!exceptionCols.has(name)) await db.prepare(sql).run().catch(() => null); }
   try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_exceptions_period ON accounting_reconciliation_exceptions(reconciliation_type, period_month DESC, exception_status)`).run(); } catch {}
+  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_exceptions_queue ON accounting_reconciliation_exceptions(exception_status, accountant_review_flag, updated_at DESC)`).run(); } catch {}
 }
 
 const HEADER_ALIASES = new Map([
@@ -383,7 +400,9 @@ export async function listAccountingReconciliationExceptions(db, { reconciliatio
   const result = await db.prepare(`
     SELECT accounting_reconciliation_exception_id, reconciliation_type, period_month, scope_key, provider_scope,
            exception_status, severity, reference_label, statement_amount_cents, book_amount_cents,
-           difference_cents, tolerance_cents, notes, detail_json, source_import_id, created_at, updated_at
+           difference_cents, tolerance_cents, notes, assigned_to_user_id, accountant_review_flag,
+           resolved_by_user_id, resolved_at, reopened_by_user_id, reopened_at,
+           detail_json, source_import_id, created_at, updated_at
     FROM accounting_reconciliation_exceptions
     WHERE (? = '' OR reconciliation_type = ?)
       AND (? = '' OR period_month = ?)
@@ -391,7 +410,19 @@ export async function listAccountingReconciliationExceptions(db, { reconciliatio
     ORDER BY updated_at DESC, accounting_reconciliation_exception_id DESC
     LIMIT ?
   `).bind(String(reconciliationType || '').trim(), String(reconciliationType || '').trim(), String(periodMonth || '').trim(), String(periodMonth || '').trim(), String(status || '').trim(), String(status || '').trim(), Math.max(1, Math.min(500, Number(limit || 200) || 200))).all().catch(() => ({ results: [] }));
-  return rows(result).map((row) => ({ ...row, accounting_reconciliation_exception_id: Number(row.accounting_reconciliation_exception_id || 0), statement_amount_cents: Number(row.statement_amount_cents || 0), book_amount_cents: Number(row.book_amount_cents || 0), difference_cents: Number(row.difference_cents || 0), tolerance_cents: Number(row.tolerance_cents || 0), source_import_id: row.source_import_id == null ? null : Number(row.source_import_id || 0) }));
+  return rows(result).map((row) => ({
+    ...row,
+    accounting_reconciliation_exception_id: Number(row.accounting_reconciliation_exception_id || 0),
+    statement_amount_cents: Number(row.statement_amount_cents || 0),
+    book_amount_cents: Number(row.book_amount_cents || 0),
+    difference_cents: Number(row.difference_cents || 0),
+    tolerance_cents: Number(row.tolerance_cents || 0),
+    assigned_to_user_id: row.assigned_to_user_id == null ? null : Number(row.assigned_to_user_id || 0),
+    accountant_review_flag: Number(row.accountant_review_flag || 0),
+    resolved_by_user_id: row.resolved_by_user_id == null ? null : Number(row.resolved_by_user_id || 0),
+    reopened_by_user_id: row.reopened_by_user_id == null ? null : Number(row.reopened_by_user_id || 0),
+    source_import_id: row.source_import_id == null ? null : Number(row.source_import_id || 0)
+  }));
 }
 
 async function getReviewByKey(db, reconciliationType, periodMonth, scopeKey) {
