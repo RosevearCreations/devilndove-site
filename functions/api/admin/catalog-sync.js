@@ -5,6 +5,7 @@ import {
   jsonResponse,
   normalizeText,
 } from "../_lib/adminAudit.js";
+import { buildAmazonInventoryNote, extractAmazonInventoryFields, getAmazonInventoryMatch } from "./_amazonInventoryMatches.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status, { "Cache-Control": "no-store" });
@@ -135,55 +136,115 @@ async function fetchJsonFromSite(request, paths) {
 
 function mapToolRow(row, index, sourcePath) {
   const name = normalizeText(row.item_name_suggested || row.name || row.example_image_file) || `Tool ${index + 1}`;
+  const amazonMatch = getAmazonInventoryMatch('toolshed', index, name);
+  const amazonFields = extractAmazonInventoryFields(amazonMatch || row, 'tool');
+  const enrichedRow = amazonMatch
+    ? {
+        ...row,
+        amazon_match: amazonMatch,
+        amazon_match_status: amazonFields.amazon_match_status,
+        amazon_match_score: amazonFields.amazon_match_score,
+        amazon_asin: row.amazon_asin || amazonFields.amazon_asin,
+        amazon_url: row.amazon_url || amazonFields.amazon_url,
+        amazon_title: amazonFields.amazon_title,
+        amazon_brand: amazonFields.amazon_brand,
+        amazon_category: amazonFields.amazon_category,
+        seller_name: amazonFields.seller_name,
+        latest_purchase_date: amazonFields.latest_purchase_date,
+        latest_order_id: amazonFields.latest_order_id,
+        latest_purchase_ppu_cad: amazonFields.latest_purchase_ppu_cad,
+        latest_item_net_total_cad: amazonFields.latest_item_net_total_cad,
+        matched_asin_total_quantity: amazonFields.matched_asin_total_quantity,
+        matched_asin_total_net_cad: amazonFields.matched_asin_total_net_cad,
+        unit_cost_cents: amazonFields.unit_cost_cents,
+        stock_unit_label: amazonFields.stock_unit_label,
+        usage_unit_label: amazonFields.usage_unit_label,
+        usage_units_per_stock_unit: amazonFields.usage_units_per_stock_unit
+      }
+    : row;
   const area = normalizeText(row.primary_area || row.area || "Workshop Basics");
   const category = normalizeText(row.category || row.tool_category || "Uncategorized");
   const sourceKey = normalizeText(row.item_group_key_strict || row.r2_object_key || row.example_image_file || `${slugify(name)}-${index + 1}`);
+  const notes = [
+    normalizeText(row.how_we_use || row.notes_public || row.notes),
+    buildAmazonInventoryNote(amazonFields)
+  ].filter(Boolean).join("\n");
   return {
     item_kind: "tool",
     source_key: sourceKey,
     slug: slugify(name),
     name,
-    brand: normalizeText(row.brand_guess || row.brand),
+    brand: normalizeText(row.brand_guess || row.brand || amazonFields.amazon_brand),
     category,
     subcategory: area,
     item_type: normalizeText(row.tool_type || ""),
     short_description: [area, category].filter(Boolean).join(" • "),
-    notes: normalizeText(row.how_we_use || row.notes_public || row.notes),
+    notes,
     image_url: buildImageUrl("https://assets.devilndove.com", "Toolshed", row.example_image_file || row.image_file, row.r2_object_key),
     r2_object_key: normalizeText(row.r2_object_key || ["Toolshed", normalizeText(row.example_image_file)].filter(Boolean).join("/")),
-    amazon_url: normalizeText(row.amazon_url || row.amazon_search_url || row.amazon_search),
+    amazon_url: normalizeText(row.amazon_url || amazonFields.amazon_url || row.amazon_search_url || row.amazon_search),
     storage_location: [row.location_zone, row.location_shelf, row.location_bin].map(normalizeText).filter(Boolean).join(" / "),
     quantity_on_hand: Number(row.quantity_owned || 0) || 0,
     reorder_point: 0,
     sort_order: index,
-    source_record_json: JSON.stringify(row || {}),
+    source_record_json: JSON.stringify(enrichedRow || {}),
     source_json_path: sourcePath,
   };
 }
 
 function mapSupplyRow(row, index, sourcePath) {
   const name = normalizeText(row.item_name_suggested || row.example_image_file) || `Supply ${index + 1}`;
+  const amazonMatch = getAmazonInventoryMatch('supplies', index, name);
+  const amazonFields = extractAmazonInventoryFields(amazonMatch || row, 'supply');
+  const enrichedRow = amazonMatch
+    ? {
+        ...row,
+        amazon_match: amazonMatch,
+        amazon_match_status: amazonFields.amazon_match_status,
+        amazon_match_score: amazonFields.amazon_match_score,
+        amazon_asin: row.amazon_asin || amazonFields.amazon_asin,
+        amazon_url: row.amazon_url || amazonFields.amazon_url,
+        amazon_title: amazonFields.amazon_title,
+        amazon_brand: amazonFields.amazon_brand,
+        amazon_category: amazonFields.amazon_category,
+        seller_name: amazonFields.seller_name,
+        latest_purchase_date: amazonFields.latest_purchase_date,
+        latest_order_id: amazonFields.latest_order_id,
+        latest_purchase_ppu_cad: amazonFields.latest_purchase_ppu_cad,
+        latest_item_net_total_cad: amazonFields.latest_item_net_total_cad,
+        matched_asin_total_quantity: amazonFields.matched_asin_total_quantity,
+        matched_asin_total_net_cad: amazonFields.matched_asin_total_net_cad,
+        unit_cost_cents: amazonFields.unit_cost_cents,
+        stock_unit_label: amazonFields.stock_unit_label,
+        usage_unit_label: amazonFields.usage_unit_label,
+        usage_units_per_stock_unit: amazonFields.usage_units_per_stock_unit
+      }
+    : row;
   const type = normalizeText(row.consumable_type || "Workshop supply");
   const sourceKey = normalizeText(row.item_group_key_strict || row.r2_object_key || row.example_image_file || `${slugify(name)}-${index + 1}`);
+  const notes = [
+    normalizeText(row.notes),
+    buildAmazonInventoryNote(amazonFields)
+  ].filter(Boolean).join("\n");
   return {
     item_kind: "supply",
     source_key: sourceKey,
     slug: slugify(name),
     name,
-    brand: normalizeText(row.brand_guess || row.brand),
+    brand: normalizeText(row.brand_guess || row.brand || amazonFields.amazon_brand),
     category: type,
     subcategory: normalizeText(row.primary_area || ""),
     item_type: type,
     short_description: [type, normalizeText(row.primary_area)].filter(Boolean).join(" • "),
-    notes: normalizeText(row.notes),
+    notes,
     image_url: buildImageUrl("https://assets.devilndove.com", "Supplies", row.example_image_file || row.image_file, row.r2_object_key),
     r2_object_key: normalizeText(row.r2_object_key || ["Supplies", normalizeText(row.example_image_file)].filter(Boolean).join("/")),
-    amazon_url: normalizeText(row.amazon_url || row.amazon_search_url),
+    amazon_url: normalizeText(row.amazon_url || amazonFields.amazon_url || row.amazon_search_url),
     storage_location: normalizeText(row.storage_location),
     quantity_on_hand: Number(row.on_hand_qty || 0) || 0,
     reorder_point: Number(row.reorder_point || 0) || 0,
     sort_order: index,
-    source_record_json: JSON.stringify(row || {}),
+    source_record_json: JSON.stringify(enrichedRow || {}),
     source_json_path: sourcePath,
   };
 }

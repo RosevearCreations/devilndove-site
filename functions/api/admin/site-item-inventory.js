@@ -1,5 +1,6 @@
 // File: /functions/api/admin/site-item-inventory.js
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+import { buildAmazonInventoryNote, extractAmazonInventoryFields, getAmazonInventoryMatch } from "./_amazonInventoryMatches.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -23,6 +24,81 @@ async function ensureUsageColumns(db) {
   if (!cols.has('usage_units_per_stock_unit')) {
     await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT NULL DEFAULT 1`).run().catch(() => null);
   }
+}
+
+async function ensureSiteInventorySchema(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS site_item_inventory (
+      site_item_inventory_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      source_type TEXT NOT NULL,
+      external_key TEXT NOT NULL,
+      item_name TEXT NOT NULL,
+      category TEXT,
+      source_url TEXT,
+      amazon_url TEXT,
+      image_url TEXT,
+      on_hand_quantity INTEGER NOT NULL DEFAULT 0,
+      reserved_quantity INTEGER NOT NULL DEFAULT 0,
+      incoming_quantity INTEGER NOT NULL DEFAULT 0,
+      reorder_level INTEGER NOT NULL DEFAULT 0,
+      unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+      stock_unit_label TEXT NOT NULL DEFAULT 'unit',
+      usage_unit_label TEXT NOT NULL DEFAULT 'unit',
+      usage_units_per_stock_unit REAL NOT NULL DEFAULT 1,
+      supplier_name TEXT,
+      supplier_sku TEXT,
+      supplier_contact TEXT,
+      reorder_notes TEXT,
+      preferred_reorder_quantity INTEGER NOT NULL DEFAULT 0,
+      is_on_reorder_list INTEGER NOT NULL DEFAULT 0,
+      do_not_reorder INTEGER NOT NULL DEFAULT 0,
+      do_not_reuse INTEGER NOT NULL DEFAULT 0,
+      reuse_status TEXT,
+      reservation_notes TEXT,
+      last_reorder_requested_at TEXT,
+      last_counted_at TEXT,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(source_type, external_key)
+    )
+  `).run();
+
+  const cols = await getTableColumnSet(db, 'site_item_inventory');
+  const migrations = [
+    ['source_url', `ALTER TABLE site_item_inventory ADD COLUMN source_url TEXT`],
+    ['amazon_url', `ALTER TABLE site_item_inventory ADD COLUMN amazon_url TEXT`],
+    ['image_url', `ALTER TABLE site_item_inventory ADD COLUMN image_url TEXT`],
+    ['reserved_quantity', `ALTER TABLE site_item_inventory ADD COLUMN reserved_quantity INTEGER NOT NULL DEFAULT 0`],
+    ['incoming_quantity', `ALTER TABLE site_item_inventory ADD COLUMN incoming_quantity INTEGER NOT NULL DEFAULT 0`],
+    ['unit_cost_cents', `ALTER TABLE site_item_inventory ADD COLUMN unit_cost_cents INTEGER NOT NULL DEFAULT 0`],
+    ['stock_unit_label', `ALTER TABLE site_item_inventory ADD COLUMN stock_unit_label TEXT NOT NULL DEFAULT 'unit'`],
+    ['usage_unit_label', `ALTER TABLE site_item_inventory ADD COLUMN usage_unit_label TEXT NOT NULL DEFAULT 'unit'`],
+    ['usage_units_per_stock_unit', `ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT NULL DEFAULT 1`],
+    ['supplier_name', `ALTER TABLE site_item_inventory ADD COLUMN supplier_name TEXT`],
+    ['supplier_sku', `ALTER TABLE site_item_inventory ADD COLUMN supplier_sku TEXT`],
+    ['supplier_contact', `ALTER TABLE site_item_inventory ADD COLUMN supplier_contact TEXT`],
+    ['preferred_reorder_quantity', `ALTER TABLE site_item_inventory ADD COLUMN preferred_reorder_quantity INTEGER NOT NULL DEFAULT 0`],
+    ['is_on_reorder_list', `ALTER TABLE site_item_inventory ADD COLUMN is_on_reorder_list INTEGER NOT NULL DEFAULT 0`],
+    ['do_not_reorder', `ALTER TABLE site_item_inventory ADD COLUMN do_not_reorder INTEGER NOT NULL DEFAULT 0`],
+    ['do_not_reuse', `ALTER TABLE site_item_inventory ADD COLUMN do_not_reuse INTEGER NOT NULL DEFAULT 0`],
+    ['reuse_status', `ALTER TABLE site_item_inventory ADD COLUMN reuse_status TEXT`],
+    ['reservation_notes', `ALTER TABLE site_item_inventory ADD COLUMN reservation_notes TEXT`],
+    ['last_reorder_requested_at', `ALTER TABLE site_item_inventory ADD COLUMN last_reorder_requested_at TEXT`],
+    ['last_counted_at', `ALTER TABLE site_item_inventory ADD COLUMN last_counted_at TEXT`],
+    ['last_seen_at', `ALTER TABLE site_item_inventory ADD COLUMN last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
+    ['created_at', `ALTER TABLE site_item_inventory ADD COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
+    ['updated_at', `ALTER TABLE site_item_inventory ADD COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
+    ['is_active', `ALTER TABLE site_item_inventory ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1`]
+  ];
+
+  for (const [name, sql] of migrations) {
+    if (!cols.has(name)) await db.prepare(sql).run().catch(() => null);
+  }
+
+  await db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_site_item_inventory_source_key_unique ON site_item_inventory(source_type, external_key)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_site_item_inventory_source ON site_item_inventory(source_type, category)`).run().catch(() => null);
 }
 
 function shape(row = {}) {
@@ -425,7 +501,7 @@ export async function onRequestGet(context) {
 
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
-  await ensureUsageColumns(db);
+  await ensureSiteInventorySchema(db);
 
   const url = new URL(request.url);
   const payload = await getItems(db, {
@@ -437,6 +513,144 @@ export async function onRequestGet(context) {
   return json({ ok: true, ...payload });
 }
 
+
+function buildInventorySyncNotes(row = {}, amazon = {}) {
+  const parts = [];
+  if (row.notes) parts.push(String(row.notes));
+  const amazonNote = buildAmazonInventoryNote(amazon);
+  if (amazonNote) parts.push(amazonNote);
+  if (amazon.amazon_title) parts.push(`Amazon title: ${amazon.amazon_title}`);
+  if (amazon.source_order_ids_for_asin) parts.push(`Matched order ids: ${amazon.source_order_ids_for_asin}`);
+  return parts.filter(Boolean).join('\n');
+}
+
+async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
+  await ensureSiteInventorySchema(db);
+  const normalizedTypes = [...new Set((Array.isArray(sourceTypes) ? sourceTypes : [])
+    .map((value) => normalizeText(value).toLowerCase())
+    .filter((value) => ['tool', 'supply'].includes(value))
+  )];
+  const requestedTypes = normalizedTypes.length ? normalizedTypes : ['tool', 'supply'];
+  const placeholders = requestedTypes.map(() => '?').join(', ');
+
+  const rows = normalizeResults(await db.prepare(`
+    SELECT
+      item_kind,
+      source_key,
+      name,
+      category,
+      subcategory,
+      image_url,
+      amazon_url,
+      quantity_on_hand,
+      reorder_point,
+      notes,
+      source_record_json
+    FROM catalog_items
+    WHERE item_kind IN (${placeholders})
+      AND COALESCE(status, 'active') != 'archived'
+    ORDER BY item_kind ASC, LOWER(COALESCE(name, '')) ASC
+  `).bind(...requestedTypes).all().catch(() => ({ results: [] })));
+
+  const summary = {
+    requested_types: requestedTypes,
+    scanned: rows.length,
+    synced: 0,
+    with_amazon_url: 0,
+    with_unit_cost: 0,
+    match_status_counts: {}
+  };
+
+  for (const row of rows) {
+    const sourceType = normalizeText(row.item_kind).toLowerCase();
+    const externalKey = normalizeText(row.source_key);
+    const itemName = normalizeText(row.name) || externalKey;
+    if (!sourceType || !externalKey || !itemName) continue;
+
+    const amazonArea = sourceType === 'tool' ? 'toolshed' : 'supplies';
+    const amazonMatch = getAmazonInventoryMatch(amazonArea, -1, itemName);
+    const amazon = extractAmazonInventoryFields(amazonMatch || row.source_record_json || {}, sourceType);
+    const amazonUrl = normalizeText(row.amazon_url || amazon.amazon_url);
+    const supplierName = normalizeText(amazon.seller_name || (amazonUrl ? 'Amazon.ca' : ''));
+    const supplierSku = normalizeText(amazon.amazon_asin);
+    const reorderNotes = buildInventorySyncNotes(row, amazon);
+    const stockUnitLabel = normalizeText(amazon.stock_unit_label) || (sourceType === 'tool' ? 'tool' : 'package');
+    const usageUnitLabel = normalizeText(amazon.usage_unit_label) || (sourceType === 'tool' ? 'use' : 'unit');
+    const usageUnitsPerStockUnit = Math.max(1, Number(amazon.usage_units_per_stock_unit || 1) || 1);
+    const unitCostCents = Math.max(0, Number(amazon.unit_cost_cents || 0) || 0);
+    const onHandQuantity = Math.max(0, Number(row.quantity_on_hand || 0) || 0);
+    const reorderPoint = Math.max(0, Number(row.reorder_point || 0) || 0);
+    const matchStatus = normalizeText(amazon.amazon_match_status || 'unmatched') || 'unmatched';
+    summary.match_status_counts[matchStatus] = (summary.match_status_counts[matchStatus] || 0) + 1;
+    if (amazonUrl) summary.with_amazon_url += 1;
+    if (unitCostCents > 0) summary.with_unit_cost += 1;
+
+    await db.prepare(`
+      INSERT INTO site_item_inventory (
+        source_type, external_key, item_name, category, source_url, amazon_url, image_url,
+        on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level, unit_cost_cents,
+        stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
+        supplier_name, supplier_sku, supplier_contact, reorder_notes, preferred_reorder_quantity,
+        is_on_reorder_list, do_not_reorder, do_not_reuse, reuse_status, reservation_notes,
+        is_active, last_seen_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, NULL, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(source_type, external_key) DO UPDATE SET
+        item_name = excluded.item_name,
+        category = excluded.category,
+        source_url = COALESCE(NULLIF(excluded.source_url, ''), site_item_inventory.source_url),
+        amazon_url = COALESCE(NULLIF(excluded.amazon_url, ''), site_item_inventory.amazon_url),
+        image_url = COALESCE(NULLIF(excluded.image_url, ''), site_item_inventory.image_url),
+        on_hand_quantity = CASE
+          WHEN COALESCE(site_item_inventory.on_hand_quantity, 0) = 0 THEN excluded.on_hand_quantity
+          ELSE site_item_inventory.on_hand_quantity
+        END,
+        reorder_level = CASE
+          WHEN COALESCE(site_item_inventory.reorder_level, 0) = 0 THEN excluded.reorder_level
+          ELSE site_item_inventory.reorder_level
+        END,
+        unit_cost_cents = CASE
+          WHEN COALESCE(excluded.unit_cost_cents, 0) > 0 THEN excluded.unit_cost_cents
+          ELSE site_item_inventory.unit_cost_cents
+        END,
+        stock_unit_label = COALESCE(NULLIF(excluded.stock_unit_label, ''), site_item_inventory.stock_unit_label),
+        usage_unit_label = COALESCE(NULLIF(excluded.usage_unit_label, ''), site_item_inventory.usage_unit_label),
+        usage_units_per_stock_unit = CASE
+          WHEN COALESCE(excluded.usage_units_per_stock_unit, 0) > 0 THEN excluded.usage_units_per_stock_unit
+          ELSE site_item_inventory.usage_units_per_stock_unit
+        END,
+        supplier_name = COALESCE(NULLIF(excluded.supplier_name, ''), site_item_inventory.supplier_name),
+        supplier_sku = COALESCE(NULLIF(excluded.supplier_sku, ''), site_item_inventory.supplier_sku),
+        supplier_contact = COALESCE(NULLIF(excluded.supplier_contact, ''), site_item_inventory.supplier_contact),
+        reorder_notes = COALESCE(NULLIF(excluded.reorder_notes, ''), site_item_inventory.reorder_notes),
+        is_active = 1,
+        last_seen_at = CURRENT_TIMESTAMP,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(
+      sourceType,
+      externalKey,
+      itemName,
+      normalizeText(row.category || row.subcategory) || null,
+      amazonUrl || null,
+      amazonUrl || null,
+      normalizeText(row.image_url) || null,
+      onHandQuantity,
+      reorderPoint,
+      unitCostCents,
+      stockUnitLabel,
+      usageUnitLabel,
+      usageUnitsPerStockUnit,
+      supplierName || null,
+      supplierSku || null,
+      amazonUrl ? 'Amazon.ca' : null,
+      reorderNotes || null
+    ).run();
+
+    summary.synced += 1;
+  }
+
+  return summary;
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
@@ -444,7 +658,7 @@ export async function onRequestPost(context) {
 
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
-  await ensureUsageColumns(db);
+  await ensureSiteInventorySchema(db);
 
   let body = {};
   try {
@@ -454,6 +668,19 @@ export async function onRequestPost(context) {
   }
 
   const action = normalizeText(body.action).toLowerCase();
+
+  if (action === 'sync_catalog') {
+    const sourceTypes = Array.isArray(body.source_types) ? body.source_types : [];
+    const summary = await syncCatalogItemsIntoInventory(db, { sourceTypes });
+
+    await auditAdminAction(env, request, adminUser, {
+      action_type: 'inventory_sync_catalog',
+      target_type: 'site_item_inventory',
+      details: summary
+    });
+
+    return json({ ok: true, ...summary });
+  }
 
   if (action === 'reserve_product_resources') {
     const productId = Number(body.product_id || 0);
@@ -607,7 +834,7 @@ export async function onRequestPatch(context) {
 
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
-  await ensureUsageColumns(db);
+  await ensureSiteInventorySchema(db);
 
   let body = {};
   try {

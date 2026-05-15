@@ -6,6 +6,7 @@ import {
   jsonResponse,
   normalizeText
 } from "../_lib/adminAudit.js";
+import { extractAmazonInventoryFields, getAmazonInventoryMatch } from "./_amazonInventoryMatches.js";
 
 function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
@@ -192,6 +193,7 @@ export async function onRequestGet(context) {
       ],
       "''"
     );
+    const inventoryAmazonUrlExpr = inventoryColumns.has("amazon_url") ? "sii.amazon_url" : "''";
     const inventoryIdExpr = inventoryColumns.has("site_item_inventory_id") ? "sii.site_item_inventory_id" : "0";
     const inventoryUnitCostExpr = coalesceSql(
       [
@@ -242,7 +244,7 @@ export async function onRequestGet(context) {
         SELECT product_id, name, slug, featured_image_url, status
         FROM products
         ORDER BY LOWER(COALESCE(name, '')) ASC
-        LIMIT 300
+        LIMIT 1200
       `).all()
     ).map((row) => ({
       product_id: Number(row.product_id || 0),
@@ -259,6 +261,8 @@ export async function onRequestGet(context) {
           ci.source_key,
           ci.name,
           ci.image_url,
+          ci.amazon_url,
+          ci.source_record_json,
           ci.category,
           ci.subcategory,
           ${inventoryIdExpr} AS site_item_inventory_id,
@@ -280,24 +284,38 @@ export async function onRequestGet(context) {
             OR LOWER(COALESCE(ci.subcategory, '')) LIKE ?
           )
         ORDER BY ci.item_kind ASC, LOWER(COALESCE(ci.name, '')) ASC
-        LIMIT 500
+        LIMIT 1200
       `).bind(query, like, like, like).all()
-    ).map((row) => ({
-      item_kind: row.item_kind || "",
-      source_key: row.source_key || "",
-      name: row.name || "",
-      image_url: normalizeImageUrl(env, row.image_url || ""),
-      category: row.category || "",
-      subcategory: row.subcategory || "",
-      site_item_inventory_id: Number(row.site_item_inventory_id || 0),
-      on_hand_quantity: parseNumber(row.on_hand_quantity, 0),
-      is_on_reorder_list: Number(row.is_on_reorder_list || 0),
-      do_not_reuse: Number(row.do_not_reuse || 0),
-      unit_cost_cents: parseMoneyCents(row.unit_cost_cents),
-      usage_unit_label: row.usage_unit_label || "unit",
-      stock_unit_label: row.stock_unit_label || "stock unit",
-      usage_units_per_stock_unit: Math.max(1, parseNumber(row.usage_units_per_stock_unit, 1))
-    }));
+    ).map((row) => {
+      const amazonArea = row.item_kind === "tool" ? "toolshed" : "supplies";
+      const amazonMatch = getAmazonInventoryMatch(amazonArea, -1, row.name || "");
+      const amazon = extractAmazonInventoryFields(amazonMatch || row.source_record_json || {}, row.item_kind || "");
+      const inventoryCostCents = parseMoneyCents(row.unit_cost_cents);
+      const inventoryUsageUnits = Math.max(1, parseNumber(row.usage_units_per_stock_unit, 1));
+      return {
+        item_kind: row.item_kind || "",
+        source_key: row.source_key || "",
+        name: row.name || "",
+        image_url: normalizeImageUrl(env, row.image_url || ""),
+        amazon_url: row.amazon_url || amazon.amazon_url || "",
+        amazon_asin: amazon.amazon_asin || "",
+        amazon_title: amazon.amazon_title || "",
+        amazon_match_status: amazon.amazon_match_status || "",
+        supplier_name: amazon.seller_name || "",
+        latest_order_id: amazon.latest_order_id || "",
+        latest_purchase_date: amazon.latest_purchase_date || "",
+        category: row.category || "",
+        subcategory: row.subcategory || "",
+        site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+        on_hand_quantity: parseNumber(row.on_hand_quantity, 0),
+        is_on_reorder_list: Number(row.is_on_reorder_list || 0),
+        do_not_reuse: Number(row.do_not_reuse || 0),
+        unit_cost_cents: inventoryCostCents || amazon.unit_cost_cents || 0,
+        usage_unit_label: (row.usage_unit_label && row.usage_unit_label !== "unit") ? row.usage_unit_label : (amazon.usage_unit_label || row.usage_unit_label || "unit"),
+        stock_unit_label: (row.stock_unit_label && row.stock_unit_label !== "stock unit") ? row.stock_unit_label : (amazon.stock_unit_label || row.stock_unit_label || "stock unit"),
+        usage_units_per_stock_unit: inventoryUsageUnits > 1 ? inventoryUsageUnits : Math.max(1, parseNumber(amazon.usage_units_per_stock_unit, 1))
+      };
+    });
 
     const canReadInventoryOnly =
       inventoryColumns.size > 0 &&
@@ -317,6 +335,7 @@ export async function onRequestGet(context) {
           ${inventoryReorderExpr} AS is_on_reorder_list,
           ${inventoryDoNotReuseExpr} AS do_not_reuse,
           ${inventoryImageExpr} AS image_url,
+          ${inventoryAmazonUrlExpr} AS amazon_url,
           ${inventoryUnitCostExpr} AS unit_cost_cents,
           ${inventoryUsageUnitLabelExpr} AS usage_unit_label,
           ${inventoryStockUnitLabelExpr} AS stock_unit_label,
@@ -337,7 +356,7 @@ export async function onRequestGet(context) {
               AND ci.source_key = ${inventoryExternalKeyExpr}
           )` : ""}
         ORDER BY LOWER(COALESCE(${inventoryNameExpr}, '')) ASC
-        LIMIT 300
+        LIMIT 1200
       `
       : null;
 
@@ -361,7 +380,11 @@ export async function onRequestGet(context) {
             unit_cost_cents: parseMoneyCents(row.unit_cost_cents),
             usage_unit_label: row.usage_unit_label || "unit",
             stock_unit_label: row.stock_unit_label || "stock unit",
-            usage_units_per_stock_unit: Math.max(1, parseNumber(row.usage_units_per_stock_unit, 1))
+            usage_units_per_stock_unit: Math.max(1, parseNumber(row.usage_units_per_stock_unit, 1)),
+            amazon_url: row.amazon_url || "",
+            amazon_asin: "",
+            amazon_title: "",
+            amazon_match_status: ""
           };
         })
       : [];
