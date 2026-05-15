@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let rendered = false;
   let catalogSeedOptions = [];
   let categorySeedOptions = [];
+  let seedSearchText = '';
 
   function setMessage(message, isError = false) {
     const el = document.getElementById('siteInventoryMessage');
@@ -66,7 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resourceSeedLabel(item = {}) {
     const stockLabel = String(item.stock_unit_label || 'unit').trim() || 'unit';
-    return `${item.item_name || item.name || item.external_key || 'Item'} (${item.source_type || 'other'} • ${Number(item.on_hand_quantity || 0)} ${stockLabel})`;
+    const cost = Number(item.unit_cost_cents || 0) > 0 ? ` • ${fmtMoney(item.unit_cost_cents)}` : '';
+    const asin = item.amazon_asin ? ` • ASIN ${item.amazon_asin}` : '';
+    const status = item.amazon_match_status ? ` • ${item.amazon_match_status}` : '';
+    return `${item.item_name || item.name || item.external_key || 'Item'} (${item.source_type || 'other'} • ${Number(item.on_hand_quantity || 0)} ${stockLabel}${cost}${asin}${status})`;
   }
 
   function renderSeedDropdowns() {
@@ -78,9 +82,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (!itemSelect) return;
     const sourceType = String(typeSelect?.value || 'tool').trim();
-    const filtered = catalogSeedOptions.filter((item) => !sourceType || item.source_type === sourceType);
+    const query = String(seedSearchText || '').trim().toLowerCase();
+    const filtered = catalogSeedOptions
+      .filter((item) => !sourceType || item.source_type === sourceType)
+      .filter((item) => {
+        if (!query) return true;
+        const haystack = [
+          item.item_name,
+          item.external_key,
+          item.category,
+          item.amazon_asin,
+          item.amazon_title,
+          item.amazon_match_status,
+          item.supplier_name
+        ].join(' ').toLowerCase();
+        return haystack.includes(query);
+      });
     if (!filtered.length) {
-      itemSelect.innerHTML = '<option value="">No matching tool/supply records found yet</option>';
+      itemSelect.innerHTML = '<option value="">No matching tool/supply records found. Try a shorter search.</option>';
       return;
     }
     itemSelect.innerHTML = '<option value="">Choose an existing tool or supply…</option>' + filtered.map((item) => `<option value="${escapeHtml(item.external_key)}">${escapeHtml(resourceSeedLabel(item))}</option>`).join('');
@@ -96,9 +115,21 @@ document.addEventListener('DOMContentLoaded', () => {
     setInputValue('siteInventoryItemName', item.item_name || '');
     setInputValue('siteInventoryCategory', item.category || '');
     setInputValue('siteInventoryImageUrl', item.image_url || '');
+    setInputValue('siteInventorySourceUrl', item.amazon_url || '');
+    setInputValue('siteInventoryAmazonUrl', item.amazon_url || '');
+    setInputValue('siteInventoryUnitCost', Number(item.unit_cost_cents || 0));
     setInputValue('siteInventoryStockUnitLabel', item.stock_unit_label || 'unit');
     setInputValue('siteInventoryUsageUnitLabel', item.usage_unit_label || 'unit');
     setInputValue('siteInventoryUsageUnitsPerStock', Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1));
+    setInputValue('siteInventorySupplierName', item.supplier_name || (item.amazon_url ? 'Amazon.ca' : ''));
+    setInputValue('siteInventorySupplierSku', item.amazon_asin || '');
+    setInputValue('siteInventorySupplierContact', item.amazon_url ? 'Amazon.ca' : '');
+    const noteBits = [];
+    if (item.amazon_match_status) noteBits.push(`Amazon CSV ${item.amazon_match_status}`);
+    if (item.amazon_title) noteBits.push(`Amazon title: ${item.amazon_title}`);
+    if (item.latest_order_id) noteBits.push(`Latest order: ${item.latest_order_id}`);
+    if (item.latest_purchase_date) noteBits.push(`Latest purchase: ${item.latest_purchase_date}`);
+    if (noteBits.length) setInputValue('siteInventoryNotes', noteBits.join(' | '));
     const seedSelect = document.getElementById('siteInventorySeedItem');
     if (seedSelect) seedSelect.value = item.external_key || '';
     syncCategoryPresetSelection(item.category || '');
@@ -128,9 +159,17 @@ document.addEventListener('DOMContentLoaded', () => {
         category: String(item.category || item.subcategory || '').trim(),
         image_url: String(item.image_url || '').trim(),
         on_hand_quantity: Number(item.on_hand_quantity || 0),
+        unit_cost_cents: Number(item.unit_cost_cents || 0),
         stock_unit_label: String(item.stock_unit_label || 'unit').trim() || 'unit',
         usage_unit_label: String(item.usage_unit_label || 'unit').trim() || 'unit',
-        usage_units_per_stock_unit: Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1)
+        usage_units_per_stock_unit: Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1),
+        amazon_url: String(item.amazon_url || '').trim(),
+        amazon_asin: String(item.amazon_asin || '').trim(),
+        amazon_title: String(item.amazon_title || '').trim(),
+        amazon_match_status: String(item.amazon_match_status || '').trim(),
+        supplier_name: String(item.supplier_name || '').trim(),
+        latest_order_id: String(item.latest_order_id || '').trim(),
+        latest_purchase_date: String(item.latest_purchase_date || '').trim()
       })).filter((item) => item.external_key && item.item_name);
       categorySeedOptions = [...new Set(catalogSeedOptions.map((item) => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
       renderSeedDropdowns();
@@ -348,8 +387,9 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <form id="siteInventoryForm" class="grid" style="gap:12px">
-          <div class="grid cols-4" style="gap:12px">
+          <div class="grid cols-5" style="gap:12px">
             <div><label class="small" for="siteInventorySourceType">Source Type</label><select id="siteInventorySourceType"><option value="tool">Tool</option><option value="supply">Supply</option><option value="product">Product</option><option value="other">Other</option></select></div>
+            <div><label class="small" for="siteInventorySeedSearch">Search existing tool / supply</label><input id="siteInventorySeedSearch" type="search" placeholder="type name, category, ASIN, Amazon title" /></div>
             <div><label class="small" for="siteInventorySeedItem">Existing tool / supply</label><select id="siteInventorySeedItem"><option value="">Loading existing tool &amp; supply records…</option></select></div>
             <div><label class="small" for="siteInventoryExternalKey">External Key</label><input id="siteInventoryExternalKey" type="text" placeholder="sku, source key, item id" /></div>
             <div><label class="small" for="siteInventoryItemName">Item Name</label><input id="siteInventoryItemName" type="text" /></div>
@@ -401,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="grid cols-4" style="gap:12px;align-items:end;margin-top:16px">
           <div><label class="small" for="siteInventorySearch">Search</label><input id="siteInventorySearch" type="text" placeholder="name, category, supplier" /></div>
           <div><label class="small" for="siteInventoryStockView">Stock view</label><select id="siteInventoryStockView"><option value="">All items</option><option value="low">Low stock</option><option value="reorder">Reorder list</option><option value="no_reuse">Do not reuse</option><option value="inactive">Inactive</option></select></div>
-          <div style="align-self:end;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh</button><button class="btn" type="button" id="siteInventorySyncToolsButton">Sync tools</button><button class="btn" type="button" id="siteInventorySyncSuppliesButton">Sync supplies</button></div>
+          <div style="align-self:end;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh</button><button class="btn" type="button" id="siteInventorySyncToolsButton">Sync tools</button><button class="btn" type="button" id="siteInventorySyncSuppliesButton">Sync supplies</button><button class="btn primary" type="button" id="siteInventorySyncAllButton">Sync all tools + supplies</button></div>
         </div>
 
         <div class="card" style="margin-top:16px">
@@ -476,10 +516,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', loadList);
     document.getElementById('siteInventoryStockView')?.addEventListener('change', loadList);
     document.getElementById('siteInventorySourceType')?.addEventListener('change', () => { renderSeedDropdowns(); });
+    document.getElementById('siteInventorySeedSearch')?.addEventListener('input', debounce(() => {
+      seedSearchText = document.getElementById('siteInventorySeedSearch')?.value || '';
+      renderSeedDropdowns();
+    }, 150));
     document.getElementById('siteInventorySeedItem')?.addEventListener('change', (event) => { applySeedItemByKey(event.target.value || ''); });
     document.getElementById('siteInventoryCategoryPreset')?.addEventListener('change', (event) => { if (event.target.value) setInputValue('siteInventoryCategory', event.target.value); });
     document.getElementById('siteInventorySyncToolsButton')?.addEventListener('click', () => syncCatalog(['tool']));
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
+    document.getElementById('siteInventorySyncAllButton')?.addEventListener('click', () => syncCatalog(['tool', 'supply']));
     document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(loadList, 250));
     document.getElementById('siteInventoryResetButton')?.addEventListener('click', () => document.getElementById('siteInventoryForm')?.reset());
     document.getElementById('siteInventoryBulkCostForm')?.addEventListener('submit', onBulkCostApply);
@@ -541,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to sync catalog items.');
-      setMessage(`Synced ${Number(data.synced || 0)} ${sourceTypes.join('/')} inventory items.`);
+      setMessage(`Synced ${Number(data.synced || 0)} ${sourceTypes.join('/')} inventory items. ${Number(data.with_unit_cost || 0)} have Amazon unit costs.`);
       await loadList();
     } catch (err) {
       setMessage(err.message || 'Failed to sync catalog items.', true);
