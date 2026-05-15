@@ -8,7 +8,7 @@ function rows(result) {
 
 export function cleanStatementProvider(value) {
   const raw = normalizeText(value).toLowerCase();
-  return ['bank', 'paypal', 'stripe', 'etsy', 'square', 'other'].includes(raw) ? raw : 'other';
+  return ['bank', 'paypal', 'stripe', 'etsy', 'square', 'manual', 'other'].includes(raw) ? raw : 'other';
 }
 
 export function cleanStatementImportStatus(value) {
@@ -259,6 +259,24 @@ function cleanDate(value) {
   return '';
 }
 
+function reconciliationConfidence(statementCents, bookCents, toleranceCents) {
+  const statement = Number(statementCents || 0);
+  const book = Number(bookCents || 0);
+  const tolerance = Math.max(0, Number(toleranceCents || 0));
+  const difference = statement - book;
+  const absDifference = Math.abs(difference);
+  if (absDifference === 0) {
+    return { difference_cents: difference, match_confidence: 1, match_bucket: 'exact', unresolved_item_count: 0, review_status: 'reviewed', severity: 'info' };
+  }
+  if (absDifference <= tolerance) {
+    return { difference_cents: difference, match_confidence: 0.9, match_bucket: 'likely', unresolved_item_count: 0, review_status: 'reviewed', severity: 'info' };
+  }
+  if (absDifference <= Math.max(tolerance * 3, 1000)) {
+    return { difference_cents: difference, match_confidence: 0.55, match_bucket: 'partial', unresolved_item_count: 1, review_status: 'needs_accountant', severity: 'warning' };
+  }
+  return { difference_cents: difference, match_confidence: 0.2, match_bucket: 'manual_review', unresolved_item_count: 1, review_status: 'needs_accountant', severity: 'critical' };
+}
+
 function summarizeImportRows(provider, parsedRows) {
   const normalizedProvider = cleanStatementProvider(provider);
   const rowsOut = [];
@@ -428,8 +446,9 @@ export async function autoMatchStatementImport(db, statementImport, adminUserId 
   for (const target of targets) {
     const review = await getReviewByKey(db, target.reconciliation_type, periodMonth, target.scope_key);
     const bookAmount = Number(review?.book_amount_cents || review?.compared_amount_cents || 0);
-    const difference = Number(target.statement_amount_cents || 0) - bookAmount;
-    const unresolved = Math.abs(difference) > Number(target.tolerance_cents || 0) ? 1 : 0;
+    const confidence = reconciliationConfidence(target.statement_amount_cents, bookAmount, target.tolerance_cents);
+    const difference = confidence.difference_cents;
+    const unresolved = confidence.unresolved_item_count;
     const detail = (() => {
       try { return JSON.parse(String(review?.detail_json || '{}')); } catch { return {}; }
     })();
@@ -437,6 +456,9 @@ export async function autoMatchStatementImport(db, statementImport, adminUserId 
     detail.statement_source_filename = statementImport.source_filename || '';
     detail.statement_provider_scope = providerScope;
     detail.statement_imported_row_count = Number(statementImport.row_count || 0);
+    detail.statement_match_confidence = confidence.match_confidence;
+    detail.statement_match_bucket = confidence.match_bucket;
+    detail.statement_match_difference_cents = difference;
 
     await db.prepare(`
       INSERT INTO accounting_reconciliation_reviews (
@@ -463,10 +485,10 @@ export async function autoMatchStatementImport(db, statementImport, adminUserId 
       target.reconciliation_type,
       periodMonth,
       target.scope_key,
-      unresolved ? 'needs_accountant' : 'reviewed',
+      confidence.review_status,
       target.note,
       statementReference,
-      unresolved ? 'statement_import_difference' : 'statement_import_matched',
+      unresolved ? `statement_import_${confidence.match_bucket}` : `statement_import_${confidence.match_bucket}`,
       JSON.stringify(detail),
       Number(review?.attachment_count || 0),
       Number(target.statement_amount_cents || 0),
@@ -489,7 +511,7 @@ export async function autoMatchStatementImport(db, statementImport, adminUserId 
         scope_key: target.scope_key,
         provider_scope: providerScope,
         exception_status: 'open',
-        severity: Math.abs(difference) > Number(target.tolerance_cents || 0) * 3 ? 'critical' : 'warning',
+        severity: confidence.severity || 'warning',
         reference_label: statementReference,
         statement_amount_cents: Number(target.statement_amount_cents || 0),
         book_amount_cents: bookAmount,
@@ -508,6 +530,9 @@ export async function autoMatchStatementImport(db, statementImport, adminUserId 
       book_amount_cents: bookAmount,
       difference_cents: difference,
       unresolved_item_count: unresolved,
+      match_confidence: confidence.match_confidence,
+      match_bucket: confidence.match_bucket,
+      review_status: confidence.review_status,
     });
   }
 

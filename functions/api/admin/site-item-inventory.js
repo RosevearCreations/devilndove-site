@@ -122,6 +122,7 @@ function shape(row = {}) {
     available_quantity: Math.max(0, onHand - reserved),
     reorder_level: reorder,
     unit_cost_cents: Number(row.unit_cost_cents || 0),
+    unit_cost_dollars: (Number(row.unit_cost_cents || 0) / 100).toFixed(2),
     stock_unit_label: row.stock_unit_label || 'unit',
     usage_unit_label: row.usage_unit_label || 'unit',
     usage_units_per_stock_unit: Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1),
@@ -145,7 +146,30 @@ function shape(row = {}) {
   };
 }
 
+function normalizeMovementType(value) {
+  const raw = normalizeText(value).toLowerCase();
+  const map = {
+    receive: 'incoming',
+    received: 'incoming',
+    reorder_request: 'incoming',
+    reservation_add: 'reserve',
+    reservation_release: 'release',
+    consume: 'adjustment',
+    update: 'adjustment',
+    sync: 'adjustment'
+  };
+  const mapped = map[raw] || raw || 'adjustment';
+  return ['create', 'adjustment', 'reserve', 'release', 'incoming', 'delete', 'correction'].includes(mapped) ? mapped : 'adjustment';
+}
+
 async function logMovement(db, payload = {}) {
+  const originalMovementType = normalizeText(payload.movement_type || 'adjustment').toLowerCase();
+  const movementType = normalizeMovementType(originalMovementType);
+  const note = [
+    payload.note || null,
+    movementType !== originalMovementType ? `Original action: ${originalMovementType}.` : null
+  ].filter(Boolean).join(' ');
+
   await db.prepare(`
     INSERT INTO site_inventory_movements (
       site_item_inventory_id, source_type, external_key, item_name, movement_type,
@@ -159,7 +183,7 @@ async function logMovement(db, payload = {}) {
     payload.source_type || null,
     payload.external_key || null,
     payload.item_name || null,
-    payload.movement_type || 'adjustment',
+    movementType,
     Number(payload.quantity_delta || 0),
     Number(payload.previous_on_hand_quantity || 0),
     Number(payload.new_on_hand_quantity || 0),
@@ -167,7 +191,7 @@ async function logMovement(db, payload = {}) {
     Number(payload.new_reserved_quantity || 0),
     Number(payload.previous_incoming_quantity || 0),
     Number(payload.new_incoming_quantity || 0),
-    payload.note || null,
+    note || null,
     payload.actor_user_id || null
   ).run().catch(() => null);
 }
@@ -777,7 +801,7 @@ export async function onRequestPost(context) {
     normalizeText(body.source_url) || null,
     normalizeText(body.amazon_url) || null,
     normalizeText(body.image_url) || null,
-    Number(body.on_hand_quantity || 0),
+    ['tool', 'supply'].includes(sourceType) ? Math.max(1, Number(body.on_hand_quantity || 0) || 0) : Number(body.on_hand_quantity || 0),
     Number(body.reserved_quantity || 0),
     Number(body.incoming_quantity || 0),
     Number(body.reorder_level || 0),
