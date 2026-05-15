@@ -543,3 +543,13 @@ body.nav-mobile-open{overflow:hidden}
 .release-sanity-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03)}
 #migration-ledger-card textarea,#release-sanity-card textarea{min-height:68px}
 @media (max-width:760px){#migrationLedgerForm.grid.cols-2{grid-template-columns:1fr}.release-sanity-summary{align-items:flex-start}}
+
+
+/* Build 125 local-intent landing pages */
+.local-hero{display:grid;gap:12px}
+.local-hero h1{max-width:900px}
+.local-cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.local-intent-grid{margin-top:18px}
+.local-link-card{margin-top:18px}
+.local-link-card ul.clean{columns:2;column-gap:28px;margin-bottom:14px}
+@media (max-width:720px){.local-link-card ul.clean{columns:1}.local-cta-row .btn{width:100%;justify-content:center}}

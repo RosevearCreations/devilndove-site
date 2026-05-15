@@ -1,6 +1,6 @@
 # Accounting Templates
 
-Current sync: 2026-05-14 — Build 124.
+Current sync: 2026-05-14 — Build 125.
 
 ## Purpose
 This folder holds safe accounting template/reference files. Private statement exports, Amazon CSVs, accountant packages, and receipts should not be deployed publicly.
@@ -20,3 +20,7 @@ These profiles are stored in D1 table `accounting_statement_provider_profiles` a
 - Add sanitized sample headers for each provider.
 - Add manual CSV templates for expenses, payouts, refunds, fees, and HST review.
 - Add accountant export manifest templates once the export package is complete.
+
+## Build 125 note
+
+Build 125 keeps Amazon order/cost data private, adds admin review/apply controls for Amazon staging rows, records inventory cost history, expands reconciliation and journal guardrails, and adds local-intent SEO pages plus `sitemap.xml`. Keep schema files and active Markdown updated on every pass.
