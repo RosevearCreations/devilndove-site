@@ -93,7 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resourceOptionLabel(item) {
     const usage = describeUsageUnit(item);
-    return `${item.name || item.source_key} (${item.item_kind || 'item'} • ${Number(item.on_hand_quantity || 0)} ${usage.stockLabel})`;
+    const cost = Number(item.unit_cost_cents || 0) > 0 ? ` • ${formatMoney(item.unit_cost_cents)}` : '';
+    const asin = item.amazon_asin ? ` • ASIN ${item.amazon_asin}` : '';
+    return `${item.name || item.source_key} (${item.item_kind || 'item'} • ${Number(item.on_hand_quantity || 0)} ${usage.stockLabel}${cost}${asin})`;
   }
 
   function render() {
@@ -229,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <strong>${escapeHtml(item.name)}</strong>
             <div class="small">${escapeHtml(item.item_kind)} • ${escapeHtml(item.category || item.subcategory || '')}</div>
             <div class="small">On hand ${Number(item.on_hand_quantity || 0)} ${escapeHtml(usageMeta.stockLabel)} • 1 ${escapeHtml(usageMeta.stockLabel)} = ${usageMeta.perStock} ${escapeHtml(usageMeta.label)}</div>
+            <div class="small">Cost ${escapeHtml(formatMoney(item.unit_cost_cents || 0))} per ${escapeHtml(usageMeta.stockLabel)}${item.amazon_asin ? ` • ASIN ${escapeHtml(item.amazon_asin)}` : ''}</div>
             <div class="small">${Number(item.is_on_reorder_list || 0) === 1 ? 'On reorder list' : 'Normal stock'}${Number(item.do_not_reuse || 0) === 1 ? ' • do not reuse' : ''}</div>
           </div>
         </button>`;

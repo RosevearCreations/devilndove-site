@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'CAD' }).format(Number(cents || 0) / 100);
   }
 
+  function centsToDollarInput(cents) {
+    const value = Number(cents || 0);
+    if (!Number.isFinite(value) || value <= 0) return '0.00';
+    return (value / 100).toFixed(2);
+  }
+
   function describeStockUsage(item = {}) {
     const stockLabel = String(item?.stock_unit_label || 'unit').trim() || 'unit';
     const usageLabel = String(item?.usage_unit_label || 'unit').trim() || 'unit';
@@ -115,9 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
     setInputValue('siteInventoryItemName', item.item_name || '');
     setInputValue('siteInventoryCategory', item.category || '');
     setInputValue('siteInventoryImageUrl', item.image_url || '');
+    setInputValue('siteInventoryOnHand', Math.max(1, Number(item.on_hand_quantity || 0) || 1));
     setInputValue('siteInventorySourceUrl', item.amazon_url || '');
     setInputValue('siteInventoryAmazonUrl', item.amazon_url || '');
-    setInputValue('siteInventoryUnitCost', Number(item.unit_cost_cents || 0));
+    setInputValue('siteInventoryUnitCost', centsToDollarInput(item.unit_cost_cents || 0));
     setInputValue('siteInventoryStockUnitLabel', item.stock_unit_label || 'unit');
     setInputValue('siteInventoryUsageUnitLabel', item.usage_unit_label || 'unit');
     setInputValue('siteInventoryUsageUnitsPerStock', Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1));
@@ -406,14 +413,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="small" style="align-self:end">Choose an existing tool or supply above to prefill the form, then adjust stock, supplier, and cost details.</div>
           </div>
           <div class="grid cols-5" style="gap:12px">
-            <div><label class="small" for="siteInventoryOnHand">On Hand</label><input id="siteInventoryOnHand" type="number" min="0" step="1" value="0" /></div>
+            <div><label class="small" for="siteInventoryOnHand">On Hand</label><input id="siteInventoryOnHand" type="number" min="0" step="1" value="1" /></div>
             <div><label class="small" for="siteInventoryReservedInput">Reserved</label><input id="siteInventoryReservedInput" type="number" min="0" step="1" value="0" /></div>
             <div><label class="small" for="siteInventoryIncomingInput">Incoming</label><input id="siteInventoryIncomingInput" type="number" min="0" step="1" value="0" /></div>
             <div><label class="small" for="siteInventoryReorder">Reorder At</label><input id="siteInventoryReorder" type="number" min="0" step="1" value="0" /></div>
             <div><label class="small" for="siteInventoryPreferredReorderQty">Preferred Reorder Qty</label><input id="siteInventoryPreferredReorderQty" type="number" min="0" step="1" value="0" /></div>
           </div>
           <div class="grid cols-6" style="gap:12px">
-            <div><label class="small" for="siteInventoryUnitCost">Unit Cost (cents)</label><input id="siteInventoryUnitCost" type="number" min="0" step="1" value="0" /></div>
+            <div><label class="small" for="siteInventoryUnitCost">Unit Cost (CAD)</label><input id="siteInventoryUnitCost" type="number" min="0" step="0.01" value="0.00" placeholder="33.99" /></div>
             <div><label class="small" for="siteInventoryStockUnitLabel">Stock Unit</label><input id="siteInventoryStockUnitLabel" type="text" placeholder="block, spool, bag, bottle" value="unit" /></div>
             <div><label class="small" for="siteInventoryUsageUnitLabel">Usage Unit</label><input id="siteInventoryUsageUnitLabel" type="text" placeholder="cup, wick, gram, use" value="unit" /></div>
             <div><label class="small" for="siteInventoryUsageUnitsPerStock">Usage Units Per Stock Unit</label><input id="siteInventoryUsageUnitsPerStock" type="number" min="1" step="0.001" value="1" /></div>
@@ -551,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
       incoming_quantity: Number(document.getElementById('siteInventoryIncomingInput')?.value || 0),
       reorder_level: Number(document.getElementById('siteInventoryReorder')?.value || 0),
       preferred_reorder_quantity: Number(document.getElementById('siteInventoryPreferredReorderQty')?.value || 0),
-      unit_cost_cents: Number(document.getElementById('siteInventoryUnitCost')?.value || 0),
+      unit_cost_cents: dollarsToCents(document.getElementById('siteInventoryUnitCost')?.value || '0') || 0,
       stock_unit_label: document.getElementById('siteInventoryStockUnitLabel')?.value || 'unit',
       usage_unit_label: document.getElementById('siteInventoryUsageUnitLabel')?.value || 'unit',
       usage_units_per_stock_unit: Math.max(1, Number(document.getElementById('siteInventoryUsageUnitsPerStock')?.value || 1) || 1),
@@ -586,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to sync catalog items.');
-      setMessage(`Synced ${Number(data.synced || 0)} ${sourceTypes.join('/')} inventory items. ${Number(data.with_unit_cost || 0)} have Amazon unit costs.`);
+      setMessage(`Synced ${Number(data.synced || 0)} ${sourceTypes.join('/')} inventory items. ${Number(data.with_unit_cost || 0)} have Amazon unit costs. ${Number(data.defaulted_on_hand_to_one || 0)} were set to at least 1 in stock.`);
       await loadList();
     } catch (err) {
       setMessage(err.message || 'Failed to sync catalog items.', true);
@@ -607,6 +614,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('siteInventoryForm')?.reset();
       const seedEl = document.getElementById('siteInventorySeedItem'); if (seedEl) seedEl.value = '';
       const categoryPresetEl = document.getElementById('siteInventoryCategoryPreset'); if (categoryPresetEl) categoryPresetEl.value = '';
+      const onHandEl = document.getElementById('siteInventoryOnHand'); if (onHandEl) onHandEl.value = '1';
+      const unitCostEl = document.getElementById('siteInventoryUnitCost'); if (unitCostEl) unitCostEl.value = '0.00';
       const stockUnitEl = document.getElementById('siteInventoryStockUnitLabel'); if (stockUnitEl) stockUnitEl.value = 'unit';
       const usageUnitEl = document.getElementById('siteInventoryUsageUnitLabel'); if (usageUnitEl) usageUnitEl.value = 'unit';
       const usageUnitsEl = document.getElementById('siteInventoryUsageUnitsPerStock'); if (usageUnitsEl) usageUnitsEl.value = '1';
@@ -626,12 +635,12 @@ document.addEventListener('DOMContentLoaded', () => {
       siteInventoryImageUrl: item.image_url || '',
       siteInventorySourceUrl: item.source_url || '',
       siteInventoryAmazonUrl: item.amazon_url || '',
-      siteInventoryOnHand: item.on_hand_quantity || 0,
+      siteInventoryOnHand: Math.max(1, Number(item.on_hand_quantity || 0) || 1),
       siteInventoryReservedInput: item.reserved_quantity || 0,
       siteInventoryIncomingInput: item.incoming_quantity || 0,
       siteInventoryReorder: item.reorder_level || 0,
       siteInventoryPreferredReorderQty: item.preferred_reorder_quantity || 0,
-      siteInventoryUnitCost: item.unit_cost_cents || 0,
+      siteInventoryUnitCost: centsToDollarInput(item.unit_cost_cents || 0),
       siteInventoryStockUnitLabel: item.stock_unit_label || 'unit',
       siteInventoryUsageUnitLabel: item.usage_unit_label || 'unit',
       siteInventoryUsageUnitsPerStock: item.usage_units_per_stock_unit || 1,
