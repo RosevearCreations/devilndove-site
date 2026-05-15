@@ -14,8 +14,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -33,8 +31,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -50,11 +46,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0DDTG8BDN",
+    "amazon_asin": "B0DDTG8BDN",
+    "notes": "Amazon CSV safe match 83.33% | ASIN B0DDTG8BDN | latest order 702-0717034-9287426 on 2026-03-04 | latest PPU CAD 24.7 | matched ASIN net total CAD 24.7"
   },
   {
     "item_group_key_strict": "creality ender pro",
@@ -71,8 +65,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -88,11 +80,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BGHML5WJ",
+    "amazon_asin": "B0BGHML5WJ",
+    "notes": "Amazon CSV safe match 81.62% | ASIN B0BGHML5WJ | latest order 702-8293020-6777850 on 2022-12-03 | latest PPU CAD 79.59 | matched ASIN net total CAD 89.94"
   },
   {
     "item_group_key_strict": "creality official cr",
@@ -109,8 +99,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -126,11 +114,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09LSCR4GC",
+    "amazon_asin": "B09LSCR4GC",
+    "notes": "Amazon CSV safe match 96.49% | ASIN B09LSCR4GC | latest order 701-3232139-3140238 on 2022-08-22 | latest PPU CAD 52.89 | matched ASIN net total CAD 59.77"
   },
   {
     "item_group_key_strict": "ender5pro ender pro",
@@ -147,8 +133,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -166,8 +150,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -185,8 +167,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -202,11 +182,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09686Z5R3",
+    "amazon_asin": "B09686Z5R3",
+    "notes": "Amazon CSV safe match 98.7% | ASIN B09686Z5R3 | latest order 701-1930568-0172232 on 2022-11-12 | latest PPU CAD 84.99 | matched ASIN net total CAD 96.04"
   },
   {
     "item_group_key_strict": "spider hotend",
@@ -223,8 +201,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -242,8 +218,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -261,8 +235,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -280,8 +252,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -299,8 +269,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -318,8 +286,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -335,11 +301,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08141BRSB",
+    "amazon_asin": "B08141BRSB",
+    "notes": "Amazon CSV safe match 96.03% | ASIN B08141BRSB | latest order 701-0843627-6551442 on 2022-11-25 | latest PPU CAD 22.99 | matched ASIN net total CAD 25.98"
   },
   {
     "item_group_key_strict": "alexa air quality",
@@ -356,8 +320,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -375,8 +337,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -392,11 +352,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09N6QBTXM",
+    "amazon_asin": "B09N6QBTXM",
+    "notes": "Amazon CSV safe match 81.87% | ASIN B09N6QBTXM | latest order 702-2821268-0543468 on 2023-07-12 | latest PPU CAD 74.99 | matched ASIN net total CAD 42.38"
   },
   {
     "item_group_key_strict": "blink compactindoorplug insmartsecuritycamera",
@@ -413,8 +371,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -432,8 +388,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -451,8 +405,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -470,8 +422,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -489,8 +439,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -508,8 +456,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -525,11 +471,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0973DV11T",
+    "amazon_asin": "B0973DV11T",
+    "notes": "Amazon CSV safe match 85.04% | ASIN B0973DV11T | latest order 702-7250485-2166624 on 2022-12-08 | latest PPU CAD 188.98 | matched ASIN net total CAD 427.1"
   },
   {
     "item_group_key_strict": "fitueyes mobile floor",
@@ -546,8 +490,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -565,8 +507,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -584,8 +524,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -603,8 +541,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -620,11 +556,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B086MCFH4P",
+    "amazon_asin": "B086MCFH4P",
+    "notes": "Amazon CSV safe match 84.84% | ASIN B086MCFH4P | latest order 701-4302880-4307404 on 2022-07-13 | latest PPU CAD 24.38 | matched ASIN net total CAD 24.38"
   },
   {
     "item_group_key_strict": "logitech c hd",
@@ -641,8 +575,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -658,11 +590,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B085TFF7M1",
+    "amazon_asin": "B085TFF7M1",
+    "notes": "Amazon CSV safe match 79.09% | ASIN B085TFF7M1 | latest order 701-5958716-1085866 on 2022-09-15 | latest PPU CAD 79.99 | matched ASIN net total CAD 90.39"
   },
   {
     "item_group_key_strict": "netvue bird feeder",
@@ -677,11 +607,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B4ZJ3P4R",
+    "amazon_asin": "B0B4ZJ3P4R",
+    "notes": "Amazon CSV safe match 77.55% | ASIN B0B4ZJ3P4R | latest order 702-2613974-5417013 on 2022-12-08 | latest PPU CAD 287.99 | matched ASIN net total CAD 325.43"
   },
   {
     "item_group_key_strict": "overhead camera mount",
@@ -698,8 +626,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -715,11 +641,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07193B7TL",
+    "amazon_asin": "B07193B7TL",
+    "notes": "Amazon CSV safe match 84.93% | ASIN B07193B7TL | latest order 702-2353956-3646635 on 2022-12-03 | latest PPU CAD 44.95 | matched ASIN net total CAD 67.74"
   },
   {
     "item_group_key_strict": "samsung odyssey g",
@@ -734,11 +658,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B088HHZBGJ",
+    "amazon_asin": "B088HHZBGJ",
+    "notes": "Amazon CSV safe match 92.09% | ASIN B088HHZBGJ | latest order 701-1930568-0172232 on 2022-11-12 | latest PPU CAD 699.99 | matched ASIN net total CAD 791.74"
   },
   {
     "item_group_key_strict": "scanner",
@@ -755,8 +677,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -774,8 +694,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -791,11 +709,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0833XSMM4",
+    "amazon_asin": "B0833XSMM4",
+    "notes": "Amazon CSV safe match 72.94% | ASIN B0833XSMM4 | latest order 702-6669159-9967460 on 2022-12-03 | latest PPU CAD 41.99 | matched ASIN net total CAD 47.45"
   },
   {
     "item_group_key_strict": "solar panel mount",
@@ -812,8 +728,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -829,11 +743,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B4MRZTNB",
+    "amazon_asin": "B0B4MRZTNB",
+    "notes": "Amazon CSV safe match 83.87% | ASIN B0B4MRZTNB | latest order 702-2148652-0193054 on 2023-01-08 | latest PPU CAD 199.99 | matched ASIN net total CAD 225.99"
   },
   {
     "item_group_key_strict": "stellate smart indoor",
@@ -848,11 +760,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B087N55K5H",
+    "amazon_asin": "B087N55K5H",
+    "notes": "Amazon CSV safe match 75.88% | ASIN B087N55K5H | latest order 701-3232139-3140238 on 2022-08-22 | latest PPU CAD 98.99 | matched ASIN net total CAD 111.86"
   },
   {
     "item_group_key_strict": "synco syncog gwireless",
@@ -869,8 +779,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -886,11 +794,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B11VDTRV",
+    "amazon_asin": "B0B11VDTRV",
+    "notes": "Amazon CSV safe match 77.51% | ASIN B0B11VDTRV | latest order 701-3328854-3513856 on 2022-11-16 | latest PPU CAD 299.99 | matched ASIN net total CAD 677.98"
   },
   {
     "item_group_key_strict": "telescope eq newtonian",
@@ -907,8 +813,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -926,8 +830,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -945,8 +847,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -962,11 +862,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00DGTP57A",
+    "amazon_asin": "B00DGTP57A",
+    "notes": "Amazon CSV safe match 75.45% | ASIN B00DGTP57A | latest order 701-2547525-1862619 on 2022-11-25 | latest PPU CAD 62.99 | matched ASIN net total CAD 71.18"
   },
   {
     "item_group_key_strict": "zhiyun smooth smartphone",
@@ -983,8 +881,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1002,8 +898,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1021,8 +915,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1038,11 +930,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08C377679",
+    "amazon_asin": "B08C377679",
+    "notes": "Amazon CSV safe match 72.52% | ASIN B08C377679 | latest order 702-8031342-5128231 on 2023-09-08 | latest PPU CAD 35.99 | matched ASIN net total CAD 40.67"
   },
   {
     "item_group_key_strict": "casting flask jewelry",
@@ -1059,8 +949,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1076,11 +964,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08ZYXXX1Y",
+    "amazon_asin": "B08ZYXXX1Y",
+    "notes": "Amazon CSV safe match 92.42% | ASIN B08ZYXXX1Y | latest order 702-0826712-4612218 on 2024-10-27 | latest PPU CAD 24.99 | matched ASIN net total CAD 28.24"
   },
   {
     "item_group_key_strict": "dzqperforated casting flask",
@@ -1097,8 +983,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1114,11 +998,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07C5GB1CH",
+    "amazon_asin": "B07C5GB1CH",
+    "notes": "Amazon CSV safe match 72.01% | ASIN B07C5GB1CH | latest order 702-2112785-5629844 on 2023-11-22 | latest PPU CAD 16.0 | matched ASIN net total CAD 18.08"
   },
   {
     "item_group_key_strict": "gold ingot casting",
@@ -1133,11 +1015,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BCHC3N2K",
+    "amazon_asin": "B0BCHC3N2K",
+    "notes": "Amazon CSV safe match 86.67% | ASIN B0BCHC3N2K | latest order 702-9727530-5749812 on 2025-01-09 | latest PPU CAD 39.19 | matched ASIN net total CAD 39.19"
   },
   {
     "item_group_key_strict": "kilixin reversible wire",
@@ -1152,11 +1032,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B7R1C2FR",
+    "amazon_asin": "B0B7R1C2FR",
+    "notes": "Amazon CSV safe match 79.77% | ASIN B0B7R1C2FR | latest order 702-3091480-5546600 on 2023-11-22 | latest PPU CAD 37.95 | matched ASIN net total CAD 42.88"
   },
   {
     "item_group_key_strict": "lixada camping stove",
@@ -1171,11 +1049,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0777BX56N",
+    "amazon_asin": "B0777BX56N",
+    "notes": "Amazon CSV safe match 94.62% | ASIN B0777BX56N | latest order 702-0304857-8467448 on 2024-05-09 | latest PPU CAD 24.99 | matched ASIN net total CAD 28.24"
   },
   {
     "item_group_key_strict": "quartz crucible bowl",
@@ -1190,11 +1066,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07HF3SM2Q",
+    "amazon_asin": "B07HF3SM2Q",
+    "notes": "Amazon CSV safe match 74.45% | ASIN B07HF3SM2Q | latest order 702-8813667-3471411 on 2023-10-19 | latest PPU CAD 19.52 | matched ASIN net total CAD 25.06"
   },
   {
     "item_group_key_strict": "sondiko butane torch",
@@ -1211,8 +1085,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1230,8 +1102,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1247,11 +1117,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00L0OTDYE",
+    "amazon_asin": "B00L0OTDYE",
+    "notes": "Amazon CSV safe match 86.19% | ASIN B00L0OTDYE | latest order 702-8810575-4421021 on 2024-05-09 | latest PPU CAD 1168.3 | matched ASIN net total CAD 1320.18"
   },
   {
     "item_group_key_strict": "tausom propane torch",
@@ -1268,8 +1136,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1285,11 +1151,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09BBZRRN8",
+    "amazon_asin": "B09BBZRRN8",
+    "notes": "Amazon CSV safe match 74.63% | ASIN B09BBZRRN8 | latest order 702-4062238-3853050 on 2023-09-08 | latest PPU CAD 169.98 | matched ASIN net total CAD 192.08"
   },
   {
     "item_group_key_strict": "vevor jewelry polisher",
@@ -1306,8 +1170,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1323,11 +1185,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B3MYJSFG",
+    "amazon_asin": "B0B3MYJSFG",
+    "notes": "Amazon CSV safe match 97.05% | ASIN B0B3MYJSFG | latest order 702-9083578-2730616 on 2024-05-09 | latest PPU CAD 799.99 | matched ASIN net total CAD 903.99"
   },
   {
     "item_group_key_strict": "vevor propane forge",
@@ -1342,11 +1202,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BN9Z2B4B",
+    "amazon_asin": "B0BN9Z2B4B",
+    "notes": "Amazon CSV safe match 77.1% | ASIN B0BN9Z2B4B | latest order 701-2286712-4845053 on 2023-10-06 | latest PPU CAD 137.76 | matched ASIN net total CAD 155.67"
   },
   {
     "item_group_key_strict": "vevor vevorgold melting",
@@ -1363,8 +1221,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1382,8 +1238,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1401,8 +1255,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1418,11 +1270,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09MT9YVY8",
+    "amazon_asin": "B09MT9YVY8",
+    "notes": "Amazon CSV safe match 83.09% | ASIN B09MT9YVY8 | latest order 702-3323841-5282625 on 2023-11-26 | latest PPU CAD 22.0 | matched ASIN net total CAD 26.6"
   },
   {
     "item_group_key_strict": "cricut pcscutting bladesfor",
@@ -1439,8 +1289,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1456,11 +1304,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09TFZFJ59",
+    "amazon_asin": "B09TFZFJ59",
+    "notes": "Amazon CSV safe match 81.16% | ASIN B09TFZFJ59 | latest order 701-6482655-5536256 on 2022-06-20 | latest PPU CAD 209.99 | matched ASIN net total CAD 272.59"
   },
   {
     "item_group_key_strict": "cricut easy x",
@@ -1475,11 +1321,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B074S8SNZN",
+    "amazon_asin": "B074S8SNZN",
+    "notes": "Amazon CSV safe match 81.39% | ASIN B074S8SNZN | latest order 701-9024942-2381800 on 2022-06-20 | latest PPU CAD 37.12 | matched ASIN net total CAD 41.95"
   },
   {
     "item_group_key_strict": "cricut hat press",
@@ -1494,11 +1338,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09TFZFJ59",
+    "amazon_asin": "B09TFZFJ59",
+    "notes": "Amazon CSV safe match 92.58% | ASIN B09TFZFJ59 | latest order 701-6482655-5536256 on 2022-06-20 | latest PPU CAD 209.99 | matched ASIN net total CAD 272.59"
   },
   {
     "item_group_key_strict": "cricut infusible ink",
@@ -1513,11 +1355,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B082PNBG4N",
+    "amazon_asin": "B082PNBG4N",
+    "notes": "Amazon CSV safe match 81.22% | ASIN B082PNBG4N | latest order 701-4379555-2542639 on 2022-07-13 | latest PPU CAD 20.37 | matched ASIN net total CAD 23.02"
   },
   {
     "item_group_key_strict": "cricut knife blades",
@@ -1532,11 +1372,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B072VZ64DQ",
+    "amazon_asin": "B072VZ64DQ",
+    "notes": "Amazon CSV safe match 83.09% | ASIN B072VZ64DQ | latest order 701-9024942-2381800 on 2022-06-20 | latest PPU CAD 29.46 | matched ASIN net total CAD 33.29"
   },
   {
     "item_group_key_strict": "cricut maker machine",
@@ -1551,11 +1389,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08H3XWXKB",
+    "amazon_asin": "B08H3XWXKB",
+    "notes": "Amazon CSV safe match 88.45% | ASIN B08H3XWXKB | latest order 701-7131501-5705836 on 2022-06-20 | latest PPU CAD 160.13 | matched ASIN net total CAD 180.95"
   },
   {
     "item_group_key_strict": "cricut maker",
@@ -1572,8 +1408,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1589,11 +1423,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08TT4XD5Z",
+    "amazon_asin": "B08TT4XD5Z",
+    "notes": "Amazon CSV safe match 89.61% | ASIN B08TT4XD5Z | latest order 701-8157554-4350610 on 2022-06-20 | latest PPU CAD 296.77 | matched ASIN net total CAD 670.7"
   },
   {
     "item_group_key_strict": "cricut rotary cutter",
@@ -1608,11 +1440,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07DQ6QGCW",
+    "amazon_asin": "B07DQ6QGCW",
+    "notes": "Amazon CSV safe match 76.47% | ASIN B07DQ6QGCW | latest order 701-8157554-4350610 on 2022-06-20 | latest PPU CAD 24.51 | matched ASIN net total CAD 27.7"
   },
   {
     "item_group_key_strict": "2pack10fti fti phone",
@@ -1627,11 +1457,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09BNCL91S",
+    "amazon_asin": "B09BNCL91S",
+    "notes": "Amazon CSV safe match 77.65% | ASIN B09BNCL91S | latest order 702-1561283-0268209 on 2023-09-28 | latest PPU CAD 16.99 | matched ASIN net total CAD 19.2"
   },
   {
     "item_group_key_strict": "3prong prong light",
@@ -1646,11 +1474,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09R1H8FHN",
+    "amazon_asin": "B09R1H8FHN",
+    "notes": "Amazon CSV safe match 73.67% | ASIN B09R1H8FHN | latest order 702-8042265-7042623 on 2023-04-15 | latest PPU CAD 13.99 | matched ASIN net total CAD 15.81"
   },
   {
     "item_group_key_strict": "4khdmicable25ft khdmicable sweguard",
@@ -1667,8 +1493,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1686,8 +1510,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1705,8 +1527,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1724,8 +1544,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1743,8 +1561,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1762,8 +1578,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1779,11 +1593,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B083SJH37L",
+    "amazon_asin": "B083SJH37L",
+    "notes": "Amazon CSV safe match 72.68% | ASIN B083SJH37L | latest order 702-6510674-5149837 on 2023-10-19 | latest PPU CAD 39.59 | matched ASIN net total CAD 44.74"
   },
   {
     "item_group_key_strict": "displayportto hdmiadapter",
@@ -1800,8 +1612,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1819,8 +1629,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1836,11 +1644,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07SV5ZFW4",
+    "amazon_asin": "B07SV5ZFW4",
+    "notes": "Amazon CSV safe match 74.24% | ASIN B07SV5ZFW4 | latest order 701-3232139-3140238 on 2022-08-22 | latest PPU CAD 13.98 | matched ASIN net total CAD 15.8"
   },
   {
     "item_group_key_strict": "etrogo pulse intelligent",
@@ -1855,11 +1661,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07XHFT6XD",
+    "amazon_asin": "B07XHFT6XD",
+    "notes": "Amazon CSV safe match 93.94% | ASIN B07XHFT6XD | latest order 702-0826712-4612218 on 2024-10-27 | latest PPU CAD 39.98 | matched ASIN net total CAD 45.18"
   },
   {
     "item_group_key_strict": "gosysongusbcprinter",
@@ -1876,8 +1680,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1895,8 +1697,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1914,8 +1714,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1931,11 +1729,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07Y1N2F6M",
+    "amazon_asin": "B07Y1N2F6M",
+    "notes": "Amazon CSV safe match 76.63% | ASIN B07Y1N2F6M | latest order 702-5711329-9241007 on 2023-06-21 | latest PPU CAD 16.99 | matched ASIN net total CAD 38.4"
   },
   {
     "item_group_key_strict": "juanwe256gbusb30flash juanwe gbusb",
@@ -1952,8 +1748,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1971,8 +1765,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -1990,8 +1782,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2009,8 +1799,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2028,8 +1816,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2047,8 +1833,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2066,8 +1850,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2083,11 +1865,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B095Y5R8HD",
+    "amazon_asin": "B095Y5R8HD",
+    "notes": "Amazon CSV safe match 96.76% | ASIN B095Y5R8HD | latest order 702-6663223-6583436 on 2024-10-21 | latest PPU CAD 39.79 | matched ASIN net total CAD 44.96"
   },
   {
     "item_group_key_strict": "powered usb",
@@ -2104,8 +1884,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2121,11 +1899,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08KVTNL28",
+    "amazon_asin": "B08KVTNL28",
+    "notes": "Amazon CSV safe match 72.45% | ASIN B08KVTNL28 | latest order 702-5711329-9241007 on 2023-06-21 | latest PPU CAD 26.77 | matched ASIN net total CAD 55.98"
   },
   {
     "item_group_key_strict": "printer",
@@ -2142,8 +1918,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2161,8 +1935,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2180,8 +1952,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2199,8 +1969,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2218,8 +1986,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2237,8 +2003,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2256,8 +2020,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2275,8 +2037,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2294,8 +2054,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2313,8 +2071,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2332,8 +2088,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2351,8 +2105,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2370,8 +2122,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2389,8 +2139,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2408,8 +2156,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2427,8 +2173,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2446,8 +2190,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2465,8 +2207,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2484,8 +2224,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2503,8 +2241,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2522,8 +2258,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2539,11 +2273,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09N77ZGHR",
+    "amazon_asin": "B09N77ZGHR",
+    "notes": "Amazon CSV safe match 88.13% | ASIN B09N77ZGHR | latest order 702-9781762-0990646 on 2023-02-06 | latest PPU CAD 129.99 | matched ASIN net total CAD 129.94"
   },
   {
     "item_group_key_strict": "homesom1pccoping homesom pccoping",
@@ -2560,8 +2292,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2577,11 +2307,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B000RAYFI6",
+    "amazon_asin": "B000RAYFI6",
+    "notes": "Amazon CSV safe match 86.85% | ASIN B000RAYFI6 | latest order 702-5627936-6857820 on 2023-09-08 | latest PPU CAD 29.61 | matched ASIN net total CAD 33.46"
   },
   {
     "item_group_key_strict": "jewelry pliers shynek",
@@ -2596,11 +2324,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B088H39M81",
+    "amazon_asin": "B088H39M81",
+    "notes": "Amazon CSV safe match 91.97% | ASIN B088H39M81 | latest order 701-3312432-3937866 on 2022-08-25 | latest PPU CAD 34.99 | matched ASIN net total CAD 39.54"
   },
   {
     "item_group_key_strict": "king canada kc",
@@ -2615,11 +2341,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00IEHWE9Q",
+    "amazon_asin": "B00IEHWE9Q",
+    "notes": "Amazon CSV safe match 92.1% | ASIN B00IEHWE9Q | latest order 702-8031342-5128231 on 2023-09-08 | latest PPU CAD 115.19 | matched ASIN net total CAD 130.16"
   },
   {
     "item_group_key_strict": "leontool2pieces5double leontool nylon",
@@ -2634,11 +2358,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09958B8TS",
+    "amazon_asin": "B09958B8TS",
+    "notes": "Amazon CSV safe match 88.38% | ASIN B09958B8TS | latest order 702-7454633-1605859 on 2023-08-20 | latest PPU CAD 21.39 | matched ASIN net total CAD 20.78"
   },
   {
     "item_group_key_strict": "newacalox multi pliers",
@@ -2653,11 +2375,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07PZ58BWJ",
+    "amazon_asin": "B07PZ58BWJ",
+    "notes": "Amazon CSV safe match 82.75% | ASIN B07PZ58BWJ | latest order 702-3017700-4502624 on 2023-08-20 | latest PPU CAD 54.99 | matched ASIN net total CAD 62.14"
   },
   {
     "item_group_key_strict": "ortur orturlaser engraverand",
@@ -2674,8 +2394,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2691,11 +2409,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07DKBJ5YC",
+    "amazon_asin": "B07DKBJ5YC",
+    "notes": "Amazon CSV safe match 88.34% | ASIN B07DKBJ5YC | latest order 702-6510674-5149837 on 2023-10-19 | latest PPU CAD 31.98 | matched ASIN net total CAD 36.14"
   },
   {
     "item_group_key_strict": "speedwox round nose",
@@ -2710,11 +2426,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07N84RMSV",
+    "amazon_asin": "B07N84RMSV",
+    "notes": "Amazon CSV safe match 80.4% | ASIN B07N84RMSV | latest order 701-6386118-5536224 on 2022-07-31 | latest PPU CAD 10.19 | matched ASIN net total CAD 10.36"
   },
   {
     "item_group_key_strict": "stainless steel wax",
@@ -2731,8 +2445,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2748,11 +2460,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09BP3F5CL",
+    "amazon_asin": "B09BP3F5CL",
+    "notes": "Amazon CSV safe match 80.71% | ASIN B09BP3F5CL | latest order 702-1246165-7178634 on 2023-11-22 | latest PPU CAD 23.19 | matched ASIN net total CAD 26.21"
   },
   {
     "item_group_key_strict": "the beadsmith wire",
@@ -2767,11 +2477,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00E8RT8BI",
+    "amazon_asin": "B00E8RT8BI",
+    "notes": "Amazon CSV safe match 78.73% | ASIN B00E8RT8BI | latest order 702-8379293-9017024 on 2023-08-20 | latest PPU CAD 19.53 | matched ASIN net total CAD 22.07"
   },
   {
     "item_group_key_strict": "tungsten carbide wire",
@@ -2786,11 +2494,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07P7Q7Q5C",
+    "amazon_asin": "B07P7Q7Q5C",
+    "notes": "Amazon CSV safe match 85.41% | ASIN B07P7Q7Q5C | latest order 702-7454633-1605859 on 2023-08-20 | latest PPU CAD 45.74 | matched ASIN net total CAD 51.69"
   },
   {
     "item_group_key_strict": "vouiu nylon jaw",
@@ -2805,11 +2511,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08763578D",
+    "amazon_asin": "B08763578D",
+    "notes": "Amazon CSV safe match 91.24% | ASIN B08763578D | latest order 702-7454633-1605859 on 2023-08-20 | latest PPU CAD 26.62 | matched ASIN net total CAD 30.08"
   },
   {
     "item_group_key_strict": "wax tube ring",
@@ -2824,11 +2528,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08GQ9TYZV",
+    "amazon_asin": "B08GQ9TYZV",
+    "notes": "Amazon CSV safe match 83.0% | ASIN B08GQ9TYZV | latest order 702-5815362-9885020 on 2023-10-31 | latest PPU CAD 15.96 | matched ASIN net total CAD 18.03"
   },
   {
     "item_group_key_strict": "wutarawhide head mallet",
@@ -2843,11 +2545,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B01MYFWLE8",
+    "amazon_asin": "B01MYFWLE8",
+    "notes": "Amazon CSV safe match 74.89% | ASIN B01MYFWLE8 | latest order 702-2223732-1509832 on 2023-09-08 | latest PPU CAD 32.99 | matched ASIN net total CAD 35.89"
   },
   {
     "item_group_key_strict": "wen xinmeiwen pcsring",
@@ -2862,11 +2562,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B094XP4GFC",
+    "amazon_asin": "B094XP4GFC",
+    "notes": "Amazon CSV safe match 85.68% | ASIN B094XP4GFC | latest order 702-8031342-5128231 on 2023-09-08 | latest PPU CAD 19.99 | matched ASIN net total CAD 22.59"
   },
   {
     "item_group_key_strict": "yasuma wax carving",
@@ -2883,8 +2581,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -2900,11 +2596,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B071D9TT9W",
+    "amazon_asin": "B071D9TT9W",
+    "notes": "Amazon CSV safe match 77.2% | ASIN B071D9TT9W | latest order 702-7454633-1605859 on 2023-08-20 | latest PPU CAD 20.98 | matched ASIN net total CAD 47.42"
   },
   {
     "item_group_key_strict": "yasumai wax carving",
@@ -2919,11 +2613,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B072PTM26S",
+    "amazon_asin": "B072PTM26S",
+    "notes": "Amazon CSV safe match 90.06% | ASIN B072PTM26S | latest order 702-0646205-0327451 on 2023-10-31 | latest PPU CAD 20.9 | matched ASIN net total CAD 23.62"
   },
   {
     "item_group_key_strict": "zjchao jewelers pin",
@@ -2938,11 +2630,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08THPHTB4",
+    "amazon_asin": "B08THPHTB4",
+    "notes": "Amazon CSV safe match 84.62% | ASIN B08THPHTB4 | latest order 702-1166365-0713066 on 2023-09-08 | latest PPU CAD 18.92 | matched ASIN net total CAD 18.92"
   },
   {
     "item_group_key_strict": "11pcs resin mold",
@@ -2957,11 +2647,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08KTKJMKV",
+    "amazon_asin": "B08KTKJMKV",
+    "notes": "Amazon CSV safe match 80.93% | ASIN B08KTKJMKV | latest order 701-6386118-5536224 on 2022-07-31 | latest PPU CAD 13.39 | matched ASIN net total CAD 15.13"
   },
   {
     "item_group_key_strict": "13pcs professional geometry",
@@ -2976,11 +2664,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B719K37V",
+    "amazon_asin": "B0B719K37V",
+    "notes": "Amazon CSV safe match 83.11% | ASIN B0B719K37V | latest order 701-0678550-7450615 on 2022-09-15 | latest PPU CAD 23.89 | matched ASIN net total CAD 27.0"
   },
   {
     "item_group_key_strict": "15pcssilicone pcssilicone mold",
@@ -2997,8 +2683,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3014,11 +2698,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07Q6LFYQ5",
+    "amazon_asin": "B07Q6LFYQ5",
+    "notes": "Amazon CSV safe match 83.02% | ASIN B07Q6LFYQ5 | latest order 702-1561283-0268209 on 2023-09-28 | latest PPU CAD 16.89 | matched ASIN net total CAD 19.09"
   },
   {
     "item_group_key_strict": "188stainless stainless steel",
@@ -3035,8 +2717,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3052,11 +2732,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07P9R1DP4",
+    "amazon_asin": "B07P9R1DP4",
+    "notes": "Amazon CSV safe match 77.05% | ASIN B07P9R1DP4 | latest order 702-1561283-0268209 on 2023-09-28 | latest PPU CAD 19.27 | matched ASIN net total CAD 21.78"
   },
   {
     "item_group_key_strict": "20l5gallon l gallon",
@@ -3071,11 +2749,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08LVXYR7M",
+    "amazon_asin": "B08LVXYR7M",
+    "notes": "Amazon CSV safe match 78.19% | ASIN B08LVXYR7M | latest order 702-7946472-9602633 on 2023-07-28 | latest PPU CAD 59.99 | matched ASIN net total CAD 67.79"
   },
   {
     "item_group_key_strict": "2pack galaxy s",
@@ -3090,11 +2766,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B4PHK1YX",
+    "amazon_asin": "B0B4PHK1YX",
+    "notes": "Amazon CSV safe match 87.02% | ASIN B0B4PHK1YX | latest order 701-2286712-4845053 on 2023-10-06 | latest PPU CAD 25.99 | matched ASIN net total CAD 29.37"
   },
   {
     "item_group_key_strict": "2pcscast pcscast iron",
@@ -3111,8 +2785,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3128,11 +2800,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09DRZJSGN",
+    "amazon_asin": "B09DRZJSGN",
+    "notes": "Amazon CSV safe match 95.14% | ASIN B09DRZJSGN | latest order 702-2469698-3231464 on 2023-01-03 | latest PPU CAD 178.99 | matched ASIN net total CAD 202.26"
   },
   {
     "item_group_key_strict": "samsung wfast stand",
@@ -3147,11 +2817,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09JGHSBX8",
+    "amazon_asin": "B09JGHSBX8",
+    "notes": "Amazon CSV safe match 76.76% | ASIN B09JGHSBX8 | latest order 701-0843627-6551442 on 2022-11-25 | latest PPU CAD 33.58 | matched ASIN net total CAD 37.95"
   },
   {
     "item_group_key_strict": "3d d printer",
@@ -3166,11 +2834,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09PRFBHPD",
+    "amazon_asin": "B09PRFBHPD",
+    "notes": "Amazon CSV safe match 96.51% | ASIN B09PRFBHPD | latest order 701-8624878-3149062 on 2022-08-09 | latest PPU CAD 29.99 | matched ASIN net total CAD 33.89"
   },
   {
     "item_group_key_strict": "3t t electric",
@@ -3187,8 +2853,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3204,11 +2868,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BYJJVBF3",
+    "amazon_asin": "B0BYJJVBF3",
+    "notes": "Amazon CSV safe match 85.28% | ASIN B0BYJJVBF3 | latest order 702-6510674-5149837 on 2023-10-19 | latest PPU CAD 16.99 | matched ASIN net total CAD 19.2"
   },
   {
     "item_group_key_strict": "4pieces geometric stencils",
@@ -3223,11 +2885,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08FX83JT4",
+    "amazon_asin": "B08FX83JT4",
+    "notes": "Amazon CSV safe match 83.13% | ASIN B08FX83JT4 | latest order 701-2286712-4845053 on 2023-10-06 | latest PPU CAD 13.99 | matched ASIN net total CAD 15.81"
   },
   {
     "item_group_key_strict": "5 gallon vacuum",
@@ -3244,8 +2904,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3263,8 +2921,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3280,11 +2936,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07PFT7PQS",
+    "amazon_asin": "B07PFT7PQS",
+    "notes": "Amazon CSV safe match 90.93% | ASIN B07PFT7PQS | latest order 702-0826712-4612218 on 2024-10-27 | latest PPU CAD 18.99 | matched ASIN net total CAD 21.46"
   },
   {
     "item_group_key_strict": "samsung galaxy s",
@@ -3299,11 +2953,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0CRB6Y25N",
+    "amazon_asin": "B0CRB6Y25N",
+    "notes": "Amazon CSV safe match 98.17% | ASIN B0CRB6Y25N | latest order 702-6787255-5181852 on 2024-06-13 | latest PPU CAD 12.99 | matched ASIN net total CAD 14.68"
   },
   {
     "item_group_key_strict": "abest hobby airbrush",
@@ -3318,11 +2970,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B01HZ1HDF6",
+    "amazon_asin": "B01HZ1HDF6",
+    "notes": "Amazon CSV safe match 88.87% | ASIN B01HZ1HDF6 | latest order 702-9710292-6679463 on 2023-02-06 | latest PPU CAD 173.99 | matched ASIN net total CAD 196.61"
   },
   {
     "item_group_key_strict": "acuvar62inch acuvar monopod",
@@ -3337,11 +2987,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08141BRSB",
+    "amazon_asin": "B08141BRSB",
+    "notes": "Amazon CSV safe match 82.58% | ASIN B08141BRSB | latest order 701-0843627-6551442 on 2022-11-25 | latest PPU CAD 22.99 | matched ASIN net total CAD 25.98"
   },
   {
     "item_group_key_strict": "aiperrostainless steel bowls",
@@ -3358,8 +3006,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3375,11 +3021,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0819DR1R5",
+    "amazon_asin": "B0819DR1R5",
+    "notes": "Amazon CSV safe match 78.69% | ASIN B0819DR1R5 | latest order 702-0535518-5310618 on 2023-12-12 | latest PPU CAD 17.99 | matched ASIN net total CAD 20.33"
   },
   {
     "item_group_key_strict": "alonefire sv nm",
@@ -3394,11 +3038,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08B637DNC",
+    "amazon_asin": "B08B637DNC",
+    "notes": "Amazon CSV safe match 96.38% | ASIN B08B637DNC | latest order 701-8624878-3149062 on 2022-08-09 | latest PPU CAD 34.99 | matched ASIN net total CAD 39.54"
   },
   {
     "item_group_key_strict": "amazon basics less",
@@ -3413,11 +3055,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B072569V1L",
+    "amazon_asin": "B072569V1L",
+    "notes": "Amazon CSV safe match 99.03% | ASIN B072569V1L | latest order 702-2547680-5708232 on 2025-02-02 | latest PPU CAD 18.99 | matched ASIN net total CAD 21.46"
   },
   {
     "item_group_key_strict": "anderson metals brass",
@@ -3432,11 +3072,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B001PNIL48",
+    "amazon_asin": "B001PNIL48",
+    "notes": "Amazon CSV safe match 97.23% | ASIN B001PNIL48 | latest order 702-5391464-6035406 on 2025-02-10 | latest PPU CAD 6.26 | matched ASIN net total CAD 14.14"
   },
   {
     "item_group_key_strict": "aonboy cat water",
@@ -3451,11 +3089,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0CC293L9D",
+    "amazon_asin": "B0CC293L9D",
+    "notes": "Amazon CSV safe match 85.34% | ASIN B0CC293L9D | latest order 702-1032538-5750668 on 2025-02-02 | latest PPU CAD 49.99 | matched ASIN net total CAD 56.49"
   },
   {
     "item_group_key_strict": "asdirne premium tailor",
@@ -3470,11 +3106,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08QZ5X8TY",
+    "amazon_asin": "B08QZ5X8TY",
+    "notes": "Amazon CSV safe match 87.74% | ASIN B08QZ5X8TY | latest order 701-7400755-2012246 on 2022-08-22 | latest PPU CAD 23.89 | matched ASIN net total CAD 26.99"
   },
   {
     "item_group_key_strict": "at&tdl723193 at tdl",
@@ -3491,8 +3125,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3510,8 +3142,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3527,11 +3157,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08QBJFNSV",
+    "amazon_asin": "B08QBJFNSV",
+    "notes": "Amazon CSV safe match 84.01% | ASIN B08QBJFNSV | latest order 702-8721431-7864258 on 2023-01-31 | latest PPU CAD 74.82 | matched ASIN net total CAD 84.55"
   },
   {
     "item_group_key_strict": "bezoxnail scissorand cuticle",
@@ -3548,8 +3176,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3567,8 +3193,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3586,8 +3210,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3603,11 +3225,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00SMS3KZO",
+    "amazon_asin": "B00SMS3KZO",
+    "notes": "Amazon CSV safe match 100.0% | ASIN B00SMS3KZO | latest order 702-8549220-3275408 on 2024-05-11 | latest PPU CAD 39.98 | matched ASIN net total CAD 45.18"
   },
   {
     "item_group_key_strict": "by flo products",
@@ -3622,11 +3242,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08X7F4BNV",
+    "amazon_asin": "B08X7F4BNV",
+    "notes": "Amazon CSV safe match 84.12% | ASIN B08X7F4BNV | latest order 701-3232139-3140238 on 2022-08-22 | latest PPU CAD 39.99 | matched ASIN net total CAD 45.19"
   },
   {
     "item_group_key_strict": "camway2pcs camway feeler",
@@ -3641,11 +3259,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08DHYB2WL",
+    "amazon_asin": "B08DHYB2WL",
+    "notes": "Amazon CSV safe match 87.9% | ASIN B08DHYB2WL | latest order 701-3232139-3140238 on 2022-08-22 | latest PPU CAD 17.99 | matched ASIN net total CAD 20.33"
   },
   {
     "item_group_key_strict": "canon eos m",
@@ -3662,8 +3278,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3681,8 +3295,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3698,11 +3310,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00LAX52IQ",
+    "amazon_asin": "B00LAX52IQ",
+    "notes": "Amazon CSV safe match 88.13% | ASIN B00LAX52IQ | latest order 702-2613974-5417013 on 2022-12-08 | latest PPU CAD 30.1 | matched ASIN net total CAD 34.01"
   },
   {
     "item_group_key_strict": "cartman locking jack",
@@ -3717,11 +3327,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00RFCDN6O",
+    "amazon_asin": "B00RFCDN6O",
+    "notes": "Amazon CSV safe match 93.89% | ASIN B00RFCDN6O | latest order 701-0304894-8528245 on 2022-07-27 | latest PPU CAD 37.99 | matched ASIN net total CAD 171.72"
   },
   {
     "item_group_key_strict": "cnctopbaos cnc pro",
@@ -3736,11 +3344,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08D3C4N2L",
+    "amazon_asin": "B08D3C4N2L",
+    "notes": "Amazon CSV safe match 84.65% | ASIN B08D3C4N2L | latest order 702-3688071-7861061 on 2023-11-27 | latest PPU CAD 192.0 | matched ASIN net total CAD 216.96"
   },
   {
     "item_group_key_strict": "coin ring punch",
@@ -3757,8 +3363,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3776,8 +3380,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3795,8 +3397,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3814,8 +3414,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3831,11 +3429,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07JLX3GWC",
+    "amazon_asin": "B07JLX3GWC",
+    "notes": "Amazon CSV safe match 83.1% | ASIN B07JLX3GWC | latest order 701-2598939-2458634 on 2022-08-06 | latest PPU CAD 19.32 | matched ASIN net total CAD 21.84"
   },
   {
     "item_group_key_strict": "creality dbl plate",
@@ -3852,8 +3448,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3871,8 +3465,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3888,11 +3480,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B073SJD7L5",
+    "amazon_asin": "B073SJD7L5",
+    "notes": "Amazon CSV safe match 92.32% | ASIN B073SJD7L5 | latest order 702-8227670-2225056 on 2023-10-19 | latest PPU CAD 14.94 | matched ASIN net total CAD 16.89"
   },
   {
     "item_group_key_strict": "dash cam hardwire",
@@ -3909,8 +3499,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -3926,11 +3514,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08BFFVCQM",
+    "amazon_asin": "B08BFFVCQM",
+    "notes": "Amazon CSV safe match 78.3% | ASIN B08BFFVCQM | latest order 701-3205987-4915469 on 2022-08-30 | latest PPU CAD 15.99 | matched ASIN net total CAD 18.07"
   },
   {
     "item_group_key_strict": "delrin folding cone",
@@ -3945,11 +3531,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07QV4JPQ6",
+    "amazon_asin": "B07QV4JPQ6",
+    "notes": "Amazon CSV safe match 79.5% | ASIN B07QV4JPQ6 | latest order 702-4359363-9009831 on 2024-10-21 | latest PPU CAD 77.86 | matched ASIN net total CAD 87.98"
   },
   {
     "item_group_key_strict": "diamond jewelry setting",
@@ -3964,11 +3548,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07V1HTYNT",
+    "amazon_asin": "B07V1HTYNT",
+    "notes": "Amazon CSV safe match 97.76% | ASIN B07V1HTYNT | latest order 702-1322641-9954647 on 2024-06-18 | latest PPU CAD 22.85 | matched ASIN net total CAD 25.82"
   },
   {
     "item_group_key_strict": "digital gram scale",
@@ -3983,11 +3565,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B06X6LW4V9",
+    "amazon_asin": "B06X6LW4V9",
+    "notes": "Amazon CSV safe match 85.2% | ASIN B06X6LW4V9 | latest order 702-5815362-9885020 on 2023-10-31 | latest PPU CAD 19.99 | matched ASIN net total CAD 22.59"
   },
   {
     "item_group_key_strict": "dremel versa flame",
@@ -4002,11 +3582,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00MJW07Z0",
+    "amazon_asin": "B00MJW07Z0",
+    "notes": "Amazon CSV safe match 83.24% | ASIN B00MJW07Z0 | latest order 702-8031342-5128231 on 2023-09-08 | latest PPU CAD 61.12 | matched ASIN net total CAD 69.07"
   },
   {
     "item_group_key_strict": "dremel flex shaft",
@@ -4021,11 +3599,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0000302Y8",
+    "amazon_asin": "B0000302Y8",
+    "notes": "Amazon CSV safe match 95.88% | ASIN B0000302Y8 | latest order 702-3968651-1246665 on 2022-12-02 | latest PPU CAD 37.0 | matched ASIN net total CAD 41.81"
   },
   {
     "item_group_key_strict": "dremel drill press",
@@ -4040,11 +3616,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00068P48O",
+    "amazon_asin": "B00068P48O",
+    "notes": "Amazon CSV safe match 92.91% | ASIN B00068P48O | latest order 702-3968651-1246665 on 2022-12-02 | latest PPU CAD 64.14 | matched ASIN net total CAD 72.48"
   },
   {
     "item_group_key_strict": "dremel",
@@ -4061,8 +3635,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4080,8 +3652,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4099,8 +3669,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4116,11 +3684,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BG4W97KN",
+    "amazon_asin": "B0BG4W97KN",
+    "notes": "Amazon CSV safe match 84.96% | ASIN B0BG4W97KN | latest order 701-9277070-6062608 on 2022-11-25 | latest PPU CAD 26.99 | matched ASIN net total CAD 30.5"
   },
   {
     "item_group_key_strict": "electric epoxy mixer",
@@ -4137,8 +3703,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4154,11 +3718,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09MDRL635",
+    "amazon_asin": "B09MDRL635",
+    "notes": "Amazon CSV safe match 91.26% | ASIN B09MDRL635 | latest order 702-7450991-0474615 on 2023-01-16 | latest PPU CAD 69.99 | matched ASIN net total CAD 158.18"
   },
   {
     "item_group_key_strict": "epoxy resin mixer",
@@ -4175,8 +3737,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4194,8 +3754,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4213,8 +3771,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4230,11 +3786,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08H75HG2B",
+    "amazon_asin": "B08H75HG2B",
+    "notes": "Amazon CSV safe match 89.01% | ASIN B08H75HG2B | latest order 701-0222156-3001015 on 2022-11-25 | latest PPU CAD 23.99 | matched ASIN net total CAD 135.55"
   },
   {
     "item_group_key_strict": "expanding file folders",
@@ -4249,11 +3803,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07DJ8CFB3",
+    "amazon_asin": "B07DJ8CFB3",
+    "notes": "Amazon CSV safe match 87.33% | ASIN B07DJ8CFB3 | latest order 702-5711329-9241007 on 2023-06-21 | latest PPU CAD 25.19 | matched ASIN net total CAD 56.92"
   },
   {
     "item_group_key_strict": "fernidaheated pantsfor men",
@@ -4270,8 +3822,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4287,11 +3837,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08KGDDRMX",
+    "amazon_asin": "B08KGDDRMX",
+    "notes": "Amazon CSV safe match 86.07% | ASIN B08KGDDRMX | latest order 701-9277070-6062608 on 2022-11-25 | latest PPU CAD 31.05 | matched ASIN net total CAD 35.09"
   },
   {
     "item_group_key_strict": "fezibo height adjustable",
@@ -4306,11 +3854,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B099ZRZLW6",
+    "amazon_asin": "B099ZRZLW6",
+    "notes": "Amazon CSV safe match 90.09% | ASIN B099ZRZLW6 | latest order 702-1841671-7110652 on 2023-07-12 | latest PPU CAD 229.99 | matched ASIN net total CAD 246.33"
   },
   {
     "item_group_key_strict": "feziboheight adjustable electric",
@@ -4325,11 +3871,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B099ZRZLW6",
+    "amazon_asin": "B099ZRZLW6",
+    "notes": "Amazon CSV safe match 77.49% | ASIN B099ZRZLW6 | latest order 702-1841671-7110652 on 2023-07-12 | latest PPU CAD 229.99 | matched ASIN net total CAD 246.33"
   },
   {
     "item_group_key_strict": "fine source electronic",
@@ -4344,11 +3888,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B073N7F2CK",
+    "amazon_asin": "B073N7F2CK",
+    "notes": "Amazon CSV safe match 88.92% | ASIN B073N7F2CK | latest order 701-8157554-4350610 on 2022-06-20 | latest PPU CAD 18.59 | matched ASIN net total CAD 21.01"
   },
   {
     "item_group_key_strict": "forney hose coupler",
@@ -4363,11 +3905,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B003X5MBM4",
+    "amazon_asin": "B003X5MBM4",
+    "notes": "Amazon CSV safe match 94.41% | ASIN B003X5MBM4 | latest order 702-6553728-5403445 on 2025-01-27 | latest PPU CAD 14.0 | matched ASIN net total CAD 15.82"
   },
   {
     "item_group_key_strict": "free mascot uvglasses",
@@ -4384,8 +3924,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4403,8 +3941,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4420,11 +3956,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08LD1XG3F",
+    "amazon_asin": "B08LD1XG3F",
+    "notes": "Amazon CSV safe match 92.46% | ASIN B08LD1XG3F | latest order 702-9246536-1469026 on 2025-01-28 | latest PPU CAD 24.49 | matched ASIN net total CAD 27.67"
   },
   {
     "item_group_key_strict": "ghome smart switch",
@@ -4439,11 +3973,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09LLS7FRT",
+    "amazon_asin": "B09LLS7FRT",
+    "notes": "Amazon CSV safe match 85.56% | ASIN B09LLS7FRT | latest order 702-1432731-0997806 on 2023-04-13 | latest PPU CAD 27.99 | matched ASIN net total CAD 31.63"
   },
   {
     "item_group_key_strict": "gigastone256gbmicro gigastone gbmicro",
@@ -4460,8 +3992,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4477,11 +4007,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B093JCVTZJ",
+    "amazon_asin": "B093JCVTZJ",
+    "notes": "Amazon CSV safe match 94.81% | ASIN B093JCVTZJ | latest order 702-2846698-7210666 on 2023-11-26 | latest PPU CAD 15.97 | matched ASIN net total CAD 18.05"
   },
   {
     "item_group_key_strict": "granite hand mortar",
@@ -4498,8 +4026,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4515,11 +4041,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07JG3GDGD",
+    "amazon_asin": "B07JG3GDGD",
+    "notes": "Amazon CSV safe match 80.31% | ASIN B07JG3GDGD | latest order 701-6803189-6404215 on 2022-08-11 | latest PPU CAD 15.99 | matched ASIN net total CAD 18.07"
   },
   {
     "item_group_key_strict": "headband magnifier glass",
@@ -4534,11 +4058,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07ZT5HGM5",
+    "amazon_asin": "B07ZT5HGM5",
+    "notes": "Amazon CSV safe match 86.77% | ASIN B07ZT5HGM5 | latest order 702-6560133-1461004 on 2023-01-16 | latest PPU CAD 46.99 | matched ASIN net total CAD 53.1"
   },
   {
     "item_group_key_strict": "healifty2pcs healifty clay",
@@ -4553,11 +4075,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07D3SLHRN",
+    "amazon_asin": "B07D3SLHRN",
+    "notes": "Amazon CSV safe match 88.42% | ASIN B07D3SLHRN | latest order 701-0035098-2002675 on 2022-09-09 | latest PPU CAD 18.99 | matched ASIN net total CAD 18.99"
   },
   {
     "item_group_key_strict": "heated pants electric",
@@ -4574,8 +4094,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4593,8 +4111,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4610,11 +4126,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B082438MSS",
+    "amazon_asin": "B082438MSS",
+    "notes": "Amazon CSV safe match 79.6% | ASIN B082438MSS | latest order 701-2286712-4845053 on 2023-10-06 | latest PPU CAD 31.95 | matched ASIN net total CAD 36.1"
   },
   {
     "item_group_key_strict": "homcomkitchen pantry",
@@ -4631,8 +4145,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4648,11 +4160,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09WKKBD7B",
+    "amazon_asin": "B09WKKBD7B",
+    "notes": "Amazon CSV safe match 80.67% | ASIN B09WKKBD7B | latest order 701-7057096-0662610 on 2022-08-06 | latest PPU CAD 128.99 | matched ASIN net total CAD 145.76"
   },
   {
     "item_group_key_strict": "i magniphy xdesktop",
@@ -4669,8 +4179,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4686,11 +4194,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B076X63FRP",
+    "amazon_asin": "B076X63FRP",
+    "notes": "Amazon CSV safe match 81.37% | ASIN B076X63FRP | latest order 702-5711329-9241007 on 2023-06-21 | latest PPU CAD 16.99 | matched ASIN net total CAD 38.4"
   },
   {
     "item_group_key_strict": "ikkle french cleat",
@@ -4707,8 +4213,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4724,11 +4228,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0CCJPT87W",
+    "amazon_asin": "B0CCJPT87W",
+    "notes": "Amazon CSV safe match 100.0% | ASIN B0CCJPT87W | latest order 702-5777867-7050650 on 2024-06-13 | latest PPU CAD 10.99 | matched ASIN net total CAD 12.42"
   },
   {
     "item_group_key_strict": "jewboer leather welding",
@@ -4743,11 +4245,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07H2C5VSW",
+    "amazon_asin": "B07H2C5VSW",
+    "notes": "Amazon CSV safe match 89.69% | ASIN B07H2C5VSW | latest order 702-3091480-5546600 on 2023-11-22 | latest PPU CAD 53.99 | matched ASIN net total CAD 61.01"
   },
   {
     "item_group_key_strict": "jewelers soldering welding",
@@ -4762,11 +4262,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08LVZQSGW",
+    "amazon_asin": "B08LVZQSGW",
+    "notes": "Amazon CSV safe match 82.45% | ASIN B08LVZQSGW | latest order 702-1561283-0268209 on 2023-09-28 | latest PPU CAD 34.38 | matched ASIN net total CAD 38.85"
   },
   {
     "item_group_key_strict": "jewellers heat proof",
@@ -4781,11 +4279,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07SXKJRXX",
+    "amazon_asin": "B07SXKJRXX",
+    "notes": "Amazon CSV safe match 83.5% | ASIN B07SXKJRXX | latest order 702-8031342-5128231 on 2023-09-08 | latest PPU CAD 23.43 | matched ASIN net total CAD 24.22"
   },
   {
     "item_group_key_strict": "jewelry earrings stand",
@@ -4800,11 +4296,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08QCPF4B3",
+    "amazon_asin": "B08QCPF4B3",
+    "notes": "Amazon CSV safe match 89.61% | ASIN B08QCPF4B3 | latest order 701-3205987-4915469 on 2022-08-30 | latest PPU CAD 18.39 | matched ASIN net total CAD 20.78"
   },
   {
     "item_group_key_strict": "canon jjcbluetooth wireless",
@@ -4819,11 +4313,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08CRH3NXL",
+    "amazon_asin": "B08CRH3NXL",
+    "notes": "Amazon CSV safe match 75.17% | ASIN B08CRH3NXL | latest order 702-9767821-0879403 on 2022-12-31 | latest PPU CAD 43.99 | matched ASIN net total CAD 49.71"
   },
   {
     "item_group_key_strict": "k&fconcept49mm k fconcept",
@@ -4840,8 +4332,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4857,11 +4347,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07G95FFN3",
+    "amazon_asin": "B07G95FFN3",
+    "notes": "Amazon CSV safe match 85.11% | ASIN B07G95FFN3 | latest order 701-3232139-3140238 on 2022-08-22 | latest PPU CAD 99.99 | matched ASIN net total CAD 112.99"
   },
   {
     "item_group_key_strict": "katchy automatic insect",
@@ -4876,11 +4364,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07H2JGSM6",
+    "amazon_asin": "B07H2JGSM6",
+    "notes": "Amazon CSV safe match 85.79% | ASIN B07H2JGSM6 | latest order 701-5379623-0145864 on 2022-08-06 | latest PPU CAD 106.8 | matched ASIN net total CAD 120.68"
   },
   {
     "item_group_key_strict": "kunova round height",
@@ -4895,11 +4381,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07GKSCCSX",
+    "amazon_asin": "B07GKSCCSX",
+    "notes": "Amazon CSV safe match 88.31% | ASIN B07GKSCCSX | latest order 702-7946472-9602633 on 2023-07-28 | latest PPU CAD 66.99 | matched ASIN net total CAD 75.7"
   },
   {
     "item_group_key_strict": "labasics4x4inch labasics x",
@@ -4914,11 +4398,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08RDKDQK4",
+    "amazon_asin": "B08RDKDQK4",
+    "notes": "Amazon CSV safe match 87.35% | ASIN B08RDKDQK4 | latest order 701-8260275-5143415 on 2022-07-31 | latest PPU CAD 21.98 | matched ASIN net total CAD 99.36"
   },
   {
     "item_group_key_strict": "le lematec sandblaster",
@@ -4933,11 +4415,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B01M0CRUUM",
+    "amazon_asin": "B01M0CRUUM",
+    "notes": "Amazon CSV safe match 86.55% | ASIN B01M0CRUUM | latest order 702-7946472-9602633 on 2023-07-28 | latest PPU CAD 66.77 | matched ASIN net total CAD 75.45"
   },
   {
     "item_group_key_strict": "ledgarage lights",
@@ -4954,8 +4434,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4973,8 +4451,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -4990,11 +4466,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07C1TWXFD",
+    "amazon_asin": "B07C1TWXFD",
+    "notes": "Amazon CSV safe match 86.39% | ASIN B07C1TWXFD | latest order 702-2807688-5083427 on 2023-10-19 | latest PPU CAD 139.99 | matched ASIN net total CAD 282.48"
   },
   {
     "item_group_key_strict": "lelematecportable sandblaster gun",
@@ -5011,8 +4485,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5030,8 +4502,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5047,11 +4517,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0CH9J7K7W",
+    "amazon_asin": "B0CH9J7K7W",
+    "notes": "Amazon CSV safe match 100.0% | ASIN B0CH9J7K7W | latest order 702-6663223-6583436 on 2024-10-21 | latest PPU CAD 49.59 | matched ASIN net total CAD 56.04"
   },
   {
     "item_group_key_strict": "letsresinresin heating mat",
@@ -5068,8 +4536,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5087,8 +4553,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5106,8 +4570,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5123,11 +4585,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00KC0L38G",
+    "amazon_asin": "B00KC0L38G",
+    "notes": "Amazon CSV safe match 88.44% | ASIN B00KC0L38G | latest order 701-9277070-6062608 on 2022-11-25 | latest PPU CAD 31.58 | matched ASIN net total CAD 35.69"
   },
   {
     "item_group_key_strict": "logi c",
@@ -5144,8 +4604,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5161,11 +4619,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07CMS5Q6P",
+    "amazon_asin": "B07CMS5Q6P",
+    "notes": "Amazon CSV safe match 78.06% | ASIN B07CMS5Q6P | latest order 701-5041800-4944233 on 2022-08-29 | latest PPU CAD 59.99 | matched ASIN net total CAD 67.79"
   },
   {
     "item_group_key_strict": "logitech wireless mouse",
@@ -5182,8 +4638,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5201,8 +4655,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5218,11 +4670,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B013MC8F5Y",
+    "amazon_asin": "B013MC8F5Y",
+    "notes": "Amazon CSV safe match 74.51% | ASIN B013MC8F5Y | latest order 702-4629268-4554667 on 2022-12-03 | latest PPU CAD 84.0 | matched ASIN net total CAD 94.92"
   },
   {
     "item_group_key_strict": "lysol disinfecting wipes",
@@ -5237,11 +4687,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09XJC428L",
+    "amazon_asin": "B09XJC428L",
+    "notes": "Amazon CSV safe match 98.48% | ASIN B09XJC428L | latest order 702-3745180-2954650 on 2024-10-27 | latest PPU CAD 36.0 | matched ASIN net total CAD 77.9"
   },
   {
     "item_group_key_strict": "magnifying glasses jewelry",
@@ -5256,11 +4704,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07XX2Z2H7",
+    "amazon_asin": "B07XX2Z2H7",
+    "notes": "Amazon CSV safe match 87.66% | ASIN B07XX2Z2H7 | latest order 702-1617555-1373025 on 2023-10-31 | latest PPU CAD 26.24 | matched ASIN net total CAD 29.65"
   },
   {
     "item_group_key_strict": "mequertshirt ruler guide",
@@ -5277,8 +4723,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5296,8 +4740,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5315,8 +4757,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5332,11 +4772,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BGB4PBH4",
+    "amazon_asin": "B0BGB4PBH4",
+    "notes": "Amazon CSV safe match 82.25% | ASIN B0BGB4PBH4 | latest order 702-7946472-9602633 on 2023-07-28 | latest PPU CAD 30.99 | matched ASIN net total CAD 35.02"
   },
   {
     "item_group_key_strict": "mini heat gunelesories",
@@ -5353,8 +4791,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5370,11 +4806,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0CNT5B2YW",
+    "amazon_asin": "B0CNT5B2YW",
+    "notes": "Amazon CSV safe match 100.0% | ASIN B0CNT5B2YW | latest order 702-3337798-6637067 on 2024-05-11 | latest PPU CAD 34.46 | matched ASIN net total CAD 38.94"
   },
   {
     "item_group_key_strict": "mrbiu5v2a mrbiu heated",
@@ -5389,11 +4823,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08YNQPKFJ",
+    "amazon_asin": "B08YNQPKFJ",
+    "notes": "Amazon CSV safe match 87.28% | ASIN B08YNQPKFJ | latest order 702-8660479-2050627 on 2022-12-31 | latest PPU CAD 97.51 | matched ASIN net total CAD 440.76"
   },
   {
     "item_group_key_strict": "mytechome vise universal",
@@ -5408,11 +4840,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B086QN1ZM9",
+    "amazon_asin": "B086QN1ZM9",
+    "notes": "Amazon CSV safe match 78.17% | ASIN B086QN1ZM9 | latest order 702-6510674-5149837 on 2023-10-19 | latest PPU CAD 32.97 | matched ASIN net total CAD 37.26"
   },
   {
     "item_group_key_strict": "nest one scoring",
@@ -5427,11 +4857,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BLHXJKLC",
+    "amazon_asin": "B0BLHXJKLC",
+    "notes": "Amazon CSV safe match 93.42% | ASIN B0BLHXJKLC | latest order 702-9138406-7784231 on 2023-11-27 | latest PPU CAD 31.25 | matched ASIN net total CAD 35.31"
   },
   {
     "item_group_key_strict": "night watch apractical",
@@ -5448,8 +4876,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5467,8 +4893,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5484,11 +4908,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B001ULC9H0",
+    "amazon_asin": "B001ULC9H0",
+    "notes": "Amazon CSV safe match 99.68% | ASIN B001ULC9H0 | latest order 702-0304857-8467448 on 2024-05-09 | latest PPU CAD 39.0 | matched ASIN net total CAD 44.07"
   },
   {
     "item_group_key_strict": "nu fix replacementfor",
@@ -5505,8 +4927,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5522,11 +4942,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08GYZXWPQ",
+    "amazon_asin": "B08GYZXWPQ",
+    "notes": "Amazon CSV safe match 76.08% | ASIN B08GYZXWPQ | latest order 701-3522234-7633040 on 2022-09-09 | latest PPU CAD 19.89 | matched ASIN net total CAD 22.48"
   },
   {
     "item_group_key_strict": "olympia pound cast",
@@ -5543,8 +4961,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5560,11 +4976,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09F6PQM27",
+    "amazon_asin": "B09F6PQM27",
+    "notes": "Amazon CSV safe match 75.11% | ASIN B09F6PQM27 | latest order 701-0183967-0217069 on 2022-08-31 | latest PPU CAD 52.9 | matched ASIN net total CAD 59.78"
   },
   {
     "item_group_key_strict": "open cat litter",
@@ -5579,11 +4993,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08GK8MNL4",
+    "amazon_asin": "B08GK8MNL4",
+    "notes": "Amazon CSV safe match 96.64% | ASIN B08GK8MNL4 | latest order 702-1032538-5750668 on 2025-02-02 | latest PPU CAD 75.89 | matched ASIN net total CAD 85.76"
   },
   {
     "item_group_key_strict": "ordro ep",
@@ -5600,8 +5012,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5617,11 +5027,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B087JTKGV3",
+    "amazon_asin": "B087JTKGV3",
+    "notes": "Amazon CSV safe match 84.5% | ASIN B087JTKGV3 | latest order 702-0398411-9149864 on 2022-11-25 | latest PPU CAD 279.0 | matched ASIN net total CAD 945.81"
   },
   {
     "item_group_key_strict": "ortur laser rollers",
@@ -5638,8 +5046,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5655,11 +5061,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09X9XXHGN",
+    "amazon_asin": "B09X9XXHGN",
+    "notes": "Amazon CSV safe match 86.36% | ASIN B09X9XXHGN | latest order 701-7057096-0662610 on 2022-08-06 | latest PPU CAD 99.99 | matched ASIN net total CAD 112.99"
   },
   {
     "item_group_key_strict": "ospreyunisex adult outdoor",
@@ -5676,8 +5080,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5693,11 +5095,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0CGCLFTRX",
+    "amazon_asin": "B0CGCLFTRX",
+    "notes": "Amazon CSV safe match 100.0% | ASIN B0CGCLFTRX | latest order 702-5777867-7050650 on 2024-06-13 | latest PPU CAD 59.99 | matched ASIN net total CAD 67.79"
   },
   {
     "item_group_key_strict": "owc gb x",
@@ -5712,11 +5112,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0C93GYKD7",
+    "amazon_asin": "B0C93GYKD7",
+    "notes": "Amazon CSV safe match 98.39% | ASIN B0C93GYKD7 | latest order 702-6553728-5403445 on 2025-01-27 | latest PPU CAD 81.0 | matched ASIN net total CAD 91.53"
   },
   {
     "item_group_key_strict": "canon packof compatible",
@@ -5733,8 +5131,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5752,8 +5148,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5769,11 +5163,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B018CW7B9K",
+    "amazon_asin": "B018CW7B9K",
+    "notes": "Amazon CSV safe match 93.33% | ASIN B018CW7B9K | latest order 702-2807688-5083427 on 2023-10-19 | latest PPU CAD 79.99 | matched ASIN net total CAD 90.39"
   },
   {
     "item_group_key_strict": "periodic tablewith real",
@@ -5788,11 +5180,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B7W54V3V",
+    "amazon_asin": "B0B7W54V3V",
+    "notes": "Amazon CSV safe match 85.19% | ASIN B0B7W54V3V | latest order 702-1561283-0268209 on 2023-09-28 | latest PPU CAD 36.5 | matched ASIN net total CAD 41.25"
   },
   {
     "item_group_key_strict": "phomemo m",
@@ -5809,8 +5199,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5826,11 +5214,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09PVHD5QJ",
+    "amazon_asin": "B09PVHD5QJ",
+    "notes": "Amazon CSV safe match 93.04% | ASIN B09PVHD5QJ | latest order 702-0398411-9149864 on 2022-11-25 | latest PPU CAD 97.98 | matched ASIN net total CAD 110.72"
   },
   {
     "item_group_key_strict": "pioneer7 pioneer pocket",
@@ -5845,11 +5231,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B06W5XLZXV",
+    "amazon_asin": "B06W5XLZXV",
+    "notes": "Amazon CSV safe match 83.49% | ASIN B06W5XLZXV | latest order 702-2112785-5629844 on 2023-11-22 | latest PPU CAD 68.13 | matched ASIN net total CAD 76.99"
   },
   {
     "item_group_key_strict": "power press",
@@ -5866,8 +5250,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5883,11 +5265,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B099R9LVV8",
+    "amazon_asin": "B099R9LVV8",
+    "notes": "Amazon CSV safe match 87.26% | ASIN B099R9LVV8 | latest order 701-7022326-2903433 on 2022-07-12 | latest PPU CAD 59.99 | matched ASIN net total CAD 67.79"
   },
   {
     "item_group_key_strict": "preciva12pcswood preciva pcswood",
@@ -5902,11 +5282,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B073WWJXWC",
+    "amazon_asin": "B073WWJXWC",
+    "notes": "Amazon CSV safe match 76.72% | ASIN B073WWJXWC | latest order 702-3091480-5546600 on 2023-11-22 | latest PPU CAD 18.99 | matched ASIN net total CAD 21.46"
   },
   {
     "item_group_key_strict": "purple large work",
@@ -5923,8 +5301,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -5940,11 +5316,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B078JPRH2Y",
+    "amazon_asin": "B078JPRH2Y",
+    "notes": "Amazon CSV safe match 85.64% | ASIN B078JPRH2Y | latest order 702-3091480-5546600 on 2023-11-22 | latest PPU CAD 19.98 | matched ASIN net total CAD 22.58"
   },
   {
     "item_group_key_strict": "qualis wireless rgbgaming",
@@ -5959,11 +5333,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08Y1GT234",
+    "amazon_asin": "B08Y1GT234",
+    "notes": "Amazon CSV safe match 80.69% | ASIN B08Y1GT234 | latest order 702-9044028-2923446 on 2022-12-08 | latest PPU CAD 62.71 | matched ASIN net total CAD 70.87"
   },
   {
     "item_group_key_strict": "quupytalcum powder case",
@@ -5978,11 +5350,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0982PBMT9",
+    "amazon_asin": "B0982PBMT9",
+    "notes": "Amazon CSV safe match 76.25% | ASIN B0982PBMT9 | latest order 702-3091480-5546600 on 2023-11-22 | latest PPU CAD 13.45 | matched ASIN net total CAD 15.2"
   },
   {
     "item_group_key_strict": "raven compact",
@@ -5999,8 +5369,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6016,11 +5384,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09QYBYLVL",
+    "amazon_asin": "B09QYBYLVL",
+    "notes": "Amazon CSV safe match 85.16% | ASIN B09QYBYLVL | latest order 701-2510219-2731427 on 2022-11-25 | latest PPU CAD 141.74 | matched ASIN net total CAD 141.74"
   },
   {
     "item_group_key_strict": "resiners deeper trays",
@@ -6035,11 +5401,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B4JVT27K",
+    "amazon_asin": "B0B4JVT27K",
+    "notes": "Amazon CSV safe match 92.74% | ASIN B0B4JVT27K | latest order 702-2177856-4285816 on 2022-12-31 | latest PPU CAD 52.47 | matched ASIN net total CAD 59.29"
   },
   {
     "item_group_key_strict": "resiners3pcsdeeper resiners pcsdeeper",
@@ -6054,11 +5418,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B4JVT27K",
+    "amazon_asin": "B0B4JVT27K",
+    "notes": "Amazon CSV safe match 76.68% | ASIN B0B4JVT27K | latest order 702-2177856-4285816 on 2022-12-31 | latest PPU CAD 52.47 | matched ASIN net total CAD 59.29"
   },
   {
     "item_group_key_strict": "rii bluetooth keyboard",
@@ -6075,8 +5437,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6092,11 +5452,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BR5Z7BRT",
+    "amazon_asin": "B0BR5Z7BRT",
+    "notes": "Amazon CSV safe match 76.02% | ASIN B0BR5Z7BRT | latest order 701-2286712-4845053 on 2023-10-06 | latest PPU CAD 161.38 | matched ASIN net total CAD 182.36"
   },
   {
     "item_group_key_strict": "rolanstar bookshelf tier",
@@ -6113,8 +5471,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6130,11 +5486,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0CJRHSDFQ",
+    "amazon_asin": "B0CJRHSDFQ",
+    "notes": "Amazon CSV safe match 99.83% | ASIN B0CJRHSDFQ | latest order 702-5212487-3779419 on 2024-06-18 | latest PPU CAD 15.53 | matched ASIN net total CAD 15.74"
   },
   {
     "item_group_key_strict": "sain smart cncrouter",
@@ -6149,11 +5503,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07Z5X9YHJ",
+    "amazon_asin": "B07Z5X9YHJ",
+    "notes": "Amazon CSV safe match 81.46% | ASIN B07Z5X9YHJ | latest order 702-3688071-7861061 on 2023-11-27 | latest PPU CAD 8.79 | matched ASIN net total CAD 9.93"
   },
   {
     "item_group_key_strict": "samsung galaxy book",
@@ -6168,11 +5520,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09VWKM6HZ",
+    "amazon_asin": "B09VWKM6HZ",
+    "notes": "Amazon CSV safe match 80.62% | ASIN B09VWKM6HZ | latest order 701-0521449-9437819 on 2022-07-18 | latest PPU CAD 1869.99 | matched ASIN net total CAD 2113.09"
   },
   {
     "item_group_key_strict": "samsung galaxy buds",
@@ -6189,8 +5539,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6206,11 +5554,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B098XXPNZV",
+    "amazon_asin": "B098XXPNZV",
+    "notes": "Amazon CSV safe match 89.62% | ASIN B098XXPNZV | latest order 701-5529705-1463411 on 2022-11-12 | latest PPU CAD 248.98 | matched ASIN net total CAD 281.35"
   },
   {
     "item_group_key_strict": "samsung lc f",
@@ -6225,11 +5571,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07PBZMW4W",
+    "amazon_asin": "B07PBZMW4W",
+    "notes": "Amazon CSV safe match 88.11% | ASIN B07PBZMW4W | latest order 702-3547832-0734607 on 2022-12-15 | latest PPU CAD 198.0 | matched ASIN net total CAD 448.46"
   },
   {
     "item_group_key_strict": "samsung ls r",
@@ -6246,8 +5590,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6263,11 +5605,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09Y6S2XMN",
+    "amazon_asin": "B09Y6S2XMN",
+    "notes": "Amazon CSV safe match 83.66% | ASIN B09Y6S2XMN | latest order 702-5538610-7962615 on 2022-12-21 | latest PPU CAD 698.0 | matched ASIN net total CAD 788.74"
   },
   {
     "item_group_key_strict": "samsung q bsoundbar",
@@ -6284,8 +5624,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6303,8 +5641,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6322,8 +5658,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6339,11 +5673,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0C5JNWF58",
+    "amazon_asin": "B0C5JNWF58",
+    "notes": "Amazon CSV safe match 84.63% | ASIN B0C5JNWF58 | latest order 701-8594760-9972251 on 2023-09-18 | latest PPU CAD 179.87 | matched ASIN net total CAD 203.25"
   },
   {
     "item_group_key_strict": "san disk ssdplus",
@@ -6360,8 +5692,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6377,11 +5707,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0B7NVV55M",
+    "amazon_asin": "B0B7NVV55M",
+    "notes": "Amazon CSV safe match 84.24% | ASIN B0B7NVV55M | latest order 702-5711329-9241007 on 2023-06-21 | latest PPU CAD 34.98 | matched ASIN net total CAD 158.12"
   },
   {
     "item_group_key_strict": "san disk gbextreme",
@@ -6396,11 +5724,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07H9DVLBB",
+    "amazon_asin": "B07H9DVLBB",
+    "notes": "Amazon CSV safe match 76.95% | ASIN B07H9DVLBB | latest order 702-9767821-0879403 on 2022-12-31 | latest PPU CAD 37.99 | matched ASIN net total CAD 42.93"
   },
   {
     "item_group_key_strict": "san disk gbultra",
@@ -6415,11 +5741,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08GYKNCCP",
+    "amazon_asin": "B08GYKNCCP",
+    "notes": "Amazon CSV safe match 78.15% | ASIN B08GYKNCCP | latest order 702-8721431-7864258 on 2023-01-31 | latest PPU CAD 20.88 | matched ASIN net total CAD 23.59"
   },
   {
     "item_group_key_strict": "san disk gbextrememicro",
@@ -6434,11 +5758,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09X7CRKRZ",
+    "amazon_asin": "B09X7CRKRZ",
+    "notes": "Amazon CSV safe match 72.97% | ASIN B09X7CRKRZ | latest order 702-9954129-7304212 on 2023-01-11 | latest PPU CAD 41.74 | matched ASIN net total CAD 47.17"
   },
   {
     "item_group_key_strict": "san disk tbportable",
@@ -6453,11 +5775,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0C5JNWF58",
+    "amazon_asin": "B0C5JNWF58",
+    "notes": "Amazon CSV safe match 72.23% | ASIN B0C5JNWF58 | latest order 701-8594760-9972251 on 2023-09-18 | latest PPU CAD 179.87 | matched ASIN net total CAD 203.25"
   },
   {
     "item_group_key_strict": "sand casting sandbox",
@@ -6472,11 +5792,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0C499522Z",
+    "amazon_asin": "B0C499522Z",
+    "notes": "Amazon CSV safe match 77.39% | ASIN B0C499522Z | latest order 702-6510674-5149837 on 2023-10-19 | latest PPU CAD 44.69 | matched ASIN net total CAD 47.98"
   },
   {
     "item_group_key_strict": "sandisk ssdplus",
@@ -6493,8 +5811,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6512,8 +5828,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6529,11 +5843,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0010JEJPC",
+    "amazon_asin": "B0010JEJPC",
+    "notes": "Amazon CSV safe match 98.66% | ASIN B0010JEJPC | latest order 702-0304857-8467448 on 2024-05-09 | latest PPU CAD 54.99 | matched ASIN net total CAD 62.14"
   },
   {
     "item_group_key_strict": "se jt rr",
@@ -6548,11 +5860,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B009NZOPBS",
+    "amazon_asin": "B009NZOPBS",
+    "notes": "Amazon CSV safe match 88.16% | ASIN B009NZOPBS | latest order 702-3043204-3488224 on 2023-09-28 | latest PPU CAD 190.65 | matched ASIN net total CAD 215.43"
   },
   {
     "item_group_key_strict": "sensyne phone tripod",
@@ -6567,11 +5877,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BD7VTXN3",
+    "amazon_asin": "B0BD7VTXN3",
+    "notes": "Amazon CSV safe match 91.17% | ASIN B0BD7VTXN3 | latest order 702-8031342-5128231 on 2023-09-08 | latest PPU CAD 35.99 | matched ASIN net total CAD 35.02"
   },
   {
     "item_group_key_strict": "singer005574 singer pro",
@@ -6588,8 +5896,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6607,8 +5913,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6624,11 +5928,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07FP3ZZS6",
+    "amazon_asin": "B07FP3ZZS6",
+    "notes": "Amazon CSV safe match 87.54% | ASIN B07FP3ZZS6 | latest order 702-6669159-9967460 on 2022-12-03 | latest PPU CAD 94.9 | matched ASIN net total CAD 107.24"
   },
   {
     "item_group_key_strict": "small rig tri",
@@ -6645,8 +5947,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6664,8 +5964,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6683,8 +5981,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6700,11 +5996,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07RDG52BH",
+    "amazon_asin": "B07RDG52BH",
+    "notes": "Amazon CSV safe match 86.69% | ASIN B07RDG52BH | latest order 702-8031342-5128231 on 2023-09-08 | latest PPU CAD 42.66 | matched ASIN net total CAD 48.21"
   },
   {
     "item_group_key_strict": "anker soundcore life",
@@ -6721,8 +6015,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6738,11 +6030,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0CM4RFSHN",
+    "amazon_asin": "B0CM4RFSHN",
+    "notes": "Amazon CSV safe match 100.0% | ASIN B0CM4RFSHN | latest order 702-6787255-5181852 on 2024-06-13 | latest PPU CAD 20.99 | matched ASIN net total CAD 23.72"
   },
   {
     "item_group_key_strict": "ssdsata500gb ssdsata gb",
@@ -6759,8 +6049,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6776,11 +6064,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09ZQPTZ6Q",
+    "amazon_asin": "B09ZQPTZ6Q",
+    "notes": "Amazon CSV safe match 93.7% | ASIN B09ZQPTZ6Q | latest order 701-7208396-5709843 on 2022-09-26 | latest PPU CAD 82.99 | matched ASIN net total CAD 75.7"
   },
   {
     "item_group_key_strict": "supcase supcaseunicorn beetle",
@@ -6797,8 +6083,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6814,11 +6098,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/=\"0228103622\"",
+    "amazon_asin": "=\"0228103622\"",
+    "notes": "Amazon CSV safe match 82.84% | ASIN =\"0228103622\" | latest order 702-1561283-0268209 on 2023-09-28 | latest PPU CAD 29.21 | matched ASIN net total CAD 30.67"
   },
   {
     "item_group_key_strict": "toolly5pieces toolly pegboard",
@@ -6833,11 +6115,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08M8Z4MQG",
+    "amazon_asin": "B08M8Z4MQG",
+    "notes": "Amazon CSV safe match 88.59% | ASIN B08M8Z4MQG | latest order 701-9024942-2381800 on 2022-06-20 | latest PPU CAD 15.95 | matched ASIN net total CAD 18.02"
   },
   {
     "item_group_key_strict": "tp link deco",
@@ -6854,8 +6134,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6871,11 +6149,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B001DKMBTO",
+    "amazon_asin": "B001DKMBTO",
+    "notes": "Amazon CSV safe match 99.57% | ASIN B001DKMBTO | latest order 701-9277070-6062608 on 2022-11-25 | latest PPU CAD 21.83 | matched ASIN net total CAD 24.67"
   },
   {
     "item_group_key_strict": "ultra pro ge",
@@ -6890,11 +6166,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B078NQ52VJ",
+    "amazon_asin": "B078NQ52VJ",
+    "notes": "Amazon CSV safe match 84.29% | ASIN B078NQ52VJ | latest order 702-8042265-7042623 on 2023-04-15 | latest PPU CAD 30.25 | matched ASIN net total CAD 34.18"
   },
   {
     "item_group_key_strict": "usareplacementparts coin ring",
@@ -6909,11 +6183,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B09TG3RF1G",
+    "amazon_asin": "B09TG3RF1G",
+    "notes": "Amazon CSV safe match 90.88% | ASIN B09TG3RF1G | latest order 702-3043204-3488224 on 2023-09-28 | latest PPU CAD 95.87 | matched ASIN net total CAD 108.33"
   },
   {
     "item_group_key_strict": "usart supply drawer",
@@ -6930,8 +6202,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -6947,11 +6217,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08R8WS6BX",
+    "amazon_asin": "B08R8WS6BX",
+    "notes": "Amazon CSV safe match 83.62% | ASIN B08R8WS6BX | latest order 701-2576063-4941859 on 2023-10-06 | latest PPU CAD 146.98 | matched ASIN net total CAD 166.09"
   },
   {
     "item_group_key_strict": "vevor ultrasonic cleaner",
@@ -6966,11 +6234,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B01HGN40SQ",
+    "amazon_asin": "B01HGN40SQ",
+    "notes": "Amazon CSV safe match 87.88% | ASIN B01HGN40SQ | latest order 701-6234632-8681025 on 2023-09-18 | latest PPU CAD 99.98 | matched ASIN net total CAD 112.98"
   },
   {
     "item_group_key_strict": "vevor ton hydraulic",
@@ -6985,11 +6251,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B0BVMFRFP9",
+    "amazon_asin": "B0BVMFRFP9",
+    "notes": "Amazon CSV safe match 88.27% | ASIN B0BVMFRFP9 | latest order 702-4546705-2310668 on 2023-09-28 | latest PPU CAD 89.98 | matched ASIN net total CAD 101.68"
   },
   {
     "item_group_key_strict": "vevor vevorbelt sander",
@@ -7006,8 +6270,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7025,8 +6287,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7044,8 +6304,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7061,11 +6319,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07BVPS15M",
+    "amazon_asin": "B07BVPS15M",
+    "notes": "Amazon CSV safe match 93.06% | ASIN B07BVPS15M | latest order 702-9148754-3905865 on 2023-01-16 | latest PPU CAD 28.99 | matched ASIN net total CAD 32.76"
   },
   {
     "item_group_key_strict": "wen la k",
@@ -7080,11 +6336,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08FBKQPJX",
+    "amazon_asin": "B08FBKQPJX",
+    "notes": "Amazon CSV safe match 95.5% | ASIN B08FBKQPJX | latest order 702-0826712-4612218 on 2024-10-27 | latest PPU CAD 25.49 | matched ASIN net total CAD 28.8"
   },
   {
     "item_group_key_strict": "wolfbox mirror dash",
@@ -7101,8 +6355,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7120,8 +6372,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7139,8 +6389,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7158,8 +6406,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7177,8 +6423,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7194,11 +6438,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08F2L5TLK",
+    "amazon_asin": "B08F2L5TLK",
+    "notes": "Amazon CSV safe match 90.53% | ASIN B08F2L5TLK | latest order 701-2286712-4845053 on 2023-10-06 | latest PPU CAD 25.68 | matched ASIN net total CAD 29.02"
   },
   {
     "item_group_key_strict": "air fed system",
@@ -7213,11 +6455,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08MKQ548W",
+    "amazon_asin": "B08MKQ548W",
+    "notes": "Amazon CSV safe match 75.09% | ASIN B08MKQ548W | latest order 701-4602207-2305060 on 2023-09-18 | latest PPU CAD 219.89 | matched ASIN net total CAD 219.89"
   },
   {
     "item_group_key_strict": "anti fog safety",
@@ -7232,11 +6472,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07SG8WY85",
+    "amazon_asin": "B07SG8WY85",
+    "notes": "Amazon CSV safe match 97.29% | ASIN B07SG8WY85 | latest order 701-8934247-9011451 on 2022-07-20 | latest PPU CAD 34.65 | matched ASIN net total CAD 39.15"
   },
   {
     "item_group_key_strict": "auto darkening welding",
@@ -7251,11 +6489,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B00BWAEYV8",
+    "amazon_asin": "B00BWAEYV8",
+    "notes": "Amazon CSV safe match 74.09% | ASIN B00BWAEYV8 | latest order 702-7946472-9602633 on 2023-07-28 | latest PPU CAD 49.99 | matched ASIN net total CAD 56.49"
   },
   {
     "item_group_key_strict": "befenybay direct dual",
@@ -7270,11 +6506,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B098BGFPH8",
+    "amazon_asin": "B098BGFPH8",
+    "notes": "Amazon CSV safe match 90.89% | ASIN B098BGFPH8 | latest order 702-3297716-4509045 on 2023-07-12 | latest PPU CAD 55.86 | matched ASIN net total CAD 63.12"
   },
   {
     "item_group_key_strict": "copper tongs curved",
@@ -7289,11 +6523,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07CH36MM2",
+    "amazon_asin": "B07CH36MM2",
+    "notes": "Amazon CSV safe match 79.64% | ASIN B07CH36MM2 | latest order 702-8031342-5128231 on 2023-09-08 | latest PPU CAD 20.0 | matched ASIN net total CAD 22.6"
   },
   {
     "item_group_key_strict": "cricut brayer trapped",
@@ -7308,11 +6540,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B072VWN1GV",
+    "amazon_asin": "B072VWN1GV",
+    "notes": "Amazon CSV safe match 87.78% | ASIN B072VWN1GV | latest order 701-8157554-4350610 on 2022-06-20 | latest PPU CAD 30.2 | matched ASIN net total CAD 34.13"
   },
   {
     "item_group_key_strict": "dräger dr ger",
@@ -7327,11 +6557,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B01GVSYO10",
+    "amazon_asin": "B01GVSYO10",
+    "notes": "Amazon CSV safe match 87.86% | ASIN B01GVSYO10 | latest order 702-6560133-1461004 on 2023-01-16 | latest PPU CAD 74.67 | matched ASIN net total CAD 84.38"
   },
   {
     "item_group_key_strict": "electric constant flow",
@@ -7346,11 +6574,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08MKQ548W",
+    "amazon_asin": "B08MKQ548W",
+    "notes": "Amazon CSV safe match 84.65% | ASIN B08MKQ548W | latest order 701-4602207-2305060 on 2023-09-18 | latest PPU CAD 219.89 | matched ASIN net total CAD 219.89"
   },
   {
     "item_group_key_strict": "free mascot uvand",
@@ -7365,11 +6591,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08B3KTFKV",
+    "amazon_asin": "B08B3KTFKV",
+    "notes": "Amazon CSV safe match 85.16% | ASIN B08B3KTFKV | latest order 701-7725723-6601845 on 2022-07-20 | latest PPU CAD 18.99 | matched ASIN net total CAD 21.46"
   },
   {
     "item_group_key_strict": "huionanti fouling artist",
@@ -7386,8 +6610,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7405,8 +6627,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7424,8 +6644,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7441,11 +6659,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B08KJ72TS9",
+    "amazon_asin": "B08KJ72TS9",
+    "notes": "Amazon CSV safe match 79.44% | ASIN B08KJ72TS9 | latest order 702-8273876-6226619 on 2023-10-11 | latest PPU CAD 16.89 | matched ASIN net total CAD 18.14"
   },
   {
     "item_group_key_strict": "respirator mask",
@@ -7460,11 +6676,9 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B01GVSYO10",
+    "amazon_asin": "B01GVSYO10",
+    "notes": "Amazon CSV safe match 76.48% | ASIN B01GVSYO10 | latest order 702-6560133-1461004 on 2023-01-16 | latest PPU CAD 74.67 | matched ASIN net total CAD 84.38"
   },
   {
     "item_group_key_strict": "ronweixsafety goggles",
@@ -7481,8 +6695,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7500,8 +6712,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7519,8 +6729,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7538,8 +6746,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7557,8 +6763,6 @@
     "location_bin": "",
     "amazon_url": "",
     "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
     "notes": ""
   },
   {
@@ -7574,10 +6778,8 @@
     "location_zone": "",
     "location_shelf": "",
     "location_bin": "",
-    "amazon_url": "",
-    "amazon_asin": "",
-    "purchase_date": "",
-    "purchase_price": "",
-    "notes": ""
+    "amazon_url": "https://www.amazon.ca/dp/B07QSFRSJX",
+    "amazon_asin": "B07QSFRSJX",
+    "notes": "Amazon CSV safe match 77.41% | ASIN B07QSFRSJX | latest order 702-2821268-0543468 on 2023-07-12 | latest PPU CAD 55.99 | matched ASIN net total CAD 63.27"
   }
 ]

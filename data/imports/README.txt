@@ -1,0 +1,1 @@
+Private Amazon match reports were intentionally removed from this public-safe deploy package. Keep CSV/XLSX/JSON import reports outside the public website tree and load approved rows through private admin/D1 import workflows.
