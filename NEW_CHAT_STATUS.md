@@ -42,3 +42,10 @@ Current rule:
 ## Private Import Data Safety Note — 2026-05-11
 
 Amazon transaction CSVs and review spreadsheets are **not** stored inside the deployable website tree because `/data/` assets may become publicly reachable after Cloudflare Pages deployment. Keep the generated Amazon import package private and load approved rows into the database through an admin/import workflow instead.
+
+## Amazon inventory purchase matching pass — 2026-05-14
+
+- Rechecked Amazon Business order CSV against Toolshed and Supplies by cleaned product title instead of exact filename/ID matching.
+- Patched 572 conservative safe matches into inventory JSON Amazon fields.
+- Added `data/imports/amazon_inventory_match_report.csv`, `data/imports/amazon_purchase_import_candidates.csv`, and `AMAZON_MATCHING_NOTES.md` for review and database import planning.
+- Rows marked `needs_review` or `weak_candidate` were not written into live JSON fields because the best candidate was ambiguous or too weak.
