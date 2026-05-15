@@ -66,3 +66,30 @@ GROUP BY source_type;
 ```
 
 Expected row totals should be close to 399 tools and 498 supplies. Unit-cost counts should increase after the admin sync because Amazon CSV match details are now available to the admin-side sync process.
+
+## 2026-05-14 inventory sync sanity checks
+
+After deploying the corrected inventory build and clicking **Sync all tools + supplies**, run:
+
+```sql
+SELECT
+  source_type,
+  COUNT(*) AS total,
+  SUM(CASE WHEN on_hand_quantity >= 1 THEN 1 ELSE 0 END) AS in_stock_rows,
+  SUM(CASE WHEN unit_cost_cents > 0 THEN 1 ELSE 0 END) AS with_unit_cost,
+  SUM(CASE WHEN usage_units_per_stock_unit > 1 THEN 1 ELSE 0 END) AS package_sized_rows
+FROM site_item_inventory
+WHERE source_type IN ('tool','supply')
+GROUP BY source_type;
+```
+
+Spot-check DTF sheets:
+
+```sql
+SELECT item_name, on_hand_quantity, unit_cost_cents, stock_unit_label, usage_unit_label, usage_units_per_stock_unit
+FROM site_item_inventory
+WHERE LOWER(item_name) LIKE '%dtf%'
+LIMIT 10;
+```
+
+Expected pattern: cost stored as cents, admin displayed as dollars; DTF should read approximately `1 package = 100 sheet`.

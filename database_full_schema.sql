@@ -758,7 +758,7 @@ CREATE TABLE IF NOT EXISTS site_item_inventory (
   source_url TEXT,
   amazon_url TEXT,
   image_url TEXT,
-  on_hand_quantity INTEGER NOT NULL DEFAULT 0,
+  on_hand_quantity INTEGER NOT NULL DEFAULT 1,
   reserved_quantity INTEGER NOT NULL DEFAULT 0,
   incoming_quantity INTEGER NOT NULL DEFAULT 0,
   reorder_level INTEGER NOT NULL DEFAULT 0,

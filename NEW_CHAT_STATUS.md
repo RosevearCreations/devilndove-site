@@ -64,3 +64,13 @@ Next action after deploy:
 1. Open `/admin/catalog/`.
 2. In Tools & Supplies Inventory Operations, click **Sync all tools + supplies**.
 3. Verify D1 `site_item_inventory` has about 897 rows and that unit-cost counts increased.
+
+## Inventory cost/display correction — 2026-05-14
+
+Patched the Tools & Supplies inventory workflow again after admin testing:
+- Inventory unit-cost form now displays/accepts dollars (`33.99`) instead of raw cents (`3399`). Values are converted back to `unit_cost_cents` only when saving to D1.
+- Catalog-to-inventory sync now treats every synced tool/supply as in stock by default and sets any zero/blank on-hand quantity to at least `1`.
+- Package-size inference now corrects count-based Amazon items. Example: `100 Sheets DTF Transfer Film Paper` syncs as `1 package = 100 sheet`, so product usage can consume `1 sheet` at a time.
+- Product resource search now also checks Amazon URL/source JSON so ASIN/Amazon-title searches work better.
+
+After deploying this build, rerun **Sync all tools + supplies** from `/admin/catalog/` so D1 gets the corrected on-hand and package/usage-unit values.

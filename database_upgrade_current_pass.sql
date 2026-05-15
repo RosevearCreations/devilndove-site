@@ -91,3 +91,13 @@ CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_review
 -- supplier_contact, reorder_notes, preferred_reorder_quantity, is_on_reorder_list,
 -- do_not_reorder, do_not_reuse, reuse_status, reservation_notes, last_reorder_requested_at,
 -- last_counted_at, is_active, last_seen_at, created_at, updated_at.
+
+-- Inventory sync correction, 2026-05-14:
+-- Existing Tools/Supplies records are considered in stock once imported.
+-- Keep stock as at least 1 package/tool; package size is tracked separately by usage_units_per_stock_unit.
+UPDATE site_item_inventory
+SET on_hand_quantity = 1,
+    updated_at = CURRENT_TIMESTAMP
+WHERE source_type IN ('tool', 'supply')
+  AND COALESCE(on_hand_quantity, 0) < 1;
+

@@ -34,3 +34,11 @@ New behavior:
 - `/api/admin/site-item-inventory` now supports `{ "action": "sync_catalog", "source_types": ["tool", "supply"] }`.
 - Inventory sync fills `site_item_inventory` with Amazon URL, ASIN, supplier/seller, unit cost, stock unit label, usage unit label, usage-units-per-stock, and review notes.
 - `needs_review` and `weak_candidate` matches are still flagged in notes/status so they can be reviewed before relying on their costing.
+
+## Cost display, stock default, and package-unit correction — 2026-05-14
+
+Admin correction after testing:
+- D1 continues storing money as integer cents in `unit_cost_cents`, but the admin form now displays costs as CAD dollars. Example: `3399` cents displays/edits as `33.99`.
+- The inventory sync now defaults synced Tools/Supplies to at least `1` on hand because the current inventory list represents items physically in the shop.
+- Count-based supply titles are now inferred as packages with usable units. Example: `100 Sheets DTF Transfer Film Paper` becomes `stock_unit_label = package`, `usage_unit_label = sheet`, `usage_units_per_stock_unit = 100`. This lets finished-product recipes consume one sheet at a time while keeping one purchased package in stock.
+- Similar count/pack wording is handled for sheets, pieces, count/ct, rolls, masks, pairs, wicks, and bags.

@@ -54,3 +54,20 @@ Import rule:
 `site_item_inventory` is the admin working table for Tools/Supplies stock, cost, reorder, and product-resource usage. The admin API now guards/creates these fields when missing: source type/key, item name/category, source/Amazon/image URLs, on-hand/reserved/incoming quantities, reorder level, unit cost cents, stock unit label, usage unit label, usage units per stock unit, supplier/seller fields, reorder notes, reuse flags, active flag, last-seen timestamp, created timestamp, and updated timestamp.
 
 `catalog_items` remains the catalog/source snapshot. Use `/api/admin/catalog-sync` first, then `/api/admin/site-item-inventory` with `action: sync_catalog` to copy the catalog snapshot into working inventory.
+
+## Inventory costing/unit conventions — 2026-05-14
+
+`site_item_inventory.unit_cost_cents` stores money in integer cents for database safety. Admin screens must display and accept CAD dollar amounts, then convert to cents before saving.
+
+`site_item_inventory.on_hand_quantity` is the count of purchased stock units on hand. For the current Tools/Supplies import, sync defaults blank/zero rows to `1` because each catalog row represents an item currently in stock.
+
+`stock_unit_label`, `usage_unit_label`, and `usage_units_per_stock_unit` describe package math. Example: a 100-sheet DTF package should be:
+
+```text
+on_hand_quantity = 1
+stock_unit_label = package
+usage_unit_label = sheet
+usage_units_per_stock_unit = 100
+```
+
+Finished-product resource links should consume `quantity_used` in the usage unit, not the stock package.
