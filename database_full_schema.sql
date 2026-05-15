@@ -1626,3 +1626,42 @@ CREATE INDEX IF NOT EXISTS idx_pickup_profiles_active_sort ON pickup_profiles(is
 -- 2026-05-09 admin products resource-selector follow-up
 -- No schema change was required for this pass.
 -- The changes were admin UX/fallback improvements for inventory seed selectors and product resource-link editing.
+
+-- Build 125 current pass: Amazon review/apply workflow, inventory cost history, and reconciliation queue hardening.
+CREATE TABLE IF NOT EXISTS site_item_inventory_cost_history (
+  site_item_inventory_cost_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_item_inventory_id INTEGER,
+  source_type TEXT,
+  external_key TEXT,
+  item_name TEXT,
+  previous_unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  new_unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  source_kind TEXT NOT NULL DEFAULT 'manual',
+  source_id TEXT,
+  source_reference TEXT,
+  reason_note TEXT,
+  changed_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_item ON site_item_inventory_cost_history(site_item_inventory_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_source ON site_item_inventory_cost_history(source_kind, source_id);
+
+ALTER TABLE amazon_purchase_import_staging ADD COLUMN applied_inventory_id INTEGER;
+ALTER TABLE amazon_purchase_import_staging ADD COLUMN applied_cost_history_id INTEGER;
+ALTER TABLE amazon_purchase_import_staging ADD COLUMN applied_at TEXT;
+ALTER TABLE amazon_purchase_import_staging ADD COLUMN reviewed_by_user_id INTEGER;
+
+ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN assigned_to_user_id INTEGER;
+ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN accountant_review_flag INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN resolved_by_user_id INTEGER;
+ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN resolved_at TEXT;
+ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN reopened_by_user_id INTEGER;
+ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN reopened_at TEXT;
+CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_exceptions_queue ON accounting_reconciliation_exceptions(exception_status, accountant_review_flag, updated_at DESC);
+
+ALTER TABLE accounting_journal_entries ADD COLUMN posted_by_user_id INTEGER;
+ALTER TABLE accounting_journal_entries ADD COLUMN posted_at TEXT;
+ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
+

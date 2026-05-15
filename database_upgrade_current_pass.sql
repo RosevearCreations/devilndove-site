@@ -94,12 +94,8 @@ CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_review
 
 -- Inventory sync correction, 2026-05-14:
 -- Existing Tools/Supplies records are considered in stock once imported.
--- Keep stock as at least 1 package/tool; package size is tracked separately by usage_units_per_stock_unit.
-UPDATE site_item_inventory
-SET on_hand_quantity = 1,
-    updated_at = CURRENT_TIMESTAMP
-WHERE source_type IN ('tool', 'supply')
-  AND COALESCE(on_hand_quantity, 0) < 1;
+-- Build 125 applies this safely through /api/admin/site-item-inventory sync and runtime migrations
+-- instead of relying on an UPDATE that can fail on older partial schemas.
 
 
 -- Current pass, 2026-05-14: schema migration ledger for D1 SQL change tracking.
@@ -123,7 +119,7 @@ CREATE INDEX IF NOT EXISTS idx_schema_migration_ledger_file ON schema_migration_
 INSERT OR IGNORE INTO schema_migration_ledger (
   migration_key, file_name, status, destructive, notes, created_at, updated_at
 ) VALUES (
-  'database_upgrade_current_pass',
+  'database_upgrade_current_pass_build124',
   'database_upgrade_current_pass.sql',
   'pending_review',
   1,
@@ -152,3 +148,45 @@ CREATE TABLE IF NOT EXISTS accounting_statement_provider_profiles (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_accounting_statement_provider_profiles_active ON accounting_statement_provider_profiles(is_active, provider_scope);
+
+-- Build 125 current pass: runtime-safe APIs now create/backfill these schema pieces when missing.
+CREATE TABLE IF NOT EXISTS site_item_inventory_cost_history (
+  site_item_inventory_cost_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_item_inventory_id INTEGER,
+  source_type TEXT,
+  external_key TEXT,
+  item_name TEXT,
+  previous_unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  new_unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  source_kind TEXT NOT NULL DEFAULT 'manual',
+  source_id TEXT,
+  source_reference TEXT,
+  reason_note TEXT,
+  changed_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_item ON site_item_inventory_cost_history(site_item_inventory_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_source ON site_item_inventory_cost_history(source_kind, source_id);
+-- The reconciliation queue index is created by the runtime API after confirming columns exist.
+
+-- Note: the Build 125 Functions add missing columns safely after checking PRAGMA table_info:
+-- amazon_purchase_import_staging.applied_inventory_id / applied_cost_history_id / applied_at / reviewed_by_user_id
+-- accounting_reconciliation_exceptions.assigned_to_user_id / accountant_review_flag / resolved_by_user_id / resolved_at / reopened_by_user_id / reopened_at
+-- accounting_journal_entries.posted_by_user_id / posted_at / validation_message
+
+
+
+-- Build 125 migration ledger marker.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build125',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 125. Adds Amazon purchase review/apply workflow, inventory cost history, reconciliation queue fields, journal validation/posting metadata, and local-intent SEO pages. Mark as applied after this SQL and the deployed Functions have been verified.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

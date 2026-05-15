@@ -1,6 +1,6 @@
 # Repo Rules — Devil n Dove
 
-Current sync: 2026-05-14 — Build 124.
+Current sync: 2026-05-14 — Build 125.
 
 ## Required rules for future passes
 1. Update Markdown when code/schema changes.
@@ -19,3 +19,7 @@ Current sync: 2026-05-14 — Build 124.
 - Record applied SQL in the Migration Ledger.
 - Run Release Sanity before declaring a build ready.
 - Re-run Tools/Supplies inventory sync after catalog JSON/D1 changes.
+
+## Build 125 note
+
+Build 125 keeps Amazon order/cost data private, adds admin review/apply controls for Amazon staging rows, records inventory cost history, expands reconciliation and journal guardrails, and adds local-intent SEO pages plus `sitemap.xml`. Keep schema files and active Markdown updated on every pass.

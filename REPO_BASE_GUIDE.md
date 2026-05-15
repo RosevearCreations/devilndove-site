@@ -1,6 +1,6 @@
 # Repo Base Guide — Devil n Dove
 
-Current sync: 2026-05-14 — Build 124.
+Current sync: 2026-05-14 — Build 125.
 
 ## Main paths
 - `/functions/api/` — Cloudflare Pages Functions.
@@ -33,3 +33,7 @@ Current sync: 2026-05-14 — Build 124.
 
 ## Keep private
 Do not commit or deploy raw Amazon order CSVs, account exports, private reports, or accountant-only documents to public static paths.
+
+## Build 125 note
+
+Build 125 keeps Amazon order/cost data private, adds admin review/apply controls for Amazon staging rows, records inventory cost history, expands reconciliation and journal guardrails, and adds local-intent SEO pages plus `sitemap.xml`. Keep schema files and active Markdown updated on every pass.

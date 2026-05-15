@@ -1,42 +1,45 @@
-# Database Schema Reference — Current Active Notes
+# Database Schema Reference — Active Notes
 
-Current sync: 2026-05-14 — Build 124.
+Current sync: 2026-05-14 — Build 125.
 
-## Active schema files updated this pass
-- `database_schema.sql`
-- `database_store_schema.sql`
-- `database_full_schema.sql`
-- `database_upgrade_current_pass.sql`
-- `database_growth_analytics_seo_extension.sql`
-- `database_payments_extension.sql`
-- `database_profiles_extension.sql`
-- `database_access_tiers.sql`
-- `database_admin_seed_template.sql`
-- `database_inventory_stock_unit_quick_fix.sql`
+## New or expanded tables in recent passes
 
-## New/updated schema areas
-- `schema_migration_ledger` records SQL file name, status, checksum, notes, admin user, and applied timestamp.
-- `accounting_statement_provider_profiles` stores saved CSV mapping rules for bank, PayPal, Stripe, Square, Etsy, and manual imports.
-- `site_inventory_movements` CHECK constraints now include both old and current movement names so historic and new movement rows stay compatible.
-- `site_item_inventory` continues as the working Tools/Supplies inventory table.
+### `schema_migration_ledger`
+Tracks which SQL files/passes have been applied, skipped, failed, or left pending review. Use `/admin/operations/` to mark the current pass after D1 is updated.
 
-## Inventory costing and unit rules
-- D1 stores `unit_cost_cents` as integer cents.
-- Admin screens should show dollars, such as `33.99`, and convert back to `3399` cents before saving.
-- Current imported Tools/Supplies rows should default to at least `1` on hand.
-- Package consumables need both stock and usage units. Example:
+### `accounting_statement_provider_profiles`
+Stores import-column mappings for bank, PayPal, Stripe, Square, Etsy, and manual CSV statements.
 
-```text
-on_hand_quantity = 1
-stock_unit_label = package
-usage_unit_label = sheet
-usage_units_per_stock_unit = 100
-```
+### `amazon_purchase_import_staging`
+Private staging table for Amazon order rows that may match tools or supplies. Build 125 adds review/apply columns:
+- `applied_inventory_id`
+- `applied_cost_history_id`
+- `applied_at`
+- `reviewed_by_user_id`
 
-## Source-of-truth direction
-D1 should become the authority for operational records: products, inventory, customers, orders, payments, accounting, reconciliation, media metadata, site content blocks, and admin audit history.
+### `site_item_inventory_cost_history`
+Tracks inventory unit-cost changes from catalog sync, manual inventory edits, bulk cost edits, and approved Amazon purchase staging rows. This prevents cost updates from being silent overwrites.
 
-JSON should remain only for emergency storefront fallback, import/export bridges, large static collections not yet migrated, and recovery snapshots.
+### `accounting_reconciliation_exceptions`
+Build 125 queue fields include assigned user, accountant review flag, resolved/reopened metadata, and richer statuses.
 
-## Deployment rule
-Apply `database_upgrade_current_pass.sql` in Cloudflare D1 before relying on the new admin panels. After applying, record it in `/admin/operations/` using the Migration Ledger panel.
+### `accounting_journal_entries`
+Build 125 adds posting/validation metadata:
+- `posted_by_user_id`
+- `posted_at`
+- `validation_message`
+
+## Current money convention
+- Store money as integer cents in D1.
+- Show dollars in admin forms.
+- Convert dollars back to cents before saving.
+
+## Inventory convention
+- Current owned tools and supplies are in stock by default with at least `on_hand_quantity = 1`.
+- Package consumables are modeled as stock unit plus usage unit count, for example `1 package = 100 sheets`.
+
+## Apply order
+1. Deploy the build.
+2. Apply `database_upgrade_current_pass.sql`.
+3. Use `/admin/operations/` to mark Build 125 applied.
+4. Use `/admin/catalog/` to sync tools/supplies and review Amazon staging rows.

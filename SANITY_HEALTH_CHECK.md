@@ -1,53 +1,28 @@
-# Sanity Health Check
+# Sanity Health Check — Build 125
 
-Current sync: 2026-05-14 — Build 124.
+Date: 2026-05-14
 
-## Automated checks run in this pass
-- JavaScript syntax check: 238 `.js` files passed `node --check`.
-- Public HTML check: exposed non-archive pages have exactly one `<h1>`, a `<title>`, and a meta description.
-- Admin CSS was updated for release sanity panels, migration ledger controls, status pills, and mobile layout.
+## Automated checks run during this pass
+- JavaScript syntax check: all non-archive `.js` files passed `node --check`.
+- Public/admin HTML check: every non-archive `.html` file has exactly one `<h1>`, a `<title>`, and a meta description.
+- Local script/style reference check: no missing local `.js` or `.css` references were found.
+- CSS brace drift check: `/css/styles.css` braces were balanced after the local-intent page additions.
+- Current-pass SQL fresh-schema smoke test passed in SQLite for create-table/index/ledger statements.
+- Public SEO additions: six local-intent pages and `sitemap.xml` were added.
 
-## New admin checks added
-Use `/admin/operations/`:
-1. **Migration Ledger** — record whether each SQL file was applied, skipped, failed, or needs review.
-2. **Release Sanity** — check public pages, catalog counts, inventory counts, journal balance, reconciliation exceptions, runtime incidents, and migration status.
+## Manual checks after deployment
+1. Open `/admin/operations/` and run Release Sanity.
+2. Confirm the Build 125 migration ledger row is marked applied only after `database_upgrade_current_pass.sql` has been applied in D1.
+3. Open `/admin/catalog/` and run Sync all tools + supplies.
+4. Confirm the inventory sync result panel shows expected totals and does not hide failures.
+5. Open Amazon purchase review and approve one obvious row only; verify inventory unit cost and cost history.
+6. Open Accounting imports and test reconciliation queue buttons on a non-critical exception.
+7. Open Accounting report, validate a month, and confirm unbalanced periods are blocked from posting.
+8. Spot-check the six local-intent pages on mobile and desktop.
 
-## Manual browser checks still recommended
-- Home, Shop, Gallery, Creations, Tools, Supplies, Movies, Members, Cart, Login, Register.
-- Admin dashboard, Accounting, Catalog, Orders, Members, Analytics, Operations, Movies, Mobile admin.
-- Statement import, provider profiles, reconciliation exceptions, journal entry review, product creation, product image review, and member login.
-
-## D1 checks after deployment
-```sql
-SELECT source_type, COUNT(*) AS total,
-       SUM(CASE WHEN on_hand_quantity >= 1 THEN 1 ELSE 0 END) AS in_stock_rows,
-       SUM(CASE WHEN unit_cost_cents > 0 THEN 1 ELSE 0 END) AS with_unit_cost,
-       SUM(CASE WHEN usage_units_per_stock_unit > 1 THEN 1 ELSE 0 END) AS package_sized_rows
-FROM site_item_inventory
-WHERE source_type IN ('tool','supply')
-GROUP BY source_type;
-```
-
-Expected row totals should be close to 399 tools and 498 supplies after sync.
-
-## Spot-check DTF package math
-```sql
-SELECT item_name, on_hand_quantity, unit_cost_cents, stock_unit_label, usage_unit_label, usage_units_per_stock_unit
-FROM site_item_inventory
-WHERE LOWER(item_name) LIKE '%dtf%'
-LIMIT 10;
-```
-
-Expected pattern: cost stored as cents, admin displayed as dollars; DTF should read approximately `1 package = 100 sheet`.
-
-## Every-pass checklist
-1. Run JS syntax checks.
-2. Check one H1/title/meta per exposed page.
-3. Check missing script/style references.
-4. Check active JSON fallback paths.
-5. Check schema drift and current-pass SQL.
-6. Check CSS drift on public and admin pages.
-7. Check local/product SEO wording.
-8. Check API routes under `/functions/api/`.
-9. Keep raw private import data out of deployable `/data/`.
-10. ZIP and verify handoff file.
+## Guardrails to keep
+- One H1 per exposed page.
+- Money stored in cents, displayed in dollars.
+- Current owned tools/supplies default to at least one stock unit.
+- Package math uses stock package plus usage unit count.
+- Keep private Amazon cost/order reports out of public static files.

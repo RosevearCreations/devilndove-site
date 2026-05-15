@@ -1,6 +1,6 @@
 # Amazon Matching Notes — Tools and Supplies
 
-Current sync: 2026-05-14 — Build 124.
+Current sync: 2026-05-14 — Build 125.
 
 ## Current status
 Amazon CSV title matching has supplied Amazon URLs and cost candidates for Tools/Supplies. `catalog_items` is the catalog snapshot and `site_item_inventory` is the working inventory table used by admin product-resource screens.
@@ -33,3 +33,7 @@ usage_units_per_stock_unit = 100
 - Add approved-import cost history rows.
 - Add duplicate detection by order ID + ASIN + net total.
 - Add accounting posting rules for approved business purchases.
+
+## Build 125 note
+
+Build 125 keeps Amazon order/cost data private, adds admin review/apply controls for Amazon staging rows, records inventory cost history, expands reconciliation and journal guardrails, and adds local-intent SEO pages plus `sitemap.xml`. Keep schema files and active Markdown updated on every pass.

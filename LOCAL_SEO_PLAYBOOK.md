@@ -1,24 +1,29 @@
 # Local SEO Playbook — Devil n Dove
 
-Current sync: 2026-05-14 — Build 124.
+Current sync: 2026-05-14 — Build 125.
 
-## Every-pass SEO rules
-- Keep one clear H1 per exposed page.
-- Keep the `<title>`, meta description, visible H1, and main body wording aligned.
-- Use natural product/local intent language: handmade jewelry, polymer clay earrings, custom gifts, laser engraving, vintage finds, workshop-made gifts, Southern Ontario, Tillsonburg, Norfolk County, Oxford County where appropriate.
-- Avoid keyword stuffing. Add useful context people would actually search for.
-- Keep crawlable internal links between Home, Shop, Gallery, Creations, About, Contact, Tools, Supplies, and key landing pages.
+## What Build 125 added
+Six local-intent landing pages were added:
+- `/handmade-jewelry-ontario/`
+- `/polymer-clay-earrings-ontario/`
+- `/custom-gifts-southern-ontario/`
+- `/laser-engraving-ontario/`
+- `/vintage-finds-ontario/`
+- `/workshop-made-gifts-ontario/`
 
-## Current pass SEO status
-The exposed non-archive HTML pages were scanned and each had one H1, a title, and a meta description.
+A `sitemap.xml` was added and the shared footer now links to these local pages.
 
-## Next SEO content pages
-1. Handmade jewelry in Southern Ontario.
-2. Polymer clay earrings.
-3. Custom gifts and small-batch handmade items.
-4. Laser engraving and personalized gifts.
-5. Vintage finds and collectible oddities.
-6. Workshop-made gifts in Tillsonburg.
+## Current SEO rules for every pass
+- Keep exactly one H1 per exposed page.
+- Use plain words people search for in titles, main headings, body copy, and internal links.
+- Keep titles and meta descriptions unique and useful.
+- Avoid keyword stuffing.
+- Keep local wording natural: Southern Ontario, Ontario, handmade jewelry, polymer clay earrings, custom gifts, laser engraving, vintage finds, workshop-made gifts.
+- Support relevance and prominence with clear pages, internal links, real product/gallery examples, and review/social proof.
 
-## Structured data direction
-Review Organization, WebSite, Product, BreadcrumbList, and local contact details where they fit the page naturally. Do not add misleading local-business schema if the page does not support it.
+## Next SEO improvements
+1. Add real product/gallery blocks to each local-intent page.
+2. Add internal links from relevant product, gallery, and creation pages back to the local pages.
+3. Add Search Console tracking fields/screens for page, query, clicks, impressions, CTR, and average position.
+4. Add Product and BreadcrumbList structured data where specific sellable products are shown.
+5. Add local pickup/shipping explanation blocks to local-intent pages.

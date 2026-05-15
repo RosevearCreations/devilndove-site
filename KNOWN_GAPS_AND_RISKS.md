@@ -1,22 +1,22 @@
 # Known Gaps and Risks — Current Active List
 
-Current sync: 2026-05-14 — Build 124.
+Current sync: 2026-05-14 — Build 125.
 
 ## Highest-priority gaps still open
 1. The accounting backend is stronger, but it is still not a finished tax-filing system.
-2. SQL files still need to be applied in Cloudflare D1 and recorded in the new migration ledger.
-3. Statement import provider profiles now exist, but real bank/PayPal/Stripe/Square/Etsy sample files still need testing.
-4. Reconciliation has confidence buckets, but still needs the full exception queue workflow.
-5. Payment application screens need the next pass to connect orders, deposits, payouts, fees, refunds, gift cards, and journals.
-6. Journal generation exists in pieces, but full auto-posting and balanced-entry enforcement still need more work.
-7. Period close still needs lock/reopen controls and audit history.
-8. HST/sales-tax review screens need final worksheet/export behaviour before accountant handoff.
-9. Accountant export still needs one packaged export with ledgers, statements, taxes, attachments, and unresolved notes.
-10. Some catalog/product areas still use JSON as a bridge while D1 becomes the long-term source of truth.
-11. Product variants/options are not complete enough for a full ecommerce app.
-12. Media management still needs retire/replace/broken-link lifecycle controls.
-13. Public SEO needs more product-intent and local-intent landing pages.
-14. Amazon purchase data must remain private and review-first; do not deploy raw order reports under `/data/`.
+2. `database_upgrade_current_pass.sql` still needs to be applied in Cloudflare D1 after deployment and recorded in the migration ledger.
+3. Amazon purchase review exists, but only obvious/safe rows should be approved first until more real-world review confidence is built.
+4. Amazon CSV loading still needs a proper admin import screen; current staging assumes rows are already loaded into `amazon_purchase_import_staging`.
+5. Cost history now exists, but inventory valuation reports still need beginning balance, additions, usage, write-offs, and ending balance logic.
+6. Reconciliation exceptions now have queue statuses, but need export, attachment links, and stronger accountant review reporting.
+7. Payment application screens still need to connect orders, deposits, payouts, refunds, fees, gift cards, and journals.
+8. Journal validation/posting exists for monthly balance checks, but full auto-generation and close controls remain open.
+9. HST/sales-tax review screens still need final worksheet/export behaviour before accountant handoff.
+10. Accountant export still needs one packaged export with ledgers, statements, taxes, attachments, and unresolved notes.
+11. Some catalog/product areas still use JSON as a bridge while D1 becomes the long-term source of truth.
+12. Product variants/options are not complete enough for a full ecommerce app.
+13. Media management still needs retire/replace/broken-link lifecycle controls.
+14. Local SEO pages have been added, but they need real photos, product links, internal links from relevant pages, and performance monitoring.
 15. Fuzzy Amazon matching can still be wrong when product titles are generic.
 
 ## Current guardrails
@@ -27,26 +27,28 @@ Current sync: 2026-05-14 — Build 124.
 - Store money in cents in D1, but display dollars in admin forms.
 - Treat current owned tools/supplies as at least 1 stock unit unless manually retired.
 - Use package math for consumables: for example, 1 package can equal 100 sheets.
-- Do not promise accountant/tax filing readiness until reconciliation, close, tax review, and export validation are complete.
+- Keep Amazon order details, costs, and review spreadsheets private; do not deploy raw order reports under public `/data/` paths.
+- Review Amazon matches before applying costs; do not mass-approve weak or generic title matches.
+- Run Release Sanity and D1 count checks after every deployment.
 
 ## Recently reduced risks
-- Added an admin D1 migration ledger API so applied SQL files can be recorded instead of guessed.
-- Added the Operations-page Migration Ledger panel for marking SQL files applied, skipped, failed, or pending review.
-- Added an admin release-sanity API that checks public pages, H1/title/meta status, catalog/inventory counts, journal balance, reconciliation exceptions, runtime incidents, and migration status.
-- Added the Operations-page Release Sanity panel so pre-deploy checks can be run from the browser.
-- Expanded the database sanity API with critical checks, index checks, catalog-vs-inventory counts, journal-balance checks, and migration ledger summary.
-- Improved the Accounting Backend sanity UI so failures and supporting details are visible instead of hidden in raw JSON.
-- Added schema support for the schema_migration_ledger table across the active SQL reference files and the current-pass migration.
-- Added statement provider profile storage for bank, PayPal, Stripe, Square, Etsy, and manual CSV mappings.
-- Added an Accounting-page Provider Profiles UI to seed, view, and edit statement import mappings.
-- Updated statement import APIs so provider profiles are available to the import screen and seeded when missing.
-- Allowed the manual CSV provider as a first-class statement-import provider.
-- Added reconciliation match confidence buckets for imported statement totals: exact, likely, partial, and manual_review.
-- Improved statement-import auto-match detail JSON so confidence, bucket, imported row count, and difference are recorded for later review.
-- Mapped inventory movement aliases into schema-safe movement names while preserving the original name in the movement note.
-- Kept Tools/Supplies manual inventory creation from saving blank or zero on-hand quantities; current owned items default to at least 1.
-- Added unit_cost_dollars to inventory API responses so admin screens can show 33.99 while D1 stores 3399 cents.
-- Added a quick D1 inventory stock/unit fix SQL file for existing rows, including package math such as 1 DTF package = 100 sheets.
-- Updated movement CHECK constraints in active schema files so older and newer movement names are represented consistently.
-- Refined admin CSS for status pills, sanity panels, and mobile-friendly migration forms.
-- Ran syntax and public-page sanity checks: 238 JavaScript files passed node --check, and exposed HTML pages had one H1 plus title/meta description.
+- Added `/api/admin/amazon-purchase-review` so private Amazon purchase staging rows can be reviewed from the admin instead of spreadsheets only.
+- Added the Amazon purchase review queue UI to `/admin/catalog/` with search, status filters, approve/apply, hold, and reject controls.
+- Added approved Amazon purchase application that updates linked inventory unit cost, supplier name, ASIN/supplier SKU, Amazon URL, and notes.
+- Added `site_item_inventory_cost_history` so Amazon-approved costs and manual cost changes create history rows instead of silently overwriting the latest cost.
+- Added inventory cost-history recording during Tools/Supplies catalog sync when a synced unit cost changes.
+- Added cost-history recording for manual site-item inventory create/update and bulk cost update workflows.
+- Improved the Tools/Supplies inventory sync result panel so inserted, updated, failed, Amazon URL, unit-cost, stock-default, match-status, and cost-history counts are visible after sync.
+- Hardened Amazon purchase review schema creation with runtime-safe staging-table migrations for applied inventory, applied cost-history, review user, and applied timestamp fields.
+- Hardened Amazon purchase review inventory access with runtime-safe inventory column backfills for older D1 tables.
+- Added audit entries for Amazon purchase review decisions so approve/hold/reject actions are traceable.
+- Expanded reconciliation exceptions with assign-to-user, accountant review flag, resolve, reopen, and richer status handling.
+- Added reconciliation exception queue controls in the Accounting import UI for assign, manual review, accountant review, resolve, reopen, ignore, and notes.
+- Added journal-period validation that checks monthly debit/credit balance before posting.
+- Added journal posting metadata and posting guardrails so unbalanced monthly journals are blocked before being marked posted.
+- Added Accounting report buttons for validating and posting the selected month’s journal entries.
+- Added six local-intent SEO landing pages for handmade jewelry, polymer clay earrings, custom gifts, laser engraving projects, vintage finds, and workshop-made gifts in Ontario/Southern Ontario.
+- Added `sitemap.xml` so the new public local-intent pages and existing public pages have a clean crawl map.
+- Added shared-footer local search links so the new local-intent pages are internally linked from public pages.
+- Added CSS for local-intent cards, related-page links, and mobile-friendly local page calls to action.
+- Updated active schema files and Markdown files, then ran syntax/H1/meta/link sanity checks for the new build.

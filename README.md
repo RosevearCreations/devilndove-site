@@ -1,6 +1,6 @@
 # Devil n Dove Site — Current Build
 
-Current sync: 2026-05-14 — Build 124.
+Current sync: 2026-05-14 — Build 125.
 
 ## Active purpose
 This repository powers the Devil n Dove public storefront, admin app, member area, catalog tools, accounting workflow, and Cloudflare Pages Functions backend.
@@ -55,3 +55,7 @@ This repository powers the Devil n Dove public storefront, admin app, member are
 
 ## Private import safety
 Amazon transaction CSVs, review spreadsheets, and private purchase reports must not be deployed in public `/data/` paths. Import approved rows through admin/D1 workflows only.
+## Build 125 update
+
+Build 125 adds the Amazon purchase review/apply workflow, inventory cost history, reconciliation exception queue controls, journal validation/posting guardrails, six local-intent SEO pages, sitemap generation, and updated schema/Markdown files. After deployment, apply `database_upgrade_current_pass.sql`, mark the migration in `/admin/operations/`, and run Tools/Supplies sync from `/admin/catalog/`.
+

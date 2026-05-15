@@ -54,6 +54,12 @@ CREATE TABLE IF NOT EXISTS amazon_purchase_import_staging (
   item_net_total_cents INTEGER NOT NULL DEFAULT 0,
   unit_net_cost_cents INTEGER,
 
+  -- Build 125 review/apply fields.
+  applied_inventory_id INTEGER,
+  applied_cost_history_id INTEGER,
+  applied_at TEXT,
+  reviewed_by_user_id INTEGER,
+
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT
 );
@@ -73,8 +79,13 @@ CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_order
 CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_review
   ON amazon_purchase_import_staging(review_decision, match_status);
 
+CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_applied
+  ON amazon_purchase_import_staging(applied_inventory_id, applied_at);
+
 -- Recommended import workflow:
 -- 1. Load amazon_inventory_high_confidence_stage_candidates.csv into this staging table.
 -- 2. Review medium/review rows in the spreadsheet before changing review_decision.
 -- 3. Only rows with review_decision = 'approved' should be applied to production inventory/accounting records.
--- 4. Use amazon_inventory_purchase_summary_by_item.csv to compare totals before posting journal lines.
+-- 4. Approve obvious safe matches first from /admin/catalog/ Amazon purchase review.
+-- 5. Approved rows apply unit cost/supplier/ASIN/URL to site_item_inventory and write site_item_inventory_cost_history.
+-- 6. Use amazon_inventory_purchase_summary_by_item.csv to compare totals before posting journal lines.
