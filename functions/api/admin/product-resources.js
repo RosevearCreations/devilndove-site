@@ -282,10 +282,12 @@ export async function onRequestGet(context) {
             OR LOWER(COALESCE(ci.name, '')) LIKE ?
             OR LOWER(COALESCE(ci.category, '')) LIKE ?
             OR LOWER(COALESCE(ci.subcategory, '')) LIKE ?
+            OR LOWER(COALESCE(ci.amazon_url, '')) LIKE ?
+            OR LOWER(COALESCE(ci.source_record_json, '')) LIKE ?
           )
         ORDER BY ci.item_kind ASC, LOWER(COALESCE(ci.name, '')) ASC
         LIMIT 1200
-      `).bind(query, like, like, like).all()
+      `).bind(query, like, like, like, like, like).all()
     ).map((row) => {
       const amazonArea = row.item_kind === "tool" ? "toolshed" : "supplies";
       const amazonMatch = getAmazonInventoryMatch(amazonArea, -1, row.name || "");
@@ -347,6 +349,7 @@ export async function onRequestGet(context) {
             OR LOWER(COALESCE(${inventoryNameExpr}, '')) LIKE ?
             OR LOWER(COALESCE(${inventoryCategoryExpr}, '')) LIKE ?
             OR LOWER(COALESCE(${inventorySubcategoryExpr}, '')) LIKE ?
+            OR LOWER(COALESCE(${inventoryAmazonUrlExpr}, '')) LIKE ?
           )
           ${canJoinCatalogInventory ? `
           AND NOT EXISTS (
@@ -362,7 +365,7 @@ export async function onRequestGet(context) {
 
     const inventoryOnlyResources = inventoryOnlySql
       ? normalizeResults(
-          await db.prepare(inventoryOnlySql).bind(query, like, like, like).all()
+          await db.prepare(inventoryOnlySql).bind(query, like, like, like, like).all()
         ).map((row) => {
           const itemKind = row.item_kind || row.source_type || "supply";
           const sourceKey = row.external_key || `inventory:${row.site_item_inventory_id}`;

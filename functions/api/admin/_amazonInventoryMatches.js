@@ -15,6 +15,49 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function inferPackUsageFromText(...values) {
+  const text = values.map((value) => String(value || '')).join(' ').replace(/\s+/g, ' ').trim();
+  const lower = text.toLowerCase();
+  if (!lower) return null;
+
+  const hasLiquidUnit = /\b(ml|millilitre|milliliter|litre|liter|oz|ounce|ounces|fl\s*oz|gallon|quart)\b/i.test(lower);
+  if (hasLiquidUnit && !/\b(sheet|sheets|roll|rolls|piece|pieces|pcs|pack|packs|count|ct|mask|masks)\b/i.test(lower)) {
+    return null;
+  }
+
+  const patterns = [
+    { re: /(?:^|\b)(\d{1,5})\s*(?:x\s*)?(?:sheets?|sheet)\b/i, unit: 'sheet' },
+    { re: /(?:^|\b)(\d{1,5})\s*(?:x\s*)?(?:pcs|pieces?|piece)\b/i, unit: 'piece' },
+    { re: /(?:^|\b)(\d{1,5})\s*(?:x\s*)?(?:counts?|count|ct)\b/i, unit: 'unit' },
+    { re: /(?:^|\b)(\d{1,5})\s*(?:x\s*)?(?:rolls?|roll)\b/i, unit: 'roll' },
+    { re: /(?:^|\b)(\d{1,5})\s*(?:x\s*)?(?:masks?|mask)\b/i, unit: 'mask' },
+    { re: /(?:^|\b)(\d{1,5})\s*(?:x\s*)?(?:pairs?|pair)\b/i, unit: 'pair' },
+    { re: /(?:^|\b)(\d{1,5})\s*(?:x\s*)?(?:wicks?|wick)\b/i, unit: 'wick' },
+    { re: /(?:^|\b)(\d{1,5})\s*(?:x\s*)?(?:bags?|bag)\b/i, unit: 'bag' }
+  ];
+
+  for (const pattern of patterns) {
+    const match = lower.match(pattern.re);
+    if (match) {
+      const count = Math.max(1, Math.round(toNumber(match[1], 1)));
+      return { stock_unit_label: 'package', usage_unit_label: pattern.unit, usage_units_per_stock_unit: count };
+    }
+  }
+
+  const packMatch = lower.match(/(?:^|\b)(\d{1,5})\s*(?:pack|pk)\b/i) || lower.match(/(?:pack\s+of|package\s+of)\s*(\d{1,5})\b/i);
+  if (packMatch) {
+    const count = Math.max(1, Math.round(toNumber(packMatch[1], 1)));
+    let unit = 'unit';
+    if (/\bsheets?\b/i.test(lower)) unit = 'sheet';
+    else if (/\bmasks?\b/i.test(lower)) unit = 'mask';
+    else if (/\brolls?\b/i.test(lower)) unit = 'roll';
+    else if (/\bwicks?\b/i.test(lower)) unit = 'wick';
+    return { stock_unit_label: 'package', usage_unit_label: unit, usage_units_per_stock_unit: count };
+  }
+
+  return null;
+}
+
 const MATCH_BY_AREA_INDEX = new Map(
   AMAZON_INVENTORY_MATCHES.map((row) => [`${normalizeKey(row.inventory_area)}::${Number(row.inventory_index || 0)}`, row])
 );
@@ -55,9 +98,22 @@ export function extractAmazonInventoryFields(sourceRecordJson, fallbackKind = ''
   const unitCostCents = Math.max(0, Math.round(toNumber(embedded.unit_cost_cents ?? source.unit_cost_cents, 0))) ||
     Math.max(0, Math.round((latestPurchasePpuCad || landedUnitCostCad || latestItemNetTotalCad || 0) * 100));
 
-  const stockUnitLabel = String(embedded.stock_unit_label || source.stock_unit_label || (kind === 'tool' ? 'tool' : 'package')).trim() || (kind === 'tool' ? 'tool' : 'package');
-  const usageUnitLabel = String(embedded.usage_unit_label || source.usage_unit_label || (kind === 'tool' ? 'use' : 'unit')).trim() || (kind === 'tool' ? 'use' : 'unit');
-  const usageUnitsPerStockUnit = Math.max(1, toNumber(embedded.usage_units_per_stock_unit ?? source.usage_units_per_stock_unit, 1));
+  const inferredPack = inferPackUsageFromText(
+    embedded.amazon_title,
+    embedded.inventory_name,
+    source.amazon_title,
+    source.inventory_name,
+    source.item_name_suggested,
+    source.name
+  );
+
+  const stockUnitLabel = inferredPack?.stock_unit_label ||
+    String(embedded.stock_unit_label || source.stock_unit_label || (kind === 'tool' ? 'tool' : 'package')).trim() ||
+    (kind === 'tool' ? 'tool' : 'package');
+  const usageUnitLabel = inferredPack?.usage_unit_label ||
+    String(embedded.usage_unit_label || source.usage_unit_label || (kind === 'tool' ? 'use' : 'unit')).trim() ||
+    (kind === 'tool' ? 'use' : 'unit');
+  const usageUnitsPerStockUnit = Math.max(1, inferredPack?.usage_units_per_stock_unit || toNumber(embedded.usage_units_per_stock_unit ?? source.usage_units_per_stock_unit, 1));
 
   return {
     amazon_match_status: String(embedded.match_status || source.amazon_match_status || '').trim(),

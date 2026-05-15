@@ -37,7 +37,7 @@ async function ensureSiteInventorySchema(db) {
       source_url TEXT,
       amazon_url TEXT,
       image_url TEXT,
-      on_hand_quantity INTEGER NOT NULL DEFAULT 0,
+      on_hand_quantity INTEGER NOT NULL DEFAULT 1,
       reserved_quantity INTEGER NOT NULL DEFAULT 0,
       incoming_quantity INTEGER NOT NULL DEFAULT 0,
       reorder_level INTEGER NOT NULL DEFAULT 0,
@@ -558,6 +558,7 @@ async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
     synced: 0,
     with_amazon_url: 0,
     with_unit_cost: 0,
+    defaulted_on_hand_to_one: 0,
     match_status_counts: {}
   };
 
@@ -578,7 +579,9 @@ async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
     const usageUnitLabel = normalizeText(amazon.usage_unit_label) || (sourceType === 'tool' ? 'use' : 'unit');
     const usageUnitsPerStockUnit = Math.max(1, Number(amazon.usage_units_per_stock_unit || 1) || 1);
     const unitCostCents = Math.max(0, Number(amazon.unit_cost_cents || 0) || 0);
-    const onHandQuantity = Math.max(0, Number(row.quantity_on_hand || 0) || 0);
+    const rawOnHandQuantity = Math.max(0, Number(row.quantity_on_hand || 0) || 0);
+    const onHandQuantity = Math.max(1, rawOnHandQuantity);
+    if (rawOnHandQuantity < 1) summary.defaulted_on_hand_to_one += 1;
     const reorderPoint = Math.max(0, Number(row.reorder_point || 0) || 0);
     const matchStatus = normalizeText(amazon.amazon_match_status || 'unmatched') || 'unmatched';
     summary.match_status_counts[matchStatus] = (summary.match_status_counts[matchStatus] || 0) + 1;
@@ -601,7 +604,7 @@ async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
         amazon_url = COALESCE(NULLIF(excluded.amazon_url, ''), site_item_inventory.amazon_url),
         image_url = COALESCE(NULLIF(excluded.image_url, ''), site_item_inventory.image_url),
         on_hand_quantity = CASE
-          WHEN COALESCE(site_item_inventory.on_hand_quantity, 0) = 0 THEN excluded.on_hand_quantity
+          WHEN COALESCE(site_item_inventory.on_hand_quantity, 0) < 1 THEN excluded.on_hand_quantity
           ELSE site_item_inventory.on_hand_quantity
         END,
         reorder_level = CASE
