@@ -1,60 +1,53 @@
-# Development Roadmap — Fresh Working Plan
+# Development Roadmap — Current Working Plan
 
-Current sync: 2026-05-10 cleanup and next-step planning pass.
+Current sync: 2026-05-14 — Build 124 release-sanity, migration-ledger, inventory, and accounting provider-profile pass.
 
-## Completed in this pass
-- Archived the old Markdown set before rewriting the active docs.
-- Moved retired root docs into `/archive/retired-markdown/`.
-- Archived the previous current-pass SQL and reset `database_upgrade_current_pass.sql`.
-- Removed duplicate API copies outside `/functions/api/`.
-- Removed duplicate nested data and duplicate public supply/movie data copies.
-- Kept active JSON fallbacks only where the current app still reads them.
-- Fixed a malformed admin Movies footer.
-- Fixed supplies duplicate-report health paths.
+## Completed 20 items in this pass
+1. Added an admin D1 migration ledger API so applied SQL files can be recorded instead of guessed.
+2. Added the Operations-page Migration Ledger panel for marking SQL files applied, skipped, failed, or pending review.
+3. Added an admin release-sanity API that checks public pages, H1/title/meta status, catalog/inventory counts, journal balance, reconciliation exceptions, runtime incidents, and migration status.
+4. Added the Operations-page Release Sanity panel so pre-deploy checks can be run from the browser.
+5. Expanded the database sanity API with critical checks, index checks, catalog-vs-inventory counts, journal-balance checks, and migration ledger summary.
+6. Improved the Accounting Backend sanity UI so failures and supporting details are visible instead of hidden in raw JSON.
+7. Added schema support for the schema_migration_ledger table across the active SQL reference files and the current-pass migration.
+8. Added statement provider profile storage for bank, PayPal, Stripe, Square, Etsy, and manual CSV mappings.
+9. Added an Accounting-page Provider Profiles UI to seed, view, and edit statement import mappings.
+10. Updated statement import APIs so provider profiles are available to the import screen and seeded when missing.
+11. Allowed the manual CSV provider as a first-class statement-import provider.
+12. Added reconciliation match confidence buckets for imported statement totals: exact, likely, partial, and manual_review.
+13. Improved statement-import auto-match detail JSON so confidence, bucket, imported row count, and difference are recorded for later review.
+14. Mapped inventory movement aliases into schema-safe movement names while preserving the original name in the movement note.
+15. Kept Tools/Supplies manual inventory creation from saving blank or zero on-hand quantities; current owned items default to at least 1.
+16. Added unit_cost_dollars to inventory API responses so admin screens can show 33.99 while D1 stores 3399 cents.
+17. Added a quick D1 inventory stock/unit fix SQL file for existing rows, including package math such as 1 DTF package = 100 sheets.
+18. Updated movement CHECK constraints in active schema files so older and newer movement names are represented consistently.
+19. Refined admin CSS for status pills, sanity panels, and mobile-friendly migration forms.
+20. Ran syntax and public-page sanity checks: 238 JavaScript files passed node --check, and exposed HTML pages had one H1 plus title/meta description.
 
 ## Next logical 20 steps
-1. Build a D1 migration ledger/admin runner that records which SQL files have been applied and blocks double-running destructive changes.
-2. Add a database sanity dashboard that checks required tables, indexes, column names, and seed rows before admin pages load.
-3. Finish statement-import provider profiles for bank, PayPal, Stripe, Square, Etsy, and manual CSV formats with saved mapping rules.
-4. Add reconciliation matching confidence scores with clear exact, likely, partial, duplicate, and manual-review buckets.
-5. Build a reconciliation exception queue with assign, note, resolve, reopen, and export controls.
-6. Add payment application screens that connect orders, deposits, refunds, fees, gift cards, processor payouts, and journal entries.
-7. Expand automatic journal-line generation for sales, discounts, shipping, COGS, inventory adjustments, fees, refunds, write-offs, and taxes.
-8. Add posting validation that refuses unbalanced entries and shows the exact missing debit/credit difference.
-9. Finish period close controls: checklist, lock, reopen reason, audit trail, and admin-only unlock.
-10. Add sales-tax/HST worksheet screens that compare collected tax, refunded tax, taxable sales, exempt sales, and remittance-ready totals.
-11. Build accountant export package v2 with GL, trial balance, P&L, balance sheet support, statement import summary, tax worksheet, attachments index, and unresolved issues.
-12. Move active creations/products from JSON-first fallback into D1 as the primary catalog while keeping JSON as emergency fallback/export.
-13. Add product variants/options tables for size, colour, material, custom request status, SKU, stock, price, and media per variant.
-14. Add media asset lifecycle controls: upload, crop/alt review, public/private flag, replace image, retire unused image, and broken-link scan.
-15. Add admin-managed homepage/gallery/featured blocks so public marketing content no longer depends on hand-edited JSON.
-16. Add local SEO landing pages for high-intent searches: handmade jewelry, polymer clay earrings, custom gifts, laser engraving, vintage finds, and workshop-made gifts in Southern Ontario.
-17. Add structured data review for Organization, WebSite, Product, BreadcrumbList, and local business-style contact details where appropriate.
-18. Add mobile-first admin quick actions: create draft product, add photos, adjust stock, record expense, scan receipt, and add customer note.
-19. Add a runtime incident inbox with grouped errors, affected page/API, first/last seen, count, status, and resolution notes.
-20. Add a release checklist page that runs H1 checks, missing script checks, broken data-source checks, schema drift checks, and SEO title/meta checks before each ZIP handoff.
+1. Run the new release sanity panel on production after deployment and record the result in the migration ledger.
+2. Apply database_upgrade_current_pass.sql in Cloudflare D1, then mark it applied in the Operations migration ledger.
+3. Click Sync all tools + supplies again, then verify site_item_inventory shows about 399 tools and 498 supplies.
+4. Add a one-click inventory sync result screen that shows inserted, updated, skipped, and failed rows without opening the console.
+5. Add an Amazon approved-import review screen for amazon_purchase_import_staging with approve, hold, reject, and link-to-inventory controls.
+6. Add cost-history rows instead of overwriting the latest inventory cost when approved Amazon purchases are applied.
+7. Build the reconciliation exception queue with assign, note, resolve, reopen, export, and accountant-review statuses.
+8. Finish payment application screens connecting orders, deposits, refunds, processor payouts, gift cards, fees, and journals.
+9. Expand automatic journal-line generation for sales, discounts, shipping, COGS, inventory adjustments, fees, refunds, write-offs, and HST.
+10. Add posting validation that blocks unbalanced journal entries and displays the exact debit/credit difference.
+11. Finish period-close lock/reopen controls with audit trail and admin-only reopen reason.
+12. Build the HST review worksheet comparing taxable sales, exempt sales, collected tax, refunded tax, and remittance-ready totals.
+13. Create accountant export package v2 with GL, trial balance, P&L, balance sheet support, statement import summary, HST worksheet, attachments index, and unresolved issues.
+14. Move active creations/products from JSON-first fallback into D1 as primary catalog authority, leaving JSON only as emergency fallback/export.
+15. Add product variant/option tables for size, colour, material, custom request status, SKU, stock, price, and media per variant.
+16. Add admin-managed homepage, gallery, shop, and featured-creation content blocks so public marketing content no longer depends on hand-edited JSON.
+17. Add media lifecycle controls: upload, crop/alt review, public/private flag, replace, retire unused image, and broken-link scan.
+18. Create local-intent landing pages for handmade jewelry, polymer clay earrings, custom gifts, laser engraving, vintage finds, and workshop-made gifts in Southern Ontario.
+19. Add structured data review for Organization, WebSite, Product, BreadcrumbList, and local contact details where appropriate.
+20. Add mobile admin quick actions: draft product, add photos, adjust stock, record expense, scan receipt, and add customer note.
 
 ## Working order recommendation
-Start with steps 1, 2, 4, 6, 8, and 19 first. Those make the backend safer and easier to trust. Then move into period close, tax review, accountant export, and catalog/media D1 migration.
+Do steps 1-6 first because they protect the database and confirm the Tools/Supplies sync is trustworthy. Then move through reconciliation, payment application, journal automation, close controls, HST review, and accountant export. After the backend is steadier, move storefront/catalog content and media from JSON-first workflows into D1-managed admin screens.
 
-
-## Amazon Purchase Import Workflow — Added 2026-05-11
-
-A review-first Amazon purchase import package was added under:
-
-`PRIVATE IMPORT PACKAGE: amazon_inventory_import_package.zip`
-
-Next logical implementation steps:
-1. Build an admin Import Review screen for `amazon_purchase_import_staging`.
-2. Add approve/hold/reject controls for each Amazon purchase row.
-3. Add an inventory match picker so medium-confidence rows can be manually attached to tools/supplies.
-4. Add an “apply approved imports” function that updates ASIN/cost/date references only after review.
-5. Add accounting posting rules for approved purchases by category.
-6. Add receipt/document attachment support for each order line.
-7. Add duplicate detection by `amazon_order_id + asin + item_net_total_cents`.
-8. Add inventory-cost history instead of overwriting the latest inventory item record.
-
-
-## Private Import Data Safety Note — 2026-05-11
-
-Amazon transaction CSVs and review spreadsheets are **not** stored inside the deployable website tree because `/data/` assets may become publicly reachable after Cloudflare Pages deployment. Keep the generated Amazon import package private and load approved rows into the database through an admin/import workflow instead.
+## SEO habit for every pass
+Keep one clear H1 per exposed page, keep page titles/meta descriptions specific, and keep local/product/service wording visible in page headings and body copy. Public pages should support real search intent without keyword stuffing.

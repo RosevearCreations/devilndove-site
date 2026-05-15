@@ -1,25 +1,24 @@
 # Local SEO Playbook — Devil n Dove
 
-Current sync: 2026-05-10 cleanup pass.
+Current sync: 2026-05-14 — Build 124.
 
-## Standing search rules
-- Use clear page titles and meta descriptions.
-- Keep one clear H1 on every exposed page.
-- Use words customers actually search for in titles, headings, intro text, product names, and collection pages.
-- Keep local wording natural: Southern Ontario, Tillsonburg, handmade gifts, artisan jewelry, custom creations, vintage finds, laser engraving, and workshop-made items where appropriate.
-- Avoid stuffing repeated city names or awkward phrases.
-- Keep image alt text descriptive and useful.
-- Add structured data where it matches the page: Organization, WebSite, Product, BreadcrumbList, and selected local/contact details.
+## Every-pass SEO rules
+- Keep one clear H1 per exposed page.
+- Keep the `<title>`, meta description, visible H1, and main body wording aligned.
+- Use natural product/local intent language: handmade jewelry, polymer clay earrings, custom gifts, laser engraving, vintage finds, workshop-made gifts, Southern Ontario, Tillsonburg, Norfolk County, Oxford County where appropriate.
+- Avoid keyword stuffing. Add useful context people would actually search for.
+- Keep crawlable internal links between Home, Shop, Gallery, Creations, About, Contact, Tools, Supplies, and key landing pages.
 
-## Next SEO content targets
+## Current pass SEO status
+The exposed non-archive HTML pages were scanned and each had one H1, a title, and a meta description.
+
+## Next SEO content pages
 1. Handmade jewelry in Southern Ontario.
-2. Polymer clay earrings and artisan accessories.
-3. Custom laser-engraved gifts.
-4. Vintage and collectible finds.
-5. Workshop-made home and gift items.
-6. Devil n Dove process/about trust page improvements.
-7. FAQ content for shipping, returns, custom orders, pickup, and product condition.
-8. Product collection pages with clearer search-intent headings.
+2. Polymer clay earrings.
+3. Custom gifts and small-batch handmade items.
+4. Laser engraving and personalized gifts.
+5. Vintage finds and collectible oddities.
+6. Workshop-made gifts in Tillsonburg.
 
-## Measurement habit
-Use Search Console and site analytics together: impressions, clicks, click-through rate, ranking movement, product page engagement, search terms, and conversion events.
+## Structured data direction
+Review Organization, WebSite, Product, BreadcrumbList, and local contact details where they fit the page naturally. Do not add misleading local-business schema if the page does not support it.

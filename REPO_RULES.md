@@ -1,25 +1,21 @@
-# Repo Rules
+# Repo Rules — Devil n Dove
 
-Current sync: 2026-05-10 cleanup pass.
+Current sync: 2026-05-14 — Build 124.
 
-## Required every pass
-- Update active Markdown docs when behavior, schema, routing, or workflows change.
-- Update schema files when DB expectations change.
-- Keep `database_upgrade_current_pass.sql` limited to the next deployable migration batch.
-- Keep one H1 per exposed public/admin HTML page.
-- Run JavaScript syntax checks.
-- Check for missing linked scripts and styles.
-- Check CSS for drift on public and admin pages.
-- Keep SEO titles, descriptions, and main headings clear and locally relevant.
+## Required rules for future passes
+1. Update Markdown when code/schema changes.
+2. Update schema references when D1 tables, columns, indexes, or constraints change.
+3. Keep one H1 per exposed public/admin HTML page.
+4. Run JavaScript syntax checks before ZIP handoff.
+5. Keep private import/accounting data out of public `/data/` paths.
+6. Prefer D1 for operational truth; keep JSON as fallback/seed/export until migrated.
+7. Store money as integer cents in D1 and show dollars in the UI.
+8. Do not overwrite inventory costs blindly; use review and cost history where possible.
+9. Do not claim tax/accountant readiness until reconciliation, close, HST review, and export validation are complete.
+10. Keep retired files in `/archive/` and active files in predictable paths.
 
-## API rule
-Only `/functions/api/` is active backend API code. Do not add or restore duplicate root-level API `.js` files.
-
-## Data rule
-Use D1 for authoritative app data. Use JSON only as fallback, static bridge, import template, export, or recovery snapshot.
-
-## Archive rule
-Do not edit archived files as if they are active. Use `/archive/` only for history and rollback reference.
-
-## Accounting rule
-Do not describe accounting as complete until payment application, journal posting validation, reconciliation review, sales-tax review, period close, and accountant export are working end to end.
+## Deployment rules
+- Apply `database_upgrade_current_pass.sql` before relying on new D1-backed admin panels.
+- Record applied SQL in the Migration Ledger.
+- Run Release Sanity before declaring a build ready.
+- Re-run Tools/Supplies inventory sync after catalog JSON/D1 changes.

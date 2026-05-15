@@ -166,3 +166,41 @@ CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification
 -- 3) product_image_annotations should continue to support width/height/orientation/crop/first_image_score.
 -- 4) No destructive schema changes were introduced in this pass; this is a documentation sync note.
 
+-- Current pass: D1 migration ledger to track SQL files after they are run in Cloudflare D1.
+CREATE TABLE IF NOT EXISTS schema_migration_ledger (
+  schema_migration_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  migration_key TEXT NOT NULL UNIQUE,
+  file_name TEXT NOT NULL,
+  checksum TEXT,
+  status TEXT NOT NULL DEFAULT 'applied' CHECK (status IN ('applied','skipped','failed','pending_review')),
+  destructive INTEGER NOT NULL DEFAULT 0,
+  applied_by_user_id INTEGER,
+  applied_at TEXT,
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_schema_migration_ledger_status ON schema_migration_ledger(status, applied_at DESC);
+CREATE INDEX IF NOT EXISTS idx_schema_migration_ledger_file ON schema_migration_ledger(file_name);
+
+-- Current pass: saved statement-import provider profiles for bank, PayPal, Stripe, Square, Etsy, and manual CSV formats.
+CREATE TABLE IF NOT EXISTS accounting_statement_provider_profiles (
+  accounting_statement_provider_profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  provider_scope TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL,
+  date_column TEXT,
+  description_column TEXT,
+  gross_column TEXT,
+  fee_column TEXT,
+  net_column TEXT,
+  currency_column TEXT,
+  reference_column TEXT,
+  default_currency TEXT NOT NULL DEFAULT 'CAD',
+  mapping_json TEXT,
+  notes TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_statement_provider_profiles_active ON accounting_statement_provider_profiles(is_active, provider_scope);
+

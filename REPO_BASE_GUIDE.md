@@ -1,27 +1,35 @@
-# Repo Base Guide — Active Map
+# Repo Base Guide — Devil n Dove
 
-Current sync: 2026-05-10 cleanup pass.
+Current sync: 2026-05-14 — Build 124.
 
-## Active top-level areas
-- `/` public static pages and route folders.
-- `/admin/` admin department HTML pages only.
-- `/functions/api/` Cloudflare Pages Functions backend.
-- `/public/js/` browser-side page/admin/member scripts.
-- `/css/styles.css` shared styling.
-- `/data/` approved JSON bridges and templates.
-- `/archive/` retired docs and archived migration snapshots.
+## Main paths
+- `/functions/api/` — Cloudflare Pages Functions.
+- `/public/js/` — active client/admin JavaScript.
+- `/admin/` — admin department pages.
+- `/data/` — approved fallback/seed/export data.
+- `/css/styles.css` — shared styling.
+- `/database_*.sql` — schema and migration references.
+- `/archive/` — historical/retired files.
 
-## Important data paths
-- `/data/itemsforsale/itemsforsale_items_master.json`
-- `/data/movies/movie_catalog_enriched.v2.json`
-- `/data/supplies/supplies_items_master.json`
-- `/data/toolshed/toolshed_items_master.json`
-- `/data/site/featured-items.json`
-- `/data/site/social-feed.json`
-- `/data/finished_products_import_template.csv`
+## Admin pages touched this pass
+- `/admin/operations/` — Migration Ledger and Release Sanity panels.
+- `/admin/accounting/` — Statement Provider Profiles panel and imports provider dropdown.
 
-## Removed active clutter
-Old duplicate API files outside `/functions/api/`, nested duplicate `/data/data/`, duplicate `/assets/movies/`, and duplicate supply data under `/supplies/` were removed from active use.
+## API files added or updated this pass
+- `functions/api/admin/migration-ledger.js`
+- `functions/api/admin/release-sanity.js`
+- `functions/api/admin/accounting-statement-provider-profiles.js`
+- `functions/api/admin/accounting-statement-imports.js`
+- `functions/api/admin/_accountingStatementImports.js`
+- `functions/api/admin/db-sanity.js`
+- `functions/api/admin/site-item-inventory.js`
 
-## Future structure goal
-Keep public pages light, move operational state into D1, keep admin work grouped by department, and keep every pass documented with matching schema notes.
+## Browser scripts added or updated this pass
+- `public/js/admin-migration-ledger.js`
+- `public/js/admin-release-sanity.js`
+- `public/js/admin-accounting-statement-profiles.js`
+- `public/js/admin-accounting-imports.js`
+- `public/js/admin-accounting-backend.js`
+
+## Keep private
+Do not commit or deploy raw Amazon order CSVs, account exports, private reports, or accountant-only documents to public static paths.
