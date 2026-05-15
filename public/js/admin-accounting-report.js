@@ -39,7 +39,7 @@
           <div class="dd-install-actions" style="margin-top:0">
             <div><label class="small" for="accountingReportMonth">Month</label><input id="accountingReportMonth" type="month"/></div>
             <button class="btn" id="refreshAccountingReportButton" type="button">Refresh report</button>
-            <button class="btn" id="syncAccountingJournalButton" type="button">Sync journal</button>
+            <button class="btn" id="syncAccountingJournalButton" type="button">Sync journal</button><button class="btn" id="validateAccountingJournalButton" type="button">Validate journal</button><button class="btn primary" id="postAccountingJournalButton" type="button">Post balanced journal</button>
           </div>
         </div>
         <div id="accountingReportMessage" class="small" style="display:none;margin-top:10px"></div>
@@ -58,6 +58,9 @@
     if (monthInput && !monthInput.value) monthInput.value = new Date().toISOString().slice(0, 7);
     document.getElementById('refreshAccountingReportButton')?.addEventListener('click', () => loadReport());
     document.getElementById('syncAccountingJournalButton')?.addEventListener('click', () => syncJournal());
+    document.getElementById('validateAccountingJournalButton')?.addEventListener('click', () => journalAction('validate_month'));
+    document.getElementById('postAccountingJournalButton')?.addEventListener('click', () => journalAction('post_month'));
+
     monthInput?.addEventListener('change', () => loadReport());
   }
 
@@ -146,6 +149,24 @@
     if (itemCosting) {
       const rows = Array.isArray(costing?.items) ? costing.items : [];
       itemCosting.innerHTML = renderTableRows(rows, 'No products available for costing yet.', (itemRows) => `<div class="table-wrap"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Product</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Price</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Direct cost</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Resources</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Overhead</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Full unit cost</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Sold</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Unit margin</th></tr></thead><tbody>${itemRows.slice(0, 24).map((row) => `<tr><td style="padding:8px;border-bottom:1px solid #eee"><strong>${escapeHtml(row.name || `DD${row.product_number || ''}`)}</strong><div class="small">${escapeHtml(row.status || 'draft')} · ${escapeHtml(row.review_status || '')} · ${escapeHtml(row.allocation_basis || 'none')}</div></td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.price_cents || 0), row.currency || 'CAD'))}</td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.direct_unit_cost_cents || 0), row.currency || 'CAD'))}<div class="small">${escapeHtml(row.direct_cost_effective_date || '')}</div></td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.linked_resource_cost_cents || 0), row.currency || 'CAD'))}<div class="small">${Number(row.missing_cost_links || 0)} missing cost links</div></td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.allocated_overhead_cents || 0), row.currency || 'CAD'))}<div class="small">Pool ${escapeHtml(centsToMoney(Number(row.allocated_overhead_pool_cents || 0), row.currency || 'CAD'))}</div></td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.estimated_full_unit_cost_cents || 0), row.currency || 'CAD'))}</td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(String(Number(row.sold_quantity_in_period || 0)))} units<div class="small">${escapeHtml(String(Number(row.sold_order_count_in_period || 0)))} orders</div></td><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(centsToMoney(Number(row.rough_unit_margin_cents || 0), row.currency || 'CAD'))}</td></tr>`).join('')}</tbody></table></div>`);
+    }
+  }
+
+
+  async function journalAction(action) {
+    const label = action === 'post_month' ? 'Posting balanced journal...' : 'Validating journal...';
+    setMessage(label, 'warning');
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/accounting-journal', { method: 'POST', body: JSON.stringify({ action, month: monthValue() }) });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Journal action failed.');
+      const validation = data.validation || data.post_result?.validation || {};
+      setMessage(action === 'post_month'
+        ? `Journal posted. Entries posted: ${Number(data.post_result?.posted_count || 0)}.`
+        : `Journal validation: ${validation.ok_to_post ? 'ready to post' : 'needs review'} (${Number(validation.invalid_entry_count || 0)} invalid entries).`, 'success');
+      await loadReport();
+    } catch (error) {
+      setMessage(error.message || 'Journal action failed.', 'error');
     }
   }
 

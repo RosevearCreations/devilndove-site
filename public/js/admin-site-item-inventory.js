@@ -200,6 +200,29 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.round(number * 100);
   }
 
+  function setInventorySyncResult(data = {}) {
+    const el = document.getElementById('siteInventorySyncResult');
+    if (!el) return;
+    if (!data || !data.ok) {
+      el.innerHTML = '';
+      el.style.display = 'none';
+      return;
+    }
+    const errors = Array.isArray(data.errors) && data.errors.length
+      ? `<details style="margin-top:8px"><summary>${escapeHtml(String(data.errors.length))} sync error(s)</summary><pre class="small" style="white-space:pre-wrap">${escapeHtml(JSON.stringify(data.errors.slice(0, 20), null, 2))}</pre></details>`
+      : '';
+    const statusCounts = data.match_status_counts && typeof data.match_status_counts === 'object'
+      ? Object.entries(data.match_status_counts).map(([key, value]) => `${escapeHtml(key)} ${escapeHtml(String(value))}`).join(' • ')
+      : '';
+    el.innerHTML = `
+      <strong>Last sync result</strong>
+      <div class="small">Scanned ${escapeHtml(String(Number(data.scanned || 0)))} • synced ${escapeHtml(String(Number(data.synced || 0)))} • inserted ${escapeHtml(String(Number(data.inserted || 0)))} • updated ${escapeHtml(String(Number(data.updated || 0)))} • failed ${escapeHtml(String(Number(data.failed || 0)))}</div>
+      <div class="small">Amazon URLs ${escapeHtml(String(Number(data.with_amazon_url || 0)))} • unit costs ${escapeHtml(String(Number(data.with_unit_cost || 0)))} • cost history rows ${escapeHtml(String(Number(data.cost_history_added || 0)))} • defaulted stock ${escapeHtml(String(Number(data.defaulted_on_hand_to_one || 0)))}</div>
+      ${statusCounts ? `<div class="small">Match statuses: ${statusCounts}</div>` : ''}
+      ${errors}`;
+    el.style.display = 'block';
+  }
+
   function setBulkPreview(html) {
     const el = document.getElementById('siteInventoryBulkCostPreview');
     if (!el) return;
@@ -445,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="submit">Save Inventory Item</button><button class="btn" type="button" id="siteInventoryResetButton">Reset Form</button></div>
         </form>
 
+        <div id="siteInventorySyncResult" class="small card" style="display:none;margin-top:12px"></div>
         <div class="grid cols-4" style="gap:12px;align-items:end;margin-top:16px">
           <div><label class="small" for="siteInventorySearch">Search</label><input id="siteInventorySearch" type="text" placeholder="name, category, supplier" /></div>
           <div><label class="small" for="siteInventoryStockView">Stock view</label><select id="siteInventoryStockView"><option value="">All items</option><option value="low">Low stock</option><option value="reorder">Reorder list</option><option value="no_reuse">Do not reuse</option><option value="inactive">Inactive</option></select></div>
@@ -593,7 +617,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to sync catalog items.');
-      setMessage(`Synced ${Number(data.synced || 0)} ${sourceTypes.join('/')} inventory items. ${Number(data.with_unit_cost || 0)} have Amazon unit costs. ${Number(data.defaulted_on_hand_to_one || 0)} were set to at least 1 in stock.`);
+      setInventorySyncResult(data);
+      setMessage(`Synced ${Number(data.synced || 0)} ${sourceTypes.join('/')} inventory items. Inserted ${Number(data.inserted || 0)}, updated ${Number(data.updated || 0)}, failed ${Number(data.failed || 0)}. ${Number(data.with_unit_cost || 0)} have Amazon unit costs.`);
       await loadList();
     } catch (err) {
       setMessage(err.message || 'Failed to sync catalog items.', true);

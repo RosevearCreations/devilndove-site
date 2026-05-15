@@ -138,6 +138,17 @@
           </div>
         </div>
         <div>
+          <div class="site-footer-heading">Local searches</div>
+          <div class="site-footer-links">
+            <a href="/handmade-jewelry-ontario/index.html">Handmade jewelry Ontario</a>
+            <a href="/polymer-clay-earrings-ontario/index.html">Polymer clay earrings</a>
+            <a href="/custom-gifts-southern-ontario/index.html">Custom gifts Southern Ontario</a>
+            <a href="/laser-engraving-ontario/index.html">Laser engraving projects</a>
+            <a href="/vintage-finds-ontario/index.html">Vintage finds Ontario</a>
+            <a href="/workshop-made-gifts-ontario/index.html">Workshop-made gifts</a>
+          </div>
+        </div>
+        <div>
           <div class="site-footer-heading">Member account</div>
           <div class="site-footer-links">
             <a href="/login/index.html">Login</a>

@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="card" id="reconciliationExceptionsCard">
         <h3 style="margin-top:0">Reconciliation exceptions queue</h3>
         <p class="small">Track unresolved statement-vs-book differences before month lock and year-end handoff.</p>
-        <div class="grid cols-2" style="gap:8px;align-items:end"><input id="exceptionMonthFilter" type="month" value="${new Date().toISOString().slice(0,7)}" /><button class="btn" type="button" id="loadExceptionsButton">Refresh exceptions</button></div>
+        <div class="grid cols-3" style="gap:8px;align-items:end"><input id="exceptionMonthFilter" type="month" value="${new Date().toISOString().slice(0,7)}" /><select id="exceptionStatusFilter"><option value="">All statuses</option><option value="open">Open</option><option value="manual_review">Manual review</option><option value="assigned">Assigned</option><option value="accountant_review">Accountant review</option><option value="reopened">Reopened</option><option value="resolved">Resolved</option><option value="ignored">Ignored</option></select><button class="btn" type="button" id="loadExceptionsButton">Refresh exceptions</button></div>
         <div id="reconciliationExceptionsList" class="small" style="margin-top:10px"></div>
       </div>
       <div class="card" id="salesTaxWorksheetCard">
@@ -124,15 +124,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadExceptions(periodMonth = '') {
-    const data = await readJson(await window.DDAuth.apiFetch(`/api/admin/accounting-reconciliation-exceptions?period_month=${encodeURIComponent(periodMonth || '')}`), 'Exceptions endpoint is unavailable.');
+    const status = document.getElementById('exceptionStatusFilter')?.value || '';
+    const data = await readJson(await window.DDAuth.apiFetch(`/api/admin/accounting-reconciliation-exceptions?period_month=${encodeURIComponent(periodMonth || '')}&status=${encodeURIComponent(status)}`), 'Exceptions endpoint is unavailable.');
     const listEl = document.getElementById('reconciliationExceptionsList');
     if (!listEl) return;
     listEl.innerHTML = data.exceptions?.length ? data.exceptions.map((row) => `
       <div style="padding:8px 0;border-bottom:1px solid #eee">
         <strong>${esc(row.reconciliation_type || '')}</strong> • ${esc(row.scope_key || 'all')} • ${esc(row.period_month || '')}
-        <div class="small">Difference ${esc(money(row.difference_cents || 0))} • tolerance ${esc(money(row.tolerance_cents || 0))} • ${esc(row.exception_status || 'open')} • ${esc(row.severity || 'warning')}</div>
+        <div class="small">Difference ${esc(money(row.difference_cents || 0))} • tolerance ${esc(money(row.tolerance_cents || 0))} • ${esc(row.exception_status || 'open')} • ${esc(row.severity || 'warning')}${Number(row.accountant_review_flag || 0) ? ' • accountant review' : ''}</div>
         <div class="small">${esc(row.notes || row.reference_label || '')}</div>
-        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-resolve-exception="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Resolve</button><button class="btn" type="button" data-ignore-exception="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Ignore</button></div>
+        <input class="small" data-exception-note="${esc(String(row.accounting_reconciliation_exception_id || 0))}" type="text" placeholder="optional note" style="margin-top:6px;width:100%" />
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-update-exception="assigned" data-exception-id="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Assign to me</button><button class="btn" type="button" data-update-exception="manual_review" data-exception-id="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Manual review</button><button class="btn" type="button" data-update-exception="accountant_review" data-exception-id="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Accountant review</button><button class="btn" type="button" data-resolve-exception="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Resolve</button><button class="btn" type="button" data-update-exception="reopened" data-exception-id="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Reopen</button><button class="btn" type="button" data-ignore-exception="${esc(String(row.accounting_reconciliation_exception_id || 0))}">Ignore</button></div>
       </div>
     `).join('') : '<div class="small">No reconciliation exceptions for this period.</div>';
   }
@@ -214,6 +216,20 @@ document.addEventListener('DOMContentLoaded', () => {
       catch (error) { setMessage(error.message || 'Failed loading statement row preview.', true); }
       return;
     }
+
+    const updateExceptionBtn = event.target.closest('[data-update-exception]');
+    if (updateExceptionBtn) {
+      const exceptionId = Number(updateExceptionBtn.getAttribute('data-exception-id') || 0);
+      const status = updateExceptionBtn.getAttribute('data-update-exception') || 'manual_review';
+      const note = document.querySelector(`[data-exception-note="${CSS.escape(String(exceptionId))}"]`)?.value || '';
+      try {
+        await readJson(await window.DDAuth.apiFetch('/api/admin/accounting-reconciliation-exceptions', { method: 'POST', body: JSON.stringify({ accounting_reconciliation_exception_id: exceptionId, exception_status: status, notes: note, assign_to_self: status === 'assigned' ? 1 : 0, accountant_review_flag: status === 'accountant_review' ? 1 : 0 }) }), 'Failed updating exception.');
+        setMessage(`Reconciliation exception marked ${status}.`);
+        await loadExceptions(document.getElementById('exceptionMonthFilter')?.value || '');
+      } catch (error) { setMessage(error.message || 'Failed updating exception.', true); }
+      return;
+    }
+
     const resolveBtn = event.target.closest('[data-resolve-exception]');
     if (resolveBtn) {
       try {
