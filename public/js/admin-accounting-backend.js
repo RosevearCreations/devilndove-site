@@ -308,10 +308,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await readJson(await window.DDAuth.apiFetch('/api/admin/db-sanity'), 'DB sanity endpoint is unavailable.');
       const stale = Array.isArray(data.stale_tables) ? data.stale_tables : [];
       const missing = Array.isArray(data.missing_tables) ? data.missing_tables : [];
+      const critical = Array.isArray(data.critical_checks) ? data.critical_checks : [];
+      const catalogCounts = Array.isArray(data.catalog_counts) ? data.catalog_counts : [];
+      const inventoryCounts = Array.isArray(data.inventory_counts) ? data.inventory_counts : [];
       mountPoint.innerHTML = `
-        <div class="small" style="margin-bottom:8px">Status: <strong>${escapeHtml(data.summary?.status || 'unknown')}</strong> · ${escapeHtml(String(Number(data.summary?.ok_table_count || 0)))} OK · ${escapeHtml(String(Number(data.summary?.stale_table_count || 0)))} stale · ${escapeHtml(String(Number(data.summary?.missing_table_count || 0)))} missing</div>
+        <div class="small" style="margin-bottom:8px">Status: <strong>${escapeHtml(data.summary?.status || 'unknown')}</strong> · ${escapeHtml(String(Number(data.summary?.ok_table_count || 0)))} OK · ${escapeHtml(String(Number(data.summary?.stale_table_count || 0)))} stale · ${escapeHtml(String(Number(data.summary?.missing_table_count || 0)))} missing · critical ${escapeHtml(String(Number(data.summary?.critical_check_count || 0)))}</div>
+        ${critical.length ? `<div style="margin-bottom:10px"><strong>Critical checks</strong><div class="small">${critical.slice(0, 12).map((row) => `${escapeHtml(row.check || '')} — ${escapeHtml(row.detail || '')}${row.action ? ` <em>${escapeHtml(row.action)}</em>` : ''}`).join('<br>')}</div></div>` : ''}
         ${missing.length ? `<div style="margin-bottom:10px"><strong>Missing tables</strong><div class="small">${missing.slice(0, 12).map((row) => `${escapeHtml(row.table_name)}${row.missing_columns?.length ? ` — needs ${escapeHtml(row.missing_columns.join(', '))}` : ''}`).join('<br>')}</div></div>` : ''}
-        ${stale.length ? `<div><strong>Tables needing column upgrades</strong><div class="small">${stale.slice(0, 12).map((row) => `${escapeHtml(row.table_name)} — missing ${escapeHtml((row.missing_columns || []).join(', '))}`).join('<br>')}</div></div>` : '<div class="small">No missing key columns were found in the current sanity set.</div>'}`;
+        ${stale.length ? `<div><strong>Tables needing column upgrades</strong><div class="small">${stale.slice(0, 12).map((row) => `${escapeHtml(row.table_name)} — missing ${escapeHtml((row.missing_columns || []).join(', '))}`).join('<br>')}</div></div>` : '<div class="small">No missing key columns were found in the current sanity set.</div>'}
+        <details style="margin-top:8px"><summary>Catalog / inventory count details</summary><pre class="small" style="white-space:pre-wrap">${escapeHtml(JSON.stringify({ catalog_counts: catalogCounts, inventory_counts: inventoryCounts, journal_balance: data.journal_balance || {}, migration_ledger_summary: data.migration_ledger_summary || {} }, null, 2))}</pre></details>`;
     } catch (error) {
       mountPoint.innerHTML = `<div style="color:#b00020">${escapeHtml(error.message || 'Failed running DB sanity.')}</div>`;
     }

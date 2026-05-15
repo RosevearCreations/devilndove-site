@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <h3 style="margin-top:0">Statement import &amp; auto-match</h3>
         <p class="small">Import bank, PayPal, Stripe, Square, and Etsy CSVs, then stage statement totals into reconciliation reviews and surface unresolved differences.</p>
         <form id="statementImportForm" class="grid" style="gap:8px" enctype="multipart/form-data">
-          <div class="grid cols-2" style="gap:8px"><select name="provider_scope"><option value="bank">Bank</option><option value="paypal">PayPal</option><option value="stripe">Stripe</option><option value="etsy">Etsy</option><option value="square">Square</option><option value="other">Other</option></select><input name="period_month" type="month" value="${new Date().toISOString().slice(0,7)}" /></div>
+          <div class="grid cols-2" style="gap:8px"><select name="provider_scope"><option value="bank">Bank</option><option value="paypal">PayPal</option><option value="stripe">Stripe</option><option value="etsy">Etsy</option><option value="square">Square</option><option value="manual">Manual</option><option value="other">Other</option></select><input name="period_month" type="month" value="${new Date().toISOString().slice(0,7)}" /></div>
           <div class="grid cols-2" style="gap:8px"><input name="statement_reference" type="text" placeholder="Statement reference / payout batch" /><input name="currency" type="text" value="CAD" maxlength="3" /></div>
           <input name="file" type="file" accept=".csv,text/csv" />
           <button class="btn primary" type="submit">Import CSV</button>
@@ -89,6 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadImports(periodMonth = '') {
     const data = await readJson(await window.DDAuth.apiFetch(`/api/admin/accounting-statement-imports?period_month=${encodeURIComponent(periodMonth || '')}`), 'Statement import endpoint is unavailable.');
+    const providerSelect = document.querySelector('#statementImportForm select[name="provider_scope"]');
+    if (providerSelect && Array.isArray(data.provider_profiles) && data.provider_profiles.length) {
+      const current = providerSelect.value || 'bank';
+      providerSelect.innerHTML = data.provider_profiles.map((profile) => `<option value="${esc(profile.provider_scope || '')}">${esc(profile.display_name || profile.provider_scope || '')}</option>`).join('');
+      providerSelect.value = data.provider_profiles.some((profile) => profile.provider_scope === current) ? current : (data.provider_profiles[0]?.provider_scope || 'bank');
+    }
     const listEl = document.getElementById('statementImportList');
     if (!listEl) return;
     listEl.innerHTML = data.imports?.length ? data.imports.map((row) => `
