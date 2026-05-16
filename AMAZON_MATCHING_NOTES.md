@@ -55,3 +55,7 @@ Guardrail: do not place raw Amazon order exports, cost reports, or review spread
 ## Build 130 inventory/catalog note
 
 No Amazon matching rules changed in Build 130. The key fix is public product API resilience so inventory/accounting improvements do not cause storefront product reads to fail while schema migrations are still catching up.
+
+## Build 131 Amazon workflow note
+
+Amazon order/cost data should continue through private staging and review. Build 131 does not make Amazon reports public; it strengthens predeploy privacy scanning so Amazon order IDs/cost import files are not accidentally shipped under public `/data/`.

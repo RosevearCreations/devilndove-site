@@ -285,3 +285,49 @@ Keep one clear H1 per exposed page, keep page titles/meta descriptions specific,
 18. Continue accounting work: payment application, journal automation, HST review, close controls, and accountant export packaging.
 19. Continue local SEO refinement with one clear H1 per public page.
 20. Continue mobile admin improvements for catalog review, inventory counts, and Amazon import approvals.
+
+## Build 131 completed 20-step pass — storefront schema repair, API health, and predeploy sanity
+
+1. Added `/api/admin/storefront-schema-repair` as an admin-only D1 schema compatibility inspector.
+2. Added a non-destructive repair action that checks live D1 before adding missing product storefront columns.
+3. Added safe repair support for older `tax_classes` schemas, including `rate_percent` compatibility.
+4. Added safe repair support for missing `product_seo` table/columns.
+5. Added storefront compatibility indexes for product slug, category, origin, and sale channel filters.
+6. Added `public/js/admin-storefront-schema-repair.js` for an Operations page repair panel.
+7. Added the Storefront Schema Repair mount and script to `/admin/operations/`.
+8. Expanded Public API Health to check HTML pages, API JSON, sitemap XML, and robots.txt.
+9. Expanded Public API Health to treat `summary.authority: "error"` as a true failure.
+10. Added D1 row-count snapshot data to Public API Health for products, catalog, inventory, incidents, and migration ledger.
+11. Added endpoint-specific next-action guidance in the Public API Health UI.
+12. Added Release Sanity coverage for storefront schema repair readiness.
+13. Updated Release Sanity actions to point admins to Storefront Schema Repair when product fallbacks remain.
+14. Added `scripts/predeploy_sanity_check.py` for local H1/title/meta, local asset, CSS brace, and public-data privacy checks.
+15. Updated `database_full_schema.sql` with `tax_classes.rate_percent` and storefront indexes.
+16. Updated `database_store_schema.sql` with `tax_classes.rate_percent` and storefront indexes.
+17. Updated `database_growth_analytics_seo_extension.sql`/full schema with a product SEO product-id index.
+18. Added the Build 131 migration ledger marker to `database_upgrade_current_pass.sql`.
+19. Re-ran JavaScript syntax checks and local predeploy sanity checks.
+20. Updated all active Markdown handoff, schema, roadmap, SEO, and repo documents for this pass.
+
+## Next logical 20 steps after Build 131
+
+1. Deploy Build 131 and open `/admin/operations/`.
+2. Run **Storefront Schema Repair > Inspect repairs** first; review missing product/tax/SEO columns.
+3. If the repair report shows safe missing columns, click **Apply safe repairs**.
+4. Run **Public API Health** and confirm `/api/products` no longer reports `authority: "error"`.
+5. If `/api/products` still uses `d1_select_star_fallback`, inspect product table columns and rerun schema repair.
+6. Run **Release Sanity** and confirm product schema repair readiness is pass/warn rather than fail.
+7. Recheck Runtime Incidents and resolve only old `/api/products` rows after the count stops increasing.
+8. Add a product schema backfill screen that can populate blank `merchandise_origin`, `sale_channel`, and `currency` values.
+9. Add admin product-filter QA cards for handmade, vintage, collectible, external-only, and hybrid products.
+10. Add product structured-data health checks for required Product fields and image URLs.
+11. Add sitemap regeneration from live D1 products/pages instead of static-only sitemap maintenance.
+12. Add public search-performance fields for Search Console clicks, impressions, CTR, and position by page/query.
+13. Continue Amazon staging import review with manual inventory-link correction and bulk approval safeguards.
+14. Continue payment application screens tying orders, deposits, refunds, fees, gift cards, and journal entries together.
+15. Continue automatic journal-line generation for sales, fees, shipping, inventory, COGS, refunds, write-offs, and HST.
+16. Continue HST/GST review worksheet with collected tax, ITCs, adjustments, and remittance-ready totals.
+17. Continue month-end close lock/reopen controls with checklist, reason, and audit trail.
+18. Continue accountant export package v2 with GL, trial balance, P&L, balance-sheet support, HST worksheet, attachments, and unresolved exceptions.
+19. Continue media lifecycle tools for replace, retire, alt text, crop, public/private flag, and broken-link scans.
+20. Continue moving duplicated JSON/DB product and content data toward D1-first management with public-safe JSON fallbacks only.

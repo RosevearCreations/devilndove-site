@@ -47,3 +47,7 @@ When continuing this project, remember that Operations now includes D1 Schema Dr
 ## Build 130 AI handoff note
 
 When continuing this project, remember that `/api/products` must remain schema-drift tolerant. Do not add optional product columns directly to public product SQL unless they are proven by strict D1 metadata checks. If product richness fails, prefer public-safe fallback data over a storefront outage.
+
+## Build 131 AI handoff
+
+Current focus: stabilize the Devil n Dove storefront against D1 schema drift. Build 131 adds `/api/admin/storefront-schema-repair` plus an Operations UI to inspect/apply non-destructive product/tax/product SEO compatibility columns. It also expands Public API Health and adds local predeploy sanity checks. Future work should continue product value backfills, structured-data checks, sitemap generation from D1, Amazon review safeguards, and accounting close/export workflows.

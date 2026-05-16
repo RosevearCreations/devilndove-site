@@ -89,3 +89,9 @@ Post-deploy validation:
 3. Confirm `summary.authority` is not `error`.
 4. Check Runtime Incidents and ensure the `/api/products` grouped count stops increasing.
 5. Mark old `/api/products` incidents resolved after fresh requests stay clean.
+
+## Current status — Build 131
+
+Build 131 adds an admin Storefront Schema Repair panel and endpoint, expands Public API Health, adds Release Sanity coverage for storefront schema repair readiness, and adds a local `scripts/predeploy_sanity_check.py` privacy/SEO/CSS/link check. This pass is focused on fixing the root cause behind repeated `/api/products` fallback incidents by making the live D1 product/tax/SEO schema repairable from admin, not just making the public endpoint survive schema drift.
+
+After deploy: open `/admin/operations/`, run Storefront Schema Repair inspect/apply if needed, then run Public API Health and Release Sanity. Only mark old `/api/products` runtime incidents resolved after the count stops increasing.

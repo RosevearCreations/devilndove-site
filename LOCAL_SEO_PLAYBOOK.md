@@ -44,3 +44,7 @@ Continue using one clear H1 per exposed page, local wording in titles/headings/b
 ## Build 130 SEO note
 
 The catalog API hotfix is also an SEO protection step: public product, gallery, and creation pages should return usable content rather than safe empty/error results when D1 schema drift exists. Continue one clear H1 per public page and clear local wording in titles/headings.
+
+## Build 131 SEO/runtime alignment
+
+The SEO habit remains: one clear H1, focused title/meta, and natural local wording. Build 131 connects that SEO goal to runtime health by checking public APIs, sitemap, robots.txt, and storefront schema drift from Operations. If product schema drift forces the shop into fallback mode, fix the schema first so filters, origins, channels, and product detail data are available for both users and search engines.

@@ -103,3 +103,12 @@ Current sync: 2026-05-15 — Build 130.
 - The only time `/api/products` should now log a new error incident is when every product query tier fails, including `SELECT * FROM products`.
 - If the endpoint returns `summary.authority: "d1_select_star_fallback"`, the storefront is protected, but D1 schema cleanup is still recommended.
 - Old `/api/products` incidents should remain open until a fresh deploy is verified, then they can be marked resolved.
+
+## Build 131 known gaps and risk updates
+
+- Storefront Schema Repair can add safe missing columns, but it does not replace the need for a reviewed full D1 migration history. Use it as a compatibility repair, then record/confirm the migration ledger.
+- `/api/products` should no longer be allowed to sit at `authority: "error"`. If the endpoint falls back to `d1_select_star_fallback`, the public storefront is protected but schema cleanup is still recommended.
+- Product rows may still need value backfills after columns are added: `merchandise_origin`, `sale_channel`, `currency`, `requires_shipping`, `status`, and image fields should be reviewed before relying on filters.
+- The new local predeploy sanity script catches obvious public data leaks, but private Amazon order/cost files still must not be placed under `/data/` or other public static folders.
+- Public API Health now checks more endpoints, but it cannot validate real buyer checkout success; payment/provider tests remain a separate workflow.
+- Next risk to reduce: product schema value backfill and product structured-data checks so richer shop filters and SEO can move from fallback-safe to fully intentional.

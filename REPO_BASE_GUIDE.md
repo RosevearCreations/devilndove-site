@@ -53,3 +53,7 @@ For each deploy, visit `/admin/operations/` and run D1 Schema Drift Report, Publ
 ## Build 130 development rule
 
 Public storefront APIs must not assume optional D1 columns exist. Use actual schema checks first, and keep a safe fallback that does not break public pages while migrations catch up.
+
+## Build 131 repo guide update
+
+Use `scripts/predeploy_sanity_check.py` before packaging when possible. For live D1 schema drift, use `/admin/operations/` > Storefront Schema Repair instead of manually guessing `ALTER TABLE` statements. Keep private import/cost/order files outside public static folders.

@@ -287,3 +287,22 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+
+-- Build 131 current pass: storefront schema repair and API health guardrails, 2026-05-15.
+-- The /api/admin/storefront-schema-repair endpoint safely checks live D1 before adding missing
+-- product/tax/product_seo compatibility columns. D1/SQLite cannot use portable ADD COLUMN IF NOT EXISTS,
+-- so the runtime admin repair applies these non-destructive updates after PRAGMA checks instead of
+-- placing unconditional ALTER TABLE statements here.
+-- Full fresh schemas now include tax_classes.rate_percent and storefront indexes used by the repair flow.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build131',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 131. Adds admin Storefront Schema Repair, expanded Public API Health, release-sanity storefront repair readiness, and non-destructive D1 compatibility guardrails for products, tax_classes, and product_seo.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

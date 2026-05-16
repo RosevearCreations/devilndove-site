@@ -146,6 +146,8 @@ CREATE TABLE IF NOT EXISTS product_seo (
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
 
+CREATE INDEX IF NOT EXISTS idx_product_seo_product_131 ON product_seo(product_id);
+
 CREATE TABLE IF NOT EXISTS product_image_annotations (
   product_image_annotation_id INTEGER PRIMARY KEY AUTOINCREMENT,
   product_id INTEGER NOT NULL,

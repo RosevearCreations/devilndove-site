@@ -41,3 +41,7 @@ Public storefront endpoints must not hard-reference optional D1 columns. If a co
 ## Build 130 rule reminder
 
 Before referencing a newer D1 column from a public endpoint, confirm it exists. Public pages should degrade safely instead of creating repeated runtime incidents.
+
+## Build 131 repo rule update
+
+Do not add private Amazon order exports, match reports, cost reports, or transaction CSV/XLSX files under public `/data/`. Use private D1 staging/admin import tools instead. Before deploy, run the local predeploy sanity script or equivalent checks for H1/meta, CSS drift, local references, and public-data privacy.

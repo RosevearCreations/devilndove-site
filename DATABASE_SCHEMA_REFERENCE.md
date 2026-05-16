@@ -104,3 +104,12 @@ The runtime API safely backfills missing columns after checking the live table. 
 Build 130 does not require a destructive D1 schema change. It is a code-first compatibility patch for public product reads. The important implementation change is that candidate optional product columns are no longer treated as verified columns. The endpoint now trusts only actual table metadata/sample rows and has a final `SELECT * FROM products` fallback before logging an incident.
 
 This protects older product schemas that do not yet have fields such as `merchandise_origin`, `sale_channel`, `condition_summary`, or similar storefront enrichment fields. Those columns can still be added later through reviewed migrations, but they are no longer required for the public product list to work.
+
+## Build 131 schema reference update
+
+- `tax_classes.rate_percent` is now included in fresh schema files so older and newer storefront/accounting code paths can agree on tax rate naming.
+- Storefront repair expects these compatibility areas:
+  - `products`: product number/SKU, category/color fields, status/review fields, product type, merchandise origin, sale channel, external listing fields, condition/era/sourcing notes, price/currency/tax/shipping/inventory fields, image/sort/timestamp fields.
+  - `tax_classes`: `code`, `name`, `tax_rate`, `rate_percent`, `is_active`, timestamps.
+  - `product_seo`: product link, meta title/description, keywords, H1 override, canonical URL, schema type, Open Graph fields, timestamps.
+- `database_upgrade_current_pass.sql` records Build 131 as a pending-review ledger marker. The actual ADD COLUMN actions are intentionally handled by `/api/admin/storefront-schema-repair` after checking live D1 because unconditional `ALTER TABLE ADD COLUMN` is unsafe to rerun in D1/SQLite.

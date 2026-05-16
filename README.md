@@ -80,3 +80,7 @@ After deploying this build, use `/admin/operations/` to run Schema Drift, Public
 ## Build 130 note
 
 Build 130 is a public catalog resilience hotfix. It keeps the storefront usable when optional product columns are missing from D1 by falling back from adaptive SQL to product-only SQL and finally to a `SELECT *` product read with JavaScript filtering.
+
+## Build 131 deploy note
+
+Build 131 adds Operations > Storefront Schema Repair, expanded Public API Health, and a local predeploy sanity script. After deploying, run `/admin/operations/` checks in this order: Storefront Schema Repair, Public API Health, Runtime Incidents, Migration Ledger, then Release Sanity.

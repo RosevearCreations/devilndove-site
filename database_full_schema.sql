@@ -150,6 +150,7 @@ CREATE TABLE IF NOT EXISTS tax_classes (
   capture_reference TEXT,
   description TEXT,
   tax_rate REAL NOT NULL DEFAULT 0.13,
+  rate_percent REAL NOT NULL DEFAULT 13,
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -206,6 +207,8 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE INDEX IF NOT EXISTS idx_products_capture_last_saved_at ON products(capture_last_saved_at DESC);
 CREATE INDEX IF NOT EXISTS idx_products_capture_updated_by ON products(capture_updated_by_user_id, capture_last_saved_at DESC);
 CREATE INDEX IF NOT EXISTS idx_products_origin_channel ON products(merchandise_origin, sale_channel, status, review_status);
+CREATE INDEX IF NOT EXISTS idx_products_slug_131 ON products(slug);
+CREATE INDEX IF NOT EXISTS idx_products_category_131 ON products(product_category);
 
 CREATE TABLE IF NOT EXISTS product_images (
   product_image_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -619,6 +622,8 @@ CREATE TABLE IF NOT EXISTS product_seo (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS idx_product_seo_product_131 ON product_seo(product_id);
 
 CREATE TABLE IF NOT EXISTS product_image_annotations (
   product_image_annotation_id INTEGER PRIMARY KEY AUTOINCREMENT,

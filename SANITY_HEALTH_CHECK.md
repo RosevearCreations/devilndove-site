@@ -54,3 +54,16 @@ Date: 2026-05-15
 - Acceptable authorities are `d1_adaptive_query`, `d1_product_only_fallback_query`, or `d1_select_star_fallback`.
 - Refresh Operations > Runtime Incidents after several public page loads and confirm `products_primary_query_failed` / `products_fallback_query_failed` counts do not increase.
 - If the response uses `d1_select_star_fallback`, run D1 Schema Drift Report and plan product-column cleanup later; do not treat it as a public outage.
+
+## Build 131 sanity additions
+
+- Operations now includes **Storefront Schema Repair** for product/tax/product SEO compatibility columns.
+- Public API Health now checks `/api/products`, product detail when a sample slug exists, shop/gallery HTML, catalog items, tools, supplies, creations, community content, sitemap XML, and robots.txt.
+- Release Sanity now warns when safe storefront repair columns are still missing.
+- Local predeploy command added:
+
+```bash
+python scripts/predeploy_sanity_check.py .
+```
+
+This local script checks one H1, title/meta descriptions, missing local references, CSS brace drift, and obvious private Amazon/order data in public `/data/` files.
