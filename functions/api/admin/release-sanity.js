@@ -167,12 +167,18 @@ export async function onRequestGet(context) {
     'warning'
   );
 
-  const incidentRow = await tableExists(db, 'runtime_incidents') ? await safeFirst(db, `
-    SELECT COUNT(*) AS incident_count
-    FROM runtime_incidents
-    WHERE datetime(COALESCE(created_at, datetime('now'))) >= datetime('now','-7 days')
-      AND COALESCE(severity,'warning') IN ('error','critical')
-  `) : { incident_count: 0 };
+  let incidentRow = { incident_count: 0 };
+  if (await tableExists(db, 'runtime_incidents')) {
+    const incidentColumns = await safeAll(db, `PRAGMA table_info(runtime_incidents)`);
+    const hasReviewStatus = incidentColumns.some((row) => String(row.name || '').toLowerCase() === 'review_status');
+    incidentRow = await safeFirst(db, `
+      SELECT COUNT(*) AS incident_count
+      FROM runtime_incidents
+      WHERE datetime(COALESCE(created_at, datetime('now'))) >= datetime('now','-7 days')
+        AND LOWER(COALESCE(severity,'warning')) IN ('error','critical')
+        ${hasReviewStatus ? "AND LOWER(COALESCE(review_status,'open')) NOT IN ('resolved','ignored')" : ''}
+    `, [], { incident_count: 0 });
+  }
   addCheck(
     checks,
     Number(incidentRow.incident_count || 0) === 0 ? 'pass' : 'warn',
