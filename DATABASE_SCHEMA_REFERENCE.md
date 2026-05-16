@@ -54,3 +54,8 @@ Build 125 adds posting/validation metadata:
 - `reviewed_at` - timestamp of the latest review action.
 
 The runtime endpoint safely backfills these columns after checking `PRAGMA table_info`, then creates supporting indexes. This avoids unsafe duplicate-column failures on older D1 databases.
+
+
+## Build 127 schema compatibility note
+
+No destructive schema change was required in Build 127. The public `/api/products` endpoint now treats several product, tax, and SEO columns as optional compatibility fields and inspects D1 with `PRAGMA table_info` before referencing them. This specifically prevents older `tax_classes` schemas with `tax_rate` but without `rate_percent` from breaking the storefront query.

@@ -59,3 +59,12 @@ Current sync: 2026-05-14 — Build 125.
 - The warning should not be treated as a deploy blocker by itself; it means unresolved `error` or `critical` incidents were logged in the last 7 days.
 - Main risk: if the same scope/code/endpoint group repeats, the underlying API or schema drift still needs a code or D1 fix.
 - Resolved or ignored rows are excluded from the warning, so do not mark rows closed until the recurring cause has been reviewed.
+
+
+## Build 127 runtime incident follow-up
+
+- The `/api/products` runtime incident group was caused by schema drift assumptions in the public products endpoint.
+- A key example is `COALESCE(tc.rate_percent, tc.tax_rate, 0)`: D1/SQLite still fails when `tc.rate_percent` does not exist, even if `tc.tax_rate` does.
+- Build 127 reduces this risk by inspecting table columns before building SQL and by using a schema-adaptive product-only fallback.
+- Remaining risk: if the live `products` table itself is missing or unreadable, `/api/products` will still return a safe empty result and log an incident.
+- After deployment, old `/api/products` incident rows should be marked resolved only after fresh requests stop creating new rows.

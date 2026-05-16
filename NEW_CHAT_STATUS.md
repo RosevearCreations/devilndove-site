@@ -1,48 +1,40 @@
-# New Chat Status — Devil n Dove Build 125
+# New Chat Status — Devil n Dove Build 127
 
-Date: 2026-05-14
-Source build: `devilndove-site-main(124).zip`
-Current output build: Build 125 Amazon purchase review, inventory cost history, reconciliation queue, journal validation, and local SEO pass.
+Date: 2026-05-15
+Source build: `devilndove-site-main-126-runtime-incidents-hotfix.zip`
+Current output build: Build 127 public products API adaptive schema hotfix.
 
-## What changed in Build 125
-- Added Amazon purchase review/apply API and admin queue.
-- Added inventory cost history table and cost-history recording from sync, manual inventory edits, bulk cost edits, and Amazon-approved purchases.
-- Improved inventory sync result visibility on the admin catalog page.
-- Expanded reconciliation exception queue actions and fields.
-- Added journal validation/posting guardrails for monthly accounting entries.
-- Added six local-intent landing pages and a sitemap.
-- Updated schema files and active Markdown files.
+## What changed in Build 127
+- Fixed the repeated `/api/products` runtime incident group: `products_primary_query_failed` followed by `products_fallback_query_failed`.
+- Rebuilt `functions/api/products.js` so public products queries inspect D1 table columns first and only reference columns that actually exist.
+- Removed unsafe assumptions such as `tc.rate_percent` existing when the live D1 table only has `tax_rate`. In D1/SQLite, referencing a missing column inside `COALESCE()` still fails, so the query must be built conditionally.
+- Made the public products fallback product-only and schema-adaptive so older D1 databases can still return products instead of empty results.
+- Fixed optional price filter parsing so missing `min_price_cents` / `max_price_cents` are not treated as zero filters.
+- Kept safe empty-result handling if the `products` table itself is unavailable.
+- Updated active Markdown and current-pass schema ledger notes.
 
 ## Deploy order
-1. Deploy the Build 125 zip.
-2. Apply `database_upgrade_current_pass.sql` in Cloudflare D1.
-3. Open `/admin/operations/`, run Release Sanity, and mark the Build 125 ledger row applied if D1 looks good.
-4. Open `/admin/catalog/`, click Sync all tools + supplies, and review the sync result panel.
-5. Open the Amazon purchase review queue on `/admin/catalog/` and approve only obvious safe matches first.
+1. Deploy the Build 127 zip.
+2. Apply `database_upgrade_current_pass.sql` or at least record the Build 127 ledger marker if the previous Build 126 SQL is already applied. Build 127 does not require a destructive schema change.
+3. Open `/api/products` directly and confirm it returns `ok: true` with `authority: "d1_adaptive_query"` or the product-only fallback, not `authority: "error"`.
+4. Open public Gallery/Shop/Creations pages that use `/api/products`.
+5. Open `/admin/operations/`, refresh Security / Runtime Incidents, and mark the old repeated `/api/products` incidents resolved after confirming new requests no longer create them.
+6. Re-run Release Sanity.
 
-## Important verification queries
+## Important D1 incident query
 ```sql
-SELECT source_type, COUNT(*) AS total,
-       SUM(CASE WHEN unit_cost_cents > 0 THEN 1 ELSE 0 END) AS with_unit_cost
-FROM site_item_inventory
-WHERE source_type IN ('tool','supply')
-GROUP BY source_type;
-```
-
-```sql
-SELECT COUNT(*) AS cost_history_rows
-FROM site_item_inventory_cost_history;
-```
-
-```sql
-SELECT review_decision, COUNT(*) AS total
-FROM amazon_purchase_import_staging
-GROUP BY review_decision;
+SELECT
+  severity,
+  incident_scope,
+  incident_code,
+  endpoint_path,
+  COUNT(*) AS total,
+  MAX(created_at) AS last_seen
+FROM runtime_incidents
+WHERE endpoint_path = '/api/products'
+GROUP BY severity, incident_scope, incident_code, endpoint_path
+ORDER BY datetime(last_seen) DESC;
 ```
 
 ## Current caution
-Amazon order data remains private operational/accounting data. Keep raw Amazon reports and review exports out of public `/data/` paths.
-
-## Build 126 handoff
-
-A hotfix build was created after Release Sanity reported 7 recent error/critical runtime incidents. The build adds a visible `/admin/operations/` Security / Runtime Incidents review panel, grouped incident API results, review statuses, and Release Sanity filtering for resolved/ignored incidents. After deploying, open Operations, refresh the runtime incidents panel, group the 7 current incidents, fix the highest-count recurring endpoint first, then mark fixed rows resolved.
+If `/api/products` still logs a fresh error after Build 127, copy the new incident `details_json`; it should now contain a narrower adaptive-query error instead of a generic primary/fallback pair.

@@ -206,3 +206,18 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+
+-- Build 127 current pass: public products API schema-drift compatibility hotfix.
+-- No destructive schema change is required. The endpoint now inspects optional products/tax/SEO columns before referencing them.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build127',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 127. Code-only compatibility fix for /api/products runtime incidents. The public products endpoint now avoids hard references to optional D1 columns such as tax_classes.rate_percent and uses a schema-adaptive fallback.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

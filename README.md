@@ -62,3 +62,8 @@ Build 125 adds the Amazon purchase review/apply workflow, inventory cost history
 ## Build 126 hotfix
 
 Build 126 adds an Operations-page runtime incident review panel. Release Sanity warnings for recent runtime errors can now be investigated from the admin UI, grouped by severity/scope/code/endpoint, and reviewed with statuses so fixed or ignored rows stop keeping the warning active.
+
+
+## Build 127 hotfix
+
+Build 127 hardens the public products API against D1 schema drift. Deploy it when Release Sanity shows repeated `/api/products` incidents such as `products_primary_query_failed` and `products_fallback_query_failed`.

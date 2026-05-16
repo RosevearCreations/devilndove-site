@@ -97,3 +97,50 @@ Keep one clear H1 per exposed page, keep page titles/meta descriptions specific,
 18. Continue local SEO page expansion with one clear H1 per public page.
 19. Continue CSS drift checks on admin tables and mobile panels.
 20. Continue migration of duplicated JSON/DB data toward a single source of truth with public-safe JSON fallbacks only.
+
+
+## Build 127 completed hotfix items
+
+1. Investigated the Release Sanity grouped incidents for `/api/products`.
+2. Identified the failure pattern as primary public product query failure followed by fallback query failure.
+3. Rebuilt `/api/products` around D1 schema inspection before query construction.
+4. Removed hard references to optional tax columns such as `tc.rate_percent`.
+5. Kept `tax_rate` support for older/current tax schemas.
+6. Made the tax-class join conditional on both `products.tax_class_id` and `tax_classes.tax_class_id`.
+7. Made the product SEO join conditional on `product_seo.product_id`.
+8. Made SEO keyword search conditional on the SEO join and `product_seo.keywords`.
+9. Made product filters skip safely when older D1 schemas are missing optional columns.
+10. Fixed missing min/max price parameters being parsed as zero.
+11. Made the primary products query adaptive instead of one-size-fits-all.
+12. Made the fallback query product-only and adaptive instead of repeating newer schema assumptions.
+13. Preserved safe empty-results if the DB binding or products table is unavailable.
+14. Added better diagnostics warnings so skipped joins/filters are visible in the API response.
+15. Kept runtime incident logging for real primary/fallback failures.
+16. Added a local smoke test for an older D1 tax schema with no `rate_percent` column.
+17. Updated active Markdown handoff and sanity documentation.
+18. Added a Build 127 schema migration ledger marker with no destructive SQL changes.
+19. Re-ran JavaScript syntax checks.
+20. Re-ran public page H1/title/meta/link and CSS drift sanity checks.
+
+## Next 20 steps after Build 127
+
+1. Deploy Build 127 and verify `/api/products` returns `ok: true`.
+2. Re-run Release Sanity and confirm the `/api/products` warning count stops increasing.
+3. Mark the old `/api/products` runtime incidents resolved once new requests no longer recreate them.
+4. Add a Release Sanity deep link from each warning row to the matching Operations panel filter.
+5. Add a lightweight public API health endpoint that checks `/api/products`, `/api/catalog`, and key public JSON fallbacks.
+6. Add an admin-visible API schema drift report showing missing optional vs required D1 columns.
+7. Continue Amazon CSV staging import UI so new Amazon files can be uploaded safely from admin.
+8. Continue Amazon match review helpers with confidence explanation and suggested linked inventory rows.
+9. Continue payment application screens connecting orders, deposits, fees, refunds, gift cards, and journals.
+10. Continue full journal-line automation and monthly posting validation.
+11. Continue HST/GST review worksheet and remittance summary.
+12. Continue period close, lock, reopen, and audit trail controls.
+13. Continue accountant export packaging with unresolved exceptions and attachments index.
+14. Continue product variants/options for colour, size, material, customization, SKU, price, stock, and media.
+15. Continue D1-first migration for public product/gallery content with JSON as fallback/export only.
+16. Continue media lifecycle tools for replace, retire, alt text, crop, and broken-link scanning.
+17. Continue local SEO internal linking and structured data review.
+18. Continue mobile admin quick actions for inventory, expenses, receipts, and product drafts.
+19. Continue CSS drift review on admin tables and public cards.
+20. Continue pre-deploy privacy checks to keep private order/cost data out of public static paths.

@@ -1,24 +1,24 @@
-# Sanity Health Check — Build 125
+# Sanity Health Check — Build 127
 
-Date: 2026-05-14
+Date: 2026-05-15
 
 ## Automated checks run during this pass
 - JavaScript syntax check: all non-archive `.js` files passed `node --check`.
 - Public/admin HTML check: every non-archive `.html` file has exactly one `<h1>`, a `<title>`, and a meta description.
 - Local script/style reference check: no missing local `.js` or `.css` references were found.
-- CSS brace drift check: `/css/styles.css` braces were balanced after the local-intent page additions.
-- Current-pass SQL fresh-schema smoke test passed in SQLite for create-table/index/ledger statements.
-- Public SEO additions: six local-intent pages and `sitemap.xml` were added.
+- CSS brace drift check: `/css/styles.css` braces were balanced.
+- `/api/products` adaptive-schema smoke test passed with an older tax schema that has `tax_rate` but no `rate_percent`.
+- Current-pass SQL includes a Build 127 migration ledger marker and no destructive changes.
 
-## Manual checks after deployment
-1. Open `/admin/operations/` and run Release Sanity.
-2. Confirm the Build 125 migration ledger row is marked applied only after `database_upgrade_current_pass.sql` has been applied in D1.
-3. Open `/admin/catalog/` and run Sync all tools + supplies.
-4. Confirm the inventory sync result panel shows expected totals and does not hide failures.
-5. Open Amazon purchase review and approve one obvious row only; verify inventory unit cost and cost history.
-6. Open Accounting imports and test reconciliation queue buttons on a non-critical exception.
-7. Open Accounting report, validate a month, and confirm unbalanced periods are blocked from posting.
-8. Spot-check the six local-intent pages on mobile and desktop.
+## Runtime incident sanity flow after deploying Build 127
+1. Open `/api/products` in the browser.
+2. Confirm the JSON response shows `ok: true`.
+3. Confirm `summary.authority` is not `error`.
+4. Open `/admin/operations/`.
+5. Use **Security / Runtime Incidents** and filter the last 7 days.
+6. Confirm no new `/api/products` incidents are created after the Build 127 deploy time.
+7. Mark the old `/api/products` rows resolved once the new endpoint is confirmed.
+8. Re-run Release Sanity.
 
 ## Guardrails to keep
 - One H1 per exposed page.
@@ -26,15 +26,4 @@ Date: 2026-05-14
 - Current owned tools/supplies default to at least one stock unit.
 - Package math uses stock package plus usage unit count.
 - Keep private Amazon cost/order reports out of public static files.
-
-## Runtime incident sanity flow - Build 126
-
-When Release Sanity reports recent runtime errors:
-
-1. Open `/admin/operations/`.
-2. Use **Security / Runtime Incidents**.
-3. Keep review status set to `Open` and days set to `7`.
-4. Check **Grouped recurring incidents** first.
-5. Fix the group with the highest count before resolving individual rows.
-6. Mark rows `resolved` only when the repeated cause is fixed; mark `ignored` only for known harmless stale rows.
-7. Re-run Release Sanity. Resolved/ignored error and critical rows no longer keep the warning active.
+- Public APIs should inspect D1 schema before referencing optional columns so older databases degrade safely.
