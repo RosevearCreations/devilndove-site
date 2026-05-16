@@ -26,3 +26,15 @@ Date: 2026-05-14
 - Current owned tools/supplies default to at least one stock unit.
 - Package math uses stock package plus usage unit count.
 - Keep private Amazon cost/order reports out of public static files.
+
+## Runtime incident sanity flow - Build 126
+
+When Release Sanity reports recent runtime errors:
+
+1. Open `/admin/operations/`.
+2. Use **Security / Runtime Incidents**.
+3. Keep review status set to `Open` and days set to `7`.
+4. Check **Grouped recurring incidents** first.
+5. Fix the group with the highest count before resolving individual rows.
+6. Mark rows `resolved` only when the repeated cause is fixed; mark `ignored` only for known harmless stale rows.
+7. Re-run Release Sanity. Resolved/ignored error and critical rows no longer keep the warning active.

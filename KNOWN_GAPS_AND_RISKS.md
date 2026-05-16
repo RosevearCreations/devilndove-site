@@ -52,3 +52,10 @@ Current sync: 2026-05-14 — Build 125.
 - Added shared-footer local search links so the new local-intent pages are internally linked from public pages.
 - Added CSS for local-intent cards, related-page links, and mobile-friendly local page calls to action.
 - Updated active schema files and Markdown files, then ran syntax/H1/meta/link sanity checks for the new build.
+
+## Build 126 runtime warning follow-up
+
+- The Release Sanity warning for recent runtime errors is now actionable from `/admin/operations/` through the new Security / Runtime Incidents panel.
+- The warning should not be treated as a deploy blocker by itself; it means unresolved `error` or `critical` incidents were logged in the last 7 days.
+- Main risk: if the same scope/code/endpoint group repeats, the underlying API or schema drift still needs a code or D1 fix.
+- Resolved or ignored rows are excluded from the warning, so do not mark rows closed until the recurring cause has been reviewed.

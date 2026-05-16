@@ -43,3 +43,14 @@ Build 125 adds posting/validation metadata:
 2. Apply `database_upgrade_current_pass.sql`.
 3. Use `/admin/operations/` to mark Build 125 applied.
 4. Use `/admin/catalog/` to sync tools/supplies and review Amazon staging rows.
+
+## Runtime incident review fields - Build 126
+
+`runtime_incidents` now supports admin review fields in addition to the original incident log columns:
+
+- `review_status` - `open`, `reviewing`, `resolved`, or `ignored`.
+- `admin_note` - short internal explanation for the review action.
+- `reviewed_by_user_id` - admin user that last changed the review state.
+- `reviewed_at` - timestamp of the latest review action.
+
+The runtime endpoint safely backfills these columns after checking `PRAGMA table_info`, then creates supporting indexes. This avoids unsafe duplicate-column failures on older D1 databases.

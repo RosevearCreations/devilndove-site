@@ -59,3 +59,6 @@ Amazon transaction CSVs, review spreadsheets, and private purchase reports must 
 
 Build 125 adds the Amazon purchase review/apply workflow, inventory cost history, reconciliation exception queue controls, journal validation/posting guardrails, six local-intent SEO pages, sitemap generation, and updated schema/Markdown files. After deployment, apply `database_upgrade_current_pass.sql`, mark the migration in `/admin/operations/`, and run Tools/Supplies sync from `/admin/catalog/`.
 
+## Build 126 hotfix
+
+Build 126 adds an Operations-page runtime incident review panel. Release Sanity warnings for recent runtime errors can now be investigated from the admin UI, grouped by severity/scope/code/endpoint, and reviewed with statuses so fixed or ignored rows stop keeping the warning active.

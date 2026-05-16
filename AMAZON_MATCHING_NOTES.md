@@ -37,3 +37,7 @@ usage_units_per_stock_unit = 100
 ## Build 125 note
 
 Build 125 keeps Amazon order/cost data private, adds admin review/apply controls for Amazon staging rows, records inventory cost history, expands reconciliation and journal guardrails, and adds local-intent SEO pages plus `sitemap.xml`. Keep schema files and active Markdown updated on every pass.
+
+## Build 126 note
+
+No Amazon matching rules changed in this hotfix. Runtime incident review was added so admin/API errors from Amazon review, catalog sync, or inventory apply workflows can be grouped and resolved from Operations if they recur.

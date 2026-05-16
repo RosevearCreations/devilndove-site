@@ -270,11 +270,17 @@ CREATE TABLE IF NOT EXISTS runtime_incidents (
   related_user_id INTEGER,
   ip_address TEXT,
   user_agent TEXT,
+  review_status TEXT DEFAULT 'open',
+  admin_note TEXT,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_runtime_incidents_created_at ON runtime_incidents(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_runtime_incidents_scope ON runtime_incidents(incident_scope, severity, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_runtime_incidents_code_path ON runtime_incidents(incident_code, endpoint_path, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_runtime_incidents_review_status_created ON runtime_incidents(review_status, severity, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_runtime_incidents_grouping ON runtime_incidents(severity, incident_scope, incident_code, endpoint_path, created_at DESC);
 
 
 

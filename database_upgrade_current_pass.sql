@@ -190,3 +190,19 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 126 current pass: runtime incident review workflow.
+-- The runtime endpoint safely adds review_status/admin_note/reviewed_by_user_id/reviewed_at after PRAGMA table_info checks, then creates indexes once columns exist.
+-- Do not place unconditional ALTER TABLE ADD COLUMN here because D1/SQLite has no portable ADD COLUMN IF NOT EXISTS.
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build126',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 126. Adds a visible Operations runtime-incident review panel, grouped incident endpoint responses, review status fields, and release-sanity filtering so resolved/ignored incidents do not keep warning forever.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

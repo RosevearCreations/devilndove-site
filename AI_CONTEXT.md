@@ -25,3 +25,7 @@ Devil n Dove is a Southern Ontario maker/storefront project with handmade jewelr
 - Keep one H1 per exposed HTML page.
 - Prefer D1 for authoritative operational data.
 - Keep robust fallbacks and admin-visible error states.
+
+## Build 126 AI context
+
+The current hotfix focus is runtime incident visibility. The app now has a visible admin Runtime Incidents panel, grouped `/api/admin/runtime-incidents` output, review status fields, and Release Sanity excludes resolved/ignored error or critical incidents from the 7-day warning.

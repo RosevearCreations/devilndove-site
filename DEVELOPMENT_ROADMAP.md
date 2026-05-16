@@ -51,3 +51,49 @@ Do steps 1-6 first because they confirm the new Amazon/private-cost workflow wit
 
 ## SEO habit for every pass
 Keep one clear H1 per exposed page, keep page titles/meta descriptions specific, and keep local/product/service wording visible in page headings and body copy. Public pages should support real search intent without keyword stuffing.
+
+## Build 126 completed hotfix items
+
+1. Added visible Security / Runtime Incidents panel to Operations.
+2. Added grouped runtime incident results by severity, scope, code, and endpoint.
+3. Added filters for incident age, severity, review status, and result count.
+4. Added selected-row review actions for reviewing, resolved, ignored, and reopened.
+5. Added admin notes on incident review actions.
+6. Added runtime incident review fields to schema references.
+7. Added runtime-safe PRAGMA-based backfills for older D1 tables.
+8. Added runtime incident grouping indexes after columns are confirmed.
+9. Updated Release Sanity to count only unresolved/unignored error or critical incidents.
+10. Added the Operations page script and mount point for the new review panel.
+11. Kept the runtime incident API guarded by admin authentication.
+12. Added admin audit records for runtime incident review status changes.
+13. Preserved no-store cache headers for incident review results.
+14. Added JSON detail expansion in the admin incident table.
+15. Added grouped view so repeated endpoint failures can be fixed before one-off noise.
+16. Documented the D1 SQL query to identify the current 7 incidents.
+17. Kept fallback behavior intact; this is visibility/review hardening, not a public-page change.
+18. Updated schema docs to reflect review status columns.
+19. Updated the sanity handoff docs with the runtime incident triage flow.
+20. Packaged Build 126 as a hotfix focused on the sanity warning.
+
+## Next 20 steps after Build 126
+
+1. Use the new Runtime Incidents panel to group the 7 current error/critical rows.
+2. Fix the highest-count grouped endpoint first.
+3. Resolve or ignore incidents only after confirming the repeated cause is fixed or no longer relevant.
+4. Add a retention/cleanup action for old resolved runtime incidents.
+5. Add a CSV export for grouped incidents for accountant/developer review.
+6. Add a direct deep link from Release Sanity rows to the matching admin panel.
+7. Add incident badges to the main Admin dashboard summary.
+8. Add a small "last deploy build" setting so incidents can be grouped by build number.
+9. Add client-side source maps or file hints for admin JS errors where practical.
+10. Add release sanity checks for stale service-worker/browser-cache issues if a PWA layer is later added.
+11. Continue Amazon staging import UX for uploading CSV rows directly from admin.
+12. Continue payment application workflows.
+13. Continue fuller journal-line automation and posting validation.
+14. Continue HST/GST filing review worksheets.
+15. Continue period close/lock/reopen controls.
+16. Continue accountant export packaging.
+17. Continue item-level inventory costing and usage-unit review screens.
+18. Continue local SEO page expansion with one clear H1 per public page.
+19. Continue CSS drift checks on admin tables and mobile panels.
+20. Continue migration of duplicated JSON/DB data toward a single source of truth with public-safe JSON fallbacks only.

@@ -42,3 +42,7 @@ GROUP BY review_decision;
 
 ## Current caution
 Amazon order data remains private operational/accounting data. Keep raw Amazon reports and review exports out of public `/data/` paths.
+
+## Build 126 handoff
+
+A hotfix build was created after Release Sanity reported 7 recent error/critical runtime incidents. The build adds a visible `/admin/operations/` Security / Runtime Incidents review panel, grouped incident API results, review statuses, and Release Sanity filtering for resolved/ignored incidents. After deploying, open Operations, refresh the runtime incidents panel, group the 7 current incidents, fix the highest-count recurring endpoint first, then mark fixed rows resolved.

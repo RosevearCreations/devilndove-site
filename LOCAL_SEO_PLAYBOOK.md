@@ -27,3 +27,7 @@ A `sitemap.xml` was added and the shared footer now links to these local pages.
 3. Add Search Console tracking fields/screens for page, query, clicks, impressions, CTR, and average position.
 4. Add Product and BreadcrumbList structured data where specific sellable products are shown.
 5. Add local pickup/shipping explanation blocks to local-intent pages.
+
+## Build 126 SEO continuity note
+
+No public SEO page structure was changed in this hotfix. Continue the one-H1-per-public-page rule, clear local-intent titles/meta, and local wording that supports relevance and prominence signals.
