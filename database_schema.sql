@@ -942,3 +942,5 @@ ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 
 
 -- Build 130 note: no required schema change. Public product reads now avoid optional-column assumptions.
+
+-- Build 132 note: no structural D1 schema change; mobile-navigation and predeploy-sanity code-only pass recorded in database_upgrade_current_pass.sql.

@@ -1,53 +1,55 @@
 # Development Roadmap — Current Working Plan
 
-Current sync: 2026-05-15 — Build 130 products API all-tiers fallback hotfix, schema-drift resilience, and SEO/sanity pass.
+Current sync: 2026-05-16 — Build 132 compact mobile navigation, phone layout polish, schema-ledger marker, and SEO/sanity pass.
 
-## Completed 20 items in this pass
-1. Added `/api/admin/amazon-purchase-review` so private Amazon purchase staging rows can be reviewed from the admin instead of spreadsheets only.
-2. Added the Amazon purchase review queue UI to `/admin/catalog/` with search, status filters, approve/apply, hold, and reject controls.
-3. Added approved Amazon purchase application that updates linked inventory unit cost, supplier name, ASIN/supplier SKU, Amazon URL, and notes.
-4. Added `site_item_inventory_cost_history` so Amazon-approved costs and manual cost changes create history rows instead of silently overwriting the latest cost.
-5. Added inventory cost-history recording during Tools/Supplies catalog sync when a synced unit cost changes.
-6. Added cost-history recording for manual site-item inventory create/update and bulk cost update workflows.
-7. Improved the Tools/Supplies inventory sync result panel so inserted, updated, failed, Amazon URL, unit-cost, stock-default, match-status, and cost-history counts are visible after sync.
-8. Hardened Amazon purchase review schema creation with runtime-safe staging-table migrations for applied inventory, applied cost-history, review user, and applied timestamp fields.
-9. Hardened Amazon purchase review inventory access with runtime-safe inventory column backfills for older D1 tables.
-10. Added audit entries for Amazon purchase review decisions so approve/hold/reject actions are traceable.
-11. Expanded reconciliation exceptions with assign-to-user, accountant review flag, resolve, reopen, and richer status handling.
-12. Added reconciliation exception queue controls in the Accounting import UI for assign, manual review, accountant review, resolve, reopen, ignore, and notes.
-13. Added journal-period validation that checks monthly debit/credit balance before posting.
-14. Added journal posting metadata and posting guardrails so unbalanced monthly journals are blocked before being marked posted.
-15. Added Accounting report buttons for validating and posting the selected month’s journal entries.
-16. Added six local-intent SEO landing pages for handmade jewelry, polymer clay earrings, custom gifts, laser engraving projects, vintage finds, and workshop-made gifts in Ontario/Southern Ontario.
-17. Added `sitemap.xml` so the new public local-intent pages and existing public pages have a clean crawl map.
-18. Added shared-footer local search links so the new local-intent pages are internally linked from public pages.
-19. Added CSS for local-intent cards, related-page links, and mobile-friendly local page calls to action.
-20. Updated active schema files and Markdown files, then ran syntax/H1/meta/link sanity checks for the new build.
+## Completed 20 items in this pass — Build 132
+
+1. Reworked the shared public navigation so the mobile menu is no longer one long flat list.
+2. Added grouped expandable mobile sections: Essentials, Shop & Browse, Workshop, Community, Account, and Local pages.
+3. Kept the desktop navigation flat and familiar while limiting it to the main high-value links.
+4. Added a mobile quick row for Shop, Search, and Cart so the most useful links are available immediately.
+5. Added accessible `details/summary` accordion behavior for grouped mobile navigation without extra dependencies.
+6. Added focus-visible styling for mobile menu controls so keyboard users can see where they are.
+7. Improved Escape-key and close-button handling for the mobile menu.
+8. Added click-outside-to-close behavior for the mobile menu drawer.
+9. Preserved active-link highlighting inside both desktop and mobile grouped navigation.
+10. Added safer focus restoration when the mobile menu closes.
+11. Hardened the mobile drawer height with `100dvh` sizing so it fits better on phone browsers with dynamic address bars.
+12. Added sticky mobile drawer heading/close controls so the close action remains easy to reach.
+13. Improved small-screen brand/logo sizing so the header does not crowd the menu button.
+14. Added mobile horizontal scrolling for admin department shortcut buttons so they no longer create a tall button stack.
+15. Added mobile card/hero spacing refinements to reduce cramped layouts on phone screens.
+16. Updated `scripts/predeploy_sanity_check.py` to verify compact mobile-nav JavaScript and CSS assets exist.
+17. Added a Build 132 marker to `database_upgrade_current_pass.sql` while confirming no D1 structural migration is required.
+18. Updated schema files with a no-structure-change Build 132 note so the schema set remains current.
+19. Re-ran JavaScript syntax checks, local predeploy sanity checks, CSS brace checks, HTML SEO checks, and missing-reference checks.
+20. Updated active Markdown documentation so the mobile navigation change, sanity process, and next steps are recorded.
 
 ## Next logical 20 steps
-1. Deploy Build 125 and apply `database_upgrade_current_pass.sql` in Cloudflare D1.
-2. Open `/admin/operations/`, run Release Sanity, and mark the Build 125 migration ledger entry applied once D1 is confirmed.
-3. Open `/admin/catalog/`, run Sync all tools + supplies, and confirm inventory counts plus cost-history counts.
-4. Use the Amazon purchase review queue to approve a small batch of obvious safe matches first, then verify cost history and unit-cost display.
-5. Add a CSV import endpoint/screen for Amazon staging rows so future Amazon order files can be loaded through admin without manual SQL.
-6. Add fuzzy review helpers in the Amazon queue: suggested inventory links, confidence explanation, and “needs human review” grouping.
-7. Add an accountant-facing reconciliation export of unresolved exceptions, assigned users, notes, and attached statement references.
-8. Finish payment application screens connecting orders, deposits, gift cards, refunds, fees, processor payouts, and journal entries.
-9. Expand automatic journal-line generation for sales, discounts, shipping income, shipping expense, COGS, inventory adjustments, fees, refunds, write-offs, and HST.
-10. Add period-close lock/reopen controls with close checklist, lock reason, reopen reason, and audit trail.
-11. Build the HST review worksheet with taxable sales, exempt sales, collected HST, refunded HST, input credits, adjustments, and remittance-ready totals.
-12. Build accountant export package v2 with GL, trial balance, P&L, balance sheet support, HST worksheet, statement import summary, attachments index, and unresolved issue log.
-13. Move product/creation management from JSON-first fallback into D1 as the primary source, keeping JSON as export/fallback only.
-14. Add product variant tables and UI for colour, size, material, customization status, SKU, stock, price, and media per variant.
-15. Add admin-managed public content blocks for Home, Gallery, Shop, About, Featured Creations, and local-intent sections.
-16. Add media lifecycle controls for upload, crop, alt text, public/private flag, replacement, retirement, and broken-link scans.
-17. Add structured data review for Product, BreadcrumbList, Organization, WebSite, and local contact details on public pages.
-18. Add Search Console metric fields/screens for clicks, impressions, CTR, position, page, query, and local-intent landing page performance.
-19. Add mobile admin quick actions: draft product, add photos, adjust stock, record expense, scan receipt, add customer note, and review Amazon match.
-20. Add a pre-deploy checklist that combines Release Sanity, SQL ledger status, JS syntax check, public-page SEO check, CSS/link check, and privacy/public-data checks.
+
+1. Deploy Build 132 and test the main menu on a real phone or narrow browser window.
+2. Confirm tapping **Menu** opens grouped expandable sections instead of one long flat list.
+3. Confirm Shop, Search, and Cart appear in the quick row and are easy to tap.
+4. Confirm the menu closes with Close, Escape, outside click/tap, and after selecting a link.
+5. Check admin department pages on a phone and confirm shortcut buttons scroll horizontally instead of stacking too tall.
+6. Run `/admin/operations/` > Public API Health after deployment.
+7. Run `/admin/operations/` > Release Sanity after deployment.
+8. Confirm no new runtime incidents appear from public page loads after the mobile-nav update.
+9. Run Storefront Schema Repair if `/api/products` still reports fallback/schema warnings.
+10. Add a Product structured-data health panel for Product, BreadcrumbList, Organization, and WebSite checks.
+11. Add product schema value backfill for blank `merchandise_origin`, `sale_channel`, `currency`, status, and shipping flags.
+12. Add sitemap regeneration from live D1 product/page records rather than relying only on static sitemap updates.
+13. Add Search Console import fields/screens for page, query, clicks, impressions, CTR, and average position.
+14. Continue Amazon CSV import hardening with duplicate detection and manual inventory relinking.
+15. Add bulk approval only for very high-confidence Amazon purchase matches with a preview and confirmation step.
+16. Continue payment application screens for deposits, orders, refunds, fees, payouts, and gift cards.
+17. Continue fuller journal automation and posting validation for sales, fees, HST, COGS, inventory, shipping, refunds, and write-offs.
+18. Build the HST/GST review worksheet and remittance review flow.
+19. Build period close/lock/reopen controls with audit notes and checklist status.
+20. Build accountant export package v2 with GL, trial balance, P&L, HST worksheet, statement summaries, attachment index, and unresolved issue log.
 
 ## Working order recommendation
-Do steps 1-6 first because they confirm the new Amazon/private-cost workflow without risking broad inventory changes. Then complete payment application, journal automation, close controls, HST review, and accountant export. After the backend is steadier, continue moving public catalog and media from JSON-first workflows into D1-managed admin screens.
+Do steps 1-5 first because they verify the mobile menu problem on real devices. Then run Operations health/sanity checks, confirm product-schema repair status, and continue the accounting/Amazon workflow work once the public mobile experience is stable.
 
 ## SEO habit for every pass
 Keep one clear H1 per exposed page, keep page titles/meta descriptions specific, and keep local/product/service wording visible in page headings and body copy. Public pages should support real search intent without keyword stuffing.
@@ -331,3 +333,49 @@ Keep one clear H1 per exposed page, keep page titles/meta descriptions specific,
 18. Continue accountant export package v2 with GL, trial balance, P&L, balance-sheet support, HST worksheet, attachments, and unresolved exceptions.
 19. Continue media lifecycle tools for replace, retire, alt text, crop, public/private flag, and broken-link scans.
 20. Continue moving duplicated JSON/DB product and content data toward D1-first management with public-safe JSON fallbacks only.
+
+## Build 132 completed 20-step pass — compact mobile menu and phone layout polish
+
+1. Reworked the shared public navigation so the mobile menu is no longer one long flat list.
+2. Added grouped expandable mobile sections: Essentials, Shop & Browse, Workshop, Community, Account, and Local pages.
+3. Kept the desktop navigation flat and familiar while limiting it to the main high-value links.
+4. Added a mobile quick row for Shop, Search, and Cart so the most useful links are available immediately.
+5. Added accessible `details/summary` accordion behavior for grouped mobile navigation without extra dependencies.
+6. Added focus-visible styling for mobile menu controls so keyboard users can see where they are.
+7. Improved Escape-key and close-button handling for the mobile menu.
+8. Added click-outside-to-close behavior for the mobile menu drawer.
+9. Preserved active-link highlighting inside both desktop and mobile grouped navigation.
+10. Added safer focus restoration when the mobile menu closes.
+11. Hardened the mobile drawer height with `100dvh` sizing so it fits better on phone browsers with dynamic address bars.
+12. Added sticky mobile drawer heading/close controls so the close action remains easy to reach.
+13. Improved small-screen brand/logo sizing so the header does not crowd the menu button.
+14. Added mobile horizontal scrolling for admin department shortcut buttons so they no longer create a tall button stack.
+15. Added mobile card/hero spacing refinements to reduce cramped layouts on phone screens.
+16. Updated `scripts/predeploy_sanity_check.py` to verify compact mobile-nav JavaScript and CSS assets exist.
+17. Added a Build 132 marker to `database_upgrade_current_pass.sql` while confirming no D1 structural migration is required.
+18. Updated schema files with a no-structure-change Build 132 note so the schema set remains current.
+19. Re-ran JavaScript syntax checks, local predeploy sanity checks, CSS brace checks, HTML SEO checks, and missing-reference checks.
+20. Updated active Markdown documentation so the mobile navigation change, sanity process, and next steps are recorded.
+
+## Next logical 20 steps after Build 132
+
+1. Deploy Build 132 and test the main menu on a real phone or narrow browser window.
+2. Confirm tapping **Menu** opens grouped expandable sections instead of one long flat list.
+3. Confirm Shop, Search, and Cart appear in the quick row and are easy to tap.
+4. Confirm the menu closes with Close, Escape, outside click/tap, and after selecting a link.
+5. Check admin department pages on a phone and confirm shortcut buttons scroll horizontally instead of stacking too tall.
+6. Run `/admin/operations/` > Public API Health after deployment.
+7. Run `/admin/operations/` > Release Sanity after deployment.
+8. Confirm no new runtime incidents appear from public page loads after the mobile-nav update.
+9. Run Storefront Schema Repair if `/api/products` still reports fallback/schema warnings.
+10. Add a Product structured-data health panel for Product, BreadcrumbList, Organization, and WebSite checks.
+11. Add product schema value backfill for blank `merchandise_origin`, `sale_channel`, `currency`, status, and shipping flags.
+12. Add sitemap regeneration from live D1 product/page records rather than relying only on static sitemap updates.
+13. Add Search Console import fields/screens for page, query, clicks, impressions, CTR, and average position.
+14. Continue Amazon CSV import hardening with duplicate detection and manual inventory relinking.
+15. Add bulk approval only for very high-confidence Amazon purchase matches with a preview and confirmation step.
+16. Continue payment application screens for deposits, orders, refunds, fees, payouts, and gift cards.
+17. Continue fuller journal automation and posting validation for sales, fees, HST, COGS, inventory, shipping, refunds, and write-offs.
+18. Build the HST/GST review worksheet and remittance review flow.
+19. Build period close/lock/reopen controls with audit notes and checklist status.
+20. Build accountant export package v2 with GL, trial balance, P&L, HST worksheet, statement summaries, attachment index, and unresolved issue log.

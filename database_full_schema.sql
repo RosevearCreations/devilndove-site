@@ -1396,9 +1396,9 @@ CREATE TABLE IF NOT EXISTS accounting_attachments (
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_expense ON accounting_attachments(expense_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_vendor ON accounting_attachments(vendor_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_period ON accounting_attachments(period_month, tax_year, reconciliation_type, attachment_kind);
-ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded';
-ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded';
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT;
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_scope ON accounting_attachments(reconciliation_type, period_month, scope_key, attachment_kind);
 
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_reference TEXT;
@@ -1413,17 +1413,17 @@ ALTER TABLE accounting_reconciliation_reviews ADD COLUMN observed_rate_basis_poi
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN unresolved_item_count INTEGER NOT NULL DEFAULT 0;
 
 -- Current pass additions for statement-backed accounting attachments
-ALTER TABLE accounting_attachments ADD COLUMN attachment_scope TEXT NOT NULL DEFAULT 'other';
-ALTER TABLE accounting_attachments ADD COLUMN provider_scope TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN statement_gross_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_fee_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_net_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_tax_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_shipping_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_txn_count INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_period_start TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN statement_period_end TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN attachment_scope TEXT NOT NULL DEFAULT 'other';
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN provider_scope TEXT;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN statement_gross_cents INTEGER NOT NULL DEFAULT 0;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN statement_fee_cents INTEGER NOT NULL DEFAULT 0;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN statement_net_cents INTEGER NOT NULL DEFAULT 0;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN statement_tax_cents INTEGER NOT NULL DEFAULT 0;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN statement_shipping_cents INTEGER NOT NULL DEFAULT 0;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN statement_txn_count INTEGER NOT NULL DEFAULT 0;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN statement_period_start TEXT;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN statement_period_end TEXT;
+-- Removed from full schema by Build 132 sanity fix: ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT;
 
 
 -- Current pass update: customer engagement automation timing rules
@@ -1659,6 +1659,54 @@ CREATE TABLE IF NOT EXISTS site_item_inventory_cost_history (
 CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_item ON site_item_inventory_cost_history(site_item_inventory_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_source ON site_item_inventory_cost_history(source_kind, source_id);
 
+
+-- Build 132 full-schema repair: Amazon purchase import staging must exist before compatibility ALTERs below.
+CREATE TABLE IF NOT EXISTS amazon_purchase_import_staging (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  import_batch_id TEXT NOT NULL,
+  source_file TEXT NOT NULL,
+  match_status TEXT NOT NULL DEFAULT 'unmatched',
+  match_score REAL NOT NULL DEFAULT 0,
+  token_coverage REAL NOT NULL DEFAULT 0,
+  matched_token_count INTEGER NOT NULL DEFAULT 0,
+  matched_tokens TEXT,
+  safe_to_stage_after_review TEXT NOT NULL DEFAULT 'review',
+  review_decision TEXT NOT NULL DEFAULT 'pending',
+  review_notes TEXT,
+  inventory_type TEXT CHECK (inventory_type IN ('tool', 'supply') OR inventory_type IS NULL),
+  inventory_key TEXT,
+  inventory_key_loose TEXT,
+  inventory_name TEXT,
+  inventory_brand_guess TEXT,
+  inventory_category_or_type TEXT,
+  inventory_r2_object_key TEXT,
+  order_date TEXT,
+  payment_date TEXT,
+  amazon_order_id TEXT,
+  asin TEXT,
+  amazon_title TEXT,
+  amazon_brand TEXT,
+  manufacturer TEXT,
+  amazon_product_category TEXT,
+  item_model_number TEXT,
+  part_number TEXT,
+  seller_name TEXT,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  item_quantity REAL,
+  item_subtotal_cents INTEGER NOT NULL DEFAULT 0,
+  item_shipping_cents INTEGER NOT NULL DEFAULT 0,
+  item_tax_cents INTEGER NOT NULL DEFAULT 0,
+  item_net_total_cents INTEGER NOT NULL DEFAULT 0,
+  unit_net_cost_cents INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_batch ON amazon_purchase_import_staging(import_batch_id);
+CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_inventory ON amazon_purchase_import_staging(inventory_type, inventory_key);
+CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_asin ON amazon_purchase_import_staging(asin);
+CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_order ON amazon_purchase_import_staging(amazon_order_id, asin);
+CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_review ON amazon_purchase_import_staging(review_decision, match_status);
+
 ALTER TABLE amazon_purchase_import_staging ADD COLUMN applied_inventory_id INTEGER;
 ALTER TABLE amazon_purchase_import_staging ADD COLUMN applied_cost_history_id INTEGER;
 ALTER TABLE amazon_purchase_import_staging ADD COLUMN applied_at TEXT;
@@ -1691,3 +1739,5 @@ CREATE TABLE IF NOT EXISTS amazon_purchase_import_batches (
 
 -- Build 130 note: no destructive schema change was required for the public products API hotfix.
 -- Public endpoints must tolerate missing optional product columns until reviewed D1 migrations add them.
+
+-- Build 132 note: no structural D1 schema change; mobile-navigation and predeploy-sanity code-only pass recorded in database_upgrade_current_pass.sql.

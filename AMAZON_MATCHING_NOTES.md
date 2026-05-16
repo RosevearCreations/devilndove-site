@@ -59,3 +59,7 @@ No Amazon matching rules changed in Build 130. The key fix is public product API
 ## Build 131 Amazon workflow note
 
 Amazon order/cost data should continue through private staging and review. Build 131 does not make Amazon reports public; it strengthens predeploy privacy scanning so Amazon order IDs/cost import files are not accidentally shipped under public `/data/`.
+
+## Build 132 note
+
+Build 132 did not change Amazon matching rules or staged purchase approval logic. It keeps the prior Amazon review-first workflow and only updates mobile navigation, mobile layout polish, sanity checks, and documentation.

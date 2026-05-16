@@ -494,3 +494,4 @@ ALTER TABLE accounting_journal_entries ADD COLUMN posted_by_user_id INTEGER;
 ALTER TABLE accounting_journal_entries ADD COLUMN posted_at TEXT;
 ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 
+-- Build 132 note: no structural D1 schema change; mobile-navigation and predeploy-sanity code-only pass recorded in database_upgrade_current_pass.sql.

@@ -57,3 +57,7 @@ Public storefront APIs must not assume optional D1 columns exist. Use actual sch
 ## Build 131 repo guide update
 
 Use `scripts/predeploy_sanity_check.py` before packaging when possible. For live D1 schema drift, use `/admin/operations/` > Storefront Schema Repair instead of manually guessing `ALTER TABLE` statements. Keep private import/cost/order files outside public static folders.
+
+## Build 132 repository note
+
+Mobile navigation changes live in `/js/main.js` and `/css/styles.css`. Do not duplicate per-page nav markup unless necessary; the shared nav injector should remain the source of truth for public pages. Use the predeploy sanity script before zipping.

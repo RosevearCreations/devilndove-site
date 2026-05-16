@@ -306,3 +306,17 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 132 current pass: compact expandable mobile navigation and phone layout hardening, 2026-05-16.
+-- No D1 schema change is required. This marker records the code/CSS/docs pass in the migration ledger.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build132',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 132. Code-only pass that replaces the mobile main-menu long list with grouped expandable sections, hardens mobile nav CSS/focus behavior, keeps one-H1/local SEO checks, and expands local predeploy sanity to verify mobile navigation assets.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

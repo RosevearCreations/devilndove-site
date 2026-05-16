@@ -112,3 +112,11 @@ Current sync: 2026-05-15 — Build 130.
 - The new local predeploy sanity script catches obvious public data leaks, but private Amazon order/cost files still must not be placed under `/data/` or other public static folders.
 - Public API Health now checks more endpoints, but it cannot validate real buyer checkout success; payment/provider tests remain a separate workflow.
 - Next risk to reduce: product schema value backfill and product structured-data checks so richer shop filters and SEO can move from fallback-safe to fully intentional.
+
+## Build 132 known gaps and risk updates
+
+- The mobile main menu is now grouped and expandable, but it still needs a real-phone pass after deployment because mobile browser address bars and font scaling can affect drawer height.
+- If an old cached `/js/main.js` or `/css/styles.css` remains in the browser, the menu may still look like the older long list. Hard refresh or clear site cache before judging the deployed result.
+- The mobile drawer is a code/CSS fix only. No D1 schema change is required, but the Build 132 marker should still be recorded so the release ledger remains complete.
+- Admin department shortcut buttons now scroll horizontally on small screens; future work should add a dedicated admin mobile command palette if the admin page count keeps growing.
+- The next major risk is still D1/product schema drift and accounting workflow completeness, not the menu itself.

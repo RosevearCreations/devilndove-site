@@ -1,6 +1,6 @@
-# Sanity Health Check — Build 127
+# Sanity Health Check — Build 132
 
-Date: 2026-05-15
+Date: 2026-05-16
 
 ## Automated checks run during this pass
 - JavaScript syntax check: all non-archive `.js` files passed `node --check`.
@@ -67,3 +67,16 @@ python scripts/predeploy_sanity_check.py .
 ```
 
 This local script checks one H1, title/meta descriptions, missing local references, CSS brace drift, and obvious private Amazon/order data in public `/data/` files.
+
+## Build 132 sanity additions
+
+- Shared mobile navigation now uses a compact expandable drawer instead of a long flat list.
+- Mobile menu groups checked locally: Essentials, Shop & Browse, Workshop, Community, Account, and Local pages.
+- Local predeploy sanity now checks that the mobile navigation JavaScript and CSS assets are present.
+- Manual post-deploy phone checks to run:
+  1. Open the home page on a phone-width screen.
+  2. Tap **Menu**.
+  3. Confirm grouped expandable sections appear.
+  4. Confirm Shop/Search/Cart quick buttons are visible.
+  5. Confirm the drawer scrolls inside the screen and closes cleanly.
+  6. Check `/admin/catalog/` or `/admin/operations/` and confirm department buttons no longer create a long stacked wall on phone screens.

@@ -1,8 +1,8 @@
-# New Chat Status — Devil n Dove Build 130
+# New Chat Status — Devil n Dove Build 132
 
-Date: 2026-05-15
-Source build: `devilndove-site-main-129-schema-drift-api-health-amazon-import.zip`
-Current output build: Build 130 public products all-tiers fallback hotfix.
+Date: 2026-05-16
+Source build: `devilndove-site-main(127).zip`
+Current output build: Build 132 compact mobile menu and phone layout polish.
 
 ## Why Build 129 was needed
 
@@ -95,3 +95,9 @@ Post-deploy validation:
 Build 131 adds an admin Storefront Schema Repair panel and endpoint, expands Public API Health, adds Release Sanity coverage for storefront schema repair readiness, and adds a local `scripts/predeploy_sanity_check.py` privacy/SEO/CSS/link check. This pass is focused on fixing the root cause behind repeated `/api/products` fallback incidents by making the live D1 product/tax/SEO schema repairable from admin, not just making the public endpoint survive schema drift.
 
 After deploy: open `/admin/operations/`, run Storefront Schema Repair inspect/apply if needed, then run Public API Health and Release Sanity. Only mark old `/api/products` runtime incidents resolved after the count stops increasing.
+
+## Current status — Build 132
+
+Build 132 focuses on mobile usability. The shared main menu now opens as a compact grouped drawer instead of a long flat list. The pass also hardens mobile drawer sizing, close/focus behavior, admin department shortcut layout on phones, and the local predeploy sanity script. No D1 structural migration is required; `database_upgrade_current_pass.sql` includes a Build 132 ledger marker.
+
+Post-deploy priority: test the main menu on a real phone, then run Operations > Public API Health and Release Sanity.

@@ -51,3 +51,7 @@ When continuing this project, remember that `/api/products` must remain schema-d
 ## Build 131 AI handoff
 
 Current focus: stabilize the Devil n Dove storefront against D1 schema drift. Build 131 adds `/api/admin/storefront-schema-repair` plus an Operations UI to inspect/apply non-destructive product/tax/product SEO compatibility columns. It also expands Public API Health and adds local predeploy sanity checks. Future work should continue product value backfills, structured-data checks, sitemap generation from D1, Amazon review safeguards, and accounting close/export workflows.
+
+## Build 132 AI handoff
+
+The latest pass is Build 132. Main user request: the mobile main menu was too long. The fix is in `/js/main.js` and `/css/styles.css`: shared nav now renders desktop links separately and mobile grouped accordions with quick buttons. `scripts/predeploy_sanity_check.py` now checks mobile-nav assets. No D1 schema change is required except the ledger marker in `database_upgrade_current_pass.sql`.

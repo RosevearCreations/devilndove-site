@@ -84,3 +84,7 @@ Build 130 is a public catalog resilience hotfix. It keeps the storefront usable 
 ## Build 131 deploy note
 
 Build 131 adds Operations > Storefront Schema Repair, expanded Public API Health, and a local predeploy sanity script. After deploying, run `/admin/operations/` checks in this order: Storefront Schema Repair, Public API Health, Runtime Incidents, Migration Ledger, then Release Sanity.
+
+## Build 132 release note
+
+Build 132 improves the public mobile header/menu. The hamburger drawer now uses grouped expandable sections, quick Shop/Search/Cart buttons, better phone sizing, safer focus/close behavior, and mobile admin shortcut polish. Run `python scripts/predeploy_sanity_check.py .` before deploying.

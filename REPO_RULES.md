@@ -45,3 +45,7 @@ Before referencing a newer D1 column from a public endpoint, confirm it exists. 
 ## Build 131 repo rule update
 
 Do not add private Amazon order exports, match reports, cost reports, or transaction CSV/XLSX files under public `/data/`. Use private D1 staging/admin import tools instead. Before deploy, run the local predeploy sanity script or equivalent checks for H1/meta, CSS drift, local references, and public-data privacy.
+
+## Build 132 rule addition
+
+For mobile navigation, keep the shared menu compact and grouped. Avoid adding more always-visible top-level mobile links; place secondary links inside grouped expandable sections so phone screens do not become a long menu wall.

@@ -48,3 +48,7 @@ The catalog API hotfix is also an SEO protection step: public product, gallery, 
 ## Build 131 SEO/runtime alignment
 
 The SEO habit remains: one clear H1, focused title/meta, and natural local wording. Build 131 connects that SEO goal to runtime health by checking public APIs, sitemap, robots.txt, and storefront schema drift from Operations. If product schema drift forces the shop into fallback mode, fix the schema first so filters, origins, channels, and product detail data are available for both users and search engines.
+
+## Build 132 local SEO and mobile UX note
+
+The mobile menu now groups the main site sections so local shoppers can reach Shop, Search, Cart, local landing pages, tools, supplies, and contact paths without scrolling through a long flat list. This supports local discovery by keeping important search words and local-intent pages reachable from the shared navigation while preserving one clear H1 per page.
