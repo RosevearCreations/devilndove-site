@@ -219,7 +219,20 @@ export async function onRequestGet(context) {
     missingProductRequired.length
       ? `Missing required product column(s): ${missingProductRequired.join(', ')}.`
       : `${missingProductRecommended.length} recommended product storefront column(s) are missing or pending migration.`,
-    missingProductRequired.length ? 'Apply product schema migration before relying on the storefront.' : 'Open Operations > D1 Schema Drift Report for full details.',
+    missingProductRequired.length ? 'Apply product schema migration before relying on the storefront.' : 'Open Operations > D1 Schema Drift Report or Storefront Schema Repair for safe product compatibility columns.',
+    missingProductRequired.length ? 'error' : 'warning'
+  );
+
+
+  const missingStorefrontColumns = ['merchandise_origin', 'sale_channel', 'featured_image_url', 'short_description', 'currency', 'requires_shipping'].filter((column) => !productColumns.has(column));
+  addCheck(
+    checks,
+    missingProductRequired.length ? 'fail' : (missingStorefrontColumns.length ? 'warn' : 'pass'),
+    'Storefront schema repair readiness',
+    missingProductRequired.length
+      ? 'The products table is missing required public storefront columns.'
+      : `${missingStorefrontColumns.length} safe storefront compatibility column(s) can still be added: ${missingStorefrontColumns.join(', ') || 'none'}.`,
+    missingProductRequired.length ? 'Apply the base products schema first.' : 'Open Operations > Storefront Schema Repair and apply safe non-destructive repairs.',
     missingProductRequired.length ? 'error' : 'warning'
   );
 
@@ -229,7 +242,7 @@ export async function onRequestGet(context) {
     productApi.ok && !productApi.error ? (productApi.warning ? 'warn' : 'pass') : 'fail',
     'Public products API health',
     productApi.ok ? `HTTP ${productApi.status}; authority ${productApi.authority || 'not reported'}${productApi.warning ? `; warning: ${productApi.warning}` : ''}.` : `HTTP ${productApi.status}; ${productApi.error || 'Products API failed.'}`,
-    'Open Operations > Public API Health and fix /api/products before marking the release clean.',
+    'Open Operations > Public API Health. If fallback authority remains, run Storefront Schema Repair, then retest /api/products.',
     productApi.ok ? 'warning' : 'error'
   );
 
