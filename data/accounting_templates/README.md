@@ -28,3 +28,7 @@ Build 125 keeps Amazon order/cost data private, adds admin review/apply controls
 ## Build 129 note
 
 Amazon purchase rows should be imported to private D1 staging and reviewed before any costs are used in inventory, COGS, HST, or accountant export workflows.
+
+## Build 131 note
+
+Accounting templates remain public sample/template files only. Do not place real Amazon orders, bank statements, PayPal/Stripe exports, or customer/order transaction data in this public template folder.
