@@ -134,6 +134,10 @@ export async function captureRuntimeIncident(env, request, payload = {}) {
         related_user_id INTEGER,
         ip_address TEXT,
         user_agent TEXT,
+        review_status TEXT DEFAULT 'open',
+        admin_note TEXT,
+        reviewed_by_user_id INTEGER,
+        reviewed_at TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `).run();
