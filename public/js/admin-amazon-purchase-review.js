@@ -20,6 +20,24 @@ document.addEventListener('DOMContentLoaded', () => {
     return data;
   }
 
+
+  function confidenceExplanation(row) {
+    const score = Number(row.match_score || 0);
+    const status = String(row.match_status || '').toLowerCase();
+    const reasons = [];
+    if (status === 'safe') reasons.push('safe match bucket');
+    if (status === 'review') reasons.push('human review recommended');
+    if (status.includes('weak')) reasons.push('weak title similarity');
+    if (score >= 0.75) reasons.push('high title/token score');
+    else if (score >= 0.45) reasons.push('medium title/token score');
+    else reasons.push('low title/token score');
+    if (row.asin) reasons.push('ASIN present');
+    if (row.linked_inventory_id) reasons.push('linked to inventory row');
+    if (!row.linked_inventory_id) reasons.push('not linked yet');
+    if (Number(row.unit_net_cost_cents || 0) > 0) reasons.push('unit cost available');
+    return reasons.join(' • ');
+  }
+
   function ensureCard() {
     if (document.getElementById('amazonPurchaseReviewCard')) return;
     const card = document.createElement('div');
@@ -64,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     body.innerHTML = rows.map((row) => `
       <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee"><strong>${esc(row.amazon_title || row.inventory_name || 'Amazon item')}</strong><div class="small">#${esc(String(row.id || ''))} • ${esc(row.asin || 'no ASIN')} • ${esc(row.amazon_order_id || '')}</div><div class="small">${esc(row.match_status || '')} • score ${esc(String(Number(row.match_score || 0).toFixed(2)))}</div></td>
+        <td style="padding:8px;border-bottom:1px solid #eee"><strong>${esc(row.amazon_title || row.inventory_name || 'Amazon item')}</strong><div class="small">#${esc(String(row.id || ''))} • ${esc(row.asin || 'no ASIN')} • ${esc(row.amazon_order_id || '')}</div><div class="small">${esc(row.match_status || '')} • score ${esc(String(Number(row.match_score || 0).toFixed(2)))}</div><div class="small"><strong>Why:</strong> ${esc(confidenceExplanation(row))}</div></td>
         <td style="padding:8px;border-bottom:1px solid #eee">${esc(row.linked_inventory_name || row.inventory_name || 'Not linked')}<div class="small">${esc(row.inventory_type || '')} • ${esc(row.inventory_key || '')}</div></td>
         <td style="padding:8px;border-bottom:1px solid #eee">${esc(money(row.unit_net_cost_cents || row.item_net_total_cents || 0))}<div class="small">Current ${esc(money(row.linked_unit_cost_cents || 0))} • Qty ${esc(String(row.item_quantity || ''))}</div></td>
         <td style="padding:8px;border-bottom:1px solid #eee"><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn primary" type="button" data-amazon-review="approved" data-amazon-row="${esc(String(row.id || 0))}">Approve/apply</button><button class="btn" type="button" data-amazon-review="hold" data-amazon-row="${esc(String(row.id || 0))}">Hold</button><button class="btn" type="button" data-amazon-review="rejected" data-amazon-row="${esc(String(row.id || 0))}">Reject</button></div><input class="small" data-amazon-note="${esc(String(row.id || 0))}" type="text" placeholder="optional review note" style="margin-top:6px;width:100%" /></td>

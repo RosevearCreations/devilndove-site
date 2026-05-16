@@ -123,6 +123,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  async function cleanupResolved() {
+    const days = Math.max(7, Math.min(Number(document.getElementById('runtimeIncidentCleanupDays')?.value || 30), 365));
+    try {
+      setMessage(`Cleaning up resolved/ignored incidents older than ${days} days...`);
+      const response = await window.DDAuth.apiFetch('/api/admin/runtime-incidents', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'cleanup_resolved', older_than_days: days })
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to clean up runtime incidents.');
+      setMessage(`Deleted ${data.deleted_count || 0} old resolved/ignored incident(s).`);
+      await loadIncidents();
+    } catch (error) {
+      setMessage(error.message || 'Failed to clean up runtime incidents.', true);
+    }
+  }
+
   async function updateSelected(action) {
     const ids = getSelectedIds();
     if (!ids.length) {
@@ -160,12 +177,17 @@ document.addEventListener('DOMContentLoaded', () => {
         <label class="small">Severity <select class="input" id="runtimeIncidentSeverity"><option value="">All</option><option value="critical">Critical</option><option value="error">Error</option><option value="warning">Warning</option><option value="info">Info</option></select></label>
         <label class="small">Review status <select class="input" id="runtimeIncidentReviewStatus"><option value="open">Open</option><option value="reviewing">Reviewing</option><option value="resolved">Resolved</option><option value="ignored">Ignored</option><option value="all">All</option></select></label>
       </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-top:10px">
+        <label class="small">Cleanup resolved/ignored older than <input class="input" id="runtimeIncidentCleanupDays" type="number" min="7" max="365" value="30" style="max-width:90px"/> days</label>
+        <button class="btn" id="cleanupRuntimeIncidentsButton" type="button">Clean old closed incidents</button>
+      </div>
       <div id="runtimeIncidentsMessage" class="small" style="display:none;margin-top:10px"></div>
       <div id="runtimeIncidentsResults"></div>
     </div>
   `;
 
   document.getElementById('refreshRuntimeIncidentsButton')?.addEventListener('click', loadIncidents);
+  document.getElementById('cleanupRuntimeIncidentsButton')?.addEventListener('click', cleanupResolved);
   ['runtimeIncidentDays', 'runtimeIncidentLimit', 'runtimeIncidentSeverity', 'runtimeIncidentReviewStatus'].forEach((id) => {
     document.getElementById(id)?.addEventListener('change', loadIncidents);
   });
