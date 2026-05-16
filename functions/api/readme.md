@@ -22,3 +22,10 @@ Do not expose raw CSV imports, Amazon order history, or accounting reports throu
 ## Build 125 note
 
 Build 125 keeps Amazon order/cost data private, adds admin review/apply controls for Amazon staging rows, records inventory cost history, expands reconciliation and journal guardrails, and adds local-intent SEO pages plus `sitemap.xml`. Keep schema files and active Markdown updated on every pass.
+
+## Build 129 admin endpoints
+
+- `/api/admin/schema-drift-report` checks live D1 tables/columns against the current build expectations.
+- `/api/admin/public-api-health` tests public JSON endpoints after deploys.
+- `/api/admin/amazon-purchase-import` imports pasted Amazon CSV rows into private D1 staging.
+- `/api/admin/runtime-incidents` now supports cleanup of old resolved/ignored incidents.
