@@ -5,6 +5,7 @@ Checks:
 - exposed HTML pages have exactly one H1, a title, and a meta description
 - local script/style/image references exist
 - CSS brace counts are balanced enough to catch obvious drift
+- shared mobile navigation has compact expandable menu assets
 - public data folders do not contain private Amazon/order import reports
 
 This script does not require network access and is safe to run before zipping/deploying.
@@ -112,6 +113,23 @@ def check_public_privacy(root: Path):
     return issues
 
 
+
+def check_mobile_nav(root: Path):
+    issues = []
+    main_js = root / 'js' / 'main.js'
+    css = root / 'css' / 'styles.css'
+    js_text = read_text(main_js) if main_js.exists() else ''
+    css_text = read_text(css) if css.exists() else ''
+    required_js = ['nav-mobile-toggle', 'mobileNavGroupsMarkup', 'nav-mobile-group', 'aria-expanded']
+    required_css = ['.nav-mobile-group', '.nav-mobile-quick-row', '@media (max-width: 860px)']
+    missing_js = [token for token in required_js if token not in js_text]
+    missing_css = [token for token in required_css if token not in css_text]
+    if missing_js:
+        issues.append({'type': 'mobile_nav_missing_js_assets', 'path': 'js/main.js', 'missing': missing_js})
+    if missing_css:
+        issues.append({'type': 'mobile_nav_missing_css_assets', 'path': 'css/styles.css', 'missing': missing_css})
+    return issues
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('root', nargs='?', default='.', help='Build root to check')
@@ -123,7 +141,8 @@ def main(argv=None) -> int:
     ref_issues = check_local_refs(root)
     css_issues = check_css(root)
     privacy_issues = check_public_privacy(root)
-    issues = html_issues + ref_issues + css_issues + privacy_issues
+    mobile_nav_issues = check_mobile_nav(root)
+    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues
     report = {
         'ok': not issues,
         'root': str(root),
