@@ -98,3 +98,9 @@ The runtime API safely backfills missing columns after checking the live table. 
 
 ### Schema drift report
 `/api/admin/schema-drift-report` does not change schema. It compares live D1 columns to the columns the current build expects and classifies gaps as required, recommended, or optional.
+
+## Build 130 schema compatibility note
+
+Build 130 does not require a destructive D1 schema change. It is a code-first compatibility patch for public product reads. The important implementation change is that candidate optional product columns are no longer treated as verified columns. The endpoint now trusts only actual table metadata/sample rows and has a final `SELECT * FROM products` fallback before logging an incident.
+
+This protects older product schemas that do not yet have fields such as `merchandise_origin`, `sale_channel`, `condition_summary`, or similar storefront enrichment fields. Those columns can still be added later through reviewed migrations, but they are no longer required for the public product list to work.

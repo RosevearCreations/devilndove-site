@@ -270,3 +270,20 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 130 current pass: /api/products all-tiers compatibility hotfix, 2026-05-15.
+-- No destructive schema change is required. This is a code-only storefront resilience pass.
+-- The products endpoint now uses strict metadata/sample-row columns, does not add candidate
+-- optional fields to SQL column sets, and falls through to SELECT * + JavaScript filtering
+-- before logging a runtime incident.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build130',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 130. Code-only hotfix for recurring /api/products products_primary_query_failed and products_fallback_query_failed incidents. The endpoint now uses strict actual D1 columns and a SELECT-star final fallback before logging incidents.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

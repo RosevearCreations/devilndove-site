@@ -940,3 +940,5 @@ ALTER TABLE accounting_journal_entries ADD COLUMN posted_by_user_id INTEGER;
 ALTER TABLE accounting_journal_entries ADD COLUMN posted_at TEXT;
 ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 
+
+-- Build 130 note: no required schema change. Public product reads now avoid optional-column assumptions.

@@ -40,3 +40,7 @@ No new local SEO pages were added in Build 128. The pass focused on keeping publ
 ## Build 129 SEO pass note
 
 Continue using one clear H1 per exposed page, local wording in titles/headings/body copy, and internal links from relevant public pages to local-intent landing pages. Do not keyword-stuff; keep wording useful for real customers in Ontario/Southern Ontario.
+
+## Build 130 SEO note
+
+The catalog API hotfix is also an SEO protection step: public product, gallery, and creation pages should return usable content rather than safe empty/error results when D1 schema drift exists. Continue one clear H1 per public page and clear local wording in titles/headings.

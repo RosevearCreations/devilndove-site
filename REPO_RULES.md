@@ -37,3 +37,7 @@ Public storefront endpoints must not hard-reference optional D1 columns. If a co
 - Do not add private Amazon order/cost CSVs or match reports under public static folders such as `/data/`.
 - New D1-sensitive endpoints should either verify optional columns before use or degrade safely with a clear runtime incident.
 - Any new admin import workflow must be review-first and must update Markdown plus schema references in the same pass.
+
+## Build 130 rule reminder
+
+Before referencing a newer D1 column from a public endpoint, confirm it exists. Public pages should degrade safely instead of creating repeated runtime incidents.

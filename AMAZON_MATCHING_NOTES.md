@@ -51,3 +51,7 @@ No Amazon matching logic changed in Build 128. This was a public product API com
 Amazon rows can now be pasted into `/admin/catalog/` through the private Amazon CSV staging import panel. Imported rows remain `pending` until reviewed. The review queue now shows a confidence explanation based on match status, match score, ASIN presence, inventory link, and available unit cost.
 
 Guardrail: do not place raw Amazon order exports, cost reports, or review spreadsheets in public `/data/` folders. Use D1 staging and review/apply workflow instead.
+
+## Build 130 inventory/catalog note
+
+No Amazon matching rules changed in Build 130. The key fix is public product API resilience so inventory/accounting improvements do not cause storefront product reads to fail while schema migrations are still catching up.

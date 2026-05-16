@@ -76,3 +76,7 @@ Build 128 is a code-only compatibility hotfix for older or partially migrated D1
 ## Build 129 operator notes
 
 After deploying this build, use `/admin/operations/` to run Schema Drift, Public API Health, Runtime Incidents, Migration Ledger, and Release Sanity. Use `/admin/catalog/` for Tools/Supplies sync, Amazon CSV staging import, and Amazon purchase review/apply.
+
+## Build 130 note
+
+Build 130 is a public catalog resilience hotfix. It keeps the storefront usable when optional product columns are missing from D1 by falling back from adaptive SQL to product-only SQL and finally to a `SELECT *` product read with JavaScript filtering.

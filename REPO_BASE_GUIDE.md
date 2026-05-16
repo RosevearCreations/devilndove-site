@@ -49,3 +49,7 @@ When adding new product columns to public APIs, do not reference them directly i
 ## Build 129 operations guide
 
 For each deploy, visit `/admin/operations/` and run D1 Schema Drift Report, Public API Health, Runtime Incidents, Migration Ledger, and Release Sanity. This is now the preferred flow for catching D1 schema drift and public API regressions before testing the storefront manually.
+
+## Build 130 development rule
+
+Public storefront APIs must not assume optional D1 columns exist. Use actual schema checks first, and keep a safe fallback that does not break public pages while migrations catch up.

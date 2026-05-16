@@ -1,6 +1,6 @@
 # Development Roadmap — Current Working Plan
 
-Current sync: 2026-05-15 — Build 129 schema drift, public API health, Amazon CSV import, runtime cleanup, and SEO/sanity pass.
+Current sync: 2026-05-15 — Build 130 products API all-tiers fallback hotfix, schema-drift resilience, and SEO/sanity pass.
 
 ## Completed 20 items in this pass
 1. Added `/api/admin/amazon-purchase-review` so private Amazon purchase staging rows can be reviewed from the admin instead of spreadsheets only.
@@ -239,3 +239,49 @@ Keep one clear H1 per exposed page, keep page titles/meta descriptions specific,
 18. Add structured data review for Product, BreadcrumbList, Organization, WebSite, and key local-intent pages.
 19. Add Search Console metric import fields/screens for clicks, impressions, CTR, position, page, query, and local landing page performance.
 20. Continue moving duplicated JSON/DB operational data toward D1 as the source of truth with public-safe JSON as fallback/export only.
+
+## Build 130 completed hotfix items
+
+1. Investigated the recurring `/api/products` incidents that increased from 7 to 8 after the previous public API patch.
+2. Confirmed the incident pair still came from `products_primary_query_failed` followed by `products_fallback_query_failed`.
+3. Rebuilt `/api/products` so optional candidate columns are no longer added to the verified column set.
+4. Changed products/tax/SEO column detection to use strict D1 `PRAGMA table_info` metadata, with `SELECT * LIMIT 1` only as a sample fallback.
+5. Added a final `SELECT * FROM products LIMIT 500` recovery tier that filters/sorts in JavaScript instead of referencing optional SQL columns.
+6. Stopped logging a runtime incident for the primary query if a lower fallback tier succeeds.
+7. Stopped logging a runtime incident for the product-only fallback if the final select-star tier succeeds.
+8. Preserved safe empty-result behavior only for true all-tier product failures.
+9. Kept product filter groups working from normalized fallback products.
+10. Hardened `/api/product-detail` to use strict actual columns rather than candidate optional product columns.
+11. Preserved one-H1 SEO checks and local-search page structure from earlier builds.
+12. Updated `database_upgrade_current_pass.sql` with the Build 130 migration-ledger marker.
+13. Updated active Markdown handoff files so the fix and next validation steps are documented.
+14. Re-ran JavaScript syntax checks after the endpoint changes.
+15. Re-ran exposed-page H1/title/meta checks.
+16. Re-ran missing local asset reference checks.
+17. Re-ran CSS brace drift checks.
+18. Re-ran ZIP integrity checks before packaging.
+19. Kept Amazon import/review and inventory cost-history features from Build 129.
+20. Prepared the new deployable Build 130 ZIP.
+
+## Next 20 steps after Build 130
+
+1. Deploy Build 130 and open `/api/products` directly.
+2. Confirm the response has `ok: true` and does not show `summary.authority: "error"`.
+3. Acceptable temporary authorities are `d1_adaptive_query`, `d1_product_only_fallback_query`, or `d1_select_star_fallback`.
+4. Refresh `/admin/operations/` > Runtime Incidents and confirm the `/api/products` grouped count does not increase after fresh page loads.
+5. If Build 130 returns `d1_select_star_fallback`, run D1 Schema Drift Report and schedule the missing product-column migration later.
+6. Mark the old `/api/products` incident groups resolved only after the count stops increasing.
+7. Open Gallery, Creations, Shop, and Product Detail pages and verify they still show products/images.
+8. Run Public API Health from Operations after deployment.
+9. Run Release Sanity from Operations after deployment.
+10. Record the Build 130 marker in the Migration Ledger.
+11. Continue Amazon CSV staging import testing with a tiny file before approving many rows.
+12. Continue approving only safe Amazon purchase matches into inventory cost history.
+13. Add a public-products schema compatibility card to Operations if `d1_select_star_fallback` remains active for more than one deploy.
+14. Add product-image fallback enrichment if products display without featured images.
+15. Add a safe `/api/product-images` health check for gallery/creations image regressions.
+16. Add admin guidance for which D1 columns are missing versus optional.
+17. Continue compacting duplicate product/catalog fields from JSON into D1 where D1 is now authoritative.
+18. Continue accounting work: payment application, journal automation, HST review, close controls, and accountant export packaging.
+19. Continue local SEO refinement with one clear H1 per public page.
+20. Continue mobile admin improvements for catalog review, inventory counts, and Amazon import approvals.

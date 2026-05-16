@@ -45,3 +45,12 @@ Date: 2026-05-15
 - Use Runtime Incidents cleanup only for resolved/ignored rows older than the selected retention period.
 - Test Amazon CSV staging import with a tiny CSV sample before importing a large order file.
 - Confirm the Amazon review queue shows confidence explanations and keeps imported rows pending until approved.
+
+## Build 130 sanity checklist
+
+- Open `/api/products` immediately after deploy.
+- Confirm `ok: true`.
+- Confirm `summary.authority` is not `error`.
+- Acceptable authorities are `d1_adaptive_query`, `d1_product_only_fallback_query`, or `d1_select_star_fallback`.
+- Refresh Operations > Runtime Incidents after several public page loads and confirm `products_primary_query_failed` / `products_fallback_query_failed` counts do not increase.
+- If the response uses `d1_select_star_fallback`, run D1 Schema Drift Report and plan product-column cleanup later; do not treat it as a public outage.

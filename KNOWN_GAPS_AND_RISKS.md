@@ -1,6 +1,6 @@
 # Known Gaps and Risks — Current Active List
 
-Current sync: 2026-05-15 — Build 129.
+Current sync: 2026-05-15 — Build 130.
 
 ## Highest-priority gaps still open
 1. The accounting backend is stronger, but it is still not a finished tax-filing system.
@@ -95,3 +95,11 @@ Current sync: 2026-05-15 — Build 129.
 - Public API Health depends on the deployed host being reachable from the Worker runtime; if fetch self is blocked/noisy, use direct browser checks too.
 - Schema Drift Report lists missing columns but does not run migrations automatically.
 - Runtime incident cleanup permanently deletes old resolved/ignored records, so export important history first if needed.
+
+## Build 130 products API risk update
+
+- The `/api/products` incident count increased again after the prior compatibility patch, which proved the endpoint still had a path that could reference optional product columns or log incidents before a successful lower-tier fallback.
+- Build 130 removes candidate optional columns from the verified SQL column set and adds a final `SELECT *` fallback that filters in JavaScript. This is intentionally less fancy but much harder for schema drift to break.
+- The only time `/api/products` should now log a new error incident is when every product query tier fails, including `SELECT * FROM products`.
+- If the endpoint returns `summary.authority: "d1_select_star_fallback"`, the storefront is protected, but D1 schema cleanup is still recommended.
+- Old `/api/products` incidents should remain open until a fresh deploy is verified, then they can be marked resolved.

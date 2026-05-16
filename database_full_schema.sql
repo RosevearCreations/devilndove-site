@@ -1683,3 +1683,6 @@ CREATE TABLE IF NOT EXISTS amazon_purchase_import_batches (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   notes TEXT
 );
+
+-- Build 130 note: no destructive schema change was required for the public products API hotfix.
+-- Public endpoints must tolerate missing optional product columns until reviewed D1 migrations add them.

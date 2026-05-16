@@ -43,3 +43,7 @@ The latest hotfix target is the public product API schema drift. Build 127 still
 ## Build 129 context
 
 When continuing this project, remember that Operations now includes D1 Schema Drift Report and Public API Health. Use those before assuming runtime errors are fixed. Amazon CSV data should be imported through the private admin staging flow, reviewed, then applied to inventory; never deploy raw order/cost spreadsheets in public `/data/` folders.
+
+## Build 130 AI handoff note
+
+When continuing this project, remember that `/api/products` must remain schema-drift tolerant. Do not add optional product columns directly to public product SQL unless they are proven by strict D1 metadata checks. If product richness fails, prefer public-safe fallback data over a storefront outage.

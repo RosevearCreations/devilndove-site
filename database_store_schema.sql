@@ -1156,3 +1156,5 @@ ALTER TABLE accounting_journal_entries ADD COLUMN posted_by_user_id INTEGER;
 ALTER TABLE accounting_journal_entries ADD COLUMN posted_at TEXT;
 ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 
+
+-- Build 130 note: storefront product endpoints now degrade safely when optional store/product columns are absent.

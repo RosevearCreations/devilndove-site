@@ -1,8 +1,8 @@
-# New Chat Status — Devil n Dove Build 129
+# New Chat Status — Devil n Dove Build 130
 
 Date: 2026-05-15
-Source build: `devilndove-site-main-127-products-api-hotfix.zip`
-Current output build: Build 129 public products/product-detail schema verification hotfix.
+Source build: `devilndove-site-main-129-schema-drift-api-health-amazon-import.zip`
+Current output build: Build 130 public products all-tiers fallback hotfix.
 
 ## Why Build 129 was needed
 
@@ -70,3 +70,22 @@ Deploy order:
 3. Open `/admin/operations/`, run D1 Schema Drift Report, Public API Health, Runtime Incidents, and Release Sanity.
 4. Open `/admin/catalog/`, test Amazon CSV import with a tiny sample first, then refresh the Amazon review queue.
 5. Only approve obvious safe Amazon matches until duplicate detection/manual relinking are added.
+
+## Build 130 handoff — 2026-05-15
+
+Build 130 follows Build 129 because the live runtime incident count still increased for `/api/products`:
+
+```text
+products_primary_query_failed
+products_fallback_query_failed
+```
+
+The new fix is more defensive: `/api/products` now uses only actual D1 columns from metadata/sample rows, and if both richer SQL paths fail it falls back to `SELECT * FROM products LIMIT 500` with JavaScript-side filtering. It does not log a runtime incident when a lower fallback succeeds.
+
+Post-deploy validation:
+
+1. Open `/api/products`.
+2. Confirm `ok: true`.
+3. Confirm `summary.authority` is not `error`.
+4. Check Runtime Incidents and ensure the `/api/products` grouped count stops increasing.
+5. Mark old `/api/products` incidents resolved after fresh requests stay clean.
