@@ -41,3 +41,7 @@ Build 125 keeps Amazon order/cost data private, adds admin review/apply controls
 ## Operations runtime review - Build 126
 
 `/admin/operations/` now includes the Security / Runtime Incidents panel. The panel reads `/api/admin/runtime-incidents?group=1`, shows grouped repeated errors, and lets an admin mark selected incident rows as reviewing, resolved, ignored, or reopened.
+
+## Build 128 endpoint guardrail
+
+When adding new product columns to public APIs, do not reference them directly in static SQL until D1 migrations are verified live. Use adaptive column checks or direct no-row column verification so public pages keep rendering during staged schema upgrades.

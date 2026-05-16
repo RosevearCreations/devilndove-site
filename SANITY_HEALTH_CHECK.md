@@ -27,3 +27,11 @@ Date: 2026-05-15
 - Package math uses stock package plus usage unit count.
 - Keep private Amazon cost/order reports out of public static files.
 - Public APIs should inspect D1 schema before referencing optional columns so older databases degrade safely.
+
+## Build 128 sanity note
+
+- Rechecked the live `/api/products` failure reported after Build 127: `D1_ERROR: no such column: p.merchandise_origin`.
+- Build 128 adds direct column verification to `/api/products` and `/api/product-detail` before optional D1 columns are referenced.
+- Local mock D1 tests covered an older schema where `PRAGMA table_info` appeared to include optional fields but direct column selection failed.
+- Expected post-deploy result: `/api/products` returns `ok: true` and does not report `authority: "error"`.
+- After deploy, refresh `/admin/operations/` > Runtime Incidents and confirm the `/api/products` incident count does not increase.

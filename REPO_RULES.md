@@ -27,3 +27,7 @@ Build 125 keeps Amazon order/cost data private, adds admin review/apply controls
 ## Runtime incident review rule - Build 126
 
 Do not clear Release Sanity runtime warnings by marking everything resolved blindly. Group incidents first, fix the recurring endpoint or schema drift, then resolve only the rows tied to the fixed cause. Use `ignored` only for known harmless stale incidents.
+
+## Build 128 rule addition
+
+Public storefront endpoints must not hard-reference optional D1 columns. If a column may not exist on the deployed D1 database, verify it before building SQL and provide a safe default in the response payload.

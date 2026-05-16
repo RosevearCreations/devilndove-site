@@ -67,3 +67,7 @@ Build 126 adds an Operations-page runtime incident review panel. Release Sanity 
 ## Build 127 hotfix
 
 Build 127 hardens the public products API against D1 schema drift. Deploy it when Release Sanity shows repeated `/api/products` incidents such as `products_primary_query_failed` and `products_fallback_query_failed`.
+
+## Build 128 deploy note
+
+Build 128 is a code-only compatibility hotfix for older or partially migrated D1 product schemas. Deploy it if `/api/products` returns a safe empty response with an error such as `no such column: p.merchandise_origin`. After deployment, open `/api/products` and confirm the response is no longer `authority: "error"`.

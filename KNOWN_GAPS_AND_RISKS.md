@@ -68,3 +68,12 @@ Current sync: 2026-05-14 — Build 125.
 - Build 127 reduces this risk by inspecting table columns before building SQL and by using a schema-adaptive product-only fallback.
 - Remaining risk: if the live `products` table itself is missing or unreadable, `/api/products` will still return a safe empty result and log an incident.
 - After deployment, old `/api/products` incident rows should be marked resolved only after fresh requests stop creating new rows.
+
+## Build 128 products API follow-up
+
+- Build 127 still allowed `p.merchandise_origin` to leak into a live `/api/products` query on the deployed D1 schema.
+- Build 128 treats `PRAGMA table_info` as helpful but not authoritative; optional columns are now verified with a direct `SELECT column FROM table LIMIT 0` test before being referenced.
+- The public product list fallback now avoids all newer optional storefront fields and supplies safe defaults instead.
+- `/api/product-detail` was also hardened because product detail used several of the same newer product, tax, and SEO columns.
+- Remaining risk: if the live `products` table lacks required basics like `slug`, `product_id`, or `name`, public product results may still be empty or product detail may return a schema-unavailable response.
+- Long-term fix: apply/verify the full product schema migration so merchandise origin, sale channel, external listing fields, condition/era/sourcing notes, and current tax fields exist in D1.

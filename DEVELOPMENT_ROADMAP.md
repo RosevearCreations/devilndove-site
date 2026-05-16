@@ -144,3 +144,49 @@ Keep one clear H1 per exposed page, keep page titles/meta descriptions specific,
 18. Continue mobile admin quick actions for inventory, expenses, receipts, and product drafts.
 19. Continue CSS drift review on admin tables and public cards.
 20. Continue pre-deploy privacy checks to keep private order/cost data out of public static paths.
+
+## Build 128 completed hotfix items
+
+1. Rechecked the live `/api/products` response that still returned `authority: "error"` after Build 127.
+2. Identified the remaining failure as optional product-column leakage: `p.merchandise_origin` was still referenced after live D1 reported it missing.
+3. Added direct column verification with `SELECT column FROM table LIMIT 0` instead of trusting `PRAGMA table_info` alone.
+4. Added short-lived schema-column caching so the endpoint does not repeat all verification checks on every warm request.
+5. Hardened `/api/products` so candidate product, tax, and SEO columns are intersected with direct-select verified columns before SQL is built.
+6. Added a product-only fallback path that never references optional newer fields such as merchandise origin, sale channel, external listing data, condition summary, era, or sourcing notes.
+7. Preserved safe default output values for optional storefront fields so public pages can still render on older D1 schemas.
+8. Kept `tax_rate` support while preventing missing `rate_percent` references from breaking older tax-class tables.
+9. Added local mock D1 smoke testing for a schema where `PRAGMA` reports optional columns but direct selection proves they do not actually exist.
+10. Confirmed the Build 128 `/api/products` mock test returns `ok: true` and `authority: "d1_adaptive_query"` without leaking `p.merchandise_origin`.
+11. Reviewed `/api/product-detail` and found the same schema-drift risk plus a malformed dynamic SQL color column expression.
+12. Rebuilt `/api/product-detail` product selection to use the same direct column verification guardrails.
+13. Made product detail tax and SEO joins conditional on verified columns.
+14. Made product detail inventory quantity tolerate either `inventory_quantity`, `on_hand_quantity`, or neither.
+15. Added product-detail safe defaults for newer product fields when the live D1 table has not been upgraded yet.
+16. Confirmed product-detail mock testing returns a product on an older product schema without leaking optional columns.
+17. Updated the schema/current-pass ledger with a Build 128 code-only compatibility marker.
+18. Updated active Markdown handoff docs to explain why Build 128 follows Build 127.
+19. Re-ran JavaScript syntax checks after the endpoint changes.
+20. Re-ran public page H1/title/meta, missing local asset, and CSS brace sanity checks.
+
+## Next 20 steps after Build 128
+
+1. Deploy Build 128 and open `/api/products` directly before testing public gallery/shop pages.
+2. Confirm the response shows `ok: true` with either `authority: "d1_adaptive_query"` or `authority: "d1_product_only_fallback_query"`, not `authority: "error"`.
+3. Check `/api/products` does not create a fresh `products_fallback_query_failed` incident after deployment.
+4. Open one product-detail page and verify `/api/product-detail?slug=...` returns a product instead of a schema error.
+5. Mark the old Build 127 `/api/products` incidents resolved only after fresh requests stop creating new rows.
+6. Add a schema drift admin report that clearly lists missing optional columns vs required blocking columns.
+7. Add an admin button to run public API health checks for `/api/products`, `/api/product-detail`, `/api/catalog`, and key JSON fallbacks.
+8. Add a D1 migration status card that compares expected current schema columns with live D1 columns.
+9. Apply or verify the product schema upgrade that adds merchandise origin, sale channel, external listing, condition, era, and sourcing notes columns.
+10. Once D1 is upgraded, re-test shop filters for handmade/vintage/collectible origins.
+11. Continue the Amazon CSV staging import screen so rows can be uploaded and reviewed fully inside admin.
+12. Continue Amazon match confidence explanation and manual link correction tools.
+13. Continue payment application screens connecting orders, deposits, fees, refunds, gift cards, and journals.
+14. Continue journal-line automation and posting validation toward a clean accountant package.
+15. Continue HST/GST review worksheet and remittance summary.
+16. Continue period close, lock, reopen, and audit trail controls.
+17. Continue product variants/options for colour, material, size, customization, SKU, price, stock, and media.
+18. Continue media lifecycle tools for replace, retire, alt text, crop, and broken-link scanning.
+19. Continue local SEO internal linking, structured data review, and one-H1 checks on every public page.
+20. Continue pre-deploy privacy checks to keep private Amazon/order/cost data out of public static paths.

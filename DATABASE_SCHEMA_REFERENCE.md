@@ -59,3 +59,15 @@ The runtime endpoint safely backfills these columns after checking `PRAGMA table
 ## Build 127 schema compatibility note
 
 No destructive schema change was required in Build 127. The public `/api/products` endpoint now treats several product, tax, and SEO columns as optional compatibility fields and inspects D1 with `PRAGMA table_info` before referencing them. This specifically prevents older `tax_classes` schemas with `tax_rate` but without `rate_percent` from breaking the storefront query.
+
+## Build 128 schema compatibility note
+
+No destructive D1 schema change is required for Build 128. This is a code compatibility pass for older or partially migrated product schemas.
+
+The public product endpoints now verify optional columns with direct no-row selects before referencing them:
+
+```sql
+SELECT merchandise_origin FROM products LIMIT 0;
+```
+
+If the select fails, the endpoint omits that column from SQL and returns a safe default such as `handmade` or `onsite` in the API payload. This protects public pages while the full product schema migration is checked/applied.

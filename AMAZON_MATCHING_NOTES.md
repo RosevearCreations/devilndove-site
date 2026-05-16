@@ -41,3 +41,7 @@ Build 125 keeps Amazon order/cost data private, adds admin review/apply controls
 ## Build 126 note
 
 No Amazon matching rules changed in this hotfix. Runtime incident review was added so admin/API errors from Amazon review, catalog sync, or inventory apply workflows can be grouped and resolved from Operations if they recur.
+
+## Build 128 note
+
+No Amazon matching logic changed in Build 128. This was a public product API compatibility hotfix. Amazon/private cost data should continue to stay in D1 staging/review tables, not public static JSON paths.

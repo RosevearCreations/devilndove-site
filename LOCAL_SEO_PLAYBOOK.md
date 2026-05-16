@@ -31,3 +31,7 @@ A `sitemap.xml` was added and the shared footer now links to these local pages.
 ## Build 126 SEO continuity note
 
 No public SEO page structure was changed in this hotfix. Continue the one-H1-per-public-page rule, clear local-intent titles/meta, and local wording that supports relevance and prominence signals.
+
+## Build 128 note
+
+No new local SEO pages were added in Build 128. The pass focused on keeping public product/shop APIs available so local landing pages and internal shop links do not lead to empty/broken product results during D1 schema drift.

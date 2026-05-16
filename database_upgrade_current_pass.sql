@@ -221,3 +221,17 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 128 current pass: public products/product-detail verified-column compatibility hotfix.
+-- No destructive schema change is required. Code now verifies optional columns with direct SELECT column FROM table LIMIT 0 checks before referencing them.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build128',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 128. Code-only compatibility fix for /api/products and /api/product-detail after live D1 still rejected p.merchandise_origin. Endpoints now verify optional columns with direct no-row SELECT checks and use safe defaults on older product schemas.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);
