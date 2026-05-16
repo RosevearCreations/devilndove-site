@@ -59,28 +59,56 @@
     return getDefaultFooterSocialRows();
   }
 
-  function navLinksMarkup() {
-    return `
-      <a href="/index.html" data-nav="/">Home</a>
-      <a href="/about/index.html" data-nav="/about/">About</a>
-      <a href="/gallery/index.html" data-nav="/gallery/">Art</a>
-      <a href="/creations/index.html" data-nav="/creations/">Creations</a>
-      <a href="/tools/index.html" data-nav="/tools/">Tools</a>
-      <a href="/supplies/index.html" data-nav="/supplies/">Supplies</a>
-      <a href="/shop/index.html" data-nav="/shop/">Shop</a>
-      <a href="/collections/index.html" data-nav="/collections/">Collections</a>
-      <a href="/marketplaces/index.html" data-nav="/marketplaces/">Marketplaces</a>
-      <a href="/events/index.html" data-nav="/events/">Events</a>
-      <a href="/pickup/index.html" data-nav="/pickup/">Pickup</a>
-      <a href="/search/index.html" data-nav="/search/">Search</a>
-      <a href="/movies/index.html" data-nav="/movies/">Movies</a>
-      <a href="/socials/index.html" data-nav="/socials/">Socials</a>
-      <a href="/contact/index.html" data-nav="/contact/">Contact</a>
-      <a href="/cart/index.html" data-nav="/cart/">Cart</a>
-      <a href="/login/index.html" data-nav="/login/" data-show-when-logged-out style="display:none">Login</a>
-      <a href="/register/index.html" data-nav="/register/" data-show-when-logged-out style="display:none">Register</a>
-      <a href="/members/index.html" data-nav="/members/" data-show-when-logged-in style="display:none">Members</a>
-      <a href="/admin/index.html" data-nav="/admin/" data-show-when-admin style="display:none">Admin</a>`;
+  const NAV_LINKS = [
+    { href: "/index.html", nav: "/", label: "Home", desktop: true, group: "Essentials" },
+    { href: "/shop/index.html", nav: "/shop/", label: "Shop", desktop: true, group: "Shop & Browse" },
+    { href: "/collections/index.html", nav: "/collections/", label: "Collections", desktop: true, group: "Shop & Browse" },
+    { href: "/marketplaces/index.html", nav: "/marketplaces/", label: "Marketplaces", desktop: true, group: "Shop & Browse" },
+    { href: "/cart/index.html", nav: "/cart/", label: "Cart", desktop: true, group: "Shop & Browse" },
+    { href: "/gallery/index.html", nav: "/gallery/", label: "Art", desktop: true, group: "Workshop" },
+    { href: "/creations/index.html", nav: "/creations/", label: "Creations", desktop: true, group: "Workshop" },
+    { href: "/tools/index.html", nav: "/tools/", label: "Tools", desktop: true, group: "Workshop" },
+    { href: "/supplies/index.html", nav: "/supplies/", label: "Supplies", desktop: true, group: "Workshop" },
+    { href: "/movies/index.html", nav: "/movies/", label: "Movies", desktop: true, group: "Workshop" },
+    { href: "/events/index.html", nav: "/events/", label: "Events", desktop: true, group: "Community" },
+    { href: "/pickup/index.html", nav: "/pickup/", label: "Pickup", desktop: true, group: "Community" },
+    { href: "/socials/index.html", nav: "/socials/", label: "Socials", desktop: true, group: "Community" },
+    { href: "/contact/index.html", nav: "/contact/", label: "Contact", desktop: true, group: "Community" },
+    { href: "/about/index.html", nav: "/about/", label: "About", desktop: true, group: "Essentials" },
+    { href: "/search/index.html", nav: "/search/", label: "Search", desktop: true, group: "Essentials" },
+    { href: "/handmade-jewelry-ontario/index.html", nav: "/handmade-jewelry-ontario/", label: "Handmade jewelry Ontario", desktop: false, group: "Local pages" },
+    { href: "/polymer-clay-earrings-ontario/index.html", nav: "/polymer-clay-earrings-ontario/", label: "Polymer clay earrings", desktop: false, group: "Local pages" },
+    { href: "/custom-gifts-southern-ontario/index.html", nav: "/custom-gifts-southern-ontario/", label: "Custom gifts", desktop: false, group: "Local pages" },
+    { href: "/laser-engraving-ontario/index.html", nav: "/laser-engraving-ontario/", label: "Laser engraving", desktop: false, group: "Local pages" },
+    { href: "/vintage-finds-ontario/index.html", nav: "/vintage-finds-ontario/", label: "Vintage finds", desktop: false, group: "Local pages" },
+    { href: "/workshop-made-gifts-ontario/index.html", nav: "/workshop-made-gifts-ontario/", label: "Workshop-made gifts", desktop: false, group: "Local pages" },
+    { href: "/login/index.html", nav: "/login/", label: "Login", desktop: true, group: "Account", attrs: 'data-show-when-logged-out style="display:none"' },
+    { href: "/register/index.html", nav: "/register/", label: "Register", desktop: false, group: "Account", attrs: 'data-show-when-logged-out style="display:none"' },
+    { href: "/members/index.html", nav: "/members/", label: "Members", desktop: true, group: "Account", attrs: 'data-show-when-logged-in style="display:none"' },
+    { href: "/admin/index.html", nav: "/admin/", label: "Admin", desktop: true, group: "Account", attrs: 'data-show-when-admin style="display:none"' }
+  ];
+
+  function navAnchorMarkup(link) {
+    const attrs = link.attrs ? ` ${link.attrs}` : "";
+    return `<a href="${escapeHtml(link.href)}" data-nav="${escapeHtml(link.nav)}"${attrs}>${escapeHtml(link.label)}</a>`;
+  }
+
+  function navLinksMarkup({ desktopOnly = false } = {}) {
+    const rows = desktopOnly ? NAV_LINKS.filter((link) => link.desktop) : NAV_LINKS;
+    return rows.map(navAnchorMarkup).join('');
+  }
+
+  function mobileNavGroupsMarkup() {
+    const groupOrder = ["Essentials", "Shop & Browse", "Workshop", "Community", "Account", "Local pages"];
+    return groupOrder.map((group, index) => {
+      const rows = NAV_LINKS.filter((link) => link.group === group);
+      if (!rows.length) return "";
+      return `
+        <details class="nav-mobile-group" ${index < 2 ? "open" : ""}>
+          <summary>${escapeHtml(group)} <span>${rows.length}</span></summary>
+          <div class="nav-mobile-group-links">${rows.map(navAnchorMarkup).join('')}</div>
+        </details>`;
+    }).join('');
   }
 
   function buildSharedNav() {
@@ -97,7 +125,7 @@
         <span>Menu</span>
       </button>
       <div class="links nav-links-desktop" aria-label="Primary navigation">
-        ${navLinksMarkup()}
+        ${navLinksMarkup({ desktopOnly: true })}
       </div>
       <div class="nav-mobile-panel" id="siteNavPanel" hidden>
         <div class="nav-mobile-panel-head">
@@ -107,8 +135,13 @@
           </div>
           <button class="btn nav-mobile-close" type="button">Close</button>
         </div>
-        <div class="nav-mobile-grid" aria-label="Mobile navigation">
-          ${navLinksMarkup()}
+        <div class="nav-mobile-quick-row" aria-label="Quick mobile navigation">
+          <a class="btn primary" href="/shop/index.html" data-nav="/shop/">Shop</a>
+          <a class="btn" href="/search/index.html" data-nav="/search/">Search</a>
+          <a class="btn" href="/cart/index.html" data-nav="/cart/">Cart</a>
+        </div>
+        <div class="nav-mobile-groups" aria-label="Mobile navigation">
+          ${mobileNavGroupsMarkup()}
         </div>
       </div>`;
   }
@@ -210,28 +243,39 @@
       nav.classList.add('nav-mobile-open');
       toggle.setAttribute('aria-expanded', 'true');
       document.body.classList.add('nav-mobile-open');
+      const activeDetails = panel.querySelector('a.active')?.closest('details');
+      if (activeDetails) activeDetails.open = true;
+      requestAnimationFrame(() => closeBtn?.focus?.());
     };
-    const close = () => {
+    const close = ({ restoreFocus = false } = {}) => {
+      if (panel.hidden) return;
       panel.hidden = true;
       nav.classList.remove('nav-mobile-open');
       toggle.setAttribute('aria-expanded', 'false');
       document.body.classList.remove('nav-mobile-open');
+      if (restoreFocus) toggle.focus?.();
     };
 
     toggle.addEventListener('click', () => {
       if (panel.hidden) open();
-      else close();
+      else close({ restoreFocus: true });
     });
-    closeBtn?.addEventListener('click', close);
-    panel.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
+    closeBtn?.addEventListener('click', () => close({ restoreFocus: true }));
+    panel.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => close()));
+    document.addEventListener('click', (event) => {
+      if (panel.hidden) return;
+      if (nav.contains(event.target)) return;
+      close();
+    });
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') close();
+      if (event.key === 'Escape') close({ restoreFocus: true });
     });
   }
 
   function injectSharedNav() {
     const nav = document.querySelector('.nav');
     if (!nav || nav.hasAttribute('data-no-shared-nav')) return;
+    nav.classList.add('nav-enhanced');
     nav.innerHTML = buildSharedNav();
     setActiveLink(nav);
     wireMobileNav(nav);
