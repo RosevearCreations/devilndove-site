@@ -24,3 +24,7 @@ These profiles are stored in D1 table `accounting_statement_provider_profiles` a
 ## Build 125 note
 
 Build 125 keeps Amazon order/cost data private, adds admin review/apply controls for Amazon staging rows, records inventory cost history, expands reconciliation and journal guardrails, and adds local-intent SEO pages plus `sitemap.xml`. Keep schema files and active Markdown updated on every pass.
+
+## Build 129 note
+
+Amazon purchase rows should be imported to private D1 staging and reviewed before any costs are used in inventory, COGS, HST, or accountant export workflows.
