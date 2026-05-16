@@ -20,41 +20,9 @@ function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
-
-const SCHEMA_CACHE_MS = 5 * 60 * 1000;
-const schemaColumnCache = new Map();
-
-const PRODUCT_COLUMN_CANDIDATES = [
-  "product_id", "product_number", "slug", "sku", "name", "product_category", "color_name",
-  "color_names_json", "shipping_code", "review_status", "short_description", "description",
-  "product_type", "status", "merchandise_origin", "sale_channel", "external_listing_url",
-  "external_listing_label", "condition_summary", "era_label", "sourcing_notes", "price_cents",
-  "compare_at_price_cents", "currency", "taxable", "tax_class_id", "requires_shipping",
-  "weight_grams", "inventory_tracking", "inventory_quantity", "digital_file_url",
-  "featured_image_url", "sort_order", "created_at", "updated_at"
-];
-
-const TAX_COLUMN_CANDIDATES = ["tax_class_id", "code", "name", "rate_percent", "tax_rate"];
-const SEO_COLUMN_CANDIDATES = [
-  "product_id", "meta_title", "meta_description", "keywords", "h1_override", "canonical_url",
-  "og_title", "og_description", "og_image_url"
-];
-
 function safeIdentifier(value) {
   const text = String(value || "").trim();
   return /^[A-Za-z_][A-Za-z0-9_]*$/.test(text) ? text : "";
-}
-
-async function canSelectColumn(db, tableName, columnName) {
-  const safeTable = safeIdentifier(tableName);
-  const safeColumn = safeIdentifier(columnName);
-  if (!safeTable || !safeColumn) return false;
-  try {
-    await db.prepare(`SELECT ${safeColumn} FROM ${safeTable} LIMIT 0`).all();
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 function parseOptionalInteger(value) {
@@ -68,47 +36,28 @@ function sqlString(value) {
   return `'${String(value || "").replace(/'/g, "''")}'`;
 }
 
-async function getTableColumnSet(db, tableName) {
-  try {
-    const safeTable = safeIdentifier(tableName);
-    if (!safeTable) return new Set();
-    const result = await db.prepare(`PRAGMA table_info(${safeTable})`).all();
-    const rows = Array.isArray(result?.results) ? result.results : [];
-    return new Set(rows.map((row) => String(row?.name || "").trim()).filter(Boolean));
-  } catch {
-    return new Set();
-  }
-}
-
-async function getVerifiedTableColumnSet(db, tableName, candidateColumns = []) {
+async function getStrictTableColumnSet(db, tableName) {
   const safeTable = safeIdentifier(tableName);
   if (!safeTable) return new Set();
 
-  const cacheKey = `${safeTable}:${candidateColumns.join(",")}`;
-  const cached = schemaColumnCache.get(cacheKey);
-  if (cached && Date.now() - cached.cachedAt < SCHEMA_CACHE_MS) {
-    return new Set(cached.columns);
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${safeTable})`).all();
+    const rows = normalizeResults(result);
+    const names = rows
+      .map((row) => String(row?.name || "").trim())
+      .filter((name) => safeIdentifier(name));
+
+    if (names.length) return new Set(names);
+  } catch {
+    // Fall back below. Some older D1 mocks/tools do not support PRAGMA reliably.
   }
 
-  const pragmaColumns = await getTableColumnSet(db, safeTable);
-  const candidates = new Set([
-    ...Array.from(pragmaColumns),
-    ...candidateColumns
-  ].filter((columnName) => safeIdentifier(columnName)));
-
-  const verified = new Set();
-  for (const columnName of candidates) {
-    if (await canSelectColumn(db, safeTable, columnName)) {
-      verified.add(columnName);
-    }
+  try {
+    const sample = await db.prepare(`SELECT * FROM ${safeTable} LIMIT 1`).first();
+    return new Set(Object.keys(sample || {}).filter((name) => safeIdentifier(name)));
+  } catch {
+    return new Set();
   }
-
-  schemaColumnCache.set(cacheKey, {
-    cachedAt: Date.now(),
-    columns: Array.from(verified)
-  });
-
-  return verified;
 }
 
 function selectColumn(columns, alias, columnName, fallbackSql, outputName = columnName) {
@@ -148,16 +97,63 @@ async function runProductQuery(db, sql, bindings = []) {
   return normalizeResults(result);
 }
 
+function normalizeProductRow(row = {}) {
+  const colorNames = parseColorNamesJson(row.color_names_json, row.color_name || "");
+  return {
+    product_id: row.product_id ?? null,
+    product_number: row.product_number ?? null,
+    slug: row.slug || "",
+    sku: row.sku || "",
+    name: row.name || "Untitled product",
+    product_category: row.product_category || row.category || "",
+    color_name: row.color_name || "",
+    color_names_json: row.color_names_json || "[]",
+    color_names: colorNames,
+    color_names_text: colorNames.join(", "),
+    shipping_code: row.shipping_code || "",
+    review_status: row.review_status || "published",
+    short_description: row.short_description || "",
+    description: row.description || "",
+    product_type: row.product_type || "physical",
+    status: row.status || "active",
+    merchandise_origin: row.merchandise_origin || "handmade",
+    sale_channel: row.sale_channel || "onsite",
+    external_listing_url: row.external_listing_url || "",
+    external_listing_label: row.external_listing_label || "",
+    condition_summary: row.condition_summary || "",
+    era_label: row.era_label || "",
+    sourcing_notes: row.sourcing_notes || "",
+    price_cents: Number(row.price_cents || 0),
+    compare_at_price_cents: row.compare_at_price_cents ?? null,
+    currency: row.currency || "CAD",
+    taxable: row.taxable ?? 1,
+    tax_class_id: row.tax_class_id ?? null,
+    tax_class_code: row.tax_class_code || "",
+    tax_class_name: row.tax_class_name || "",
+    tax_rate: Number(row.tax_rate || 0),
+    requires_shipping: row.requires_shipping ?? 0,
+    weight_grams: row.weight_grams ?? null,
+    inventory_tracking: row.inventory_tracking ?? 0,
+    inventory_quantity: Number(row.inventory_quantity ?? row.on_hand_quantity ?? 0),
+    digital_file_url: row.digital_file_url || "",
+    featured_image_url: row.featured_image_url || "",
+    sort_order: Number(row.sort_order || 0),
+    created_at: row.created_at || "",
+    updated_at: row.updated_at || "",
+    meta_title: row.meta_title || "",
+    meta_description: row.meta_description || "",
+    keywords: row.keywords || "",
+    h1_override: row.h1_override || "",
+    canonical_url: row.canonical_url || "",
+    og_title: row.og_title || "",
+    og_description: row.og_description || "",
+    og_image_url: row.og_image_url || "",
+    seo_h1: row.h1_override || row.name || "Untitled product"
+  };
+}
+
 function shapeProducts(rows) {
-  return rows.map((row) => {
-    const colorNames = parseColorNamesJson(row.color_names_json, row.color_name || "");
-    return {
-      ...row,
-      color_names: colorNames,
-      color_names_text: colorNames.join(", "),
-      seo_h1: row.h1_override || row.name || ""
-    };
-  });
+  return rows.map((row) => normalizeProductRow(row));
 }
 
 function buildFilterGroups(products) {
@@ -200,6 +196,65 @@ function buildFilterGroups(products) {
     merchandise_origins: group(origins),
     sale_channels: group(saleChannels)
   };
+}
+
+function productMatchesFilters(product, filters) {
+  const q = normalizeText(filters.q).toLowerCase();
+  if (q) {
+    const haystack = [
+      product.name,
+      product.short_description,
+      product.description,
+      product.sku,
+      product.product_category,
+      product.color_name,
+      product.color_names_text,
+      product.keywords
+    ]
+      .join(" ")
+      .toLowerCase();
+    if (!haystack.includes(q)) return false;
+  }
+
+  if (["physical", "digital"].includes(filters.product_type)) {
+    if (String(product.product_type || "physical").toLowerCase() !== filters.product_type) return false;
+  }
+
+  if (["handmade", "vintage", "collectible", "antique", "oddity", "prebuilt"].includes(filters.merchandise_origin)) {
+    if (String(product.merchandise_origin || "handmade").toLowerCase() !== filters.merchandise_origin) return false;
+  }
+
+  if (["onsite", "external_only", "hybrid"].includes(filters.sale_channel)) {
+    if (String(product.sale_channel || "onsite").toLowerCase() !== filters.sale_channel) return false;
+  }
+
+  if (filters.color_name) {
+    const wanted = filters.color_name.toLowerCase();
+    const colors = Array.isArray(product.color_names) ? product.color_names : [];
+    const hasExactColor = colors.some((color) => String(color || "").trim().toLowerCase() === wanted);
+    const hasJsonColor = String(product.color_names_json || "").toLowerCase().includes(wanted);
+    const hasFallbackColor = String(product.color_name || "").trim().toLowerCase() === wanted;
+    if (!hasExactColor && !hasJsonColor && !hasFallbackColor) return false;
+  }
+
+  if (filters.min_price_cents != null && Number(product.price_cents || 0) < filters.min_price_cents) return false;
+  if (filters.max_price_cents != null && Number(product.price_cents || 0) > filters.max_price_cents) return false;
+
+  if (filters.requires_shipping === "1" || filters.requires_shipping === "0") {
+    if (Number(product.requires_shipping || 0) !== Number(filters.requires_shipping)) return false;
+  }
+
+  return true;
+}
+
+function sortProducts(products) {
+  return [...products].sort((a, b) => {
+    const sortDelta = Number(a.sort_order || 0) - Number(b.sort_order || 0);
+    if (sortDelta) return sortDelta;
+    const createdDelta = String(b.created_at || "").localeCompare(String(a.created_at || ""));
+    if (createdDelta) return createdDelta;
+    return Number(b.product_id || 0) - Number(a.product_id || 0);
+  });
 }
 
 function buildWhere({ productColumns, seoColumns, hasSeoJoin, filters, includeSeoKeywords }) {
@@ -332,12 +387,8 @@ function buildOrderBy(productColumns) {
 
 function buildProductSelectSql({ productColumns, taxColumns, seoColumns, hasTaxJoin, hasSeoJoin, whereSql, includeJoins }) {
   const joins = [];
-  if (includeJoins && hasTaxJoin) {
-    joins.push("LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id");
-  }
-  if (includeJoins && hasSeoJoin) {
-    joins.push("LEFT JOIN product_seo ps ON ps.product_id = p.product_id");
-  }
+  if (includeJoins && hasTaxJoin) joins.push("LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id");
+  if (includeJoins && hasSeoJoin) joins.push("LEFT JOIN product_seo ps ON ps.product_id = p.product_id");
 
   const taxSelects = includeJoins && hasTaxJoin
     ? [
@@ -401,7 +452,9 @@ function buildProductSelectSql({ productColumns, taxColumns, seoColumns, hasTaxJ
     selectColumn(productColumns, "p", "inventory_tracking", "0"),
     productColumns.has("inventory_quantity")
       ? "COALESCE(p.inventory_quantity, 0) AS inventory_quantity"
-      : "0 AS inventory_quantity",
+      : productColumns.has("on_hand_quantity")
+        ? "COALESCE(p.on_hand_quantity, 0) AS inventory_quantity"
+        : "0 AS inventory_quantity",
     selectColumn(productColumns, "p", "digital_file_url", "''"),
     selectColumn(productColumns, "p", "featured_image_url", "''"),
     selectColumn(productColumns, "p", "sort_order", "0"),
@@ -418,9 +471,9 @@ function buildProductSelectSql({ productColumns, taxColumns, seoColumns, hasTaxJ
     ${joins.join("\n    ")}
     WHERE ${whereSql}
     ORDER BY ${buildOrderBy(productColumns)}
+    LIMIT 500
   `;
 }
-
 
 function buildProductSafeFallbackSql({ productColumns, whereSql }) {
   const selectList = [
@@ -455,7 +508,9 @@ function buildProductSafeFallbackSql({ productColumns, whereSql }) {
     selectColumn(productColumns, "p", "inventory_tracking", "0"),
     productColumns.has("inventory_quantity")
       ? "COALESCE(p.inventory_quantity, 0) AS inventory_quantity"
-      : "0 AS inventory_quantity",
+      : productColumns.has("on_hand_quantity")
+        ? "COALESCE(p.on_hand_quantity, 0) AS inventory_quantity"
+        : "0 AS inventory_quantity",
     selectColumn(productColumns, "p", "digital_file_url", "''"),
     selectColumn(productColumns, "p", "featured_image_url", "''"),
     selectColumn(productColumns, "p", "sort_order", "0"),
@@ -480,7 +535,16 @@ function buildProductSafeFallbackSql({ productColumns, whereSql }) {
     FROM products p
     WHERE ${whereSql}
     ORDER BY ${buildOrderBy(productColumns)}
+    LIMIT 500
   `;
+}
+
+async function runUltraProductFallback(db, filters) {
+  const rows = await runProductQuery(db, "SELECT * FROM products LIMIT 500");
+  const products = shapeProducts(rows)
+    .filter((product) => String(product.status || "active").toLowerCase() === "active")
+    .filter((product) => productMatchesFilters(product, filters));
+  return sortProducts(products);
 }
 
 export async function onRequestGet(context) {
@@ -498,8 +562,8 @@ export async function onRequestGet(context) {
     max_price_cents: parseOptionalInteger(url.searchParams.get("max_price_cents")),
     requires_shipping: normalizeText(url.searchParams.get("requires_shipping"))
   };
-  const warnings = [];
 
+  const warnings = [];
   const emptyFilterGroups = {
     categories: [],
     colors: [],
@@ -520,32 +584,44 @@ export async function onRequestGet(context) {
     });
   }
 
-  const productColumns = await getVerifiedTableColumnSet(db, "products", PRODUCT_COLUMN_CANDIDATES);
-  const taxColumns = await getVerifiedTableColumnSet(db, "tax_classes", TAX_COLUMN_CANDIDATES);
-  const seoColumns = await getVerifiedTableColumnSet(db, "product_seo", SEO_COLUMN_CANDIDATES);
+  const productColumns = await getStrictTableColumnSet(db, "products");
+  const taxColumns = await getStrictTableColumnSet(db, "tax_classes");
+  const seoColumns = await getStrictTableColumnSet(db, "product_seo");
 
   if (!productColumns.size) {
-    warnings.push("products_table_missing_or_unreadable");
-    await captureRuntimeIncident(env, request, {
-      incident_scope: "public_catalog",
-      incident_code: "products_table_missing_or_unreadable",
-      severity: "error",
-      message: "The public products endpoint could not inspect the products table.",
-      details: { ...filters }
-    });
-    return json({
-      ok: true,
-      products: [],
-      warning: "Product database schema is unavailable right now. A safe empty result was returned.",
-      summary: { total_products: 0, authority: "schema_unavailable" },
-      filter_groups: emptyFilterGroups,
-      diagnostics: { warnings, ...filters }
-    });
+    try {
+      const products = await runUltraProductFallback(db, filters);
+      warnings.push("schema_columns_unavailable_ultra_fallback_used");
+      return json({
+        ok: true,
+        products,
+        warning: "Schema inspection was unavailable, so a safe product-only fallback was used.",
+        summary: { total_products: products.length, authority: "d1_select_star_fallback" },
+        filter_groups: buildFilterGroups(products),
+        diagnostics: { warnings, ...filters }
+      });
+    } catch (error) {
+      warnings.push("products_table_missing_or_unreadable");
+      await captureRuntimeIncident(env, request, {
+        incident_scope: "public_catalog",
+        incident_code: "products_unavailable_all_tiers_failed",
+        severity: "error",
+        message: "The public products endpoint could not inspect or read the products table.",
+        details: { error: String(error?.message || error || "Unknown products table error"), ...filters }
+      });
+      return json({
+        ok: true,
+        products: [],
+        warning: "Product database schema is unavailable right now. A safe empty result was returned.",
+        summary: { total_products: 0, authority: "schema_unavailable" },
+        filter_groups: emptyFilterGroups,
+        diagnostics: { warnings, ...filters }
+      });
+    }
   }
 
   const hasTaxJoin = productColumns.has("tax_class_id") && taxColumns.has("tax_class_id");
-  const hasSeoJoin = seoColumns.has("product_id");
-
+  const hasSeoJoin = seoColumns.has("product_id") && productColumns.has("product_id");
   if (!hasTaxJoin) warnings.push("tax_class_join_skipped_schema_not_ready");
   if (!hasSeoJoin) warnings.push("product_seo_join_skipped_schema_not_ready");
 
@@ -579,20 +655,7 @@ export async function onRequestGet(context) {
       diagnostics: { warnings, ...filters }
     });
   } catch (primaryError) {
-    warnings.push("primary_query_failed");
-
-    await captureRuntimeIncident(env, request, {
-      incident_scope: "public_catalog",
-      incident_code: "products_primary_query_failed",
-      severity: "warning",
-      message: "Primary adaptive products query failed. Trying the product-only fallback query.",
-      details: {
-        error: String(primaryError?.message || primaryError || "Unknown primary query error"),
-        warnings,
-        ...filters
-      }
-    });
-
+    warnings.push("primary_query_failed_no_incident_until_all_tiers_fail");
     const fallbackWhere = buildWhere({
       productColumns,
       seoColumns: new Set(),
@@ -611,7 +674,6 @@ export async function onRequestGet(context) {
       const rows = await runProductQuery(db, fallbackSql, fallbackWhere.bindings);
       const products = shapeProducts(rows);
       warnings.push("fallback_query_used");
-
       return json({
         ok: true,
         products,
@@ -621,30 +683,45 @@ export async function onRequestGet(context) {
         diagnostics: { warnings, ...filters }
       });
     } catch (fallbackError) {
-      warnings.push("fallback_query_failed");
+      warnings.push("fallback_query_failed_trying_select_star_fallback");
 
-      await captureRuntimeIncident(env, request, {
-        incident_scope: "public_catalog",
-        incident_code: "products_fallback_query_failed",
-        severity: "error",
-        message: "Both adaptive primary and product-only fallback product queries failed. Returning a safe empty live result.",
-        details: {
-          primary_error: String(primaryError?.message || primaryError || "Unknown primary query error"),
-          fallback_error: String(fallbackError?.message || fallbackError || "Unknown fallback query error"),
-          warnings,
-          ...filters
-        }
-      });
+      try {
+        const products = await runUltraProductFallback(db, filters);
+        warnings.push("select_star_fallback_used");
+        return json({
+          ok: true,
+          products,
+          warning: "Safe product-only fallback used because richer product queries are still recovering.",
+          summary: { total_products: products.length, authority: "d1_select_star_fallback" },
+          filter_groups: buildFilterGroups(products),
+          diagnostics: { warnings, ...filters }
+        });
+      } catch (ultraError) {
+        warnings.push("select_star_fallback_failed");
+        await captureRuntimeIncident(env, request, {
+          incident_scope: "public_catalog",
+          incident_code: "products_unavailable_all_tiers_failed",
+          severity: "error",
+          message: "All product query tiers failed. Returning a safe empty live result.",
+          details: {
+            primary_error: String(primaryError?.message || primaryError || "Unknown primary query error"),
+            fallback_error: String(fallbackError?.message || fallbackError || "Unknown fallback query error"),
+            ultra_error: String(ultraError?.message || ultraError || "Unknown select-star fallback error"),
+            warnings,
+            ...filters
+          }
+        });
 
-      return json({
-        ok: true,
-        products: [],
-        warning: "Live product queries are unavailable right now. A safe empty result was returned.",
-        error_detail: String(fallbackError?.message || primaryError?.message || "Unknown error"),
-        summary: { total_products: 0, authority: "error" },
-        filter_groups: emptyFilterGroups,
-        diagnostics: { warnings, ...filters }
-      });
+        return json({
+          ok: true,
+          products: [],
+          warning: "Live product queries are unavailable right now. A safe empty result was returned.",
+          error_detail: String(ultraError?.message || fallbackError?.message || primaryError?.message || "Unknown error"),
+          summary: { total_products: 0, authority: "error" },
+          filter_groups: emptyFilterGroups,
+          diagnostics: { warnings, ...filters }
+        });
+      }
     }
   }
 }

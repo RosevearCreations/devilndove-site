@@ -52,44 +52,38 @@ function sqlString(value) {
 }
 
 async function getTableColumnSet(db, tableName) {
+  const safeTable = safeIdentifier(tableName);
+  if (!safeTable) return new Set();
   try {
-    const safeTable = safeIdentifier(tableName);
-    if (!safeTable) return new Set();
     const result = await db.prepare(`PRAGMA table_info(${safeTable})`).all();
     const rows = Array.isArray(result?.results) ? result.results : [];
-    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+    const names = rows.map((row) => String(row?.name || '').trim()).filter((name) => safeIdentifier(name));
+    if (names.length) return new Set(names);
+  } catch {
+    // Fall through to the SELECT * sample fallback below.
+  }
+
+  try {
+    const sample = await db.prepare(`SELECT * FROM ${safeTable} LIMIT 1`).first();
+    return new Set(Object.keys(sample || {}).filter((name) => safeIdentifier(name)));
   } catch {
     return new Set();
-  }
-}
-
-async function canSelectColumn(db, tableName, columnName) {
-  const safeTable = safeIdentifier(tableName);
-  const safeColumn = safeIdentifier(columnName);
-  if (!safeTable || !safeColumn) return false;
-  try {
-    await db.prepare(`SELECT ${safeColumn} FROM ${safeTable} LIMIT 0`).all();
-    return true;
-  } catch {
-    return false;
   }
 }
 
 async function getVerifiedTableColumnSet(db, tableName, candidateColumns = []) {
   const safeTable = safeIdentifier(tableName);
   if (!safeTable) return new Set();
-  const cacheKey = `${safeTable}:${candidateColumns.join(',')}`;
+  const cacheKey = `${safeTable}:strict:${candidateColumns.join(',')}`;
   const cached = schemaColumnCache.get(cacheKey);
   if (cached && Date.now() - cached.cachedAt < SCHEMA_CACHE_MS) return new Set(cached.columns);
 
-  const pragmaColumns = await getTableColumnSet(db, safeTable);
-  const candidates = new Set([...Array.from(pragmaColumns), ...candidateColumns].filter((columnName) => safeIdentifier(columnName)));
-  const verified = new Set();
-  for (const columnName of candidates) {
-    if (await canSelectColumn(db, safeTable, columnName)) verified.add(columnName);
-  }
-  schemaColumnCache.set(cacheKey, { cachedAt: Date.now(), columns: Array.from(verified) });
-  return verified;
+  // Build 130: use only columns proven by D1 table metadata/sample rows.
+  // Do not add candidate columns to the returned set. D1/SQLite will throw if a query
+  // references a missing optional column such as p.merchandise_origin.
+  const columns = await getTableColumnSet(db, safeTable);
+  schemaColumnCache.set(cacheKey, { cachedAt: Date.now(), columns: Array.from(columns) });
+  return columns;
 }
 
 function selectColumn(columns, alias, columnName, fallbackSql, outputName = columnName) {
