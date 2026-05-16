@@ -13,6 +13,26 @@ async function tableExists(db, tableName) {
   }
 }
 
+async function tableColumns(db, tableName) {
+  try {
+    const rows = normalizeResults(await db.prepare(`PRAGMA table_info(${tableName})`).all());
+    return new Set(rows.map((row) => String(row.name || '').toLowerCase()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function publicJsonCheck(request, path) {
+  const url = new URL(path, request.url);
+  try {
+    const response = await fetch(url.toString(), { headers: { Accept: 'application/json' }, cf: { cacheTtl: 0, cacheEverything: false } });
+    const data = await response.json().catch(() => null);
+    return { ok: response.ok && data?.ok !== false, status: response.status, authority: data?.summary?.authority || data?.authority || '', warning: data?.warning || '', error: data?.error || data?.error_detail || '' };
+  } catch (error) {
+    return { ok: false, status: 0, error: error?.message || String(error || 'Fetch failed') };
+  }
+}
+
 async function safeFirst(db, sql, bindings = [], fallback = {}) {
   try { return (await db.prepare(sql).bind(...bindings).first()) || fallback; }
   catch { return fallback; }
@@ -186,6 +206,31 @@ export async function onRequestGet(context) {
     `${Number(incidentRow.incident_count || 0)} error/critical runtime incident(s) recorded in the last 7 days.`,
     'Open Operations > Security/Runtime incidents and group/fix recurring errors.',
     'warning'
+  );
+
+
+  const productColumns = await tableExists(db, 'products') ? await tableColumns(db, 'products') : new Set();
+  const missingProductRequired = ['product_id', 'slug', 'name'].filter((column) => !productColumns.has(column));
+  const missingProductRecommended = ['status', 'price_cents', 'featured_image_url', 'merchandise_origin', 'sale_channel'].filter((column) => !productColumns.has(column));
+  addCheck(
+    checks,
+    missingProductRequired.length ? 'fail' : (missingProductRecommended.length ? 'warn' : 'pass'),
+    'Product schema drift snapshot',
+    missingProductRequired.length
+      ? `Missing required product column(s): ${missingProductRequired.join(', ')}.`
+      : `${missingProductRecommended.length} recommended product storefront column(s) are missing or pending migration.`,
+    missingProductRequired.length ? 'Apply product schema migration before relying on the storefront.' : 'Open Operations > D1 Schema Drift Report for full details.',
+    missingProductRequired.length ? 'error' : 'warning'
+  );
+
+  const productApi = await publicJsonCheck(context.request, '/api/products?limit=6');
+  addCheck(
+    checks,
+    productApi.ok && !productApi.error ? (productApi.warning ? 'warn' : 'pass') : 'fail',
+    'Public products API health',
+    productApi.ok ? `HTTP ${productApi.status}; authority ${productApi.authority || 'not reported'}${productApi.warning ? `; warning: ${productApi.warning}` : ''}.` : `HTTP ${productApi.status}; ${productApi.error || 'Products API failed.'}`,
+    'Open Operations > Public API Health and fix /api/products before marking the release clean.',
+    productApi.ok ? 'warning' : 'error'
   );
 
   const schemaLedgerRow = await tableExists(db, 'schema_migration_ledger') ? await safeFirst(db, `

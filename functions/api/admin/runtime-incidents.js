@@ -239,6 +239,26 @@ export async function onRequestPost(context) {
   const ids = parseIds(body.runtime_incident_ids || body.ids || body.runtime_incident_id);
   const adminNote = normalizeText(body.admin_note || body.note);
   const allowedStatuses = new Set(['open', 'reviewing', 'resolved', 'ignored']);
+
+  if (action === 'cleanup_resolved' || action === 'purge_resolved') {
+    const olderThanDays = Math.max(7, Math.min(Number(body.older_than_days || 30), 365));
+    try {
+      const result = await db.prepare(`
+        DELETE FROM runtime_incidents
+        WHERE LOWER(COALESCE(review_status,'open')) IN ('resolved','ignored')
+          AND datetime(COALESCE(created_at, datetime('now'))) < datetime('now', ?)
+      `).bind(`-${olderThanDays} days`).run();
+      await auditAdminAction(env, request, adminUser, {
+        action_type: 'runtime_incident_cleanup_resolved',
+        target_type: 'runtime_incidents',
+        target_key: `${olderThanDays}_days`,
+        details: { older_than_days: olderThanDays, deleted_count: result?.meta?.changes || 0, admin_note: adminNote }
+      });
+      return jsonResponse({ ok: true, warnings, deleted_count: result?.meta?.changes || 0, older_than_days: olderThanDays });
+    } catch (error) {
+      return jsonResponse({ ok: false, error: error?.message || 'Failed to clean up resolved runtime incidents.' }, 500);
+    }
+  }
   const statusByAction = {
     reopen: 'open',
     reviewing: 'reviewing',
