@@ -29,3 +29,7 @@ Build 125 keeps Amazon order/cost data private, adds admin review/apply controls
 - `/api/admin/public-api-health` tests public JSON endpoints after deploys.
 - `/api/admin/amazon-purchase-import` imports pasted Amazon CSV rows into private D1 staging.
 - `/api/admin/runtime-incidents` now supports cleanup of old resolved/ignored incidents.
+
+## Build 131 API note
+
+New admin endpoint: `/api/admin/storefront-schema-repair`. It requires admin auth and can inspect/apply non-destructive storefront compatibility columns for `products`, `tax_classes`, and `product_seo`. Public API Health was expanded to treat `authority: "error"` as a failure and to check sitemap/robots/page HTML health.
