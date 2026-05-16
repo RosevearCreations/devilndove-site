@@ -31,3 +31,9 @@ Do not clear Release Sanity runtime warnings by marking everything resolved blin
 ## Build 128 rule addition
 
 Public storefront endpoints must not hard-reference optional D1 columns. If a column may not exist on the deployed D1 database, verify it before building SQL and provide a safe default in the response payload.
+
+## Build 129 repo rule additions
+
+- Do not add private Amazon order/cost CSVs or match reports under public static folders such as `/data/`.
+- New D1-sensitive endpoints should either verify optional columns before use or degrade safely with a clear runtime incident.
+- Any new admin import workflow must be review-first and must update Markdown plus schema references in the same pass.

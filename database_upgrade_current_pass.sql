@@ -235,3 +235,38 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 129 operations/import guardrails, 2026-05-15:
+-- Adds private Amazon import batch tracking and keeps runtime incident cleanup reviewable.
+CREATE TABLE IF NOT EXISTS amazon_purchase_import_batches (
+  amazon_purchase_import_batch_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  import_batch_id TEXT NOT NULL UNIQUE,
+  source_file TEXT,
+  imported_row_count INTEGER NOT NULL DEFAULT 0,
+  skipped_row_count INTEGER NOT NULL DEFAULT 0,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+
+-- Runtime-safe staging backfills used by the admin Amazon CSV import/review flow.
+-- The admin import/review Functions add missing columns after PRAGMA checks.
+-- Do not place unconditional ALTER TABLE ADD COLUMN here because D1/SQLite has no portable ADD COLUMN IF NOT EXISTS.
+-- Columns expected by Build 129 include amazon_url, applied_inventory_id, applied_cost_history_id, applied_at, reviewed_by_user_id, and updated_at.
+CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_batches_batch
+  ON amazon_purchase_import_batches(import_batch_id);
+CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_batch_129
+  ON amazon_purchase_import_staging(import_batch_id);
+
+-- Build 129 migration ledger marker.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build129',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 129. Adds D1 schema drift reporting, public API health checks, private Amazon CSV staging import, Amazon match confidence explanations, and runtime incident cleanup for old resolved/ignored rows.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

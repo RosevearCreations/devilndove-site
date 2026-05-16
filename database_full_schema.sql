@@ -1671,3 +1671,15 @@ ALTER TABLE accounting_journal_entries ADD COLUMN posted_by_user_id INTEGER;
 ALTER TABLE accounting_journal_entries ADD COLUMN posted_at TEXT;
 ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 
+
+-- Build 129 private Amazon import batch tracking.
+CREATE TABLE IF NOT EXISTS amazon_purchase_import_batches (
+  amazon_purchase_import_batch_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  import_batch_id TEXT NOT NULL UNIQUE,
+  source_file TEXT,
+  imported_row_count INTEGER NOT NULL DEFAULT 0,
+  skipped_row_count INTEGER NOT NULL DEFAULT 0,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);

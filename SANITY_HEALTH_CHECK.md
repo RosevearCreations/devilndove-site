@@ -35,3 +35,13 @@ Date: 2026-05-15
 - Local mock D1 tests covered an older schema where `PRAGMA table_info` appeared to include optional fields but direct column selection failed.
 - Expected post-deploy result: `/api/products` returns `ok: true` and does not report `authority: "error"`.
 - After deploy, refresh `/admin/operations/` > Runtime Incidents and confirm the `/api/products` incident count does not increase.
+
+
+## Build 129 sanity checklist
+
+- Run Operations > D1 Schema Drift Report after deployment and before assuming D1 is current.
+- Run Operations > Public API Health and confirm `/api/products` is not returning `authority: error`.
+- Run Operations > Release Sanity and review any product schema/API warnings.
+- Use Runtime Incidents cleanup only for resolved/ignored rows older than the selected retention period.
+- Test Amazon CSV staging import with a tiny CSV sample before importing a large order file.
+- Confirm the Amazon review queue shows confidence explanations and keeps imported rows pending until approved.

@@ -35,3 +35,8 @@ No public SEO page structure was changed in this hotfix. Continue the one-H1-per
 ## Build 128 note
 
 No new local SEO pages were added in Build 128. The pass focused on keeping public product/shop APIs available so local landing pages and internal shop links do not lead to empty/broken product results during D1 schema drift.
+
+
+## Build 129 SEO pass note
+
+Continue using one clear H1 per exposed page, local wording in titles/headings/body copy, and internal links from relevant public pages to local-intent landing pages. Do not keyword-stuff; keep wording useful for real customers in Ontario/Southern Ontario.

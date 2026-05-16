@@ -1,6 +1,6 @@
 # Development Roadmap — Current Working Plan
 
-Current sync: 2026-05-14 — Build 125 Amazon purchase review, inventory cost history, reconciliation queue, journal validation, and local SEO pass.
+Current sync: 2026-05-15 — Build 129 schema drift, public API health, Amazon CSV import, runtime cleanup, and SEO/sanity pass.
 
 ## Completed 20 items in this pass
 1. Added `/api/admin/amazon-purchase-review` so private Amazon purchase staging rows can be reviewed from the admin instead of spreadsheets only.
@@ -190,3 +190,52 @@ Keep one clear H1 per exposed page, keep page titles/meta descriptions specific,
 18. Continue media lifecycle tools for replace, retire, alt text, crop, and broken-link scanning.
 19. Continue local SEO internal linking, structured data review, and one-H1 checks on every public page.
 20. Continue pre-deploy privacy checks to keep private Amazon/order/cost data out of public static paths.
+
+
+
+## Build 129 completed 20-step pass
+
+1. Added `/api/admin/schema-drift-report` so live D1 schema drift can be checked from admin before endpoints fail publicly.
+2. Added an Operations **D1 Schema Drift Report** panel with required/recommended column status by table.
+3. Added `/api/admin/public-api-health` to test the public JSON APIs used by shop, product detail, Tools, and Supplies.
+4. Added an Operations **Public API Health** panel so `/api/products` regressions can be caught right after deploy.
+5. Added product schema drift snapshot checks into Release Sanity.
+6. Added direct `/api/products` public endpoint health into Release Sanity.
+7. Added runtime incident cleanup support for old resolved/ignored rows.
+8. Added a cleanup control to the Runtime Incidents panel with a 7-365 day safety range.
+9. Added private `amazon_purchase_import_batches` tracking for admin-imported Amazon CSV batches.
+10. Added `/api/admin/amazon-purchase-import` so Amazon CSV rows can be pasted/imported into private D1 staging from admin.
+11. Added an Amazon CSV staging import panel to `/admin/catalog/`.
+12. Added `amazon_url` support for staged Amazon rows so product links survive the private import process.
+13. Added Amazon match confidence explanations in the review queue so safe/review/weak rows are easier to understand before approval.
+14. Kept Amazon costs/order data out of public `/data/` paths; the new import path writes only to private D1 staging.
+15. Updated Operations page mounts/scripts for schema drift, API health, migration ledger, release sanity, and runtime incidents.
+16. Updated Catalog page scripts so Amazon CSV import sits before the Amazon review/apply queue.
+17. Updated `database_upgrade_current_pass.sql` with Build 129 batch table and migration-ledger marker while avoiding unsafe unconditional `ALTER TABLE ADD COLUMN` statements.
+18. Updated `database_amazon_purchase_import_staging.sql` and `database_full_schema.sql` with Build 129 Amazon import batch tracking.
+19. Updated active Markdown handoff, roadmap, schema, sanity, and known-gaps documentation.
+20. Ran JavaScript syntax, one-H1/title/meta, missing local asset, CSS brace, and SQL smoke checks for the new build.
+
+
+## Next 20 steps after Build 129
+
+1. Deploy Build 129 and apply/record `database_upgrade_current_pass.sql` in the D1 migration ledger.
+2. Open `/admin/operations/` and run **D1 Schema Drift Report** before approving any future schema-sensitive code.
+3. Open `/admin/operations/` and run **Public API Health** immediately after deployment.
+4. Confirm `/api/products` shows a non-error authority and does not create fresh runtime incidents.
+5. Use Runtime Incidents cleanup only after real recurring errors are fixed and old resolved/ignored rows are no longer useful.
+6. Paste/import a very small Amazon CSV sample through the new Catalog import panel and verify pending rows appear in the review queue.
+7. Add duplicate-detection to the Amazon import endpoint using order id + ASIN + title + amount so accidental double imports are blocked.
+8. Add manual inventory relinking in the Amazon review queue for rows whose best match is wrong or missing.
+9. Add bulk approve for only high-confidence safe Amazon rows, with a hard confirmation and preview total.
+10. Add an Amazon import summary by inventory item, supplier, order date, and tax totals for accountant review.
+11. Add payment application screens connecting orders, deposits, payouts, refunds, fees, gift cards, and journal entries.
+12. Expand journal-line automation for sales, discounts, shipping income, shipping expense, COGS, inventory adjustments, fees, refunds, write-offs, and HST.
+13. Add HST/GST review worksheet with taxable sales, exempt sales, collected tax, ITCs, adjustments, and remittance totals.
+14. Add period close/lock/reopen controls with checklist, reason fields, and audit records.
+15. Build accountant export package v2 with GL, trial balance, P&L, HST worksheet, statement summaries, attachments index, and unresolved issue log.
+16. Add product variants/options for colour, material, size, customization, SKU, stock, price, and media.
+17. Add media lifecycle controls for replace, retire, alt text, crop, public/private flag, and broken-link scans.
+18. Add structured data review for Product, BreadcrumbList, Organization, WebSite, and key local-intent pages.
+19. Add Search Console metric import fields/screens for clicks, impressions, CTR, position, page, query, and local landing page performance.
+20. Continue moving duplicated JSON/DB operational data toward D1 as the source of truth with public-safe JSON as fallback/export only.

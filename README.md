@@ -71,3 +71,8 @@ Build 127 hardens the public products API against D1 schema drift. Deploy it whe
 ## Build 128 deploy note
 
 Build 128 is a code-only compatibility hotfix for older or partially migrated D1 product schemas. Deploy it if `/api/products` returns a safe empty response with an error such as `no such column: p.merchandise_origin`. After deployment, open `/api/products` and confirm the response is no longer `authority: "error"`.
+
+
+## Build 129 operator notes
+
+After deploying this build, use `/admin/operations/` to run Schema Drift, Public API Health, Runtime Incidents, Migration Ledger, and Release Sanity. Use `/admin/catalog/` for Tools/Supplies sync, Amazon CSV staging import, and Amazon purchase review/apply.

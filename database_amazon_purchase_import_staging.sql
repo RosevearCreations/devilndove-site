@@ -89,3 +89,19 @@ CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_applied
 -- 4. Approve obvious safe matches first from /admin/catalog/ Amazon purchase review.
 -- 5. Approved rows apply unit cost/supplier/ASIN/URL to site_item_inventory and write site_item_inventory_cost_history.
 -- 6. Use amazon_inventory_purchase_summary_by_item.csv to compare totals before posting journal lines.
+
+-- Build 129 admin-import batch tracking.
+CREATE TABLE IF NOT EXISTS amazon_purchase_import_batches (
+  amazon_purchase_import_batch_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  import_batch_id TEXT NOT NULL UNIQUE,
+  source_file TEXT,
+  imported_row_count INTEGER NOT NULL DEFAULT 0,
+  skipped_row_count INTEGER NOT NULL DEFAULT 0,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+
+-- Build 129 added amazon_url so pasted Amazon CSV rows can preserve product links.
+-- Existing D1 databases should add this column once, or allow the admin API runtime guard to backfill it.
+-- ALTER TABLE amazon_purchase_import_staging ADD COLUMN amazon_url TEXT;

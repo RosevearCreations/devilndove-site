@@ -71,3 +71,30 @@ SELECT merchandise_origin FROM products LIMIT 0;
 ```
 
 If the select fails, the endpoint omits that column from SQL and returns a safe default such as `handmade` or `onsite` in the API payload. This protects public pages while the full product schema migration is checked/applied.
+
+
+## Build 129 schema notes
+
+### `amazon_purchase_import_batches`
+Tracks private admin imports of Amazon CSV rows before review/apply.
+
+Important columns:
+- `import_batch_id`
+- `source_file`
+- `imported_row_count`
+- `skipped_row_count`
+- `created_by_user_id`
+- `created_at`
+- `notes`
+
+### `amazon_purchase_import_staging` additions expected by Build 129
+The runtime API safely backfills missing columns after checking the live table. Expected optional/current columns now include:
+- `amazon_url`
+- `applied_inventory_id`
+- `applied_cost_history_id`
+- `applied_at`
+- `reviewed_by_user_id`
+- `updated_at`
+
+### Schema drift report
+`/api/admin/schema-drift-report` does not change schema. It compares live D1 columns to the columns the current build expects and classifies gaps as required, recommended, or optional.

@@ -45,3 +45,7 @@ Build 125 keeps Amazon order/cost data private, adds admin review/apply controls
 ## Build 128 endpoint guardrail
 
 When adding new product columns to public APIs, do not reference them directly in static SQL until D1 migrations are verified live. Use adaptive column checks or direct no-row column verification so public pages keep rendering during staged schema upgrades.
+
+## Build 129 operations guide
+
+For each deploy, visit `/admin/operations/` and run D1 Schema Drift Report, Public API Health, Runtime Incidents, Migration Ledger, and Release Sanity. This is now the preferred flow for catching D1 schema drift and public API regressions before testing the storefront manually.

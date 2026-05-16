@@ -1,6 +1,6 @@
 # Known Gaps and Risks — Current Active List
 
-Current sync: 2026-05-14 — Build 125.
+Current sync: 2026-05-15 — Build 129.
 
 ## Highest-priority gaps still open
 1. The accounting backend is stronger, but it is still not a finished tax-filing system.
@@ -77,3 +77,21 @@ Current sync: 2026-05-14 — Build 125.
 - `/api/product-detail` was also hardened because product detail used several of the same newer product, tax, and SEO columns.
 - Remaining risk: if the live `products` table lacks required basics like `slug`, `product_id`, or `name`, public product results may still be empty or product detail may return a schema-unavailable response.
 - Long-term fix: apply/verify the full product schema migration so merchandise origin, sale channel, external listing fields, condition/era/sourcing notes, and current tax fields exist in D1.
+
+
+## Build 129 reduced risks
+
+- Added a visible D1 Schema Drift Report so missing live D1 columns can be found before public APIs fail.
+- Added Public API Health checks for shop/product/catalog endpoints after deployment.
+- Release Sanity now includes a product schema drift snapshot and `/api/products` health check.
+- Runtime incidents can now be cleaned up only after they are resolved/ignored and old enough to be safe to remove.
+- Amazon CSV rows can now be imported into private D1 staging from admin rather than placing private import files in public static folders.
+- Amazon review rows now explain match confidence using status, score, ASIN presence, inventory link, and available unit cost.
+
+## Build 129 remaining risks
+
+- The Amazon CSV import is intentionally simple and review-first; it still needs duplicate detection before large imports.
+- Amazon staging import does not automatically match new rows to inventory yet unless the CSV already includes inventory keys.
+- Public API Health depends on the deployed host being reachable from the Worker runtime; if fetch self is blocked/noisy, use direct browser checks too.
+- Schema Drift Report lists missing columns but does not run migrations automatically.
+- Runtime incident cleanup permanently deletes old resolved/ignored records, so export important history first if needed.

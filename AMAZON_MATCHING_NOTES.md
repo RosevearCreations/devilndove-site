@@ -45,3 +45,9 @@ No Amazon matching rules changed in this hotfix. Runtime incident review was add
 ## Build 128 note
 
 No Amazon matching logic changed in Build 128. This was a public product API compatibility hotfix. Amazon/private cost data should continue to stay in D1 staging/review tables, not public static JSON paths.
+
+## Build 129 update
+
+Amazon rows can now be pasted into `/admin/catalog/` through the private Amazon CSV staging import panel. Imported rows remain `pending` until reviewed. The review queue now shows a confidence explanation based on match status, match score, ASIN presence, inventory link, and available unit cost.
+
+Guardrail: do not place raw Amazon order exports, cost reports, or review spreadsheets in public `/data/` folders. Use D1 staging and review/apply workflow instead.
