@@ -24,14 +24,163 @@ function parseColorNamesJson(value, fallbackColor = '') {
   return values;
 }
 
+const SCHEMA_CACHE_MS = 5 * 60 * 1000;
+const schemaColumnCache = new Map();
+
+const PRODUCT_COLUMN_CANDIDATES = [
+  'product_id', 'product_number', 'slug', 'sku', 'name', 'product_category', 'color_name',
+  'color_names_json', 'shipping_code', 'review_status', 'short_description', 'description',
+  'product_type', 'status', 'merchandise_origin', 'sale_channel', 'external_listing_url',
+  'external_listing_label', 'condition_summary', 'era_label', 'sourcing_notes', 'price_cents',
+  'compare_at_price_cents', 'currency', 'taxable', 'tax_class_id', 'requires_shipping',
+  'weight_grams', 'inventory_tracking', 'inventory_quantity', 'on_hand_quantity',
+  'digital_file_url', 'featured_image_url', 'sort_order', 'created_at', 'updated_at'
+];
+const TAX_COLUMN_CANDIDATES = ['tax_class_id', 'code', 'name', 'rate_percent', 'tax_rate'];
+const SEO_COLUMN_CANDIDATES = [
+  'product_id', 'meta_title', 'meta_description', 'keywords', 'h1_override', 'canonical_url',
+  'schema_type', 'og_title', 'og_description', 'og_image_url'
+];
+
+function safeIdentifier(value) {
+  const text = String(value || '').trim();
+  return /^[A-Za-z_][A-Za-z0-9_]*$/.test(text) ? text : '';
+}
+
+function sqlString(value) {
+  return `'${String(value || '').replace(/'/g, "''")}'`;
+}
+
 async function getTableColumnSet(db, tableName) {
   try {
-    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const safeTable = safeIdentifier(tableName);
+    if (!safeTable) return new Set();
+    const result = await db.prepare(`PRAGMA table_info(${safeTable})`).all();
     const rows = Array.isArray(result?.results) ? result.results : [];
     return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
   } catch {
     return new Set();
   }
+}
+
+async function canSelectColumn(db, tableName, columnName) {
+  const safeTable = safeIdentifier(tableName);
+  const safeColumn = safeIdentifier(columnName);
+  if (!safeTable || !safeColumn) return false;
+  try {
+    await db.prepare(`SELECT ${safeColumn} FROM ${safeTable} LIMIT 0`).all();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function getVerifiedTableColumnSet(db, tableName, candidateColumns = []) {
+  const safeTable = safeIdentifier(tableName);
+  if (!safeTable) return new Set();
+  const cacheKey = `${safeTable}:${candidateColumns.join(',')}`;
+  const cached = schemaColumnCache.get(cacheKey);
+  if (cached && Date.now() - cached.cachedAt < SCHEMA_CACHE_MS) return new Set(cached.columns);
+
+  const pragmaColumns = await getTableColumnSet(db, safeTable);
+  const candidates = new Set([...Array.from(pragmaColumns), ...candidateColumns].filter((columnName) => safeIdentifier(columnName)));
+  const verified = new Set();
+  for (const columnName of candidates) {
+    if (await canSelectColumn(db, safeTable, columnName)) verified.add(columnName);
+  }
+  schemaColumnCache.set(cacheKey, { cachedAt: Date.now(), columns: Array.from(verified) });
+  return verified;
+}
+
+function selectColumn(columns, alias, columnName, fallbackSql, outputName = columnName) {
+  return columns.has(columnName) ? `${alias}.${columnName} AS ${outputName}` : `${fallbackSql} AS ${outputName}`;
+}
+
+function taxRateExpression(taxColumns) {
+  const parts = [];
+  if (taxColumns.has('rate_percent')) parts.push('tc.rate_percent');
+  if (taxColumns.has('tax_rate')) parts.push('tc.tax_rate');
+  return parts.length ? `COALESCE(${parts.join(', ')}, 0) AS tax_rate` : '0 AS tax_rate';
+}
+
+function inventoryQuantityExpression(productColumns) {
+  const parts = [];
+  if (productColumns.has('inventory_quantity')) parts.push('p.inventory_quantity');
+  if (productColumns.has('on_hand_quantity')) parts.push('p.on_hand_quantity');
+  return parts.length ? `COALESCE(${parts.join(', ')}, 0) AS inventory_quantity` : '0 AS inventory_quantity';
+}
+
+function buildProductDetailSql({ productColumns, taxColumns, seoColumns, hasTaxJoin, hasSeoJoin }) {
+  const joins = [];
+  if (hasTaxJoin) joins.push('LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id');
+  if (hasSeoJoin) joins.push('LEFT JOIN product_seo ps ON ps.product_id = p.product_id');
+  const where = productColumns.has('status') ? `p.slug = ? AND p.status = 'active'` : 'p.slug = ?';
+  const taxSelects = hasTaxJoin
+    ? [
+        selectColumn(taxColumns, 'tc', 'code', "''", 'tax_class_code'),
+        selectColumn(taxColumns, 'tc', 'name', "''", 'tax_class_name'),
+        taxRateExpression(taxColumns)
+      ]
+    : ["'' AS tax_class_code", "'' AS tax_class_name", '0 AS tax_rate'];
+  const seoSelects = hasSeoJoin
+    ? [
+        selectColumn(seoColumns, 'ps', 'meta_title', "''"),
+        selectColumn(seoColumns, 'ps', 'meta_description', "''"),
+        selectColumn(seoColumns, 'ps', 'keywords', "''"),
+        selectColumn(seoColumns, 'ps', 'h1_override', "''"),
+        selectColumn(seoColumns, 'ps', 'canonical_url', "''"),
+        selectColumn(seoColumns, 'ps', 'schema_type', sqlString('Product')),
+        selectColumn(seoColumns, 'ps', 'og_title', "''"),
+        selectColumn(seoColumns, 'ps', 'og_description', "''"),
+        selectColumn(seoColumns, 'ps', 'og_image_url', "''")
+      ]
+    : [
+        "'' AS meta_title", "'' AS meta_description", "'' AS keywords", "'' AS h1_override",
+        "'' AS canonical_url", "'Product' AS schema_type", "'' AS og_title", "'' AS og_description", "'' AS og_image_url"
+      ];
+  const selectList = [
+    selectColumn(productColumns, 'p', 'product_id', 'NULL'),
+    selectColumn(productColumns, 'p', 'slug', "''"),
+    selectColumn(productColumns, 'p', 'sku', "''"),
+    selectColumn(productColumns, 'p', 'name', sqlString('Untitled product')),
+    selectColumn(productColumns, 'p', 'short_description', "''"),
+    selectColumn(productColumns, 'p', 'description', "''"),
+    selectColumn(productColumns, 'p', 'product_type', sqlString('physical')),
+    selectColumn(productColumns, 'p', 'status', sqlString('active')),
+    selectColumn(productColumns, 'p', 'color_name', "''"),
+    selectColumn(productColumns, 'p', 'color_names_json', sqlString('[]')),
+    selectColumn(productColumns, 'p', 'merchandise_origin', sqlString('handmade')),
+    selectColumn(productColumns, 'p', 'sale_channel', sqlString('onsite')),
+    selectColumn(productColumns, 'p', 'external_listing_url', "''"),
+    selectColumn(productColumns, 'p', 'external_listing_label', "''"),
+    selectColumn(productColumns, 'p', 'condition_summary', "''"),
+    selectColumn(productColumns, 'p', 'era_label', "''"),
+    selectColumn(productColumns, 'p', 'sourcing_notes', "''"),
+    selectColumn(productColumns, 'p', 'price_cents', '0'),
+    selectColumn(productColumns, 'p', 'compare_at_price_cents', 'NULL'),
+    selectColumn(productColumns, 'p', 'currency', sqlString('CAD')),
+    selectColumn(productColumns, 'p', 'taxable', '1'),
+    selectColumn(productColumns, 'p', 'tax_class_id', 'NULL'),
+    selectColumn(productColumns, 'p', 'requires_shipping', '0'),
+    selectColumn(productColumns, 'p', 'weight_grams', 'NULL'),
+    selectColumn(productColumns, 'p', 'inventory_tracking', '0'),
+    inventoryQuantityExpression(productColumns),
+    selectColumn(productColumns, 'p', 'digital_file_url', "''"),
+    selectColumn(productColumns, 'p', 'featured_image_url', "''"),
+    selectColumn(productColumns, 'p', 'sort_order', '0'),
+    selectColumn(productColumns, 'p', 'created_at', "''"),
+    selectColumn(productColumns, 'p', 'updated_at', "''"),
+    ...taxSelects,
+    ...seoSelects
+  ];
+  return `
+    SELECT
+      ${selectList.join(',\n      ')}
+    FROM products p
+    ${joins.join('\n    ')}
+    WHERE ${where}
+    LIMIT 1
+  `;
 }
 
 export async function onRequestGet(context) {
@@ -43,27 +192,28 @@ export async function onRequestGet(context) {
   if (!slug) return json({ ok: false, error: 'A valid slug is required.' }, 400);
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
 
-  const productColumns = await getTableColumnSet(db, 'products');
-  const hasColorNamesJson = productColumns.has('color_names_json');
+  const productColumns = await getVerifiedTableColumnSet(db, 'products', PRODUCT_COLUMN_CANDIDATES);
+  if (!productColumns.has('slug')) {
+    return json({ ok: false, error: 'Product database schema is missing the slug column.' }, 503);
+  }
 
-  const product = await db.prepare(`
-    SELECT
-      p.product_id, p.slug, p.sku, p.name, p.short_description, p.description, p.product_type, p.status,
-      p.color_name, ${'${hasColorNamesJson ? `p.color_names_json,` : `"" AS color_names_json,`}'}
-      COALESCE(p.merchandise_origin, 'handmade') AS merchandise_origin, COALESCE(p.sale_channel, 'onsite') AS sale_channel,
-      p.external_listing_url, p.external_listing_label, p.condition_summary, p.era_label, p.sourcing_notes,
-      p.price_cents, p.compare_at_price_cents, p.currency, p.taxable, p.tax_class_id, p.requires_shipping,
-      p.weight_grams, p.inventory_tracking, COALESCE(p.inventory_quantity, p.on_hand_quantity, 0) AS inventory_quantity,
-      p.digital_file_url, p.featured_image_url, p.sort_order, p.created_at, p.updated_at,
-      tc.code AS tax_class_code, tc.name AS tax_class_name, COALESCE(tc.rate_percent, tc.tax_rate, 0) AS tax_rate,
-      ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override, ps.canonical_url, ps.schema_type,
-      ps.og_title, ps.og_description, ps.og_image_url
-    FROM products p
-    LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id
-    LEFT JOIN product_seo ps ON ps.product_id = p.product_id
-    WHERE p.slug = ? AND p.status = 'active'
-    LIMIT 1
-  `).bind(slug).first();
+  const taxColumns = await getVerifiedTableColumnSet(db, 'tax_classes', TAX_COLUMN_CANDIDATES);
+  const seoColumns = await getVerifiedTableColumnSet(db, 'product_seo', SEO_COLUMN_CANDIDATES);
+  const hasTaxJoin = productColumns.has('tax_class_id') && taxColumns.has('tax_class_id');
+  const hasSeoJoin = seoColumns.has('product_id');
+  const productSql = buildProductDetailSql({ productColumns, taxColumns, seoColumns, hasTaxJoin, hasSeoJoin });
+
+  let product = null;
+  try {
+    product = await db.prepare(productSql).bind(slug).first();
+  } catch (error) {
+    return json({
+      ok: false,
+      error: 'Product detail is temporarily unavailable because the product schema is out of sync.',
+      detail: String(error?.message || error || 'Unknown product detail error')
+    }, 503);
+  }
+
 
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
   product.color_names = parseColorNamesJson(product.color_names_json, product.color_name || '');
