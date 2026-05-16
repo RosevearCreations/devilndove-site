@@ -28,17 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const summary = data.summary || {};
     const rows = Array.isArray(data.results) ? data.results : [];
     results.innerHTML = `
-      <div class="release-sanity-summary" style="margin-top:10px"><div>${pill(summary.status)} <strong>${esc(data.generated_at || '')}</strong></div><div class="small">Pass ${esc(summary.pass_count || 0)} • Warn ${esc(summary.warning_count || 0)} • Fail ${esc(summary.fail_count || 0)}</div></div>
-      <div class="admin-table-wrap" style="margin-top:10px"><table><thead><tr><th>Status</th><th>Endpoint</th><th>HTTP</th><th>Count</th><th>Authority / warning</th></tr></thead><tbody>
+      <div class="release-sanity-summary" style="margin-top:10px"><div>${pill(summary.status)} <strong>${esc(data.generated_at || '')}</strong></div><div class="small">Pass ${esc(summary.pass_count || 0)} • Warn ${esc(summary.warning_count || 0)} • Fail ${esc(summary.fail_count || 0)}</div></div>${data.db_snapshot ? `<details style="margin-top:8px"><summary>D1 snapshot</summary><pre class="small" style="white-space:pre-wrap">${esc(JSON.stringify(data.db_snapshot, null, 2))}</pre></details>` : ''}
+      <div class="admin-table-wrap" style="margin-top:10px"><table><thead><tr><th>Status</th><th>Endpoint</th><th>HTTP</th><th>Count</th><th>Authority / warning</th><th>Next action</th></tr></thead><tbody>
         ${rows.map((row) => `
           <tr>
             <td>${pill(row.ok ? (row.warning || row.error ? 'warn' : 'pass') : 'fail')}</td>
             <td><strong>${esc(row.label)}</strong><div class="small"><code>${esc(row.path)}</code> • ${esc(String(row.duration_ms || 0))}ms</div></td>
             <td>${esc(row.status || 0)}</td>
             <td>${row.count == null ? '—' : esc(row.count)}</td>
-            <td>${esc(row.authority || row.warning || row.error || 'ok')}</td>
+            <td>${esc(row.authority || row.warning || row.error || 'ok')}</td><td class="small">${esc(row.next_action || '')}</td>
           </tr>
-        `).join('') || '<tr><td colspan="5">No endpoint checks returned.</td></tr>'}
+        `).join('') || '<tr><td colspan="6">No endpoint checks returned.</td></tr>'}
       </tbody></table></div>
       <details style="margin-top:10px"><summary>Raw endpoint health payload</summary><pre class="small" style="white-space:pre-wrap">${esc(JSON.stringify(data, null, 2))}</pre></details>`;
   }
