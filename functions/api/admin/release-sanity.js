@@ -25,7 +25,12 @@ async function tableColumns(db, tableName) {
 async function publicJsonCheck(request, path) {
   const url = new URL(path, request.url);
   try {
-    const response = await fetch(url.toString(), { headers: { Accept: 'application/json' }, cf: { cacheTtl: 0, cacheEverything: false } });
+    const headers = { Accept: 'application/json' };
+    const cookie = request.headers.get('Cookie');
+    const authorization = request.headers.get('Authorization');
+    if (cookie) headers.Cookie = cookie;
+    if (authorization) headers.Authorization = authorization;
+    const response = await fetch(url.toString(), { headers, cf: { cacheTtl: 0, cacheEverything: false } });
     const data = await response.json().catch(() => null);
     return { ok: response.ok && data?.ok !== false, status: response.status, authority: data?.summary?.authority || data?.authority || '', warning: data?.warning || '', error: data?.error || data?.error_detail || '' };
   } catch (error) {
@@ -244,6 +249,45 @@ export async function onRequestGet(context) {
     productApi.ok ? `HTTP ${productApi.status}; authority ${productApi.authority || 'not reported'}${productApi.warning ? `; warning: ${productApi.warning}` : ''}.` : `HTTP ${productApi.status}; ${productApi.error || 'Products API failed.'}`,
     'Open Operations > Public API Health. If fallback authority remains, run Storefront Schema Repair, then retest /api/products.',
     productApi.ok ? 'warning' : 'error'
+  );
+
+
+
+  const structuredDataHealth = await publicJsonCheck(context.request, '/api/admin/structured-data-health');
+  addCheck(
+    checks,
+    structuredDataHealth.ok && !structuredDataHealth.error ? (structuredDataHealth.warning ? 'warn' : 'pass') : 'warn',
+    'Structured-data health endpoint',
+    structuredDataHealth.ok ? `HTTP ${structuredDataHealth.status}; structured-data health endpoint responded.` : `HTTP ${structuredDataHealth.status}; ${structuredDataHealth.error || 'Structured-data health endpoint could not be checked.'}`,
+    'Open Operations > Structured Data Health and repair missing JSON-LD/Product readiness warnings.',
+    'warning'
+  );
+
+  const sitemapPreviewHealth = await publicJsonCheck(context.request, '/api/admin/sitemap-preview');
+  addCheck(
+    checks,
+    sitemapPreviewHealth.ok && !sitemapPreviewHealth.error ? 'pass' : 'warn',
+    'Live sitemap preview endpoint',
+    sitemapPreviewHealth.ok ? `HTTP ${sitemapPreviewHealth.status}; sitemap preview responded.` : `HTTP ${sitemapPreviewHealth.status}; ${sitemapPreviewHealth.error || 'Sitemap preview endpoint could not be checked.'}`,
+    'Open Operations > Live Sitemap Preview and compare product URL count with live products.',
+    'warning'
+  );
+
+  const storefrontValueDefaults = productColumns.size ? await safeAll(db, `
+    SELECT 'status' AS field, COUNT(*) AS missing_count FROM products WHERE ${productColumns.has('status') ? "COALESCE(status,'') = ''" : '0'}
+    UNION ALL SELECT 'product_type', COUNT(*) FROM products WHERE ${productColumns.has('product_type') ? "COALESCE(product_type,'') = ''" : '0'}
+    UNION ALL SELECT 'merchandise_origin', COUNT(*) FROM products WHERE ${productColumns.has('merchandise_origin') ? "COALESCE(merchandise_origin,'') = ''" : '0'}
+    UNION ALL SELECT 'sale_channel', COUNT(*) FROM products WHERE ${productColumns.has('sale_channel') ? "COALESCE(sale_channel,'') = ''" : '0'}
+    UNION ALL SELECT 'currency', COUNT(*) FROM products WHERE ${productColumns.has('currency') ? "COALESCE(currency,'') = ''" : '0'}
+  `) : [];
+  const storefrontDefaultMissing = storefrontValueDefaults.reduce((total, row) => total + Number(row.missing_count || 0), 0);
+  addCheck(
+    checks,
+    storefrontDefaultMissing ? 'warn' : 'pass',
+    'Storefront value defaults',
+    `${storefrontDefaultMissing} product default value(s) are blank across status, type, origin, sale channel, and currency checks.`,
+    'Open Operations > Storefront Value Backfill and apply safe defaults after Storefront Schema Repair.',
+    'warning'
   );
 
   const schemaLedgerRow = await tableExists(db, 'schema_migration_ledger') ? await safeFirst(db, `
