@@ -38,7 +38,7 @@
 
     <div class="card" style="margin-bottom:18px">
       <h2 style="margin-top:0">Product editor</h2>
-      <p class="small" style="margin-top:0">Create a new product or load an existing one into the editor. Existing records can also be opened from the table below.</p>
+      <p class="small" style="margin-top:0">Create a quick draft with only the product name and type, then fill in price, SEO, images, resources, and publishing details when ready. Existing records can also be opened from the table below.</p>
       <div class="grid cols-3" style="gap:10px;margin-bottom:12px">
         <label>
           <span class="small">Load existing product</span>
@@ -52,6 +52,7 @@
         </div>
         <div class="small" id="existingProductHelp" style="display:flex;align-items:end">Use this picker when the product table is long or you already know which record you want to edit.</div>
       </div>
+      <div class="small" style="margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03)">Draft mode is intentionally light: SEO title/description, external listing URLs, pricing, and images are readiness items, not blockers. Switch status from Draft only when the product is ready for storefront review.</div>
       <div id="createProductMessage" class="small" style="display:none;margin-bottom:12px"></div>
       <form id="createProductForm">
         <div class="grid cols-3" style="gap:10px">
@@ -123,7 +124,7 @@
         </div>
         <label style="display:block;margin-top:12px"><span class="small">Open Graph description</span><textarea class="input" name="og_description" rows="3" maxlength="200"></textarea></label>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
-          <button class="btn primary" type="submit">Create Product</button>
+          <button class="btn primary" type="submit">Save Draft Product</button>
         </div>
       </form>
       <div id="productResourcesAdminMount"></div>
