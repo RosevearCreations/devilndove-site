@@ -6,6 +6,7 @@ Checks:
 - local script/style/image references exist
 - CSS brace counts are balanced enough to catch obvious drift
 - shared mobile navigation has compact expandable menu assets
+- operations admin has the structured-data, sitemap preview, and storefront backfill assets
 - public data folders do not contain private Amazon/order import reports
 
 This script does not require network access and is safe to run before zipping/deploying.
@@ -130,6 +131,34 @@ def check_mobile_nav(root: Path):
         issues.append({'type': 'mobile_nav_missing_css_assets', 'path': 'css/styles.css', 'missing': missing_css})
     return issues
 
+
+def check_operations_assets(root: Path):
+    issues = []
+    ops = root / 'admin' / 'operations' / 'index.html'
+    text = read_text(ops) if ops.exists() else ''
+    required = [
+        'structuredDataHealthAdminMount',
+        'storefrontValueBackfillAdminMount',
+        'sitemapPreviewAdminMount',
+        '/public/js/admin-structured-data-health.js',
+        '/public/js/admin-storefront-value-backfill.js',
+        '/public/js/admin-sitemap-preview.js',
+    ]
+    missing = [token for token in required if token not in text]
+    if missing:
+        issues.append({'type': 'operations_missing_admin_assets', 'path': 'admin/operations/index.html', 'missing': missing})
+    for ref in [
+        'public/js/admin-structured-data-health.js',
+        'public/js/admin-storefront-value-backfill.js',
+        'public/js/admin-sitemap-preview.js',
+        'functions/api/admin/structured-data-health.js',
+        'functions/api/admin/storefront-value-backfill.js',
+        'functions/api/admin/sitemap-preview.js',
+    ]:
+        if not (root / ref).exists():
+            issues.append({'type': 'operations_missing_asset_file', 'path': ref})
+    return issues
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('root', nargs='?', default='.', help='Build root to check')
@@ -142,7 +171,8 @@ def main(argv=None) -> int:
     css_issues = check_css(root)
     privacy_issues = check_public_privacy(root)
     mobile_nav_issues = check_mobile_nav(root)
-    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues
+    operations_issues = check_operations_assets(root)
+    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues
     report = {
         'ok': not issues,
         'root': str(root),

@@ -63,3 +63,7 @@ Amazon order/cost data should continue through private staging and review. Build
 ## Build 132 note
 
 Build 132 did not change Amazon matching rules or staged purchase approval logic. It keeps the prior Amazon review-first workflow and only updates mobile navigation, mobile layout polish, sanity checks, and documentation.
+
+## Build 133 note
+
+Build 133 does not change Amazon matching rules, but the next pass should add duplicate detection and manual relinking before any bulk approval workflow.

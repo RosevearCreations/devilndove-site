@@ -495,3 +495,37 @@ ALTER TABLE accounting_journal_entries ADD COLUMN posted_at TEXT;
 ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 
 -- Build 132 note: no structural D1 schema change; mobile-navigation and predeploy-sanity code-only pass recorded in database_upgrade_current_pass.sql.
+
+-- Build 133 SEO extension: Search Console CSV staging foundation.
+CREATE TABLE IF NOT EXISTS search_console_import_batches (
+  search_console_import_batch_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  import_batch_key TEXT NOT NULL UNIQUE,
+  source_file TEXT,
+  site_property TEXT,
+  row_count INTEGER NOT NULL DEFAULT 0,
+  imported_by_user_id INTEGER,
+  imported_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS search_console_page_queries (
+  search_console_page_query_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  import_batch_key TEXT,
+  report_date TEXT,
+  page_url TEXT NOT NULL,
+  query_text TEXT,
+  clicks INTEGER NOT NULL DEFAULT 0,
+  impressions INTEGER NOT NULL DEFAULT 0,
+  ctr REAL NOT NULL DEFAULT 0,
+  average_position REAL NOT NULL DEFAULT 0,
+  country TEXT,
+  device TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_page
+  ON search_console_page_queries(page_url, report_date);
+CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_query
+  ON search_console_page_queries(query_text, report_date);
+CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_batch
+  ON search_console_page_queries(import_batch_key);
