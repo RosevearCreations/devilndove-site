@@ -243,9 +243,9 @@ export async function onRequestPost(context) {
     if (!Number.isInteger(sort_order)) {
       return json({ ok: false, error: "sort_order must be a valid whole number." }, 400);
     }
-    if (sale_channel !== "onsite" && !external_listing_url) {
+    if (status !== "draft" && sale_channel !== "onsite" && !external_listing_url) {
       return json(
-        { ok: false, error: "Add an external listing URL when sale_channel is external_only or hybrid." },
+        { ok: false, error: "Add an external listing URL before activating hybrid or external-only items. Drafts can skip this." },
         400
       );
     }
