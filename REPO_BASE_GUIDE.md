@@ -61,3 +61,7 @@ Use `scripts/predeploy_sanity_check.py` before packaging when possible. For live
 ## Build 132 repository note
 
 Mobile navigation changes live in `/js/main.js` and `/css/styles.css`. Do not duplicate per-page nav markup unless necessary; the shared nav injector should remain the source of truth for public pages. Use the predeploy sanity script before zipping.
+
+## Build 133 note
+
+Build 133 adds admin Operations assets for structured data health, live sitemap preview, and safe storefront value backfill. Keep these panels together on `/admin/operations/` when refactoring admin departments.

@@ -49,3 +49,7 @@ Do not add private Amazon order exports, match reports, cost reports, or transac
 ## Build 132 rule addition
 
 For mobile navigation, keep the shared menu compact and grouped. Avoid adding more always-visible top-level mobile links; place secondary links inside grouped expandable sections so phone screens do not become a long menu wall.
+
+## Build 133 note
+
+Build 133 rule reminder: do not expose private Amazon/order CSV files under public `/data/`; Search Console imports should go to D1 staging tables, not public JSON.

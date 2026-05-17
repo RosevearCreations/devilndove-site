@@ -117,3 +117,9 @@ This protects older product schemas that do not yet have fields such as `merchan
 ## Build 132 schema note
 
 Build 132 does not add or remove D1 tables/columns. It is a code/CSS/mobile UX pass. The schema files were still touched with a no-structure-change note, and `database_upgrade_current_pass.sql` contains a Build 132 ledger marker so the release can be recorded in the migration ledger.
+
+## Build 133 schema update
+
+Build 133 adds Search Console CSV staging tables: `search_console_import_batches` and `search_console_page_queries`. These support future imports of page, query, clicks, impressions, CTR, average position, country, and device data.
+
+The pass also adds `/api/admin/storefront-value-backfill`, which performs runtime-safe product default backfills only after checking live D1 columns. This avoids unconditional `ALTER TABLE` patterns that are unsafe in D1/SQLite.

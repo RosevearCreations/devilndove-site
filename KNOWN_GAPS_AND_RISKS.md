@@ -120,3 +120,11 @@ Current sync: 2026-05-15 — Build 130.
 - The mobile drawer is a code/CSS fix only. No D1 schema change is required, but the Build 132 marker should still be recorded so the release ledger remains complete.
 - Admin department shortcut buttons now scroll horizontally on small screens; future work should add a dedicated admin mobile command palette if the admin page count keeps growing.
 - The next major risk is still D1/product schema drift and accounting workflow completeness, not the menu itself.
+
+## Build 133 known gaps and risk updates
+
+- Structured Data Health is a diagnostic layer, not a guarantee that Google will show rich results. It helps catch missing/invalid JSON-LD and Product-readiness fields before pages are submitted or crawled.
+- Live Sitemap Preview does not overwrite the static `sitemap.xml` yet. It gives a live D1 product URL preview so the next pass can decide whether to regenerate static XML or move to a dynamic sitemap route.
+- Storefront Value Backfill is intentionally conservative. It fills blank defaults and creates missing `product_seo` placeholder rows, but it does not invent product descriptions, prices, or images.
+- Search Console tables are staging-only. The actual CSV import screen and charts are still pending.
+- The mobile menu should remain compact from Build 132, but deployed phones should still be checked after cache clears.

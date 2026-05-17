@@ -1163,3 +1163,7 @@ ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 -- Build 130 note: storefront product endpoints now degrade safely when optional store/product columns are absent.
 
 -- Build 132 note: no structural D1 schema change; mobile-navigation and predeploy-sanity code-only pass recorded in database_upgrade_current_pass.sql.
+
+-- Build 133 note: storefront schema is current with admin Structured Data Health,
+-- Live Sitemap Preview, and Storefront Value Backfill. Search Console staging
+-- tables live in database_full_schema.sql and database_growth_analytics_seo_extension.sql.

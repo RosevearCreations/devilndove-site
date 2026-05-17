@@ -80,3 +80,22 @@ This local script checks one H1, title/meta descriptions, missing local referenc
   4. Confirm Shop/Search/Cart quick buttons are visible.
   5. Confirm the drawer scrolls inside the screen and closes cleanly.
   6. Check `/admin/catalog/` or `/admin/operations/` and confirm department buttons no longer create a long stacked wall on phone screens.
+
+## Build 133 sanity checklist
+
+1. Deploy Build 133.
+2. Apply or record `database_upgrade_current_pass.sql`.
+3. Open `/admin/operations/`.
+4. Run Storefront Schema Repair.
+5. Run Storefront Value Backfill inspect, then apply only if the pending defaults look safe.
+6. Run Structured Data Health.
+7. Run Live Sitemap Preview.
+8. Run Public API Health and Release Sanity.
+9. Confirm exposed pages still have one H1, title, and meta description.
+10. Confirm the mobile main menu still opens as grouped expandable sections.
+
+Local predeploy command remains:
+
+```bash
+python scripts/predeploy_sanity_check.py .
+```

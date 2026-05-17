@@ -52,3 +52,7 @@ The SEO habit remains: one clear H1, focused title/meta, and natural local wordi
 ## Build 132 local SEO and mobile UX note
 
 The mobile menu now groups the main site sections so local shoppers can reach Shop, Search, Cart, local landing pages, tools, supplies, and contact paths without scrolling through a long flat list. This supports local discovery by keeping important search words and local-intent pages reachable from the shared navigation while preserving one clear H1 per page.
+
+## Build 133 local SEO operations
+
+Build 133 adds an admin Structured Data Health check and Live Sitemap Preview. Use these after each deploy so local pages keep clear titles/headings, readable structured data, and live product URLs in the sitemap workflow. Search Console staging tables were added so future passes can import real query/page performance instead of guessing which Ontario/local phrases are working.
