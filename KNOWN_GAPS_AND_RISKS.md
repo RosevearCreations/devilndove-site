@@ -1,6 +1,15 @@
 # Known Gaps and Risks — Current Active List
 
-Current sync: 2026-05-15 — Build 130.
+Current sync: 2026-05-17 — Build 134.
+
+
+## Build 134 product editor risk update
+
+- The Product editor now supports true draft creation with only product name and product type required.
+- SEO title, SEO description, price, category, featured image, and external listing URL are publish-readiness fields, not draft blockers.
+- `/api/admin/create-product` now returns JSON on server failure and records `admin_products/create_product_failed` runtime incidents instead of allowing an HTML 500 page to produce `Unexpected token '<'` in the browser.
+- The inline image uploader depends on the R2 media bucket binding and public media base URL. If those bindings are missing, the form still supports pasted image URLs and the API will return a readable JSON error.
+- Remaining risk: existing-product edit mode still needs the same inline uploader workflow; use the Product Images panel or pasted URLs until that is added.
 
 ## Highest-priority gaps still open
 1. The accounting backend is stronger, but it is still not a finished tax-filing system.

@@ -123,3 +123,7 @@ Build 132 does not add or remove D1 tables/columns. It is a code/CSS/mobile UX p
 Build 133 adds Search Console CSV staging tables: `search_console_import_batches` and `search_console_page_queries`. These support future imports of page, query, clicks, impressions, CTR, average position, country, and device data.
 
 The pass also adds `/api/admin/storefront-value-backfill`, which performs runtime-safe product default backfills only after checking live D1 columns. This avoids unconditional `ALTER TABLE` patterns that are unsafe in D1/SQLite.
+
+## Build 134 schema note
+
+No structural D1 schema change is required for Build 134. The product create endpoint now inspects live `products`, `product_images`, and `product_seo` columns before inserting, which protects older D1 databases while Storefront Schema Repair remains the preferred long-term schema alignment tool.

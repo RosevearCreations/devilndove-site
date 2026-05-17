@@ -92,3 +92,8 @@ Build 132 improves the public mobile header/menu. The hamburger drawer now uses 
 ## Build 133 release note
 
 Build 133 adds Operations panels for Structured Data Health, Storefront Value Backfill, and Live Sitemap Preview while preserving the compact grouped mobile menu from Build 132. After deploying, apply/record `database_upgrade_current_pass.sql`, then run the Operations checks and apply safe storefront value backfill only after reviewing the inspect report.
+
+
+## Build 134 note
+
+This pass fixes the Product editor draft workflow: drafts require only name/type, image upload is available from the editor when R2 media storage is configured, create-product failures return JSON instead of HTML 500 pages, and the create endpoint adapts to live D1 product/media/SEO columns.

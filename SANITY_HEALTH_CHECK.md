@@ -99,3 +99,10 @@ Local predeploy command remains:
 ```bash
 python scripts/predeploy_sanity_check.py .
 ```
+
+## Build 134 sanity additions
+
+- Product editor draft-save smoke test: create a draft with only product name and product type.
+- Product editor error-handling smoke test: failed `/api/admin/create-product` responses should show readable JSON-backed messages, not `Unexpected token '<'`.
+- Product media smoke test: use the inline image uploader if R2 media storage is configured; otherwise paste a URL and confirm the draft still saves.
+- Runtime follow-up: check Operations > Runtime Incidents for `admin_products/create_product_failed` after the first live draft test.

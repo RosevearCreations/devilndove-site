@@ -660,9 +660,12 @@ CREATE TABLE IF NOT EXISTS accounting_attachments (
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_expense ON accounting_attachments(expense_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_vendor ON accounting_attachments(vendor_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_period ON accounting_attachments(period_month, tax_year, reconciliation_type, attachment_kind);
-ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded';
-ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT;
+-- Build 134 schema cleanup: column accounting_attachments.attachment_status already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded';
+-- Build 134 schema cleanup: column accounting_attachments.document_date already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT;
+-- Build 134 schema cleanup: column accounting_attachments.scope_key already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT;
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_scope ON accounting_attachments(reconciliation_type, period_month, scope_key, attachment_kind);
 
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_reference TEXT;
@@ -677,17 +680,28 @@ ALTER TABLE accounting_reconciliation_reviews ADD COLUMN observed_rate_basis_poi
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN unresolved_item_count INTEGER NOT NULL DEFAULT 0;
 
 -- Current pass additions for statement-backed accounting attachments
-ALTER TABLE accounting_attachments ADD COLUMN attachment_scope TEXT NOT NULL DEFAULT 'other';
-ALTER TABLE accounting_attachments ADD COLUMN provider_scope TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN statement_gross_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_fee_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_net_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_tax_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_shipping_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_txn_count INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_period_start TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN statement_period_end TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT;
+-- Build 134 schema cleanup: column accounting_attachments.attachment_scope already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN attachment_scope TEXT NOT NULL DEFAULT 'other';
+-- Build 134 schema cleanup: column accounting_attachments.provider_scope already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN provider_scope TEXT;
+-- Build 134 schema cleanup: column accounting_attachments.statement_gross_cents already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN statement_gross_cents INTEGER NOT NULL DEFAULT 0;
+-- Build 134 schema cleanup: column accounting_attachments.statement_fee_cents already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN statement_fee_cents INTEGER NOT NULL DEFAULT 0;
+-- Build 134 schema cleanup: column accounting_attachments.statement_net_cents already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN statement_net_cents INTEGER NOT NULL DEFAULT 0;
+-- Build 134 schema cleanup: column accounting_attachments.statement_tax_cents already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN statement_tax_cents INTEGER NOT NULL DEFAULT 0;
+-- Build 134 schema cleanup: column accounting_attachments.statement_shipping_cents already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN statement_shipping_cents INTEGER NOT NULL DEFAULT 0;
+-- Build 134 schema cleanup: column accounting_attachments.statement_txn_count already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN statement_txn_count INTEGER NOT NULL DEFAULT 0;
+-- Build 134 schema cleanup: column accounting_attachments.statement_period_start already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN statement_period_start TEXT;
+-- Build 134 schema cleanup: column accounting_attachments.statement_period_end already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN statement_period_end TEXT;
+-- Build 134 schema cleanup: column accounting_attachments.statement_detail_json already exists in the CREATE TABLE block; duplicate ALTER removed for fresh-schema smoke tests.
+-- ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT;
 
 
 -- Current pass update: customer engagement automation timing rules
@@ -948,3 +962,5 @@ ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 -- Build 133 note: storefront schema is current with admin Structured Data Health,
 -- Live Sitemap Preview, and Storefront Value Backfill. Search Console staging
 -- tables live in database_full_schema.sql and database_growth_analytics_seo_extension.sql.
+
+-- Build 134 note: no structural schema change; create-product/admin product editor now adapts to existing product/media/SEO columns and treats draft-only fields as optional until publish readiness.

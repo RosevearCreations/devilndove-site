@@ -1,6 +1,15 @@
-# New Chat Status — Devil n Dove Build 133
+# New Chat Status — Devil n Dove Build 134
 
-Current output build: Build 133 structured-data health, live sitemap preview, safe storefront value backfill, Search Console staging, and mobile-menu preservation.
+Current output build: Build 134 draft-first product editor, inline image upload, JSON-safe create-product failures, and adaptive product create schema handling.
+
+## Current status — Build 134
+
+Build 134 fixes the admin Product editor workflow. Draft mode now only requires product name and product type. SEO title/description, price, category, images, and external links are treated as publish-readiness items instead of draft blockers. The Product editor now includes an inline image uploader that uses `/api/admin/media-upload` when R2 media storage is connected, while still allowing pasted image URLs.
+
+`/api/admin/create-product` was rebuilt to adapt to live D1 columns, insert SEO/images only when their tables/columns are present, and always return JSON on failure. Create-product failures are logged as runtime incidents under `admin_products/create_product_failed`.
+
+Post-deploy priority: open `/admin/products/`, create a draft with only name/type, test one pasted image URL, then test one upload if R2 media bindings are configured. If upload fails, inspect Operations > Runtime Incidents and confirm R2 public base settings.
+
 
 ## Current status — Build 133
 

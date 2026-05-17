@@ -53,3 +53,8 @@ For mobile navigation, keep the shared menu compact and grouped. Avoid adding mo
 ## Build 133 note
 
 Build 133 rule reminder: do not expose private Amazon/order CSV files under public `/data/`; Search Console imports should go to D1 staging tables, not public JSON.
+
+
+## Build 134 note
+
+This pass fixes the Product editor draft workflow: drafts require only name/type, image upload is available from the editor when R2 media storage is configured, create-product failures return JSON instead of HTML 500 pages, and the create endpoint adapts to live D1 product/media/SEO columns.

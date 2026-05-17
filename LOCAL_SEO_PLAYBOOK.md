@@ -56,3 +56,8 @@ The mobile menu now groups the main site sections so local shoppers can reach Sh
 ## Build 133 local SEO operations
 
 Build 133 adds an admin Structured Data Health check and Live Sitemap Preview. Use these after each deploy so local pages keep clear titles/headings, readable structured data, and live product URLs in the sitemap workflow. Search Console staging tables were added so future passes can import real query/page performance instead of guessing which Ontario/local phrases are working.
+
+
+## Build 134 note
+
+This pass fixes the Product editor draft workflow: drafts require only name/type, image upload is available from the editor when R2 media storage is configured, create-product failures return JSON instead of HTML 500 pages, and the create endpoint adapts to live D1 product/media/SEO columns.

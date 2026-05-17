@@ -59,3 +59,8 @@ The latest pass is Build 132. Main user request: the mobile main menu was too lo
 ## Build 133 AI handoff
 
 The current build includes Operations panels and endpoints for Structured Data Health, Storefront Value Backfill, and Live Sitemap Preview. The compact mobile menu from Build 132 must be preserved. The next AI pass should continue with Search Console CSV import UI, Amazon duplicate/relink hardening, and accounting close workflow expansion.
+
+
+## Build 134 note
+
+This pass fixes the Product editor draft workflow: drafts require only name/type, image upload is available from the editor when R2 media storage is configured, create-product failures return JSON instead of HTML 500 pages, and the create endpoint adapts to live D1 product/media/SEO columns.

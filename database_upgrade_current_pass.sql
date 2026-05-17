@@ -369,3 +369,17 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 134 current pass: draft-first product editor, JSON-safe create-product errors, and inline image upload, 2026-05-17.
+-- No structural D1 schema change is required. /api/admin/create-product now adapts to the live products/product_images/product_seo columns and returns JSON on failures.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build134',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 134. Code/admin UX pass: product editor draft mode now requires only product name/type, SEO/images/external links are publish-readiness items, inline media upload fills product image URL fields, and create-product failures return JSON with runtime incident logging instead of HTML 500 pages.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

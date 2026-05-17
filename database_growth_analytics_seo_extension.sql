@@ -529,3 +529,5 @@ CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_query
   ON search_console_page_queries(query_text, report_date);
 CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_batch
   ON search_console_page_queries(import_batch_key);
+
+-- Build 134 note: no structural schema change; create-product/admin product editor now adapts to existing product/media/SEO columns and treats draft-only fields as optional until publish readiness.

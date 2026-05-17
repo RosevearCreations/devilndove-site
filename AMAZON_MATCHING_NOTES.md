@@ -67,3 +67,8 @@ Build 132 did not change Amazon matching rules or staged purchase approval logic
 ## Build 133 note
 
 Build 133 does not change Amazon matching rules, but the next pass should add duplicate detection and manual relinking before any bulk approval workflow.
+
+
+## Build 134 note
+
+This pass fixes the Product editor draft workflow: drafts require only name/type, image upload is available from the editor when R2 media storage is configured, create-product failures return JSON instead of HTML 500 pages, and the create endpoint adapts to live D1 product/media/SEO columns.

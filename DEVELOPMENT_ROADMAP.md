@@ -1,6 +1,52 @@
 # Development Roadmap
 
-Current sync: 2026-05-16 — Build 133 structured-data health, live sitemap preview, safe storefront value backfill, Search Console staging, and mobile-menu preservation.
+## Completed 20 items in this pass — Build 134
+
+1. Reworked the admin Product editor to be draft-first instead of publish-first.
+2. Changed the Create button label to "Save Draft Product" so the workflow matches how partial products are actually created.
+3. Added clear draft-mode guidance that SEO, images, pricing, and external links are readiness items, not draft blockers.
+4. Relaxed client-side draft validation to require only product name and product type for a new draft.
+5. Kept external listing URL required only when a hybrid/external item is no longer in draft mode.
+6. Added publish-readiness badges for category, price, featured image, SEO title, and SEO description without blocking draft save.
+7. Added an inline Product pictures uploader to the Product editor.
+8. The uploader can place the uploaded image into featured image or the next empty gallery image URL field.
+9. The uploader sends product draft images through `/api/admin/media-upload` with FormData so JSON Content-Type is not forced on file uploads.
+10. Added upload status messaging, preview thumbnail, automatic alt-text suggestion, and mobile-friendly media upload layout.
+11. Added JSON-safe response handling in `admin-create-product.js` so HTML 500 pages produce a readable admin message instead of `Unexpected token '<'`.
+12. Rebuilt `/api/admin/create-product` with a top-level try/catch so failures return JSON and are logged as runtime incidents.
+13. Made `/api/admin/create-product` adaptive to the live `products` table columns instead of assuming every newer storefront column exists.
+14. Made product SEO insertion adaptive to the live `product_seo` table columns.
+15. Made product image insertion adaptive to the live `product_images` table columns.
+16. Added runtime incident logging with `incident_scope: admin_products` and `incident_code: create_product_failed` for failed creates.
+17. Allowed draft products to save without image, price, SEO title, SEO description, category, or external listing URL.
+18. Kept readiness scoring so incomplete drafts remain not-ready for storefront until missing publish fields are completed.
+19. Added product-editor checks to `scripts/predeploy_sanity_check.py` so future passes catch missing draft/media assets.
+20. Updated schema files, active Markdown, CSS, and the migration ledger marker for the Build 134 pass.
+
+## Next logical 20 steps after Build 134
+
+1. Deploy Build 134 and open `/admin/products/` on desktop and mobile.
+2. Create a draft with only product name and product type to confirm draft mode saves cleanly.
+3. Confirm the admin message no longer shows `Unexpected token '<'` if the API fails.
+4. If image upload fails, check whether the R2 media bucket binding and public base URL are configured for `/api/admin/media-upload`.
+5. Upload one product image from the editor and confirm the returned URL fills the featured/gallery image field.
+6. Create another draft with pasted image URLs only to confirm non-upload workflows still work.
+7. Open Operations > Runtime Incidents and check for new `admin_products/create_product_failed` rows.
+8. If a create-product incident appears, copy its `error_detail` and fix the exact live D1 column/table issue.
+9. Run Storefront Schema Repair after deployment if product columns are still missing.
+10. Run Storefront Value Backfill after several drafts exist so defaults and SEO placeholder rows can be filled safely.
+11. Add an edit-mode version of the same inline image uploader so existing products can receive new images without leaving the editor.
+12. Add a product draft checklist card that explains which missing fields block publish readiness.
+13. Add a one-click "Move draft to review" action that verifies image/SEO/price/category readiness first.
+14. Add an image library picker so uploaded media can be reused across products instead of re-uploaded.
+15. Add R2 binding diagnostics to Operations so missing media storage is visible before uploads fail.
+16. Add product-image health checks to Public API Health for featured and gallery image coverage.
+17. Add product SEO bulk-fix tools for drafts missing title, description, alt text, and local wording.
+18. Continue Search Console CSV import UI and page/query SEO performance reporting.
+19. Continue accounting work: payment application, HST review, journal automation, period close, and accountant export packaging.
+20. Continue local SEO refinement while keeping one clear H1 and mobile-friendly layouts on every exposed page.
+
+Current sync: 2026-05-17 — Build 134 draft-first product editor, inline image upload, JSON-safe create-product errors, and adaptive product create schema handling.
 
 ## Completed 20 items in this pass — Build 133
 

@@ -1167,3 +1167,5 @@ ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 -- Build 133 note: storefront schema is current with admin Structured Data Health,
 -- Live Sitemap Preview, and Storefront Value Backfill. Search Console staging
 -- tables live in database_full_schema.sql and database_growth_analytics_seo_extension.sql.
+
+-- Build 134 note: no structural schema change; create-product/admin product editor now adapts to existing product/media/SEO columns and treats draft-only fields as optional until publish readiness.
