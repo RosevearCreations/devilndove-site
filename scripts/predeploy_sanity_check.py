@@ -7,6 +7,7 @@ Checks:
 - CSS brace counts are balanced enough to catch obvious drift
 - shared mobile navigation has compact expandable menu assets
 - operations admin has the structured-data, sitemap preview, and storefront backfill assets
+- product editor has draft-first media upload and JSON-safe create-product assets
 - public data folders do not contain private Amazon/order import reports
 
 This script does not require network access and is safe to run before zipping/deploying.
@@ -159,6 +160,29 @@ def check_operations_assets(root: Path):
             issues.append({'type': 'operations_missing_asset_file', 'path': ref})
     return issues
 
+
+def check_product_editor_assets(root: Path):
+    issues = []
+    product_page = root / 'admin' / 'products' / 'index.html'
+    create_js = root / 'public' / 'js' / 'admin-create-product.js'
+    create_api = root / 'functions' / 'api' / 'admin' / 'create-product.js'
+    page_text = read_text(product_page) if product_page.exists() else ''
+    js_text = read_text(create_js) if create_js.exists() else ''
+    api_text = read_text(create_api) if create_api.exists() else ''
+    required_page = ['Draft mode is intentionally light', 'Save Draft Product', '/public/js/admin-create-product.js']
+    required_js = ['productDraftImageUploader', 'readApiJson', 'PUBLISH_READINESS_CONFIG', '/api/admin/media-upload']
+    required_api = ['captureRuntimeIncident', 'draft_mode_relaxed', 'addColumnValue', 'Products table is unavailable']
+    missing_page = [token for token in required_page if token not in page_text]
+    missing_js = [token for token in required_js if token not in js_text]
+    missing_api = [token for token in required_api if token not in api_text]
+    if missing_page:
+        issues.append({'type': 'product_editor_missing_page_assets', 'path': 'admin/products/index.html', 'missing': missing_page})
+    if missing_js:
+        issues.append({'type': 'product_editor_missing_js_assets', 'path': 'public/js/admin-create-product.js', 'missing': missing_js})
+    if missing_api:
+        issues.append({'type': 'product_editor_missing_api_assets', 'path': 'functions/api/admin/create-product.js', 'missing': missing_api})
+    return issues
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('root', nargs='?', default='.', help='Build root to check')
@@ -172,7 +196,8 @@ def main(argv=None) -> int:
     privacy_issues = check_public_privacy(root)
     mobile_nav_issues = check_mobile_nav(root)
     operations_issues = check_operations_assets(root)
-    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues
+    product_editor_issues = check_product_editor_assets(root)
+    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues
     report = {
         'ok': not issues,
         'root': str(root),
