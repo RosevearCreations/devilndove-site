@@ -270,9 +270,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const placement = normalizeText(panel.querySelector("#productDraftImagePlacement")?.value || "auto");
         const dimensions = await getImageDimensions(file);
         const formData = new FormData();
+        const currentProductId = Number(form?.dataset?.productId || window.DDCurrentProductEditorId || 0);
+        const attachToCurrentProduct = form?.dataset?.mode === "edit" && Number.isInteger(currentProductId) && currentProductId > 0;
         formData.append("file", file);
         formData.append("upload_scope", "product");
-        formData.append("attach_to_product", "0");
+        if (attachToCurrentProduct) formData.append("product_id", String(currentProductId));
+        formData.append("attach_to_product", attachToCurrentProduct ? "1" : "0");
         formData.append("set_featured", placement === "featured" ? "1" : "0");
         formData.append("variant_role", placement === "featured" ? "featured" : "gallery");
         formData.append("asset_tag", "draft-product-editor");
@@ -453,6 +456,8 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage(data.message || "Product draft saved successfully.");
       form.reset();
       form.dataset.mode = "create";
+      delete form.dataset.productId;
+      window.DDCurrentProductEditorId = 0;
       resetCreateDefaults();
       await loadTaxClasses();
       syncRequiredFieldOutlines();

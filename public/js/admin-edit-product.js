@@ -175,6 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
     editingProductId = null;
     latestPriceSuggestion = null;
     form.dataset.mode = "create";
+    delete form.dataset.productId;
+    window.DDCurrentProductEditorId = 0;
     if (submitButton) { submitButton.textContent = "Create Product"; submitButton.disabled = false; }
     const cancelButton = document.getElementById("cancelProductEdit");
     if (cancelButton) cancelButton.style.display = "none";
@@ -395,11 +397,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setFormModeEdit() {
     form.dataset.mode = "edit";
+    form.dataset.productId = String(editingProductId || "");
+    window.DDCurrentProductEditorId = Number(editingProductId || 0);
     if (submitButton) submitButton.textContent = "Update Product";
     ensureCancelButton().style.display = "";
   }
 
   async function fillForm(product, images) {
+    form.dataset.productId = String(product.product_id || editingProductId || "");
+    window.DDCurrentProductEditorId = Number(product.product_id || editingProductId || 0);
     setField("name", product.name || "");
     setField("slug", product.slug || "");
     setField("sku", product.sku || "");
@@ -717,6 +723,13 @@ document.addEventListener("DOMContentLoaded", () => {
       og_title: String(formData.get("og_title") || "").trim(),
       og_description: String(formData.get("og_description") || "").trim(),
       og_image_url: String(formData.get("og_image_url") || "").trim(),
+      merchandise_origin: String(formData.get("merchandise_origin") || "handmade").trim(),
+      sale_channel: String(formData.get("sale_channel") || "onsite").trim(),
+      external_listing_url: String(formData.get("external_listing_url") || "").trim(),
+      external_listing_label: String(formData.get("external_listing_label") || "").trim(),
+      condition_summary: String(formData.get("condition_summary") || "").trim(),
+      era_label: String(formData.get("era_label") || "").trim(),
+      sourcing_notes: String(formData.get("sourcing_notes") || "").trim(),
       image_urls
     };
 
