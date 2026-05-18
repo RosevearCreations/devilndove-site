@@ -1,5 +1,10 @@
 # Devil n Dove Site — Current Build
 
+## Build 135 update
+
+Admin product media workflow now includes Media/R2 Diagnostics, Product Image Health, a Product editor readiness checklist, reusable image picker, and edit-mode upload attachment. Run the Operations diagnostics after deployment before bulk product work.
+
+
 Current sync: 2026-05-14 — Build 125.
 
 ## Active purpose

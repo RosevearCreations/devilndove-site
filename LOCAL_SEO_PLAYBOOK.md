@@ -1,5 +1,10 @@
 # Local SEO Playbook — Devil n Dove
 
+## Build 135 SEO workflow note
+
+Product images now have stronger admin checks for featured image coverage and alt text. Keep product titles, H1/page titles, descriptions, and image alt text clear and locally useful where relevant, without adding multiple H1 headings.
+
+
 Current sync: 2026-05-14 — Build 125.
 
 ## What Build 125 added

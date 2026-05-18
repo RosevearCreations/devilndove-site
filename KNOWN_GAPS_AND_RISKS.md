@@ -1,5 +1,14 @@
 # Known Gaps and Risks — Current Active List
 
+## Build 135 known gaps and risk updates
+
+- Product uploads now have a public URL fallback and diagnostics, but the best long-term setup is still to configure `PRODUCT_MEDIA_PUBLIC_BASE_URL=https://assets.devilndove.com` in Cloudflare so the setting is explicit.
+- The Product editor checklist is a guidance layer; it does not replace final admin review before publishing.
+- The reusable image picker uses existing `media_assets` rows. Older images pasted directly into product URL fields may not appear in the picker until they are imported into `media_assets`.
+- Product Image Health samples the first missing-image and weak-alt rows, so large catalogs should still be repaired in batches.
+- Edit-mode uploads now attach to the loaded product, but unassigned uploads from earlier tests may still need manual linking or cleanup.
+
+
 Current sync: 2026-05-17 — Build 134.
 
 

@@ -1,5 +1,10 @@
 # New Chat Status — Devil n Dove Build 134
 
+## Current status — Build 135
+
+Build 135 adds Media/R2 Diagnostics, Product Image Health, a product draft checklist, reusable media picker, edit-mode image upload attachment, and saved handmade/vintage/external listing fields during product updates. Deploy it, run `database_upgrade_current_pass.sql` or record the Build 135 ledger marker, then test `/admin/products/` and `/admin/operations/`.
+
+
 Current output build: Build 134 draft-first product editor, inline image upload, JSON-safe create-product failures, and adaptive product create schema handling.
 
 ## Current status — Build 134

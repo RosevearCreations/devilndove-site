@@ -1,5 +1,10 @@
 # Database Schema Reference — Active Notes
 
+## Build 135 schema reference note
+
+No new structural tables are required for Build 135. The media diagnostics and image-health checks use existing `media_assets`, `product_images`, `product_image_annotations`, `products`, `runtime_incidents`, and `schema_migration_ledger` tables. `database_upgrade_current_pass.sql` includes the Build 135 ledger marker.
+
+
 Current sync: 2026-05-14 — Build 125.
 
 ## New or expanded tables in recent passes

@@ -1,5 +1,52 @@
 # Development Roadmap
 
+## Completed 20 items in this pass — Build 135
+
+1. Carried forward the media-upload public URL fallback so uploads return `https://assets.devilndove.com/...` when no explicit R2 public base variable is set.
+2. Added upload diagnostics to `/api/admin/media-upload` responses so admins can see the public base source and bucket binding used.
+3. Added `/api/admin/media-diagnostics` for admin-only R2/media configuration checks.
+4. Added Operations > Media / R2 Diagnostics with bucket binding, public base URL, sample URL, and recent media asset review.
+5. Added optional latest-public-URL verification from the Media / R2 Diagnostics panel.
+6. Added `/api/admin/product-image-health` for product featured image, gallery image, alt text, and media public URL coverage checks.
+7. Added Operations > Product Image Health with missing-image product samples and weak-alt-text image samples.
+8. Added Release Sanity checks for the new media diagnostics endpoint.
+9. Added Release Sanity checks for the new product image health endpoint.
+10. Added a live Product editor draft-readiness checklist that separates draft, review, and publish readiness.
+11. Added a one-click slug-from-name helper inside the Product editor checklist.
+12. Added a Move draft to review helper that verifies name, type, slug, category, price, and image before setting the review-ready draft state.
+13. Added a reusable image library picker inside the Product editor.
+14. Connected the image library picker to `/api/admin/media-assets` so existing R2 uploads can be reused instead of uploaded again.
+15. Added image-library tiles that can fill the featured image or next empty gallery image URL field.
+16. Updated the inline Product editor upload panel so edit-mode uploads attach to the currently loaded product instead of always being unassigned.
+17. Exposed the currently loaded product id to product editor helpers through form dataset/window state.
+18. Fixed product edit payloads so merchandise origin, sale channel, external listing details, condition, era, and sourcing notes are saved during updates.
+19. Added CSS for the checklist, reusable image picker, mobile image-library tiles, and media diagnostics metric cards.
+20. Updated schema files, active Markdown, the migration-ledger marker, and local predeploy sanity checks for Build 135 assets.
+
+## Next logical 20 steps after Build 135
+
+1. Deploy Build 135 and open `/admin/products/` on desktop and phone.
+2. Test image upload again and confirm the returned URL starts with `https://assets.devilndove.com/`.
+3. Run Operations > Media / R2 Diagnostics and confirm the bucket binding is connected.
+4. Add an explicit `PRODUCT_MEDIA_PUBLIC_BASE_URL=https://assets.devilndove.com` environment variable if the diagnostics panel says it is using the default fallback.
+5. Create a draft with only product name/type and confirm the checklist shows draft-ready but review/publish incomplete.
+6. Use Fill slug from name and confirm the slug field updates cleanly.
+7. Upload one new image while editing an existing product and confirm it attaches to that product.
+8. Use the reusable image library picker to assign an existing media asset to a draft product.
+9. Run Operations > Product Image Health and fix the first products without featured/gallery images.
+10. Fill short alt text rows shown by Product Image Health before publishing products.
+11. Add a bulk alt-text helper that creates draft alt text from product name, material, colour, and category.
+12. Add a real product media library page with filters for unassigned, duplicate URL, missing alt, weak score, and product-linked assets.
+13. Add one-click attach/detach controls for media assets from the media library page.
+14. Add a safe product publish wizard that requires passing the checklist before setting `status=active` and `review_status=published`.
+15. Add product SEO bulk tools for missing title, description, canonical, OG image, and JSON-LD readiness.
+16. Continue Search Console CSV import UI and page/query reporting.
+17. Continue Amazon duplicate detection, manual relinking, and high-confidence bulk approval with rollback notes.
+18. Continue accounting work: payment application, HST review, journal automation, period close/lock controls, and accountant export packaging.
+19. Continue local SEO refinement using one clear H1, clear title/meta pairs, and Ontario/Southern Ontario wording on relevant public pages.
+20. Keep CSS/mobile sanity checks in every pass because admin panels are becoming large and phone layout can drift.
+
+
 ## Completed 20 items in this pass — Build 134
 
 1. Reworked the admin Product editor to be draft-first instead of publish-first.

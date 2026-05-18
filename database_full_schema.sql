@@ -1777,3 +1777,7 @@ CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_batch
   ON search_console_page_queries(import_batch_key);
 
 -- Build 134 note: no structural schema change; create-product/admin product editor now adapts to existing product/media/SEO columns and treats draft-only fields as optional until publish readiness.
+
+-- Build 135 schema sync note: no new structural tables are required for the media/R2 diagnostics,
+-- product image health report, draft checklist, or reusable image picker. These features reuse existing
+-- products, product_images, media_assets, product_image_annotations, runtime_incidents, and schema_migration_ledger tables.

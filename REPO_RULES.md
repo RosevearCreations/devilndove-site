@@ -1,5 +1,10 @@
 # Repo Rules — Devil n Dove
 
+## Build 135 rule reminder
+
+When changing product media or product editor workflows, update `/admin/products/`, Operations diagnostics, schema notes, and Markdown together. Do not place private Amazon/order CSV reports under public `/data/`.
+
+
 Current sync: 2026-05-14 — Build 125.
 
 ## Required rules for future passes

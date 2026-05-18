@@ -1,5 +1,13 @@
 # Sanity Health Check — Build 132
 
+## Build 135 sanity additions
+
+- Run `/admin/operations/` > Media / R2 Diagnostics before testing product uploads.
+- Run Product Image Health after creating or editing products.
+- Run Release Sanity and confirm the new media/image checks respond.
+- On `/admin/products/`, verify the draft checklist, reusable image picker, image upload, and edit-mode attachment.
+
+
 Date: 2026-05-16
 
 ## Automated checks run during this pass

@@ -383,3 +383,19 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 135 current pass: media/R2 diagnostics, product image health, image library reuse, and draft checklist, 2026-05-17.
+-- No destructive structural change is required. The new admin diagnostics use the existing media_assets,
+-- product_images, and products tables and the existing R2 media bucket binding. Product editor updates are
+-- code/CSS/admin UX changes with adaptive create/update endpoints.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build135',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 135. Adds Media/R2 Diagnostics, Product Image Health, product-editor draft checklist, reusable image library picker, edit-mode image upload attachment, update-product handmade/vintage fields, and Release Sanity checks for media/image health.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

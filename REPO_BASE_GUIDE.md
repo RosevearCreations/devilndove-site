@@ -1,5 +1,10 @@
 # Repo Base Guide — Devil n Dove
 
+## Build 135 repository note
+
+New admin assets: `functions/api/admin/media-diagnostics.js`, `functions/api/admin/product-image-health.js`, `public/js/admin-media-diagnostics.js`, `public/js/admin-product-image-health.js`, and `public/js/admin-product-draft-checklist.js`. Keep these wired into Operations/Product pages during future refactors.
+
+
 Current sync: 2026-05-14 — Build 125.
 
 ## Main paths

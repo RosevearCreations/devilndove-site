@@ -1,5 +1,10 @@
 # Amazon Matching Notes — Tools and Supplies
 
+## Build 135 inventory/media note
+
+This pass did not change Amazon matching logic. It improves product media and editor readiness so reviewed Amazon-linked supplies/tools can support clearer product listings with better images and draft workflow.
+
+
 Current sync: 2026-05-14 — Build 125.
 
 ## Current status

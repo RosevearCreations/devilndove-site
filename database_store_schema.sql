@@ -1169,3 +1169,7 @@ ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 -- tables live in database_full_schema.sql and database_growth_analytics_seo_extension.sql.
 
 -- Build 134 note: no structural schema change; create-product/admin product editor now adapts to existing product/media/SEO columns and treats draft-only fields as optional until publish readiness.
+
+-- Build 135 schema sync note: no new structural tables are required for the media/R2 diagnostics,
+-- product image health report, draft checklist, or reusable image picker. These features reuse existing
+-- products, product_images, media_assets, product_image_annotations, runtime_incidents, and schema_migration_ledger tables.
