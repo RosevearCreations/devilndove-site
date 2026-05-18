@@ -1,5 +1,10 @@
 # AI Context — Devil n Dove
 
+## Build 135 AI handoff
+
+The latest pass focuses on product media workflow: R2/media diagnostics, product image health, draft checklist, reusable image library, edit-mode upload attachment, and update-product persistence for origin/channel/external listing fields. Continue to treat uploaded Amazon/order files as private and keep public `/data/` free of order details.
+
+
 Current sync: 2026-05-14 — Build 125.
 
 Devil n Dove is a Southern Ontario maker/storefront project with handmade jewelry, polymer clay, resin, laser engraving, sublimation, workshop tools/supplies, vintage/collectible finds, and admin/accounting workflows.

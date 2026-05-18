@@ -6,8 +6,8 @@ Checks:
 - local script/style/image references exist
 - CSS brace counts are balanced enough to catch obvious drift
 - shared mobile navigation has compact expandable menu assets
-- operations admin has the structured-data, sitemap preview, and storefront backfill assets
-- product editor has draft-first media upload and JSON-safe create-product assets
+- operations admin has the structured-data, sitemap preview, media diagnostics, product image health, and storefront backfill assets
+- product editor has draft-first media upload, checklist, image-library reuse, and JSON-safe create-product assets
 - public data folders do not contain private Amazon/order import reports
 
 This script does not require network access and is safe to run before zipping/deploying.
@@ -141,9 +141,13 @@ def check_operations_assets(root: Path):
         'structuredDataHealthAdminMount',
         'storefrontValueBackfillAdminMount',
         'sitemapPreviewAdminMount',
+        'mediaDiagnosticsAdminMount',
+        'productImageHealthAdminMount',
         '/public/js/admin-structured-data-health.js',
         '/public/js/admin-storefront-value-backfill.js',
         '/public/js/admin-sitemap-preview.js',
+        '/public/js/admin-media-diagnostics.js',
+        '/public/js/admin-product-image-health.js',
     ]
     missing = [token for token in required if token not in text]
     if missing:
@@ -155,6 +159,8 @@ def check_operations_assets(root: Path):
         'functions/api/admin/structured-data-health.js',
         'functions/api/admin/storefront-value-backfill.js',
         'functions/api/admin/sitemap-preview.js',
+        'functions/api/admin/media-diagnostics.js',
+        'functions/api/admin/product-image-health.js',
     ]:
         if not (root / ref).exists():
             issues.append({'type': 'operations_missing_asset_file', 'path': ref})
@@ -169,8 +175,8 @@ def check_product_editor_assets(root: Path):
     page_text = read_text(product_page) if product_page.exists() else ''
     js_text = read_text(create_js) if create_js.exists() else ''
     api_text = read_text(create_api) if create_api.exists() else ''
-    required_page = ['Draft mode is intentionally light', 'Save Draft Product', '/public/js/admin-create-product.js']
-    required_js = ['productDraftImageUploader', 'readApiJson', 'PUBLISH_READINESS_CONFIG', '/api/admin/media-upload']
+    required_page = ['Draft mode is intentionally light', 'Save Draft Product', '/public/js/admin-create-product.js', '/public/js/admin-product-draft-checklist.js']
+    required_js = ['productDraftImageUploader', 'readApiJson', 'PUBLISH_READINESS_CONFIG', '/api/admin/media-upload', 'attachToCurrentProduct']
     required_api = ['captureRuntimeIncident', 'draft_mode_relaxed', 'addColumnValue', 'Products table is unavailable']
     missing_page = [token for token in required_page if token not in page_text]
     missing_js = [token for token in required_js if token not in js_text]
