@@ -449,6 +449,11 @@ export async function onRequestPost(context) {
   return json({
     ok: true,
     message: "Image uploaded successfully.",
+    diagnostics: {
+      public_base_url: getProductMediaPublicBase(env),
+      public_base_source: env.PRODUCT_MEDIA_PUBLIC_BASE_URL ? "PRODUCT_MEDIA_PUBLIC_BASE_URL" : env.R2_PUBLIC_BASE_URL ? "R2_PUBLIC_BASE_URL" : env.PUBLIC_R2_BASE_URL ? "PUBLIC_R2_BASE_URL" : env.ASSET_ORIGIN ? "ASSET_ORIGIN" : "default_fallback",
+      bucket_binding: env.PRODUCT_MEDIA_BUCKET ? "PRODUCT_MEDIA_BUCKET" : env.MEDIA_BUCKET ? "MEDIA_BUCKET" : env.R2_PRODUCT_MEDIA ? "R2_PRODUCT_MEDIA" : "missing"
+    },
     asset: {
       media_asset_id: mediaAssetId,
       product_image_id: productImageId,
