@@ -253,6 +253,27 @@ export async function onRequestGet(context) {
 
 
 
+
+  const mediaDiagnostics = await publicJsonCheck(context.request, '/api/admin/media-diagnostics');
+  addCheck(
+    checks,
+    mediaDiagnostics.ok && !mediaDiagnostics.error ? (mediaDiagnostics.warning ? 'warn' : 'pass') : 'warn',
+    'Media/R2 diagnostics endpoint',
+    mediaDiagnostics.ok ? `HTTP ${mediaDiagnostics.status}; media diagnostics responded.` : `HTTP ${mediaDiagnostics.status}; ${mediaDiagnostics.error || 'Media diagnostics endpoint could not be checked.'}`,
+    'Open Operations > Media / R2 Diagnostics before testing product image upload.',
+    'warning'
+  );
+
+  const productImageHealth = await publicJsonCheck(context.request, '/api/admin/product-image-health');
+  addCheck(
+    checks,
+    productImageHealth.ok && !productImageHealth.error ? (productImageHealth.warning ? 'warn' : 'pass') : 'warn',
+    'Product image health endpoint',
+    productImageHealth.ok ? `HTTP ${productImageHealth.status}; product image health responded.` : `HTTP ${productImageHealth.status}; ${productImageHealth.error || 'Product image health endpoint could not be checked.'}`,
+    'Open Operations > Product Image Health and patch missing featured/gallery images before publishing.',
+    'warning'
+  );
+
   const structuredDataHealth = await publicJsonCheck(context.request, '/api/admin/structured-data-health');
   addCheck(
     checks,

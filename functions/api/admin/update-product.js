@@ -288,83 +288,51 @@ export async function onRequestPost(context) {
       if (!taxClass) return json({ ok: false, error: "Selected tax class was not found." }, 400);
     }
 
-    const assignments = [
-      "product_number = ?",
-      "slug = ?",
-      "sku = ?",
-      "name = ?",
-      "product_category = ?",
-      "color_name = ?",
-      "shipping_code = ?",
-      "review_status = ?",
-      "is_ready_for_storefront = ?",
-      "ready_check_notes = ?",
-      "short_description = ?",
-      "description = ?",
-      "product_type = ?",
-      "status = ?",
-      "price_cents = ?",
-      "compare_at_price_cents = ?",
-      "currency = ?",
-      "taxable = ?",
-      "tax_class_id = ?",
-      "requires_shipping = ?",
-      "weight_grams = ?",
-      "inventory_tracking = ?",
-      "inventory_quantity = ?",
-      "digital_file_url = ?",
-      "featured_image_url = ?",
-      "sort_order = ?"
-    ];
+    const assignments = [];
+    const bindValues = [];
+    const addColumnValue = (column, value) => {
+      if (!productColumns.has(column)) return;
+      assignments.push(`${column} = ?`);
+      bindValues.push(value);
+    };
 
-    const bindValues = [
-      product_number,
-      slug,
-      sku,
-      name,
-      product_category,
-      color_name,
-      shipping_code,
-      review_status,
-      readiness.is_ready_for_storefront,
-      readiness.ready_check_notes || null,
-      short_description,
-      description,
-      product_type,
-      status,
-      price_cents,
-      compare_at_price_cents,
-      currency,
-      taxable,
-      tax_class_id,
-      requires_shipping,
-      weight_grams,
-      inventory_tracking,
-      inventory_quantity,
-      digital_file_url,
-      featured_image_url,
-      sort_order
-    ];
+    addColumnValue("product_number", product_number);
+    addColumnValue("slug", slug);
+    addColumnValue("sku", sku);
+    addColumnValue("name", name);
+    addColumnValue("product_category", product_category);
+    addColumnValue("color_name", color_name);
+    addColumnValue("shipping_code", shipping_code);
+    addColumnValue("review_status", review_status);
+    addColumnValue("is_ready_for_storefront", readiness.is_ready_for_storefront);
+    addColumnValue("ready_check_notes", readiness.ready_check_notes || null);
+    addColumnValue("short_description", short_description);
+    addColumnValue("description", description);
+    addColumnValue("product_type", product_type);
+    addColumnValue("status", status);
+    addColumnValue("price_cents", price_cents);
+    addColumnValue("compare_at_price_cents", compare_at_price_cents);
+    addColumnValue("currency", currency);
+    addColumnValue("taxable", taxable);
+    addColumnValue("tax_class_id", tax_class_id);
+    addColumnValue("requires_shipping", requires_shipping);
+    addColumnValue("weight_grams", weight_grams);
+    addColumnValue("inventory_tracking", inventory_tracking);
+    addColumnValue("inventory_quantity", inventory_quantity);
+    addColumnValue("digital_file_url", digital_file_url);
+    addColumnValue("featured_image_url", featured_image_url);
+    addColumnValue("sort_order", sort_order);
+    addColumnValue("color_names_json", color_names_json);
+    addColumnValue("merchandise_origin", merchandise_origin);
+    addColumnValue("sale_channel", sale_channel);
+    addColumnValue("external_listing_url", external_listing_url);
+    addColumnValue("external_listing_label", external_listing_label);
+    addColumnValue("condition_summary", condition_summary);
+    addColumnValue("era_label", era_label);
+    addColumnValue("sourcing_notes", sourcing_notes);
 
-    const optionalPairs = [
-      ["color_names_json", color_names_json],
-      ["merchandise_origin", merchandise_origin],
-      ["sale_channel", sale_channel],
-      ["external_listing_url", external_listing_url],
-      ["external_listing_label", external_listing_label],
-      ["condition_summary", condition_summary],
-      ["era_label", era_label],
-      ["sourcing_notes", sourcing_notes]
-    ];
-
-    optionalPairs.forEach(([column, value]) => {
-      if (productColumns.has(column)) {
-        assignments.push(`${column} = ?`);
-        bindValues.push(value);
-      }
-    });
-
-    assignments.push("updated_at = CURRENT_TIMESTAMP");
+    if (productColumns.has("updated_at")) assignments.push("updated_at = CURRENT_TIMESTAMP");
+    if (!assignments.length) return json({ ok: false, error: "Products table has no editable columns available for update." }, 500);
     bindValues.push(product_id);
 
     await db
