@@ -294,6 +294,16 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+  const searchConsoleHealth = await publicJsonCheck(context.request, '/api/admin/search-console-import');
+  addCheck(
+    checks,
+    searchConsoleHealth.ok && !searchConsoleHealth.error ? 'pass' : 'warn',
+    'Search Console import endpoint',
+    searchConsoleHealth.ok ? `HTTP ${searchConsoleHealth.status}; Search Console import summary responded.` : `HTTP ${searchConsoleHealth.status}; ${searchConsoleHealth.error || 'Search Console import endpoint could not be checked.'}`,
+    'Open Operations > Search Console CSV Import and stage recent page/query exports before changing SEO titles or local wording.',
+    'warning'
+  );
+
   const storefrontValueDefaults = productColumns.size ? await safeAll(db, `
     SELECT 'status' AS field, COUNT(*) AS missing_count FROM products WHERE ${productColumns.has('status') ? "COALESCE(status,'') = ''" : '0'}
     UNION ALL SELECT 'product_type', COUNT(*) FROM products WHERE ${productColumns.has('product_type') ? "COALESCE(product_type,'') = ''" : '0'}
