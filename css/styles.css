@@ -626,3 +626,11 @@ body.nav-mobile-open{overflow:hidden}
 .media-diagnostic-metrics strong{font-size:1.35rem}
 @media (max-width:760px){.dd-draft-checklist-actions,.dd-draft-checklist-actions .btn{width:100%}.dd-draft-checklist-actions .btn{justify-content:center}.dd-image-library-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:360px}.media-diagnostic-metrics.grid.cols-4{grid-template-columns:1fr 1fr}}
 @media (max-width:480px){.dd-image-library-grid{grid-template-columns:1fr}.media-diagnostic-metrics.grid.cols-4{grid-template-columns:1fr}}
+
+/* Build 136: Search Console CSV import and SEO opportunity review */
+.search-console-admin-panel textarea{width:100%;min-height:120px;resize:vertical}
+.search-console-import-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;align-items:end}
+.search-console-admin-panel input[type="file"]{width:100%;padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.035);color:inherit}
+.search-console-admin-panel h3{margin-top:18px;margin-bottom:8px}
+.search-console-admin-panel code{white-space:normal;overflow-wrap:anywhere}
+@media (max-width:760px){.search-console-import-grid{grid-template-columns:1fr}.search-console-admin-panel .admin-table-wrap{max-height:360px;overflow:auto}.search-console-admin-panel .btn{width:100%;justify-content:center}}
