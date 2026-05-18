@@ -114,3 +114,14 @@ python scripts/predeploy_sanity_check.py .
 - Product editor error-handling smoke test: failed `/api/admin/create-product` responses should show readable JSON-backed messages, not `Unexpected token '<'`.
 - Product media smoke test: use the inline image uploader if R2 media storage is configured; otherwise paste a URL and confirm the draft still saves.
 - Runtime follow-up: check Operations > Runtime Incidents for `admin_products/create_product_failed` after the first live draft test.
+
+## Build 136 status — 2026-05-18
+
+- Added Operations > Search Console CSV Import.
+- Added `/api/admin/search-console-import` for private D1 staging of Search Console CSV exports.
+- Added top-page and SEO-opportunity summaries for manual title/meta/internal-link review.
+- Added Release Sanity coverage and current-pass SQL table/index self-healing for the Search Console staging tables.
+- Keep Search Console CSV exports private; do not store them in public `/data/`.
+
+Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
+

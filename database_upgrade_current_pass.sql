@@ -399,3 +399,51 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 136 current pass: Search Console CSV import UI, SEO opportunity review, and release-sanity coverage, 2026-05-18.
+-- The Search Console tables were introduced in Build 133. This pass adds the admin import/review workflow
+-- and repeats the safe table/index definitions so older D1 databases can self-heal when the current pass is applied.
+CREATE TABLE IF NOT EXISTS search_console_import_batches (
+  search_console_import_batch_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  import_batch_key TEXT NOT NULL UNIQUE,
+  source_file TEXT,
+  site_property TEXT,
+  row_count INTEGER NOT NULL DEFAULT 0,
+  imported_by_user_id INTEGER,
+  imported_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS search_console_page_queries (
+  search_console_page_query_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  import_batch_key TEXT,
+  report_date TEXT,
+  page_url TEXT NOT NULL,
+  query_text TEXT,
+  clicks INTEGER NOT NULL DEFAULT 0,
+  impressions INTEGER NOT NULL DEFAULT 0,
+  ctr REAL NOT NULL DEFAULT 0,
+  average_position REAL NOT NULL DEFAULT 0,
+  country TEXT,
+  device TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_page
+  ON search_console_page_queries(page_url, report_date);
+CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_query
+  ON search_console_page_queries(query_text, report_date);
+CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_batch
+  ON search_console_page_queries(import_batch_key);
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build136',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 136. Adds Operations > Search Console CSV Import, admin endpoint /api/admin/search-console-import, SEO opportunity summaries, mobile-safe import UI, and Release Sanity coverage for the Search Console staging workflow.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

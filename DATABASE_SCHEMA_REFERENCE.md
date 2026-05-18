@@ -132,3 +132,14 @@ The pass also adds `/api/admin/storefront-value-backfill`, which performs runtim
 ## Build 134 schema note
 
 No structural D1 schema change is required for Build 134. The product create endpoint now inspects live `products`, `product_images`, and `product_seo` columns before inserting, which protects older D1 databases while Storefront Schema Repair remains the preferred long-term schema alignment tool.
+
+## Build 136 status — 2026-05-18
+
+- Added Operations > Search Console CSV Import.
+- Added `/api/admin/search-console-import` for private D1 staging of Search Console CSV exports.
+- Added top-page and SEO-opportunity summaries for manual title/meta/internal-link review.
+- Added Release Sanity coverage and current-pass SQL table/index self-healing for the Search Console staging tables.
+- Keep Search Console CSV exports private; do not store them in public `/data/`.
+
+Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
+

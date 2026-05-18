@@ -52,3 +52,14 @@ After deploy: open `/admin/operations/`, run Storefront Schema Repair inspect/ap
 Build 132 focuses on mobile usability. The shared main menu now opens as a compact grouped drawer instead of a long flat list. The pass also hardens mobile drawer sizing, close/focus behavior, admin department shortcut layout on phones, and the local predeploy sanity script. No D1 structural migration is required; `database_upgrade_current_pass.sql` includes a Build 132 ledger marker.
 
 Post-deploy priority: test the main menu on a real phone, then run Operations > Public API Health and Release Sanity.
+
+## Build 136 status — 2026-05-18
+
+- Added Operations > Search Console CSV Import.
+- Added `/api/admin/search-console-import` for private D1 staging of Search Console CSV exports.
+- Added top-page and SEO-opportunity summaries for manual title/meta/internal-link review.
+- Added Release Sanity coverage and current-pass SQL table/index self-healing for the Search Console staging tables.
+- Keep Search Console CSV exports private; do not store them in public `/data/`.
+
+Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
+

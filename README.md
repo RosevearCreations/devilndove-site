@@ -102,3 +102,14 @@ Build 133 adds Operations panels for Structured Data Health, Storefront Value Ba
 ## Build 134 note
 
 This pass fixes the Product editor draft workflow: drafts require only name/type, image upload is available from the editor when R2 media storage is configured, create-product failures return JSON instead of HTML 500 pages, and the create endpoint adapts to live D1 product/media/SEO columns.
+
+## Build 136 status — 2026-05-18
+
+- Added Operations > Search Console CSV Import.
+- Added `/api/admin/search-console-import` for private D1 staging of Search Console CSV exports.
+- Added top-page and SEO-opportunity summaries for manual title/meta/internal-link review.
+- Added Release Sanity coverage and current-pass SQL table/index self-healing for the Search Console staging tables.
+- Keep Search Console CSV exports private; do not store them in public `/data/`.
+
+Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
+

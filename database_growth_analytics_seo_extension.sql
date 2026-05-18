@@ -535,3 +535,6 @@ CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_batch
 -- Build 135 schema sync note: no new structural tables are required for the media/R2 diagnostics,
 -- product image health report, draft checklist, or reusable image picker. These features reuse existing
 -- products, product_images, media_assets, product_image_annotations, runtime_incidents, and schema_migration_ledger tables.
+
+-- Build 136 note: Operations > Search Console CSV Import now writes to the Search Console staging tables above
+-- and summarizes pages/queries for manual SEO title/meta/internal-link review.

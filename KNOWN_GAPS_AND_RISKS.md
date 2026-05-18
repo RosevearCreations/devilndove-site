@@ -146,3 +146,12 @@ Current sync: 2026-05-17 — Build 134.
 - Storefront Value Backfill is intentionally conservative. It fills blank defaults and creates missing `product_seo` placeholder rows, but it does not invent product descriptions, prices, or images.
 - Search Console tables are staging-only. The actual CSV import screen and charts are still pending.
 - The mobile menu should remain compact from Build 132, but deployed phones should still be checked after cache clears.
+
+## Build 136 known gaps and risk updates
+
+- Search Console CSV import is manual and staging-only. It does not connect to Google Search Console directly and should be tested with a small export first.
+- Imported Search Console rows can accumulate quickly. A delete/revert batch action and date filters should be added before large recurring imports.
+- SEO opportunity rows are hints, not automatic edits. Review the actual page intent before changing titles, meta descriptions, H1 wording, or internal links.
+- The Search Console staging tables are private D1 tables. Do not place Search Console CSV exports under public `/data/` folders.
+- The next highest SEO value is turning imported opportunities into a simple page-level action list with suggested title/meta/internal-link improvements.
+

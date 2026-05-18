@@ -1,5 +1,53 @@
 # Development Roadmap
 
+## Completed 20 items in this pass — Build 136
+
+1. Added an admin-only `/api/admin/search-console-import` endpoint for Search Console CSV staging.
+2. Added CSV file upload support for Search Console exports.
+3. Added pasted-CSV support for small/manual Search Console imports.
+4. Added safe CSV parsing that handles quoted commas and blank rows.
+5. Added flexible column mapping for Page, Query, Clicks, Impressions, CTR, Position, Country, Device, and Date.
+6. Added Search Console import batch tracking with source file, site property, row count, notes, and importing admin user.
+7. Added top-page Search Console summaries by clicks, impressions, CTR, and average position.
+8. Added SEO opportunity query summaries for terms with impressions and average positions roughly between 4 and 20.
+9. Added Operations > Search Console CSV Import panel.
+10. Added mobile-friendly Search Console import form layout.
+11. Added Search Console import results tables for top pages, opportunity queries, and recent batches.
+12. Added Release Sanity coverage for the new Search Console import endpoint.
+13. Added current-pass SQL self-healing table/index definitions for Search Console staging tables.
+14. Added a Build 136 migration ledger marker.
+15. Preserved the compact grouped mobile menu from the previous passes.
+16. Preserved product editor draft/image upload fixes from the recent product workflow passes.
+17. Preserved media/R2 diagnostics and product image health checks.
+18. Updated schema notes for the Search Console staging workflow.
+19. Updated active Markdown files so the current build and next steps stay in sync.
+20. Ran syntax, H1/meta, CSS, reference, SQL, privacy, and ZIP integrity checks before packaging.
+
+## Next logical 20 steps after Build 136
+
+1. Deploy Build 136 and apply/record `database_upgrade_current_pass.sql`.
+2. Open `/admin/operations/` and run Search Console CSV Import.
+3. Export a small Search Console page/query CSV and import only a few rows first.
+4. Confirm the top-pages table shows clicks, impressions, CTR, and average position.
+5. Use the SEO opportunities table to pick one page/query pair for title/meta refinement.
+6. Compare the opportunity page against its current H1, title, and meta description.
+7. Add a Search Console delete/revert batch action before doing large imports.
+8. Add filters for date range, page path, query text, country, and device.
+9. Add a local SEO recommendations panel that converts query opportunities into suggested page-title/meta/internal-link tasks.
+10. Add Search Console trend charts once enough dated rows are imported.
+11. Add a sitemap-to-Search-Console coverage comparison.
+12. Add product SEO bulk tools for missing title, description, canonical, OG image, and Product JSON-LD readiness.
+13. Add a dedicated product media library page with filters for unassigned, duplicate URL, missing alt, weak score, and product-linked assets.
+14. Add one-click attach/detach controls for media assets.
+15. Add high-confidence Amazon bulk approval with rollback notes and duplicate detection.
+16. Add payment application workflow for matching payments to orders/invoices.
+17. Add HST/GST review worksheet for taxable sales, input tax credits, and remittance readiness.
+18. Add period close/lock and reopen controls.
+19. Add accountant export packaging with ledgers, journals, reconciliations, tax summaries, and attachment index.
+20. Continue checking one H1, local wording, mobile CSS, and public `/data/` privacy on every pass.
+
+Current sync: 2026-05-18 — Build 136 Search Console CSV import/review workflow, SEO opportunity summaries, and release-sanity coverage.
+
 ## Completed 20 items in this pass — Build 135
 
 1. Carried forward the media-upload public URL fallback so uploads return `https://assets.devilndove.com/...` when no explicit R2 public base variable is set.
