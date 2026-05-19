@@ -634,3 +634,11 @@ body.nav-mobile-open{overflow:hidden}
 .search-console-admin-panel h3{margin-top:18px;margin-bottom:8px}
 .search-console-admin-panel code{white-space:normal;overflow-wrap:anywhere}
 @media (max-width:760px){.search-console-import-grid{grid-template-columns:1fr}.search-console-admin-panel .admin-table-wrap{max-height:360px;overflow:auto}.search-console-admin-panel .btn{width:100%;justify-content:center}}
+
+/* Build 137: Search Console filter/revert/action-list polish */
+.btn.danger{border-color:rgba(176,0,32,.45);background:rgba(176,0,32,.12);color:#ffd6dc}
+.btn.danger:hover{background:rgba(176,0,32,.2)}
+.search-console-filter-panel{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,.025)}
+.search-console-filter-panel summary{cursor:pointer;font-weight:800}
+.search-console-admin-panel td .small{margin-top:4px;line-height:1.35}
+@media (max-width:760px){.search-console-filter-panel{padding:10px}.search-console-admin-panel details[open] summary{margin-bottom:8px}}
