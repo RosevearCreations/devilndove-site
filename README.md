@@ -1,11 +1,15 @@
-# Devil n Dove Site — Current Build
+# Devil n Dove Site
+
+## Build 137 update
+
+This build adds safer Search Console SEO workflow tools in Operations: filtered Search Console summaries, import batch delete/revert, and private SEO opportunity actions. These tools help review page/query opportunities before editing public titles, meta descriptions, headings, or internal links. Apply/record `database_upgrade_current_pass.sql` after deploying.
 
 ## Build 135 update
 
 Admin product media workflow now includes Media/R2 Diagnostics, Product Image Health, a Product editor readiness checklist, reusable image picker, and edit-mode upload attachment. Run the Operations diagnostics after deployment before bulk product work.
 
 
-Current sync: 2026-05-14 — Build 125.
+Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch revert, and private SEO opportunity action queue.
 
 ## Active purpose
 This repository powers the Devil n Dove public storefront, admin app, member area, catalog tools, accounting workflow, and Cloudflare Pages Functions backend.
@@ -112,4 +116,3 @@ This pass fixes the Product editor draft workflow: drafts require only name/type
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
-

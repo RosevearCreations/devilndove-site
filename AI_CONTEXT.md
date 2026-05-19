@@ -1,11 +1,13 @@
-# AI Context — Devil n Dove
+# AI Context — Devil n Dove Build 137
+
+Build 137 extends the Search Console workflow. The current admin flow is: import Search Console CSV privately, filter page/query opportunities, optionally delete/revert a bad import batch, then generate private `seo_opportunity_actions` for human-reviewed title/meta/internal-link tasks. Nothing edits public SEO copy automatically. Keep one H1 per exposed page, maintain local Ontario wording where relevant, and keep private CSV/order/import files out of public `/data/`.
 
 ## Build 135 AI handoff
 
 The latest pass focuses on product media workflow: R2/media diagnostics, product image health, draft checklist, reusable image library, edit-mode upload attachment, and update-product persistence for origin/channel/external listing fields. Continue to treat uploaded Amazon/order files as private and keep public `/data/` free of order details.
 
 
-Current sync: 2026-05-14 — Build 125.
+Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch revert, and private SEO opportunity action queue.
 
 Devil n Dove is a Southern Ontario maker/storefront project with handmade jewelry, polymer clay, resin, laser engraving, sublimation, workshop tools/supplies, vintage/collectible finds, and admin/accounting workflows.
 
@@ -79,4 +81,3 @@ This pass fixes the Product editor draft workflow: drafts require only name/type
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
-

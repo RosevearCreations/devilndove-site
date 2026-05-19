@@ -1,11 +1,15 @@
-# Repo Base Guide — Devil n Dove
+# Repo Base Guide
+
+## Build 137 note
+
+After deploying this build, apply or record `database_upgrade_current_pass.sql`. The new Search Console action queue is private D1 data and should not be exported into public static folders. Use `/admin/operations/` to test Search Console filters, batch delete/revert, and generated SEO action items.
 
 ## Build 135 repository note
 
 New admin assets: `functions/api/admin/media-diagnostics.js`, `functions/api/admin/product-image-health.js`, `public/js/admin-media-diagnostics.js`, `public/js/admin-product-image-health.js`, and `public/js/admin-product-draft-checklist.js`. Keep these wired into Operations/Product pages during future refactors.
 
 
-Current sync: 2026-05-14 — Build 125.
+Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch revert, and private SEO opportunity action queue.
 
 ## Main paths
 - `/functions/api/` — Cloudflare Pages Functions.

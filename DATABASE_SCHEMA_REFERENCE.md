@@ -1,11 +1,15 @@
-# Database Schema Reference — Active Notes
+# Database Schema Reference
+
+## Build 137 schema update
+
+Build 137 adds `seo_opportunity_actions`, a private admin table for Search Console-derived SEO tasks. It stores page URL, query text, priority score, suggested title, suggested meta description, suggested internal-link note, action status, source batch key, user, timestamps, and notes. Supporting indexes were added for action status/priority and page URL. Search Console CSV rows remain in `search_console_page_queries`; import batches remain in `search_console_import_batches`.
 
 ## Build 135 schema reference note
 
 No new structural tables are required for Build 135. The media diagnostics and image-health checks use existing `media_assets`, `product_images`, `product_image_annotations`, `products`, `runtime_incidents`, and `schema_migration_ledger` tables. `database_upgrade_current_pass.sql` includes the Build 135 ledger marker.
 
 
-Current sync: 2026-05-14 — Build 125.
+Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch revert, and private SEO opportunity action queue.
 
 ## New or expanded tables in recent passes
 
@@ -142,4 +146,3 @@ No structural D1 schema change is required for Build 134. The product create end
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
-

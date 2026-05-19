@@ -1,11 +1,15 @@
-# Repo Rules — Devil n Dove
+# Repo Rules
+
+## Build 137 rule reminder
+
+Search Console CSV exports, Amazon order CSVs, and generated review queues are private working data. Do not place them under public `/data/`. Public pages still require exactly one H1, a clear title, and a meta description.
 
 ## Build 135 rule reminder
 
 When changing product media or product editor workflows, update `/admin/products/`, Operations diagnostics, schema notes, and Markdown together. Do not place private Amazon/order CSV reports under public `/data/`.
 
 
-Current sync: 2026-05-14 — Build 125.
+Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch revert, and private SEO opportunity action queue.
 
 ## Required rules for future passes
 1. Update Markdown when code/schema changes.

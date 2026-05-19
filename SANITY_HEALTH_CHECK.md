@@ -1,4 +1,12 @@
-# Sanity Health Check — Build 132
+# Sanity Health Check — Build 137
+
+## Build 137 sanity additions
+
+1. Search Console CSV Import now supports filters for page, query, country, device, date range, impressions, position range, and result limit.
+2. Search Console import batches can be safely reverted/deleted from the Operations panel after typing the confirmation word.
+3. Private SEO opportunity actions are checked by Release Sanity through the `seo_opportunity_actions` table.
+4. The predeploy sanity script now verifies Search Console filter, batch delete, recommendation, and action-status assets.
+5. Continue using Release Sanity, Public API Health, Runtime Incidents, Media/R2 Diagnostics, Product Image Health, and D1 Schema Drift after deployment.
 
 ## Build 135 sanity additions
 
@@ -124,4 +132,3 @@ python scripts/predeploy_sanity_check.py .
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
-

@@ -447,3 +447,40 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 137 current pass: Search Console filtering, safe batch revert, and private SEO action list, 2026-05-18.
+CREATE TABLE IF NOT EXISTS seo_opportunity_actions (
+  seo_opportunity_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  action_key TEXT NOT NULL UNIQUE,
+  source TEXT NOT NULL DEFAULT 'search_console',
+  page_url TEXT NOT NULL,
+  query_text TEXT,
+  priority_score INTEGER NOT NULL DEFAULT 0,
+  suggested_title TEXT,
+  suggested_meta_description TEXT,
+  suggested_internal_link_note TEXT,
+  action_status TEXT NOT NULL DEFAULT 'open',
+  created_from_batch_key TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_filters
+  ON search_console_page_queries(report_date, country, device, impressions, average_position);
+CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_status
+  ON seo_opportunity_actions(action_status, priority_score);
+CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_page
+  ON seo_opportunity_actions(page_url);
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build137',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 137. Adds Search Console filters, delete/revert batch workflow, and private seo_opportunity_actions table for reviewable title/meta/internal-link tasks generated from imported Search Console opportunities.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

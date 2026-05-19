@@ -1,11 +1,15 @@
-# Amazon Matching Notes — Tools and Supplies
+# Amazon Matching Notes
+
+## Build 137 note
+
+This pass did not change Amazon matching logic. Amazon review/import data remains private. The next Amazon-related priorities are duplicate detection, high-confidence bulk approval with rollback notes, and clearer inventory relinking tools.
 
 ## Build 135 inventory/media note
 
 This pass did not change Amazon matching logic. It improves product media and editor readiness so reviewed Amazon-linked supplies/tools can support clearer product listings with better images and draft workflow.
 
 
-Current sync: 2026-05-14 — Build 125.
+Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch revert, and private SEO opportunity action queue.
 
 ## Current status
 Amazon CSV title matching has supplied Amazon URLs and cost candidates for Tools/Supplies. `catalog_items` is the catalog snapshot and `site_item_inventory` is the working inventory table used by admin product-resource screens.

@@ -1784,3 +1784,28 @@ CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_batch
 
 -- Build 136 note: Search Console CSV imports are staged through /api/admin/search-console-import.
 -- Tables: search_console_import_batches and search_console_page_queries. No public static CSV storage is used.
+
+-- Build 137 SEO action queue for Search Console opportunities.
+CREATE TABLE IF NOT EXISTS seo_opportunity_actions (
+  seo_opportunity_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  action_key TEXT NOT NULL UNIQUE,
+  source TEXT NOT NULL DEFAULT 'search_console',
+  page_url TEXT NOT NULL,
+  query_text TEXT,
+  priority_score INTEGER NOT NULL DEFAULT 0,
+  suggested_title TEXT,
+  suggested_meta_description TEXT,
+  suggested_internal_link_note TEXT,
+  action_status TEXT NOT NULL DEFAULT 'open',
+  created_from_batch_key TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_filters
+  ON search_console_page_queries(report_date, country, device, impressions, average_position);
+CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_status
+  ON seo_opportunity_actions(action_status, priority_score);
+CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_page
+  ON seo_opportunity_actions(page_url);

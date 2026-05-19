@@ -1,4 +1,12 @@
-# Known Gaps and Risks — Current Active List
+# Known Gaps and Risks
+
+## Build 137 known gaps and risk updates
+
+- Search Console SEO actions are recommendations only. Do not apply generated titles, meta descriptions, H1 wording, or internal links without checking the actual page intent.
+- Batch delete/revert removes staged Search Console rows for that import batch. It does not change public pages, product records, or sitemap rows.
+- Large Search Console imports can still grow D1 quickly. Test with a small CSV and use filters before importing a full export.
+- The SEO action list now needs an export/share workflow and a current-title/current-meta comparison before it becomes a full SEO production queue.
+- Product/media/accounting gaps remain: product SEO bulk tooling, media library attach/detach, Amazon bulk approval safeguards, payment application, HST review, period close/lock, and accountant export packaging.
 
 ## Build 135 known gaps and risk updates
 
@@ -9,7 +17,7 @@
 - Edit-mode uploads now attach to the loaded product, but unassigned uploads from earlier tests may still need manual linking or cleanup.
 
 
-Current sync: 2026-05-17 — Build 134.
+Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch revert, and private SEO opportunity action queue.
 
 
 ## Build 134 product editor risk update
@@ -154,4 +162,3 @@ Current sync: 2026-05-17 — Build 134.
 - SEO opportunity rows are hints, not automatic edits. Review the actual page intent before changing titles, meta descriptions, H1 wording, or internal links.
 - The Search Console staging tables are private D1 tables. Do not place Search Console CSV exports under public `/data/` folders.
 - The next highest SEO value is turning imported opportunities into a simple page-level action list with suggested title/meta/internal-link improvements.
-

@@ -1,11 +1,15 @@
-# New Chat Status — Devil n Dove Build 134
+# New Chat Status — Devil n Dove Build 137
+
+## Current status — Build 137
+
+Build 137 starts from the latest uploaded build and focuses on Search Console SEO workflow safety. Operations > Search Console CSV Import now has filters, safe batch delete/revert, and private SEO opportunity actions. Generated title/meta/internal-link ideas are stored as reviewable admin tasks and do not edit public pages automatically. Deploy it, apply or record `database_upgrade_current_pass.sql`, then test with a small Search Console CSV batch.
 
 ## Current status — Build 135
 
 Build 135 adds Media/R2 Diagnostics, Product Image Health, a product draft checklist, reusable media picker, edit-mode image upload attachment, and saved handmade/vintage/external listing fields during product updates. Deploy it, run `database_upgrade_current_pass.sql` or record the Build 135 ledger marker, then test `/admin/products/` and `/admin/operations/`.
 
 
-Current output build: Build 134 draft-first product editor, inline image upload, JSON-safe create-product failures, and adaptive product create schema handling.
+Current output build: Build 137 Search Console filters, safe import batch revert, private SEO opportunity actions, and all prior compact mobile/product/media safeguards carried forward.
 
 ## Current status — Build 134
 
@@ -62,4 +66,3 @@ Post-deploy priority: test the main menu on a real phone, then run Operations > 
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
-

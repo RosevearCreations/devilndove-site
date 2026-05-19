@@ -6,7 +6,7 @@ Checks:
 - local script/style/image references exist
 - CSS brace counts are balanced enough to catch obvious drift
 - shared mobile navigation has compact expandable menu assets
-- operations admin has the structured-data, sitemap preview, media diagnostics, product image health, and storefront backfill assets
+- operations admin has the structured-data, sitemap preview, media diagnostics, product image health, Search Console, and storefront backfill assets
 - product editor has draft-first media upload, checklist, image-library reuse, and JSON-safe create-product assets
 - public data folders do not contain private Amazon/order import reports
 
@@ -143,11 +143,13 @@ def check_operations_assets(root: Path):
         'sitemapPreviewAdminMount',
         'mediaDiagnosticsAdminMount',
         'productImageHealthAdminMount',
+        'searchConsoleImportAdminMount',
         '/public/js/admin-structured-data-health.js',
         '/public/js/admin-storefront-value-backfill.js',
         '/public/js/admin-sitemap-preview.js',
         '/public/js/admin-media-diagnostics.js',
         '/public/js/admin-product-image-health.js',
+        '/public/js/admin-search-console-import.js',
     ]
     missing = [token for token in required if token not in text]
     if missing:
@@ -161,9 +163,22 @@ def check_operations_assets(root: Path):
         'functions/api/admin/sitemap-preview.js',
         'functions/api/admin/media-diagnostics.js',
         'functions/api/admin/product-image-health.js',
+        'functions/api/admin/search-console-import.js',
     ]:
         if not (root / ref).exists():
             issues.append({'type': 'operations_missing_asset_file', 'path': ref})
+    search_js = root / 'public' / 'js' / 'admin-search-console-import.js'
+    search_api = root / 'functions' / 'api' / 'admin' / 'search-console-import.js'
+    search_js_text = read_text(search_js) if search_js.exists() else ''
+    search_api_text = read_text(search_api) if search_api.exists() else ''
+    required_search_js = ['Generate private SEO actions', 'data-delete-search-console-batch', 'searchConsoleFilterQuery', 'updateActionStatus']
+    required_search_api = ['delete_batch', 'generate_recommendations', 'seo_opportunity_actions', 'buildFiltersFromUrl']
+    missing_search_js = [token for token in required_search_js if token not in search_js_text]
+    missing_search_api = [token for token in required_search_api if token not in search_api_text]
+    if missing_search_js:
+        issues.append({'type': 'search_console_missing_admin_assets', 'path': 'public/js/admin-search-console-import.js', 'missing': missing_search_js})
+    if missing_search_api:
+        issues.append({'type': 'search_console_missing_api_assets', 'path': 'functions/api/admin/search-console-import.js', 'missing': missing_search_api})
     return issues
 
 

@@ -1,5 +1,54 @@
 # Development Roadmap
 
+## Completed 20 items in this pass — Build 137
+
+1. Extended `/api/admin/search-console-import` with filtered GET summaries for page, query, country, device, date range, impressions, average position range, and result limit.
+2. Added Search Console batch live-row counts so imported CSV batches can be checked against staged rows.
+3. Added safe batch delete/revert for Search Console imports using `action: delete_batch`.
+4. Added confirmation-gated batch deletion in the Operations UI so a mistaken CSV import can be removed without touching public pages.
+5. Added private `seo_opportunity_actions` table for reviewable SEO work items.
+6. Added generated title suggestions capped for search-result clarity.
+7. Added generated meta-description prompts that require human review before public copy changes.
+8. Added internal-link recommendation notes for matching opportunity queries to related local/shop/collection pages.
+9. Added duplicate prevention for generated SEO actions using a stable action key per page/query pair.
+10. Added action-status updates for private SEO tasks: open, in progress, done, or ignored.
+11. Added Search Console filter controls to `/admin/operations/`.
+12. Added “Generate private SEO actions” to turn filtered opportunity rows into a managed task list.
+13. Added reviewable SEO action table with priority, query, page, suggested title, suggested meta, and link note.
+14. Added mobile-friendly CSS for Search Console filters, action rows, and danger/revert buttons.
+15. Expanded Release Sanity with an SEO opportunity action-list check.
+16. Expanded the local predeploy sanity script so Search Console filter/revert/action assets are verified before zipping.
+17. Updated SQL schema files with `seo_opportunity_actions` and supporting indexes.
+18. Added a Build 137 migration-ledger marker to `database_upgrade_current_pass.sql`.
+19. Updated active Markdown files so the handoff, schema notes, sanity notes, roadmap, and known gaps match the current build.
+20. Ran JavaScript syntax, HTML H1/meta, CSS, public-data privacy, SQL smoke, predeploy sanity, and ZIP integrity checks before packaging.
+
+## Next logical 20 steps after Build 137
+
+1. Deploy Build 137 and apply/record `database_upgrade_current_pass.sql`.
+2. Open `/admin/operations/` and test Search Console filters with a small imported CSV batch.
+3. Use the new Delete/revert batch action on a test batch before importing a large file.
+4. Generate private SEO actions from one filtered opportunity set only.
+5. Review generated title/meta suggestions manually before editing any public page.
+6. Add an export CSV button for `seo_opportunity_actions` so the task list can be shared or archived.
+7. Add page-level “current title/current meta/current H1” comparison beside generated SEO actions.
+8. Add an “apply to draft SEO fields” helper for product pages only, keeping public publish separate.
+9. Add Search Console trend charts for clicks/impressions/position once dated imports accumulate.
+10. Add sitemap-to-Search-Console coverage comparison.
+11. Add product SEO bulk tools for missing title, description, canonical, OG image, and Product JSON-LD readiness.
+12. Add a dedicated product media library page with filters for unassigned, duplicate URL, missing alt, weak score, and product-linked assets.
+13. Add one-click attach/detach controls for media assets.
+14. Add high-confidence Amazon bulk approval with rollback notes and duplicate detection.
+15. Add payment application workflow for matching payments to orders/invoices.
+16. Add HST/GST review worksheet for taxable sales, input tax credits, and remittance readiness.
+17. Add period close/lock and reopen controls.
+18. Add accountant export packaging with ledgers, journals, reconciliations, tax summaries, and attachment index.
+19. Continue mobile testing for the grouped menu and larger admin tables.
+20. Continue checking one H1, local wording, mobile CSS, schema drift, and public `/data/` privacy on every pass.
+
+Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch revert, private SEO opportunity actions, and release-sanity coverage.
+
+
 ## Completed 20 items in this pass — Build 136
 
 1. Added an admin-only `/api/admin/search-console-import` endpoint for Search Console CSV staging.

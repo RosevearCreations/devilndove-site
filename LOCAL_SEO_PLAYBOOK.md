@@ -1,11 +1,15 @@
-# Local SEO Playbook — Devil n Dove
+# Local SEO Playbook
+
+## Build 137 Search Console workflow
+
+Use Search Console CSV imports as evidence, not automatic copy. Filter by page, query, country, device, date range, impressions, and position. Generate private SEO actions for promising page/query pairs, then manually compare the page intent, title, meta description, H1, and internal links before publishing changes. Keep one clear H1 and locally useful Southern Ontario wording where it genuinely matches the page.
 
 ## Build 135 SEO workflow note
 
 Product images now have stronger admin checks for featured image coverage and alt text. Keep product titles, H1/page titles, descriptions, and image alt text clear and locally useful where relevant, without adding multiple H1 headings.
 
 
-Current sync: 2026-05-14 — Build 125.
+Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch revert, and private SEO opportunity action queue.
 
 ## What Build 125 added
 Six local-intent landing pages were added:
@@ -76,4 +80,3 @@ This pass fixes the Product editor draft workflow: drafts require only name/type
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
-
