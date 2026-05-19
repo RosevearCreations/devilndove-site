@@ -304,6 +304,22 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+  const seoActionRows = await tableExists(db, 'seo_opportunity_actions') ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+           SUM(CASE WHEN COALESCE(action_status,'open') IN ('open','in_progress') THEN 1 ELSE 0 END) AS open_count
+    FROM seo_opportunity_actions
+  `) : { total: 0, open_count: 0 };
+  addCheck(
+    checks,
+    await tableExists(db, 'seo_opportunity_actions') ? 'pass' : 'warn',
+    'SEO opportunity action list',
+    await tableExists(db, 'seo_opportunity_actions')
+      ? `${Number(seoActionRows.total || 0)} private SEO action item(s), ${Number(seoActionRows.open_count || 0)} still open/in progress.`
+      : 'seo_opportunity_actions table is not installed yet.',
+    'Apply the current migration, then use Operations > Search Console CSV Import to generate reviewable SEO tasks from filtered opportunities.',
+    'warning'
+  );
+
   const storefrontValueDefaults = productColumns.size ? await safeAll(db, `
     SELECT 'status' AS field, COUNT(*) AS missing_count FROM products WHERE ${productColumns.has('status') ? "COALESCE(status,'') = ''" : '0'}
     UNION ALL SELECT 'product_type', COUNT(*) FROM products WHERE ${productColumns.has('product_type') ? "COALESCE(product_type,'') = ''" : '0'}
