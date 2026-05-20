@@ -642,3 +642,29 @@ body.nav-mobile-open{overflow:hidden}
 .search-console-filter-panel summary{cursor:pointer;font-weight:800}
 .search-console-admin-panel td .small{margin-top:4px;line-height:1.35}
 @media (max-width:760px){.search-console-filter-panel{padding:10px}.search-console-admin-panel details[open] summary{margin-bottom:8px}}
+
+
+/* Build 138 - Social posting queue and mobile-safe admin form polish */
+.social-queue-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:12px;
+}
+.social-post-queue-admin-panel textarea,
+.social-post-queue-admin-panel input,
+.social-post-queue-admin-panel select{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.social-queue-platforms{
+  border:1px solid rgba(148,163,184,.35);
+  border-radius:14px;
+  padding:10px 12px;
+  background:rgba(248,250,252,.72);
+}
+@media (max-width:700px){
+  .social-queue-grid{grid-template-columns:1fr;}
+  .social-post-queue-admin-panel .admin-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .social-post-queue-admin-panel table{min-width:760px;}
+}
