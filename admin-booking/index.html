@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Bookings | Rosie Dazzlers</title>
+  <meta name="description" content="Admin booking management for Rosie Dazzlers." />
+  <link rel="stylesheet" href="/assets/site.css" />
+</head>
+<body data-page="admin-bookings">
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/admin.html">
+        <img data-logo alt="Rosie Dazzlers logo" />
+        <strong>Rosie Dazzlers Admin</strong>
+      </a>
+
+      <button id="navToggle" class="btn small ghost nav-toggle" type="button" aria-expanded="false" aria-controls="navLinks">
+        Menu
+      </button>
+
+      <nav id="navLinks" class="nav-links">
+        <a href="/admin.html">Dashboard</a>
+        <a href="/admin-booking.html">Bookings</a>
+        <a href="/admin-blocks.html">Blocks</a>
+        <a href="/admin-progress.html">Progress</a>
+        <a href="/admin-promos.html">Promos</a>
+        <a href="/book.html">Public Site</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="panel">
+        <img data-banner alt="Rosie Dazzlers banner" style="display:block;width:100%;height:auto;object-fit:contain" />
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="hero">
+        <div>
+          <div class="badge">Admin Bookings</div>
+          <h1>Manage bookings and assignments</h1>
+          <p>Review bookings, update status, assign staff, and copy the progress token for the customer progress workflow.</p>
+        </div>
+        <div class="panel">
+          <div class="kicker">Loaded booking</div>
+          <h3 id="bookingTitle" style="margin:6px 0 8px">No booking selected</h3>
+          <div id="bookingMeta" class="kicker">Load bookings below to begin.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div id="pageNotice" class="notice">Ready.</div>
+    </section>
+
+    <section class="section">
+      <div class="grid cards">
+        <div class="panel">
+          <h2>Staff session</h2>
+          <p class="kicker" id="sessionMeta">Signed-in staff access is required. This page now prefers the real staff session.</p>
+          <div>
+            <button id="loadBookingsBtn" class="btn primary" type="button">Refresh bookings</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Selected booking tools</h2>
+          <div id="selectedBookingTools" class="kicker">Choose a booking to view tools.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="panel">
+        <h2>Bookings</h2>
+        <div id="bookingFilters" class="grid2" style="margin-top:12px">
+          <div><label for="bookingServiceAreaFilter">Service area</label><select id="bookingServiceAreaFilter"><option value="">All service areas</option></select></div>
+          <div><label for="bookingSearch">Search</label><input id="bookingSearch" type="search" class="search-input" placeholder="Customer, package, zone, or status" /></div>
+        </div>
+        <div id="bookingAreaSummary" class="notice mini" style="margin-top:12px">Filtering disabled until bookings load.</div>
+        <div id="bookingsList" class="grid" style="margin-top:12px">
+          <div class="notice">Bookings have not been loaded yet.</div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <section class="section">
+      <div class="grid cards">
+        <div class="panel">
+          <h2>Finance adjustments and refunds</h2>
+          <p class="kicker">Use this office workflow for on-site discounts, weather adjustments, detailing-error refunds, tips, and any manual payment notes.</p>
+          <div id="financeSummary" class="notice mini">Choose a booking to load the finance summary.</div>
+          <form id="financeForm" class="form" style="margin-top:12px">
+            <label>
+              Entry type
+              <select id="financeEntryType" name="financeEntryType">
+                <option value="discount">discount</option>
+                <option value="refund">refund</option>
+                <option value="deposit">deposit</option>
+                <option value="final_payment">final_payment</option>
+                <option value="tip">tip</option>
+                <option value="other">other</option>
+              </select>
+            </label>
+            <label>
+              Amount (CAD)
+              <input id="financeAmount" name="financeAmount" type="number" min="0.01" step="0.01" placeholder="25.00" />
+            </label>
+            <label>
+              Payment method
+              <select id="financePaymentMethod" name="financePaymentMethod">
+                <option value="">-- optional --</option>
+                <option value="cash">cash</option>
+                <option value="card">card</option>
+                <option value="etransfer">etransfer</option>
+                <option value="paypal">paypal</option>
+                <option value="stripe">stripe</option>
+                <option value="manual">manual</option>
+              </select>
+            </label>
+            <label>
+              Reason code
+              <select id="financeReasonCode" name="financeReasonCode">
+                <option value="">-- optional --</option>
+                <option value="weather_adjustment">weather_adjustment</option>
+                <option value="scope_change">scope_change</option>
+                <option value="detailing_error">detailing_error</option>
+                <option value="customer_service">customer_service</option>
+                <option value="gift_redemption_manual">gift_redemption_manual</option>
+                <option value="other">other</option>
+              </select>
+            </label>
+            <label>
+              Note
+              <textarea id="financeNote" name="financeNote" placeholder="Describe why the discount, refund, or other change was issued."></textarea>
+            </label>
+            <div>
+              <button id="financeBtn" class="btn primary" type="submit" disabled>Record finance entry</button>
+            </div>
+          </form>
+          <div id="financeEntries" class="kicker" style="margin-top:12px">No finance entries loaded yet.</div>
+        </div>
+
+        <div class="panel">
+          <h2>Customer documents</h2>
+          <p class="kicker">Print or email the customer-facing paperwork from the selected booking. Booking stays the single source for the live details.</p>
+          <div id="documentTools" class="kicker">Choose a booking to unlock order confirmation, invoice, and progress links.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="grid cards">
+        <div class="panel">
+          <h2>Update status</h2>
+          <form id="statusForm" class="form">
+            <label>
+              Status
+              <select id="bookingStatus" name="bookingStatus">
+                <option value="pending">pending</option>
+                <option value="confirmed">confirmed</option>
+                <option value="cancelled">cancelled</option>
+                <option value="completed">completed</option>
+              </select>
+            </label>
+
+            <label>
+              Job status
+              <select id="jobStatus" name="jobStatus">
+                <option value="">-- none --</option>
+                <option value="scheduled">scheduled</option>
+                <option value="in_progress">in_progress</option>
+                <option value="completed">completed</option>
+              </select>
+            </label>
+
+            <div>
+              <button id="statusBtn" class="btn primary" type="submit" disabled>Save status</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>Assign staff</h2>
+          <form id="assignForm" class="form">
+            <label>
+              Assignable staff
+              <select id="assignedStaffSelect" name="assignedStaffSelect">
+                <option value="">Unassigned</option>
+              </select>
+            </label>
+
+            <label>
+              Manual fallback label
+              <input id="assignedTo" name="assignedTo" type="text" placeholder="Optional manual label when no staff profile matches" />
+            </label>
+
+            <div class="mini">Prefer the staff dropdown so the booking stores staff user id and email, not only a display name.</div>
+
+            <div class="notice mini">For multi-detailer jobs, use <a href="/admin-assign.html">Assign Crew</a> so one lead / senior detailer and supporting crew can be scheduled together.</div>
+
+            <div>
+              <button id="assignBtn" class="btn primary" type="submit" disabled>Save assignment</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer container" data-footer></footer>
+
+  <script src="/assets/admin-auth.js"></script>
+  <script src="/assets/admin-shell.js"></script>
+  <script src="/assets/chrome.js"></script>
+  <script type="module">
+    import { setBrandImages, setFooter } from "/assets/site.js";
+
+    let actor = null;
+    let currentBooking = null;
+    let allBookings = [];
+    let filteredBookings = [];
+    let assignableStaff = [];
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+      return escapeHtml(value);
+    }
+
+    function setNotice(message, kind = "") {
+      const el = document.querySelector("#pageNotice");
+      if (!el) return;
+      el.className = kind ? `notice ${kind}` : "notice";
+      el.textContent = message;
+    }
+
+    async function loadBookings() {
+      const res = await fetch("/api/admin/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({})
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not load bookings.");
+      return data;
+    }
+
+    async function updateBookingStatus(bookingId, status, jobStatus) {
+      const res = await fetch("/api/admin/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          booking_id: bookingId,
+          status,
+          job_status: jobStatus || null
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not update booking status.");
+      return data;
+    }
+
+    async function assignBooking(bookingId, selection) {
+      const payload = { booking_id: bookingId };
+
+      if (selection && selection.type === "staff") {
+        payload.assigned_to = selection.full_name || selection.email || "";
+        payload.assigned_staff_name = selection.full_name || "";
+        payload.assigned_staff_user_id = selection.id || null;
+        payload.assigned_staff_email = selection.email || null;
+      } else if (selection && selection.type === "manual") {
+        payload.assigned_to = selection.assigned_to || "";
+        payload.assigned_staff_name = selection.assigned_to || "";
+      }
+
+      const res = await fetch("/api/admin/assign_booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not assign booking.");
+      return data;
+    }
+
+    async function loadAssignableStaff() {
+      const res = await fetch('/api/admin/staff_assignable_list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ include_admins: true })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Could not load assignable staff.');
+      assignableStaff = Array.isArray(data.staff_users) ? data.staff_users : [];
+      renderAssignableStaffOptions();
+    }
+
+    function renderAssignableStaffOptions() {
+      const select = document.querySelector('#assignedStaffSelect');
+      if (!select) return;
+      const currentId = currentBooking && currentBooking.assigned_staff_user_id ? String(currentBooking.assigned_staff_user_id) : '';
+      const currentName = currentBooking && currentBooking.assigned_to ? String(currentBooking.assigned_to) : '';
+      select.innerHTML = ['<option value="">Unassigned</option>'].concat(assignableStaff.map((staff) => {
+        const selected = currentId && String(staff.id) === currentId ? ' selected' : '';
+        const label = escapeHtml(staff.assignment_label || staff.full_name || staff.email || 'Staff');
+        return `<option value="${escapeHtml(staff.id || '')}"${selected}>${label}</option>`;
+      })).join('');
+      if (!currentId && !assignableStaff.some((staff) => String(staff.full_name || '').trim().toLowerCase() === currentName.trim().toLowerCase())) {
+        document.querySelector('#assignedTo').value = currentName || '';
+      }
+    }
+
+    function readAssignmentSelection() {
+      const selectedId = document.querySelector('#assignedStaffSelect').value || '';
+      if (selectedId) {
+        const staff = assignableStaff.find((row) => String(row.id || '') === String(selectedId));
+        if (staff) return Object.assign({ type: 'staff' }, staff);
+      }
+      const manualName = document.querySelector('#assignedTo').value.trim();
+      if (manualName) return { type: 'manual', assigned_to: manualName };
+      return { type: 'manual', assigned_to: '' };
+    }
+
+
+
+    async function loadBookingFinance(bookingId) {
+      const res = await fetch(`/api/admin/booking_finance?booking_id=${encodeURIComponent(bookingId)}`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Accept": "application/json" }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not load booking finance.");
+      return data;
+    }
+
+    async function recordBookingFinance(bookingId, payload) {
+      const res = await fetch("/api/admin/booking_finance", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.assign({ booking_id: bookingId }, payload))
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not record finance entry.");
+      return data;
+    }
+
+    function money(value) {
+      const n = Number(value || 0);
+      return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(Number.isFinite(n) ? n : 0);
+    }
+
+    async function refreshSelectedBookingFinance() {
+      const summaryNode = document.querySelector('#financeSummary');
+      const entriesNode = document.querySelector('#financeEntries');
+      const documentTools = document.querySelector('#documentTools');
+      const financeBtn = document.querySelector('#financeBtn');
+      if (!currentBooking?.id) {
+        if (summaryNode) summaryNode.textContent = 'Choose a booking to load the finance summary.';
+        if (entriesNode) entriesNode.textContent = 'No finance entries loaded yet.';
+        if (documentTools) documentTools.textContent = 'Choose a booking to unlock order confirmation, invoice, and progress links.';
+        if (financeBtn) financeBtn.disabled = true;
+        return;
+      }
+      if (financeBtn) financeBtn.disabled = false;
+      try {
+        const finance = await loadBookingFinance(currentBooking.id);
+        const summary = finance?.summary || {};
+        if (summaryNode) {
+          summaryNode.innerHTML = `Deposit ${escapeHtml(money(summary.deposit))} · Final ${escapeHtml(money(summary.final_payment))} · Discounts ${escapeHtml(money(summary.discount))} · Refunds ${escapeHtml(money(summary.refund))} · Tips ${escapeHtml(money(summary.tip))} · Collected ${escapeHtml(money(summary.collected_total))}`;
+        }
+        const items = Array.isArray(finance?.entries) ? finance.entries : [];
+        if (entriesNode) {
+          entriesNode.innerHTML = items.length
+            ? items.map((entry) => `<div style="margin-top:8px"><strong>${escapeHtml(entry.entry_type)}</strong> — ${escapeHtml(money(entry.amount_cad))}${entry.payment_method ? ` via ${escapeHtml(entry.payment_method)}` : ''}${entry.reason_code ? ` (${escapeHtml(entry.reason_code)})` : ''}<br><span class="kicker">${escapeHtml(entry.recorded_at || entry.created_at || '')}${entry.actor_name ? ` · ${escapeHtml(entry.actor_name)}` : ''}${entry.note ? ` · ${escapeHtml(entry.note)}` : ''}</span></div>`).join('')
+            : 'No finance entries recorded for this booking yet.';
+        }
+      } catch (err) {
+        if (summaryNode) summaryNode.textContent = err.message || 'Could not load finance summary.';
+        if (entriesNode) entriesNode.textContent = 'Finance entries are unavailable right now.';
+      }
+
+      if (documentTools) {
+        const progressUrl = currentBooking.progress_token ? `${window.location.origin}/progress.html?token=${encodeURIComponent(currentBooking.progress_token)}` : '';
+        const orderUrl = currentBooking.progress_token ? `${window.location.origin}/order-confirmation?token=${encodeURIComponent(currentBooking.progress_token)}` : '';
+        const invoiceUrl = currentBooking.progress_token ? `${window.location.origin}/invoice?token=${encodeURIComponent(currentBooking.progress_token)}` : '';
+        documentTools.innerHTML = currentBooking.progress_token
+          ? `<div><strong>Order confirmation:</strong> <a href="${orderUrl}" target="_blank" rel="noopener">Open / print</a></div>
+             <div><strong>Invoice / summary:</strong> <a href="${invoiceUrl}" target="_blank" rel="noopener">Open / print</a></div>
+             <div><strong>Progress page:</strong> <a href="${progressUrl}" target="_blank" rel="noopener">Open customer progress page</a></div>
+             <div class="kicker" style="margin-top:8px">These pages are safe to email or print using the booking tokenized document route.</div>`
+          : 'This booking does not have a progress token yet, so customer-facing document links are unavailable.';
+      }
+    }
+
+    function renderSelectedBooking() {
+      const title = document.querySelector("#bookingTitle");
+      const meta = document.querySelector("#bookingMeta");
+      const tools = document.querySelector("#selectedBookingTools");
+
+      const statusBtn = document.querySelector("#statusBtn");
+      const assignBtn = document.querySelector("#assignBtn");
+
+      if (!currentBooking) {
+        title.textContent = "No booking selected";
+        meta.textContent = "Choose a booking from the list below.";
+        tools.textContent = "Choose a booking to view tools.";
+        statusBtn.disabled = true;
+        assignBtn.disabled = true;
+        refreshSelectedBookingFinance();
+        return;
+      }
+
+      title.textContent = currentBooking.customer_name || currentBooking.package_code || "Booking selected";
+      meta.textContent = [
+        currentBooking.service_date || "—",
+        currentBooking.start_slot || "—",
+        currentBooking.package_code || "—",
+        currentBooking.vehicle_size || "—"
+      ].join(" · ");
+
+      const progressLink = currentBooking.progress_token
+        ? `${window.location.origin}/progress.html?token=${encodeURIComponent(currentBooking.progress_token)}`
+        : "No progress token";
+
+      tools.innerHTML = `
+        <div><strong>Booking ID:</strong> ${escapeHtml(currentBooking.id || "")}</div>
+        <div><strong>Assigned To:</strong> ${escapeHtml(currentBooking.assigned_to || "—")}</div>
+        <div><strong>Progress Token:</strong> ${escapeHtml(currentBooking.progress_token || "—")}</div>
+        ${currentBooking.progress_token ? `<div style="margin-top:8px;word-break:break-all"><a href="${progressLink}" target="_blank" rel="noopener">Open customer progress page</a></div>` : ""}
+      `;
+
+      document.querySelector("#bookingStatus").value = currentBooking.status || "pending";
+      document.querySelector("#jobStatus").value = currentBooking.job_status || "";
+      document.querySelector("#assignedTo").value = currentBooking.assigned_staff_user_id ? "" : (currentBooking.assigned_to || "");
+      renderAssignableStaffOptions();
+
+      statusBtn.disabled = false;
+      assignBtn.disabled = false;
+      refreshSelectedBookingFinance();
+    }
+
+    function renderBookingsList() {
+      const wrap = document.querySelector("#bookingsList");
+      if (!wrap) return;
+
+      const list = filteredBookings.length || !allBookings.length ? filteredBookings : allBookings;
+      if (!list.length) {
+        wrap.innerHTML = `<div class="notice">No bookings match the current filters.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = list.map((booking) => `
+        <article class="card">
+          <div class="kicker">${formatDate(booking.service_date)} · ${escapeHtml(booking.start_slot || "—")}</div>
+          <h3>${escapeHtml(booking.customer_name || "Unknown customer")}</h3>
+          <p>${escapeHtml(booking.package_code || "—")} · ${escapeHtml(booking.vehicle_size || "—")}</p>
+          <div class="kicker">Area: ${escapeHtml(booking.service_area_zone || booking.service_area || "—")} ${booking.service_area_municipality ? `· ${escapeHtml(booking.service_area_municipality)}` : ""}</div>
+          <div class="kicker">Status: ${escapeHtml(booking.status || "pending")} · Job: ${escapeHtml(booking.job_status || "—")}</div>
+          <div class="kicker">Assigned: ${escapeHtml(booking.assigned_to || "—")}</div>
+          <div class="hr"></div>
+          <button class="btn primary" type="button" data-booking-id="${escapeHtml(booking.id)}">Select booking</button>
+        </article>
+      `).join("");
+
+      wrap.querySelectorAll("[data-booking-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const bookingId = btn.getAttribute("data-booking-id");
+          currentBooking = (filteredBookings.length ? filteredBookings : allBookings).find((b) => b.id === bookingId) || allBookings.find((b) => b.id === bookingId) || null;
+          renderSelectedBooking();
+        });
+      });
+    }
+
+
+    function renderServiceAreaFilterOptions() {
+      const select = document.querySelector('#bookingServiceAreaFilter');
+      if (!select) return;
+      const current = select.value || '';
+      const options = Array.from(new Set(allBookings.map((booking) => booking.service_area_zone || booking.service_area || '').filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+      select.innerHTML = `<option value="">All service areas</option>${options.map((value)=>`<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}`;
+      if ([...select.options].some((opt)=>opt.value === current)) select.value = current;
+    }
+
+    function applyBookingFilters() {
+      const area = String(document.querySelector('#bookingServiceAreaFilter')?.value || '').trim().toLowerCase();
+      const query = String(document.querySelector('#bookingSearch')?.value || '').trim().toLowerCase();
+      filteredBookings = allBookings.filter((booking) => {
+        const areaValue = String(booking.service_area_zone || booking.service_area || '').trim().toLowerCase();
+        const searchHay = [booking.customer_name, booking.customer_email, booking.package_code, booking.vehicle_size, booking.status, booking.job_status, booking.service_area_zone, booking.service_area_municipality, booking.service_area].filter(Boolean).join(' ').toLowerCase();
+        if (area && areaValue !== area) return false;
+        if (query && !searchHay.includes(query)) return false;
+        return true;
+      });
+      const summary = document.querySelector('#bookingAreaSummary');
+      const counts = new Map();
+      for (const booking of filteredBookings) {
+        const key = booking.service_area_zone || booking.service_area || 'Unknown';
+        counts.set(key, (counts.get(key) || 0) + 1);
+      }
+      const top = [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5).map(([label,count])=>`${label} (${count})`).join(' • ');
+      if (summary) summary.textContent = filteredBookings.length ? `Showing ${filteredBookings.length} booking(s). Top visible service areas: ${top || '—'}` : 'No bookings match the current filters.';
+      renderBookingsList();
+    }
+
+    async function refreshBookings() {
+      const data = await loadBookings();
+      const sessionActor = data?.actor || actor || null;
+      document.querySelector("#sessionMeta").textContent = sessionActor?.full_name ? `Signed in as ${sessionActor.full_name} (${sessionActor.role_code || 'staff'}).` : "Signed-in staff access is required.";
+
+      allBookings = Array.isArray(data.bookings) ? data.bookings : [];
+      renderServiceAreaFilterOptions();
+      applyBookingFilters();
+
+      if (currentBooking?.id) {
+        currentBooking = allBookings.find((b) => b.id === currentBooking.id) || null;
+      }
+
+      renderSelectedBooking();
+    }
+
+    async function boot() {
+      setBrandImages();
+      setFooter();
+
+      document.querySelector("#bookingServiceAreaFilter")?.addEventListener("change", applyBookingFilters);
+      document.querySelector("#bookingSearch")?.addEventListener("input", applyBookingFilters);
+
+      document.querySelector("#loadBookingsBtn").addEventListener("click", async () => {
+        try {
+          setNotice("Loading bookings…");
+          await refreshBookings();
+          setNotice("Bookings loaded.", "ok");
+        } catch (err) {
+          setNotice(err.message || "Could not load bookings.", "bad");
+        }
+      });
+
+      document.querySelector("#statusForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!currentBooking?.id) {
+          setNotice("Choose a booking first.", "bad");
+          return;
+        }
+
+        try {
+          setNotice("Saving status…");
+          await updateBookingStatus(
+            currentBooking.id,
+            document.querySelector("#bookingStatus").value,
+            document.querySelector("#jobStatus").value
+          );
+          await refreshBookings();
+          setNotice("Booking status updated.", "ok");
+        } catch (err) {
+          setNotice(err.message || "Could not update booking status.", "bad");
+        }
+      });
+
+      document.querySelector("#assignForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!currentBooking?.id) {
+          setNotice("Choose a booking first.", "bad");
+          return;
+        }
+
+        try {
+          setNotice("Saving assignment…");
+          await assignBooking(currentBooking.id, readAssignmentSelection());
+          await refreshBookings();
+          setNotice("Booking assignment updated.", "ok");
+        } catch (err) {
+          setNotice(err.message || "Could not update assignment.", "bad");
+        }
+      });
+
+      document.querySelector("#financeForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!currentBooking?.id) {
+          setNotice("Choose a booking first.", "bad");
+          return;
+        }
+
+        try {
+          setNotice("Recording finance entry…");
+          await recordBookingFinance(currentBooking.id, {
+            entry_type: document.querySelector('#financeEntryType').value,
+            amount_cad: document.querySelector('#financeAmount').value,
+            payment_method: document.querySelector('#financePaymentMethod').value,
+            reason_code: document.querySelector('#financeReasonCode').value,
+            note: document.querySelector('#financeNote').value
+          });
+          document.querySelector('#financeAmount').value = '';
+          document.querySelector('#financeNote').value = '';
+          document.querySelector('#financePaymentMethod').value = '';
+          document.querySelector('#financeReasonCode').value = '';
+          await refreshSelectedBookingFinance();
+          setNotice("Finance entry recorded.", "ok");
+        } catch (err) {
+          setNotice(err.message || "Could not record finance entry.", "bad");
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await window.AdminShell.boot({
+        pageKey: 'admin-booking',
+        onReady: async ({ actor: currentActor }) => {
+          actor = currentActor || null;
+          await boot();
+          await loadAssignableStaff();
+          document.querySelector("#loadBookingsBtn").click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

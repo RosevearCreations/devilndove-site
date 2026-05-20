@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" fill="none">
+  <rect width="640" height="360" rx="28" fill="#0f172a"/>
+  <path d="M176 214h288c17 0 30 13 30 30v13c0 14-11 25-25 25H171c-14 0-25-11-25-25v-13c0-17 13-30 30-30Z" stroke="#f8fafc" stroke-width="10"/>
+  <path d="M219 214v-30c0-22 18-40 40-40h122c22 0 40 18 40 40v30" stroke="#f8fafc" stroke-width="10"/>
+  <circle cx="218" cy="268" r="28" stroke="#f8fafc" stroke-width="10"/>
+  <circle cx="422" cy="268" r="28" stroke="#f8fafc" stroke-width="10"/>
+  <path d="M261 234h118" stroke="#f8fafc" stroke-width="8" stroke-linecap="round"/>
+  <path d="M209 234h25M406 234h25" stroke="#fda4af" stroke-width="8" stroke-linecap="round"/>
+  <rect x="280" y="182" width="80" height="18" rx="6" stroke="#93c5fd" stroke-width="8"/>
+  <text x="320" y="326" fill="#cbd5e1" font-size="24" font-family="Arial, sans-serif" text-anchor="middle">Rear photo guide</text>
+</svg>
