@@ -58,6 +58,22 @@ function addCheck(checks, status, label, detail, action = '', severity = 'info')
   });
 }
 
+function envText(env, ...names) {
+  for (const name of names) {
+    const value = normalizeText(env?.[name]);
+    if (value) return value;
+  }
+  return '';
+}
+function socialApiReadyCount(env = {}) {
+  const ready = [];
+  if (envText(env, 'FACEBOOK_PAGE_ID', 'META_PAGE_ID') && envText(env, 'FACEBOOK_PAGE_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN')) ready.push('facebook');
+  if (envText(env, 'INSTAGRAM_USER_ID', 'IG_USER_ID', 'INSTAGRAM_BUSINESS_ACCOUNT_ID') && envText(env, 'INSTAGRAM_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN', 'FACEBOOK_PAGE_ACCESS_TOKEN')) ready.push('instagram');
+  if (envText(env, 'X_USER_ACCESS_TOKEN', 'TWITTER_USER_ACCESS_TOKEN')) ready.push('x');
+  if (envText(env, 'PINTEREST_ACCESS_TOKEN') && envText(env, 'PINTEREST_BOARD_ID')) ready.push('pinterest');
+  return ready;
+}
+
 async function checkPublicPage(request, path) {
   const url = new URL(path, request.url);
   const result = { path, ok: false, status_code: 0, h1_count: 0, has_title: false, has_meta_description: false, title: '', meta_description: '' };
@@ -346,6 +362,18 @@ export async function onRequestGet(context) {
       ? `${Number(socialQueueRows.total || 0)} queued social post(s), ${Number(socialQueueRows.open_count || 0)} open, ${Number(socialQueueRows.needs_review_count || 0)} needing review.`
       : 'social_post_queue table is not installed yet.',
     'Apply the current migration, then use Operations > Social Posting Queue for review-first job/process social posts.',
+    'warning'
+  );
+
+  const apiReadyPlatforms = socialApiReadyCount(context.env);
+  addCheck(
+    checks,
+    apiReadyPlatforms.length ? 'pass' : 'warn',
+    'Social API publisher readiness',
+    apiReadyPlatforms.length
+      ? `API publishing credentials detected for: ${apiReadyPlatforms.join(', ')}.`
+      : 'No social API publisher credentials detected yet; queue/manual copy mode remains active.',
+    'Add platform tokens in Cloudflare environment variables only when you are ready for approved posts to publish through APIs. Keep TikTok/YouTube manual until their upload workflows are configured.',
     'warning'
   );
 
