@@ -109,6 +109,94 @@ function buildCaption({ title, summary, hashtags, linkUrl }) {
   if (hashtags) parts.push(hashtags);
   return trimTo(parts.filter(Boolean).join('\n\n'), 2200);
 }
+
+function envText(env, ...names) {
+  for (const name of names) {
+    const value = normalizeText(env?.[name]);
+    if (value) return value;
+  }
+  return '';
+}
+function getPlatformReadiness(env = {}) {
+  const facebookReady = !!(envText(env, 'FACEBOOK_PAGE_ID', 'META_PAGE_ID') && envText(env, 'FACEBOOK_PAGE_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN'));
+  const instagramReady = !!(envText(env, 'INSTAGRAM_USER_ID', 'IG_USER_ID', 'INSTAGRAM_BUSINESS_ACCOUNT_ID') && envText(env, 'INSTAGRAM_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN', 'FACEBOOK_PAGE_ACCESS_TOKEN'));
+  const xReady = !!envText(env, 'X_USER_ACCESS_TOKEN', 'TWITTER_USER_ACCESS_TOKEN');
+  const pinterestReady = !!(envText(env, 'PINTEREST_ACCESS_TOKEN') && envText(env, 'PINTEREST_BOARD_ID'));
+  const tiktokReady = !!envText(env, 'TIKTOK_ACCESS_TOKEN');
+  const youtubeReady = !!envText(env, 'YOUTUBE_ACCESS_TOKEN');
+  return {
+    facebook: {
+      platform_key: 'facebook', api_ready: facebookReady ? 1 : 0, publish_mode: facebookReady ? 'api_ready' : 'manual_ready',
+      missing_env: facebookReady ? [] : ['FACEBOOK_PAGE_ID', 'FACEBOOK_PAGE_ACCESS_TOKEN'],
+      notes: facebookReady ? 'API publishing can be attempted through the Facebook Page feed/photos endpoints.' : 'Manual/copy-paste ready. Add Page ID and Page access token as Cloudflare environment variables to attempt API publishing.'
+    },
+    instagram: {
+      platform_key: 'instagram', api_ready: instagramReady ? 1 : 0, publish_mode: instagramReady ? 'api_ready' : 'manual_ready',
+      missing_env: instagramReady ? [] : ['INSTAGRAM_USER_ID', 'INSTAGRAM_ACCESS_TOKEN or FACEBOOK_PAGE_ACCESS_TOKEN'],
+      notes: instagramReady ? 'API image publishing can be attempted through the Instagram Content Publishing media/container flow.' : 'Manual/copy-paste ready. Instagram API publishing also requires a professional Instagram account connected through Meta.'
+    },
+    x: {
+      platform_key: 'x', api_ready: xReady ? 1 : 0, publish_mode: xReady ? 'api_ready' : 'manual_ready',
+      missing_env: xReady ? [] : ['X_USER_ACCESS_TOKEN'],
+      notes: xReady ? 'API text/link publishing can be attempted through POST /2/tweets.' : 'Manual/copy-paste ready. Add an OAuth user access token with write permission to attempt API publishing.'
+    },
+    pinterest: {
+      platform_key: 'pinterest', api_ready: pinterestReady ? 1 : 0, publish_mode: pinterestReady ? 'api_ready' : 'manual_ready',
+      missing_env: pinterestReady ? [] : ['PINTEREST_ACCESS_TOKEN', 'PINTEREST_BOARD_ID'],
+      notes: pinterestReady ? 'API image pin publishing can be attempted for public image URLs.' : 'Manual/copy-paste ready. Add access token and board ID for API pin publishing.'
+    },
+    tiktok: {
+      platform_key: 'tiktok', api_ready: 0, publish_mode: tiktokReady ? 'credentials_detected_manual_review' : 'manual_ready',
+      missing_env: tiktokReady ? [] : ['TIKTOK_ACCESS_TOKEN'],
+      notes: 'Kept manual/review-first in this build. TikTok direct publishing needs the platform upload/publish flow and app approval before we should automate it.'
+    },
+    youtube: {
+      platform_key: 'youtube', api_ready: 0, publish_mode: youtubeReady ? 'credentials_detected_manual_review' : 'manual_ready',
+      missing_env: youtubeReady ? [] : ['YOUTUBE_ACCESS_TOKEN'],
+      notes: 'Kept manual/review-first in this build. YouTube upload/community posting needs Google OAuth upload handling before we should automate it.'
+    }
+  };
+}
+async function tableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row.name || '').toLowerCase()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+async function ensureColumn(db, tableName, columnName, sql) {
+  const columns = await tableColumnSet(db, tableName);
+  if (!columns.has(String(columnName || '').toLowerCase())) {
+    await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${sql}`).run().catch(() => null);
+  }
+}
+function safeResponseJson(text) {
+  try { return JSON.parse(text || '{}'); } catch { return { raw: text || '' }; }
+}
+async function fetchJson(url, options = {}) {
+  const response = await fetch(url, options);
+  const text = await response.text().catch(() => '');
+  return { response, body: safeResponseJson(text), text };
+}
+function absolutePostUrl(row, platform) {
+  const url = safeUrl(row?.link_url || '');
+  if (url) return url;
+  const key = normalizeText(row?.social_post_key || '');
+  return key ? `https://devilndove.com/?social=${encodeURIComponent(key)}&platform=${encodeURIComponent(platform)}` : '';
+}
+function platformCaption(row, platform) {
+  const caption = normalizeText(row?.caption || buildCaption({
+    title: row?.title || '',
+    summary: row?.summary || '',
+    hashtags: row?.hashtags || '',
+    linkUrl: absolutePostUrl(row, platform)
+  }));
+  const link = absolutePostUrl(row, platform);
+  if (platform === 'x') return trimTo([caption, link && !caption.includes(link) ? link : ''].filter(Boolean).join('\n'), 280);
+  if (platform === 'pinterest') return trimTo(caption, 500);
+  return trimTo(caption, 2200);
+}
 async function ensureSchema(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS social_platform_connections (
     social_platform_connection_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -161,6 +249,12 @@ async function ensureSchema(db) {
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_status ON social_post_queue(post_status, approval_status, scheduled_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_source ON social_post_queue(source_type, source_id)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_attempts_queue ON social_post_attempts(social_post_queue_id, platform_key)`).run().catch(() => null);
+  await ensureColumn(db, 'social_post_queue', 'last_publish_attempt_at', 'last_publish_attempt_at TEXT');
+  await ensureColumn(db, 'social_post_queue', 'api_publish_mode', "api_publish_mode TEXT DEFAULT 'review_first'");
+  await ensureColumn(db, 'social_post_attempts', 'request_mode', 'request_mode TEXT');
+  await ensureColumn(db, 'social_post_attempts', 'http_status', 'http_status INTEGER');
+  await ensureColumn(db, 'social_post_attempts', 'platform_response_id', 'platform_response_id TEXT');
+  await ensureColumn(db, 'social_post_attempts', 'published_url', 'published_url TEXT');
 
   for (const platform of PLATFORM_DEFINITIONS) {
     await db.prepare(`INSERT INTO social_platform_connections (
@@ -181,7 +275,7 @@ async function ensureSchema(db) {
       ).run().catch(() => null);
   }
 }
-async function summarize(db) {
+async function summarize(db, env = {}) {
   await ensureSchema(db);
   const summary = await db.prepare(`SELECT
     COUNT(*) AS total,
@@ -192,7 +286,13 @@ async function summarize(db) {
   const queue = rows(await db.prepare(`SELECT * FROM social_post_queue ORDER BY datetime(updated_at) DESC, social_post_queue_id DESC LIMIT 50`).all().catch(() => ({ results: [] })));
   const platforms = rows(await db.prepare(`SELECT * FROM social_platform_connections ORDER BY platform_key`).all().catch(() => ({ results: [] })));
   const attempts = rows(await db.prepare(`SELECT a.*, q.social_post_key FROM social_post_attempts a INNER JOIN social_post_queue q ON q.social_post_queue_id = a.social_post_queue_id ORDER BY datetime(a.attempted_at) DESC LIMIT 30`).all().catch(() => ({ results: [] })));
-  return { summary, queue, platforms, attempts };
+  const platform_readiness = getPlatformReadiness(env);
+  const platformRows = platforms.map((platform) => ({
+    ...platform,
+    ...(platform_readiness[platform.platform_key] || {}),
+    stored_api_ready: platform.api_ready
+  }));
+  return { summary, queue, platforms: platformRows, attempts, platform_readiness };
 }
 function normalizeQueueRow(row = {}) {
   return {
@@ -309,14 +409,188 @@ async function generateFromRecentMedia(db, adminUser) {
   });
 }
 
+async function publishToFacebook(env, row, images) {
+  const pageId = envText(env, 'FACEBOOK_PAGE_ID', 'META_PAGE_ID');
+  const token = envText(env, 'FACEBOOK_PAGE_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN');
+  if (!pageId || !token) throw new Error('Facebook API credentials are missing. Add FACEBOOK_PAGE_ID and FACEBOOK_PAGE_ACCESS_TOKEN.');
+  const caption = platformCaption(row, 'facebook');
+  const version = envText(env, 'META_GRAPH_API_VERSION') || 'v20.0';
+  const url = images[0]
+    ? `https://graph.facebook.com/${version}/${encodeURIComponent(pageId)}/photos`
+    : `https://graph.facebook.com/${version}/${encodeURIComponent(pageId)}/feed`;
+  const body = new URLSearchParams();
+  body.set('access_token', token);
+  if (images[0]) {
+    body.set('url', images[0]);
+    body.set('caption', caption);
+  } else {
+    body.set('message', caption);
+  }
+  const { response, body: responseBody, text } = await fetchJson(url, { method: 'POST', body });
+  if (!response.ok) throw new Error(`Facebook publish failed (${response.status}): ${responseBody?.error?.message || text || 'unknown error'}`);
+  return { id: responseBody.post_id || responseBody.id || '', url: responseBody.post_id ? `https://www.facebook.com/${responseBody.post_id}` : '', response: responseBody, http_status: response.status };
+}
+async function publishToInstagram(env, row, images) {
+  const igUserId = envText(env, 'INSTAGRAM_USER_ID', 'IG_USER_ID', 'INSTAGRAM_BUSINESS_ACCOUNT_ID');
+  const token = envText(env, 'INSTAGRAM_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN', 'FACEBOOK_PAGE_ACCESS_TOKEN');
+  if (!igUserId || !token) throw new Error('Instagram API credentials are missing. Add INSTAGRAM_USER_ID and INSTAGRAM_ACCESS_TOKEN or FACEBOOK_PAGE_ACCESS_TOKEN.');
+  if (!images[0]) throw new Error('Instagram publishing needs at least one public image URL.');
+  const version = envText(env, 'META_GRAPH_API_VERSION') || 'v20.0';
+  const createBody = new URLSearchParams();
+  createBody.set('access_token', token);
+  createBody.set('image_url', images[0]);
+  createBody.set('caption', platformCaption(row, 'instagram'));
+  const createResult = await fetchJson(`https://graph.facebook.com/${version}/${encodeURIComponent(igUserId)}/media`, { method: 'POST', body: createBody });
+  if (!createResult.response.ok || !createResult.body?.id) throw new Error(`Instagram media container failed (${createResult.response.status}): ${createResult.body?.error?.message || createResult.text || 'unknown error'}`);
+  const publishBody = new URLSearchParams();
+  publishBody.set('access_token', token);
+  publishBody.set('creation_id', createResult.body.id);
+  const publishResult = await fetchJson(`https://graph.facebook.com/${version}/${encodeURIComponent(igUserId)}/media_publish`, { method: 'POST', body: publishBody });
+  if (!publishResult.response.ok) throw new Error(`Instagram publish failed (${publishResult.response.status}): ${publishResult.body?.error?.message || publishResult.text || 'unknown error'}`);
+  return { id: publishResult.body?.id || createResult.body.id || '', url: '', response: { create: createResult.body, publish: publishResult.body }, http_status: publishResult.response.status };
+}
+async function publishToX(env, row) {
+  const token = envText(env, 'X_USER_ACCESS_TOKEN', 'TWITTER_USER_ACCESS_TOKEN');
+  if (!token) throw new Error('X API token is missing. Add X_USER_ACCESS_TOKEN with post/write permission.');
+  const text = platformCaption(row, 'x');
+  if (!text) throw new Error('X post text is empty. Add a caption before publishing.');
+  const { response, body, text: raw } = await fetchJson('https://api.x.com/2/tweets', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text })
+  });
+  if (!response.ok) throw new Error(`X publish failed (${response.status}): ${body?.detail || body?.title || body?.errors?.[0]?.message || raw || 'unknown error'}`);
+  const id = body?.data?.id || '';
+  return { id, url: id ? `https://x.com/i/web/status/${id}` : '', response: body, http_status: response.status };
+}
+async function publishToPinterest(env, row, images) {
+  const token = envText(env, 'PINTEREST_ACCESS_TOKEN');
+  const boardId = envText(env, 'PINTEREST_BOARD_ID');
+  if (!token || !boardId) throw new Error('Pinterest API credentials are missing. Add PINTEREST_ACCESS_TOKEN and PINTEREST_BOARD_ID.');
+  if (!images[0]) throw new Error('Pinterest publishing needs at least one public image URL.');
+  const payload = {
+    board_id: boardId,
+    title: trimTo(row.title || 'Devil n Dove workshop update', 100),
+    description: platformCaption(row, 'pinterest'),
+    link: absolutePostUrl(row, 'pinterest') || undefined,
+    media_source: { source_type: 'image_url', url: images[0] }
+  };
+  const { response, body, text } = await fetchJson('https://api.pinterest.com/v5/pins', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) throw new Error(`Pinterest publish failed (${response.status}): ${body?.message || text || 'unknown error'}`);
+  return { id: body?.id || '', url: body?.link || '', response: body, http_status: response.status };
+}
+async function recordApiAttempt(db, adminUser, id, platform, status, details = {}) {
+  await db.prepare(`INSERT INTO social_post_attempts (
+    social_post_queue_id, platform_key, attempt_status, external_post_url, external_post_id,
+    platform_response_id, published_url, request_mode, http_status, response_json,
+    attempted_by_user_id, attempted_at, notes
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, 'api', ?, ?, ?, CURRENT_TIMESTAMP, ?)`).bind(
+    id,
+    platform,
+    status,
+    details.external_post_url || details.url || null,
+    details.external_post_id || details.id || null,
+    details.platform_response_id || details.id || null,
+    details.published_url || details.url || null,
+    details.http_status || null,
+    JSON.stringify(details.response || details.error || details || {}),
+    adminUser.user_id,
+    details.notes || null
+  ).run().catch(async () => {
+    await db.prepare(`INSERT INTO social_post_attempts (
+      social_post_queue_id, platform_key, attempt_status, external_post_url, external_post_id,
+      response_json, attempted_by_user_id, attempted_at, notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)`).bind(
+      id,
+      platform,
+      status,
+      details.external_post_url || details.url || null,
+      details.external_post_id || details.id || null,
+      JSON.stringify(details.response || details.error || details || {}),
+      adminUser.user_id,
+      details.notes || null
+    ).run().catch(() => null);
+  });
+}
+async function publishQueuedPost(context, db, adminUser, payload = {}) {
+  const id = Number(payload.social_post_queue_id || 0);
+  if (!id) throw new Error('A social_post_queue_id is required.');
+  const row = await db.prepare(`SELECT * FROM social_post_queue WHERE social_post_queue_id = ? LIMIT 1`).bind(id).first();
+  if (!row) throw new Error('Queued social post not found.');
+  const queuedPlatforms = safeJson(row.target_platforms_json, []);
+  const selected = normalizePlatforms(payload.platform_keys || payload.platforms || queuedPlatforms);
+  const images = safeJson(row.image_urls_json, []).map(safeUrl).filter(Boolean);
+  const readiness = getPlatformReadiness(context.env);
+  const results = [];
+
+  await db.prepare(`UPDATE social_post_queue SET last_publish_attempt_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id, id).run().catch(() => null);
+
+  for (const platform of selected) {
+    if (row.approval_status !== 'approved' && payload.force !== true) {
+      const blocked = { platform, status: 'blocked_needs_approval', notes: 'Approve/ready the queue item before API publishing.' };
+      await recordApiAttempt(db, adminUser, id, platform, 'blocked_needs_approval', blocked);
+      results.push(blocked);
+      continue;
+    }
+    if (['tiktok', 'youtube'].includes(platform)) {
+      const manual = { platform, status: 'manual_pending', notes: readiness[platform]?.notes || 'This platform remains manual/review-first in this build.' };
+      await recordApiAttempt(db, adminUser, id, platform, 'manual_pending', manual);
+      results.push(manual);
+      continue;
+    }
+    if (!readiness[platform]?.api_ready) {
+      const missing = { platform, status: 'credentials_missing', notes: readiness[platform]?.notes || 'Missing platform credentials.', missing_env: readiness[platform]?.missing_env || [] };
+      await recordApiAttempt(db, adminUser, id, platform, 'credentials_missing', missing);
+      results.push(missing);
+      continue;
+    }
+    try {
+      let published;
+      if (platform === 'facebook') published = await publishToFacebook(context.env, row, images);
+      else if (platform === 'instagram') published = await publishToInstagram(context.env, row, images);
+      else if (platform === 'x') published = await publishToX(context.env, row, images);
+      else if (platform === 'pinterest') published = await publishToPinterest(context.env, row, images);
+      else throw new Error(`API publishing is not implemented for ${platform}.`);
+      await recordApiAttempt(db, adminUser, id, platform, 'api_posted', {
+        platform,
+        id: published.id,
+        url: published.url,
+        external_post_id: published.id,
+        external_post_url: published.url,
+        published_url: published.url,
+        http_status: published.http_status,
+        response: published.response,
+        notes: 'Published through configured platform API.'
+      });
+      results.push({ platform, status: 'api_posted', external_post_id: published.id, external_post_url: published.url, http_status: published.http_status });
+    } catch (error) {
+      const failure = { platform, status: 'api_failed', error: error?.message || String(error || 'Publish failed.') };
+      await recordApiAttempt(db, adminUser, id, platform, 'api_failed', failure);
+      results.push(failure);
+    }
+  }
+  const postedCount = results.filter((row) => row.status === 'api_posted').length;
+  const failedCount = results.filter((row) => row.status === 'api_failed').length;
+  const terminal = postedCount && !failedCount && results.every((row) => ['api_posted', 'manual_pending'].includes(row.status)) ? 'posted' : postedCount ? 'ready' : failedCount ? 'failed' : 'ready';
+  await db.prepare(`UPDATE social_post_queue
+    SET post_status = ?, published_at = CASE WHEN ?='posted' THEN COALESCE(published_at,CURRENT_TIMESTAMP) ELSE published_at END,
+        updated_by_user_id = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE social_post_queue_id = ?`).bind(terminal, terminal, adminUser.user_id, id).run().catch(() => null);
+  return { social_post_queue_id: id, attempted_platforms: selected, results };
+}
+
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   try {
-    const data = await summarize(db);
-    return jsonResponse({ ok: true, ...data, queue: data.queue.map(normalizeQueueRow), mode: 'review_first_manual_ready' }, 200, { 'Cache-Control': 'no-store' });
+    const data = await summarize(db, context.env);
+    return jsonResponse({ ok: true, ...data, queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'admin_social',
@@ -347,6 +621,7 @@ export async function onRequestPost(context) {
     else if (action === 'update_status') await updateStatus(db, adminUser, payload);
     else if (action === 'record_manual_post') await recordManualPost(db, adminUser, payload);
     else if (action === 'generate_from_recent_media') result = await generateFromRecentMedia(db, adminUser);
+    else if (action === 'publish_platforms') result = await publishQueuedPost(context, db, adminUser, payload);
     else throw new Error(`Unsupported social queue action: ${action}`);
 
     await auditAdminAction(context.env, context.request, adminUser, {
@@ -357,8 +632,8 @@ export async function onRequestPost(context) {
       details: { action, platforms: payload.target_platforms || payload.platforms || null }
     });
 
-    const data = await summarize(db);
-    return jsonResponse({ ok: true, message: 'Social queue updated.', result, ...data, queue: data.queue.map(normalizeQueueRow), mode: 'review_first_manual_ready' }, 200, { 'Cache-Control': 'no-store' });
+    const data = await summarize(db, context.env);
+    return jsonResponse({ ok: true, message: 'Social queue updated.', result, ...data, queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'admin_social',
