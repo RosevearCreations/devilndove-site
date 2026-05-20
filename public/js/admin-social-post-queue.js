@@ -1,5 +1,5 @@
 // File: /public/js/admin-social-post-queue.js
-// Brief description: Operations admin panel for review-first social posting queue.
+// Brief description: Operations admin panel for review-first social posting queue plus API publishing when platform credentials exist.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('socialPostQueueAdminMount');
@@ -30,6 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const list = Array.isArray(platforms) ? platforms : parseJson(platforms, []);
     return list.map((platform) => `<span class="admin-status-pill muted">${esc(platform)}</span>`).join(' ');
   }
+  function missingEnvList(row) {
+    const list = Array.isArray(row.missing_env) ? row.missing_env : parseJson(row.missing_env_json, []);
+    return list.length ? `<div class="small"><strong>Missing:</strong> ${list.map(esc).join(', ')}</div>` : '';
+  }
+  function publishHint(platforms) {
+    const list = Array.isArray(platforms) ? platforms : [];
+    if (!list.length) return 'No target platforms selected.';
+    return `This will try API publishing for configured platforms (${list.join(', ')}). Platforms without credentials stay manual-ready and get an attempt note.`;
+  }
   function copyText(value) {
     const text = String(value || '');
     if (!text) return;
@@ -51,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <details style="margin-top:12px" open><summary>Platform readiness</summary>
         <div class="admin-table-wrap"><table><thead><tr><th>Platform</th><th>Status</th><th>API ready</th><th>Scopes / notes</th></tr></thead><tbody>
-          ${platforms.map((row) => `<tr><td><strong>${esc(row.display_name || row.platform_key)}</strong><br><span class="small">${esc(row.platform_key)}</span></td><td>${esc(row.connection_status || '')}</td><td>${Number(row.api_ready || 0) ? 'Yes' : 'Manual/copy-ready'}</td><td><div class="small">${esc(row.required_scopes || '')}</div><div>${esc(row.notes || '')}</div></td></tr>`).join('') || '<tr><td colspan="4">No platforms seeded yet.</td></tr>'}
+          ${platforms.map((row) => `<tr><td><strong>${esc(row.display_name || row.platform_key)}</strong><br><span class="small">${esc(row.platform_key)}</span></td><td>${esc(row.publish_mode || row.connection_status || '')}</td><td>${Number(row.api_ready || 0) ? '<span class="admin-status-pill good">API ready</span>' : '<span class="admin-status-pill muted">Manual/copy-ready</span>'}</td><td><div class="small">${esc(row.required_scopes || '')}</div><div>${esc(row.notes || '')}</div>${missingEnvList(row)}</td></tr>`).join('') || '<tr><td colspan="4">No platforms seeded yet.</td></tr>'}
         </tbody></table></div>
       </details>
       <details style="margin-top:12px" open><summary>Queued posts</summary>
@@ -67,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <td><div style="display:flex;gap:6px;flex-wrap:wrap">
                 <button class="btn small" data-social-copy="${esc(row.social_post_queue_id)}">Copy caption</button>
                 <button class="btn small" data-social-ready="${esc(row.social_post_queue_id)}">Approve/ready</button>
+                <button class="btn small primary" data-social-publish="${esc(row.social_post_queue_id)}">Publish APIs</button>
                 <button class="btn small" data-social-posted="${esc(row.social_post_queue_id)}">Mark posted</button>
                 <button class="btn small danger" data-social-archive="${esc(row.social_post_queue_id)}">Archive</button>
               </div></td>
@@ -128,6 +138,23 @@ document.addEventListener('DOMContentLoaded', () => {
       setMsg('Social post status updated.');
     } catch (error) { setMsg(error.message || 'Unable to update status.', true); }
   }
+  async function publishApis(id) {
+    const results = document.getElementById('socialPostQueueResults');
+    const row = (results?._queueRows || []).find((item) => Number(item.social_post_queue_id) === Number(id));
+    const platforms = Array.isArray(row?.target_platforms) ? row.target_platforms : parseJson(row?.target_platforms_json, []);
+    const message = `${publishHint(platforms)}\n\nApprove the post first. Continue?`;
+    if (!window.confirm(message)) return;
+    try {
+      setMsg('Attempting configured social API publishing...');
+      const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'publish_platforms', social_post_queue_id: Number(id), platform_keys: platforms })
+      }));
+      render(data);
+      const summary = (data.result?.results || []).map((item) => `${item.platform}: ${item.status}`).join(' • ');
+      setMsg(summary ? `Publish attempts recorded: ${summary}` : 'Publish attempts recorded.');
+    } catch (error) { setMsg(error.message || 'Unable to publish via APIs.', true); }
+  }
   async function markPosted(id) {
     const platform = window.prompt('Which platform was posted? facebook, instagram, tiktok, x, youtube, or pinterest:', 'facebook');
     if (!platform) return;
@@ -142,11 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
   mount.innerHTML = `
     <div class="card social-post-queue-admin-panel" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div><h2 style="margin-top:0">Social Posting Queue</h2><p class="small" style="margin:8px 0 0 0">Queue job/process photos and summaries for Facebook, Instagram, TikTok, X, YouTube, Pinterest, or manual copy-paste. This is review-first so nothing posts without approval.</p></div>
+        <div><h2 style="margin-top:0">Social Posting Queue</h2><p class="small" style="margin:8px 0 0 0">Queue crafting/job photos and summaries for Facebook, Instagram, TikTok, X, YouTube, Pinterest, or manual copy-paste. Approved items can be pushed through configured APIs; unconfigured platforms stay manual/copy-ready.</p></div>
         <button class="btn" type="button" id="socialQueueLoadButton">Refresh queue</button>
       </div>
       <div class="social-queue-grid" style="margin-top:12px">
-        <label>Source type<select id="socialSourceType"><option value="job_update">Job/process update</option><option value="product_story">Product story</option><option value="workshop_update">Workshop update</option><option value="event">Event</option><option value="customer_delivery">Customer delivery</option></select></label>
+        <label>Source type<select id="socialSourceType"><option value="crafting_process">Crafting process update</option><option value="job_update">Job/process update</option><option value="product_story">Product story</option><option value="workshop_update">Workshop update</option><option value="before_after">Before/after progress</option><option value="event">Event</option><option value="customer_delivery">Customer delivery</option></select></label>
         <label>Optional source/job ID<input id="socialSourceId" placeholder="Example: order/job/product id"></label>
         <label>Post title<input id="socialPostTitle" placeholder="Fresh from the Devil n Dove workshop"></label>
         <label>Related link<input id="socialPostLink" placeholder="https://devilndove.com/... or product URL"></label>
@@ -163,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <label class="small" style="display:block;margin-top:10px"><input type="checkbox" id="socialReadyNow"> Mark as approved/ready immediately</label>
       <div class="dd-product-draft-media-actions" style="margin-top:10px">
         <button class="btn primary" type="button" id="socialQueueCreateButton">Queue social post</button>
-        <button class="btn" type="button" id="socialQueueRecentMediaButton">Draft from recent media</button>
+        <button class="btn" type="button" id="socialQueueRecentMediaButton">Draft from recent media</button><span class="small">API publishing uses Cloudflare environment variables only; secrets are never stored in public files.</span>
       </div>
       <div id="socialPostQueueMessage" class="small" style="display:none;margin-top:10px"></div>
       <div id="socialPostQueueResults"></div>
@@ -182,6 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const readyButton = event.target.closest('[data-social-ready]');
     if (readyButton) updateStatus(readyButton.getAttribute('data-social-ready'), 'ready', 'approved');
+    const publishButton = event.target.closest('[data-social-publish]');
+    if (publishButton) publishApis(publishButton.getAttribute('data-social-publish'));
     const postedButton = event.target.closest('[data-social-posted]');
     if (postedButton) markPosted(postedButton.getAttribute('data-social-posted'));
     const archiveButton = event.target.closest('[data-social-archive]');
