@@ -1,3 +1,9 @@
+# Repo Base Guide — Devil n Dove
+
+## Build 139 repo note
+
+Social posting files now include API publishing attempts inside `functions/api/admin/social-post-queue.js` and UI controls in `public/js/admin-social-post-queue.js`. The Operations page mount remains `socialPostQueueAdminMount`. The workflow is review-first and credential-safe.
+
 # Repo Base Guide
 
 ## Build 137 note

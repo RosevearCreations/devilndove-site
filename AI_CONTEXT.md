@@ -1,4 +1,8 @@
-# AI Context — Devil n Dove Build 137
+# AI Context — Devil n Dove
+
+## Build 139 working context
+
+The current build adds approved social API publishing attempts to Operations > Social Posting Queue. Keep all credentials in Cloudflare environment variables only. Do not place platform tokens in D1, JSON files, Markdown, or public assets. Facebook/Instagram/X/Pinterest are API-attempt capable when configured; TikTok/YouTube remain manual/review-first until their upload workflows are explicitly built.
 
 Build 137 extends the Search Console workflow. The current admin flow is: import Search Console CSV privately, filter page/query opportunities, optionally delete/revert a bad import batch, then generate private `seo_opportunity_actions` for human-reviewed title/meta/internal-link tasks. Nothing edits public SEO copy automatically. Keep one H1 per exposed page, maintain local Ontario wording where relevant, and keep private CSV/order/import files out of public `/data/`.
 

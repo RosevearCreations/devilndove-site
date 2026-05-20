@@ -1,3 +1,9 @@
+# Sanity Health Check — Devil n Dove
+
+## Build 139 checks added
+
+Release Sanity now includes Social API publisher readiness. The check reports whether Facebook, Instagram, X, or Pinterest credentials are detected in Cloudflare environment variables. Missing credentials are a warning, not a failure, because manual/copy-posting remains available. Social publish attempts are recorded per platform so failed credentials or app-review issues do not break the public storefront.
+
 # Sanity Health Check — Build 137
 
 ## Build 137 sanity additions

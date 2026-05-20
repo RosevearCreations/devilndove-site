@@ -1,3 +1,9 @@
+# New Chat Status — Devil n Dove Build 139
+
+## Current status — Build 139
+
+Build 139 starts from the latest uploaded build and adds an approved-post social API publishing layer on top of the existing Operations > Social Posting Queue. Crafting/job photos and summaries remain review-first. Approved posts can attempt API publishing to Facebook, Instagram, X, and Pinterest when Cloudflare environment variables are configured. TikTok and YouTube remain manual/review-first until their stricter upload workflows and app approvals are configured. Deploy the build, apply or record `database_upgrade_current_pass.sql`, then test a queued post before adding any live credentials.
+
 # New Chat Status — Devil n Dove Build 137
 
 ## Current status — Build 137

@@ -521,7 +521,9 @@ CREATE TABLE IF NOT EXISTS social_post_queue (
   updated_by_user_id INTEGER,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-  notes TEXT
+  notes TEXT,
+  last_publish_attempt_at TEXT,
+  api_publish_mode TEXT DEFAULT 'review_first'
 );
 
 CREATE TABLE IF NOT EXISTS social_post_attempts (
@@ -531,6 +533,10 @@ CREATE TABLE IF NOT EXISTS social_post_attempts (
   attempt_status TEXT NOT NULL DEFAULT 'manual_ready',
   external_post_url TEXT,
   external_post_id TEXT,
+  platform_response_id TEXT,
+  published_url TEXT,
+  request_mode TEXT,
+  http_status INTEGER,
   response_json TEXT,
   attempted_by_user_id INTEGER,
   attempted_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -562,6 +568,29 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   'pending_review',
   0,
   'Created by build 138. Adds review-first social post queue and platform readiness for job/process photo summaries.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);
+
+-- Build 139 - Social API publishing attempts for approved crafting/job process posts.
+-- Existing D1 installs are self-healed by /api/admin/social-post-queue before publishing because SQLite/D1
+-- cannot safely run ALTER TABLE ADD COLUMN repeatedly without a migration guard.
+-- Latest schema columns added to the reference CREATE TABLE definitions above:
+--   social_post_queue.last_publish_attempt_at
+--   social_post_queue.api_publish_mode
+--   social_post_attempts.platform_response_id
+--   social_post_attempts.published_url
+--   social_post_attempts.request_mode
+--   social_post_attempts.http_status
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build139',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 139. Adds approved-post API publishing attempts for Facebook, Instagram, X, and Pinterest when credentials are configured in Cloudflare environment variables; TikTok and YouTube remain manual/review-first until upload flows are configured.',
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );

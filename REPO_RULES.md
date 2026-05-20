@@ -1,3 +1,9 @@
+# Repo Rules — Devil n Dove
+
+## Build 139 rule reminder
+
+Never commit social platform access tokens, page tokens, OAuth refresh tokens, app secrets, or API keys. Social publisher credentials belong only in Cloudflare environment variables. Keep generated social captions and public post URLs in D1; keep secrets out of D1 and public files.
+
 # Repo Rules
 
 ## Build 137 rule reminder

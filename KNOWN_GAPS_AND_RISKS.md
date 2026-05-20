@@ -1,3 +1,13 @@
+# Known Gaps and Risks — Devil n Dove
+
+## Build 139 update — social API publishing risks
+
+- Social posting is now review-first plus API-capable, but credentials must be stored only in Cloudflare environment variables.
+- Facebook, Instagram, X, and Pinterest can attempt publishing only when their required credentials are present.
+- TikTok and YouTube remain manual/copy-ready in this pass because they require more involved upload flows and platform approval.
+- The first live social tests should be done one platform at a time with harmless test captions and images.
+- API failures are expected during setup and should be reviewed in Social Posting Queue attempts and Runtime Incidents instead of treated as storefront failures.
+
 # Known Gaps and Risks
 
 ## Build 137 known gaps and risk updates

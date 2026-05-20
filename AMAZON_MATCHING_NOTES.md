@@ -1,3 +1,9 @@
+# Amazon Matching Notes — Devil n Dove
+
+## Build 139 note
+
+No Amazon matching rules changed in this pass. The focus was social publishing from crafting/job process photos. Amazon purchase/import data should remain private and should not be reused in social captions unless it is useful public product context and does not expose order or cost details.
+
 # Amazon Matching Notes
 
 ## Build 137 note

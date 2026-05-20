@@ -6,7 +6,7 @@ Checks:
 - local script/style/image references exist
 - CSS brace counts are balanced enough to catch obvious drift
 - shared mobile navigation has compact expandable menu assets
-- operations admin has the structured-data, sitemap preview, media diagnostics, product image health, Search Console, and storefront backfill assets
+- operations admin has the structured-data, sitemap preview, media diagnostics, product image health, Search Console, social publisher, and storefront backfill assets
 - product editor has draft-first media upload, checklist, image-library reuse, and JSON-safe create-product assets
 - public data folders do not contain private Amazon/order import reports
 
@@ -144,12 +144,14 @@ def check_operations_assets(root: Path):
         'mediaDiagnosticsAdminMount',
         'productImageHealthAdminMount',
         'searchConsoleImportAdminMount',
+        'socialPostQueueAdminMount',
         '/public/js/admin-structured-data-health.js',
         '/public/js/admin-storefront-value-backfill.js',
         '/public/js/admin-sitemap-preview.js',
         '/public/js/admin-media-diagnostics.js',
         '/public/js/admin-product-image-health.js',
         '/public/js/admin-search-console-import.js',
+        '/public/js/admin-social-post-queue.js',
     ]
     missing = [token for token in required if token not in text]
     if missing:
@@ -164,6 +166,7 @@ def check_operations_assets(root: Path):
         'functions/api/admin/media-diagnostics.js',
         'functions/api/admin/product-image-health.js',
         'functions/api/admin/search-console-import.js',
+        'functions/api/admin/social-post-queue.js',
     ]:
         if not (root / ref).exists():
             issues.append({'type': 'operations_missing_asset_file', 'path': ref})
@@ -179,6 +182,18 @@ def check_operations_assets(root: Path):
         issues.append({'type': 'search_console_missing_admin_assets', 'path': 'public/js/admin-search-console-import.js', 'missing': missing_search_js})
     if missing_search_api:
         issues.append({'type': 'search_console_missing_api_assets', 'path': 'functions/api/admin/search-console-import.js', 'missing': missing_search_api})
+    social_js = root / 'public' / 'js' / 'admin-social-post-queue.js'
+    social_api = root / 'functions' / 'api' / 'admin' / 'social-post-queue.js'
+    social_js_text = read_text(social_js) if social_js.exists() else ''
+    social_api_text = read_text(social_api) if social_api.exists() else ''
+    required_social_js = ['Publish APIs', 'data-social-publish', 'Crafting process update']
+    required_social_api = ['publish_platforms', 'publishToFacebook', 'publishToInstagram', 'publishToX', 'getPlatformReadiness']
+    missing_social_js = [token for token in required_social_js if token not in social_js_text]
+    missing_social_api = [token for token in required_social_api if token not in social_api_text]
+    if missing_social_js:
+        issues.append({'type': 'social_publisher_missing_admin_assets', 'path': 'public/js/admin-social-post-queue.js', 'missing': missing_social_js})
+    if missing_social_api:
+        issues.append({'type': 'social_publisher_missing_api_assets', 'path': 'functions/api/admin/social-post-queue.js', 'missing': missing_social_api})
     return issues
 
 
@@ -240,4 +255,4 @@ def main(argv=None) -> int:
 if __name__ == '__main__':
     raise SystemExit(main())
 
-# Build 138 note: predeploy checks should include public/js/admin-social-post-queue.js and functions/api/admin/social-post-queue.js.
+# Build 139 note: predeploy checks include social API publisher controls and endpoint helpers.

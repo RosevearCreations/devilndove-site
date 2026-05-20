@@ -1846,7 +1846,9 @@ CREATE TABLE IF NOT EXISTS social_post_queue (
   updated_by_user_id INTEGER,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-  notes TEXT
+  notes TEXT,
+  last_publish_attempt_at TEXT,
+  api_publish_mode TEXT DEFAULT 'review_first'
 );
 
 CREATE TABLE IF NOT EXISTS social_post_attempts (
@@ -1856,6 +1858,10 @@ CREATE TABLE IF NOT EXISTS social_post_attempts (
   attempt_status TEXT NOT NULL DEFAULT 'manual_ready',
   external_post_url TEXT,
   external_post_id TEXT,
+  platform_response_id TEXT,
+  published_url TEXT,
+  request_mode TEXT,
+  http_status INTEGER,
   response_json TEXT,
   attempted_by_user_id INTEGER,
   attempted_at TEXT DEFAULT CURRENT_TIMESTAMP,

@@ -1,5 +1,9 @@
 # Devil n Dove Site
 
+## Build 139 note
+
+This build adds a review-first social publisher workflow. Admins can queue crafting/job photos and summaries, approve them, and then attempt API publishing to configured platforms. The site still works in manual/copy mode when no platform credentials are present.
+
 ## Build 137 update
 
 This build adds safer Search Console SEO workflow tools in Operations: filtered Search Console summaries, import batch delete/revert, and private SEO opportunity actions. These tools help review page/query opportunities before editing public titles, meta descriptions, headings, or internal links. Apply/record `database_upgrade_current_pass.sql` after deploying.

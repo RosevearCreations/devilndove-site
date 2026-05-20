@@ -1,3 +1,9 @@
+# Database Schema Reference — Devil n Dove
+
+## Build 139 schema update
+
+Build 139 extends the social posting schema reference. `social_post_queue` now includes `last_publish_attempt_at` and `api_publish_mode`. `social_post_attempts` now includes `platform_response_id`, `published_url`, `request_mode`, and `http_status`. Existing D1 installations are self-healed by `/api/admin/social-post-queue` before use because SQLite/D1 does not safely repeat unguarded `ALTER TABLE ADD COLUMN` statements. `database_upgrade_current_pass.sql` includes a Build 139 ledger marker.
+
 # Database Schema Reference
 
 ## Build 137 schema update

@@ -1,4 +1,50 @@
-# Development Roadmap
+# Development Roadmap — Devil n Dove
+
+## Completed 20 items in this pass — Build 139
+
+1. Added approved-post API publishing attempts to the existing Social Posting Queue.
+2. Kept the workflow review-first so crafting/job posts must be approved before any API push attempt.
+3. Added platform credential readiness checks for Facebook, Instagram, X, and Pinterest using Cloudflare environment variables only.
+4. Added Facebook Page post/photo publishing support when `FACEBOOK_PAGE_ID` and `FACEBOOK_PAGE_ACCESS_TOKEN` are configured.
+5. Added Instagram image publishing support through the Meta media-container/media-publish flow when `INSTAGRAM_USER_ID` and a valid Meta/Instagram token are configured.
+6. Added X text/link publishing support through the X post endpoint when `X_USER_ACCESS_TOKEN` is configured.
+7. Added Pinterest image-pin publishing support when `PINTEREST_ACCESS_TOKEN` and `PINTEREST_BOARD_ID` are configured.
+8. Kept TikTok manual/review-first in this pass because the direct upload/publish flow needs separate app approval and upload handling.
+9. Kept YouTube manual/review-first in this pass because Shorts/upload publishing needs a separate Google OAuth upload workflow.
+10. Added per-platform attempt recording for API posted, failed, credentials missing, manual pending, and blocked-needs-approval outcomes.
+11. Added `last_publish_attempt_at` and `api_publish_mode` support to the social queue reference schema.
+12. Added richer attempt metadata to the social attempt reference schema, including HTTP status, response IDs, request mode, and published URL.
+13. Added a Social API publisher readiness check into Release Sanity.
+14. Updated the Operations Social Posting Queue UI with an API Publish button beside approved posts.
+15. Updated the Platform Readiness table to show API-ready, missing environment variables, and manual/copy-ready status.
+16. Added a Crafting process source type and preserved job/process/product story source labels.
+17. Preserved the compact mobile menu, product draft/editor improvements, media diagnostics, Search Console import/actions, sitemap, structured-data, and storefront health tools.
+18. Kept social credentials out of D1, JSON, Markdown, and public files; they belong in Cloudflare environment variables only.
+19. Updated schema reference files and `database_upgrade_current_pass.sql` with the Build 139 ledger marker.
+20. Ran syntax, H1/title/meta, CSS, public-data privacy, SQL smoke, and ZIP integrity checks for the packaged build.
+
+## Next logical 20 steps after Build 139
+
+1. Deploy Build 139 and apply/record `database_upgrade_current_pass.sql`.
+2. Open Operations > Social Posting Queue and queue one test crafting-process post.
+3. Approve the queued post and test API publishing with no credentials first; confirm attempts record `credentials_missing` instead of failing the whole page.
+4. Add only one platform credential set at a time in Cloudflare environment variables, starting with Facebook or X.
+5. Create a private social credential checklist in Operations so missing/ready variables are more visible before posting.
+6. Add a dry-run preview endpoint that shows the exact platform payload without sending it.
+7. Add post scheduling controls so approved posts can be queued for a future date/time.
+8. Add per-platform caption variants so X can stay shorter while Instagram/Facebook get longer story captions.
+9. Add automatic first-image quality warnings before sending posts to image-heavy platforms.
+10. Add a “job progress timeline” source so process updates can be created from a project/job record instead of a blank form.
+11. Add a public-safe gallery/story block that can reuse approved social captions without exposing private admin notes.
+12. Add TikTok API readiness diagnostics, then implement the direct/post upload flow only after developer app approval and media URL rules are confirmed.
+13. Add YouTube Shorts upload diagnostics and upload handling after Google OAuth credentials are safely configured.
+14. Add platform rate-limit/backoff handling and retry notes for failed API attempts.
+15. Add a “do not post again” duplicate detector for repeated image/caption/platform combinations.
+16. Connect product publish/review status to optional social queue generation after a product reaches publish-ready.
+17. Add Search Console feedback columns to compare page impressions before/after social and SEO pushes.
+18. Add month-end social/export summary for accountant/marketing review.
+19. Continue local SEO content tuning page by page while keeping one clear H1 per exposed page.
+20. Continue retiring JSON duplication where D1 has become the reliable source of truth.
 
 ## Completed 20 items in this pass — Build 137
 
