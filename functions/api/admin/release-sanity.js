@@ -320,6 +320,35 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+
+
+  const socialQueueHealth = await publicJsonCheck(context.request, '/api/admin/social-post-queue');
+  addCheck(
+    checks,
+    socialQueueHealth.ok && !socialQueueHealth.error ? 'pass' : 'warn',
+    'Social posting queue endpoint',
+    socialQueueHealth.ok ? `HTTP ${socialQueueHealth.status}; social queue responded for review-first posting.` : `HTTP ${socialQueueHealth.status}; ${socialQueueHealth.error || 'Social queue endpoint could not be checked.'}`,
+    'Open Operations > Social Posting Queue before pushing job/process summaries to Facebook, Instagram, TikTok, X, or other platforms.',
+    'warning'
+  );
+
+  const socialQueueRows = await tableExists(db, 'social_post_queue') ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+           SUM(CASE WHEN COALESCE(post_status,'draft') IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
+           SUM(CASE WHEN COALESCE(approval_status,'needs_review')='needs_review' THEN 1 ELSE 0 END) AS needs_review_count
+    FROM social_post_queue
+  `) : { total: 0, open_count: 0, needs_review_count: 0 };
+  addCheck(
+    checks,
+    await tableExists(db, 'social_post_queue') ? 'pass' : 'warn',
+    'Social post review queue',
+    await tableExists(db, 'social_post_queue')
+      ? `${Number(socialQueueRows.total || 0)} queued social post(s), ${Number(socialQueueRows.open_count || 0)} open, ${Number(socialQueueRows.needs_review_count || 0)} needing review.`
+      : 'social_post_queue table is not installed yet.',
+    'Apply the current migration, then use Operations > Social Posting Queue for review-first job/process social posts.',
+    'warning'
+  );
+
   const storefrontValueDefaults = productColumns.size ? await safeAll(db, `
     SELECT 'status' AS field, COUNT(*) AS missing_count FROM products WHERE ${productColumns.has('status') ? "COALESCE(status,'') = ''" : '0'}
     UNION ALL SELECT 'product_type', COUNT(*) FROM products WHERE ${productColumns.has('product_type') ? "COALESCE(product_type,'') = ''" : '0'}
