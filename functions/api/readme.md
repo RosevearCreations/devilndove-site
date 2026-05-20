@@ -33,3 +33,5 @@ Build 125 keeps Amazon order/cost data private, adds admin review/apply controls
 ## Build 131 API note
 
 New admin endpoint: `/api/admin/storefront-schema-repair`. It requires admin auth and can inspect/apply non-destructive storefront compatibility columns for `products`, `tax_classes`, and `product_seo`. Public API Health was expanded to treat `authority: "error"` as a failure and to check sitemap/robots/page HTML health.
+
+- `/api/admin/social-post-queue` — admin review-first social post queue for job/process photos and summaries.
