@@ -376,3 +376,50 @@ Current sync: 2026-05-17 — Build 134 draft-first product editor, inline image 
 18. Build the HST/GST review worksheet and remittance review flow.
 19. Build period close/lock/reopen controls with audit notes and checklist status.
 20. Build accountant export package v2 with GL, trial balance, P&L, HST worksheet, statement summaries, attachment index, and unresolved issue log.
+
+
+## Build 138 completed 20-step pass — social posting queue, process-photo workflow, and platform readiness
+
+1. Added an admin-only Social Posting Queue in `/admin/operations/` for job/process photos and summaries.
+2. Added `/api/admin/social-post-queue` with review-first create, refresh, status update, manual-post recording, and recent-media draft generation actions.
+3. Added `social_platform_connections` so Facebook, Instagram, TikTok, X, YouTube, and Pinterest can be tracked separately.
+4. Added `social_post_queue` to hold captions, image URLs, hashtags, target platforms, review status, schedule notes, and source/job references.
+5. Added `social_post_attempts` to record manual posts now and future API attempts later.
+6. Seeded platform readiness rows as manual/copy-ready until official OAuth tokens, app permissions, and review are configured.
+7. Added a “Draft from recent media” button so recently uploaded product/job images can become a reviewed social post draft.
+8. Added copy-to-clipboard support for captions so posts can be published manually today without exposing platform tokens.
+9. Added manual posted-record flow so published Facebook/Instagram/TikTok/X URLs can be linked back to the queue.
+10. Added approve/ready/archive controls so posts are not pushed accidentally.
+11. Added source type/source ID fields for job updates, product stories, workshop updates, events, and customer deliveries.
+12. Added platform-specific checkbox targeting for Facebook, Instagram, TikTok, X, YouTube, and Pinterest.
+13. Added mobile-safe CSS for the social queue form and tables.
+14. Added social queue checks to Release Sanity.
+15. Added runtime incident logging for social queue load/save failures.
+16. Added admin audit logging for social queue actions.
+17. Added schema entries to the current migration, full schema, store schema, and growth/SEO extension schema set.
+18. Added Build 138 migration-ledger marker.
+19. Preserved compact mobile navigation, product image workflow, Search Console action queue, and schema-drift protections from prior builds.
+20. Updated active Markdown handoff, roadmap, known gaps, sanity, schema, SEO, and repo documents.
+
+## Next logical 20 steps after Build 138
+
+1. Deploy Build 138 and run `database_upgrade_current_pass.sql`.
+2. Open `/admin/operations/` and confirm Social Posting Queue loads.
+3. Queue one test post from a real job/process photo and copy it manually to Facebook or Instagram.
+4. Record the resulting public post URL back into the queue as a manual post.
+5. Test “Draft from recent media” after uploading product/job photos.
+6. Decide which profiles are official for Devil n Dove: Facebook Page, Instagram account, TikTok, X, YouTube, Pinterest, and any others.
+7. Add profile URLs to `social_platform_connections` in the admin UI or a follow-up editor.
+8. Add a platform credential settings screen that stores only non-secret public status in D1 and keeps secrets in Cloudflare environment variables.
+9. Add Meta/Facebook Page OAuth connection diagnostics before attempting any API publishing.
+10. Add Instagram Content Publishing API diagnostics after Meta/Instagram account setup is confirmed.
+11. Add TikTok Content Posting API diagnostics only after TikTok developer app approval and verified media URL/domain rules are ready.
+12. Add X API diagnostics only after confirming current pricing and write permissions still fit the business.
+13. Add per-platform caption length checks and media-ratio warnings before approval.
+14. Add short-video/Reels/TikTok-specific media checks for duration, aspect ratio, and thumbnail readiness.
+15. Add a content calendar view that groups queued posts by scheduled week.
+16. Add product/job link helpers that pull image, title, price, and short summary automatically into a social draft.
+17. Add reusable caption templates for “making story,” “finished product,” “behind the scenes,” “oops/funny shop moment,” and “local market/event.”
+18. Add UTM-tagged links so social posts can be measured in analytics.
+19. Add social performance import fields later for clicks, likes, comments, saves, shares, and platform post URLs.
+20. Continue payment application, HST review, period close, accountant export, and Search Console SEO action workflows.

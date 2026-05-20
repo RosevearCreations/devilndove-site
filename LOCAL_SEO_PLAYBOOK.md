@@ -80,3 +80,8 @@ This pass fixes the Product editor draft workflow: drafts require only name/type
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
+
+
+## Build 138 social content SEO/local note
+
+Job/process social posts should reuse local phrases naturally: Southern Ontario handmade gifts, Ontario workshop-made jewelry, polymer clay earrings, laser engraving, vintage finds, and behind-the-scenes Devil n Dove workshop stories. Queue posts first, review them, then publish manually until platform API credentials are fully configured.

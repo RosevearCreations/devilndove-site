@@ -162,3 +162,11 @@ Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch reve
 - SEO opportunity rows are hints, not automatic edits. Review the actual page intent before changing titles, meta descriptions, H1 wording, or internal links.
 - The Search Console staging tables are private D1 tables. Do not place Search Console CSV exports under public `/data/` folders.
 - The next highest SEO value is turning imported opportunities into a simple page-level action list with suggested title/meta/internal-link improvements.
+
+
+## Build 138 update — social posting queue risk posture
+
+- Social posting is now review-first and manual/copy-ready, not blind auto-posting.
+- Direct API posting remains a known future gap because Facebook/Instagram/TikTok/X require platform apps, OAuth tokens, scopes, and in some cases app review or paid API access.
+- Platform secrets must stay in Cloudflare environment variables, not D1, Markdown, JSON, or public site files.
+- Next risk-reduction step: add per-platform connection diagnostics before any live API publish action is enabled.

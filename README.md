@@ -116,3 +116,8 @@ This pass fixes the Product editor draft workflow: drafts require only name/type
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
+
+
+## Build 138 highlight
+
+Operations now includes a Social Posting Queue for review-first job/process photo captions and manual publishing records across Facebook, Instagram, TikTok, X, YouTube, and Pinterest.

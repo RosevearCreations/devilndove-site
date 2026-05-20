@@ -146,3 +146,10 @@ No structural D1 schema change is required for Build 134. The product create end
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
+
+
+## Build 138 schema additions
+
+- `social_platform_connections` tracks platform readiness, profile URLs, required scopes, and manual/API readiness.
+- `social_post_queue` stores reviewed social captions, target platforms, source/job reference, media URLs, status, and schedule notes.
+- `social_post_attempts` records manual posted URLs now and future API attempts later.

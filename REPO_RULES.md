@@ -67,3 +67,8 @@ Build 133 rule reminder: do not expose private Amazon/order CSV files under publ
 ## Build 134 note
 
 This pass fixes the Product editor draft workflow: drafts require only name/type, image upload is available from the editor when R2 media storage is configured, create-product failures return JSON instead of HTML 500 pages, and the create endpoint adapts to live D1 product/media/SEO columns.
+## Build 138 social posting rules
+
+- Social posting remains review-first. Queue, review, copy/manual-post, then record the public post URL.
+- Do not store Facebook, Instagram, TikTok, X, YouTube, Pinterest, or other platform secrets in Markdown, JSON, D1 public tables, or front-end JavaScript.
+- Future direct API posting must use Cloudflare environment variables for secrets, platform OAuth diagnostics, and explicit admin approval before any publish action.

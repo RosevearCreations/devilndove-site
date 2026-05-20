@@ -81,3 +81,6 @@ Build 133 does not change Amazon matching rules, but the next pass should add du
 ## Build 134 note
 
 This pass fixes the Product editor draft workflow: drafts require only name/type, image upload is available from the editor when R2 media storage is configured, create-product failures return JSON instead of HTML 500 pages, and the create endpoint adapts to live D1 product/media/SEO columns.
+## Build 138 note
+
+No Amazon matching logic changed in Build 138. The new Social Posting Queue can use approved product/job image URLs after inventory and product-media records are reviewed. Amazon private cost/order data should still remain private and must not be copied into public captions unless intentionally summarized for customers.

@@ -81,3 +81,8 @@ This pass fixes the Product editor draft workflow: drafts require only name/type
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
+
+
+## Build 138 AI handoff note
+
+The site now has a review-first Social Posting Queue. Keep future social work safe: manual/copy-ready first, OAuth/API diagnostics second, direct publishing last. Never store platform secrets in public files or D1; use Cloudflare environment variables for secrets.

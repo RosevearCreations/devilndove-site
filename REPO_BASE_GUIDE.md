@@ -79,3 +79,7 @@ Build 133 adds admin Operations assets for structured data health, live sitemap 
 ## Build 134 note
 
 This pass fixes the Product editor draft workflow: drafts require only name/type, image upload is available from the editor when R2 media storage is configured, create-product failures return JSON instead of HTML 500 pages, and the create endpoint adapts to live D1 product/media/SEO columns.
+
+## Build 138 repo note
+
+Social posting queue files added: `functions/api/admin/social-post-queue.js` and `public/js/admin-social-post-queue.js`. The Operations page mounts the panel and Release Sanity checks the endpoint.

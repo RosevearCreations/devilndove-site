@@ -563,3 +563,84 @@ CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_status
   ON seo_opportunity_actions(action_status, priority_score);
 CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_page
   ON seo_opportunity_actions(page_url);
+
+
+-- Build 138 - Social posting queue for job/process photos and summaries.
+CREATE TABLE IF NOT EXISTS social_platform_connections (
+  social_platform_connection_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  platform_key TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL,
+  profile_url TEXT,
+  connection_status TEXT NOT NULL DEFAULT 'manual_ready',
+  api_ready INTEGER NOT NULL DEFAULT 0,
+  requires_oauth INTEGER NOT NULL DEFAULT 1,
+  required_scopes TEXT,
+  notes TEXT,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS social_post_queue (
+  social_post_queue_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  social_post_key TEXT NOT NULL UNIQUE,
+  source_type TEXT NOT NULL DEFAULT 'job_update',
+  source_id TEXT,
+  title TEXT NOT NULL,
+  summary TEXT,
+  caption TEXT,
+  hashtags TEXT,
+  target_platforms_json TEXT NOT NULL DEFAULT '[]',
+  image_urls_json TEXT NOT NULL DEFAULT '[]',
+  video_url TEXT,
+  link_url TEXT,
+  approval_status TEXT NOT NULL DEFAULT 'needs_review',
+  post_status TEXT NOT NULL DEFAULT 'draft',
+  scheduled_at TEXT,
+  published_at TEXT,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS social_post_attempts (
+  social_post_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  social_post_queue_id INTEGER NOT NULL,
+  platform_key TEXT NOT NULL,
+  attempt_status TEXT NOT NULL DEFAULT 'manual_ready',
+  external_post_url TEXT,
+  external_post_id TEXT,
+  response_json TEXT,
+  attempted_by_user_id INTEGER,
+  attempted_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT,
+  FOREIGN KEY (social_post_queue_id) REFERENCES social_post_queue(social_post_queue_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_social_post_queue_status ON social_post_queue(post_status, approval_status, scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_social_post_queue_source ON social_post_queue(source_type, source_id);
+CREATE INDEX IF NOT EXISTS idx_social_post_attempts_queue ON social_post_attempts(social_post_queue_id, platform_key);
+
+INSERT INTO social_platform_connections (platform_key, display_name, connection_status, api_ready, requires_oauth, required_scopes, notes, updated_at) VALUES
+('facebook','Facebook Page','manual_ready',0,1,'pages_manage_posts,pages_read_engagement,pages_show_list','Manual-ready now. API posting later requires Meta Page permissions and app review where applicable.',CURRENT_TIMESTAMP),
+('instagram','Instagram Business/Creator','manual_ready',0,1,'instagram_business_content_publish,pages_show_list','Manual-ready now. API publishing later requires Instagram professional account + Meta Content Publishing API flow.',CURRENT_TIMESTAMP),
+('tiktok','TikTok','manual_ready',0,1,'video.upload,video.publish','Manual-ready now. API posting later requires TikTok developer app approval and verified media URL/domain rules.',CURRENT_TIMESTAMP),
+('x','X','manual_ready',0,1,'tweet.write,users.read,offline.access','Manual-ready now. API posting later requires X API access and OAuth tokens.',CURRENT_TIMESTAMP),
+('youtube','YouTube Shorts/Community','manual_ready',0,1,'youtube.upload,youtube.force-ssl','Manual-ready now. API upload/posting later requires Google OAuth/app setup.',CURRENT_TIMESTAMP),
+('pinterest','Pinterest','manual_ready',0,1,'pins:write,boards:read','Manual-ready now. Good fit for finished goods and workshop inspiration boards after OAuth setup.',CURRENT_TIMESTAMP)
+ON CONFLICT(platform_key) DO UPDATE SET
+  display_name = excluded.display_name,
+  required_scopes = excluded.required_scopes,
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build138',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 138. Adds review-first social post queue and platform readiness for job/process photo summaries.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

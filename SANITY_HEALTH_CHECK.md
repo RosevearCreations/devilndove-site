@@ -132,3 +132,8 @@ python scripts/predeploy_sanity_check.py .
 - Keep Search Console CSV exports private; do not store them in public `/data/`.
 
 Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `/admin/operations/`, import a tiny Search Console CSV sample, then run Release Sanity and Public API Health.
+
+
+## Build 138 social posting sanity checks
+
+After deploy, open `/admin/operations/` and run Social Posting Queue plus Release Sanity. Queue one draft from recent media, copy the caption manually, and record the public URL after posting. Confirm no `admin_social/social_queue_*` runtime incidents appear.
