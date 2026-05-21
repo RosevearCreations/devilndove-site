@@ -368,6 +368,22 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+  const socialTemplateRows = await tableExists(db, 'social_caption_templates') ? await safeFirst(db, `
+    SELECT COUNT(*) AS template_count,
+           SUM(CASE WHEN COALESCE(is_active,1)=1 THEN 1 ELSE 0 END) AS active_count
+    FROM social_caption_templates
+  `) : { template_count: 0, active_count: 0 };
+  addCheck(
+    checks,
+    Number(socialTemplateRows.active_count || 0) >= 5 ? 'pass' : 'warn',
+    'Social caption templates and content calendar',
+    await tableExists(db, 'social_caption_templates')
+      ? `${Number(socialTemplateRows.active_count || 0)} active caption template(s) available for review-first social posts.`
+      : 'social_caption_templates table is not installed yet.',
+    'Apply the current migration, then refresh Operations > Social Posting Queue to seed reusable caption templates and the upcoming calendar.',
+    'warning'
+  );
+
   addCheck(
     checks,
     Number(socialQueueRows.duplicate_warning_count || 0) ? 'warn' : 'pass',
