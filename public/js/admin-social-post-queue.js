@@ -57,6 +57,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const pad = (num) => String(num).padStart(2, '0');
     return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
   }
+
+  function populateTemplateSelect(templates = []) {
+    const select = document.getElementById('socialCaptionTemplate');
+    if (!select) return;
+    const current = select.value;
+    select.innerHTML = '<option value="">Basic caption / no template</option>' + templates.map((row) => `<option value="${esc(row.template_key)}" data-pillar="${esc(row.content_pillar || '')}" data-cta="${esc(row.call_to_action || '')}" data-hashtags="${esc(row.default_hashtags || '')}">${esc(row.display_name || row.template_key)}</option>`).join('');
+    if (current && Array.from(select.options).some((option) => option.value === current)) select.value = current;
+  }
+  function applySelectedTemplateDefaults() {
+    const select = document.getElementById('socialCaptionTemplate');
+    const option = select?.selectedOptions?.[0];
+    if (!option || !option.value) return;
+    const pillar = option.getAttribute('data-pillar') || '';
+    const cta = option.getAttribute('data-cta') || '';
+    const hashtags = option.getAttribute('data-hashtags') || '';
+    if (pillar && !document.getElementById('socialContentPillar')?.value) document.getElementById('socialContentPillar').value = pillar;
+    if (cta && !document.getElementById('socialCallToAction')?.value) document.getElementById('socialCallToAction').value = cta;
+    if (hashtags && document.getElementById('socialPostHashtags')) document.getElementById('socialPostHashtags').value = hashtags.replace(/#/g, '').replace(/\s+/g, ',');
+    if (option.value && !document.getElementById('socialUtmCampaign')?.value) document.getElementById('socialUtmCampaign').value = option.value;
+  }
   function renderDryRunPreview(payload) {
     const dryRun = payload || {};
     const warnings = Array.isArray(dryRun.media_quality_warnings) ? dryRun.media_quality_warnings : [];
@@ -74,6 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const platforms = Array.isArray(data.platforms) ? data.platforms : [];
     const queue = Array.isArray(data.queue) ? data.queue : [];
     const attempts = Array.isArray(data.attempts) ? data.attempts : [];
+    const templates = Array.isArray(data.templates) ? data.templates : [];
+    const calendar = Array.isArray(data.calendar) ? data.calendar : [];
+    populateTemplateSelect(templates);
 
     result.innerHTML = `
       <div class="release-sanity-summary" style="margin-top:12px">
@@ -83,6 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
       <details style="margin-top:12px" open><summary>Platform readiness and credential checklist</summary>
         <div class="admin-table-wrap"><table><thead><tr><th>Platform</th><th>Status</th><th>API ready</th><th>Scopes / notes</th></tr></thead><tbody>
           ${platforms.map((row) => `<tr><td><strong>${esc(row.display_name || row.platform_key)}</strong><br><span class="small">${esc(row.platform_key)}</span></td><td>${esc(row.publish_mode || row.connection_status || '')}</td><td>${Number(row.api_ready || 0) ? '<span class="admin-status-pill good">API ready</span>' : '<span class="admin-status-pill muted">Manual/copy-ready</span>'}</td><td><div class="small">${esc(row.required_scopes || '')}</div><div>${esc(row.notes || '')}</div>${missingEnvList(row)}</td></tr>`).join('') || '<tr><td colspan="4">No platforms seeded yet.</td></tr>'}
+        </tbody></table></div>
+      </details>
+      <details style="margin-top:12px" open><summary>Upcoming content calendar</summary>
+        <div class="admin-table-wrap"><table><thead><tr><th>Date</th><th>Total</th><th>Ready</th><th>Posted</th><th>Duplicate warnings</th></tr></thead><tbody>
+          ${calendar.map((row) => `<tr><td><strong>${esc(row.calendar_date || '')}</strong></td><td>${esc(row.total || 0)}</td><td>${esc(row.ready_count || 0)}</td><td>${esc(row.posted_count || 0)}</td><td>${Number(row.duplicate_warning_count || 0) ? `<span class="admin-status-pill warning">${esc(row.duplicate_warning_count)} review</span>` : '<span class="small">0</span>'}</td></tr>`).join('') || '<tr><td colspan="5">No upcoming social posts yet.</td></tr>'}
+        </tbody></table></div>
+      </details>
+      <details style="margin-top:12px"><summary>Caption templates</summary>
+        <div class="admin-table-wrap"><table><thead><tr><th>Template</th><th>Pillar</th><th>Default hashtags</th><th>Use</th></tr></thead><tbody>
+          ${templates.map((row) => `<tr><td><strong>${esc(row.display_name || row.template_key)}</strong><div class="small">${esc(row.notes || '')}</div></td><td>${esc(row.content_pillar || '')}</td><td class="small">${esc(row.default_hashtags || '')}</td><td><button class="btn small" data-social-use-template="${esc(row.template_key)}">Use template</button></td></tr>`).join('') || '<tr><td colspan="4">No caption templates seeded yet.</td></tr>'}
         </tbody></table></div>
       </details>
       <details style="margin-top:12px" open><summary>Queued posts</summary>
@@ -148,6 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
         source_id: document.getElementById('socialSourceId')?.value || '',
         title: document.getElementById('socialPostTitle')?.value || '',
         summary: document.getElementById('socialPostSummary')?.value || '',
+        caption_template_key: document.getElementById('socialCaptionTemplate')?.value || '',
+        content_pillar: document.getElementById('socialContentPillar')?.value || '',
+        call_to_action: document.getElementById('socialCallToAction')?.value || '',
+        utm_campaign: document.getElementById('socialUtmCampaign')?.value || '',
         image_urls: document.getElementById('socialPostImages')?.value || '',
         video_url: document.getElementById('socialPostVideo')?.value || '',
         link_url: document.getElementById('socialPostLink')?.value || '',
@@ -167,6 +204,27 @@ document.addEventListener('DOMContentLoaded', () => {
       setMsg(`Social post queued. Review/dry run before posting.${warning}`);
     } catch (error) { setMsg(error.message || 'Unable to create social post.', true); }
   }
+  async function previewTemplateCaption() {
+    try {
+      const payload = {
+        action: 'preview_caption_template',
+        caption_template_key: document.getElementById('socialCaptionTemplate')?.value || '',
+        title: document.getElementById('socialPostTitle')?.value || '',
+        summary: document.getElementById('socialPostSummary')?.value || '',
+        link_url: document.getElementById('socialPostLink')?.value || '',
+        hashtags: document.getElementById('socialPostHashtags')?.value || '',
+        call_to_action: document.getElementById('socialCallToAction')?.value || '',
+        utm_campaign: document.getElementById('socialUtmCampaign')?.value || '',
+        target_platforms: selectedPlatforms()
+      };
+      if (!payload.caption_template_key) throw new Error('Choose a caption template first.');
+      const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue', { method: 'POST', body: JSON.stringify(payload) }));
+      const preview = data.result?.caption || '';
+      if (preview) window.prompt('Template caption preview:', preview);
+      setMsg('Caption template preview built. Nothing was queued or posted.');
+    } catch (error) { setMsg(error.message || 'Unable to preview caption template.', true); }
+  }
+
   async function quickRecentMedia() {
     try {
       setMsg('Generating a social post from recent uploaded media...');
@@ -241,6 +299,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <label>Post title<input id="socialPostTitle" placeholder="Fresh from the Devil n Dove workshop"></label>
         <label>Related link<input id="socialPostLink" placeholder="https://devilndove.com/... or product URL"></label>
       </div>
+      <div class="social-queue-grid" style="margin-top:12px">
+        <label>Caption template<select id="socialCaptionTemplate"><option value="">Basic caption / no template</option></select></label>
+        <label>Content pillar<input id="socialContentPillar" placeholder="behind_the_scenes, finished_goods, local_presence..."></label>
+        <label>Call to action<input id="socialCallToAction" placeholder="Follow along, shop the piece, ask about custom work..."></label>
+        <label>UTM campaign<input id="socialUtmCampaign" placeholder="making_story, finished_product, local_market..."></label>
+      </div>
       <label style="display:block;margin-top:10px">Summary / behind-the-scenes caption starter<textarea id="socialPostSummary" rows="4" placeholder="What we made, what went right, what went sideways, and why it was fun..."></textarea></label>
       <label style="display:block;margin-top:10px">Image URLs, one per line<textarea id="socialPostImages" rows="3" placeholder="https://assets.devilndove.com/products/..."></textarea></label>
       <div class="social-queue-grid" style="margin-top:12px">
@@ -269,6 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <label class="small" style="display:block;margin-top:10px"><input type="checkbox" id="socialReadyNow"> Mark as approved/ready immediately</label>
       <div class="dd-product-draft-media-actions" style="margin-top:10px">
         <button class="btn primary" type="button" id="socialQueueCreateButton">Queue social post</button>
+        <button class="btn" type="button" id="socialQueuePreviewTemplateButton">Preview template caption</button>
         <button class="btn" type="button" id="socialQueueRecentMediaButton">Draft from recent media</button><span class="small">API publishing uses Cloudflare environment variables only; secrets are never stored in public files.</span>
       </div>
       <div id="socialPostQueueMessage" class="small" style="display:none;margin-top:10px"></div>
@@ -277,9 +342,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('socialQueueLoadButton')?.addEventListener('click', load);
   document.getElementById('socialQueueCreateButton')?.addEventListener('click', createPost);
+  document.getElementById('socialQueuePreviewTemplateButton')?.addEventListener('click', previewTemplateCaption);
   document.getElementById('socialQueueRecentMediaButton')?.addEventListener('click', quickRecentMedia);
+  document.getElementById('socialCaptionTemplate')?.addEventListener('change', applySelectedTemplateDefaults);
   mount.addEventListener('click', (event) => {
     const results = document.getElementById('socialPostQueueResults');
+    const useTemplateButton = event.target.closest('[data-social-use-template]');
+    if (useTemplateButton) {
+      const key = useTemplateButton.getAttribute('data-social-use-template') || '';
+      const select = document.getElementById('socialCaptionTemplate');
+      if (select) { select.value = key; applySelectedTemplateDefaults(); setMsg('Caption template selected. Add a title/summary, then preview or queue.'); }
+    }
     const copyButton = event.target.closest('[data-social-copy]');
     if (copyButton) {
       const id = Number(copyButton.getAttribute('data-social-copy'));
