@@ -62,6 +62,69 @@ const PLATFORM_DEFINITIONS = [
   }
 ];
 
+const CAPTION_TEMPLATES = [
+  {
+    template_key: 'making_story',
+    display_name: 'Making story / in progress',
+    content_pillar: 'behind_the_scenes',
+    default_platforms_json: JSON.stringify(['facebook', 'instagram', 'tiktok', 'x']),
+    default_hashtags: '#DevilnDove #HandmadeOntario #WorkshopMade #SmallBusinessCanada',
+    body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+    call_to_action: 'Follow along as we turn shop experiments into one-of-a-kind pieces.',
+    notes: 'Use while a crafting job or workshop experiment is in progress.'
+  },
+  {
+    template_key: 'finished_product',
+    display_name: 'Finished product / shop-ready',
+    content_pillar: 'finished_goods',
+    default_platforms_json: JSON.stringify(['facebook', 'instagram', 'pinterest', 'x']),
+    default_hashtags: '#DevilnDove #HandmadeGifts #OntarioMaker #ShopSmallCanada',
+    body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+    call_to_action: 'See the finished piece, details, and availability here:',
+    notes: 'Use for product launches, gallery items, vintage finds, and ready-to-sell pieces.'
+  },
+  {
+    template_key: 'shop_oops',
+    display_name: 'Funny shop moment / oops',
+    content_pillar: 'human_story',
+    default_platforms_json: JSON.stringify(['facebook', 'instagram', 'tiktok', 'x']),
+    default_hashtags: '#DevilnDove #MakerLife #WorkshopOops #CreativeProcess',
+    body_template: '{title}\n\n{summary}\n\n{cta}\n\n{hashtags}',
+    call_to_action: 'We are calling this one “learning with character.”',
+    notes: 'Use for light, human, therapy-workshop moments that should not sound too polished.'
+  },
+  {
+    template_key: 'local_market',
+    display_name: 'Local Ontario update / event',
+    content_pillar: 'local_presence',
+    default_platforms_json: JSON.stringify(['facebook', 'instagram', 'x']),
+    default_hashtags: '#DevilnDove #SouthernOntario #TillsonburgOntario #OntarioSmallBusiness',
+    body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+    call_to_action: 'Local friends can message us with questions or pickup ideas.',
+    notes: 'Use when relevance to Southern Ontario/Tillsonburg/local shoppers matters.'
+  },
+  {
+    template_key: 'laser_engraving',
+    display_name: 'Laser engraving / personalized gift',
+    content_pillar: 'custom_work',
+    default_platforms_json: JSON.stringify(['facebook', 'instagram', 'pinterest', 'x']),
+    default_hashtags: '#DevilnDove #LaserEngravingOntario #CustomGiftsOntario #WorkshopMade',
+    body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+    call_to_action: 'Ask us about making something similar with your own wording or idea.',
+    notes: 'Use for engraving jobs, custom gift ideas, and personalized workshop updates.'
+  },
+  {
+    template_key: 'vintage_find',
+    display_name: 'Vintage find / collected item',
+    content_pillar: 'vintage_collectibles',
+    default_platforms_json: JSON.stringify(['facebook', 'instagram', 'pinterest', 'x']),
+    default_hashtags: '#DevilnDove #VintageFindsOntario #CollectiblesCanada #ShopSmallCanada',
+    body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+    call_to_action: 'Condition, story, and availability details are listed here:',
+    notes: 'Use for sourced vintage/collectible/antiquity items.'
+  }
+];
+
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function safeJson(value, fallback) { try { return JSON.parse(value || ''); } catch { return fallback; } }
 function slugKey(value) { return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''); }
@@ -180,6 +243,8 @@ async function fetchJson(url, options = {}) {
   return { response, body: safeResponseJson(text), text };
 }
 function absolutePostUrl(row, platform) {
+  const utmUrl = safeUrl(row?.utm_url || '');
+  if (utmUrl) return utmUrl;
   const url = safeUrl(row?.link_url || '');
   if (url) return url;
   const key = normalizeText(row?.social_post_key || '');
@@ -208,6 +273,48 @@ function stableHash(value) {
   }
   return Math.abs(hash).toString(36);
 }
+
+function templateByKey(key) {
+  const clean = slugKey(key || '');
+  return CAPTION_TEMPLATES.find((template) => template.template_key === clean) || null;
+}
+function fillCaptionTemplate(template, values = {}) {
+  if (!template) return '';
+  const map = {
+    title: normalizeText(values.title || ''),
+    summary: normalizeText(values.summary || ''),
+    cta: normalizeText(values.call_to_action || template.call_to_action || ''),
+    link: safeUrl(values.link_url || values.utm_url || ''),
+    hashtags: normalizeText(values.hashtags || template.default_hashtags || '')
+  };
+  return trimTo(String(template.body_template || '')
+    .replace(/\{title\}/g, map.title)
+    .replace(/\{summary\}/g, map.summary)
+    .replace(/\{cta\}/g, map.cta)
+    .replace(/\{link\}/g, map.link)
+    .replace(/\{hashtags\}/g, map.hashtags)
+    .replace(/\n{3,}/g, '\n\n')
+    .trim(), 2200);
+}
+function buildUtmUrl(linkUrl, payload = {}, platforms = []) {
+  const clean = safeUrl(linkUrl || '');
+  if (!clean) return '';
+  try {
+    const url = new URL(clean, 'https://devilndove.com');
+    const source = normalizeText(payload.utm_source || 'devilndove_social');
+    const medium = normalizeText(payload.utm_medium || 'social');
+    const campaign = slugKey(payload.utm_campaign || payload.caption_template_key || payload.source_type || 'workshop_update');
+    const content = normalizePlatforms(platforms || payload.target_platforms || payload.platforms || []).join('-') || 'social';
+    if (source && !url.searchParams.has('utm_source')) url.searchParams.set('utm_source', source);
+    if (medium && !url.searchParams.has('utm_medium')) url.searchParams.set('utm_medium', medium);
+    if (campaign && !url.searchParams.has('utm_campaign')) url.searchParams.set('utm_campaign', campaign);
+    if (content && !url.searchParams.has('utm_content')) url.searchParams.set('utm_content', content);
+    return url.toString();
+  } catch {
+    return clean;
+  }
+}
+
 function normalizeCaptionOverrides(payload = {}, platforms = []) {
   const source = typeof payload.platform_captions === 'object' && payload.platform_captions ? payload.platform_captions : {};
   const aliases = { facebook: 'facebook_caption', instagram: 'instagram_caption', tiktok: 'tiktok_caption', x: 'x_caption', youtube: 'youtube_caption', pinterest: 'pinterest_caption' };
@@ -330,6 +437,46 @@ async function ensureSchema(db) {
     notes TEXT,
     FOREIGN KEY (social_post_queue_id) REFERENCES social_post_queue(social_post_queue_id)
   )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS social_caption_templates (
+    social_caption_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    template_key TEXT NOT NULL UNIQUE,
+    display_name TEXT NOT NULL,
+    content_pillar TEXT,
+    default_platforms_json TEXT NOT NULL DEFAULT '[]',
+    default_hashtags TEXT,
+    body_template TEXT NOT NULL,
+    call_to_action TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    notes TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_caption_templates_active ON social_caption_templates(is_active, content_pillar)`).run().catch(() => null);
+  for (const template of CAPTION_TEMPLATES) {
+    await db.prepare(`INSERT INTO social_caption_templates (
+      template_key, display_name, content_pillar, default_platforms_json, default_hashtags,
+      body_template, call_to_action, is_active, notes, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(template_key) DO UPDATE SET
+      display_name = excluded.display_name,
+      content_pillar = excluded.content_pillar,
+      default_platforms_json = excluded.default_platforms_json,
+      default_hashtags = excluded.default_hashtags,
+      body_template = excluded.body_template,
+      call_to_action = excluded.call_to_action,
+      is_active = 1,
+      notes = excluded.notes,
+      updated_at = CURRENT_TIMESTAMP`).bind(
+      template.template_key,
+      template.display_name,
+      template.content_pillar,
+      template.default_platforms_json,
+      template.default_hashtags,
+      template.body_template,
+      template.call_to_action,
+      template.notes
+    ).run().catch(() => null);
+  }
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_status ON social_post_queue(post_status, approval_status, scheduled_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_source ON social_post_queue(source_type, source_id)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_attempts_queue ON social_post_attempts(social_post_queue_id, platform_key)`).run().catch(() => null);
@@ -346,6 +493,13 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'social_post_queue', 'schedule_timezone', 'schedule_timezone TEXT');
   await ensureColumn(db, 'social_post_queue', 'dry_run_payload_json', "dry_run_payload_json TEXT DEFAULT '{}'");
   await ensureColumn(db, 'social_post_queue', 'last_dry_run_at', 'last_dry_run_at TEXT');
+  await ensureColumn(db, 'social_post_queue', 'caption_template_key', 'caption_template_key TEXT');
+  await ensureColumn(db, 'social_post_queue', 'content_pillar', 'content_pillar TEXT');
+  await ensureColumn(db, 'social_post_queue', 'call_to_action', 'call_to_action TEXT');
+  await ensureColumn(db, 'social_post_queue', 'utm_source', 'utm_source TEXT');
+  await ensureColumn(db, 'social_post_queue', 'utm_medium', 'utm_medium TEXT');
+  await ensureColumn(db, 'social_post_queue', 'utm_campaign', 'utm_campaign TEXT');
+  await ensureColumn(db, 'social_post_queue', 'utm_url', 'utm_url TEXT');
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_duplicate ON social_post_queue(duplicate_signature, do_not_repost)`).run().catch(() => null);
 
   for (const platform of PLATFORM_DEFINITIONS) {
@@ -381,13 +535,27 @@ async function summarize(db, env = {}) {
   const queue = rows(await db.prepare(`SELECT * FROM social_post_queue ORDER BY datetime(updated_at) DESC, social_post_queue_id DESC LIMIT 50`).all().catch(() => ({ results: [] })));
   const platforms = rows(await db.prepare(`SELECT * FROM social_platform_connections ORDER BY platform_key`).all().catch(() => ({ results: [] })));
   const attempts = rows(await db.prepare(`SELECT a.*, q.social_post_key FROM social_post_attempts a INNER JOIN social_post_queue q ON q.social_post_queue_id = a.social_post_queue_id ORDER BY datetime(a.attempted_at) DESC LIMIT 30`).all().catch(() => ({ results: [] })));
+  const templates = rows(await db.prepare(`SELECT * FROM social_caption_templates WHERE COALESCE(is_active,1)=1 ORDER BY content_pillar, display_name`).all().catch(() => ({ results: [] })));
+  const calendar = rows(await db.prepare(`SELECT
+      substr(COALESCE(scheduled_at, created_at), 1, 10) AS calendar_date,
+      COUNT(*) AS total,
+      SUM(CASE WHEN post_status='ready' AND approval_status='approved' THEN 1 ELSE 0 END) AS ready_count,
+      SUM(CASE WHEN post_status='posted' THEN 1 ELSE 0 END) AS posted_count,
+      SUM(CASE WHEN COALESCE(do_not_repost,0)=1 THEN 1 ELSE 0 END) AS duplicate_warning_count
+    FROM social_post_queue
+    WHERE datetime(COALESCE(scheduled_at, created_at, datetime('now'))) >= datetime('now','-7 days')
+      AND datetime(COALESCE(scheduled_at, created_at, datetime('now'))) <= datetime('now','+45 days')
+      AND COALESCE(post_status,'draft') <> 'archived'
+    GROUP BY calendar_date
+    ORDER BY calendar_date ASC
+    LIMIT 60`).all().catch(() => ({ results: [] })));
   const platform_readiness = getPlatformReadiness(env);
   const platformRows = platforms.map((platform) => ({
     ...platform,
     ...(platform_readiness[platform.platform_key] || {}),
     stored_api_ready: platform.api_ready
   }));
-  return { summary, queue, platforms: platformRows, attempts, platform_readiness };
+  return { summary, queue, platforms: platformRows, attempts, templates, calendar, platform_readiness };
 }
 function normalizeQueueRow(row = {}) {
   return {
@@ -402,14 +570,24 @@ function normalizeQueueRow(row = {}) {
 async function createQueuedPost(db, adminUser, payload = {}) {
   const title = trimTo(payload.title || payload.job_title || payload.process_title || 'Workshop update', 140);
   const summary = trimTo(payload.summary || payload.description || '', 1200);
-  const hashtags = normalizeHashtags(payload.hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada');
+  const templateKey = slugKey(payload.caption_template_key || payload.template_key || '');
+  const template = templateByKey(templateKey);
+  const templatePlatforms = template ? safeJson(template.default_platforms_json, []) : [];
+  const hashtags = normalizeHashtags(payload.hashtags || template?.default_hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada');
   const imageUrls = splitList(payload.image_urls || payload.image_url || payload.images).map(safeUrl).filter(Boolean).slice(0, 10);
   const videoUrl = safeUrl(payload.video_url || '');
   const linkUrl = safeUrl(payload.link_url || payload.product_url || '');
-  const platforms = normalizePlatforms(payload.target_platforms || payload.platforms);
+  const platforms = normalizePlatforms(payload.target_platforms || payload.platforms || templatePlatforms);
   const sourceType = slugKey(payload.source_type || 'job_update') || 'job_update';
   const sourceId = normalizeText(payload.source_id || payload.job_id || '');
-  const caption = trimTo(payload.caption || buildCaption({ title, summary, hashtags, linkUrl }), 2200);
+  const contentPillar = slugKey(payload.content_pillar || template?.content_pillar || sourceType || 'workshop_update');
+  const callToAction = normalizeText(payload.call_to_action || template?.call_to_action || 'Follow along with the Devil n Dove workshop.');
+  const utmSource = normalizeText(payload.utm_source || 'devilndove_social');
+  const utmMedium = normalizeText(payload.utm_medium || 'social');
+  const utmCampaign = slugKey(payload.utm_campaign || templateKey || contentPillar || sourceType || 'workshop_update');
+  const utmUrl = buildUtmUrl(linkUrl, { ...payload, utm_source: utmSource, utm_medium: utmMedium, utm_campaign: utmCampaign, caption_template_key: templateKey, source_type: sourceType }, platforms);
+  const templatedCaption = template ? fillCaptionTemplate(template, { title, summary, call_to_action: callToAction, link_url: utmUrl || linkUrl, hashtags }) : '';
+  const caption = trimTo(payload.caption || templatedCaption || buildCaption({ title, summary, hashtags, linkUrl: utmUrl || linkUrl }), 2200);
   const platformCaptionOverrides = normalizeCaptionOverrides(payload, platforms);
   const notes = normalizeText(payload.notes || '');
   const scheduledAt = parseScheduledAt(payload.scheduled_at || '');
@@ -428,8 +606,9 @@ async function createQueuedPost(db, adminUser, payload = {}) {
     target_platforms_json, image_urls_json, video_url, link_url, approval_status,
     post_status, scheduled_at, created_by_user_id, updated_by_user_id, notes,
     platform_caption_overrides_json, media_quality_warnings_json, duplicate_signature, do_not_repost, schedule_timezone,
+    caption_template_key, content_pillar, call_to_action, utm_source, utm_medium, utm_campaign, utm_url,
     created_at, updated_at
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
     socialPostKey,
     sourceType,
     sourceId || null,
@@ -451,7 +630,14 @@ async function createQueuedPost(db, adminUser, payload = {}) {
     JSON.stringify(mediaWarnings),
     duplicateSignature,
     doNotRepost,
-    scheduleTimezone || null
+    scheduleTimezone || null,
+    templateKey || null,
+    contentPillar || null,
+    callToAction || null,
+    utmSource || null,
+    utmMedium || null,
+    utmCampaign || null,
+    utmUrl || null
   ).run();
   const socialPostQueueId = Number(insert?.meta?.last_row_id || 0);
 
@@ -632,6 +818,24 @@ async function recordApiAttempt(db, adminUser, id, platform, status, details = {
     ).run().catch(() => null);
   });
 }
+
+async function previewCaptionTemplate(payload = {}) {
+  const template = templateByKey(payload.caption_template_key || payload.template_key || '');
+  if (!template) throw new Error('Choose a valid caption template.');
+  const platforms = normalizePlatforms(payload.target_platforms || payload.platforms || safeJson(template.default_platforms_json, []));
+  const hashtags = normalizeHashtags(payload.hashtags || template.default_hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada');
+  const linkUrl = safeUrl(payload.link_url || payload.product_url || '');
+  const utmUrl = buildUtmUrl(linkUrl, { ...payload, caption_template_key: template.template_key }, platforms);
+  const caption = fillCaptionTemplate(template, {
+    title: payload.title || 'Fresh from the Devil n Dove workshop',
+    summary: payload.summary || 'A quick behind-the-scenes update from our making table.',
+    call_to_action: payload.call_to_action || template.call_to_action,
+    link_url: utmUrl || linkUrl,
+    hashtags
+  });
+  return { template_key: template.template_key, display_name: template.display_name, platforms, hashtags, utm_url: utmUrl, caption };
+}
+
 async function dryRunQueuedPost(context, db, adminUser, payload = {}) {
   const id = Number(payload.social_post_queue_id || 0);
   if (!id) throw new Error('A social_post_queue_id is required.');
@@ -772,6 +976,7 @@ export async function onRequestPost(context) {
     else if (action === 'update_status') await updateStatus(db, adminUser, payload);
     else if (action === 'record_manual_post') await recordManualPost(db, adminUser, payload);
     else if (action === 'generate_from_recent_media') result = await generateFromRecentMedia(db, adminUser);
+    else if (action === 'preview_caption_template') result = await previewCaptionTemplate(payload);
     else if (action === 'dry_run_platforms') result = await dryRunQueuedPost(context, db, adminUser, payload);
     else if (action === 'publish_platforms') result = await publishQueuedPost(context, db, adminUser, payload);
     else throw new Error(`Unsupported social queue action: ${action}`);
