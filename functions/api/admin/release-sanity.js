@@ -351,17 +351,31 @@ export async function onRequestGet(context) {
   const socialQueueRows = await tableExists(db, 'social_post_queue') ? await safeFirst(db, `
     SELECT COUNT(*) AS total,
            SUM(CASE WHEN COALESCE(post_status,'draft') IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
-           SUM(CASE WHEN COALESCE(approval_status,'needs_review')='needs_review' THEN 1 ELSE 0 END) AS needs_review_count
+           SUM(CASE WHEN COALESCE(approval_status,'needs_review')='needs_review' THEN 1 ELSE 0 END) AS needs_review_count,
+           SUM(CASE WHEN COALESCE(scheduled_at,'') <> '' AND COALESCE(post_status,'draft') IN ('draft','ready') THEN 1 ELSE 0 END) AS scheduled_count,
+           SUM(CASE WHEN COALESCE(last_dry_run_at,'') <> '' THEN 1 ELSE 0 END) AS dry_run_count,
+           SUM(CASE WHEN COALESCE(do_not_repost,0)=1 AND COALESCE(post_status,'draft') IN ('draft','ready') THEN 1 ELSE 0 END) AS duplicate_warning_count
     FROM social_post_queue
-  `) : { total: 0, open_count: 0, needs_review_count: 0 };
+  `) : { total: 0, open_count: 0, needs_review_count: 0, scheduled_count: 0, dry_run_count: 0, duplicate_warning_count: 0 };
   addCheck(
     checks,
     await tableExists(db, 'social_post_queue') ? 'pass' : 'warn',
     'Social post review queue',
     await tableExists(db, 'social_post_queue')
-      ? `${Number(socialQueueRows.total || 0)} queued social post(s), ${Number(socialQueueRows.open_count || 0)} open, ${Number(socialQueueRows.needs_review_count || 0)} needing review.`
+      ? `${Number(socialQueueRows.total || 0)} queued social post(s), ${Number(socialQueueRows.open_count || 0)} open, ${Number(socialQueueRows.needs_review_count || 0)} needing review, ${Number(socialQueueRows.scheduled_count || 0)} scheduled, ${Number(socialQueueRows.dry_run_count || 0)} dry-run previewed.`
       : 'social_post_queue table is not installed yet.',
     'Apply the current migration, then use Operations > Social Posting Queue for review-first job/process social posts.',
+    'warning'
+  );
+
+  addCheck(
+    checks,
+    Number(socialQueueRows.duplicate_warning_count || 0) ? 'warn' : 'pass',
+    'Social duplicate/repost guardrails',
+    Number(socialQueueRows.duplicate_warning_count || 0)
+      ? `${Number(socialQueueRows.duplicate_warning_count || 0)} queued social post(s) are flagged as possible duplicates and should not be published until reviewed.`
+      : 'No open social posts are flagged as possible duplicates.',
+    'Use Operations > Social Posting Queue to clear duplicate warnings only after reviewing image/caption/platform history.',
     'warning'
   );
 
