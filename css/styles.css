@@ -668,3 +668,16 @@ body.nav-mobile-open{overflow:hidden}
   .social-post-queue-admin-panel .admin-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .social-post-queue-admin-panel table{min-width:760px;}
 }
+
+/* Build 140: social queue dry-run, scheduling, duplicate warnings, and phone polish */
+.social-warning-list{margin:.35rem 0 0 1rem;padding:0;color:#8a5a00;line-height:1.35}
+.social-dry-run-preview{display:grid;gap:8px;margin-top:8px}
+.social-dry-run-preview pre{max-height:260px;overflow:auto;border:1px solid var(--border);border-radius:12px;padding:10px;background:rgba(0,0,0,.08)}
+.social-post-queue-admin-panel input[type="datetime-local"]{min-height:42px}
+.social-post-queue-admin-panel .admin-status-pill.danger{background:rgba(176,0,32,.12);border-color:rgba(176,0,32,.35);color:#b00020;margin-top:6px}
+.social-post-queue-admin-panel .notice.warning{border:1px solid rgba(194,147,0,.35);background:rgba(194,147,0,.08);border-radius:12px;padding:9px}
+@media (max-width:700px){
+  .social-post-queue-admin-panel table{min-width:980px;}
+  .social-post-queue-admin-panel .dd-product-draft-media-actions .small{width:100%;}
+  .social-post-queue-admin-panel details summary{min-height:38px;display:flex;align-items:center;}
+}
