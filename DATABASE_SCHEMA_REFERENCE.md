@@ -164,3 +164,19 @@ Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `
 - `social_platform_connections` tracks platform readiness, profile URLs, required scopes, and manual/API readiness.
 - `social_post_queue` stores reviewed social captions, target platforms, source/job reference, media URLs, status, and schedule notes.
 - `social_post_attempts` records manual posted URLs now and future API attempts later.
+
+
+## Build 141 schema note — social caption templates and UTM links
+
+Build 141 adds/updates these social queue schema pieces:
+
+- `social_caption_templates`
+- `social_post_queue.caption_template_key`
+- `social_post_queue.content_pillar`
+- `social_post_queue.call_to_action`
+- `social_post_queue.utm_source`
+- `social_post_queue.utm_medium`
+- `social_post_queue.utm_campaign`
+- `social_post_queue.utm_url`
+
+The `/api/admin/social-post-queue` endpoint self-heals the optional columns before use so older D1 databases do not fail immediately after deployment. The current migration includes the Build 141 ledger marker.

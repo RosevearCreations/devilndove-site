@@ -516,3 +516,49 @@ Current sync: 2026-05-17 — Build 134 draft-first product editor, inline image 
 18. Add UTM-tagged links so social posts can be measured in analytics.
 19. Add social performance import fields later for clicks, likes, comments, saves, shares, and platform post URLs.
 20. Continue payment application, HST review, period close, accountant export, and Search Console SEO action workflows.
+
+## Build 141 completed 20-step pass — social content calendar, caption templates, UTM links, and continued safety hardening
+
+1. Preserved the Build 140 social queue, dry-run, scheduling, duplicate guardrail, and credential-readiness workflow.
+2. Added reusable social caption templates for making stories, finished products, funny shop moments, local updates, laser engraving, and vintage finds.
+3. Added `social_caption_templates` to the D1 schema and current migration references.
+4. Added template seeding/self-healing inside `/api/admin/social-post-queue` so older D1 installs can recover safely.
+5. Added `caption_template_key` to queued social posts.
+6. Added `content_pillar` to group posts as behind-the-scenes, finished goods, local presence, custom work, human story, or vintage/collectible content.
+7. Added `call_to_action` for each queued social post so captions are less generic.
+8. Added `utm_source`, `utm_medium`, `utm_campaign`, and `utm_url` fields to the queue.
+9. Added automatic UTM link generation for product/job/social links without overwriting existing UTM values.
+10. Updated platform payload generation so UTM URLs are preferred in social dry runs and API attempts.
+11. Added a caption-template preview action that returns a generated caption without queueing or posting anything.
+12. Added a Social Posting Queue template selector in Operations.
+13. Added a “Preview template caption” button before queueing posts.
+14. Added a content calendar summary showing upcoming/due/posted/duplicate-warning social rows by date.
+15. Added a caption-template reference table inside the Operations panel.
+16. Added quick “Use template” buttons that copy template defaults into the queue form.
+17. Expanded Release Sanity to check active social caption templates and calendar readiness.
+18. Updated full schema/current migration/store/growth schema notes for Build 141.
+19. Re-ran JavaScript syntax checks and SQL smoke tests after the social queue changes.
+20. Updated active Markdown handoff, roadmap, known gaps, sanity, schema, SEO, and repo documents for this pass.
+
+## Next logical 20 steps after Build 141
+
+1. Deploy Build 141 and run/record `database_upgrade_current_pass.sql`.
+2. Open `/admin/operations/` and confirm Social Posting Queue loads with caption templates and the content calendar.
+3. Create one test crafting-process post using the “Making story” template.
+4. Use “Preview template caption” before queueing so the generated caption can be reviewed.
+5. Confirm the generated UTM link is used in dry-run payloads when a related link is provided.
+6. Queue one local Ontario update and confirm hashtags/content pillar are locally relevant.
+7. Dry-run the post and confirm Facebook/Instagram/X/Pinterest payloads look correct before API publishing.
+8. Keep TikTok and YouTube manual until their upload flows and app approvals are configured.
+9. Add a weekly/monthly social calendar view that can filter by content pillar and platform.
+10. Add one-click product-story drafts from Product editor records, pulling image, title, price, short description, and product URL.
+11. Add one-click workshop/process drafts from recent media uploads with selected images.
+12. Add per-platform image ratio/size checks for Instagram, TikTok, Pinterest, and X before approval.
+13. Add a reusable caption-template editor so templates can be adjusted from admin without code changes.
+14. Add UTM analytics rollup so social-post campaigns can be tied to `/api/site-search-event`/visitor analytics later.
+15. Add platform post-performance import fields for clicks, likes, comments, shares, saves, and video views.
+16. Add a “do not post before/after” customer privacy checkbox for job/customer-related media.
+17. Continue payment application screens for deposits, orders, refunds, processor fees, payouts, gift cards, and manual adjustments.
+18. Continue HST/GST review worksheet and remittance-ready totals.
+19. Continue month-end close lock/reopen controls with checklist, review notes, and audit trail.
+20. Continue accountant export package v2 with GL, trial balance, P&L, HST worksheet, attachment index, and unresolved issue log.

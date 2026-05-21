@@ -148,3 +148,19 @@ Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `
 ## Build 138 social posting sanity checks
 
 After deploy, open `/admin/operations/` and run Social Posting Queue plus Release Sanity. Queue one draft from recent media, copy the caption manually, and record the public URL after posting. Confirm no `admin_social/social_queue_*` runtime incidents appear.
+
+
+## Build 141 sanity additions
+
+After deploying Build 141:
+
+1. Open `/admin/operations/`.
+2. Run **Social Posting Queue** and confirm these appear:
+   - Upcoming content calendar
+   - Caption templates
+   - Template selector
+   - Preview template caption button
+3. Queue one test post using a template, then run Dry run.
+4. Confirm UTM-tagged links are used when a related link is supplied.
+5. Run **Release Sanity** and check the new social caption-template/calendar readiness line.
+6. Run **Runtime Incidents** and confirm no new `admin_social` errors are being recorded.

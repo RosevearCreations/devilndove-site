@@ -658,3 +658,8 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+
+-- Build 141 social caption templates / UTM social links note:
+-- Social queue schema now includes social_caption_templates and social_post_queue caption_template_key, content_pillar, call_to_action, utm_source, utm_medium, utm_campaign, and utm_url.
+-- The runtime endpoint self-heals these optional columns before use to stay safe on older D1 databases.

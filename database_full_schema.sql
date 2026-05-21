@@ -1855,8 +1855,32 @@ CREATE TABLE IF NOT EXISTS social_post_queue (
   do_not_repost INTEGER DEFAULT 0,
   schedule_timezone TEXT,
   dry_run_payload_json TEXT DEFAULT '{}',
-  last_dry_run_at TEXT
+  last_dry_run_at TEXT,
+  caption_template_key TEXT,
+  content_pillar TEXT,
+  call_to_action TEXT,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  utm_url TEXT
 );
+
+CREATE TABLE IF NOT EXISTS social_caption_templates (
+  social_caption_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  template_key TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL,
+  content_pillar TEXT,
+  default_platforms_json TEXT NOT NULL DEFAULT '[]',
+  default_hashtags TEXT,
+  body_template TEXT NOT NULL,
+  call_to_action TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_social_caption_templates_active ON social_caption_templates(is_active, content_pillar);
 
 CREATE TABLE IF NOT EXISTS social_post_attempts (
   social_post_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,

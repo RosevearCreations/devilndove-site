@@ -83,3 +83,14 @@ Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `
 ## Build 138 status
 
 Build 138 adds the Social Posting Queue in Operations. It can queue job/process photos, create captions, target Facebook/Instagram/TikTok/X/YouTube/Pinterest, copy captions for manual publishing, and record public post URLs after publishing. It intentionally does not auto-post yet because platform OAuth/app approvals and secret storage need to be configured safely first.
+
+
+## Latest status — Build 141
+
+Latest packaged pass: Build 141, focused on social content planning and safer review-first publishing.
+
+Carry-forward notes for the next chat:
+- Use the latest ZIP as the base.
+- Social Posting Queue now supports reusable caption templates, template preview, content pillars, calls to action, UTM links, dry run, scheduling, duplicate warnings, and API attempts only when credentials exist.
+- Recommended deploy checks: run `database_upgrade_current_pass.sql`, open `/admin/operations/`, then test Social Posting Queue, Release Sanity, Runtime Incidents, and Public API Health.
+- Next high-value work: admin-editable caption templates, product-story draft helpers, social analytics rollups, job/customer media privacy guards, payment application, HST review, period close, and accountant export.

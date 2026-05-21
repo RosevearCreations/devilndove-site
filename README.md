@@ -130,3 +130,7 @@ Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `
 ## Build 138 highlight
 
 Operations now includes a Social Posting Queue for review-first job/process photo captions and manual publishing records across Facebook, Instagram, TikTok, X, YouTube, and Pinterest.
+
+## Build 141 note
+
+Operations now includes a stronger Social Posting Queue for crafting/process photos and summaries. It supports reusable caption templates, template previews, UTM-tagged related links, a small content calendar, dry runs, scheduling, duplicate warnings, and manual/API publishing records. API publishing still requires platform credentials in Cloudflare environment variables and should be tested one platform at a time.

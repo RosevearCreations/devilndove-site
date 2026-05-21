@@ -94,3 +94,8 @@ This pass fixes the Product editor draft workflow: drafts require only name/type
 ## Build 138 repo note
 
 Social posting queue files added: `functions/api/admin/social-post-queue.js` and `public/js/admin-social-post-queue.js`. The Operations page mounts the panel and Release Sanity checks the endpoint.
+
+
+## Build 141 repo note
+
+Current-pass social changes touch `/functions/api/admin/social-post-queue.js`, `/public/js/admin-social-post-queue.js`, `database_upgrade_current_pass.sql`, and schema/reference Markdown. Keep future social platform secrets out of repo files; use Cloudflare environment variables only.

@@ -189,3 +189,15 @@ Current sync: 2026-05-18 — Build 137 Search Console filtering, safe batch reve
 - Direct API posting remains a known future gap because Facebook/Instagram/TikTok/X require platform apps, OAuth tokens, scopes, and in some cases app review or paid API access.
 - Platform secrets must stay in Cloudflare environment variables, not D1, Markdown, JSON, or public site files.
 - Next risk-reduction step: add per-platform connection diagnostics before any live API publish action is enabled.
+
+
+## Build 141 update — social queue gaps moved forward
+
+Completed: the social queue now has reusable caption templates, a compact content calendar summary, content pillars, calls to action, and UTM-tagged links for review-first crafting/process posts.
+
+Remaining gaps:
+- Social caption templates are seeded by code and not yet fully editable from an admin template editor.
+- TikTok and YouTube remain manual/review-first until their upload flows, permissions, media rules, and app approvals are configured.
+- Social API credentials must stay in Cloudflare environment variables only; do not store tokens in D1, Markdown, JSON, or public files.
+- UTM links are generated, but analytics rollups from those UTM campaigns still need a reporting panel.
+- Customer/job-media privacy controls still need a dedicated “do not post” guard before job/customer images can be selected for social posts.

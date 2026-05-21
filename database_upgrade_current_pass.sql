@@ -530,8 +530,32 @@ CREATE TABLE IF NOT EXISTS social_post_queue (
   do_not_repost INTEGER DEFAULT 0,
   schedule_timezone TEXT,
   dry_run_payload_json TEXT DEFAULT '{}',
-  last_dry_run_at TEXT
+  last_dry_run_at TEXT,
+  caption_template_key TEXT,
+  content_pillar TEXT,
+  call_to_action TEXT,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  utm_url TEXT
 );
+
+CREATE TABLE IF NOT EXISTS social_caption_templates (
+  social_caption_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  template_key TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL,
+  content_pillar TEXT,
+  default_platforms_json TEXT NOT NULL DEFAULT '[]',
+  default_hashtags TEXT,
+  body_template TEXT NOT NULL,
+  call_to_action TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_social_caption_templates_active ON social_caption_templates(is_active, content_pillar);
 
 CREATE TABLE IF NOT EXISTS social_post_attempts (
   social_post_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -622,6 +646,65 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   'pending_review',
   0,
   'Created by build 140. Adds social queue scheduling, dry-run platform payload previews, caption variants, duplicate/repost warnings, and media-quality guardrails for crafting-process posts.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);
+
+
+-- Build 141 - Social content calendar, reusable caption templates, and UTM-tagged social links.
+-- Existing installs are self-healed by /api/admin/social-post-queue before use. Reference columns now include:
+--   social_post_queue.caption_template_key
+--   social_post_queue.content_pillar
+--   social_post_queue.call_to_action
+--   social_post_queue.utm_source
+--   social_post_queue.utm_medium
+--   social_post_queue.utm_campaign
+--   social_post_queue.utm_url
+--   social_caption_templates
+
+CREATE TABLE IF NOT EXISTS social_caption_templates (
+  social_caption_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  template_key TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL,
+  content_pillar TEXT,
+  default_platforms_json TEXT NOT NULL DEFAULT '[]',
+  default_hashtags TEXT,
+  body_template TEXT NOT NULL,
+  call_to_action TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_social_caption_templates_active ON social_caption_templates(is_active, content_pillar);
+
+INSERT INTO social_caption_templates (template_key, display_name, content_pillar, default_platforms_json, default_hashtags, body_template, call_to_action, is_active, notes, updated_at) VALUES
+('making_story','Making story / in progress','behind_the_scenes','["facebook","instagram","tiktok","x"]','#DevilnDove #HandmadeOntario #WorkshopMade #SmallBusinessCanada','{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}','Follow along as we turn shop experiments into one-of-a-kind pieces.',1,'Use while a crafting job or workshop experiment is in progress.',CURRENT_TIMESTAMP),
+('finished_product','Finished product / shop-ready','finished_goods','["facebook","instagram","pinterest","x"]','#DevilnDove #HandmadeGifts #OntarioMaker #ShopSmallCanada','{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}','See the finished piece, details, and availability here:',1,'Use for product launches, gallery items, vintage finds, and ready-to-sell pieces.',CURRENT_TIMESTAMP),
+('shop_oops','Funny shop moment / oops','human_story','["facebook","instagram","tiktok","x"]','#DevilnDove #MakerLife #WorkshopOops #CreativeProcess','{title}\n\n{summary}\n\n{cta}\n\n{hashtags}','We are calling this one “learning with character.”',1,'Use for light, human, therapy-workshop moments that should not sound too polished.',CURRENT_TIMESTAMP),
+('local_market','Local Ontario update / event','local_presence','["facebook","instagram","x"]','#DevilnDove #SouthernOntario #TillsonburgOntario #OntarioSmallBusiness','{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}','Local friends can message us with questions or pickup ideas.',1,'Use when relevance to Southern Ontario/Tillsonburg/local shoppers matters.',CURRENT_TIMESTAMP),
+('laser_engraving','Laser engraving / personalized gift','custom_work','["facebook","instagram","pinterest","x"]','#DevilnDove #LaserEngravingOntario #CustomGiftsOntario #WorkshopMade','{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}','Ask us about making something similar with your own wording or idea.',1,'Use for engraving jobs, custom gift ideas, and personalized workshop updates.',CURRENT_TIMESTAMP),
+('vintage_find','Vintage find / collected item','vintage_collectibles','["facebook","instagram","pinterest","x"]','#DevilnDove #VintageFindsOntario #CollectiblesCanada #ShopSmallCanada','{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}','Condition, story, and availability details are listed here:',1,'Use for sourced vintage/collectible/antiquity items.',CURRENT_TIMESTAMP)
+ON CONFLICT(template_key) DO UPDATE SET
+  display_name = excluded.display_name,
+  content_pillar = excluded.content_pillar,
+  default_platforms_json = excluded.default_platforms_json,
+  default_hashtags = excluded.default_hashtags,
+  body_template = excluded.body_template,
+  call_to_action = excluded.call_to_action,
+  is_active = 1,
+  notes = excluded.notes,
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build141',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 141. Adds reusable social caption templates, a social content calendar summary, content-pillar fields, and UTM-tagged social links for review-first crafting-process posts.',
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );

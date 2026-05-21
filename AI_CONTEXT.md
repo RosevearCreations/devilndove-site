@@ -95,3 +95,7 @@ Next deployment checks: apply/record `database_upgrade_current_pass.sql`, open `
 ## Build 138 AI handoff note
 
 The site now has a review-first Social Posting Queue. Keep future social work safe: manual/copy-ready first, OAuth/API diagnostics second, direct publishing last. Never store platform secrets in public files or D1; use Cloudflare environment variables for secrets.
+
+## Build 141 AI handoff
+
+The current social workflow is review-first. Do not recommend blind auto-posting. Social queue now supports caption templates, content pillars, calls to action, UTM-tagged links, calendar summary, dry run, scheduling, duplicate guards, and API attempts only when Cloudflare environment variables exist. Future work should add an admin template editor, social analytics rollups, and job/customer media privacy controls before more automation.
