@@ -186,7 +186,9 @@ function absolutePostUrl(row, platform) {
   return key ? `https://devilndove.com/?social=${encodeURIComponent(key)}&platform=${encodeURIComponent(platform)}` : '';
 }
 function platformCaption(row, platform) {
-  const caption = normalizeText(row?.caption || buildCaption({
+  const overrides = safeJson(row?.platform_caption_overrides_json, {});
+  const override = normalizeText(overrides?.[platform] || overrides?.[String(platform || '').toLowerCase()] || '');
+  const caption = override || normalizeText(row?.caption || buildCaption({
     title: row?.title || '',
     summary: row?.summary || '',
     hashtags: row?.hashtags || '',
@@ -196,6 +198,88 @@ function platformCaption(row, platform) {
   if (platform === 'x') return trimTo([caption, link && !caption.includes(link) ? link : ''].filter(Boolean).join('\n'), 280);
   if (platform === 'pinterest') return trimTo(caption, 500);
   return trimTo(caption, 2200);
+}
+function stableHash(value) {
+  const raw = normalizeText(value);
+  let hash = 0;
+  for (let index = 0; index < raw.length; index += 1) {
+    hash = ((hash << 5) - hash) + raw.charCodeAt(index);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+function normalizeCaptionOverrides(payload = {}, platforms = []) {
+  const source = typeof payload.platform_captions === 'object' && payload.platform_captions ? payload.platform_captions : {};
+  const aliases = { facebook: 'facebook_caption', instagram: 'instagram_caption', tiktok: 'tiktok_caption', x: 'x_caption', youtube: 'youtube_caption', pinterest: 'pinterest_caption' };
+  const result = {};
+  for (const platform of platforms) {
+    const value = normalizeText(source[platform] || payload[aliases[platform]] || '');
+    if (!value) continue;
+    const limit = platform === 'x' ? 280 : platform === 'pinterest' ? 500 : 2200;
+    result[platform] = trimTo(value, limit);
+  }
+  return result;
+}
+function buildDuplicateSignature({ title, caption, imageUrls, platforms, linkUrl }) {
+  return stableHash(JSON.stringify({
+    title: normalizeText(title).toLowerCase(),
+    caption: normalizeText(caption).toLowerCase(),
+    image_urls: [...new Set((imageUrls || []).map(safeUrl).filter(Boolean))].sort(),
+    platforms: [...new Set((platforms || []).map(slugKey).filter(Boolean))].sort(),
+    link_url: safeUrl(linkUrl || '')
+  }));
+}
+function parseScheduledAt(value) {
+  const clean = normalizeText(value);
+  if (!clean) return '';
+  const parsed = new Date(clean);
+  if (Number.isNaN(parsed.getTime())) return clean;
+  return parsed.toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+function isScheduledInFuture(value) {
+  const clean = normalizeText(value);
+  if (!clean) return false;
+  const parsed = new Date(clean);
+  return Number.isFinite(parsed.getTime()) && parsed.getTime() > Date.now() + 60_000;
+}
+function buildMediaWarnings({ platforms = [], imageUrls = [], videoUrl = '', caption = '' }) {
+  const warnings = [];
+  const imageCount = imageUrls.length;
+  const needsImage = platforms.some((platform) => ['instagram', 'pinterest', 'tiktok'].includes(platform));
+  if (needsImage && !imageCount) warnings.push('Instagram, Pinterest, and TikTok-style posts should have at least one public image URL before publishing.');
+  if (imageCount > 10) warnings.push('More than 10 images were supplied; only the first 10 are retained for the queue.');
+  for (const url of imageUrls) {
+    if (!/^https:\/\//i.test(url)) warnings.push(`Image URL is not HTTPS/public: ${url}`);
+    if (/localhost|127\.0\.0\.1|file:/i.test(url)) warnings.push(`Image URL looks private/local and will not work for social platforms: ${url}`);
+  }
+  if (platforms.includes('x') && normalizeText(caption).length > 280) warnings.push('The X caption will be trimmed to 280 characters during payload generation.');
+  if (videoUrl && !/^https:\/\//i.test(videoUrl)) warnings.push('Video URL is not HTTPS/public; video-first platforms may reject it.');
+  return [...new Set(warnings)];
+}
+function platformPayload(row, platform, env = {}) {
+  const images = safeJson(row.image_urls_json, []).map(safeUrl).filter(Boolean);
+  const caption = platformCaption(row, platform);
+  const link = absolutePostUrl(row, platform);
+  const readiness = getPlatformReadiness(env)[platform] || { api_ready: 0, missing_env: [] };
+  const base = { platform, api_ready: !!readiness.api_ready, missing_env: readiness.missing_env || [], caption, link_url: link || '', image_count: images.length, first_image_url: images[0] || '' };
+  if (platform === 'facebook') return { ...base, method: 'POST', endpoint_template: 'https://graph.facebook.com/v19.0/{FACEBOOK_PAGE_ID}/feed or /photos', body_preview: { message: caption, link: link || undefined, url: images[0] || undefined } };
+  if (platform === 'instagram') return { ...base, method: 'POST', endpoint_template: 'https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/media then /media_publish', body_preview: { image_url: images[0] || '', caption } };
+  if (platform === 'x') return { ...base, method: 'POST', endpoint_template: 'https://api.x.com/2/tweets', body_preview: { text: caption } };
+  if (platform === 'pinterest') return { ...base, method: 'POST', endpoint_template: 'https://api.pinterest.com/v5/pins', body_preview: { board_id: '{PINTEREST_BOARD_ID}', title: trimTo(row.title || 'Devil n Dove workshop update', 100), description: caption, link: link || undefined, media_source: images[0] ? { source_type: 'image_url', url: images[0] } : undefined } };
+  return { ...base, method: 'manual', endpoint_template: 'manual/copy-paste for now', body_preview: { caption, media: images, video_url: row.video_url || '' } };
+}
+function buildDryRunPayload(row, selectedPlatforms, env = {}) {
+  const platforms = normalizePlatforms(selectedPlatforms || safeJson(row.target_platforms_json, []));
+  const images = safeJson(row.image_urls_json, []).map(safeUrl).filter(Boolean);
+  const warnings = buildMediaWarnings({ platforms, imageUrls: images, videoUrl: row.video_url || '', caption: row.caption || '' });
+  return {
+    social_post_queue_id: Number(row.social_post_queue_id || 0),
+    scheduled_at: row.scheduled_at || null,
+    blocked_until_schedule: isScheduledInFuture(row.scheduled_at),
+    do_not_repost: Number(row.do_not_repost || 0) === 1,
+    media_quality_warnings: warnings,
+    platform_payloads: platforms.map((platform) => platformPayload(row, platform, env))
+  };
 }
 async function ensureSchema(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS social_platform_connections (
@@ -255,6 +339,14 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'social_post_attempts', 'http_status', 'http_status INTEGER');
   await ensureColumn(db, 'social_post_attempts', 'platform_response_id', 'platform_response_id TEXT');
   await ensureColumn(db, 'social_post_attempts', 'published_url', 'published_url TEXT');
+  await ensureColumn(db, 'social_post_queue', 'platform_caption_overrides_json', "platform_caption_overrides_json TEXT DEFAULT '{}'");
+  await ensureColumn(db, 'social_post_queue', 'media_quality_warnings_json', "media_quality_warnings_json TEXT DEFAULT '[]'");
+  await ensureColumn(db, 'social_post_queue', 'duplicate_signature', 'duplicate_signature TEXT');
+  await ensureColumn(db, 'social_post_queue', 'do_not_repost', 'do_not_repost INTEGER DEFAULT 0');
+  await ensureColumn(db, 'social_post_queue', 'schedule_timezone', 'schedule_timezone TEXT');
+  await ensureColumn(db, 'social_post_queue', 'dry_run_payload_json', "dry_run_payload_json TEXT DEFAULT '{}'");
+  await ensureColumn(db, 'social_post_queue', 'last_dry_run_at', 'last_dry_run_at TEXT');
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_duplicate ON social_post_queue(duplicate_signature, do_not_repost)`).run().catch(() => null);
 
   for (const platform of PLATFORM_DEFINITIONS) {
     await db.prepare(`INSERT INTO social_platform_connections (
@@ -281,8 +373,11 @@ async function summarize(db, env = {}) {
     COUNT(*) AS total,
     SUM(CASE WHEN post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
     SUM(CASE WHEN approval_status='needs_review' THEN 1 ELSE 0 END) AS needs_review_count,
-    SUM(CASE WHEN post_status='posted' THEN 1 ELSE 0 END) AS posted_count
-    FROM social_post_queue`).first().catch(() => ({ total: 0, open_count: 0, needs_review_count: 0, posted_count: 0 }));
+    SUM(CASE WHEN post_status='posted' THEN 1 ELSE 0 END) AS posted_count,
+    SUM(CASE WHEN COALESCE(scheduled_at,'') <> '' AND datetime(scheduled_at) > datetime('now') AND post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS scheduled_count,
+    SUM(CASE WHEN COALESCE(scheduled_at,'') <> '' AND datetime(scheduled_at) <= datetime('now') AND post_status='ready' AND approval_status='approved' THEN 1 ELSE 0 END) AS due_count,
+    SUM(CASE WHEN COALESCE(do_not_repost,0)=1 AND post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS duplicate_warning_count
+    FROM social_post_queue`).first().catch(() => ({ total: 0, open_count: 0, needs_review_count: 0, posted_count: 0, scheduled_count: 0, due_count: 0, duplicate_warning_count: 0 }));
   const queue = rows(await db.prepare(`SELECT * FROM social_post_queue ORDER BY datetime(updated_at) DESC, social_post_queue_id DESC LIMIT 50`).all().catch(() => ({ results: [] })));
   const platforms = rows(await db.prepare(`SELECT * FROM social_platform_connections ORDER BY platform_key`).all().catch(() => ({ results: [] })));
   const attempts = rows(await db.prepare(`SELECT a.*, q.social_post_key FROM social_post_attempts a INNER JOIN social_post_queue q ON q.social_post_queue_id = a.social_post_queue_id ORDER BY datetime(a.attempted_at) DESC LIMIT 30`).all().catch(() => ({ results: [] })));
@@ -298,7 +393,10 @@ function normalizeQueueRow(row = {}) {
   return {
     ...row,
     target_platforms: safeJson(row.target_platforms_json, []),
-    image_urls: safeJson(row.image_urls_json, [])
+    image_urls: safeJson(row.image_urls_json, []),
+    platform_caption_overrides: safeJson(row.platform_caption_overrides_json, {}),
+    media_quality_warnings: safeJson(row.media_quality_warnings_json, []),
+    dry_run_payload: safeJson(row.dry_run_payload_json, {})
   };
 }
 async function createQueuedPost(db, adminUser, payload = {}) {
@@ -312,17 +410,26 @@ async function createQueuedPost(db, adminUser, payload = {}) {
   const sourceType = slugKey(payload.source_type || 'job_update') || 'job_update';
   const sourceId = normalizeText(payload.source_id || payload.job_id || '');
   const caption = trimTo(payload.caption || buildCaption({ title, summary, hashtags, linkUrl }), 2200);
+  const platformCaptionOverrides = normalizeCaptionOverrides(payload, platforms);
   const notes = normalizeText(payload.notes || '');
-  const scheduledAt = normalizeText(payload.scheduled_at || '');
+  const scheduledAt = parseScheduledAt(payload.scheduled_at || '');
+  const scheduleTimezone = normalizeText(payload.schedule_timezone || payload.timezone || 'America/Toronto');
   const status = ['draft', 'ready'].includes(slugKey(payload.post_status)) ? slugKey(payload.post_status) : 'draft';
   const approval = status === 'ready' ? 'approved' : 'needs_review';
+  const mediaWarnings = buildMediaWarnings({ platforms, imageUrls, videoUrl, caption });
+  const duplicateSignature = buildDuplicateSignature({ title, caption, imageUrls, platforms, linkUrl });
+  const existingDuplicate = await db.prepare(`SELECT social_post_queue_id, title, post_status FROM social_post_queue WHERE duplicate_signature = ? AND COALESCE(post_status,'draft') <> 'archived' ORDER BY datetime(created_at) DESC LIMIT 1`).bind(duplicateSignature).first().catch(() => null);
+  const doNotRepost = existingDuplicate ? 1 : 0;
   const socialPostKey = buildQueueKey(`${sourceType}|${sourceId}|${title}|${summary}`);
+  const mergedNotes = [notes, existingDuplicate ? `Possible duplicate of social queue #${existingDuplicate.social_post_queue_id}; review before reposting.` : ''].filter(Boolean).join(' | ');
 
   const insert = await db.prepare(`INSERT INTO social_post_queue (
     social_post_key, source_type, source_id, title, summary, caption, hashtags,
     target_platforms_json, image_urls_json, video_url, link_url, approval_status,
-    post_status, scheduled_at, created_by_user_id, updated_by_user_id, notes, created_at, updated_at
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    post_status, scheduled_at, created_by_user_id, updated_by_user_id, notes,
+    platform_caption_overrides_json, media_quality_warnings_json, duplicate_signature, do_not_repost, schedule_timezone,
+    created_at, updated_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
     socialPostKey,
     sourceType,
     sourceId || null,
@@ -339,21 +446,27 @@ async function createQueuedPost(db, adminUser, payload = {}) {
     scheduledAt || null,
     adminUser.user_id,
     adminUser.user_id,
-    notes || null
+    mergedNotes || null,
+    JSON.stringify(platformCaptionOverrides),
+    JSON.stringify(mediaWarnings),
+    duplicateSignature,
+    doNotRepost,
+    scheduleTimezone || null
   ).run();
   const socialPostQueueId = Number(insert?.meta?.last_row_id || 0);
 
   for (const platform of platforms) {
     await db.prepare(`INSERT INTO social_post_attempts (
       social_post_queue_id, platform_key, attempt_status, attempted_by_user_id, notes, attempted_at
-    ) VALUES (?, ?, 'manual_ready', ?, 'Prepared for manual publishing/copy-paste.', CURRENT_TIMESTAMP)`).bind(
+    ) VALUES (?, ?, 'manual_ready', ?, ?, CURRENT_TIMESTAMP)`).bind(
       socialPostQueueId,
       platform,
-      adminUser.user_id
+      adminUser.user_id,
+      doNotRepost ? 'Prepared but flagged as possible duplicate; review before publishing.' : 'Prepared for manual publishing/copy-paste.'
     ).run().catch(() => null);
   }
 
-  return { social_post_queue_id: socialPostQueueId, social_post_key: socialPostKey };
+  return { social_post_queue_id: socialPostQueueId, social_post_key: socialPostKey, duplicate_warning: !!existingDuplicate, media_warnings: mediaWarnings };
 }
 async function updateStatus(db, adminUser, payload = {}) {
   const id = Number(payload.social_post_queue_id || 0);
@@ -367,6 +480,9 @@ async function updateStatus(db, adminUser, payload = {}) {
   if (allowedPost.has(postStatus)) { fields.push('post_status = ?'); bindings.push(postStatus); }
   if (allowedApproval.has(approvalStatus)) { fields.push('approval_status = ?'); bindings.push(approvalStatus); }
   if (payload.notes !== undefined) { fields.push('notes = ?'); bindings.push(normalizeText(payload.notes) || null); }
+  if (payload.scheduled_at !== undefined) { fields.push('scheduled_at = ?'); bindings.push(parseScheduledAt(payload.scheduled_at) || null); }
+  if (payload.schedule_timezone !== undefined) { fields.push('schedule_timezone = ?'); bindings.push(normalizeText(payload.schedule_timezone) || null); }
+  if (payload.do_not_repost !== undefined) { fields.push('do_not_repost = ?'); bindings.push(Number(payload.do_not_repost) ? 1 : 0); }
   if (postStatus === 'posted') { fields.push('published_at = COALESCE(published_at, CURRENT_TIMESTAMP)'); }
   if (!fields.length) throw new Error('No valid status change was provided.');
   fields.push('updated_by_user_id = ?'); bindings.push(adminUser.user_id);
@@ -516,6 +632,23 @@ async function recordApiAttempt(db, adminUser, id, platform, status, details = {
     ).run().catch(() => null);
   });
 }
+async function dryRunQueuedPost(context, db, adminUser, payload = {}) {
+  const id = Number(payload.social_post_queue_id || 0);
+  if (!id) throw new Error('A social_post_queue_id is required.');
+  const row = await db.prepare(`SELECT * FROM social_post_queue WHERE social_post_queue_id = ? LIMIT 1`).bind(id).first();
+  if (!row) throw new Error('Queued social post not found.');
+  const selected = normalizePlatforms(payload.platform_keys || payload.platforms || safeJson(row.target_platforms_json, []));
+  const dryRun = buildDryRunPayload(row, selected, context.env);
+  await db.prepare(`UPDATE social_post_queue SET dry_run_payload_json=?, last_dry_run_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(
+    JSON.stringify(dryRun),
+    adminUser.user_id,
+    id
+  ).run().catch(() => null);
+  for (const item of dryRun.platform_payloads || []) {
+    await recordApiAttempt(db, adminUser, id, item.platform, 'dry_run_preview', { platform: item.platform, response: item, notes: 'Dry-run payload preview only; nothing was posted.' });
+  }
+  return dryRun;
+}
 async function publishQueuedPost(context, db, adminUser, payload = {}) {
   const id = Number(payload.social_post_queue_id || 0);
   if (!id) throw new Error('A social_post_queue_id is required.');
@@ -528,6 +661,24 @@ async function publishQueuedPost(context, db, adminUser, payload = {}) {
   const results = [];
 
   await db.prepare(`UPDATE social_post_queue SET last_publish_attempt_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id, id).run().catch(() => null);
+
+  if (Number(row.do_not_repost || 0) === 1 && payload.force !== true) {
+    for (const platform of selected) {
+      const blocked = { platform, status: 'blocked_duplicate_suspected', notes: 'Possible duplicate/repost detected. Clear the duplicate warning or force publish only after review.' };
+      await recordApiAttempt(db, adminUser, id, platform, 'blocked_duplicate_suspected', blocked);
+      results.push(blocked);
+    }
+    return { social_post_queue_id: id, attempted_platforms: selected, results };
+  }
+
+  if (isScheduledInFuture(row.scheduled_at) && payload.force !== true) {
+    for (const platform of selected) {
+      const blocked = { platform, status: 'blocked_scheduled', scheduled_at: row.scheduled_at, notes: 'This post is scheduled for the future. Use dry run/preview now or wait until it is due.' };
+      await recordApiAttempt(db, adminUser, id, platform, 'blocked_scheduled', blocked);
+      results.push(blocked);
+    }
+    return { social_post_queue_id: id, attempted_platforms: selected, results };
+  }
 
   for (const platform of selected) {
     if (row.approval_status !== 'approved' && payload.force !== true) {
@@ -621,6 +772,7 @@ export async function onRequestPost(context) {
     else if (action === 'update_status') await updateStatus(db, adminUser, payload);
     else if (action === 'record_manual_post') await recordManualPost(db, adminUser, payload);
     else if (action === 'generate_from_recent_media') result = await generateFromRecentMedia(db, adminUser);
+    else if (action === 'dry_run_platforms') result = await dryRunQueuedPost(context, db, adminUser, payload);
     else if (action === 'publish_platforms') result = await publishQueuedPost(context, db, adminUser, payload);
     else throw new Error(`Unsupported social queue action: ${action}`);
 
