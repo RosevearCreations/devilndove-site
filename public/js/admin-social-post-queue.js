@@ -1,5 +1,6 @@
 // File: /public/js/admin-social-post-queue.js
-// Brief description: Operations admin panel for review-first social posting queue plus API publishing when platform credentials exist.
+// Brief description: Operations admin panel for review-first social posting queue, scheduling,
+// dry-run payload previews, caption variants, duplicate warnings, and API publishing when credentials exist.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('socialPostQueueAdminMount');
@@ -30,6 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const list = Array.isArray(platforms) ? platforms : parseJson(platforms, []);
     return list.map((platform) => `<span class="admin-status-pill muted">${esc(platform)}</span>`).join(' ');
   }
+  function warningList(warnings) {
+    const list = Array.isArray(warnings) ? warnings : parseJson(warnings, []);
+    return list.length ? `<ul class="small social-warning-list">${list.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>` : '';
+  }
   function missingEnvList(row) {
     const list = Array.isArray(row.missing_env) ? row.missing_env : parseJson(row.missing_env_json, []);
     return list.length ? `<div class="small"><strong>Missing:</strong> ${list.map(esc).join(', ')}</div>` : '';
@@ -37,13 +42,30 @@ document.addEventListener('DOMContentLoaded', () => {
   function publishHint(platforms) {
     const list = Array.isArray(platforms) ? platforms : [];
     if (!list.length) return 'No target platforms selected.';
-    return `This will try API publishing for configured platforms (${list.join(', ')}). Platforms without credentials stay manual-ready and get an attempt note.`;
+    return `This will try API publishing for configured platforms (${list.join(', ')}). Future-scheduled posts, duplicate-warning posts, and unapproved posts are blocked unless reviewed first.`;
   }
   function copyText(value) {
     const text = String(value || '');
     if (!text) return;
     if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(() => setMsg('Copied caption to clipboard.')).catch(() => window.prompt('Copy this caption:', text));
     else window.prompt('Copy this caption:', text);
+  }
+  function dateTimeLocalValue(value) {
+    if (!value) return '';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '';
+    const pad = (num) => String(num).padStart(2, '0');
+    return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+  }
+  function renderDryRunPreview(payload) {
+    const dryRun = payload || {};
+    const warnings = Array.isArray(dryRun.media_quality_warnings) ? dryRun.media_quality_warnings : [];
+    const items = Array.isArray(dryRun.platform_payloads) ? dryRun.platform_payloads : [];
+    if (!items.length && !warnings.length) return '<span class="small">No dry-run preview yet.</span>';
+    return `<div class="social-dry-run-preview">
+      ${warnings.length ? `<div class="notice warning"><strong>Warnings:</strong>${warningList(warnings)}</div>` : ''}
+      ${items.map((item) => `<details><summary>${esc(item.platform)} payload preview ${item.api_ready ? '(API ready)' : '(manual/missing credentials)'}</summary><pre class="small" style="white-space:pre-wrap">${esc(JSON.stringify(item, null, 2))}</pre></details>`).join('')}
+    </div>`;
   }
   function render(data) {
     const result = document.getElementById('socialPostQueueResults');
@@ -56,36 +78,43 @@ document.addEventListener('DOMContentLoaded', () => {
     result.innerHTML = `
       <div class="release-sanity-summary" style="margin-top:12px">
         <div><strong>${esc(summary.total || 0)}</strong> queued social post(s)</div>
-        <div class="small">Open ${esc(summary.open_count || 0)} • Needs review ${esc(summary.needs_review_count || 0)} • Posted ${esc(summary.posted_count || 0)}</div>
+        <div class="small">Open ${esc(summary.open_count || 0)} • Needs review ${esc(summary.needs_review_count || 0)} • Scheduled ${esc(summary.scheduled_count || 0)} • Due ${esc(summary.due_count || 0)} • Duplicate warnings ${esc(summary.duplicate_warning_count || 0)} • Posted ${esc(summary.posted_count || 0)}</div>
       </div>
-      <details style="margin-top:12px" open><summary>Platform readiness</summary>
+      <details style="margin-top:12px" open><summary>Platform readiness and credential checklist</summary>
         <div class="admin-table-wrap"><table><thead><tr><th>Platform</th><th>Status</th><th>API ready</th><th>Scopes / notes</th></tr></thead><tbody>
           ${platforms.map((row) => `<tr><td><strong>${esc(row.display_name || row.platform_key)}</strong><br><span class="small">${esc(row.platform_key)}</span></td><td>${esc(row.publish_mode || row.connection_status || '')}</td><td>${Number(row.api_ready || 0) ? '<span class="admin-status-pill good">API ready</span>' : '<span class="admin-status-pill muted">Manual/copy-ready</span>'}</td><td><div class="small">${esc(row.required_scopes || '')}</div><div>${esc(row.notes || '')}</div>${missingEnvList(row)}</td></tr>`).join('') || '<tr><td colspan="4">No platforms seeded yet.</td></tr>'}
         </tbody></table></div>
       </details>
       <details style="margin-top:12px" open><summary>Queued posts</summary>
-        <div class="admin-table-wrap"><table><thead><tr><th>Status</th><th>Post</th><th>Platforms</th><th>Media</th><th>Actions</th></tr></thead><tbody>
+        <div class="admin-table-wrap"><table><thead><tr><th>Status</th><th>Post</th><th>Platforms</th><th>Media</th><th>Schedule</th><th>Actions</th></tr></thead><tbody>
           ${queue.map((row) => {
             const images = Array.isArray(row.image_urls) ? row.image_urls : parseJson(row.image_urls_json, []);
-            const platforms = Array.isArray(row.target_platforms) ? row.target_platforms : parseJson(row.target_platforms_json, []);
+            const targetPlatforms = Array.isArray(row.target_platforms) ? row.target_platforms : parseJson(row.target_platforms_json, []);
+            const warnings = Array.isArray(row.media_quality_warnings) ? row.media_quality_warnings : parseJson(row.media_quality_warnings_json, []);
+            const dryRun = row.dry_run_payload || parseJson(row.dry_run_payload_json, {});
+            const duplicate = Number(row.do_not_repost || 0) === 1;
             return `<tr>
-              <td><strong>${esc(row.post_status)}</strong><br><span class="small">${esc(row.approval_status)}</span></td>
-              <td><strong>${esc(row.title)}</strong><div class="small">${esc(row.summary || '')}</div><details><summary>Caption</summary><pre class="small" style="white-space:pre-wrap">${esc(row.caption || '')}</pre></details></td>
-              <td>${platformBadges(platforms)}</td>
+              <td><strong>${esc(row.post_status)}</strong><br><span class="small">${esc(row.approval_status)}</span>${duplicate ? '<div class="admin-status-pill danger">possible duplicate</div>' : ''}</td>
+              <td><strong>${esc(row.title)}</strong><div class="small">${esc(row.summary || '')}</div>${warningList(warnings)}<details><summary>Caption</summary><pre class="small" style="white-space:pre-wrap">${esc(row.caption || '')}</pre></details><details><summary>Dry-run preview</summary>${renderDryRunPreview(dryRun)}</details></td>
+              <td>${platformBadges(targetPlatforms)}</td>
               <td>${images.slice(0, 3).map((url) => `<a href="${esc(url)}" target="_blank" rel="noopener">image</a>`).join(' ') || '<span class="small">No images</span>'}${images.length > 3 ? `<div class="small">+${images.length - 3} more</div>` : ''}</td>
+              <td><input type="datetime-local" data-social-schedule-input="${esc(row.social_post_queue_id)}" value="${esc(dateTimeLocalValue(row.scheduled_at))}"><div class="small">${row.scheduled_at ? `Scheduled: ${esc(row.scheduled_at)}` : 'Post now/manual when ready'}</div></td>
               <td><div style="display:flex;gap:6px;flex-wrap:wrap">
                 <button class="btn small" data-social-copy="${esc(row.social_post_queue_id)}">Copy caption</button>
+                <button class="btn small" data-social-dry-run="${esc(row.social_post_queue_id)}">Dry run</button>
+                <button class="btn small" data-social-save-schedule="${esc(row.social_post_queue_id)}">Save schedule</button>
                 <button class="btn small" data-social-ready="${esc(row.social_post_queue_id)}">Approve/ready</button>
+                ${duplicate ? `<button class="btn small" data-social-clear-duplicate="${esc(row.social_post_queue_id)}">Clear duplicate warning</button>` : ''}
                 <button class="btn small primary" data-social-publish="${esc(row.social_post_queue_id)}">Publish APIs</button>
                 <button class="btn small" data-social-posted="${esc(row.social_post_queue_id)}">Mark posted</button>
                 <button class="btn small danger" data-social-archive="${esc(row.social_post_queue_id)}">Archive</button>
               </div></td>
             </tr>`;
-          }).join('') || '<tr><td colspan="5">No social posts queued yet.</td></tr>'}
+          }).join('') || '<tr><td colspan="6">No social posts queued yet.</td></tr>'}
         </tbody></table></div>
       </details>
       <details style="margin-top:12px"><summary>Recent post attempts</summary><div class="admin-table-wrap"><table><thead><tr><th>Platform</th><th>Status</th><th>URL</th><th>When</th></tr></thead><tbody>
-        ${attempts.map((row) => `<tr><td>${esc(row.platform_key)}</td><td>${esc(row.attempt_status)}</td><td>${row.external_post_url ? `<a href="${esc(row.external_post_url)}" target="_blank" rel="noopener">open</a>` : '<span class="small">manual-ready</span>'}</td><td>${esc(row.attempted_at || '')}</td></tr>`).join('') || '<tr><td colspan="4">No attempts recorded yet.</td></tr>'}
+        ${attempts.map((row) => `<tr><td>${esc(row.platform_key)}</td><td>${esc(row.attempt_status)}</td><td>${row.external_post_url ? `<a href="${esc(row.external_post_url)}" target="_blank" rel="noopener">open</a>` : '<span class="small">manual/dry-run</span>'}</td><td>${esc(row.attempted_at || '')}</td></tr>`).join('') || '<tr><td colspan="4">No attempts recorded yet.</td></tr>'}
       </tbody></table></div></details>`;
 
     result._queueRows = queue;
@@ -95,11 +124,21 @@ document.addEventListener('DOMContentLoaded', () => {
       setMsg('Loading social queue...');
       const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue'));
       render(data);
-      setMsg('Social queue loaded.');
+      setMsg('Social queue loaded. Use Dry run before publishing to see exact platform payloads.');
     } catch (error) { setMsg(error.message || 'Unable to load social queue.', true); }
   }
   function selectedPlatforms() {
     return Array.from(document.querySelectorAll('[data-social-platform]:checked')).map((el) => el.value);
+  }
+  function platformCaptions() {
+    return {
+      facebook: document.getElementById('socialFacebookCaption')?.value || '',
+      instagram: document.getElementById('socialInstagramCaption')?.value || '',
+      tiktok: document.getElementById('socialTikTokCaption')?.value || '',
+      x: document.getElementById('socialXCaption')?.value || '',
+      youtube: document.getElementById('socialYouTubeCaption')?.value || '',
+      pinterest: document.getElementById('socialPinterestCaption')?.value || ''
+    };
   }
   async function createPost() {
     try {
@@ -110,8 +149,12 @@ document.addEventListener('DOMContentLoaded', () => {
         title: document.getElementById('socialPostTitle')?.value || '',
         summary: document.getElementById('socialPostSummary')?.value || '',
         image_urls: document.getElementById('socialPostImages')?.value || '',
+        video_url: document.getElementById('socialPostVideo')?.value || '',
         link_url: document.getElementById('socialPostLink')?.value || '',
         hashtags: document.getElementById('socialPostHashtags')?.value || '',
+        scheduled_at: document.getElementById('socialPostScheduledAt')?.value || '',
+        schedule_timezone: document.getElementById('socialPostTimezone')?.value || 'America/Toronto',
+        platform_captions: platformCaptions(),
         target_platforms: selectedPlatforms(),
         post_status: document.getElementById('socialReadyNow')?.checked ? 'ready' : 'draft',
         notes: document.getElementById('socialPostNotes')?.value || ''
@@ -120,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setMsg('Creating social post queue item...');
       const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue', { method: 'POST', body: JSON.stringify(payload) }));
       render(data);
-      setMsg('Social post queued. Review/copy before posting.');
+      const warning = data.result?.duplicate_warning ? ' Possible duplicate flagged for review.' : '';
+      setMsg(`Social post queued. Review/dry run before posting.${warning}`);
     } catch (error) { setMsg(error.message || 'Unable to create social post.', true); }
   }
   async function quickRecentMedia() {
@@ -128,21 +172,36 @@ document.addEventListener('DOMContentLoaded', () => {
       setMsg('Generating a social post from recent uploaded media...');
       const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue', { method: 'POST', body: JSON.stringify({ action: 'generate_from_recent_media' }) }));
       render(data);
-      setMsg('Recent-media post queued. Review it before posting.');
+      setMsg('Recent-media post queued. Review and dry run it before posting.');
     } catch (error) { setMsg(error.message || 'Unable to generate from recent media.', true); }
   }
-  async function updateStatus(id, postStatus, approvalStatus) {
+  async function updateStatus(id, postStatus, approvalStatus, extras = {}) {
     try {
-      const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue', { method: 'POST', body: JSON.stringify({ action: 'update_status', social_post_queue_id: Number(id), post_status: postStatus, approval_status: approvalStatus }) }));
+      const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue', { method: 'POST', body: JSON.stringify({ action: 'update_status', social_post_queue_id: Number(id), post_status: postStatus, approval_status: approvalStatus, ...extras }) }));
       render(data);
       setMsg('Social post status updated.');
     } catch (error) { setMsg(error.message || 'Unable to update status.', true); }
+  }
+  async function dryRunApis(id) {
+    const results = document.getElementById('socialPostQueueResults');
+    const row = (results?._queueRows || []).find((item) => Number(item.social_post_queue_id) === Number(id));
+    const platforms = Array.isArray(row?.target_platforms) ? row.target_platforms : parseJson(row?.target_platforms_json, []);
+    try {
+      setMsg('Building dry-run payload preview...');
+      const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'dry_run_platforms', social_post_queue_id: Number(id), platform_keys: platforms })
+      }));
+      render(data);
+      const count = (data.result?.platform_payloads || []).length;
+      setMsg(`Dry-run payload preview saved for ${count} platform(s). Nothing was posted.`);
+    } catch (error) { setMsg(error.message || 'Unable to dry run social APIs.', true); }
   }
   async function publishApis(id) {
     const results = document.getElementById('socialPostQueueResults');
     const row = (results?._queueRows || []).find((item) => Number(item.social_post_queue_id) === Number(id));
     const platforms = Array.isArray(row?.target_platforms) ? row.target_platforms : parseJson(row?.target_platforms_json, []);
-    const message = `${publishHint(platforms)}\n\nApprove the post first. Continue?`;
+    const message = `${publishHint(platforms)}\n\nRun Dry run first if this is a new platform/token. Continue?`;
     if (!window.confirm(message)) return;
     try {
       setMsg('Attempting configured social API publishing...');
@@ -154,6 +213,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const summary = (data.result?.results || []).map((item) => `${item.platform}: ${item.status}`).join(' • ');
       setMsg(summary ? `Publish attempts recorded: ${summary}` : 'Publish attempts recorded.');
     } catch (error) { setMsg(error.message || 'Unable to publish via APIs.', true); }
+  }
+  async function saveSchedule(id) {
+    const input = document.querySelector(`[data-social-schedule-input="${CSS.escape(String(id))}"]`);
+    await updateStatus(id, '', '', { scheduled_at: input?.value || '', schedule_timezone: 'America/Toronto' });
   }
   async function markPosted(id) {
     const platform = window.prompt('Which platform was posted? facebook, instagram, tiktok, x, youtube, or pinterest:', 'facebook');
@@ -169,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
   mount.innerHTML = `
     <div class="card social-post-queue-admin-panel" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div><h2 style="margin-top:0">Social Posting Queue</h2><p class="small" style="margin:8px 0 0 0">Queue crafting/job photos and summaries for Facebook, Instagram, TikTok, X, YouTube, Pinterest, or manual copy-paste. Approved items can be pushed through configured APIs; unconfigured platforms stay manual/copy-ready.</p></div>
+        <div><h2 style="margin-top:0">Social Posting Queue</h2><p class="small" style="margin:8px 0 0 0">Queue crafting/job photos and summaries for Facebook, Instagram, TikTok, X, YouTube, Pinterest, or manual copy-paste. Approved items can be dry-run, scheduled, and pushed through configured APIs; unconfigured platforms stay manual/copy-ready.</p></div>
         <button class="btn" type="button" id="socialQueueLoadButton">Refresh queue</button>
       </div>
       <div class="social-queue-grid" style="margin-top:12px">
@@ -180,6 +243,22 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <label style="display:block;margin-top:10px">Summary / behind-the-scenes caption starter<textarea id="socialPostSummary" rows="4" placeholder="What we made, what went right, what went sideways, and why it was fun..."></textarea></label>
       <label style="display:block;margin-top:10px">Image URLs, one per line<textarea id="socialPostImages" rows="3" placeholder="https://assets.devilndove.com/products/..."></textarea></label>
+      <div class="social-queue-grid" style="margin-top:12px">
+        <label>Video URL, optional<input id="socialPostVideo" placeholder="https://assets.devilndove.com/social/...mp4"></label>
+        <label>Schedule date/time<input id="socialPostScheduledAt" type="datetime-local"></label>
+        <label>Schedule timezone<input id="socialPostTimezone" value="America/Toronto"></label>
+      </div>
+      <details style="margin-top:12px"><summary>Optional platform-specific captions</summary>
+        <p class="small">Leave blank to use the main caption. X is trimmed shorter automatically.</p>
+        <div class="social-queue-grid">
+          <label>Facebook caption<textarea id="socialFacebookCaption" rows="3"></textarea></label>
+          <label>Instagram caption<textarea id="socialInstagramCaption" rows="3"></textarea></label>
+          <label>TikTok caption<textarea id="socialTikTokCaption" rows="3"></textarea></label>
+          <label>X caption<textarea id="socialXCaption" rows="3" maxlength="280"></textarea></label>
+          <label>YouTube caption<textarea id="socialYouTubeCaption" rows="3"></textarea></label>
+          <label>Pinterest caption<textarea id="socialPinterestCaption" rows="3"></textarea></label>
+        </div>
+      </details>
       <div class="social-queue-platforms" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
         ${['facebook','instagram','tiktok','x','youtube','pinterest'].map((platform) => `<label class="small"><input type="checkbox" data-social-platform value="${platform}" ${['facebook','instagram','tiktok','x'].includes(platform) ? 'checked' : ''}> ${platform}</label>`).join('')}
       </div>
@@ -207,8 +286,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const row = (results?._queueRows || []).find((item) => Number(item.social_post_queue_id) === id);
       copyText(row?.caption || '');
     }
+    const dryRunButton = event.target.closest('[data-social-dry-run]');
+    if (dryRunButton) dryRunApis(dryRunButton.getAttribute('data-social-dry-run'));
+    const scheduleButton = event.target.closest('[data-social-save-schedule]');
+    if (scheduleButton) saveSchedule(scheduleButton.getAttribute('data-social-save-schedule'));
     const readyButton = event.target.closest('[data-social-ready]');
     if (readyButton) updateStatus(readyButton.getAttribute('data-social-ready'), 'ready', 'approved');
+    const clearDuplicateButton = event.target.closest('[data-social-clear-duplicate]');
+    if (clearDuplicateButton && window.confirm('Clear the duplicate warning after reviewing this post?')) updateStatus(clearDuplicateButton.getAttribute('data-social-clear-duplicate'), '', '', { do_not_repost: 0 });
     const publishButton = event.target.closest('[data-social-publish]');
     if (publishButton) publishApis(publishButton.getAttribute('data-social-publish'));
     const postedButton = event.target.closest('[data-social-posted]');
