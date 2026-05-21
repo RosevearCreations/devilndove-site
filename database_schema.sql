@@ -968,3 +968,8 @@ ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 -- Build 135 schema sync note: no new structural tables are required for the media/R2 diagnostics,
 -- product image health report, draft checklist, or reusable image picker. These features reuse existing
 -- products, product_images, media_assets, product_image_annotations, runtime_incidents, and schema_migration_ledger tables.
+
+-- Build 140 schema sync note: social queue scheduling, dry-run payload previews,
+-- platform caption variants, duplicate/repost guardrails, and media-warning fields
+-- are reflected in database_full_schema.sql, database_store_schema.sql,
+-- database_growth_analytics_seo_extension.sql, and database_upgrade_current_pass.sql.

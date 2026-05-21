@@ -1212,7 +1212,14 @@ CREATE TABLE IF NOT EXISTS social_post_queue (
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
   notes TEXT,
   last_publish_attempt_at TEXT,
-  api_publish_mode TEXT DEFAULT 'review_first'
+  api_publish_mode TEXT DEFAULT 'review_first',
+  platform_caption_overrides_json TEXT DEFAULT '{}',
+  media_quality_warnings_json TEXT DEFAULT '[]',
+  duplicate_signature TEXT,
+  do_not_repost INTEGER DEFAULT 0,
+  schedule_timezone TEXT,
+  dry_run_payload_json TEXT DEFAULT '{}',
+  last_dry_run_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS social_post_attempts (
@@ -1235,6 +1242,7 @@ CREATE TABLE IF NOT EXISTS social_post_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_social_post_queue_status ON social_post_queue(post_status, approval_status, scheduled_at);
 CREATE INDEX IF NOT EXISTS idx_social_post_queue_source ON social_post_queue(source_type, source_id);
+CREATE INDEX IF NOT EXISTS idx_social_post_queue_duplicate ON social_post_queue(duplicate_signature, do_not_repost);
 CREATE INDEX IF NOT EXISTS idx_social_post_attempts_queue ON social_post_attempts(social_post_queue_id, platform_key);
 
 INSERT INTO social_platform_connections (platform_key, display_name, connection_status, api_ready, requires_oauth, required_scopes, notes, updated_at) VALUES

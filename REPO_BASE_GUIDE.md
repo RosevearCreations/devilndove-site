@@ -1,5 +1,10 @@
 # Repo Base Guide — Devil n Dove
 
+## Build 140 repo note
+
+Social posting now includes dry-run previews, scheduling, caption variants, duplicate guardrails, and media warnings in `functions/api/admin/social-post-queue.js` and `public/js/admin-social-post-queue.js`. Release Sanity and the predeploy sanity script both check the social queue layer.
+
+
 ## Build 139 repo note
 
 Social posting files now include API publishing attempts inside `functions/api/admin/social-post-queue.js` and UI controls in `public/js/admin-social-post-queue.js`. The Operations page mount remains `socialPostQueueAdminMount`. The workflow is review-first and credential-safe.

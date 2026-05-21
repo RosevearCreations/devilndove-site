@@ -523,7 +523,14 @@ CREATE TABLE IF NOT EXISTS social_post_queue (
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
   notes TEXT,
   last_publish_attempt_at TEXT,
-  api_publish_mode TEXT DEFAULT 'review_first'
+  api_publish_mode TEXT DEFAULT 'review_first',
+  platform_caption_overrides_json TEXT DEFAULT '{}',
+  media_quality_warnings_json TEXT DEFAULT '[]',
+  duplicate_signature TEXT,
+  do_not_repost INTEGER DEFAULT 0,
+  schedule_timezone TEXT,
+  dry_run_payload_json TEXT DEFAULT '{}',
+  last_dry_run_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS social_post_attempts (
@@ -546,6 +553,7 @@ CREATE TABLE IF NOT EXISTS social_post_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_social_post_queue_status ON social_post_queue(post_status, approval_status, scheduled_at);
 CREATE INDEX IF NOT EXISTS idx_social_post_queue_source ON social_post_queue(source_type, source_id);
+CREATE INDEX IF NOT EXISTS idx_social_post_queue_duplicate ON social_post_queue(duplicate_signature, do_not_repost);
 CREATE INDEX IF NOT EXISTS idx_social_post_attempts_queue ON social_post_attempts(social_post_queue_id, platform_key);
 
 INSERT INTO social_platform_connections (platform_key, display_name, connection_status, api_ready, requires_oauth, required_scopes, notes, updated_at) VALUES
@@ -591,6 +599,29 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   'pending_review',
   0,
   'Created by build 139. Adds approved-post API publishing attempts for Facebook, Instagram, X, and Pinterest when credentials are configured in Cloudflare environment variables; TikTok and YouTube remain manual/review-first until upload flows are configured.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);
+
+
+-- Build 140 - Social scheduling, dry-run previews, caption variants, and duplicate/repost guardrails.
+-- Existing installs are self-healed by /api/admin/social-post-queue before use. Reference columns now include:
+--   social_post_queue.platform_caption_overrides_json
+--   social_post_queue.media_quality_warnings_json
+--   social_post_queue.duplicate_signature
+--   social_post_queue.do_not_repost
+--   social_post_queue.schedule_timezone
+--   social_post_queue.dry_run_payload_json
+--   social_post_queue.last_dry_run_at
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'database_upgrade_current_pass_build140',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Created by build 140. Adds social queue scheduling, dry-run platform payload previews, caption variants, duplicate/repost warnings, and media-quality guardrails for crafting-process posts.',
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );

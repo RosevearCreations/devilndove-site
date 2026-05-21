@@ -1,5 +1,10 @@
 # AI Context — Devil n Dove
 
+## Build 140 working context
+
+The current build adds safer social publishing controls: dry-run platform payload previews, scheduled post blocking, per-platform caption variants, duplicate/repost guardrails, media warnings, and social Release Sanity checks. Keep social API secrets in Cloudflare environment variables only. Never store tokens in D1, Markdown, JSON, or public assets.
+
+
 ## Build 139 working context
 
 The current build adds approved social API publishing attempts to Operations > Social Posting Queue. Keep all credentials in Cloudflare environment variables only. Do not place platform tokens in D1, JSON files, Markdown, or public assets. Facebook/Instagram/X/Pinterest are API-attempt capable when configured; TikTok/YouTube remain manual/review-first until their upload workflows are explicitly built.

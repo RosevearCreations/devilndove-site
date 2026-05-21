@@ -1,5 +1,10 @@
 # Devil n Dove Site
 
+## Build 140 note
+
+This build strengthens the Social Posting Queue for crafting/job process updates. It adds dry-run payload previews, scheduling, per-platform captions, duplicate/repost warnings, media-quality warnings, and Release Sanity coverage before API publishing. Use dry run first; credentials still belong only in Cloudflare environment variables.
+
+
 ## Build 139 note
 
 This build adds a review-first social publisher workflow. Admins can queue crafting/job photos and summaries, approve them, and then attempt API publishing to configured platforms. The site still works in manual/copy mode when no platform credentials are present.

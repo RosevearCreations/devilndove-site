@@ -1,5 +1,14 @@
 # Known Gaps and Risks — Devil n Dove
 
+## Build 140 update — social scheduling and dry-run risks
+
+- Dry run previews do not guarantee that a platform will accept the final API request; they are a safety preview before live publishing.
+- Future-scheduled posts are blocked from API publishing early, but the queue is not yet a background scheduler. Someone still needs to run/trigger publishing after the scheduled time.
+- Duplicate/repost warnings are based on a practical signature of caption, images, platforms, and link. Review before clearing because similar posts may still be intentional.
+- Media warnings are URL-level checks only. Full platform media validation for aspect ratio, duration, file size, and rights still needs deeper platform-specific work.
+- TikTok and YouTube remain manual/review-first until app approvals, OAuth upload handling, and media rules are fully configured.
+
+
 ## Build 139 update — social API publishing risks
 
 - Social posting is now review-first plus API-capable, but credentials must be stored only in Cloudflare environment variables.

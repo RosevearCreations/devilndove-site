@@ -1,5 +1,52 @@
 # Development Roadmap — Devil n Dove
 
+## Completed 20 items in this pass — Build 140
+
+1. Added a dry-run platform payload preview for Social Posting Queue items before any API call is attempted.
+2. Added `dry_run_platforms` support to `/api/admin/social-post-queue` so admins can inspect Facebook, Instagram, X, Pinterest, TikTok, and YouTube payloads safely.
+3. Added dry-run attempt logging with `dry_run_preview` status so preview history is visible in recent attempts.
+4. Added platform-specific caption variants for Facebook, Instagram, TikTok, X, YouTube, and Pinterest while keeping the main caption as the fallback.
+5. Added scheduled date/time support to the Social Posting Queue form and queue table.
+6. Added schedule blocking so future-scheduled posts are not API-published early unless deliberately forced later by code/admin review.
+7. Added duplicate/repost signatures based on title, caption, images, platforms, and link.
+8. Added `do_not_repost` guardrails so likely duplicate posts are blocked from API publishing until the warning is cleared by an admin.
+9. Added a queue-table “Clear duplicate warning” action for reviewed duplicates.
+10. Added media-quality warnings for missing image URLs, non-HTTPS/private media URLs, too many images, and X caption trimming.
+11. Added saved dry-run payload JSON and last-dry-run timestamp fields for auditability.
+12. Added social queue summary counts for scheduled posts, due posts, dry-run previews, and duplicate warnings.
+13. Expanded Release Sanity to report social scheduled/dry-run counts and warn on duplicate/repost flags.
+14. Expanded the platform readiness UI into a clearer credential checklist.
+15. Improved the Social Posting Queue mobile layout, dry-run preview display, warnings, and wide table handling.
+16. Updated social queue schema references in `database_full_schema.sql`, `database_store_schema.sql`, `database_growth_analytics_seo_extension.sql`, and `database_upgrade_current_pass.sql`.
+17. Added a Build 140 schema migration ledger marker.
+18. Updated `scripts/predeploy_sanity_check.py` so dry-run and caption-variant social assets are checked before packaging.
+19. Preserved the previous product/media/mobile/Search Console/storefront fallback work while adding the new social publishing safety layer.
+20. Updated active Markdown files with the Build 140 handoff, risks, sanity notes, schema notes, local SEO note, and next steps.
+
+## Next logical 20 steps after Build 140
+
+1. Deploy Build 140 and apply or record `database_upgrade_current_pass.sql`.
+2. Open `/admin/operations/` and refresh Social Posting Queue.
+3. Queue one harmless crafting-process post with one public image URL.
+4. Use **Dry run** before any publish attempt and verify the platform payload preview looks correct.
+5. Set a future schedule and confirm **Publish APIs** records `blocked_scheduled` instead of posting early.
+6. Queue a similar duplicate post and confirm the duplicate/repost warning appears.
+7. Clear the duplicate warning only after reviewing the caption/image/platform combination.
+8. Add one platform credential set at a time in Cloudflare environment variables, starting with Facebook Page or X.
+9. Run dry-run previews after each credential change before pressing Publish APIs.
+10. Add a richer job/project timeline source so crafting-process posts can be generated from job records rather than a blank form.
+11. Add platform-specific image/video rules, especially aspect ratio and duration checks for Instagram, TikTok, YouTube Shorts, and Pinterest.
+12. Add retry/backoff notes for API failures and rate-limit responses.
+13. Add a public-safe “workshop story” block that can reuse approved social captions without exposing admin notes.
+14. Add social-post performance fields for manual engagement tracking until API analytics are available.
+15. Add Google Business Profile post/photo planning as a manual checklist because GBP posting/media workflows differ from the other platforms.
+16. Continue Search Console CSV import testing and generate private SEO actions only from real opportunity rows.
+17. Add product SEO bulk tools for missing title, description, canonical, OG image, and Product JSON-LD readiness.
+18. Continue accounting work: payment application, HST/GST review, period close/lock, and accountant export packaging.
+19. Keep testing the compact mobile menu, admin tables, and product editor on a real phone after cache clears.
+20. Continue checking one H1, local wording, schema drift, CSS drift, public `/data/` privacy, and robust fallbacks on every pass.
+
+
 ## Completed 20 items in this pass — Build 139
 
 1. Added approved-post API publishing attempts to the existing Social Posting Queue.

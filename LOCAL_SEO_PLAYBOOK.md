@@ -1,5 +1,10 @@
 # Local SEO Playbook — Devil n Dove
 
+## Build 140 social-local SEO note
+
+Use the Social Posting Queue dry-run preview to check captions before publishing. Keep local wording natural: Southern Ontario, handmade gifts, polymer clay earrings, laser engraving, vintage finds, and workshop-made process notes should be used only where they honestly fit the post and linked page.
+
+
 ## Build 139 social-local SEO note
 
 Crafting-process social posts should use natural local wording where it fits: handmade in Southern Ontario, workshop-made gifts, polymer clay earrings, laser engraving, vintage finds, and Devil n Dove behind-the-scenes work. Do not stuff keywords. Use clear captions, useful photos, and links back to the most relevant page.

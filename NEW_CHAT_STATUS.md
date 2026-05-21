@@ -1,3 +1,9 @@
+# New Chat Status — Devil n Dove Build 140
+
+## Current status — Build 140
+
+Build 140 starts from the latest uploaded build and adds a safer social-publishing workflow for crafting-process photos and summaries. Operations > Social Posting Queue now supports dry-run previews, schedules, per-platform captions, duplicate warnings, media warnings, and guarded API publishing. Deploy the build, apply or record `database_upgrade_current_pass.sql`, then test a harmless queued post with **Dry run** before adding or using live platform credentials.
+
 # New Chat Status — Devil n Dove Build 139
 
 ## Current status — Build 139

@@ -1,4 +1,9 @@
-# Database Schema Reference — Devil n Dove
+# Database Schema Reference
+
+## Build 140 schema update
+
+Build 140 expands `social_post_queue` with dry-run and scheduling support: `platform_caption_overrides_json`, `media_quality_warnings_json`, `duplicate_signature`, `do_not_repost`, `schedule_timezone`, `dry_run_payload_json`, and `last_dry_run_at`. The queue also has an index for duplicate/repost review. The endpoint self-heals older D1 installs before use, and `database_upgrade_current_pass.sql` includes the Build 140 ledger marker.
+
 
 ## Build 139 schema update
 

@@ -186,8 +186,8 @@ def check_operations_assets(root: Path):
     social_api = root / 'functions' / 'api' / 'admin' / 'social-post-queue.js'
     social_js_text = read_text(social_js) if social_js.exists() else ''
     social_api_text = read_text(social_api) if social_api.exists() else ''
-    required_social_js = ['Publish APIs', 'data-social-publish', 'Crafting process update']
-    required_social_api = ['publish_platforms', 'publishToFacebook', 'publishToInstagram', 'publishToX', 'getPlatformReadiness']
+    required_social_js = ['Publish APIs', 'data-social-publish', 'Crafting process update', 'Dry run', 'data-social-dry-run', 'Optional platform-specific captions']
+    required_social_api = ['publish_platforms', 'dry_run_platforms', 'publishToFacebook', 'publishToInstagram', 'publishToX', 'getPlatformReadiness', 'buildDryRunPayload']
     missing_social_js = [token for token in required_social_js if token not in social_js_text]
     missing_social_api = [token for token in required_social_api if token not in social_api_text]
     if missing_social_js:
