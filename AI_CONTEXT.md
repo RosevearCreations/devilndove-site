@@ -1,3 +1,7 @@
+## Build 145 working context
+
+The current build improves finished-product capture in `/admin/products/`: autosave starts after product name/type are entered while status is Draft; the first autosave creates a D1 draft and subsequent autosaves update that same draft; the upload panel accepts multiple image files and caps selected uploads at seven; the editor now has Image URL 1–6 plus featured image. Keep SEO/title/meta/image readiness as review/publish checks, not draft blockers.
+
 # AI Context — Devil n Dove
 
 ## Build 140 working context

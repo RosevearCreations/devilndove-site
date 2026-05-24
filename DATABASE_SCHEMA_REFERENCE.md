@@ -1,3 +1,7 @@
+## Build 145 schema update
+
+Build 145 does not require a destructive schema change or a new table. Product autosave reuses the existing `products`, `product_seo`, `product_images`, `media_assets`, and `product_image_annotations` tables. The active editor now caps gallery image arrays at seven and records the pass in `schema_migration_ledger` through `database_upgrade_current_pass.sql`.
+
 # Database Schema Reference
 
 ## Build 140 schema update

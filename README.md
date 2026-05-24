@@ -1,3 +1,7 @@
+## Build 145 update
+
+The Product editor now supports draft autosave and multi-image upload for finished products. Drafts only need name/type before autosave starts. The main editor can select up to seven images at once and fill six gallery URL fields plus the featured image, while price, SEO, and external links remain review/publish readiness items instead of draft blockers.
+
 # Devil n Dove Site
 
 ## Build 140 note

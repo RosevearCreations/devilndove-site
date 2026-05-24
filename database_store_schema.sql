@@ -1361,3 +1361,5 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP
 );
 
+
+-- Build 145 note: Store/product image schema remains compatible with product editor autosave and seven-image gallery entry. No destructive change required.

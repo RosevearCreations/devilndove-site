@@ -853,3 +853,18 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP
 );
 
+
+-- Build 145: product editor autosave and seven-image upload support.
+-- No destructive schema change is required. Existing product_images/media_assets tables are reused.
+-- The admin editor now supports up to seven gallery URL fields plus featured image, multi-select upload, and draft autosave once name/type are present.
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'build_145_product_editor_autosave_multi_image',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Build 145 is a no-destructive-schema admin workflow update: product editor autosave after draft-ready fields, multi-image upload capped at 7 selected files, and seven gallery URL slots.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

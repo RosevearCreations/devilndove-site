@@ -782,3 +782,5 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP
 );
 
+
+-- Build 145 note: SEO/local-growth schema unchanged; product editor autosave supports faster draft capture without requiring SEO fields until review/publish readiness.

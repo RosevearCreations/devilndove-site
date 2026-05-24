@@ -1,3 +1,11 @@
+## Build 145 update — Product editor autosave and multi-image risks
+
+- Autosave only runs when status is Draft and the product has name/type. This avoids accidentally publishing partial active products, but admins should still review before changing status.
+- Autosave creates or updates live D1 draft rows. If a draft was created by mistake, archive/delete it from the product table rather than leaving clutter.
+- Multi-image upload is intentionally capped at seven selected files per action to keep finished-product pages useful without overwhelming the editor or storefront.
+- R2/public media URL configuration still matters. The fallback public URL exists, but Media/R2 Diagnostics should be used after deployment to confirm uploaded images are actually publicly reachable.
+- The Product editor now supports seven gallery URL slots, but drag/drop ordering and duplicate-image detection are still future work.
+
 # Known Gaps and Risks — Devil n Dove
 
 ## Build 140 update — social scheduling and dry-run risks

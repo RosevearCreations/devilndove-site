@@ -242,8 +242,8 @@ def check_product_editor_assets(root: Path):
     page_text = read_text(product_page) if product_page.exists() else ''
     js_text = read_text(create_js) if create_js.exists() else ''
     api_text = read_text(create_api) if create_api.exists() else ''
-    required_page = ['Draft mode is intentionally light', 'Save Draft Product', '/public/js/admin-create-product.js', '/public/js/admin-product-draft-checklist.js']
-    required_js = ['productDraftImageUploader', 'readApiJson', 'PUBLISH_READINESS_CONFIG', '/api/admin/media-upload', 'attachToCurrentProduct']
+    required_page = ['Draft mode is intentionally light', 'Save Draft Product', '/public/js/admin-create-product.js', '/public/js/admin-product-draft-checklist.js', 'image_url_6']
+    required_js = ['productDraftImageUploader', 'readApiJson', 'PUBLISH_READINESS_CONFIG', '/api/admin/media-upload', 'attachToCurrentProduct', 'MAX_PRODUCT_IMAGES = 7', 'productAutosavePanel', 'dd:product-autosaved-new']
     required_api = ['captureRuntimeIncident', 'draft_mode_relaxed', 'addColumnValue', 'Products table is unavailable']
     missing_page = [token for token in required_page if token not in page_text]
     missing_js = [token for token in required_js if token not in js_text]
@@ -295,3 +295,5 @@ if __name__ == '__main__':
 # Build 139 note: predeploy checks include social API publisher controls and endpoint helpers.
 
 # Build 142 note: predeploy checks include Operations > Competitive Roadmap and completed COMPETITIVE.md assets.
+
+# Build 145 note: predeploy checks include product editor autosave and seven-total-image upload readiness.

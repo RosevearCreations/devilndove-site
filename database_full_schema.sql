@@ -2047,3 +2047,5 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP
 );
 
+
+-- Build 145 note: Product editor autosave and seven-image upload reuse existing products, product_images, media_assets, and product_image_annotations schema. No additional table is required for this pass.

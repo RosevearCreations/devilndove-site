@@ -1,3 +1,7 @@
+## Build 145 checks added
+
+Predeploy sanity now checks that the Product editor includes the autosave panel, seven-image upload support, and Image URL 7 field. Manual deployment sanity should include: create a draft with name/type only, wait for autosave, upload 2–7 images at once, save/update the draft, reload it, and confirm all image URLs persist.
+
 # Sanity Health Check — Devil n Dove
 
 ## Build 140 checks added

@@ -1,5 +1,20 @@
 # Competitive Roadmap — Devil n Dove
 
+
+## Build 145 execution update — product capture competitiveness
+
+Build 145 moves another competitive gap from strategy into the admin workflow: finished-product capture is now faster on desktop because the Product editor supports draft autosave and multi-image upload. This matters competitively because small handmade/vintage shops often lose listings when the admin process is too slow, too fragile, or too image-limited. Devil n Dove should continue moving toward a workflow where a product can be photographed, drafted, story-noted, priced, reviewed, socially queued, and published from one mobile-friendly admin surface.
+
+New directions added this pass:
+
+1. Treat draft capture speed as a competitive advantage, not just an admin convenience.
+2. Allow up to seven product images from the main Product editor so finished goods can show front, back, scale, detail, materials, packaging, and process/context.
+3. Autosave drafts once product name and type exist so partial listing work is not lost.
+4. Keep SEO title, meta description, price, images, and external listing links as review/publish readiness items, not draft blockers.
+5. Continue making product-story, image-health, social queue, and privacy review work together before public publishing.
+6. Next direction: add an admin editor for approved public product-story notes and show short story snippets in shop cards/search results.
+
+
 For mixed media artists, handmade shops, vintage/collectible sellers, and small creative businesses.
 
 ## Executive takeaway

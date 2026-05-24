@@ -1,3 +1,11 @@
+# New Chat Status — Devil n Dove Build 145
+
+## Current status — Build 145
+
+Build 145 starts from the latest uploaded build and improves finished-product capture. The admin Product editor now supports draft autosave once product name/type are filled, multi-image upload with a seven-file cap, six gallery URL fields plus the featured image, and updated edit/save/checklist handling for seven product images. Schema files were updated with a no-destructive-change marker, and active Markdown files now point to the next product-story/media workflow steps.
+
+Deploy the build, apply or record `database_upgrade_current_pass.sql`, then test `/admin/products/` by entering a product name/type, watching autosave create a draft, uploading several images at once, and confirming six gallery URL fields plus the featured image can save.
+
 # New Chat Status — Devil n Dove Build 142
 
 ## Current status — Build 142

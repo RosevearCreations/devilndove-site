@@ -1,3 +1,7 @@
+## Build 145 local SEO workflow note
+
+Autosave and seven-image upload should help create richer product pages faster. For local SEO, use the extra images to support trust and clarity: finished hero image, detail close-up, scale/context, packaging, process shot when safe, and material/tool evidence. Keep wording natural and locally relevant only where it genuinely applies.
+
 # Local SEO Playbook — Devil n Dove
 
 ## Build 140 social-local SEO note
