@@ -500,6 +500,11 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'social_post_queue', 'utm_medium', 'utm_medium TEXT');
   await ensureColumn(db, 'social_post_queue', 'utm_campaign', 'utm_campaign TEXT');
   await ensureColumn(db, 'social_post_queue', 'utm_url', 'utm_url TEXT');
+  await ensureColumn(db, 'social_post_queue', 'privacy_status', "privacy_status TEXT DEFAULT 'needs_review'");
+  await ensureColumn(db, 'social_post_queue', 'privacy_notes', 'privacy_notes TEXT');
+  await ensureColumn(db, 'social_post_queue', 'media_consent_required', 'media_consent_required INTEGER DEFAULT 1');
+  await ensureColumn(db, 'social_post_queue', 'customer_media_present', 'customer_media_present INTEGER DEFAULT 0');
+  await ensureColumn(db, 'social_post_queue', 'approved_for_public_post', 'approved_for_public_post INTEGER DEFAULT 0');
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_duplicate ON social_post_queue(duplicate_signature, do_not_repost)`).run().catch(() => null);
 
   for (const platform of PLATFORM_DEFINITIONS) {
@@ -865,6 +870,17 @@ async function publishQueuedPost(context, db, adminUser, payload = {}) {
   const results = [];
 
   await db.prepare(`UPDATE social_post_queue SET last_publish_attempt_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id, id).run().catch(() => null);
+
+  const privacyStatus = slugKey(row.privacy_status || 'needs_review');
+  const privacyApproved = Number(row.approved_for_public_post || 0) === 1 || ['approved', 'no_private_media'].includes(privacyStatus);
+  if (!privacyApproved && payload.force !== true) {
+    for (const platform of selected) {
+      const blocked = { platform, status: 'blocked_privacy_review', privacy_status: privacyStatus, notes: 'Review Social Media Privacy Guard before API publishing this post.' };
+      await recordApiAttempt(db, adminUser, id, platform, 'blocked_privacy_review', blocked);
+      results.push(blocked);
+    }
+    return { social_post_queue_id: id, attempted_platforms: selected, results };
+  }
 
   if (Number(row.do_not_repost || 0) === 1 && payload.force !== true) {
     for (const platform of selected) {
