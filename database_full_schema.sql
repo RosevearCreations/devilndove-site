@@ -1962,3 +1962,56 @@ CREATE TABLE IF NOT EXISTS competitive_opportunity_events (
   created_by_user_id INTEGER,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+
+-- Build 143 - Social media privacy guard before API/social publishing.
+CREATE TABLE IF NOT EXISTS social_media_privacy_rules (
+  social_media_privacy_rule_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  rule_key TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL,
+  applies_to TEXT,
+  default_blocked INTEGER NOT NULL DEFAULT 1,
+  public_post_allowed INTEGER NOT NULL DEFAULT 0,
+  consent_status TEXT NOT NULL DEFAULT 'requires_review',
+  checklist TEXT,
+  notes TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_social_media_privacy_rules_active ON social_media_privacy_rules(is_active, default_blocked);
+
+CREATE TABLE IF NOT EXISTS social_post_privacy_reviews (
+  social_post_privacy_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  social_post_queue_id INTEGER NOT NULL,
+  privacy_status TEXT NOT NULL DEFAULT 'needs_review',
+  customer_media_present INTEGER NOT NULL DEFAULT 0,
+  media_consent_required INTEGER NOT NULL DEFAULT 1,
+  approved_for_public_post INTEGER NOT NULL DEFAULT 0,
+  reviewer_note TEXT,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_social_post_privacy_reviews_queue ON social_post_privacy_reviews(social_post_queue_id, privacy_status);
+
+INSERT OR IGNORE INTO social_media_privacy_rules (rule_key, display_name, applies_to, default_blocked, public_post_allowed, consent_status, checklist, notes, is_active, updated_at) VALUES
+('customer_faces_or_names','Customer faces, names, plates, addresses, or private identifiers','customer_or_job_media',1,0,'requires_explicit_consent','Do not post until the customer has clearly approved the exact photo/video/caption or identifiers are removed.','Blocks accidental sharing of customer/private details.',1,CURRENT_TIMESTAMP),
+('workshop_background_private_info','Workshop background with receipts, screens, labels, or private paperwork','workshop_process_media',1,0,'requires_review','Check the image background for addresses, order IDs, customer notes, screens, payment info, or private documents.','Useful for bench/process shots where background clutter can leak private information.',1,CURRENT_TIMESTAMP),
+('finished_product_only','Finished product only — no private/customer details visible','product_media',0,1,'safe_when_reviewed','Confirm the photo only shows the product, packaging, tools, or shop-safe background.','Safe default for product and gallery posts after visual review.',1,CURRENT_TIMESTAMP),
+('therapy_or_health_context','Personal therapy/health context mentioned in caption','caption_copy',0,1,'review_wording','Keep wording human and honest without sharing more personal health detail than intended.','Allows process storytelling while avoiding oversharing.',1,CURRENT_TIMESTAMP),
+('kids_or_visitors_visible','Children, visitors, or bystanders visible','people_in_media',1,0,'requires_explicit_consent','Do not post unless each visible person has consented, and avoid posting children without explicit guardian approval.','High-safety rule for public social sharing.',1,CURRENT_TIMESTAMP)
+ON CONFLICT(rule_key) DO UPDATE SET
+  display_name = excluded.display_name,
+  applies_to = excluded.applies_to,
+  default_blocked = excluded.default_blocked,
+  public_post_allowed = excluded.public_post_allowed,
+  consent_status = excluded.consent_status,
+  checklist = excluded.checklist,
+  notes = excluded.notes,
+  is_active = 1,
+  updated_at = CURRENT_TIMESTAMP;
+
+-- Existing social_post_queue installs are self-healed by /api/admin/social-post-queue and /api/admin/social-media-privacy-guard:
+--   privacy_status, privacy_notes, media_consent_required, customer_media_present, approved_for_public_post.

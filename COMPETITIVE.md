@@ -304,3 +304,178 @@ Track:
 ## Build 142 update
 
 Build 142 turns this document into a tracked admin workflow. The new Operations > Competitive Roadmap panel seeds the highest-value opportunities into D1, lets us track status/notes, and keeps the roadmap tied to Release Sanity instead of leaving it as a static document only.
+
+## Build 143 expansion — Competitive execution system
+
+Build 143 keeps `COMPETITIVE.md` as the strategic source, but it adds a practical safety layer for the social/content direction: **Social Media Privacy Guard**. This means process photos, job summaries, and workshop updates can still become Facebook, Instagram, TikTok, X, Pinterest, or YouTube content, but they must pass a privacy review before API publishing.
+
+### Why this matters competitively
+
+A small creative workshop can compete with bigger stores by showing real process, tools, mistakes, finished pieces, and human story. The risk is accidentally sharing too much: customer details, addresses, order notes, private background paperwork, personal health wording, or people who did not agree to be posted. The new privacy guard lets Devil n Dove stay authentic without making public posting reckless.
+
+### New competitive moat
+
+Devil n Dove should build around four repeatable advantages:
+
+1. **Proof of making** — photos/video of the real shop, tools, materials, tests, and finished pieces.
+2. **Proof of uniqueness** — product stories, material notes, one-of-a-kind status, vintage condition, provenance, and size/scale proof.
+3. **Proof of trust** — local wording, clear policies, safe checkout cues, customer/privacy controls, review/testimonial workflow, and honest condition notes.
+4. **Proof of business control** — cost history, inventory sync, SEO action queue, social queue, margin readiness, accounting close, and accountant export.
+
+## Detailed competitive change list by area
+
+### 1. Product discovery and navigation
+
+Current direction:
+- Keep the compact expandable mobile menu.
+- Keep Shop/Search/Cart visible on mobile.
+- Continue turning long menus into grouped buyer-intent paths.
+
+Next work:
+- Add collection chips for `Under $25`, `One-of-a-kind`, `Local pickup`, `Custom gifts`, `Vintage finds`, `Laser engraved`, and `Workshop experiments`.
+- Add a no-results helper that suggests nearby searches and collections.
+- Add “gift intent” filters that are friendlier than raw product categories.
+
+### 2. Product page conversion
+
+Current direction:
+- Drafts should be easy to create.
+- Publish readiness should enforce the polish: image, alt text, SEO, story, price, cost, stock, policy, and shipping/pickup info.
+
+Next work:
+- Add a public product-story section to product detail pages.
+- Add media checklist output on product pages: main/detail/scale/process/video.
+- Add a “How this was made or sourced” block.
+- Add variant/condition/era/provenance support for vintage and sourced items.
+- Add a margin-readiness badge before publishing.
+
+### 3. Product media and image scoring
+
+Current direction:
+- Product Image Health exists.
+- Media/R2 diagnostics exist.
+- Product editor supports uploads/reuse.
+
+Next work:
+- Add product media roles: main, detail, scale, process, packaging, short-form video.
+- Add a “safe for social” media flag.
+- Add a privacy/background check before a process image is queued publicly.
+- Add public image alt text suggestions based on product type/material/technique.
+
+### 4. Social content engine
+
+Current direction:
+- Social Queue is review-first.
+- Captions/templates, UTM links, dry runs, scheduling, duplicate warnings, and platform readiness are in place.
+- Build 143 adds Social Media Privacy Guard.
+
+Next work:
+- Add social analytics rollups by platform, content pillar, and UTM campaign.
+- Add admin-editable caption templates.
+- Add weekly content planner presets: making story, finished piece, vintage find, custom gift, shop oops, and local update.
+- Add a “post this product” button from Product editor.
+- Add “do not post” guard to customer/job records before a media asset is selectable.
+
+### 5. Local SEO and trust
+
+Current direction:
+- Keep one H1 per exposed page.
+- Keep titles and descriptions clear.
+- Keep local wording natural, not stuffed.
+- Keep Southern Ontario/Tillsonburg/Oxford/Norfolk references where accurate.
+
+Next work:
+- Add a reusable local trust block to Home, About, Shop, Product, Contact, and local landing pages.
+- Add a Google Business Profile posting checklist tied to social queue items.
+- Add review/testimonial approval workflow.
+- Add locally useful FAQs: pickup, custom requests, handmade variations, vintage condition, and care.
+
+### 6. Marketplace and channel readiness
+
+Current direction:
+- Public product data and private import/accounting data are separated.
+- Social queue can track platform post URLs.
+
+Next work:
+- Add Etsy/Facebook/Pinterest export readiness checks.
+- Add per-channel title/description/caption versions.
+- Add image-size and caption-length checks for each marketplace/social platform.
+- Keep manual posting fallback even if APIs work, because platform rules and costs change.
+
+### 7. Accounting and margin competitiveness
+
+Current direction:
+- Amazon cost staging, inventory cost history, product costing, and accounting modules are progressing.
+
+Next work:
+- Finish payment application.
+- Finish HST review/remittance workflow.
+- Add period close/lock controls.
+- Add product margin readiness before publish.
+- Add accountant export packaging.
+- Add simple “can we afford this discount?” helper.
+
+### 8. Competitive content calendar
+
+A practical weekly rhythm:
+
+| Day | Content | Purpose |
+| --- | --- | --- |
+| Monday | What we are making this week | Process proof and repeat visits |
+| Tuesday | Tool/material spotlight | Workshop personality and search content |
+| Wednesday | Finished item or product story | Sales and product discovery |
+| Thursday | Shop oops / human moment | Authenticity and engagement |
+| Friday | Gift idea / local pickup reminder | Conversion and local SEO |
+| Weekend | Vintage find, custom idea, or recap | Evergreen browsing and social reuse |
+
+### 9. Competitive scorecard
+
+Use this simple scorecard before marking a competitive item done:
+
+- Does it improve phone usability?
+- Does it help a buyer trust the product?
+- Does it help Google understand the page?
+- Does it create a reusable admin workflow?
+- Does it avoid exposing private data?
+- Does it help social, marketplace, or local visibility?
+- Does it improve margin/accounting control?
+
+## Next implementation waves
+
+### Immediate wave
+
+1. Social media privacy guard review before publishing.
+2. Product story fields rendered publicly.
+3. Local trust block component.
+4. Gift-intent collection chips.
+5. Product media role checklist.
+6. Admin-editable social caption templates.
+7. Search Console action completion workflow.
+8. Product-page internal links to related collections.
+
+### Next business-control wave
+
+1. Payment application workflow.
+2. HST filing review worksheet.
+3. Period close/lock/reopen controls.
+4. Accountant export package.
+5. Product margin readiness before publish.
+6. Marketplace export readiness.
+7. Social analytics rollups.
+8. Testimonial approval/display workflow.
+
+### Later growth wave
+
+1. Dynamic sitemap generation from D1.
+2. Dynamic Product JSON-LD per item.
+3. Custom request intake and quote flow.
+4. Event/market mode with QR cards.
+5. Customer media consent records.
+6. Google Business Profile posting checklist.
+7. Email/newsletter capture tied to content pillars.
+8. Bundle/upsell recommendations.
+
+## Build 143 update
+
+Build 143 adds Social Media Privacy Guard and expands this competitive playbook from strategy into safer execution. The next public-facing competitive priority is product-story rendering, because the shop will convert better when every item explains what it is, how it was made or sourced, why it is unique, and how it fits a gift/local/buyer intent.
+

@@ -220,3 +220,12 @@ Remaining gaps:
 - Social platform directions remain review-first. Direct posting still depends on platform credentials, scopes, app review, and platform-specific media rules.
 - X API cost/rate-limit changes can make API publishing less practical than manual/copy mode; keep manual posting as a fallback.
 - Competitive tracking should not distract from accounting completeness: payment application, HST review, close controls, and accountant export remain important business-risk items.
+
+
+## Build 143 update — social privacy guard risks reduced
+
+- Reduced risk of accidental public posting of customer details, private workshop background information, visible bystanders, or overly personal captions.
+- Social API publishing now blocks unless the queue item is privacy-approved or marked as product-only/no-private-media.
+- Default privacy rules are seeded in D1 and visible in Operations > Social Media Privacy Guard.
+- Remaining risk: this is an admin review workflow, not image-recognition. Someone still needs to inspect the media before approving it.
+- Next risk reduction: add customer/job consent records and connect media assets to a “safe for social” flag.

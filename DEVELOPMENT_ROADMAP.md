@@ -608,3 +608,32 @@ Current sync: 2026-05-17 — Build 134 draft-first product editor, inline image 
 18. Continue HST/GST review worksheet and remittance-ready totals.
 19. Continue month-end close lock/reopen controls with checklist, review notes, and audit trail.
 20. Continue accountant export package v2 with GL, trial balance, P&L, HST worksheet, attachment index, and unresolved issue log.
+
+
+## Build 143 — Social Media Privacy Guard + Competitive Execution
+
+Completed in this pass:
+
+1. Added Operations > Social Media Privacy Guard.
+2. Added `/api/admin/social-media-privacy-guard`.
+3. Added `social_media_privacy_rules` and `social_post_privacy_reviews` schema support.
+4. Added default rules for customer/private identifiers, workshop background leaks, product-only media, personal wording review, and visible children/visitors.
+5. Added privacy columns to `social_post_queue` through runtime-safe self-healing.
+6. Blocked API publishing from Social Posting Queue until the queued post is privacy-approved or marked no-private-media.
+7. Added Release Sanity checks for the Social Media Privacy Guard endpoint and open posts needing privacy review.
+8. Expanded `COMPETITIVE.md` with competitive execution details, product-page direction, social calendar, trust/privacy posture, marketplace direction, accounting/margin priorities, and immediate/next/later implementation waves.
+9. Expanded `data/site/competitive-opportunities.json` with social privacy, product story, and local trust block opportunities.
+10. Updated schema files and active Markdown handoff docs.
+
+Next strongest directions:
+
+1. Render product-story blocks publicly on product detail pages.
+2. Add a reusable local trust block to Home, About, Shop, Contact, product, and local pages.
+3. Add “post this product” from Product editor into Social Posting Queue.
+4. Add admin-editable caption templates.
+5. Add social analytics rollups from UTM links and manual/API post URLs.
+6. Add product media role checklist: main/detail/scale/process/packaging/video.
+7. Add customer media consent records for job/customer-specific posts.
+8. Add testimonials/review approval workflow.
+9. Add marketplace export readiness checks.
+10. Continue payment application, HST review, period close, and accountant export packaging.

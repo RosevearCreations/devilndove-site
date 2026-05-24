@@ -145,6 +145,7 @@ def check_operations_assets(root: Path):
         'productImageHealthAdminMount',
         'searchConsoleImportAdminMount',
         'socialPostQueueAdminMount',
+        'socialMediaPrivacyGuardAdminMount',
         'competitiveRoadmapAdminMount',
         '/public/js/admin-structured-data-health.js',
         '/public/js/admin-storefront-value-backfill.js',
@@ -153,6 +154,7 @@ def check_operations_assets(root: Path):
         '/public/js/admin-product-image-health.js',
         '/public/js/admin-search-console-import.js',
         '/public/js/admin-social-post-queue.js',
+        '/public/js/admin-social-media-privacy-guard.js',
         '/public/js/admin-competitive-roadmap.js',
     ]
     missing = [token for token in required if token not in text]
@@ -169,6 +171,8 @@ def check_operations_assets(root: Path):
         'functions/api/admin/product-image-health.js',
         'functions/api/admin/search-console-import.js',
         'functions/api/admin/social-post-queue.js',
+        'public/js/admin-social-media-privacy-guard.js',
+        'functions/api/admin/social-media-privacy-guard.js',
         'functions/api/admin/competitive-roadmap.js',
     ]:
         if not (root / ref).exists():
@@ -197,6 +201,18 @@ def check_operations_assets(root: Path):
         issues.append({'type': 'social_publisher_missing_admin_assets', 'path': 'public/js/admin-social-post-queue.js', 'missing': missing_social_js})
     if missing_social_api:
         issues.append({'type': 'social_publisher_missing_api_assets', 'path': 'functions/api/admin/social-post-queue.js', 'missing': missing_social_api})
+    social_privacy_js = root / 'public' / 'js' / 'admin-social-media-privacy-guard.js'
+    social_privacy_api = root / 'functions' / 'api' / 'admin' / 'social-media-privacy-guard.js'
+    social_privacy_js_text = read_text(social_privacy_js) if social_privacy_js.exists() else ''
+    social_privacy_api_text = read_text(social_privacy_api) if social_privacy_api.exists() else ''
+    required_privacy_js = ['Social Media Privacy Guard', 'data-social-privacy-save', 'customer/private media visible']
+    required_privacy_api = ['social_media_privacy_rules', 'social_post_privacy_reviews', 'update_queue_privacy', 'requires_explicit_consent']
+    missing_privacy_js = [token for token in required_privacy_js if token not in social_privacy_js_text]
+    missing_privacy_api = [token for token in required_privacy_api if token not in social_privacy_api_text]
+    if missing_privacy_js:
+        issues.append({'type': 'social_privacy_guard_missing_admin_assets', 'path': 'public/js/admin-social-media-privacy-guard.js', 'missing': missing_privacy_js})
+    if missing_privacy_api:
+        issues.append({'type': 'social_privacy_guard_missing_api_assets', 'path': 'functions/api/admin/social-media-privacy-guard.js', 'missing': missing_privacy_api})
     competitive_js = root / 'public' / 'js' / 'admin-competitive-roadmap.js'
     competitive_api = root / 'functions' / 'api' / 'admin' / 'competitive-roadmap.js'
     competitive_md = root / 'COMPETITIVE.md'
