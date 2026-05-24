@@ -1,11 +1,3 @@
-# New Chat Status — Devil n Dove Build 145
-
-## Current status — Build 145
-
-Build 145 starts from the latest uploaded build and improves finished-product capture. The admin Product editor now supports draft autosave once product name/type are filled, multi-image upload with a seven-file cap, six gallery URL fields plus the featured image, and updated edit/save/checklist handling for seven product images. Schema files were updated with a no-destructive-change marker, and active Markdown files now point to the next product-story/media workflow steps.
-
-Deploy the build, apply or record `database_upgrade_current_pass.sql`, then test `/admin/products/` by entering a product name/type, watching autosave create a draft, uploading several images at once, and confirming six gallery URL fields plus the featured image can save.
-
 # New Chat Status — Devil n Dove Build 142
 
 ## Current status — Build 142
@@ -155,4 +147,27 @@ Immediate deployment checks:
 2. Open `/shop/product/?slug=...` and confirm the story/trust blocks render.
 3. Open `/admin/products/`, click **Post this product** on a harmless draft/test product, then review it in `/admin/operations/` → Social Posting Queue.
 4. Run Release Sanity, Public API Health, Runtime Incidents, and Social Media Privacy Guard.
+
+## Build 146 handoff status
+
+Current build direction: product capture and product storytelling.
+
+Recently completed:
+
+- Mobile product draft save fix for missing `normalizeColorNames`.
+- Desktop product autosave and seven-image capture carried forward.
+- Admin Product Story Notes editor added.
+- Product-story API added at `/api/admin/product-story-notes`.
+- Story notes now support public display status and privacy status.
+- `COMPETITIVE.md`, `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AND_RISKS.md`, schema files, and sanity notes updated.
+
+After deployment, check:
+
+1. `/admin/mobile-product/` draft save.
+2. `/admin/products/` autosave with name/type only.
+3. Upload/select multiple product images, up to seven total product images.
+4. Product Story Notes panel loads in `/admin/products/`.
+5. Seed one draft story from an existing product.
+6. Approve/publish only a public-safe story note.
+7. Runtime incidents for `admin_mobile_product` and `admin_products` stay quiet.
 

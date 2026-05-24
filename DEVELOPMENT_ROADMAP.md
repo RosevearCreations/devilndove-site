@@ -1,49 +1,3 @@
-## Completed items in this pass — Build 145
-
-1. Added Product editor autosave status panel.
-2. Added autosave once product name and product type are present while status is Draft.
-3. Autosave creates a draft product on the first successful save and keeps the editor attached to that record.
-4. Autosave updates existing loaded draft records instead of creating duplicates.
-5. Added manual **Autosave now** button.
-6. Expanded Product editor upload input to allow multiple image selection.
-7. Limited the main Product editor upload flow to a maximum of seven selected files per upload action.
-8. Added sequential multi-image upload with per-file progress/failure reporting.
-9. Updated image placement rules: auto-fill featured then gallery, first image as featured, or gallery-only.
-10. Expanded Product editor gallery URL fields to Image URL 1 through Image URL 6.
-11. Updated Product editor image payload creation to include seven gallery URLs.
-12. Updated existing-product edit form image handling to load/save seven image URLs.
-13. Updated product draft checklist image readiness count to include Image URL 6.
-14. Updated create/update product endpoints to cap normalized gallery image arrays at seven.
-15. Added mobile/desktop CSS for multi-image thumbnails and autosave status.
-16. Updated predeploy sanity checks for autosave and seven-image upload assets.
-17. Added Build 145 migration ledger marker as a no-destructive-schema workflow update.
-18. Updated schema reference files to note no new table is required for autosave/multi-image upload.
-19. Updated `COMPETITIVE.md` with the product-capture competitiveness direction.
-20. Updated active Markdown handoff/status files with the new direction and next steps.
-
-## Next several steps after Build 145
-
-1. Add an admin editor for `product_story_public_notes` so approved public product stories can be written without SQL.
-2. Add short product-story snippets to shop cards and search results.
-3. Add a Product editor image role checklist: front, back, scale, detail, process, packaging, finished hero.
-4. Add drag/drop image ordering for the seven total product image slots.
-5. Add image duplicate detection so the same URL is not saved into several slots by accident.
-6. Add product media consent/privacy checks directly beside the **Post this product** shortcut.
-7. Add admin-editable caption templates for Social Posting Queue.
-8. Add UTM/social analytics rollups to show which platform sends clicks back to product pages.
-9. Add customer/job/media consent records before allowing customer-related photos into public queues.
-10. Add reusable testimonial/local trust blocks and an admin review screen for them.
-11. Add custom request intake for engraving, personalized gifts, and local pickup questions.
-12. Add marketplace export helpers for Facebook Marketplace/Etsy-style copy fields.
-13. Add product margin preview beside price before publish.
-14. Add payment application UI.
-15. Add HST review worksheet.
-16. Add month-end close lock/reopen controls.
-17. Add accountant export packaging.
-18. Add storefront API caching/status diagnostics.
-19. Continue Search Console action workflow from private opportunities to reviewed copy changes.
-20. Continue one-H1, page-title, local wording, and CSS drift checks every pass.
-
 ## Completed items in this pass — Build 142
 
 1. Completed `COMPETITIVE.md` as the main competitive strategy document for Devil n Dove.
@@ -731,4 +685,52 @@ Completed in this pass:
 18. Add accountant export packaging.
 19. Add inventory depletion simulation from product/resource links.
 20. Add marketplace/channel margin previews before publishing or discounting.
+
+## Build 146 completed — product story editor, mobile draft fix, and capture hardening
+
+Completed in this pass:
+
+1. Replaced the mobile product capture API with a safer version that defines `normalizeColorNames`.
+2. Kept mobile draft saves JSON-only on failure so browser pages do not show `Unexpected token '<'` style errors.
+3. Preserved product draft autosave from the desktop Product editor.
+4. Preserved seven-total-image finished-product capture.
+5. Preserved sequential image uploads so one bad file does not cancel the full batch.
+6. Added `product_story_public_notes` admin editor support.
+7. Added `/api/admin/product-story-notes`.
+8. Added `/public/js/admin-product-story-notes.js`.
+9. Added Product editor mount for story notes.
+10. Added story seeding from existing product fields.
+11. Added display statuses: draft, review, approved, published, archived.
+12. Added story privacy statuses: needs_review, safe, private_detail_removed, blocked.
+13. Added story review/internal notes fields.
+14. Added safe schema helpers so older D1 databases can add optional story columns at runtime.
+15. Updated reference schema files for story source/privacy/review columns.
+16. Updated predeploy sanity checks for the new story editor assets.
+17. Updated `COMPETITIVE.md` with the new story-led product strategy.
+18. Updated Known Gaps with the remaining story/media/accounting risks.
+19. Kept one-H1/page, title/meta, CSS, and public-data privacy checks in the deployment workflow.
+20. Prepared Build 146 as a deployable handoff with sanity/outstanding items.
+
+### Next several steps
+
+1. Add story snippets to public shop cards and search results.
+2. Add image drag/drop ordering in the Product editor.
+3. Add duplicate image URL warnings and “same angle” warnings.
+4. Add product media role checklist: hero, back, scale, detail, process, packaging, material/tool proof.
+5. Add a “Post this product” panel inside the Product editor, not only in the product table.
+6. Add customer/job/media consent records for social publishing.
+7. Add admin-editable social caption templates.
+8. Add social analytics rollups from UTM-tagged links.
+9. Add approved testimonial/trust blocks and local proof snippets.
+10. Add custom request intake for engraving, personalized gifts, and workshop-made requests.
+11. Add Search Console action application workflow that updates titles/meta only after review.
+12. Add payment application workflow.
+13. Add reconciliation exception closeout.
+14. Add HST review worksheets.
+15. Add month-end close checklist and lock/reopen controls.
+16. Add accountant export packaging.
+17. Add Amazon high-confidence bulk approval with duplicate/relink protection.
+18. Add inventory movement audit views for product-resource consumption.
+19. Add product margin preview before publishing.
+20. Add release-health “go/no-go” summary that combines schema drift, public API health, runtime incidents, sitemap, structured data, and image readiness.
 

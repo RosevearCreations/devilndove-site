@@ -1,20 +1,5 @@
 # Competitive Roadmap — Devil n Dove
 
-
-## Build 145 execution update — product capture competitiveness
-
-Build 145 moves another competitive gap from strategy into the admin workflow: finished-product capture is now faster on desktop because the Product editor supports draft autosave and multi-image upload. This matters competitively because small handmade/vintage shops often lose listings when the admin process is too slow, too fragile, or too image-limited. Devil n Dove should continue moving toward a workflow where a product can be photographed, drafted, story-noted, priced, reviewed, socially queued, and published from one mobile-friendly admin surface.
-
-New directions added this pass:
-
-1. Treat draft capture speed as a competitive advantage, not just an admin convenience.
-2. Allow up to seven product images from the main Product editor so finished goods can show front, back, scale, detail, materials, packaging, and process/context.
-3. Autosave drafts once product name and type exist so partial listing work is not lost.
-4. Keep SEO title, meta description, price, images, and external listing links as review/publish readiness items, not draft blockers.
-5. Continue making product-story, image-health, social queue, and privacy review work together before public publishing.
-6. Next direction: add an admin editor for approved public product-story notes and show short story snippets in shop cards/search results.
-
-
 For mixed media artists, handmade shops, vintage/collectible sellers, and small creative businesses.
 
 ## Executive takeaway
@@ -547,4 +532,49 @@ This pass moves the competitive roadmap from only being a strategy document into
 8. Add analytics rollups for UTM social links.
 9. Add customer/job consent records for any media that is not product-only.
 10. Continue accounting work: payment application, HST review, period close, and accountant export packaging.
+
+## Build 146 update — product story notes editor and finished-product capture hardening
+
+This pass moves the competitive plan from “tell better stories someday” into an admin-managed workflow.
+
+### New competitive direction
+
+1. **Every finished product should be able to carry a public-safe story.**
+   - Handmade, vintage, collectible, laser-engraved, and workshop-made items now have a structured place for story copy.
+   - The goal is to compete against generic marketplace listings by explaining the maker process, sourcing context, condition, care notes, and local Southern Ontario connection.
+
+2. **Story copy must be review-first.**
+   - Story notes include display status and privacy status.
+   - Draft/review notes should not publish until we confirm there are no private names, addresses, customer details, workshop paperwork, or sensitive personal references.
+
+3. **Finished-product capture should not lose work.**
+   - Product autosave and seven-image capture remain core competitive features.
+   - This reduces friction when photographing a finished item from the shop or phone and keeps the draft moving toward social, SEO, product page, and accounting readiness.
+
+4. **Mobile and desktop product creation must stay forgiving.**
+   - Drafts should be allowed with limited information.
+   - SEO fields, external listing URLs, price, and images are readiness checks, not draft blockers.
+
+5. **Product stories should feed multiple channels.**
+   - The same approved story can support the product page, social queue captions, local trust content, Search Console improvement tasks, and future email/newsletter snippets.
+
+### Competitive execution additions
+
+- Added an admin product story notes editor.
+- Added story seeding from existing product fields.
+- Added public-safety/privacy status for story notes.
+- Added review/publish/archive workflow for product story copy.
+- Preserved the seven-image product capture and autosave direction.
+- Fixed the mobile-create product endpoint so draft capture does not fail on missing color-name normalization.
+
+### Next competitive moves
+
+1. Add story snippets to shop cards and search results.
+2. Add a “Generate story from product fields” assistant-style helper after enough structured data exists.
+3. Add approved testimonials and local trust proof blocks.
+4. Add product media roles: hero, back, scale, detail, process, packaging, and material/tool proof.
+5. Add consent records for customer/job media before social posting.
+6. Add social analytics rollups that connect UTM links back to product and content pillars.
+7. Add custom request intake for engraving and personalized gifts.
+8. Add payment application, HST review, month-end close, and accountant export packaging so admin workflows become business-ready, not only storefront-ready.
 

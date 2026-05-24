@@ -1,7 +1,3 @@
-## Build 145 local SEO workflow note
-
-Autosave and seven-image upload should help create richer product pages faster. For local SEO, use the extra images to support trust and clarity: finished hero image, detail close-up, scale/context, packaging, process shot when safe, and material/tool evidence. Keep wording natural and locally relevant only where it genuinely applies.
-
 # Local SEO Playbook — Devil n Dove
 
 ## Build 140 social-local SEO note
@@ -147,4 +143,15 @@ Next strongest directions:
 ## Build 144 note
 
 Build 144 adds public product storytelling, a reusable Southern Ontario trust block, and a Product editor shortcut that queues product-based social posts for review. Keep social posting privacy-gated and keep public `/data/` files free of private costs, orders, customer records, and credentials.
+
+## Build 146 local SEO note
+
+Product story notes should reinforce local relevance naturally without keyword stuffing. Good story copy can mention Southern Ontario, local pickup/shipping context, workshop-made details, handmade materials, vintage/collectible condition, and custom gift use cases when true.
+
+Rules:
+
+- Keep one clear page H1.
+- Keep titles and meta descriptions clear and product-specific.
+- Do not publish private customer/job details.
+- Use local wording only where it truthfully helps the customer understand the product or buying process.
 

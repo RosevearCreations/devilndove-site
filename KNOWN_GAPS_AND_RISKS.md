@@ -1,11 +1,3 @@
-## Build 145 update — Product editor autosave and multi-image risks
-
-- Autosave only runs when status is Draft and the product has name/type. This avoids accidentally publishing partial active products, but admins should still review before changing status.
-- Autosave creates or updates live D1 draft rows. If a draft was created by mistake, archive/delete it from the product table rather than leaving clutter.
-- Multi-image upload is intentionally capped at seven selected files per action to keep finished-product pages useful without overwhelming the editor or storefront.
-- R2/public media URL configuration still matters. The fallback public URL exists, but Media/R2 Diagnostics should be used after deployment to confirm uploaded images are actually publicly reachable.
-- The Product editor now supports seven gallery URL slots, but drag/drop ordering and duplicate-image detection are still future work.
-
 # Known Gaps and Risks — Devil n Dove
 
 ## Build 140 update — social scheduling and dry-run risks
@@ -247,4 +239,27 @@ Remaining gaps:
 - The story-note table is schema-ready, but an admin story editor is still needed so we do not rely on SQL/manual inserts.
 - Local trust wording should remain natural. Do not repeat Southern Ontario/Tillsonburg/Oxford/Norfolk excessively on every page.
 - The next business-risk items remain accounting-heavy: payment application, HST review, month-end close controls, and accountant export packaging.
+
+## Build 146 gaps and risks update
+
+### Reduced risk
+
+- Mobile product capture should no longer fail with `normalizeColorNames is not defined` because the endpoint now includes the missing normalizer.
+- Desktop Product editor draft capture is still light enough for unfinished products and can preserve work with autosave.
+- Product story copy now has an admin workflow instead of requiring raw SQL edits.
+
+### Remaining risk
+
+- Story notes still need human review. The system cannot guarantee that private/customer/workshop-sensitive details are safe without us checking.
+- Product story snippets are not yet shown on shop cards/search result cards.
+- Drag/drop image ordering and duplicate-image warnings are still outstanding.
+- Social API posting must remain review-first until platform credentials, privacy review, and media rules are tested one platform at a time.
+- Accounting is still not year-end complete until payment application, HST review, close controls, reconciliation packaging, and accountant exports are finished.
+
+### Watch after deployment
+
+- `/api/admin/mobile-create-product` should return JSON and should not log `mobile_create_product_failed` for normal draft saves.
+- `/api/admin/product-story-notes` should load in the Product editor for admin users.
+- Product drafts should not require SEO title, SEO description, external links, or images.
+- Product story notes should stay draft/review until privacy status is safe.
 

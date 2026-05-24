@@ -1,7 +1,3 @@
-## Build 145 update
-
-The Product editor now supports draft autosave and multi-image upload for finished products. Drafts only need name/type before autosave starts. The main editor can select up to seven images at once and fill six gallery URL fields plus the featured image, while price, SEO, and external links remain review/publish readiness items instead of draft blockers.
-
 # Devil n Dove Site
 
 ## Build 140 note
@@ -180,4 +176,15 @@ Next strongest directions:
 ## Build 144 note
 
 Build 144 adds public product storytelling, a reusable Southern Ontario trust block, and a Product editor shortcut that queues product-based social posts for review. Keep social posting privacy-gated and keep public `/data/` files free of private costs, orders, customer records, and credentials.
+
+## Build 146 operator note
+
+Build 146 focuses on product capture reliability and product storytelling:
+
+- Mobile product capture now includes the missing `normalizeColorNames` helper.
+- Product editor autosave and seven-image capture remain part of the expected admin workflow.
+- Product Story Notes are now editable from the Product admin screen.
+- Story notes must be privacy-reviewed before public use.
+
+After deployment, apply/record `database_upgrade_current_pass.sql`, then test mobile draft save, desktop autosave, multi-image upload, and Product Story Notes.
 

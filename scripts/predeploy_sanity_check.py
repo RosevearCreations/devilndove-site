@@ -256,6 +256,35 @@ def check_product_editor_assets(root: Path):
         issues.append({'type': 'product_editor_missing_api_assets', 'path': 'functions/api/admin/create-product.js', 'missing': missing_api})
     return issues
 
+
+def check_product_story_assets(root: Path):
+    issues = []
+    product_page = root / 'admin' / 'products' / 'index.html'
+    story_js = root / 'public' / 'js' / 'admin-product-story-notes.js'
+    story_api = root / 'functions' / 'api' / 'admin' / 'product-story-notes.js'
+    competitive_md = root / 'COMPETITIVE.md'
+    page_text = read_text(product_page) if product_page.exists() else ''
+    js_text = read_text(story_js) if story_js.exists() else ''
+    api_text = read_text(story_api) if story_api.exists() else ''
+    comp_text = read_text(competitive_md) if competitive_md.exists() else ''
+    required_page = ['productStoryNotesAdminMount', '/public/js/admin-product-story-notes.js']
+    required_js = ['Product story notes', 'seed_from_product', 'Approve safe story']
+    required_api = ['product_story_public_notes', 'privacy_status', 'seedFromProduct']
+    required_comp = ['Build 146 update', 'product story notes editor']
+    missing_page = [token for token in required_page if token not in page_text]
+    missing_js = [token for token in required_js if token not in js_text]
+    missing_api = [token for token in required_api if token not in api_text]
+    missing_comp = [token for token in required_comp if token not in comp_text]
+    if missing_page:
+        issues.append({'type': 'product_story_missing_page_assets', 'path': 'admin/products/index.html', 'missing': missing_page})
+    if missing_js:
+        issues.append({'type': 'product_story_missing_js_assets', 'path': 'public/js/admin-product-story-notes.js', 'missing': missing_js})
+    if missing_api:
+        issues.append({'type': 'product_story_missing_api_assets', 'path': 'functions/api/admin/product-story-notes.js', 'missing': missing_api})
+    if missing_comp:
+        issues.append({'type': 'competitive_product_story_direction_missing', 'path': 'COMPETITIVE.md', 'missing': missing_comp})
+    return issues
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('root', nargs='?', default='.', help='Build root to check')
@@ -270,7 +299,8 @@ def main(argv=None) -> int:
     mobile_nav_issues = check_mobile_nav(root)
     operations_issues = check_operations_assets(root)
     product_editor_issues = check_product_editor_assets(root)
-    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues
+    product_story_issues = check_product_story_assets(root)
+    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues
     report = {
         'ok': not issues,
         'root': str(root),
@@ -297,3 +327,5 @@ if __name__ == '__main__':
 # Build 142 note: predeploy checks include Operations > Competitive Roadmap and completed COMPETITIVE.md assets.
 
 # Build 145 note: predeploy checks include product editor autosave and seven-total-image upload readiness.
+
+# Build 146 note: predeploy checks include product story notes editor, mobile-create-product fix, and continued draft capture readiness.

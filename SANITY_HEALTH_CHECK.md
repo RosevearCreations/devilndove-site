@@ -1,7 +1,3 @@
-## Build 145 checks added
-
-Predeploy sanity now checks that the Product editor includes the autosave panel, seven-image upload support, and Image URL 7 field. Manual deployment sanity should include: create a draft with name/type only, wait for autosave, upload 2–7 images at once, save/update the draft, reload it, and confirm all image URLs persist.
-
 # Sanity Health Check — Devil n Dove
 
 ## Build 140 checks added
@@ -215,4 +211,19 @@ Next strongest directions:
 - Confirm `/api/product-detail?slug=...` returns `story_notes` without failing when the `product_story_public_notes` table is absent.
 - Confirm `/admin/products/` product rows include **Post this product** and queue social drafts without publishing.
 - Confirm Social Media Privacy Guard still blocks API publishing unless posts are privacy-approved or product-only/no-private-media.
+
+## Build 146 sanity additions
+
+Check these after deployment:
+
+1. `/admin/mobile-product/` can save a draft without `normalizeColorNames is not defined`.
+2. `/api/admin/mobile-create-product` returns JSON on both success and failure.
+3. `/admin/products/` shows product autosave status once name/type are filled.
+4. Desktop Product editor can upload more than one image, up to seven total product images.
+5. `/admin/products/` shows Product story notes.
+6. `/api/admin/product-story-notes` returns products, notes, and summary for admin users.
+7. Product story note can be seeded from an existing product.
+8. Approved/published story notes should be privacy-safe before public product pages consume them.
+9. Runtime Incidents should not show fresh `mobile_create_product_failed` errors after normal draft saves.
+10. Predeploy sanity script now checks the story note editor assets.
 

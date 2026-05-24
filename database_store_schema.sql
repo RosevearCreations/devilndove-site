@@ -1341,6 +1341,10 @@ CREATE TABLE IF NOT EXISTS product_story_public_notes (
   care_notes TEXT,
   local_pickup_note TEXT,
   display_status TEXT NOT NULL DEFAULT 'draft',
+  story_source TEXT,
+  privacy_status TEXT DEFAULT 'needs_review',
+  review_notes TEXT,
+  internal_notes TEXT,
   created_by_user_id INTEGER,
   updated_by_user_id INTEGER,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -1348,6 +1352,7 @@ CREATE TABLE IF NOT EXISTS product_story_public_notes (
   FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 CREATE INDEX IF NOT EXISTS idx_product_story_public_notes_product ON product_story_public_notes(product_id, display_status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_product_story_public_notes_status ON product_story_public_notes(display_status, privacy_status, updated_at);
 
 INSERT OR IGNORE INTO schema_migration_ledger (
   migration_key, file_name, status, destructive, notes, created_at, updated_at
@@ -1361,5 +1366,3 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP
 );
 
-
--- Build 145 note: Store/product image schema remains compatible with product editor autosave and seven-image gallery entry. No destructive change required.

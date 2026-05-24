@@ -1,7 +1,3 @@
-## Build 145 working context
-
-The current build improves finished-product capture in `/admin/products/`: autosave starts after product name/type are entered while status is Draft; the first autosave creates a D1 draft and subsequent autosaves update that same draft; the upload panel accepts multiple image files and caps selected uploads at seven; the editor now has Image URL 1–6 plus featured image. Keep SEO/title/meta/image readiness as review/publish checks, not draft blockers.
-
 # AI Context — Devil n Dove
 
 ## Build 140 working context
@@ -145,4 +141,14 @@ Next strongest directions:
 ## Build 144 note
 
 Build 144 adds public product storytelling, a reusable Southern Ontario trust block, and a Product editor shortcut that queues product-based social posts for review. Keep social posting privacy-gated and keep public `/data/` files free of private costs, orders, customer records, and credentials.
+
+## Build 146 AI context
+
+The next assistant should know:
+
+- The user reported `/api/admin/mobile-create-product` failed with `normalizeColorNames is not defined`; Build 146 replaces the endpoint with a fixed version.
+- Product editor draft autosave and seven-image upload are active expectations.
+- Product Story Notes were added as an admin-managed workflow for `product_story_public_notes`.
+- Story notes are public-facing only after review and should avoid private/customer/sensitive workshop details.
+- Next priorities include story snippets on shop cards, image ordering/role checklist, social consent records, social analytics, and the accounting close workflow.
 

@@ -1,7 +1,3 @@
-## Build 145 schema update
-
-Build 145 does not require a destructive schema change or a new table. Product autosave reuses the existing `products`, `product_seo`, `product_images`, `media_assets`, and `product_image_annotations` tables. The active editor now caps gallery image arrays at seven and records the pass in `schema_migration_ledger` through `database_upgrade_current_pass.sql`.
-
 # Database Schema Reference
 
 ## Build 140 schema update
@@ -242,4 +238,22 @@ Important fields:
 - `created_by_user_id`, `updated_by_user_id`, `created_at`, `updated_at`
 
 Public `/api/product-detail` now attempts to read the latest approved/published note. If the table or row is missing, the public page safely falls back to existing product fields.
+
+## Build 146 schema reference update
+
+### `product_story_public_notes` additions
+
+The product story notes table now includes optional review/support columns in the reference schema:
+
+- `story_source`
+- `privacy_status`
+- `review_notes`
+- `internal_notes`
+
+These support the admin Product Story Notes editor. The endpoint also attempts safe runtime column backfills for older D1 databases so the editor can work even if a previous Build 144 table exists without these optional columns.
+
+Recommended statuses:
+
+- `display_status`: `draft`, `review`, `approved`, `published`, `archived`
+- `privacy_status`: `needs_review`, `safe`, `private_detail_removed`, `blocked`
 
