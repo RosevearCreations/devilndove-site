@@ -268,6 +268,33 @@
       "priority_score": 92,
       "status": "open",
       "suggested_next_step": "Add component to Home, About, Shop, Product, Contact, and local pages."
+    },
+    {
+      "opportunity_key": "product_story_notes_editor",
+      "title": "Admin-managed product story notes",
+      "category": "product_storytelling",
+      "priority": "high",
+      "status": "in_progress",
+      "summary": "Create and review public-safe product story copy without raw SQL edits.",
+      "next_action": "Use the Product Story Notes panel to seed and approve one story for a real product."
+    },
+    {
+      "opportunity_key": "mobile_create_product_json_fix",
+      "title": "Reliable mobile draft save",
+      "category": "admin_capture",
+      "priority": "high",
+      "status": "done",
+      "summary": "Fix mobile product capture so missing color normalization does not crash draft saves.",
+      "next_action": "Watch runtime incidents after deployment for fresh mobile_create_product_failed rows."
+    },
+    {
+      "opportunity_key": "seven_image_finished_product_capture",
+      "title": "Seven-image finished product capture",
+      "category": "product_media",
+      "priority": "high",
+      "status": "in_progress",
+      "summary": "Finished products should support a hero image plus multiple gallery/process/detail images.",
+      "next_action": "Add drag/drop ordering and image role labels in the next pass."
     }
   ]
 }

@@ -595,20 +595,16 @@ body.nav-mobile-open{overflow:hidden}
   .nav-mobile-toggle span:last-child{font-size:.92rem}
 }
 
-/* Build 134/145: draft-first product editor, autosave, and inline multi-image upload polish */
+/* Build 134: draft-first product editor and inline media upload polish */
 .dd-recommended-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(194,147,0,.10);border:1px solid rgba(194,147,0,.32);color:#ffe39a;font-size:.72rem;font-weight:700;vertical-align:middle}
 .dd-publish-readiness-field{display:grid;gap:6px}
 .dd-publish-readiness-field.is-readiness-missing > .small{color:#ffe39a}
 .dd-readiness-outline{border:2px solid rgba(194,147,0,.45)!important;box-shadow:0 0 0 2px rgba(194,147,0,.10)!important;background:rgba(194,147,0,.035)!important}
-.dd-product-autosave-panel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px 0;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.03)}
-.dd-product-autosave-panel [data-tone="saved"]{color:#9ef0b4}
-.dd-product-autosave-panel [data-tone="pending"]{color:#ffe39a}
-.dd-product-autosave-panel [data-tone="error"]{color:#ffb4c1}
 .dd-product-draft-media-panel{display:grid;gap:12px;margin:16px 0;padding:14px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.035)}
 .dd-product-draft-media-grid{display:grid;grid-template-columns:1fr 1fr minmax(180px,.7fr);gap:10px}
 .dd-product-draft-media-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.dd-product-draft-image-preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:8px;border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px;background:rgba(0,0,0,.12);max-width:560px}
-.dd-product-draft-image-preview img{display:block;width:100%;height:96px;object-fit:cover;border-radius:10px}
+.dd-product-draft-image-preview{border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px;background:rgba(0,0,0,.12);max-width:260px}
+.dd-product-draft-image-preview img{display:block;width:100%;height:auto;max-height:220px;object-fit:contain;border-radius:10px}
 @media (max-width:860px){.dd-product-draft-media-grid{grid-template-columns:1fr}.dd-product-draft-media-actions .btn{width:100%;justify-content:center}.dd-product-draft-image-preview{max-width:100%}}
 
 /* Build 135: product draft checklist, image library reuse, and media diagnostics */
@@ -699,3 +695,27 @@ body.nav-mobile-open{overflow:hidden}
 .dd-local-trust-block h2{margin:.15rem 0 .5rem 0}.dd-local-trust-kicker{text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#6b3a22}.dd-local-trust-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dd-local-trust-product{background:rgba(255,255,255,.62)}
 #productPublicStoryCard ul{margin-bottom:0}#productPublicStoryKicker{font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#6b3a22;margin-bottom:8px}.products-admin-table [data-social-product-id]{border-color:rgba(31,114,72,.35);background:rgba(31,114,72,.08)}
 @media (max-width:760px){.dd-local-trust-block{grid-template-columns:1fr}.dd-local-trust-actions{justify-content:flex-start}.dd-local-trust-actions .btn{width:100%;justify-content:center}}
+
+/* Build 134/145: draft-first product editor, autosave, and inline multi-image upload polish */
+.dd-recommended-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(194,147,0,.10);border:1px solid rgba(194,147,0,.32);color:#ffe39a;font-size:.72rem;font-weight:700;vertical-align:middle}
+.dd-publish-readiness-field{display:grid;gap:6px}
+.dd-publish-readiness-field.is-readiness-missing > .small{color:#ffe39a}
+.dd-readiness-outline{border:2px solid rgba(194,147,0,.45)!important;box-shadow:0 0 0 2px rgba(194,147,0,.10)!important;background:rgba(194,147,0,.035)!important}
+.dd-product-autosave-panel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px 0;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.03)}
+.dd-product-autosave-panel [data-tone="saved"]{color:#9ef0b4}
+.dd-product-autosave-panel [data-tone="pending"]{color:#ffe39a}
+.dd-product-autosave-panel [data-tone="error"]{color:#ffb4c1}
+.dd-product-draft-media-panel{display:grid;gap:12px;margin:16px 0;padding:14px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.035)}
+.dd-product-draft-media-grid{display:grid;grid-template-columns:1fr 1fr minmax(180px,.7fr);gap:10px}
+.dd-product-draft-media-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dd-product-draft-image-preview{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:8px;border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px;background:rgba(0,0,0,.12);max-width:560px}
+.dd-product-draft-image-preview img{display:block;width:100%;height:96px;object-fit:cover;border-radius:10px}
+@media (max-width:860px){.dd-product-draft-media-grid{grid-template-columns:1fr}.dd-product-draft-media-actions .btn{width:100%;justify-content:center}.dd-product-draft-image-preview{max-width:100%}}
+
+/* Build 146: product story notes admin polish */
+.dd-product-story-notes-panel textarea.input{resize:vertical;min-height:74px}
+.dd-product-story-notes-panel .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.06);font-size:.82rem;white-space:nowrap}
+.dd-product-story-notes-panel .status-note{padding:9px 11px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04)}
+.dd-product-story-notes-panel .status-note.success{border-color:rgba(80,180,120,.45);color:#9ef0b4}
+.dd-product-story-notes-panel .status-note.error{border-color:rgba(255,120,150,.45);color:#ffb4c1}
+@media (max-width:760px){.dd-product-story-notes-panel .products-admin-table th:nth-child(4),.dd-product-story-notes-panel .products-admin-table td:nth-child(4),.dd-product-story-notes-panel .products-admin-table th:nth-child(5),.dd-product-story-notes-panel .products-admin-table td:nth-child(5){display:none}.dd-product-story-notes-panel .btn{width:100%;justify-content:center}}
