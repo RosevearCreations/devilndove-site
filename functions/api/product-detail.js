@@ -365,6 +365,22 @@ export async function onRequestGet(context) {
     resource_shortage_links: resource_links.filter((row) => row.inventory && Number(row.inventory.buildable_products || 0) < 1 && row.consumption_mode !== 'story_only').length
   };
 
+
+  let story_notes = {};
+  try {
+    const storyTable = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='product_story_public_notes' LIMIT 1`).first();
+    if (storyTable) {
+      story_notes = await db.prepare(`
+        SELECT product_story_public_note_id, product_id, story_heading, story_summary, story_body,
+               process_notes, care_notes, local_pickup_note, display_status, updated_at
+        FROM product_story_public_notes
+        WHERE product_id = ? AND COALESCE(display_status,'draft') IN ('approved','published')
+        ORDER BY datetime(updated_at) DESC, product_story_public_note_id DESC
+        LIMIT 1
+      `).bind(product.product_id).first().catch(() => ({})) || {};
+    }
+  } catch {}
+
   const trust_summary = {
     has_multiple_images: storefront_images.length > 1,
     has_maker_story: resource_links.length > 0,
@@ -402,5 +418,5 @@ export async function onRequestGet(context) {
     }
   } catch {}
 
-  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, reviews, review_summary });
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, reviews, review_summary });
 }
