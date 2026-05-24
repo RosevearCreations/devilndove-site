@@ -241,6 +241,33 @@
       "status": "open",
       "source_note": "Local handmade business workflow",
       "suggested_next_step": "Add event inventory list and quick sold/manual payment workflow after accounting payment application is stable."
+    },
+    {
+      "opportunity_key": "social_media_privacy_guard",
+      "area": "social_trust",
+      "title": "Approve or block process media before public posting",
+      "description": "Prevent accidental sharing of customer/private details while keeping authentic shop-process posts moving.",
+      "priority_score": 98,
+      "status": "in_progress",
+      "suggested_next_step": "Use Operations > Social Media Privacy Guard after queueing crafting/process posts."
+    },
+    {
+      "opportunity_key": "product_story_public_rendering",
+      "area": "product_pages",
+      "title": "Render product story blocks on public product pages",
+      "description": "Turn maker notes, material notes, process, condition, and provenance into a trust-building sales block.",
+      "priority_score": 96,
+      "status": "open",
+      "suggested_next_step": "Add Story Behind This Piece and How It Was Made/Sourced sections to product detail."
+    },
+    {
+      "opportunity_key": "local_trust_block_component",
+      "area": "local_seo",
+      "title": "Reusable Southern Ontario trust block",
+      "description": "Add natural Tillsonburg/Oxford/Norfolk/Southern Ontario trust copy to key pages without keyword stuffing.",
+      "priority_score": 92,
+      "status": "open",
+      "suggested_next_step": "Add component to Home, About, Shop, Product, Contact, and local pages."
     }
   ]
 }
