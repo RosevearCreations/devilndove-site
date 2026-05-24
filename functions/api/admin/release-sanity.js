@@ -395,6 +395,33 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+
+  const privacyGuardHealth = await publicJsonCheck(context.request, '/api/admin/social-media-privacy-guard');
+  addCheck(
+    checks,
+    privacyGuardHealth.ok && !privacyGuardHealth.error ? 'pass' : 'warn',
+    'Social media privacy guard endpoint',
+    privacyGuardHealth.ok ? `HTTP ${privacyGuardHealth.status}; social privacy guard responded.` : `HTTP ${privacyGuardHealth.status}; ${privacyGuardHealth.error || 'Social privacy guard could not be checked.'}`,
+    'Open Operations > Social Media Privacy Guard before pushing job/process/customer media to public social platforms.',
+    'warning'
+  );
+
+  const privacyRows = await tableExists(db, 'social_post_queue') ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+           SUM(CASE WHEN COALESCE(post_status,'draft') IN ('draft','ready') AND COALESCE(privacy_status,'needs_review') IN ('needs_review','consent_needed') THEN 1 ELSE 0 END) AS needs_privacy_review,
+           SUM(CASE WHEN COALESCE(post_status,'draft') IN ('draft','ready') AND COALESCE(privacy_status,'needs_review') IN ('blocked','do_not_post') THEN 1 ELSE 0 END) AS blocked_count,
+           SUM(CASE WHEN COALESCE(post_status,'draft') IN ('draft','ready') AND (COALESCE(approved_for_public_post,0)=1 OR COALESCE(privacy_status,'') IN ('approved','no_private_media')) THEN 1 ELSE 0 END) AS approved_count
+    FROM social_post_queue
+  `, [], { total: 0, needs_privacy_review: 0, blocked_count: 0, approved_count: 0 }) : { total: 0, needs_privacy_review: 0, blocked_count: 0, approved_count: 0 };
+  addCheck(
+    checks,
+    Number(privacyRows.needs_privacy_review || 0) ? 'warn' : 'pass',
+    'Social media privacy review',
+    `${Number(privacyRows.approved_count || 0)} open social post(s) approved/safe, ${Number(privacyRows.needs_privacy_review || 0)} needing privacy review, ${Number(privacyRows.blocked_count || 0)} blocked/do-not-post.`,
+    'Use Operations > Social Media Privacy Guard to approve safe product-only media or block private/customer media before API publishing.',
+    'warning'
+  );
+
   const apiReadyPlatforms = socialApiReadyCount(context.env);
   addCheck(
     checks,
