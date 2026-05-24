@@ -163,9 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getImageUrlFields() {
-    return [1, 2, 3, 4, 5, 6]
-      .map((index) => form.elements.namedItem(`image_url_${index}`))
-      .filter(Boolean);
+    return [form.elements.namedItem("image_url_1"), form.elements.namedItem("image_url_2"), form.elements.namedItem("image_url_3"), form.elements.namedItem("image_url_4"), form.elements.namedItem("image_url_5")].filter(Boolean);
   }
 
   function resetImageUrlFields() { getImageUrlFields().forEach(field => { field.value = ""; }); }
@@ -454,7 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (existingProductSelect) existingProductSelect.value = String(product.product_id || '');
     resetImageUrlFields();
     const imageFields = getImageUrlFields();
-    const safeImages = Array.isArray(images) ? images.slice(0, 6) : [];
+    const safeImages = Array.isArray(images) ? images.slice(0, 5) : [];
     for (let i = 0; i < imageFields.length; i += 1) imageFields[i].value = safeImages[i]?.image_url || "";
     if (window.DDProductEditorRequiredState?.sync) window.DDProductEditorRequiredState.sync();
   }
@@ -628,16 +626,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPendingActions();
   }
 
-
-
-  document.addEventListener('dd:product-autosaved-new', (event) => {
-    const productId = Number(event?.detail?.product_id || event?.detail?.product?.product_id || 0);
-    if (!productId) return;
-    editingProductId = productId;
-    setFormModeEdit();
-    if (existingProductSelect) existingProductSelect.value = String(productId);
-  });
-
   loadExistingProductButton?.addEventListener('click', () => {
     startExistingProductLoad(existingProductSelect?.value || 0);
   });
@@ -700,9 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (Number.isNaN(price_cents)) return setMessage("Price must be a valid amount.", true);
     if (compare_at_price_cents !== null && Number.isNaN(compare_at_price_cents)) return setMessage("Compare-at price must be a valid amount.", true);
 
-    const image_urls = [1, 2, 3, 4, 5, 6]
-      .map((index) => String(formData.get(`image_url_${index}`) || "").trim())
-      .filter(Boolean);
+    const image_urls = [String(formData.get("image_url_1") || "").trim(), String(formData.get("image_url_2") || "").trim(), String(formData.get("image_url_3") || "").trim(), String(formData.get("image_url_4") || "").trim(), String(formData.get("image_url_5") || "").trim()].filter(Boolean);
     const payload = {
       product_id: editingProductId,
       name: String(formData.get("name") || "").trim(),
