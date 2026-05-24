@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   mount.innerHTML = `
     <div class="card" id="release-sanity-card" style="margin-top:18px">
       <h2 style="margin-top:0">Release Sanity Checklist</h2>
-      <p class="small">Run this after each deploy or ZIP handoff. It checks public page title/meta/H1 basics, Tools/Supplies D1 sync, inventory stock defaults, journal balance blockers, reconciliation exceptions, runtime errors, and migration-ledger status.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" id="runReleaseSanityButton" type="button">Run release sanity</button><a class="btn" href="/admin/catalog/">Open Catalog Sync</a><a class="btn" href="/admin/accounting/#db-sanity">Open DB Sanity</a><a class="btn" href="#schemaDriftAdminMount">Schema Drift</a><a class="btn" href="#publicApiHealthAdminMount">API Health</a></div>
+      <p class="small">Run this after each deploy or ZIP handoff. It checks public page title/meta/H1 basics, Tools/Supplies D1 sync, inventory stock defaults, journal balance blockers, reconciliation exceptions, runtime errors, and migration-ledger status, and competitive roadmap readiness.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" id="runReleaseSanityButton" type="button">Run release sanity</button><a class="btn" href="/admin/catalog/">Open Catalog Sync</a><a class="btn" href="/admin/accounting/#db-sanity">Open DB Sanity</a><a class="btn" href="#schemaDriftAdminMount">Schema Drift</a><a class="btn" href="#publicApiHealthAdminMount">API Health</a><a class="btn" href="#competitiveRoadmapAdminMount">Competitive Roadmap</a></div>
       <div id="releaseSanityMessage" class="small" style="display:none;margin-top:10px"></div>
       <div id="releaseSanityResults" style="margin-top:12px"></div>
     </div>`;
