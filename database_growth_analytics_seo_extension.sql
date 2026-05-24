@@ -663,3 +663,37 @@ INSERT OR IGNORE INTO schema_migration_ledger (
 -- Build 141 social caption templates / UTM social links note:
 -- Social queue schema now includes social_caption_templates and social_post_queue caption_template_key, content_pillar, call_to_action, utm_source, utm_medium, utm_campaign, and utm_url.
 -- The runtime endpoint self-heals these optional columns before use to stay safe on older D1 databases.
+
+
+-- Build 142 competitive roadmap tracker
+CREATE TABLE IF NOT EXISTS competitive_opportunities (
+  competitive_opportunity_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  opportunity_key TEXT NOT NULL UNIQUE,
+  area TEXT,
+  title TEXT NOT NULL,
+  description TEXT,
+  priority_score INTEGER DEFAULT 50,
+  impact_level TEXT DEFAULT 'medium',
+  effort_level TEXT DEFAULT 'medium',
+  status TEXT DEFAULT 'open',
+  owner_note TEXT,
+  source_note TEXT,
+  suggested_next_step TEXT,
+  last_reviewed_at TEXT,
+  completed_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_competitive_opportunities_status ON competitive_opportunities(status, priority_score DESC);
+CREATE INDEX IF NOT EXISTS idx_competitive_opportunities_area ON competitive_opportunities(area, priority_score DESC);
+
+CREATE TABLE IF NOT EXISTS competitive_opportunity_events (
+  competitive_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  competitive_opportunity_id INTEGER,
+  event_type TEXT,
+  old_status TEXT,
+  new_status TEXT,
+  note TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);

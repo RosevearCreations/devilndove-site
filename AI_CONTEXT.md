@@ -99,3 +99,12 @@ The site now has a review-first Social Posting Queue. Keep future social work sa
 ## Build 141 AI handoff
 
 The current social workflow is review-first. Do not recommend blind auto-posting. Social queue now supports caption templates, content pillars, calls to action, UTM-tagged links, calendar summary, dry run, scheduling, duplicate guards, and API attempts only when Cloudflare environment variables exist. Future work should add an admin template editor, social analytics rollups, and job/customer media privacy controls before more automation.
+
+
+## Build 142 update — Competitive roadmap completed and tracked
+
+- Completed `COMPETITIVE.md` as the active competitive strategy for Devil n Dove, covering positioning, homepage/product-page improvements, mobile UX, local SEO, social workflow, marketplace readiness, product media, trust, and accounting/margin direction.
+- Added Operations > Competitive Roadmap so the highest-value items from the document can be seeded into D1, assigned a status, and reviewed during Release Sanity.
+- Added `competitive_opportunities` and `competitive_opportunity_events` schema support.
+- Added `/data/site/competitive-opportunities.json` as a public-safe roadmap seed file; it contains strategy/action metadata only and no private costs, orders, or customer data.
+- Next direction: connect competitive opportunities to product readiness, SEO action completion, social analytics, testimonials, custom requests, and marketplace export checks.

@@ -180,3 +180,12 @@ Build 141 adds/updates these social queue schema pieces:
 - `social_post_queue.utm_url`
 
 The `/api/admin/social-post-queue` endpoint self-heals the optional columns before use so older D1 databases do not fail immediately after deployment. The current migration includes the Build 141 ledger marker.
+
+
+## Build 142 update — Competitive roadmap completed and tracked
+
+- Completed `COMPETITIVE.md` as the active competitive strategy for Devil n Dove, covering positioning, homepage/product-page improvements, mobile UX, local SEO, social workflow, marketplace readiness, product media, trust, and accounting/margin direction.
+- Added Operations > Competitive Roadmap so the highest-value items from the document can be seeded into D1, assigned a status, and reviewed during Release Sanity.
+- Added `competitive_opportunities` and `competitive_opportunity_events` schema support.
+- Added `/data/site/competitive-opportunities.json` as a public-safe roadmap seed file; it contains strategy/action metadata only and no private costs, orders, or customer data.
+- Next direction: connect competitive opportunities to product readiness, SEO action completion, social analytics, testimonials, custom requests, and marketplace export checks.

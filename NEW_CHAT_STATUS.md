@@ -1,3 +1,9 @@
+# New Chat Status — Devil n Dove Build 142
+
+## Current status — Build 142
+
+Build 142 starts from the latest uploaded build and focuses on completing the competitive direction. `COMPETITIVE.md` is now a full strategy/playbook, Operations > Competitive Roadmap tracks the highest-value opportunities in D1, Release Sanity checks the tracker, and schema/Markdown files are current. Deploy the build, apply or record `database_upgrade_current_pass.sql`, then open `/admin/operations/` and run Competitive Roadmap plus Release Sanity.
+
 # New Chat Status — Devil n Dove Build 140
 
 ## Current status — Build 140

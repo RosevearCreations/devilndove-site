@@ -90,3 +90,12 @@ This pass fixes the Product editor draft workflow: drafts require only name/type
 ## Build 138 note
 
 No Amazon matching logic changed in Build 138. The new Social Posting Queue can use approved product/job image URLs after inventory and product-media records are reviewed. Amazon private cost/order data should still remain private and must not be copied into public captions unless intentionally summarized for customers.
+
+
+## Build 142 update — Competitive roadmap completed and tracked
+
+- Completed `COMPETITIVE.md` as the active competitive strategy for Devil n Dove, covering positioning, homepage/product-page improvements, mobile UX, local SEO, social workflow, marketplace readiness, product media, trust, and accounting/margin direction.
+- Added Operations > Competitive Roadmap so the highest-value items from the document can be seeded into D1, assigned a status, and reviewed during Release Sanity.
+- Added `competitive_opportunities` and `competitive_opportunity_events` schema support.
+- Added `/data/site/competitive-opportunities.json` as a public-safe roadmap seed file; it contains strategy/action metadata only and no private costs, orders, or customer data.
+- Next direction: connect competitive opportunities to product readiness, SEO action completion, social analytics, testimonials, custom requests, and marketplace export checks.

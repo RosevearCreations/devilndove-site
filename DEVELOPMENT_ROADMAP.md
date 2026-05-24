@@ -1,3 +1,49 @@
+## Completed items in this pass — Build 142
+
+1. Completed `COMPETITIVE.md` as the main competitive strategy document for Devil n Dove.
+2. Added source-backed direction for handmade/mixed-media positioning, product storytelling, local SEO, ecommerce UX, and social publishing.
+3. Added a competitive feature matrix comparing baseline small shops, stronger shops, and the Devil n Dove target.
+4. Added tiered competitive priorities for homepage, product pages, media, mobile UX, local trust, collections, filters, custom requests, testimonials, and marketplace readiness.
+5. Added product page, homepage, mobile UX, social, local SEO, content, measurement, and 30/60/90-day implementation blueprints.
+6. Added `data/site/competitive-opportunities.json` as a public-safe opportunity seed list.
+7. Added D1 table `competitive_opportunities` for tracking strategic opportunities.
+8. Added D1 table `competitive_opportunity_events` for status/note history.
+9. Added `/api/admin/competitive-roadmap` to seed, list, and update competitive opportunities.
+10. Added `public/js/admin-competitive-roadmap.js` for the Operations admin panel.
+11. Added Operations > Competitive Roadmap mount and script.
+12. Added mobile-friendly CSS for the Competitive Roadmap summary and table panel.
+13. Added Release Sanity coverage for the Competitive Roadmap endpoint.
+14. Added Release Sanity coverage for competitive-opportunity table seeding and high-priority open counts.
+15. Updated the local predeploy sanity script so Competitive Roadmap assets and the completed `COMPETITIVE.md` are checked before packaging.
+16. Added competitive roadmap schema to `database_full_schema.sql`.
+17. Added competitive roadmap schema and Build 142 ledger marker to `database_upgrade_current_pass.sql`.
+18. Added schema notes to `database_growth_analytics_seo_extension.sql` and `database_store_schema.sql`.
+19. Updated all active Markdown handoff/status files with the Build 142 direction.
+20. Re-ran JavaScript syntax, HTML H1/title/meta, local reference, CSS brace, privacy, SQL smoke, and ZIP integrity checks.
+
+## Next logical steps after Build 142
+
+1. Deploy Build 142 and apply or record `database_upgrade_current_pass.sql`.
+2. Open `/admin/operations/` and run **Competitive Roadmap**.
+3. Click **Seed defaults** if the D1 table has not populated yet.
+4. Mark the items already underway as `in_progress`: mobile menu, social queue, Search Console workflow, product draft readiness, and image health.
+5. Use Release Sanity to confirm competitive opportunities are seeded.
+6. Start the highest-priority product story work: add story/material/process/care fields into product detail rendering.
+7. Expand Product Image Health into separate sale-ready, social-ready, and process-media groups.
+8. Add mobile Shop quick chips for New Arrivals, Under $25, One-of-a-Kind, Local Pickup, Vintage Finds, and Custom Gifts.
+9. Add the reusable local Southern Ontario trust block to shop, about, contact, local pages, and product detail pages.
+10. Add custom request intake for engraving, personalization, and similar-piece requests.
+11. Add private testimonials/reviews intake with approval workflow.
+12. Add marketplace-safe export readiness checks for Etsy/Facebook/Pinterest/manual posting.
+13. Add social analytics rollups from UTM-tagged posts.
+14. Add customer/job-media privacy guards before media can be selected for public social posts.
+15. Connect Search Console opportunity actions to reviewed title/meta/internal-link updates.
+16. Add margin-readiness cards using product price, supplies/tools cost, fees, and shipping assumptions.
+17. Continue payment application screens for deposits, orders, refunds, processor fees, payouts, gift cards, and manual adjustments.
+18. Continue HST/GST review worksheet and remittance-ready totals.
+19. Continue month-end close lock/reopen controls with checklist, review notes, and audit trail.
+20. Continue accountant export package v2 with GL, trial balance, P&L, HST worksheet, attachment index, and unresolved issue log.
+
 # Development Roadmap — Devil n Dove
 
 ## Completed 20 items in this pass — Build 140
