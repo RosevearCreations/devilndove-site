@@ -25,7 +25,7 @@ function normalizeImageUrls(imageUrls) {
   return imageUrls
     .map((url) => String(url || "").trim())
     .filter(Boolean)
-    .slice(0, 8);
+    .slice(0, 7);
 }
 
 function normalizeColorNamesInput(input, fallbackColor = "") {
