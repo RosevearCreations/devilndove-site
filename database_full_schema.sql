@@ -2015,3 +2015,35 @@ ON CONFLICT(rule_key) DO UPDATE SET
 
 -- Existing social_post_queue installs are self-healed by /api/admin/social-post-queue and /api/admin/social-media-privacy-guard:
 --   privacy_status, privacy_notes, media_consent_required, customer_media_present, approved_for_public_post.
+
+-- Build 144: public product-story notes and product/social competitive execution.
+CREATE TABLE IF NOT EXISTS product_story_public_notes (
+  product_story_public_note_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  story_heading TEXT,
+  story_summary TEXT,
+  story_body TEXT,
+  process_notes TEXT,
+  care_notes TEXT,
+  local_pickup_note TEXT,
+  display_status TEXT NOT NULL DEFAULT 'draft',
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+CREATE INDEX IF NOT EXISTS idx_product_story_public_notes_product ON product_story_public_notes(product_id, display_status, updated_at);
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'build_144_product_story_local_trust_social_shortcut',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Build 144 adds product story note schema, reusable local trust assets, and product-to-social queue workflow notes.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);
+

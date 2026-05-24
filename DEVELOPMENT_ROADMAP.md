@@ -637,3 +637,52 @@ Next strongest directions:
 8. Add testimonials/review approval workflow.
 9. Add marketplace export readiness checks.
 10. Continue payment application, HST review, period close, and accountant export packaging.
+
+## Build 144 completed — product story, local trust, and product-to-social workflow
+
+Completed in this pass:
+
+1. Added a public product-story block to product detail pages.
+2. Added approved story-note schema through `product_story_public_notes`.
+3. Added a safe fallback story generator using existing product fields when no approved story note exists.
+4. Added condition/era/sourcing notes to the story block when available.
+5. Added linked-tool/supply count and image count into the public story context.
+6. Added `data/site/local-trust.json` as a public-safe Southern Ontario trust seed.
+7. Added `/public/js/local-trust-block.js` as a reusable local trust renderer.
+8. Added the local trust block to the homepage.
+9. Added the local trust block to product detail pages.
+10. Added mobile-friendly styling for the trust block.
+11. Added **Post this product** buttons to the admin product table.
+12. Added product-to-social queue payload generation from product rows.
+13. Product social posts are queued as drafts, not published automatically.
+14. Product social posts use UTM-ready product links through the existing Social Posting Queue.
+15. Product social posts continue to pass through privacy review and platform readiness checks.
+16. Added Build 144 schema updates to active SQL files.
+17. Updated `COMPETITIVE.md` with the new buyer/admin directions.
+18. Updated active Markdown handoff/status files for the new workflow.
+19. Extended product detail structured/story direction without exposing private import/accounting data.
+20. Preserved one-H1/page SEO checks, compact mobile direction, and public `/data/` privacy posture.
+
+## Next several steps after Build 144
+
+1. Build an admin editor for `product_story_public_notes` so story copy can be approved/published without SQL.
+2. Add product readiness warnings when public story output is fallback-only.
+3. Add story snippets to shop cards and site search results.
+4. Add reusable testimonial/trust approval tables and a public testimonial block.
+5. Add customer/job/media consent records and connect them to social privacy review.
+6. Add a local pickup confidence block to cart and checkout.
+7. Add custom request intake for engraving, personalization, ring ideas, and “can you make something similar?” requests.
+8. Add marketplace export readiness checks for Etsy/Facebook/Pinterest/manual channels.
+9. Add social analytics rollups from UTM-tagged links and posted URLs.
+10. Add product media role checklist enforcement for main/detail/scale/process/packaging photos.
+11. Add admin-editable social caption templates.
+12. Add product story-to-social caption helpers.
+13. Add Search Console action completion links back to page/product records.
+14. Add dynamic sitemap generation from active D1 product rows once schema health is stable.
+15. Add accounting payment application screens.
+16. Add HST/GST review worksheet and filing support.
+17. Add month-end close lock/reopen controls.
+18. Add accountant export packaging.
+19. Add inventory depletion simulation from product/resource links.
+20. Add marketplace/channel margin previews before publishing or discounting.
+

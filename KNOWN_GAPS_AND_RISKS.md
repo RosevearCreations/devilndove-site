@@ -229,3 +229,14 @@ Remaining gaps:
 - Default privacy rules are seeded in D1 and visible in Operations > Social Media Privacy Guard.
 - Remaining risk: this is an admin review workflow, not image-recognition. Someone still needs to inspect the media before approving it.
 - Next risk reduction: add customer/job consent records and connect media assets to a “safe for social” flag.
+
+## Build 144 known gaps and risk updates
+
+- Public product pages now show a story section, but most products will initially use fallback text until approved `product_story_public_notes` rows are created.
+- The local trust block is public-safe and reusable, but it should be reviewed on real phones to ensure it does not crowd product purchase actions.
+- **Post this product** only queues a social draft. It does not bypass caption review, privacy review, scheduling, duplicate warnings, or missing platform credentials.
+- Product-to-social posts depend on product list data. If a product has no slug or featured image, the queued post may need manual link/media cleanup before posting.
+- The story-note table is schema-ready, but an admin story editor is still needed so we do not rely on SQL/manual inserts.
+- Local trust wording should remain natural. Do not repeat Southern Ontario/Tillsonburg/Oxford/Norfolk excessively on every page.
+- The next business-risk items remain accounting-heavy: payment application, HST review, month-end close controls, and accountant export packaging.
+

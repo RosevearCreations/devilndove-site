@@ -137,3 +137,8 @@ Next strongest directions:
 8. Add testimonials/review approval workflow.
 9. Add marketplace export readiness checks.
 10. Continue payment application, HST review, period close, and accountant export packaging.
+
+## Build 144 note
+
+Build 144 adds public product storytelling, a reusable Southern Ontario trust block, and a Product editor shortcut that queues product-based social posts for review. Keep social posting privacy-gated and keep public `/data/` files free of private costs, orders, customer records, and credentials.
+

@@ -202,3 +202,13 @@ Next strongest directions:
 8. Add testimonials/review approval workflow.
 9. Add marketplace export readiness checks.
 10. Continue payment application, HST review, period close, and accountant export packaging.
+
+## Build 144 sanity additions
+
+- Confirm `/public/js/local-trust-block.js` exists and loads on homepage/product detail pages.
+- Confirm `data/site/local-trust.json` contains only public-safe copy.
+- Confirm `/shop/product/` has one H1 and the new story/trust cards do not add extra H1s.
+- Confirm `/api/product-detail?slug=...` returns `story_notes` without failing when the `product_story_public_notes` table is absent.
+- Confirm `/admin/products/` product rows include **Post this product** and queue social drafts without publishing.
+- Confirm Social Media Privacy Guard still blocks API publishing unless posts are privacy-approved or product-only/no-private-media.
+

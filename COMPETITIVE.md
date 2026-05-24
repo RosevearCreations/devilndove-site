@@ -479,3 +479,57 @@ Use this simple scorecard before marking a competitive item done:
 
 Build 143 adds Social Media Privacy Guard and expands this competitive playbook from strategy into safer execution. The next public-facing competitive priority is product-story rendering, because the shop will convert better when every item explains what it is, how it was made or sourced, why it is unique, and how it fits a gift/local/buyer intent.
 
+## Build 144 implementation pass — competitive direction made more visible
+
+This pass moves the competitive roadmap from only being a strategy document into visible buyer/admin behavior.
+
+### New buyer-facing competitive improvements
+
+1. **Product story rendering on public product pages**
+   - Public product pages now include a dedicated **The story behind this piece** section.
+   - The block can read approved `product_story_public_notes` when present.
+   - When no approved note exists, it falls back to safe product fields such as short description, sourcing notes, condition summary, era label, image count, and linked tool/supply count.
+   - This supports the main competitive promise: items should feel story-backed, not like generic catalog rows.
+
+2. **Reusable Southern Ontario trust block**
+   - Added a public-safe `/data/site/local-trust.json` seed.
+   - Added `/public/js/local-trust-block.js` so public pages can render the same local trust message without duplicating copy everywhere.
+   - Added the block to the homepage and product detail page.
+   - The wording emphasizes Southern Ontario, Tillsonburg, Oxford County, Norfolk County, local pickup, workshop proof, and privacy-safe social posting.
+
+3. **Product-to-social shortcut**
+   - Product rows in admin now include **Post this product**.
+   - The button queues a draft social post through the Social Posting Queue using the product name, description, image URL, product URL, and a fitting caption template.
+   - Posts remain draft/review-first and must still pass privacy review, caption review, scheduling, and platform readiness checks before API publishing.
+
+### New data/schema direction
+
+4. **Product story notes table**
+   - Added `product_story_public_notes` for approved/published product story copy.
+   - This separates public product storytelling from raw admin notes, supplier notes, Amazon import data, and private cost/accounting data.
+
+5. **Public-safe trust seed file**
+   - Added `data/site/local-trust.json`.
+   - It contains public website copy only: no private costs, order IDs, customer names, platform tokens, or Amazon import rows.
+
+### How this helps us compete
+
+- Handmade and mixed-media products need story, process, and trust, not only title/price/photo.
+- Vintage and sourced pieces need condition/provenance context.
+- Local pages and product pages should repeat the local trust message naturally, not keyword-stuff it.
+- Social posting should be easy, but not reckless. The queue + privacy guard keeps the workflow safe.
+- Product storytelling should be editable and reviewable in future passes instead of hardcoded into descriptions.
+
+### Next competitive implementation targets
+
+1. Add an admin editor for `product_story_public_notes`.
+2. Add a product readiness check that warns when the public story block is only using fallback text.
+3. Add public testimonial/trust blocks that are approved before display.
+4. Add custom request intake for engraving, personalized gifts, and “can you make something like this?” questions.
+5. Add marketplace export readiness checks for Etsy/Facebook/Pinterest/manual listings.
+6. Add product story snippets to shop cards/search results.
+7. Add a local pickup confidence section on cart/checkout.
+8. Add analytics rollups for UTM social links.
+9. Add customer/job consent records for any media that is not product-only.
+10. Continue accounting work: payment application, HST review, period close, and accountant export packaging.
+

@@ -218,3 +218,24 @@ Next strongest directions:
 8. Add testimonials/review approval workflow.
 9. Add marketplace export readiness checks.
 10. Continue payment application, HST review, period close, and accountant export packaging.
+
+## Build 144 schema addition — product story notes
+
+### `product_story_public_notes`
+
+Purpose: stores approved or publish-ready public storytelling copy for product detail pages without mixing private supplier, Amazon, accounting, or raw admin notes into public rendering.
+
+Important fields:
+- `product_story_public_note_id`
+- `product_id`
+- `story_heading`
+- `story_summary`
+- `story_body`
+- `process_notes`
+- `care_notes`
+- `local_pickup_note`
+- `display_status` — expected values are draft, approved, or published.
+- `created_by_user_id`, `updated_by_user_id`, `created_at`, `updated_at`
+
+Public `/api/product-detail` now attempts to read the latest approved/published note. If the table or row is missing, the public page safely falls back to existing product fields.
+

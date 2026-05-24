@@ -129,3 +129,22 @@ Next strongest directions:
 8. Add testimonials/review approval workflow.
 9. Add marketplace export readiness checks.
 10. Continue payment application, HST review, period close, and accountant export packaging.
+
+## Build 144 status handoff
+
+Latest build direction: product storytelling and competitive execution.
+
+New in this pass:
+- Public product detail pages now include **The story behind this piece**.
+- Added `product_story_public_notes` schema support for future approved story copy.
+- Added reusable Southern Ontario trust content through `data/site/local-trust.json` and `/public/js/local-trust-block.js`.
+- Homepage and product pages now render the local trust block.
+- Admin product rows now have **Post this product**, which queues a draft social post through the existing Social Posting Queue.
+- Social posting remains review-first and privacy-gated.
+
+Immediate deployment checks:
+1. Apply/record `database_upgrade_current_pass.sql`.
+2. Open `/shop/product/?slug=...` and confirm the story/trust blocks render.
+3. Open `/admin/products/`, click **Post this product** on a harmless draft/test product, then review it in `/admin/operations/` → Social Posting Queue.
+4. Run Release Sanity, Public API Health, Runtime Incidents, and Social Media Privacy Guard.
+
