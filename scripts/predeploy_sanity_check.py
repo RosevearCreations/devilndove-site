@@ -6,7 +6,7 @@ Checks:
 - local script/style/image references exist
 - CSS brace counts are balanced enough to catch obvious drift
 - shared mobile navigation has compact expandable menu assets
-- operations admin has the structured-data, sitemap preview, media diagnostics, product image health, Search Console, social publisher, and storefront backfill assets
+- operations admin has the structured-data, sitemap preview, media diagnostics, product image health, Search Console, social publisher, competitive roadmap, and storefront backfill assets
 - product editor has draft-first media upload, checklist, image-library reuse, and JSON-safe create-product assets
 - public data folders do not contain private Amazon/order import reports
 
@@ -145,6 +145,7 @@ def check_operations_assets(root: Path):
         'productImageHealthAdminMount',
         'searchConsoleImportAdminMount',
         'socialPostQueueAdminMount',
+        'competitiveRoadmapAdminMount',
         '/public/js/admin-structured-data-health.js',
         '/public/js/admin-storefront-value-backfill.js',
         '/public/js/admin-sitemap-preview.js',
@@ -152,6 +153,7 @@ def check_operations_assets(root: Path):
         '/public/js/admin-product-image-health.js',
         '/public/js/admin-search-console-import.js',
         '/public/js/admin-social-post-queue.js',
+        '/public/js/admin-competitive-roadmap.js',
     ]
     missing = [token for token in required if token not in text]
     if missing:
@@ -167,6 +169,7 @@ def check_operations_assets(root: Path):
         'functions/api/admin/product-image-health.js',
         'functions/api/admin/search-console-import.js',
         'functions/api/admin/social-post-queue.js',
+        'functions/api/admin/competitive-roadmap.js',
     ]:
         if not (root / ref).exists():
             issues.append({'type': 'operations_missing_asset_file', 'path': ref})
@@ -194,6 +197,24 @@ def check_operations_assets(root: Path):
         issues.append({'type': 'social_publisher_missing_admin_assets', 'path': 'public/js/admin-social-post-queue.js', 'missing': missing_social_js})
     if missing_social_api:
         issues.append({'type': 'social_publisher_missing_api_assets', 'path': 'functions/api/admin/social-post-queue.js', 'missing': missing_social_api})
+    competitive_js = root / 'public' / 'js' / 'admin-competitive-roadmap.js'
+    competitive_api = root / 'functions' / 'api' / 'admin' / 'competitive-roadmap.js'
+    competitive_md = root / 'COMPETITIVE.md'
+    comp_js_text = read_text(competitive_js) if competitive_js.exists() else ''
+    comp_api_text = read_text(competitive_api) if competitive_api.exists() else ''
+    comp_md_text = read_text(competitive_md) if competitive_md.exists() else ''
+    required_competitive_js = ['Competitive Roadmap', 'Seed defaults', 'data-competitive-save']
+    required_competitive_api = ['competitive_opportunities', 'DEFAULT_OPPORTUNITIES', 'seedDefaults']
+    required_competitive_md = ['Competitive feature matrix', 'Implementation order', 'Build 142 update']
+    missing_comp_js = [token for token in required_competitive_js if token not in comp_js_text]
+    missing_comp_api = [token for token in required_competitive_api if token not in comp_api_text]
+    missing_comp_md = [token for token in required_competitive_md if token not in comp_md_text]
+    if missing_comp_js:
+        issues.append({'type': 'competitive_roadmap_missing_admin_assets', 'path': 'public/js/admin-competitive-roadmap.js', 'missing': missing_comp_js})
+    if missing_comp_api:
+        issues.append({'type': 'competitive_roadmap_missing_api_assets', 'path': 'functions/api/admin/competitive-roadmap.js', 'missing': missing_comp_api})
+    if missing_comp_md:
+        issues.append({'type': 'competitive_markdown_incomplete', 'path': 'COMPETITIVE.md', 'missing': missing_comp_md})
     return issues
 
 
@@ -256,3 +277,5 @@ if __name__ == '__main__':
     raise SystemExit(main())
 
 # Build 139 note: predeploy checks include social API publisher controls and endpoint helpers.
+
+# Build 142 note: predeploy checks include Operations > Competitive Roadmap and completed COMPETITIVE.md assets.
