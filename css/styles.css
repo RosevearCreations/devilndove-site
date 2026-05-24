@@ -688,3 +688,10 @@ body.nav-mobile-open{overflow:hidden}
 .metric-card{border:1px solid rgba(92,47,27,.18);border-radius:16px;padding:12px;background:rgba(255,255,255,.72);box-shadow:0 6px 18px rgba(36,20,12,.06)}
 .metric-card strong{display:block;font-size:1.45rem;line-height:1.1;color:#4b2b1b}.metric-card span{display:block;color:#6c5145;font-size:.86rem;margin-top:3px}
 @media (max-width: 720px){#competitive-roadmap-card .admin-table-wrap{overflow-x:auto}#competitive-roadmap-card table{min-width:860px}#competitive-roadmap-card textarea{min-width:180px}}
+
+
+/* Build 144: product story, local trust, and product-to-social polish */
+.dd-local-trust-block{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(210px,.75fr);gap:16px;align-items:start;border:1px solid rgba(92,47,27,.16);background:linear-gradient(135deg,rgba(255,255,255,.82),rgba(252,244,236,.72));}
+.dd-local-trust-block h2{margin:.15rem 0 .5rem 0}.dd-local-trust-kicker{text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#6b3a22}.dd-local-trust-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dd-local-trust-product{background:rgba(255,255,255,.62)}
+#productPublicStoryCard ul{margin-bottom:0}#productPublicStoryKicker{font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#6b3a22;margin-bottom:8px}.products-admin-table [data-social-product-id]{border-color:rgba(31,114,72,.35);background:rgba(31,114,72,.08)}
+@media (max-width:760px){.dd-local-trust-block{grid-template-columns:1fr}.dd-local-trust-actions{justify-content:flex-start}.dd-local-trust-actions .btn{width:100%;justify-content:center}}

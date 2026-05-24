@@ -1,0 +1,16 @@
+{
+  "heading": "Southern Ontario workshop trust",
+  "summary": "Devil n Dove is a small Southern Ontario maker workshop sharing handmade jewelry, mixed-media gifts, vintage finds, tools, supplies, and the real making process behind the pieces.",
+  "points": [
+    "Workshop-made, sourced, or vintage items are labelled clearly so buyers know what they are viewing.",
+    "Product pages are being built around real photos, condition notes, materials, process details, and local pickup/shipping clarity.",
+    "We serve online shoppers while keeping local Southern Ontario wording natural for Tillsonburg, Oxford County, Norfolk County, and nearby communities.",
+    "Behind-the-scenes photos and social posts stay review-first so private workshop or customer details are not posted accidentally."
+  ],
+  "links": [
+    { "label": "Local pickup", "url": "/pickup/" },
+    { "label": "Custom gifts", "url": "/custom-gifts-southern-ontario/" },
+    { "label": "Handmade jewelry", "url": "/handmade-jewelry-ontario/" },
+    { "label": "Workshop stories", "url": "/creations/" }
+  ]
+}
