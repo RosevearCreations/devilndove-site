@@ -424,6 +424,37 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+
+
+  const competitiveEndpointHealth = await publicJsonCheck(context.request, '/api/admin/competitive-roadmap');
+  addCheck(
+    checks,
+    competitiveEndpointHealth.ok ? 'pass' : 'warn',
+    'Competitive roadmap tracker',
+    competitiveEndpointHealth.ok
+      ? `HTTP ${competitiveEndpointHealth.status}; competitive roadmap endpoint responded.`
+      : `HTTP ${competitiveEndpointHealth.status}; ${competitiveEndpointHealth.error || 'Competitive roadmap endpoint could not be checked.'}`,
+    'Open Operations > Competitive Roadmap and seed/review the priority actions from COMPETITIVE.md.',
+    'warning'
+  );
+
+  const competitiveRows = await tableExists(db, 'competitive_opportunities') ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+           SUM(CASE WHEN COALESCE(status,'open') IN ('open','in_progress','blocked') AND COALESCE(priority_score,0) >= 85 THEN 1 ELSE 0 END) AS high_priority_open,
+           SUM(CASE WHEN COALESCE(status,'open') = 'done' THEN 1 ELSE 0 END) AS done_count
+    FROM competitive_opportunities
+  `) : { total: 0, high_priority_open: 0, done_count: 0 };
+  addCheck(
+    checks,
+    Number(competitiveRows.total || 0) >= 10 ? 'pass' : 'warn',
+    'Competitive opportunities seeded',
+    await tableExists(db, 'competitive_opportunities')
+      ? `${Number(competitiveRows.total || 0)} competitive opportunity row(s), ${Number(competitiveRows.high_priority_open || 0)} high-priority open, ${Number(competitiveRows.done_count || 0)} done.`
+      : 'competitive_opportunities table is not installed yet.',
+    'Apply the current migration, then use Operations > Competitive Roadmap to seed and review opportunities.',
+    'warning'
+  );
+
   const schemaLedgerRow = await tableExists(db, 'schema_migration_ledger') ? await safeFirst(db, `
     SELECT COUNT(*) AS total,
            SUM(CASE WHEN status='failed' THEN 1 ELSE 0 END) AS failed_count,
