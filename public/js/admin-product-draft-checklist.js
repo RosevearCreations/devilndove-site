@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getChecks() {
-    const imageUrls = [text('featured_image_url'), text('image_url_1'), text('image_url_2'), text('image_url_3'), text('image_url_4'), text('image_url_5')].filter(Boolean);
+    const imageUrls = [text('featured_image_url'), text('image_url_1'), text('image_url_2'), text('image_url_3'), text('image_url_4'), text('image_url_5'), text('image_url_6')].filter(Boolean);
     const checks = [
       { key: 'draft-name', label: 'Draft name', pass: !!text('name'), blocker: 'draft', action: 'Add a product name.' },
       { key: 'draft-type', label: 'Product type', pass: !!text('product_type'), blocker: 'draft', action: 'Choose physical or digital.' },

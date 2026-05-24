@@ -1,13 +1,37 @@
 // File: /public/js/admin-create-product.js
-// Build 134: Draft-first product creation, safer JSON handling, and an inline product image uploader.
+// Build 145: Draft-first product creation with autosave and multi-image upload (max 7 images).
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("createProductForm");
   const messageEl = document.getElementById("createProductMessage");
   const taxClassSelect = document.getElementById("create_product_tax_class_id");
+  const MAX_PRODUCT_IMAGES = 7;
+  const MAX_GALLERY_IMAGE_FIELDS = MAX_PRODUCT_IMAGES - 1;
+  const AUTOSAVE_DELAY_MS = 1400;
+  let autosaveTimer = null;
+  let autosaveInFlight = false;
+  let lastAutosaveFingerprint = "";
+  let autosaveStatusEl = null;
 
   function normalizeText(value) {
     return String(value || "").trim();
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function slugify(value) {
+    return normalizeText(value)
+      .toLowerCase()
+      .replace(/["']/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
 
   function setMessage(message, isError = false) {
@@ -21,6 +45,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!messageEl) return;
     messageEl.textContent = "";
     messageEl.style.display = "none";
+  }
+
+  function setAutosaveStatus(message, tone = "muted") {
+    if (!autosaveStatusEl) return;
+    autosaveStatusEl.textContent = message || "";
+    autosaveStatusEl.dataset.tone = tone;
   }
 
   async function readApiJson(response, fallbackMessage = "Request failed.") {
@@ -192,14 +222,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function firstEmptyImageField() {
-    const featured = form?.elements?.namedItem("featured_image_url");
-    if (featured && !normalizeText(featured.value)) return featured;
-    for (let i = 1; i <= 5; i += 1) {
+  function imageUrlFields() {
+    const rows = [];
+    for (let i = 1; i <= MAX_GALLERY_IMAGE_FIELDS; i += 1) {
       const field = form?.elements?.namedItem(`image_url_${i}`);
-      if (field && !normalizeText(field.value)) return field;
+      if (field) rows.push(field);
     }
-    return featured || form?.elements?.namedItem("image_url_1") || null;
+    return rows;
+  }
+
+  function firstEmptyImageField(preferGallery = false) {
+    const featured = form?.elements?.namedItem("featured_image_url");
+    if (!preferGallery && featured && !normalizeText(featured.value)) return featured;
+    const galleryField = imageUrlFields().find((field) => field && !normalizeText(field.value));
+    if (galleryField) return galleryField;
+    return featured || imageUrlFields()[0] || null;
+  }
+
+  function countExistingImageSlots() {
+    const featuredCount = normalizeText(form?.elements?.namedItem("featured_image_url")?.value) ? 1 : 0;
+    return featuredCount + imageUrlFields().filter((field) => normalizeText(field.value)).length;
+  }
+
+  function fillImageField(url, placement = "auto") {
+    const cleanUrl = normalizeText(url);
+    if (!cleanUrl) return false;
+    let field = null;
+    if (placement === "featured") field = form.elements.namedItem("featured_image_url");
+    else if (placement === "gallery") field = imageUrlFields().find((candidate) => candidate && !normalizeText(candidate.value));
+    field = field || firstEmptyImageField(placement === "gallery");
+    if (!field) return false;
+    field.value = cleanUrl;
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+    return true;
   }
 
   function ensureImageUploadPanel() {
@@ -212,16 +267,16 @@ document.addEventListener("DOMContentLoaded", () => {
     panel.innerHTML = `
       <div>
         <h3 style="margin:0 0 6px 0">Product pictures</h3>
-        <p class="small" style="margin:0">Drafts can be saved without pictures. Upload a picture here when R2 media storage is connected, or paste image URLs below.</p>
+        <p class="small" style="margin:0">Drafts can be saved without pictures. Upload up to 7 pictures at a time, or paste public image URLs below. The first image can become the featured image.</p>
       </div>
       <div class="dd-product-draft-media-grid">
-        <label><span class="small">Choose image</span><input class="input" id="productDraftImageFile" type="file" accept="image/*" /></label>
-        <label><span class="small">Alt text</span><input class="input" id="productDraftImageAlt" type="text" maxlength="160" placeholder="Short description for the product picture" /></label>
-        <label><span class="small">Placement</span><select class="input" id="productDraftImagePlacement"><option value="auto">Auto-fill first empty image field</option><option value="featured">Featured image</option><option value="gallery">Next gallery image</option></select></label>
+        <label><span class="small">Choose images</span><input class="input" id="productDraftImageFile" type="file" accept="image/*" multiple /></label>
+        <label><span class="small">Alt text base</span><input class="input" id="productDraftImageAlt" type="text" maxlength="160" placeholder="Short description used as the base for uploaded product pictures" /></label>
+        <label><span class="small">Placement</span><select class="input" id="productDraftImagePlacement"><option value="auto">Auto-fill featured, then gallery</option><option value="featured">First image featured, rest gallery</option><option value="gallery">Gallery only</option></select></label>
       </div>
       <div class="dd-product-draft-media-actions">
-        <button class="btn" id="productDraftUploadButton" type="button">Upload selected image</button>
-        <span class="small" id="productDraftUploadStatus">No image selected.</span>
+        <button class="btn" id="productDraftUploadButton" type="button">Upload selected images</button>
+        <span class="small" id="productDraftUploadStatus">No images selected.</span>
       </div>
       <div class="dd-product-draft-image-preview" id="productDraftImagePreview" hidden></div>
     `;
@@ -235,88 +290,100 @@ document.addEventListener("DOMContentLoaded", () => {
     const preview = panel.querySelector("#productDraftImagePreview");
 
     fileInput?.addEventListener("change", () => {
-      const file = fileInput.files?.[0];
-      if (!file) {
-        status.textContent = "No image selected.";
+      const files = Array.from(fileInput.files || []).filter((file) => file?.type?.startsWith("image/"));
+      if (!files.length) {
+        status.textContent = "No images selected.";
         preview.hidden = true;
         preview.innerHTML = "";
         return;
       }
-      status.textContent = `${file.name} selected.`;
-      const url = URL.createObjectURL(file);
+      const trimmed = files.slice(0, MAX_PRODUCT_IMAGES);
+      const rejected = files.length > MAX_PRODUCT_IMAGES ? ` Only the first ${MAX_PRODUCT_IMAGES} will be uploaded.` : "";
+      status.textContent = `${trimmed.length} image${trimmed.length === 1 ? "" : "s"} selected.${rejected}`;
       preview.hidden = false;
-      preview.innerHTML = `<img alt="Selected product preview" src="${url}" />`;
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      preview.innerHTML = trimmed.map((file) => {
+        const url = URL.createObjectURL(file);
+        setTimeout(() => URL.revokeObjectURL(url), 2500);
+        return `<img alt="Selected product preview" src="${url}" />`;
+      }).join("");
       if (altInput && !normalizeText(altInput.value)) {
-        altInput.value = normalizeText(form.elements.namedItem("name")?.value) || file.name.replace(/\.[a-z0-9]+$/i, "");
+        altInput.value = normalizeText(form.elements.namedItem("name")?.value) || trimmed[0].name.replace(/\.[a-z0-9]+$/i, "");
       }
     });
 
     uploadButton?.addEventListener("click", async () => {
-      const file = fileInput?.files?.[0];
-      if (!file) {
-        status.textContent = "Choose an image first.";
+      const rawFiles = Array.from(fileInput?.files || []).filter((file) => file?.type?.startsWith("image/"));
+      const files = rawFiles.slice(0, MAX_PRODUCT_IMAGES);
+      if (!files.length) {
+        status.textContent = "Choose one or more images first.";
         return;
       }
       if (!window.DDAuth || !window.DDAuth.isLoggedIn()) {
         status.textContent = "Log in before uploading media.";
         return;
       }
+      const openSlots = MAX_PRODUCT_IMAGES - countExistingImageSlots();
+      if (openSlots <= 0) {
+        status.textContent = `This form already has the ${MAX_PRODUCT_IMAGES} available image slots filled. Clear one before uploading more.`;
+        return;
+      }
+      const uploadFiles = files.slice(0, Math.min(MAX_PRODUCT_IMAGES, openSlots));
       const originalText = uploadButton.textContent;
       uploadButton.disabled = true;
       uploadButton.textContent = "Uploading…";
-      status.textContent = "Uploading image…";
+      status.textContent = `Uploading ${uploadFiles.length} image${uploadFiles.length === 1 ? "" : "s"}…`;
+      const uploadedUrls = [];
+      const failures = [];
       try {
         const placement = normalizeText(panel.querySelector("#productDraftImagePlacement")?.value || "auto");
-        const dimensions = await getImageDimensions(file);
-        const formData = new FormData();
         const currentProductId = Number(form?.dataset?.productId || window.DDCurrentProductEditorId || 0);
         const attachToCurrentProduct = form?.dataset?.mode === "edit" && Number.isInteger(currentProductId) && currentProductId > 0;
-        formData.append("file", file);
-        formData.append("upload_scope", "product");
-        if (attachToCurrentProduct) formData.append("product_id", String(currentProductId));
-        formData.append("attach_to_product", attachToCurrentProduct ? "1" : "0");
-        formData.append("set_featured", placement === "featured" ? "1" : "0");
-        formData.append("variant_role", placement === "featured" ? "featured" : "gallery");
-        formData.append("asset_tag", "draft-product-editor");
-        formData.append("alt_text", normalizeText(altInput?.value) || normalizeText(form.elements.namedItem("name")?.value) || file.name);
-        Object.entries(dimensions || {}).forEach(([key, value]) => {
-          if (value !== "" && value != null) formData.append(key, value);
-        });
 
-        const response = await window.DDAuth.apiFetch("/api/admin/media-upload", {
-          method: "POST",
-          body: formData
-        });
-        const data = await readApiJson(response, "Image upload failed.");
-        const url = normalizeText(data?.asset?.public_url);
-        if (!url) throw new Error("Upload succeeded but no public image URL was returned. Check the R2 public base URL setting.");
+        for (let index = 0; index < uploadFiles.length; index += 1) {
+          const file = uploadFiles[index];
+          try {
+            const dimensions = await getImageDimensions(file);
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_scope", "product");
+            if (attachToCurrentProduct) formData.append("product_id", String(currentProductId));
+            formData.append("attach_to_product", attachToCurrentProduct ? "1" : "0");
+            const shouldBeFeatured = placement === "featured" && index === 0;
+            formData.append("set_featured", shouldBeFeatured ? "1" : "0");
+            formData.append("variant_role", shouldBeFeatured ? "featured" : "gallery");
+            formData.append("asset_tag", "draft-product-editor-multi");
+            const altBase = normalizeText(altInput?.value) || normalizeText(form.elements.namedItem("name")?.value) || file.name;
+            formData.append("alt_text", uploadFiles.length > 1 ? `${altBase} ${index + 1}` : altBase);
+            Object.entries(dimensions || {}).forEach(([key, value]) => {
+              if (value !== "" && value != null) formData.append(key, value);
+            });
 
-        let field = null;
-        if (placement === "featured") field = form.elements.namedItem("featured_image_url");
-        else if (placement === "gallery") {
-          for (let i = 1; i <= 5; i += 1) {
-            const candidate = form.elements.namedItem(`image_url_${i}`);
-            if (candidate && !normalizeText(candidate.value)) {
-              field = candidate;
-              break;
-            }
+            const response = await window.DDAuth.apiFetch("/api/admin/media-upload", { method: "POST", body: formData });
+            const data = await readApiJson(response, `Image upload failed for ${file.name}.`);
+            const url = normalizeText(data?.asset?.public_url);
+            if (!url) throw new Error("Upload succeeded but no public image URL was returned. Check the R2 public base URL setting.");
+            uploadedUrls.push(url);
+            fillImageField(url, placement === "gallery" ? "gallery" : (placement === "featured" && index === 0 ? "featured" : "auto"));
+            status.textContent = `Uploaded ${uploadedUrls.length}/${uploadFiles.length} image${uploadFiles.length === 1 ? "" : "s"}…`;
+          } catch (error) {
+            failures.push(`${file.name}: ${error.message || "Upload failed"}`);
           }
         }
-        field = field || firstEmptyImageField();
-        if (field) {
-          field.value = url;
-          field.dispatchEvent(new Event("input", { bubbles: true }));
+
+        if (uploadedUrls.length) {
+          setMessage(`${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded and added to the product form.`);
+          syncRequiredFieldOutlines();
+          scheduleAutosave("image-upload");
         }
-        status.textContent = "Image uploaded and added to the product form.";
-        setMessage("Image uploaded. You can now save the draft product.");
-        syncRequiredFieldOutlines();
+        status.textContent = failures.length
+          ? `${uploadedUrls.length} uploaded, ${failures.length} failed. ${failures[0]}`
+          : `${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded.`;
       } catch (error) {
         status.textContent = error.message || "Image upload failed.";
         setMessage(error.message || "Image upload failed.", true);
       } finally {
         uploadButton.disabled = false;
-        uploadButton.textContent = originalText || "Upload selected image";
+        uploadButton.textContent = originalText || "Upload selected images";
       }
     });
   }
@@ -340,51 +407,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const field = form.elements.namedItem(name);
       if (field) field.value = value;
     });
+    setAutosaveStatus("Autosave starts after product name and type are filled.", "muted");
   }
 
-  if (!form) {
-    loadTaxClasses();
-    return;
-  }
-
-  if (!form.dataset.mode) form.dataset.mode = "create";
-  ensureImageUploadPanel();
-  resetCreateDefaults();
-  loadTaxClasses().finally(() => { syncRequiredFieldOutlines(); });
-
-  form.addEventListener("input", () => { syncRequiredFieldOutlines(); });
-  form.addEventListener("change", () => { syncRequiredFieldOutlines(); });
-
-  form.addEventListener("submit", async (event) => {
-    syncRequiredFieldOutlines();
-    if (form.dataset.mode === "edit") return;
-
-    event.preventDefault();
-    clearMessage();
-
-    const submitButton = form.querySelector('button[type="submit"]');
+  function collectProductPayload({ forceDraft = false } = {}) {
     const formData = new FormData(form);
-
     const price_cents = dollarsToCents(formData.get("price"));
     const compareRaw = normalizeText(formData.get("compare_at_price"));
     const compare_at_price_cents = compareRaw ? dollarsToCents(compareRaw) : null;
+    const rawSlug = normalizeText(formData.get("slug"));
+    const name = normalizeText(formData.get("name"));
+    const imageUrls = imageUrlFields()
+      .map((field) => normalizeText(field.value))
+      .filter(Boolean)
+      .slice(0, MAX_PRODUCT_IMAGES);
 
-    if (Number.isNaN(price_cents)) {
-      setMessage("Price must be a valid amount, or leave it blank for a draft.", true);
-      return;
-    }
-    if (compare_at_price_cents !== null && Number.isNaN(compare_at_price_cents)) {
-      setMessage("Compare-at price must be a valid amount.", true);
-      return;
-    }
-
-    const imageUrls = [1, 2, 3, 4, 5]
-      .map((index) => normalizeText(formData.get(`image_url_${index}`)))
-      .filter(Boolean);
-
-    const payload = {
-      name: normalizeText(formData.get("name")),
-      slug: normalizeText(formData.get("slug")),
+    return {
+      product_id: Number(form?.dataset?.productId || window.DDCurrentProductEditorId || 0) || undefined,
+      name,
+      slug: rawSlug || slugify(name),
       sku: normalizeText(formData.get("sku")),
       short_description: normalizeText(formData.get("short_description")),
       product_category: normalizeText(formData.get("product_category")),
@@ -394,7 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
       review_status: normalizeText(formData.get("review_status") || "pending_review"),
       description: normalizeText(formData.get("description")),
       product_type: normalizeText(formData.get("product_type") || "physical"),
-      status: normalizeText(formData.get("status") || "draft"),
+      status: forceDraft ? "draft" : normalizeText(formData.get("status") || "draft"),
       price_cents,
       compare_at_price_cents,
       currency: normalizeText(formData.get("currency") || "CAD").toUpperCase(),
@@ -425,15 +466,131 @@ document.addEventListener("DOMContentLoaded", () => {
       image_urls: imageUrls,
       capture_entry_mode: "full"
     };
+  }
 
-    if (!payload.name) {
-      setMessage("Product name is required to save a draft.", true);
+  function validatePayload(payload, { allowDraft = true } = {}) {
+    if (Number.isNaN(payload.price_cents)) return "Price must be a valid amount, or leave it blank for a draft.";
+    if (payload.compare_at_price_cents !== null && Number.isNaN(payload.compare_at_price_cents)) return "Compare-at price must be a valid amount.";
+    if (!payload.name) return "Product name is required to save a draft.";
+    if (!payload.product_type) return "Product type is required.";
+    if (!allowDraft && payload.status !== "draft" && ["hybrid", "external_only"].includes(payload.sale_channel) && !payload.external_listing_url) {
+      return "Add an external listing URL before activating hybrid or external-only items. Drafts can skip this.";
+    }
+    return "";
+  }
+
+  async function saveProductPayload(payload, { autosave = false } = {}) {
+    const isExisting = Number(payload.product_id || 0) > 0;
+    const endpoint = isExisting ? "/api/admin/update-product" : "/api/admin/create-product";
+    const response = await window.DDAuth.apiFetch(endpoint, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    const data = await readApiJson(response, autosave ? "Autosave failed." : "Failed to save product.");
+    if (!isExisting && Number(data?.product?.product_id || 0)) {
+      form.dataset.productId = String(data.product.product_id);
+      window.DDCurrentProductEditorId = Number(data.product.product_id || 0);
+      document.dispatchEvent(new CustomEvent("dd:product-autosaved-new", {
+        detail: { product: data.product || null, product_id: Number(data.product.product_id || 0) }
+      }));
+    }
+    if (data?.product?.slug && !normalizeText(form.elements.namedItem("slug")?.value)) {
+      form.elements.namedItem("slug").value = data.product.slug;
+    }
+    return data;
+  }
+
+  function canAutosaveDraft() {
+    if (!form || !window.DDAuth || !window.DDAuth.isLoggedIn()) return false;
+    const name = normalizeText(form.elements.namedItem("name")?.value);
+    const productType = normalizeText(form.elements.namedItem("product_type")?.value);
+    const status = normalizeText(form.elements.namedItem("status")?.value || "draft").toLowerCase();
+    return Boolean(name && productType && status === "draft");
+  }
+
+  function scheduleAutosave(reason = "change") {
+    if (!form || form.dataset.autosavePaused === "1") return;
+    clearTimeout(autosaveTimer);
+    if (!canAutosaveDraft()) {
+      setAutosaveStatus("Autosave starts after product name and type are filled while status is Draft.", "muted");
       return;
     }
-    if (!payload.product_type) {
-      setMessage("Product type is required.", true);
+    setAutosaveStatus("Autosave pending…", "pending");
+    autosaveTimer = setTimeout(() => runAutosave(reason), AUTOSAVE_DELAY_MS);
+  }
+
+  async function runAutosave(reason = "change") {
+    if (autosaveInFlight || !canAutosaveDraft()) return;
+    const payload = collectProductPayload({ forceDraft: true });
+    const validationError = validatePayload(payload, { allowDraft: true });
+    if (validationError) {
+      setAutosaveStatus(validationError, "error");
       return;
     }
+    const fingerprint = JSON.stringify(payload);
+    if (fingerprint === lastAutosaveFingerprint) {
+      setAutosaveStatus("Autosaved — no changes.", "saved");
+      return;
+    }
+    autosaveInFlight = true;
+    setAutosaveStatus("Autosaving draft…", "pending");
+    try {
+      const data = await saveProductPayload(payload, { autosave: true });
+      lastAutosaveFingerprint = JSON.stringify(collectProductPayload({ forceDraft: true }));
+      const productId = Number(data?.product?.product_id || payload.product_id || 0);
+      setAutosaveStatus(`Autosaved draft${productId ? ` #${productId}` : ""} at ${new Date().toLocaleTimeString()}.`, "saved");
+      document.dispatchEvent(new CustomEvent("dd:product-autosaved", { detail: { product: data.product || null, reason } }));
+    } catch (error) {
+      setAutosaveStatus(`Autosave failed: ${error.message || "unknown error"}`, "error");
+    } finally {
+      autosaveInFlight = false;
+    }
+  }
+
+  function ensureAutosavePanel() {
+    if (!form || document.getElementById("productAutosavePanel")) return;
+    const panel = document.createElement("div");
+    panel.id = "productAutosavePanel";
+    panel.className = "dd-product-autosave-panel small";
+    panel.innerHTML = `
+      <strong>Draft autosave:</strong>
+      <span id="productAutosaveStatus" data-tone="muted">Autosave starts after product name and type are filled.</span>
+      <button class="btn" type="button" id="productAutosaveNowButton">Autosave now</button>
+    `;
+    form.insertBefore(panel, form.firstElementChild || null);
+    autosaveStatusEl = panel.querySelector("#productAutosaveStatus");
+    panel.querySelector("#productAutosaveNowButton")?.addEventListener("click", () => runAutosave("manual"));
+  }
+
+  if (!form) {
+    loadTaxClasses();
+    return;
+  }
+
+  if (!form.dataset.mode) form.dataset.mode = "create";
+  ensureAutosavePanel();
+  ensureImageUploadPanel();
+  resetCreateDefaults();
+  loadTaxClasses().finally(() => { syncRequiredFieldOutlines(); });
+
+  form.addEventListener("input", () => { syncRequiredFieldOutlines(); scheduleAutosave("input"); });
+  form.addEventListener("change", () => { syncRequiredFieldOutlines(); scheduleAutosave("change"); });
+
+  form.addEventListener("submit", async (event) => {
+    syncRequiredFieldOutlines();
+    if (form.dataset.mode === "edit") return;
+
+    event.preventDefault();
+    clearMessage();
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    const payload = collectProductPayload();
+    const validationError = validatePayload(payload, { allowDraft: false });
+    if (validationError) {
+      setMessage(validationError, true);
+      return;
+    }
+
     if (payload.status !== "draft" && ["hybrid", "external_only"].includes(payload.sale_channel) && !payload.external_listing_url) {
       setMessage("Add an external listing URL before activating hybrid or external-only items. Drafts can skip this.", true);
       return;
@@ -442,26 +599,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const originalButtonText = submitButton ? submitButton.textContent : "";
 
     try {
+      clearTimeout(autosaveTimer);
       if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = payload.status === "draft" ? "Saving draft…" : "Creating…";
       }
 
-      const response = await window.DDAuth.apiFetch("/api/admin/create-product", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-      const data = await readApiJson(response, "Failed to create product.");
-
+      const data = await saveProductPayload(payload, { autosave: false });
       setMessage(data.message || "Product draft saved successfully.");
-      form.reset();
-      form.dataset.mode = "create";
-      delete form.dataset.productId;
-      window.DDCurrentProductEditorId = 0;
-      resetCreateDefaults();
-      await loadTaxClasses();
-      syncRequiredFieldOutlines();
-
+      lastAutosaveFingerprint = JSON.stringify(collectProductPayload({ forceDraft: true }));
+      setAutosaveStatus("Saved. You can continue editing this draft or clear the editor.", "saved");
       document.dispatchEvent(new CustomEvent("dd:product-created", { detail: { product: data.product || null } }));
       document.dispatchEvent(new CustomEvent("dd:product-editor-target", {
         detail: { product: data.product || null, product_id: Number(data?.product?.product_id || 0) }
@@ -471,7 +618,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = originalButtonText || "Create Product";
+        submitButton.textContent = originalButtonText || "Save Draft Product";
       }
     }
   });
