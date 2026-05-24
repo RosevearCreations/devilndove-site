@@ -681,3 +681,10 @@ body.nav-mobile-open{overflow:hidden}
   .social-post-queue-admin-panel .dd-product-draft-media-actions .small{width:100%;}
   .social-post-queue-admin-panel details summary{min-height:38px;display:flex;align-items:center;}
 }
+
+
+/* Build 142 competitive roadmap admin polish */
+.competitive-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+.metric-card{border:1px solid rgba(92,47,27,.18);border-radius:16px;padding:12px;background:rgba(255,255,255,.72);box-shadow:0 6px 18px rgba(36,20,12,.06)}
+.metric-card strong{display:block;font-size:1.45rem;line-height:1.1;color:#4b2b1b}.metric-card span{display:block;color:#6c5145;font-size:.86rem;margin-top:3px}
+@media (max-width: 720px){#competitive-roadmap-card .admin-table-wrap{overflow-x:auto}#competitive-roadmap-card table{min-width:860px}#competitive-roadmap-card textarea{min-width:180px}}
