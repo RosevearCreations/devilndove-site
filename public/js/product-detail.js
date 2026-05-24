@@ -19,6 +19,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productInventoryEl = document.getElementById("productInventory");
   const productDescriptionEl = document.getElementById("productDescription");
   const productStoryCardEl = document.getElementById("productStoryCard");
+  const productPublicStoryCardEl = document.getElementById("productPublicStoryCard");
+  const productPublicStoryKickerEl = document.getElementById("productPublicStoryKicker");
+  const productPublicStoryBodyEl = document.getElementById("productPublicStoryBody");
+  const productPublicStoryListEl = document.getElementById("productPublicStoryList");
   const productStorySummaryEl = document.getElementById("productStorySummary");
   const productResourcesStoryEl = document.getElementById("productResourcesStory");
   const productMainImageWrapEl = document.getElementById("productMainImageWrap");
@@ -92,6 +96,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         <img src="${escapeHtml(image.image_url || "")}" alt="${escapeHtml(image.alt_text || `${productName} image ${index + 1}`)}" title="${escapeHtml(image.image_title || image.caption || '')}" style="width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:10px" />
         ${image.caption ? `<figcaption class="small" style="margin-top:6px">${escapeHtml(image.caption)}</figcaption>` : ''}
       </figure>`).join("");
+  }
+
+
+  function titleCaseLabel(value) {
+    return String(value || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()).trim();
+  }
+
+  function renderPublicProductStory(product, storyNotes, resourceLinks, images) {
+    if (!productPublicStoryCardEl || !productPublicStoryBodyEl || !productPublicStoryListEl) return;
+    const notes = storyNotes && typeof storyNotes === 'object' ? storyNotes : {};
+    const origin = String(product?.merchandise_origin || 'handmade').toLowerCase();
+    const originLabel = titleCaseLabel(origin || 'handmade');
+    const resourceCount = Array.isArray(resourceLinks) ? resourceLinks.length : 0;
+    const imageCount = Array.isArray(images) ? images.length : 0;
+    const hasVintageNotes = ['vintage', 'collectible', 'sourced', 'antique', 'oddity'].some((token) => origin.includes(token)) || String(product?.condition_summary || product?.era_label || product?.sourcing_notes || '').trim();
+    const storyBody = String(notes.story_body || notes.story_summary || '').trim()
+      || String(product?.sourcing_notes || '').trim()
+      || String(product?.short_description || product?.description || '').trim()
+      || (hasVintageNotes
+        ? 'This item is listed with condition, era, and sourcing notes so buyers can understand what makes the piece different before deciding.'
+        : 'This item is part of the Devil n Dove workshop story: a real small-shop piece with materials, photos, and process notes added as the listing becomes more complete.');
+    const points = [];
+    if (notes.process_notes) points.push(notes.process_notes);
+    if (product?.condition_summary) points.push(`Condition: ${product.condition_summary}`);
+    if (product?.era_label) points.push(`Era / style note: ${product.era_label}`);
+    if (resourceCount) points.push(`${resourceCount} linked workshop tool/supply record${resourceCount === 1 ? '' : 's'} help explain what went into this piece.`);
+    if (imageCount) points.push(`${imageCount} product image${imageCount === 1 ? '' : 's'} are available for buyer review.`);
+    if (notes.care_notes) points.push(`Care note: ${notes.care_notes}`);
+    if (!points.length) points.push('More making notes can be added from the admin workflow as this listing moves from draft to publish-ready.');
+
+    show(productPublicStoryCardEl);
+    if (productPublicStoryKickerEl) productPublicStoryKickerEl.textContent = `${originLabel} • Devil n Dove workshop note`;
+    productPublicStoryBodyEl.innerHTML = escapeHtml(storyBody).replaceAll('\n', '<br>');
+    productPublicStoryListEl.innerHTML = points.slice(0, 6).map((point) => `<li>${escapeHtml(point)}</li>`).join('');
   }
 
   function renderResourceStory(resourceLinks, resourceSummary) {
@@ -233,7 +271,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       </article>`).join('');
   }
 
-  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary) {
+  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes) {
     currentProduct = product || null;
     if (productTypeEl) {
       const badges = [product.product_type || ''];
@@ -289,7 +327,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET" });
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {});
+      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {});
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;

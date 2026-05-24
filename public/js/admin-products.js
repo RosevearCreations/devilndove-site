@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const SNAPSHOT_KEY = "dd_admin_products_snapshot_v2";
   const LOCAL_PENDING_KEY = "dd_admin_product_review_pending_actions_v1";
   let currentSharedPendingActions = [];
+  let latestProductRows = [];
 
   function show(el) {
     if (el) el.style.display = "";
@@ -131,6 +132,53 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).join('');
   }
 
+
+  function productDetailUrl(product) {
+    const slug = String(product?.slug || '').trim();
+    const path = slug ? `/shop/product/?slug=${encodeURIComponent(slug)}` : '/shop/';
+    try { return new URL(path, window.location.origin).toString(); } catch { return path; }
+  }
+
+  function productSocialSummary(product) {
+    const parts = [];
+    if (product?.short_description) parts.push(product.short_description);
+    if (product?.product_type) parts.push(`Type: ${product.product_type}.`);
+    if (product?.merchandise_origin) parts.push(`Origin: ${String(product.merchandise_origin).replace(/[_-]+/g, ' ')}.`);
+    if (product?.condition_summary) parts.push(`Condition: ${product.condition_summary}.`);
+    if (product?.price_cents) parts.push(`Listed at ${formatMoney(product.price_cents, product.currency)}.`);
+    return parts.join(' ').slice(0, 900) || 'A Devil n Dove product update from our Southern Ontario workshop.';
+  }
+
+  async function queueProductSocialPost(productId) {
+    const product = latestProductRows.find((row) => Number(row.product_id || 0) === Number(productId || 0));
+    if (!product) throw new Error('Product details are not loaded yet. Refresh products and try again.');
+    const title = `New Devil n Dove product: ${product.name || `Product #${productId}`}`;
+    const summary = productSocialSummary(product);
+    const linkUrl = productDetailUrl(product);
+    const imageUrls = [product.featured_image_url, product.og_image_url].filter(Boolean).join('\n');
+    const templateKey = String(product.merchandise_origin || '').toLowerCase().includes('vintage') ? 'vintage_find' : 'finished_product';
+    const response = await window.DDAuth.apiFetch('/api/admin/social-post-queue', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'create',
+        source_type: 'product_update',
+        source_id: String(productId),
+        caption_template_key: templateKey,
+        title,
+        summary,
+        image_urls: imageUrls,
+        link_url: linkUrl,
+        target_platforms: ['facebook', 'instagram', 'pinterest', 'x'],
+        hashtags: '#DevilnDove #HandmadeOntario #ShopSmallCanada #SouthernOntario',
+        post_status: 'draft',
+        notes: 'Queued from Product editor. Review privacy, caption, schedule, and platform readiness before posting.'
+      })
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to queue product social post.');
+    return data;
+  }
+
   function renderRows(products) {
     if (!tableBody) return;
 
@@ -196,6 +244,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <button class="btn" type="button" data-review-action="request_changes" data-product-id="${productId}">Needs Changes</button>
               <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}" ${canPublish ? '' : 'disabled'} title="${escapeHtml(publishTitle)}">Publish</button>
               ${(!canPublish && ["approved", "published"].includes(reviewStatusValue)) ? `<button class="btn" type="button" data-review-action="publish_override" data-product-id="${productId}" title="Override low publish score and push live anyway.">Override Publish</button>` : ''}
+              <button class="btn" type="button" data-social-product-id="${productId}">Post this product</button>
               <button class="btn" type="button" data-resource-action="reserve" data-product-id="${productId}">Reserve Resources</button>
               <button class="btn" type="button" data-resource-action="release" data-product-id="${productId}">Release Resources</button>
               <button class="btn" type="button" data-archive-product-id="${productId}" ${isArchived ? "disabled" : ""}>Archive</button>
@@ -343,6 +392,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to load products.");
 
       const products = Array.isArray(data.products) ? data.products : [];
+      latestProductRows = products;
       saveSnapshot(products);
       setStatus("");
 
@@ -357,6 +407,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (error) {
       const cached = loadSnapshot();
       if (cached?.products?.length) {
+        latestProductRows = cached.products;
         renderProductPicker(cached.products);
         renderRows(cached.products);
         setStatus(`Live product list is unavailable. Showing the last saved snapshot from ${cached.cached_at || "an earlier visit"}.`, "warning");
@@ -525,10 +576,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.addEventListener("click", async (event) => {
     const reviewButton = event.target.closest("[data-review-action]");
     const resourceButton = event.target.closest("[data-resource-action]");
+    const socialProductButton = event.target.closest("[data-social-product-id]");
     const retryButton = event.target.closest("[data-product-pending-retry]");
     const dismissButton = event.target.closest("[data-product-pending-dismiss]");
-    if (!reviewButton && !resourceButton && !retryButton && !dismissButton) return;
+    if (!reviewButton && !resourceButton && !socialProductButton && !retryButton && !dismissButton) return;
     if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+
+
+    if (socialProductButton) {
+      const productId = Number(socialProductButton.getAttribute('data-social-product-id') || 0);
+      if (!productId) return;
+      try {
+        socialProductButton.disabled = true;
+        const data = await queueProductSocialPost(productId);
+        const queuedId = data?.result?.social_post_queue_id || data?.social_post_queue_id || '';
+        setStatus(`Product social post queued${queuedId ? ` as #${queuedId}` : ''}. Review it in Operations > Social Posting Queue before publishing.`, 'success');
+      } catch (error) {
+        setStatus(error.message || 'Failed to queue product social post.', 'error');
+      } finally {
+        socialProductButton.disabled = false;
+      }
+      return;
+    }
 
     if (retryButton || dismissButton) {
       const actionKey = String((retryButton || dismissButton).getAttribute(retryButton ? "data-product-pending-retry" : "data-product-pending-dismiss") || "").trim();
