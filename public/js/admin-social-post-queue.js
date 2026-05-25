@@ -77,6 +77,51 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hashtags && document.getElementById('socialPostHashtags')) document.getElementById('socialPostHashtags').value = hashtags.replace(/#/g, '').replace(/\s+/g, ',');
     if (option.value && !document.getElementById('socialUtmCampaign')?.value) document.getElementById('socialUtmCampaign').value = option.value;
   }
+  function fillTemplateEditor(row = {}) {
+    const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value ?? ''; };
+    set('socialTemplateEditKey', row.template_key || '');
+    set('socialTemplateEditName', row.display_name || '');
+    set('socialTemplateEditPillar', row.content_pillar || 'workshop_update');
+    set('socialTemplateEditPlatforms', (Array.isArray(row.default_platforms) ? row.default_platforms : parseJson(row.default_platforms_json, [])).join(','));
+    set('socialTemplateEditHashtags', row.default_hashtags || '');
+    set('socialTemplateEditCta', row.call_to_action || '');
+    set('socialTemplateEditBody', row.body_template || '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}');
+    set('socialTemplateEditNotes', row.notes || '');
+    const active = document.getElementById('socialTemplateEditActive');
+    if (active) active.value = String(Number(row.is_active ?? 1) ? 1 : 0);
+  }
+  function templateEditorPayload() {
+    const value = (id) => document.getElementById(id)?.value || '';
+    return {
+      action: 'save_caption_template',
+      template_key: value('socialTemplateEditKey'),
+      display_name: value('socialTemplateEditName'),
+      content_pillar: value('socialTemplateEditPillar'),
+      default_platforms: value('socialTemplateEditPlatforms'),
+      default_hashtags: value('socialTemplateEditHashtags'),
+      call_to_action: value('socialTemplateEditCta'),
+      body_template: value('socialTemplateEditBody'),
+      notes: value('socialTemplateEditNotes'),
+      is_active: value('socialTemplateEditActive')
+    };
+  }
+  async function saveTemplateEditor() {
+    try {
+      setMsg('Saving caption template...');
+      const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue', { method: 'POST', body: JSON.stringify(templateEditorPayload()) }));
+      render(data);
+      setMsg('Caption template saved.');
+    } catch (error) { setMsg(error.message || 'Unable to save caption template.', true); }
+  }
+  async function archiveTemplate(key) {
+    if (!key || !window.confirm('Archive this caption template? Existing queued posts will keep their saved captions.')) return;
+    try {
+      const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-post-queue', { method: 'POST', body: JSON.stringify({ action: 'archive_caption_template', template_key: key }) }));
+      render(data);
+      setMsg('Caption template archived.');
+    } catch (error) { setMsg(error.message || 'Unable to archive caption template.', true); }
+  }
+
   function renderDryRunPreview(payload) {
     const dryRun = payload || {};
     const warnings = Array.isArray(dryRun.media_quality_warnings) ? dryRun.media_quality_warnings : [];
@@ -96,7 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const attempts = Array.isArray(data.attempts) ? data.attempts : [];
     const templates = Array.isArray(data.templates) ? data.templates : [];
     const calendar = Array.isArray(data.calendar) ? data.calendar : [];
+    const utmRollups = Array.isArray(data.utm_rollups) ? data.utm_rollups : [];
     populateTemplateSelect(templates);
+    result._templates = templates;
 
     result.innerHTML = `
       <div class="release-sanity-summary" style="margin-top:12px">
@@ -113,9 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
           ${calendar.map((row) => `<tr><td><strong>${esc(row.calendar_date || '')}</strong></td><td>${esc(row.total || 0)}</td><td>${esc(row.ready_count || 0)}</td><td>${esc(row.posted_count || 0)}</td><td>${Number(row.duplicate_warning_count || 0) ? `<span class="admin-status-pill warning">${esc(row.duplicate_warning_count)} review</span>` : '<span class="small">0</span>'}</td></tr>`).join('') || '<tr><td colspan="5">No upcoming social posts yet.</td></tr>'}
         </tbody></table></div>
       </details>
+      <details style="margin-top:12px"><summary>UTM campaign rollups</summary>
+        <div class="admin-table-wrap"><table><thead><tr><th>Campaign</th><th>Source / medium</th><th>Total</th><th>Open</th><th>Approved</th><th>Posted</th></tr></thead><tbody>
+          ${utmRollups.map((row) => `<tr><td><strong>${esc(row.utm_campaign || '')}</strong></td><td>${esc(row.utm_source || '')} / ${esc(row.utm_medium || '')}</td><td>${esc(row.total_posts || 0)}</td><td>${esc(row.open_count || 0)}</td><td>${esc(row.approved_count || 0)}</td><td>${esc(row.posted_count || 0)}</td></tr>`).join('') || '<tr><td colspan="6">No UTM-tagged social posts yet.</td></tr>'}
+        </tbody></table></div>
+      </details>
       <details style="margin-top:12px"><summary>Caption templates</summary>
-        <div class="admin-table-wrap"><table><thead><tr><th>Template</th><th>Pillar</th><th>Default hashtags</th><th>Use</th></tr></thead><tbody>
-          ${templates.map((row) => `<tr><td><strong>${esc(row.display_name || row.template_key)}</strong><div class="small">${esc(row.notes || '')}</div></td><td>${esc(row.content_pillar || '')}</td><td class="small">${esc(row.default_hashtags || '')}</td><td><button class="btn small" data-social-use-template="${esc(row.template_key)}">Use template</button></td></tr>`).join('') || '<tr><td colspan="4">No caption templates seeded yet.</td></tr>'}
+        <div class="admin-table-wrap"><table><thead><tr><th>Template</th><th>Pillar</th><th>Default hashtags</th><th>Actions</th></tr></thead><tbody>
+          ${templates.map((row) => `<tr><td><strong>${esc(row.display_name || row.template_key)}</strong><div class="small">${esc(row.notes || '')}</div></td><td>${esc(row.content_pillar || '')}</td><td class="small">${esc(row.default_hashtags || '')}</td><td><button class="btn small" data-social-use-template="${esc(row.template_key)}">Use</button> <button class="btn small" data-social-edit-template="${esc(row.template_key)}">Edit</button> <button class="btn small" data-social-archive-template="${esc(row.template_key)}">Archive</button></td></tr>`).join('') || '<tr><td colspan="4">No caption templates seeded yet.</td></tr>'}
         </tbody></table></div>
       </details>
       <details style="margin-top:12px" open><summary>Queued posts</summary>
@@ -336,6 +388,30 @@ document.addEventListener('DOMContentLoaded', () => {
         <button class="btn" type="button" id="socialQueuePreviewTemplateButton">Preview template caption</button>
         <button class="btn" type="button" id="socialQueueRecentMediaButton">Draft from recent media</button><span class="small">API publishing uses Cloudflare environment variables only; secrets are never stored in public files.</span>
       </div>
+      <details style="margin-top:12px"><summary>Admin-editable caption template editor</summary>
+        <div class="social-queue-grid" style="margin-top:12px">
+          <label>Template key<input id="socialTemplateEditKey" placeholder="finished_product"></label>
+          <label>Display name<input id="socialTemplateEditName" placeholder="Finished product / shop-ready"></label>
+          <label>Content pillar<input id="socialTemplateEditPillar" value="workshop_update"></label>
+          <label>Platforms<input id="socialTemplateEditPlatforms" value="facebook,instagram"></label>
+        </div>
+        <div class="social-queue-grid" style="margin-top:12px">
+          <label>Default hashtags<input id="socialTemplateEditHashtags" value="#DevilnDove #HandmadeOntario"></label>
+          <label>Call to action<input id="socialTemplateEditCta" placeholder="Ask us about making something similar."></label>
+          <label>Active<select id="socialTemplateEditActive"><option value="1">Active</option><option value="0">Inactive</option></select></label>
+        </div>
+        <label style="display:block;margin-top:10px">Body template<textarea id="socialTemplateEditBody" rows="4">{title}
+
+{summary}
+
+{cta}
+
+{link}
+
+{hashtags}</textarea></label>
+        <label style="display:block;margin-top:10px">Template notes<input id="socialTemplateEditNotes" placeholder="When to use this template"></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn primary" type="button" id="socialTemplateSaveButton">Save caption template</button><button class="btn" type="button" id="socialTemplateClearButton">Clear editor</button></div>
+      </details>
       <div id="socialPostQueueMessage" class="small" style="display:none;margin-top:10px"></div>
       <div id="socialPostQueueResults"></div>
     </div>`;
@@ -345,6 +421,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('socialQueuePreviewTemplateButton')?.addEventListener('click', previewTemplateCaption);
   document.getElementById('socialQueueRecentMediaButton')?.addEventListener('click', quickRecentMedia);
   document.getElementById('socialCaptionTemplate')?.addEventListener('change', applySelectedTemplateDefaults);
+  document.getElementById('socialTemplateSaveButton')?.addEventListener('click', saveTemplateEditor);
+  document.getElementById('socialTemplateClearButton')?.addEventListener('click', () => fillTemplateEditor({}));
   mount.addEventListener('click', (event) => {
     const results = document.getElementById('socialPostQueueResults');
     const useTemplateButton = event.target.closest('[data-social-use-template]');
@@ -353,6 +431,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const select = document.getElementById('socialCaptionTemplate');
       if (select) { select.value = key; applySelectedTemplateDefaults(); setMsg('Caption template selected. Add a title/summary, then preview or queue.'); }
     }
+    const editTemplateButton = event.target.closest('[data-social-edit-template]');
+    if (editTemplateButton) {
+      const key = editTemplateButton.getAttribute('data-social-edit-template') || '';
+      const row = (results?._templates || []).find((item) => item.template_key === key) || { template_key: key };
+      fillTemplateEditor(row);
+      setMsg('Template loaded into the editor.');
+    }
+    const archiveTemplateButton = event.target.closest('[data-social-archive-template]');
+    if (archiveTemplateButton) archiveTemplate(archiveTemplateButton.getAttribute('data-social-archive-template'));
     const copyButton = event.target.closest('[data-social-copy]');
     if (copyButton) {
       const id = Number(copyButton.getAttribute('data-social-copy'));

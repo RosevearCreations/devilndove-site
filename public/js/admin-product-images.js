@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
           URL.revokeObjectURL(objectUrl);
           const rowForScore = {
             image_url: file.name || 'upload',
-            alt_text: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
+            alt_text: uploadFile.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
             width_px: metrics.width,
             height_px: metrics.height,
             image_orientation: metrics.orientation,
@@ -337,6 +337,124 @@ document.addEventListener('DOMContentLoaded', () => {
         resolve({ width: 0, height: 0, ratio: 0, orientation: 'unknown', ok: false, first_image_ok: false, merchandising_score: 0 });
       }
     });
+  }
+
+
+  function uploadEditorOptions() {
+    const preset = document.getElementById('productImageEditPreset')?.value || 'original';
+    const maxSide = clamp(document.getElementById('productImageResizeMax')?.value || 1600, 800, 2600);
+    const quality = clamp((Number(document.getElementById('productImageQuality')?.value || 88) / 100), 0.55, 0.95);
+    return { preset, maxSide: Math.round(maxSide), quality };
+  }
+
+  function imageFileToImage(file) {
+    return new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(img);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Could not read the selected image.'));
+      };
+      img.src = objectUrl;
+    });
+  }
+
+  function canvasToBlob(canvas, type = 'image/jpeg', quality = 0.88) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Could not prepare edited upload.')), type, quality);
+    });
+  }
+
+  function cropForPreset(width, height, preset) {
+    if (preset === 'square_1200') {
+      const side = Math.min(width, height);
+      return { sx: Math.round((width - side) / 2), sy: Math.round((height - side) / 2), sw: side, sh: side, outW: 1200, outH: 1200, label: 'square 1200×1200 crop' };
+    }
+    if (preset === 'landscape_1600') {
+      const targetRatio = 4 / 3;
+      let sw = width;
+      let sh = Math.round(width / targetRatio);
+      if (sh > height) {
+        sh = height;
+        sw = Math.round(height * targetRatio);
+      }
+      const outW = Math.min(1600, Math.round(sw));
+      const outH = Math.round(outW / targetRatio);
+      return { sx: Math.round((width - sw) / 2), sy: Math.round((height - sh) / 2), sw, sh, outW, outH, label: 'landscape 4:3 crop' };
+    }
+    if (preset === 'max_side') {
+      const scale = Math.min(1, uploadEditorOptions().maxSide / Math.max(width, height));
+      return { sx: 0, sy: 0, sw: width, sh: height, outW: Math.round(width * scale), outH: Math.round(height * scale), label: 'resized original ratio' };
+    }
+    return { sx: 0, sy: 0, sw: width, sh: height, outW: width, outH: height, label: 'original' };
+  }
+
+  async function buildEditedUpload(file, previewOnly = false) {
+    const options = uploadEditorOptions();
+    if (options.preset === 'original') return { file, edited: false, crop: null, resize: null, note: 'Original file kept.' };
+    const img = await imageFileToImage(file);
+    const sourceWidth = Number(img.naturalWidth || 0);
+    const sourceHeight = Number(img.naturalHeight || 0);
+    const crop = cropForPreset(sourceWidth, sourceHeight, options.preset);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(crop.outW));
+    canvas.height = Math.max(1, Math.round(crop.outH));
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, canvas.width, canvas.height);
+
+    const preview = document.getElementById('productImageEditPreview');
+    if (preview) {
+      preview.width = Math.min(360, canvas.width);
+      preview.height = Math.round(preview.width * (canvas.height / canvas.width));
+      const previewCtx = preview.getContext('2d');
+      previewCtx.clearRect(0, 0, preview.width, preview.height);
+      previewCtx.drawImage(canvas, 0, 0, preview.width, preview.height);
+    }
+    if (previewOnly) return { file, edited: true, crop, resize: { width: canvas.width, height: canvas.height }, note: crop.label };
+
+    const blob = await canvasToBlob(canvas, 'image/jpeg', options.quality);
+    const cleanName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'product-image';
+    const editedFile = new File([blob], `${cleanName}-${options.preset}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+    return {
+      file: editedFile,
+      edited: true,
+      crop: {
+        x: crop.sx / sourceWidth,
+        y: crop.sy / sourceHeight,
+        width: crop.sw / sourceWidth,
+        height: crop.sh / sourceHeight
+      },
+      resize: { width: canvas.width, height: canvas.height },
+      note: crop.label
+    };
+  }
+
+  async function refreshUploadPreview() {
+    const file = document.getElementById('productImageUploadInput')?.files?.[0];
+    const note = document.getElementById('productImageEditNote');
+    const preview = document.getElementById('productImageEditPreview');
+    if (!file) {
+      if (note) note.textContent = 'Choose an image to preview crop/resize output.';
+      if (preview) {
+        const ctx = preview.getContext('2d');
+        ctx.clearRect(0, 0, preview.width, preview.height);
+      }
+      return null;
+    }
+    try {
+      const edited = await buildEditedUpload(file, true);
+      const analysisFile = edited.edited ? (await buildEditedUpload(file, false)).file : file;
+      const info = await inspectLocalImageFile(analysisFile);
+      if (note) note.textContent = `${edited.note || 'Original'} • output ${info.width}×${info.height} • ${info.orientation} • estimated score ${info.merchandising_score}%.`;
+      return info;
+    } catch (error) {
+      if (note) note.textContent = error.message || 'Could not preview this edit.';
+      return null;
+    }
   }
 
   function rowTemplate(row = {}, index = 0) {
@@ -587,7 +705,16 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="card" style="margin-top:4px">
             <h4 style="margin-top:0">Direct Upload to R2</h4>
             <div class="grid cols-2" style="gap:12px;align-items:end"><div><label class="small" for="productImageUploadInput">Image File</label><input id="productImageUploadInput" type="file" accept="image/*" /></div><div><button class="btn" type="button" id="uploadProductImageButton">Upload Image</button></div></div>
-            <div class="small" style="margin-top:8px">Upload analysis now estimates background cleanliness, subject fill, sharpness, brightness, and contrast before save.</div>
+            <div class="grid cols-3" style="gap:12px;margin-top:12px;align-items:end">
+              <label><span class="small">Crop / sizing preset</span><select id="productImageEditPreset"><option value="original">Keep original</option><option value="square_1200">Center crop square 1200×1200</option><option value="landscape_1600">Center crop landscape 4:3</option><option value="max_side">Resize max side only</option></select></label>
+              <label><span class="small">Max side px</span><input id="productImageResizeMax" type="number" min="800" max="2600" step="100" value="1600" /></label>
+              <label><span class="small">JPEG quality %</span><input id="productImageQuality" type="number" min="55" max="95" step="1" value="88" /></label>
+            </div>
+            <div class="grid cols-2" style="gap:12px;margin-top:12px;align-items:start">
+              <canvas id="productImageEditPreview" width="240" height="180" style="width:100%;max-width:360px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03)"></canvas>
+              <div class="small" id="productImageEditNote">Choose an image to preview crop/resize output.</div>
+            </div>
+            <div class="small" style="margin-top:8px">Upload analysis now estimates background cleanliness, subject fill, sharpness, brightness, contrast, and optional crop/resize output before save.</div>
           </div>
           <div class="card" style="margin-top:4px">
             <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h4 style="margin:0">Uploaded Asset Library</h4><button class="btn" type="button" id="refreshMediaAssetsButton">Refresh Assets</button></div>
@@ -604,19 +731,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('productImageUploadInput')?.addEventListener('change', async (event) => {
       const file = event.target?.files?.[0];
       if (!file) return;
-      const info = await inspectLocalImageFile(file);
+      const info = await refreshUploadPreview() || await inspectLocalImageFile(file);
       const hasExistingRows = Array.from(document.querySelectorAll('[data-product-image-row]')).some((row) => normalizeText(row.querySelector('[data-field="image_url"]')?.value));
       const warnings = summarizeImageGuidance(info, !hasExistingRows);
       if (!info.ok) {
-        setMessage(`Upload guidance: use a square or landscape image at least 800×800. Current file is ${info.width}×${info.height}.`, true);
+        setMessage(`Upload guidance: use a square or landscape image at least 800×800. Current edited output is ${info.width}×${info.height}.`, true);
       } else if (!hasExistingRows && !info.first_image_ok) {
-        setMessage(`Lead-image guidance: featured image target is 1200×1200 or larger and square/landscape. Current file is ${info.width}×${info.height}.`, true);
+        setMessage(`Lead-image guidance: featured image target is 1200×1200 or larger and square/landscape. Current edited output is ${info.width}×${info.height}.`, true);
       } else if (warnings.length) {
         setMessage(`Upload guidance: ${warnings.join(' • ')}. Estimated merchandising score ${info.merchandising_score}%.`, true);
       } else {
         setMessage(`Image looks solid for listing use: ${info.width}×${info.height} • est. merchandising ${info.merchandising_score}%.`, false);
       }
     });
+    document.getElementById('productImageEditPreset')?.addEventListener('change', refreshUploadPreview);
+    document.getElementById('productImageResizeMax')?.addEventListener('input', refreshUploadPreview);
+    document.getElementById('productImageQuality')?.addEventListener('input', refreshUploadPreview);
     document.getElementById('refreshMediaAssetsButton')?.addEventListener('click', loadAssetLibrary);
     document.getElementById('adminProductImagesForm')?.addEventListener('submit', saveImages);
     mountEl.addEventListener('click', onClick);
@@ -707,18 +837,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('productImageUploadInput');
     const file = fileInput?.files?.[0];
     if (!file) return setMessage('Choose an image file first.', true);
-    const localInfo = await inspectLocalImageFile(file);
+    const editedUpload = await buildEditedUpload(file, false);
+    const uploadFile = editedUpload.file || file;
+    const localInfo = await inspectLocalImageFile(uploadFile);
     if (!localInfo.ok) {
-      return setMessage(`Use a square or landscape image at least 800×800. Current file is ${localInfo.width}×${localInfo.height}.`, true);
+      return setMessage(`Use a square or landscape image at least 800×800. Current edited output is ${localInfo.width}×${localInfo.height}.`, true);
     }
     const isFirstImageUpload = !Array.from(document.querySelectorAll('[data-product-image-row]')).some((row) => normalizeText(row.querySelector('[data-field="image_url"]')?.value));
     if (isFirstImageUpload && !localInfo.first_image_ok) {
-      return setMessage(`First listing image should be at least 1200×1200 and square or landscape. Current file is ${localInfo.width}×${localInfo.height}.`, true);
+      return setMessage(`First listing image should be at least 1200×1200 and square or landscape. Current edited output is ${localInfo.width}×${localInfo.height}.`, true);
     }
     try {
       setMessage(`Uploading image ${localInfo.width}×${localInfo.height} (${localInfo.orientation}) • est. merchandising ${localInfo.merchandising_score}%.`);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', uploadFile);
       formData.append('product_id', String(productId));
       formData.append('width_px', String(localInfo.width || ''));
       formData.append('height_px', String(localInfo.height || ''));
@@ -730,12 +862,22 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('contrast_score', String(localInfo.contrast_score || ''));
       formData.append('merchandising_score', String(localInfo.merchandising_score || ''));
       formData.append('shot_style', 'record');
+      if (editedUpload.crop) {
+        formData.append('crop_x', String(editedUpload.crop.x));
+        formData.append('crop_y', String(editedUpload.crop.y));
+        formData.append('crop_width', String(editedUpload.crop.width));
+        formData.append('crop_height', String(editedUpload.crop.height));
+      }
+      if (editedUpload.resize) {
+        formData.append('resize_width_px', String(editedUpload.resize.width));
+        formData.append('resize_height_px', String(editedUpload.resize.height));
+      }
       const response = await window.DDAuth.apiFetch('/api/admin/media-upload', { method: 'POST', body: formData, headers: {} });
       const data = await response.json();
       if (!response.ok || !data?.ok || !data?.asset?.public_url) throw new Error(data?.error || 'Failed to upload image.');
       addRow({
         image_url: data.asset.public_url,
-        alt_text: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
+        alt_text: uploadFile.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
         sort_order: document.querySelectorAll('[data-product-image-row]').length,
         width_px: localInfo.width,
         height_px: localInfo.height,
@@ -745,6 +887,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sharpness_score: localInfo.sharpness_score,
         brightness_score: localInfo.brightness_score,
         contrast_score: localInfo.contrast_score,
+        crop_x: editedUpload.crop?.x ?? null,
+        crop_y: editedUpload.crop?.y ?? null,
+        crop_width: editedUpload.crop?.width ?? null,
+        crop_height: editedUpload.crop?.height ?? null,
+        annotation_notes: editedUpload.edited ? `Upload edited: ${editedUpload.note || 'crop/resize applied'}` : '',
         shot_style: 'record',
         merchandising_score: localInfo.merchandising_score,
         first_image_score: localInfo.merchandising_score

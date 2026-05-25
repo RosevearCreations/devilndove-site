@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let products = [];
   let notes = [];
   let selectedNoteId = '';
+  let consentSummaries = {};
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -68,18 +69,32 @@ document.addEventListener('DOMContentLoaded', () => {
       .join(' — ');
   }
 
+  function consentSummaryForProduct(productId) {
+    return consentSummaries[String(productId || '')] || null;
+  }
+
+  function renderConsentSummary(summary) {
+    if (!summary || !summary.checked) return '<span class="pill">Consent not checked</span>';
+    const blockers = Number(summary.blocked_count || 0) + Number(summary.missing_consent_count || 0) + Number(summary.not_public_allowed_count || 0);
+    const tone = blockers ? 'danger' : 'success';
+    const label = blockers ? `${blockers} blocker(s)` : 'Clear';
+    const details = `${Number(summary.public_ready_count || 0)}/${Number(summary.total_images || 0)} image(s) public-ready`;
+    return `<span class="pill ${tone}">${escapeHtml(label)}</span><div class="small">${escapeHtml(details)}</div>${blockers ? `<div class="small">Blocked ${escapeHtml(String(summary.blocked_count || 0))} • Missing ${escapeHtml(String(summary.missing_consent_count || 0))} • Not allowed ${escapeHtml(String(summary.not_public_allowed_count || 0))}</div>` : ''}`;
+  }
+
   function renderNoteRows() {
     if (!notes.length) {
       return '<p class="small">No product story notes yet. Choose a product and seed a draft from product fields.</p>';
     }
 
     return `<div class="admin-table-wrap"><table class="products-admin-table">
-      <thead><tr><th>Product</th><th>Status</th><th>Privacy</th><th>Heading</th><th>Updated</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Product</th><th>Status</th><th>Privacy</th><th>Media consent</th><th>Heading</th><th>Updated</th><th>Actions</th></tr></thead>
       <tbody>${notes.map((note) => `
         <tr>
           <td>${escapeHtml(note.product_name || `Product #${note.product_id}`)}</td>
           <td><span class="pill">${escapeHtml(note.display_status || 'draft')}</span></td>
           <td><span class="pill">${escapeHtml(note.privacy_status || 'needs_review')}</span></td>
+          <td>${renderConsentSummary(note.media_consent_summary || consentSummaryForProduct(note.product_id))}</td>
           <td>${escapeHtml(note.story_heading || note.story_summary || 'Untitled story')}</td>
           <td class="small">${escapeHtml(note.updated_at || '')}</td>
           <td><button class="btn" type="button" data-edit-story-note="${escapeHtml(note.product_story_public_note_id)}">Edit</button></td>
@@ -169,7 +184,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const select = document.getElementById('productStoryProductSelect');
     const summary = document.getElementById('productStoryProductSummary');
     const product = findProduct(select?.value);
-    if (summary) summary.textContent = product ? summarizeProduct(product) || 'No source story fields yet.' : 'Choose a product to write or seed story copy.';
+    if (summary) {
+      const consent = product ? consentSummaryForProduct(product.product_id) : null;
+      const base = product ? summarizeProduct(product) || 'No source story fields yet.' : 'Choose a product to write or seed story copy.';
+      if (!product || !consent) summary.textContent = base;
+      else {
+        const blockers = Number(consent.blocked_count || 0) + Number(consent.missing_consent_count || 0) + Number(consent.not_public_allowed_count || 0);
+        summary.textContent = `${base} Media consent: ${blockers ? `${blockers} blocker(s)` : 'clear'} (${Number(consent.public_ready_count || 0)}/${Number(consent.total_images || 0)} image(s) public-ready).`;
+      }
+    }
   }
 
   async function loadData() {
@@ -178,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await apiFetchJson('/api/admin/product-story-notes');
       products = Array.isArray(data.products) ? data.products : [];
       notes = Array.isArray(data.notes) ? data.notes : [];
+      consentSummaries = data.consent_summaries && typeof data.consent_summaries === 'object' ? data.consent_summaries : {};
       render();
       setMessage(`Loaded ${notes.length} story note(s).`, 'success');
     } catch (error) {
