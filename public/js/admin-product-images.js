@@ -38,6 +38,40 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(value || '').trim();
   }
 
+  const IMAGE_ROLE_OPTIONS = [
+    ['hero_front', 'Hero/front'],
+    ['detail_texture', 'Detail/texture'],
+    ['scale_context', 'Scale/context'],
+    ['back_side', 'Back/side'],
+    ['process_story', 'Process/story'],
+    ['packaging_pickup', 'Packaging/pickup'],
+    ['material_tool_proof', 'Material/tool proof'],
+    ['gallery_support', 'Gallery/support']
+  ];
+
+  const PUBLIC_USE_OPTIONS = [
+    ['internal_review', 'Internal review'],
+    ['product_page_ok', 'Product page OK'],
+    ['social_ok', 'Social OK'],
+    ['all_public_ok', 'All public OK'],
+    ['consent_needed', 'Consent needed'],
+    ['blocked', 'Blocked']
+  ];
+
+  function normalizeRole(value, index = 0) {
+    const clean = normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    return IMAGE_ROLE_OPTIONS.some(([key]) => key === clean) ? clean : index === 0 ? 'hero_front' : 'gallery_support';
+  }
+
+  function roleLabel(value) {
+    const found = IMAGE_ROLE_OPTIONS.find(([key]) => key === value);
+    return found ? found[1] : 'Gallery/support';
+  }
+
+  function optionList(options, selected) {
+    return options.map(([value, label]) => `<option value="${escapeHtml(value)}" ${String(selected || '') === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('');
+  }
+
   function toOptionalNumber(value) {
     if (value == null || value === '') return null;
     const numeric = Number(value);
@@ -308,11 +342,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function rowTemplate(row = {}, index = 0) {
     const shotStyle = normalizeText(row.shot_style || 'record').toLowerCase() || 'record';
     return `
-      <div class="card" data-product-image-row style="margin-top:12px">
+      <div class="card product-image-sortable-row" data-product-image-row draggable="true" style="margin-top:12px">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
           <strong>Image Row ${index + 1}</strong>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
             <span class="small" data-score-display>${escapeHtml(String(row.merchandising_score ?? row.first_image_score ?? 0))}% merch</span>
+            <span class="small" data-role-display>${escapeHtml(roleLabel(normalizeRole(row.image_role, index)))}</span>
+            <button class="btn" type="button" data-row-drag-handle title="Drag this image to reorder">↕ drag</button>
             <button class="btn" type="button" data-row-move="up">↑</button>
             <button class="btn" type="button" data-row-move="down">↓</button>
             <button class="btn" type="button" data-row-remove>Remove</button>
@@ -332,6 +368,12 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><label class="small">Image Title</label><input type="text" data-field="image_title" value="${escapeHtml(row.image_title || '')}" /></div>
           <div><label class="small">Caption</label><input type="text" data-field="caption" value="${escapeHtml(row.caption || '')}" /></div>
           <div><label class="small">Sort Order</label><input type="number" data-field="sort_order" min="0" step="1" value="${escapeHtml(String(row.sort_order ?? index))}" /></div>
+        </div>
+        <div class="grid cols-4" style="gap:12px;margin-top:12px">
+          <div><label class="small">Image role</label><select data-field="image_role">${optionList(IMAGE_ROLE_OPTIONS, normalizeRole(row.image_role, index))}</select></div>
+          <div><label class="small">Public use status</label><select data-field="public_use_status">${optionList(PUBLIC_USE_OPTIONS, row.public_use_status || 'internal_review')}</select></div>
+          <div><label class="small">Consent record ID</label><input type="number" data-field="consent_record_id" min="1" step="1" value="${escapeHtml(row.consent_record_id ?? '')}" placeholder="optional" /></div>
+          <div><label class="small">Role/review notes</label><input type="text" data-field="role_review_notes" value="${escapeHtml(row.role_review_notes || '')}" placeholder="Consent, crop, or usage note" /></div>
         </div>
         <div class="grid cols-3" style="gap:12px;margin-top:12px">
           <div><label class="small">Focal X</label><input type="number" data-field="focal_point_x" min="0" max="1" step="0.01" value="${escapeHtml(row.focal_point_x ?? '')}" /></div>
@@ -395,6 +437,10 @@ document.addEventListener('DOMContentLoaded', () => {
         image_title: normalizeText(value('image_title')),
         caption: normalizeText(value('caption')),
         sort_order: index,
+        image_role: normalizeRole(value('image_role'), index),
+        public_use_status: normalizeText(value('public_use_status')) || 'internal_review',
+        consent_record_id: toOptionalNumber(value('consent_record_id')),
+        role_review_notes: normalizeText(value('role_review_notes')),
         focal_point_x: toOptionalNumber(value('focal_point_x')),
         focal_point_y: toOptionalNumber(value('focal_point_y')),
         annotation_notes: normalizeText(value('annotation_notes')),
@@ -474,6 +520,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const weakUnapprovedGalleryImages = rows.filter((row, index) => index > 0 && Number(row.merchandising_score || row.first_image_score || 0) < 64 && !normalizeText(row.merchandising_override_reason)).length;
     const firstOrientation = String(firstImage?.image_orientation || '').toLowerCase();
     const firstWarnings = firstImage ? summarizeImageGuidance(firstImage, true) : ['Choose a first image before publish.'];
+    const roleCounts = rows.reduce((acc, row, index) => { const key = normalizeRole(row.image_role, index); acc[key] = Number(acc[key] || 0) + 1; return acc; }, {});
+    const roleSummary = Object.entries(roleCounts).map(([key, count]) => `${roleLabel(key)}: ${count}`).join(' • ');
+    const consentNeeded = rows.filter((row) => ['consent_needed', 'blocked'].includes(normalizeText(row.public_use_status))).length;
     const lastSaved = latestSavedSummary || currentScoreHistory[0] || null;
     const priorSaved = currentScoreHistory[1] || null;
     const draftLeadTrend = lastSaved ? formatTrendDelta(firstImageScore, Number(lastSaved.lead_image_score || 0)) : '';
@@ -489,6 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mount.innerHTML = `
       <h4 style="margin-top:0">Photo merchandising before publish</h4>
       <div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • average merchandising score ${overallScore}% • lead image score ${firstImageScore}% • duplicate-angle rows ${duplicateAngleGroups}</div>
+      <div class="small" style="margin-top:6px">Roles: ${escapeHtml(roleSummary || 'No roles selected yet.')} ${consentNeeded ? `• ${escapeHtml(String(consentNeeded))} image(s) need consent or are blocked` : ''}</div>
       <div class="small" style="margin-top:6px">${guidance.join(' ')}</div>
       <div class="small" style="margin-top:6px">${overriddenGalleryImages ? `${escapeHtml(String(overriddenGalleryImages))} gallery image(s) are being kept by documented override reason.` : 'No gallery overrides are documented right now.'}${weakUnapprovedGalleryImages ? ` ${escapeHtml(String(weakUnapprovedGalleryImages))} low-scoring gallery image(s) still need an override reason or replacement.` : ''}</div>
       ${(draftLeadTrend || draftGalleryTrend) ? `<div class="small" style="margin-top:6px">Draft vs last saved: ${escapeHtml(draftGalleryTrend || 'flat')} gallery • ${escapeHtml(draftLeadTrend || 'flat')} lead${lastSaved?.created_at ? ` • last saved ${escapeHtml(lastSaved.created_at)}` : ''}</div>` : ''}
@@ -497,6 +547,30 @@ document.addEventListener('DOMContentLoaded', () => {
       ${firstWarnings.map((warning) => `<div class="small" style="margin-top:6px;color:#b00020">${escapeHtml(warning)}</div>`).join('')}`;
   }
 
+
+  function applyRecommendedRoles() {
+    const rows = Array.from(document.querySelectorAll('[data-product-image-row]'));
+    const recommended = ['hero_front', 'detail_texture', 'scale_context', 'back_side', 'process_story', 'packaging_pickup', 'material_tool_proof'];
+    rows.forEach((row, index) => {
+      const roleField = row.querySelector('[data-field="image_role"]');
+      if (roleField) roleField.value = recommended[index] || 'gallery_support';
+      const statusField = row.querySelector('[data-field="public_use_status"]');
+      if (statusField && !statusField.value) statusField.value = index === 0 ? 'product_page_ok' : 'internal_review';
+    });
+    reindexRows();
+    renderQualityScore();
+    setMessage('Recommended image roles applied. Review consent/public-use status before saving.');
+  }
+
+  function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('[data-product-image-row]:not(.is-dragging)')];
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) return { offset, element: child };
+      return closest;
+    }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+  }
   function render() {
     if (rendered) return;
     rendered = true;
@@ -508,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <form id="adminProductImagesForm" class="grid" style="gap:12px">
           <div class="grid cols-2" style="gap:12px">
             <div><label class="small" for="productImagesProductId">Product ID</label><input id="productImagesProductId" type="number" min="1" step="1" required /></div>
-            <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap"><button class="btn" type="button" id="loadProductImagesButton">Load Images</button><button class="btn" type="button" id="addProductImageRowButton">Add Row</button><button class="btn" type="submit" id="saveProductImagesButton">Save Images</button></div>
+            <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap"><button class="btn" type="button" id="loadProductImagesButton">Load Images</button><button class="btn" type="button" id="addProductImageRowButton">Add Row</button><button class="btn" type="button" id="applyRecommendedImageRolesButton">Apply recommended roles</button><button class="btn" type="submit" id="saveProductImagesButton">Save Images</button></div>
           </div>
           <div class="card" style="margin-top:4px">
             <h4 style="margin-top:0">Direct Upload to R2</h4>
@@ -525,6 +599,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('loadProductImagesButton')?.addEventListener('click', loadImages);
     document.getElementById('addProductImageRowButton')?.addEventListener('click', () => addRow());
+    document.getElementById('applyRecommendedImageRolesButton')?.addEventListener('click', applyRecommendedRoles);
     document.getElementById('uploadProductImageButton')?.addEventListener('click', uploadImage);
     document.getElementById('productImageUploadInput')?.addEventListener('change', async (event) => {
       const file = event.target?.files?.[0];
@@ -546,7 +621,35 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('adminProductImagesForm')?.addEventListener('submit', saveImages);
     mountEl.addEventListener('click', onClick);
     mountEl.addEventListener('input', (event) => {
-      if (event.target?.closest?.('[data-product-image-row]')) renderQualityScore();
+      if (event.target?.closest?.('[data-product-image-row]')) {
+        reindexRows();
+        renderQualityScore();
+      }
+    });
+    mountEl.addEventListener('dragstart', (event) => {
+      const row = event.target?.closest?.('[data-product-image-row]');
+      if (!row) return;
+      row.classList.add('is-dragging');
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', row.querySelector('[data-field="image_url"]')?.value || 'product-image-row');
+      }
+    });
+    mountEl.addEventListener('dragover', (event) => {
+      const container = document.getElementById('productImagesRows');
+      if (!container || !event.target?.closest?.('#productImagesRows')) return;
+      event.preventDefault();
+      const afterElement = getDragAfterElement(container, event.clientY);
+      const dragging = container.querySelector('.is-dragging');
+      if (!dragging) return;
+      if (afterElement == null) container.appendChild(dragging);
+      else container.insertBefore(dragging, afterElement);
+      reindexRows();
+    });
+    mountEl.addEventListener('dragend', () => {
+      mountEl.querySelectorAll('.is-dragging').forEach((row) => row.classList.remove('is-dragging'));
+      reindexRows();
+      renderQualityScore();
     });
     addRow();
     renderQualityScore();
@@ -560,6 +663,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sort) sort.value = String(index);
       const gateHint = row.querySelector('[data-field="lead_gate_hint"]');
       if (gateHint) gateHint.value = index === 0 ? 'Lead candidate' : 'Gallery/support image';
+      const roleField = row.querySelector('[data-field="image_role"]');
+      if (roleField && !roleField.value) roleField.value = normalizeRole('', index);
+      const roleDisplay = row.querySelector('[data-role-display]');
+      if (roleDisplay) roleDisplay.textContent = roleLabel(normalizeRole(roleField?.value, index));
     });
   }
 

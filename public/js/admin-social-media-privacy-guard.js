@@ -23,6 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cls = ['approved', 'no_private_media'].includes(clean) ? 'ok' : ['blocked', 'do_not_post', 'consent_needed'].includes(clean) ? 'danger' : 'warn';
     return `<span class="admin-status-pill ${cls}">${esc(clean.replace(/_/g, ' '))}</span>`;
   }
+  function consentPill(summary = {}) {
+    const status = String(summary.consent_status || 'not_linked');
+    const cls = status === 'social_ok' ? 'ok' : status === 'blocked' ? 'danger' : ['requested', 'linked_no_public_use', 'public_only'].includes(status) ? 'warn' : '';
+    return `<span class="admin-status-pill ${cls}">consent: ${esc(status.replace(/_/g, ' '))}</span>`;
+  }
   function render(data) {
     const summary = data.summary || {};
     const rules = Array.isArray(data.rules) ? data.rules : [];
@@ -48,7 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const current = row.privacy_status || inferred.privacy_status || 'needs_review';
             return `<tr data-social-privacy-row="${esc(row.social_post_queue_id)}">
               <td><strong>${esc(row.title || '')}</strong><div class="small">${esc(row.source_type || '')} · ${esc(row.post_status || '')} · ${esc(row.approval_status || '')}</div><div class="small">${esc(row.summary || '')}</div></td>
-              <td>${num((row.image_urls || []).length)}<div class="small">${(row.image_urls || []).slice(0, 2).map((url) => `<code>${esc(url)}</code>`).join('<br>')}</div></td>
+              <td>${num((row.image_urls || []).length)}<div class="small">${(row.image_urls || []).slice(0, 2).map((url) => `<code>${esc(url)}</code>`).join('<br>')}</div>
+                <div class="small" style="margin-top:6px">${consentPill(row.consent_summary || {})}</div>
+                <div class="small">Matches: ${num(row.consent_summary?.matching_count || 0)} • Social OK: ${num(row.consent_summary?.social_allowed_count || 0)} • Blocked: ${num(row.consent_summary?.blocked_count || 0)}</div>
+              </td>
               <td><select data-social-privacy-status>
                 ${['needs_review','approved','no_private_media','consent_needed','blocked','do_not_post'].map((status) => `<option value="${status}" ${current === status ? 'selected' : ''}>${status.replace(/_/g, ' ')}</option>`).join('')}
               </select><div style="margin-top:6px">${statusPill(current)}</div>
@@ -95,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   mount.innerHTML = `
     <div class="card" id="social-media-privacy-guard-card" style="margin-top:18px">
       <h2 style="margin-top:0">Social Media Privacy Guard</h2>
-      <p class="small">Review crafting/job/process photos before public posting. Use this to block private backgrounds, customer details, faces, addresses, order information, or anything that should not go to Facebook, Instagram, TikTok, X, Pinterest, or YouTube.</p>
+      <p class="small">Review crafting/job/process photos before public posting. Consent matches are pulled from Media Consent Records by source or media URL, so customer/private media cannot be approved without a proper consent trail.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn primary" type="button" id="loadSocialPrivacyGuardButton">Load privacy guard</button>
         <button class="btn" type="button" id="seedSocialPrivacyRulesButton">Refresh default rules</button>
