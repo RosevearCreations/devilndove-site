@@ -274,9 +274,11 @@ function stableHash(value) {
   return Math.abs(hash).toString(36);
 }
 
-function templateByKey(key) {
+async function templateByKey(db, key) {
   const clean = slugKey(key || '');
-  return CAPTION_TEMPLATES.find((template) => template.template_key === clean) || null;
+  if (!clean) return null;
+  const stored = await db.prepare(`SELECT * FROM social_caption_templates WHERE template_key = ? AND COALESCE(is_active,1)=1 LIMIT 1`).bind(clean).first().catch(() => null);
+  return stored || CAPTION_TEMPLATES.find((template) => template.template_key === clean) || null;
 }
 function fillCaptionTemplate(template, values = {}) {
   if (!template) return '';
@@ -457,16 +459,7 @@ async function ensureSchema(db) {
       template_key, display_name, content_pillar, default_platforms_json, default_hashtags,
       body_template, call_to_action, is_active, notes, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(template_key) DO UPDATE SET
-      display_name = excluded.display_name,
-      content_pillar = excluded.content_pillar,
-      default_platforms_json = excluded.default_platforms_json,
-      default_hashtags = excluded.default_hashtags,
-      body_template = excluded.body_template,
-      call_to_action = excluded.call_to_action,
-      is_active = 1,
-      notes = excluded.notes,
-      updated_at = CURRENT_TIMESTAMP`).bind(
+    ON CONFLICT(template_key) DO NOTHING`).bind(
       template.template_key,
       template.display_name,
       template.content_pillar,
@@ -554,13 +547,26 @@ async function summarize(db, env = {}) {
     GROUP BY calendar_date
     ORDER BY calendar_date ASC
     LIMIT 60`).all().catch(() => ({ results: [] })));
+  const utm_rollups = rows(await db.prepare(`SELECT
+      COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source,
+      COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium,
+      COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign,
+      COUNT(*) AS total_posts,
+      SUM(CASE WHEN post_status='posted' THEN 1 ELSE 0 END) AS posted_count,
+      SUM(CASE WHEN post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
+      SUM(CASE WHEN approval_status='approved' THEN 1 ELSE 0 END) AS approved_count
+    FROM social_post_queue
+    WHERE COALESCE(post_status,'draft') <> 'archived'
+    GROUP BY utm_source, utm_medium, utm_campaign
+    ORDER BY total_posts DESC, posted_count DESC, utm_campaign ASC
+    LIMIT 40`).all().catch(() => ({ results: [] })));
   const platform_readiness = getPlatformReadiness(env);
   const platformRows = platforms.map((platform) => ({
     ...platform,
     ...(platform_readiness[platform.platform_key] || {}),
     stored_api_ready: platform.api_ready
   }));
-  return { summary, queue, platforms: platformRows, attempts, templates, calendar, platform_readiness };
+  return { summary, queue, platforms: platformRows, attempts, templates, calendar, utm_rollups, platform_readiness };
 }
 function normalizeQueueRow(row = {}) {
   return {
@@ -576,7 +582,7 @@ async function createQueuedPost(db, adminUser, payload = {}) {
   const title = trimTo(payload.title || payload.job_title || payload.process_title || 'Workshop update', 140);
   const summary = trimTo(payload.summary || payload.description || '', 1200);
   const templateKey = slugKey(payload.caption_template_key || payload.template_key || '');
-  const template = templateByKey(templateKey);
+  const template = await templateByKey(db, templateKey);
   const templatePlatforms = template ? safeJson(template.default_platforms_json, []) : [];
   const hashtags = normalizeHashtags(payload.hashtags || template?.default_hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada');
   const imageUrls = splitList(payload.image_urls || payload.image_url || payload.images).map(safeUrl).filter(Boolean).slice(0, 10);
@@ -824,8 +830,51 @@ async function recordApiAttempt(db, adminUser, id, platform, status, details = {
   });
 }
 
-async function previewCaptionTemplate(payload = {}) {
-  const template = templateByKey(payload.caption_template_key || payload.template_key || '');
+
+async function saveCaptionTemplate(db, payload = {}) {
+  const templateKey = slugKey(payload.template_key || payload.caption_template_key || payload.display_name || '');
+  const displayName = trimTo(payload.display_name || templateKey.replace(/_/g, ' '), 120);
+  const bodyTemplate = trimTo(payload.body_template || '', 2200);
+  if (!templateKey) throw new Error('Template key is required.');
+  if (!displayName) throw new Error('Template display name is required.');
+  if (!bodyTemplate) throw new Error('Template body is required.');
+  const platforms = normalizePlatforms(payload.default_platforms || payload.platforms || payload.default_platforms_json || ['facebook', 'instagram']);
+  const hashtags = normalizeHashtags(payload.default_hashtags || payload.hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade');
+  const contentPillar = slugKey(payload.content_pillar || 'workshop_update');
+  const callToAction = trimTo(payload.call_to_action || '', 280);
+  const notes = trimTo(payload.notes || '', 1200);
+  const isActive = payload.is_active === false || String(payload.is_active || '').toLowerCase() === '0' ? 0 : 1;
+
+  await db.prepare(`INSERT INTO social_caption_templates (
+    template_key, display_name, content_pillar, default_platforms_json, default_hashtags,
+    body_template, call_to_action, is_active, notes, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  ON CONFLICT(template_key) DO UPDATE SET
+    display_name = excluded.display_name,
+    content_pillar = excluded.content_pillar,
+    default_platforms_json = excluded.default_platforms_json,
+    default_hashtags = excluded.default_hashtags,
+    body_template = excluded.body_template,
+    call_to_action = excluded.call_to_action,
+    is_active = excluded.is_active,
+    notes = excluded.notes,
+    updated_at = CURRENT_TIMESTAMP`).bind(
+      templateKey, displayName, contentPillar, JSON.stringify(platforms), hashtags,
+      bodyTemplate, callToAction || null, isActive, notes || null
+    ).run();
+
+  return { template_key: templateKey, display_name: displayName, is_active: isActive };
+}
+
+async function archiveCaptionTemplate(db, payload = {}) {
+  const templateKey = slugKey(payload.template_key || payload.caption_template_key || '');
+  if (!templateKey) throw new Error('Template key is required.');
+  await db.prepare(`UPDATE social_caption_templates SET is_active=0, updated_at=CURRENT_TIMESTAMP WHERE template_key = ?`).bind(templateKey).run();
+  return { template_key: templateKey, archived: true };
+}
+
+async function previewCaptionTemplate(db, payload = {}) {
+  const template = await templateByKey(db, payload.caption_template_key || payload.template_key || '');
   if (!template) throw new Error('Choose a valid caption template.');
   const platforms = normalizePlatforms(payload.target_platforms || payload.platforms || safeJson(template.default_platforms_json, []));
   const hashtags = normalizeHashtags(payload.hashtags || template.default_hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada');
@@ -992,7 +1041,9 @@ export async function onRequestPost(context) {
     else if (action === 'update_status') await updateStatus(db, adminUser, payload);
     else if (action === 'record_manual_post') await recordManualPost(db, adminUser, payload);
     else if (action === 'generate_from_recent_media') result = await generateFromRecentMedia(db, adminUser);
-    else if (action === 'preview_caption_template') result = await previewCaptionTemplate(payload);
+    else if (action === 'preview_caption_template') result = await previewCaptionTemplate(db, payload);
+    else if (action === 'save_caption_template') result = await saveCaptionTemplate(db, payload);
+    else if (action === 'archive_caption_template') result = await archiveCaptionTemplate(db, payload);
     else if (action === 'dry_run_platforms') result = await dryRunQueuedPost(context, db, adminUser, payload);
     else if (action === 'publish_platforms') result = await publishQueuedPost(context, db, adminUser, payload);
     else throw new Error(`Unsupported social queue action: ${action}`);
