@@ -1,11 +1,12 @@
 // File: /functions/api/admin/product-images.js
 // Brief description: Gets and updates ordered product images so product media, annotations,
-// and storefront rendering can be managed together from the admin interface.
+// image roles, public-use status, consent links, product_image_role_reference, and storefront rendering can be managed
+// together from the admin interface.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
   });
 }
 
@@ -36,7 +37,7 @@ async function getAdminUserFromRequest(request, env) {
     WHERE (s.session_token = ? OR s.token = ?)
       AND s.expires_at > datetime('now')
     LIMIT 1
-  `).bind(token, token).first();
+  `).bind(token, token).first().catch(() => null);
 
   if (!session) return null;
   if (Number(session.is_active || 0) !== 1) return null;
@@ -61,8 +62,45 @@ async function getTableColumnSet(db, tableName) {
   }
 }
 
+async function ensureColumn(db, tableName, columnName, alterSql, columnSet = null) {
+  const existing = columnSet || await getTableColumnSet(db, tableName);
+  if (existing.has(columnName)) return existing;
+  await db.prepare(alterSql).run().catch(() => null);
+  return await getTableColumnSet(db, tableName);
+}
+
+async function ensureProductImageTables(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS product_images (
+      product_image_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      product_id INTEGER NOT NULL,
+      image_url TEXT NOT NULL,
+      alt_text TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run().catch(() => null);
+
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS product_image_annotations (
+      product_image_annotation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      product_id INTEGER NOT NULL,
+      product_image_id INTEGER,
+      image_url TEXT,
+      alt_text TEXT,
+      image_title TEXT,
+      caption TEXT,
+      focal_point_x REAL,
+      focal_point_y REAL,
+      annotation_notes TEXT,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run().catch(() => null);
+}
+
 async function ensureAnnotationColumns(db) {
-  const annotationCols = await getTableColumnSet(db, 'product_image_annotations');
+  await ensureProductImageTables(db);
+  let annotationCols = await getTableColumnSet(db, 'product_image_annotations');
   const statements = [
     ['width_px', 'ALTER TABLE product_image_annotations ADD COLUMN width_px INTEGER'],
     ['height_px', 'ALTER TABLE product_image_annotations ADD COLUMN height_px INTEGER'],
@@ -81,12 +119,17 @@ async function ensureAnnotationColumns(db) {
     ['shot_style', 'ALTER TABLE product_image_annotations ADD COLUMN shot_style TEXT'],
     ['merchandising_score', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_score INTEGER'],
     ['merchandising_override_reason', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_override_reason TEXT'],
-    ['merchandising_override_note', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_override_note TEXT']
+    ['merchandising_override_note', 'ALTER TABLE product_image_annotations ADD COLUMN merchandising_override_note TEXT'],
+    ['image_role', 'ALTER TABLE product_image_annotations ADD COLUMN image_role TEXT'],
+    ['public_use_status', "ALTER TABLE product_image_annotations ADD COLUMN public_use_status TEXT DEFAULT 'internal_review'"],
+    ['consent_record_id', 'ALTER TABLE product_image_annotations ADD COLUMN consent_record_id INTEGER'],
+    ['role_review_notes', 'ALTER TABLE product_image_annotations ADD COLUMN role_review_notes TEXT']
   ];
+
   for (const [name, sql] of statements) {
-    if (!annotationCols.has(name)) await db.prepare(sql).run().catch(() => null);
+    annotationCols = await ensureColumn(db, 'product_image_annotations', name, sql, annotationCols);
   }
-  return await getTableColumnSet(db, 'product_image_annotations');
+  return annotationCols;
 }
 
 async function ensureMediaScoreHistoryTable(db) {
@@ -103,9 +146,7 @@ async function ensureMediaScoreHistoryTable(db) {
       overridden_image_count INTEGER NOT NULL DEFAULT 0,
       override_reasons_json TEXT,
       source TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
-      FOREIGN KEY (actor_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_product_media_score_history_product_id_created_at ON product_media_score_history(product_id, created_at DESC)`).run().catch(() => null);
@@ -121,6 +162,19 @@ function parseOptionalPercent(value) {
   const numeric = parseOptionalNumber(value);
   if (numeric == null) return null;
   return Math.max(0, Math.min(100, Math.round(numeric)));
+}
+
+function normalizeRole(value, index = 0) {
+  const clean = normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const allowed = new Set(['hero_front', 'detail_texture', 'scale_context', 'back_side', 'process_story', 'packaging_pickup', 'material_tool_proof', 'gallery_support']);
+  if (allowed.has(clean)) return clean;
+  return index === 0 ? 'hero_front' : 'gallery_support';
+}
+
+function normalizePublicUseStatus(value) {
+  const clean = normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const allowed = new Set(['internal_review', 'product_page_ok', 'social_ok', 'all_public_ok', 'consent_needed', 'blocked']);
+  return allowed.has(clean) ? clean : 'internal_review';
 }
 
 function scoreForRow(row = {}) {
@@ -146,6 +200,11 @@ function summarizeRows(rows = []) {
     return scoreForRow(row) < 64 && !hasOverrideReason(row);
   });
   const overrideReasonCounts = {};
+  const roleCounts = {};
+  for (const row of rows) {
+    const role = normalizeRole(row.image_role, rows.indexOf(row));
+    roleCounts[role] = Number(roleCounts[role] || 0) + 1;
+  }
   for (const row of overriddenRows) {
     const key = normalizeText(row.merchandising_override_reason).toLowerCase() || 'other';
     overrideReasonCounts[key] = Number(overrideReasonCounts[key] || 0) + 1;
@@ -157,8 +216,16 @@ function summarizeRows(rows = []) {
     weak_image_count: weakRows.length,
     weak_unapproved_image_count: weakUnapprovedRows.length,
     overridden_image_count: overriddenRows.length,
-    override_reasons: overrideReasonCounts
+    override_reasons: overrideReasonCounts,
+    role_counts: roleCounts,
+    missing_role_count: rows.filter((row, index) => !normalizeText(row.image_role) && index > 0).length,
+    consent_needed_count: rows.filter((row) => normalizePublicUseStatus(row.public_use_status) === 'consent_needed').length,
+    blocked_public_use_count: rows.filter((row) => normalizePublicUseStatus(row.public_use_status) === 'blocked').length
   };
+}
+
+function selectAnnotationColumn(annotationCols, columnName, fallbackSql) {
+  return annotationCols.has(columnName) ? `pia.${columnName}` : `${fallbackSql} AS ${columnName}`;
 }
 
 export async function onRequestGet(context) {
@@ -178,36 +245,40 @@ export async function onRequestGet(context) {
   const rawImages = normalizeResults(await db.prepare(`
     SELECT pi.product_image_id, pi.product_id, pi.image_url, pi.alt_text, pi.sort_order, pi.created_at,
            pia.image_title, pia.caption, pia.focal_point_x, pia.focal_point_y, pia.annotation_notes,
-           ${annotationCols.has('width_px') ? 'pia.width_px' : 'NULL AS width_px'},
-           ${annotationCols.has('height_px') ? 'pia.height_px' : 'NULL AS height_px'},
-           ${annotationCols.has('image_orientation') ? 'pia.image_orientation' : 'NULL AS image_orientation'},
-           ${annotationCols.has('crop_x') ? 'pia.crop_x' : 'NULL AS crop_x'},
-           ${annotationCols.has('crop_y') ? 'pia.crop_y' : 'NULL AS crop_y'},
-           ${annotationCols.has('crop_width') ? 'pia.crop_width' : 'NULL AS crop_width'},
-           ${annotationCols.has('crop_height') ? 'pia.crop_height' : 'NULL AS crop_height'},
-           ${annotationCols.has('first_image_score') ? 'pia.first_image_score' : 'NULL AS first_image_score'},
-           ${annotationCols.has('background_consistency_score') ? 'pia.background_consistency_score' : 'NULL AS background_consistency_score'},
-           ${annotationCols.has('subject_fill_score') ? 'pia.subject_fill_score' : 'NULL AS subject_fill_score'},
-           ${annotationCols.has('sharpness_score') ? 'pia.sharpness_score' : 'NULL AS sharpness_score'},
-           ${annotationCols.has('brightness_score') ? 'pia.brightness_score' : 'NULL AS brightness_score'},
-           ${annotationCols.has('contrast_score') ? 'pia.contrast_score' : 'NULL AS contrast_score'},
-           ${annotationCols.has('angle_group') ? 'pia.angle_group' : 'NULL AS angle_group'},
-           ${annotationCols.has('shot_style') ? 'pia.shot_style' : 'NULL AS shot_style'},
-           ${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : 'NULL AS merchandising_score'},
-           ${annotationCols.has('merchandising_override_reason') ? 'pia.merchandising_override_reason' : 'NULL AS merchandising_override_reason'},
-           ${annotationCols.has('merchandising_override_note') ? 'pia.merchandising_override_note' : 'NULL AS merchandising_override_note'}
+           ${selectAnnotationColumn(annotationCols, 'width_px', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'height_px', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'image_orientation', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'crop_x', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'crop_y', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'crop_width', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'crop_height', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'first_image_score', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'background_consistency_score', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'subject_fill_score', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'sharpness_score', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'brightness_score', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'contrast_score', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'angle_group', "''")},
+           ${selectAnnotationColumn(annotationCols, 'shot_style', "''")},
+           ${selectAnnotationColumn(annotationCols, 'merchandising_score', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'merchandising_override_reason', "''")},
+           ${selectAnnotationColumn(annotationCols, 'merchandising_override_note', "''")},
+           ${selectAnnotationColumn(annotationCols, 'image_role', "''")},
+           ${selectAnnotationColumn(annotationCols, 'public_use_status', "'internal_review'")},
+           ${selectAnnotationColumn(annotationCols, 'consent_record_id', 'NULL')},
+           ${selectAnnotationColumn(annotationCols, 'role_review_notes', "''")}
     FROM product_images pi
     LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
     WHERE pi.product_id = ?
     ORDER BY pi.sort_order ASC, pi.product_image_id ASC
   `).bind(product_id).all());
 
-  const images = rawImages.map((row) => ({
+  const images = rawImages.map((row, index) => ({
     product_image_id: Number(row.product_image_id || 0),
     product_id: Number(row.product_id || 0),
     image_url: row.image_url || '',
     alt_text: row.alt_text || '',
-    sort_order: Number(row.sort_order || 0),
+    sort_order: Number(row.sort_order ?? index),
     created_at: row.created_at || null,
     image_title: row.image_title || '',
     caption: row.caption || '',
@@ -231,7 +302,11 @@ export async function onRequestGet(context) {
     shot_style: row.shot_style || '',
     merchandising_score: row.merchandising_score == null ? null : Number(row.merchandising_score || 0),
     merchandising_override_reason: row.merchandising_override_reason || '',
-    merchandising_override_note: row.merchandising_override_note || ''
+    merchandising_override_note: row.merchandising_override_note || '',
+    image_role: normalizeRole(row.image_role, index),
+    public_use_status: normalizePublicUseStatus(row.public_use_status),
+    consent_record_id: row.consent_record_id == null ? null : Number(row.consent_record_id || 0),
+    role_review_notes: row.role_review_notes || ''
   }));
 
   const scoreHistory = normalizeResults(await db.prepare(`
@@ -283,7 +358,7 @@ export async function onRequestPost(context) {
   const images = Array.isArray(body.images) ? body.images.slice(0, 20) : [];
   if (!Number.isInteger(product_id) || product_id <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
 
-  const product = await db.prepare(`SELECT product_id, name, featured_image_url FROM products WHERE product_id = ? LIMIT 1`).bind(product_id).first();
+  const product = await db.prepare(`SELECT product_id, name, featured_image_url FROM products WHERE product_id = ? LIMIT 1`).bind(product_id).first().catch(() => null);
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
 
   await db.prepare(`DELETE FROM product_image_annotations WHERE product_id = ?`).bind(product_id).run();
@@ -300,6 +375,10 @@ export async function onRequestPost(context) {
     const merchandisingScore = parseOptionalPercent(row.merchandising_score ?? row.first_image_score);
     const merchandisingOverrideReason = normalizeText(row.merchandising_override_reason);
     const merchandisingOverrideNote = normalizeText(row.merchandising_override_note);
+    const imageRole = normalizeRole(row.image_role, i);
+    const publicUseStatus = normalizePublicUseStatus(row.public_use_status);
+    const consentRecordId = parseOptionalNumber(row.consent_record_id);
+    const roleReviewNotes = normalizeText(row.role_review_notes);
 
     const insert = await db.prepare(`
       INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
@@ -317,8 +396,9 @@ export async function onRequestPost(context) {
         background_consistency_score, subject_fill_score, sharpness_score, brightness_score, contrast_score,
         angle_group, shot_style, merchandising_score,
         merchandising_override_reason, merchandising_override_note,
+        image_role, public_use_status, consent_record_id, role_review_notes,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `).bind(
       product_id,
       productImageId || null,
@@ -346,7 +426,11 @@ export async function onRequestPost(context) {
       normalizeText(row.shot_style) || null,
       merchandisingScore,
       merchandisingOverrideReason || null,
-      merchandisingOverrideNote || null
+      merchandisingOverrideNote || null,
+      imageRole,
+      publicUseStatus,
+      consentRecordId,
+      roleReviewNotes || null
     ).run();
 
     savedRows.push({
@@ -356,7 +440,11 @@ export async function onRequestPost(context) {
       alt_text: altText,
       merchandising_score: merchandisingScore,
       merchandising_override_reason: merchandisingOverrideReason,
-      merchandising_override_note: merchandisingOverrideNote
+      merchandising_override_note: merchandisingOverrideNote,
+      image_role: imageRole,
+      public_use_status: publicUseStatus,
+      consent_record_id: consentRecordId,
+      role_review_notes: roleReviewNotes
     });
 
     if (featuredImageUrl == null || Number(sortOrder) === 0) {
@@ -372,7 +460,8 @@ export async function onRequestPost(context) {
     `).bind(featuredImageUrl, product_id).run();
   }
 
-  const summary = summarizeRows(savedRows.sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0)));
+  const orderedSavedRows = savedRows.sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+  const summary = summarizeRows(orderedSavedRows);
   await db.prepare(`
     INSERT INTO product_media_score_history (
       product_id, actor_user_id, image_count, lead_image_score, gallery_merchandising_score,
@@ -387,7 +476,7 @@ export async function onRequestPost(context) {
     summary.weak_image_count,
     summary.weak_unapproved_image_count,
     summary.overridden_image_count,
-    JSON.stringify(summary.override_reasons || {}),
+    JSON.stringify({ ...(summary.override_reasons || {}), image_roles: summary.role_counts || {} }),
     'admin_product_images_save'
   ).run().catch(() => null);
 
