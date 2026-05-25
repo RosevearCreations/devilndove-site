@@ -1,3 +1,34 @@
+# Build 149 schema reference update
+
+## `custom_requests`
+
+Purpose: stores public custom-request intake for engraving, personalized gifts, handmade jewelry, sublimation, and workshop-made commissions before they become quotes/jobs/products.
+
+Important fields:
+
+- `custom_request_id`
+- `request_key`
+- `name`, `email`, `phone`
+- `request_type`
+- `product_interest`
+- `deadline_date`
+- `budget_cents`
+- `message`
+- `attachment_urls_json`
+- `consent_to_contact`
+- `status`
+- `admin_notes`
+- `created_at`, `updated_at`
+
+Indexes:
+
+- `idx_custom_requests_status` on `status, created_at`
+- `idx_custom_requests_email` on `email, created_at`
+
+## `social_caption_templates` behavior
+
+Caption templates are still seeded when missing, but Build 149 stops overwriting edited templates on each schema pass. Admin edits now persist through Social Posting Queue actions.
+
 # Database Schema Reference
 
 ## Build 140 schema update

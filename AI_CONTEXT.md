@@ -1,3 +1,16 @@
+# Build 149 AI context
+
+The latest pass focused on the outstanding sanity-check list for Devil n Dove:
+
+- Product readiness/review now checks missing image roles, hero/front role, and blocked/consent-needed public-use status.
+- Product Story Notes now depend on story privacy status plus product media consent summaries before approved/published states are allowed.
+- Product Media Workflow now includes simple browser-side crop/resize upload presets.
+- Public product detail image output is role-aware and filters blocked/consent-needed media.
+- Public `/custom-request/` plus Operations > Custom Requests now capture/review custom engraving, personalized gift, jewelry, sublimation, and workshop-made requests.
+- Social Posting Queue caption templates are admin-editable and UTM campaign rollups are visible.
+
+When continuing, prioritize testimonial/local trust workflow, custom request -> quote/job/product draft conversion, Search Console reviewed-action application, and the accounting close/export work.
+
 # AI Context — Devil n Dove
 
 ## Build 140 working context

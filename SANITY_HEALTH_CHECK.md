@@ -1,3 +1,19 @@
+# Build 149 sanity additions
+
+After deploying Build 149:
+
+1. Run `database_upgrade_current_pass.sql` or record the migration ledger state for this build.
+2. Open `/admin/catalog/`, load a product in Product Media Workflow, select an image, try the square 1200 crop preset, upload, and save.
+3. Confirm the product image row stores width/height/orientation and crop fields.
+4. Run Product Readiness and confirm missing image roles or missing hero/front role produce warnings/failures.
+5. Open Product Story Notes, select a product, and confirm media consent summary appears in the product summary and table.
+6. Try approving a story with blocked/consent-needed media and confirm the API blocks it with a readable JSON message.
+7. Open a public product detail page and confirm images are still visible but role-aware groups are present in `/api/product-detail?slug=...`.
+8. Submit a harmless `/custom-request/` test and confirm it appears in `/admin/operations/` > Custom Requests.
+9. Edit a Social Posting Queue caption template, refresh, and confirm the custom text persists.
+10. Confirm Social Posting Queue shows UTM campaign rollups after at least one UTM-linked queued post exists.
+11. Run `python scripts/predeploy_sanity_check.py .` before packaging and confirm one-H1/title/meta checks still pass.
+
 # Sanity Health Check — Devil n Dove
 
 ## Build 140 checks added

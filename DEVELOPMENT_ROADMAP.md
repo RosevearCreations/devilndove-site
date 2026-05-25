@@ -1,3 +1,29 @@
+# Build 149 completed — product media gates, consent checks, custom requests, and social template editing
+
+Completed in Build 149:
+
+1. Added automatic product-readiness checks for missing image roles, missing hero/front image role, and blocked/consent-needed public-use statuses.
+2. Added the same image-role/public-use blockers to admin product review/publish actions.
+3. Connected Product Story Notes approval/publishing to privacy status plus product-image media consent summaries.
+4. Displayed media consent status inside Product Story Notes rows and product summary copy.
+5. Added simple upload-time image editing presets: keep original, square 1200 crop, landscape 4:3 crop, and max-side resize.
+6. Added role-aware public product detail gallery output using image roles such as hero, detail, scale, process, packaging, proof, and gallery.
+7. Hid storefront images that are explicitly blocked or consent-needed, and hid images linked to consent records that are not public-safe.
+8. Added public `/custom-request/` intake for engraving, personalized gifts, handmade jewelry, sublimation, and other workshop-made custom work.
+9. Added Operations > Custom Requests admin review queue with statuses and admin notes.
+10. Made Social Posting Queue caption templates editable from admin instead of overwriting them from code on every schema pass.
+11. Added Social Posting Queue UTM campaign rollups for queued/open/approved/posted social posts.
+12. Updated current-pass SQL and schema reference files for `custom_requests` and caption-template persistence.
+13. Updated Markdown handoff docs and sanity notes for this pass.
+
+Still strongest next steps:
+
+1. Finish approved testimonial/local trust block workflow.
+2. Add a direct custom request -> quote/job/product draft conversion action.
+3. Add Search Console reviewed-action auto-apply with a final confirmation gate.
+4. Continue payment application, HST/GST review, month-end close checklist hardening, and accountant export packaging.
+5. Add click/session analytics joins to the new UTM social rollups once production analytics tables are confirmed.
+
 ## Completed items in this pass — Build 142
 
 1. Completed `COMPETITIVE.md` as the main competitive strategy document for Devil n Dove.

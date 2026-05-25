@@ -1,3 +1,11 @@
+# New Chat Status — Devil n Dove Build 149
+
+## Current status — Build 149
+
+Build 149 starts from the latest uploaded build and closes several product/media/social/custom-request gaps. Product publish readiness and review actions now fail/warn on missing image roles, missing hero/front role, and public-use/consent blockers. Product Story Notes now show media-consent status and block approved/published status when privacy or consent is not cleared. Product Media Workflow now has simple browser-side crop/resize presets during upload. Public product detail images are filtered/grouped by image role and public-use status. Operations now includes a Custom Requests admin queue, while the public site has `/custom-request/` for engraving, personalized gifts, and workshop-made commissions. Social Posting Queue now has admin-editable caption templates and UTM campaign rollups.
+
+Deploy checks: apply or record `database_upgrade_current_pass.sql`, open `/admin/catalog/` and test Product Media Workflow upload presets, open Product Story Notes and confirm media consent blockers appear, open `/custom-request/` and submit a harmless test request, then open `/admin/operations/` to review Custom Requests and Social Posting Queue template/UTM panels.
+
 # New Chat Status — Devil n Dove Build 142
 
 ## Current status — Build 142

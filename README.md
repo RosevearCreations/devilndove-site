@@ -1,3 +1,9 @@
+# Build 149 operator note
+
+Build 149 adds stronger product media gates, Product Story consent checks, simple crop/resize tools during upload, public custom request intake, Operations custom-request review, editable social caption templates, and social UTM rollups.
+
+Recommended first checks after deploy: Product Media Workflow upload preset, Product Story approval blocker, `/custom-request/` form submission, Operations > Custom Requests, and Social Posting Queue template editing.
+
 # Devil n Dove Site
 
 ## Build 140 note

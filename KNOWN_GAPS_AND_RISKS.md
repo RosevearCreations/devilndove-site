@@ -1,3 +1,31 @@
+# Build 149 gaps and risks update
+
+## Closed or reduced in Build 149
+
+- Simple photo editing is now available during Product Media Workflow uploads through crop/resize presets.
+- Product readiness and review actions now flag/fail missing image roles, missing hero/front role, and blocked/consent-needed public-use statuses.
+- Product Story Notes approval/publishing is now blocked unless the story privacy status is safe/private-detail-removed and product media consent is clear.
+- Media consent status now appears in Product Story Notes product summaries and rows.
+- Public product detail galleries now return role-aware image groups and hide explicitly blocked/consent-needed images.
+- Custom request intake is now public and has an Operations admin review queue.
+- Social caption templates are now admin-editable.
+- Social UTM campaign rollups now exist in the Social Posting Queue admin panel.
+
+## Still open
+
+- Approved testimonial/local trust block workflow is still not complete.
+- Custom requests are captured and reviewable, but they do not yet convert directly into quotes, jobs, or product drafts.
+- Search Console reviewed title/meta/internal-link actions still remain manual/review-first and do not auto-apply to public pages.
+- Social UTM rollups currently summarize queued/posted social records; they do not yet join live visitor/session conversion analytics.
+- Payment application, HST/GST review, month-end close controls, and accountant export packaging remain the most important unfinished accounting workflows.
+
+## Watch after deployment
+
+- Confirm old products with no image-role annotations still show usable public images, while blocked/consent-needed images are hidden.
+- Confirm Product Story Notes cannot be approved while media consent blockers are present.
+- Confirm upload crop/resize output still passes the first-image 1200×1200 gate for square crops.
+- Confirm `/custom-request/` submits JSON successfully and Operations > Custom Requests can update statuses.
+
 # Known Gaps and Risks — Devil n Dove
 
 ## Build 140 update — social scheduling and dry-run risks

@@ -973,3 +973,25 @@ ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT;
 -- platform caption variants, duplicate/repost guardrails, and media-warning fields
 -- are reflected in database_full_schema.sql, database_store_schema.sql,
 -- database_growth_analytics_seo_extension.sql, and database_upgrade_current_pass.sql.
+
+-- Build 146: custom request intake table.
+CREATE TABLE IF NOT EXISTS custom_requests (
+  custom_request_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  request_key TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  request_type TEXT NOT NULL,
+  product_interest TEXT,
+  deadline_date TEXT,
+  budget_cents INTEGER,
+  message TEXT NOT NULL,
+  attachment_urls_json TEXT DEFAULT '[]',
+  consent_to_contact INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'new',
+  admin_notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_custom_requests_status ON custom_requests(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_custom_requests_email ON custom_requests(email, created_at);

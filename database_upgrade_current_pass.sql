@@ -942,3 +942,41 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- Build 146: custom request intake + social caption template editing + media consent publish gates.
+CREATE TABLE IF NOT EXISTS custom_requests (
+  custom_request_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  request_key TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  request_type TEXT NOT NULL,
+  product_interest TEXT,
+  deadline_date TEXT,
+  budget_cents INTEGER,
+  message TEXT NOT NULL,
+  attachment_urls_json TEXT DEFAULT '[]',
+  consent_to_contact INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'new',
+  admin_notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_custom_requests_status ON custom_requests(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_custom_requests_email ON custom_requests(email, created_at);
+
+CREATE TABLE IF NOT EXISTS social_caption_templates (
+  social_caption_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  template_key TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL,
+  content_pillar TEXT,
+  default_platforms_json TEXT NOT NULL DEFAULT '[]',
+  default_hashtags TEXT,
+  body_template TEXT NOT NULL,
+  call_to_action TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_social_caption_templates_active ON social_caption_templates(is_active, content_pillar);
