@@ -719,3 +719,16 @@ body.nav-mobile-open{overflow:hidden}
 .dd-product-story-notes-panel .status-note.success{border-color:rgba(80,180,120,.45);color:#9ef0b4}
 .dd-product-story-notes-panel .status-note.error{border-color:rgba(255,120,150,.45);color:#ffb4c1}
 @media (max-width:760px){.dd-product-story-notes-panel .products-admin-table th:nth-child(4),.dd-product-story-notes-panel .products-admin-table td:nth-child(4),.dd-product-story-notes-panel .products-admin-table th:nth-child(5),.dd-product-story-notes-panel .products-admin-table td:nth-child(5){display:none}.dd-product-story-notes-panel .btn{width:100%;justify-content:center}}
+
+
+/* Build 147: shop story snippets, editor image roles, social shortcut, and media consent registry */
+.shop-card-story{margin:10px 0;padding:9px 10px;border-left:3px solid rgba(255,207,112,.85);border-radius:10px;background:rgba(255,255,255,.04)}
+.dd-product-image-role-checklist{display:grid;gap:10px;margin:12px 0 16px 0;padding:12px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.035)}
+.dd-product-image-role-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.dd-product-image-role{display:grid;gap:3px;padding:9px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.035)}
+.dd-product-image-role.ok{border-color:rgba(80,180,120,.45);background:rgba(80,180,120,.08)}
+.dd-product-image-role.todo{opacity:.82}
+.dd-product-image-role span{font-size:.84rem;opacity:.85}
+.dd-product-social-shortcut-panel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0 0;padding:10px 12px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03)}
+.media-consent-admin-panel .status-note.warning,.dd-product-image-role-checklist .status-note.warning{border-color:rgba(255,207,112,.55);color:#ffe39a;background:rgba(255,207,112,.08)}
+@media (max-width:860px){.dd-product-image-role-grid{grid-template-columns:1fr}.dd-product-social-shortcut-panel .btn{width:100%;justify-content:center}}
