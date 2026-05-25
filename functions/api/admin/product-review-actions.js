@@ -38,6 +38,9 @@ function buildReadiness(row = {}) {
   const firstHeight = Number(row.first_height_px || 0);
   const firstMerchandisingScore = Number(row.first_merchandising_score ?? row.first_image_score ?? 0);
   const averageMerchandisingScore = Number(row.average_merchandising_score || 0);
+  const missingImageRoleCount = Number(row.missing_image_role_count || 0);
+  const heroImageRoleCount = Number(row.hero_image_role_count || 0);
+  const blockedPublicUseCount = Number(row.blocked_public_use_count || 0);
   const knowsDims = firstWidth > 0 && firstHeight > 0;
   const checks = {
     has_name: normalizeText(row.name).length > 0,
@@ -53,9 +56,12 @@ function buildReadiness(row = {}) {
     first_image_shape: !knowsDims || ['square', 'landscape'].includes(firstOrientation),
     first_image_size: !knowsDims || (firstWidth >= 800 && firstHeight >= 800),
     first_image_merchandising: !normalizeText(row.featured_image_url) || firstMerchandisingScore >= 72,
-    gallery_merchandising: imageCount === 0 || averageMerchandisingScore >= 64
+    gallery_merchandising: imageCount === 0 || averageMerchandisingScore >= 64,
+    image_roles_documented: imageCount === 0 || missingImageRoleCount === 0,
+    hero_role_present: imageCount === 0 || heroImageRoleCount > 0,
+    public_use_allowed: blockedPublicUseCount === 0
   };
-  const weights = { has_name:10, has_slug:8, has_price:12, has_featured_image:12, has_image_count:12, has_image_alt:8, has_short_description:10, has_meta_title:8, has_meta_description:8, has_category:4, first_image_shape:4, first_image_size:4, first_image_merchandising:6, gallery_merchandising:4 };
+  const weights = { has_name:10, has_slug:8, has_price:12, has_featured_image:12, has_image_count:12, has_image_alt:8, has_short_description:10, has_meta_title:8, has_meta_description:8, has_category:4, first_image_shape:4, first_image_size:4, first_image_merchandising:6, gallery_merchandising:4, image_roles_documented:8, hero_role_present:6, public_use_allowed:8 };
   const total = Object.values(weights).reduce((sum, value) => sum + value, 0);
   const earned = Object.entries(checks).reduce((sum, [key, ok]) => sum + (ok ? Number(weights[key] || 0) : 0), 0);
   const failedKeys = Object.entries(checks).filter(([, ok]) => !ok).map(([key]) => key);
@@ -70,6 +76,9 @@ function buildReadiness(row = {}) {
   return {
     is_ready_for_storefront: failedKeys.length === 0 ? 1 : 0,
     ready_check_notes: failedKeys.join(", "),
+    missing_image_role_count: missingImageRoleCount,
+    hero_image_role_count: heroImageRoleCount,
+    blocked_public_use_count: blockedPublicUseCount,
     publish_readiness_score: publishScore,
     image_quality_score: imageScore,
     merchandising_score: averageMerchandisingScore,
@@ -111,7 +120,10 @@ export async function onRequestPost(context) {
            MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has('width_px') ? 'pia.width_px' : 'NULL'} ELSE NULL END) AS first_width_px,
            MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has('height_px') ? 'pia.height_px' : 'NULL'} ELSE NULL END) AS first_height_px,
            MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : 'NULL')} ELSE NULL END) AS first_merchandising_score,
-           AVG(COALESCE(${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : 'NULL')}, 0)) AS average_merchandising_score
+           AVG(COALESCE(${annotationCols.has('merchandising_score') ? 'pia.merchandising_score' : (annotationCols.has('first_image_score') ? 'pia.first_image_score' : 'NULL')}, 0)) AS average_merchandising_score,
+           SUM(CASE WHEN pi.product_image_id IS NOT NULL AND COALESCE(${annotationCols.has('image_role') ? 'pia.image_role' : "''"}, '') = '' THEN 1 ELSE 0 END) AS missing_image_role_count,
+           SUM(CASE WHEN LOWER(COALESCE(${annotationCols.has('image_role') ? 'pia.image_role' : "''"}, '')) = 'hero_front' THEN 1 ELSE 0 END) AS hero_image_role_count,
+           SUM(CASE WHEN LOWER(COALESCE(${annotationCols.has('public_use_status') ? 'pia.public_use_status' : "''"}, '')) IN ('consent_needed','blocked') THEN 1 ELSE 0 END) AS blocked_public_use_count
     FROM products p
     LEFT JOIN product_seo ps ON ps.product_id = p.product_id
     LEFT JOIN product_images pi ON pi.product_id = p.product_id

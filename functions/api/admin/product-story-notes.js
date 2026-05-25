@@ -36,6 +36,96 @@ function normalizePrivacyStatus(value) {
   return 'needs_review';
 }
 
+
+function normalizePublicUseStatus(value) {
+  const clean = normalizeText(value).toLowerCase();
+  return ['internal_review','product_page_ok','social_ok','all_public_ok','consent_needed','blocked'].includes(clean) ? clean : 'internal_review';
+}
+
+function isConsentPublicSafe(row = {}) {
+  const status = normalizeText(row.consent_status).toLowerCase();
+  const scope = normalizeText(row.consent_scope).toLowerCase();
+  if (Number(row.public_use_allowed || 0) === 1) return true;
+  return ['granted','not_required'].includes(status) && ['product_page','website_gallery','all_public'].includes(scope);
+}
+
+async function mediaConsentSummaryForProduct(db, productId) {
+  const empty = { product_id: productId, checked: false, total_images: 0, blocked_count: 0, consent_needed_count: 0, missing_consent_count: 0, not_public_allowed_count: 0, public_ready_count: 0, rows: [] };
+  if (!productId) return empty;
+  try {
+    const productImagesTable = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='product_images' LIMIT 1`).first();
+    if (!productImagesTable) return empty;
+    const annotationTable = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='product_image_annotations' LIMIT 1`).first();
+    const consentTable = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='media_consent_records' LIMIT 1`).first();
+    const rowsResult = await db.prepare(`
+      SELECT pi.product_image_id, pi.image_url, pi.sort_order,
+             ${annotationTable ? `COALESCE(pia.image_role,'')` : `''`} AS image_role,
+             ${annotationTable ? `COALESCE(pia.public_use_status,'internal_review')` : `'internal_review'`} AS public_use_status,
+             ${annotationTable ? `pia.consent_record_id` : `NULL`} AS consent_record_id,
+             ${consentTable ? `mcr.consent_status` : `NULL`} AS consent_status,
+             ${consentTable ? `mcr.consent_scope` : `NULL`} AS consent_scope,
+             ${consentTable ? `mcr.public_use_allowed` : `0`} AS public_use_allowed,
+             ${consentTable ? `mcr.social_use_allowed` : `0`} AS social_use_allowed,
+             ${consentTable ? `mcr.privacy_notes` : `NULL`} AS consent_privacy_notes
+      FROM product_images pi
+      ${annotationTable ? `LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id` : ``}
+      ${annotationTable && consentTable ? `LEFT JOIN media_consent_records mcr ON mcr.consent_record_id = pia.consent_record_id` : ``}
+      WHERE pi.product_id = ? AND COALESCE(pi.image_url,'') <> ''
+      ORDER BY pi.sort_order ASC, pi.product_image_id ASC
+      LIMIT 50
+    `).bind(productId).all().catch(() => ({ results: [] }));
+    const imageRows = rows(rowsResult).map((row, index) => {
+      const status = normalizePublicUseStatus(row.public_use_status);
+      const hasConsentId = Number(row.consent_record_id || 0) > 0;
+      const publicSafe = hasConsentId ? isConsentPublicSafe(row) : false;
+      const blocked = status === 'blocked' || ['blocked','revoked'].includes(normalizeText(row.consent_status).toLowerCase());
+      const consentNeeded = status === 'consent_needed';
+      const missingConsent = consentNeeded && !hasConsentId;
+      const notPublicAllowed = hasConsentId && !publicSafe;
+      return {
+        product_image_id: Number(row.product_image_id || 0),
+        sort_order: Number(row.sort_order ?? index),
+        image_role: row.image_role || '',
+        public_use_status: status,
+        consent_record_id: hasConsentId ? Number(row.consent_record_id || 0) : null,
+        consent_status: row.consent_status || '',
+        consent_scope: row.consent_scope || '',
+        public_use_allowed: Number(row.public_use_allowed || 0),
+        blocked,
+        consent_needed: consentNeeded,
+        missing_consent: missingConsent,
+        not_public_allowed: notPublicAllowed,
+        is_public_ready: !blocked && !missingConsent && !notPublicAllowed
+      };
+    });
+    return imageRows.reduce((summary, row) => {
+      summary.total_images += 1;
+      if (row.blocked) summary.blocked_count += 1;
+      if (row.consent_needed) summary.consent_needed_count += 1;
+      if (row.missing_consent) summary.missing_consent_count += 1;
+      if (row.not_public_allowed) summary.not_public_allowed_count += 1;
+      if (row.is_public_ready) summary.public_ready_count += 1;
+      summary.rows.push(row);
+      return summary;
+    }, { ...empty, checked: true, rows: [] });
+  } catch {
+    return empty;
+  }
+}
+
+async function ensureStoryCanGoPublic(db, productId) {
+  const summary = await mediaConsentSummaryForProduct(db, productId);
+  const blockerCount = Number(summary.blocked_count || 0) + Number(summary.missing_consent_count || 0) + Number(summary.not_public_allowed_count || 0);
+  if (blockerCount > 0) {
+    const parts = [];
+    if (summary.blocked_count) parts.push(`${summary.blocked_count} blocked image(s)`);
+    if (summary.missing_consent_count) parts.push(`${summary.missing_consent_count} missing consent record(s)`);
+    if (summary.not_public_allowed_count) parts.push(`${summary.not_public_allowed_count} consent record(s) not approved for public use`);
+    return { ok: false, summary, error: `Product story cannot be approved/published until media consent is cleared: ${parts.join(', ')}.` };
+  }
+  return { ok: true, summary };
+}
+
 async function getColumnSet(db, tableName) {
   try {
     const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
@@ -128,11 +218,19 @@ async function listPayload(db) {
     LIMIT 250
   `).all().catch(() => ({ results: [] })));
 
+  const consent_summaries = {};
+  const productIds = [...new Set([...products.slice(0, 80).map((row) => Number(row.product_id || 0)), ...notes.map((row) => Number(row.product_id || 0))].filter(Boolean))];
+  for (const productId of productIds) {
+    consent_summaries[String(productId)] = await mediaConsentSummaryForProduct(db, productId);
+  }
+  notes.forEach((note) => { note.media_consent_summary = consent_summaries[String(note.product_id || '')] || null; });
+
   const open_reviews = notes.filter((row) => ['draft', 'review'].includes(String(row.display_status || 'draft').toLowerCase())).length;
   const approved = notes.filter((row) => ['approved', 'published'].includes(String(row.display_status || '').toLowerCase())).length;
   const blocked = notes.filter((row) => String(row.privacy_status || '').toLowerCase() === 'blocked').length;
+  const consent_blocked = Object.values(consent_summaries).filter((row) => Number(row?.blocked_count || 0) + Number(row?.missing_consent_count || 0) + Number(row?.not_public_allowed_count || 0) > 0).length;
 
-  return { ok: true, products, notes, summary: { products: products.length, notes: notes.length, open_reviews, approved, blocked } };
+  return { ok: true, products, notes, consent_summaries, summary: { products: products.length, notes: notes.length, open_reviews, approved, blocked, consent_blocked } };
 }
 
 async function readJson(request) {
@@ -178,6 +276,13 @@ async function saveNote(db, body, adminUser) {
 
   if (['approved', 'published'].includes(displayStatus) && privacyStatus === 'blocked') {
     return { ok: false, error: 'Blocked story notes cannot be approved or published.', status: 400 };
+  }
+  if (['approved', 'published'].includes(displayStatus)) {
+    if (!['safe', 'private_detail_removed'].includes(privacyStatus)) {
+      return { ok: false, error: 'Set the story privacy status to Safe or Private detail removed before approving or publishing.', status: 400 };
+    }
+    const gate = await ensureStoryCanGoPublic(db, productId);
+    if (!gate.ok) return { ok: false, error: gate.error, media_consent_summary: gate.summary, status: 400 };
   }
 
   if (noteId) {
@@ -259,6 +364,13 @@ async function updateStatus(db, body, adminUser) {
   const finalPrivacy = privacyStatus || normalizePrivacyStatus(existing.privacy_status || 'needs_review');
   if (['approved', 'published'].includes(displayStatus) && finalPrivacy === 'blocked') {
     return { ok: false, error: 'Blocked story notes cannot be approved or published.', status: 400 };
+  }
+  if (['approved', 'published'].includes(displayStatus)) {
+    if (!['safe', 'private_detail_removed'].includes(finalPrivacy)) {
+      return { ok: false, error: 'Set the story privacy status to Safe or Private detail removed before approving or publishing.', status: 400 };
+    }
+    const gate = await ensureStoryCanGoPublic(db, Number(existing.product_id || 0));
+    if (!gate.ok) return { ok: false, error: gate.error, media_consent_summary: gate.summary, status: 400 };
   }
 
   await db.prepare(`

@@ -40,6 +40,9 @@ function buildChecks(row = {}, imageHistory = []) {
   const weakUnapprovedGalleryImageCount = imageHistory.filter((item, index) => index > 0 && Number(item?.merchandising_score ?? item?.first_image_score ?? 0) < 64 && !hasOverrideReason(item)).length;
   const hasCropHistory = firstImage && firstImage.crop_x != null && firstImage.crop_y != null && firstImage.crop_width != null && firstImage.crop_height != null;
   const contextualShotCount = imageHistory.filter((item) => ['detail','lifestyle','process','packaging','scale_reference'].includes(String(item?.shot_style || '').toLowerCase())).length;
+  const missingImageRoleCount = imageHistory.filter((item) => !normalizeText(item?.image_role)).length;
+  const hasHeroRole = imageHistory.some((item, index) => (normalizeText(item?.image_role).toLowerCase() || (index === 0 ? 'hero_front' : '')) === 'hero_front');
+  const publicBlockedCount = imageHistory.filter((item) => ['consent_needed','blocked'].includes(normalizeText(item?.public_use_status).toLowerCase())).length;
   const knowsFirstDimensions = firstWidth > 0 && firstHeight > 0;
   const checks = [];
   checks.push({ key: 'name', ok: normalizeText(row.name).length > 0, label: 'Product name present', weight: 10 });
@@ -59,6 +62,9 @@ function buildChecks(row = {}, imageHistory = []) {
   checks.push({ key: 'first_image_score', ok: !normalizeText(row.featured_image_url) || firstImageScore >= 72, label: 'First image merchandising score is strong enough', weight: 6 });
   checks.push({ key: 'gallery_score', ok: imageCount === 0 || (effectiveGalleryMerchandisingScore >= 64 && weakUnapprovedGalleryImageCount === 0), label: 'Gallery merchandising score is strong enough', weight: 4 });
   checks.push({ key: 'shot_mix', ok: imageCount < 4 || contextualShotCount >= 1, label: 'Gallery includes at least one detail, lifestyle, process, packaging, or scale shot', weight: 4 });
+  checks.push({ key: 'image_roles_documented', ok: imageCount === 0 || missingImageRoleCount === 0, label: 'Every product image has a storefront role', weight: 8 });
+  checks.push({ key: 'hero_role_present', ok: imageCount === 0 || hasHeroRole, label: 'One image is marked as the hero/front role', weight: 6 });
+  checks.push({ key: 'public_use_allowed', ok: publicBlockedCount === 0, label: 'No storefront image is blocked or waiting for consent', weight: 8 });
 
   const totalWeight = checks.reduce((sum, item) => sum + item.weight, 0);
   const earnedWeight = checks.reduce((sum, item) => sum + (item.ok ? item.weight : 0), 0);
@@ -83,6 +89,9 @@ function buildChecks(row = {}, imageHistory = []) {
   if (overriddenGalleryImageCount > 0) leadWarnings.push(`${overriddenGalleryImageCount} gallery image(s) are being kept by documented override reason.`);
   if (weakUnapprovedGalleryImageCount > 0) leadWarnings.push(`${weakUnapprovedGalleryImageCount} gallery image(s) are still weak without an override reason.`);
   if (imageCount >= 4 && contextualShotCount < 1) leadWarnings.push('Add at least one detail, lifestyle, process, packaging, or scale-reference image to improve the gallery mix.');
+  if (missingImageRoleCount > 0) leadWarnings.push(`${missingImageRoleCount} image(s) still need a storefront role before approval.`);
+  if (imageCount > 0 && !hasHeroRole) leadWarnings.push('Mark one image as Hero/front before approval.');
+  if (publicBlockedCount > 0) leadWarnings.push(`${publicBlockedCount} image(s) are blocked or waiting for consent.`);
 
   return {
     checks,
@@ -94,6 +103,9 @@ function buildChecks(row = {}, imageHistory = []) {
     overridden_gallery_image_count: overriddenGalleryImageCount,
     weak_unapproved_gallery_image_count: weakUnapprovedGalleryImageCount,
     contextual_shot_count: contextualShotCount,
+    missing_image_role_count: missingImageRoleCount,
+    hero_image_role_present: hasHeroRole ? 1 : 0,
+    public_blocked_image_count: publicBlockedCount,
     media_completeness_score: Math.round((((imageCount >= 3 ? 1 : imageCount / 3) + (imageCount > 0 ? Math.min(altCoverage / Math.max(imageCount, 1), 1) : 0) + (knowsFirstDimensions ? 1 : 0.5) + (hasCropHistory ? 1 : 0.4)) / 4) * 100),
     is_ready_for_storefront: failed.length === 0 ? 1 : 0,
     ready_check_notes: failed.map((item) => item.label).join('; '),
@@ -131,6 +143,9 @@ export async function onRequestGet(context) {
            ${annotationCols.has('height_px') ? 'pia.height_px' : 'NULL AS height_px'},
            ${annotationCols.has('image_orientation') ? 'pia.image_orientation' : 'NULL AS image_orientation'},
            ${annotationCols.has('annotation_notes') ? 'pia.annotation_notes' : 'NULL AS annotation_notes'},
+           ${annotationCols.has('image_role') ? 'pia.image_role' : 'NULL AS image_role'},
+           ${annotationCols.has('public_use_status') ? 'pia.public_use_status' : 'NULL AS public_use_status'},
+           ${annotationCols.has('consent_record_id') ? 'pia.consent_record_id' : 'NULL AS consent_record_id'},
            ${annotationCols.has('crop_x') ? 'pia.crop_x' : 'NULL AS crop_x'},
            ${annotationCols.has('crop_y') ? 'pia.crop_y' : 'NULL AS crop_y'},
            ${annotationCols.has('crop_width') ? 'pia.crop_width' : 'NULL AS crop_width'},
@@ -160,6 +175,9 @@ export async function onRequestGet(context) {
     height_px: row.height_px == null ? null : Number(row.height_px || 0),
     image_orientation: row.image_orientation || '',
     annotation_notes: row.annotation_notes || '',
+    image_role: row.image_role || '',
+    public_use_status: row.public_use_status || '',
+    consent_record_id: row.consent_record_id == null ? null : Number(row.consent_record_id || 0),
     crop_x: row.crop_x == null ? null : Number(row.crop_x || 0),
     crop_y: row.crop_y == null ? null : Number(row.crop_y || 0),
     crop_width: row.crop_width == null ? null : Number(row.crop_width || 0),
