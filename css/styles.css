@@ -732,3 +732,30 @@ body.nav-mobile-open{overflow:hidden}
 .dd-product-social-shortcut-panel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0 0;padding:10px 12px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03)}
 .media-consent-admin-panel .status-note.warning,.dd-product-image-role-checklist .status-note.warning{border-color:rgba(255,207,112,.55);color:#ffe39a;background:rgba(255,207,112,.08)}
 @media (max-width:860px){.dd-product-image-role-grid{grid-template-columns:1fr}.dd-product-social-shortcut-panel .btn{width:100%;justify-content:center}}
+
+/* Build 148: product image ordering, roles, and consent UX */
+.product-image-sortable-row {
+  cursor: grab;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.product-image-sortable-row:active,
+.product-image-sortable-row.is-dragging {
+  cursor: grabbing;
+}
+.product-image-sortable-row.is-dragging {
+  opacity: .62;
+  transform: scale(.995);
+  border-color: rgba(170, 92, 29, .65);
+  box-shadow: 0 16px 34px rgba(44, 28, 16, .18);
+}
+.product-image-sortable-row [data-row-drag-handle] {
+  touch-action: none;
+}
+@media (max-width: 740px) {
+  .product-image-sortable-row {
+    cursor: default;
+  }
+  .product-image-sortable-row [data-row-drag-handle] {
+    min-width: 88px;
+  }
+}
