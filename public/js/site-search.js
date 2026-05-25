@@ -105,10 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
       fetchSearchSource('Products', `/api/products?q=${encodeURIComponent(query)}`, (data) => Array.isArray(data.products) ? data.products : [], (row, q) => ({
         type: 'Product',
         name: row.name || 'Product',
-        summary: row.short_description || row.meta_description || row.product_type || 'Storefront product',
+        summary: row.public_story_snippet || row.short_description || row.meta_description || row.product_type || 'Storefront product',
         url: `/shop/product/?slug=${encodeURIComponent(row.slug || '')}`,
         image: row.featured_image_url || row.og_image_url || '',
-        score: scoreText(q, row.name, row.short_description, row.meta_description, row.keywords, row.product_type)
+        score: scoreText(q, row.name, row.short_description, row.meta_description, row.public_story_heading, row.public_story_summary, row.public_story_snippet, row.keywords, row.product_type)
       }), query),
       fetchSearchSource('Tools', `/api/tools?q=${encodeURIComponent(query)}&limit=250`, (data) => Array.isArray(data.items) ? data.items : [], (row, q) => ({
         type: 'Tool',
