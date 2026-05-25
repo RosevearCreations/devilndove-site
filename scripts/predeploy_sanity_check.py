@@ -146,6 +146,7 @@ def check_operations_assets(root: Path):
         'searchConsoleImportAdminMount',
         'socialPostQueueAdminMount',
         'socialMediaPrivacyGuardAdminMount',
+        'mediaConsentRecordsAdminMount',
         'competitiveRoadmapAdminMount',
         '/public/js/admin-structured-data-health.js',
         '/public/js/admin-storefront-value-backfill.js',
@@ -155,6 +156,7 @@ def check_operations_assets(root: Path):
         '/public/js/admin-search-console-import.js',
         '/public/js/admin-social-post-queue.js',
         '/public/js/admin-social-media-privacy-guard.js',
+        '/public/js/admin-media-consent-records.js',
         '/public/js/admin-competitive-roadmap.js',
     ]
     missing = [token for token in required if token not in text]
@@ -173,6 +175,7 @@ def check_operations_assets(root: Path):
         'functions/api/admin/social-post-queue.js',
         'public/js/admin-social-media-privacy-guard.js',
         'functions/api/admin/social-media-privacy-guard.js',
+        'functions/api/admin/media-consent-records.js',
         'functions/api/admin/competitive-roadmap.js',
     ]:
         if not (root / ref).exists():
@@ -243,7 +246,7 @@ def check_product_editor_assets(root: Path):
     js_text = read_text(create_js) if create_js.exists() else ''
     api_text = read_text(create_api) if create_api.exists() else ''
     required_page = ['Draft mode is intentionally light', 'Save Draft Product', '/public/js/admin-create-product.js', '/public/js/admin-product-draft-checklist.js', 'image_url_6']
-    required_js = ['productDraftImageUploader', 'readApiJson', 'PUBLISH_READINESS_CONFIG', '/api/admin/media-upload', 'attachToCurrentProduct', 'MAX_PRODUCT_IMAGES = 7', 'productAutosavePanel', 'dd:product-autosaved-new']
+    required_js = ['productDraftImageUploader', 'readApiJson', 'PUBLISH_READINESS_CONFIG', '/api/admin/media-upload', 'attachToCurrentProduct', 'MAX_PRODUCT_IMAGES = 7', 'productAutosavePanel', 'dd:product-autosaved-new', 'productImageRoleChecklist', 'queueCurrentProductSocialPost']
     required_api = ['captureRuntimeIncident', 'draft_mode_relaxed', 'addColumnValue', 'Products table is unavailable']
     missing_page = [token for token in required_page if token not in page_text]
     missing_js = [token for token in required_js if token not in js_text]
@@ -285,6 +288,30 @@ def check_product_story_assets(root: Path):
         issues.append({'type': 'competitive_product_story_direction_missing', 'path': 'COMPETITIVE.md', 'missing': missing_comp})
     return issues
 
+
+
+def check_product_story_shop_assets(root: Path):
+    issues = []
+    shop_js = root / 'public' / 'js' / 'shop.js'
+    products_api = root / 'functions' / 'api' / 'products.js'
+    css = root / 'css' / 'styles.css'
+    shop_text = read_text(shop_js) if shop_js.exists() else ''
+    api_text = read_text(products_api) if products_api.exists() else ''
+    css_text = read_text(css) if css.exists() else ''
+    required_shop = ['public_story_snippet', 'shop-card-story']
+    required_api = ['enrichProductsWithStoryNotes', 'public_story_snippet', 'product_story_public_notes']
+    required_css = ['.shop-card-story', '.dd-product-image-role-checklist', '.dd-product-social-shortcut-panel']
+    missing_shop = [token for token in required_shop if token not in shop_text]
+    missing_api = [token for token in required_api if token not in api_text]
+    missing_css = [token for token in required_css if token not in css_text]
+    if missing_shop:
+        issues.append({'type': 'shop_story_snippet_missing_assets', 'path': 'public/js/shop.js', 'missing': missing_shop})
+    if missing_api:
+        issues.append({'type': 'products_api_story_snippet_missing_assets', 'path': 'functions/api/products.js', 'missing': missing_api})
+    if missing_css:
+        issues.append({'type': 'product_editor_story_media_css_missing', 'path': 'css/styles.css', 'missing': missing_css})
+    return issues
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('root', nargs='?', default='.', help='Build root to check')
@@ -300,7 +327,8 @@ def main(argv=None) -> int:
     operations_issues = check_operations_assets(root)
     product_editor_issues = check_product_editor_assets(root)
     product_story_issues = check_product_story_assets(root)
-    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues
+    product_story_shop_issues = check_product_story_shop_assets(root)
+    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues + product_story_shop_issues
     report = {
         'ok': not issues,
         'root': str(root),
@@ -329,3 +357,5 @@ if __name__ == '__main__':
 # Build 145 note: predeploy checks include product editor autosave and seven-total-image upload readiness.
 
 # Build 146 note: predeploy checks include product story notes editor, mobile-create-product fix, and continued draft capture readiness.
+
+# Build 147 note: predeploy checks include shop story snippets, product image role checklist, Product editor social shortcut, and media consent registry.

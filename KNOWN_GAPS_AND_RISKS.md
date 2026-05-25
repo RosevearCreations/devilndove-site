@@ -263,3 +263,30 @@ Remaining gaps:
 - Product drafts should not require SEO title, SEO description, external links, or images.
 - Product story notes should stay draft/review until privacy status is safe.
 
+
+
+## Build 147 gaps and risks update
+
+### Reduced risk
+
+- Approved product stories can now appear earlier in the customer journey on shop cards.
+- Product image duplication is easier to catch before publishing.
+- Finished-product photo coverage is easier to review because the Product editor now shows a seven-role image checklist.
+- Product-to-social posting is easier from the editor, while still remaining review-first.
+- Media consent now has a private D1 registry instead of being a loose note outside the system.
+
+### Remaining risk
+
+- The image role checklist is advisory only. Role labels are not yet stored per image.
+- Image ordering is still field-order based; drag/drop ordering is not finished.
+- Consent records are not yet automatically linked to specific Social Posting Queue rows or Product Story Notes.
+- Story snippets only show if a product has an approved/privacy-safe note; most existing products may still rely on fallback copy.
+- Social API publishing must stay blocked/review-first until credentials, privacy status, media consent, and platform rules are verified.
+- Accounting remains incomplete until payment application, HST review, close controls, reconciliation packaging, and accountant exports are finished.
+
+### Watch after deployment
+
+- `/api/products` should return story fields without failing if `product_story_public_notes` is empty or absent.
+- `/admin/products/` should show the image role checklist and social shortcut panel.
+- `/admin/operations/` should show Media Consent Records.
+- The public shop cards should remain mobile-friendly after story snippets appear.

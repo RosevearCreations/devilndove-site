@@ -734,3 +734,52 @@ Completed in this pass:
 19. Add product margin preview before publishing.
 20. Add release-health “go/no-go” summary that combines schema drift, public API health, runtime incidents, sitemap, structured data, and image readiness.
 
+
+
+## Build 147 completed — shop story snippets, image role checklist, social shortcut, and consent registry
+
+Completed in this pass:
+
+1. Added public story snippet fields to `/api/products` output.
+2. Added safe D1 enrichment from approved/privacy-safe `product_story_public_notes` rows.
+3. Kept `/api/products` resilient when the story table or columns are missing.
+4. Added story snippet text to public shop cards.
+5. Added story fields to public shop/search query matching.
+6. Added `.shop-card-story` CSS for product story snippets.
+7. Added duplicate image URL warnings inside the Product editor.
+8. Added a Product image role checklist for seven total product photos.
+9. Added the roles: hero/front, detail/texture, scale/context, back/side, process/story, packaging/pickup, material/tool proof.
+10. Added a **Post this product** shortcut directly inside the Product editor.
+11. Kept Product editor social posts as draft/review-only; they still go through Social Posting Queue and Privacy Guard.
+12. Added Operations > Media Consent Records.
+13. Added `/api/admin/media-consent-records`.
+14. Added `public/js/admin-media-consent-records.js`.
+15. Added `media_consent_records` schema/table support.
+16. Added consent status/scope/public/social-use fields for safer media approvals.
+17. Added media-consent assets to Operations and predeploy sanity checks.
+18. Removed the duplicate product-story script include from the Product admin page.
+19. Updated `data/site/competitive-opportunities.json` with story snippets, image roles, and consent registry items.
+20. Updated active Markdown and schema files for the new direction.
+
+### Next several steps
+
+1. Add drag/drop image ordering in the Product editor.
+2. Persist image role labels per product image instead of only using the checklist.
+3. Add duplicate/same-angle warnings using image metadata once image scoring is deeper.
+4. Add story snippets to internal site search results, not only shop cards.
+5. Connect Media Consent Records directly to Social Media Privacy Guard queue items.
+6. Connect consent records to Product Story Notes before story approval.
+7. Add approved testimonial/trust block workflow.
+8. Add custom request intake for engraving, personalized gifts, ring ideas, and “make similar” requests.
+9. Add admin-editable social caption templates.
+10. Add social analytics rollups from UTM-tagged links.
+11. Add Search Console action application workflow that updates titles/meta only after review.
+12. Add product margin preview before active/published status.
+13. Add inventory depletion simulation from product-resource links.
+14. Add payment application workflow.
+15. Add reconciliation exception closeout.
+16. Add HST/GST review worksheets.
+17. Add month-end close checklist and lock/reopen controls.
+18. Add accountant export packaging.
+19. Add release-health “go/no-go” summary combining schema drift, public API health, runtime incidents, sitemap, structured data, image readiness, and media consent risk.
+20. Add marketplace/channel export readiness for Etsy, Facebook Marketplace, Pinterest, and manual copy/paste channels.

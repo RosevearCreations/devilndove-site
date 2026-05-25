@@ -152,3 +152,8 @@ The next assistant should know:
 - Story notes are public-facing only after review and should avoid private/customer/sensitive workshop details.
 - Next priorities include story snippets on shop cards, image ordering/role checklist, social consent records, social analytics, and the accounting close workflow.
 
+
+
+## Build 147 AI handoff
+
+The current working direction is: product capture should flow from quick draft → multi-image/product-role review → approved public story → shop-card story snippet → social queue → privacy/consent review. The new media consent registry is private D1 data and must not be placed in public `/data/` files.

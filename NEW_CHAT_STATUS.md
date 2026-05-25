@@ -171,3 +171,26 @@ After deployment, check:
 6. Approve/publish only a public-safe story note.
 7. Runtime incidents for `admin_mobile_product` and `admin_products` stay quiet.
 
+
+
+## Build 147 status note
+
+Current build direction: shop story snippets, product-image review helpers, Product editor social shortcut, and media-consent registry are now implemented.
+
+Important files added/changed:
+
+- `functions/api/products.js`
+- `public/js/shop.js`
+- `public/js/admin-create-product.js`
+- `functions/api/admin/media-consent-records.js`
+- `public/js/admin-media-consent-records.js`
+- `admin/operations/index.html`
+- `admin/products/index.html`
+- `css/styles.css`
+- `data/site/competitive-opportunities.json`
+- `database_upgrade_current_pass.sql`
+- `database_full_schema.sql`
+- `database_store_schema.sql`
+- `database_growth_analytics_seo_extension.sql`
+
+Deployment checks should focus on `/api/products`, `/shop/`, `/admin/products/`, and `/admin/operations/`.

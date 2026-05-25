@@ -578,3 +578,34 @@ This pass moves the competitive plan from “tell better stories someday” into
 7. Add custom request intake for engraving and personalized gifts.
 8. Add payment application, HST review, month-end close, and accountant export packaging so admin workflows become business-ready, not only storefront-ready.
 
+
+
+## Build 147 update — shop-card story snippets, product media roles, and consent trail
+
+Build 147 moves another set of competitive ideas from strategy into working product/admin behavior.
+
+### What changed competitively
+
+- Approved, privacy-safe `product_story_public_notes` can now surface on shop cards as short story snippets, not only on the individual product page.
+- The public product search/browse API enriches products with approved story snippets when D1 has them, while safely falling back when the story table is missing or still empty.
+- The Product editor now warns when the same image URL is used more than once, reducing duplicate-gallery issues before publish.
+- The Product editor now includes a seven-role media checklist: hero/front, detail/texture, scale/context, back/side, process/story, packaging/pickup, and material/tool proof.
+- The Product editor now includes a direct **Post this product** shortcut so finished products can enter the Social Posting Queue without finding the row in the table first.
+- Operations now includes **Media Consent Records** so public/social use of customer, job, visitor, or private-background media can be tracked before publishing.
+
+### New direction to keep moving toward
+
+The strongest competitive advantage is now a full capture loop:
+
+1. Create a forgiving draft quickly.
+2. Upload several useful images at once.
+3. Check image roles and duplicates before publishing.
+4. Write or seed a public-safe story note.
+5. Show that story snippet in the shop card and full product page.
+6. Queue the product for social posting.
+7. Check privacy and consent before posting.
+8. Use UTM/social/Search Console feedback to improve titles, descriptions, stories, and internal links.
+
+### Why this matters
+
+Marketplace listings usually show only a photo, price, and title. Devil n Dove can compete by showing process, materials, story, condition, local trust, and honest small-shop context before the buyer even clicks the product page.

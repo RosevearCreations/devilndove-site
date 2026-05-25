@@ -227,3 +227,16 @@ Check these after deployment:
 9. Runtime Incidents should not show fresh `mobile_create_product_failed` errors after normal draft saves.
 10. Predeploy sanity script now checks the story note editor assets.
 
+
+
+## Build 147 sanity additions
+
+After deploying, check:
+
+1. `/api/products` returns `ok: true` and includes public story fields when approved story notes exist.
+2. `/shop/` product cards still fit on mobile and show story snippets only when available.
+3. `/admin/products/` shows the Product image role checklist.
+4. `/admin/products/` warns about duplicate image URLs.
+5. `/admin/products/` can queue a product social draft from the editor.
+6. `/admin/operations/` loads Media Consent Records.
+7. `database_upgrade_current_pass.sql` has been applied or recorded in the migration ledger.

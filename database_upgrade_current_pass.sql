@@ -873,3 +873,38 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+
+-- Build 147: media consent registry for product/social media privacy checks.
+CREATE TABLE IF NOT EXISTS media_consent_records (
+  consent_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  consent_key TEXT NOT NULL UNIQUE,
+  subject_label TEXT,
+  source_type TEXT DEFAULT 'general',
+  source_id TEXT,
+  media_url TEXT,
+  consent_status TEXT NOT NULL DEFAULT 'unknown',
+  consent_scope TEXT NOT NULL DEFAULT 'internal_only',
+  public_use_allowed INTEGER NOT NULL DEFAULT 0,
+  social_use_allowed INTEGER NOT NULL DEFAULT 0,
+  privacy_notes TEXT,
+  reviewed_by_user_id INTEGER,
+  expires_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_media_consent_records_status ON media_consent_records(consent_status, consent_scope, updated_at);
+CREATE INDEX IF NOT EXISTS idx_media_consent_records_source ON media_consent_records(source_type, source_id, updated_at);
+
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'build_147_story_snippets_image_roles_media_consent',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Build 147 adds public shop story snippets, Product editor duplicate-image/role/social helpers, and media consent records for public/social photo approval.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

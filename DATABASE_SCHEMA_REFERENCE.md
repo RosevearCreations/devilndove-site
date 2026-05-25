@@ -257,3 +257,28 @@ Recommended statuses:
 - `display_status`: `draft`, `review`, `approved`, `published`, `archived`
 - `privacy_status`: `needs_review`, `safe`, `private_detail_removed`, `blocked`
 
+
+
+## Build 147 schema note — media consent records
+
+Added `media_consent_records` for private tracking of product/job/customer/social media approval.
+
+Main fields:
+
+- `consent_record_id`
+- `consent_key`
+- `subject_label`
+- `source_type`
+- `source_id`
+- `media_url`
+- `consent_status`
+- `consent_scope`
+- `public_use_allowed`
+- `social_use_allowed`
+- `privacy_notes`
+- `reviewed_by_user_id`
+- `expires_at`
+- `created_at`
+- `updated_at`
+
+This table is private D1 data and should not be mirrored into public `/data/` JSON.

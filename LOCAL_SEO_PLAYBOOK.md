@@ -155,3 +155,8 @@ Rules:
 - Do not publish private customer/job details.
 - Use local wording only where it truthfully helps the customer understand the product or buying process.
 
+
+
+## Build 147 local SEO note
+
+Approved product story snippets now help shop cards include more human, local, and material/context language. Keep snippets natural: mention Southern Ontario, Tillsonburg, handmade, vintage, workshop-made, or custom work only where it genuinely fits the product.
