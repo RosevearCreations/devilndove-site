@@ -254,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!field) return false;
     field.value = cleanUrl;
     field.dispatchEvent(new Event("input", { bubbles: true }));
+    updateImageRoleChecklist();
     return true;
   }
 
@@ -378,6 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
         status.textContent = failures.length
           ? `${uploadedUrls.length} uploaded, ${failures.length} failed. ${failures[0]}`
           : `${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded.`;
+        updateImageRoleChecklist();
       } catch (error) {
         status.textContent = error.message || "Image upload failed.";
         setMessage(error.message || "Image upload failed.", true);
@@ -408,6 +410,131 @@ document.addEventListener("DOMContentLoaded", () => {
       if (field) field.value = value;
     });
     setAutosaveStatus("Autosave starts after product name and type are filled.", "muted");
+  }
+
+
+  function currentProductImageUrls() {
+    return [form?.elements?.namedItem("featured_image_url"), ...imageUrlFields()]
+      .map((field) => normalizeText(field?.value))
+      .filter(Boolean);
+  }
+
+  function findDuplicateImageUrls() {
+    const seen = new Map();
+    const duplicates = [];
+    currentProductImageUrls().forEach((url, index) => {
+      const key = url.toLowerCase().replace(/\?.*$/, "").replace(/#.*$/, "").replace(/\/+$/, "");
+      if (seen.has(key)) duplicates.push({ url, firstSlot: seen.get(key) + 1, duplicateSlot: index + 1 });
+      else seen.set(key, index);
+    });
+    return duplicates;
+  }
+
+  function ensureImageRoleChecklistPanel() {
+    if (!form || document.getElementById("productImageRoleChecklist")) return;
+    const anchor = document.getElementById("productDraftImageUploader") || form.elements.namedItem("featured_image_url")?.closest("label") || form.firstElementChild;
+    const panel = document.createElement("div");
+    panel.id = "productImageRoleChecklist";
+    panel.className = "dd-product-image-role-checklist small";
+    panel.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+        <strong>Product image role checklist</strong>
+        <span id="productImageRoleChecklistSummary">Add photos to check coverage.</span>
+      </div>
+      <div class="dd-product-image-role-grid" id="productImageRoleChecklistItems"></div>
+      <div class="status-note" id="productDuplicateImageWarning" style="display:none;margin-top:10px"></div>
+    `;
+    if (anchor?.parentElement) anchor.parentElement.insertBefore(panel, anchor.nextSibling);
+    else form.insertBefore(panel, form.firstElementChild || null);
+    updateImageRoleChecklist();
+  }
+
+  function updateImageRoleChecklist() {
+    const panel = document.getElementById("productImageRoleChecklist");
+    if (!panel) return;
+    const urls = currentProductImageUrls();
+    const count = urls.length;
+    const roles = [
+      { key: "hero", label: "Hero/front", ok: count >= 1, hint: "Clear square or landscape first image." },
+      { key: "detail", label: "Detail/texture", ok: count >= 2, hint: "Close-up of texture, finish, engraving, beadwork, or material." },
+      { key: "scale", label: "Scale/context", ok: count >= 3, hint: "Shows size in hand, beside a ruler, display card, or packaging." },
+      { key: "back", label: "Back/side", ok: count >= 4, hint: "Shows backside, clasp, edge, underside, or condition details." },
+      { key: "process", label: "Process/story", ok: count >= 5, hint: "Workshop or making-progress image when public-safe." },
+      { key: "packaging", label: "Packaging/pickup", ok: count >= 6, hint: "Gift, pickup, or shipping presentation." },
+      { key: "proof", label: "Material/tool proof", ok: count >= 7, hint: "Material, tool, supply, provenance, or authenticity/context photo." }
+    ];
+    const items = panel.querySelector("#productImageRoleChecklistItems");
+    if (items) {
+      items.innerHTML = roles.map((role) => `<div class="dd-product-image-role ${role.ok ? 'ok' : 'todo'}"><strong>${role.ok ? '✓' : '○'} ${escapeHtml(role.label)}</strong><span>${escapeHtml(role.hint)}</span></div>`).join("");
+    }
+    const summary = panel.querySelector("#productImageRoleChecklistSummary");
+    if (summary) summary.textContent = `${count}/${MAX_PRODUCT_IMAGES} product image slot${count === 1 ? "" : "s"} filled.`;
+    const duplicateEl = panel.querySelector("#productDuplicateImageWarning");
+    const duplicates = findDuplicateImageUrls();
+    if (duplicateEl) {
+      duplicateEl.style.display = duplicates.length ? "block" : "none";
+      duplicateEl.className = `status-note ${duplicates.length ? 'warning' : ''}`;
+      duplicateEl.textContent = duplicates.length
+        ? `Duplicate image warning: ${duplicates.length} repeated image URL${duplicates.length === 1 ? "" : "s"} found. Remove duplicates before publishing.`
+        : "";
+    }
+  }
+
+  async function queueCurrentProductSocialPost() {
+    const productId = Number(form?.dataset?.productId || window.DDCurrentProductEditorId || 0);
+    if (!productId) throw new Error("Save or autosave this draft before queueing a social post.");
+    const name = normalizeText(form.elements.namedItem("name")?.value) || `Product #${productId}`;
+    const slug = normalizeText(form.elements.namedItem("slug")?.value);
+    const summary = normalizeText(form.elements.namedItem("short_description")?.value)
+      || normalizeText(form.elements.namedItem("description")?.value)
+      || "A Devil n Dove finished-product update from our Southern Ontario workshop.";
+    const linkUrl = slug ? `${window.location.origin}/shop/product/?slug=${encodeURIComponent(slug)}` : `${window.location.origin}/shop/`;
+    const imageUrls = currentProductImageUrls().slice(0, 7).join("\n");
+    const merchandiseOrigin = normalizeText(form.elements.namedItem("merchandise_origin")?.value).toLowerCase();
+    const response = await window.DDAuth.apiFetch("/api/admin/social-post-queue", {
+      method: "POST",
+      body: JSON.stringify({
+        action: "create",
+        source_type: "product_update",
+        source_id: String(productId),
+        caption_template_key: merchandiseOrigin.includes("vintage") ? "vintage_find" : "finished_product",
+        title: `New Devil n Dove product: ${name}`,
+        summary,
+        image_urls: imageUrls,
+        link_url: linkUrl,
+        target_platforms: ["facebook", "instagram", "pinterest", "x"],
+        hashtags: "#DevilnDove #HandmadeOntario #ShopSmallCanada #SouthernOntario",
+        post_status: "draft",
+        notes: "Queued from Product editor. Review privacy, caption, schedule, and platform readiness before posting."
+      })
+    });
+    const data = await readApiJson(response, "Failed to queue product social post.");
+    return data;
+  }
+
+  function ensureProductSocialShortcutPanel() {
+    if (!form || document.getElementById("productSocialShortcutPanel")) return;
+    const panel = document.createElement("div");
+    panel.id = "productSocialShortcutPanel";
+    panel.className = "dd-product-social-shortcut-panel small";
+    panel.innerHTML = `
+      <strong>Social shortcut:</strong>
+      <span id="productSocialShortcutStatus">Save the draft, then queue it for social review.</span>
+      <button class="btn" type="button" id="queueProductSocialFromEditorButton">Post this product</button>
+    `;
+    const submitArea = form.querySelector('button[type="submit"]')?.parentElement;
+    if (submitArea?.parentElement) submitArea.parentElement.insertBefore(panel, submitArea.nextSibling);
+    else form.appendChild(panel);
+    panel.querySelector("#queueProductSocialFromEditorButton")?.addEventListener("click", async () => {
+      const status = panel.querySelector("#productSocialShortcutStatus");
+      try {
+        if (status) status.textContent = "Queueing product social draft...";
+        await queueCurrentProductSocialPost();
+        if (status) status.textContent = "Queued. Review it in Operations > Social Posting Queue and Privacy Guard before posting.";
+      } catch (error) {
+        if (status) status.textContent = error.message || "Could not queue social post.";
+      }
+    });
   }
 
   function collectProductPayload({ forceDraft = false } = {}) {
@@ -570,11 +697,13 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!form.dataset.mode) form.dataset.mode = "create";
   ensureAutosavePanel();
   ensureImageUploadPanel();
+  ensureImageRoleChecklistPanel();
+  ensureProductSocialShortcutPanel();
   resetCreateDefaults();
   loadTaxClasses().finally(() => { syncRequiredFieldOutlines(); });
 
-  form.addEventListener("input", () => { syncRequiredFieldOutlines(); scheduleAutosave("input"); });
-  form.addEventListener("change", () => { syncRequiredFieldOutlines(); scheduleAutosave("change"); });
+  form.addEventListener("input", () => { syncRequiredFieldOutlines(); updateImageRoleChecklist(); scheduleAutosave("input"); });
+  form.addEventListener("change", () => { syncRequiredFieldOutlines(); updateImageRoleChecklist(); scheduleAutosave("change"); });
 
   form.addEventListener("submit", async (event) => {
     syncRequiredFieldOutlines();
