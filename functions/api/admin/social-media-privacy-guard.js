@@ -130,6 +130,26 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'social_post_queue', 'updated_by_user_id', 'updated_by_user_id INTEGER');
   await ensureColumn(db, 'social_post_queue', 'updated_at', 'updated_at TEXT');
 
+  await db.prepare(`CREATE TABLE IF NOT EXISTS media_consent_records (
+    consent_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    consent_key TEXT NOT NULL UNIQUE,
+    subject_label TEXT,
+    source_type TEXT DEFAULT 'general',
+    source_id TEXT,
+    media_url TEXT,
+    consent_status TEXT NOT NULL DEFAULT 'unknown',
+    consent_scope TEXT NOT NULL DEFAULT 'internal_only',
+    public_use_allowed INTEGER NOT NULL DEFAULT 0,
+    social_use_allowed INTEGER NOT NULL DEFAULT 0,
+    privacy_notes TEXT,
+    reviewed_by_user_id INTEGER,
+    expires_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_media_consent_records_source ON media_consent_records(source_type, source_id, updated_at)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_media_consent_records_media_url ON media_consent_records(media_url, updated_at)`).run().catch(() => null);
+
   for (const rule of DEFAULT_RULES) {
     await db.prepare(`INSERT INTO social_media_privacy_rules (
       rule_key, display_name, applies_to, default_blocked, public_post_allowed, consent_status, checklist, notes, is_active, updated_at
@@ -172,11 +192,76 @@ function inferPrivacyFromPost(row = {}) {
   };
 }
 
+
+async function getPostConsentSummary(db, row = {}) {
+  const imageUrls = safeJson(row.image_urls_json, []).map((url) => normalizeText(url)).filter(Boolean).slice(0, 12);
+  const sourceType = normalizeText(row.source_type || '');
+  const sourceId = normalizeText(row.source_id || '');
+  const clauses = [];
+  const bindings = [];
+
+  if (sourceType && sourceId) {
+    clauses.push('(LOWER(COALESCE(source_type,\'\')) = ? AND COALESCE(source_id,\'\') = ?)');
+    bindings.push(sourceType.toLowerCase(), sourceId);
+  }
+  if (imageUrls.length) {
+    clauses.push(`media_url IN (${imageUrls.map(() => '?').join(',')})`);
+    bindings.push(...imageUrls);
+  }
+  if (!clauses.length) {
+    return {
+      matching_count: 0,
+      social_allowed_count: 0,
+      public_allowed_count: 0,
+      blocked_count: 0,
+      requested_count: 0,
+      consent_status: 'not_linked',
+      records: []
+    };
+  }
+
+  const consentRows = rows(await db.prepare(`
+    SELECT consent_record_id, subject_label, source_type, source_id, media_url, consent_status, consent_scope,
+           public_use_allowed, social_use_allowed, privacy_notes, updated_at
+    FROM media_consent_records
+    WHERE ${clauses.join(' OR ')}
+    ORDER BY datetime(COALESCE(updated_at, created_at, '1970-01-01')) DESC
+    LIMIT 12
+  `).bind(...bindings).all().catch(() => ({ results: [] })));
+
+  const matchingCount = consentRows.length;
+  const socialAllowed = consentRows.filter((record) => Number(record.social_use_allowed || 0) === 1 || String(record.consent_scope || '').toLowerCase() === 'all_public').length;
+  const publicAllowed = consentRows.filter((record) => Number(record.public_use_allowed || 0) === 1 || String(record.consent_scope || '').toLowerCase() === 'all_public').length;
+  const blocked = consentRows.filter((record) => ['blocked', 'revoked'].includes(String(record.consent_status || '').toLowerCase())).length;
+  const requested = consentRows.filter((record) => String(record.consent_status || '').toLowerCase() === 'requested').length;
+  let status = 'not_linked';
+  if (blocked) status = 'blocked';
+  else if (socialAllowed) status = 'social_ok';
+  else if (publicAllowed) status = 'public_only';
+  else if (requested) status = 'requested';
+  else if (matchingCount) status = 'linked_no_public_use';
+
+  return {
+    matching_count: matchingCount,
+    social_allowed_count: socialAllowed,
+    public_allowed_count: publicAllowed,
+    blocked_count: blocked,
+    requested_count: requested,
+    consent_status: status,
+    records: consentRows
+  };
+}
+
 async function summarize(db) {
   await ensureSchema(db);
   const rules = rows(await db.prepare(`SELECT * FROM social_media_privacy_rules WHERE COALESCE(is_active,1)=1 ORDER BY default_blocked DESC, rule_key`).all().catch(() => ({ results: [] })));
   const queueRows = rows(await db.prepare(`SELECT * FROM social_post_queue WHERE COALESCE(post_status,'draft') IN ('draft','ready','failed') ORDER BY datetime(updated_at) DESC, social_post_queue_id DESC LIMIT 80`).all().catch(() => ({ results: [] })));
-  const queue = queueRows.map((row) => ({ ...row, inferred_privacy: inferPrivacyFromPost(row), image_urls: safeJson(row.image_urls_json, []) }));
+  const queue = await Promise.all(queueRows.map(async (row) => ({
+    ...row,
+    inferred_privacy: inferPrivacyFromPost(row),
+    image_urls: safeJson(row.image_urls_json, []),
+    consent_summary: await getPostConsentSummary(db, row)
+  })));
   const summary = await db.prepare(`SELECT
       COUNT(*) AS open_total,
       SUM(CASE WHEN COALESCE(privacy_status,'needs_review')='approved' OR COALESCE(approved_for_public_post,0)=1 THEN 1 ELSE 0 END) AS approved_count,
@@ -198,6 +283,13 @@ async function updateQueuePrivacy(db, adminUser, payload = {}) {
   const consentRequired = payload.media_consent_required == null ? null : Number(payload.media_consent_required ? 1 : 0);
   const approved = ['approved', 'no_private_media'].includes(status) ? 1 : 0;
   const notes = normalizeText(payload.privacy_notes || payload.reviewer_note || '');
+  if (status === 'approved' && Number(consentRequired || 0) === 1 && Number(customerMedia || 0) === 1) {
+    const row = await db.prepare('SELECT * FROM social_post_queue WHERE social_post_queue_id = ? LIMIT 1').bind(id).first().catch(() => null);
+    const consentSummary = await getPostConsentSummary(db, row || {});
+    if (consentSummary.social_allowed_count < 1) {
+      throw new Error('Customer/private media needs a linked media consent record with social use allowed before approving this social post.');
+    }
+  }
   await db.prepare(`UPDATE social_post_queue SET
       privacy_status = ?,
       privacy_notes = ?,
