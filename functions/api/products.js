@@ -148,12 +148,72 @@ function normalizeProductRow(row = {}) {
     og_title: row.og_title || "",
     og_description: row.og_description || "",
     og_image_url: row.og_image_url || "",
+    public_story_heading: row.public_story_heading || "",
+    public_story_summary: row.public_story_summary || "",
+    public_story_snippet: row.public_story_snippet || "",
+    public_story_status: row.public_story_status || "",
+    public_story_privacy_status: row.public_story_privacy_status || "",
     seo_h1: row.h1_override || row.name || "Untitled product"
   };
 }
 
 function shapeProducts(rows) {
   return rows.map((row) => normalizeProductRow(row));
+}
+
+async function enrichProductsWithStoryNotes(db, products) {
+  const rows = Array.isArray(products) ? products : [];
+  if (!db || !rows.length) return rows;
+
+  try {
+    const storyColumns = await getStrictTableColumnSet(db, "product_story_public_notes");
+    if (!storyColumns.has("product_id")) return rows;
+
+    const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 500);
+    if (!ids.length) return rows;
+
+    const selectList = [
+      "product_id",
+      storyColumns.has("story_heading") ? "story_heading" : "'' AS story_heading",
+      storyColumns.has("story_summary") ? "story_summary" : "'' AS story_summary",
+      storyColumns.has("story_body") ? "story_body" : "'' AS story_body",
+      storyColumns.has("display_status") ? "display_status" : "'approved' AS display_status",
+      storyColumns.has("privacy_status") ? "privacy_status" : "'safe' AS privacy_status",
+      storyColumns.has("updated_at") ? "updated_at" : "'' AS updated_at"
+    ];
+    const whereParts = [`product_id IN (${ids.map(() => "?").join(",")})`];
+    if (storyColumns.has("display_status")) whereParts.push("LOWER(COALESCE(display_status,'')) IN ('approved','published')");
+    if (storyColumns.has("privacy_status")) whereParts.push("LOWER(COALESCE(privacy_status,'')) IN ('safe','private_detail_removed')");
+    const orderSql = storyColumns.has("updated_at")
+      ? "ORDER BY CASE LOWER(COALESCE(display_status,'')) WHEN 'published' THEN 0 ELSE 1 END, datetime(COALESCE(updated_at,'1970-01-01')) DESC"
+      : "ORDER BY product_id ASC";
+
+    const storyRows = await runProductQuery(db, `
+      SELECT ${selectList.join(", ")}
+      FROM product_story_public_notes
+      WHERE ${whereParts.join(" AND ")}
+      ${orderSql}
+    `, ids);
+
+    const byProductId = new Map();
+    storyRows.forEach((story) => {
+      const productId = Number(story.product_id || 0);
+      if (!productId || byProductId.has(productId)) return;
+      const summary = normalizeText(story.story_summary) || normalizeText(story.story_body);
+      const snippet = summary.length > 220 ? `${summary.slice(0, 217).trim()}...` : summary;
+      byProductId.set(productId, {
+        public_story_heading: normalizeText(story.story_heading),
+        public_story_summary: summary,
+        public_story_snippet: snippet,
+        public_story_status: normalizeText(story.display_status),
+        public_story_privacy_status: normalizeText(story.privacy_status)
+      });
+    });
+
+    return rows.map((product) => ({ ...product, ...(byProductId.get(Number(product.product_id || 0)) || {}) }));
+  } catch {
+    return rows;
+  }
 }
 
 function buildFilterGroups(products) {
@@ -209,6 +269,9 @@ function productMatchesFilters(product, filters) {
       product.product_category,
       product.color_name,
       product.color_names_text,
+      product.public_story_heading,
+      product.public_story_summary,
+      product.public_story_snippet,
       product.keywords
     ]
       .join(" ")
@@ -541,7 +604,8 @@ function buildProductSafeFallbackSql({ productColumns, whereSql }) {
 
 async function runUltraProductFallback(db, filters) {
   const rows = await runProductQuery(db, "SELECT * FROM products LIMIT 500");
-  const products = shapeProducts(rows)
+  const enrichedProducts = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
+  const products = enrichedProducts
     .filter((product) => String(product.status || "active").toLowerCase() === "active")
     .filter((product) => productMatchesFilters(product, filters));
   return sortProducts(products);
@@ -646,7 +710,7 @@ export async function onRequestGet(context) {
 
   try {
     const rows = await runProductQuery(db, primarySql, primaryWhere.bindings);
-    const products = shapeProducts(rows);
+    const products = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
     return json({
       ok: true,
       products,
@@ -672,7 +736,7 @@ export async function onRequestGet(context) {
 
     try {
       const rows = await runProductQuery(db, fallbackSql, fallbackWhere.bindings);
-      const products = shapeProducts(rows);
+      const products = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
       warnings.push("fallback_query_used");
       return json({
         ok: true,
