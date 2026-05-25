@@ -156,6 +156,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const name = escapeHtml(product.name || '');
       const slug = encodeURIComponent(product.slug || '');
       const shortDescription = escapeHtml(product.short_description || product.meta_description || '');
+      const storySnippet = escapeHtml(product.public_story_snippet || product.public_story_summary || '');
+      const storyHeading = escapeHtml(product.public_story_heading || 'Story behind this piece');
       const productType = escapeHtml(product.product_type || '');
       const price = escapeHtml(formatMoney(product.price_cents, product.currency));
       const imageUrl = String(product.featured_image_url || product.og_image_url || '').trim();
@@ -184,6 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           ${keywordBadge}
           ${swatchMarkup}
           <p class="small" style="min-height:48px">${shortDescription || 'No description available yet.'}</p>
+          ${storySnippet ? `<div class="shop-card-story small"><strong>${storyHeading}:</strong> ${storySnippet}</div>` : ''}
           <div class="small" style="margin-top:8px">${product.requires_shipping ? 'Shipping / pickup item' : 'Digital or no-shipping item'}${product.product_category ? ` • ${escapeHtml(product.product_category)}` : ''}${product.condition_summary ? ` • ${escapeHtml(product.condition_summary)}` : ''}</div>
           <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
             <a class="btn" href="/shop/product/?slug=${slug}">View</a>
