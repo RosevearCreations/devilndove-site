@@ -193,3 +193,8 @@ After deployment, apply/record `database_upgrade_current_pass.sql`, then test mo
 ## Build 147 update
 
 This build adds public shop-card story snippets, Product editor image duplicate warnings, a seven-role image checklist, a Product editor social-post shortcut, and an Operations media-consent registry. Apply `database_upgrade_current_pass.sql` after deploying.
+
+
+## Build 148 Update
+
+Product media management now supports drag/drop ordering, role labels, public-use status, consent-record references, and story snippets in internal search. See `COMPETITIVE.md`, `DEVELOPMENT_ROADMAP.md`, and `KNOWN_GAPS_AND_RISKS.md` for the updated direction.

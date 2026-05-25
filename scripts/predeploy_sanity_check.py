@@ -312,6 +312,36 @@ def check_product_story_shop_assets(root: Path):
         issues.append({'type': 'product_editor_story_media_css_missing', 'path': 'css/styles.css', 'missing': missing_css})
     return issues
 
+
+
+def check_product_image_role_assets(root: Path):
+    issues = []
+    media_js = root / 'public' / 'js' / 'admin-product-images.js'
+    media_api = root / 'functions' / 'api' / 'admin' / 'product-images.js'
+    search_js = root / 'public' / 'js' / 'site-search.js'
+    schema = root / 'database_upgrade_current_pass.sql'
+    js_text = read_text(media_js) if media_js.exists() else ''
+    api_text = read_text(media_api) if media_api.exists() else ''
+    search_text = read_text(search_js) if search_js.exists() else ''
+    schema_text = read_text(schema) if schema.exists() else ''
+    required_js = ['product-image-sortable-row', 'IMAGE_ROLE_OPTIONS', 'Apply recommended roles', 'public_use_status', 'consent_record_id']
+    required_api = ['image_role', 'public_use_status', 'consent_record_id', 'role_review_notes', 'product_image_role_reference']
+    required_search = ['public_story_snippet', 'public_story_summary']
+    required_schema = ['product_image_role_reference', 'build_148_image_order_roles_consent_search']
+    missing_js = [token for token in required_js if token not in js_text]
+    missing_api = [token for token in required_api if token not in api_text]
+    missing_search = [token for token in required_search if token not in search_text]
+    missing_schema = [token for token in required_schema if token not in schema_text]
+    if missing_js:
+        issues.append({'type': 'product_image_role_ui_missing_assets', 'path': 'public/js/admin-product-images.js', 'missing': missing_js})
+    if missing_api:
+        issues.append({'type': 'product_image_role_api_missing_assets', 'path': 'functions/api/admin/product-images.js', 'missing': missing_api})
+    if missing_search:
+        issues.append({'type': 'site_search_story_snippet_missing_assets', 'path': 'public/js/site-search.js', 'missing': missing_search})
+    if missing_schema:
+        issues.append({'type': 'product_image_role_schema_missing_assets', 'path': 'database_upgrade_current_pass.sql', 'missing': missing_schema})
+    return issues
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('root', nargs='?', default='.', help='Build root to check')
@@ -328,7 +358,8 @@ def main(argv=None) -> int:
     product_editor_issues = check_product_editor_assets(root)
     product_story_issues = check_product_story_assets(root)
     product_story_shop_issues = check_product_story_shop_assets(root)
-    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues + product_story_shop_issues
+    product_image_role_issues = check_product_image_role_assets(root)
+    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues + product_story_shop_issues + product_image_role_issues
     report = {
         'ok': not issues,
         'root': str(root),
@@ -359,3 +390,5 @@ if __name__ == '__main__':
 # Build 146 note: predeploy checks include product story notes editor, mobile-create-product fix, and continued draft capture readiness.
 
 # Build 147 note: predeploy checks include shop story snippets, product image role checklist, Product editor social shortcut, and media consent registry.
+
+# Build 148 note: predeploy checks include drag/drop product image ordering, image roles, consent-link fields, and story snippet search assets.

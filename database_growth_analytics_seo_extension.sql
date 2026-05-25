@@ -809,3 +809,6 @@ CREATE TABLE IF NOT EXISTS media_consent_records (
 );
 CREATE INDEX IF NOT EXISTS idx_media_consent_records_status ON media_consent_records(consent_status, consent_scope, updated_at);
 CREATE INDEX IF NOT EXISTS idx_media_consent_records_source ON media_consent_records(source_type, source_id, updated_at);
+
+
+-- Build 148 note: product image role/public-use/consent fields are represented in database_full_schema.sql and are self-healed by /api/admin/product-images for existing D1 installs.

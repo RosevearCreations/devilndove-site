@@ -157,3 +157,8 @@ The next assistant should know:
 ## Build 147 AI handoff
 
 The current working direction is: product capture should flow from quick draft → multi-image/product-role review → approved public story → shop-card story snippet → social queue → privacy/consent review. The new media consent registry is private D1 data and must not be placed in public `/data/` files.
+
+
+## Build 148 AI Context
+
+Continue treating product media as role-aware and privacy-aware. Product images can now carry `image_role`, `public_use_status`, `consent_record_id`, and `role_review_notes`. Social Privacy Guard checks Media Consent Records for customer/private media before approval. Internal site search should keep using approved product story snippets.

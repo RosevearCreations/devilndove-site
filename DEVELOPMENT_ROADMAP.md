@@ -783,3 +783,52 @@ Completed in this pass:
 18. Add accountant export packaging.
 19. Add release-health “go/no-go” summary combining schema drift, public API health, runtime incidents, sitemap, structured data, image readiness, and media consent risk.
 20. Add marketplace/channel export readiness for Etsy, Facebook Marketplace, Pinterest, and manual copy/paste channels.
+
+
+## Build 148 Completed — Product Image Ordering, Roles, Consent Link, and Search Story Snippets
+
+Completed in this pass:
+
+1. Fixed the Product Images admin API syntax issue caused by a duplicated `return json({` block.
+2. Added self-healing product image annotation fields for `image_role`, `public_use_status`, `consent_record_id`, and `role_review_notes`.
+3. Added a `product_image_role_reference` schema table and seeded role definitions.
+4. Added drag/drop ordering to the Product Media Workflow.
+5. Kept up/down image movement as a fallback for mobile and accessibility.
+6. Added image role selection per image.
+7. Added public-use status per image.
+8. Added optional consent record ID per image.
+9. Added role/review notes per image.
+10. Added an “Apply recommended roles” helper in the Product Media Workflow.
+11. Expanded the image quality summary to show role coverage and consent/blocking warnings.
+12. Persisted role/public-use/consent fields through `/api/admin/product-images`.
+13. Included image role counts in media score history metadata.
+14. Connected Social Privacy Guard to Media Consent Records by social source and media URL.
+15. Added consent match counts/status to Social Privacy Guard rows.
+16. Blocked approval of customer/private social media when consent is required but no social-use consent is linked.
+17. Added approved product story snippets to internal site search summaries and scoring.
+18. Updated CSS for drag/drop product image rows and mobile-safe fallback controls.
+19. Updated schema files and active Markdown handoff files.
+20. Updated `COMPETITIVE.md` with the new product-media/consent/search direction.
+
+## Next Several Steps
+
+1. Add automatic missing-role warnings before a product can move from draft to review.
+2. Add story snippets to more internal search/result card surfaces, including homepage featured areas if appropriate.
+3. Connect Media Consent Records directly to Product Story Notes approval.
+4. Add a product-story privacy checklist beside the story editor.
+5. Add approved testimonial/trust block workflow.
+6. Add custom request intake for engraving, personalized gifts, and mixed-media commissions.
+7. Add admin-editable social caption templates.
+8. Add social analytics rollups from UTM links.
+9. Add Search Console action apply/review workflow for title/meta/internal-link updates.
+10. Add payment application workflow.
+11. Add HST/GST review workflow.
+12. Add month-end close checklist and lock/reopen controls.
+13. Add accountant export packaging.
+14. Add marketplace export helpers for selected products.
+15. Add product image duplicate detection across the whole catalog, not only within the editor.
+16. Add product media “missing scale photo” and “missing packaging photo” warnings.
+17. Add public-safe gallery/testimonial blocks to local SEO pages.
+18. Add customer/media consent expiry reminders.
+19. Add social posting result reconciliation into analytics.
+20. Keep retiring duplicate JSON into D1/private staging where the data is operational or private.

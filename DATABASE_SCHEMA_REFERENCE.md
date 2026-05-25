@@ -282,3 +282,8 @@ Main fields:
 - `updated_at`
 
 This table is private D1 data and should not be mirrored into public `/data/` JSON.
+
+
+## Build 148 Schema Notes
+
+Build 148 adds `product_image_role_reference` and extends the runtime product-image annotation model with optional fields: `image_role`, `public_use_status`, `consent_record_id`, and `role_review_notes`. Existing D1 databases are self-healed by `/api/admin/product-images` because SQLite/D1 migrations cannot safely re-add already-existing optional columns without live introspection. The current pass SQL seeds the role reference table and records the migration ledger marker.

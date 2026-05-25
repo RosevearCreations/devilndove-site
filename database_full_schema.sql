@@ -654,6 +654,10 @@ CREATE TABLE IF NOT EXISTS product_image_annotations (
   merchandising_score INTEGER,
   merchandising_override_reason TEXT,
   merchandising_override_note TEXT,
+  image_role TEXT,
+  public_use_status TEXT DEFAULT 'internal_review',
+  consent_record_id INTEGER,
+  role_review_notes TEXT,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
   FOREIGN KEY (product_image_id) REFERENCES product_images(product_image_id) ON DELETE CASCADE
@@ -677,6 +681,26 @@ CREATE TABLE IF NOT EXISTS product_media_score_history (
 );
 
 CREATE INDEX IF NOT EXISTS idx_product_media_score_history_product_id_created_at ON product_media_score_history(product_id, created_at DESC);
+
+
+-- Build 148: optional product image role reference used by the admin media workflow.
+CREATE TABLE IF NOT EXISTS product_image_role_reference (
+  image_role_key TEXT PRIMARY KEY,
+  display_name TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  storefront_hint TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+INSERT OR IGNORE INTO product_image_role_reference (image_role_key, display_name, sort_order, storefront_hint, is_active, updated_at) VALUES
+('hero_front','Hero/front',0,'Primary product image for shop cards and product detail hero.',1,CURRENT_TIMESTAMP),
+('detail_texture','Detail/texture',1,'Close-up texture, finish, material, maker detail, or engraving proof.',1,CURRENT_TIMESTAMP),
+('scale_context','Scale/context',2,'Scale reference, hand/display/context image, or practical sizing view.',1,CURRENT_TIMESTAMP),
+('back_side','Back/side',3,'Back, clasp, edge, underside, side profile, or condition detail.',1,CURRENT_TIMESTAMP),
+('process_story','Process/story',4,'Bench/process image that supports the maker story after privacy review.',1,CURRENT_TIMESTAMP),
+('packaging_pickup','Packaging/pickup',5,'Packaging, pickup, gift-ready, or delivery context.',1,CURRENT_TIMESTAMP),
+('material_tool_proof','Material/tool proof',6,'Material, supply, tool, or making-proof image for transparency.',1,CURRENT_TIMESTAMP),
+('gallery_support','Gallery/support',7,'Extra supporting image that does not fit a specific required role.',1,CURRENT_TIMESTAMP);
 
 CREATE TABLE IF NOT EXISTS catalog_items (
   catalog_item_id INTEGER PRIMARY KEY AUTOINCREMENT,

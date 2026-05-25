@@ -908,3 +908,37 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+
+-- Build 148: product image role reference, drag/drop ordering support, and consent-linked public-use tracking.
+-- Existing product_image_annotations installs are self-healed by /api/admin/product-images with:
+--   image_role, public_use_status, consent_record_id, role_review_notes.
+CREATE TABLE IF NOT EXISTS product_image_role_reference (
+  image_role_key TEXT PRIMARY KEY,
+  display_name TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  storefront_hint TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+INSERT OR IGNORE INTO product_image_role_reference (image_role_key, display_name, sort_order, storefront_hint, is_active, updated_at) VALUES
+('hero_front','Hero/front',0,'Primary product image for shop cards and product detail hero.',1,CURRENT_TIMESTAMP),
+('detail_texture','Detail/texture',1,'Close-up texture, finish, material, maker detail, or engraving proof.',1,CURRENT_TIMESTAMP),
+('scale_context','Scale/context',2,'Scale reference, hand/display/context image, or practical sizing view.',1,CURRENT_TIMESTAMP),
+('back_side','Back/side',3,'Back, clasp, edge, underside, side profile, or condition detail.',1,CURRENT_TIMESTAMP),
+('process_story','Process/story',4,'Bench/process image that supports the maker story after privacy review.',1,CURRENT_TIMESTAMP),
+('packaging_pickup','Packaging/pickup',5,'Packaging, pickup, gift-ready, or delivery context.',1,CURRENT_TIMESTAMP),
+('material_tool_proof','Material/tool proof',6,'Material, supply, tool, or making-proof image for transparency.',1,CURRENT_TIMESTAMP),
+('gallery_support','Gallery/support',7,'Extra supporting image that does not fit a specific required role.',1,CURRENT_TIMESTAMP);
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'build_148_image_order_roles_consent_search',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Build 148 adds drag/drop product image ordering, persisted image roles/public-use status, consent-record linking in media workflow, and story snippet search improvements. Existing annotation columns are self-healed by the product-images admin API.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

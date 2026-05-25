@@ -290,3 +290,22 @@ Remaining gaps:
 - `/admin/products/` should show the image role checklist and social shortcut panel.
 - `/admin/operations/` should show Media Consent Records.
 - The public shop cards should remain mobile-friendly after story snippets appear.
+
+
+## Build 148 Known Gaps Update
+
+Closed or improved:
+
+- Product image ordering is now easier through drag/drop plus up/down fallback buttons.
+- Image roles are now stored per image through the Product Media Workflow.
+- Public-use status and consent record references can now be stored per product image.
+- Social Privacy Guard now checks Media Consent Records before approving customer/private social media.
+- Internal site search can use approved product story snippets.
+
+Still open:
+
+- Product publish readiness does not yet automatically fail a product for missing image roles.
+- Product Story Notes approval does not yet automatically require a linked media consent check.
+- Media consent records are not yet surfaced directly inside each Product Story row.
+- The public storefront does not yet expose role-aware galleries, such as “detail,” “scale,” or “process” tabs.
+- Accounting workflows are still the largest unfinished business area: payment application, HST/GST review, close controls, and accountant exports.

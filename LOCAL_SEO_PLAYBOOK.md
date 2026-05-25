@@ -160,3 +160,8 @@ Rules:
 ## Build 147 local SEO note
 
 Approved product story snippets now help shop cards include more human, local, and material/context language. Keep snippets natural: mention Southern Ontario, Tillsonburg, handmade, vintage, workshop-made, or custom work only where it genuinely fits the product.
+
+
+## Build 148 Local SEO Direction
+
+Approved product story snippets now support internal discovery. Continue writing product stories with real material/process/local terms people search for, while keeping one clear H1 per page and avoiding private customer or workshop-background details in public media.

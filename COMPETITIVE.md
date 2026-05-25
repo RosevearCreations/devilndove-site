@@ -609,3 +609,24 @@ The strongest competitive advantage is now a full capture loop:
 ### Why this matters
 
 Marketplace listings usually show only a photo, price, and title. Devil n Dove can compete by showing process, materials, story, condition, local trust, and honest small-shop context before the buyer even clicks the product page.
+
+
+## Build 148 Competitive Direction — Product Media Control, Consent, and Search Discovery
+
+This pass moves Devil n Dove from “we can upload product photos” toward “we can control how finished-product media is used across the store, search, and social posting.” The competitive advantage is not perfect studio work; it is a fast, honest, public-safe workflow that turns one-off workshop creations into searchable products with a clear story, useful images, and a privacy trail.
+
+### New direction added
+
+1. **Finished-product media should have roles, not just URLs.** Product photos now need a purpose: hero/front, detail/texture, scale/context, back/side, process/story, packaging/pickup, material/tool proof, or gallery support. This lets us identify missing photos before publishing and helps future storefront layouts choose better images automatically.
+2. **Image order should be visual and fast.** The Product Media Workflow now supports drag/drop ordering in addition to up/down buttons, so we can set the hero image and supporting gallery order without editing raw numbers.
+3. **Public use should be tracked at the image level.** Each product image can now carry a public-use status such as product-page OK, social OK, consent needed, or blocked. This connects product media to the social privacy direction instead of treating every uploaded image as safe by default.
+4. **Consent records must become part of the social workflow.** Social Privacy Guard now checks Media Consent Records by source and media URL, and blocks approval when customer/private media is marked as requiring consent but no linked social-use consent exists.
+5. **Product stories should help search.** Approved story snippets now feed internal site search summaries and scoring, giving visitors more ways to find products by process, material, provenance, and story words.
+
+### Why this matters competitively
+
+Handmade and mixed-media shops often lose sales because product pages feel thin: one photo, weak context, no provenance, and no clear trust signal. Devil n Dove can compete by showing the making path, photo purpose, consent/privacy care, local Ontario trust, and product story all together. That is a stronger position than simply copying generic ecommerce layouts.
+
+### Practical next direction
+
+The next competitive layer should be: (1) auto-detect missing image roles before publishing, (2) show story snippets in more search/listing surfaces, (3) connect consent records directly to product-story approval, (4) add testimonial/trust blocks, and (5) start converting social/SEO data into reviewed content improvements.

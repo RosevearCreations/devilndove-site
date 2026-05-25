@@ -240,3 +240,14 @@ After deploying, check:
 5. `/admin/products/` can queue a product social draft from the editor.
 6. `/admin/operations/` loads Media Consent Records.
 7. `database_upgrade_current_pass.sql` has been applied or recorded in the migration ledger.
+
+
+## Build 148 Sanity Notes
+
+Checks to perform after deploy:
+
+1. Open `/admin/products/`, load a product in Product Media Workflow, drag images into a new order, save, reload, and confirm the order persisted.
+2. Set image roles and public-use statuses, save, reload, and confirm they persisted.
+3. Create or update a Media Consent Record in `/admin/operations/`.
+4. Open Social Media Privacy Guard and confirm consent status appears for matching social posts.
+5. Search the public site for wording from an approved product story snippet and confirm product results surface properly.
