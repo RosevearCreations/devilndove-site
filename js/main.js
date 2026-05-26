@@ -74,6 +74,7 @@
     { href: "/pickup/index.html", nav: "/pickup/", label: "Pickup", desktop: true, group: "Community" },
     { href: "/socials/index.html", nav: "/socials/", label: "Socials", desktop: true, group: "Community" },
     { href: "/contact/index.html", nav: "/contact/", label: "Contact", desktop: true, group: "Community" },
+    { href: "/custom-request/index.html", nav: "/custom-request/", label: "Request custom work", desktop: false, group: "Community" },
     { href: "/about/index.html", nav: "/about/", label: "About", desktop: true, group: "Essentials" },
     { href: "/search/index.html", nav: "/search/", label: "Search", desktop: true, group: "Essentials" },
     { href: "/handmade-jewelry-ontario/index.html", nav: "/handmade-jewelry-ontario/", label: "Handmade jewelry Ontario", desktop: false, group: "Local pages" },
@@ -176,6 +177,7 @@
             <a href="/handmade-jewelry-ontario/index.html">Handmade jewelry Ontario</a>
             <a href="/polymer-clay-earrings-ontario/index.html">Polymer clay earrings</a>
             <a href="/custom-gifts-southern-ontario/index.html">Custom gifts Southern Ontario</a>
+            <a href="/custom-request/index.html">Request custom work</a>
             <a href="/laser-engraving-ontario/index.html">Laser engraving projects</a>
             <a href="/vintage-finds-ontario/index.html">Vintage finds Ontario</a>
             <a href="/workshop-made-gifts-ontario/index.html">Workshop-made gifts</a>
@@ -342,6 +344,41 @@
     footer.parentNode.insertBefore(section, footer);
   }
 
+  function trustContextFromPath(pathname) {
+    const path = String(pathname || location.pathname || '/').toLowerCase();
+    if (path === '/' || path === '/index.html') return 'home';
+    const part = path.split('/').filter(Boolean)[0] || 'sitewide';
+    return part.replace(/[^a-z0-9_-]+/g, '_') || 'sitewide';
+  }
+
+  async function loadFeaturedTrustItems(meta) {
+    try {
+      const response = await fetch(`/api/trust-blocks?context=${encodeURIComponent(trustContextFromPath(location.pathname))}&limit=${encodeURIComponent(meta.limit)}`, { headers: { Accept: 'application/json' } });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load approved trust blocks.');
+      const items = Array.isArray(data.items) ? data.items : [];
+      if (items.length) {
+        return items.map((row) => ({
+          rating: String(row.rating_label || '').match(/\d/) ? Number(String(row.rating_label).match(/\d/)[0]) : 5,
+          review_text: row.body || '',
+          reviewer_name: row.attribution_label || row.locality_label || 'Devil n Dove customer',
+          product_slug: row.related_product_slug || '',
+          product_name: row.related_product_name || '',
+          review_kind: row.item_kind || 'testimonial',
+          trust_title: row.title || '',
+        }));
+      }
+    } catch (_error) {}
+    try {
+      const response = await fetch(`/api/product-reviews?featured_only=1&limit=${meta.limit}`, { headers: { Accept: 'application/json' } });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load testimonials.');
+      return Array.isArray(data.reviews) ? data.reviews : [];
+    } catch (_error) {
+      return [];
+    }
+  }
+
   async function injectFeaturedTestimonials() {
     if (!shouldShowFeaturedTestimonials(location.pathname)) return;
     const container = document.querySelector('.container') || document.body;
@@ -349,10 +386,7 @@
     if (!container || !footer || document.getElementById('featuredTestimonialsBlock')) return;
     try {
       const meta = featuredTestimonialMeta(location.pathname);
-      const response = await fetch(`/api/product-reviews?featured_only=1&limit=${meta.limit}`, { headers: { Accept: 'application/json' } });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load testimonials.');
-      const reviews = Array.isArray(data.reviews) ? data.reviews : [];
+      const reviews = await loadFeaturedTrustItems(meta);
       if (!reviews.length) return;
       const section = document.createElement('section');
       section.id = 'featuredTestimonialsBlock';
@@ -369,11 +403,12 @@
         <div class="featured-testimonials-grid" style="margin-top:12px">
           ${reviews.map((row) => `
             <article class="featured-testimonial-card">
+              ${row.trust_title ? `<div class="small"><strong>${escapeHtml(row.trust_title)}</strong></div>` : ''}
               <div class="small">${escapeHtml('★'.repeat(Math.max(1, Number(row.rating || 0))))}</div>
               <p style="margin:10px 0">${escapeHtml(row.review_text || '')}</p>
               <div class="small"><strong>${escapeHtml(row.reviewer_name || 'Devil n Dove customer')}</strong>${row.product_slug ? ` • <a href="/shop/product/?slug=${encodeURIComponent(row.product_slug)}">${escapeHtml(row.product_name || 'Product')}</a>` : ''}</div><div class="small" style="margin-top:4px">${escapeHtml(row.review_kind || 'testimonial')}</div>
             </article>`).join('')}
-        </div><div class="small" style="margin-top:10px">Featured reviews are used across the shop and public sections to build trust, show real buyer reactions, and support local discovery.</div>`;
+        </div><div class="small" style="margin-top:10px">Approved trust blocks and featured reviews are used across the shop and public sections to build trust, show real buyer reactions, and support local discovery.</div>`;
       const anchor = container.querySelector(meta.insertAfterSelector);
       if (anchor && anchor.parentNode === container) container.insertBefore(section, anchor.nextSibling);
       else container.insertBefore(section, footer);
