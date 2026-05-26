@@ -42,7 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return params.toString();
   }
   function renderStatusButton(action) {
-    return `<button class="btn small" type="button" data-seo-action-status="${esc(action.action_key)}">Status</button>`;
+    const applied = action.action_status === 'applied' || Number(action.applied_override_id || 0) > 0;
+    return `<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn small" type="button" data-seo-action-status="${esc(action.action_key)}">Status</button>${applied ? '<span class="admin-status-pill ok">applied</span>' : `<button class="btn small primary" type="button" data-seo-action-apply="${esc(action.action_key)}">Apply</button>`}</div>`;
   }
   function render(data) {
     const totals = data.totals || {};
@@ -67,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ${opps.map((row) => `<tr><td>${esc(row.query_text)}</td><td><code>${esc(row.page_url)}</code></td><td>${num(row.clicks)}</td><td>${num(row.impressions)}</td><td>${esc(row.average_position)}</td></tr>`).join('') || '<tr><td colspan="5">No opportunity rows match the current filters.</td></tr>'}
       </tbody></table></div>
       <h3>Reviewable SEO action list</h3>
-      <p class="small">Generated actions stay private in D1 until a human reviews copy and manually changes a page/product.</p>
+      <p class="small">Generated actions stay private until reviewed. Use Apply only after the suggested title/meta/internal-link note matches the real page intent; applied rows save a D1 SEO override and a client-side enhancement uses it as a fallback.</p>
       <div class="admin-table-wrap"><table><thead><tr><th>Status</th><th>Priority</th><th>Query/Page</th><th>Suggested title</th><th>Suggested meta/link note</th><th>Action</th></tr></thead><tbody>
-        ${actions.map((action) => `<tr><td><strong>${esc(action.action_status)}</strong></td><td>${esc(action.priority_score)}</td><td><div>${esc(action.query_text)}</div><code>${esc(action.page_url)}</code></td><td>${esc(action.suggested_title)}</td><td><div>${esc(action.suggested_meta_description)}</div><div class="small">${esc(action.suggested_internal_link_note)}</div></td><td>${renderStatusButton(action)}</td></tr>`).join('') || '<tr><td colspan="6">No SEO actions generated yet.</td></tr>'}
+        ${actions.map((action) => `<tr><td><strong>${esc(action.action_status)}</strong><div class="small">${action.applied_at ? `applied ${esc(action.applied_at)}` : ''}</div></td><td>${esc(action.priority_score)}</td><td><div>${esc(action.query_text)}</div><code>${esc(action.page_url)}</code></td><td>${esc(action.suggested_title)}</td><td><div>${esc(action.suggested_meta_description)}</div><div class="small">${esc(action.suggested_internal_link_note)}</div></td><td>${renderStatusButton(action)}</td></tr>`).join('') || '<tr><td colspan="6">No SEO actions generated yet.</td></tr>'}
       </tbody></table></div>
       <details style="margin-top:12px" open><summary>Recent imports and safe revert</summary><div class="admin-table-wrap"><table><thead><tr><th>Batch</th><th>File</th><th>Rows</th><th>Live rows</th><th>Imported</th><th>Action</th></tr></thead><tbody>${batches.map((row) => `<tr><td><code>${esc(row.import_batch_key)}</code></td><td>${esc(row.source_file)}</td><td>${num(row.row_count)}</td><td>${num(row.live_rows)}</td><td>${esc(row.imported_at)}</td><td><button class="btn small danger" type="button" data-delete-search-console-batch="${esc(row.import_batch_key)}">Delete/revert batch</button></td></tr>`).join('') || '<tr><td colspan="6">No imports yet.</td></tr>'}</tbody></table></div></details>`;
   }
@@ -129,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) { setMsg(error.message || 'Unable to generate SEO recommendations.', true); }
   }
   async function updateActionStatus(actionKey) {
-    const next = window.prompt('Set action status to open, in_progress, done, or ignored:', 'in_progress');
+    const next = window.prompt('Set action status to open, in_progress, done, ignored, or applied:', 'in_progress');
     if (!next) return;
     try {
       setMsg('Updating SEO action status...');
@@ -138,6 +139,18 @@ document.addEventListener('DOMContentLoaded', () => {
       render(data);
       setMsg(data.message || 'SEO action status updated.');
     } catch (error) { setMsg(error.message || 'Unable to update SEO action.', true); }
+  }
+  async function applySeoAction(actionKey) {
+    if (!actionKey) return;
+    const note = window.prompt('Optional note for this reviewed SEO apply action:', 'Reviewed and applied from Search Console action.');
+    if (note === null) return;
+    try {
+      setMsg('Applying reviewed SEO override...');
+      const response = await window.DDAuth.apiFetch('/api/admin/search-console-import', { method: 'POST', body: JSON.stringify({ action: 'apply_seo_action', action_key: actionKey, notes: note, filters: currentFilters() }) });
+      const data = await readJson(response);
+      render(data);
+      setMsg(data.message || 'SEO override applied.');
+    } catch (error) { setMsg(error.message || 'Unable to apply SEO override.', true); }
   }
 
   mount.innerHTML = `
@@ -192,6 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (deleteButton) deleteBatch(deleteButton.getAttribute('data-delete-search-console-batch'));
     const statusButton = event.target.closest('[data-seo-action-status]');
     if (statusButton) updateActionStatus(statusButton.getAttribute('data-seo-action-status'));
+    const applyButton = event.target.closest('[data-seo-action-apply]');
+    if (applyButton) applySeoAction(applyButton.getAttribute('data-seo-action-apply'));
   });
   load();
 });
