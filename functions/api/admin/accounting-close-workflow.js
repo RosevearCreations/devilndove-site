@@ -3,6 +3,7 @@
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { ensureAccountingPeriodClosuresTable, getAccountingPeriodClosure, monthValue, normalizeChecklistPayload } from './_accountingPeriods.js';
+import { queueNotification } from '../_lib/notificationOutbox.js';
 
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function clean(value, limit = 1200) { const text = normalizeText(value); return text.length > limit ? text.slice(0, limit).trim() : text; }
@@ -79,6 +80,27 @@ async function ensureSchema(db) {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_outbox (
+    notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_kind TEXT NOT NULL,
+    channel TEXT NOT NULL DEFAULT 'email',
+    destination TEXT,
+    related_order_id INTEGER,
+    related_payment_id INTEGER,
+    related_product_id INTEGER,
+    payload_json TEXT,
+    metadata_json TEXT,
+    status TEXT NOT NULL DEFAULT 'queued',
+    attempt_count INTEGER NOT NULL DEFAULT 0,
+    last_attempt_at TEXT,
+    next_attempt_at TEXT,
+    provider_message_id TEXT,
+    error_text TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_notification_outbox_kind ON notification_outbox(notification_kind, destination, created_at)`).run().catch(() => null);
   await db.prepare(`CREATE TABLE IF NOT EXISTS accountant_export_packages (
     accountant_export_package_id INTEGER PRIMARY KEY AUTOINCREMENT,
     package_key TEXT NOT NULL UNIQUE,
@@ -229,6 +251,32 @@ export async function onRequestPost(context) {
       ).run();
       await auditAdminAction(context.env, context.request, adminUser, { action_type: 'save_hst_gst_review', target_type: 'accounting_hst_gst_review', target_key: periodMonth, details: { period_month: periodMonth, review_status: status } }).catch(() => null);
       return jsonResponse({ message: 'HST/GST review saved.', ...(await payload(db, periodMonth)) }, 200, { 'Cache-Control': 'no-store' });
+    }
+    if (action === 'queue_hst_reminder') {
+      const hst = await hstReview(db, periodMonth, 0);
+      const destination = clean(body.destination_email || context.env.ACCOUNTING_ALERT_EMAIL || adminUser.email || '', 254);
+      if (!destination) return jsonResponse({ ok: false, error: 'No reminder destination email is available.' }, 400);
+      const nextAttempt = clean(body.reminder_date || hst.reminder_date || '', 20);
+      const nextAttemptAt = nextAttempt ? `${nextAttempt} 09:00:00` : null;
+      const queued = await queueNotification(db, {
+        notification_kind: 'hst_gst_reminder',
+        channel: 'email',
+        destination,
+        next_attempt_at: nextAttemptAt,
+        payload: {
+          subject: `Devil n Dove HST/GST review reminder for ${periodMonth}`,
+          period_month: periodMonth,
+          review_status: hst.review_status || 'draft',
+          remittance_status: hst.remittance_status || 'not_ready',
+          filing_due_date: hst.filing_due_date || '',
+          reminder_date: nextAttempt || '',
+          net_tax_payable_cents: hst.net_tax_payable_cents || 0,
+          note: 'Review HST/GST filing, evidence, and remittance status before closing the period.'
+        },
+        metadata: { source: 'accounting_close_workflow', period_month: periodMonth, queued_by_user_id: adminUser.user_id }
+      });
+      await auditAdminAction(context.env, context.request, adminUser, { action_type: 'queue_hst_gst_reminder', target_type: 'notification_outbox', target_id: queued.notification_outbox_id || null, details: { period_month: periodMonth, destination, next_attempt_at: nextAttemptAt, queued: queued.queued, suppressed: queued.suppressed } }).catch(() => null);
+      return jsonResponse({ message: queued.suppressed ? `Reminder suppressed: ${queued.reason || 'cooldown/exclusion rule'}` : 'HST/GST reminder queued.', reminder: queued, ...(await payload(db, periodMonth)) }, 200, { 'Cache-Control': 'no-store' });
     }
     if (action === 'save_close_checklist') {
       const checklist = normalizeChecklistPayload({
