@@ -775,3 +775,6 @@ body.nav-mobile-open{overflow:hidden}
 .public-trust-card{padding:14px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.045)}
 .public-trust-card blockquote{margin:8px 0 10px 0;font-size:.98rem;line-height:1.48}.public-trust-card .small{opacity:.88}
 @media (max-width:760px){.testimonial-trust-admin-panel .products-admin-table,.accounting-close-workflow .products-admin-table{min-width:780px}.testimonial-trust-admin-panel .admin-table-wrap,.accounting-close-workflow .admin-table-wrap{overflow-x:auto}.trust-block-form .btn,.accounting-close-form .btn{width:100%;justify-content:center}}
+
+/* Build 151: custom request conversion and campaign attribution polish */
+.custom-request-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.custom-request-actions .btn{white-space:nowrap}.status-note.small{display:inline-block;margin:2px 4px 2px 0;padding:3px 7px;border-radius:999px;background:rgba(120,84,44,.1)}.admin-table-wrap td .status-note{max-width:100%}@media (max-width:720px){.custom-request-actions{flex-direction:column}.custom-request-actions .btn{width:100%}}
