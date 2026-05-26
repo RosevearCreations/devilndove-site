@@ -759,3 +759,19 @@ body.nav-mobile-open{overflow:hidden}
     min-width: 88px;
   }
 }
+
+/* Build 150: trust blocks, SEO override fallback note, and accounting close workflow polish */
+.testimonial-trust-admin-panel,.accounting-close-workflow{display:grid;gap:14px}
+.trust-block-grid,.accounting-close-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;align-items:start}
+.trust-block-form,.accounting-close-form{display:grid;gap:10px;padding:12px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.035)}
+.trust-block-preview,.accounting-close-summary-card{padding:12px;border:1px solid rgba(255,207,112,.28);border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,207,112,.055))}
+.trust-block-status,.accounting-close-status{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.055);font-size:.82rem;font-weight:700;text-transform:capitalize}
+.trust-block-status.approved,.accounting-close-status.ready{border-color:rgba(80,180,120,.45);color:#9ef0b4;background:rgba(80,180,120,.08)}
+.trust-block-status.draft,.accounting-close-status.needs_review{border-color:rgba(255,207,112,.45);color:#ffe39a;background:rgba(255,207,112,.08)}
+.trust-block-status.archived,.accounting-close-status.blocked{border-color:rgba(255,120,150,.45);color:#ffb4c1;background:rgba(255,120,150,.08)}
+.seo-page-override-note{margin:18px 0;padding:14px 16px;border:1px solid rgba(255,207,112,.35);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,207,112,.07));box-shadow:0 12px 30px rgba(28,18,10,.10)}
+.seo-page-override-note strong{display:block;margin-bottom:4px;color:#ffe39a}.seo-page-override-note a{font-weight:800}
+.public-trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}
+.public-trust-card{padding:14px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.045)}
+.public-trust-card blockquote{margin:8px 0 10px 0;font-size:.98rem;line-height:1.48}.public-trust-card .small{opacity:.88}
+@media (max-width:760px){.testimonial-trust-admin-panel .products-admin-table,.accounting-close-workflow .products-admin-table{min-width:780px}.testimonial-trust-admin-panel .admin-table-wrap,.accounting-close-workflow .admin-table-wrap{overflow-x:auto}.trust-block-form .btn,.accounting-close-form .btn{width:100%;justify-content:center}}

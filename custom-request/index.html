@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <link href="/css/styles.css" rel="stylesheet"/>
+  <link href="/assets/mark.png" rel="icon" type="image/png"/>
+  <title>Custom Gift Request in Southern Ontario — Devil n Dove</title>
+  <meta name="description" content="Request a custom handmade gift, engraving, jewelry idea, sublimation item, vintage-style find, or workshop-made Devil n Dove creation in Southern Ontario."/>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <img alt="Devil n Dove logo" src="/assets/logo-clear.png"/>
+        <div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Custom handmade requests</div></div>
+      </div>
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/shop/">Shop</a>
+        <a href="/gallery/">Gallery</a>
+        <a href="/custom-gifts-southern-ontario/">Custom Gifts</a>
+        <a href="/contact/">Contact</a>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div>
+        <p class="small" style="font-weight:800;letter-spacing:.08em;text-transform:uppercase">Southern Ontario custom gift requests</p>
+        <h1>Request a custom Devil n Dove creation</h1>
+        <p>Tell us about the handmade gift, engraving, polymer clay jewelry, sublimation piece, vintage-inspired idea, or workshop-made experiment you have in mind. We review requests before replying so we can be honest about timing, materials, and fit.</p>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Custom request form</h2>
+      <p class="small">This does not create an automatic order. It sends the idea to our admin review queue so we can decide whether it should become a quote, product draft, or follow-up conversation.</p>
+      <form id="customRequestForm" class="admin-form-grid" style="margin-top:12px">
+        <label>Name<input class="input" name="name" autocomplete="name" required/></label>
+        <label>Email<input class="input" name="email" type="email" autocomplete="email" required/></label>
+        <label>Phone, optional<input class="input" name="phone" autocomplete="tel"/></label>
+        <label>Request type<select class="input" name="request_type">
+          <option value="custom_gift">Custom handmade gift</option>
+          <option value="engraving">Laser engraving</option>
+          <option value="jewelry">Jewelry or polymer clay piece</option>
+          <option value="sublimation">Sublimation item</option>
+          <option value="vintage_find">Vintage or collectible idea</option>
+          <option value="repair_or_remake">Repair, remake, or matching piece</option>
+          <option value="other">Other workshop request</option>
+        </select></label>
+        <label>Product or idea name<input class="input" name="product_interest" placeholder="Example: personalized keychain, memorial ornament, matching earrings"/></label>
+        <label>Deadline, optional<input class="input" name="deadline_date" type="date"/></label>
+        <label>Budget range, optional<input class="input" name="budget" inputmode="decimal" placeholder="Example: 40"/></label>
+        <label style="grid-column:1/-1">Links or image URLs, optional<textarea class="input" name="attachment_urls" rows="3" placeholder="Paste public image links or reference URLs, one per line."></textarea></label>
+        <label style="grid-column:1/-1">Tell us what you are hoping for<textarea class="input" name="message" rows="6" required minlength="12" placeholder="Please include size, colours, wording, material ideas, pickup/shipping needs, or anything that matters."></textarea></label>
+        <label class="small" style="grid-column:1/-1;display:flex;gap:8px;align-items:flex-start"><input name="consent_to_contact" type="checkbox" required/> <span>We may contact you about this request. We will not publish your request details or images without review/permission.</span></label>
+        <div style="grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn primary" type="submit">Send custom request</button><a class="btn" href="/shop/">Browse current shop</a></div>
+      </form>
+      <div id="customRequestMessage" class="status-note" style="display:none;margin-top:12px"></div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Good details to include</h2>
+      <ul class="small">
+        <li>What the item is for: gift, memorial, event, display, daily use, or experiment.</li>
+        <li>Size, colour, wording, finish, and any material limits.</li>
+        <li>Whether you need local pickup in Southern Ontario or shipping.</li>
+        <li>Photos or links that show the style, not private photos unless you are comfortable sharing them for review.</li>
+      </ul>
+    </section>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js"></script><script src="/public/js/seo-page-overrides.js"></script>
+  <script src="/public/js/custom-request-intake.js"></script>
+</body>
+</html>
