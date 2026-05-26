@@ -31,6 +31,36 @@ async function tableExists(db, tableName) {
   return !!row?.name;
 }
 
+async function ensureColumn(db, tableName, columnName, definition) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const columns = Array.isArray(result?.results) ? result.results : [];
+    if (columns.some((row) => row?.name === columnName)) return;
+    await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${definition}`).run();
+  } catch {
+    // Visit tracking must never block public pages. If an older D1 install cannot self-heal,
+    // the outer fallback returns ok/skipped rather than breaking the storefront.
+  }
+}
+
+function parseUtm(queryString, referrer) {
+  const out = { utm_source: '', utm_medium: '', utm_campaign: '', utm_content: '', utm_term: '' };
+  try {
+    const params = new URLSearchParams(String(queryString || '').replace(/^\?/, ''));
+    for (const key of Object.keys(out)) out[key] = normalizeText(params.get(key)).slice(0, 180);
+  } catch {}
+  if (!out.utm_source && referrer) {
+    try {
+      const host = new URL(referrer).hostname.replace(/^www\./, '');
+      if (/facebook|instagram|tiktok|pinterest|youtube|x\.com|twitter/i.test(host)) {
+        out.utm_source = host.slice(0, 180);
+        out.utm_medium = out.utm_medium || 'social_referral';
+      }
+    } catch {}
+  }
+  return out;
+}
+
 async function getSessionUser(env, token) {
   if (!token || !env.DB) return null;
   const hasUsers = await tableExists(env.DB, "users");
@@ -68,6 +98,14 @@ export async function onRequestPost(context) {
       }
     }
 
+    for (const tableName of ['site_visitor_sessions', 'site_page_views']) {
+      await ensureColumn(env.DB, tableName, 'utm_source', 'utm_source TEXT');
+      await ensureColumn(env.DB, tableName, 'utm_medium', 'utm_medium TEXT');
+      await ensureColumn(env.DB, tableName, 'utm_campaign', 'utm_campaign TEXT');
+      await ensureColumn(env.DB, tableName, 'utm_content', 'utm_content TEXT');
+      await ensureColumn(env.DB, tableName, 'utm_term', 'utm_term TEXT');
+    }
+
     let body = {};
     try {
       body = await request.json();
@@ -80,6 +118,7 @@ export async function onRequestPost(context) {
     const path = normalizeText(body.path || new URL(request.url).pathname) || "/";
     const query_string = normalizeText(body.query_string);
     const referrer = normalizeText(body.referrer || request.headers.get("Referer"));
+    const utm = parseUtm(query_string, referrer);
     const page_title = normalizeText(body.page_title);
     const page_h1 = normalizeText(body.page_h1);
     const event_type = normalizeText(body.event_type || "page_view") || "page_view";
@@ -152,9 +191,10 @@ export async function onRequestPost(context) {
       const insertSession = await env.DB.prepare(`
         INSERT INTO site_visitor_sessions (
           site_visitor_id, session_token, user_id, entry_path, last_path, country,
+          utm_source, utm_medium, utm_campaign, utm_content, utm_term,
           started_at, last_seen_at, page_view_count, event_count,
           is_checkout_started, is_abandoned_cart
-        ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 1, ?, 0)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 1, ?, 0)
       `).bind(
         Number(visitor.site_visitor_id || 0),
         browser_session_token,
@@ -162,6 +202,11 @@ export async function onRequestPost(context) {
         path,
         path,
         country || null,
+        utm.utm_source || null,
+        utm.utm_medium || null,
+        utm.utm_campaign || null,
+        utm.utm_content || null,
+        utm.utm_term || null,
         event_type === "page_view" ? 1 : 0,
         path.includes("/checkout") ? 1 : 0
       ).run();
@@ -174,6 +219,11 @@ export async function onRequestPost(context) {
           user_id = COALESCE(?, user_id),
           last_path = ?,
           country = COALESCE(NULLIF(?, ''), country),
+          utm_source = COALESCE(NULLIF(?, ''), utm_source),
+          utm_medium = COALESCE(NULLIF(?, ''), utm_medium),
+          utm_campaign = COALESCE(NULLIF(?, ''), utm_campaign),
+          utm_content = COALESCE(NULLIF(?, ''), utm_content),
+          utm_term = COALESCE(NULLIF(?, ''), utm_term),
           last_seen_at = CURRENT_TIMESTAMP,
           page_view_count = page_view_count + ?,
           event_count = event_count + 1,
@@ -183,6 +233,11 @@ export async function onRequestPost(context) {
         user_id,
         path,
         country,
+        utm.utm_source,
+        utm.utm_medium,
+        utm.utm_campaign,
+        utm.utm_content,
+        utm.utm_term,
         event_type === "page_view" ? 1 : 0,
         path.includes("/checkout") ? 1 : 0,
         Number(visitorSession.site_visitor_session_id || 0)
@@ -192,8 +247,9 @@ export async function onRequestPost(context) {
     await env.DB.prepare(`
       INSERT INTO site_page_views (
         site_visitor_id, site_visitor_session_id, user_id, path, query_string,
-        referrer, page_title, page_h1, event_type, duration_ms, meta_json, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        referrer, page_title, page_h1, event_type, duration_ms, meta_json,
+        utm_source, utm_medium, utm_campaign, utm_content, utm_term, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `).bind(
       Number(visitor.site_visitor_id || 0),
       Number(visitorSession.site_visitor_session_id || 0),
@@ -205,7 +261,12 @@ export async function onRequestPost(context) {
       page_h1 || null,
       event_type,
       duration_ms,
-      meta_json
+      meta_json,
+      utm.utm_source || null,
+      utm.utm_medium || null,
+      utm.utm_campaign || null,
+      utm.utm_content || null,
+      utm.utm_term || null
     ).run();
 
     const searchTableExists = await tableExists(env.DB, "site_search_events");

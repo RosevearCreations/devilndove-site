@@ -23,6 +23,38 @@ function parseBudgetCents(value) {
   return Number.isFinite(number) && number > 0 ? Math.round(number * 100) : null;
 }
 
+async function ensureColumn(db, tableName, columnName, definition) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    const columns = Array.isArray(result?.results) ? result.results : [];
+    if (columns.some((row) => row?.name === columnName)) return;
+    await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${definition}`).run();
+  } catch {}
+}
+
+function parseUtm(body, request) {
+  const out = {
+    utm_source: clean(body.utm_source, 180),
+    utm_medium: clean(body.utm_medium, 180),
+    utm_campaign: clean(body.utm_campaign, 180),
+    utm_content: clean(body.utm_content, 180),
+    utm_term: clean(body.utm_term, 180),
+    visitor_token: clean(body.visitor_token, 120),
+    browser_session_token: clean(body.browser_session_token, 120)
+  };
+  if (!out.utm_source) {
+    try {
+      const ref = request.headers.get('Referer') || '';
+      const url = new URL(ref);
+      const params = url.searchParams;
+      for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']) {
+        out[key] = clean(params.get(key), 180) || out[key];
+      }
+    } catch {}
+  }
+  return out;
+}
+
 async function ensureSchema(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS custom_requests (
     custom_request_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +75,15 @@ async function ensureSchema(db) {
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_requests_status ON custom_requests(status, created_at)`).run().catch(() => null);
+  await ensureColumn(db, 'custom_requests', 'utm_source', 'utm_source TEXT');
+  await ensureColumn(db, 'custom_requests', 'utm_medium', 'utm_medium TEXT');
+  await ensureColumn(db, 'custom_requests', 'utm_campaign', 'utm_campaign TEXT');
+  await ensureColumn(db, 'custom_requests', 'utm_content', 'utm_content TEXT');
+  await ensureColumn(db, 'custom_requests', 'utm_term', 'utm_term TEXT');
+  await ensureColumn(db, 'custom_requests', 'visitor_token', 'visitor_token TEXT');
+  await ensureColumn(db, 'custom_requests', 'browser_session_token', 'browser_session_token TEXT');
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_requests_email ON custom_requests(email, created_at)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_requests_utm ON custom_requests(utm_source, utm_medium, utm_campaign, created_at)`).run().catch(() => null);
 }
 
 export async function onRequestOptions() {
@@ -65,6 +105,7 @@ export async function onRequestPost(context) {
   const message = clean(body.message || body.notes || '', 3000);
   const consentToContact = body.consent_to_contact === true || String(body.consent_to_contact || '').toLowerCase() === 'on' || String(body.consent_to_contact || '') === '1' ? 1 : 0;
   const attachmentUrls = Array.isArray(body.attachment_urls) ? body.attachment_urls.map((item) => clean(item, 500)).filter(Boolean).slice(0, 8) : [];
+  const utm = parseUtm(body, context.request);
 
   if (!name) return json({ ok: false, error: 'Please add your name.' }, 400);
   if (!email) return json({ ok: false, error: 'Please add a valid email address.' }, 400);
@@ -75,10 +116,12 @@ export async function onRequestPost(context) {
   const requestKey = `cr_${Date.now().toString(36)}_${crypto.randomUUID().slice(0, 8)}`;
   const insert = await db.prepare(`INSERT INTO custom_requests (
     request_key, name, email, phone, request_type, product_interest, deadline_date,
-    budget_cents, message, attachment_urls_json, consent_to_contact, status, created_at, updated_at
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    budget_cents, message, attachment_urls_json, consent_to_contact, utm_source, utm_medium, utm_campaign, utm_content, utm_term, visitor_token, browser_session_token, status, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
     requestKey, name, email, phone || null, requestType || 'custom_gift', productInterest || null,
-    deadlineDate || null, parseBudgetCents(body.budget), message, JSON.stringify(attachmentUrls), consentToContact
+    deadlineDate || null, parseBudgetCents(body.budget), message, JSON.stringify(attachmentUrls), consentToContact,
+    utm.utm_source || null, utm.utm_medium || null, utm.utm_campaign || null, utm.utm_content || null, utm.utm_term || null,
+    utm.visitor_token || null, utm.browser_session_token || null
   ).run();
 
   return json({ ok: true, message: 'Custom request received. We will review it before replying.', request_key: requestKey, custom_request_id: Number(insert?.meta?.last_row_id || 0) || null });
