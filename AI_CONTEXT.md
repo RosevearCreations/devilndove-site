@@ -1,3 +1,16 @@
+# Build 151 AI context update
+
+The latest build pass adds Custom Request conversion and campaign attribution improvements. Important implementation notes:
+
+- Operations now actually mounts the Custom Requests admin panel.
+- `/api/admin/custom-requests` now creates internal planning records in `custom_request_quote_drafts`, `custom_request_job_drafts`, and `custom_request_product_drafts` instead of only updating request status.
+- `/api/custom-request` now captures UTM fields plus visitor/session tokens from `DDAnalytics`.
+- `/api/track/visit` now self-heals UTM columns on visitor sessions and page views and records campaign values.
+- `/api/admin/social-post-queue` now joins UTM queue rows to traffic/session/custom-request conversion counts when those analytics tables exist.
+- Accounting close workflow can emit a CSV through `/api/admin/accounting-close-workflow?period_month=YYYY-MM&format=csv`.
+
+Continue keeping docs/schema files current in every pass and preserve one H1 per public page.
+
 # Build 150 AI context
 
 Build 150 starts from the Build 149 media/custom/social baseline and adds the next workflow layer:

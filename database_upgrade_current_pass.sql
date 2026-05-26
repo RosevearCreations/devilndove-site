@@ -1099,3 +1099,95 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP
 );
 
+
+-- Build 151: custom request conversion drafts, UTM attribution joins, and accountant close CSV/evidence fields.
+CREATE TABLE IF NOT EXISTS custom_request_quote_drafts (
+  custom_request_quote_draft_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL UNIQUE,
+  quote_key TEXT NOT NULL UNIQUE,
+  quote_status TEXT NOT NULL DEFAULT 'draft',
+  title TEXT NOT NULL,
+  customer_name TEXT,
+  customer_email TEXT,
+  customer_phone TEXT,
+  request_type TEXT,
+  requested_deadline TEXT,
+  estimated_budget_cents INTEGER NOT NULL DEFAULT 0,
+  scope_notes TEXT,
+  quote_notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_quote_drafts_status ON custom_request_quote_drafts(quote_status, updated_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_job_drafts (
+  custom_request_job_draft_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL UNIQUE,
+  job_key TEXT NOT NULL UNIQUE,
+  job_status TEXT NOT NULL DEFAULT 'draft',
+  title TEXT NOT NULL,
+  source_quote_draft_id INTEGER,
+  customer_name TEXT,
+  customer_email TEXT,
+  work_type TEXT,
+  target_due_date TEXT,
+  estimated_budget_cents INTEGER NOT NULL DEFAULT 0,
+  work_notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_job_drafts_status ON custom_request_job_drafts(job_status, updated_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_product_drafts (
+  custom_request_product_draft_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL UNIQUE,
+  product_draft_key TEXT NOT NULL UNIQUE,
+  product_draft_status TEXT NOT NULL DEFAULT 'draft',
+  suggested_product_name TEXT NOT NULL,
+  product_category TEXT,
+  price_cents INTEGER NOT NULL DEFAULT 0,
+  story_seed TEXT,
+  seo_seed_title TEXT,
+  seo_seed_description TEXT,
+  source_payload_json TEXT DEFAULT '{}',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_product_drafts_status ON custom_request_product_drafts(product_draft_status, updated_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_conversion_events (
+  custom_request_conversion_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  conversion_type TEXT NOT NULL,
+  target_key TEXT,
+  target_table TEXT,
+  target_id INTEGER,
+  event_notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_request_conversion_events_request ON custom_request_conversion_events(custom_request_id, created_at);
+
+-- Runtime APIs self-heal these attribution/support columns when older D1 installs are missing them.
+-- custom_requests: utm_source, utm_medium, utm_campaign, utm_content, utm_term, visitor_token, browser_session_token
+-- site_visitor_sessions/site_page_views: utm_source, utm_medium, utm_campaign, utm_content, utm_term
+-- accounting_hst_gst_reviews: remittance_evidence_url, reminder_date
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'build_151_custom_request_conversion_utm_close_export',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Build 151 mounts Custom Requests in Operations, adds quote/job/product draft conversion tables, captures UTM attribution for requests and visitor analytics, joins social UTM rollups to traffic/custom-request conversions, and adds accountant close CSV/remittance evidence support.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

@@ -147,6 +147,7 @@ def check_operations_assets(root: Path):
         'socialPostQueueAdminMount',
         'socialMediaPrivacyGuardAdminMount',
         'mediaConsentRecordsAdminMount',
+        'customRequestsAdminMount',
         'competitiveRoadmapAdminMount',
         '/public/js/admin-structured-data-health.js',
         '/public/js/admin-storefront-value-backfill.js',
@@ -157,6 +158,7 @@ def check_operations_assets(root: Path):
         '/public/js/admin-social-post-queue.js',
         '/public/js/admin-social-media-privacy-guard.js',
         '/public/js/admin-media-consent-records.js',
+        '/public/js/admin-custom-requests.js',
         '/public/js/admin-competitive-roadmap.js',
     ]
     missing = [token for token in required if token not in text]
@@ -176,6 +178,8 @@ def check_operations_assets(root: Path):
         'public/js/admin-social-media-privacy-guard.js',
         'functions/api/admin/social-media-privacy-guard.js',
         'functions/api/admin/media-consent-records.js',
+        'functions/api/admin/custom-requests.js',
+        'public/js/admin-custom-requests.js',
         'functions/api/admin/competitive-roadmap.js',
     ]:
         if not (root / ref).exists():
@@ -342,6 +346,31 @@ def check_product_image_role_assets(root: Path):
         issues.append({'type': 'product_image_role_schema_missing_assets', 'path': 'database_upgrade_current_pass.sql', 'missing': missing_schema})
     return issues
 
+
+def check_build151_assets(root: Path):
+    issues = []
+    ops = read_text(root / 'admin' / 'operations' / 'index.html') if (root / 'admin' / 'operations' / 'index.html').exists() else ''
+    custom_api = read_text(root / 'functions' / 'api' / 'admin' / 'custom-requests.js') if (root / 'functions' / 'api' / 'admin' / 'custom-requests.js').exists() else ''
+    custom_js = read_text(root / 'public' / 'js' / 'admin-custom-requests.js') if (root / 'public' / 'js' / 'admin-custom-requests.js').exists() else ''
+    visit_api = read_text(root / 'functions' / 'api' / 'track' / 'visit.js') if (root / 'functions' / 'api' / 'track' / 'visit.js').exists() else ''
+    social_api = read_text(root / 'functions' / 'api' / 'admin' / 'social-post-queue.js') if (root / 'functions' / 'api' / 'admin' / 'social-post-queue.js').exists() else ''
+    accounting_api = read_text(root / 'functions' / 'api' / 'admin' / 'accounting-close-workflow.js') if (root / 'functions' / 'api' / 'admin' / 'accounting-close-workflow.js').exists() else ''
+    schema = read_text(root / 'database_upgrade_current_pass.sql') if (root / 'database_upgrade_current_pass.sql').exists() else ''
+    checks = [
+        ('build151_operations_custom_requests_mount', 'admin/operations/index.html', ['customRequestsAdminMount', '/public/js/admin-custom-requests.js'], ops),
+        ('build151_custom_request_conversion_api', 'functions/api/admin/custom-requests.js', ['custom_request_quote_drafts', 'create_quote_draft', 'custom_request_conversion_events'], custom_api),
+        ('build151_custom_request_conversion_js', 'public/js/admin-custom-requests.js', ['Create quote draft', 'Create job draft', 'Create product plan'], custom_js),
+        ('build151_utm_visit_tracking', 'functions/api/track/visit.js', ['parseUtm', 'utm_campaign', 'site_page_views'], visit_api),
+        ('build151_social_utm_conversion_rollups', 'functions/api/admin/social-post-queue.js', ['custom_request_count', 'checkout_starts', 'ensureUtmAnalyticsColumns'], social_api),
+        ('build151_accounting_close_csv', 'functions/api/admin/accounting-close-workflow.js', ['format === \'csv\'', 'remittance_evidence_url', 'buildCloseCsv'], accounting_api),
+        ('build151_schema_marker', 'database_upgrade_current_pass.sql', ['build_151_custom_request_conversion_utm_close_export', 'custom_request_quote_drafts'], schema),
+    ]
+    for issue_type, path, tokens, text in checks:
+        missing = [token for token in tokens if token not in text]
+        if missing:
+            issues.append({'type': issue_type, 'path': path, 'missing': missing})
+    return issues
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('root', nargs='?', default='.', help='Build root to check')
@@ -359,7 +388,8 @@ def main(argv=None) -> int:
     product_story_issues = check_product_story_assets(root)
     product_story_shop_issues = check_product_story_shop_assets(root)
     product_image_role_issues = check_product_image_role_assets(root)
-    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues + product_story_shop_issues + product_image_role_issues
+    build151_issues = check_build151_assets(root)
+    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues + product_story_shop_issues + product_image_role_issues + build151_issues
     report = {
         'ok': not issues,
         'root': str(root),
@@ -392,3 +422,5 @@ if __name__ == '__main__':
 # Build 147 note: predeploy checks include shop story snippets, product image role checklist, Product editor social shortcut, and media consent registry.
 
 # Build 148 note: predeploy checks include drag/drop product image ordering, image roles, consent-link fields, and story snippet search assets.
+
+# Build 151 note: predeploy checks include Custom Request conversion actions, UTM attribution joins, and Accounting Close CSV export.

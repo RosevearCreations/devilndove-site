@@ -1,3 +1,15 @@
+# Build 151 update
+
+This build adds a stronger business workflow layer for Devil n Dove:
+
+- Custom Requests are visible in Operations.
+- Intake rows can become quote drafts, job drafts, or product draft plans.
+- Custom request conversions are tracked with event history.
+- UTM campaign attribution now connects social campaigns, visitor analytics, and custom request submissions.
+- Accounting Close Workflow can export a close-summary CSV and track HST/GST remittance evidence/reminder fields.
+
+Before deploying, run the D1 schema/current pass review and open Operations, Social Posting Queue, and Accounting Close Workflow after deployment.
+
 # Build 150 operator note
 
 Build 150 adds D1-backed testimonial/trust blocks, Search Console reviewed SEO override application, public SEO override fallback, and an Accounting Close Workflow for payment application, HST/GST review, month-end readiness, and accountant export manifest records.

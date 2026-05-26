@@ -1,3 +1,27 @@
+# Current handoff — Build 151
+
+Build 151 was based on the latest uploaded Devil n Dove build and continues the roadmap/gaps direction.
+
+Completed this pass:
+
+- Operations now mounts the Custom Requests panel.
+- Custom Requests can now create quote drafts, job drafts, and product draft plans.
+- Custom request conversion events and repeat-request/customer-history indicators were added.
+- Public custom request submissions now capture UTM and visitor/session attribution.
+- Visit tracking now self-heals UTM columns for sessions and page views.
+- Social UTM rollups now include traffic, session, checkout-start, abandoned-cart, and custom-request conversion counts when analytics tables exist.
+- HST/GST review gained remittance evidence URL and reminder date fields.
+- Accounting Close Workflow can export a close-summary CSV.
+- Schema files, roadmap, gaps, competitive notes, and sanity notes were updated.
+
+Recommended next pass:
+
+1. Build full quote/email reply templates from quote drafts.
+2. Add quote acceptance/deposit/invoice candidate workflow.
+3. Add R2 reference-image upload for custom requests.
+4. Add static SEO override bake tooling.
+5. Add accountant ZIP export packaging.
+
 # New Chat Status — Devil n Dove Build 150
 
 ## Current status — Build 150

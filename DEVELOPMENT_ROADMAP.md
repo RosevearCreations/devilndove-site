@@ -1,3 +1,37 @@
+# Build 151 completed — custom request conversion, UTM attribution joins, and close export hardening
+
+Completed in Build 151:
+
+1. Mounted the existing Custom Requests admin workflow inside Operations so the panel is actually visible after deployment.
+2. Added Custom Request conversion actions: create quote draft, create job draft, and create product draft plan.
+3. Added D1-backed draft tables for `custom_request_quote_drafts`, `custom_request_job_drafts`, and `custom_request_product_drafts`.
+4. Added `custom_request_conversion_events` so every request-to-draft action has an audit-style event trail.
+5. Added repeat-request/customer-history indicators by email in the Custom Requests admin table.
+6. Added UTM capture to public custom request submissions.
+7. Added visitor/session token capture to custom request rows so later analytics can connect request forms to traffic journeys.
+8. Added UTM self-healing columns to visit tracking for `site_visitor_sessions` and `site_page_views`.
+9. Extended Social Posting Queue UTM rollups to show campaign traffic, sessions, checkout starts, abandoned carts, and custom request counts when analytics tables exist.
+10. Added remittance evidence URL and reminder date support to the HST/GST review workflow.
+11. Added downloadable Accounting Close CSV output from the Accounting Close Workflow endpoint.
+12. Added Accounting Close export manifest pointers to the downloadable CSV summary.
+13. Added public Custom Request page analytics loading so form submissions can feed the campaign conversion loop.
+14. Added CSS polish for mobile-friendly custom request conversion buttons and status notes.
+15. Updated active schema SQL files and active Markdown handoff docs for the new workflow.
+16. Updated `COMPETITIVE.md` with the new custom-request-to-workflow and campaign-measurement direction.
+
+Next strongest build pass:
+
+1. Convert quote/job/product draft records into the future full quote, job, and product modules once those modules are ready.
+2. Add email reply templates from quote drafts so we can answer custom requests faster without auto-sending.
+3. Add deposit/invoice candidate creation from accepted quote drafts.
+4. Bake approved SEO overrides into static HTML during deploy instead of relying only on client-side fallback.
+5. Add reviewed static SEO export/import tooling for Cloudflare/GitHub deployments.
+6. Add custom request attachment upload to R2 instead of only accepting pasted public URLs.
+7. Add accountant ZIP packaging with bundled CSV files and attachment index.
+8. Add HST/GST due-date reminder notifications in the notification outbox.
+9. Add product proof filters by material, process, locality, and product category.
+10. Add marketplace readiness exports for Etsy, Facebook Marketplace, Pinterest, and manual listings.
+
 # Build 150 completed — trust blocks, reviewed SEO apply loop, and accounting close workflow
 
 Completed in Build 150:

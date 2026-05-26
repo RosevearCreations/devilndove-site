@@ -1,3 +1,30 @@
+# Build 151 gaps and risks update
+
+## Closed or reduced in Build 151
+
+- Custom Requests are now mounted in Operations and can be converted into quote draft, job draft, or product draft plan records.
+- Custom request conversion history is tracked in D1 through `custom_request_conversion_events`.
+- UTM campaign attribution now flows into public custom request submissions and visitor/page-view analytics.
+- Social Posting Queue UTM rollups now show traffic and conversion signals when analytics tables are present.
+- HST/GST review now stores remittance evidence URL and reminder date fields.
+- Accounting Close Workflow can now download a close-summary CSV for accountant handoff.
+
+## Still open
+
+- Quote/job/product draft records are planning records; they are not yet full quote, job, invoice, or catalog product modules.
+- Approved SEO overrides still need a deploy/build-time static HTML baking step for the strongest crawler signal.
+- Custom request attachments still accept pasted URLs only; R2 upload for request references is still outstanding.
+- Accountant export packaging now has CSV summary support, but not a bundled ZIP package with all supporting files.
+- HST/GST reminders are recorded but are not yet pushed into the notification outbox automatically.
+- UTM conversion joins depend on production analytics tables existing and receiving traffic after deployment.
+
+## Deployment watch items
+
+- Apply or record the Build 151 schema changes before relying on Custom Request conversion tables.
+- Open `/admin/operations/` after deploy and confirm Custom Requests appears between Media Consent Records and Testimonials / Trust Blocks.
+- Submit a test custom request with a UTM-tagged URL and confirm the Operations panel shows it.
+- Run Social Posting Queue after a few tracked visits to confirm campaign traffic/conversion counts appear without breaking when analytics tables are empty.
+
 # Build 150 gaps and risks update
 
 ## Closed or reduced in Build 150

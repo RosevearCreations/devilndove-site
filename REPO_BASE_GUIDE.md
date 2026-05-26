@@ -1,3 +1,7 @@
+# Build 151 repo guide note
+
+This build continues the clean handoff pattern: code, schema SQL, and active Markdown files were updated together. After deployment, verify Operations > Custom Requests, Social Posting Queue UTM rollups, and Accounting > Close Workflow CSV export.
+
 # Build 150 repo note
 
 New Build 150 files and touchpoints:

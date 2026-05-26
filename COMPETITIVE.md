@@ -1,3 +1,28 @@
+# Build 151 competitive update — intake becomes workflow, campaigns become measurable
+
+Build 151 closes an important competitive gap: custom request intake is no longer just a form submission. It now becomes a reviewable internal workflow.
+
+## What changed competitively
+
+1. **Custom request ideas can become work.** Operations can convert a public request into a quote draft, job draft, or product draft plan while preserving the original request details.
+2. **Repeat requesters are easier to spot.** The admin panel highlights customers who have submitted more than one request by email.
+3. **Campaigns can now be judged by action.** UTM values flow from social/custom links into visit tracking and custom request rows, then Social Posting Queue rollups can show traffic and request conversions.
+4. **Accounting handoff is less manual.** The close workflow now has CSV export and HST/GST remittance evidence/reminder fields.
+
+## Why this helps Devil n Dove compete
+
+Small handmade shops often lose custom work because requests sit in email or messages with no follow-through path. This build creates a safer bridge from “someone asked for a thing” to “we can review, quote, plan, make, publish, and measure it.” It also supports the local search strategy because campaigns can be tied to actual custom-gift requests from Southern Ontario visitors.
+
+## Next competitive moves
+
+1. Turn quote drafts into customer-ready reply templates.
+2. Add deposit/invoice candidates from accepted quotes.
+3. Add R2 upload for custom request reference images.
+4. Bake approved SEO overrides into static HTML.
+5. Package accountant exports into ZIP bundles with evidence indexes.
+6. Add marketplace readiness checks for custom/product draft plans.
+7. Add public proof filters by material, process, locality, and product type.
+
 # Build 150 competitive completion update
 
 Build 150 moves several roadmap items from “strategy only” into working site/admin systems:

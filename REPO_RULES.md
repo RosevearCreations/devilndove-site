@@ -1,3 +1,7 @@
+# Build 151 repo rules note
+
+Continue the pass rule: every feature change must update active Markdown and schema references. Public pages must keep exactly one H1, and private/customer/accounting data must stay out of public `/data/` JSON files.
+
 # Build 150 rule reminder
 
 Trust blocks and SEO overrides must remain review-first. Do not publish private customer details, private Amazon/order data, or unapproved photo/story consent into public trust blocks. Search Console CSV exports and generated SEO action rows are admin/private data; only approved title/meta/internal-link outcomes should become public copy.

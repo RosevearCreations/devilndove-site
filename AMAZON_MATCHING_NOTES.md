@@ -1,3 +1,7 @@
+# Build 151 note
+
+No Amazon matching logic changed in this pass. The accounting/custom-request work still preserves the rule that private purchase/order data remains in D1/admin workflows and is not copied into public `/data/` files. Future quote/job/product draft costing should link to reviewed tool/supply costs only after private review.
+
 # Build 150 Amazon/private-data note
 
 No Amazon matching rules changed in Build 150. The new trust block, Search Console override, and accounting close workflows keep private source data in D1/admin routes. Amazon order/import data should still not be exposed in public trust blocks, public SEO notes, or social captions unless the wording is non-private product context.

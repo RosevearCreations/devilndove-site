@@ -1,3 +1,9 @@
+# Build 151 local SEO and measurement note
+
+This pass keeps the local SEO direction intact while improving measurement. Public pages should continue using words real buyers search for in clear titles, main headings, alt text, and internal links. Custom request submissions now capture UTM source/medium/campaign values, so future social and local campaign tests can be reviewed by actual request and checkout-start behaviour instead of only post counts.
+
+Next SEO move: add a deploy-time static baking step for reviewed `seo_page_overrides`, because client-side title/meta fallback is useful for users but static HTML remains the cleaner crawler-facing signal.
+
 # Build 150 local SEO workflow note
 
 Search Console actions are still review-first, but Build 150 adds an apply path: approved title/meta/internal-link suggestions can now be saved to `seo_page_overrides` and used by public fallback code. Keep using natural Southern Ontario wording only where it matches page intent. For the strongest SEO signal, later deploy passes should bake approved overrides into each static page title, meta description, and visible internal-link copy instead of relying only on JavaScript fallback.

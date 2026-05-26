@@ -1,3 +1,22 @@
+# Build 151 schema reference update
+
+Build 151 adds the first D1-backed bridge from public custom request intake into internal work planning.
+
+New tables:
+
+- `custom_request_quote_drafts` — quote planning rows seeded from a custom request.
+- `custom_request_job_drafts` — job/work planning rows seeded from a custom request.
+- `custom_request_product_drafts` — product draft planning rows seeded from a custom request.
+- `custom_request_conversion_events` — event trail showing when a request was converted to a quote/job/product draft.
+
+Runtime-safe optional columns:
+
+- `custom_requests`: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `visitor_token`, `browser_session_token`.
+- `site_visitor_sessions` and `site_page_views`: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`.
+- `accounting_hst_gst_reviews`: `remittance_evidence_url`, `reminder_date`.
+
+The Functions self-heal these optional columns with PRAGMA checks so older D1 databases do not fail from duplicate-column migrations. The current pass SQL also documents the expected tables and ledger marker.
+
 # Build 150 schema reference update
 
 ## `trust_block_items`

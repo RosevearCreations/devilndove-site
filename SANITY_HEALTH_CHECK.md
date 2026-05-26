@@ -1,3 +1,14 @@
+# Build 151 sanity notes
+
+Validation targets for this pass:
+
+- `/admin/operations/` should include `customRequestsAdminMount` and `/public/js/admin-custom-requests.js`.
+- Custom request rows should support Save Review, Create Quote Draft, Create Job Draft, and Create Product Plan actions.
+- Public `/custom-request/` should include analytics tracking and should pass one-H1/title/meta checks.
+- Social Posting Queue UTM rollups should still work if analytics tables are missing, and should show conversion metrics when they exist.
+- Accounting Close Workflow should still load normally and should expose a downloadable CSV link for the selected period.
+- CSS brace balance and JavaScript syntax checks should pass before packaging.
+
 # Build 150 sanity additions
 
 After deploying Build 150:
