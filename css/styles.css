@@ -778,3 +778,9 @@ body.nav-mobile-open{overflow:hidden}
 
 /* Build 151: custom request conversion and campaign attribution polish */
 .custom-request-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.custom-request-actions .btn{white-space:nowrap}.status-note.small{display:inline-block;margin:2px 4px 2px 0;padding:3px 7px;border-radius:999px;background:rgba(120,84,44,.1)}.admin-table-wrap td .status-note{max-width:100%}@media (max-width:720px){.custom-request-actions{flex-direction:column}.custom-request-actions .btn{width:100%}}
+
+/* Build 152 custom request workflow polish */
+.custom-request-template-card{display:grid;gap:10px;margin:10px 0;border-color:rgba(255,207,112,.28)}
+.custom-request-template-card textarea{width:100%;min-height:180px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.45}
+.custom-request-actions{align-items:center}
+@media (max-width:720px){.custom-request-template-card textarea{min-height:240px}.custom-request-actions .btn.small{font-size:.92rem;padding:9px 10px}}
