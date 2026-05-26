@@ -9,6 +9,39 @@ function clean(value, limit = 1200) { const text = normalizeText(value); return 
 function cents(value) { const n = Number(value); return Number.isFinite(n) ? Math.round(n) : 0; }
 function boolInt(value) { return value === true || value === 1 || value === '1' || String(value || '').toLowerCase() === 'true' ? 1 : 0; }
 async function tableExists(db, tableName) { try { return !!(await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`).bind(tableName).first()); } catch { return false; } }
+async function tableColumnSet(db, tableName) {
+  try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); return new Set(rows(result).map((row) => String(row.name || '').toLowerCase()).filter(Boolean)); } catch { return new Set(); }
+}
+async function ensureColumn(db, tableName, columnName, sql) {
+  const columns = await tableColumnSet(db, tableName);
+  if (!columns.has(String(columnName || '').toLowerCase())) await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${sql}`).run().catch(() => null);
+}
+function csvCell(value) { return `"${String(value ?? '').replace(/"/g, '""')}"`; }
+function csvLine(values) { return values.map(csvCell).join(','); }
+function csvResponse(text, filename) {
+  return new Response(text, { status: 200, headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'no-store' } });
+}
+function buildCloseCsv(data) {
+  const lines = [];
+  lines.push(csvLine(['section','field','value','notes']));
+  lines.push(csvLine(['period','period_month',data.period_month || '', '']));
+  lines.push(csvLine(['payment','order_count',data.payment?.summary?.order_count || 0, '']));
+  lines.push(csvLine(['payment','total_cents',data.payment?.summary?.total_cents || 0, '']));
+  lines.push(csvLine(['payment','paid_cents',data.payment?.summary?.paid_cents || 0, '']));
+  lines.push(csvLine(['payment','outstanding_cents',data.payment?.summary?.outstanding_cents || 0, '']));
+  lines.push(csvLine(['hst_gst','review_status',data.hst_review?.review_status || '', '']));
+  lines.push(csvLine(['hst_gst','sales_tax_collected_cents',data.hst_review?.sales_tax_collected_cents || 0, '']));
+  lines.push(csvLine(['hst_gst','input_tax_credit_cents',data.hst_review?.input_tax_credit_cents || 0, '']));
+  lines.push(csvLine(['hst_gst','net_tax_payable_cents',data.hst_review?.net_tax_payable_cents || 0, '']));
+  lines.push(csvLine(['hst_gst','filing_due_date',data.hst_review?.filing_due_date || '', '']));
+  lines.push(csvLine(['hst_gst','remittance_status',data.hst_review?.remittance_status || '', '']));
+  lines.push(csvLine(['hst_gst','remittance_evidence_url',data.hst_review?.remittance_evidence_url || '', '']));
+  lines.push(csvLine(['hst_gst','reminder_date',data.hst_review?.reminder_date || '', '']));
+  lines.push(csvLine(['close','lock_state',data.closure?.lock_state || '', '']));
+  lines.push(csvLine(['close','ready',data.close_readiness?.ready ? 'yes' : 'no', (data.close_readiness?.blockers || []).join(' | ')]));
+  for (const row of data.payment?.applied_rows || []) lines.push(csvLine(['payment_application', row.transaction_reference || row.accounting_payment_application_id || '', row.applied_amount_cents || 0, row.application_status || '']));
+  return `${lines.join('\n')}\n`;
+}
 
 async function ensureSchema(db) {
   await ensureAccountingPeriodClosuresTable(db);
@@ -60,6 +93,8 @@ async function ensureSchema(db) {
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
     notes TEXT
   )`).run();
+  await ensureColumn(db, 'accounting_hst_gst_reviews', 'remittance_evidence_url', 'remittance_evidence_url TEXT');
+  await ensureColumn(db, 'accounting_hst_gst_reviews', 'reminder_date', 'reminder_date TEXT');
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_payment_applications_period ON accounting_payment_applications(period_month, application_status)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_hst_gst_reviews_period ON accounting_hst_gst_reviews(period_month, review_status)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accountant_export_packages_period ON accountant_export_packages(period_month, tax_year, package_status)`).run().catch(() => null);
@@ -94,7 +129,7 @@ async function paymentSummary(db, periodMonth) {
 async function hstReview(db, periodMonth, fallbackTaxCents = 0) {
   const row = await db.prepare(`SELECT * FROM accounting_hst_gst_reviews WHERE period_month=? LIMIT 1`).bind(periodMonth).first().catch(() => null);
   if (row) return row;
-  return { period_month: periodMonth, review_status: 'draft', sales_tax_collected_cents: fallbackTaxCents, input_tax_credit_cents: 0, net_tax_payable_cents: fallbackTaxCents, filing_reference: '', filing_due_date: '', remittance_status: 'not_ready', notes: '' };
+  return { period_month: periodMonth, review_status: 'draft', sales_tax_collected_cents: fallbackTaxCents, input_tax_credit_cents: 0, net_tax_payable_cents: fallbackTaxCents, filing_reference: '', filing_due_date: '', remittance_status: 'not_ready', remittance_evidence_url: '', reminder_date: '', notes: '' };
 }
 
 async function exportPackages(db, periodMonth) {
@@ -128,7 +163,12 @@ export async function onRequestGet(context) {
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   const url = new URL(context.request.url);
   const periodMonth = monthValue(url.searchParams.get('period_month'));
-  try { return jsonResponse(await payload(db, periodMonth), 200, { 'Cache-Control': 'no-store' }); }
+  const format = clean(url.searchParams.get('format') || '', 20).toLowerCase();
+  try {
+    const data = await payload(db, periodMonth);
+    if (format === 'csv') return csvResponse(buildCloseCsv(data), `devilndove-accounting-close-${periodMonth}.csv`);
+    return jsonResponse(data, 200, { 'Cache-Control': 'no-store' });
+  }
   catch (error) {
     await captureRuntimeIncident(context.env, context.request, { incident_scope: 'accounting_close_workflow', incident_code: 'load_failed', severity: 'error', message: error?.message || 'Accounting close workflow failed to load.', related_user_id: adminUser.user_id, details: { error: String(error?.stack || error?.message || error), period_month: periodMonth } }).catch(() => null);
     return jsonResponse({ ok: false, error: error?.message || 'Could not load accounting close workflow.' }, 500);
@@ -177,14 +217,14 @@ export async function onRequestPost(context) {
       const status = clean(body.review_status || 'draft', 40).toLowerCase();
       await db.prepare(`INSERT INTO accounting_hst_gst_reviews (
         period_month, review_status, sales_tax_collected_cents, input_tax_credit_cents, net_tax_payable_cents,
-        filing_reference, filing_due_date, remittance_status, reviewed_by_user_id, reviewed_at, notes, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? IN ('reviewed','finalized','filed') THEN ? ELSE NULL END, CASE WHEN ? IN ('reviewed','finalized','filed') THEN CURRENT_TIMESTAMP ELSE NULL END, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        filing_reference, filing_due_date, remittance_status, remittance_evidence_url, reminder_date, reviewed_by_user_id, reviewed_at, notes, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? IN ('reviewed','finalized','filed') THEN ? ELSE NULL END, CASE WHEN ? IN ('reviewed','finalized','filed') THEN CURRENT_TIMESTAMP ELSE NULL END, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       ON CONFLICT(period_month) DO UPDATE SET review_status=excluded.review_status, sales_tax_collected_cents=excluded.sales_tax_collected_cents,
         input_tax_credit_cents=excluded.input_tax_credit_cents, net_tax_payable_cents=excluded.net_tax_payable_cents, filing_reference=excluded.filing_reference,
-        filing_due_date=excluded.filing_due_date, remittance_status=excluded.remittance_status, reviewed_by_user_id=excluded.reviewed_by_user_id,
+        filing_due_date=excluded.filing_due_date, remittance_status=excluded.remittance_status, remittance_evidence_url=excluded.remittance_evidence_url, reminder_date=excluded.reminder_date, reviewed_by_user_id=excluded.reviewed_by_user_id,
         reviewed_at=CASE WHEN excluded.reviewed_by_user_id IS NOT NULL THEN CURRENT_TIMESTAMP ELSE accounting_hst_gst_reviews.reviewed_at END,
         notes=excluded.notes, updated_at=CURRENT_TIMESTAMP`).bind(
-        periodMonth, status, collected, inputTax, net, clean(body.filing_reference, 120) || null, clean(body.filing_due_date, 20) || null, clean(body.remittance_status || 'not_ready', 40).toLowerCase(),
+        periodMonth, status, collected, inputTax, net, clean(body.filing_reference, 120) || null, clean(body.filing_due_date, 20) || null, clean(body.remittance_status || 'not_ready', 40).toLowerCase(), clean(body.remittance_evidence_url, 500) || null, clean(body.reminder_date, 20) || null,
         status, Number(adminUser.user_id || 0), status, clean(body.notes, 1200) || null
       ).run();
       await auditAdminAction(context.env, context.request, adminUser, { action_type: 'save_hst_gst_review', target_type: 'accounting_hst_gst_review', target_key: periodMonth, details: { period_month: periodMonth, review_status: status } }).catch(() => null);
@@ -217,7 +257,8 @@ export async function onRequestPost(context) {
         payment_summary: current.payment.summary,
         hst_review: current.hst_review,
         closure: current.closure,
-        recommended_files: ['general-ledger CSV', 'orders/payments CSV', 'expense receipts', 'HST/GST worksheet', 'bank/payment processor statements', 'month-end close checklist']
+        recommended_files: ['general-ledger CSV', 'orders/payments CSV', 'expense receipts', 'HST/GST worksheet', 'bank/payment processor statements', 'month-end close checklist'],
+        downloadable_summary_csv: `/api/admin/accounting-close-workflow?period_month=${periodMonth}&format=csv`
       };
       await db.prepare(`INSERT INTO accountant_export_packages (package_key, period_month, tax_year, package_status, manifest_json, created_by_user_id, created_at, updated_at, notes)
         VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
