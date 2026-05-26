@@ -1,3 +1,9 @@
+# Build 150 operator note
+
+Build 150 adds D1-backed testimonial/trust blocks, Search Console reviewed SEO override application, public SEO override fallback, and an Accounting Close Workflow for payment application, HST/GST review, month-end readiness, and accountant export manifest records.
+
+Recommended first checks after deploy: Operations > Testimonials / Trust Blocks, Operations > Search Console CSV Import > Apply, Operations > Public API Health, Operations > Release Sanity, and Accounting > Close Workflow.
+
 # Build 149 operator note
 
 Build 149 adds stronger product media gates, Product Story consent checks, simple crop/resize tools during upload, public custom request intake, Operations custom-request review, editable social caption templates, and social UTM rollups.

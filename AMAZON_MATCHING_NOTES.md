@@ -1,3 +1,7 @@
+# Build 150 Amazon/private-data note
+
+No Amazon matching rules changed in Build 150. The new trust block, Search Console override, and accounting close workflows keep private source data in D1/admin routes. Amazon order/import data should still not be exposed in public trust blocks, public SEO notes, or social captions unless the wording is non-private product context.
+
 # Amazon Matching Notes — Devil n Dove
 
 ## Build 139 note

@@ -1,3 +1,33 @@
+# Build 150 completed — trust blocks, reviewed SEO apply loop, and accounting close workflow
+
+Completed in Build 150:
+
+1. Added D1-backed `trust_block_items` for approved testimonial, local proof, product proof, and supporter trust blocks.
+2. Added Operations > Testimonials / Trust Blocks admin workflow for creating trust blocks from reviews or saving custom approved proof rows.
+3. Added public `/api/trust-blocks` with safe empty fallback if the table is missing or no approved rows exist.
+4. Updated public trust/testimonial injection to try approved trust blocks first, then fall back to featured product reviews.
+5. Added `seo_page_overrides` for reviewed title/meta/internal-link improvements from Search Console actions.
+6. Added Search Console “Apply” action that writes an approved SEO override and marks the source action applied.
+7. Added public `/api/seo-page-overrides` plus client-side fallback script on public pages.
+8. Added Accounting > Close Workflow panel for payment application, HST/GST review, month-end close readiness, and accountant export manifests.
+9. Added admin API support for `accounting_payment_applications`, `accounting_hst_gst_reviews`, and `accountant_export_packages`.
+10. Added Release Sanity and Public API Health coverage for trust blocks, SEO overrides, and accounting close tables/endpoints.
+11. Updated schema SQL files and Markdown handoff docs.
+12. Added responsive CSS polish for the new trust, SEO override, and accounting close UI blocks.
+
+Next strongest build pass:
+
+1. Convert custom requests into draft quotes, jobs, or product drafts.
+2. Add quote status controls and approval thresholds for custom work.
+3. Bake approved SEO overrides into static HTML during deploy, not only client-side fallback.
+4. Join social UTM rollups with visitor/session/order/request conversion analytics.
+5. Add post-fulfillment review/photo/request prompts to feed trust blocks.
+6. Add a phone-first quick-capture workflow: photo, crop, role, consent, story note, caption draft.
+7. Add downloadable accountant export ZIP/CSV bundle generation from the close manifest.
+8. Add HST/GST filing reminder and remittance evidence attachment fields.
+9. Add public proof filtering by product type, material, process, and locality.
+10. Add custom request duplicate/customer-history matching.
+
 # Build 149 completed — product media gates, consent checks, custom requests, and social template editing
 
 Completed in Build 149:

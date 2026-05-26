@@ -1,3 +1,11 @@
+# New Chat Status — Devil n Dove Build 150
+
+## Current status — Build 150
+
+Build 150 starts from the latest uploaded Build 149 baseline and adds approved trust blocks, Search Console reviewed-action application, and the first consolidated accounting close workflow. Operations now includes a Testimonials / Trust Blocks panel backed by `trust_block_items`. Public trust sections try `/api/trust-blocks` first and fall back to featured reviews. Search Console action rows can be applied into `seo_page_overrides`, and public pages include a safe SEO override fallback script. Accounting now includes a Close Workflow panel for payment application, HST/GST review, month-end close readiness, and accountant export manifests.
+
+Deploy checks: apply or record `database_upgrade_current_pass.sql`, open `/admin/operations/` and test Testimonials / Trust Blocks, Search Console Import Apply, Public API Health, and Release Sanity. Then open `/admin/accounting/`, select the current month, save a harmless close checklist note, and create a draft export manifest. Run `python3 scripts/predeploy_sanity_check.py` before packaging/deploy.
+
 # New Chat Status — Devil n Dove Build 149
 
 ## Current status — Build 149

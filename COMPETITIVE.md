@@ -1,3 +1,21 @@
+# Build 150 competitive completion update
+
+Build 150 moves several roadmap items from “strategy only” into working site/admin systems:
+
+1. **Trust proof becomes publishable, not just written copy.** Operations can now turn approved reviews/local proof into D1-backed public trust blocks. This helps Devil n Dove compete against generic marketplace listings by showing human proof, locality, product context, and maker credibility.
+2. **Search Console findings now have an apply loop.** Reviewed title/meta/internal-link ideas can become page override records, with public fallback handling. This keeps SEO action review-first while reducing copy/paste drift. Static page title/meta updates should still be baked into HTML during later deploy passes for the strongest crawler signal.
+3. **Accounting close becomes a visible business workflow.** Payment application, HST/GST review, close checklist, and accountant export manifests are now grouped in Accounting so the storefront grows with cleaner back-office habits.
+4. **Data moves away from scattered copy.** Trust blocks, SEO overrides, and close/export records are D1-backed rather than living only in Markdown or JSON notes. This reduces duplication and makes admin review possible.
+
+## Highest-value competitive moves after Build 150
+
+- Convert custom requests into quote/job/product drafts so engraved gifts, personalized jewelry, sublimation, and vintage sourcing requests do not stop at inbox-style intake.
+- Add service/product proof filtering by material, process, locality, and product type so visitors can quickly see “things like the thing they want.”
+- Bake approved SEO overrides into static HTML each deploy so client-side fallback is not the only public signal.
+- Add review/photo/request prompts after fulfilled orders to keep trust proof fresh.
+- Connect UTM rollups to live visitor/session and order/request conversions so social posts can be judged by actual outcomes.
+- Add a mobile “workshop assistant” path for quick photo capture, consent choice, image role, product story note, and social caption draft from a phone.
+
 # Competitive Roadmap — Devil n Dove
 
 For mixed media artists, handmade shops, vintage/collectible sellers, and small creative businesses.

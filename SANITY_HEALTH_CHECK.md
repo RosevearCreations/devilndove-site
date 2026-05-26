@@ -1,3 +1,19 @@
+# Build 150 sanity additions
+
+After deploying Build 150:
+
+1. Apply or record `database_upgrade_current_pass.sql`.
+2. Open `/admin/operations/` and confirm Testimonials / Trust Blocks loads.
+3. Create a draft trust block, then approve/public only harmless test copy.
+4. Open `/api/trust-blocks?context=homepage&limit=4` and confirm it returns JSON without breaking when no approved rows exist.
+5. Open Search Console CSV Import, generate or pick a test action, and use Apply to create a `seo_page_overrides` row.
+6. Open `/api/seo-page-overrides?path=/` and confirm it returns JSON.
+7. Open a public page and confirm the new SEO override script does not create console errors.
+8. Open `/admin/accounting/` and confirm Close Workflow loads.
+9. Save a harmless close checklist note and create a draft accountant export manifest.
+10. Open Operations > Public API Health and Release Sanity and confirm the new checks appear.
+11. Run `python3 scripts/predeploy_sanity_check.py` and confirm one-H1/title/meta checks still pass.
+
 # Build 149 sanity additions
 
 After deploying Build 149:

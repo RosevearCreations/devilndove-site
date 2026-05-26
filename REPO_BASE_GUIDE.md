@@ -1,3 +1,14 @@
+# Build 150 repo note
+
+New Build 150 files and touchpoints:
+
+- `functions/api/admin/testimonial-trust-blocks.js` and `public/js/admin-testimonial-trust-blocks.js`
+- `functions/api/trust-blocks.js`
+- `functions/api/seo-page-overrides.js` and `public/js/seo-page-overrides.js`
+- `functions/api/admin/accounting-close-workflow.js` and `public/js/admin-accounting-close-workflow.js`
+- `functions/api/admin/search-console-import.js` now applies reviewed SEO actions.
+- `admin/operations/index.html`, `admin/accounting/index.html`, public page scripts, Release Sanity, Public API Health, schema SQL, and Markdown docs were updated.
+
 # Repo Base Guide — Devil n Dove
 
 ## Build 140 repo note

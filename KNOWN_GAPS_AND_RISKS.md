@@ -1,3 +1,28 @@
+# Build 150 gaps and risks update
+
+## Closed or reduced in Build 150
+
+- Approved testimonial/local trust blocks now have a D1-backed admin workflow and public API fallback.
+- Search Console reviewed actions now have an “Apply” path into `seo_page_overrides`.
+- Public pages now load a safe SEO override fallback script that can update title/meta and insert a reviewed internal-link note when approved D1 data exists.
+- Payment application, HST/GST review, month-end close checklist/readiness, and accountant export manifest packaging now exist in Accounting.
+- Release Sanity and Public API Health now cover the new trust, SEO override, and accounting close workflow surfaces.
+
+## Still open
+
+- Custom requests are still not converted directly into quotes, jobs, or product drafts.
+- Client-side SEO override fallback is helpful, but approved title/meta changes should still be baked into static HTML for the strongest crawler signal.
+- Social UTM rollups still need live visitor/session/order/request conversion joins.
+- Accountant export manifests do not yet generate a downloadable ZIP/CSV package.
+- HST/GST review does not yet attach remittance evidence or send due-date reminders.
+- Public proof filtering by material/process/locality is not yet finished.
+
+## Deployment watch items
+
+- Apply or record the Build 150 schema changes before relying on the new panels.
+- Existing `seo_opportunity_actions` tables may need the self-healed `applied_override_id` and `applied_at` columns; the Search Console endpoint attempts this safely.
+- If trust blocks are empty, public pages should still fall back to featured product reviews or show nothing without breaking layout.
+
 # Build 149 gaps and risks update
 
 ## Closed or reduced in Build 149

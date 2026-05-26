@@ -1,3 +1,16 @@
+# Build 150 AI context
+
+Build 150 starts from the Build 149 media/custom/social baseline and adds the next workflow layer:
+
+- Operations now has an approved testimonial/local trust block workflow backed by D1 (`trust_block_items`).
+- Public trust/testimonial blocks try `/api/trust-blocks` first and fall back to featured product reviews if no trust rows are approved yet.
+- Search Console opportunity actions can now be applied into `seo_page_overrides` for reviewed title/meta/internal-link fallback use.
+- Public pages load `/public/js/seo-page-overrides.js` so approved override records can enhance title/meta/internal-link notes without breaking pages when D1 is empty.
+- Accounting now has a Close Workflow panel for payment application, HST/GST review, month-end close readiness, and accountant export manifest packaging.
+- Release Sanity and Public API Health now check the new trust, SEO override, and accounting close tables/endpoints.
+
+Next priorities: custom request -> quote/job/product draft conversion, visitor/session conversion joins for social UTM rollups, static-build baking of approved SEO overrides, and downloadable accountant export bundles.
+
 # Build 149 AI context
 
 The latest pass focused on the outstanding sanity-check list for Devil n Dove:

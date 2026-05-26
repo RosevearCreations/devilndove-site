@@ -1,3 +1,27 @@
+# Build 150 schema reference update
+
+## `trust_block_items`
+
+Purpose: stores approved testimonial, local proof, product proof, and supporter trust blocks for public display after admin/privacy review.
+
+Key fields: `trust_block_item_id`, `source_review_id`, `item_kind`, `display_context`, `title`, `body`, `attribution_label`, `rating_label`, `related_product_id`, `related_product_slug`, `locality_label`, `block_status`, `is_public`, `privacy_status`, `approved_by_user_id`, `approved_at`.
+
+## `seo_page_overrides`
+
+Purpose: stores reviewed Search Console action output so page title, meta description, and internal-link note improvements can be applied through D1 with a public fallback script.
+
+Key fields: `seo_page_override_id`, `page_path`, `source_action_id`, `source_query_text`, `override_status`, `title_override`, `meta_description_override`, `internal_link_note`, `approved_by_user_id`, `approved_at`.
+
+## Accounting close workflow tables
+
+- `accounting_payment_applications`: records payment/order application notes, amounts, fees, tax components, provider references, and review status by month.
+- `accounting_hst_gst_reviews`: stores monthly HST/GST collected, input tax credits, net payable, filing reference, due date, remittance status, and review notes.
+- `accountant_export_packages`: stores generated export manifest records for accountant handoff packages by period/month/year.
+
+## Compatibility note
+
+`seo_opportunity_actions` now includes `applied_override_id` and `applied_at` in the current schema. Existing D1 tables are self-healed by the Search Console admin endpoint to avoid duplicate-column migration failures.
+
 # Build 149 schema reference update
 
 ## `custom_requests`

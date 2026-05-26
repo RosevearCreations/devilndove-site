@@ -555,7 +555,9 @@ CREATE TABLE IF NOT EXISTS seo_opportunity_actions (
   created_by_user_id INTEGER,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-  notes TEXT
+  notes TEXT,
+  applied_override_id INTEGER,
+  applied_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_filters
   ON search_console_page_queries(report_date, country, device, impressions, average_position);
@@ -812,3 +814,120 @@ CREATE INDEX IF NOT EXISTS idx_media_consent_records_source ON media_consent_rec
 
 
 -- Build 148 note: product image role/public-use/consent fields are represented in database_full_schema.sql and are self-healed by /api/admin/product-images for existing D1 installs.
+
+-- Build 150: reviewed trust blocks, Search Console SEO override apply loop, and accounting close workflow.
+CREATE TABLE IF NOT EXISTS trust_block_items (
+  trust_block_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  source_review_id INTEGER,
+  item_kind TEXT NOT NULL DEFAULT 'testimonial',
+  display_context TEXT NOT NULL DEFAULT 'sitewide',
+  title TEXT,
+  body TEXT NOT NULL,
+  attribution_label TEXT,
+  rating_label TEXT,
+  related_product_id INTEGER,
+  related_product_slug TEXT,
+  related_product_name TEXT,
+  locality_label TEXT,
+  block_status TEXT NOT NULL DEFAULT 'draft',
+  is_featured INTEGER NOT NULL DEFAULT 0,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_public INTEGER NOT NULL DEFAULT 0,
+  privacy_status TEXT NOT NULL DEFAULT 'needs_review',
+  reviewer_notes TEXT,
+  created_by_user_id INTEGER,
+  approved_by_user_id INTEGER,
+  approved_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_trust_block_items_public ON trust_block_items(block_status, is_public, display_context, sort_order);
+CREATE INDEX IF NOT EXISTS idx_trust_block_items_product ON trust_block_items(related_product_id, related_product_slug);
+
+CREATE TABLE IF NOT EXISTS seo_page_overrides (
+  seo_page_override_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  page_path TEXT NOT NULL UNIQUE,
+  source_action_id INTEGER,
+  source_query_text TEXT,
+  override_status TEXT NOT NULL DEFAULT 'draft',
+  title_override TEXT,
+  meta_description_override TEXT,
+  internal_link_note TEXT,
+  approved_by_user_id INTEGER,
+  approved_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_seo_page_overrides_status ON seo_page_overrides(override_status, page_path);
+
+CREATE TABLE IF NOT EXISTS accounting_payment_applications (
+  accounting_payment_application_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  payment_id INTEGER,
+  order_id INTEGER,
+  period_month TEXT NOT NULL,
+  application_status TEXT NOT NULL DEFAULT 'draft',
+  applied_amount_cents INTEGER NOT NULL DEFAULT 0,
+  fee_amount_cents INTEGER NOT NULL DEFAULT 0,
+  tax_component_cents INTEGER NOT NULL DEFAULT 0,
+  provider TEXT,
+  transaction_reference TEXT,
+  application_notes TEXT,
+  created_by_user_id INTEGER,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_payment_applications_period ON accounting_payment_applications(period_month, application_status);
+
+CREATE TABLE IF NOT EXISTS accounting_hst_gst_reviews (
+  accounting_hst_gst_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_month TEXT NOT NULL UNIQUE,
+  review_status TEXT NOT NULL DEFAULT 'draft',
+  sales_tax_collected_cents INTEGER NOT NULL DEFAULT 0,
+  input_tax_credit_cents INTEGER NOT NULL DEFAULT 0,
+  net_tax_payable_cents INTEGER NOT NULL DEFAULT 0,
+  filing_reference TEXT,
+  filing_due_date TEXT,
+  remittance_status TEXT NOT NULL DEFAULT 'not_ready',
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_hst_gst_reviews_period ON accounting_hst_gst_reviews(period_month, review_status);
+
+CREATE TABLE IF NOT EXISTS accountant_export_packages (
+  accountant_export_package_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  package_key TEXT NOT NULL UNIQUE,
+  period_month TEXT,
+  tax_year TEXT,
+  package_status TEXT NOT NULL DEFAULT 'draft',
+  manifest_json TEXT,
+  created_by_user_id INTEGER,
+  finalized_by_user_id INTEGER,
+  finalized_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_accountant_export_packages_period ON accountant_export_packages(period_month, tax_year, package_status);
+
+-- Build 150 compatibility note: existing Build 137 seo_opportunity_actions tables need
+-- applied_override_id INTEGER and applied_at TEXT. The admin Search Console endpoint
+-- self-heals those columns safely at runtime, avoiding duplicate-column migration failures.
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'build_150_trust_seo_close_workflow',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Build 150 adds approved trust blocks, reviewed SEO override application from Search Console actions, payment application, HST/GST review, month-end close readiness, and accountant export manifest packaging.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);
+
