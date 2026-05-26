@@ -1,3 +1,25 @@
+# Build 152 known gaps and risks update
+
+Resolved or reduced in Build 152:
+
+- Custom request quote drafts can now generate manual customer reply templates.
+- Custom request quote drafts can now generate deposit and invoice candidates.
+- HST/GST reminder dates can now queue a reminder into `notification_outbox`.
+- The Operations UI now exposes reply template and payment-candidate follow-up instead of leaving draft records hidden.
+
+Still outstanding:
+
+1. Reply templates are not auto-sent and are intentionally manual/copy-only. A future safe dispatch workflow should require review/approval.
+2. Deposit and invoice candidates are not real invoices or payment requests yet. They need a bridge into the order/payment system before customers can pay.
+3. Custom request attachments still rely on pasted public URLs; R2 reference-image upload is still needed.
+4. Quote acceptance/decline tracking is not complete.
+5. Accountant export packaging is still CSV/manifest focused and not a full ZIP bundle with evidence index.
+6. Approved SEO overrides still need static HTML baking during deploy for the strongest crawler signal.
+7. Public proof filters by material/process/locality/product type are not finished.
+8. Marketplace readiness export is not finished.
+9. HST/GST reminders queue to notification outbox, but live dispatch still depends on the notification dispatch setup.
+10. Continue checking CSS drift and one-H1 compliance every pass.
+
 # Build 151 gaps and risks update
 
 ## Closed or reduced in Build 151

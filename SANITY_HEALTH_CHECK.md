@@ -1,3 +1,16 @@
+# Build 152 sanity additions
+
+After deployment:
+
+1. Open `/admin/operations/` and verify Custom Requests loads.
+2. From a harmless test request, create a quote draft, reply template, deposit candidate, invoice candidate, job draft, and product plan.
+3. Confirm reply template text appears and the copy button works.
+4. Confirm Recent conversion events show the new actions.
+5. Open `/admin/accounting/` and verify HST/GST review still saves.
+6. Add a reminder date and use Queue reminder; confirm a readable success/suppression message appears.
+7. Run Release Sanity and Public API Health.
+8. Run `python3 scripts/predeploy_sanity_check.py .` and confirm H1/title/meta checks still pass.
+
 # Build 151 sanity notes
 
 Validation targets for this pass:

@@ -1,3 +1,15 @@
+# Build 152 AI context update
+
+The latest build pass turns custom requests into a more complete quote/payment workflow and adds HST/GST reminder support. Important implementation notes:
+
+- `/api/admin/custom-requests` now creates manual customer reply templates from quote drafts. These are copy/review templates only; nothing is auto-sent.
+- Custom requests can now create deposit and invoice candidate rows in `custom_request_payment_candidates`. These are internal candidates only until a future payment-request/invoice module connects them to real billing.
+- Operations > Custom Requests now shows reply template text, copy buttons, deposit candidates, and invoice candidates.
+- `/api/admin/accounting-close-workflow` can queue an HST/GST reminder into `notification_outbox` using the saved reminder date and admin/accounting destination.
+- Active schema SQL files include `custom_request_reply_templates`, `custom_request_payment_candidates`, and reminder-safe `notification_outbox` support.
+
+Continue keeping docs/schema files current in every pass and preserve one H1 per exposed public page.
+
 # Build 151 AI context update
 
 The latest build pass adds Custom Request conversion and campaign attribution improvements. Important implementation notes:

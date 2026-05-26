@@ -1,3 +1,15 @@
+# Build 152 local SEO update
+
+Build 152 supports local search indirectly by making custom-gift follow-up faster and more measurable. Custom requests from Southern Ontario landing pages can now become quote drafts, manual reply templates, and deposit/invoice candidates without losing the original request or UTM campaign source.
+
+Ongoing local SEO habits:
+
+- Keep one clear H1 per exposed public page.
+- Keep titles and main headings written in words real buyers would search for.
+- Keep local wording natural: Southern Ontario, Tillsonburg, Oxford County, Norfolk County, custom handmade gifts, polymer clay earrings, laser engraving, personalized gifts, vintage finds.
+- Keep trust/proof blocks tied to approved public-safe content only.
+- Bake approved SEO overrides into static HTML in a future pass so title/meta improvements are not only client-side.
+
 # Build 151 local SEO and measurement note
 
 This pass keeps the local SEO direction intact while improving measurement. Public pages should continue using words real buyers search for in clear titles, main headings, alt text, and internal links. Custom request submissions now capture UTM source/medium/campaign values, so future social and local campaign tests can be reviewed by actual request and checkout-start behaviour instead of only post counts.

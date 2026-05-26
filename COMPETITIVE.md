@@ -1,3 +1,29 @@
+# Build 152 competitive update — custom work now has follow-up muscle
+
+Build 152 moves Devil n Dove closer to a serious custom-work workflow without making it risky or over-automated. A public request can now become a quote draft, a customer-ready reply template, a deposit candidate, an invoice candidate, a job draft, and a product draft plan while keeping the original request and campaign source intact.
+
+## What changed competitively
+
+1. **Faster replies without losing the human touch.** The admin can generate a clear customer reply template from the request and quote draft, then review/copy it manually.
+2. **Custom work can move toward payment carefully.** Deposit and invoice candidates are created as internal planning records, not automatic bills. This keeps the workflow safer while preparing for future payment links.
+3. **Better follow-through than marketplace messages.** Handmade and custom shops often lose requests in DMs. This build gives every request a path: review, quote, reply, deposit, job, invoice, product plan.
+4. **Accounting stays connected.** HST/GST reminder support keeps the back office from becoming an afterthought as custom requests grow.
+
+## Competitive priority now
+
+The next advantage is to make custom work feel easy for the customer: private quote preview, accept/decline buttons, reference image upload, deposit request, and clear pickup/shipping expectations. Keep every step review-first so the site feels trustworthy rather than automated and cold.
+
+## Next competitive moves
+
+1. Private quote preview page with token access.
+2. Customer accept/decline quote response.
+3. Deposit payment request connected to accepted quote.
+4. R2 reference image upload for custom request forms.
+5. Public proof filters showing similar work by material, process, locality, and product type.
+6. Marketplace-ready copy and image checklist for Etsy/Facebook/Pinterest/manual listings.
+7. Static HTML SEO bake for approved Search Console actions.
+8. Accountant export ZIP with CSV bundle and evidence index.
+
 # Build 151 competitive update — intake becomes workflow, campaigns become measurable
 
 Build 151 closes an important competitive gap: custom request intake is no longer just a form submission. It now becomes a reviewable internal workflow.

@@ -1,3 +1,7 @@
+# Build 152 repo base note
+
+Custom request follow-up now lives in `/functions/api/admin/custom-requests.js` and `/public/js/admin-custom-requests.js`. Keep generated reply templates manual/review-first; do not auto-send customer email or auto-create a payable invoice until the future payment-request bridge is complete. HST/GST reminders are queued through `/functions/api/admin/accounting-close-workflow.js` and depend on notification outbox dispatch setup.
+
 # Build 151 repo guide note
 
 This build continues the clean handoff pattern: code, schema SQL, and active Markdown files were updated together. After deployment, verify Operations > Custom Requests, Social Posting Queue UTM rollups, and Accounting > Close Workflow CSV export.

@@ -1,3 +1,27 @@
+# Build 152 new chat status
+
+Latest completed build: Build 152.
+
+Primary changes:
+
+- Custom Requests can now generate quote drafts, manual customer reply templates, deposit candidates, invoice candidates, job drafts, and product draft plans.
+- New D1 tables: `custom_request_reply_templates` and `custom_request_payment_candidates`.
+- Accounting Close Workflow can queue an HST/GST reminder into `notification_outbox`.
+- Markdown and schema files were updated in the same pass.
+
+Deploy checks after applying the build:
+
+1. Apply or record `database_upgrade_current_pass.sql`.
+2. Open `/admin/operations/` > Custom Requests.
+3. Create a harmless quote draft, reply template, deposit candidate, and invoice candidate from a test request.
+4. Confirm reply template copy button works.
+5. Open `/admin/accounting/`, save an HST/GST reminder date, then queue a reminder.
+6. Check Operations > Notifications/Notification Outbox if available.
+7. Run Release Sanity and Public API Health.
+8. Run `python3 scripts/predeploy_sanity_check.py .` before deploy when possible.
+
+Next best pass: payment-request/invoice bridge, private quote preview/acceptance, R2 custom request image upload, static SEO bake, and accountant ZIP packaging.
+
 # Current handoff — Build 151
 
 Build 151 was based on the latest uploaded Devil n Dove build and continues the roadmap/gaps direction.

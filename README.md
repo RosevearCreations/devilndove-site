@@ -1,3 +1,7 @@
+# Build 152 update
+
+Build 152 expands the custom request workflow and accounting close reminders. Operations > Custom Requests can now create manual reply templates, deposit candidates, and invoice candidates from request/quote drafts. Accounting > Close Workflow can queue an HST/GST reminder into the notification outbox. Apply or record `database_upgrade_current_pass.sql` before testing these features against live D1.
+
 # Build 151 update
 
 This build adds a stronger business workflow layer for Devil n Dove:

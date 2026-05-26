@@ -1204,3 +1204,84 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- =========================================================
+-- BUILD 152 — CUSTOM REQUEST REPLY/PAYMENT CANDIDATES + HST REMINDER QUEUE
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS custom_request_reply_templates (
+  custom_request_reply_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  quote_draft_id INTEGER,
+  template_key TEXT NOT NULL UNIQUE,
+  template_status TEXT NOT NULL DEFAULT 'draft',
+  channel TEXT NOT NULL DEFAULT 'email',
+  subject TEXT NOT NULL,
+  body_text TEXT NOT NULL,
+  copied_at TEXT,
+  sent_manually_at TEXT,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_custom_reply_templates_request ON custom_request_reply_templates(custom_request_id, template_status, updated_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_reply_templates_unique_email ON custom_request_reply_templates(custom_request_id, channel);
+
+CREATE TABLE IF NOT EXISTS custom_request_payment_candidates (
+  custom_request_payment_candidate_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  quote_draft_id INTEGER,
+  candidate_key TEXT NOT NULL UNIQUE,
+  candidate_type TEXT NOT NULL DEFAULT 'deposit',
+  candidate_status TEXT NOT NULL DEFAULT 'draft',
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  due_date TEXT,
+  description TEXT,
+  customer_name TEXT,
+  customer_email TEXT,
+  source_payload_json TEXT DEFAULT '{}',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_custom_payment_candidates_request ON custom_request_payment_candidates(custom_request_id, candidate_type, candidate_status);
+
+CREATE TABLE IF NOT EXISTS notification_outbox (
+  notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notification_kind TEXT NOT NULL,
+  channel TEXT NOT NULL DEFAULT 'email',
+  destination TEXT,
+  related_order_id INTEGER,
+  related_payment_id INTEGER,
+  related_product_id INTEGER,
+  payload_json TEXT,
+  metadata_json TEXT,
+  status TEXT NOT NULL DEFAULT 'queued',
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at TEXT,
+  next_attempt_at TEXT,
+  provider_message_id TEXT,
+  error_text TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_kind ON notification_outbox(notification_kind, destination, created_at);
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'build_152_custom_request_reply_payment_candidates_hst_reminders',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Build 152 adds manual customer reply templates, deposit/invoice candidates for custom requests, and HST/GST reminder queue support through notification_outbox.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);

@@ -1,3 +1,36 @@
+# Build 152 completed — custom request reply templates, deposit/invoice candidates, and HST/GST reminder queue
+
+Completed in Build 152:
+
+1. Added manual customer reply templates generated from custom request quote drafts.
+2. Added Operations UI for viewing/copying customer reply templates without auto-sending.
+3. Added D1 table `custom_request_reply_templates`.
+4. Added deposit candidate generation from custom request quote drafts.
+5. Added invoice candidate generation from custom request quote drafts.
+6. Added D1 table `custom_request_payment_candidates`.
+7. Added conversion-event logging for reply templates, deposit candidates, and invoice candidates.
+8. Kept all custom request payment records as internal candidates so no customer is billed accidentally.
+9. Added HST/GST reminder queuing from the Accounting Close Workflow.
+10. Ensured `notification_outbox` exists before reminder queue operations.
+11. Added Accounting Close UI button to queue the reminder using the selected period/reminder date.
+12. Added CSS polish for reply template cards and phone-friendly custom request action buttons.
+13. Updated active schema SQL files with Build 152 tables and ledger marker.
+14. Updated Markdown handoff documents and competitive notes for the new workflow.
+15. Re-ran JS syntax, CSS brace, H1/title/meta, predeploy, and ZIP integrity checks before packaging.
+
+Next strongest build pass:
+
+1. Add a real payment-request/invoice bridge from custom request payment candidates into the existing payment/order system.
+2. Add customer-ready quote preview pages that are private/link-token protected.
+3. Add R2 upload for custom request reference images so customers do not need to paste public links.
+4. Add quote acceptance/decline tracking and deposit-paid status.
+5. Add accountant export ZIP packaging with CSV files plus evidence index.
+6. Bake approved SEO overrides into static HTML during deploy.
+7. Add marketplace readiness exports for Etsy/Facebook/Pinterest/manual listing copy.
+8. Add proof filters by material, process, locality, and product type.
+9. Add phone-first workshop capture: photo, crop, role, consent, story note, caption draft.
+10. Add notification review controls for HST/GST reminders before dispatch.
+
 # Build 151 completed — custom request conversion, UTM attribution joins, and close export hardening
 
 Completed in Build 151:

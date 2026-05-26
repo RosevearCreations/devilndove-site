@@ -1,3 +1,18 @@
+# Build 152 schema reference update
+
+Build 152 extends the custom request bridge from intake/drafts into practical follow-up and payment planning.
+
+New tables:
+
+- `custom_request_reply_templates` — stores manual email/copy templates generated from a custom request and quote draft. Nothing is sent automatically. Key fields: `custom_request_id`, `quote_draft_id`, `template_key`, `template_status`, `channel`, `subject`, `body_text`, `copied_at`, `sent_manually_at`.
+- `custom_request_payment_candidates` — stores internal deposit/final-invoice candidates from a request/quote draft. Key fields: `custom_request_id`, `quote_draft_id`, `candidate_key`, `candidate_type`, `candidate_status`, `amount_cents`, `currency`, `due_date`, `customer_email`, `source_payload_json`.
+
+Reminder support:
+
+- `notification_outbox` is now guaranteed by the accounting close workflow before queuing HST/GST reminders. The workflow uses `notification_kind='hst_gst_reminder'` and stores period/month/remittance metadata in the payload.
+
+Compatibility note: these additions are idempotent `CREATE TABLE IF NOT EXISTS` / `CREATE INDEX IF NOT EXISTS` changes and do not remove older custom request draft tables.
+
 # Build 151 schema reference update
 
 Build 151 adds the first D1-backed bridge from public custom request intake into internal work planning.

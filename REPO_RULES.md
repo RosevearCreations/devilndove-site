@@ -1,3 +1,9 @@
+# Build 152 repo rule additions
+
+- Custom request reply templates are internal drafts until a human reviews/copies/sends them. Do not auto-send them in a future pass without an explicit approval gate.
+- Deposit and invoice candidates are planning records, not customer-payable invoices. Do not expose them publicly until quote acceptance and payment-request controls exist.
+- HST/GST reminders may queue to `notification_outbox`, but live dispatch must continue to respect notification exclusions, cooldowns, and admin review rules.
+
 # Build 151 repo rules note
 
 Continue the pass rule: every feature change must update active Markdown and schema references. Public pages must keep exactly one H1, and private/customer/accounting data must stay out of public `/data/` JSON files.

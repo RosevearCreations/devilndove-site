@@ -359,11 +359,15 @@ def check_build151_assets(root: Path):
     checks = [
         ('build151_operations_custom_requests_mount', 'admin/operations/index.html', ['customRequestsAdminMount', '/public/js/admin-custom-requests.js'], ops),
         ('build151_custom_request_conversion_api', 'functions/api/admin/custom-requests.js', ['custom_request_quote_drafts', 'create_quote_draft', 'custom_request_conversion_events'], custom_api),
-        ('build151_custom_request_conversion_js', 'public/js/admin-custom-requests.js', ['Create quote draft', 'Create job draft', 'Create product plan'], custom_js),
+        ('build151_custom_request_conversion_js', 'public/js/admin-custom-requests.js', ['Quote draft', 'Job draft', 'Product plan'], custom_js),
         ('build151_utm_visit_tracking', 'functions/api/track/visit.js', ['parseUtm', 'utm_campaign', 'site_page_views'], visit_api),
         ('build151_social_utm_conversion_rollups', 'functions/api/admin/social-post-queue.js', ['custom_request_count', 'checkout_starts', 'ensureUtmAnalyticsColumns'], social_api),
         ('build151_accounting_close_csv', 'functions/api/admin/accounting-close-workflow.js', ['format === \'csv\'', 'remittance_evidence_url', 'buildCloseCsv'], accounting_api),
         ('build151_schema_marker', 'database_upgrade_current_pass.sql', ['build_151_custom_request_conversion_utm_close_export', 'custom_request_quote_drafts'], schema),
+        ('build152_custom_request_followup_api', 'functions/api/admin/custom-requests.js', ['custom_request_reply_templates', 'custom_request_payment_candidates', 'create_reply_template', 'create_deposit_candidate', 'create_invoice_candidate'], custom_api),
+        ('build152_custom_request_followup_js', 'public/js/admin-custom-requests.js', ['Reply template', 'Deposit candidate', 'Invoice candidate', 'data-copy-reply-template'], custom_js),
+        ('build152_hst_reminder_queue', 'functions/api/admin/accounting-close-workflow.js', ['queue_hst_reminder', 'hst_gst_reminder', 'queueNotification'], accounting_api),
+        ('build152_schema_marker', 'database_upgrade_current_pass.sql', ['build_152_custom_request_reply_payment_candidates_hst_reminders', 'custom_request_reply_templates', 'custom_request_payment_candidates'], schema),
     ]
     for issue_type, path, tokens, text in checks:
         missing = [token for token in tokens if token not in text]
@@ -424,3 +428,5 @@ if __name__ == '__main__':
 # Build 148 note: predeploy checks include drag/drop product image ordering, image roles, consent-link fields, and story snippet search assets.
 
 # Build 151 note: predeploy checks include Custom Request conversion actions, UTM attribution joins, and Accounting Close CSV export.
+
+# Build 152 note: predeploy checks include Custom Request reply templates, payment candidates, and HST/GST reminder queue support.
