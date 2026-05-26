@@ -161,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </tbody></table></div>
       </details>
       <details style="margin-top:12px"><summary>UTM campaign rollups</summary>
-        <div class="admin-table-wrap"><table><thead><tr><th>Campaign</th><th>Source / medium</th><th>Total</th><th>Open</th><th>Approved</th><th>Posted</th></tr></thead><tbody>
-          ${utmRollups.map((row) => `<tr><td><strong>${esc(row.utm_campaign || '')}</strong></td><td>${esc(row.utm_source || '')} / ${esc(row.utm_medium || '')}</td><td>${esc(row.total_posts || 0)}</td><td>${esc(row.open_count || 0)}</td><td>${esc(row.approved_count || 0)}</td><td>${esc(row.posted_count || 0)}</td></tr>`).join('') || '<tr><td colspan="6">No UTM-tagged social posts yet.</td></tr>'}
+        <div class="admin-table-wrap"><table><thead><tr><th>Campaign</th><th>Source / medium</th><th>Queue</th><th>Traffic</th><th>Conversions</th></tr></thead><tbody>
+          ${utmRollups.map((row) => `<tr><td><strong>${esc(row.utm_campaign || '')}</strong></td><td>${esc(row.utm_source || '')} / ${esc(row.utm_medium || '')}</td><td>${esc(row.total_posts || 0)} total<br><span class="small">${esc(row.open_count || 0)} open • ${esc(row.approved_count || 0)} approved • ${esc(row.posted_count || 0)} posted</span></td><td>${esc(row.page_views || 0)} view(s)<br><span class="small">${esc(row.visitor_sessions || row.session_count || 0)} session(s)</span></td><td>${esc(row.custom_request_count || 0)} request(s)<br><span class="small">${esc(row.checkout_starts || 0)} checkout start(s) • ${esc(row.abandoned_carts || 0)} abandoned</span></td></tr>`).join('') || '<tr><td colspan="5">No UTM-tagged social posts yet.</td></tr>'}
         </tbody></table></div>
       </details>
       <details style="margin-top:12px"><summary>Caption templates</summary>
