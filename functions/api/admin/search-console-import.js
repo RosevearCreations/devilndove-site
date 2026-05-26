@@ -29,6 +29,23 @@ function normalizeUrl(value, requestUrl) {
     return u.toString();
   } catch { return clean; }
 }
+function pagePathFromUrl(value, requestUrl) {
+  const clean = normalizeText(value);
+  try {
+    const u = new URL(clean || '/', requestUrl);
+    let path = u.pathname || '/';
+    if (!path.endsWith('/') && !path.includes('.')) path += '/';
+    return path || '/';
+  } catch {
+    if (clean.startsWith('/')) return clean;
+    return '/';
+  }
+}
+function clampText(value, maxLength) {
+  const clean = normalizeText(value);
+  if (!clean) return '';
+  return clean.length > maxLength ? clean.slice(0, maxLength).trim() : clean;
+}
 function parseCsv(text) {
   const output = [];
   let row = [];
@@ -152,17 +169,43 @@ async function ensureSchema(db) {
     action_status TEXT NOT NULL DEFAULT 'open',
     created_from_batch_key TEXT,
     created_by_user_id INTEGER,
+    applied_override_id INTEGER,
+    applied_at TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
     notes TEXT
   )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS seo_page_overrides (
+    seo_page_override_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_path TEXT NOT NULL UNIQUE,
+    page_url TEXT,
+    title TEXT,
+    meta_description TEXT,
+    h1_suggestion TEXT,
+    internal_link_note TEXT,
+    status TEXT NOT NULL DEFAULT 'approved',
+    source_action_key TEXT,
+    source_query_text TEXT,
+    reviewed_by_user_id INTEGER,
+    applied_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT
+  )`).run();
+  const seoActionAlters = [
+    `ALTER TABLE seo_opportunity_actions ADD COLUMN applied_override_id INTEGER`,
+    `ALTER TABLE seo_opportunity_actions ADD COLUMN applied_at TEXT`
+  ];
+  for (const sql of seoActionAlters) await db.prepare(sql).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_page ON search_console_page_queries(page_url, report_date)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_query ON search_console_page_queries(query_text, report_date)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_batch ON search_console_page_queries(import_batch_key)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_filters ON search_console_page_queries(report_date, country, device, impressions, average_position)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_status ON seo_opportunity_actions(action_status, priority_score)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_page ON seo_opportunity_actions(page_url)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_seo_page_overrides_status ON seo_page_overrides(status, page_path)`).run().catch(() => null);
 }
+
 async function summary(db, filters = {}) {
   await ensureSchema(db);
   const limit = Math.round(clampNumber(filters.limit, 5, 100, 20));
@@ -178,7 +221,7 @@ async function summary(db, filters = {}) {
   const positionTo = Number(filters.position_to || 20) || 20;
   opportunityWhere.push(Math.min(positionFrom, positionTo), Math.max(positionFrom, positionTo));
   const opportunityQueries = rows(await db.prepare(`SELECT query_text, page_url, SUM(clicks) AS clicks, SUM(impressions) AS impressions, ROUND(AVG(average_position),2) AS average_position, MAX(import_batch_key) AS import_batch_key FROM search_console_page_queries ${where.sql ? `${where.sql} AND COALESCE(query_text,'') <> ''` : "WHERE COALESCE(query_text,'') <> ''"} GROUP BY query_text, page_url HAVING ${havingClauses.join(' AND ')} ORDER BY impressions DESC, average_position ASC LIMIT ?`).bind(...opportunityWhere, limit).all().catch(() => ({ results: [] })));
-  const actions = rows(await db.prepare(`SELECT action_key, page_url, query_text, priority_score, suggested_title, suggested_meta_description, suggested_internal_link_note, action_status, created_from_batch_key, created_at, notes FROM seo_opportunity_actions ORDER BY CASE action_status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'done' THEN 2 ELSE 3 END, priority_score DESC, datetime(updated_at) DESC LIMIT ?`).bind(limit).all().catch(() => ({ results: [] })));
+  const actions = rows(await db.prepare(`SELECT action_key, page_url, query_text, priority_score, suggested_title, suggested_meta_description, suggested_internal_link_note, action_status, created_from_batch_key, applied_override_id, applied_at, created_at, notes FROM seo_opportunity_actions ORDER BY CASE action_status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'done' THEN 2 ELSE 3 END, priority_score DESC, datetime(updated_at) DESC LIMIT ?`).bind(limit).all().catch(() => ({ results: [] })));
   return { totals, batches, top_pages: topPages, opportunity_queries: opportunityQueries, seo_actions: actions, active_filters: filters };
 }
 async function deleteBatch(db, importBatchKey) {
@@ -223,9 +266,55 @@ async function updateActionStatus(db, payload) {
   const actionKey = normalizeText(payload.action_key);
   const status = normalizeText(payload.action_status).toLowerCase();
   if (!actionKey) throw new Error('SEO action key is required.');
-  if (!['open', 'in_progress', 'done', 'ignored'].includes(status)) throw new Error('Action status must be open, in_progress, done, or ignored.');
+  if (!['open', 'in_progress', 'done', 'ignored', 'applied'].includes(status)) throw new Error('Action status must be open, in_progress, done, ignored, or applied.');
   const result = await db.prepare(`UPDATE seo_opportunity_actions SET action_status = ?, notes = COALESCE(?, notes), updated_at = CURRENT_TIMESTAMP WHERE action_key = ?`).bind(status, normalizeText(payload.notes) || null, actionKey).run();
   return { updated: Number(result?.meta?.changes || 0) };
+}
+
+async function applySeoAction(db, adminUser, payload, requestUrl) {
+  const actionKey = normalizeText(payload.action_key);
+  if (!actionKey) throw new Error('SEO action key is required.');
+  const action = await db.prepare(`SELECT * FROM seo_opportunity_actions WHERE action_key=? LIMIT 1`).bind(actionKey).first();
+  if (!action) throw new Error('SEO action was not found.');
+  if (String(action.action_status || '').toLowerCase() === 'ignored') throw new Error('Ignored SEO actions cannot be applied.');
+  const pagePath = pagePathFromUrl(payload.page_url || action.page_url, requestUrl);
+  const title = clampText(payload.title || action.suggested_title, 70);
+  const metaDescription = clampText(payload.meta_description || action.suggested_meta_description, 160);
+  const internalLinkNote = clampText(payload.internal_link_note || action.suggested_internal_link_note, 260);
+  const h1Suggestion = clampText(payload.h1_suggestion || '', 90);
+  if (!pagePath) throw new Error('Could not derive a page path for this SEO action.');
+  if (!title && !metaDescription && !internalLinkNote && !h1Suggestion) throw new Error('Nothing to apply. Add a title, meta description, H1 suggestion, or internal-link note.');
+  await db.prepare(`INSERT INTO seo_page_overrides (
+      page_path, page_url, title, meta_description, h1_suggestion, internal_link_note, status,
+      source_action_key, source_query_text, reviewed_by_user_id, applied_at, created_at, updated_at, notes
+    ) VALUES (?, ?, ?, ?, ?, ?, 'applied', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
+    ON CONFLICT(page_path) DO UPDATE SET
+      page_url=excluded.page_url,
+      title=excluded.title,
+      meta_description=excluded.meta_description,
+      h1_suggestion=excluded.h1_suggestion,
+      internal_link_note=excluded.internal_link_note,
+      status='applied',
+      source_action_key=excluded.source_action_key,
+      source_query_text=excluded.source_query_text,
+      reviewed_by_user_id=excluded.reviewed_by_user_id,
+      applied_at=CURRENT_TIMESTAMP,
+      updated_at=CURRENT_TIMESTAMP,
+      notes=excluded.notes`).bind(
+    pagePath,
+    normalizeText(action.page_url),
+    title || null,
+    metaDescription || null,
+    h1Suggestion || null,
+    internalLinkNote || null,
+    actionKey,
+    normalizeText(action.query_text) || null,
+    Number(adminUser.user_id || 0),
+    normalizeText(payload.notes || 'Applied from reviewed Search Console SEO action.') || null
+  ).run();
+  const override = await db.prepare(`SELECT seo_page_override_id FROM seo_page_overrides WHERE page_path=? LIMIT 1`).bind(pagePath).first().catch(() => null);
+  await db.prepare(`UPDATE seo_opportunity_actions SET action_status='applied', applied_override_id=?, applied_at=CURRENT_TIMESTAMP, notes=COALESCE(?, notes), updated_at=CURRENT_TIMESTAMP WHERE action_key=?`).bind(Number(override?.seo_page_override_id || 0) || null, normalizeText(payload.notes) || null, actionKey).run();
+  return { applied: 1, page_path: pagePath, seo_page_override_id: Number(override?.seo_page_override_id || 0) || null };
 }
 
 export async function onRequestGet(context) {
@@ -281,6 +370,12 @@ export async function onRequestPost(context) {
     const update = await updateActionStatus(db, payload);
     await auditAdminAction(context.env, context.request, adminUser, { action_type: 'seo_opportunity_action_status', target_type: 'seo_opportunity_action', target_key: normalizeText(payload.action_key), details: { action_status: normalizeText(payload.action_status), ...update } });
     return jsonResponse({ ok: true, message: 'SEO action status updated.', ...update, ...(await summary(db, filters)) }, 200, { 'Cache-Control': 'no-store' });
+  }
+
+  if (action === 'apply_seo_action') {
+    const applied = await applySeoAction(db, adminUser, payload, context.request.url);
+    await auditAdminAction(context.env, context.request, adminUser, { action_type: 'seo_opportunity_action_apply', target_type: 'seo_page_override', target_id: applied.seo_page_override_id || null, target_key: normalizeText(payload.action_key), details: applied });
+    return jsonResponse({ ok: true, message: `Applied reviewed SEO override for ${applied.page_path}.`, ...applied, ...(await summary(db, filters)) }, 200, { 'Cache-Control': 'no-store' });
   }
 
   const csvText = normalizeText(payload.csv_text);

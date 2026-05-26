@@ -338,6 +338,75 @@ export async function onRequestGet(context) {
 
 
 
+  const seoOverrideRows = await tableExists(db, 'seo_page_overrides') ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+           SUM(CASE WHEN COALESCE(override_status,'draft') IN ('approved','applied') THEN 1 ELSE 0 END) AS approved_count
+    FROM seo_page_overrides
+  `) : { total: 0, approved_count: 0 };
+  addCheck(
+    checks,
+    await tableExists(db, 'seo_page_overrides') ? 'pass' : 'warn',
+    'Reviewed SEO override apply loop',
+    await tableExists(db, 'seo_page_overrides')
+      ? `${Number(seoOverrideRows.total || 0)} SEO page override(s), ${Number(seoOverrideRows.approved_count || 0)} approved/applied for public fallback.`
+      : 'seo_page_overrides table is not installed yet.',
+    'Apply Build 150 schema, then use Operations > Search Console CSV Import to review and apply title/meta/internal-link actions.',
+    'warning'
+  );
+
+  const trustBlockRows = await tableExists(db, 'trust_block_items') ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+           SUM(CASE WHEN COALESCE(block_status,'draft')='approved' AND COALESCE(is_public,0)=1 THEN 1 ELSE 0 END) AS approved_public_count
+    FROM trust_block_items
+  `) : { total: 0, approved_public_count: 0 };
+  addCheck(
+    checks,
+    await tableExists(db, 'trust_block_items') ? 'pass' : 'warn',
+    'Approved testimonial/local trust blocks',
+    await tableExists(db, 'trust_block_items')
+      ? `${Number(trustBlockRows.total || 0)} trust block item(s), ${Number(trustBlockRows.approved_public_count || 0)} approved for public display.`
+      : 'trust_block_items table is not installed yet.',
+    'Apply Build 150 schema, then use Operations > Testimonials / Trust Blocks to publish review-safe proof blocks.',
+    'warning'
+  );
+
+  const accountingCloseTables = ['accounting_payment_applications', 'accounting_hst_gst_reviews', 'accountant_export_packages'];
+  const missingCloseTables = [];
+  for (const tableName of accountingCloseTables) {
+    if (!await tableExists(db, tableName)) missingCloseTables.push(tableName);
+  }
+  addCheck(
+    checks,
+    missingCloseTables.length ? 'warn' : 'pass',
+    'Accounting close workflow tables',
+    missingCloseTables.length
+      ? `Missing Build 150 accounting close table(s): ${missingCloseTables.join(', ')}.`
+      : 'Payment application, HST/GST review, and accountant export package tables are installed.',
+    'Apply Build 150 schema before relying on Accounting > Close Workflow for month-end review.',
+    'warning'
+  );
+
+  const trustApiHealth = await publicJsonCheck(context.request, '/api/trust-blocks?context=homepage&limit=4');
+  addCheck(
+    checks,
+    trustApiHealth.ok && !trustApiHealth.error ? 'pass' : 'warn',
+    'Public trust blocks endpoint',
+    trustApiHealth.ok ? `HTTP ${trustApiHealth.status}; trust blocks endpoint responded.` : `HTTP ${trustApiHealth.status}; ${trustApiHealth.error || 'Trust blocks endpoint could not be checked.'}`,
+    'Seed approved trust blocks or confirm the public fallback remains non-breaking when no trust rows exist.',
+    'warning'
+  );
+
+  const seoOverrideHealth = await publicJsonCheck(context.request, '/api/seo-page-overrides?path=/');
+  addCheck(
+    checks,
+    seoOverrideHealth.ok && !seoOverrideHealth.error ? 'pass' : 'warn',
+    'Public SEO override endpoint',
+    seoOverrideHealth.ok ? `HTTP ${seoOverrideHealth.status}; SEO override endpoint responded.` : `HTTP ${seoOverrideHealth.status}; ${seoOverrideHealth.error || 'SEO override endpoint could not be checked.'}`,
+    'Apply Build 150 schema if this endpoint fails, then apply a reviewed Search Console action for testing.',
+    'warning'
+  );
+
+
   const socialQueueHealth = await publicJsonCheck(context.request, '/api/admin/social-post-queue');
   addCheck(
     checks,

@@ -150,7 +150,7 @@ async function fetchEndpoint(request, endpoint) {
 async function buildDbSnapshot(db) {
   if (!db) return {};
   const snapshot = {};
-  for (const table of ['products', 'catalog_items', 'site_item_inventory', 'runtime_incidents', 'schema_migration_ledger']) {
+  for (const table of ['products', 'catalog_items', 'site_item_inventory', 'runtime_incidents', 'schema_migration_ledger', 'trust_block_items', 'seo_page_overrides', 'accounting_payment_applications', 'accounting_hst_gst_reviews', 'accountant_export_packages']) {
     snapshot[table] = await tableCount(db, table);
   }
   if (await tableExists(db, 'runtime_incidents')) {
@@ -186,6 +186,8 @@ export async function onRequestGet(context) {
     { key: 'supplies', label: 'Public supplies API', path: '/api/supplies', next_action: 'If this fails, verify supplies JSON and D1 catalog bridge.' },
     { key: 'creations', label: 'Public creations API', path: '/api/creations', next_action: 'If empty, confirm products/creations are in D1 or public JSON fallback.' },
     { key: 'community_content', label: 'Community content API', path: '/api/community-content?limit=5', next_action: 'If this fails, check community content tables or fallback JSON.' },
+    { key: 'trust_blocks', label: 'Public trust blocks API', path: '/api/trust-blocks?context=homepage&limit=4', next_action: 'If empty, seed approved trust_block_items from Operations > Testimonials / Trust Blocks.' },
+    { key: 'seo_overrides', label: 'Public SEO override API', path: '/api/seo-page-overrides?path=/', next_action: 'If this fails, apply the Build 150 SEO override schema and retry.' },
     { key: 'sitemap', label: 'Sitemap XML', path: '/sitemap.xml', expected_type: 'xml', next_action: 'If missing, regenerate sitemap before deploy.' },
     { key: 'robots', label: 'Robots.txt', path: '/robots.txt', expected_type: 'text', next_action: 'If missing, restore robots.txt before deploy.' },
   ];
