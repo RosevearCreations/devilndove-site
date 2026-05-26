@@ -234,6 +234,22 @@ async function ensureColumn(db, tableName, columnName, sql) {
     await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${sql}`).run().catch(() => null);
   }
 }
+async function tableExists(db, tableName) {
+  try {
+    const row = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`).bind(tableName).first();
+    return !!row?.name;
+  } catch { return false; }
+}
+async function ensureUtmAnalyticsColumns(db) {
+  for (const tableName of ['site_visitor_sessions', 'site_page_views', 'custom_requests']) {
+    if (!(await tableExists(db, tableName))) continue;
+    await ensureColumn(db, tableName, 'utm_source', 'utm_source TEXT');
+    await ensureColumn(db, tableName, 'utm_medium', 'utm_medium TEXT');
+    await ensureColumn(db, tableName, 'utm_campaign', 'utm_campaign TEXT');
+    await ensureColumn(db, tableName, 'utm_content', 'utm_content TEXT');
+    await ensureColumn(db, tableName, 'utm_term', 'utm_term TEXT');
+  }
+}
 function safeResponseJson(text) {
   try { return JSON.parse(text || '{}'); } catch { return { raw: text || '' }; }
 }
@@ -547,18 +563,43 @@ async function summarize(db, env = {}) {
     GROUP BY calendar_date
     ORDER BY calendar_date ASC
     LIMIT 60`).all().catch(() => ({ results: [] })));
-  const utm_rollups = rows(await db.prepare(`SELECT
+  await ensureUtmAnalyticsColumns(db);
+  const hasPageViews = await tableExists(db, 'site_page_views');
+  const hasSessions = await tableExists(db, 'site_visitor_sessions');
+  const hasCustomRequests = await tableExists(db, 'custom_requests');
+  const utm_rollups = rows(await db.prepare(`${hasPageViews || hasSessions || hasCustomRequests ? `WITH
+    q AS (
+      SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source,
+             COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium,
+             COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign,
+             COUNT(*) AS total_posts,
+             SUM(CASE WHEN post_status='posted' THEN 1 ELSE 0 END) AS posted_count,
+             SUM(CASE WHEN post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
+             SUM(CASE WHEN approval_status='approved' THEN 1 ELSE 0 END) AS approved_count
+      FROM social_post_queue
+      WHERE COALESCE(post_status,'draft') <> 'archived'
+      GROUP BY utm_source, utm_medium, utm_campaign
+    ),
+    v AS (${hasPageViews ? `SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source, COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium, COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign, COUNT(*) AS page_views, COUNT(DISTINCT site_visitor_session_id) AS visitor_sessions, SUM(CASE WHEN path LIKE '/checkout%' THEN 1 ELSE 0 END) AS checkout_views FROM site_page_views WHERE COALESCE(utm_campaign,'') <> '' GROUP BY utm_source, utm_medium, utm_campaign` : `SELECT 'none' AS utm_source, 'none' AS utm_medium, 'none' AS utm_campaign, 0 AS page_views, 0 AS visitor_sessions, 0 AS checkout_views WHERE 0`}),
+    s AS (${hasSessions ? `SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source, COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium, COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign, COUNT(*) AS session_count, SUM(CASE WHEN is_checkout_started=1 THEN 1 ELSE 0 END) AS checkout_starts, SUM(CASE WHEN is_abandoned_cart=1 THEN 1 ELSE 0 END) AS abandoned_carts FROM site_visitor_sessions WHERE COALESCE(utm_campaign,'') <> '' GROUP BY utm_source, utm_medium, utm_campaign` : `SELECT 'none' AS utm_source, 'none' AS utm_medium, 'none' AS utm_campaign, 0 AS session_count, 0 AS checkout_starts, 0 AS abandoned_carts WHERE 0`}),
+    cr AS (${hasCustomRequests ? `SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source, COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium, COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign, COUNT(*) AS custom_request_count FROM custom_requests WHERE COALESCE(utm_campaign,'') <> '' GROUP BY utm_source, utm_medium, utm_campaign` : `SELECT 'none' AS utm_source, 'none' AS utm_medium, 'none' AS utm_campaign, 0 AS custom_request_count WHERE 0`})
+    SELECT q.*, COALESCE(v.page_views,0) AS page_views, COALESCE(v.visitor_sessions,0) AS visitor_sessions, COALESCE(v.checkout_views,0) AS checkout_views, COALESCE(s.session_count,0) AS session_count, COALESCE(s.checkout_starts,0) AS checkout_starts, COALESCE(s.abandoned_carts,0) AS abandoned_carts, COALESCE(cr.custom_request_count,0) AS custom_request_count
+    FROM q
+    LEFT JOIN v ON v.utm_source=q.utm_source AND v.utm_medium=q.utm_medium AND v.utm_campaign=q.utm_campaign
+    LEFT JOIN s ON s.utm_source=q.utm_source AND s.utm_medium=q.utm_medium AND s.utm_campaign=q.utm_campaign
+    LEFT JOIN cr ON cr.utm_source=q.utm_source AND cr.utm_medium=q.utm_medium AND cr.utm_campaign=q.utm_campaign` : `SELECT
       COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source,
       COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium,
       COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign,
       COUNT(*) AS total_posts,
       SUM(CASE WHEN post_status='posted' THEN 1 ELSE 0 END) AS posted_count,
       SUM(CASE WHEN post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
-      SUM(CASE WHEN approval_status='approved' THEN 1 ELSE 0 END) AS approved_count
+      SUM(CASE WHEN approval_status='approved' THEN 1 ELSE 0 END) AS approved_count,
+      0 AS page_views, 0 AS visitor_sessions, 0 AS checkout_views, 0 AS session_count, 0 AS checkout_starts, 0 AS abandoned_carts, 0 AS custom_request_count
     FROM social_post_queue
     WHERE COALESCE(post_status,'draft') <> 'archived'
-    GROUP BY utm_source, utm_medium, utm_campaign
-    ORDER BY total_posts DESC, posted_count DESC, utm_campaign ASC
+    GROUP BY utm_source, utm_medium, utm_campaign`}
+    ORDER BY total_posts DESC, posted_count DESC, page_views DESC, custom_request_count DESC, utm_campaign ASC
     LIMIT 40`).all().catch(() => ({ results: [] })));
   const platform_readiness = getPlatformReadiness(env);
   const platformRows = platforms.map((platform) => ({
