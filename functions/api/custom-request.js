@@ -114,15 +114,16 @@ export async function onRequestPost(context) {
 
   await ensureSchema(db);
   const requestKey = `cr_${Date.now().toString(36)}_${crypto.randomUUID().slice(0, 8)}`;
+  const uploadToken = `upload_${crypto.randomUUID().replace(/-/g, '')}`;
   const insert = await db.prepare(`INSERT INTO custom_requests (
     request_key, name, email, phone, request_type, product_interest, deadline_date,
-    budget_cents, message, attachment_urls_json, consent_to_contact, utm_source, utm_medium, utm_campaign, utm_content, utm_term, visitor_token, browser_session_token, status, created_at, updated_at
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    budget_cents, message, attachment_urls_json, consent_to_contact, utm_source, utm_medium, utm_campaign, utm_content, utm_term, visitor_token, browser_session_token, upload_token, reference_upload_count, status, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'new', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
     requestKey, name, email, phone || null, requestType || 'custom_gift', productInterest || null,
     deadlineDate || null, parseBudgetCents(body.budget), message, JSON.stringify(attachmentUrls), consentToContact,
     utm.utm_source || null, utm.utm_medium || null, utm.utm_campaign || null, utm.utm_content || null, utm.utm_term || null,
-    utm.visitor_token || null, utm.browser_session_token || null
+    utm.visitor_token || null, utm.browser_session_token || null, uploadToken
   ).run();
 
-  return json({ ok: true, message: 'Custom request received. We will review it before replying.', request_key: requestKey, custom_request_id: Number(insert?.meta?.last_row_id || 0) || null });
+  return json({ ok: true, message: 'Custom request received. We will review it before replying.', request_key: requestKey, upload_token: uploadToken, reference_upload_limit: 5, custom_request_id: Number(insert?.meta?.last_row_id || 0) || null });
 }
