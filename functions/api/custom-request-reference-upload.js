@@ -1,5 +1,5 @@
 // File: /functions/api/custom-request-reference-upload.js
-// Brief description: Public post-submit image/reference upload for custom requests. Uploads are token-bound to a submitted request and stored as private-review references until admin approves public use.
+// Brief description: Public post-submit image/reference upload for custom requests. Uploads are token-bound to a submitted request, stored as private-review references, and mirrored into media consent review records until admin approves public use.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -55,7 +55,27 @@ async function ensureSchema(db) {
     FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
   )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_request_reference_uploads_request ON custom_request_reference_uploads(custom_request_id, created_at)`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS media_consent_records (
+    consent_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    consent_key TEXT NOT NULL UNIQUE,
+    subject_label TEXT,
+    source_type TEXT DEFAULT 'general',
+    source_id TEXT,
+    media_url TEXT,
+    consent_status TEXT NOT NULL DEFAULT 'unknown',
+    consent_scope TEXT NOT NULL DEFAULT 'internal_only',
+    public_use_allowed INTEGER NOT NULL DEFAULT 0,
+    social_use_allowed INTEGER NOT NULL DEFAULT 0,
+    privacy_notes TEXT,
+    reviewed_by_user_id INTEGER,
+    expires_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_media_consent_records_source ON media_consent_records(source_type, source_id, updated_at)`).run().catch(() => null);
 }
+function consentKey(requestKey, objectKey) { return `custom_request_reference_${requestKey}_${String(objectKey || '').split('/').pop().replace(/[^a-zA-Z0-9_-]+/g, '_')}`.slice(0, 180); }
+
 
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Methods': 'POST,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } });
@@ -93,8 +113,13 @@ export async function onRequestPost(context) {
   await bucket.put(objectKey, await file.arrayBuffer(), { httpMetadata: { contentType: mimeType }, customMetadata: { request_key: requestKey, reference_use_status: 'private_review_only' } });
   const publicUrl = `${publicBase(context.env)}/${objectKey}`;
 
-  await db.prepare(`INSERT INTO custom_request_reference_uploads (custom_request_id, request_key, public_url, object_key, original_filename, mime_type, file_size_bytes, reference_use_status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'private_review_only', CURRENT_TIMESTAMP)`).bind(
+  const uploadResult = await db.prepare(`INSERT INTO custom_request_reference_uploads (custom_request_id, request_key, public_url, object_key, original_filename, mime_type, file_size_bytes, reference_use_status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'private_review_only', CURRENT_TIMESTAMP)`).bind(
     Number(row.custom_request_id || 0), requestKey, publicUrl, objectKey, originalName, mimeType, fileSize
+  ).run().catch(() => null);
+
+  const uploadId = Number(uploadResult?.meta?.last_row_id || 0) || null;
+  await db.prepare(`INSERT INTO media_consent_records (consent_key, subject_label, source_type, source_id, media_url, consent_status, consent_scope, public_use_allowed, social_use_allowed, privacy_notes, created_at, updated_at) VALUES (?, ?, 'custom_request_reference_upload', ?, ?, 'requested', 'internal_only', 0, 0, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(consent_key) DO UPDATE SET media_url=excluded.media_url, consent_status=CASE WHEN media_consent_records.consent_status='unknown' THEN 'requested' ELSE media_consent_records.consent_status END, privacy_notes=excluded.privacy_notes, updated_at=CURRENT_TIMESTAMP`).bind(
+    consentKey(requestKey, objectKey), `Reference image for ${requestKey}`, uploadId ? String(uploadId) : objectKey, publicUrl, 'Customer-uploaded reference image. Keep private until consent scope is reviewed and explicitly approved.'
   ).run().catch(() => null);
 
   let links = [];
@@ -102,5 +127,5 @@ export async function onRequestPost(context) {
   links.push(publicUrl);
   await db.prepare(`UPDATE custom_requests SET attachment_urls_json=?, reference_upload_count=COALESCE(reference_upload_count,0)+1, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(JSON.stringify(links.slice(0, 12)), Number(row.custom_request_id || 0)).run();
 
-  return json({ ok: true, message: 'Reference image uploaded for private review.', public_url: publicUrl, object_key: objectKey });
+  return json({ ok: true, message: 'Reference image uploaded for private review and consent review.', public_url: publicUrl, object_key: objectKey, consent_status: 'requested', consent_scope: 'internal_only' });
 }

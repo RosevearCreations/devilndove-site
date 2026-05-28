@@ -174,6 +174,23 @@ function normalizeCreationItem(source, row = null, options = {}) {
   };
 }
 
+
+function listifyFacet(value) {
+  if (Array.isArray(value)) return value.map(normalizeText).filter(Boolean);
+  const text = normalizeText(value);
+  return text ? text.split(/[|,;]/).map(normalizeText).filter(Boolean) : [];
+}
+function itemMaterials(item) { return [...listifyFacet(item.materials), ...listifyFacet(item.material), ...listifyFacet(item.medium)]; }
+function itemProcesses(item) { return [...listifyFacet(item.processes), ...listifyFacet(item.process), ...listifyFacet(item.technique), ...listifyFacet(item.making_process)]; }
+function itemLocalities(item) {
+  const values = [...listifyFacet(item.locality), ...listifyFacet(item.location), ...listifyFacet(item.local_area), ...listifyFacet(item.provenance_location), ...listifyFacet(item.pickup_area)];
+  if (normalizeText(`${item.description || ''} ${item.notes || ''}`).toLowerCase().includes('southern ontario')) values.push('Southern Ontario');
+  return values.filter(Boolean);
+}
+function facetCounts(items, getter) {
+  return Object.entries(items.reduce((acc, item) => { for (const key of getter(item)) acc[key] = (acc[key] || 0) + 1; return acc; }, {})).map(([label, count]) => ({ label, count })).sort((a, b) => a.label.localeCompare(b.label));
+}
+
 async function loadJsonFallback(request, assetOrigin, assetPrefix) {
   try {
     const response = await fetch(
@@ -344,6 +361,9 @@ export async function onRequestGet(context) {
     )
       .map(([label, count]) => ({ label, count }))
       .sort((a, b) => a.label.localeCompare(b.label)),
+    materials: facetCounts(items, itemMaterials),
+    processes: facetCounts(items, itemProcesses),
+    localities: facetCounts(items, itemLocalities),
   };
 
   return json({
