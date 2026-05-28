@@ -1,5 +1,5 @@
 // File: /functions/api/admin/custom-requests.js
-// Brief description: Admin review queue for custom gift, engraving, and personalized work requests, including quote/job/product draft conversion, customer reply templates, and payment candidates.
+// Brief description: Admin review queue for custom gift, engraving, and personalized work requests, including quote/job/product draft conversion, customer reply templates, payment candidates, and private quote preview links.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
@@ -141,8 +141,34 @@ async function ensureSchema(db) {
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_product_drafts_status ON custom_request_product_drafts(product_draft_status, updated_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_reply_templates_request ON custom_request_reply_templates(custom_request_id, template_status, updated_at)`).run().catch(() => null);
   await db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_reply_templates_unique_email ON custom_request_reply_templates(custom_request_id, channel)`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_quote_share_links (
+    custom_request_quote_share_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    quote_draft_id INTEGER,
+    share_token TEXT NOT NULL UNIQUE,
+    share_status TEXT NOT NULL DEFAULT 'active',
+    customer_name TEXT,
+    customer_email TEXT,
+    title TEXT,
+    quote_total_cents INTEGER NOT NULL DEFAULT 0,
+    scope_summary TEXT,
+    payment_summary_json TEXT DEFAULT '{}',
+    expires_at TEXT,
+    accepted_at TEXT,
+    declined_at TEXT,
+    customer_response_note TEXT,
+    created_by_user_id INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+    FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL
+  )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_candidates_request ON custom_request_payment_candidates(custom_request_id, candidate_type, candidate_status)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_request ON custom_request_quote_share_links(custom_request_id, share_status, updated_at)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_token ON custom_request_quote_share_links(share_token, share_status)`).run().catch(() => null);
 }
+
 
 async function requestById(db, id) {
   return db.prepare(`SELECT * FROM custom_requests WHERE custom_request_id=? LIMIT 1`).bind(Number(id || 0)).first();
@@ -177,9 +203,10 @@ async function listPayload(db) {
   const productDrafts = rows(await db.prepare(`SELECT * FROM custom_request_product_drafts ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const replyTemplates = rows(await db.prepare(`SELECT * FROM custom_request_reply_templates ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const paymentCandidates = rows(await db.prepare(`SELECT * FROM custom_request_payment_candidates ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
+  const previewLinks = rows(await db.prepare(`SELECT * FROM custom_request_quote_share_links ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const conversionEvents = rows(await db.prepare(`SELECT * FROM custom_request_conversion_events ORDER BY datetime(created_at) DESC LIMIT 160`).all().catch(() => ({ results: [] })));
   const customerHistory = rows(await db.prepare(`SELECT email, COUNT(*) AS request_count, MAX(created_at) AS last_request_at FROM custom_requests WHERE COALESCE(email,'') <> '' GROUP BY email HAVING COUNT(*) > 1 ORDER BY request_count DESC, last_request_at DESC LIMIT 50`).all().catch(() => ({ results: [] })));
-  return { ok: true, requests, summary, quote_drafts: quoteDrafts, job_drafts: jobDrafts, product_drafts: productDrafts, reply_templates: replyTemplates, payment_candidates: paymentCandidates, conversion_events: conversionEvents, customer_history: customerHistory };
+  return { ok: true, requests, summary, quote_drafts: quoteDrafts, job_drafts: jobDrafts, product_drafts: productDrafts, reply_templates: replyTemplates, payment_candidates: paymentCandidates, quote_preview_links: previewLinks, conversion_events: conversionEvents, customer_history: customerHistory };
 }
 
 async function recordConversion(db, adminUser, requestId, type, tableName, targetId, targetKey, notes) {
@@ -318,6 +345,36 @@ async function createPaymentCandidate(db, adminUser, requestId, candidateType) {
   return { ok: true, message: `${type === 'deposit' ? 'Deposit' : 'Invoice'} candidate created.`, target_key: candidateKey, target_id: targetId };
 }
 
+async function createQuotePreviewLink(db, adminUser, requestId, origin) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  const quote = await getOrCreateQuote(db, adminUser, requestId);
+  const existing = await db.prepare(`SELECT * FROM custom_request_quote_share_links WHERE custom_request_id=? AND share_status IN ('active','viewed') ORDER BY datetime(created_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  if (existing) return { ok: true, message: 'Quote preview link already exists.', target_key: existing.share_token, target_id: existing.custom_request_quote_share_link_id, share_url: `${origin}/custom-request/quote/?token=${encodeURIComponent(existing.share_token)}` };
+  const shareToken = `quote_${crypto.randomUUID().replace(/-/g, '')}`;
+  const quoteTotal = cents(quote?.estimated_budget_cents || row.budget_cents || 0);
+  const depositCandidate = await db.prepare(`SELECT amount_cents, candidate_status FROM custom_request_payment_candidates WHERE custom_request_id=? AND candidate_type='deposit' LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const invoiceCandidate = await db.prepare(`SELECT amount_cents, candidate_status FROM custom_request_payment_candidates WHERE custom_request_id=? AND candidate_type='invoice' LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const paymentSummary = JSON.stringify({
+    deposit_cents: Number(depositCandidate?.amount_cents || 0),
+    invoice_balance_cents: Number(invoiceCandidate?.amount_cents || 0),
+    note: 'Payment amounts are planning values only until Devil n Dove sends a final payment request or invoice.'
+  });
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+  const insert = await db.prepare(`INSERT INTO custom_request_quote_share_links (
+    custom_request_id, quote_draft_id, share_token, share_status, customer_name, customer_email, title, quote_total_cents,
+    scope_summary, payment_summary_json, expires_at, created_by_user_id, created_at, updated_at
+  ) VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    Number(requestId), Number(quote?.custom_request_quote_draft_id || 0) || null, shareToken, row.name || null, row.email || null,
+    titleForRequest(row), quoteTotal, clean(quote?.scope_notes || quoteScope(row), 3000), paymentSummary, expiresAt, Number(adminUser.user_id || 0)
+  ).run();
+  const targetId = Number(insert?.meta?.last_row_id || 0) || null;
+  await db.prepare(`UPDATE custom_requests SET status=CASE WHEN status IN ('new','reviewing','quote_needed') THEN 'quoted' ELSE status END, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(Number(requestId)).run();
+  await db.prepare(`UPDATE custom_request_quote_drafts SET quote_status=CASE WHEN quote_status='draft' THEN 'shared' ELSE quote_status END, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(Number(requestId)).run().catch(() => null);
+  await recordConversion(db, adminUser, requestId, 'quote_preview_link', 'custom_request_quote_share_links', targetId, shareToken, 'Private quote preview link created for manual customer sharing.');
+  return { ok: true, message: 'Private quote preview link created.', target_key: shareToken, target_id: targetId, share_url: `${origin}/custom-request/quote/?token=${encodeURIComponent(shareToken)}` };
+}
+
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
@@ -349,6 +406,7 @@ export async function onRequestPost(context) {
     else if (action === 'create_reply_template') actionResult = await createReplyTemplate(db, adminUser, id);
     else if (action === 'create_deposit_candidate') actionResult = await createPaymentCandidate(db, adminUser, id, 'deposit');
     else if (action === 'create_invoice_candidate') actionResult = await createPaymentCandidate(db, adminUser, id, 'invoice');
+    else if (action === 'create_quote_preview_link') actionResult = await createQuotePreviewLink(db, adminUser, id, new URL(context.request.url).origin);
     else {
       const nextStatus = status(body.status);
       const adminNotes = clean(body.admin_notes || '', 1600);
