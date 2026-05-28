@@ -1,3 +1,22 @@
+# Build 154 schema update
+
+New/expanded custom request tables:
+
+- `custom_request_quote_line_items` — editable quote lines for material, labour, pickup/shipping, custom charges, quantity, taxable flag, and calculated line amount.
+- `custom_request_quote_revisions` — revision/change history for quote creation, sharing, line item changes, customer decline, and accepted follow-through.
+- `custom_request_payment_request_drafts` — review-needed payment request drafts created from accepted private quotes.
+- `custom_request_order_drafts` — review-needed order drafts created from accepted private quotes.
+
+Expanded table:
+
+- `custom_request_quote_drafts` now self-heals these planning columns when the functions run: `material_cost_cents`, `labor_cost_cents`, `pickup_shipping_cents`, `tax_estimate_cents`, and `quote_total_cents`.
+
+Related behavior:
+
+- `custom_request_reference_uploads` now mirrors uploaded reference images into `media_consent_records` with `source_type='custom_request_reference_upload'`, `consent_status='requested'`, `consent_scope='internal_only'`, and no public/social approval by default.
+- `accounting-close-workflow?format=zip` now emits a text/CSV ZIP bundle for accountant handoff.
+- Static SEO override baking uses `data/site/seo-page-overrides.json` and `scripts/bake_approved_seo_overrides.py`.
+
 # Build 153 schema reference update
 
 Build 153 adds `custom_request_quote_share_links` for private quote preview tokens, quote status, customer accept/decline timestamps, and response notes. It also adds `custom_request_reference_uploads` for request-bound R2 reference image uploads. Runtime APIs self-heal `custom_requests.upload_token` and `custom_requests.reference_upload_count` for older D1 installations.

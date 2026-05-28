@@ -1,3 +1,9 @@
+# Build 154 AI handoff
+
+Latest completed pass: Build 154. The build now connects accepted private custom quote previews to review-needed payment-request and order-draft records. Quote drafts have editable line items, calculated material/labour/pickup-shipping/tax/total estimates, and revision history. Customer reference uploads now create media consent records as requested/internal-only. Accounting close can produce an accountant ZIP. Approved SEO overrides can be baked into static HTML from `data/site/seo-page-overrides.json` with `scripts/bake_approved_seo_overrides.py`. The public gallery now filters by product type, material, process, and locality.
+
+Next best work: convert reviewed payment-request drafts to real payment links, convert reviewed order drafts to real orders, add quote revision resend/version links, add marketplace export packs, and extend proof filters into shop/product APIs.
+
 # Build 153 AI context update
 
 The current build adds private custom quote preview links and post-submit custom-request reference image uploads. The important new assets are `/api/custom-request-quote`, `/custom-request/quote/`, `/public/js/custom-request-quote-preview.js`, `/api/custom-request-reference-upload`, and updated Operations > Custom Requests actions. Quote acceptance/decline is intent tracking only; it does not charge the customer or create a real order yet. Reference images are private-review-only until media consent/public-use review is added.

@@ -1,3 +1,7 @@
+# Build 154 local SEO update
+
+Build 154 keeps the local SEO habit moving forward by adding static SEO override baking and better public proof filters. The gallery can now help visitors find examples by material, process, locality, and product type, which supports locally relevant browsing for custom gifts, handmade jewelry, engraving, vintage finds, and workshop-made items in Southern Ontario. Reviewed Search Console title/meta/internal-link actions can now be exported into `data/site/seo-page-overrides.json` and baked into static HTML before deploy.
+
 # Build 153 local SEO note
 
 The custom request flow now supports a stronger local-service path: Southern Ontario visitors can submit custom gift, engraving, jewelry, sublimation, and workshop requests, upload private reference images, and receive a private quote preview. Continue using customer-search wording in titles/headings while keeping one clear H1 per public page and avoiding indexing private quote-token pages.

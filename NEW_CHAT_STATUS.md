@@ -1,3 +1,9 @@
+# Build 154 new chat status
+
+Current build: Build 154. Work completed: accepted quote previews -> review-needed payment-request/order drafts; editable quote line items; quote revision history; media consent records for reference uploads; accountant ZIP export; static SEO bake script/fallback; proof/gallery filters by material, process, locality, and product type.
+
+Recommended next prompt: continue from Build 154 and convert reviewed payment-request/order drafts into real approved payment/order workflows, then add quote revision resend links and marketplace export packs.
+
 # New Chat Status — Devil n Dove Build 153
 
 ## Current status — Build 153

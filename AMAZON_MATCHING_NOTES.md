@@ -1,3 +1,7 @@
+# Build 154 note
+
+No Amazon matching logic was changed in this pass. The new quote line item workflow can later use matched tool/supply cost records to prefill material and consumable estimates for custom requests.
+
 # Build 153 note
 
 No Amazon matching schema was changed in Build 153. Custom-request quote previews and reference uploads are separate from Amazon purchase matching. Continue keeping Amazon order/import data private and out of public `/data` files.

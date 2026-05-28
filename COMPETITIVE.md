@@ -1,3 +1,31 @@
+# Build 154 competitive update — accepted quotes now become reviewable business records
+
+Build 154 closes the biggest custom-work handoff gap. A customer can now move from request to private quote preview to acceptance, and that acceptance creates reviewed internal payment-request and order-draft records instead of stopping at intent. The workflow stays human and safe: no automatic charge, no automatic order publishing, and no public use of reference images without consent review.
+
+## What changed competitively
+
+1. **Accepted quotes are actionable.** Accepting a private quote now prepares review-needed payment-request and order-draft records. This gives Devil n Dove a more professional custom-order path without risky automation.
+2. **Quotes are easier to explain.** Quote drafts now support editable line items for material, labour, pickup/shipping, custom charges, and tax estimates. Customers see clearer quote detail before deciding.
+3. **Revisions are tracked.** Declines, shared previews, line-item changes, accepted-quote follow-through, and quote creation are logged in revision history. This helps custom work stay organized when a customer changes their mind.
+4. **Reference images get consent review.** Uploaded reference images are now mirrored into Media Consent Records as requested/internal-only records, protecting private gifts, memorial work, names, people, and customer-supplied inspiration.
+5. **Accountant export is more useful.** Accounting close now supports a downloadable ZIP with close CSV, evidence index CSV, and manifest JSON.
+6. **SEO can move from review to static pages.** Approved SEO overrides have a static JSON fallback and a deploy-time bake script so reviewed titles/meta/internal-link notes can become real HTML.
+7. **Proof browsing is better.** The gallery now filters by material, process, locality, and product type so shoppers can find examples closer to what they want made.
+
+## Current competitive position
+
+Devil n Dove is now moving beyond a simple storefront into a workshop-commerce system: product proof, custom intake, quote review, customer response, payment/order drafting, consent safety, accounting close, and SEO improvement all connect. That is stronger than relying only on Etsy, Facebook messages, or manual spreadsheets because the site can show the workshop story and preserve the business trail.
+
+## Remaining high-value competitive moves
+
+1. Convert reviewed payment-request drafts into real payment links only after admin approval.
+2. Convert reviewed order drafts into real order records with line items, tax, pickup/shipping, and deposit state.
+3. Add quote revision resend links so changed estimates can be shared as version 2, version 3, etc.
+4. Add marketplace-ready export copy for Etsy, Facebook Marketplace, Pinterest, and manual listings.
+5. Add product/story proof filters to the shop/product APIs, not only the gallery page.
+6. Add post-order review/photo/consent prompts to keep trust proof fresh.
+7. Add mobile-first workshop capture: photo, consent choice, image role, story note, and caption draft from one phone screen.
+
 # Build 153 competitive update — custom work feels more like a real service
 
 Build 153 makes custom work easier for customers without turning the site into an unsafe automatic billing machine. A request can now move from intake to quote draft, private preview link, customer accept/decline response, and reference-image upload while keeping the review-first workshop workflow intact.

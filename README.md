@@ -1,3 +1,7 @@
+# Build 154 summary
+
+Build 154 adds the next custom-work business layer: accepted quote previews create review-needed payment-request and order-draft records; quotes have editable line items and revision history; uploaded reference images create media consent review records; accounting close can download a ZIP; SEO overrides can be baked into static HTML; and the gallery has proof filters by material, process, locality, and product type.
+
 # Build 153 update
 
 Build 153 adds private custom quote preview links, customer accept/decline tracking, and post-submit reference-image uploads for custom requests. Apply `database_upgrade_current_pass.sql`, then test `/custom-request/`, `/admin/operations/` > Custom Requests, and `/custom-request/quote/?token=...` with a test quote link.

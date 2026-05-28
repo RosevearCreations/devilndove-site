@@ -1165,3 +1165,103 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP
 );
 
+-- Build 154 custom quote, consent, SEO bake, gallery filter, and accountant export extension
+ALTER TABLE custom_request_quote_drafts ADD COLUMN material_cost_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_request_quote_drafts ADD COLUMN labor_cost_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_request_quote_drafts ADD COLUMN pickup_shipping_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_request_quote_drafts ADD COLUMN tax_estimate_cents INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_request_quote_drafts ADD COLUMN quote_total_cents INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS custom_request_quote_line_items (
+  custom_request_quote_line_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  quote_draft_id INTEGER NOT NULL,
+  line_type TEXT NOT NULL DEFAULT 'custom',
+  line_label TEXT NOT NULL,
+  quantity REAL NOT NULL DEFAULT 1,
+  unit_amount_cents INTEGER NOT NULL DEFAULT 0,
+  line_amount_cents INTEGER NOT NULL DEFAULT 0,
+  is_taxable INTEGER NOT NULL DEFAULT 1,
+  line_status TEXT NOT NULL DEFAULT 'active',
+  sort_order INTEGER NOT NULL DEFAULT 100,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_quote_line_items_quote ON custom_request_quote_line_items(quote_draft_id, line_status, sort_order);
+
+CREATE TABLE IF NOT EXISTS custom_request_quote_revisions (
+  custom_request_quote_revision_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  quote_draft_id INTEGER,
+  revision_type TEXT NOT NULL DEFAULT 'changed',
+  revision_status TEXT NOT NULL DEFAULT 'open',
+  revision_notes TEXT,
+  snapshot_json TEXT DEFAULT '{}',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_custom_quote_revisions_request ON custom_request_quote_revisions(custom_request_id, created_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_payment_request_drafts (
+  custom_request_payment_request_draft_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  quote_draft_id INTEGER,
+  share_link_id INTEGER,
+  payment_request_key TEXT NOT NULL UNIQUE,
+  payment_request_status TEXT NOT NULL DEFAULT 'review_needed',
+  request_type TEXT NOT NULL DEFAULT 'deposit',
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  customer_name TEXT,
+  customer_email TEXT,
+  due_date TEXT,
+  review_notes TEXT,
+  source_payload_json TEXT DEFAULT '{}',
+  created_by_user_id INTEGER,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL,
+  FOREIGN KEY (share_link_id) REFERENCES custom_request_quote_share_links(custom_request_quote_share_link_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_custom_payment_request_drafts_request ON custom_request_payment_request_drafts(custom_request_id, payment_request_status, updated_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_order_drafts (
+  custom_request_order_draft_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  quote_draft_id INTEGER,
+  share_link_id INTEGER,
+  order_draft_key TEXT NOT NULL UNIQUE,
+  order_draft_status TEXT NOT NULL DEFAULT 'review_needed',
+  customer_name TEXT,
+  customer_email TEXT,
+  subtotal_cents INTEGER NOT NULL DEFAULT 0,
+  shipping_cents INTEGER NOT NULL DEFAULT 0,
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  total_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  fulfillment_notes TEXT,
+  source_payload_json TEXT DEFAULT '{}',
+  created_by_user_id INTEGER,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL,
+  FOREIGN KEY (share_link_id) REFERENCES custom_request_quote_share_links(custom_request_quote_share_link_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_custom_order_drafts_request ON custom_request_order_drafts(custom_request_id, order_draft_status, updated_at);
+
+-- Reference uploads now also create media_consent_records rows with source_type='custom_request_reference_upload', consent_status='requested', and consent_scope='internal_only'.
+-- Approved SEO can now be baked from data/site/seo-page-overrides.json using scripts/bake_approved_seo_overrides.py.
+-- Accounting close workflow now supports format=zip for a CSV bundle plus evidence-index.csv and manifest.json.

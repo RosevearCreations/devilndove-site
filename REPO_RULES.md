@@ -1,3 +1,7 @@
+# Build 154 repo rule reminder
+
+When updating custom request quote workflows, keep every payment/order action review-first. Customer acceptance may create drafts, but it must not charge, publish, or create a live order without an admin review step. Uploaded reference images must remain private/internal until Media Consent Records explicitly allow public or social use.
+
 # Build 153 repo rules update
 
 Private quote preview links must remain noindex and manual-share only. Customer quote acceptance records intent but must not auto-charge, auto-invoice, or auto-publish work. Uploaded reference images must remain private-review-only until media consent and public-use review are implemented.

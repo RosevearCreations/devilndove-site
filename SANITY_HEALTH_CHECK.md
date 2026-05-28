@@ -1,3 +1,15 @@
+# Build 154 sanity additions
+
+Check these after deploy:
+
+1. Submit a custom request, create a quote draft, add at least one quote line item, and confirm totals update.
+2. Create a private quote preview, accept it, then confirm payment-request and order-draft records appear in Operations.
+3. Decline a quote preview and confirm quote revision history records the decline note.
+4. Upload a custom request reference image and confirm a media consent record appears as requested/internal-only.
+5. Open Accounting Close Workflow and confirm CSV and ZIP downloads respond.
+6. Run `python scripts/bake_approved_seo_overrides.py` with a test override JSON in a branch only.
+7. Open `/gallery/` and test product type, material, process, and locality filters.
+
 # Build 153 sanity health check update
 
 Before deploy, run `python3 scripts/predeploy_sanity_check.py`. Then test: public custom request submit without files, public custom request submit with reference image upload, Operations > Custom Requests quote preview link creation, private quote preview GET, private quote accept, private quote decline on a separate test row, and fallback behavior when R2 upload bindings are missing.

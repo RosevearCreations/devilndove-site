@@ -1,3 +1,26 @@
+# Build 154 roadmap update
+
+Completed in this pass:
+
+- Connected accepted custom quote previews to review-needed payment-request and order-draft records.
+- Added editable custom quote line items for material, labour, pickup/shipping, custom charges, and taxable/non-taxable planning.
+- Added quote totals for material cost, labour cost, pickup/shipping estimate, tax estimate, and quote total.
+- Added quote revision history for created/shared/changed/declined/accepted follow-through events.
+- Added media-consent review records for uploaded custom-request reference images.
+- Added accountant export ZIP packaging with close-summary CSV, evidence-index CSV, and manifest JSON.
+- Added static SEO override JSON fallback and `scripts/bake_approved_seo_overrides.py` for deploy-time title/meta/internal-link baking.
+- Added public gallery/proof filters by material, process, locality, and product type.
+
+Next build priorities:
+
+1. Convert reviewed payment-request drafts into real payment-link records only after admin approval.
+2. Convert reviewed order drafts into real orders with quote line items, tax, pickup/shipping, deposit, and balance state.
+3. Add quote revision resend flow and versioned private preview links.
+4. Add marketplace export packs for Etsy, Facebook Marketplace, Pinterest, and manual listings.
+5. Extend proof filters into shop/product list APIs and product detail proof sections.
+6. Add post-fulfillment review/photo/consent prompts.
+7. Add a mobile workshop capture flow for image role, consent, story note, and social caption draft.
+
 # Build 153 completed — private quote previews, accept/decline tracking, and custom-request reference uploads
 
 Completed in Build 153:

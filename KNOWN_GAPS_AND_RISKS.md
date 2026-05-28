@@ -1,3 +1,33 @@
+# Build 154 gaps and risks update
+
+Closed or reduced in Build 154:
+
+- Accepted quote previews now create review-needed payment-request and order-draft records.
+- Quote drafts now support editable line items and calculated material/labour/pickup-shipping/tax/total estimates.
+- Quote revision history now records important quote changes and customer decisions.
+- Customer reference uploads now create media consent records as requested/internal-only.
+- Accounting close can now download a ZIP bundle containing close-summary CSV, evidence-index CSV, and manifest JSON.
+- Approved SEO overrides now have a static JSON fallback and a deploy-time bake script.
+- The gallery now has proof filters for material, process, locality, and product type.
+
+Still open:
+
+1. Payment-request drafts are not real payment links yet; they require admin review before sending.
+2. Order drafts are not real orders yet; conversion into `orders` and order line items is still needed.
+3. Quote revisions are tracked, but customer-facing revised quote resend/version links are not finished.
+4. The accountant ZIP includes generated text/CSV evidence indexes, but not binary receipt attachments yet.
+5. Static SEO baking depends on populating `data/site/seo-page-overrides.json` before deploy.
+6. Gallery filters depend on available metadata; older JSON/catalog rows may need material/process/locality cleanup.
+7. Media consent records are created for reference uploads, but admin must still review/approve public/social use manually.
+
+Deployment watch items:
+
+- Apply Build 154 schema changes before relying on quote line items, revisions, payment-request drafts, or order drafts.
+- Test custom quote acceptance with a private token and confirm Operations shows the payment/order drafts.
+- Test one reference image upload and confirm Media Consent Records shows it as requested/internal-only.
+- Run `python scripts/bake_approved_seo_overrides.py` only after reviewing static SEO override JSON.
+- Confirm `/gallery/` filters still work when live D1 falls back to JSON.
+
 # Build 153 known gaps and risks update
 
 Moved forward in Build 153:

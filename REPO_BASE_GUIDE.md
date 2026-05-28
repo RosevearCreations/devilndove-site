@@ -1,3 +1,15 @@
+# Build 154 repo note
+
+New important files/paths:
+
+- `scripts/bake_approved_seo_overrides.py`
+- `data/site/seo-page-overrides.json`
+- `functions/api/admin/custom-requests.js` expanded quote/payment/order draft workflow
+- `functions/api/custom-request-quote.js` accepted quote follow-through
+- `functions/api/custom-request-reference-upload.js` media consent mirroring
+- `functions/api/admin/accounting-close-workflow.js` ZIP export support
+- `/gallery/` filter UI
+
 # Build 153 repo guide update
 
 Key Build 153 files: `functions/api/admin/custom-requests.js`, `public/js/admin-custom-requests.js`, `functions/api/custom-request.js`, `functions/api/custom-request-reference-upload.js`, `functions/api/custom-request-quote.js`, `public/js/custom-request-intake.js`, `public/js/custom-request-quote-preview.js`, `custom-request/index.html`, `custom-request/quote/index.html`, `css/styles.css`, and active Markdown/schema files.
