@@ -20,12 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const product = rowsForRequest(data.product_drafts, id)[0];
     const reply = rowsForRequest(data.reply_templates, id)[0];
     const candidates = rowsForRequest(data.payment_candidates, id);
+    const preview = rowsForRequest(data.quote_preview_links, id)[0];
     const pills = [];
     if (quote) pills.push(`<span class="status-note small">Quote: ${esc(quote.quote_key)} / ${esc(quote.quote_status || 'draft')}</span>`);
     if (job) pills.push(`<span class="status-note small">Job: ${esc(job.job_key)} / ${esc(job.job_status || 'draft')}</span>`);
     if (product) pills.push(`<span class="status-note small">Product plan: ${esc(product.product_draft_key)} / ${esc(product.product_draft_status || 'draft')}</span>`);
     if (reply) pills.push(`<span class="status-note small">Reply template ready</span>`);
     candidates.forEach((candidate) => pills.push(`<span class="status-note small">${esc(candidate.candidate_type || 'payment')}: ${money(candidate.amount_cents)} / ${esc(candidate.candidate_status || 'draft')}</span>`));
+    if (preview) pills.push(`<span class="status-note small">Preview: ${esc(preview.share_status || 'active')}</span>`);
     return pills.join(' ');
   }
 
@@ -33,6 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const rows = Array.isArray(data.reply_templates) ? data.reply_templates : [];
     if (!rows.length) return '<p class="small">No reply templates yet. Use “Create reply template” on a request row.</p>';
     return rows.slice(0, 15).map((template) => `<article class="card custom-request-template-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><strong>${esc(template.subject || '')}</strong><div class="small">${esc(template.template_key || '')} • request #${esc(template.custom_request_id || '')}</div></div><button class="btn small" type="button" data-copy-reply-template="${esc(template.custom_request_reply_template_id || '')}">Copy body</button></div><textarea class="input" rows="8" readonly data-reply-template-body="${esc(template.custom_request_reply_template_id || '')}">${esc(template.body_text || '')}</textarea></article>`).join('');
+  }
+
+
+  function renderQuotePreviewLinks(data) {
+    const rows = Array.isArray(data.quote_preview_links) ? data.quote_preview_links : [];
+    if (!rows.length) return '<p class="small">No private quote preview links yet.</p>';
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Quote</th><th>Customer</th><th>Status</th><th>Private link</th><th>Response</th></tr></thead><tbody>${rows.slice(0, 25).map((row) => {
+      const url = `/custom-request/quote/?token=${encodeURIComponent(row.share_token || '')}`;
+      return `<tr><td><strong>${esc(row.title || '')}</strong><br><span class="small">Request #${esc(row.custom_request_id || '')} • ${money(row.quote_total_cents)}</span></td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${esc(row.share_status || '')}<br><span class="small">Expires ${esc(row.expires_at || '—')}</span></td><td><a href="${esc(url)}" target="_blank" rel="noopener">Open preview</a><br><button class="btn small" type="button" data-copy-preview-link="${esc(url)}">Copy link</button></td><td class="small">${row.accepted_at ? `Accepted ${esc(row.accepted_at)}` : row.declined_at ? `Declined ${esc(row.declined_at)}` : 'No response yet.'}<br>${esc(row.customer_response_note || '')}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
   }
 
   function renderPaymentCandidates(data) {
@@ -55,10 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <td><strong>${esc(row.request_type || '')}</strong><br><span class="small">${esc(row.product_interest || '')}</span><br><span class="small">Budget ${money(row.budget_cents)} • Deadline ${esc(row.deadline_date || '—')}</span><div style="margin-top:6px">${renderDraftSummary(row, data)}</div></td>
           <td>${esc(row.name || '')}<br><a href="mailto:${esc(row.email || '')}">${esc(row.email || '')}</a><br><span class="small">${esc(row.phone || '')}</span><div style="margin-top:6px">${historyBadge(data.customer_history || [], row.email)}</div></td>
           <td><div class="small" style="max-width:420px;white-space:pre-wrap">${esc(row.message || '')}</div>${attachmentLinks(row.attachment_urls_json)}</td>
-          <td><select data-custom-request-status="${esc(row.custom_request_id)}"><option value="new" ${row.status === 'new' ? 'selected' : ''}>New</option><option value="reviewing" ${row.status === 'reviewing' ? 'selected' : ''}>Reviewing</option><option value="quote_needed" ${row.status === 'quote_needed' ? 'selected' : ''}>Quote needed</option><option value="quoted" ${row.status === 'quoted' ? 'selected' : ''}>Quoted</option><option value="accepted" ${row.status === 'accepted' ? 'selected' : ''}>Accepted</option><option value="declined" ${row.status === 'declined' ? 'selected' : ''}>Declined</option><option value="archived" ${row.status === 'archived' ? 'selected' : ''}>Archived</option></select><textarea data-custom-request-notes="${esc(row.custom_request_id)}" rows="3" placeholder="Admin notes">${esc(row.admin_notes || '')}</textarea><div class="custom-request-actions"><button class="btn small" data-custom-request-save="${esc(row.custom_request_id)}">Save review</button><button class="btn small" data-custom-request-action="create_quote_draft" data-custom-request-id="${esc(row.custom_request_id)}">Quote draft</button><button class="btn small" data-custom-request-action="create_reply_template" data-custom-request-id="${esc(row.custom_request_id)}">Reply template</button><button class="btn small" data-custom-request-action="create_deposit_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Deposit candidate</button><button class="btn small" data-custom-request-action="create_job_draft" data-custom-request-id="${esc(row.custom_request_id)}">Job draft</button><button class="btn small" data-custom-request-action="create_invoice_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Invoice candidate</button><button class="btn small" data-custom-request-action="create_product_draft" data-custom-request-id="${esc(row.custom_request_id)}">Product plan</button></div></td>
+          <td><select data-custom-request-status="${esc(row.custom_request_id)}"><option value="new" ${row.status === 'new' ? 'selected' : ''}>New</option><option value="reviewing" ${row.status === 'reviewing' ? 'selected' : ''}>Reviewing</option><option value="quote_needed" ${row.status === 'quote_needed' ? 'selected' : ''}>Quote needed</option><option value="quoted" ${row.status === 'quoted' ? 'selected' : ''}>Quoted</option><option value="accepted" ${row.status === 'accepted' ? 'selected' : ''}>Accepted</option><option value="declined" ${row.status === 'declined' ? 'selected' : ''}>Declined</option><option value="archived" ${row.status === 'archived' ? 'selected' : ''}>Archived</option></select><textarea data-custom-request-notes="${esc(row.custom_request_id)}" rows="3" placeholder="Admin notes">${esc(row.admin_notes || '')}</textarea><div class="custom-request-actions"><button class="btn small" data-custom-request-save="${esc(row.custom_request_id)}">Save review</button><button class="btn small" data-custom-request-action="create_quote_draft" data-custom-request-id="${esc(row.custom_request_id)}">Quote draft</button><button class="btn small" data-custom-request-action="create_reply_template" data-custom-request-id="${esc(row.custom_request_id)}">Reply template</button><button class="btn small" data-custom-request-action="create_deposit_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Deposit candidate</button><button class="btn small" data-custom-request-action="create_job_draft" data-custom-request-id="${esc(row.custom_request_id)}">Job draft</button><button class="btn small" data-custom-request-action="create_invoice_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Invoice candidate</button><button class="btn small" data-custom-request-action="create_quote_preview_link" data-custom-request-id="${esc(row.custom_request_id)}">Quote preview link</button><button class="btn small" data-custom-request-action="create_product_draft" data-custom-request-id="${esc(row.custom_request_id)}">Product plan</button></div></td>
         </tr>`).join('') || '<tr><td colspan="5">No custom requests yet.</td></tr>'}
       </tbody></table></div>
       <details style="margin-top:12px" open><summary>Manual customer reply templates</summary>${renderReplyTemplates(data)}</details>
+      <details style="margin-top:12px" open><summary>Private quote preview links</summary>${renderQuotePreviewLinks(data)}</details>
       <details style="margin-top:12px" open><summary>Deposit and invoice candidates</summary>${renderPaymentCandidates(data)}</details>
       <details style="margin-top:12px"><summary>Recent conversion events</summary><div class="small">${(data.conversion_events || []).slice(0, 30).map((event) => `${esc(event.created_at || '')} • request #${esc(event.custom_request_id || '')} • ${esc(event.conversion_type || '')} • ${esc(event.target_key || '')}`).join('<br>') || 'No conversion events yet.'}</div></details>`;
   }
@@ -87,6 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saveButton) save(saveButton.getAttribute('data-custom-request-save'));
     const actionButton = event.target.closest('[data-custom-request-action]');
     if (actionButton) runAction(actionButton.getAttribute('data-custom-request-id'), actionButton.getAttribute('data-custom-request-action'));
+    const previewCopyButton = event.target.closest('[data-copy-preview-link]');
+    if (previewCopyButton) {
+      const path = previewCopyButton.getAttribute('data-copy-preview-link') || '';
+      const link = `${window.location.origin}${path.startsWith('/') ? path : `/${path}`}`;
+      try { await navigator.clipboard.writeText(link); setMsg('Quote preview link copied.'); } catch { setMsg(link, false); }
+    }
     const copyButton = event.target.closest('[data-copy-reply-template]');
     if (copyButton) {
       const id = copyButton.getAttribute('data-copy-reply-template');
