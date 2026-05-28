@@ -1,3 +1,7 @@
+# Build 153 repo guide update
+
+Key Build 153 files: `functions/api/admin/custom-requests.js`, `public/js/admin-custom-requests.js`, `functions/api/custom-request.js`, `functions/api/custom-request-reference-upload.js`, `functions/api/custom-request-quote.js`, `public/js/custom-request-intake.js`, `public/js/custom-request-quote-preview.js`, `custom-request/index.html`, `custom-request/quote/index.html`, `css/styles.css`, and active Markdown/schema files.
+
 # Build 152 repo base note
 
 Custom request follow-up now lives in `/functions/api/admin/custom-requests.js` and `/public/js/admin-custom-requests.js`. Keep generated reply templates manual/review-first; do not auto-send customer email or auto-create a payable invoice until the future payment-request bridge is complete. HST/GST reminders are queued through `/functions/api/admin/accounting-close-workflow.js` and depend on notification outbox dispatch setup.

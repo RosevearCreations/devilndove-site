@@ -1,3 +1,33 @@
+# Build 153 known gaps and risks update
+
+Moved forward in Build 153:
+
+- Private quote preview links are now generated from Custom Requests.
+- Customers can accept or decline a quote preview without being charged automatically.
+- Quote responses are tracked in D1 and recorded in conversion history.
+- Public custom requests can now upload reference images after the written request is saved.
+- Reference-image uploads use a request-bound token, image-only validation, an 8 MB per-file limit, and a 5-file cap.
+- If R2 upload is not configured, the written request still succeeds and the customer receives a clear fallback message.
+
+Still outstanding:
+
+1. Accepted quote previews do not yet create real payment links, invoices, or order records.
+2. Quote drafts do not yet have editable line items, taxes, pickup/shipping, material cost, labour time, or revision history.
+3. Uploaded custom-request reference images are still stored as private-review references; they do not yet create full media-consent review records.
+4. Deposit/invoice candidates still need a reviewed bridge into the real payment/order system.
+5. Accountant export packaging is still CSV/manifest-focused; ZIP bundle packaging is still outstanding.
+6. Approved SEO overrides still need to be baked into static HTML during deployment.
+7. Public proof/gallery filtering by material, process, locality, and product type is still outstanding.
+8. Marketplace-ready export copy/checklists are still outstanding.
+9. HST/GST reminders are queued, but final reminder review/dispatch controls should be strengthened.
+10. Live production testing still needs to confirm R2 public base URL and bucket bindings for custom-request uploads.
+
+Risk notes:
+
+- Keep quote preview links private and manual-share only. They are token-protected and noindexed, but anyone with the link can view the quote.
+- Do not treat customer acceptance as paid work. Build 153 records intent only; a reviewed payment request or invoice should still happen separately.
+- Reference images may contain private people, gifts, names, or memorial content. They must stay private-review-only until media consent/public-use review is complete.
+
 # Build 152 known gaps and risks update
 
 Resolved or reduced in Build 152:

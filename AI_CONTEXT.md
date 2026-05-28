@@ -1,3 +1,7 @@
+# Build 153 AI context update
+
+The current build adds private custom quote preview links and post-submit custom-request reference image uploads. The important new assets are `/api/custom-request-quote`, `/custom-request/quote/`, `/public/js/custom-request-quote-preview.js`, `/api/custom-request-reference-upload`, and updated Operations > Custom Requests actions. Quote acceptance/decline is intent tracking only; it does not charge the customer or create a real order yet. Reference images are private-review-only until media consent/public-use review is added.
+
 # Build 152 AI context update
 
 The latest build pass turns custom requests into a more complete quote/payment workflow and adds HST/GST reminder support. Important implementation notes:

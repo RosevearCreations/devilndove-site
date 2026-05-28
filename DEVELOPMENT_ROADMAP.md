@@ -1,3 +1,37 @@
+# Build 153 completed — private quote previews, accept/decline tracking, and custom-request reference uploads
+
+Completed in Build 153:
+
+1. Added token-protected private quote preview links for custom request quote drafts.
+2. Added public `/custom-request/quote/` preview page with `noindex,nofollow` so private quote links are not search-index targets.
+3. Added public `/api/custom-request-quote` GET endpoint for loading private quote previews by token.
+4. Added public `/api/custom-request-quote` POST endpoint for customer accept/decline response tracking.
+5. Quote acceptance/decline now updates the custom request status, quote draft status, quote share link status, and conversion event history.
+6. Added Operations > Custom Requests button for creating private quote preview links after quote/deposit/invoice planning.
+7. Added Operations panel for viewing/copying private quote preview links and seeing accepted/declined responses.
+8. Added post-submit reference image upload support for custom request forms.
+9. Added `/api/custom-request-reference-upload`, using request-bound upload tokens, image-only validation, 8 MB limit, and 5-file limit.
+10. Reference uploads are stored as private-review-only media until admin review/consent clears public use.
+11. Public custom request form now lets customers choose reference images while preserving pasted reference URL support.
+12. Upload failures do not destroy the written request; the form reports the upload issue and keeps the intake safe.
+13. Added D1 schema support for `custom_request_quote_share_links` and `custom_request_reference_uploads`.
+14. Updated active schema SQL files and all active Markdown handoff docs.
+15. Added CSS/mobile polish for quote previews, reference uploads, and the Custom Requests action cluster.
+16. Updated predeploy sanity checks to cover Build 153 assets.
+
+Next strongest build pass:
+
+1. Connect accepted quote previews to a reviewed payment-request/order draft bridge.
+2. Add admin-editable quote line items, tax estimate, pickup/shipping estimate, and material/labour estimate fields.
+3. Add customer quote revision tracking so declined/not-now responses can become revised quote drafts.
+4. Add admin media-consent review rows for uploaded custom-request reference images.
+5. Add marketplace-ready exports for accepted custom product plans.
+6. Add accountant export ZIP packaging with CSV bundle and evidence index.
+7. Bake approved SEO overrides into static HTML during deployment.
+8. Add proof/gallery filters by material, process, locality, and product type.
+9. Add follow-up notification queue entries after quote acceptance, deposit candidate creation, and request inactivity.
+10. Add phone-first workshop capture: photo, crop, role, consent, story note, caption draft.
+
 # Build 152 completed — custom request reply templates, deposit/invoice candidates, and HST/GST reminder queue
 
 Completed in Build 152:

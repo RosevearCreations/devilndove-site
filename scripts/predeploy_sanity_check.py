@@ -368,6 +368,11 @@ def check_build151_assets(root: Path):
         ('build152_custom_request_followup_js', 'public/js/admin-custom-requests.js', ['Reply template', 'Deposit candidate', 'Invoice candidate', 'data-copy-reply-template'], custom_js),
         ('build152_hst_reminder_queue', 'functions/api/admin/accounting-close-workflow.js', ['queue_hst_reminder', 'hst_gst_reminder', 'queueNotification'], accounting_api),
         ('build152_schema_marker', 'database_upgrade_current_pass.sql', ['build_152_custom_request_reply_payment_candidates_hst_reminders', 'custom_request_reply_templates', 'custom_request_payment_candidates'], schema),
+        ('build153_custom_quote_preview_api', 'functions/api/admin/custom-requests.js', ['custom_request_quote_share_links', 'create_quote_preview_link', 'quote_preview_links'], custom_api),
+        ('build153_custom_quote_preview_js', 'public/js/admin-custom-requests.js', ['Quote preview link', 'data-copy-preview-link', 'renderQuotePreviewLinks'], custom_js),
+        ('build153_public_quote_preview_endpoint', 'functions/api/custom-request-quote.js', ['custom_request_quote_share_links', 'quote_preview_accepted', 'quote_preview_declined'], read_text(root / 'functions' / 'api' / 'custom-request-quote.js') if (root / 'functions' / 'api' / 'custom-request-quote.js').exists() else ''),
+        ('build153_reference_upload_endpoint', 'functions/api/custom-request-reference-upload.js', ['custom_request_reference_uploads', 'reference_upload_count', 'private_review_only'], read_text(root / 'functions' / 'api' / 'custom-request-reference-upload.js') if (root / 'functions' / 'api' / 'custom-request-reference-upload.js').exists() else ''),
+        ('build153_schema_marker', 'database_upgrade_current_pass.sql', ['build_153_custom_quote_preview_reference_uploads', 'custom_request_quote_share_links', 'custom_request_reference_uploads'], schema),
     ]
     for issue_type, path, tokens, text in checks:
         missing = [token for token in tokens if token not in text]
@@ -430,3 +435,5 @@ if __name__ == '__main__':
 # Build 151 note: predeploy checks include Custom Request conversion actions, UTM attribution joins, and Accounting Close CSV export.
 
 # Build 152 note: predeploy checks include Custom Request reply templates, payment candidates, and HST/GST reminder queue support.
+
+# Build 153 note: predeploy checks include private custom quote previews, customer accept/decline tracking, and reference-image uploads.

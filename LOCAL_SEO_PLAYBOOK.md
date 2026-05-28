@@ -1,3 +1,7 @@
+# Build 153 local SEO note
+
+The custom request flow now supports a stronger local-service path: Southern Ontario visitors can submit custom gift, engraving, jewelry, sublimation, and workshop requests, upload private reference images, and receive a private quote preview. Continue using customer-search wording in titles/headings while keeping one clear H1 per public page and avoiding indexing private quote-token pages.
+
 # Build 152 local SEO update
 
 Build 152 supports local search indirectly by making custom-gift follow-up faster and more measurable. Custom requests from Southern Ontario landing pages can now become quote drafts, manual reply templates, and deposit/invoice candidates without losing the original request or UTM campaign source.

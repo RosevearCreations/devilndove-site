@@ -1681,3 +1681,64 @@ INSERT OR IGNORE INTO schema_migration_ledger (
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
+
+-- =========================================================
+-- BUILD 153 — PRIVATE QUOTE PREVIEWS + CUSTOM REQUEST REFERENCE UPLOADS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS custom_request_quote_share_links (
+  custom_request_quote_share_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  quote_draft_id INTEGER,
+  share_token TEXT NOT NULL UNIQUE,
+  share_status TEXT NOT NULL DEFAULT 'active',
+  customer_name TEXT,
+  customer_email TEXT,
+  title TEXT,
+  quote_total_cents INTEGER NOT NULL DEFAULT 0,
+  scope_summary TEXT,
+  payment_summary_json TEXT DEFAULT '{}',
+  expires_at TEXT,
+  accepted_at TEXT,
+  declined_at TEXT,
+  customer_response_note TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_request ON custom_request_quote_share_links(custom_request_id, share_status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_token ON custom_request_quote_share_links(share_token, share_status);
+
+CREATE TABLE IF NOT EXISTS custom_request_reference_uploads (
+  custom_request_reference_upload_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  request_key TEXT NOT NULL,
+  public_url TEXT,
+  object_key TEXT,
+  original_filename TEXT,
+  mime_type TEXT,
+  file_size_bytes INTEGER NOT NULL DEFAULT 0,
+  reference_use_status TEXT NOT NULL DEFAULT 'private_review_only',
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_request_reference_uploads_request ON custom_request_reference_uploads(custom_request_id, created_at);
+
+-- Runtime APIs self-heal these optional request upload columns on older D1 installs:
+-- custom_requests.upload_token
+-- custom_requests.reference_upload_count
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key, file_name, status, destructive, notes, created_at, updated_at
+) VALUES (
+  'build_153_custom_quote_preview_reference_uploads',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  'Build 153 adds private custom quote preview links, customer accept/decline tracking, and request-bound private-review reference image uploads for custom requests.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+);
+

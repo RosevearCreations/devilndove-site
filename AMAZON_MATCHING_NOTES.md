@@ -1,3 +1,7 @@
+# Build 153 note
+
+No Amazon matching schema was changed in Build 153. Custom-request quote previews and reference uploads are separate from Amazon purchase matching. Continue keeping Amazon order/import data private and out of public `/data` files.
+
 # Build 152 Amazon/import privacy note
 
 Build 152 does not change Amazon matching logic. The same rule still applies: Amazon order/cost data stays private in D1 staging/admin workflows and must not be placed in public JSON, public Markdown, marketplace exports, or storefront files. Custom request reply templates, deposit candidates, and invoice candidates should use reviewed product/work pricing only, not raw private Amazon order records.

@@ -1,3 +1,7 @@
+# Build 153 schema reference update
+
+Build 153 adds `custom_request_quote_share_links` for private quote preview tokens, quote status, customer accept/decline timestamps, and response notes. It also adds `custom_request_reference_uploads` for request-bound R2 reference image uploads. Runtime APIs self-heal `custom_requests.upload_token` and `custom_requests.reference_upload_count` for older D1 installations.
+
 # Build 152 schema reference update
 
 Build 152 extends the custom request bridge from intake/drafts into practical follow-up and payment planning.

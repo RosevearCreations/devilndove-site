@@ -1,3 +1,11 @@
+# New Chat Status — Devil n Dove Build 153
+
+## Current status — Build 153
+
+Build 153 starts from the latest uploaded Build 149/152-era baseline and adds a practical customer-facing custom quote layer. Operations > Custom Requests can now create private quote preview links from request quote drafts. Customers can open `/custom-request/quote/?token=...`, review the planning quote, and accept or decline it. Acceptance/decline updates the quote share link, custom request status, quote draft status, and conversion event history. The public Custom Request form also supports optional reference image uploads after the written request is saved. Uploads are token-bound to the submitted request, image-only, limited to 8 MB each and 5 files per request, and remain private-review-only until later media consent/public-use review.
+
+Deploy checks: apply or record `database_upgrade_current_pass.sql`, open `/custom-request/` and submit a harmless test request with and without reference images, then open `/admin/operations/` > Custom Requests, create a quote draft/deposit candidate/invoice candidate/quote preview link, copy the preview link, open the private quote preview, and test accept/decline using a test row. If R2 is not configured, confirm the written request still saves and the upload fallback message appears. Run `python3 scripts/predeploy_sanity_check.py` before packaging/deploy.
+
 # Build 152 new chat status
 
 Latest completed build: Build 152.

@@ -1,3 +1,7 @@
+# Build 153 repo rules update
+
+Private quote preview links must remain noindex and manual-share only. Customer quote acceptance records intent but must not auto-charge, auto-invoice, or auto-publish work. Uploaded reference images must remain private-review-only until media consent and public-use review are implemented.
+
 # Build 152 repo rule additions
 
 - Custom request reply templates are internal drafts until a human reviews/copies/sends them. Do not auto-send them in a future pass without an explicit approval gate.

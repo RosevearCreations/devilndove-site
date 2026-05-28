@@ -1,3 +1,7 @@
+# Build 153 update
+
+Build 153 adds private custom quote preview links, customer accept/decline tracking, and post-submit reference-image uploads for custom requests. Apply `database_upgrade_current_pass.sql`, then test `/custom-request/`, `/admin/operations/` > Custom Requests, and `/custom-request/quote/?token=...` with a test quote link.
+
 # Build 152 update
 
 Build 152 expands the custom request workflow and accounting close reminders. Operations > Custom Requests can now create manual reply templates, deposit candidates, and invoice candidates from request/quote drafts. Accounting > Close Workflow can queue an HST/GST reminder into the notification outbox. Apply or record `database_upgrade_current_pass.sql` before testing these features against live D1.

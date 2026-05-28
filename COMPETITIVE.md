@@ -1,3 +1,30 @@
+# Build 153 competitive update — custom work feels more like a real service
+
+Build 153 makes custom work easier for customers without turning the site into an unsafe automatic billing machine. A request can now move from intake to quote draft, private preview link, customer accept/decline response, and reference-image upload while keeping the review-first workshop workflow intact.
+
+## What changed competitively
+
+1. **Customers can review a quote privately.** A token-protected quote page gives the customer a clean place to see scope notes, planning total, deposit/invoice planning, and next-step wording.
+2. **Acceptance is tracked without accidental charging.** Customers can accept or decline the planning quote, but no payment is taken automatically. That keeps Devil n Dove safer than a rushed ecommerce automation while still feeling professional.
+3. **Reference images are easier.** Customers no longer need to paste public image links only. They can upload reference images after the written request is saved, and those uploads remain private review references.
+4. **The admin has a clearer sales path.** Operations can create quote drafts, reply templates, deposit candidates, invoice candidates, product plans, and now private preview links from one request row.
+5. **Local custom-gift positioning is stronger.** This makes the site feel more like a Southern Ontario custom workshop, not just a product catalog or a marketplace message inbox.
+
+## Competitive priority now
+
+The next advantage is to make accepted quote previews become reviewed payment/order drafts. Keep the sequence human: request -> quote -> private acceptance -> reviewed deposit/payment request -> job/product work -> proof/story/review. That is more trustworthy for handmade, sentimental, engraved, memorial, or personalized items.
+
+## Next competitive moves
+
+1. Add editable quote line items and revision history.
+2. Bridge accepted quote previews into reviewed payment requests or order drafts.
+3. Add customer-facing quote revision/resubmit flow.
+4. Add media-consent review records for uploaded reference images.
+5. Add proof filters by material, process, locality, and product type.
+6. Add marketplace-ready copy exports for accepted product plans.
+7. Bake reviewed Search Console title/meta/internal-link changes into static HTML.
+8. Package accountant exports into a ZIP with CSV files and evidence index.
+
 # Build 152 competitive update — custom work now has follow-up muscle
 
 Build 152 moves Devil n Dove closer to a serious custom-work workflow without making it risky or over-automated. A public request can now become a quote draft, a customer-ready reply template, a deposit candidate, an invoice candidate, a job draft, and a product draft plan while keeping the original request and campaign source intact.

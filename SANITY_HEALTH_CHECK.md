@@ -1,3 +1,7 @@
+# Build 153 sanity health check update
+
+Before deploy, run `python3 scripts/predeploy_sanity_check.py`. Then test: public custom request submit without files, public custom request submit with reference image upload, Operations > Custom Requests quote preview link creation, private quote preview GET, private quote accept, private quote decline on a separate test row, and fallback behavior when R2 upload bindings are missing.
+
 # Build 152 sanity additions
 
 After deployment:
