@@ -784,3 +784,19 @@ body.nav-mobile-open{overflow:hidden}
 .custom-request-template-card textarea{width:100%;min-height:180px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.45}
 .custom-request-actions{align-items:center}
 @media (max-width:720px){.custom-request-template-card textarea{min-height:240px}.custom-request-actions .btn.small{font-size:.92rem;padding:9px 10px}}
+
+
+/* Build 153 — custom request reference uploads and quote previews */
+.custom-request-actions { align-items: stretch; }
+.custom-request-actions .btn { min-height: 36px; }
+.quote-preview-shell { border: 1px solid rgba(255,255,255,.08); }
+.quote-preview-card { display: grid; gap: 14px; }
+.quote-preview-total { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px; border:1px solid rgba(255,255,255,.12); border-radius:16px; background:rgba(255,255,255,.04); }
+.quote-preview-total strong { font-size:1.5rem; }
+.quote-preview-scope { white-space:pre-wrap; overflow:auto; max-height:320px; padding:12px; border-radius:14px; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.1); }
+.quote-preview-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.custom-request-template-card textarea { min-height: 170px; }
+@media (max-width: 720px) {
+  .quote-preview-total { align-items:flex-start; flex-direction:column; }
+  .quote-preview-actions .btn, .custom-request-actions .btn { width:100%; justify-content:center; }
+}
