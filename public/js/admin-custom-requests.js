@@ -1,5 +1,5 @@
 // File: /public/js/admin-custom-requests.js
-// Brief description: Operations admin panel for reviewing custom requests and converting them into quote/job/product/payment planning records.
+// Brief description: Operations admin panel for reviewing custom requests and converting them into quote/job/product/payment planning records with editable line items, revision history, consent review, and accepted-quote follow-through.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('customRequestsAdminMount');
@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const reply = rowsForRequest(data.reply_templates, id)[0];
     const candidates = rowsForRequest(data.payment_candidates, id);
     const preview = rowsForRequest(data.quote_preview_links, id)[0];
+    const payReq = rowsForRequest(data.payment_request_drafts, id)[0];
+    const orderDraft = rowsForRequest(data.order_drafts, id)[0];
+    const revisions = rowsForRequest(data.quote_revisions, id);
     const pills = [];
     if (quote) pills.push(`<span class="status-note small">Quote: ${esc(quote.quote_key)} / ${esc(quote.quote_status || 'draft')}</span>`);
     if (job) pills.push(`<span class="status-note small">Job: ${esc(job.job_key)} / ${esc(job.job_status || 'draft')}</span>`);
@@ -28,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (reply) pills.push(`<span class="status-note small">Reply template ready</span>`);
     candidates.forEach((candidate) => pills.push(`<span class="status-note small">${esc(candidate.candidate_type || 'payment')}: ${money(candidate.amount_cents)} / ${esc(candidate.candidate_status || 'draft')}</span>`));
     if (preview) pills.push(`<span class="status-note small">Preview: ${esc(preview.share_status || 'active')}</span>`);
+    if (payReq) pills.push(`<span class="status-note small">Payment request draft: ${money(payReq.amount_cents)}</span>`);
+    if (orderDraft) pills.push(`<span class="status-note small">Order draft: ${money(orderDraft.total_cents)}</span>`);
+    if (revisions.length) pills.push(`<span class="status-note small">Revisions: ${esc(revisions.length)}</span>`);
     return pills.join(' ');
   }
 
@@ -53,6 +59,40 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<div class="admin-table-wrap"><table><thead><tr><th>Type</th><th>Amount</th><th>Customer</th><th>Status</th><th>Description</th></tr></thead><tbody>${rows.slice(0, 25).map((row) => `<tr><td>${esc(row.candidate_type || '')}<br><span class="small">${esc(row.candidate_key || '')}</span></td><td>${money(row.amount_cents)}</td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${esc(row.candidate_status || '')}</td><td class="small">${esc(row.description || '')}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
+
+
+  function renderQuoteLineItems(data) {
+    const quotes = Array.isArray(data.quote_drafts) ? data.quote_drafts : [];
+    if (!quotes.length) return '<p class="small">No quote drafts yet. Create a quote draft from a custom request first.</p>';
+    const lines = Array.isArray(data.quote_line_items) ? data.quote_line_items : [];
+    return quotes.slice(0, 20).map((quote) => {
+      const quoteLines = lines.filter((line) => Number(line.quote_draft_id || 0) === Number(quote.custom_request_quote_draft_id || 0));
+      return `<article class="card custom-request-template-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><strong>${esc(quote.title || quote.quote_key || 'Quote')}</strong><div class="small">${esc(quote.quote_key || '')} • request #${esc(quote.custom_request_id || '')} • total ${money(quote.quote_total_cents || quote.estimated_budget_cents)}</div></div><button class="btn small" type="button" data-custom-request-action="create_accepted_payment_order_drafts" data-custom-request-id="${esc(quote.custom_request_id || '')}">Create accepted follow-through drafts</button></div>
+      <div class="admin-table-wrap" style="margin-top:8px"><table><thead><tr><th>Type</th><th>Label</th><th>Qty</th><th>Unit</th><th>Total</th><th>Taxable</th></tr></thead><tbody>${quoteLines.map((line) => `<tr><td>${esc(line.line_type || '')}</td><td>${esc(line.line_label || '')}</td><td>${esc(line.quantity || 1)}</td><td>${money(line.unit_amount_cents)}</td><td>${money(line.line_amount_cents)}</td><td>${Number(line.is_taxable || 0) === 1 ? 'yes' : 'no'}</td></tr>`).join('') || '<tr><td colspan="6">No line items yet.</td></tr>'}</tbody></table></div>
+      <form class="admin-form-grid quote-line-item-form" data-quote-line-item-form="${esc(quote.custom_request_id || '')}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:8px"><select name="line_type"><option value="material">material</option><option value="labour">labour</option><option value="pickup_shipping">pickup/shipping</option><option value="custom">custom</option><option value="discount">discount</option></select><input name="line_label" placeholder="Line label"><input name="quantity" type="number" step="0.01" value="1" placeholder="Qty"><input name="unit_amount_cents" type="number" placeholder="Unit cents"><select name="is_taxable"><option value="1">taxable</option><option value="0">not taxable</option></select><input name="sort_order" type="number" value="100" placeholder="Sort"><button class="btn small primary" type="button" data-save-quote-line="${esc(quote.custom_request_id || '')}">Add line</button></form></article>`;
+    }).join('');
+  }
+
+  function renderAcceptedDrafts(data) {
+    const payment = Array.isArray(data.payment_request_drafts) ? data.payment_request_drafts : [];
+    const orders = Array.isArray(data.order_drafts) ? data.order_drafts : [];
+    if (!payment.length && !orders.length) return '<p class="small">No accepted quote follow-through drafts yet. They are created when a customer accepts a preview, or manually from the line-item section.</p>';
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Kind</th><th>Key</th><th>Customer</th><th>Status</th><th>Amount</th><th>Notes</th></tr></thead><tbody>${payment.map((row) => `<tr><td>Payment request</td><td>${esc(row.payment_request_key || '')}</td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${esc(row.payment_request_status || '')}</td><td>${money(row.amount_cents)}</td><td class="small">${esc(row.review_notes || '')}</td></tr>`).join('')}${orders.map((row) => `<tr><td>Order draft</td><td>${esc(row.order_draft_key || '')}</td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${esc(row.order_draft_status || '')}</td><td>${money(row.total_cents)}</td><td class="small">${esc(row.fulfillment_notes || '')}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function renderQuoteRevisions(data) {
+    const rows = Array.isArray(data.quote_revisions) ? data.quote_revisions : [];
+    if (!rows.length) return '<p class="small">No quote revision history yet.</p>';
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Request</th><th>Type</th><th>Notes</th><th>When</th></tr></thead><tbody>${rows.slice(0, 40).map((row) => `<tr><td>#${esc(row.custom_request_id || '')}</td><td>${esc(row.revision_type || '')}</td><td class="small">${esc(row.revision_notes || '')}</td><td class="small">${esc(row.created_at || '')}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function renderReferenceUploads(data) {
+    const rows = Array.isArray(data.reference_uploads) ? data.reference_uploads : [];
+    if (!rows.length) return '<p class="small">No customer reference uploads yet.</p>';
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Request</th><th>File</th><th>Status</th><th>Review</th></tr></thead><tbody>${rows.slice(0, 40).map((row) => `<tr><td>#${esc(row.custom_request_id || '')}<br><span class="small">${esc(row.request_key || '')}</span></td><td><a href="${esc(row.public_url || '#')}" target="_blank" rel="noopener">${esc(row.original_filename || 'reference')}</a><br><span class="small">${esc(row.mime_type || '')} • ${esc(row.file_size_bytes || 0)} bytes</span></td><td>${esc(row.reference_use_status || 'private_review_only')}</td><td class="small">Consent record is created as requested/internal-only. Approve public/social use in Media Consent Records only after review.</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+
   function render(data = {}) {
     const requests = Array.isArray(data.requests) ? data.requests : [];
     const summary = data.summary || {};
@@ -67,12 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
           <td><strong>${esc(row.request_type || '')}</strong><br><span class="small">${esc(row.product_interest || '')}</span><br><span class="small">Budget ${money(row.budget_cents)} • Deadline ${esc(row.deadline_date || '—')}</span><div style="margin-top:6px">${renderDraftSummary(row, data)}</div></td>
           <td>${esc(row.name || '')}<br><a href="mailto:${esc(row.email || '')}">${esc(row.email || '')}</a><br><span class="small">${esc(row.phone || '')}</span><div style="margin-top:6px">${historyBadge(data.customer_history || [], row.email)}</div></td>
           <td><div class="small" style="max-width:420px;white-space:pre-wrap">${esc(row.message || '')}</div>${attachmentLinks(row.attachment_urls_json)}</td>
-          <td><select data-custom-request-status="${esc(row.custom_request_id)}"><option value="new" ${row.status === 'new' ? 'selected' : ''}>New</option><option value="reviewing" ${row.status === 'reviewing' ? 'selected' : ''}>Reviewing</option><option value="quote_needed" ${row.status === 'quote_needed' ? 'selected' : ''}>Quote needed</option><option value="quoted" ${row.status === 'quoted' ? 'selected' : ''}>Quoted</option><option value="accepted" ${row.status === 'accepted' ? 'selected' : ''}>Accepted</option><option value="declined" ${row.status === 'declined' ? 'selected' : ''}>Declined</option><option value="archived" ${row.status === 'archived' ? 'selected' : ''}>Archived</option></select><textarea data-custom-request-notes="${esc(row.custom_request_id)}" rows="3" placeholder="Admin notes">${esc(row.admin_notes || '')}</textarea><div class="custom-request-actions"><button class="btn small" data-custom-request-save="${esc(row.custom_request_id)}">Save review</button><button class="btn small" data-custom-request-action="create_quote_draft" data-custom-request-id="${esc(row.custom_request_id)}">Quote draft</button><button class="btn small" data-custom-request-action="create_reply_template" data-custom-request-id="${esc(row.custom_request_id)}">Reply template</button><button class="btn small" data-custom-request-action="create_deposit_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Deposit candidate</button><button class="btn small" data-custom-request-action="create_job_draft" data-custom-request-id="${esc(row.custom_request_id)}">Job draft</button><button class="btn small" data-custom-request-action="create_invoice_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Invoice candidate</button><button class="btn small" data-custom-request-action="create_quote_preview_link" data-custom-request-id="${esc(row.custom_request_id)}">Quote preview link</button><button class="btn small" data-custom-request-action="create_product_draft" data-custom-request-id="${esc(row.custom_request_id)}">Product plan</button></div></td>
+          <td><select data-custom-request-status="${esc(row.custom_request_id)}"><option value="new" ${row.status === 'new' ? 'selected' : ''}>New</option><option value="reviewing" ${row.status === 'reviewing' ? 'selected' : ''}>Reviewing</option><option value="quote_needed" ${row.status === 'quote_needed' ? 'selected' : ''}>Quote needed</option><option value="quoted" ${row.status === 'quoted' ? 'selected' : ''}>Quoted</option><option value="accepted" ${row.status === 'accepted' ? 'selected' : ''}>Accepted</option><option value="declined" ${row.status === 'declined' ? 'selected' : ''}>Declined</option><option value="archived" ${row.status === 'archived' ? 'selected' : ''}>Archived</option></select><textarea data-custom-request-notes="${esc(row.custom_request_id)}" rows="3" placeholder="Admin notes">${esc(row.admin_notes || '')}</textarea><div class="custom-request-actions"><button class="btn small" data-custom-request-save="${esc(row.custom_request_id)}">Save review</button><button class="btn small" data-custom-request-action="create_quote_draft" data-custom-request-id="${esc(row.custom_request_id)}">Quote draft</button><button class="btn small" data-custom-request-action="create_reply_template" data-custom-request-id="${esc(row.custom_request_id)}">Reply template</button><button class="btn small" data-custom-request-action="create_deposit_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Deposit candidate</button><button class="btn small" data-custom-request-action="create_job_draft" data-custom-request-id="${esc(row.custom_request_id)}">Job draft</button><button class="btn small" data-custom-request-action="create_invoice_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Invoice candidate</button><button class="btn small" data-custom-request-action="create_quote_preview_link" data-custom-request-id="${esc(row.custom_request_id)}">Quote preview link</button><button class="btn small" data-custom-request-action="create_accepted_payment_order_drafts" data-custom-request-id="${esc(row.custom_request_id)}">Accepted follow-through</button><button class="btn small" data-custom-request-action="create_product_draft" data-custom-request-id="${esc(row.custom_request_id)}">Product plan</button></div></td>
         </tr>`).join('') || '<tr><td colspan="5">No custom requests yet.</td></tr>'}
       </tbody></table></div>
       <details style="margin-top:12px" open><summary>Manual customer reply templates</summary>${renderReplyTemplates(data)}</details>
       <details style="margin-top:12px" open><summary>Private quote preview links</summary>${renderQuotePreviewLinks(data)}</details>
       <details style="margin-top:12px" open><summary>Deposit and invoice candidates</summary>${renderPaymentCandidates(data)}</details>
+      <details style="margin-top:12px" open><summary>Editable quote line items and estimates</summary>${renderQuoteLineItems(data)}</details>
+      <details style="margin-top:12px" open><summary>Accepted quote payment/order drafts</summary>${renderAcceptedDrafts(data)}</details>
+      <details style="margin-top:12px" open><summary>Quote revision history</summary>${renderQuoteRevisions(data)}</details>
+      <details style="margin-top:12px" open><summary>Reference uploads and consent review</summary>${renderReferenceUploads(data)}</details>
       <details style="margin-top:12px"><summary>Recent conversion events</summary><div class="small">${(data.conversion_events || []).slice(0, 30).map((event) => `${esc(event.created_at || '')} • request #${esc(event.custom_request_id || '')} • ${esc(event.conversion_type || '')} • ${esc(event.target_key || '')}`).join('<br>') || 'No conversion events yet.'}</div></details>`;
   }
 
@@ -93,6 +137,16 @@ document.addEventListener('DOMContentLoaded', () => {
     catch (error) { setMsg(error.message || 'Unable to convert custom request.', true); }
   }
 
+  async function saveQuoteLine(id) {
+    const form = mount.querySelector(`[data-quote-line-item-form="${CSS.escape(String(id))}"]`);
+    if (!form) return;
+    const payload = Object.fromEntries(new FormData(form).entries());
+    payload.custom_request_id = Number(id);
+    payload.action = 'save_quote_line_item';
+    try { setMsg('Saving quote line item...'); const data = await readJson(await window.DDAuth.apiFetch('/api/admin/custom-requests', { method: 'POST', body: JSON.stringify(payload) })); render(data); setMsg(data.message || 'Quote line item saved.'); }
+    catch (error) { setMsg(error.message || 'Unable to save quote line item.', true); }
+  }
+
   mount.innerHTML = `<div class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin-top:0">Custom Requests</h2><p class="small" style="margin:0">Review engraving, personalized gift, and workshop-made commission requests before turning them into quotes, replies, deposits, jobs, invoices, or product draft plans.</p></div><button class="btn" type="button" id="customRequestsLoadButton">Refresh requests</button></div><div id="customRequestsAdminMessage" class="small" style="display:none;margin-top:10px"></div><div id="customRequestsAdminRows"></div></div>`;
   document.getElementById('customRequestsLoadButton')?.addEventListener('click', load);
   mount.addEventListener('click', async (event) => {
@@ -100,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saveButton) save(saveButton.getAttribute('data-custom-request-save'));
     const actionButton = event.target.closest('[data-custom-request-action]');
     if (actionButton) runAction(actionButton.getAttribute('data-custom-request-id'), actionButton.getAttribute('data-custom-request-action'));
+    const quoteLineButton = event.target.closest('[data-save-quote-line]');
+    if (quoteLineButton) saveQuoteLine(quoteLineButton.getAttribute('data-save-quote-line'));
     const previewCopyButton = event.target.closest('[data-copy-preview-link]');
     if (previewCopyButton) {
       const path = previewCopyButton.getAttribute('data-copy-preview-link') || '';

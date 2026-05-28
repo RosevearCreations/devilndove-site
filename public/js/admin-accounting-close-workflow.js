@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </form>
         </details>
         <details style="margin-top:12px" open><summary>Accountant export packaging</summary>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn primary" type="button" id="createExportManifestButton">Create export manifest</button><a class="btn" href="/api/admin/accounting-close-workflow?period_month=${encodeURIComponent(data.period_month || monthNow())}&format=csv" target="_blank" rel="noopener">Download close CSV</a><a class="btn" href="/api/admin/accounting-period-summary-export" target="_blank" rel="noopener">Open period export endpoint</a><a class="btn" href="/api/admin/accounting-year-end-close" target="_blank" rel="noopener">Open year-end bundle endpoint</a></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn primary" type="button" id="createExportManifestButton">Create export manifest</button><a class="btn" href="/api/admin/accounting-close-workflow?period_month=${encodeURIComponent(data.period_month || monthNow())}&format=csv" target="_blank" rel="noopener">Download close CSV</a><a class="btn" href="/api/admin/accounting-close-workflow?period_month=${encodeURIComponent(data.period_month || monthNow())}&format=zip" target="_blank" rel="noopener">Download accountant ZIP</a><a class="btn" href="/api/admin/accounting-period-summary-export" target="_blank" rel="noopener">Open period export endpoint</a><a class="btn" href="/api/admin/accounting-year-end-close" target="_blank" rel="noopener">Open year-end bundle endpoint</a></div>
           <div>${renderPackages(data.export_packages || [])}</div>
         </details>
       </div>`;
