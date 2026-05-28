@@ -1,5 +1,5 @@
 // File: /public/js/seo-page-overrides.js
-// Brief description: Applies reviewed SEO page overrides from D1 as a graceful client-side enhancement.
+// Brief description: Applies reviewed SEO page overrides from D1, with a static JSON fallback for deploy-baked review flows.
 
 (function () {
   function esc(value) {
@@ -27,15 +27,35 @@
     section.innerHTML = `<h2 style="margin-top:0">Helpful links and browsing notes</h2><p class="small">${esc(note)}</p>`;
     container.insertBefore(section, footer);
   }
+  function findStaticOverride(data) {
+    const path = location.pathname.endsWith('/') ? location.pathname : `${location.pathname}/`;
+    const list = Array.isArray(data?.overrides) ? data.overrides : [];
+    return list.find((row) => {
+      const rowPath = String(row.path || row.page_path || '').trim();
+      const normalized = rowPath.endsWith('/') ? rowPath : `${rowPath}/`;
+      const status = String(row.status || row.review_status || 'approved').toLowerCase();
+      return normalized === path && ['approved', 'applied', 'published'].includes(status);
+    }) || null;
+  }
+  function applyOverride(override) {
+    if (!override) return false;
+    const title = override.title || override.approved_title || '';
+    const meta = override.meta_description || override.approved_meta_description || '';
+    const note = override.internal_link_note || override.approved_internal_link_note || '';
+    if (title) document.title = title;
+    if (meta) ensureMetaDescription(meta);
+    if (note) insertInternalLinkNote(note);
+    return Boolean(title || meta || note);
+  }
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       const response = await fetch(`/api/seo-page-overrides?path=${encodeURIComponent(location.pathname)}`, { headers: { Accept: 'application/json' } });
       const data = await response.json().catch(() => null);
-      const override = data?.override || null;
-      if (!response.ok || !data?.ok || !override) return;
-      if (override.title) document.title = override.title;
-      if (override.meta_description) ensureMetaDescription(override.meta_description);
-      if (override.internal_link_note) insertInternalLinkNote(override.internal_link_note);
+      if (response.ok && data?.ok && applyOverride(data.override || null)) return;
+    } catch (_error) {}
+    try {
+      const fallback = await fetch('/data/site/seo-page-overrides.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null));
+      applyOverride(findStaticOverride(fallback));
     } catch (_error) {}
   });
 })();
