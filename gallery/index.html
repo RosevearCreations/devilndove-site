@@ -104,7 +104,7 @@
 
     .controls-row{
       display:grid;
-      grid-template-columns: 1fr 260px;
+      grid-template-columns: minmax(220px,1.4fr) repeat(4,minmax(150px,.7fr));
       gap: 10px;
       align-items:end;
     }
@@ -175,13 +175,25 @@
           <input class="input" id="artQ" placeholder="Type: ring, pendant, purple, spoon…" />
         </div>
         <div>
-          <label class="small" for="artType">Group</label>
+          <label class="small" for="artType">Product type</label>
           <select class="input" id="artType">
-            <option value="all">All</option>
+            <option value="all">All product types</option>
             <option value="rings">Rings</option>
             <option value="sets">Sets</option>
             <option value="other">Other</option>
           </select>
+        </div>
+        <div>
+          <label class="small" for="artMaterial">Material</label>
+          <select class="input" id="artMaterial"><option value="all">All materials</option></select>
+        </div>
+        <div>
+          <label class="small" for="artProcess">Process</label>
+          <select class="input" id="artProcess"><option value="all">All processes</option></select>
+        </div>
+        <div>
+          <label class="small" for="artLocality">Locality</label>
+          <select class="input" id="artLocality"><option value="all">All local proof</option></select>
         </div>
       </div>
 
@@ -366,6 +378,48 @@
         return out.filter(Boolean).slice(0, 5);
       }
 
+
+
+      function listify(value) {
+        if (Array.isArray(value)) return value.map(safeText).filter(Boolean);
+        const text = safeText(value);
+        if (!text) return [];
+        return text.split(/[|,;]/).map(safeText).filter(Boolean);
+      }
+
+      function getMaterials(it) {
+        return [...listify(it.materials), ...listify(it.material), ...listify(it.medium)].filter(Boolean);
+      }
+
+      function getProcesses(it) {
+        return [...listify(it.processes), ...listify(it.process), ...listify(it.technique), ...listify(it.making_process)].filter(Boolean);
+      }
+
+      function getLocalities(it) {
+        const values = [...listify(it.locality), ...listify(it.location), ...listify(it.local_area), ...listify(it.provenance_location), ...listify(it.pickup_area)];
+        if (norm(it.description || it.notes || '').includes('southern ontario')) values.push('Southern Ontario');
+        return values.filter(Boolean);
+      }
+
+      function hasFacet(it, value, getter) {
+        if (!value || value === 'all') return true;
+        return getter(it).map(norm).includes(norm(value));
+      }
+
+      function setFacetOptions(select, values, allLabel) {
+        if (!select) return;
+        const current = select.value || 'all';
+        const unique = [...new Set(values.map(safeText).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        select.innerHTML = `<option value="all">${escHtml(allLabel)}</option>` + unique.map((value) => `<option value="${escHtml(value)}">${escHtml(value)}</option>`).join('');
+        select.value = unique.includes(current) ? current : 'all';
+      }
+
+      function refreshFacetOptions() {
+        setFacetOptions(materialEl, items.flatMap(getMaterials), 'All materials');
+        setFacetOptions(processEl, items.flatMap(getProcesses), 'All processes');
+        setFacetOptions(localityEl, items.flatMap(getLocalities), 'All local proof');
+      }
+
       function buildCard(meta, it) {
         const name = getItemName(it);
         const primaryUrl = getPrimaryImageUrl(meta, it);
@@ -441,6 +495,9 @@
 
       const qEl = document.getElementById("artQ");
       const typeEl = document.getElementById("artType");
+      const materialEl = document.getElementById("artMaterial");
+      const processEl = document.getElementById("artProcess");
+      const localityEl = document.getElementById("artLocality");
       const gridEl = document.getElementById("grid");
       const shownEl = document.getElementById("shown");
       const totalEl = document.getElementById("total");
@@ -451,6 +508,9 @@
       function render() {
         const term = norm(qEl.value);
         const groupVal = typeEl.value;
+        const materialVal = materialEl?.value || "all";
+        const processVal = processEl?.value || "all";
+        const localityVal = localityEl?.value || "all";
 
         let list = items.slice();
 
@@ -458,13 +518,17 @@
           list = list.filter((it) => getGroup(it) === groupVal);
         }
 
+        list = list.filter((it) => hasFacet(it, materialVal, getMaterials) && hasFacet(it, processVal, getProcesses) && hasFacet(it, localityVal, getLocalities));
+
         if (term) {
           list = list.filter((it) => {
             const hay = [
               norm(it.title),
               norm(it.name),
               norm(it.subcategory),
-              norm((it.materials || []).join(" ")),
+              norm(getMaterials(it).join(" ")),
+              norm(getProcesses(it).join(" ")),
+              norm(getLocalities(it).join(" ")),
               norm((it.tags || []).join(" ")),
               norm(it.image_file),
               norm(it.r2_object_key)
@@ -499,9 +563,13 @@
             throw new Error("No creations were returned from the live API.");
           }
 
+          refreshFacetOptions();
           render();
           qEl.addEventListener("input", render);
           typeEl.addEventListener("change", render);
+          materialEl?.addEventListener("change", render);
+          processEl?.addEventListener("change", render);
+          localityEl?.addEventListener("change", render);
         } catch (e) {
           console.error(e);
 
@@ -521,9 +589,13 @@
             };
             items = fallbackItems.slice();
             setStatus("Live creations API is unavailable. Showing the local gallery fallback list.", "warning");
+            refreshFacetOptions();
             render();
             qEl.addEventListener("input", render);
             typeEl.addEventListener("change", render);
+            materialEl?.addEventListener("change", render);
+            processEl?.addEventListener("change", render);
+            localityEl?.addEventListener("change", render);
             return;
           }
 
