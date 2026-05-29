@@ -800,3 +800,6 @@ body.nav-mobile-open{overflow:hidden}
   .quote-preview-total { align-items:flex-start; flex-direction:column; }
   .quote-preview-actions .btn, .custom-request-actions .btn { width:100%; justify-content:center; }
 }
+
+/* Build 155: custom quote/payment/admin marketplace polish */
+.quote-payment-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.quote-payment-summary{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin:12px 0}.marketplace-copy-grid,.admin-form-grid{align-items:stretch}.custom-request-template-card label textarea{margin-top:6px}.shop-card-story + .small .pill{margin-top:4px}@media (max-width:720px){.quote-payment-actions .btn{width:100%;justify-content:center}.custom-request-template-card .admin-form-grid{grid-template-columns:1fr!important}}

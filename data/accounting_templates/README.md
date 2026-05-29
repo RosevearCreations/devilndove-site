@@ -32,3 +32,7 @@ Amazon purchase rows should be imported to private D1 staging and reviewed befor
 ## Build 131 note
 
 Accounting templates remain public sample/template files only. Do not place real Amazon orders, bank statements, PayPal/Stripe exports, or customer/order transaction data in this public template folder.
+
+## Build 155 maintenance note
+
+This Markdown file was reviewed during the Build 155 pass. The active roadmap/schema/gaps documents carry the detailed implementation notes for custom request payment links, order conversion, marketplace export packs, proof filters, and post-fulfillment prompts.
