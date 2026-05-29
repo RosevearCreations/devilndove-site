@@ -1,5 +1,5 @@
 // File: /functions/api/admin/custom-requests.js
-// Brief description: Admin review queue for custom gift, engraving, and personalized work requests, including quote/job/product draft conversion, editable quote line items, payment/order draft follow-through, customer reply templates, payment candidates, private quote preview links, and quote revision history.
+// Brief description: Admin review queue for custom gift, engraving, and personalized work requests, including quote/job/product conversion, editable quote line items, approved payment links, real order conversion, marketplace export packs, post-fulfillment prompts, private quote links, and revision history.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
@@ -270,6 +270,100 @@ async function ensureSchema(db) {
   )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_order_drafts_request ON custom_request_order_drafts(custom_request_id, order_draft_status, updated_at)`).run().catch(() => null);
 
+  await ensureColumn(db, 'custom_request_order_drafts', 'order_id', 'order_id INTEGER');
+  await ensureColumn(db, 'custom_request_order_drafts', 'converted_by_user_id', 'converted_by_user_id INTEGER');
+  await ensureColumn(db, 'custom_request_order_drafts', 'converted_at', 'converted_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_request_drafts', 'approved_payment_link_id', 'approved_payment_link_id INTEGER');
+  await ensureColumn(db, 'custom_request_payment_request_drafts', 'approved_payment_link_url', 'approved_payment_link_url TEXT');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'version_number', 'version_number INTEGER NOT NULL DEFAULT 1');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'supersedes_share_link_id', 'supersedes_share_link_id INTEGER');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'resent_at', 'resent_at TEXT');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'resend_note', 'resend_note TEXT');
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_payment_links (
+    custom_request_payment_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    payment_request_draft_id INTEGER,
+    quote_draft_id INTEGER,
+    payment_link_key TEXT NOT NULL UNIQUE,
+    link_token TEXT NOT NULL UNIQUE,
+    link_status TEXT NOT NULL DEFAULT 'active',
+    link_url_path TEXT NOT NULL,
+    request_type TEXT NOT NULL DEFAULT 'deposit',
+    amount_cents INTEGER NOT NULL DEFAULT 0,
+    tax_cents INTEGER NOT NULL DEFAULT 0,
+    currency TEXT NOT NULL DEFAULT 'CAD',
+    customer_name TEXT,
+    customer_email TEXT,
+    provider TEXT NOT NULL DEFAULT 'manual_review',
+    provider_reference TEXT,
+    approval_notes TEXT,
+    customer_viewed_at TEXT,
+    customer_ready_at TEXT,
+    customer_note TEXT,
+    approved_by_user_id INTEGER,
+    approved_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+    FOREIGN KEY (payment_request_draft_id) REFERENCES custom_request_payment_request_drafts(custom_request_payment_request_draft_id) ON DELETE SET NULL,
+    FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL
+  )`).run();
+  await ensureColumn(db, 'custom_request_payment_links', 'provider', "provider TEXT NOT NULL DEFAULT 'manual_review'");
+  await ensureColumn(db, 'custom_request_payment_links', 'provider_reference', 'provider_reference TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'customer_viewed_at', 'customer_viewed_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'customer_ready_at', 'customer_ready_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'customer_note', 'customer_note TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'viewed_at', 'viewed_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'ready_to_pay_at', 'ready_to_pay_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'customer_ready_note', 'customer_ready_note TEXT');
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_links_request ON custom_request_payment_links(custom_request_id, link_status, updated_at)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_links_token ON custom_request_payment_links(link_token, link_status)`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_marketplace_export_packs (
+    custom_request_marketplace_export_pack_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    quote_draft_id INTEGER,
+    product_draft_id INTEGER,
+    pack_key TEXT NOT NULL UNIQUE,
+    pack_status TEXT NOT NULL DEFAULT 'draft',
+    etsy_title TEXT,
+    etsy_description TEXT,
+    facebook_title TEXT,
+    facebook_description TEXT,
+    pinterest_title TEXT,
+    pinterest_description TEXT,
+    manual_listing_copy TEXT,
+    tags_json TEXT DEFAULT '[]',
+    readiness_notes TEXT,
+    created_by_user_id INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+    FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL,
+    FOREIGN KEY (product_draft_id) REFERENCES custom_request_product_drafts(custom_request_product_draft_id) ON DELETE SET NULL
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_marketplace_exports_request ON custom_request_marketplace_export_packs(custom_request_id, pack_status, updated_at)`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_fulfillment_prompts (
+    custom_request_fulfillment_prompt_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    order_id INTEGER,
+    prompt_key TEXT NOT NULL UNIQUE,
+    prompt_status TEXT NOT NULL DEFAULT 'draft',
+    prompt_type TEXT NOT NULL DEFAULT 'review_photo_consent',
+    customer_name TEXT,
+    customer_email TEXT,
+    subject TEXT,
+    body_text TEXT,
+    consent_question_text TEXT,
+    created_by_user_id INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_fulfillment_prompts_request ON custom_request_fulfillment_prompts(custom_request_id, prompt_status, updated_at)`).run().catch(() => null);
+
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_candidates_request ON custom_request_payment_candidates(custom_request_id, candidate_type, candidate_status)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_request ON custom_request_quote_share_links(custom_request_id, share_status, updated_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_token ON custom_request_quote_share_links(share_token, share_status)`).run().catch(() => null);
@@ -314,10 +408,13 @@ async function listPayload(db) {
   const quoteRevisions = rows(await db.prepare(`SELECT * FROM custom_request_quote_revisions ORDER BY datetime(created_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const paymentRequestDrafts = rows(await db.prepare(`SELECT * FROM custom_request_payment_request_drafts ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const orderDrafts = rows(await db.prepare(`SELECT * FROM custom_request_order_drafts ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
+  const paymentLinks = rows(await db.prepare(`SELECT * FROM custom_request_payment_links ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
+  const marketplaceExportPacks = rows(await db.prepare(`SELECT * FROM custom_request_marketplace_export_packs ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
+  const fulfillmentPrompts = rows(await db.prepare(`SELECT * FROM custom_request_fulfillment_prompts ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const referenceUploads = rows(await db.prepare(`SELECT * FROM custom_request_reference_uploads ORDER BY datetime(created_at) DESC LIMIT 160`).all().catch(() => ({ results: [] })));
   const conversionEvents = rows(await db.prepare(`SELECT * FROM custom_request_conversion_events ORDER BY datetime(created_at) DESC LIMIT 160`).all().catch(() => ({ results: [] })));
   const customerHistory = rows(await db.prepare(`SELECT email, COUNT(*) AS request_count, MAX(created_at) AS last_request_at FROM custom_requests WHERE COALESCE(email,'') <> '' GROUP BY email HAVING COUNT(*) > 1 ORDER BY request_count DESC, last_request_at DESC LIMIT 50`).all().catch(() => ({ results: [] })));
-  return { ok: true, requests, summary, quote_drafts: quoteDrafts, quote_line_items: quoteLineItems, quote_revisions: quoteRevisions, payment_request_drafts: paymentRequestDrafts, order_drafts: orderDrafts, job_drafts: jobDrafts, product_drafts: productDrafts, reply_templates: replyTemplates, payment_candidates: paymentCandidates, quote_preview_links: previewLinks, reference_uploads: referenceUploads, conversion_events: conversionEvents, customer_history: customerHistory };
+  return { ok: true, requests, summary, quote_drafts: quoteDrafts, quote_line_items: quoteLineItems, quote_revisions: quoteRevisions, payment_request_drafts: paymentRequestDrafts, order_drafts: orderDrafts, payment_links: paymentLinks, marketplace_export_packs: marketplaceExportPacks, fulfillment_prompts: fulfillmentPrompts, job_drafts: jobDrafts, product_drafts: productDrafts, reply_templates: replyTemplates, payment_candidates: paymentCandidates, quote_preview_links: previewLinks, reference_uploads: referenceUploads, conversion_events: conversionEvents, customer_history: customerHistory };
 }
 
 async function recordConversion(db, adminUser, requestId, type, tableName, targetId, targetKey, notes) {
@@ -604,6 +701,235 @@ async function createAcceptedPaymentAndOrderDrafts(db, adminUser, requestId, sha
   return { ok: true, message: 'Accepted quote connected to payment request and order draft records.', target_key: orderKey, payment_request_key: paymentKey };
 }
 
+async function approvePaymentLink(db, adminUser, requestId, origin) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  const follow = await createAcceptedPaymentAndOrderDrafts(db, adminUser, requestId);
+  if (!follow.ok) return follow;
+  const draft = await db.prepare(`SELECT * FROM custom_request_payment_request_drafts WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  if (!draft) return { ok: false, error: 'Create a payment request draft first.' };
+  if (String(draft.payment_request_status || '').toLowerCase() === 'approved_link_active' && draft.approved_payment_link_url) {
+    return { ok: true, message: 'Approved payment link already exists.', target_key: draft.payment_request_key, share_url: draft.approved_payment_link_url };
+  }
+  const existing = await db.prepare(`SELECT * FROM custom_request_payment_links WHERE payment_request_draft_id=? AND link_status IN ('active','viewed','ready_to_pay') LIMIT 1`).bind(Number(draft.custom_request_payment_request_draft_id || 0)).first().catch(() => null);
+  if (existing) {
+    return { ok: true, message: 'Approved payment link already exists.', target_key: existing.payment_link_key, share_url: `${origin}${existing.link_url_path}` };
+  }
+  const paymentKey = key('paylink');
+  const token = `pay_${crypto.randomUUID().replace(/-/g, '')}`;
+  const path = `/custom-request/pay/?token=${encodeURIComponent(token)}`;
+  const insert = await db.prepare(`INSERT INTO custom_request_payment_links (
+    custom_request_id, payment_request_draft_id, quote_draft_id, payment_link_key, link_token, link_status, link_url_path,
+    request_type, amount_cents, tax_cents, currency, customer_name, customer_email, approval_notes, approved_by_user_id, approved_at, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    Number(requestId),
+    Number(draft.custom_request_payment_request_draft_id || 0),
+    Number(draft.quote_draft_id || 0) || null,
+    paymentKey,
+    token,
+    path,
+    draft.request_type || 'deposit',
+    Number(draft.amount_cents || 0),
+    Number(draft.tax_cents || 0),
+    draft.currency || 'CAD',
+    draft.customer_name || row.name || null,
+    draft.customer_email || row.email || null,
+    'Approved manual payment link. This link is safe to share but still routes payment through the reviewed Devil n Dove payment workflow.',
+    Number(adminUser.user_id || 0)
+  ).run();
+  const targetId = Number(insert?.meta?.last_row_id || 0) || null;
+  await db.prepare(`UPDATE custom_request_payment_request_drafts SET payment_request_status='approved_link_active', approved_payment_link_id=?, approved_payment_link_url=?, reviewed_by_user_id=?, reviewed_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE custom_request_payment_request_draft_id=?`).bind(targetId, `${origin}${path}`, Number(adminUser.user_id || 0), Number(draft.custom_request_payment_request_draft_id || 0)).run();
+  await recordQuoteRevision(db, adminUser, requestId, draft.quote_draft_id, 'payment_link_approved', 'Reviewed payment request draft was converted into an approved customer payment link.', { payment_link_key: paymentKey, amount_cents: Number(draft.amount_cents || 0) });
+  await recordConversion(db, adminUser, requestId, 'approved_payment_link', 'custom_request_payment_links', targetId, paymentKey, 'Reviewed payment request draft converted to an approved payment link.');
+  return { ok: true, message: 'Approved payment link created.', target_key: paymentKey, target_id: targetId, share_url: `${origin}${path}` };
+}
+
+async function convertOrderDraftToOrder(db, adminUser, requestId) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  const follow = await createAcceptedPaymentAndOrderDrafts(db, adminUser, requestId);
+  if (!follow.ok) return follow;
+  const draft = await db.prepare(`SELECT * FROM custom_request_order_drafts WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  if (!draft) return { ok: false, error: 'Create an order draft first.' };
+  if (Number(draft.order_id || 0) > 0) return { ok: true, message: 'Order draft is already converted to a real order record.', target_key: draft.order_draft_key, target_id: Number(draft.order_id || 0) };
+  const orderNumber = `DD-CUSTOM-${Date.now().toString(36).toUpperCase()}-${String(requestId).padStart(4, '0')}`;
+  const notes = [
+    `Created from custom request ${row.request_key || requestId}.`,
+    `Order draft: ${draft.order_draft_key || ''}.`,
+    draft.fulfillment_notes || '',
+    row.admin_notes ? `Admin notes: ${row.admin_notes}` : ''
+  ].filter(Boolean).join('\n');
+  const orderInsert = await db.prepare(`INSERT INTO orders (
+    order_number, customer_email, customer_name, order_status, payment_status, payment_method, fulfillment_type, currency,
+    subtotal_cents, discount_cents, shipping_cents, tax_cents, total_cents, notes, created_at, updated_at
+  ) VALUES (?, ?, ?, 'draft', 'pending', 'manual', 'shipping', ?, ?, 0, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    orderNumber,
+    draft.customer_email || row.email || 'custom-request@example.invalid',
+    draft.customer_name || row.name || 'Custom request customer',
+    draft.currency || 'CAD',
+    Number(draft.subtotal_cents || 0),
+    Number(draft.shipping_cents || 0),
+    Number(draft.tax_cents || 0),
+    Number(draft.total_cents || 0),
+    notes
+  ).run();
+  const orderId = Number(orderInsert?.meta?.last_row_id || 0);
+  await db.prepare(`INSERT INTO order_items (
+    order_id, product_id, sku, product_name, product_type, unit_price_cents, quantity, line_subtotal_cents, taxable, tax_class_code, requires_shipping, digital_file_url, created_at
+  ) VALUES (?, NULL, ?, ?, 'physical', ?, 1, ?, 1, 'standard', 1, NULL, CURRENT_TIMESTAMP)`).bind(
+    orderId,
+    row.request_key || draft.order_draft_key || null,
+    titleForRequest(row),
+    Number(draft.subtotal_cents || draft.total_cents || 0),
+    Number(draft.subtotal_cents || draft.total_cents || 0)
+  ).run();
+  await db.prepare(`UPDATE custom_request_order_drafts SET order_draft_status='converted_to_order', order_id=?, reviewed_by_user_id=?, reviewed_at=CURRENT_TIMESTAMP, converted_by_user_id=?, converted_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE custom_request_order_draft_id=?`).bind(orderId, Number(adminUser.user_id || 0), Number(adminUser.user_id || 0), Number(draft.custom_request_order_draft_id || 0)).run();
+  await db.prepare(`UPDATE custom_requests SET status=CASE WHEN status IN ('quoted','accepted') THEN 'accepted' ELSE status END, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(Number(requestId)).run().catch(() => null);
+  await recordQuoteRevision(db, adminUser, requestId, draft.quote_draft_id, 'order_converted', `Order draft converted into real order ${orderNumber}.`, { order_id: orderId, order_number: orderNumber });
+  await recordConversion(db, adminUser, requestId, 'order_draft_to_order', 'orders', orderId, orderNumber, 'Reviewed order draft converted into a real order record.');
+  return { ok: true, message: `Real order record created: ${orderNumber}.`, target_key: orderNumber, target_id: orderId };
+}
+
+async function createQuoteRevisionLink(db, adminUser, requestId, origin) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  const quote = await getOrCreateQuote(db, adminUser, requestId);
+  await ensureDefaultQuoteLineItems(db, adminUser, row, quote);
+  const totals = await syncQuoteTotals(db, quote, row.budget_cents || 0);
+  const previous = await db.prepare(`SELECT * FROM custom_request_quote_share_links WHERE custom_request_id=? ORDER BY version_number DESC, datetime(created_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  if (previous?.custom_request_quote_share_link_id) {
+    await db.prepare(`UPDATE custom_request_quote_share_links SET share_status=CASE WHEN share_status IN ('active','viewed') THEN 'superseded' ELSE share_status END, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(Number(requestId)).run().catch(() => null);
+  }
+  const version = Math.max(1, Number(previous?.version_number || 1) + 1);
+  const shareToken = `quote_${crypto.randomUUID().replace(/-/g, '')}`;
+  const paymentSummary = JSON.stringify({ subtotal_cents: totals.subtotal_cents, pickup_shipping_cents: totals.pickup_shipping_cents, tax_estimate_cents: totals.tax_estimate_cents, quote_total_cents: totals.quote_total_cents, note: `Quote revision/version ${version}.` });
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+  const insert = await db.prepare(`INSERT INTO custom_request_quote_share_links (
+    custom_request_id, quote_draft_id, share_token, share_status, customer_name, customer_email, title, quote_total_cents,
+    scope_summary, payment_summary_json, expires_at, created_by_user_id, version_number, supersedes_share_link_id, resent_at, resend_note, created_at, updated_at
+  ) VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    Number(requestId),
+    Number(quote.custom_request_quote_draft_id || 0),
+    shareToken,
+    row.name || null,
+    row.email || null,
+    `${titleForRequest(row)} — revision ${version}`,
+    Number(totals.quote_total_cents || 0),
+    clean(quote.scope_notes || quoteScope(row), 3000),
+    paymentSummary,
+    expiresAt,
+    Number(adminUser.user_id || 0),
+    version,
+    Number(previous?.custom_request_quote_share_link_id || 0) || null,
+    `Revision ${version} link created after quote changes or customer response.`
+  ).run();
+  const targetId = Number(insert?.meta?.last_row_id || 0) || null;
+  await db.prepare(`UPDATE custom_request_quote_drafts SET quote_status='shared', updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(Number(requestId)).run().catch(() => null);
+  await recordQuoteRevision(db, adminUser, requestId, quote.custom_request_quote_draft_id, 'quote_revision_link', `Quote revision/version ${version} link created.`, { share_link_id: targetId, version_number: version, quote_total_cents: Number(totals.quote_total_cents || 0) });
+  await recordConversion(db, adminUser, requestId, 'quote_revision_link', 'custom_request_quote_share_links', targetId, shareToken, `Quote revision/version ${version} link created for manual resend.`);
+  return { ok: true, message: `Quote revision/version ${version} link created.`, target_key: shareToken, target_id: targetId, share_url: `${origin}/custom-request/quote/?token=${encodeURIComponent(shareToken)}` };
+}
+
+async function createMarketplaceExportPack(db, adminUser, requestId) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  const quote = await getOrCreateQuote(db, adminUser, requestId);
+  const productDraft = await db.prepare(`SELECT * FROM custom_request_product_drafts WHERE custom_request_id=? LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const existing = await db.prepare(`SELECT * FROM custom_request_marketplace_export_packs WHERE custom_request_id=? LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const title = clean(productDraft?.suggested_product_name || quote?.title || titleForRequest(row), 120);
+  const baseDescription = clean([
+    title,
+    '',
+    'Handmade or workshop-planned Devil n Dove custom piece from Southern Ontario.',
+    quote?.scope_notes || quoteScope(row),
+    '',
+    'Please confirm size, material, colour, timing, local pickup/shipping, and reference-image consent before purchase.',
+    'Photos and proof notes must be reviewed before public marketplace posting.'
+  ].join('\n'), 4500);
+  const tags = ['Devil n Dove', 'Southern Ontario', row.request_type || 'custom gift', 'handmade', 'local maker'].filter(Boolean);
+  const manualCopy = [
+    `TITLE: ${title}`,
+    '',
+    `PRICE: ${money(quote?.quote_total_cents || row.budget_cents || 0)} CAD review-needed`,
+    '',
+    baseDescription,
+    '',
+    `TAGS: ${tags.join(', ')}`
+  ].join('\n');
+  const values = {
+    etsy_title: clean(title, 140),
+    etsy_description: clean(baseDescription, 4500),
+    facebook_title: clean(`${title} | Devil n Dove`, 100),
+    facebook_description: clean(`${baseDescription}\n\nLocal pickup/shipping to be confirmed.`, 4500),
+    pinterest_title: clean(`${title} by Devil n Dove`, 100),
+    pinterest_description: clean(`Custom workshop-made gift idea from Devil n Dove in Southern Ontario. ${row.product_interest || row.request_type || ''}`, 500),
+    manual_listing_copy: clean(manualCopy, 5000),
+    tags_json: JSON.stringify(tags),
+    readiness_notes: 'Draft export only. Confirm price, images, consent, shipping, category, marketplace fees, and product readiness before posting.'
+  };
+  if (existing) {
+    await db.prepare(`UPDATE custom_request_marketplace_export_packs SET etsy_title=?, etsy_description=?, facebook_title=?, facebook_description=?, pinterest_title=?, pinterest_description=?, manual_listing_copy=?, tags_json=?, readiness_notes=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_marketplace_export_pack_id=?`).bind(
+      values.etsy_title, values.etsy_description, values.facebook_title, values.facebook_description, values.pinterest_title, values.pinterest_description, values.manual_listing_copy, values.tags_json, values.readiness_notes, Number(existing.custom_request_marketplace_export_pack_id || 0)
+    ).run();
+    await recordConversion(db, adminUser, requestId, 'marketplace_export_pack_refreshed', 'custom_request_marketplace_export_packs', existing.custom_request_marketplace_export_pack_id, existing.pack_key, 'Marketplace export pack refreshed.');
+    return { ok: true, message: 'Marketplace export pack refreshed.', target_key: existing.pack_key, target_id: existing.custom_request_marketplace_export_pack_id };
+  }
+  const packKey = key('mktpack');
+  const insert = await db.prepare(`INSERT INTO custom_request_marketplace_export_packs (
+    custom_request_id, quote_draft_id, product_draft_id, pack_key, pack_status, etsy_title, etsy_description,
+    facebook_title, facebook_description, pinterest_title, pinterest_description, manual_listing_copy, tags_json,
+    readiness_notes, created_by_user_id, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    Number(requestId),
+    Number(quote?.custom_request_quote_draft_id || 0) || null,
+    Number(productDraft?.custom_request_product_draft_id || 0) || null,
+    packKey,
+    values.etsy_title,
+    values.etsy_description,
+    values.facebook_title,
+    values.facebook_description,
+    values.pinterest_title,
+    values.pinterest_description,
+    values.manual_listing_copy,
+    values.tags_json,
+    values.readiness_notes,
+    Number(adminUser.user_id || 0)
+  ).run();
+  const targetId = Number(insert?.meta?.last_row_id || 0) || null;
+  await recordConversion(db, adminUser, requestId, 'marketplace_export_pack', 'custom_request_marketplace_export_packs', targetId, packKey, 'Marketplace export copy pack created for Etsy, Facebook Marketplace, Pinterest, and manual listings.');
+  return { ok: true, message: 'Marketplace export pack created.', target_key: packKey, target_id: targetId };
+}
+
+async function createPostFulfillmentPrompts(db, adminUser, requestId) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  const orderDraft = await db.prepare(`SELECT * FROM custom_request_order_drafts WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const existing = await db.prepare(`SELECT * FROM custom_request_fulfillment_prompts WHERE custom_request_id=? LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  if (existing) return { ok: true, message: 'Post-fulfillment prompt already exists.', target_key: existing.prompt_key, target_id: existing.custom_request_fulfillment_prompt_id };
+  const promptKey = key('fulfillprompt');
+  const subject = clean(`Thank you for your Devil n Dove custom piece`, 180);
+  const body = clean(`Hi ${row.name || 'there'},\n\nThank you again for letting us make your custom Devil n Dove piece: ${titleForRequest(row)}.\n\nWhen everything is received and you have had a chance to look it over, we would love a short review or a quick note about what you liked. If you are comfortable with it, we may also ask whether finished photos or process photos can be used on our website, gallery, or social posts.\n\nNo pressure — private custom work stays private unless you clearly approve public use.\n\nThanks,\nDevil n Dove`, 2500);
+  const consentQuestion = clean(`May Devil n Dove use finished photos or process photos from this custom request in public product stories, gallery examples, or social media? Please reply with one of: private only, website/gallery okay, social okay, or all public okay.`, 800);
+  const insert = await db.prepare(`INSERT INTO custom_request_fulfillment_prompts (
+    custom_request_id, order_id, prompt_key, prompt_status, prompt_type, customer_name, customer_email,
+    subject, body_text, consent_question_text, created_by_user_id, created_at, updated_at
+  ) VALUES (?, ?, ?, 'draft', 'review_photo_consent', ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    Number(requestId),
+    Number(orderDraft?.order_id || 0) || null,
+    promptKey,
+    row.name || null,
+    row.email || null,
+    subject,
+    body,
+    consentQuestion,
+    Number(adminUser.user_id || 0)
+  ).run();
+  const targetId = Number(insert?.meta?.last_row_id || 0) || null;
+  await recordConversion(db, adminUser, requestId, 'post_fulfillment_prompt', 'custom_request_fulfillment_prompts', targetId, promptKey, 'Review/photo/consent prompt created for manual sending after fulfillment.');
+  return { ok: true, message: 'Post-fulfillment review/photo/consent prompt created.', target_key: promptKey, target_id: targetId };
+}
+
+
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
@@ -635,7 +961,13 @@ export async function onRequestPost(context) {
     else if (action === 'create_reply_template') actionResult = await createReplyTemplate(db, adminUser, id);
     else if (action === 'create_deposit_candidate') actionResult = await createPaymentCandidate(db, adminUser, id, 'deposit');
     else if (action === 'create_invoice_candidate') actionResult = await createPaymentCandidate(db, adminUser, id, 'invoice');
+    else if (action === 'create_accepted_payment_order_drafts') actionResult = await createAcceptedPaymentAndOrderDrafts(db, adminUser, id);
     else if (action === 'create_quote_preview_link') actionResult = await createQuotePreviewLink(db, adminUser, id, new URL(context.request.url).origin);
+    else if (action === 'create_quote_revision_link') actionResult = await createQuoteRevisionLink(db, adminUser, id, new URL(context.request.url).origin);
+    else if (action === 'approve_payment_link') actionResult = await approvePaymentLink(db, adminUser, id, new URL(context.request.url).origin);
+    else if (action === 'convert_order_draft_to_order') actionResult = await convertOrderDraftToOrder(db, adminUser, id);
+    else if (action === 'create_marketplace_export_pack') actionResult = await createMarketplaceExportPack(db, adminUser, id);
+    else if (action === 'create_post_fulfillment_prompts') actionResult = await createPostFulfillmentPrompts(db, adminUser, id);
     else {
       const nextStatus = status(body.status);
       const adminNotes = clean(body.admin_notes || '', 1600);
