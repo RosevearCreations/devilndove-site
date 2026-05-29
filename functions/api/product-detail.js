@@ -50,6 +50,34 @@ function parseColorNamesJson(value, fallbackColor = '') {
   return values;
 }
 
+function splitFilterValues(...values) {
+  const seen = new Set();
+  const output = [];
+  values.forEach((value) => {
+    if (value == null) return;
+    let parsed = value;
+    if (typeof value === 'string') {
+      const text = value.trim();
+      if (!text) return;
+      if ((text.startsWith('[') && text.endsWith(']')) || (text.startsWith('{') && text.endsWith('}'))) {
+        try { parsed = JSON.parse(text); } catch { parsed = text; }
+      }
+    }
+    const list = Array.isArray(parsed) ? parsed : String(parsed || '').split(/[|,;/\n]+/);
+    list.map((entry) => String(entry || '').trim()).filter(Boolean).forEach((entry) => {
+      const key = entry.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      output.push(entry);
+    });
+  });
+  return output;
+}
+
+function filterText(values) {
+  return (Array.isArray(values) ? values : splitFilterValues(values)).join(', ');
+}
+
 const SCHEMA_CACHE_MS = 5 * 60 * 1000;
 const schemaColumnCache = new Map();
 
@@ -60,7 +88,7 @@ const PRODUCT_COLUMN_CANDIDATES = [
   'external_listing_label', 'condition_summary', 'era_label', 'sourcing_notes', 'price_cents',
   'compare_at_price_cents', 'currency', 'taxable', 'tax_class_id', 'requires_shipping',
   'weight_grams', 'inventory_tracking', 'inventory_quantity', 'on_hand_quantity',
-  'digital_file_url', 'featured_image_url', 'sort_order', 'created_at', 'updated_at'
+  'digital_file_url', 'featured_image_url', 'material_tags', 'materials_json', 'primary_material', 'material', 'process_tags', 'making_process', 'process_notes', 'locality_label', 'local_pickup_note', 'sort_order', 'created_at', 'updated_at'
 ];
 const TAX_COLUMN_CANDIDATES = ['tax_class_id', 'code', 'name', 'rate_percent', 'tax_rate'];
 const SEO_COLUMN_CANDIDATES = [
@@ -163,6 +191,7 @@ function buildProductDetailSql({ productColumns, taxColumns, seoColumns, hasTaxJ
     selectColumn(productColumns, 'p', 'slug', "''"),
     selectColumn(productColumns, 'p', 'sku', "''"),
     selectColumn(productColumns, 'p', 'name', sqlString('Untitled product')),
+    selectColumn(productColumns, 'p', 'product_category', "''"),
     selectColumn(productColumns, 'p', 'short_description', "''"),
     selectColumn(productColumns, 'p', 'description', "''"),
     selectColumn(productColumns, 'p', 'product_type', sqlString('physical')),
@@ -176,6 +205,15 @@ function buildProductDetailSql({ productColumns, taxColumns, seoColumns, hasTaxJ
     selectColumn(productColumns, 'p', 'condition_summary', "''"),
     selectColumn(productColumns, 'p', 'era_label', "''"),
     selectColumn(productColumns, 'p', 'sourcing_notes', "''"),
+    selectColumn(productColumns, 'p', 'material_tags', "''"),
+    selectColumn(productColumns, 'p', 'materials_json', "''"),
+    selectColumn(productColumns, 'p', 'primary_material', "''"),
+    selectColumn(productColumns, 'p', 'material', "''"),
+    selectColumn(productColumns, 'p', 'process_tags', "''"),
+    selectColumn(productColumns, 'p', 'making_process', "''"),
+    selectColumn(productColumns, 'p', 'process_notes', "''"),
+    selectColumn(productColumns, 'p', 'locality_label', "''"),
+    selectColumn(productColumns, 'p', 'local_pickup_note', "''"),
     selectColumn(productColumns, 'p', 'price_cents', '0'),
     selectColumn(productColumns, 'p', 'compare_at_price_cents', 'NULL'),
     selectColumn(productColumns, 'p', 'currency', sqlString('CAD')),
@@ -238,6 +276,12 @@ export async function onRequestGet(context) {
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
   product.color_names = parseColorNamesJson(product.color_names_json, product.color_name || '');
   product.color_names_text = product.color_names.join(', ');
+  product.proof_materials = splitFilterValues(product.material_tags, product.materials_json, product.primary_material, product.material, product.product_category);
+  product.proof_material = filterText(product.proof_materials);
+  product.proof_processes = splitFilterValues(product.process_tags, product.making_process, product.process_notes);
+  product.proof_process = filterText(product.proof_processes);
+  product.proof_localities = splitFilterValues(product.locality_label, product.local_pickup_note, product.sourcing_notes);
+  product.proof_locality = filterText(product.proof_localities);
 
   const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
   const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');

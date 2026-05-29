@@ -91,6 +91,34 @@ function parseColorNamesJson(value, fallbackColor = "") {
   return values;
 }
 
+function splitFilterValues(...values) {
+  const seen = new Set();
+  const output = [];
+  values.forEach((value) => {
+    if (value == null) return;
+    let parsed = value;
+    if (typeof value === "string") {
+      const text = value.trim();
+      if (!text) return;
+      if ((text.startsWith("[") && text.endsWith("]")) || (text.startsWith("{") && text.endsWith("}"))) {
+        try { parsed = JSON.parse(text); } catch { parsed = text; }
+      }
+    }
+    const list = Array.isArray(parsed) ? parsed : String(parsed || "").split(/[|,;/\n]+/);
+    list.map((entry) => String(entry || "").trim()).filter(Boolean).forEach((entry) => {
+      const key = entry.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      output.push(entry);
+    });
+  });
+  return output;
+}
+
+function filterText(values) {
+  return (Array.isArray(values) ? values : splitFilterValues(values)).join(", ");
+}
+
 async function runProductQuery(db, sql, bindings = []) {
   const stmt = db.prepare(sql);
   const result = bindings.length ? await stmt.bind(...bindings).all() : await stmt.all();
@@ -99,6 +127,9 @@ async function runProductQuery(db, sql, bindings = []) {
 
 function normalizeProductRow(row = {}) {
   const colorNames = parseColorNamesJson(row.color_names_json, row.color_name || "");
+  const proofMaterials = splitFilterValues(row.proof_material, row.material_tags, row.materials_json, row.materials, row.primary_material, row.material, row.product_category);
+  const proofProcesses = splitFilterValues(row.proof_process, row.process_tags, row.making_process, row.process_notes, row.public_story_heading);
+  const proofLocalities = splitFilterValues(row.proof_locality, row.locality_label, row.local_pickup_note, row.sourcing_notes);
   return {
     product_id: row.product_id ?? null,
     product_number: row.product_number ?? null,
@@ -153,6 +184,12 @@ function normalizeProductRow(row = {}) {
     public_story_snippet: row.public_story_snippet || "",
     public_story_status: row.public_story_status || "",
     public_story_privacy_status: row.public_story_privacy_status || "",
+    proof_material: filterText(proofMaterials),
+    proof_materials: proofMaterials,
+    proof_process: filterText(proofProcesses),
+    proof_processes: proofProcesses,
+    proof_locality: filterText(proofLocalities),
+    proof_localities: proofLocalities,
     seo_h1: row.h1_override || row.name || "Untitled product"
   };
 }
@@ -179,6 +216,9 @@ async function enrichProductsWithStoryNotes(db, products) {
       storyColumns.has("story_body") ? "story_body" : "'' AS story_body",
       storyColumns.has("display_status") ? "display_status" : "'approved' AS display_status",
       storyColumns.has("privacy_status") ? "privacy_status" : "'safe' AS privacy_status",
+      storyColumns.has("process_notes") ? "process_notes" : "'' AS process_notes",
+      storyColumns.has("local_pickup_note") ? "local_pickup_note" : "'' AS local_pickup_note",
+      storyColumns.has("care_notes") ? "care_notes" : "'' AS care_notes",
       storyColumns.has("updated_at") ? "updated_at" : "'' AS updated_at"
     ];
     const whereParts = [`product_id IN (${ids.map(() => "?").join(",")})`];
@@ -201,12 +241,18 @@ async function enrichProductsWithStoryNotes(db, products) {
       if (!productId || byProductId.has(productId)) return;
       const summary = normalizeText(story.story_summary) || normalizeText(story.story_body);
       const snippet = summary.length > 220 ? `${summary.slice(0, 217).trim()}...` : summary;
+      const processValues = splitFilterValues(story.process_notes, story.story_heading);
+      const localityValues = splitFilterValues(story.local_pickup_note);
       byProductId.set(productId, {
         public_story_heading: normalizeText(story.story_heading),
         public_story_summary: summary,
         public_story_snippet: snippet,
         public_story_status: normalizeText(story.display_status),
-        public_story_privacy_status: normalizeText(story.privacy_status)
+        public_story_privacy_status: normalizeText(story.privacy_status),
+        proof_process: filterText(processValues),
+        proof_processes: processValues,
+        proof_locality: filterText(localityValues),
+        proof_localities: localityValues
       });
     });
 
@@ -227,6 +273,9 @@ function buildFilterGroups(products) {
   const productTypes = {};
   const origins = {};
   const saleChannels = {};
+  const materials = {};
+  const processes = {};
+  const localities = {};
 
   products.forEach((product) => {
     const category = normalizeText(product.product_category);
@@ -239,6 +288,9 @@ function buildFilterGroups(products) {
     const productType = normalizeText(product.product_type);
     const origin = normalizeText(product.merchandise_origin);
     const channel = normalizeText(product.sale_channel);
+    const materialValues = Array.isArray(product.proof_materials) ? product.proof_materials : splitFilterValues(product.proof_material);
+    const processValues = Array.isArray(product.proof_processes) ? product.proof_processes : splitFilterValues(product.proof_process);
+    const localityValues = Array.isArray(product.proof_localities) ? product.proof_localities : splitFilterValues(product.proof_locality);
 
     if (category) categories[category] = (categories[category] || 0) + 1;
     colorsForProduct.forEach((color) => {
@@ -247,6 +299,9 @@ function buildFilterGroups(products) {
     if (productType) productTypes[productType] = (productTypes[productType] || 0) + 1;
     if (origin) origins[origin] = (origins[origin] || 0) + 1;
     if (channel) saleChannels[channel] = (saleChannels[channel] || 0) + 1;
+    materialValues.forEach((material) => { materials[material] = (materials[material] || 0) + 1; });
+    processValues.forEach((process) => { processes[process] = (processes[process] || 0) + 1; });
+    localityValues.forEach((locality) => { localities[locality] = (localities[locality] || 0) + 1; });
   });
 
   return {
@@ -254,7 +309,10 @@ function buildFilterGroups(products) {
     colors: group(colors),
     product_types: group(productTypes),
     merchandise_origins: group(origins),
-    sale_channels: group(saleChannels)
+    sale_channels: group(saleChannels),
+    materials: group(materials),
+    processes: group(processes),
+    localities: group(localities)
   };
 }
 
@@ -272,6 +330,9 @@ function productMatchesFilters(product, filters) {
       product.public_story_heading,
       product.public_story_summary,
       product.public_story_snippet,
+      product.proof_material,
+      product.proof_process,
+      product.proof_locality,
       product.keywords
     ]
       .join(" ")
@@ -298,6 +359,21 @@ function productMatchesFilters(product, filters) {
     const hasJsonColor = String(product.color_names_json || "").toLowerCase().includes(wanted);
     const hasFallbackColor = String(product.color_name || "").trim().toLowerCase() === wanted;
     if (!hasExactColor && !hasJsonColor && !hasFallbackColor) return false;
+  }
+
+
+  const proofFilterMap = [
+    [filters.material, product.proof_materials, product.proof_material],
+    [filters.process, product.proof_processes, product.proof_process],
+    [filters.locality, product.proof_localities, product.proof_locality]
+  ];
+  for (const [wanted, list, fallback] of proofFilterMap) {
+    if (!wanted) continue;
+    const needle = String(wanted || "").toLowerCase();
+    const values = Array.isArray(list) ? list : splitFilterValues(fallback);
+    const exact = values.some((value) => String(value || "").trim().toLowerCase() === needle);
+    const fuzzy = String(fallback || "").toLowerCase().includes(needle);
+    if (!exact && !fuzzy) return false;
   }
 
   if (filters.min_price_cents != null && Number(product.price_cents || 0) < filters.min_price_cents) return false;
@@ -342,7 +418,12 @@ function buildWhere({ productColumns, seoColumns, hasSeoJoin, filters, includeSe
       "sku",
       "product_category",
       "color_name",
-      "color_names_json"
+      "color_names_json",
+      "material_tags",
+      "materials_json",
+      "primary_material",
+      "process_tags",
+      "locality_label"
     ].forEach((columnName) => {
       if (productColumns.has(columnName)) {
         searchParts.push(`LOWER(COALESCE(p.${columnName}, '')) LIKE ?`);
@@ -405,6 +486,22 @@ function buildWhere({ productColumns, seoColumns, hasSeoJoin, filters, includeSe
       warnings.push("color_filter_skipped_column_missing");
     }
   }
+
+  [[filters.material, ["material_tags", "materials_json", "primary_material", "material", "product_category"], "material"], [filters.process, ["process_tags", "making_process", "process_notes"], "process"], [filters.locality, ["locality_label", "local_pickup_note", "sourcing_notes"], "locality"]].forEach(([value, columnNames, label]) => {
+    if (!value) return;
+    const proofParts = [];
+    columnNames.forEach((columnName) => {
+      if (productColumns.has(columnName)) {
+        proofParts.push(`LOWER(COALESCE(p.${columnName}, '')) LIKE ?`);
+        bindings.push(`%${value}%`);
+      }
+    });
+    if (proofParts.length) {
+      clauses.push(`(${proofParts.join(" OR ")})`);
+    } else {
+      warnings.push(`${label}_filter_client_side_only`);
+    }
+  });
 
   if (filters.min_price_cents != null) {
     if (productColumns.has("price_cents")) {
@@ -505,6 +602,15 @@ function buildProductSelectSql({ productColumns, taxColumns, seoColumns, hasTaxJ
     selectColumn(productColumns, "p", "condition_summary", "''"),
     selectColumn(productColumns, "p", "era_label", "''"),
     selectColumn(productColumns, "p", "sourcing_notes", "''"),
+    selectColumn(productColumns, "p", "material_tags", "''"),
+    selectColumn(productColumns, "p", "materials_json", "''"),
+    selectColumn(productColumns, "p", "primary_material", "''"),
+    selectColumn(productColumns, "p", "material", "''"),
+    selectColumn(productColumns, "p", "process_tags", "''"),
+    selectColumn(productColumns, "p", "making_process", "''"),
+    selectColumn(productColumns, "p", "process_notes", "''"),
+    selectColumn(productColumns, "p", "locality_label", "''"),
+    selectColumn(productColumns, "p", "local_pickup_note", "''"),
     selectColumn(productColumns, "p", "price_cents", "0"),
     selectColumn(productColumns, "p", "compare_at_price_cents", "NULL"),
     selectColumn(productColumns, "p", "currency", sqlString("CAD")),
@@ -622,6 +728,9 @@ export async function onRequestGet(context) {
     merchandise_origin: normalizeText(url.searchParams.get("merchandise_origin")).toLowerCase(),
     sale_channel: normalizeText(url.searchParams.get("sale_channel")).toLowerCase(),
     color_name: normalizeText(url.searchParams.get("color_name")).toLowerCase(),
+    material: normalizeText(url.searchParams.get("material") || url.searchParams.get("product_material")).toLowerCase(),
+    process: normalizeText(url.searchParams.get("process") || url.searchParams.get("making_process")).toLowerCase(),
+    locality: normalizeText(url.searchParams.get("locality") || url.searchParams.get("proof_locality")).toLowerCase(),
     min_price_cents: parseOptionalInteger(url.searchParams.get("min_price_cents")),
     max_price_cents: parseOptionalInteger(url.searchParams.get("max_price_cents")),
     requires_shipping: normalizeText(url.searchParams.get("requires_shipping"))
@@ -633,7 +742,10 @@ export async function onRequestGet(context) {
     colors: [],
     product_types: [],
     merchandise_origins: [],
-    sale_channels: []
+    sale_channels: [],
+    materials: [],
+    processes: [],
+    localities: []
   };
 
   if (!db) {
@@ -710,7 +822,7 @@ export async function onRequestGet(context) {
 
   try {
     const rows = await runProductQuery(db, primarySql, primaryWhere.bindings);
-    const products = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
+    const products = (await enrichProductsWithStoryNotes(db, shapeProducts(rows))).filter((product) => productMatchesFilters(product, filters));
     return json({
       ok: true,
       products,
@@ -736,7 +848,7 @@ export async function onRequestGet(context) {
 
     try {
       const rows = await runProductQuery(db, fallbackSql, fallbackWhere.bindings);
-      const products = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
+      const products = (await enrichProductsWithStoryNotes(db, shapeProducts(rows))).filter((product) => productMatchesFilters(product, filters));
       warnings.push("fallback_query_used");
       return json({
         ok: true,
