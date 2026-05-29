@@ -119,3 +119,8 @@ No Amazon matching logic changed in Build 138. The new Social Posting Queue can 
 - Added `competitive_opportunities` and `competitive_opportunity_events` schema support.
 - Added `/data/site/competitive-opportunities.json` as a public-safe roadmap seed file; it contains strategy/action metadata only and no private costs, orders, or customer data.
 - Next direction: connect competitive opportunities to product readiness, SEO action completion, social analytics, testimonials, custom requests, and marketplace export checks.
+
+## Build 155 maintenance note
+
+- Updated alongside the latest custom request payment/order/marketplace/proof-filter pass.
+- Schema, roadmap, gaps, SEO, and sanity notes now reflect the new Build 155 workflow direction.

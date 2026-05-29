@@ -195,3 +195,10 @@ Approved product story snippets now help shop cards include more human, local, a
 ## Build 148 Local SEO Direction
 
 Approved product story snippets now support internal discovery. Continue writing product stories with real material/process/local terms people search for, while keeping one clear H1 per page and avoiding private customer or workshop-background details in public media.
+
+## Build 155 SEO/local search notes
+
+- Shop/product APIs now expose proof filters for material, process, and locality. These fields support natural phrases shoppers may use, such as handmade jewelry, polymer clay earrings, engraved gifts, local pickup, Southern Ontario workshop, vintage finds, and custom gifts.
+- Marketplace export packs should reuse clear titles, concise descriptions, local context, material/process wording, and one main selling point per listing.
+- Payment/revision/private quote pages remain `noindex` because they are customer-specific and should not compete with public product/category pages.
+

@@ -1296,6 +1296,10 @@ CREATE TABLE IF NOT EXISTS custom_request_quote_share_links (
   quote_draft_id INTEGER,
   share_token TEXT NOT NULL UNIQUE,
   share_status TEXT NOT NULL DEFAULT 'active',
+  version_number INTEGER NOT NULL DEFAULT 1,
+  supersedes_share_link_id INTEGER,
+  resent_at TEXT,
+  resend_note TEXT,
   customer_name TEXT,
   customer_email TEXT,
   title TEXT,
@@ -1408,6 +1412,8 @@ CREATE TABLE IF NOT EXISTS custom_request_payment_request_drafts (
   created_by_user_id INTEGER,
   reviewed_by_user_id INTEGER,
   reviewed_at TEXT,
+  approved_payment_link_id INTEGER,
+  approved_payment_link_url TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
@@ -1435,6 +1441,9 @@ CREATE TABLE IF NOT EXISTS custom_request_order_drafts (
   created_by_user_id INTEGER,
   reviewed_by_user_id INTEGER,
   reviewed_at TEXT,
+  order_id INTEGER,
+  converted_by_user_id INTEGER,
+  converted_at TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
@@ -1446,3 +1455,87 @@ CREATE INDEX IF NOT EXISTS idx_custom_order_drafts_request ON custom_request_ord
 -- Reference uploads now also create media_consent_records rows with source_type='custom_request_reference_upload', consent_status='requested', and consent_scope='internal_only'.
 -- Approved SEO can now be baked from data/site/seo-page-overrides.json using scripts/bake_approved_seo_overrides.py.
 -- Accounting close workflow now supports format=zip for a CSV bundle plus evidence-index.csv and manifest.json.
+
+-- Build 155 - approved custom request payment links, real order conversion, marketplace packs, and post-fulfillment prompts.
+CREATE TABLE IF NOT EXISTS custom_request_payment_links (
+  custom_request_payment_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  payment_request_draft_id INTEGER,
+  quote_draft_id INTEGER,
+  payment_link_key TEXT NOT NULL UNIQUE,
+  link_token TEXT NOT NULL UNIQUE,
+  link_status TEXT NOT NULL DEFAULT 'active',
+  link_url_path TEXT,
+  request_type TEXT NOT NULL DEFAULT 'deposit',
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  customer_name TEXT,
+  customer_email TEXT,
+  provider TEXT NOT NULL DEFAULT 'manual_review',
+  provider_reference TEXT,
+  approval_notes TEXT,
+  customer_viewed_at TEXT,
+  customer_ready_at TEXT,
+  customer_note TEXT,
+  viewed_at TEXT,
+  ready_to_pay_at TEXT,
+  customer_ready_note TEXT,
+  approved_by_user_id INTEGER,
+  approved_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (payment_request_draft_id) REFERENCES custom_request_payment_request_drafts(custom_request_payment_request_draft_id) ON DELETE SET NULL,
+  FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_custom_payment_links_request ON custom_request_payment_links(custom_request_id, link_status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_custom_payment_links_token ON custom_request_payment_links(link_token, link_status);
+
+CREATE TABLE IF NOT EXISTS custom_request_marketplace_export_packs (
+  custom_request_marketplace_export_pack_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  quote_draft_id INTEGER,
+  product_draft_id INTEGER,
+  export_key TEXT NOT NULL UNIQUE,
+  export_status TEXT NOT NULL DEFAULT 'draft',
+  etsy_title TEXT,
+  etsy_description TEXT,
+  etsy_tags TEXT,
+  facebook_title TEXT,
+  facebook_description TEXT,
+  pinterest_title TEXT,
+  pinterest_description TEXT,
+  manual_listing_title TEXT,
+  manual_listing_description TEXT,
+  suggested_local_keywords TEXT,
+  source_payload_json TEXT DEFAULT '{}',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL,
+  FOREIGN KEY (product_draft_id) REFERENCES custom_request_product_drafts(custom_request_product_draft_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_custom_marketplace_export_request ON custom_request_marketplace_export_packs(custom_request_id, export_status, updated_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_fulfillment_prompts (
+  custom_request_fulfillment_prompt_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  order_id INTEGER,
+  prompt_key TEXT NOT NULL UNIQUE,
+  prompt_status TEXT NOT NULL DEFAULT 'draft',
+  customer_name TEXT,
+  customer_email TEXT,
+  review_prompt_text TEXT,
+  photo_prompt_text TEXT,
+  consent_prompt_text TEXT,
+  created_by_user_id INTEGER,
+  sent_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_custom_fulfillment_prompts_request ON custom_request_fulfillment_prompts(custom_request_id, prompt_status, updated_at);
+

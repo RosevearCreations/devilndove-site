@@ -399,3 +399,16 @@ This table is private D1 data and should not be mirrored into public `/data/` JS
 ## Build 148 Schema Notes
 
 Build 148 adds `product_image_role_reference` and extends the runtime product-image annotation model with optional fields: `image_role`, `public_use_status`, `consent_record_id`, and `role_review_notes`. Existing D1 databases are self-healed by `/api/admin/product-images` because SQLite/D1 migrations cannot safely re-add already-existing optional columns without live introspection. The current pass SQL seeds the role reference table and records the migration ledger marker.
+
+## Build 155 schema additions
+
+New/expanded custom request tables and fields:
+
+- `custom_request_payment_links` stores approved private payment review links for reviewed payment-request drafts.
+- `custom_request_order_drafts.order_id`, `converted_by_user_id`, and `converted_at` connect reviewed order drafts to real order records.
+- `custom_request_payment_request_drafts.approved_payment_link_id` and `approved_payment_link_url` connect reviewed drafts to approved payment review links.
+- `custom_request_quote_share_links.version_number`, `supersedes_share_link_id`, `resent_at`, and `resend_note` support revision/resend links.
+- `custom_request_marketplace_export_packs` stores Etsy, Facebook Marketplace, Pinterest, and manual listing copy.
+- `custom_request_fulfillment_prompts` stores draft review/photo/consent prompts for completed custom work.
+- Product/shop APIs now expose proof fields derived from product/material/process/locality columns and public story notes.
+

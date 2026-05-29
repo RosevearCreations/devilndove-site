@@ -471,3 +471,22 @@ Still open:
 - Media consent records are not yet surfaced directly inside each Product Story row.
 - The public storefront does not yet expose role-aware galleries, such as “detail,” “scale,” or “process” tabs.
 - Accounting workflows are still the largest unfinished business area: payment application, HST/GST review, close controls, and accountant exports.
+
+## Build 155 gap closure and remaining risks
+
+Closed or reduced:
+
+- Reviewed payment-request drafts can now become private approved payment review links.
+- Reviewed order drafts can now become real `orders`/`order_items` records.
+- Quote revisions can now create versioned replacement links and supersede older active links.
+- Marketplace copy no longer has to be drafted manually from scratch.
+- Proof filtering is available in the shop/product API layer, not only gallery JavaScript.
+- Post-fulfillment review/photo/consent prompts are now tracked as internal draft records.
+
+Still intentionally guarded:
+
+- Payment links are manual review links only; no card charge happens inside the new page.
+- Converted custom request orders remain draft/pending until the final payment and fulfillment workflow is approved.
+- Marketplace exports are copy/card packs, not direct marketplace API publishing.
+- Consent prompts are draft/copy-only until a proper consent acceptance page is built.
+

@@ -234,3 +234,8 @@ This build adds public shop-card story snippets, Product editor image duplicate 
 ## Build 148 Update
 
 Product media management now supports drag/drop ordering, role labels, public-use status, consent-record references, and story snippets in internal search. See `COMPETITIVE.md`, `DEVELOPMENT_ROADMAP.md`, and `KNOWN_GAPS_AND_RISKS.md` for the updated direction.
+
+## Build 155 summary
+
+Build 155 extends Devil n Dove custom request commerce: reviewed payment-request drafts can become private approved payment review links, reviewed order drafts can become real draft orders, quote revisions can create replacement links, marketplace copy packs can be generated, shop/product APIs expose proof filters, and post-fulfillment review/photo/consent prompts are tracked as internal draft records.
+

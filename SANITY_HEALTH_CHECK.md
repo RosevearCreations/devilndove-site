@@ -323,3 +323,15 @@ Checks to perform after deploy:
 3. Create or update a Media Consent Record in `/admin/operations/`.
 4. Open Social Media Privacy Guard and confirm consent status appears for matching social posts.
 5. Search the public site for wording from an approved product story snippet and confirm product results surface properly.
+
+## Build 155 sanity targets
+
+Required checks for this pass:
+
+- One H1 per exposed HTML page.
+- JavaScript syntax check for Functions, `public/js`, and `js`.
+- CSS brace drift check.
+- ZIP integrity check.
+- Confirm private payment page is `noindex,nofollow`.
+- Confirm schema files include Build 155 custom request payment/order/marketplace/fulfillment additions.
+

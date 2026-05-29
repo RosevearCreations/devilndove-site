@@ -277,3 +277,17 @@ Deployment checks should focus on `/api/products`, `/shop/`, `/admin/products/`,
 ## Build 148 Status
 
 Build 148 adds role-aware product media management and consent-linked social privacy. Use `/admin/products/` → Product Media Workflow to drag/drop order images, apply recommended roles, set public-use status, and reference a Media Consent Record ID where needed. Use `/admin/operations/` → Social Media Privacy Guard to verify consent matches before approving social posts with private/customer media.
+
+## Build 155 handoff status
+
+Completed in this pass:
+
+- Approved private payment review links from reviewed custom payment-request drafts.
+- Real draft/pending orders from reviewed custom order drafts.
+- Quote revision/version links.
+- Marketplace export copy packs.
+- Shop/product API proof filters for material, process, and locality.
+- Post-fulfillment review/photo/consent prompt drafts.
+
+Next pass should focus on real payment provider checkout, order status/customer view pages, marketplace CSV exports, and consent-response capture.
+

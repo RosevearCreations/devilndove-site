@@ -223,3 +223,11 @@ The current working direction is: product capture should flow from quick draft â
 ## Build 148 AI Context
 
 Continue treating product media as role-aware and privacy-aware. Product images can now carry `image_role`, `public_use_status`, `consent_record_id`, and `role_review_notes`. Social Privacy Guard checks Media Consent Records for customer/private media before approval. Internal site search should keep using approved product story snippets.
+
+## Build 155 update - custom request follow-through, marketplace packs, and proof filters
+
+- Custom requests now have a safer end-to-end path from intake to quote preview, quote revision link, reviewed payment request link, real order draft conversion, marketplace export pack, and post-fulfillment review/photo/consent prompt.
+- Public payment review pages are private/noindex pages and do not process cards automatically; they record customer readiness and keep the final payment method under admin review.
+- Product/shop APIs now expose proof filter fields for material, process, and locality so public filtering is not limited to the gallery page.
+- Schema files were updated for the new custom request payment link, marketplace export, and fulfillment prompt tables.
+

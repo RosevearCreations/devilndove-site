@@ -754,3 +754,22 @@ Handmade and mixed-media shops often lose sales because product pages feel thin:
 ### Practical next direction
 
 The next competitive layer should be: (1) auto-detect missing image roles before publishing, (2) show story snippets in more search/listing surfaces, (3) connect consent records directly to product-story approval, (4) add testimonial/trust blocks, and (5) start converting social/SEO data into reviewed content improvements.
+
+## Build 155 competitive completion pass
+
+Build 155 pushes Devil n Dove closer to a strong small-maker commerce workflow instead of a basic product catalog:
+
+- **Custom work advantage:** customer requests can move from intake to quote, revised quote, accepted quote, approved payment review, and real order draft without losing the story/history.
+- **Marketplace advantage:** one custom request can generate listing copy for Etsy, Facebook Marketplace, Pinterest, and manual sales channels, keeping wording consistent across platforms.
+- **Trust/proof advantage:** material, process, and locality proof filters now exist at the shop/product API level, helping shoppers find polymer clay, jewelry, casting, engraving, vintage, collectible, or local Southern Ontario proof signals faster.
+- **Safety advantage:** uploaded reference images and post-fulfillment prompts stay consent-aware and review-first instead of being automatically published.
+- **SEO/local advantage:** proof fields and marketplace-ready copy give more places to use natural customer search wording while preserving one clear H1 per public page.
+
+Remaining competitive upgrades:
+
+1. Processor-backed checkout links after admin approval.
+2. Customer order-status pages for custom work.
+3. Marketplace CSV/export files.
+4. Public consent capture and review-request landing pages.
+5. Related-products proof matching on product detail pages.
+

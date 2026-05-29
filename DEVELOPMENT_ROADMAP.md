@@ -1012,3 +1012,22 @@ Completed in this pass:
 18. Add customer/media consent expiry reminders.
 19. Add social posting result reconciliation into analytics.
 20. Keep retiring duplicate JSON into D1/private staging where the data is operational or private.
+
+## Build 155 completed roadmap items
+
+- Converted reviewed custom request payment-request drafts into approved private payment review links.
+- Converted reviewed custom request order drafts into real `orders` and `order_items` records while keeping status as draft/pending until final review.
+- Added quote revision resend/version links so changed quotes can supersede older private links.
+- Added marketplace export packs for Etsy, Facebook Marketplace, Pinterest, and manual listing copy.
+- Extended proof filters into the shop/product APIs and shop UI for material, process, and locality.
+- Added post-fulfillment review/photo/consent prompts as draft/copy-only admin records.
+
+### Next strongest steps after Build 155
+
+1. Connect approved payment review links to Stripe/PayPal/Square provider checkout records once processor settings are confirmed.
+2. Add order status history rows and customer order-view pages for converted custom request orders.
+3. Add marketplace CSV exports for Etsy/Facebook/Pinterest instead of copy-only cards.
+4. Add consent-response capture from the post-fulfillment prompt.
+5. Add proof filters to product detail related-item suggestions and collection landing pages.
+6. Add admin approval gates before payment links can be sent externally.
+
