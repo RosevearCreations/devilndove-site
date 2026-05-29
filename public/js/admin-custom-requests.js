@@ -31,8 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (reply) pills.push(`<span class="status-note small">Reply template ready</span>`);
     candidates.forEach((candidate) => pills.push(`<span class="status-note small">${esc(candidate.candidate_type || 'payment')}: ${money(candidate.amount_cents)} / ${esc(candidate.candidate_status || 'draft')}</span>`));
     if (preview) pills.push(`<span class="status-note small">Preview: ${esc(preview.share_status || 'active')}</span>`);
-    if (payReq) pills.push(`<span class="status-note small">Payment request draft: ${money(payReq.amount_cents)}</span>`);
-    if (orderDraft) pills.push(`<span class="status-note small">Order draft: ${money(orderDraft.total_cents)}</span>`);
+    if (payReq) pills.push(`<span class="status-note small">Payment request draft: ${money(payReq.amount_cents)} / ${esc(payReq.payment_request_status || 'review_needed')}</span>`);
+    if (orderDraft) pills.push(`<span class="status-note small">Order draft: ${money(orderDraft.total_cents)} / ${esc(orderDraft.order_draft_status || 'review_needed')}</span>`);
+    rowsForRequest(data.payment_links, id).forEach((link) => pills.push(`<span class="status-note small">Payment link: ${esc(link.link_status || 'active')}</span>`));
+    rowsForRequest(data.marketplace_export_packs, id).forEach((pack) => pills.push(`<span class="status-note small">Marketplace pack: ${esc(pack.export_status || 'draft')}</span>`));
+    rowsForRequest(data.fulfillment_prompts, id).forEach((prompt) => pills.push(`<span class="status-note small">Fulfillment prompt: ${esc(prompt.prompt_status || 'draft')}</span>`));
     if (revisions.length) pills.push(`<span class="status-note small">Revisions: ${esc(revisions.length)}</span>`);
     return pills.join(' ');
   }
@@ -51,6 +54,44 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = `/custom-request/quote/?token=${encodeURIComponent(row.share_token || '')}`;
       return `<tr><td><strong>${esc(row.title || '')}</strong><br><span class="small">Request #${esc(row.custom_request_id || '')} • ${money(row.quote_total_cents)}</span></td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${esc(row.share_status || '')}<br><span class="small">Expires ${esc(row.expires_at || '—')}</span></td><td><a href="${esc(url)}" target="_blank" rel="noopener">Open preview</a><br><button class="btn small" type="button" data-copy-preview-link="${esc(url)}">Copy link</button></td><td class="small">${row.accepted_at ? `Accepted ${esc(row.accepted_at)}` : row.declined_at ? `Declined ${esc(row.declined_at)}` : 'No response yet.'}<br>${esc(row.customer_response_note || '')}</td></tr>`;
     }).join('')}</tbody></table></div>`;
+  }
+
+
+  function renderApprovedPaymentLinks(data) {
+    const rows = Array.isArray(data.payment_links) ? data.payment_links : [];
+    if (!rows.length) return '<p class="small">No approved internal payment links yet. Use “Approve payment link” only after reviewing the payment-request draft.</p>';
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Payment link</th><th>Customer</th><th>Amount</th><th>Status</th><th>Private link</th></tr></thead><tbody>${rows.slice(0, 25).map((row) => {
+      const url = row.link_path || `/custom-request/pay/?token=${encodeURIComponent(row.link_token || '')}`;
+      return `<tr><td><strong>${esc(row.payment_link_key || '')}</strong><br><span class="small">Request #${esc(row.custom_request_id || '')}</span></td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${money(row.amount_cents)}<br><span class="small">Tax ${money(row.tax_cents)}</span></td><td>${esc(row.link_status || '')}<br><span class="small">Viewed ${esc(row.customer_viewed_at || row.viewed_at || '—')}</span></td><td><a href="${esc(url)}" target="_blank" rel="noopener">Open payment review</a><br><button class="btn small" type="button" data-copy-payment-link="${esc(url)}">Copy link</button></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+  }
+
+  function renderMarketplaceExportPacks(data) {
+    const rows = Array.isArray(data.marketplace_export_packs) ? data.marketplace_export_packs : [];
+    if (!rows.length) return '<p class="small">No marketplace export packs yet. Use “Marketplace pack” after the product plan and quote scope are reviewed.</p>';
+    return rows.slice(0, 12).map((pack) => `<article class="card custom-request-template-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><strong>${esc(pack.export_key || '')}</strong><div class="small">Request #${esc(pack.custom_request_id || '')} • ${esc(pack.export_status || 'draft')}</div></div><button class="btn small" type="button" data-copy-marketplace-pack="${esc(pack.custom_request_marketplace_export_pack_id || '')}">Copy all copy</button></div><div class="admin-form-grid" style="margin-top:8px"><label class="small">Etsy<textarea class="input" rows="5" readonly data-marketplace-pack-body="${esc(pack.custom_request_marketplace_export_pack_id || '')}">${esc(pack.etsy_title || '')}
+
+${esc(pack.etsy_description || '')}
+
+Tags: ${esc(pack.etsy_tags || '')}</textarea></label><label class="small">Facebook<textarea class="input" rows="5" readonly>${esc(pack.facebook_title || '')}
+
+${esc(pack.facebook_description || '')}</textarea></label><label class="small">Pinterest<textarea class="input" rows="5" readonly>${esc(pack.pinterest_title || '')}
+
+${esc(pack.pinterest_description || '')}</textarea></label><label class="small">Manual listing<textarea class="input" rows="5" readonly>${esc(pack.manual_listing_title || '')}
+
+${esc(pack.manual_listing_description || '')}
+
+${esc(pack.suggested_local_keywords || '')}</textarea></label></div></article>`).join('');
+  }
+
+  function renderFulfillmentPrompts(data) {
+    const rows = Array.isArray(data.fulfillment_prompts) ? data.fulfillment_prompts : [];
+    if (!rows.length) return '<p class="small">No post-fulfillment review/photo/consent prompts yet. Generate one after the job/order is fulfilled.</p>';
+    return rows.slice(0, 15).map((prompt) => `<article class="card custom-request-template-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><strong>${esc(prompt.prompt_key || '')}</strong><div class="small">Request #${esc(prompt.custom_request_id || '')} • ${esc(prompt.prompt_status || 'draft')}</div></div><button class="btn small" type="button" data-copy-fulfillment-prompt="${esc(prompt.custom_request_fulfillment_prompt_id || '')}">Copy prompt</button></div><textarea class="input" rows="8" readonly data-fulfillment-prompt-body="${esc(prompt.custom_request_fulfillment_prompt_id || '')}">${esc(prompt.review_prompt_text || '')}
+
+${esc(prompt.photo_prompt_text || '')}
+
+${esc(prompt.consent_prompt_text || '')}</textarea></article>`).join('');
   }
 
   function renderPaymentCandidates(data) {
@@ -77,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const payment = Array.isArray(data.payment_request_drafts) ? data.payment_request_drafts : [];
     const orders = Array.isArray(data.order_drafts) ? data.order_drafts : [];
     if (!payment.length && !orders.length) return '<p class="small">No accepted quote follow-through drafts yet. They are created when a customer accepts a preview, or manually from the line-item section.</p>';
-    return `<div class="admin-table-wrap"><table><thead><tr><th>Kind</th><th>Key</th><th>Customer</th><th>Status</th><th>Amount</th><th>Notes</th></tr></thead><tbody>${payment.map((row) => `<tr><td>Payment request</td><td>${esc(row.payment_request_key || '')}</td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${esc(row.payment_request_status || '')}</td><td>${money(row.amount_cents)}</td><td class="small">${esc(row.review_notes || '')}</td></tr>`).join('')}${orders.map((row) => `<tr><td>Order draft</td><td>${esc(row.order_draft_key || '')}</td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${esc(row.order_draft_status || '')}</td><td>${money(row.total_cents)}</td><td class="small">${esc(row.fulfillment_notes || '')}</td></tr>`).join('')}</tbody></table></div>`;
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Kind</th><th>Key</th><th>Customer</th><th>Status</th><th>Amount</th><th>Notes</th><th>Reviewed action</th></tr></thead><tbody>${payment.map((row) => `<tr><td>Payment request</td><td>${esc(row.payment_request_key || '')}</td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${esc(row.payment_request_status || '')}<br><span class="small">${esc(row.approved_payment_link_url || '')}</span></td><td>${money(row.amount_cents)}</td><td class="small">${esc(row.review_notes || '')}</td><td><button class="btn small" type="button" data-custom-request-action="approve_payment_link" data-custom-request-id="${esc(row.custom_request_id || '')}">Approve payment link</button></td></tr>`).join('')}${orders.map((row) => `<tr><td>Order draft</td><td>${esc(row.order_draft_key || '')}</td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${esc(row.order_draft_status || '')}<br><span class="small">Order ID ${esc(row.order_id || '—')}</span></td><td>${money(row.total_cents)}</td><td class="small">${esc(row.fulfillment_notes || '')}</td><td><button class="btn small" type="button" data-custom-request-action="convert_order_draft_to_order" data-custom-request-id="${esc(row.custom_request_id || '')}">Convert to order</button></td></tr>`).join('')}</tbody></table></div>`;
   }
 
   function renderQuoteRevisions(data) {
@@ -107,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td><strong>${esc(row.request_type || '')}</strong><br><span class="small">${esc(row.product_interest || '')}</span><br><span class="small">Budget ${money(row.budget_cents)} • Deadline ${esc(row.deadline_date || '—')}</span><div style="margin-top:6px">${renderDraftSummary(row, data)}</div></td>
           <td>${esc(row.name || '')}<br><a href="mailto:${esc(row.email || '')}">${esc(row.email || '')}</a><br><span class="small">${esc(row.phone || '')}</span><div style="margin-top:6px">${historyBadge(data.customer_history || [], row.email)}</div></td>
           <td><div class="small" style="max-width:420px;white-space:pre-wrap">${esc(row.message || '')}</div>${attachmentLinks(row.attachment_urls_json)}</td>
-          <td><select data-custom-request-status="${esc(row.custom_request_id)}"><option value="new" ${row.status === 'new' ? 'selected' : ''}>New</option><option value="reviewing" ${row.status === 'reviewing' ? 'selected' : ''}>Reviewing</option><option value="quote_needed" ${row.status === 'quote_needed' ? 'selected' : ''}>Quote needed</option><option value="quoted" ${row.status === 'quoted' ? 'selected' : ''}>Quoted</option><option value="accepted" ${row.status === 'accepted' ? 'selected' : ''}>Accepted</option><option value="declined" ${row.status === 'declined' ? 'selected' : ''}>Declined</option><option value="archived" ${row.status === 'archived' ? 'selected' : ''}>Archived</option></select><textarea data-custom-request-notes="${esc(row.custom_request_id)}" rows="3" placeholder="Admin notes">${esc(row.admin_notes || '')}</textarea><div class="custom-request-actions"><button class="btn small" data-custom-request-save="${esc(row.custom_request_id)}">Save review</button><button class="btn small" data-custom-request-action="create_quote_draft" data-custom-request-id="${esc(row.custom_request_id)}">Quote draft</button><button class="btn small" data-custom-request-action="create_reply_template" data-custom-request-id="${esc(row.custom_request_id)}">Reply template</button><button class="btn small" data-custom-request-action="create_deposit_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Deposit candidate</button><button class="btn small" data-custom-request-action="create_job_draft" data-custom-request-id="${esc(row.custom_request_id)}">Job draft</button><button class="btn small" data-custom-request-action="create_invoice_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Invoice candidate</button><button class="btn small" data-custom-request-action="create_quote_preview_link" data-custom-request-id="${esc(row.custom_request_id)}">Quote preview link</button><button class="btn small" data-custom-request-action="create_accepted_payment_order_drafts" data-custom-request-id="${esc(row.custom_request_id)}">Accepted follow-through</button><button class="btn small" data-custom-request-action="create_product_draft" data-custom-request-id="${esc(row.custom_request_id)}">Product plan</button></div></td>
+          <td><select data-custom-request-status="${esc(row.custom_request_id)}"><option value="new" ${row.status === 'new' ? 'selected' : ''}>New</option><option value="reviewing" ${row.status === 'reviewing' ? 'selected' : ''}>Reviewing</option><option value="quote_needed" ${row.status === 'quote_needed' ? 'selected' : ''}>Quote needed</option><option value="quoted" ${row.status === 'quoted' ? 'selected' : ''}>Quoted</option><option value="accepted" ${row.status === 'accepted' ? 'selected' : ''}>Accepted</option><option value="declined" ${row.status === 'declined' ? 'selected' : ''}>Declined</option><option value="archived" ${row.status === 'archived' ? 'selected' : ''}>Archived</option></select><textarea data-custom-request-notes="${esc(row.custom_request_id)}" rows="3" placeholder="Admin notes">${esc(row.admin_notes || '')}</textarea><div class="custom-request-actions"><button class="btn small" data-custom-request-save="${esc(row.custom_request_id)}">Save review</button><button class="btn small" data-custom-request-action="create_quote_draft" data-custom-request-id="${esc(row.custom_request_id)}">Quote draft</button><button class="btn small" data-custom-request-action="create_reply_template" data-custom-request-id="${esc(row.custom_request_id)}">Reply template</button><button class="btn small" data-custom-request-action="create_deposit_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Deposit candidate</button><button class="btn small" data-custom-request-action="create_job_draft" data-custom-request-id="${esc(row.custom_request_id)}">Job draft</button><button class="btn small" data-custom-request-action="create_invoice_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Invoice candidate</button><button class="btn small" data-custom-request-action="create_quote_preview_link" data-custom-request-id="${esc(row.custom_request_id)}">Quote preview link</button><button class="btn small" data-custom-request-action="create_quote_revision_link" data-custom-request-id="${esc(row.custom_request_id)}">Revision link</button><button class="btn small" data-custom-request-action="create_accepted_payment_order_drafts" data-custom-request-id="${esc(row.custom_request_id)}">Accepted follow-through</button><button class="btn small" data-custom-request-action="approve_payment_link" data-custom-request-id="${esc(row.custom_request_id)}">Approve payment link</button><button class="btn small" data-custom-request-action="convert_order_draft_to_order" data-custom-request-id="${esc(row.custom_request_id)}">Convert order</button><button class="btn small" data-custom-request-action="create_marketplace_export_pack" data-custom-request-id="${esc(row.custom_request_id)}">Marketplace pack</button><button class="btn small" data-custom-request-action="create_post_fulfillment_prompts" data-custom-request-id="${esc(row.custom_request_id)}">Fulfillment prompt</button><button class="btn small" data-custom-request-action="create_product_draft" data-custom-request-id="${esc(row.custom_request_id)}">Product plan</button></div></td>
         </tr>`).join('') || '<tr><td colspan="5">No custom requests yet.</td></tr>'}
       </tbody></table></div>
       <details style="margin-top:12px" open><summary>Manual customer reply templates</summary>${renderReplyTemplates(data)}</details>
@@ -115,6 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <details style="margin-top:12px" open><summary>Deposit and invoice candidates</summary>${renderPaymentCandidates(data)}</details>
       <details style="margin-top:12px" open><summary>Editable quote line items and estimates</summary>${renderQuoteLineItems(data)}</details>
       <details style="margin-top:12px" open><summary>Accepted quote payment/order drafts</summary>${renderAcceptedDrafts(data)}</details>
+      <details style="margin-top:12px" open><summary>Approved payment review links</summary>${renderApprovedPaymentLinks(data)}</details>
+      <details style="margin-top:12px" open><summary>Marketplace export packs</summary>${renderMarketplaceExportPacks(data)}</details>
+      <details style="margin-top:12px" open><summary>Post-fulfillment review/photo/consent prompts</summary>${renderFulfillmentPrompts(data)}</details>
       <details style="margin-top:12px" open><summary>Quote revision history</summary>${renderQuoteRevisions(data)}</details>
       <details style="margin-top:12px" open><summary>Reference uploads and consent review</summary>${renderReferenceUploads(data)}</details>
       <details style="margin-top:12px"><summary>Recent conversion events</summary><div class="small">${(data.conversion_events || []).slice(0, 30).map((event) => `${esc(event.created_at || '')} • request #${esc(event.custom_request_id || '')} • ${esc(event.conversion_type || '')} • ${esc(event.target_key || '')}`).join('<br>') || 'No conversion events yet.'}</div></details>`;
@@ -147,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     catch (error) { setMsg(error.message || 'Unable to save quote line item.', true); }
   }
 
-  mount.innerHTML = `<div class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin-top:0">Custom Requests</h2><p class="small" style="margin:0">Review engraving, personalized gift, and workshop-made commission requests before turning them into quotes, replies, deposits, jobs, invoices, or product draft plans.</p></div><button class="btn" type="button" id="customRequestsLoadButton">Refresh requests</button></div><div id="customRequestsAdminMessage" class="small" style="display:none;margin-top:10px"></div><div id="customRequestsAdminRows"></div></div>`;
+  mount.innerHTML = `<div class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin-top:0">Custom Requests</h2><p class="small" style="margin:0">Review engraving, personalized gift, and workshop-made commission requests before turning them into quotes, replies, deposits, jobs, invoices, approved payment review links, marketplace copy packs, or product draft plans.</p></div><button class="btn" type="button" id="customRequestsLoadButton">Refresh requests</button></div><div id="customRequestsAdminMessage" class="small" style="display:none;margin-top:10px"></div><div id="customRequestsAdminRows"></div></div>`;
   document.getElementById('customRequestsLoadButton')?.addEventListener('click', load);
   mount.addEventListener('click', async (event) => {
     const saveButton = event.target.closest('[data-custom-request-save]');
@@ -161,6 +205,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const path = previewCopyButton.getAttribute('data-copy-preview-link') || '';
       const link = `${window.location.origin}${path.startsWith('/') ? path : `/${path}`}`;
       try { await navigator.clipboard.writeText(link); setMsg('Quote preview link copied.'); } catch { setMsg(link, false); }
+    }
+
+    const paymentCopyButton = event.target.closest('[data-copy-payment-link]');
+    if (paymentCopyButton) {
+      const path = paymentCopyButton.getAttribute('data-copy-payment-link') || '';
+      const link = `${window.location.origin}${path.startsWith('/') ? path : `/${path}`}`;
+      try { await navigator.clipboard.writeText(link); setMsg('Payment review link copied.'); } catch { setMsg(link, false); }
+    }
+    const marketplaceCopyButton = event.target.closest('[data-copy-marketplace-pack]');
+    if (marketplaceCopyButton) {
+      const id = marketplaceCopyButton.getAttribute('data-copy-marketplace-pack');
+      const body = mount.querySelector(`[data-marketplace-pack-body="${CSS.escape(String(id))}"]`)?.value || '';
+      try { await navigator.clipboard.writeText(body); setMsg('Marketplace copy pack copied.'); } catch { setMsg('Copy failed; select the marketplace text manually.', true); }
+    }
+    const fulfillmentCopyButton = event.target.closest('[data-copy-fulfillment-prompt]');
+    if (fulfillmentCopyButton) {
+      const id = fulfillmentCopyButton.getAttribute('data-copy-fulfillment-prompt');
+      const body = mount.querySelector(`[data-fulfillment-prompt-body="${CSS.escape(String(id))}"]`)?.value || '';
+      try { await navigator.clipboard.writeText(body); setMsg('Fulfillment prompt copied.'); } catch { setMsg('Copy failed; select the prompt text manually.', true); }
     }
     const copyButton = event.target.closest('[data-copy-reply-template]');
     if (copyButton) {
