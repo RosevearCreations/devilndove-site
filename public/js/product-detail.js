@@ -47,6 +47,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productReviewsCardEl = document.getElementById("productReviewsCard");
   const productReviewsSummaryEl = document.getElementById("productReviewsSummary");
   const productReviewsListEl = document.getElementById("productReviewsList");
+  const productRelatedProofCardEl = document.getElementById("productRelatedProofCard");
+  const productRelatedProofSummaryEl = document.getElementById("productRelatedProofSummary");
+  const productRelatedProofListEl = document.getElementById("productRelatedProofList");
   let currentProduct = null;
   let currentTrustSummary = null;
 
@@ -249,6 +252,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     productTrustListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
   }
 
+  function renderRelatedProducts(relatedProducts) {
+    if (!productRelatedProofCardEl || !productRelatedProofListEl || !productRelatedProofSummaryEl) return;
+    const rows = Array.isArray(relatedProducts) ? relatedProducts : [];
+    if (!rows.length) {
+      hide(productRelatedProofCardEl);
+      productRelatedProofListEl.innerHTML = '';
+      productRelatedProofSummaryEl.textContent = '';
+      return;
+    }
+    show(productRelatedProofCardEl);
+    productRelatedProofSummaryEl.textContent = 'These pieces share material, process, locality, or product-proof wording with the current listing.';
+    productRelatedProofListEl.innerHTML = rows.map((row) => `<a class="card" href="/shop/product/?slug=${encodeURIComponent(row.slug || '')}" style="text-decoration:none;color:inherit"><div>${row.featured_image_url ? `<img src="${escapeHtml(row.featured_image_url)}" alt="${escapeHtml(row.name || 'Related product')}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px"/>` : '<div class="resource-story-placeholder">Related</div>'}</div><strong style="display:block;margin-top:8px">${escapeHtml(row.name || 'Related piece')}</strong><span class="small">${escapeHtml(row.product_category || '')}</span><br><span class="small">${escapeHtml(formatMoney(row.price_cents || 0, row.currency || 'CAD'))}</span></a>`).join('');
+  }
+
   function renderReviews(reviews, reviewSummary) {
     if (!productReviewsCardEl || !productReviewsSummaryEl || !productReviewsListEl) return;
     const rows = Array.isArray(reviews) ? reviews : [];
@@ -271,7 +288,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       </article>`).join('');
   }
 
-  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes) {
+  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts) {
     currentProduct = product || null;
     if (productTypeEl) {
       const badges = [product.product_type || ''];
@@ -306,6 +323,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderPolicySupport(product, trustSummary, resourceLinks);
     renderMarketplaceSupport(product);
     renderProcessLinks(product, resourceLinks);
+    renderRelatedProducts(relatedProducts);
     if (addToCartButton) {
       const externalOnly = String(product.sale_channel || 'onsite').toLowerCase() === 'external_only';
       addToCartButton.style.display = externalOnly ? 'none' : '';
@@ -327,7 +345,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET" });
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {});
+      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || []);
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;
