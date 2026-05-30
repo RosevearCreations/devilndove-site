@@ -73,6 +73,9 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'custom_request_payment_links', 'gate_status', "gate_status TEXT NOT NULL DEFAULT 'pending'");
   await ensureColumn(db, 'custom_request_payment_links', 'preferred_provider', "preferred_provider TEXT NOT NULL DEFAULT 'manual'");
   await ensureColumn(db, 'custom_request_payment_links', 'checkout_redirect_url', 'checkout_redirect_url TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'expired_at', 'expired_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'voided_at', 'voided_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'lifecycle_note', 'lifecycle_note TEXT');
   await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_payment_checkout_records (
     custom_request_payment_checkout_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
     custom_request_id INTEGER NOT NULL,
@@ -98,7 +101,8 @@ async function loadLink(db, token) {
   await ensureSchema(db);
   const link = await db.prepare(`SELECT * FROM custom_request_payment_links WHERE link_token=? LIMIT 1`).bind(token).first();
   if (!link) return null;
-  if (String(link.link_status || '').toLowerCase() === 'void') return null;
+  if (['void','expired'].includes(String(link.link_status || '').toLowerCase())) return null;
+  if (link.expired_at || link.voided_at) return null;
   if (String(link.external_share_status || 'share_allowed').toLowerCase() !== 'share_allowed') return null;
   if (String(link.gate_status || 'passed').toLowerCase() !== 'passed') return null;
   await db.prepare(`UPDATE custom_request_payment_links SET link_status=CASE WHEN link_status='active' THEN 'viewed' ELSE link_status END, customer_viewed_at=COALESCE(customer_viewed_at,CURRENT_TIMESTAMP), viewed_at=COALESCE(viewed_at,CURRENT_TIMESTAMP), updated_at=CURRENT_TIMESTAMP WHERE custom_request_payment_link_id=?`).bind(Number(link.custom_request_payment_link_id || 0)).run().catch(() => null);
@@ -199,7 +203,7 @@ export async function onRequestPost(context) {
   if (!token || !token.startsWith('pay_')) return json({ ok: false, error: 'A valid payment token is required.' }, 400);
   await ensureSchema(db);
   const link = await db.prepare(`SELECT * FROM custom_request_payment_links WHERE link_token=? LIMIT 1`).bind(token).first();
-  if (!link || String(link.link_status || '').toLowerCase() === 'void') return json({ ok: false, error: 'Payment link not found or no longer active.' }, 404);
+  if (!link || ['void','expired'].includes(String(link.link_status || '').toLowerCase()) || link.expired_at || link.voided_at) return json({ ok: false, error: 'Payment link not found or no longer active.' }, 404);
   if (String(link.external_share_status || 'share_allowed').toLowerCase() !== 'share_allowed' || String(link.gate_status || 'passed').toLowerCase() !== 'passed') return json({ ok: false, error: 'This payment link has not passed the required admin share gates yet.' }, 403);
   const action = clean(body.action || 'ready_to_pay', 60).toLowerCase();
   if (action === 'prepare_checkout') {

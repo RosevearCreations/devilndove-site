@@ -31,6 +31,9 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'custom_request_fulfillment_prompts', 'review_text', 'review_text TEXT');
   await ensureColumn(db, 'custom_request_fulfillment_prompts', 'customer_response_note', 'customer_response_note TEXT');
   await ensureColumn(db, 'custom_request_fulfillment_prompts', 'responded_at', 'responded_at TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'expired_at', 'expired_at TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'voided_at', 'voided_at TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'public_proof_candidate_id', 'public_proof_candidate_id INTEGER');
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_fulfillment_prompts_token ON custom_request_fulfillment_prompts(prompt_token)`).run().catch(() => null);
 }
 function publicPrompt(row) {
@@ -56,7 +59,7 @@ export async function onRequestGet(context) {
   if (!token || !token.startsWith('consent_')) return json({ ok: false, error: 'A valid consent token is required.' }, 400);
   await ensureSchema(db);
   const row = await db.prepare(`SELECT * FROM custom_request_fulfillment_prompts WHERE prompt_token=? LIMIT 1`).bind(token).first().catch(() => null);
-  if (!row) return json({ ok: false, error: 'Consent prompt was not found.' }, 404);
+  if (!row || ['void','expired'].includes(String(row.prompt_status || '').toLowerCase()) || row.expired_at || row.voided_at) return json({ ok: false, error: 'Consent prompt was not found or is no longer active.' }, 404);
   return json({ ok: true, prompt: publicPrompt(row) });
 }
 export async function onRequestPost(context) {
@@ -67,7 +70,7 @@ export async function onRequestPost(context) {
   if (!token || !token.startsWith('consent_')) return json({ ok: false, error: 'A valid consent token is required.' }, 400);
   await ensureSchema(db);
   const row = await db.prepare(`SELECT * FROM custom_request_fulfillment_prompts WHERE prompt_token=? LIMIT 1`).bind(token).first().catch(() => null);
-  if (!row) return json({ ok: false, error: 'Consent prompt was not found.' }, 404);
+  if (!row || ['void','expired'].includes(String(row.prompt_status || '').toLowerCase()) || row.expired_at || row.voided_at) return json({ ok: false, error: 'Consent prompt was not found or is no longer active.' }, 404);
   const scope = ['private_only','website_gallery','social_only','all_public_ok'].includes(clean(body.public_use_scope, 40)) ? clean(body.public_use_scope, 40) : 'private_only';
   await db.prepare(`UPDATE custom_request_fulfillment_prompts SET public_response_status='responded', prompt_status='responded', public_use_scope=?, review_text=?, customer_response_note=?, responded_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE custom_request_fulfillment_prompt_id=?`).bind(scope, clean(body.review_text, 1600) || null, clean(body.customer_response_note, 1200) || null, Number(row.custom_request_fulfillment_prompt_id || 0)).run();
   return json({ ok: true, message: 'Thank you. Your review/photo consent response was saved.' });

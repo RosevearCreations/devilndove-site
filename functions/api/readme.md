@@ -51,3 +51,7 @@ New admin endpoint: `/api/admin/storefront-schema-repair`. It requires admin aut
 ## Build 155 maintenance note
 
 This Markdown file was reviewed during the Build 155 pass. The active roadmap/schema/gaps documents carry the detailed implementation notes for custom request payment links, order conversion, marketplace export packs, proof filters, and post-fulfillment prompts.
+
+## Build 157 API note
+
+Build 157 adds safer custom request operations across the admin and public APIs: mobile product save fallback handling, lifecycle controls for quote/payment/order/consent links, order-stage history, candle/soap product-spec fields, richer marketplace CSV preset data, payment provider readiness records, and consent-to-public-proof approval records.

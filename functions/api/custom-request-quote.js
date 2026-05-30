@@ -33,6 +33,9 @@ async function ensureSchema(db) {
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_token ON custom_request_quote_share_links(share_token, share_status)`).run().catch(() => null);
+  await ensureColumn(db, 'custom_request_quote_share_links', 'voided_at', 'voided_at TEXT');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'expired_at', 'expired_at TEXT');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'lifecycle_note', 'lifecycle_note TEXT');
 
   await ensureColumn(db, 'custom_request_quote_drafts', 'material_cost_cents', 'material_cost_cents INTEGER NOT NULL DEFAULT 0');
   await ensureColumn(db, 'custom_request_quote_drafts', 'labor_cost_cents', 'labor_cost_cents INTEGER NOT NULL DEFAULT 0');
@@ -123,7 +126,7 @@ async function event(db, requestId, type, note) {
 async function loadQuote(db, token) {
   await ensureSchema(db);
   const link = await db.prepare(`SELECT * FROM custom_request_quote_share_links WHERE share_token=? LIMIT 1`).bind(token).first().catch(() => null);
-  if (!link) return null;
+  if (!link || ['void','expired'].includes(String(link.share_status || '').toLowerCase()) || link.voided_at || link.expired_at) return null;
   const request = await db.prepare(`SELECT request_key, request_type, product_interest, deadline_date, status FROM custom_requests WHERE custom_request_id=? LIMIT 1`).bind(Number(link.custom_request_id || 0)).first().catch(() => null);
   const quoteDraft = await db.prepare(`SELECT * FROM custom_request_quote_drafts WHERE custom_request_quote_draft_id=? OR custom_request_id=? ORDER BY custom_request_quote_draft_id DESC LIMIT 1`).bind(Number(link.quote_draft_id || 0), Number(link.custom_request_id || 0)).first().catch(() => null);
   const lineItems = quoteDraft ? rows(await db.prepare(`SELECT * FROM custom_request_quote_line_items WHERE quote_draft_id=? AND COALESCE(line_status,'active') <> 'void' ORDER BY sort_order, custom_request_quote_line_item_id`).bind(Number(quoteDraft.custom_request_quote_draft_id || 0)).all().catch(() => ({ results: [] }))) : [];
@@ -132,7 +135,7 @@ async function loadQuote(db, token) {
 }
 function publicPayload(loaded) {
   const { link, request, quote_draft, quote_line_items, payment_candidates } = loaded;
-  const expired = link.expires_at && new Date(link.expires_at).getTime() < Date.now();
+  const expired = (link.expires_at && new Date(link.expires_at).getTime() < Date.now()) || Boolean(link.expired_at);
   const status = expired && link.share_status === 'active' ? 'expired' : link.share_status;
   return {
     ok: true,
@@ -212,7 +215,7 @@ export async function onRequestPost(context) {
   const loaded = await loadQuote(db, token);
   if (!loaded) return json({ ok: false, error: 'Quote preview was not found.' }, 404);
   const { link } = loaded;
-  if (link.expires_at && new Date(link.expires_at).getTime() < Date.now()) return json({ ok: false, error: 'This quote preview link has expired.' }, 400);
+  if ((link.expires_at && new Date(link.expires_at).getTime() < Date.now()) || link.expired_at || link.voided_at) return json({ ok: false, error: 'This quote preview link has expired or was closed.' }, 400);
   if (!['active', 'viewed'].includes(String(link.share_status || ''))) return json({ ok: false, error: 'This quote has already been responded to or closed.' }, 400);
   const accepted = action === 'accept';
   await db.prepare(`UPDATE custom_request_quote_share_links SET share_status=?, accepted_at=CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE accepted_at END, declined_at=CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE declined_at END, customer_response_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_quote_share_link_id=?`).bind(

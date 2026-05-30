@@ -82,6 +82,30 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'custom_requests', 'utm_term', 'utm_term TEXT');
   await ensureColumn(db, 'custom_requests', 'visitor_token', 'visitor_token TEXT');
   await ensureColumn(db, 'custom_requests', 'browser_session_token', 'browser_session_token TEXT');
+  await ensureColumn(db, 'custom_requests', 'upload_token', 'upload_token TEXT');
+  await ensureColumn(db, 'custom_requests', 'reference_upload_count', 'reference_upload_count INTEGER NOT NULL DEFAULT 0');
+  await ensureColumn(db, 'custom_requests', 'scent_profile', 'scent_profile TEXT');
+  await ensureColumn(db, 'custom_requests', 'wax_or_base', 'wax_or_base TEXT');
+  await ensureColumn(db, 'custom_requests', 'colour_notes', 'colour_notes TEXT');
+  await ensureColumn(db, 'custom_requests', 'batch_number', 'batch_number TEXT');
+  await ensureColumn(db, 'custom_requests', 'ingredient_notes', 'ingredient_notes TEXT');
+  await ensureColumn(db, 'custom_requests', 'allergen_safety_notes', 'allergen_safety_notes TEXT');
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_candle_soap_product_specs (
+    custom_candle_soap_product_spec_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER,
+    product_id INTEGER,
+    product_draft_id INTEGER,
+    product_family TEXT NOT NULL DEFAULT 'candle',
+    scent_profile TEXT,
+    wax_or_base TEXT,
+    colour_notes TEXT,
+    batch_number TEXT,
+    ingredient_notes TEXT,
+    allergen_safety_notes TEXT,
+    cure_ready_date TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_requests_email ON custom_requests(email, created_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_requests_utm ON custom_requests(utm_source, utm_medium, utm_campaign, created_at)`).run().catch(() => null);
 }
@@ -101,6 +125,12 @@ export async function onRequestPost(context) {
   const phone = clean(body.phone, 60);
   const requestType = clean(body.request_type || body.type || 'custom_gift', 80).toLowerCase().replace(/[^a-z0-9_ -]/g, '').replace(/\s+/g, '_');
   const productInterest = clean(body.product_interest || body.product || '', 200);
+  const scentProfile = clean(body.scent_profile || '', 240);
+  const waxOrBase = clean(body.wax_or_base || '', 240);
+  const colourNotes = clean(body.colour_notes || '', 240);
+  const batchNumber = clean(body.batch_number || '', 120);
+  const ingredientNotes = clean(body.ingredient_notes || '', 600);
+  const allergenSafetyNotes = clean(body.allergen_safety_notes || '', 600);
   const deadlineDate = clean(body.deadline_date || '', 20);
   const message = clean(body.message || body.notes || '', 3000);
   const consentToContact = body.consent_to_contact === true || String(body.consent_to_contact || '').toLowerCase() === 'on' || String(body.consent_to_contact || '') === '1' ? 1 : 0;
@@ -117,13 +147,32 @@ export async function onRequestPost(context) {
   const uploadToken = `upload_${crypto.randomUUID().replace(/-/g, '')}`;
   const insert = await db.prepare(`INSERT INTO custom_requests (
     request_key, name, email, phone, request_type, product_interest, deadline_date,
-    budget_cents, message, attachment_urls_json, consent_to_contact, utm_source, utm_medium, utm_campaign, utm_content, utm_term, visitor_token, browser_session_token, upload_token, reference_upload_count, status, created_at, updated_at
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'new', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    budget_cents, message, attachment_urls_json, consent_to_contact, utm_source, utm_medium, utm_campaign, utm_content, utm_term, visitor_token, browser_session_token,
+    scent_profile, wax_or_base, colour_notes, batch_number, ingredient_notes, allergen_safety_notes,
+    upload_token, reference_upload_count, status, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'new', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
     requestKey, name, email, phone || null, requestType || 'custom_gift', productInterest || null,
     deadlineDate || null, parseBudgetCents(body.budget), message, JSON.stringify(attachmentUrls), consentToContact,
     utm.utm_source || null, utm.utm_medium || null, utm.utm_campaign || null, utm.utm_content || null, utm.utm_term || null,
-    utm.visitor_token || null, utm.browser_session_token || null, uploadToken
+    utm.visitor_token || null, utm.browser_session_token || null,
+    scentProfile || null, waxOrBase || null, colourNotes || null, batchNumber || null, ingredientNotes || null, allergenSafetyNotes || null,
+    uploadToken
   ).run();
 
-  return json({ ok: true, message: 'Custom request received. We will review it before replying.', request_key: requestKey, upload_token: uploadToken, reference_upload_limit: 5, custom_request_id: Number(insert?.meta?.last_row_id || 0) || null });
+  const customRequestId = Number(insert?.meta?.last_row_id || 0) || null;
+  if (customRequestId && (requestType.includes('candle') || requestType.includes('soap') || scentProfile || waxOrBase || ingredientNotes)) {
+    await db.prepare(`INSERT INTO custom_candle_soap_product_specs (custom_request_id, product_family, scent_profile, wax_or_base, colour_notes, batch_number, ingredient_notes, allergen_safety_notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+      customRequestId,
+      requestType.includes('soap') ? 'soap' : 'candle',
+      scentProfile || null,
+      waxOrBase || null,
+      colourNotes || null,
+      batchNumber || null,
+      ingredientNotes || null,
+      allergenSafetyNotes || null
+    ).run().catch(() => null);
+  }
+
+
+  return json({ ok: true, message: 'Custom request received. We will review it before replying.', request_key: requestKey, upload_token: uploadToken, reference_upload_limit: 5, custom_request_id: customRequestId });
 }
