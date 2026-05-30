@@ -1,7 +1,8 @@
 // File: /functions/api/admin/mobile-create-product.js
 // Purpose: Admin-only mobile product capture endpoint for quick draft creation/update.
 // Repair: prevents duplicate generated SKUs/product numbers/slugs from crashing Save Partial.
-// It re-checks identity fields before insert and retries cleanly if D1 reports a unique constraint.
+// It re-checks identity fields before insert, retries cleanly if D1 reports a unique constraint,
+// and keeps optional image/SEO/resource side effects from turning a partial mobile save into a hard 500.
 
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { DEFAULT_PRODUCT_NUMBER_START, getNextProductNumber } from "./_product-numbering.js";
@@ -44,6 +45,17 @@ function inferExtension(filename, mimeType) {
 }
 
 const DEFAULT_PRODUCT_MEDIA_PUBLIC_BASE_URL = "https://assets.devilndove.com";
+
+const FALLBACK_PRODUCT_COLUMNS = new Set([
+  'product_id', 'slug', 'product_number', 'sku', 'name', 'capture_reference', 'product_category',
+  'color_name', 'color_names_json', 'shipping_code', 'review_status', 'is_ready_for_storefront',
+  'ready_check_notes', 'short_description', 'description', 'product_type', 'status', 'price_cents',
+  'compare_at_price_cents', 'currency', 'taxable', 'tax_class_id', 'requires_shipping', 'weight_grams',
+  'inventory_tracking', 'inventory_quantity', 'featured_image_url', 'sort_order', 'capture_entry_mode',
+  'capture_created_by_user_id', 'capture_updated_by_user_id', 'capture_entry_started_at',
+  'capture_last_saved_at', 'created_at', 'updated_at'
+]);
+
 
 function getProductMediaPublicBase(env) {
   return normalizeText(
@@ -260,10 +272,14 @@ async function getTableColumnSet(db, tableName) {
   try {
     const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
     const rows = Array.isArray(result?.results) ? result.results : [];
-    return new Set(rows.map((row) => String(row?.name || "").trim()).filter(Boolean));
+    const columns = new Set(rows.map((row) => String(row?.name || "").trim()).filter(Boolean));
+    if (columns.size > 0) return columns;
   } catch {
-    return new Set();
+    // Fall through to compatibility defaults below.
   }
+
+  if (String(tableName || '').toLowerCase() === 'products') return new Set(FALLBACK_PRODUCT_COLUMNS);
+  return new Set();
 }
 
 function selectColumnSql(columnSet, columnName, alias = columnName) {
@@ -287,8 +303,18 @@ function pushOptionalUpdate({ assignments, bindings, columnSet, column, value, e
   }
 }
 
+async function tableExists(db, tableName) {
+  try {
+    const row = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1").bind(tableName).first();
+    return Boolean(row?.name);
+  } catch {
+    return true;
+  }
+}
+
 async function upsertProductSeo(db, payload) {
   try {
+    if (!(await tableExists(db, 'product_seo'))) return;
     await db
       .prepare(`
         INSERT INTO product_seo (
@@ -465,6 +491,7 @@ async function uploadImages({ db, env, files, productId, resolvedName, adminUser
 }
 
 async function saveResourceLinks({ db, productId, resourceLinksRaw, supportsConsumptionMode, supportsLotSizeUnits }) {
+  if (!(await tableExists(db, 'product_resource_links'))) return;
   let links = [];
 
   try {
@@ -869,6 +896,18 @@ export async function onRequestPost(context) {
       });
     } catch {
       // Do not let incident logging hide the original endpoint error.
+    }
+
+    if (isSqliteUniqueConstraint(error)) {
+      return json(
+        {
+          ok: false,
+          error: "A draft product could not be saved because the SKU/product number/slug already exists. The endpoint will generate a new identity on the next Save Partial attempt.",
+          details: error?.message || String(error || "Unique constraint failed."),
+          recoverable: true
+        },
+        409
+      );
     }
 
     return json({ ok: false, error: error?.message || "Phone product capture failed unexpectedly." }, 500);

@@ -1,5 +1,5 @@
 // File: /functions/api/admin/custom-requests.js
-// Brief description: Admin review queue for custom gift, engraving, and personalized work requests, including quote/job/product conversion, editable quote line items, approved payment links, real checkout handoffs, customer order-status links, marketplace CSV exports, post-fulfillment consent prompts, private quote links, and revision history.
+// Brief description: Admin review queue for custom gift, engraving, and personalized work requests, including quote/job/product conversion, editable quote line items, approved payment links, real checkout handoffs, customer order-status links, marketplace CSV exports, post-fulfillment consent prompts, private quote links, revision history, link lifecycle controls, order-stage tracking, marketplace presets, and consent-to-public-proof review candidates.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
@@ -279,6 +279,10 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'custom_request_quote_share_links', 'supersedes_share_link_id', 'supersedes_share_link_id INTEGER');
   await ensureColumn(db, 'custom_request_quote_share_links', 'resent_at', 'resent_at TEXT');
   await ensureColumn(db, 'custom_request_quote_share_links', 'resend_note', 'resend_note TEXT');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'voided_at', 'voided_at TEXT');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'expired_at', 'expired_at TEXT');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'resend_count', 'resend_count INTEGER NOT NULL DEFAULT 0');
+  await ensureColumn(db, 'custom_request_quote_share_links', 'lifecycle_note', 'lifecycle_note TEXT');
 
   await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_payment_links (
     custom_request_payment_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -325,6 +329,11 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'custom_request_payment_links', 'gate_notes', 'gate_notes TEXT');
   await ensureColumn(db, 'custom_request_payment_links', 'preferred_provider', "preferred_provider TEXT NOT NULL DEFAULT 'manual'");
   await ensureColumn(db, 'custom_request_payment_links', 'checkout_redirect_url', 'checkout_redirect_url TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'voided_at', 'voided_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'expired_at', 'expired_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'resent_at', 'resent_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'resend_count', 'resend_count INTEGER NOT NULL DEFAULT 0');
+  await ensureColumn(db, 'custom_request_payment_links', 'lifecycle_note', 'lifecycle_note TEXT');
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_links_request ON custom_request_payment_links(custom_request_id, link_status, updated_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_links_token ON custom_request_payment_links(link_token, link_status)`).run().catch(() => null);
 
@@ -378,6 +387,14 @@ async function ensureSchema(db) {
   )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_order_status_links_request ON custom_request_order_status_links(custom_request_id, link_status, updated_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_order_status_links_token ON custom_request_order_status_links(order_status_token, link_status)`).run().catch(() => null);
+  await ensureColumn(db, 'custom_request_order_status_links', 'order_stage', "order_stage TEXT NOT NULL DEFAULT 'planning'");
+  await ensureColumn(db, 'custom_request_order_status_links', 'stage_notes', 'stage_notes TEXT');
+  await ensureColumn(db, 'custom_request_order_status_links', 'stage_updated_at', 'stage_updated_at TEXT');
+  await ensureColumn(db, 'custom_request_order_status_links', 'voided_at', 'voided_at TEXT');
+  await ensureColumn(db, 'custom_request_order_status_links', 'expired_at', 'expired_at TEXT');
+  await ensureColumn(db, 'custom_request_order_status_links', 'resent_at', 'resent_at TEXT');
+  await ensureColumn(db, 'custom_request_order_status_links', 'resend_count', 'resend_count INTEGER NOT NULL DEFAULT 0');
+  await ensureColumn(db, 'custom_request_order_status_links', 'lifecycle_note', 'lifecycle_note TEXT');
 
   await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_marketplace_export_packs (
     custom_request_marketplace_export_pack_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -406,6 +423,20 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'custom_request_marketplace_export_packs', 'etsy_csv_row_json', "etsy_csv_row_json TEXT DEFAULT '{}'");
   await ensureColumn(db, 'custom_request_marketplace_export_packs', 'facebook_csv_row_json', "facebook_csv_row_json TEXT DEFAULT '{}'");
   await ensureColumn(db, 'custom_request_marketplace_export_packs', 'pinterest_csv_row_json', "pinterest_csv_row_json TEXT DEFAULT '{}'");
+  await ensureColumn(db, 'custom_request_marketplace_export_packs', 'manual_csv_row_json', "manual_csv_row_json TEXT DEFAULT '{}'");
+  await ensureColumn(db, 'custom_request_marketplace_export_packs', 'preset_summary_json', "preset_summary_json TEXT DEFAULT '{}'");
+  await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_channel_presets (
+    marketplace_channel_preset_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    channel TEXT NOT NULL UNIQUE,
+    category_label TEXT,
+    shipping_profile_label TEXT,
+    default_tags_json TEXT DEFAULT '[]',
+    default_fields_json TEXT DEFAULT '{}',
+    preset_status TEXT NOT NULL DEFAULT 'active',
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_marketplace_channel_presets_status ON marketplace_channel_presets(preset_status, channel)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_marketplace_exports_request ON custom_request_marketplace_export_packs(custom_request_id, pack_status, updated_at)`).run().catch(() => null);
 
   await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_fulfillment_prompts (
@@ -431,12 +462,98 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'custom_request_fulfillment_prompts', 'review_text', 'review_text TEXT');
   await ensureColumn(db, 'custom_request_fulfillment_prompts', 'customer_response_note', 'customer_response_note TEXT');
   await ensureColumn(db, 'custom_request_fulfillment_prompts', 'responded_at', 'responded_at TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'voided_at', 'voided_at TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'expired_at', 'expired_at TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'resent_at', 'resent_at TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'resend_count', 'resend_count INTEGER NOT NULL DEFAULT 0');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'lifecycle_note', 'lifecycle_note TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'public_proof_candidate_id', 'public_proof_candidate_id INTEGER');
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_public_proof_candidates (
+    custom_request_public_proof_candidate_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    fulfillment_prompt_id INTEGER,
+    candidate_key TEXT NOT NULL UNIQUE,
+    candidate_type TEXT NOT NULL DEFAULT 'trust_block',
+    candidate_status TEXT NOT NULL DEFAULT 'review_needed',
+    public_use_scope TEXT,
+    title TEXT,
+    body_text TEXT,
+    attribution_label TEXT,
+    locality_label TEXT,
+    source_review_text TEXT,
+    customer_note TEXT,
+    trust_block_item_id INTEGER,
+    product_story_public_note_id INTEGER,
+    review_notes TEXT,
+    created_by_user_id INTEGER,
+    approved_by_user_id INTEGER,
+    approved_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_public_proof_candidates_status ON custom_request_public_proof_candidates(candidate_status, updated_at)`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_order_stage_events (
+    custom_request_order_stage_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    order_id INTEGER,
+    stage_key TEXT NOT NULL,
+    stage_label TEXT NOT NULL,
+    stage_status TEXT NOT NULL DEFAULT 'current',
+    stage_notes TEXT,
+    created_by_user_id INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_order_stage_events_request ON custom_request_order_stage_events(custom_request_id, created_at)`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_payment_provider_tests (
+    custom_request_payment_provider_test_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    provider TEXT NOT NULL,
+    test_status TEXT NOT NULL DEFAULT 'not_configured',
+    mode TEXT,
+    result_notes TEXT,
+    checked_by_user_id INTEGER,
+    checked_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_provider_tests_provider ON custom_request_payment_provider_tests(provider, checked_at)`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_candle_soap_product_specs (
+    custom_candle_soap_product_spec_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER,
+    product_id INTEGER,
+    product_draft_id INTEGER,
+    product_family TEXT NOT NULL DEFAULT 'candle',
+    scent_profile TEXT,
+    wax_or_base TEXT,
+    colour_notes TEXT,
+    batch_number TEXT,
+    ingredient_notes TEXT,
+    allergen_safety_notes TEXT,
+    cure_ready_date TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_candle_soap_specs_request ON custom_candle_soap_product_specs(custom_request_id, product_family)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_fulfillment_prompts_request ON custom_request_fulfillment_prompts(custom_request_id, prompt_status, updated_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_fulfillment_prompts_token ON custom_request_fulfillment_prompts(prompt_token)`).run().catch(() => null);
 
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_candidates_request ON custom_request_payment_candidates(custom_request_id, candidate_type, candidate_status)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_request ON custom_request_quote_share_links(custom_request_id, share_status, updated_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_token ON custom_request_quote_share_links(share_token, share_status)`).run().catch(() => null);
+  for (const [columnName, definition] of [
+    ['scent_profile', 'scent_profile TEXT'],
+    ['wax_or_base', 'wax_or_base TEXT'],
+    ['soap_base', 'soap_base TEXT'],
+    ['colour_recipe', 'colour_recipe TEXT'],
+    ['batch_number', 'batch_number TEXT'],
+    ['ingredient_notes', 'ingredient_notes TEXT'],
+    ['allergen_safety_notes', 'allergen_safety_notes TEXT'],
+    ['cure_ready_date', 'cure_ready_date TEXT']
+  ]) {
+    await ensureColumn(db, 'products', columnName, definition);
+  }
 }
 
 
@@ -484,10 +601,14 @@ async function listPayload(db) {
   const orderStatusLinks = rows(await db.prepare(`SELECT * FROM custom_request_order_status_links ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const marketplaceExportPacks = rows(await db.prepare(`SELECT * FROM custom_request_marketplace_export_packs ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const fulfillmentPrompts = rows(await db.prepare(`SELECT * FROM custom_request_fulfillment_prompts ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
+  const orderStageEvents = rows(await db.prepare(`SELECT * FROM custom_request_order_stage_events ORDER BY datetime(created_at) DESC LIMIT 160`).all().catch(() => ({ results: [] })));
+  const publicProofCandidates = rows(await db.prepare(`SELECT * FROM custom_request_public_proof_candidates ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
+  const marketplacePresets = rows(await db.prepare(`SELECT * FROM marketplace_channel_presets ORDER BY channel ASC`).all().catch(() => ({ results: [] })));
+  const paymentProviderTests = rows(await db.prepare(`SELECT * FROM custom_request_payment_provider_tests ORDER BY datetime(checked_at) DESC LIMIT 40`).all().catch(() => ({ results: [] })));
   const referenceUploads = rows(await db.prepare(`SELECT * FROM custom_request_reference_uploads ORDER BY datetime(created_at) DESC LIMIT 160`).all().catch(() => ({ results: [] })));
   const conversionEvents = rows(await db.prepare(`SELECT * FROM custom_request_conversion_events ORDER BY datetime(created_at) DESC LIMIT 160`).all().catch(() => ({ results: [] })));
   const customerHistory = rows(await db.prepare(`SELECT email, COUNT(*) AS request_count, MAX(created_at) AS last_request_at FROM custom_requests WHERE COALESCE(email,'') <> '' GROUP BY email HAVING COUNT(*) > 1 ORDER BY request_count DESC, last_request_at DESC LIMIT 50`).all().catch(() => ({ results: [] })));
-  return { ok: true, requests, summary, quote_drafts: quoteDrafts, quote_line_items: quoteLineItems, quote_revisions: quoteRevisions, payment_request_drafts: paymentRequestDrafts, order_drafts: orderDrafts, payment_links: paymentLinks, payment_gates: paymentGates, checkout_records: checkoutRecords, order_status_links: orderStatusLinks, marketplace_export_packs: marketplaceExportPacks, fulfillment_prompts: fulfillmentPrompts, job_drafts: jobDrafts, product_drafts: productDrafts, reply_templates: replyTemplates, payment_candidates: paymentCandidates, quote_preview_links: previewLinks, reference_uploads: referenceUploads, conversion_events: conversionEvents, customer_history: customerHistory };
+  return { ok: true, requests, summary, quote_drafts: quoteDrafts, quote_line_items: quoteLineItems, quote_revisions: quoteRevisions, payment_request_drafts: paymentRequestDrafts, order_drafts: orderDrafts, payment_links: paymentLinks, payment_gates: paymentGates, checkout_records: checkoutRecords, order_status_links: orderStatusLinks, order_stage_events: orderStageEvents, marketplace_export_packs: marketplaceExportPacks, marketplace_presets: marketplacePresets, fulfillment_prompts: fulfillmentPrompts, public_proof_candidates: publicProofCandidates, payment_provider_tests: paymentProviderTests, job_drafts: jobDrafts, product_drafts: productDrafts, reply_templates: replyTemplates, payment_candidates: paymentCandidates, quote_preview_links: previewLinks, reference_uploads: referenceUploads, conversion_events: conversionEvents, customer_history: customerHistory };
 }
 
 async function recordConversion(db, adminUser, requestId, type, tableName, targetId, targetKey, notes) {
@@ -1010,6 +1131,15 @@ async function createMarketplaceExportPack(db, adminUser, requestId) {
     'Photos and proof notes must be reviewed before public marketplace posting.'
   ].join('\n'), 4500);
   const tags = ['Devil n Dove', 'Southern Ontario', row.request_type || 'custom gift', 'handmade', 'local maker'].filter(Boolean);
+  await seedMarketplacePresets(db);
+  const presets = defaultMarketplacePresets();
+  const mergedTags = Array.from(new Set([...tags, ...(presets.etsy.tags || []), ...(presets.facebook.tags || []), ...(presets.pinterest.tags || [])])).slice(0, 13);
+  const etsyCsv = { title: clean(title, 140), description: clean(baseDescription, 4500), price: Number(quote?.quote_total_cents || row.budget_cents || 0) > 0 ? (Number(quote?.quote_total_cents || row.budget_cents || 0) / 100).toFixed(2) : '', quantity: 1, category: presets.etsy.category_label, shipping_profile: presets.etsy.shipping_profile_label, tags: mergedTags.join(', ') };
+  const facebookCsv = { title: clean(`${title} | Devil n Dove`, 100), description: clean(`${baseDescription}
+
+Local pickup/shipping to be confirmed.`, 4500), price: Number(quote?.quote_total_cents || row.budget_cents || 0) > 0 ? (Number(quote?.quote_total_cents || row.budget_cents || 0) / 100).toFixed(2) : '', category: presets.facebook.category_label, availability: 'single_item', shipping_profile: presets.facebook.shipping_profile_label, tags: presets.facebook.tags.join(', ') };
+  const pinterestCsv = { title: clean(`${title} by Devil n Dove`, 100), description: clean(`Custom workshop-made gift idea from Devil n Dove in Southern Ontario. ${row.product_interest || row.request_type || ''}`, 500), board: presets.pinterest.category_label, destination_url: '/custom-request/', tags: presets.pinterest.tags.join(', ') };
+  const manualCsv = { title, description: baseDescription, price_note: 'Review final price, shipping, tax, marketplace fees, and media consent before posting.', category: presets.manual.category_label, shipping_profile: presets.manual.shipping_profile_label, tags: presets.manual.tags.join(', ') };
   const manualCopy = [
     `TITLE: ${title}`,
     '',
@@ -1027,12 +1157,12 @@ async function createMarketplaceExportPack(db, adminUser, requestId) {
     pinterest_title: clean(`${title} by Devil n Dove`, 100),
     pinterest_description: clean(`Custom workshop-made gift idea from Devil n Dove in Southern Ontario. ${row.product_interest || row.request_type || ''}`, 500),
     manual_listing_copy: clean(manualCopy, 5000),
-    tags_json: JSON.stringify(tags),
+    tags_json: JSON.stringify(mergedTags || tags),
     readiness_notes: 'Draft export only. Confirm price, images, consent, shipping, category, marketplace fees, and product readiness before posting.'
   };
   if (existing) {
-    await db.prepare(`UPDATE custom_request_marketplace_export_packs SET etsy_title=?, etsy_description=?, facebook_title=?, facebook_description=?, pinterest_title=?, pinterest_description=?, manual_listing_copy=?, tags_json=?, readiness_notes=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_marketplace_export_pack_id=?`).bind(
-      values.etsy_title, values.etsy_description, values.facebook_title, values.facebook_description, values.pinterest_title, values.pinterest_description, values.manual_listing_copy, values.tags_json, values.readiness_notes, Number(existing.custom_request_marketplace_export_pack_id || 0)
+    await db.prepare(`UPDATE custom_request_marketplace_export_packs SET etsy_title=?, etsy_description=?, facebook_title=?, facebook_description=?, pinterest_title=?, pinterest_description=?, manual_listing_copy=?, tags_json=?, readiness_notes=?, etsy_csv_row_json=?, facebook_csv_row_json=?, pinterest_csv_row_json=?, manual_csv_row_json=?, preset_summary_json=?, csv_status='ready', updated_at=CURRENT_TIMESTAMP WHERE custom_request_marketplace_export_pack_id=?`).bind(
+      values.etsy_title, values.etsy_description, values.facebook_title, values.facebook_description, values.pinterest_title, values.pinterest_description, values.manual_listing_copy, values.tags_json, values.readiness_notes, JSON.stringify(etsyCsv), JSON.stringify(facebookCsv), JSON.stringify(pinterestCsv), JSON.stringify(manualCsv), JSON.stringify(presets), Number(existing.custom_request_marketplace_export_pack_id || 0)
     ).run();
     await recordConversion(db, adminUser, requestId, 'marketplace_export_pack_refreshed', 'custom_request_marketplace_export_packs', existing.custom_request_marketplace_export_pack_id, existing.pack_key, 'Marketplace export pack refreshed.');
     return { ok: true, message: 'Marketplace export pack refreshed.', target_key: existing.pack_key, target_id: existing.custom_request_marketplace_export_pack_id };
@@ -1041,8 +1171,9 @@ async function createMarketplaceExportPack(db, adminUser, requestId) {
   const insert = await db.prepare(`INSERT INTO custom_request_marketplace_export_packs (
     custom_request_id, quote_draft_id, product_draft_id, pack_key, pack_status, etsy_title, etsy_description,
     facebook_title, facebook_description, pinterest_title, pinterest_description, manual_listing_copy, tags_json,
-    readiness_notes, created_by_user_id, created_at, updated_at
-  ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    readiness_notes, etsy_csv_row_json, facebook_csv_row_json, pinterest_csv_row_json, manual_csv_row_json, preset_summary_json, csv_status,
+    created_by_user_id, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ready', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
     Number(requestId),
     Number(quote?.custom_request_quote_draft_id || 0) || null,
     Number(productDraft?.custom_request_product_draft_id || 0) || null,
@@ -1056,6 +1187,11 @@ async function createMarketplaceExportPack(db, adminUser, requestId) {
     values.manual_listing_copy,
     values.tags_json,
     values.readiness_notes,
+    JSON.stringify(etsyCsv),
+    JSON.stringify(facebookCsv),
+    JSON.stringify(pinterestCsv),
+    JSON.stringify(manualCsv),
+    JSON.stringify(presets),
     Number(adminUser.user_id || 0)
   ).run();
   const targetId = Number(insert?.meta?.last_row_id || 0) || null;
@@ -1094,6 +1230,206 @@ async function createPostFulfillmentPrompts(db, adminUser, requestId) {
   return { ok: true, message: 'Post-fulfillment review/photo/consent prompt created.', target_key: promptKey, target_id: targetId };
 }
 
+
+function defaultMarketplacePresets() {
+  return {
+    etsy: {
+      category_label: 'Handmade > Home & Living / Jewelry > Custom order review needed',
+      shipping_profile_label: 'Devil n Dove Canada Post / local pickup review',
+      tags: ['custom gift', 'handmade Ontario', 'Devil n Dove', 'personalized gift', 'small batch', 'artisan']
+    },
+    facebook: {
+      category_label: 'Home Decor / Jewellery / Handmade Goods',
+      shipping_profile_label: 'Local pickup or shipping by arrangement',
+      tags: ['local maker', 'handmade', 'custom gift', 'Southern Ontario']
+    },
+    pinterest: {
+      category_label: 'Handmade gift idea pin',
+      shipping_profile_label: 'Link to product or custom request page',
+      tags: ['handmade gifts', 'custom order', 'Ontario maker', 'Devil n Dove']
+    },
+    manual: {
+      category_label: 'Manual listing review',
+      shipping_profile_label: 'Confirm per item',
+      tags: ['handmade', 'custom', 'local']
+    }
+  };
+}
+
+async function seedMarketplacePresets(db) {
+  const presets = defaultMarketplacePresets();
+  for (const [channel, preset] of Object.entries(presets)) {
+    await db.prepare(`INSERT INTO marketplace_channel_presets (channel, category_label, shipping_profile_label, default_tags_json, default_fields_json, preset_status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(channel) DO UPDATE SET
+        category_label = COALESCE(marketplace_channel_presets.category_label, excluded.category_label),
+        shipping_profile_label = COALESCE(marketplace_channel_presets.shipping_profile_label, excluded.shipping_profile_label),
+        default_tags_json = COALESCE(marketplace_channel_presets.default_tags_json, excluded.default_tags_json),
+        default_fields_json = COALESCE(marketplace_channel_presets.default_fields_json, excluded.default_fields_json),
+        updated_at = CURRENT_TIMESTAMP`).bind(
+      channel,
+      preset.category_label,
+      preset.shipping_profile_label,
+      JSON.stringify(preset.tags || []),
+      JSON.stringify({ category_label: preset.category_label, shipping_profile_label: preset.shipping_profile_label })
+    ).run().catch(() => null);
+  }
+}
+
+function nextOrderStage(currentStage) {
+  const flow = [
+    ['planning', 'Planning'],
+    ['making', 'Making'],
+    ['curing_finishing', 'Curing / finishing'],
+    ['ready', 'Ready for pickup/shipping'],
+    ['shipped_pickup', 'Shipped / picked up'],
+    ['complete', 'Complete']
+  ];
+  const current = String(currentStage || 'planning').toLowerCase();
+  const index = flow.findIndex(([key]) => key === current);
+  return flow[Math.min(index + 1, flow.length - 1)] || flow[0];
+}
+
+async function advanceOrderStage(db, adminUser, requestId) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  let orderLink = await db.prepare(`SELECT * FROM custom_request_order_status_links WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  if (!orderLink) {
+    const draft = await db.prepare(`SELECT * FROM custom_request_order_drafts WHERE custom_request_id=? AND order_id IS NOT NULL ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+    if (draft?.order_id) {
+      await ensureOrderStatusLink(db, adminUser, requestId, Number(draft.order_id || 0), 'https://devilndove.com').catch(() => null);
+      orderLink = await db.prepare(`SELECT * FROM custom_request_order_status_links WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+    }
+  }
+  if (!orderLink) return { ok: false, error: 'Create or convert a customer order before updating order stage.' };
+  const [stageKey, stageLabel] = nextOrderStage(orderLink.order_stage || 'planning');
+  const note = `Custom request moved to ${stageLabel}.`;
+  await db.prepare(`UPDATE custom_request_order_status_links SET order_stage=?, stage_notes=?, stage_updated_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE custom_request_order_status_link_id=?`).bind(stageKey, note, Number(orderLink.custom_request_order_status_link_id || 0)).run();
+  if (Number(orderLink.order_id || 0)) {
+    const orderStatus = stageKey === 'complete' ? 'fulfilled' : (stageKey === 'shipped_pickup' ? 'fulfilled' : 'pending');
+    await db.prepare(`UPDATE orders SET order_status=CASE WHEN order_status IN ('cancelled','refunded') THEN order_status ELSE ? END, notes=COALESCE(notes,'') || ?, updated_at=CURRENT_TIMESTAMP WHERE order_id=?`).bind(orderStatus, `\nStage update: ${note}`, Number(orderLink.order_id || 0)).run().catch(() => null);
+  }
+  const insert = await db.prepare(`INSERT INTO custom_request_order_stage_events (custom_request_id, order_id, stage_key, stage_label, stage_status, stage_notes, created_by_user_id, created_at) VALUES (?, ?, ?, ?, 'current', ?, ?, CURRENT_TIMESTAMP)`).bind(Number(requestId), Number(orderLink.order_id || 0) || null, stageKey, stageLabel, note, Number(adminUser.user_id || 0)).run();
+  const targetId = Number(insert?.meta?.last_row_id || 0) || null;
+  await recordConversion(db, adminUser, requestId, `order_stage_${stageKey}`, 'custom_request_order_stage_events', targetId, stageKey, note);
+  return { ok: true, message: `Order stage updated to ${stageLabel}.`, target_key: stageKey, target_id: targetId };
+}
+
+async function manageCustomRequestLinks(db, adminUser, requestId, mode) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  const safeMode = ['void', 'expire', 'resend'].includes(mode) ? mode : 'resend';
+  const note = `${safeMode} action recorded by admin.`;
+  if (safeMode === 'void') {
+    await db.prepare(`UPDATE custom_request_quote_share_links SET share_status='void', voided_at=CURRENT_TIMESTAMP, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=? AND share_status IN ('active','viewed','superseded')`).bind(note, Number(requestId)).run().catch(() => null);
+    await db.prepare(`UPDATE custom_request_payment_links SET link_status='void', external_share_status='voided', voided_at=CURRENT_TIMESTAMP, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=? AND link_status IN ('active','viewed','ready_to_pay')`).bind(note, Number(requestId)).run().catch(() => null);
+    await db.prepare(`UPDATE custom_request_order_status_links SET link_status='void', voided_at=CURRENT_TIMESTAMP, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=? AND link_status IN ('active','viewed')`).bind(note, Number(requestId)).run().catch(() => null);
+    await db.prepare(`UPDATE custom_request_fulfillment_prompts SET prompt_status='void', public_response_status=CASE WHEN public_response_status='responded' THEN public_response_status ELSE 'voided' END, voided_at=CURRENT_TIMESTAMP, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=? AND prompt_status IN ('draft','sent','active')`).bind(note, Number(requestId)).run().catch(() => null);
+  } else if (safeMode === 'expire') {
+    await db.prepare(`UPDATE custom_request_quote_share_links SET share_status='expired', expired_at=CURRENT_TIMESTAMP, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=? AND share_status IN ('active','viewed')`).bind(note, Number(requestId)).run().catch(() => null);
+    await db.prepare(`UPDATE custom_request_payment_links SET link_status='expired', external_share_status='expired', expired_at=CURRENT_TIMESTAMP, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=? AND link_status IN ('active','viewed','ready_to_pay')`).bind(note, Number(requestId)).run().catch(() => null);
+    await db.prepare(`UPDATE custom_request_order_status_links SET link_status='expired', expired_at=CURRENT_TIMESTAMP, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=? AND link_status IN ('active','viewed')`).bind(note, Number(requestId)).run().catch(() => null);
+    await db.prepare(`UPDATE custom_request_fulfillment_prompts SET prompt_status='expired', public_response_status=CASE WHEN public_response_status='responded' THEN public_response_status ELSE 'expired' END, expired_at=CURRENT_TIMESTAMP, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=? AND prompt_status IN ('draft','sent','active')`).bind(note, Number(requestId)).run().catch(() => null);
+  } else {
+    await db.prepare(`UPDATE custom_request_quote_share_links SET share_status=CASE WHEN share_status IN ('expired','void') THEN 'active' ELSE share_status END, resent_at=CURRENT_TIMESTAMP, resend_count=COALESCE(resend_count,0)+1, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(note, Number(requestId)).run().catch(() => null);
+    await db.prepare(`UPDATE custom_request_payment_links SET link_status=CASE WHEN link_status IN ('expired','void') THEN 'active' ELSE link_status END, external_share_status=CASE WHEN gate_status='passed' THEN 'share_allowed' ELSE external_share_status END, resent_at=CURRENT_TIMESTAMP, resend_count=COALESCE(resend_count,0)+1, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(note, Number(requestId)).run().catch(() => null);
+    await db.prepare(`UPDATE custom_request_order_status_links SET link_status=CASE WHEN link_status IN ('expired','void') THEN 'active' ELSE link_status END, resent_at=CURRENT_TIMESTAMP, resend_count=COALESCE(resend_count,0)+1, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(note, Number(requestId)).run().catch(() => null);
+    await db.prepare(`UPDATE custom_request_fulfillment_prompts SET prompt_status=CASE WHEN prompt_status IN ('expired','void') THEN 'draft' ELSE prompt_status END, public_response_status=CASE WHEN public_response_status IN ('expired','voided') THEN 'not_sent' ELSE public_response_status END, resent_at=CURRENT_TIMESTAMP, resend_count=COALESCE(resend_count,0)+1, lifecycle_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(note, Number(requestId)).run().catch(() => null);
+  }
+  await recordConversion(db, adminUser, requestId, `${safeMode}_customer_links`, 'custom_requests', Number(requestId), row.request_key || String(requestId), `Quote/payment/order/consent link ${safeMode} controls applied.`);
+  return { ok: true, message: `Customer quote/payment/order/consent links ${safeMode === 'resend' ? 'marked for resend' : `${safeMode}ed`}.`, target_key: row.request_key || String(requestId), target_id: Number(requestId) };
+}
+
+async function createConsentProofCandidate(db, adminUser, requestId) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  const prompt = await db.prepare(`SELECT * FROM custom_request_fulfillment_prompts WHERE custom_request_id=? AND public_response_status='responded' ORDER BY datetime(responded_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  if (!prompt) return { ok: false, error: 'No responded consent prompt found yet.' };
+  if (String(prompt.public_use_scope || '') === 'private_only') return { ok: false, error: 'Customer chose private-only use, so no public proof candidate was created.' };
+  const existing = await db.prepare(`SELECT * FROM custom_request_public_proof_candidates WHERE custom_request_id=? AND fulfillment_prompt_id=? LIMIT 1`).bind(Number(requestId), Number(prompt.custom_request_fulfillment_prompt_id || 0)).first().catch(() => null);
+  if (existing) return { ok: true, message: 'Public proof candidate already exists for this consent response.', target_key: existing.candidate_key, target_id: existing.custom_request_public_proof_candidate_id };
+  const candidateKey = key('proof');
+  const title = clean(`Custom work review: ${titleForRequest(row)}`, 180);
+  const body = clean(prompt.review_text || prompt.customer_response_note || `Customer approved public proof use for ${titleForRequest(row)}.`, 1200);
+  const insert = await db.prepare(`INSERT INTO custom_request_public_proof_candidates (custom_request_id, fulfillment_prompt_id, candidate_key, candidate_type, candidate_status, public_use_scope, title, body_text, attribution_label, locality_label, source_review_text, customer_note, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, 'trust_block', 'review_needed', ?, ?, ?, ?, 'Southern Ontario', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    Number(requestId),
+    Number(prompt.custom_request_fulfillment_prompt_id || 0),
+    candidateKey,
+    prompt.public_use_scope || 'website_gallery',
+    title,
+    body,
+    row.name ? `${String(row.name).split(' ')[0]} — custom request customer` : 'Custom request customer',
+    prompt.review_text || null,
+    prompt.customer_response_note || null,
+    Number(adminUser.user_id || 0)
+  ).run();
+  const targetId = Number(insert?.meta?.last_row_id || 0) || null;
+  await db.prepare(`UPDATE custom_request_fulfillment_prompts SET public_proof_candidate_id=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_fulfillment_prompt_id=?`).bind(targetId, Number(prompt.custom_request_fulfillment_prompt_id || 0)).run().catch(() => null);
+  await recordConversion(db, adminUser, requestId, 'public_proof_candidate', 'custom_request_public_proof_candidates', targetId, candidateKey, 'Consent response converted into a review-needed public proof candidate.');
+  return { ok: true, message: 'Public proof candidate created for admin review.', target_key: candidateKey, target_id: targetId };
+}
+
+async function approveConsentPublicProof(db, adminUser, requestId) {
+  const candidate = await db.prepare(`SELECT * FROM custom_request_public_proof_candidates WHERE custom_request_id=? AND candidate_status IN ('review_needed','approved') ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  if (!candidate) {
+    const created = await createConsentProofCandidate(db, adminUser, requestId);
+    if (!created.ok) return created;
+    return approveConsentPublicProof(db, adminUser, requestId);
+  }
+  await db.prepare(`CREATE TABLE IF NOT EXISTS trust_block_items (
+    trust_block_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_key TEXT UNIQUE,
+    item_kind TEXT NOT NULL DEFAULT 'testimonial',
+    display_context TEXT NOT NULL DEFAULT 'sitewide',
+    title TEXT,
+    body TEXT,
+    attribution_label TEXT,
+    rating_label TEXT,
+    related_product_id INTEGER,
+    related_product_slug TEXT,
+    related_product_name TEXT,
+    locality_label TEXT,
+    status TEXT NOT NULL DEFAULT 'draft',
+    is_featured INTEGER NOT NULL DEFAULT 0,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    approved_for_public_use INTEGER NOT NULL DEFAULT 0,
+    privacy_review_status TEXT NOT NULL DEFAULT 'needs_review',
+    internal_notes TEXT,
+    created_by_user_id INTEGER,
+    approved_by_user_id INTEGER,
+    approved_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  const itemKey = key('trust');
+  const trustInsert = await db.prepare(`INSERT INTO trust_block_items (item_key, item_kind, display_context, title, body, attribution_label, rating_label, locality_label, status, is_featured, approved_for_public_use, privacy_review_status, internal_notes, created_by_user_id, approved_by_user_id, approved_at, created_at, updated_at) VALUES (?, 'testimonial', 'custom_work', ?, ?, ?, 'Custom work', ?, 'active', 0, 1, 'approved', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    itemKey,
+    candidate.title || 'Custom work review',
+    candidate.body_text || candidate.source_review_text || 'Customer approved a public custom-work proof note.',
+    candidate.attribution_label || 'Custom request customer',
+    candidate.locality_label || 'Southern Ontario',
+    `Approved from consent candidate ${candidate.candidate_key}. Scope: ${candidate.public_use_scope || ''}`,
+    Number(adminUser.user_id || 0),
+    Number(adminUser.user_id || 0)
+  ).run();
+  const trustId = Number(trustInsert?.meta?.last_row_id || 0) || null;
+  await db.prepare(`UPDATE custom_request_public_proof_candidates SET candidate_status='approved', trust_block_item_id=?, approved_by_user_id=?, approved_at=CURRENT_TIMESTAMP, review_notes='Approved into public trust block.', updated_at=CURRENT_TIMESTAMP WHERE custom_request_public_proof_candidate_id=?`).bind(trustId, Number(adminUser.user_id || 0), Number(candidate.custom_request_public_proof_candidate_id || 0)).run();
+  await recordConversion(db, adminUser, requestId, 'public_proof_approved', 'trust_block_items', trustId, itemKey, 'Consent response approved into a public trust block.');
+  return { ok: true, message: 'Consent response approved into a public trust block.', target_key: itemKey, target_id: trustId };
+}
+
+async function testPaymentProviderHandoffs(db, env, adminUser) {
+  const checks = [
+    { provider: 'stripe', ok: Boolean(env.STRIPE_SECRET_KEY), mode: env.STRIPE_SECRET_KEY ? 'configured' : 'missing_secret', note: env.STRIPE_SECRET_KEY ? 'Stripe secret key is configured. Run a real checkout test with a low-value order before production use.' : 'STRIPE_SECRET_KEY is missing.' },
+    { provider: 'paypal', ok: Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_SECRET), mode: env.PAYPAL_ENV || 'sandbox', note: env.PAYPAL_CLIENT_ID && env.PAYPAL_SECRET ? `PayPal credentials are configured in ${env.PAYPAL_ENV || 'sandbox'} mode. Confirm live mode before production.` : 'PAYPAL_CLIENT_ID or PAYPAL_SECRET is missing.' },
+    { provider: 'square', ok: Boolean(env.SQUARE_ACCESS_TOKEN || env.SQUARE_APP_ID), mode: env.SQUARE_ENV || 'not_configured', note: env.SQUARE_ACCESS_TOKEN || env.SQUARE_APP_ID ? 'Square environment variables are present, but live Square checkout still needs a provider implementation test.' : 'Square credentials are not configured.' }
+  ];
+  for (const check of checks) {
+    await db.prepare(`INSERT INTO custom_request_payment_provider_tests (provider, test_status, mode, result_notes, checked_by_user_id, checked_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(check.provider, check.ok ? 'configured_needs_live_test' : 'not_configured', check.mode, check.note, Number(adminUser.user_id || 0)).run().catch(() => null);
+  }
+  return { ok: true, message: 'Payment provider readiness checks recorded. This does not charge cards; real credential checkout should still be tested manually.', target_key: 'payment-provider-readiness' };
+}
+
 function csvEscape(value) {
   const text = String(value ?? '');
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
@@ -1104,18 +1440,38 @@ function csvResponse(filename, headers, rowsData) {
 }
 async function marketplaceCsv(context, db) {
   await ensureSchema(db);
+  await seedMarketplacePresets(db).catch(() => null);
   const url = new URL(context.request.url);
   const channel = clean(url.searchParams.get('channel') || 'all', 40).toLowerCase();
   const rowsData = rows(await db.prepare(`SELECT * FROM custom_request_marketplace_export_packs ORDER BY datetime(updated_at) DESC LIMIT 500`).all().catch(() => ({ results: [] })));
-  const headers = ['channel','pack_key','custom_request_id','title','description','tags','price_note','readiness_notes','status','updated_at'];
+  const headers = ['channel','pack_key','custom_request_id','title','description','price','category','shipping_profile','tags','destination_url','readiness_notes','status','updated_at'];
   const out = [];
+  const parse = (value) => { try { const parsed = JSON.parse(value || '{}'); return parsed && typeof parsed === 'object' ? parsed : {}; } catch { return {}; } };
   rowsData.forEach((pack) => {
+    const etsy = parse(pack.etsy_csv_row_json);
+    const facebook = parse(pack.facebook_csv_row_json);
+    const pinterest = parse(pack.pinterest_csv_row_json);
+    const manual = parse(pack.manual_csv_row_json);
     const tags = (() => { try { const parsed = JSON.parse(pack.tags_json || '[]'); return Array.isArray(parsed) ? parsed.join(', ') : String(pack.tags_json || ''); } catch { return String(pack.tags_json || ''); } })();
-    const add = (name, title, description) => out.push({ channel: name, pack_key: pack.pack_key || '', custom_request_id: pack.custom_request_id || '', title: title || '', description: description || '', tags, price_note: 'Review final price, shipping, tax, marketplace fees, and media readiness before posting.', readiness_notes: pack.readiness_notes || '', status: pack.pack_status || 'draft', updated_at: pack.updated_at || '' });
-    if (channel === 'all' || channel === 'etsy') add('etsy', pack.etsy_title, pack.etsy_description);
-    if (channel === 'all' || channel === 'facebook') add('facebook_marketplace', pack.facebook_title, pack.facebook_description);
-    if (channel === 'all' || channel === 'pinterest') add('pinterest', pack.pinterest_title, pack.pinterest_description);
-    if (channel === 'all' || channel === 'manual') add('manual_listing', pack.etsy_title || pack.facebook_title || pack.pinterest_title, pack.manual_listing_copy);
+    const add = (name, row) => out.push({
+      channel: name,
+      pack_key: pack.pack_key || '',
+      custom_request_id: pack.custom_request_id || '',
+      title: row.title || pack.etsy_title || pack.facebook_title || pack.pinterest_title || '',
+      description: row.description || pack.manual_listing_copy || '',
+      price: row.price || '',
+      category: row.category || row.board || '',
+      shipping_profile: row.shipping_profile || '',
+      tags: row.tags || tags,
+      destination_url: row.destination_url || '/custom-request/',
+      readiness_notes: pack.readiness_notes || 'Review final price, media consent, shipping, and channel rules before posting.',
+      status: pack.pack_status || 'draft',
+      updated_at: pack.updated_at || ''
+    });
+    if (channel === 'all' || channel === 'etsy') add('etsy', etsy);
+    if (channel === 'all' || channel === 'facebook') add('facebook_marketplace', facebook);
+    if (channel === 'all' || channel === 'pinterest') add('pinterest', pinterest);
+    if (channel === 'all' || channel === 'manual') add('manual_listing', manual);
   });
   return csvResponse(`devilndove-marketplace-${channel || 'all'}-export.csv`, headers, out);
 }
@@ -1165,6 +1521,13 @@ export async function onRequestPost(context) {
     else if (action === 'convert_order_draft_to_order') actionResult = await convertOrderDraftToOrder(db, adminUser, id);
     else if (action === 'create_marketplace_export_pack') actionResult = await createMarketplaceExportPack(db, adminUser, id);
     else if (action === 'create_post_fulfillment_prompts') actionResult = await createPostFulfillmentPrompts(db, adminUser, id);
+    else if (action === 'advance_order_stage') actionResult = await advanceOrderStage(db, adminUser, id);
+    else if (action === 'void_custom_links') actionResult = await manageCustomRequestLinks(db, adminUser, id, 'void');
+    else if (action === 'expire_custom_links') actionResult = await manageCustomRequestLinks(db, adminUser, id, 'expire');
+    else if (action === 'resend_custom_links') actionResult = await manageCustomRequestLinks(db, adminUser, id, 'resend');
+    else if (action === 'create_consent_proof_candidate') actionResult = await createConsentProofCandidate(db, adminUser, id);
+    else if (action === 'approve_consent_public_proof') actionResult = await approveConsentPublicProof(db, adminUser, id);
+    else if (action === 'test_payment_provider_handoffs') actionResult = await testPaymentProviderHandoffs(db, context.env, adminUser);
     else {
       const nextStatus = status(body.status);
       const adminNotes = clean(body.admin_notes || '', 1600);
