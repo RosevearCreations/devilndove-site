@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const productInterest = params.get('product_interest');
     if (requestType && form.elements.request_type) form.elements.request_type.value = requestType;
     if (productInterest && form.elements.product_interest) form.elements.product_interest.value = productInterest;
+    ['scent_profile', 'wax_or_base', 'colour_notes', 'ingredient_notes'].forEach((key) => { if (params.get(key) && form.elements[key]) form.elements[key].value = params.get(key); });
   } catch {}
 
   function setMsg(text, isError = false) {
