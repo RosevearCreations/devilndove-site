@@ -1,3 +1,15 @@
+# Build 156 API note
+
+New or expanded API surface:
+
+- `/api/custom-request-payment` — public private-token payment page API. It now blocks links that did not pass admin share gates and can prepare Stripe/PayPal/Square/manual checkout records.
+- `/api/custom-request-order` — public private-token order-status API for converted custom-request orders.
+- `/api/custom-request-consent` — public private-token review/photo/consent response API.
+- `/api/admin/custom-requests?format=marketplace_csv&channel=...` — authenticated CSV export for Etsy, Facebook Marketplace, Pinterest, or all/manual listing review.
+- `/api/admin/custom-requests` — expanded with payment-share gate checks, checkout record visibility, order-status links, consent prompt tokens, and stricter approved payment link rules.
+
+Do not expose private token URLs in sitemap or public navigation. Keep all external payment sharing behind admin approval gates.
+
 # Functions API Notes
 
 Current sync: 2026-05-14 — Build 125.

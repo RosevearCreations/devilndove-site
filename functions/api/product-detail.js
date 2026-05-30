@@ -508,6 +508,47 @@ export async function onRequestGet(context) {
     image_count: storefront_images.length
   };
 
+  async function relatedProductsByProof() {
+    const fields = ['material_tags', 'materials_json', 'primary_material', 'material', 'product_category', 'process_tags', 'making_process', 'process_notes', 'locality_label', 'local_pickup_note', 'sourcing_notes'].filter((field) => productColumns.has(field));
+    if (!fields.length) return [];
+    const tokens = [
+      ...(Array.isArray(product.proof_materials) ? product.proof_materials : []),
+      ...(Array.isArray(product.proof_processes) ? product.proof_processes : []),
+      ...(Array.isArray(product.proof_localities) ? product.proof_localities : [])
+    ].map((item) => String(item || '').trim().toLowerCase()).filter((item) => item.length >= 3).slice(0, 8);
+    if (!tokens.length) return [];
+    const clauses = [];
+    const binds = [];
+    tokens.forEach((token) => {
+      const parts = fields.map((field) => `LOWER(COALESCE(p.${field}, '')) LIKE ?`);
+      clauses.push(`(${parts.join(' OR ')})`);
+      fields.forEach(() => binds.push(`%${token}%`));
+    });
+    const statusClause = productColumns.has('status') ? `AND p.status='active'` : '';
+    const imageColumn = productColumns.has('featured_image_url') ? 'p.featured_image_url' : "''";
+    const priceColumn = productColumns.has('price_cents') ? 'p.price_cents' : '0';
+    const currencyColumn = productColumns.has('currency') ? 'p.currency' : "'CAD'";
+    const rows = normalizeResults(await db.prepare(`
+      SELECT p.product_id, p.slug, p.name, p.product_category, ${imageColumn} AS featured_image_url, ${priceColumn} AS price_cents, ${currencyColumn} AS currency,
+             (${clauses.map((clause) => `CASE WHEN ${clause} THEN 1 ELSE 0 END`).join(' + ')}) AS proof_match_score
+      FROM products p
+      WHERE p.product_id <> ? ${statusClause} AND (${clauses.join(' OR ')})
+      ORDER BY proof_match_score DESC, p.updated_at DESC, p.product_id DESC
+      LIMIT 6
+    `).bind(...binds, Number(product.product_id || 0), ...binds).all().catch(() => ({ results: [] })));
+    return rows.map((row) => ({
+      product_id: Number(row.product_id || 0),
+      slug: row.slug || '',
+      name: row.name || '',
+      product_category: row.product_category || '',
+      featured_image_url: row.featured_image_url || '',
+      price_cents: Number(row.price_cents || 0),
+      currency: row.currency || 'CAD',
+      proof_match_score: Number(row.proof_match_score || 0),
+      proof_match_note: 'Related by material, process, locality, or product proof tags.'
+    }));
+  }
+
   let reviews = [];
   let review_summary = { review_count: 0, average_rating: 0 };
   try {
@@ -537,5 +578,6 @@ export async function onRequestGet(context) {
     }
   } catch {}
 
-  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, reviews, review_summary });
+  const related_products = await relatedProductsByProof();
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, reviews, review_summary, related_products });
 }
