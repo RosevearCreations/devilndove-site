@@ -1,5 +1,5 @@
 // File: /functions/api/admin/custom-requests.js
-// Brief description: Admin review queue for custom gift, engraving, and personalized work requests, including quote/job/product conversion, editable quote line items, approved payment links, real order conversion, marketplace export packs, post-fulfillment prompts, private quote links, and revision history.
+// Brief description: Admin review queue for custom gift, engraving, and personalized work requests, including quote/job/product conversion, editable quote line items, approved payment links, real checkout handoffs, customer order-status links, marketplace CSV exports, post-fulfillment consent prompts, private quote links, and revision history.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
@@ -317,8 +317,67 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'custom_request_payment_links', 'viewed_at', 'viewed_at TEXT');
   await ensureColumn(db, 'custom_request_payment_links', 'ready_to_pay_at', 'ready_to_pay_at TEXT');
   await ensureColumn(db, 'custom_request_payment_links', 'customer_ready_note', 'customer_ready_note TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'order_id', 'order_id INTEGER');
+  await ensureColumn(db, 'custom_request_payment_links', 'payment_id', 'payment_id INTEGER');
+  await ensureColumn(db, 'custom_request_payment_links', 'external_share_status', "external_share_status TEXT NOT NULL DEFAULT 'gate_pending'");
+  await ensureColumn(db, 'custom_request_payment_links', 'gate_status', "gate_status TEXT NOT NULL DEFAULT 'pending'");
+  await ensureColumn(db, 'custom_request_payment_links', 'gate_checked_at', 'gate_checked_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'gate_notes', 'gate_notes TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'preferred_provider', "preferred_provider TEXT NOT NULL DEFAULT 'manual'");
+  await ensureColumn(db, 'custom_request_payment_links', 'checkout_redirect_url', 'checkout_redirect_url TEXT');
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_links_request ON custom_request_payment_links(custom_request_id, link_status, updated_at)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_links_token ON custom_request_payment_links(link_token, link_status)`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_payment_link_approval_gates (
+    custom_request_payment_link_approval_gate_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    payment_request_draft_id INTEGER,
+    order_draft_id INTEGER,
+    order_id INTEGER,
+    gate_status TEXT NOT NULL DEFAULT 'failed',
+    gate_notes TEXT,
+    gate_snapshot_json TEXT DEFAULT '{}',
+    checked_by_user_id INTEGER,
+    checked_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_gate_request ON custom_request_payment_link_approval_gates(custom_request_id, gate_status, checked_at)`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_payment_checkout_records (
+    custom_request_payment_checkout_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    payment_link_id INTEGER,
+    order_id INTEGER,
+    payment_id INTEGER,
+    provider TEXT NOT NULL DEFAULT 'manual',
+    checkout_status TEXT NOT NULL DEFAULT 'prepared',
+    provider_order_id TEXT,
+    provider_payment_id TEXT,
+    redirect_url TEXT,
+    mode TEXT,
+    source_payload_json TEXT DEFAULT '{}',
+    created_by_user_id INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_checkout_records_request ON custom_request_payment_checkout_records(custom_request_id, provider, checkout_status, updated_at)`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_order_status_links (
+    custom_request_order_status_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    order_id INTEGER NOT NULL,
+    order_status_token TEXT NOT NULL UNIQUE,
+    link_status TEXT NOT NULL DEFAULT 'active',
+    customer_email TEXT,
+    customer_name TEXT,
+    created_by_user_id INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_order_status_links_request ON custom_request_order_status_links(custom_request_id, link_status, updated_at)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_order_status_links_token ON custom_request_order_status_links(order_status_token, link_status)`).run().catch(() => null);
 
   await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_marketplace_export_packs (
     custom_request_marketplace_export_pack_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -343,6 +402,10 @@ async function ensureSchema(db) {
     FOREIGN KEY (quote_draft_id) REFERENCES custom_request_quote_drafts(custom_request_quote_draft_id) ON DELETE SET NULL,
     FOREIGN KEY (product_draft_id) REFERENCES custom_request_product_drafts(custom_request_product_draft_id) ON DELETE SET NULL
   )`).run();
+  await ensureColumn(db, 'custom_request_marketplace_export_packs', 'csv_status', "csv_status TEXT NOT NULL DEFAULT 'draft'");
+  await ensureColumn(db, 'custom_request_marketplace_export_packs', 'etsy_csv_row_json', "etsy_csv_row_json TEXT DEFAULT '{}'");
+  await ensureColumn(db, 'custom_request_marketplace_export_packs', 'facebook_csv_row_json', "facebook_csv_row_json TEXT DEFAULT '{}'");
+  await ensureColumn(db, 'custom_request_marketplace_export_packs', 'pinterest_csv_row_json', "pinterest_csv_row_json TEXT DEFAULT '{}'");
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_marketplace_exports_request ON custom_request_marketplace_export_packs(custom_request_id, pack_status, updated_at)`).run().catch(() => null);
 
   await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_fulfillment_prompts (
@@ -362,7 +425,14 @@ async function ensureSchema(db) {
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
   )`).run();
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'prompt_token', 'prompt_token TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'public_response_status', "public_response_status TEXT NOT NULL DEFAULT 'not_sent'");
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'public_use_scope', 'public_use_scope TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'review_text', 'review_text TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'customer_response_note', 'customer_response_note TEXT');
+  await ensureColumn(db, 'custom_request_fulfillment_prompts', 'responded_at', 'responded_at TEXT');
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_fulfillment_prompts_request ON custom_request_fulfillment_prompts(custom_request_id, prompt_status, updated_at)`).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_fulfillment_prompts_token ON custom_request_fulfillment_prompts(prompt_token)`).run().catch(() => null);
 
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_candidates_request ON custom_request_payment_candidates(custom_request_id, candidate_type, candidate_status)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_request ON custom_request_quote_share_links(custom_request_id, share_status, updated_at)`).run().catch(() => null);
@@ -409,12 +479,15 @@ async function listPayload(db) {
   const paymentRequestDrafts = rows(await db.prepare(`SELECT * FROM custom_request_payment_request_drafts ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const orderDrafts = rows(await db.prepare(`SELECT * FROM custom_request_order_drafts ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const paymentLinks = rows(await db.prepare(`SELECT * FROM custom_request_payment_links ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
+  const paymentGates = rows(await db.prepare(`SELECT * FROM custom_request_payment_link_approval_gates ORDER BY datetime(checked_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
+  const checkoutRecords = rows(await db.prepare(`SELECT * FROM custom_request_payment_checkout_records ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
+  const orderStatusLinks = rows(await db.prepare(`SELECT * FROM custom_request_order_status_links ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const marketplaceExportPacks = rows(await db.prepare(`SELECT * FROM custom_request_marketplace_export_packs ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const fulfillmentPrompts = rows(await db.prepare(`SELECT * FROM custom_request_fulfillment_prompts ORDER BY datetime(updated_at) DESC LIMIT 120`).all().catch(() => ({ results: [] })));
   const referenceUploads = rows(await db.prepare(`SELECT * FROM custom_request_reference_uploads ORDER BY datetime(created_at) DESC LIMIT 160`).all().catch(() => ({ results: [] })));
   const conversionEvents = rows(await db.prepare(`SELECT * FROM custom_request_conversion_events ORDER BY datetime(created_at) DESC LIMIT 160`).all().catch(() => ({ results: [] })));
   const customerHistory = rows(await db.prepare(`SELECT email, COUNT(*) AS request_count, MAX(created_at) AS last_request_at FROM custom_requests WHERE COALESCE(email,'') <> '' GROUP BY email HAVING COUNT(*) > 1 ORDER BY request_count DESC, last_request_at DESC LIMIT 50`).all().catch(() => ({ results: [] })));
-  return { ok: true, requests, summary, quote_drafts: quoteDrafts, quote_line_items: quoteLineItems, quote_revisions: quoteRevisions, payment_request_drafts: paymentRequestDrafts, order_drafts: orderDrafts, payment_links: paymentLinks, marketplace_export_packs: marketplaceExportPacks, fulfillment_prompts: fulfillmentPrompts, job_drafts: jobDrafts, product_drafts: productDrafts, reply_templates: replyTemplates, payment_candidates: paymentCandidates, quote_preview_links: previewLinks, reference_uploads: referenceUploads, conversion_events: conversionEvents, customer_history: customerHistory };
+  return { ok: true, requests, summary, quote_drafts: quoteDrafts, quote_line_items: quoteLineItems, quote_revisions: quoteRevisions, payment_request_drafts: paymentRequestDrafts, order_drafts: orderDrafts, payment_links: paymentLinks, payment_gates: paymentGates, checkout_records: checkoutRecords, order_status_links: orderStatusLinks, marketplace_export_packs: marketplaceExportPacks, fulfillment_prompts: fulfillmentPrompts, job_drafts: jobDrafts, product_drafts: productDrafts, reply_templates: replyTemplates, payment_candidates: paymentCandidates, quote_preview_links: previewLinks, reference_uploads: referenceUploads, conversion_events: conversionEvents, customer_history: customerHistory };
 }
 
 async function recordConversion(db, adminUser, requestId, type, tableName, targetId, targetKey, notes) {
@@ -701,30 +774,117 @@ async function createAcceptedPaymentAndOrderDrafts(db, adminUser, requestId, sha
   return { ok: true, message: 'Accepted quote connected to payment request and order draft records.', target_key: orderKey, payment_request_key: paymentKey };
 }
 
+
+async function paymentShareGate(db, adminUser, requestId) {
+  const row = await requestById(db, requestId);
+  if (!row) return { ok: false, error: 'Custom request was not found.' };
+  const quote = await db.prepare(`SELECT * FROM custom_request_quote_drafts WHERE custom_request_id=? LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const draft = await db.prepare(`SELECT * FROM custom_request_payment_request_drafts WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const orderDraft = await db.prepare(`SELECT * FROM custom_request_order_drafts WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const lines = quote?.custom_request_quote_draft_id ? await quoteLineItems(db, quote.custom_request_quote_draft_id) : [];
+  const blockers = [];
+  if (!quote) blockers.push('quote draft missing');
+  if (!lines.length) blockers.push('quote line items missing');
+  if (!draft) blockers.push('payment request draft missing');
+  if (draft && Number(draft.amount_cents || 0) <= 0) blockers.push('payment amount must be greater than zero');
+  if (draft && !String(draft.customer_email || row.email || '').includes('@')) blockers.push('customer email missing');
+  if (!orderDraft) blockers.push('order draft missing');
+  if (orderDraft && String(orderDraft.order_draft_status || '').toLowerCase() !== 'converted_to_order') blockers.push('order draft must be converted to a real order first');
+  if (orderDraft && Number(orderDraft.order_id || 0) <= 0) blockers.push('real order ID missing');
+  if (!['accepted','quoted'].includes(String(row.status || '').toLowerCase())) blockers.push('request must be quoted or accepted before payment link sharing');
+  const statusValue = blockers.length ? 'failed' : 'passed';
+  const snapshot = {
+    request_key: row.request_key || null,
+    quote_key: quote?.quote_key || null,
+    line_count: lines.length,
+    payment_request_key: draft?.payment_request_key || null,
+    amount_cents: Number(draft?.amount_cents || 0),
+    order_draft_key: orderDraft?.order_draft_key || null,
+    order_id: Number(orderDraft?.order_id || 0) || null,
+    blockers
+  };
+  const insert = await db.prepare(`INSERT INTO custom_request_payment_link_approval_gates (custom_request_id, payment_request_draft_id, order_draft_id, order_id, gate_status, gate_notes, gate_snapshot_json, checked_by_user_id, checked_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
+    Number(requestId),
+    Number(draft?.custom_request_payment_request_draft_id || 0) || null,
+    Number(orderDraft?.custom_request_order_draft_id || 0) || null,
+    Number(orderDraft?.order_id || 0) || null,
+    statusValue,
+    blockers.length ? blockers.join('; ') : 'All payment share gates passed.',
+    JSON.stringify(snapshot),
+    Number(adminUser?.user_id || 0) || null
+  ).run();
+  const gateId = Number(insert?.meta?.last_row_id || 0) || null;
+  await recordConversion(db, adminUser || { user_id: 0 }, requestId, `payment_share_gate_${statusValue}`, 'custom_request_payment_link_approval_gates', gateId, statusValue, blockers.length ? blockers.join('; ') : 'Payment link gate passed.');
+  if (blockers.length) return { ok: false, error: `Payment link cannot be shared yet: ${blockers.join('; ')}.`, gate_status: statusValue, blockers, gate_id: gateId, draft, orderDraft, quote };
+  return { ok: true, message: 'Payment share gate passed.', gate_status: statusValue, gate_id: gateId, draft, orderDraft, quote };
+}
+
+async function runPaymentShareGate(db, adminUser, requestId) {
+  const result = await paymentShareGate(db, adminUser, requestId);
+  if (!result.ok) return result;
+  return { ok: true, message: 'Payment share gate passed. The payment link may now be approved.', target_id: result.gate_id, target_key: 'gate_passed' };
+}
+
+async function ensureOrderStatusLink(db, adminUser, requestId, orderId, origin) {
+  if (!Number(orderId || 0)) return null;
+  const existing = await db.prepare(`SELECT * FROM custom_request_order_status_links WHERE custom_request_id=? AND order_id=? AND link_status IN ('active','viewed') LIMIT 1`).bind(Number(requestId), Number(orderId)).first().catch(() => null);
+  if (existing) return { ...existing, share_url: `${origin}/custom-request/order/?token=${encodeURIComponent(existing.order_status_token || '')}` };
+  const row = await requestById(db, requestId).catch(() => null);
+  const token = `order_${crypto.randomUUID().replace(/-/g, '')}`;
+  const insert = await db.prepare(`INSERT INTO custom_request_order_status_links (custom_request_id, order_id, order_status_token, link_status, customer_email, customer_name, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, 'active', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    Number(requestId), Number(orderId), token, row?.email || null, row?.name || null, Number(adminUser?.user_id || 0) || null
+  ).run();
+  const id = Number(insert?.meta?.last_row_id || 0) || null;
+  await recordConversion(db, adminUser || { user_id: 0 }, requestId, 'order_status_link', 'custom_request_order_status_links', id, token, 'Private customer order-status link created.');
+  return { custom_request_order_status_link_id: id, order_status_token: token, share_url: `${origin}/custom-request/order/?token=${encodeURIComponent(token)}` };
+}
+
 async function approvePaymentLink(db, adminUser, requestId, origin) {
   const row = await requestById(db, requestId);
   if (!row) return { ok: false, error: 'Custom request was not found.' };
   const follow = await createAcceptedPaymentAndOrderDrafts(db, adminUser, requestId);
   if (!follow.ok) return follow;
-  const draft = await db.prepare(`SELECT * FROM custom_request_payment_request_drafts WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const gate = await paymentShareGate(db, adminUser, requestId);
+  if (!gate.ok) return gate;
+  const draft = gate.draft || await db.prepare(`SELECT * FROM custom_request_payment_request_drafts WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
   if (!draft) return { ok: false, error: 'Create a payment request draft first.' };
+  const orderDraft = gate.orderDraft || await db.prepare(`SELECT * FROM custom_request_order_drafts WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
+  const orderId = Number(orderDraft?.order_id || 0) || null;
   if (String(draft.payment_request_status || '').toLowerCase() === 'approved_link_active' && draft.approved_payment_link_url) {
+    await ensureOrderStatusLink(db, adminUser, requestId, orderId, origin);
     return { ok: true, message: 'Approved payment link already exists.', target_key: draft.payment_request_key, share_url: draft.approved_payment_link_url };
   }
   const existing = await db.prepare(`SELECT * FROM custom_request_payment_links WHERE payment_request_draft_id=? AND link_status IN ('active','viewed','ready_to_pay') LIMIT 1`).bind(Number(draft.custom_request_payment_request_draft_id || 0)).first().catch(() => null);
   if (existing) {
+    await ensureOrderStatusLink(db, adminUser, requestId, orderId, origin);
     return { ok: true, message: 'Approved payment link already exists.', target_key: existing.payment_link_key, share_url: `${origin}${existing.link_url_path}` };
   }
   const paymentKey = key('paylink');
   const token = `pay_${crypto.randomUUID().replace(/-/g, '')}`;
   const path = `/custom-request/pay/?token=${encodeURIComponent(token)}`;
+  let paymentId = null;
+  if (orderId) {
+    const existingPayment = await db.prepare(`SELECT payment_id FROM payments WHERE order_id=? AND provider='manual' AND payment_status IN ('pending','authorized') ORDER BY payment_id DESC LIMIT 1`).bind(orderId).first().catch(() => null);
+    if (existingPayment?.payment_id) paymentId = Number(existingPayment.payment_id || 0);
+    else {
+      const paymentInsert = await db.prepare(`INSERT INTO payments (order_id, provider, payment_status, amount_cents, currency, payment_method_label, created_at, updated_at, notes) VALUES (?, 'manual', 'pending', ?, ?, 'Custom request payment review', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)`).bind(
+        orderId,
+        Number(draft.amount_cents || 0),
+        draft.currency || 'CAD',
+        `Created from approved custom request payment link ${paymentKey}. Stripe/PayPal/Square handoff can be prepared from the private payment page.`
+      ).run().catch(() => null);
+      paymentId = Number(paymentInsert?.meta?.last_row_id || 0) || null;
+    }
+  }
   const insert = await db.prepare(`INSERT INTO custom_request_payment_links (
-    custom_request_id, payment_request_draft_id, quote_draft_id, payment_link_key, link_token, link_status, link_url_path,
-    request_type, amount_cents, tax_cents, currency, customer_name, customer_email, approval_notes, approved_by_user_id, approved_at, created_at, updated_at
-  ) VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    custom_request_id, payment_request_draft_id, quote_draft_id, order_id, payment_id, payment_link_key, link_token, link_status, link_url_path,
+    request_type, amount_cents, tax_cents, currency, customer_name, customer_email, provider, preferred_provider, external_share_status, gate_status, gate_checked_at, gate_notes, approval_notes, approved_by_user_id, approved_at, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?, ?, ?, 'manual_review', 'manual', 'share_allowed', 'passed', CURRENT_TIMESTAMP, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
     Number(requestId),
     Number(draft.custom_request_payment_request_draft_id || 0),
     Number(draft.quote_draft_id || 0) || null,
+    orderId,
+    paymentId,
     paymentKey,
     token,
     path,
@@ -734,14 +894,16 @@ async function approvePaymentLink(db, adminUser, requestId, origin) {
     draft.currency || 'CAD',
     draft.customer_name || row.name || null,
     draft.customer_email || row.email || null,
-    'Approved manual payment link. This link is safe to share but still routes payment through the reviewed Devil n Dove payment workflow.',
+    'All required approval gates passed: quote lines, positive amount, customer email, and converted real order.',
+    'Approved payment link after strict share gate. Customer can choose Stripe/PayPal/Square/manual if configured; no payment is captured by this approval alone.',
     Number(adminUser.user_id || 0)
   ).run();
   const targetId = Number(insert?.meta?.last_row_id || 0) || null;
+  await ensureOrderStatusLink(db, adminUser, requestId, orderId, origin);
   await db.prepare(`UPDATE custom_request_payment_request_drafts SET payment_request_status='approved_link_active', approved_payment_link_id=?, approved_payment_link_url=?, reviewed_by_user_id=?, reviewed_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE custom_request_payment_request_draft_id=?`).bind(targetId, `${origin}${path}`, Number(adminUser.user_id || 0), Number(draft.custom_request_payment_request_draft_id || 0)).run();
-  await recordQuoteRevision(db, adminUser, requestId, draft.quote_draft_id, 'payment_link_approved', 'Reviewed payment request draft was converted into an approved customer payment link.', { payment_link_key: paymentKey, amount_cents: Number(draft.amount_cents || 0) });
-  await recordConversion(db, adminUser, requestId, 'approved_payment_link', 'custom_request_payment_links', targetId, paymentKey, 'Reviewed payment request draft converted to an approved payment link.');
-  return { ok: true, message: 'Approved payment link created.', target_key: paymentKey, target_id: targetId, share_url: `${origin}${path}` };
+  await recordQuoteRevision(db, adminUser, requestId, draft.quote_draft_id, 'payment_link_approved', 'Reviewed payment request passed strict share gates and became an approved customer payment link.', { payment_link_key: paymentKey, amount_cents: Number(draft.amount_cents || 0), order_id: orderId, payment_id: paymentId });
+  await recordConversion(db, adminUser, requestId, 'approved_payment_link', 'custom_request_payment_links', targetId, paymentKey, 'Reviewed payment request passed strict gates and converted to an approved payment link connected to a real order/payment record.');
+  return { ok: true, message: 'Approved payment link created after strict payment-share gate.', target_key: paymentKey, target_id: targetId, share_url: `${origin}${path}` };
 }
 
 async function convertOrderDraftToOrder(db, adminUser, requestId) {
@@ -787,6 +949,7 @@ async function convertOrderDraftToOrder(db, adminUser, requestId) {
   await db.prepare(`UPDATE custom_requests SET status=CASE WHEN status IN ('quoted','accepted') THEN 'accepted' ELSE status END, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(Number(requestId)).run().catch(() => null);
   await recordQuoteRevision(db, adminUser, requestId, draft.quote_draft_id, 'order_converted', `Order draft converted into real order ${orderNumber}.`, { order_id: orderId, order_number: orderNumber });
   await recordConversion(db, adminUser, requestId, 'order_draft_to_order', 'orders', orderId, orderNumber, 'Reviewed order draft converted into a real order record.');
+  await ensureOrderStatusLink(db, adminUser, requestId, orderId, 'https://devilndove.com').catch(() => null);
   return { ok: true, message: `Real order record created: ${orderNumber}.`, target_key: orderNumber, target_id: orderId };
 }
 
@@ -907,16 +1070,18 @@ async function createPostFulfillmentPrompts(db, adminUser, requestId) {
   const existing = await db.prepare(`SELECT * FROM custom_request_fulfillment_prompts WHERE custom_request_id=? LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
   if (existing) return { ok: true, message: 'Post-fulfillment prompt already exists.', target_key: existing.prompt_key, target_id: existing.custom_request_fulfillment_prompt_id };
   const promptKey = key('fulfillprompt');
+  const promptToken = `consent_${crypto.randomUUID().replace(/-/g, '')}`;
   const subject = clean(`Thank you for your Devil n Dove custom piece`, 180);
   const body = clean(`Hi ${row.name || 'there'},\n\nThank you again for letting us make your custom Devil n Dove piece: ${titleForRequest(row)}.\n\nWhen everything is received and you have had a chance to look it over, we would love a short review or a quick note about what you liked. If you are comfortable with it, we may also ask whether finished photos or process photos can be used on our website, gallery, or social posts.\n\nNo pressure — private custom work stays private unless you clearly approve public use.\n\nThanks,\nDevil n Dove`, 2500);
   const consentQuestion = clean(`May Devil n Dove use finished photos or process photos from this custom request in public product stories, gallery examples, or social media? Please reply with one of: private only, website/gallery okay, social okay, or all public okay.`, 800);
   const insert = await db.prepare(`INSERT INTO custom_request_fulfillment_prompts (
-    custom_request_id, order_id, prompt_key, prompt_status, prompt_type, customer_name, customer_email,
+    custom_request_id, order_id, prompt_key, prompt_token, prompt_status, prompt_type, public_response_status, customer_name, customer_email,
     subject, body_text, consent_question_text, created_by_user_id, created_at, updated_at
-  ) VALUES (?, ?, ?, 'draft', 'review_photo_consent', ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+  ) VALUES (?, ?, ?, ?, 'draft', 'review_photo_consent', 'not_sent', ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
     Number(requestId),
     Number(orderDraft?.order_id || 0) || null,
     promptKey,
+    promptToken,
     row.name || null,
     row.email || null,
     subject,
@@ -929,13 +1094,44 @@ async function createPostFulfillmentPrompts(db, adminUser, requestId) {
   return { ok: true, message: 'Post-fulfillment review/photo/consent prompt created.', target_key: promptKey, target_id: targetId };
 }
 
+function csvEscape(value) {
+  const text = String(value ?? '');
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+function csvResponse(filename, headers, rowsData) {
+  const body = [headers.join(','), ...rowsData.map((row) => headers.map((h) => csvEscape(row[h] ?? '')).join(','))].join('\n');
+  return new Response(body, { status: 200, headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'no-store' } });
+}
+async function marketplaceCsv(context, db) {
+  await ensureSchema(db);
+  const url = new URL(context.request.url);
+  const channel = clean(url.searchParams.get('channel') || 'all', 40).toLowerCase();
+  const rowsData = rows(await db.prepare(`SELECT * FROM custom_request_marketplace_export_packs ORDER BY datetime(updated_at) DESC LIMIT 500`).all().catch(() => ({ results: [] })));
+  const headers = ['channel','pack_key','custom_request_id','title','description','tags','price_note','readiness_notes','status','updated_at'];
+  const out = [];
+  rowsData.forEach((pack) => {
+    const tags = (() => { try { const parsed = JSON.parse(pack.tags_json || '[]'); return Array.isArray(parsed) ? parsed.join(', ') : String(pack.tags_json || ''); } catch { return String(pack.tags_json || ''); } })();
+    const add = (name, title, description) => out.push({ channel: name, pack_key: pack.pack_key || '', custom_request_id: pack.custom_request_id || '', title: title || '', description: description || '', tags, price_note: 'Review final price, shipping, tax, marketplace fees, and media readiness before posting.', readiness_notes: pack.readiness_notes || '', status: pack.pack_status || 'draft', updated_at: pack.updated_at || '' });
+    if (channel === 'all' || channel === 'etsy') add('etsy', pack.etsy_title, pack.etsy_description);
+    if (channel === 'all' || channel === 'facebook') add('facebook_marketplace', pack.facebook_title, pack.facebook_description);
+    if (channel === 'all' || channel === 'pinterest') add('pinterest', pack.pinterest_title, pack.pinterest_description);
+    if (channel === 'all' || channel === 'manual') add('manual_listing', pack.etsy_title || pack.facebook_title || pack.pinterest_title, pack.manual_listing_copy);
+  });
+  return csvResponse(`devilndove-marketplace-${channel || 'all'}-export.csv`, headers, out);
+}
+
+
 
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  try { return jsonResponse(await listPayload(db), 200, { 'Cache-Control': 'no-store' }); }
+  try {
+    const url = new URL(context.request.url);
+    if (String(url.searchParams.get('format') || '').toLowerCase() === 'marketplace_csv') return marketplaceCsv(context, db);
+    return jsonResponse(await listPayload(db), 200, { 'Cache-Control': 'no-store' });
+  }
   catch (error) {
     await captureRuntimeIncident(context.env, context.request, { incident_scope: 'admin_custom_requests', incident_code: 'custom_requests_list_failed', severity: 'error', message: error?.message || 'Custom request list failed.', details: { error: String(error?.stack || error?.message || error) }, related_user_id: adminUser.user_id }).catch(() => null);
     return jsonResponse({ ok: false, error: error?.message || 'Could not load custom requests.' }, 500);
@@ -964,6 +1160,7 @@ export async function onRequestPost(context) {
     else if (action === 'create_accepted_payment_order_drafts') actionResult = await createAcceptedPaymentAndOrderDrafts(db, adminUser, id);
     else if (action === 'create_quote_preview_link') actionResult = await createQuotePreviewLink(db, adminUser, id, new URL(context.request.url).origin);
     else if (action === 'create_quote_revision_link') actionResult = await createQuoteRevisionLink(db, adminUser, id, new URL(context.request.url).origin);
+    else if (action === 'run_payment_share_gate') actionResult = await runPaymentShareGate(db, adminUser, id);
     else if (action === 'approve_payment_link') actionResult = await approvePaymentLink(db, adminUser, id, new URL(context.request.url).origin);
     else if (action === 'convert_order_draft_to_order') actionResult = await convertOrderDraftToOrder(db, adminUser, id);
     else if (action === 'create_marketplace_export_pack') actionResult = await createMarketplaceExportPack(db, adminUser, id);
