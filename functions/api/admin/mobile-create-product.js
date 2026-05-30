@@ -1,10 +1,10 @@
 // File: /functions/api/admin/mobile-create-product.js
 // Purpose: Admin-only mobile product capture endpoint for quick draft creation/update.
-// Fix included: defines normalizeColorNames so mobile draft saves no longer fail with
-// "normalizeColorNames is not defined". Also keeps JSON error responses instead of HTML 500s.
+// Repair: prevents duplicate generated SKUs/product numbers/slugs from crashing Save Partial.
+// It re-checks identity fields before insert and retries cleanly if D1 reports a unique constraint.
 
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
-import { getNextProductNumber } from "./_product-numbering.js";
+import { DEFAULT_PRODUCT_NUMBER_START, getNextProductNumber } from "./_product-numbering.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -130,6 +130,130 @@ function parseWholeNumber(value, fallback = 0) {
   if (!raw) return fallback;
   const parsed = Number(raw);
   return Number.isInteger(parsed) ? parsed : NaN;
+}
+
+function normalizeSku(value) {
+  const clean = normalizeText(value)
+    .toUpperCase()
+    .replace(/[^A-Z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[-.]+|[-.]+$/g, "");
+
+  return clean || "DND-DRAFT";
+}
+
+function buildDefaultSku(productNumber, fallbackSeed = "DRAFT") {
+  const parsed = Number(productNumber || 0);
+  if (Number.isInteger(parsed) && parsed > 0) {
+    return `DND-${String(parsed).padStart(5, "0")}`;
+  }
+
+  return normalizeSku(`DND-${fallbackSeed}`);
+}
+
+function isSqliteUniqueConstraint(error) {
+  const message = String(error?.message || error || "").toLowerCase();
+  return message.includes("unique constraint") || message.includes("sqlite_constraint_unique") || message.includes("sqlite_constraint");
+}
+
+async function productColumnValueExists(db, columnName, value, excludeProductId = 0) {
+  const cleanValue = normalizeText(value);
+  if (!cleanValue) return false;
+
+  const safeColumns = new Set(["sku", "slug"]);
+  if (!safeColumns.has(columnName)) return false;
+
+  try {
+    const row = await db
+      .prepare(
+        `SELECT product_id
+         FROM products
+         WHERE ${columnName} = ?
+           AND (? <= 0 OR product_id <> ?)
+         LIMIT 1`
+      )
+      .bind(cleanValue, Number(excludeProductId || 0), Number(excludeProductId || 0))
+      .first();
+
+    return Boolean(row?.product_id);
+  } catch {
+    return false;
+  }
+}
+
+async function productNumberExists(db, value, excludeProductId = 0) {
+  const parsed = Number(value || 0);
+  if (!Number.isInteger(parsed) || parsed <= 0) return false;
+
+  try {
+    const row = await db
+      .prepare(
+        `SELECT product_id
+         FROM products
+         WHERE product_number = ?
+           AND (? <= 0 OR product_id <> ?)
+         LIMIT 1`
+      )
+      .bind(parsed, Number(excludeProductId || 0), Number(excludeProductId || 0))
+      .first();
+
+    return Boolean(row?.product_id);
+  } catch {
+    return false;
+  }
+}
+
+async function resolveAvailableProductNumber(db, productColumns, preferredProductNumber, excludeProductId = 0) {
+  if (!productColumns.has("product_number")) return Number(preferredProductNumber || 0) || 0;
+
+  const start = await getNextProductNumber(db).catch(() => DEFAULT_PRODUCT_NUMBER_START);
+  let candidate = Number(preferredProductNumber || start || DEFAULT_PRODUCT_NUMBER_START);
+  if (!Number.isInteger(candidate) || candidate <= 0) candidate = DEFAULT_PRODUCT_NUMBER_START;
+
+  for (let attempt = 0; attempt < 250; attempt += 1) {
+    const exists = await productNumberExists(db, candidate, excludeProductId);
+    if (!exists) return candidate;
+    candidate += 1;
+  }
+
+  const fallback = await db
+    .prepare("SELECT COALESCE(MAX(product_number), 0) + 1 AS next_product_number FROM products")
+    .first()
+    .catch(() => null);
+
+  const fallbackNumber = Number(fallback?.next_product_number || candidate || DEFAULT_PRODUCT_NUMBER_START);
+  return Number.isInteger(fallbackNumber) && fallbackNumber > 0 ? fallbackNumber : candidate;
+}
+
+async function resolveAvailableTextValue(db, productColumns, columnName, preferredValue, fallbackValue, excludeProductId = 0) {
+  if (!productColumns.has(columnName)) return normalizeText(preferredValue || fallbackValue);
+
+  const base =
+    columnName === "sku"
+      ? normalizeSku(preferredValue || fallbackValue)
+      : slugify(preferredValue || fallbackValue) || slugify(fallbackValue) || "draft-product";
+
+  let candidate = base;
+
+  for (let attempt = 0; attempt < 250; attempt += 1) {
+    const exists = await productColumnValueExists(db, columnName, candidate, excludeProductId);
+    if (!exists) return candidate;
+
+    candidate = `${base}-${attempt + 2}`;
+  }
+
+  return `${base}-${Date.now()}`;
+}
+
+async function resolveNewProductIdentity({ db, productColumns, preferredProductNumber, resolvedName, slugCandidate, skuCandidate, excludeProductId = 0 }) {
+  const productNumber = await resolveAvailableProductNumber(db, productColumns, preferredProductNumber, excludeProductId);
+  const fallbackSlug = slugify(`${resolvedName || "draft-product"}-${productNumber || Date.now()}`) || `product-${productNumber || Date.now()}`;
+  const fallbackSku = buildDefaultSku(productNumber, productNumber || Date.now());
+
+  const slug = await resolveAvailableTextValue(db, productColumns, "slug", slugCandidate || fallbackSlug, fallbackSlug, excludeProductId);
+  const sku = await resolveAvailableTextValue(db, productColumns, "sku", skuCandidate || fallbackSku, fallbackSku, excludeProductId);
+
+  return { productNumber, slug, sku };
 }
 
 async function getTableColumnSet(db, tableName) {
@@ -554,8 +678,20 @@ export async function onRequestPost(context) {
     } else {
       productNumber = await getNextProductNumber(db);
       resolvedName = name || captureReference || `Draft product ${productNumber}`;
-      slug = slugify(`${resolvedName}-${productNumber}`) || `product-${productNumber}`;
-      sku = skuOverride || `DND-${String(productNumber).padStart(5, "0")}`;
+
+      const identity = await resolveNewProductIdentity({
+        db,
+        productColumns,
+        preferredProductNumber: productNumber,
+        resolvedName,
+        slugCandidate: slugify(`${resolvedName}-${productNumber}`) || `product-${productNumber}`,
+        skuCandidate: skuOverride || buildDefaultSku(productNumber, productNumber)
+      });
+
+      productNumber = identity.productNumber || productNumber;
+      slug = identity.slug || slugify(`${resolvedName}-${productNumber}`) || `product-${productNumber}`;
+      sku = identity.sku || buildDefaultSku(productNumber, productNumber);
+
       readyNotes = [
         captureReference ? `Capture reference: ${captureReference}` : "",
         !name ? "Partial draft saved without final product name." : "",
@@ -609,13 +745,58 @@ export async function onRequestPost(context) {
 
       if (!columns.includes("name")) return json({ ok: false, error: "The products table is missing the required name column." }, 500);
 
-      const insertResult = await db
-        .prepare(`
-          INSERT INTO products (${columns.join(", ")})
-          VALUES (${placeholders.join(", ")})
-        `)
-        .bind(...bindings)
-        .run();
+      let insertResult = null;
+      let lastUniqueError = null;
+
+      for (let insertAttempt = 0; insertAttempt < 5; insertAttempt += 1) {
+        try {
+          insertResult = await db
+            .prepare(`
+              INSERT INTO products (${columns.join(", ")})
+              VALUES (${placeholders.join(", ")})
+            `)
+            .bind(...bindings)
+            .run();
+          break;
+        } catch (error) {
+          if (!isSqliteUniqueConstraint(error)) throw error;
+          lastUniqueError = error;
+
+          const identityRetry = await resolveNewProductIdentity({
+            db,
+            productColumns,
+            preferredProductNumber: productNumber + insertAttempt + 1,
+            resolvedName,
+            slugCandidate: slugify(`${resolvedName}-${productNumber + insertAttempt + 1}`) || `product-${productNumber + insertAttempt + 1}`,
+            skuCandidate: skuOverride ? `${normalizeSku(skuOverride)}-${insertAttempt + 2}` : buildDefaultSku(productNumber + insertAttempt + 1, productNumber + insertAttempt + 1)
+          });
+
+          productNumber = identityRetry.productNumber || productNumber + insertAttempt + 1;
+          slug = identityRetry.slug || slug;
+          sku = identityRetry.sku || sku;
+
+          const numberIndex = columns.indexOf("product_number");
+          if (numberIndex >= 0) bindings[numberIndex] = productNumber;
+
+          const slugIndex = columns.indexOf("slug");
+          if (slugIndex >= 0) bindings[slugIndex] = slug;
+
+          const skuIndex = columns.indexOf("sku");
+          if (skuIndex >= 0) bindings[skuIndex] = sku;
+        }
+      }
+
+      if (!insertResult) {
+        return json(
+          {
+            ok: false,
+            error: "This draft could not be saved because the generated SKU or product number already exists. Refresh the mobile product page and try Save Partial again.",
+            details: lastUniqueError?.message || "Unique constraint failed.",
+            recoverable: true
+          },
+          409
+        );
+      }
 
       resolvedProductId = Number(insertResult?.meta?.last_row_id || 0);
       if (!resolvedProductId) return json({ ok: false, error: "Product could not be created." }, 500);
