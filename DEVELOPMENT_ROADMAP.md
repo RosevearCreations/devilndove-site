@@ -1053,3 +1053,27 @@ Completed in this pass:
 5. Add proof filters to product detail related-item suggestions and collection landing pages.
 6. Add admin approval gates before payment links can be sent externally.
 
+## Build 157 update — payment readiness, link controls, stages, candle/soap specs, marketplace presets, and consent proof review
+
+Completed in this pass:
+
+- Hardened `/api/admin/mobile-create-product` so Save Partial retries duplicate SKU/product-number/slug conflicts and returns a recoverable JSON response instead of a raw D1 500 when identity generation collides.
+- Added admin link lifecycle controls for custom quote, payment, order-status, and consent links: resend marker, expire, and void.
+- Added customer custom-order stage tracking for planning, making, curing/finishing, ready, shipped/pickup, and complete.
+- Added candle/soap intake fields for scent profile, wax/base, colour notes, batch, ingredient notes, and allergen/safety notes.
+- Added `custom_candle_soap_product_specs` so candle/soap details can be tracked outside the general message text and later linked to product drafts or finished products.
+- Added marketplace channel presets and richer CSV rows for Etsy, Facebook Marketplace, Pinterest, and manual listings, including category and shipping-profile review fields.
+- Added payment provider readiness records for Stripe, PayPal, and Square configuration checks. This records configuration readiness only; real production checkout still requires a live low-value test order with credentials in Cloudflare.
+- Added consent-to-public-proof candidates and an admin approval action that can turn an approved response into a public trust block.
+- Updated private order-status pages to show custom work stage history.
+- Updated schema files and handoff Markdown for the new workflow.
+
+Next strongest steps:
+
+1. Add editable UI fields for candle/soap scent, wax/base, colour, batch, ingredients, allergen/safety notes, and cure-ready date inside product drafts and mobile product capture.
+2. Add explicit Stripe/PayPal/Square live-test result buttons after production credentials are configured in Cloudflare.
+3. Add per-link customer copy templates for resend actions so quote/payment/order/consent links can be manually resent with consistent wording.
+4. Add public-safe trust block moderation filters so approved consent proof can be scheduled by page/context.
+5. Add stage-specific customer messages for custom work: planning, making, curing/finishing, ready, and shipped/pickup.
+6. Add marketplace preset editing UI instead of relying on seeded defaults.
+

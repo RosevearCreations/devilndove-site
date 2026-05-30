@@ -2726,3 +2726,134 @@ CREATE INDEX IF NOT EXISTS idx_custom_order_status_links_token ON custom_request
 -- custom_request_marketplace_export_packs: csv_status, etsy_csv_row_json, facebook_csv_row_json, pinterest_csv_row_json.
 -- custom_request_fulfillment_prompts: prompt_token, public_response_status, public_use_scope, review_text, customer_response_note, responded_at.
 
+-- Build 157 - custom commerce hardening, candle/soap specs, marketplace presets, and consent proof review
+ALTER TABLE products ADD COLUMN scent_profile TEXT;
+ALTER TABLE products ADD COLUMN wax_or_base TEXT;
+ALTER TABLE products ADD COLUMN soap_base TEXT;
+ALTER TABLE products ADD COLUMN colour_recipe TEXT;
+ALTER TABLE products ADD COLUMN batch_number TEXT;
+ALTER TABLE products ADD COLUMN ingredient_notes TEXT;
+ALTER TABLE products ADD COLUMN allergen_safety_notes TEXT;
+ALTER TABLE products ADD COLUMN cure_ready_date TEXT;
+
+ALTER TABLE custom_requests ADD COLUMN upload_token TEXT;
+ALTER TABLE custom_requests ADD COLUMN reference_upload_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_requests ADD COLUMN scent_profile TEXT;
+ALTER TABLE custom_requests ADD COLUMN wax_or_base TEXT;
+ALTER TABLE custom_requests ADD COLUMN colour_notes TEXT;
+ALTER TABLE custom_requests ADD COLUMN batch_number TEXT;
+ALTER TABLE custom_requests ADD COLUMN ingredient_notes TEXT;
+ALTER TABLE custom_requests ADD COLUMN allergen_safety_notes TEXT;
+
+ALTER TABLE custom_request_quote_share_links ADD COLUMN voided_at TEXT;
+ALTER TABLE custom_request_quote_share_links ADD COLUMN expired_at TEXT;
+ALTER TABLE custom_request_quote_share_links ADD COLUMN resend_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_request_quote_share_links ADD COLUMN lifecycle_note TEXT;
+
+ALTER TABLE custom_request_payment_links ADD COLUMN voided_at TEXT;
+ALTER TABLE custom_request_payment_links ADD COLUMN expired_at TEXT;
+ALTER TABLE custom_request_payment_links ADD COLUMN resent_at TEXT;
+ALTER TABLE custom_request_payment_links ADD COLUMN resend_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_request_payment_links ADD COLUMN lifecycle_note TEXT;
+
+ALTER TABLE custom_request_order_status_links ADD COLUMN order_stage TEXT NOT NULL DEFAULT 'planning';
+ALTER TABLE custom_request_order_status_links ADD COLUMN stage_notes TEXT;
+ALTER TABLE custom_request_order_status_links ADD COLUMN stage_updated_at TEXT;
+ALTER TABLE custom_request_order_status_links ADD COLUMN voided_at TEXT;
+ALTER TABLE custom_request_order_status_links ADD COLUMN expired_at TEXT;
+ALTER TABLE custom_request_order_status_links ADD COLUMN resent_at TEXT;
+ALTER TABLE custom_request_order_status_links ADD COLUMN resend_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_request_order_status_links ADD COLUMN lifecycle_note TEXT;
+
+ALTER TABLE custom_request_marketplace_export_packs ADD COLUMN manual_csv_row_json TEXT DEFAULT '{}';
+ALTER TABLE custom_request_marketplace_export_packs ADD COLUMN preset_summary_json TEXT DEFAULT '{}';
+
+ALTER TABLE custom_request_fulfillment_prompts ADD COLUMN voided_at TEXT;
+ALTER TABLE custom_request_fulfillment_prompts ADD COLUMN expired_at TEXT;
+ALTER TABLE custom_request_fulfillment_prompts ADD COLUMN resent_at TEXT;
+ALTER TABLE custom_request_fulfillment_prompts ADD COLUMN resend_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_request_fulfillment_prompts ADD COLUMN lifecycle_note TEXT;
+ALTER TABLE custom_request_fulfillment_prompts ADD COLUMN public_proof_candidate_id INTEGER;
+
+CREATE TABLE IF NOT EXISTS marketplace_channel_presets (
+  marketplace_channel_preset_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel TEXT NOT NULL UNIQUE,
+  category_label TEXT,
+  shipping_profile_label TEXT,
+  default_tags_json TEXT DEFAULT '[]',
+  default_fields_json TEXT DEFAULT '{}',
+  preset_status TEXT NOT NULL DEFAULT 'active',
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_marketplace_channel_presets_status ON marketplace_channel_presets(preset_status, channel);
+
+CREATE TABLE IF NOT EXISTS custom_request_order_stage_events (
+  custom_request_order_stage_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  order_id INTEGER,
+  stage_key TEXT NOT NULL,
+  stage_label TEXT NOT NULL,
+  stage_status TEXT NOT NULL DEFAULT 'current',
+  stage_notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_order_stage_events_request ON custom_request_order_stage_events(custom_request_id, created_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_public_proof_candidates (
+  custom_request_public_proof_candidate_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  fulfillment_prompt_id INTEGER,
+  candidate_key TEXT NOT NULL UNIQUE,
+  candidate_type TEXT NOT NULL DEFAULT 'trust_block',
+  candidate_status TEXT NOT NULL DEFAULT 'review_needed',
+  public_use_scope TEXT,
+  title TEXT,
+  body_text TEXT,
+  attribution_label TEXT,
+  locality_label TEXT,
+  source_review_text TEXT,
+  customer_note TEXT,
+  trust_block_item_id INTEGER,
+  product_story_public_note_id INTEGER,
+  review_notes TEXT,
+  created_by_user_id INTEGER,
+  approved_by_user_id INTEGER,
+  approved_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_public_proof_candidates_status ON custom_request_public_proof_candidates(candidate_status, updated_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_payment_provider_tests (
+  custom_request_payment_provider_test_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  provider TEXT NOT NULL,
+  test_status TEXT NOT NULL DEFAULT 'not_configured',
+  mode TEXT,
+  result_notes TEXT,
+  checked_by_user_id INTEGER,
+  checked_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_custom_payment_provider_tests_provider ON custom_request_payment_provider_tests(provider, checked_at);
+
+CREATE TABLE IF NOT EXISTS custom_candle_soap_product_specs (
+  custom_candle_soap_product_spec_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER,
+  product_id INTEGER,
+  product_draft_id INTEGER,
+  product_family TEXT NOT NULL DEFAULT 'candle',
+  scent_profile TEXT,
+  wax_or_base TEXT,
+  colour_notes TEXT,
+  batch_number TEXT,
+  ingredient_notes TEXT,
+  allergen_safety_notes TEXT,
+  cure_ready_date TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_custom_candle_soap_specs_request ON custom_candle_soap_product_specs(custom_request_id, product_family);
+

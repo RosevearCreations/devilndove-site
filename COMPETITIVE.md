@@ -1,3 +1,30 @@
+
+
+# Build 157 competitive update — safer custom-commerce operations
+
+Build 157 strengthens Devil n Dove’s custom-work advantage by making the workflow feel more professional without removing the human review that protects handmade, sentimental, and customer-supplied work.
+
+## Competitive improvements
+
+1. **Mobile product capture is safer.** Save Partial now recovers from duplicate SKU/product-number collisions instead of blocking the phone workflow with a raw D1 error.
+2. **Customer links can be controlled.** Quote, payment, order-status, and consent links now support admin resend, expiry, and void controls so old private links do not linger forever.
+3. **Custom work has visible stages.** Private order-status pages can show planning, making, curing/finishing, ready, shipped/pickup, and complete stages. This reduces customer uncertainty for slow handmade work.
+4. **Candle and soap requests are more structured.** Scent profile, wax/base, colour, batch, ingredient, and allergen/safety notes are now first-class intake/spec data instead of being buried in free text.
+5. **Marketplace exports are more practical.** Etsy, Facebook Marketplace, Pinterest, and manual CSV rows now include category, shipping-profile, and tag preset fields for faster listing prep.
+6. **Consent can become proof safely.** Customer review/photo/consent responses can become review-needed public proof candidates and then approved public trust blocks from admin only.
+7. **Payment provider readiness is auditable.** Stripe, PayPal, and Square configuration checks are recorded so live checkout testing can be tracked instead of guessed.
+
+## Positioning impact
+
+Devil n Dove should keep leaning into “Southern Ontario handmade custom gifts, candles, soap, jewelry, engraving, and mixed-media workshop creations.” The site is no longer only a catalog; it is becoming a custom-work operating system with request intake, quote review, payment handoff, order tracking, marketplace listing support, consent, and proof.
+
+## Next competitive moves
+
+- Add finished candle/soap examples with scent, base, colour, batch, and safety notes.
+- Add stage-specific progress messages to customer order-status pages.
+- Add editable marketplace preset screens for category, shipping profile, and channel tags.
+- Add consent-approved proof blocks to candle/soap/custom-gift pages.
+- Add production payment-provider test logs once live credentials are configured.
 # Build 156 competitive update — custom commerce, proof, and local service expansion
 
 Build 156 makes Devil n Dove more competitive as a small mixed-media maker because it connects discovery, custom intake, proof, quoting, payment preparation, order status, marketplace exports, and post-fulfillment consent into one safer workflow.
