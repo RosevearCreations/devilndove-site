@@ -803,3 +803,12 @@ body.nav-mobile-open{overflow:hidden}
 
 /* Build 155: custom quote/payment/admin marketplace polish */
 .quote-payment-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.quote-payment-summary{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin:12px 0}.marketplace-copy-grid,.admin-form-grid{align-items:stretch}.custom-request-template-card label textarea{margin-top:6px}.shop-card-story + .small .pill{margin-top:4px}@media (max-width:720px){.quote-payment-actions .btn{width:100%;justify-content:center}.custom-request-template-card .admin-form-grid{grid-template-columns:1fr!important}}
+
+/* Build 156: custom candle/soap, private payment/order/consent pages, and related proof polish */
+.quote-payment-provider-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.quote-payment-provider-grid .btn{width:100%;justify-content:center}
+#productRelatedProofList .card{transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease}
+#productRelatedProofList .card:hover{transform:translateY(-2px);border-color:rgba(255,207,112,.4);box-shadow:0 14px 28px rgba(28,18,10,.16)}
+.custom-service-hero{display:grid;gap:14px;margin:18px 0;padding:18px;border:1px solid var(--border);border-radius:22px;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,207,112,.055))}
+.custom-service-hero .custom-request-actions{margin-top:4px}
+@media (max-width:720px){.quote-payment-provider-grid{grid-template-columns:1fr}.custom-service-hero .btn{width:100%;justify-content:center}#productRelatedProofList.grid.cols-3{grid-template-columns:1fr!important}}

@@ -1,3 +1,7 @@
+# Build 156 accounting/template note
+
+Build 156 did not change close CSV math, but custom request payments now create provider checkout preparation records. Future accountant exports should include `custom_request_payment_checkout_records`, `custom_request_payment_links`, and related `payments` rows when custom work is paid through Stripe, PayPal, Square, or manual fallback.
+
 # Accounting Templates
 
 Current sync: 2026-05-14 — Build 125.
