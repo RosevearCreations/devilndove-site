@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const msg = document.getElementById('customRequestMessage');
   if (!form) return;
 
+
+  try {
+    const params = new URLSearchParams(window.location.search || '');
+    const requestType = params.get('request_type');
+    const productInterest = params.get('product_interest');
+    if (requestType && form.elements.request_type) form.elements.request_type.value = requestType;
+    if (productInterest && form.elements.product_interest) form.elements.product_interest.value = productInterest;
+  } catch {}
+
   function setMsg(text, isError = false) {
     if (!msg) return;
     msg.textContent = text || '';

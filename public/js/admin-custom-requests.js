@@ -33,8 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (preview) pills.push(`<span class="status-note small">Preview: ${esc(preview.share_status || 'active')}</span>`);
     if (payReq) pills.push(`<span class="status-note small">Payment request draft: ${money(payReq.amount_cents)} / ${esc(payReq.payment_request_status || 'review_needed')}</span>`);
     if (orderDraft) pills.push(`<span class="status-note small">Order draft: ${money(orderDraft.total_cents)} / ${esc(orderDraft.order_draft_status || 'review_needed')}</span>`);
-    rowsForRequest(data.payment_links, id).forEach((link) => pills.push(`<span class="status-note small">Payment link: ${esc(link.link_status || 'active')}</span>`));
-    rowsForRequest(data.marketplace_export_packs, id).forEach((pack) => pills.push(`<span class="status-note small">Marketplace pack: ${esc(pack.export_status || 'draft')}</span>`));
+    rowsForRequest(data.payment_gates, id).slice(0, 1).forEach((gate) => pills.push(`<span class="status-note small">Payment gate: ${esc(gate.gate_status || 'pending')}</span>`));
+    rowsForRequest(data.payment_links, id).forEach((link) => pills.push(`<span class="status-note small">Payment link: ${esc(link.link_status || 'active')} / ${esc(link.external_share_status || 'gate pending')}</span>`));
+    rowsForRequest(data.checkout_records, id).forEach((checkout) => pills.push(`<span class="status-note small">Checkout: ${esc(checkout.provider || '')} / ${esc(checkout.checkout_status || '')}</span>`));
+    rowsForRequest(data.marketplace_export_packs, id).forEach((pack) => pills.push(`<span class="status-note small">Marketplace pack: ${esc(pack.pack_status || pack.export_status || 'draft')}</span>`));
     rowsForRequest(data.fulfillment_prompts, id).forEach((prompt) => pills.push(`<span class="status-note small">Fulfillment prompt: ${esc(prompt.prompt_status || 'draft')}</span>`));
     if (revisions.length) pills.push(`<span class="status-note small">Revisions: ${esc(revisions.length)}</span>`);
     return pills.join(' ');
@@ -60,38 +62,57 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderApprovedPaymentLinks(data) {
     const rows = Array.isArray(data.payment_links) ? data.payment_links : [];
     if (!rows.length) return '<p class="small">No approved internal payment links yet. Use “Approve payment link” only after reviewing the payment-request draft.</p>';
-    return `<div class="admin-table-wrap"><table><thead><tr><th>Payment link</th><th>Customer</th><th>Amount</th><th>Status</th><th>Private link</th></tr></thead><tbody>${rows.slice(0, 25).map((row) => {
-      const url = row.link_path || `/custom-request/pay/?token=${encodeURIComponent(row.link_token || '')}`;
-      return `<tr><td><strong>${esc(row.payment_link_key || '')}</strong><br><span class="small">Request #${esc(row.custom_request_id || '')}</span></td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${money(row.amount_cents)}<br><span class="small">Tax ${money(row.tax_cents)}</span></td><td>${esc(row.link_status || '')}<br><span class="small">Viewed ${esc(row.customer_viewed_at || row.viewed_at || '—')}</span></td><td><a href="${esc(url)}" target="_blank" rel="noopener">Open payment review</a><br><button class="btn small" type="button" data-copy-payment-link="${esc(url)}">Copy link</button></td></tr>`;
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Payment link</th><th>Customer</th><th>Amount</th><th>Status</th><th>Private link</th><th>Gate/order</th></tr></thead><tbody>${rows.slice(0, 25).map((row) => {
+      const url = row.link_url_path || row.link_path || `/custom-request/pay/?token=${encodeURIComponent(row.link_token || '')}`;
+      return `<tr><td><strong>${esc(row.payment_link_key || '')}</strong><br><span class="small">Request #${esc(row.custom_request_id || '')}</span></td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td>${money(row.amount_cents)}<br><span class="small">Tax ${money(row.tax_cents)}</span></td><td>${esc(row.link_status || '')}<br><span class="small">Share ${esc(row.external_share_status || 'gate pending')} • gate ${esc(row.gate_status || 'pending')}</span><br><span class="small">Provider ${esc(row.preferred_provider || row.provider || 'manual')}</span></td><td><a href="${esc(url)}" target="_blank" rel="noopener">Open payment review</a><br><button class="btn small" type="button" data-copy-payment-link="${esc(url)}">Copy link</button></td><td class="small">Order ID ${esc(row.order_id || '—')}<br>Payment ID ${esc(row.payment_id || '—')}<br>${esc(row.gate_notes || '')}</td></tr>`;
     }).join('')}</tbody></table></div>`;
+  }
+
+  function renderPaymentGates(data) {
+    const rows = Array.isArray(data.payment_gates) ? data.payment_gates : [];
+    if (!rows.length) return '<p class="small">No payment share gates have been run yet.</p>';
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Request</th><th>Status</th><th>Order</th><th>Notes</th><th>When</th></tr></thead><tbody>${rows.slice(0, 30).map((row) => `<tr><td>#${esc(row.custom_request_id || '')}</td><td>${esc(row.gate_status || '')}</td><td>Order ${esc(row.order_id || '—')}<br><span class="small">Draft ${esc(row.order_draft_id || '—')}</span></td><td class="small">${esc(row.gate_notes || '')}</td><td class="small">${esc(row.checked_at || '')}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function renderCheckoutRecords(data) {
+    const rows = Array.isArray(data.checkout_records) ? data.checkout_records : [];
+    if (!rows.length) return '<p class="small">No Stripe/PayPal/Square/manual checkout records have been prepared yet.</p>';
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Request</th><th>Provider</th><th>Status</th><th>Order/payment</th><th>Redirect</th></tr></thead><tbody>${rows.slice(0, 30).map((row) => `<tr><td>#${esc(row.custom_request_id || '')}</td><td>${esc(row.provider || '')}<br><span class="small">${esc(row.mode || '')}</span></td><td>${esc(row.checkout_status || '')}<br><span class="small">${esc(row.updated_at || '')}</span></td><td class="small">Order ${esc(row.order_id || '—')}<br>Payment ${esc(row.payment_id || '—')}<br>${esc(row.provider_order_id || row.provider_payment_id || '')}</td><td>${row.redirect_url ? `<a href="${esc(row.redirect_url)}" target="_blank" rel="noopener">Open</a>` : '<span class="small">No redirect</span>'}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function renderOrderStatusLinks(data) {
+    const rows = Array.isArray(data.order_status_links) ? data.order_status_links : [];
+    if (!rows.length) return '<p class="small">No customer order-status links yet. Convert an order draft to a real order first.</p>';
+    return `<div class="admin-table-wrap"><table><thead><tr><th>Request</th><th>Customer</th><th>Status link</th><th>Status</th></tr></thead><tbody>${rows.slice(0, 30).map((row) => { const url = `/custom-request/order/?token=${encodeURIComponent(row.order_status_token || '')}`; return `<tr><td>#${esc(row.custom_request_id || '')}<br><span class="small">Order ${esc(row.order_id || '—')}</span></td><td>${esc(row.customer_name || '')}<br><span class="small">${esc(row.customer_email || '')}</span></td><td><a href="${esc(url)}" target="_blank" rel="noopener">Open order status</a><br><button class="btn small" type="button" data-copy-order-status-link="${esc(url)}">Copy link</button></td><td>${esc(row.link_status || 'active')}<br><span class="small">${esc(row.updated_at || '')}</span></td></tr>`; }).join('')}</tbody></table></div>`;
   }
 
   function renderMarketplaceExportPacks(data) {
     const rows = Array.isArray(data.marketplace_export_packs) ? data.marketplace_export_packs : [];
     if (!rows.length) return '<p class="small">No marketplace export packs yet. Use “Marketplace pack” after the product plan and quote scope are reviewed.</p>';
-    return rows.slice(0, 12).map((pack) => `<article class="card custom-request-template-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><strong>${esc(pack.export_key || '')}</strong><div class="small">Request #${esc(pack.custom_request_id || '')} • ${esc(pack.export_status || 'draft')}</div></div><button class="btn small" type="button" data-copy-marketplace-pack="${esc(pack.custom_request_marketplace_export_pack_id || '')}">Copy all copy</button></div><div class="admin-form-grid" style="margin-top:8px"><label class="small">Etsy<textarea class="input" rows="5" readonly data-marketplace-pack-body="${esc(pack.custom_request_marketplace_export_pack_id || '')}">${esc(pack.etsy_title || '')}
+    return `<div class="custom-request-actions" style="margin-bottom:10px"><a class="btn small" href="/api/admin/custom-requests?format=marketplace_csv&channel=all">Download all CSV</a><a class="btn small" href="/api/admin/custom-requests?format=marketplace_csv&channel=etsy">Etsy CSV</a><a class="btn small" href="/api/admin/custom-requests?format=marketplace_csv&channel=facebook">Facebook CSV</a><a class="btn small" href="/api/admin/custom-requests?format=marketplace_csv&channel=pinterest">Pinterest CSV</a></div>` + rows.slice(0, 12).map((pack) => `<article class="card custom-request-template-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><strong>${esc(pack.pack_key || '')}</strong><div class="small">Request #${esc(pack.custom_request_id || '')} • ${esc(pack.pack_status || 'draft')} • CSV ${esc(pack.csv_status || 'draft')}</div></div><button class="btn small" type="button" data-copy-marketplace-pack="${esc(pack.custom_request_marketplace_export_pack_id || '')}">Copy all copy</button></div><div class="admin-form-grid" style="margin-top:8px"><label class="small">Etsy<textarea class="input" rows="5" readonly data-marketplace-pack-body="${esc(pack.custom_request_marketplace_export_pack_id || '')}">${esc(pack.etsy_title || '')}
 
 ${esc(pack.etsy_description || '')}
 
-Tags: ${esc(pack.etsy_tags || '')}</textarea></label><label class="small">Facebook<textarea class="input" rows="5" readonly>${esc(pack.facebook_title || '')}
+Tags: ${esc(pack.tags_json || '')}</textarea></label><label class="small">Facebook<textarea class="input" rows="5" readonly>${esc(pack.facebook_title || '')}
 
 ${esc(pack.facebook_description || '')}</textarea></label><label class="small">Pinterest<textarea class="input" rows="5" readonly>${esc(pack.pinterest_title || '')}
 
-${esc(pack.pinterest_description || '')}</textarea></label><label class="small">Manual listing<textarea class="input" rows="5" readonly>${esc(pack.manual_listing_title || '')}
-
-${esc(pack.manual_listing_description || '')}
-
-${esc(pack.suggested_local_keywords || '')}</textarea></label></div></article>`).join('');
+${esc(pack.pinterest_description || '')}</textarea></label><label class="small">Manual listing<textarea class="input" rows="5" readonly>${esc(pack.manual_listing_copy || '')}</textarea></label></div></article>`).join('');
   }
 
   function renderFulfillmentPrompts(data) {
     const rows = Array.isArray(data.fulfillment_prompts) ? data.fulfillment_prompts : [];
     if (!rows.length) return '<p class="small">No post-fulfillment review/photo/consent prompts yet. Generate one after the job/order is fulfilled.</p>';
-    return rows.slice(0, 15).map((prompt) => `<article class="card custom-request-template-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><strong>${esc(prompt.prompt_key || '')}</strong><div class="small">Request #${esc(prompt.custom_request_id || '')} • ${esc(prompt.prompt_status || 'draft')}</div></div><button class="btn small" type="button" data-copy-fulfillment-prompt="${esc(prompt.custom_request_fulfillment_prompt_id || '')}">Copy prompt</button></div><textarea class="input" rows="8" readonly data-fulfillment-prompt-body="${esc(prompt.custom_request_fulfillment_prompt_id || '')}">${esc(prompt.review_prompt_text || '')}
+    return rows.slice(0, 15).map((prompt) => {
+      const consentPath = prompt.prompt_token ? `/custom-request/consent/?token=${encodeURIComponent(prompt.prompt_token)}` : '';
+      return `<article class="card custom-request-template-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><strong>${esc(prompt.prompt_key || '')}</strong><div class="small">Request #${esc(prompt.custom_request_id || '')} • ${esc(prompt.prompt_status || 'draft')} • public response ${esc(prompt.public_response_status || 'not_sent')}</div></div><div class="custom-request-actions"><button class="btn small" type="button" data-copy-fulfillment-prompt="${esc(prompt.custom_request_fulfillment_prompt_id || '')}">Copy prompt</button>${consentPath ? `<button class="btn small" type="button" data-copy-consent-link="${esc(consentPath)}">Copy consent link</button>` : ''}</div></div><textarea class="input" rows="8" readonly data-fulfillment-prompt-body="${esc(prompt.custom_request_fulfillment_prompt_id || '')}">${esc(prompt.review_prompt_text || '')}
 
 ${esc(prompt.photo_prompt_text || '')}
 
-${esc(prompt.consent_prompt_text || '')}</textarea></article>`).join('');
+${esc(prompt.consent_prompt_text || '')}${consentPath ? `
+
+Consent/review response link: ${esc(consentPath)}` : ''}</textarea></article>`;
+    }).join('');
   }
 
   function renderPaymentCandidates(data) {
@@ -148,7 +169,7 @@ ${esc(prompt.consent_prompt_text || '')}</textarea></article>`).join('');
           <td><strong>${esc(row.request_type || '')}</strong><br><span class="small">${esc(row.product_interest || '')}</span><br><span class="small">Budget ${money(row.budget_cents)} • Deadline ${esc(row.deadline_date || '—')}</span><div style="margin-top:6px">${renderDraftSummary(row, data)}</div></td>
           <td>${esc(row.name || '')}<br><a href="mailto:${esc(row.email || '')}">${esc(row.email || '')}</a><br><span class="small">${esc(row.phone || '')}</span><div style="margin-top:6px">${historyBadge(data.customer_history || [], row.email)}</div></td>
           <td><div class="small" style="max-width:420px;white-space:pre-wrap">${esc(row.message || '')}</div>${attachmentLinks(row.attachment_urls_json)}</td>
-          <td><select data-custom-request-status="${esc(row.custom_request_id)}"><option value="new" ${row.status === 'new' ? 'selected' : ''}>New</option><option value="reviewing" ${row.status === 'reviewing' ? 'selected' : ''}>Reviewing</option><option value="quote_needed" ${row.status === 'quote_needed' ? 'selected' : ''}>Quote needed</option><option value="quoted" ${row.status === 'quoted' ? 'selected' : ''}>Quoted</option><option value="accepted" ${row.status === 'accepted' ? 'selected' : ''}>Accepted</option><option value="declined" ${row.status === 'declined' ? 'selected' : ''}>Declined</option><option value="archived" ${row.status === 'archived' ? 'selected' : ''}>Archived</option></select><textarea data-custom-request-notes="${esc(row.custom_request_id)}" rows="3" placeholder="Admin notes">${esc(row.admin_notes || '')}</textarea><div class="custom-request-actions"><button class="btn small" data-custom-request-save="${esc(row.custom_request_id)}">Save review</button><button class="btn small" data-custom-request-action="create_quote_draft" data-custom-request-id="${esc(row.custom_request_id)}">Quote draft</button><button class="btn small" data-custom-request-action="create_reply_template" data-custom-request-id="${esc(row.custom_request_id)}">Reply template</button><button class="btn small" data-custom-request-action="create_deposit_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Deposit candidate</button><button class="btn small" data-custom-request-action="create_job_draft" data-custom-request-id="${esc(row.custom_request_id)}">Job draft</button><button class="btn small" data-custom-request-action="create_invoice_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Invoice candidate</button><button class="btn small" data-custom-request-action="create_quote_preview_link" data-custom-request-id="${esc(row.custom_request_id)}">Quote preview link</button><button class="btn small" data-custom-request-action="create_quote_revision_link" data-custom-request-id="${esc(row.custom_request_id)}">Revision link</button><button class="btn small" data-custom-request-action="create_accepted_payment_order_drafts" data-custom-request-id="${esc(row.custom_request_id)}">Accepted follow-through</button><button class="btn small" data-custom-request-action="approve_payment_link" data-custom-request-id="${esc(row.custom_request_id)}">Approve payment link</button><button class="btn small" data-custom-request-action="convert_order_draft_to_order" data-custom-request-id="${esc(row.custom_request_id)}">Convert order</button><button class="btn small" data-custom-request-action="create_marketplace_export_pack" data-custom-request-id="${esc(row.custom_request_id)}">Marketplace pack</button><button class="btn small" data-custom-request-action="create_post_fulfillment_prompts" data-custom-request-id="${esc(row.custom_request_id)}">Fulfillment prompt</button><button class="btn small" data-custom-request-action="create_product_draft" data-custom-request-id="${esc(row.custom_request_id)}">Product plan</button></div></td>
+          <td><select data-custom-request-status="${esc(row.custom_request_id)}"><option value="new" ${row.status === 'new' ? 'selected' : ''}>New</option><option value="reviewing" ${row.status === 'reviewing' ? 'selected' : ''}>Reviewing</option><option value="quote_needed" ${row.status === 'quote_needed' ? 'selected' : ''}>Quote needed</option><option value="quoted" ${row.status === 'quoted' ? 'selected' : ''}>Quoted</option><option value="accepted" ${row.status === 'accepted' ? 'selected' : ''}>Accepted</option><option value="declined" ${row.status === 'declined' ? 'selected' : ''}>Declined</option><option value="archived" ${row.status === 'archived' ? 'selected' : ''}>Archived</option></select><textarea data-custom-request-notes="${esc(row.custom_request_id)}" rows="3" placeholder="Admin notes">${esc(row.admin_notes || '')}</textarea><div class="custom-request-actions"><button class="btn small" data-custom-request-save="${esc(row.custom_request_id)}">Save review</button><button class="btn small" data-custom-request-action="create_quote_draft" data-custom-request-id="${esc(row.custom_request_id)}">Quote draft</button><button class="btn small" data-custom-request-action="create_reply_template" data-custom-request-id="${esc(row.custom_request_id)}">Reply template</button><button class="btn small" data-custom-request-action="create_deposit_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Deposit candidate</button><button class="btn small" data-custom-request-action="create_job_draft" data-custom-request-id="${esc(row.custom_request_id)}">Job draft</button><button class="btn small" data-custom-request-action="create_invoice_candidate" data-custom-request-id="${esc(row.custom_request_id)}">Invoice candidate</button><button class="btn small" data-custom-request-action="create_quote_preview_link" data-custom-request-id="${esc(row.custom_request_id)}">Quote preview link</button><button class="btn small" data-custom-request-action="create_quote_revision_link" data-custom-request-id="${esc(row.custom_request_id)}">Revision link</button><button class="btn small" data-custom-request-action="create_accepted_payment_order_drafts" data-custom-request-id="${esc(row.custom_request_id)}">Accepted follow-through</button><button class="btn small" data-custom-request-action="run_payment_share_gate" data-custom-request-id="${esc(row.custom_request_id)}">Run payment gate</button><button class="btn small" data-custom-request-action="approve_payment_link" data-custom-request-id="${esc(row.custom_request_id)}">Approve payment link</button><button class="btn small" data-custom-request-action="convert_order_draft_to_order" data-custom-request-id="${esc(row.custom_request_id)}">Convert order</button><button class="btn small" data-custom-request-action="create_marketplace_export_pack" data-custom-request-id="${esc(row.custom_request_id)}">Marketplace pack</button><button class="btn small" data-custom-request-action="create_post_fulfillment_prompts" data-custom-request-id="${esc(row.custom_request_id)}">Fulfillment prompt</button><button class="btn small" data-custom-request-action="create_product_draft" data-custom-request-id="${esc(row.custom_request_id)}">Product plan</button></div></td>
         </tr>`).join('') || '<tr><td colspan="5">No custom requests yet.</td></tr>'}
       </tbody></table></div>
       <details style="margin-top:12px" open><summary>Manual customer reply templates</summary>${renderReplyTemplates(data)}</details>
@@ -156,7 +177,10 @@ ${esc(prompt.consent_prompt_text || '')}</textarea></article>`).join('');
       <details style="margin-top:12px" open><summary>Deposit and invoice candidates</summary>${renderPaymentCandidates(data)}</details>
       <details style="margin-top:12px" open><summary>Editable quote line items and estimates</summary>${renderQuoteLineItems(data)}</details>
       <details style="margin-top:12px" open><summary>Accepted quote payment/order drafts</summary>${renderAcceptedDrafts(data)}</details>
+      <details style="margin-top:12px" open><summary>Payment share gates</summary>${renderPaymentGates(data)}</details>
       <details style="margin-top:12px" open><summary>Approved payment review links</summary>${renderApprovedPaymentLinks(data)}</details>
+      <details style="margin-top:12px" open><summary>Provider checkout records</summary>${renderCheckoutRecords(data)}</details>
+      <details style="margin-top:12px" open><summary>Customer order-status links</summary>${renderOrderStatusLinks(data)}</details>
       <details style="margin-top:12px" open><summary>Marketplace export packs</summary>${renderMarketplaceExportPacks(data)}</details>
       <details style="margin-top:12px" open><summary>Post-fulfillment review/photo/consent prompts</summary>${renderFulfillmentPrompts(data)}</details>
       <details style="margin-top:12px" open><summary>Quote revision history</summary>${renderQuoteRevisions(data)}</details>
@@ -191,7 +215,7 @@ ${esc(prompt.consent_prompt_text || '')}</textarea></article>`).join('');
     catch (error) { setMsg(error.message || 'Unable to save quote line item.', true); }
   }
 
-  mount.innerHTML = `<div class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin-top:0">Custom Requests</h2><p class="small" style="margin:0">Review engraving, personalized gift, and workshop-made commission requests before turning them into quotes, replies, deposits, jobs, invoices, approved payment review links, marketplace copy packs, or product draft plans.</p></div><button class="btn" type="button" id="customRequestsLoadButton">Refresh requests</button></div><div id="customRequestsAdminMessage" class="small" style="display:none;margin-top:10px"></div><div id="customRequestsAdminRows"></div></div>`;
+  mount.innerHTML = `<div class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin-top:0">Custom Requests</h2><p class="small" style="margin:0">Review engraving, personalized gift, and workshop-made commission requests before turning them into quotes, replies, deposits, jobs, invoices, approved payment review links, payment share gates, provider checkout records, marketplace CSV exports, or product draft plans.</p></div><button class="btn" type="button" id="customRequestsLoadButton">Refresh requests</button></div><div id="customRequestsAdminMessage" class="small" style="display:none;margin-top:10px"></div><div id="customRequestsAdminRows"></div></div>`;
   document.getElementById('customRequestsLoadButton')?.addEventListener('click', load);
   mount.addEventListener('click', async (event) => {
     const saveButton = event.target.closest('[data-custom-request-save]');
@@ -213,6 +237,20 @@ ${esc(prompt.consent_prompt_text || '')}</textarea></article>`).join('');
       const link = `${window.location.origin}${path.startsWith('/') ? path : `/${path}`}`;
       try { await navigator.clipboard.writeText(link); setMsg('Payment review link copied.'); } catch { setMsg(link, false); }
     }
+
+    const orderStatusCopyButton = event.target.closest('[data-copy-order-status-link]');
+    if (orderStatusCopyButton) {
+      const path = orderStatusCopyButton.getAttribute('data-copy-order-status-link') || '';
+      const link = `${window.location.origin}${path.startsWith('/') ? path : `/${path}`}`;
+      try { await navigator.clipboard.writeText(link); setMsg('Order-status link copied.'); } catch { setMsg(link, false); }
+    }
+    const consentCopyButton = event.target.closest('[data-copy-consent-link]');
+    if (consentCopyButton) {
+      const path = consentCopyButton.getAttribute('data-copy-consent-link') || '';
+      const link = `${window.location.origin}${path.startsWith('/') ? path : `/${path}`}`;
+      try { await navigator.clipboard.writeText(link); setMsg('Consent response link copied.'); } catch { setMsg(link, false); }
+    }
+
     const marketplaceCopyButton = event.target.closest('[data-copy-marketplace-pack]');
     if (marketplaceCopyButton) {
       const id = marketplaceCopyButton.getAttribute('data-copy-marketplace-pack');
