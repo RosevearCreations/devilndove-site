@@ -1935,3 +1935,63 @@ CREATE TABLE IF NOT EXISTS custom_request_fulfillment_prompts (
 );
 CREATE INDEX IF NOT EXISTS idx_custom_fulfillment_prompts_request ON custom_request_fulfillment_prompts(custom_request_id, prompt_status, updated_at);
 
+-- Build 156 custom request payment/order/marketplace/consent upgrade
+-- Runtime functions use PRAGMA table_info guarded ALTER TABLE ADD COLUMN for existing tables.
+-- Keep this reference block with the current pass so D1, docs, and app expectations stay aligned.
+CREATE TABLE IF NOT EXISTS custom_request_payment_link_approval_gates (
+  custom_request_payment_link_approval_gate_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  payment_request_draft_id INTEGER,
+  order_draft_id INTEGER,
+  order_id INTEGER,
+  gate_status TEXT NOT NULL DEFAULT 'pending',
+  gate_notes TEXT,
+  gate_snapshot_json TEXT DEFAULT '{}',
+  checked_by_user_id INTEGER,
+  checked_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_payment_gates_request ON custom_request_payment_link_approval_gates(custom_request_id, gate_status, checked_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_payment_checkout_records (
+  custom_request_payment_checkout_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  payment_link_id INTEGER,
+  order_id INTEGER,
+  payment_id INTEGER,
+  provider TEXT NOT NULL DEFAULT 'manual',
+  checkout_status TEXT NOT NULL DEFAULT 'prepared',
+  provider_order_id TEXT,
+  provider_payment_id TEXT,
+  redirect_url TEXT,
+  mode TEXT,
+  source_payload_json TEXT DEFAULT '{}',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_checkout_records_request ON custom_request_payment_checkout_records(custom_request_id, provider, checkout_status, updated_at);
+
+CREATE TABLE IF NOT EXISTS custom_request_order_status_links (
+  custom_request_order_status_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER NOT NULL,
+  order_id INTEGER NOT NULL,
+  order_status_token TEXT NOT NULL UNIQUE,
+  link_status TEXT NOT NULL DEFAULT 'active',
+  customer_email TEXT,
+  customer_name TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (custom_request_id) REFERENCES custom_requests(custom_request_id) ON DELETE CASCADE,
+  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_custom_order_status_links_request ON custom_request_order_status_links(custom_request_id, link_status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_custom_order_status_links_token ON custom_request_order_status_links(order_status_token, link_status);
+
+-- Existing table column expectations added by guarded runtime migrations in Build 156:
+-- custom_request_payment_links: order_id, payment_id, external_share_status, gate_status, gate_checked_at, gate_notes, preferred_provider, checkout_redirect_url.
+-- custom_request_marketplace_export_packs: csv_status, etsy_csv_row_json, facebook_csv_row_json, pinterest_csv_row_json.
+-- custom_request_fulfillment_prompts: prompt_token, public_response_status, public_use_scope, review_text, customer_response_note, responded_at.
+

@@ -1,3 +1,26 @@
+# New chat status — Build 156
+
+Latest packaged state: Build 156.
+
+Main completed items:
+
+- Custom candle making and custom soap making public landing pages.
+- Payment-share gates before externally shareable approved custom payment links.
+- Stripe/PayPal/Square/manual checkout preparation records from private payment links.
+- Private customer order-status pages for converted custom-request orders.
+- Marketplace CSV exports for Etsy, Facebook Marketplace, Pinterest, and manual listing review.
+- Public private-token consent/review/photo response page.
+- Related-product proof matching on product detail pages.
+- Markdown and schema files updated for Build 156.
+
+Next recommended work:
+
+1. Live-check Stripe/PayPal/Square redirects in production mode.
+2. Add link void/resend/expiry controls.
+3. Add order-stage updates and fulfillment-photo notes.
+4. Add channel-specific marketplace CSV presets.
+5. Turn consent responses into reviewed public trust/product-story candidates.
+
 # Build 154 new chat status
 
 Current build: Build 154. Work completed: accepted quote previews -> review-needed payment-request/order drafts; editable quote line items; quote revision history; media consent records for reference uploads; accountant ZIP export; static SEO bake script/fallback; proof/gallery filters by material, process, locality, and product type.

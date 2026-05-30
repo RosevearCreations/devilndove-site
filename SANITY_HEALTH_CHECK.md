@@ -1,3 +1,16 @@
+# Build 156 sanity additions
+
+Before deploy or after staging deploy:
+
+1. Open `/custom-candle-making-ontario/` and `/custom-soap-making-ontario/`; confirm each has one H1, useful title/meta, and Custom Request prefill links.
+2. Create or use a test custom request, add quote lines, create accepted follow-through drafts, convert the order, run the payment gate, then approve the payment link.
+3. Open `/custom-request/pay/?token=...` and test Stripe/PayPal/Square/manual provider preparation with safe/test configuration.
+4. Open `/custom-request/order/?token=...` and confirm the customer sees order number, status, payment status, items, and totals.
+5. Create a post-fulfillment prompt, copy `/custom-request/consent/?token=...`, submit a test response, and confirm it records as responded.
+6. Download marketplace CSV files from Operations > Custom Requests.
+7. Open a product detail page and confirm related proof matches do not break if no related products exist.
+8. Run predeploy sanity, JavaScript syntax checks, CSS brace check, and ZIP integrity check before uploading.
+
 # Build 154 sanity additions
 
 Check these after deploy:

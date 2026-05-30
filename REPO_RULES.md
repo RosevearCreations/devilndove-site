@@ -1,3 +1,7 @@
+# Build 156 repo rules update
+
+Continue the same rules: update Markdown and schema files on every pass, keep one H1 per exposed page, avoid indexing private token pages, keep customer images private until consent is reviewed, and keep payment links behind admin approval gates. Payment/order/consent links must have void/resend/expiry controls before broader customer rollout.
+
 # Build 154 repo rule reminder
 
 When updating custom request quote workflows, keep every payment/order action review-first. Customer acceptance may create drafts, but it must not charge, publish, or create a live order without an admin review step. Uploaded reference images must remain private/internal until Media Consent Records explicitly allow public or social use.

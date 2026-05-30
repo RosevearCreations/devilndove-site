@@ -1,3 +1,7 @@
+# Build 156 inventory/proof note
+
+No Amazon matching logic was changed in Build 156. Continue keeping Amazon/order-cost data private in D1/admin tools only. The new custom candle/soap direction may require future supply matching for wax, fragrance oils, wicks, soap base, colourants, molds, packaging, safety labels, and batch/ingredient notes.
+
 # Build 154 note
 
 No Amazon matching logic was changed in this pass. The new quote line item workflow can later use matched tool/supply cost records to prefill material and consumable estimates for custom requests.

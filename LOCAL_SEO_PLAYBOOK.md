@@ -1,3 +1,15 @@
+# Build 156 local SEO update
+
+Build 156 adds two locally relevant service pages: Custom Candle Making in Southern Ontario and Custom Soap Making in Southern Ontario. Both use one clear H1, direct custom-work wording, and links into the Custom Request intake. Keep expanding pages this way: one page per real service, honest local wording, proof photos, useful alt text, and clear next steps.
+
+SEO habits for the next pass:
+
+- Add candle/soap photos with descriptive filenames and alt text once real examples are ready.
+- Keep private quote, payment, order-status, and consent pages `noindex,nofollow`.
+- Use approved consent responses to build public proof blocks only after admin review.
+- Keep product proof metadata clean so related-product matching improves internal linking.
+- Bake reviewed SEO overrides into static HTML before deploy whenever Search Console rows have been approved.
+
 # Build 154 local SEO update
 
 Build 154 keeps the local SEO habit moving forward by adding static SEO override baking and better public proof filters. The gallery can now help visitors find examples by material, process, locality, and product type, which supports locally relevant browsing for custom gifts, handmade jewelry, engraving, vintage finds, and workshop-made items in Southern Ontario. Reviewed Search Console title/meta/internal-link actions can now be exported into `data/site/seo-page-overrides.json` and baked into static HTML before deploy.

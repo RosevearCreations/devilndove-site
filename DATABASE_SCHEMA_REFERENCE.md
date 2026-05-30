@@ -1,3 +1,21 @@
+# Build 156 schema reference update
+
+Build 156 adds payment-share gating, checkout handoff records, private order-status links, marketplace CSV metadata, and public consent-response fields.
+
+New tables:
+
+- `custom_request_payment_link_approval_gates` — records pass/fail gate checks before payment links are externally shareable. Important fields: `custom_request_id`, `payment_request_draft_id`, `order_draft_id`, `order_id`, `gate_status`, `gate_notes`, `gate_snapshot_json`, `checked_by_user_id`, `checked_at`.
+- `custom_request_payment_checkout_records` — records Stripe/PayPal/Square/manual checkout preparation attempts from private custom payment pages. Important fields: `custom_request_id`, `payment_link_id`, `order_id`, `payment_id`, `provider`, `checkout_status`, `provider_order_id`, `provider_payment_id`, `redirect_url`, `mode`, `source_payload_json`.
+- `custom_request_order_status_links` — stores private customer order-status tokens for converted custom-request orders. Important fields: `custom_request_id`, `order_id`, `order_status_token`, `link_status`, `customer_email`, `customer_name`.
+
+Runtime-guarded column additions:
+
+- `custom_request_payment_links`: `order_id`, `payment_id`, `external_share_status`, `gate_status`, `gate_checked_at`, `gate_notes`, `preferred_provider`, `checkout_redirect_url`.
+- `custom_request_marketplace_export_packs`: `csv_status`, `etsy_csv_row_json`, `facebook_csv_row_json`, `pinterest_csv_row_json`.
+- `custom_request_fulfillment_prompts`: `prompt_token`, `public_response_status`, `public_use_scope`, `review_text`, `customer_response_note`, `responded_at`.
+
+The SQL files include the Build 156 reference block. Existing-table column additions are guarded in runtime functions with `PRAGMA table_info` checks to avoid duplicate-column failures on Cloudflare D1.
+
 # Build 154 schema update
 
 New/expanded custom request tables:

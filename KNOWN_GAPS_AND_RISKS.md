@@ -1,3 +1,24 @@
+# Build 156 gaps and risks update
+
+Closed or reduced in Build 156:
+
+- Payment links now require a stricter admin share gate before external sharing: quote line items, customer email, positive amount, reviewed payment draft, converted real order, and accepted/quoted request status are checked.
+- Approved payment pages can prepare Stripe/PayPal/Square/manual checkout records instead of stopping at a manual readiness note.
+- Converted custom-request orders now have private customer order-status pages.
+- Marketplace copy packs now have CSV downloads for Etsy, Facebook Marketplace, Pinterest, and manual listings.
+- Post-fulfillment review/photo/consent prompts now have a public private-token response page.
+- Product detail pages now show related proof-matched products when metadata exists.
+- Candle and soap custom-work entry pages now exist and feed the Custom Request intake.
+
+Still open:
+
+1. Stripe/PayPal/Square checkout preparation must still be verified against live provider credentials before relying on redirects for real payments.
+2. Payment/order/consent links need admin void/resend/expiry management.
+3. Marketplace CSV rows still need channel-specific category, shipping, variation, and fee settings before direct upload.
+4. Product proof matching depends on clean product metadata; older products may need material/process/locality cleanup.
+5. Consent responses are saved, but admin review must still decide whether anything becomes public/social.
+6. Candle/soap pages need product photos, batch examples, ingredient/scent notes, and safety/allergen language before heavy promotion.
+
 # Build 154 gaps and risks update
 
 Closed or reduced in Build 154:

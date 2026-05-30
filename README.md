@@ -1,3 +1,9 @@
+# Build 156 summary
+
+Build 156 adds the next custom-work commerce layer. Custom candle making and custom soap making now have public Southern Ontario landing pages that route into the Custom Request flow. Approved payment review links are protected by stricter admin share gates, can prepare Stripe/PayPal/Square/manual checkout records from the private payment page, and stay connected to converted order records. Converted custom-request orders now have private customer order-status pages. Marketplace export packs now include downloadable CSV output for Etsy, Facebook Marketplace, Pinterest, and manual listings. Post-fulfillment review/photo/consent prompts now have a private public response page. Product detail pages now show related proof-matched products by material, process, locality, and product type.
+
+Deploy checks: apply `database_upgrade_current_pass.sql`, test `/custom-candle-making-ontario/`, `/custom-soap-making-ontario/`, `/custom-request/pay/?token=...`, `/custom-request/order/?token=...`, `/custom-request/consent/?token=...`, Operations > Custom Requests, marketplace CSV download, and a product detail page with related proof matches.
+
 # Build 154 summary
 
 Build 154 adds the next custom-work business layer: accepted quote previews create review-needed payment-request and order-draft records; quotes have editable line items and revision history; uploaded reference images create media consent review records; accounting close can download a ZIP; SEO overrides can be baked into static HTML; and the gallery has proof filters by material, process, locality, and product type.

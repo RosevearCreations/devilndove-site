@@ -1,3 +1,25 @@
+# Build 156 roadmap update
+
+Completed in this pass:
+
+- Added public Custom Candle Making and Custom Soap Making landing pages with one H1 each, local SEO wording, and Custom Request prefill links.
+- Added stricter admin payment-share gates before approved custom payment links can be copied or used externally.
+- Connected approved payment links to provider checkout preparation records for Stripe, PayPal, Square, and manual fallback.
+- Added private customer order-status links for converted custom-request orders.
+- Added marketplace CSV downloads for Etsy, Facebook Marketplace, Pinterest, and manual listing review workflows.
+- Added public private-token consent/review/photo response pages for post-fulfillment prompts.
+- Added related-product proof matching on product detail pages using material, process, locality, product type, and proof metadata.
+
+Next build priorities:
+
+1. Convert provider checkout preparation from safe handoff records into live Stripe/PayPal/Square redirect verification once production credentials are confirmed.
+2. Add admin void/resend controls for payment, order-status, and consent-response links.
+3. Add customer-facing order status updates for production stages, pickup/shipping notes, and fulfillment photos.
+4. Add marketplace CSV presets per channel category, shipping profile, taxonomy, and tags.
+5. Add consent-response follow-through into public trust blocks and product stories after admin review.
+6. Add mobile capture shortcuts for candle/soap batches, scent notes, batch numbers, ingredients, and safety/allergen notes.
+7. Add schema drift repair actions for all Build 156 runtime-added columns.
+
 # Build 154 roadmap update
 
 Completed in this pass:

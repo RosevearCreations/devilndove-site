@@ -1,3 +1,29 @@
+# Build 156 competitive update — custom commerce, proof, and local service expansion
+
+Build 156 makes Devil n Dove more competitive as a small mixed-media maker because it connects discovery, custom intake, proof, quoting, payment preparation, order status, marketplace exports, and post-fulfillment consent into one safer workflow.
+
+## What changed competitively
+
+1. **More custom services are visible.** Custom candle making and custom soap making now have dedicated Southern Ontario landing pages instead of being hidden inside a general request form.
+2. **Payment links are safer to share.** Approved custom payment links now require a gate check for quote detail, customer email, positive amount, and a converted real order before they are externally shareable.
+3. **Provider handoffs are closer to real checkout.** Private payment pages can prepare Stripe, PayPal, Square, or manual checkout records while still keeping admin review in place.
+4. **Customers can check order status.** Converted custom-request orders now have private status links, reducing follow-up confusion for handmade commissions.
+5. **Marketplace work is faster.** Etsy, Facebook Marketplace, Pinterest, and manual listing CSV exports reduce copy/paste time and help keep product descriptions consistent.
+6. **Proof is easier to browse.** Product pages can surface related items by material, process, locality, and product type, giving visitors more reasons to keep browsing.
+7. **Consent remains a differentiator.** Review/photo/consent prompts now have a private response page, which supports public storytelling without assuming customers approve photo use.
+
+## Positioning angle
+
+Devil n Dove should continue presenting itself as a Southern Ontario handmade and mixed-media workshop, not a mass-production shop. The best competitive lane is: custom gifts, process story, local pickup/shipping clarity, honest handmade limits, consent-aware proof, and easy private quote/payment/order follow-up.
+
+## Near-term competitive moves
+
+- Add candle and soap example photos with scent, colour, wax/base, batch, and safety notes.
+- Add customer-safe proof blocks from approved consent responses only.
+- Add marketplace CSV presets for the exact channels used most often.
+- Add related-product proof sections to collection/shop pages, not only product detail pages.
+- Add simple mobile admin capture for “made today” product stories, scent/batch notes, and finished photos.
+
 # Build 154 competitive update — accepted quotes now become reviewable business records
 
 Build 154 closes the biggest custom-work handoff gap. A customer can now move from request to private quote preview to acceptance, and that acceptance creates reviewed internal payment-request and order-draft records instead of stopping at intent. The workflow stays human and safe: no automatic charge, no automatic order publishing, and no public use of reference images without consent review.

@@ -1,3 +1,7 @@
+# Build 156 repo guide update
+
+Build 156 adds public service pages under `/custom-candle-making-ontario/` and `/custom-soap-making-ontario/`, private token pages under `/custom-request/pay/`, `/custom-request/order/`, and `/custom-request/consent/`, and new public/admin API functions for custom payment/order/consent workflows. Keep private token pages out of `sitemap.xml`; only public service pages should be indexed.
+
 # Build 154 repo note
 
 New important files/paths:

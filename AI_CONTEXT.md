@@ -1,3 +1,9 @@
+# Build 156 AI context update
+
+The current Devil n Dove build now includes a safer custom commerce path: request → quote → line items → accepted follow-through → converted order → strict payment-share gate → private payment page → provider checkout preparation → private order-status page → post-fulfillment consent response. Custom candle and soap landing pages now feed into the same Custom Request intake. Marketplace export packs now include CSV downloads, and product detail pages can show related proof-matched products.
+
+When continuing work, preserve the review-first rule: do not auto-send, auto-charge, auto-publish, or auto-use customer images publicly without explicit admin review and consent.
+
 # Build 154 AI handoff
 
 Latest completed pass: Build 154. The build now connects accepted private custom quote previews to review-needed payment-request and order-draft records. Quote drafts have editable line items, calculated material/labour/pickup-shipping/tax/total estimates, and revision history. Customer reference uploads now create media consent records as requested/internal-only. Accounting close can produce an accountant ZIP. Approved SEO overrides can be baked into static HTML from `data/site/seo-page-overrides.json` with `scripts/bake_approved_seo_overrides.py`. The public gallery now filters by product type, material, process, and locality.
