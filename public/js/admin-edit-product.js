@@ -163,7 +163,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getImageUrlFields() {
-    return [form.elements.namedItem("image_url_1"), form.elements.namedItem("image_url_2"), form.elements.namedItem("image_url_3"), form.elements.namedItem("image_url_4"), form.elements.namedItem("image_url_5")].filter(Boolean);
+    const fields = [];
+    for (let i = 1; i <= 6; i += 1) {
+      const field = form.elements.namedItem(`image_url_${i}`);
+      if (field) fields.push(field);
+    }
+    return fields;
+  }
+
+  function normalizeImageKey(url) {
+    return String(url || '').trim().toLowerCase().replace(/[?#].*$/, '').replace(/\/+$/, '');
+  }
+
+  function uniqueImageRows(rows = []) {
+    const seen = new Set();
+    const output = [];
+    rows.forEach((row) => {
+      const imageUrl = String(row?.image_url || row || '').trim();
+      if (!imageUrl) return;
+      const key = normalizeImageKey(imageUrl);
+      if (seen.has(key)) return;
+      seen.add(key);
+      output.push({ ...(typeof row === 'object' ? row : {}), image_url: imageUrl });
+    });
+    return output;
   }
 
   function resetImageUrlFields() { getImageUrlFields().forEach(field => { field.value = ""; }); }
@@ -416,7 +439,9 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("weight_grams", product.weight_grams == null ? "" : product.weight_grams);
     setField("inventory_quantity", product.inventory_quantity == null ? "0" : product.inventory_quantity);
     setField("digital_file_url", product.digital_file_url || "");
-    setField("featured_image_url", product.featured_image_url || "");
+    const uniqueLoadedImages = uniqueImageRows(Array.isArray(images) ? images : []);
+    const resolvedFeaturedImageUrl = product.featured_image_url || uniqueLoadedImages[0]?.image_url || "";
+    setField("featured_image_url", resolvedFeaturedImageUrl);
     setField("sort_order", product.sort_order == null ? "0" : product.sort_order);
     setField("meta_title", product.meta_title || "");
     setField("meta_description", product.meta_description || "");
@@ -452,9 +477,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (existingProductSelect) existingProductSelect.value = String(product.product_id || '');
     resetImageUrlFields();
     const imageFields = getImageUrlFields();
-    const safeImages = Array.isArray(images) ? images.slice(0, 5) : [];
+    const featuredKey = normalizeImageKey(resolvedFeaturedImageUrl || '');
+    const safeImages = uniqueLoadedImages
+      .filter((row) => normalizeImageKey(row.image_url) !== featuredKey)
+      .slice(0, imageFields.length);
     for (let i = 0; i < imageFields.length; i += 1) imageFields[i].value = safeImages[i]?.image_url || "";
     if (window.DDProductEditorRequiredState?.sync) window.DDProductEditorRequiredState.sync();
+    window.DDProductDraftMedia?.render?.();
+    document.dispatchEvent(new CustomEvent('dd:product-image-fields-updated', { detail: { product_id: Number(product.product_id || editingProductId || 0) } }));
   }
 
   async function loadProduct(productId) {
@@ -688,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (Number.isNaN(price_cents)) return setMessage("Price must be a valid amount.", true);
     if (compare_at_price_cents !== null && Number.isNaN(compare_at_price_cents)) return setMessage("Compare-at price must be a valid amount.", true);
 
-    const image_urls = [String(formData.get("image_url_1") || "").trim(), String(formData.get("image_url_2") || "").trim(), String(formData.get("image_url_3") || "").trim(), String(formData.get("image_url_4") || "").trim(), String(formData.get("image_url_5") || "").trim()].filter(Boolean);
+    const image_urls = getImageUrlFields().map((field) => String(field.value || "").trim()).filter(Boolean);
     const payload = {
       product_id: editingProductId,
       name: String(formData.get("name") || "").trim(),

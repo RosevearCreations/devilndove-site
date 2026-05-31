@@ -255,7 +255,168 @@ document.addEventListener("DOMContentLoaded", () => {
     field.value = cleanUrl;
     field.dispatchEvent(new Event("input", { bubbles: true }));
     updateImageRoleChecklist();
+    renderDraftImageManager();
     return true;
+  }
+
+  function imageSlotFields() {
+    return [
+      { key: "featured_image_url", label: "Featured / first", field: form?.elements?.namedItem("featured_image_url") },
+      ...imageUrlFields().map((field, index) => ({ key: `image_url_${index + 1}`, label: `Gallery ${index + 1}`, field }))
+    ].filter((slot) => slot.field);
+  }
+
+  function imageSlotRows({ includeEmpty = false } = {}) {
+    return imageSlotFields()
+      .map((slot, index) => ({
+        ...slot,
+        index,
+        url: normalizeText(slot.field?.value),
+        isFeatured: slot.key === "featured_image_url"
+      }))
+      .filter((slot) => includeEmpty || slot.url);
+  }
+
+  function uniqueUrlsInOrder(rows) {
+    const seen = new Set();
+    const urls = [];
+    rows.forEach((row) => {
+      const url = normalizeText(row?.url || row);
+      if (!url) return;
+      const key = url.toLowerCase().replace(/[?#].*$/, "").replace(/\/+$/, "");
+      if (seen.has(key)) return;
+      seen.add(key);
+      urls.push(url);
+    });
+    return urls.slice(0, MAX_PRODUCT_IMAGES);
+  }
+
+  function writeImageSlots(urls = []) {
+    const cleanUrls = uniqueUrlsInOrder(urls);
+    const fields = imageSlotFields();
+    fields.forEach((slot, index) => {
+      slot.field.value = cleanUrls[index] || "";
+      slot.field.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    updateImageRoleChecklist();
+    renderDraftImageManager();
+  }
+
+  function setFeaturedFromSlot(slotIndex) {
+    const rows = imageSlotRows();
+    const index = Number(slotIndex || 0);
+    if (!rows[index]) return;
+    const selected = rows[index].url;
+    const reordered = [selected, ...rows.filter((_, rowIndex) => rowIndex !== index).map((row) => row.url)];
+    writeImageSlots(reordered);
+    scheduleAutosave("image-featured-change");
+  }
+
+  function removeImageSlot(slotIndex) {
+    const rows = imageSlotRows();
+    const index = Number(slotIndex || 0);
+    if (!rows[index]) return;
+    writeImageSlots(rows.filter((_, rowIndex) => rowIndex !== index).map((row) => row.url));
+    scheduleAutosave("image-remove");
+  }
+
+  function moveImageSlot(fromIndex, toIndex) {
+    const rows = imageSlotRows();
+    const from = Number(fromIndex || 0);
+    let to = Number(toIndex || 0);
+    if (!rows[from]) return;
+    to = Math.max(0, Math.min(rows.length - 1, to));
+    const [moved] = rows.splice(from, 1);
+    rows.splice(to, 0, moved);
+    writeImageSlots(rows.map((row) => row.url));
+    scheduleAutosave("image-reorder");
+  }
+
+  function focusImageUrlField(slotIndex) {
+    const rows = imageSlotRows();
+    const row = rows[Number(slotIndex || 0)];
+    if (!row?.field) return;
+    row.field.scrollIntoView({ behavior: "smooth", block: "center" });
+    row.field.focus({ preventScroll: true });
+    row.field.select?.();
+  }
+
+  function renderDraftImageManager() {
+    const grid = document.getElementById("productDraftExistingImages");
+    const hint = document.getElementById("productDraftExistingImageStatus");
+    if (!grid) return;
+    const rows = imageSlotRows();
+    if (hint) hint.textContent = rows.length
+      ? `${rows.length}/${MAX_PRODUCT_IMAGES} saved image slot${rows.length === 1 ? "" : "s"}. Drag a card to change order. The first card becomes the featured image.`
+      : "No saved image URLs yet. Upload images or paste public URLs below.";
+    if (!rows.length) {
+      grid.innerHTML = '<div class="small dd-product-image-empty-card">No existing product pictures yet.</div>';
+      return;
+    }
+    grid.innerHTML = rows.map((row, index) => `
+      <article class="dd-product-image-manager-card ${index === 0 ? 'is-featured' : ''}" draggable="true" data-draft-image-card="${index}" data-slot-key="${escapeHtml(row.key)}">
+        <button class="dd-product-image-manager-thumb" type="button" data-draft-image-edit="${index}" title="Click to edit this image URL">
+          <img src="${escapeHtml(row.url)}" alt="${escapeHtml(index === 0 ? 'Featured product image' : `Product gallery image ${index}`)}" loading="lazy" />
+        </button>
+        <div class="dd-product-image-manager-meta">
+          <strong>${escapeHtml(index === 0 ? 'Featured / first' : `Gallery ${index}`)}</strong>
+          <span class="small">${escapeHtml(row.url)}</span>
+        </div>
+        <div class="dd-product-image-manager-actions">
+          <button class="btn" type="button" data-draft-image-edit="${index}">Edit URL</button>
+          <button class="btn" type="button" data-draft-image-featured="${index}" ${index === 0 ? 'disabled' : ''}>Make first</button>
+          <button class="btn" type="button" data-draft-image-remove="${index}">Remove</button>
+        </div>
+      </article>`).join("");
+  }
+
+  function handleDraftImageManagerClick(event) {
+    const editButton = event.target.closest("[data-draft-image-edit]");
+    if (editButton) {
+      focusImageUrlField(editButton.getAttribute("data-draft-image-edit"));
+      return;
+    }
+    const featuredButton = event.target.closest("[data-draft-image-featured]");
+    if (featuredButton) {
+      setFeaturedFromSlot(featuredButton.getAttribute("data-draft-image-featured"));
+      return;
+    }
+    const removeButton = event.target.closest("[data-draft-image-remove]");
+    if (removeButton) {
+      removeImageSlot(removeButton.getAttribute("data-draft-image-remove"));
+    }
+  }
+
+  function wireDraftImageManagerDrag(panel) {
+    if (!panel || panel.dataset.dragWired === "1") return;
+    panel.dataset.dragWired = "1";
+    let draggedIndex = null;
+    panel.addEventListener("click", handleDraftImageManagerClick);
+    panel.addEventListener("dragstart", (event) => {
+      const card = event.target.closest("[data-draft-image-card]");
+      if (!card) return;
+      draggedIndex = Number(card.getAttribute("data-draft-image-card") || 0);
+      card.classList.add("is-dragging");
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", String(draggedIndex));
+      }
+    });
+    panel.addEventListener("dragover", (event) => {
+      if (event.target.closest("[data-draft-image-card]")) event.preventDefault();
+    });
+    panel.addEventListener("drop", (event) => {
+      const card = event.target.closest("[data-draft-image-card]");
+      if (!card || draggedIndex == null) return;
+      event.preventDefault();
+      const targetIndex = Number(card.getAttribute("data-draft-image-card") || 0);
+      moveImageSlot(draggedIndex, targetIndex);
+      draggedIndex = null;
+    });
+    panel.addEventListener("dragend", () => {
+      panel.querySelectorAll(".is-dragging").forEach((card) => card.classList.remove("is-dragging"));
+      draggedIndex = null;
+    });
   }
 
   function ensureImageUploadPanel() {
@@ -268,8 +429,13 @@ document.addEventListener("DOMContentLoaded", () => {
     panel.innerHTML = `
       <div>
         <h3 style="margin:0 0 6px 0">Product pictures</h3>
-        <p class="small" style="margin:0">Drafts can be saved without pictures. Upload up to 7 pictures at a time, or paste public image URLs below. The first image can become the featured image.</p>
+        <p class="small" style="margin:0">Drafts can be saved without pictures. Upload up to 7 pictures at a time, or paste public image URLs below. Existing saved image URLs appear here as visual cards so we can click to edit, remove, or drag them into the correct order. The first card becomes the featured image.</p>
       </div>
+      <div class="dd-product-image-manager-head">
+        <strong>Current product pictures</strong>
+        <span class="small" id="productDraftExistingImageStatus">No saved image URLs yet.</span>
+      </div>
+      <div class="dd-product-image-manager-grid" id="productDraftExistingImages" aria-live="polite"></div>
       <div class="dd-product-draft-media-grid">
         <label><span class="small">Choose images</span><input class="input" id="productDraftImageFile" type="file" accept="image/*" multiple /></label>
         <label><span class="small">Alt text base</span><input class="input" id="productDraftImageAlt" type="text" maxlength="160" placeholder="Short description used as the base for uploaded product pictures" /></label>
@@ -289,6 +455,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const uploadButton = panel.querySelector("#productDraftUploadButton");
     const status = panel.querySelector("#productDraftUploadStatus");
     const preview = panel.querySelector("#productDraftImagePreview");
+
+    wireDraftImageManagerDrag(panel);
+    renderDraftImageManager();
 
     fileInput?.addEventListener("change", () => {
       const files = Array.from(fileInput.files || []).filter((file) => file?.type?.startsWith("image/"));
@@ -380,6 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ? `${uploadedUrls.length} uploaded, ${failures.length} failed. ${failures[0]}`
           : `${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded.`;
         updateImageRoleChecklist();
+        renderDraftImageManager();
       } catch (error) {
         status.textContent = error.message || "Image upload failed.";
         setMessage(error.message || "Image upload failed.", true);
@@ -702,8 +872,10 @@ document.addEventListener("DOMContentLoaded", () => {
   resetCreateDefaults();
   loadTaxClasses().finally(() => { syncRequiredFieldOutlines(); });
 
-  form.addEventListener("input", () => { syncRequiredFieldOutlines(); updateImageRoleChecklist(); scheduleAutosave("input"); });
-  form.addEventListener("change", () => { syncRequiredFieldOutlines(); updateImageRoleChecklist(); scheduleAutosave("change"); });
+  form.addEventListener("input", () => { syncRequiredFieldOutlines(); updateImageRoleChecklist(); renderDraftImageManager(); scheduleAutosave("input"); });
+  form.addEventListener("change", () => { syncRequiredFieldOutlines(); updateImageRoleChecklist(); renderDraftImageManager(); scheduleAutosave("change"); });
+  document.addEventListener("dd:product-image-fields-updated", renderDraftImageManager);
+  window.DDProductDraftMedia = { render: renderDraftImageManager, writeSlots: writeImageSlots };
 
   form.addEventListener("submit", async (event) => {
     syncRequiredFieldOutlines();
