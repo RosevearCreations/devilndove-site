@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ['channel', 'shopChannelFilter'], ['sale_channel', 'shopChannelFilter'],
       ['type', 'shopTypeFilter'], ['product_type', 'shopTypeFilter'],
       ['color', 'shopColorFilter'], ['color_name', 'shopColorFilter'],
-      ['q', 'shopSearchInput'], ['min_price_cents', 'shopMinPrice'], ['max_price_cents', 'shopMaxPrice']
+      ['q', 'shopSearchInput'], ['material', 'shopMaterialFilter'], ['process', 'shopProcessFilter'], ['locality', 'shopLocalityFilter'], ['min_price_cents', 'shopMinPrice'], ['max_price_cents', 'shopMaxPrice']
     ];
     map.forEach(([param, id]) => {
       const value = params.get(param);
@@ -72,6 +72,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       merchandise_origin: String(document.getElementById('shopOriginFilter')?.value || '').trim(),
       sale_channel: String(document.getElementById('shopChannelFilter')?.value || '').trim(),
       color_name: String(document.getElementById('shopColorFilter')?.value || '').trim(),
+      material: String(document.getElementById('shopMaterialFilter')?.value || '').trim(),
+      process: String(document.getElementById('shopProcessFilter')?.value || '').trim(),
+      locality: String(document.getElementById('shopLocalityFilter')?.value || '').trim(),
       min_price_cents: String(document.getElementById('shopMinPrice')?.value || '').trim(),
       max_price_cents: String(document.getElementById('shopMaxPrice')?.value || '').trim(),
       requires_shipping: document.getElementById('shopShippingOnly')?.checked ? '1' : ''
@@ -104,10 +107,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       <section class="card">
         <h2 style="margin-top:0">Browse by collection direction</h2>
         <p class="small" style="margin-top:0">This helps move the shop toward clearer collection-style landing sections for handmade work, vintage stock, collectibles, oddities, and external-listing inventory instead of making every visit start with a blank search.</p>
-        <div class="customer-welcome-grid" style="margin-top:12px">
-          ${originCards.map((card) => `<div class="card" style="margin:0;background:#fffaf6"><strong>${escapeHtml(card.title)}</strong><p class="small" style="margin:8px 0">${escapeHtml(card.copy)}</p><button class="btn" type="button" data-origin-collection="${escapeHtml(card.key)}">Browse ${escapeHtml(card.key)}</button></div>`).join('')}
+        <div class="shop-collection-card-grid">
+          ${originCards.map((card) => `<div class="shop-collection-card"><strong>${escapeHtml(card.title)}</strong><p class="small">${escapeHtml(card.copy)}</p><button class="btn" type="button" data-origin-collection="${escapeHtml(card.key)}">Browse ${escapeHtml(card.key)}</button></div>`).join('')}
         </div>
-        <div class="customer-welcome-grid" style="margin-top:12px">
+        <div class="shop-filter-pill-groups">
           <div><strong>Categories</strong><div class="small" style="margin-top:8px">${categories.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No categories yet.'}</div></div>
           <div><strong>Colours / themes</strong><div class="small" style="margin-top:8px">${colors.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No colour groups yet.'}</div></div>
           <div><strong>Product types</strong><div class="small" style="margin-top:8px">${types.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No product-type groups yet.'}</div></div>
@@ -141,14 +144,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     const key = String(color || '').trim().toLowerCase();
     return map[key] || '#cbd5e1';
   }
-  function renderColorFilter(filterGroups = {}) {
-    const select = document.getElementById('shopColorFilter');
+  function renderSelectFilter(selectId, rows = []) {
+    const select = document.getElementById(selectId);
     if (!select) return;
     const current = select.value || '';
-    const colors = Array.isArray(filterGroups.colors) ? filterGroups.colors : [];
-    select.innerHTML = `<option value="">All</option>${colors.map((row) => `<option value="${escapeHtml(row.label)}">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</option>`).join('')}`;
+    const safeRows = Array.isArray(rows) ? rows : [];
+    select.innerHTML = `<option value="">All</option>${safeRows.map((row) => `<option value="${escapeHtml(row.label)}">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</option>`).join('')}`;
     select.value = current;
   }
+
+  function renderColorFilter(filterGroups = {}) {
+    renderSelectFilter('shopColorFilter', filterGroups.colors);
+    renderSelectFilter('shopMaterialFilter', filterGroups.materials);
+    renderSelectFilter('shopProcessFilter', filterGroups.processes);
+    renderSelectFilter('shopLocalityFilter', filterGroups.localities);
+  }
+  function productImages(product) {
+    const output = [];
+    const push = (entry) => {
+      const imageUrl = String(typeof entry === 'string' ? entry : entry?.image_url || '').trim();
+      if (!imageUrl) return;
+      if (output.some((row) => row.image_url.toLowerCase() === imageUrl.toLowerCase())) return;
+      output.push({
+        image_url: imageUrl,
+        alt_text: String(typeof entry === 'object' ? entry.alt_text || '' : '').trim() || product.name || 'Product image'
+      });
+    };
+    push(product.featured_image_url || product.og_image_url || '');
+    (Array.isArray(product.images) ? product.images : []).forEach(push);
+    (Array.isArray(product.image_urls) ? product.image_urls : []).forEach(push);
+    return output.slice(0, 6);
+  }
+
   function renderProducts(products) {
     if (!productsEl) return;
     productsEl.innerHTML = products.map(product => {
@@ -156,46 +183,65 @@ document.addEventListener("DOMContentLoaded", async () => {
       const name = escapeHtml(product.name || '');
       const slug = encodeURIComponent(product.slug || '');
       const shortDescription = escapeHtml(product.short_description || product.meta_description || '');
+      const longDescription = escapeHtml(product.description || '');
       const storySnippet = escapeHtml(product.public_story_snippet || product.public_story_summary || '');
       const storyHeading = escapeHtml(product.public_story_heading || 'Story behind this piece');
       const productType = escapeHtml(product.product_type || '');
       const price = escapeHtml(formatMoney(product.price_cents, product.currency));
-      const imageUrl = String(product.featured_image_url || product.og_image_url || '').trim();
+      const images = productImages(product);
       const imageAlt = escapeHtml(product.seo_h1 || product.h1_override || product.meta_title || product.name || 'Product image');
-      const keywordBadge = product.keywords ? `<div class="small" style="opacity:.8">${escapeHtml(product.keywords.split(',').slice(0,3).join(' • '))}</div>` : '';
+      const keywordBadge = product.keywords ? `<div class="small shop-card-keywords">${escapeHtml(product.keywords.split(',').slice(0,4).join(' • '))}</div>` : '';
       const origin = escapeHtml(product.merchandise_origin || 'handmade');
       const saleChannel = escapeHtml(product.sale_channel || 'onsite');
       const externalUrl = String(product.external_listing_url || '').trim();
       const externalLabel = escapeHtml(product.external_listing_label || 'External listing');
       const colorNames = Array.isArray(product.color_names) ? product.color_names : [];
-      const originBadge = `<div class="small" style="margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill">${origin}</span><span class="pill">${saleChannel}</span>${product.era_label ? `<span class="pill">${escapeHtml(product.era_label)}</span>` : ''}</div>`;
-      const swatchMarkup = colorNames.length ? `<div class="small" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0">${colorNames.slice(0,5).map((color) => `<span class="pill" title="${escapeHtml(color)}" style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:999px;border:1px solid #cbd5e1;background:${swatch(color)}"></span>${escapeHtml(color)}</span>`).join('')}</div>` : '';
-      const imageMarkup = imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${imageAlt}" style="width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:12px;margin-bottom:12px" />`
-        : `<div style="width:100%;aspect-ratio:1 / 1;border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd" class="small">No Image</div>`;
+      const proofBits = [product.proof_material, product.proof_process, product.proof_locality].map((v) => String(v || '').trim()).filter(Boolean).slice(0, 3);
+      const proofMarkup = proofBits.length ? `<div class="shop-card-proof small">${proofBits.map((bit) => `<span class="pill">${escapeHtml(bit.split(',')[0])}</span>`).join('')}</div>` : '';
+      const originBadge = `<div class="small shop-card-badges"><span class="pill">${origin}</span><span class="pill">${saleChannel}</span>${product.era_label ? `<span class="pill">${escapeHtml(product.era_label)}</span>` : ''}</div>`;
+      const swatchMarkup = colorNames.length ? `<div class="small shop-card-swatches">${colorNames.slice(0,5).map((color) => `<span class="pill" title="${escapeHtml(color)}"><span class="shop-swatch" style="background:${swatch(color)}"></span>${escapeHtml(color)}</span>`).join('')}</div>` : '';
+      const mainImage = images[0]?.image_url || '';
+      const imageMarkup = mainImage
+        ? `<div class="shop-card-gallery" data-shop-card-gallery="${productId}"><button class="shop-card-main-image" type="button" data-main-image-button><img src="${escapeHtml(mainImage)}" alt="${imageAlt}" data-main-image /></button>${images.length > 1 ? `<div class="shop-card-thumbs">${images.map((image, index) => `<button class="shop-card-thumb ${index === 0 ? 'is-active' : ''}" type="button" data-shop-thumb="${escapeHtml(image.image_url)}" aria-label="Show image ${index + 1} for ${name}"><img src="${escapeHtml(image.image_url)}" alt="${escapeHtml(image.alt_text || product.name || 'Product image')}" loading="lazy" /></button>`).join('')}</div>` : ''}</div>`
+        : `<div class="shop-card-no-image small">No Image</div>`;
       const originLink = `/shop/?merchandise_origin=${encodeURIComponent(product.merchandise_origin || '')}`;
       const ctaMarkup = externalUrl
         ? `<a class="btn" href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">${externalLabel}</a>${product.sale_channel === 'hybrid' ? `<button class="btn" type="button" data-add-shop-cart-id="${productId}">Add to Cart</button>` : ''}`
         : `<button class="btn" type="button" data-add-shop-cart-id="${productId}">Add to Cart</button>`;
       return `
-        <article class="card">
+        <article class="card shop-product-card">
           ${imageMarkup}
-          ${originBadge}
-          <div class="small" style="text-transform:capitalize;opacity:.8">${productType}</div>
-          <h3 style="margin:8px 0 6px 0">${name}</h3>
-          <div style="font-weight:700;margin-bottom:10px">${price}</div>
-          ${keywordBadge}
-          ${swatchMarkup}
-          <p class="small" style="min-height:48px">${shortDescription || 'No description available yet.'}</p>
-          ${storySnippet ? `<div class="shop-card-story small"><strong>${storyHeading}:</strong> ${storySnippet}</div>` : ''}
-          <div class="small" style="margin-top:8px">${product.requires_shipping ? 'Shipping / pickup item' : 'Digital or no-shipping item'}${product.product_category ? ` • ${escapeHtml(product.product_category)}` : ''}${product.condition_summary ? ` • ${escapeHtml(product.condition_summary)}` : ''}</div>
-          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-            <a class="btn" href="/shop/product/?slug=${slug}">View</a>
-            <a class="btn" href="${originLink}">More like this</a>
-            ${product.requires_shipping ? `<a class="btn" href="/pickup/">Pickup info</a>` : ``}
-            ${ctaMarkup}
+          <div class="shop-card-content">
+            ${originBadge}
+            <div class="small shop-card-type">${productType}${product.product_category ? ` • ${escapeHtml(product.product_category)}` : ''}</div>
+            <h3>${name}</h3>
+            <div class="shop-card-price">${price}</div>
+            ${keywordBadge}
+            ${swatchMarkup}
+            ${proofMarkup}
+            <p class="small shop-card-description">${shortDescription || longDescription || 'No description available yet.'}</p>
+            ${longDescription && longDescription !== shortDescription ? `<details class="shop-card-details"><summary>More details</summary><p class="small">${longDescription}</p></details>` : ''}
+            ${storySnippet ? `<div class="shop-card-story small"><strong>${storyHeading}:</strong> ${storySnippet}</div>` : ''}
+            <div class="small shop-card-meta">${product.requires_shipping ? 'Shipping / pickup item' : 'Digital or no-shipping item'}${product.condition_summary ? ` • ${escapeHtml(product.condition_summary)}` : ''}${Number(product.inventory_tracking || 0) === 1 ? ` • Stock: ${escapeHtml(String(product.inventory_quantity ?? 0))}` : ''}</div>
+            <div class="shop-card-actions">
+              <a class="btn" href="/shop/product/?slug=${slug}">View</a>
+              <a class="btn" href="${originLink}">More like this</a>
+              ${product.requires_shipping ? `<a class="btn" href="/pickup/">Pickup info</a>` : ``}
+              ${ctaMarkup}
+            </div>
           </div>
         </article>`;
     }).join('');
+    productsEl.querySelectorAll('[data-shop-thumb]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const gallery = button.closest('[data-shop-card-gallery]');
+        const main = gallery?.querySelector('[data-main-image]');
+        const imageUrl = String(button.getAttribute('data-shop-thumb') || '').trim();
+        if (main && imageUrl) main.src = imageUrl;
+        gallery?.querySelectorAll('.shop-card-thumb').forEach((thumb) => thumb.classList.remove('is-active'));
+        button.classList.add('is-active');
+      });
+    });
   }
   function bindCartButtons(products) {
     productsEl?.querySelectorAll('[data-add-shop-cart-id]').forEach(button => {
