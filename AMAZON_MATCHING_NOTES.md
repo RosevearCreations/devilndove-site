@@ -153,3 +153,7 @@ Next strongest steps:
 5. Add stage-specific customer messages for custom work: planning, making, curing/finishing, ready, and shipped/pickup.
 6. Add marketplace preset editing UI instead of relying on seeded defaults.
 
+## Build 158 documentation review
+
+Reviewed during the catalog/media repair pass. No accounting-template or Amazon matching schema change was required for this pass, but the new `IMAGES.md` product-media checklist should be used before marketplace/image-heavy product exports.
+

@@ -1730,3 +1730,10 @@ CREATE TABLE IF NOT EXISTS custom_candle_soap_product_specs (
 );
 CREATE INDEX IF NOT EXISTS idx_custom_candle_soap_specs_request ON custom_candle_soap_product_specs(custom_request_id, product_family);
 
+-- Build 158 catalog/media repair note:
+-- No destructive schema migration is required. Existing tables used/verified this pass:
+-- products.featured_image_url, product_images, product_image_annotations,
+-- product_review_actions, product_publish_overrides, site_item_inventory,
+-- product_resource_links, product_seo. Runtime guards now ensure the review/media
+-- support tables exist before admin catalog actions run.
+
