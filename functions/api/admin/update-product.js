@@ -27,6 +27,99 @@ function normalizeImageUrls(imageUrls) {
     .slice(0, 7);
 }
 
+function normalizeCanonicalUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("/")) return raw;
+  return `/${raw.replace(/^\/+/, "")}`;
+}
+
+function normalizeImageKey(value) {
+  return String(value || "").trim().toLowerCase().replace(/[?#].*$/, "").replace(/\/+$/, "");
+}
+
+function uniqueProductImageUrls(featuredImageUrl, imageUrls = []) {
+  const seen = new Set();
+  const urls = [];
+  [featuredImageUrl, ...normalizeImageUrls(imageUrls)].forEach((url) => {
+    const clean = String(url || "").trim();
+    if (!clean) return;
+    const key = normalizeImageKey(clean);
+    if (seen.has(key)) return;
+    seen.add(key);
+    urls.push(clean);
+  });
+  return urls.slice(0, 7);
+}
+
+async function syncProductImages(db, productId, name, featuredImageUrl, imageUrls = []) {
+  const rows = [];
+  const urls = uniqueProductImageUrls(featuredImageUrl, imageUrls);
+  const imageColumns = await getTableColumnSet(db, "product_images");
+  if (!productId || !imageColumns.has("product_id") || !imageColumns.has("image_url")) return rows;
+
+  const existingResult = await db
+    .prepare(`SELECT * FROM product_images WHERE product_id = ?`)
+    .bind(productId)
+    .all()
+    .catch(() => ({ results: [] }));
+  const existingRows = Array.isArray(existingResult?.results) ? existingResult.results : [];
+  const existingByUrl = new Map();
+  existingRows.forEach((row) => {
+    const key = normalizeImageKey(row?.image_url);
+    if (key && !existingByUrl.has(key)) existingByUrl.set(key, row);
+  });
+
+  const keptIds = [];
+  for (let index = 0; index < urls.length; index += 1) {
+    const imageUrl = urls[index];
+    const existing = existingByUrl.get(normalizeImageKey(imageUrl));
+    const existingId = Number(existing?.product_image_id || 0);
+    const fallbackAlt = name || (index === 0 ? "Featured product image" : `Product image ${index + 1}`);
+
+    if (existingId && imageColumns.has("product_image_id")) {
+      const assignments = [];
+      const binds = [];
+      if (imageColumns.has("image_url")) { assignments.push("image_url = ?"); binds.push(imageUrl); }
+      if (imageColumns.has("sort_order")) { assignments.push("sort_order = ?"); binds.push(index); }
+      if (imageColumns.has("alt_text")) { assignments.push("alt_text = COALESCE(NULLIF(alt_text, ''), ?)"); binds.push(fallbackAlt); }
+      if (imageColumns.has("updated_at")) assignments.push("updated_at = CURRENT_TIMESTAMP");
+      if (assignments.length) {
+        binds.push(existingId);
+        await db.prepare(`UPDATE product_images SET ${assignments.join(", ")} WHERE product_image_id = ?`).bind(...binds).run().catch(() => null);
+      }
+      keptIds.push(existingId);
+    } else {
+      const columns = ["product_id", "image_url"];
+      const placeholders = ["?", "?"];
+      const binds = [productId, imageUrl];
+      if (imageColumns.has("alt_text")) { columns.push("alt_text"); placeholders.push("?"); binds.push(fallbackAlt); }
+      if (imageColumns.has("sort_order")) { columns.push("sort_order"); placeholders.push("?"); binds.push(index); }
+      if (imageColumns.has("created_at")) { columns.push("created_at"); placeholders.push("CURRENT_TIMESTAMP"); }
+      if (imageColumns.has("updated_at")) { columns.push("updated_at"); placeholders.push("CURRENT_TIMESTAMP"); }
+      const inserted = await db.prepare(`INSERT INTO product_images (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`).bind(...binds).run().catch(() => null);
+      const insertedId = Number(inserted?.meta?.last_row_id || 0);
+      if (insertedId) keptIds.push(insertedId);
+    }
+  }
+
+  if (imageColumns.has("product_image_id")) {
+    if (keptIds.length) {
+      const placeholders = keptIds.map(() => "?").join(", ");
+      await db.prepare(`DELETE FROM product_images WHERE product_id = ? AND product_image_id NOT IN (${placeholders})`).bind(productId, ...keptIds).run().catch(() => null);
+    } else {
+      await db.prepare(`DELETE FROM product_images WHERE product_id = ?`).bind(productId).run().catch(() => null);
+    }
+  } else if (!urls.length) {
+    await db.prepare(`DELETE FROM product_images WHERE product_id = ?`).bind(productId).run().catch(() => null);
+  }
+
+  const orderSql = imageColumns.has("sort_order") ? "sort_order ASC," : "";
+  const updated = await db.prepare(`SELECT * FROM product_images WHERE product_id = ? ORDER BY ${orderSql} product_image_id ASC`).bind(productId).all().catch(() => ({ results: [] }));
+  return Array.isArray(updated?.results) ? updated.results : [];
+}
+
 function normalizeColorNamesInput(input, fallbackColor = "") {
   const values = [];
 
@@ -180,7 +273,7 @@ export async function onRequestPost(context) {
     const meta_description = String(body.meta_description || "").trim() || null;
     const keywords = String(body.keywords || "").trim() || null;
     const h1_override = String(body.h1_override || "").trim() || null;
-    const canonical_url = String(body.canonical_url || "").trim() || null;
+    const canonical_url = normalizeCanonicalUrl(body.canonical_url);
     const og_title = String(body.og_title || "").trim() || null;
     const og_description = String(body.og_description || "").trim() || null;
     const og_image_url = String(body.og_image_url || "").trim() || null;
@@ -377,32 +470,14 @@ export async function onRequestPost(context) {
         .run();
     } catch {}
 
-    await db.prepare(`DELETE FROM product_images WHERE product_id = ?`).bind(product_id).run();
-
-    for (let i = 0; i < image_urls.length; i += 1) {
-      await db
-        .prepare(`
-          INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
-          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-        `)
-        .bind(product_id, image_urls[i], name, i)
-        .run();
-    }
+    const syncedImages = await syncProductImages(db, product_id, name, featured_image_url, image_urls);
 
     const updatedProduct = await db
       .prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`)
       .bind(product_id)
       .first();
 
-    const updatedImagesResult = await db
-      .prepare(`
-        SELECT product_image_id, product_id, image_url, alt_text, sort_order, created_at
-        FROM product_images
-        WHERE product_id = ?
-        ORDER BY sort_order ASC, product_image_id ASC
-      `)
-      .bind(product_id)
-      .all();
+    const updatedImagesResult = { results: syncedImages };
 
     await auditAdminAction(env, request, authCheck.sessionUser, {
       action_type: "product_update",
@@ -414,7 +489,7 @@ export async function onRequestPost(context) {
         status,
         review_status,
         inventory_quantity,
-        has_images: image_urls.length > 0,
+        has_images: uniqueProductImageUrls(featured_image_url, image_urls).length > 0,
         merchandise_origin,
         sale_channel,
         has_external_listing: !!external_listing_url,
