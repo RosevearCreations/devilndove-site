@@ -812,3 +812,17 @@ body.nav-mobile-open{overflow:hidden}
 .custom-service-hero{display:grid;gap:14px;margin:18px 0;padding:18px;border:1px solid var(--border);border-radius:22px;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,207,112,.055))}
 .custom-service-hero .custom-request-actions{margin-top:4px}
 @media (max-width:720px){.quote-payment-provider-grid{grid-template-columns:1fr}.custom-service-hero .btn{width:100%;justify-content:center}#productRelatedProofList.grid.cols-3{grid-template-columns:1fr!important}}
+
+/* Build 159: visual product picture manager in the catalog Product Editor */
+.dd-product-image-manager-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.025)}
+.dd-product-image-manager-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:stretch}
+.dd-product-image-empty-card{padding:14px;border:1px dashed rgba(255,255,255,.22);border-radius:14px;background:rgba(0,0,0,.10)}
+.dd-product-image-manager-card{display:grid;grid-template-rows:auto auto 1fr;gap:8px;padding:10px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.04);min-width:0;cursor:grab;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
+.dd-product-image-manager-card.is-featured{border-color:rgba(255,207,112,.62);box-shadow:0 0 0 2px rgba(255,207,112,.10)}
+.dd-product-image-manager-card.is-dragging{opacity:.65;transform:scale(.985);cursor:grabbing}
+.dd-product-image-manager-thumb{appearance:none;border:0;background:transparent;padding:0;display:block;width:100%;cursor:pointer;border-radius:13px;overflow:hidden}
+.dd-product-image-manager-thumb img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:rgba(0,0,0,.12)}
+.dd-product-image-manager-meta{display:grid;gap:4px;min-width:0}.dd-product-image-manager-meta .small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.dd-product-image-manager-actions{display:flex;gap:6px;flex-wrap:wrap;align-self:end}.dd-product-image-manager-actions .btn{padding:7px 9px;font-size:.84rem}
+@media (max-width:760px){.dd-product-image-manager-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dd-product-image-manager-actions .btn{flex:1 1 auto;justify-content:center}}
+@media (max-width:480px){.dd-product-image-manager-grid{grid-template-columns:1fr}}
