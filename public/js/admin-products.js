@@ -215,8 +215,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const canApprove = ready;
       const lowScorePublish = publishScore < 85 || imageScore < 70 || !ready;
       const canPublish = ready && ["approved", "published"].includes(reviewStatusValue) && !lowScorePublish;
-      const approveTitle = canApprove ? 'Approve this draft for storefront review.' : `Finish required approval fields first${readyNotes ? `: ${readyNotes}` : '.'}`;
-      const publishTitle = canPublish ? 'Publish this product to the storefront.' : (!ready ? `Finish required approval fields first${readyNotes ? `: ${readyNotes}` : '.'}` : 'Approve this product before publishing.');
+      const approveTitle = canApprove ? 'Approve this draft for storefront review.' : `Click to see the exact missing approval fields${readyNotes ? `: ${readyNotes}` : '.'}`;
+      const publishTitle = canPublish ? 'Publish this product to the storefront.' : (!ready ? `Click to see the exact publish blockers${readyNotes ? `: ${readyNotes}` : '.'}` : 'Click to see why publish is blocked.');
       const linkedResourceCount = Number(product.linked_resource_count || 0);
       const linkedResourceCost = escapeHtml(formatMoney(product.linked_resource_cost_cents || 0, product.currency));
       const grossMargin = escapeHtml(formatMoney(product.gross_margin_cents || 0, product.currency));
@@ -240,9 +240,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn" type="button" data-edit-product-id="${productId}">Edit</button>
-              <button class="btn" type="button" data-review-action="approve" data-product-id="${productId}" ${canApprove ? '' : 'disabled'} title="${escapeHtml(approveTitle)}">Approve</button>
+              <button class="btn" type="button" data-review-action="approve" data-product-id="${productId}" title="${escapeHtml(approveTitle)}">Approve</button>
               <button class="btn" type="button" data-review-action="request_changes" data-product-id="${productId}">Needs Changes</button>
-              <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}" ${canPublish ? '' : 'disabled'} title="${escapeHtml(publishTitle)}">Publish</button>
+              <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}" title="${escapeHtml(publishTitle)}">Publish</button>
               ${(!canPublish && ["approved", "published"].includes(reviewStatusValue)) ? `<button class="btn" type="button" data-review-action="publish_override" data-product-id="${productId}" title="Override low publish score and push live anyway.">Override Publish</button>` : ''}
               <button class="btn" type="button" data-social-product-id="${productId}">Post this product</button>
               <button class="btn" type="button" data-resource-action="reserve" data-product-id="${productId}">Reserve Resources</button>
@@ -486,12 +486,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!options.payload) {
       const promptLabel = action === 'publish_override'
         ? 'Override Publish note (required): explain why this low-score listing should go live now.'
-        : 'Optional note for this review action:';
+        : action === 'request_changes'
+          ? 'What needs to change? This note will be saved to the product review history.'
+          : action === 'approve'
+            ? 'Optional approval note. If approval is blocked, the next message will show the missing fields.'
+            : 'Optional note for this review action:';
       const note = window.prompt(promptLabel, "");
       payload.note = String(note || "").trim();
       if (action === 'publish_override' && !payload.note) {
         window.alert('Override Publish requires a note.');
         return { cancelled: true };
+      }
+      if (action === 'request_changes' && !payload.note) {
+        const continueWithout = window.confirm('No change note was entered. Continue and mark as Needs Changes anyway?');
+        if (!continueWithout) return { cancelled: true };
       }
       if (action === "publish" || action === "publish_override" || action === "unpublish") {
         const password = window.prompt("Confirm your admin password to continue:");
@@ -551,7 +559,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function runResourceAction(productId, action) {
     const quantityInput = window.prompt("Quantity multiplier for linked resources:", "1");
-    if (quantityInput === null) return;
+    if (quantityInput === null) return { cancelled: true };
     const quantityMultiplier = Math.max(1, Number(quantityInput || 1));
     if (!Number.isFinite(quantityMultiplier)) {
       throw new Error("Quantity multiplier must be a valid number.");
@@ -568,9 +576,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) throw new Error(data?.error || `Failed to ${action} resources.`);
-    const summary = data.summary || {};
-    window.alert(`${action === "reserve" ? "Reserved" : "Released"} resources for ${data.product?.name || "product"}.\nAffected items: ${Number(summary.affected_items || 0)}\nShortage items: ${Number(summary.shortage_item_count || 0)}`);
-    document.dispatchEvent(new CustomEvent("dd:product-updated", { detail: data.product || null }));
+    const results = Array.isArray(data.results) ? data.results : [];
+    const affectedItems = results.filter((row) => row && row.ok && !row.skipped_reservation).length;
+    const skippedItems = results.filter((row) => row && row.skipped_reservation).length;
+    const missingItems = results.filter((row) => row && row.missing_inventory).length;
+    const failedItems = results.filter((row) => row && row.ok === false).length;
+    const summary = data.summary || {
+      affected_items: affectedItems,
+      skipped_items: skippedItems,
+      missing_inventory_count: missingItems,
+      failed_items: failedItems
+    };
+    const message = `${action === "reserve" ? "Reserved" : "Released"} resources for product #${Number(productId || 0)}. Affected: ${Number(summary.affected_items || affectedItems)}. Skipped/story-only: ${Number(summary.skipped_items || skippedItems)}. Missing inventory links: ${Number(summary.missing_inventory_count || missingItems)}.`;
+    setStatus(message, missingItems || failedItems ? "warning" : "success");
+    document.dispatchEvent(new CustomEvent("dd:product-updated", { detail: data.product || { product_id: Number(productId || 0) } }));
+    return { ok: true, summary, results };
   }
 
   document.addEventListener("click", async (event) => {
@@ -654,8 +674,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const action = String(resourceButton.getAttribute("data-resource-action") || "").trim();
     if (!productId || !action) return;
     try {
-      await runResourceAction(productId, action);
-      setStatus(`Product resources ${action} action complete.`, "success");
+      const resourceResult = await runResourceAction(productId, action);
+      if (resourceResult?.cancelled) return;
+      if (!resourceResult?.ok) setStatus(`Product resources ${action} action complete.`, "success");
       await loadProducts({ silent: true });
     } catch (error) {
       setStatus(error.message || `Failed to ${action} product resources.`, "error");

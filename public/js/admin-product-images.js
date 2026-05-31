@@ -463,13 +463,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="card product-image-sortable-row" data-product-image-row draggable="true" style="margin-top:12px">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
           <strong>Image Row ${index + 1}</strong>
+          ${row.image_url ? `<img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.alt_text || 'Product image preview')}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--border)" />` : ''}
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
             <span class="small" data-score-display>${escapeHtml(String(row.merchandising_score ?? row.first_image_score ?? 0))}% merch</span>
             <span class="small" data-role-display>${escapeHtml(roleLabel(normalizeRole(row.image_role, index)))}</span>
             <button class="btn" type="button" data-row-drag-handle title="Drag this image to reorder">↕ drag</button>
             <button class="btn" type="button" data-row-move="up">↑</button>
             <button class="btn" type="button" data-row-move="down">↓</button>
-            <button class="btn" type="button" data-row-remove>Remove</button>
+            <button class="btn" type="button" data-row-remove title="Remove this image row. Click Save Images to confirm the delete.">Delete image row</button>
           </div>
         </div>
         <div class="grid cols-2" style="gap:12px;margin-top:12px">
@@ -749,6 +750,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('productImageQuality')?.addEventListener('input', refreshUploadPreview);
     document.getElementById('refreshMediaAssetsButton')?.addEventListener('click', loadAssetLibrary);
     document.getElementById('adminProductImagesForm')?.addEventListener('submit', saveImages);
+    document.addEventListener('dd:product-editor-target', async (event) => {
+      const productId = Number(event?.detail?.product_id || event?.detail?.product?.product_id || 0);
+      if (!productId) return;
+      const field = document.getElementById('productImagesProductId');
+      if (field) field.value = String(productId);
+      await loadImages();
+    });
     mountEl.addEventListener('click', onClick);
     mountEl.addEventListener('input', (event) => {
       if (event.target?.closest?.('[data-product-image-row]')) {
@@ -973,7 +981,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function validateFirstImageForSave(rows) {
     const first = Array.isArray(rows) ? rows.find((row) => normalizeText(row.image_url)) : null;
-    if (!first) return { ok: false, message: 'Add a first image before saving product media.' };
+    if (!first) return { ok: true, message: 'No images will remain attached to this product.' };
     const orientation = normalizeText(first.image_orientation).toLowerCase();
     const width = Number(first.width_px || 0);
     const height = Number(first.height_px || 0);
