@@ -494,7 +494,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><label class="small">Consent record ID</label><input type="number" data-field="consent_record_id" min="1" step="1" value="${escapeHtml(row.consent_record_id ?? '')}" placeholder="optional" /></div>
           <div><label class="small">Role/review notes</label><input type="text" data-field="role_review_notes" value="${escapeHtml(row.role_review_notes || '')}" placeholder="Consent, crop, or usage note" /></div>
         </div>
-        <div class="grid cols-3" style="gap:12px;margin-top:12px">
+        <details class="product-image-advanced-details">
+          <summary>Advanced crop, quality, and scoring fields</summary>
+          <div class="grid cols-3" style="gap:12px;margin-top:12px">
           <div><label class="small">Focal X</label><input type="number" data-field="focal_point_x" min="0" max="1" step="0.01" value="${escapeHtml(row.focal_point_x ?? '')}" /></div>
           <div><label class="small">Focal Y</label><input type="number" data-field="focal_point_y" min="0" max="1" step="0.01" value="${escapeHtml(row.focal_point_y ?? '')}" /></div>
           <div><label class="small">Notes</label><input type="text" data-field="annotation_notes" value="${escapeHtml(row.annotation_notes || '')}" placeholder="Lead angle, crop intent, background notes" /></div>
@@ -544,6 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div><label class="small">Override note</label><input type="text" data-field="merchandising_override_note" value="${escapeHtml(row.merchandising_override_note || '')}" placeholder="Why keep this weaker image?" /></div>
         </div>
+        </details>
       </div>`;
   }
 

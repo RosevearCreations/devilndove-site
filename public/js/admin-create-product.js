@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const messageEl = document.getElementById("createProductMessage");
   const taxClassSelect = document.getElementById("create_product_tax_class_id");
   const MAX_PRODUCT_IMAGES = 7;
+  const MAX_UPLOAD_SELECTION = 6;
   const MAX_GALLERY_IMAGE_FIELDS = MAX_PRODUCT_IMAGES - 1;
   const AUTOSAVE_DELAY_MS = 1400;
   let autosaveTimer = null;
@@ -441,7 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
     panel.innerHTML = `
       <div>
         <h3 style="margin:0 0 6px 0">Product pictures</h3>
-        <p class="small" style="margin:0">Drafts can be saved without pictures. Upload up to 7 pictures at a time, or paste public image URLs below. Existing saved image URLs appear here as visual cards so we can click to edit, remove, or drag them into the correct order. The first card becomes the featured image.</p>
+        <p class="small" style="margin:0">Drafts can be saved without pictures. Upload up to 6 pictures at a time, or paste public image URLs below. Existing saved image URLs appear here as visual cards so we can click to edit, remove, or drag them into the correct order. The first card becomes the featured image.</p>
       </div>
       <div class="dd-product-image-manager-head">
         <strong>Current product pictures</strong>
@@ -479,8 +480,8 @@ document.addEventListener("DOMContentLoaded", () => {
         preview.innerHTML = "";
         return;
       }
-      const trimmed = files.slice(0, MAX_PRODUCT_IMAGES);
-      const rejected = files.length > MAX_PRODUCT_IMAGES ? ` Only the first ${MAX_PRODUCT_IMAGES} will be uploaded.` : "";
+      const trimmed = files.slice(0, MAX_UPLOAD_SELECTION);
+      const rejected = files.length > MAX_UPLOAD_SELECTION ? ` Only the first ${MAX_UPLOAD_SELECTION} will be uploaded.` : "";
       status.textContent = `${trimmed.length} image${trimmed.length === 1 ? "" : "s"} selected.${rejected}`;
       preview.hidden = false;
       preview.innerHTML = trimmed.map((file) => {
@@ -495,7 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     uploadButton?.addEventListener("click", async () => {
       const rawFiles = Array.from(fileInput?.files || []).filter((file) => file?.type?.startsWith("image/"));
-      const files = rawFiles.slice(0, MAX_PRODUCT_IMAGES);
+      const files = rawFiles.slice(0, MAX_UPLOAD_SELECTION);
       if (!files.length) {
         status.textContent = "Choose one or more images first.";
         return;
@@ -509,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
         status.textContent = `This form already has the ${MAX_PRODUCT_IMAGES} available image slots filled. Clear one before uploading more.`;
         return;
       }
-      const uploadFiles = files.slice(0, Math.min(MAX_PRODUCT_IMAGES, openSlots));
+      const uploadFiles = files.slice(0, Math.min(MAX_UPLOAD_SELECTION, openSlots));
       const originalText = uploadButton.textContent;
       uploadButton.disabled = true;
       uploadButton.textContent = "Uploading…";
