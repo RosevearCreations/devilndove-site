@@ -30,7 +30,7 @@
     <div class="hero compact-hero">
       <div>
         <h1>Catalog, Products &amp; Inventory</h1>
-        <p>Manage products, imports, SEO, images, resources, stock, and publishing review from one dedicated catalog page.</p>
+        <p>Manage products and publishing review here. Inventory, tools/supplies, media, and image workflows now have smaller operation pages to reduce scrolling.</p>
       </div>
     </div>
 
@@ -48,6 +48,25 @@
     </div>
 
     <div id="brandContentAdminMount"></div>
+
+    <div class="card catalog-workspace-nav" style="margin-bottom:18px">
+      <h2 style="margin-top:0">Catalog workspaces</h2>
+      <p class="small">The original catalog page was becoming too long. Use these smaller workspaces for focused work.</p>
+      <div class="catalog-workspace-grid">
+        <a class="catalog-workspace-card" href="/admin/catalog/">
+          <strong>Products & publishing</strong>
+          <span class="small">Edit product details, approve, publish, archive, or delete products.</span>
+        </a>
+        <a class="catalog-workspace-card" href="/admin/catalog-media/">
+          <strong>Media & product images</strong>
+          <span class="small">Edit image roles, public-use status, crop notes, SEO, product stories, and media assets.</span>
+        </a>
+        <a class="catalog-workspace-card" href="/admin/inventory-operations/">
+          <strong>Tools & supplies inventory operations</strong>
+          <span class="small">Manage linked supplies, tools, reservations, releases, stock reports, and catalog sync.</span>
+        </a>
+      </div>
+    </div>
 
     <div class="card" style="margin-bottom:18px">
       <h2 style="margin-top:0">Product editor</h2>
@@ -144,18 +163,10 @@
           <button class="btn primary" type="submit">Save Draft Product</button>
         </div>
       </form>
-      <div id="productResourcesAdminMount"></div>
     </div>
 
     <div class="card">
-      <div id="productStoryNotesAdminMount"></div>
-      <div id="productSeoAdminMount"></div>
-      <div id="adminProductImageAnnotationsMount"></div>
-      <div id="siteInventoryAdminMount"></div>
-      <div id="catalogSyncAdminMount"></div>
-      <div id="notificationAdminMount"></div>
-      <div id="appSettingsAdminMount"></div>
-      <div id="catalogOptionManagerMount"></div>
+      <div class="catalog-page-note small" style="margin-bottom:12px">Media, SEO, product story, image annotation, inventory, and sync panels have been moved to the focused workspace links above.</div>
       <h2 style="margin-top:0">Products</h2>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
         <button class="btn" data-refresh-products type="button">Refresh products</button>
@@ -185,10 +196,7 @@
         </table>
       </div>
       <div id="productsAdminMount"></div>
-      <div id="productMediaAdminMount"></div>
-      <div id="productStockReportMount"></div>
       <div id="productPriceSuggestionMount"></div>
-      <div id="mediaLibraryAdminMount"></div>
       <div class="admin-quick-link-grid">
         <div class="admin-quick-link-card">
           <h3 style="margin:0 0 8px 0">Phone finished-product capture</h3>
@@ -220,18 +228,6 @@
   <script src="/public/js/admin-archive-product.js"></script>
   <script src="/public/js/admin-product-bulk-tools.js"></script>
   <script src="/public/js/admin-import-products.js"></script>
-  <script src="/public/js/admin-product-story-notes.js"></script>
-  <script src="/public/js/admin-product-seo.js"></script>
-  <script src="/public/js/admin-product-images.js"></script>
-  <script src="/public/js/admin-product-resources.js"></script>
-  <script src="/public/js/admin-product-stock-report.js"></script>
   <script src="/public/js/admin-product-price-suggestions.js"></script>
-  <script src="/public/js/admin-product-image-annotations.js"></script>
-  <script src="/public/js/admin-site-item-inventory.js"></script>
-  <script src="/public/js/admin-catalog-sync.js"></script>
-  <script src="/public/js/admin-notifications.js"></script>
-  <script src="/public/js/admin-app-settings.js"></script>
-  <script src="/public/js/admin-brand-content.js"></script>
-  <script src="/public/js/admin-catalog-option-manager.js"></script>
 </body>
 </html>
