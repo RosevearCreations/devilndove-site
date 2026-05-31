@@ -55,3 +55,23 @@ This Markdown file was reviewed during the Build 155 pass. The active roadmap/sc
 ## Build 157 API note
 
 Build 157 adds safer custom request operations across the admin and public APIs: mobile product save fallback handling, lifecycle controls for quote/payment/order/consent links, order-stage history, candle/soap product-spec fields, richer marketplace CSV preset data, payment provider readiness records, and consent-to-public-proof approval records.
+
+## Build 158 — Catalog action and image workflow repair
+
+- Added `IMAGES.md` with the complete image/video placement checklist, required sizes, allowed video use, target paths/data fields, and product image role workflow.
+- Repaired `/admin/catalog/` so it now includes the full product editor form required by Edit, product picker, image fields, SEO fields, marketplace fields, and the media/resource modules.
+- Changed Product table Approve/Publish buttons so they are clickable even when blocked; the backend now returns the exact missing fields instead of silently doing nothing through a disabled button.
+- Improved Needs Changes so admins are prompted for what needs changing and that note can be saved into the product review history/readiness notes.
+- Hardened product review actions by ensuring support tables exist before review/publish checks run and by returning human-readable readiness labels.
+- Repaired Reserve Resources and Release Resources UI feedback so it handles the actual inventory API response shape and reports affected, skipped/story-only, and missing inventory links.
+- Improved Product Media Workflow so loading a product for editing auto-loads its image rows, each row shows a thumbnail, Delete image row is clearer, and saving an empty image set clears `featured_image_url`.
+- Continued SEO/H1 discipline: one H1 per scanned public page, private/admin pages kept separate from public SEO goals, and local/product image guidance documented.
+
+### Build 158 next steps
+
+1. Add admin dashboard counters for products missing hero image, missing image roles, missing alt text, blocked public-use status, and missing OG image.
+2. Add static example images for custom candle making, custom soap making, custom requests, and About/workshop story.
+3. Add a backend endpoint that returns product readiness blockers separately from review actions so the UI can show a checklist before clicking Approve/Publish.
+4. Add CSV/export image validation for Etsy/Facebook/Pinterest before marketplace export.
+5. Add video poster image fields to product story notes and custom candle/soap pages.
+
