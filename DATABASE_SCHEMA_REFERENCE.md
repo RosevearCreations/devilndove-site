@@ -497,3 +497,19 @@ Next recommended checks:
 2. Confirm External Listing URL is blank for normal onsite listings.
 3. Save, reload, and confirm the first visual image is the featured image and appears in Product Media Workflow.
 4. Run Approve/Publish; any blocker should now be a real readiness issue such as missing image role, missing SEO, missing price, or blocked public-use status.
+
+## Build 161 — shop image/gallery, product detail JSON fallback, and catalog workspace split
+
+- Repaired the public product detail page so an HTML fallback response from `/api/product-detail` no longer throws a raw `Unexpected token '<'` JSON error in the browser. The page now reads the response as text, detects HTML, and falls back to `/api/products` by slug when possible.
+- Hardened `functions/api/product-detail.js` with a final JSON error wrapper so late D1/query failures return JSON instead of a static HTML error page.
+- Extended `/api/products` to attach product image arrays from `product_images`, allowing shop cards to show a main image plus selectable thumbnail images.
+- Updated the Shop product card UI so cards are more compact, show richer product details, and allow thumbnail clicks to change the main product image.
+- CSS-polished the Shop “Browse by collection direction” area and the `/creations/` collection/trust grid so the layouts are less cramped and more mobile-safe.
+- Split the oversized `/admin/catalog/` workflow into focused workspaces: Products & Publishing, Media & Product Images, and Tools & Supplies Inventory Operations.
+- Added `/admin/catalog-media/` for media, image roles, image annotations, SEO, and product story work.
+- Added `/admin/inventory-operations/` for tools, supplies, stock, product resource reservations, catalog sync, option sets, notifications, and app settings.
+- Capped the Product Editor file picker to six selected uploads at a time while preserving existing product-image slots.
+- Made the Product Media Workflow more compact by moving advanced crop/quality/scoring fields into a collapsible advanced section.
+
+Next recommended steps: add a dedicated readiness-preview endpoint for product publishing blockers, add image health counters to the admin dashboard, and add live test notes after deploying Build 161.
+

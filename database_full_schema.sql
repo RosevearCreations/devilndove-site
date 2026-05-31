@@ -2871,3 +2871,5 @@ CREATE INDEX IF NOT EXISTS idx_custom_candle_soap_specs_request ON custom_candle
 -- into product_images in displayed order, preserving existing product_image rows where URLs match
 -- so product_image_annotations and publish-readiness checks remain attached.
 -- Canonical URL handling now accepts relative internal product paths in product_seo.canonical_url.
+
+-- Build 161 note: no new D1 tables required. Public product APIs now enrich products with image arrays from existing product_images rows. Admin catalog work was split into /admin/catalog-media/ and /admin/inventory-operations/. Product detail now has a JSON error wrapper so late query failures do not return HTML to the browser.
