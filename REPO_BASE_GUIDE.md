@@ -1,3 +1,7 @@
+# Build 159 note
+
+Catalog Product Editor image UX was repaired: existing saved images now appear as draggable thumbnail cards in Product pictures, the first card syncs to the featured image, gallery URL slots are de-duplicated from the featured image, and advanced media metadata remains in Product Media Workflow. No schema migration required for this front-end pass.
+
 # Build 156 repo guide update
 
 Build 156 adds public service pages under `/custom-candle-making-ontario/` and `/custom-soap-making-ontario/`, private token pages under `/custom-request/pay/`, `/custom-request/order/`, and `/custom-request/consent/`, and new public/admin API functions for custom payment/order/consent workflows. Keep private token pages out of `sitemap.xml`; only public service pages should be indexed.

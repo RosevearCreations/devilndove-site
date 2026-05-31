@@ -1,3 +1,18 @@
+# Build 159 sanity additions
+
+After deploy:
+
+1. Open `/admin/catalog/`.
+2. Click **Edit** on a product that already has multiple images.
+3. Confirm Product Editor → Product pictures shows thumbnail cards above the file chooser.
+4. Confirm the featured image appears only once, not duplicated as Image URL 1.
+5. Click a thumbnail or **Edit URL** and confirm the matching URL field receives focus.
+6. Drag Image 2 before Image 1 and confirm the first card becomes Featured / first.
+7. Use **Make first** and **Remove** on a gallery card, then save/update the product.
+8. Reload the product and confirm image order persists.
+9. Open Product Media Workflow for the same product and confirm advanced image rows still load for role/public-use/crop metadata.
+10. Run predeploy sanity, JavaScript syntax checks, CSS brace check, and ZIP integrity check.
+
 # Build 156 sanity additions
 
 Before deploy or after staging deploy:

@@ -2863,4 +2863,6 @@ CREATE INDEX IF NOT EXISTS idx_custom_candle_soap_specs_request ON custom_candle
 -- product_review_actions, product_publish_overrides, site_item_inventory,
 -- product_resource_links, product_seo. Runtime guards now ensure the review/media
 -- support tables exist before admin catalog actions run.
+-- Build 159: Catalog Product Editor visual image manager repair.
+-- No D1 schema migration required; existing products.featured_image_url and product_images/image URL update handling are reused.
 

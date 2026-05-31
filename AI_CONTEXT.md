@@ -1,3 +1,7 @@
+# Build 159 note
+
+Catalog Product Editor image UX was repaired: existing saved images now appear as draggable thumbnail cards in Product pictures, the first card syncs to the featured image, gallery URL slots are de-duplicated from the featured image, and advanced media metadata remains in Product Media Workflow. No schema migration required for this front-end pass.
+
 # Build 156 AI context update
 
 The current Devil n Dove build now includes a safer custom commerce path: request → quote → line items → accepted follow-through → converted order → strict payment-share gate → private payment page → provider checkout preparation → private order-status page → post-fulfillment consent response. Custom candle and soap landing pages now feed into the same Custom Request intake. Marketplace export packs now include CSV downloads, and product detail pages can show related proof-matched products.

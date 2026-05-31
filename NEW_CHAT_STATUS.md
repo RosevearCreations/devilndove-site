@@ -1,3 +1,23 @@
+# New chat status — Build 159
+
+Latest packaged state: Build 159.
+
+Completed in this pass:
+
+- Catalog Product Editor now shows existing saved images as thumbnail cards in the Product pictures upload area.
+- Thumbnail cards support click-to-edit URL focus, remove-from-draft, Make first, and drag-to-reorder.
+- The first visual card syncs to `featured_image_url`; remaining cards sync to `image_url_1` through `image_url_6`.
+- Existing product load now de-duplicates the featured image from gallery URL slots.
+- Product Media Workflow still manages the deeper image rows, metadata, roles, public-use status, crop history, delete row, and Save Images behavior.
+- Markdown/schema handoff notes updated for the visual image manager pass.
+
+Next recommended work:
+
+1. Live-test `/admin/catalog/` image cards on a product with 3+ saved images.
+2. Add visual crop/focal-point editing directly from the thumbnail cards.
+3. Add a one-click “sync Product Editor URLs to Product Media Workflow rows” control.
+4. Add dashboard counters for missing hero/front, public-use approval, alt text, and image role coverage.
+
 # New chat status — Build 156
 
 Latest packaged state: Build 156.

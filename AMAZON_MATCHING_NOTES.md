@@ -1,3 +1,7 @@
+# Build 159 note
+
+Catalog Product Editor image UX was repaired: existing saved images now appear as draggable thumbnail cards in Product pictures, the first card syncs to the featured image, gallery URL slots are de-duplicated from the featured image, and advanced media metadata remains in Product Media Workflow. No schema migration required for this front-end pass.
+
 # Build 156 inventory/proof note
 
 No Amazon matching logic was changed in Build 156. Continue keeping Amazon/order-cost data private in D1/admin tools only. The new custom candle/soap direction may require future supply matching for wax, fragrance oils, wicks, soap base, colourants, molds, packaging, safety labels, and batch/ingredient notes.

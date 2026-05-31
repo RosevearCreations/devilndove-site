@@ -1,3 +1,9 @@
+# Build 159 summary
+
+Build 159 repairs the Catalog Product Editor image UX. The inline Product pictures section now shows saved product image URLs as real thumbnail cards beside the chooser, not only as plain URL fields lower on the page. Cards can be clicked to focus/edit the source URL, removed from the draft, or dragged into a new order; the first card becomes the featured image. Loading an existing product now de-duplicates the featured image from the gallery URL slots, so the same image should not appear once as Featured and again as Image URL 1. The detailed Product Media Workflow remains available for full row metadata, public-use status, image roles, crop/history, and save-to-gallery confirmation.
+
+Deploy checks: open `/admin/catalog/`, click Edit on a product with existing images, confirm the Product pictures card grid appears above the URL fields, drag a gallery image into first position, save/update the product, then reload to confirm Featured image URL and gallery order persist.
+
 # Build 156 summary
 
 Build 156 adds the next custom-work commerce layer. Custom candle making and custom soap making now have public Southern Ontario landing pages that route into the Custom Request flow. Approved payment review links are protected by stricter admin share gates, can prepare Stripe/PayPal/Square/manual checkout records from the private payment page, and stay connected to converted order records. Converted custom-request orders now have private customer order-status pages. Marketplace export packs now include downloadable CSV output for Etsy, Facebook Marketplace, Pinterest, and manual listings. Post-fulfillment review/photo/consent prompts now have a private public response page. Product detail pages now show related proof-matched products by material, process, locality, and product type.

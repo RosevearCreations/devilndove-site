@@ -1,3 +1,21 @@
+# Build 159 roadmap update
+
+Completed in this pass:
+
+- Repaired the Catalog Product Editor image workflow so saved product image URLs are visible as thumbnail cards in the Product pictures section.
+- Added click-to-edit, Make first, Remove, and drag-to-reorder controls to the inline image cards.
+- Synchronized the first visual card to `featured_image_url` and the remaining cards to the gallery URL fields.
+- Prevented existing product loads from duplicating the featured image into Image URL 1.
+- Kept the deeper Product Media Workflow as the source for advanced image roles, consent/public-use status, crop history, merchandising score, and delete-row/save behavior.
+
+Next build priorities:
+
+1. Add direct thumbnail-card crop/focal-point editing instead of only URL focus.
+2. Add a visible “save image order” confirmation tied to both Product Editor and Product Media Workflow.
+3. Add product readiness badges beside the visual cards for hero/front, detail, scale, public-use, and alt text coverage.
+4. Add bulk replace/compress tools for images that are too small, portrait-only, or missing alt text.
+5. Add dashboard counters for products missing required image roles.
+
 # Build 156 roadmap update
 
 Completed in this pass:

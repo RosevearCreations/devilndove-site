@@ -1,3 +1,13 @@
+# Build 159 schema reference update
+
+Build 159 is a front-end Catalog Product Editor image workflow repair. No new D1 tables or columns are required. Existing fields used by the visual image cards are:
+
+- `products.featured_image_url` — first/featured product image.
+- product update payload gallery URLs — `image_url_1` through `image_url_6`, saved through existing product update/product image handling.
+- existing `product_images` rows — still managed by Product Media Workflow for role metadata, public-use status, crop history, merchandising scores, sort order, and delete/save behavior.
+
+The active SQL files include a Build 159 comment block noting that this pass has no schema migration requirement.
+
 # Build 156 schema reference update
 
 Build 156 adds payment-share gating, checkout handoff records, private order-status links, marketplace CSV metadata, and public consent-response fields.

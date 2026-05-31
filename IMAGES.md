@@ -1,3 +1,28 @@
+# Build 159 image workflow note
+
+## Catalog Product Editor visual image cards
+
+Location: `/admin/catalog/` → Product Editor → Product pictures.
+
+Build 159 changes this area so existing saved image URLs render as thumbnail cards above the file chooser. We can now:
+
+- click a thumbnail or **Edit URL** to jump to the matching URL field;
+- drag cards to reorder images;
+- use **Make first** to set a gallery image as the featured image;
+- use **Remove** to clear that URL slot from the draft;
+- keep using the deeper Product Media Workflow for role metadata, public-use status, crop notes, merchandising score, and permanent row-save/delete behavior.
+
+The first card maps to `products.featured_image_url`. The remaining cards map to `image_url_1` through `image_url_6` for the product update payload. Existing product loads now remove the featured image from gallery URL slots so the same image is not shown twice by default.
+
+Recommended Product Editor image sizes remain:
+
+- featured/first image: 1200 × 1200 px minimum, square or landscape;
+- gallery detail images: 1000–1600 px wide preferred;
+- process/story images: 1200 px wide preferred;
+- Open Graph/social preview: 1200 × 630 px when a separate social image is used.
+
+Videos are still better handled as separate product story/social assets rather than the Product Editor URL slots. Product image slots should remain still image URLs unless a future video-specific field is added.
+
 # IMAGES.md — Devil n Dove image and video placement map
 
 _Last updated: Build 158 catalog/media repair pass._

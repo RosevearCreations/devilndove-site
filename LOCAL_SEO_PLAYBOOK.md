@@ -1,3 +1,7 @@
+# Build 159 note
+
+Catalog Product Editor image UX was repaired: existing saved images now appear as draggable thumbnail cards in Product pictures, the first card syncs to the featured image, gallery URL slots are de-duplicated from the featured image, and advanced media metadata remains in Product Media Workflow. No schema migration required for this front-end pass.
+
 # Build 156 local SEO update
 
 Build 156 adds two locally relevant service pages: Custom Candle Making in Southern Ontario and Custom Soap Making in Southern Ontario. Both use one clear H1, direct custom-work wording, and links into the Custom Request intake. Keep expanding pages this way: one page per real service, honest local wording, proof photos, useful alt text, and clear next steps.

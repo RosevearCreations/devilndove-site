@@ -1,3 +1,7 @@
+# Build 159 note
+
+Catalog Product Editor image UX was repaired: existing saved images now appear as draggable thumbnail cards in Product pictures, the first card syncs to the featured image, gallery URL slots are de-duplicated from the featured image, and advanced media metadata remains in Product Media Workflow. No schema migration required for this front-end pass.
+
 # Build 156 repo rules update
 
 Continue the same rules: update Markdown and schema files on every pass, keep one H1 per exposed page, avoid indexing private token pages, keep customer images private until consent is reviewed, and keep payment links behind admin approval gates. Payment/order/consent links must have void/resend/expiry controls before broader customer rollout.

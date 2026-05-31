@@ -1,3 +1,17 @@
+# Build 159 gaps and risks update
+
+Closed or reduced in Build 159:
+
+- Existing Product Editor images are no longer hidden as plain URL-only fields; they now appear as thumbnail cards in the Product pictures area.
+- Product Editor image order can now be adjusted visually by dragging cards.
+- Featured-image duplication risk is reduced because existing product loads filter the featured image out of the gallery URL fields.
+
+Still outstanding:
+
+- Clicking an image currently focuses its URL field for editing; true crop/focal-point editing still happens in the Product Media Workflow, not directly inside the thumbnail card.
+- Removing a card clears it from the Product Editor URL fields; permanent product-image row deletion still requires saving through the Product Media Workflow when using row metadata.
+- The Product Editor and Product Media Workflow both manage image data, so future work should add a clearer one-click sync/save-order path to reduce operator confusion.
+
 # Build 156 gaps and risks update
 
 Closed or reduced in Build 156:

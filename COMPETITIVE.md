@@ -1,3 +1,22 @@
+# Build 159 competitive update — better product image operations
+
+Build 159 improves the day-to-day competitiveness of Devil n Dove because product images are now easier to see, reorder, and correct from the Catalog Product Editor. For handmade, custom, vintage, candle, soap, and mixed-media products, the first image is often the biggest trust signal. Making the image order visual reduces listing mistakes and helps keep product pages, marketplace exports, and social posts more consistent.
+
+Competitive gains:
+
+1. **Fewer listing mistakes.** Existing images are visible as thumbnails instead of hidden in URL fields.
+2. **Faster product cleanup.** We can drag images into the strongest order without manually copying URLs.
+3. **Better first impressions.** The first card syncs to the featured image, making it easier to choose the strongest hero image.
+4. **Less duplicate clutter.** Existing product loads now avoid putting the featured image into the first gallery URL slot again.
+5. **Clearer workflow.** Quick visual order is handled in Product Editor; detailed consent/role/crop/history remains in Product Media Workflow.
+
+Next competitive moves:
+
+- Add image quality badges directly on the thumbnail cards.
+- Add one-click crop/focal-point edit from the card.
+- Add automatic marketplace-image readiness checks before CSV/export packs.
+- Add product-page proof image recommendations by product type, material, and process.
+
 
 
 # Build 157 competitive update — safer custom-commerce operations
