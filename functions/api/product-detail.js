@@ -241,7 +241,7 @@ function buildProductDetailSql({ productColumns, taxColumns, seoColumns, hasTaxJ
   `;
 }
 
-export async function onRequestGet(context) {
+async function handleProductDetailRequest(context) {
   const { request, env } = context;
   const db = env.DB || env.DD_DB;
   const url = new URL(request.url);
@@ -580,4 +580,17 @@ export async function onRequestGet(context) {
 
   const related_products = await relatedProductsByProof();
   return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, reviews, review_summary, related_products });
+}
+
+
+export async function onRequestGet(context) {
+  try {
+    return await handleProductDetailRequest(context);
+  } catch (error) {
+    return json({
+      ok: false,
+      error: 'Product detail is temporarily unavailable, but the page can try the shop fallback.',
+      detail: String(error?.message || error || 'Unknown product detail error')
+    }, 503);
+  }
 }

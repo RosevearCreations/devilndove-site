@@ -262,6 +262,68 @@ async function enrichProductsWithStoryNotes(db, products) {
   }
 }
 
+async function enrichProductsWithImages(db, products) {
+  const rows = Array.isArray(products) ? products : [];
+  if (!db || !rows.length) return rows;
+  try {
+    const imageColumns = await getStrictTableColumnSet(db, "product_images");
+    if (!imageColumns.has("product_id") || !imageColumns.has("image_url")) return rows;
+    const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 500);
+    if (!ids.length) return rows;
+    const selectList = [
+      imageColumns.has("product_image_id") ? "product_image_id" : "NULL AS product_image_id",
+      "product_id",
+      "image_url",
+      imageColumns.has("alt_text") ? "alt_text" : "'' AS alt_text",
+      imageColumns.has("sort_order") ? "sort_order" : "0 AS sort_order",
+      imageColumns.has("created_at") ? "created_at" : "'' AS created_at"
+    ];
+    const imageRows = await runProductQuery(db, `
+      SELECT ${selectList.join(", ")}
+      FROM product_images
+      WHERE product_id IN (${ids.map(() => "?").join(",")})
+      ORDER BY product_id ASC, COALESCE(sort_order,0) ASC, COALESCE(product_image_id,0) ASC
+    `, ids);
+    const byProductId = new Map();
+    imageRows.forEach((image) => {
+      const productId = Number(image.product_id || 0);
+      const imageUrl = normalizeText(image.image_url);
+      if (!productId || !imageUrl) return;
+      if (!byProductId.has(productId)) byProductId.set(productId, []);
+      const list = byProductId.get(productId);
+      if (list.some((row) => String(row.image_url || '').trim().toLowerCase() === imageUrl.toLowerCase())) return;
+      list.push({
+        product_image_id: Number(image.product_image_id || 0),
+        image_url: imageUrl,
+        alt_text: normalizeText(image.alt_text),
+        sort_order: Number(image.sort_order || 0),
+        created_at: normalizeText(image.created_at)
+      });
+    });
+    return rows.map((product) => {
+      const savedImages = byProductId.get(Number(product.product_id || 0)) || [];
+      const allImages = [];
+      const push = (image) => {
+        const imageUrl = normalizeText(image?.image_url || image);
+        if (!imageUrl) return;
+        if (allImages.some((row) => String(row.image_url || '').trim().toLowerCase() === imageUrl.toLowerCase())) return;
+        allImages.push(typeof image === 'object' ? { ...image, image_url: imageUrl } : { image_url: imageUrl, alt_text: product.name || '' });
+      };
+      push(product.featured_image_url);
+      savedImages.forEach(push);
+      return {
+        ...product,
+        image_urls: allImages.map((image) => image.image_url),
+        images: allImages.slice(0, 12),
+        image_count: allImages.length,
+        featured_image_url: product.featured_image_url || allImages[0]?.image_url || ''
+      };
+    });
+  } catch {
+    return rows;
+  }
+}
+
 function buildFilterGroups(products) {
   const group = (values) =>
     Object.entries(values)
@@ -321,6 +383,7 @@ function productMatchesFilters(product, filters) {
   if (q) {
     const haystack = [
       product.name,
+      product.slug,
       product.short_description,
       product.description,
       product.sku,
@@ -766,7 +829,7 @@ export async function onRequestGet(context) {
 
   if (!productColumns.size) {
     try {
-      const products = await runUltraProductFallback(db, filters);
+      const products = await enrichProductsWithImages(db, await runUltraProductFallback(db, filters));
       warnings.push("schema_columns_unavailable_ultra_fallback_used");
       return json({
         ok: true,
@@ -822,7 +885,8 @@ export async function onRequestGet(context) {
 
   try {
     const rows = await runProductQuery(db, primarySql, primaryWhere.bindings);
-    const products = (await enrichProductsWithStoryNotes(db, shapeProducts(rows))).filter((product) => productMatchesFilters(product, filters));
+    const storyProducts = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
+    const products = (await enrichProductsWithImages(db, storyProducts)).filter((product) => productMatchesFilters(product, filters));
     return json({
       ok: true,
       products,
@@ -848,7 +912,8 @@ export async function onRequestGet(context) {
 
     try {
       const rows = await runProductQuery(db, fallbackSql, fallbackWhere.bindings);
-      const products = (await enrichProductsWithStoryNotes(db, shapeProducts(rows))).filter((product) => productMatchesFilters(product, filters));
+      const storyProducts = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
+      const products = (await enrichProductsWithImages(db, storyProducts)).filter((product) => productMatchesFilters(product, filters));
       warnings.push("fallback_query_used");
       return json({
         ok: true,
@@ -862,7 +927,7 @@ export async function onRequestGet(context) {
       warnings.push("fallback_query_failed_trying_select_star_fallback");
 
       try {
-        const products = await runUltraProductFallback(db, filters);
+        const products = await enrichProductsWithImages(db, await runUltraProductFallback(db, filters));
         warnings.push("select_star_fallback_used");
         return json({
           ok: true,
