@@ -483,3 +483,17 @@ Next strongest steps:
 4. Add CSV/export image validation for Etsy/Facebook/Pinterest before marketplace export.
 5. Add video poster image fields to product story notes and custom candle/soap pages.
 
+## Build 160 — Catalog editor URL validation and publish image sync repair
+
+- Fixed the Product Editor canonical URL field so relative site paths such as `/shop/product/?slug=desert-succulents-100` are accepted. The input is now text with helper guidance instead of browser `type=url` validation.
+- Clarified External Listing URL: leave it blank for normal Devil n Dove shop products; only add a full `https://` Etsy/Facebook/marketplace URL when Sale Channel is Hybrid or External-only.
+- Hardened update/create product image syncing so the featured image is also stored in `product_images` at sort order 0, gallery rows follow after it, duplicates are removed, and existing image rows/annotations are preserved when the URL already exists.
+- Fixed Clear editor so the visual image cards and Product Media Workflow panel clear along with the form fields.
+- Improved publish/approve readiness consistency by making the editor’s image fields and backend `product_images` rows agree before review actions run.
+- No new D1 table is required in this pass; this is a code/data-sync behavior repair against the existing products, product_images, product_seo, and product_image_annotations tables.
+
+Next recommended checks:
+1. Edit a product with a relative canonical path and click Update Product.
+2. Confirm External Listing URL is blank for normal onsite listings.
+3. Save, reload, and confirm the first visual image is the featured image and appears in Product Media Workflow.
+4. Run Approve/Publish; any blocker should now be a real readiness issue such as missing image role, missing SEO, missing price, or blocked public-use status.

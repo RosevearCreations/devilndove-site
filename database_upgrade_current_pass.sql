@@ -1726,3 +1726,8 @@ CREATE INDEX IF NOT EXISTS idx_custom_candle_soap_specs_request ON custom_candle
 -- Build 159: Catalog Product Editor visual image manager repair.
 -- No D1 schema migration required; existing products.featured_image_url and product_images/image URL update handling are reused.
 
+-- Build 160 catalog/editor repair note:
+-- No new table is required. Product save now synchronizes the featured image and gallery URLs
+-- into product_images in displayed order, preserving existing product_image rows where URLs match
+-- so product_image_annotations and publish-readiness checks remain attached.
+-- Canonical URL handling now accepts relative internal product paths in product_seo.canonical_url.
