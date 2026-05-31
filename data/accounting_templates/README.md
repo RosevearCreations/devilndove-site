@@ -40,3 +40,8 @@ Accounting templates remain public sample/template files only. Do not place real
 ## Build 155 maintenance note
 
 This Markdown file was reviewed during the Build 155 pass. The active roadmap/schema/gaps documents carry the detailed implementation notes for custom request payment links, order conversion, marketplace export packs, proof filters, and post-fulfillment prompts.
+
+## Build 158 documentation review
+
+Reviewed during the catalog/media repair pass. No accounting-template or Amazon matching schema change was required for this pass, but the new `IMAGES.md` product-media checklist should be used before marketplace/image-heavy product exports.
+
