@@ -34,6 +34,18 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/^-+|-+$/g, "");
   }
 
+  function normalizeCanonicalInput(value) {
+    const clean = normalizeText(value);
+    if (!clean) return "";
+    if (/^https?:\/\//i.test(clean)) return clean;
+    if (clean.startsWith("/")) return clean;
+    return `/${clean.replace(/^\/+/, "")}`;
+  }
+
+  function isFullHttpUrl(value) {
+    return /^https?:\/\//i.test(normalizeText(value));
+  }
+
   function setMessage(message, isError = false) {
     if (!messageEl) return;
     messageEl.textContent = message;
@@ -78,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       name: "external_listing_url",
       label: "External listing URL",
-      badge: "Required before active",
+      badge: "Only required for hybrid/external active listings",
       when: () => !isDraftMode() && ["hybrid", "external_only"].includes(normalizeText(form?.elements?.namedItem("sale_channel")?.value).toLowerCase())
     }
   ];
@@ -749,7 +761,7 @@ document.addEventListener("DOMContentLoaded", () => {
       meta_description: normalizeText(formData.get("meta_description")),
       keywords: normalizeText(formData.get("keywords")),
       h1_override: normalizeText(formData.get("h1_override")),
-      canonical_url: normalizeText(formData.get("canonical_url")),
+      canonical_url: normalizeCanonicalInput(formData.get("canonical_url")),
       og_title: normalizeText(formData.get("og_title")),
       og_description: normalizeText(formData.get("og_description")),
       og_image_url: normalizeText(formData.get("og_image_url")),
@@ -770,8 +782,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (payload.compare_at_price_cents !== null && Number.isNaN(payload.compare_at_price_cents)) return "Compare-at price must be a valid amount.";
     if (!payload.name) return "Product name is required to save a draft.";
     if (!payload.product_type) return "Product type is required.";
+    if (payload.external_listing_url && !isFullHttpUrl(payload.external_listing_url)) {
+      return "External listing URL must be a full https:// or http:// link. Leave it blank for normal Devil n Dove shop listings.";
+    }
     if (!allowDraft && payload.status !== "draft" && ["hybrid", "external_only"].includes(payload.sale_channel) && !payload.external_listing_url) {
-      return "Add an external listing URL before activating hybrid or external-only items. Drafts can skip this.";
+      return "Add a full external listing URL before activating hybrid or external-only items. Drafts and normal Devil n Dove shop listings can skip this.";
     }
     return "";
   }
@@ -892,8 +907,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (payload.external_listing_url && !isFullHttpUrl(payload.external_listing_url)) {
+      setMessage("External listing URL must be a full https:// or http:// link. Leave it blank for normal Devil n Dove shop listings.", true);
+      return;
+    }
     if (payload.status !== "draft" && ["hybrid", "external_only"].includes(payload.sale_channel) && !payload.external_listing_url) {
-      setMessage("Add an external listing URL before activating hybrid or external-only items. Drafts can skip this.", true);
+      setMessage("Add a full external listing URL before activating hybrid or external-only items. Drafts and normal Devil n Dove shop listings can skip this.", true);
       return;
     }
 

@@ -752,11 +752,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('adminProductImagesForm')?.addEventListener('submit', saveImages);
     document.addEventListener('dd:product-editor-target', async (event) => {
       const productId = Number(event?.detail?.product_id || event?.detail?.product?.product_id || 0);
-      if (!productId) return;
+      if (!productId) { clearImagesPanel(); return; }
       const field = document.getElementById('productImagesProductId');
       if (field) field.value = String(productId);
       await loadImages();
     });
+    document.addEventListener('dd:product-editor-cleared', clearImagesPanel);
     mountEl.addEventListener('click', onClick);
     mountEl.addEventListener('input', (event) => {
       if (event.target?.closest?.('[data-product-image-row]')) {
@@ -814,6 +815,21 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.insertAdjacentHTML('beforeend', rowTemplate(row, wrap.children.length));
     reindexRows();
     renderQualityScore();
+  }
+
+
+  function clearImagesPanel() {
+    const productIdField = document.getElementById('productImagesProductId');
+    if (productIdField) productIdField.value = '';
+    const rows = document.getElementById('productImagesRows');
+    if (rows) rows.innerHTML = '';
+    const quality = document.getElementById('adminProductImagesQuality');
+    if (quality) quality.innerHTML = '<p class="small">Load a product to review image quality, roles, and public-use status.</p>';
+    const assetList = document.getElementById('adminMediaAssetsList');
+    if (assetList) assetList.textContent = 'Load a product first to browse uploaded media.';
+    currentScoreHistory = [];
+    latestSavedSummary = null;
+    setMessage('Product image editor cleared.');
   }
 
   async function loadImages() {

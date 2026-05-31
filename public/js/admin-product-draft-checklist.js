@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const featured = field('featured_image_url');
       if (featured && !String(featured.value || '').trim()) return featured;
     }
-    for (let i = 1; i <= 5; i += 1) {
+    for (let i = 1; i <= 6; i += 1) {
       const candidate = field(`image_url_${i}`);
       if (candidate && !String(candidate.value || '').trim()) return candidate;
     }
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { key: 'image', label: 'Featured or gallery image', pass: imageUrls.length > 0, blocker: 'review', action: 'Upload or reuse at least one product image.' },
       { key: 'seo-title', label: 'SEO title', pass: !!text('meta_title'), blocker: 'publish', action: 'Add a clear SEO title before publishing.' },
       { key: 'seo-description', label: 'SEO description', pass: !!text('meta_description'), blocker: 'publish', action: 'Add a concise search description before publishing.' },
-      { key: 'external-url', label: 'External listing link if needed', pass: !['hybrid', 'external_only'].includes(text('sale_channel')) || !!text('external_listing_url') || text('status') === 'draft', blocker: 'publish', action: 'Hybrid/external items need a URL before leaving draft.' }
+      { key: 'external-url', label: 'External listing link only if needed', pass: !['hybrid', 'external_only'].includes(text('sale_channel')) || !!text('external_listing_url') || text('status') === 'draft', blocker: 'publish', action: 'Leave blank for normal Devil n Dove shop listings. Add a full https:// Etsy/Facebook/etc. URL only for Hybrid or External-only active listings.' }
     ];
     return checks;
   }

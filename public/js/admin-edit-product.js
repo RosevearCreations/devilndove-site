@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <label><span class="small">External listing label</span><input type="text" name="external_listing_label" maxlength="120" placeholder="Facebook Marketplace" /></label>
       </div>
       <div class="grid cols-2" style="gap:10px;margin-top:12px">
-        <label><span class="small">External listing URL</span><input type="url" name="external_listing_url" placeholder="https://www.facebook.com/marketplace/..." /></label>
+        <label><span class="small">External listing URL <em class="small">(only for Etsy/Facebook/etc.)</em></span><input type="text" name="external_listing_url" placeholder="Optional unless Hybrid or External only" /><span class="small">Leave blank for normal Devil n Dove shop products. Use a full https:// URL for outside listings.</span></label>
         <label><span class="small">Era / period</span><input type="text" name="era_label" maxlength="120" placeholder="1960s, Edwardian, mid-century" /></label>
       </div>
       <div class="grid cols-2" style="gap:10px;margin-top:12px">
@@ -175,6 +175,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return String(url || '').trim().toLowerCase().replace(/[?#].*$/, '').replace(/\/+$/, '');
   }
 
+  function normalizeCanonicalInput(value) {
+    const clean = String(value || '').trim();
+    if (!clean) return '';
+    if (/^https?:\/\//i.test(clean)) return clean;
+    if (clean.startsWith('/')) return clean;
+    return `/${clean.replace(/^\/+/, '')}`;
+  }
+
+  function isFullHttpUrl(value) {
+    return /^https?:\/\//i.test(String(value || '').trim());
+  }
+
   function uniqueImageRows(rows = []) {
     const seen = new Set();
     const output = [];
@@ -189,12 +201,28 @@ document.addEventListener("DOMContentLoaded", () => {
     return output;
   }
 
-  function resetImageUrlFields() { getImageUrlFields().forEach(field => { field.value = ""; }); }
+  function resetImageUrlFields() {
+    [form.elements.namedItem("featured_image_url"), ...getImageUrlFields()]
+      .filter(Boolean)
+      .forEach((field) => {
+        field.value = "";
+        field.defaultValue = "";
+        field.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+  }
+
+  function clearEditorImageManagers() {
+    resetImageUrlFields();
+    if (window.DDProductDraftMedia?.writeSlots) window.DDProductDraftMedia.writeSlots([]);
+    if (window.DDProductDraftMedia?.render) window.DDProductDraftMedia.render();
+    document.dispatchEvent(new CustomEvent('dd:product-image-fields-updated', { detail: { product_id: 0, cleared: true } }));
+    document.dispatchEvent(new CustomEvent('dd:product-editor-cleared'));
+  }
 
   function resetFormState() {
     form.reset();
     if (existingProductSelect) existingProductSelect.value = '';
-    resetImageUrlFields();
+    clearEditorImageManagers();
     editingProductId = null;
     latestPriceSuggestion = null;
     form.dataset.mode = "create";
@@ -749,7 +777,7 @@ document.addEventListener("DOMContentLoaded", () => {
       meta_description: String(formData.get("meta_description") || "").trim(),
       keywords: String(formData.get("keywords") || "").trim(),
       h1_override: String(formData.get("h1_override") || "").trim(),
-      canonical_url: String(formData.get("canonical_url") || "").trim(),
+      canonical_url: normalizeCanonicalInput(formData.get("canonical_url")),
       og_title: String(formData.get("og_title") || "").trim(),
       og_description: String(formData.get("og_description") || "").trim(),
       og_image_url: String(formData.get("og_image_url") || "").trim(),
@@ -762,6 +790,13 @@ document.addEventListener("DOMContentLoaded", () => {
       sourcing_notes: String(formData.get("sourcing_notes") || "").trim(),
       image_urls
     };
+
+    if (payload.external_listing_url && !isFullHttpUrl(payload.external_listing_url)) {
+      return setMessage("External listing URL must be a full https:// or http:// link. Leave it blank for normal Devil n Dove shop listings.", true);
+    }
+    if (payload.status !== "draft" && ["hybrid", "external_only"].includes(payload.sale_channel) && !payload.external_listing_url) {
+      return setMessage("Add a full external listing URL before activating hybrid or external-only items. Drafts and normal Devil n Dove shop listings can skip this.", true);
+    }
 
     try {
       const currentSuggestion = editingProductId ? await fetchPriceSuggestion(editingProductId).catch(() => null) : null;
