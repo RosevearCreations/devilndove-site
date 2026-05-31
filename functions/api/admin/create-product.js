@@ -127,6 +127,32 @@ function cleanExternalUrl(value) {
   return /^https?:\/\//i.test(raw) ? raw : null;
 }
 
+function normalizeCanonicalUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("/")) return raw;
+  return `/${raw.replace(/^\/+/, "")}`;
+}
+
+function normalizeImageKey(value) {
+  return String(value || "").trim().toLowerCase().replace(/[?#].*$/, "").replace(/\/+$/, "");
+}
+
+function uniqueProductImageUrls(featuredImageUrl, imageUrls = []) {
+  const seen = new Set();
+  const urls = [];
+  [featuredImageUrl, ...normalizeImageUrls(imageUrls)].forEach((url) => {
+    const clean = String(url || "").trim();
+    if (!clean) return;
+    const key = normalizeImageKey(clean);
+    if (seen.has(key)) return;
+    seen.add(key);
+    urls.push(clean);
+  });
+  return urls.slice(0, 7);
+}
+
 function cleanText(value, max = 255) {
   const raw = String(value || "").trim();
   return raw ? raw.slice(0, max) : null;
@@ -168,18 +194,19 @@ async function ensureUniqueSlug(db, productColumns, requestedSlug, name, product
   return `${baseSlug}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-async function insertProductImages(db, productId, name, imageUrls) {
+async function insertProductImages(db, productId, name, featuredImageUrl, imageUrls) {
   const rows = [];
-  if (!productId || !imageUrls.length) return rows;
+  const urls = uniqueProductImageUrls(featuredImageUrl, imageUrls);
+  if (!productId || !urls.length) return rows;
   const imageColumns = await getTableColumnSet(db, "product_images");
   if (!imageColumns.has("product_id") || !imageColumns.has("image_url")) return rows;
 
-  for (let i = 0; i < imageUrls.length; i += 1) {
+  for (let i = 0; i < urls.length; i += 1) {
     const columns = ["product_id", "image_url"];
-    const values = [productId, imageUrls[i]];
+    const values = [productId, urls[i]];
     if (imageColumns.has("alt_text")) {
       columns.push("alt_text");
-      values.push(name || "Product image");
+      values.push(name || (i === 0 ? "Featured product image" : `Product image ${i + 1}`));
     }
     if (imageColumns.has("sort_order")) {
       columns.push("sort_order");
@@ -188,6 +215,10 @@ async function insertProductImages(db, productId, name, imageUrls) {
     const placeholders = columns.map(() => "?");
     if (imageColumns.has("created_at")) {
       columns.push("created_at");
+      placeholders.push("CURRENT_TIMESTAMP");
+    }
+    if (imageColumns.has("updated_at")) {
+      columns.push("updated_at");
       placeholders.push("CURRENT_TIMESTAMP");
     }
     await db.prepare(`INSERT INTO product_images (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`).bind(...values).run().catch(() => null);
@@ -306,7 +337,7 @@ export async function onRequestPost(context) {
     const meta_description = cleanText(body.meta_description, 180);
     const keywords = cleanText(body.keywords, 255);
     const h1_override = cleanText(body.h1_override, 120);
-    const canonical_url = cleanExternalUrl(body.canonical_url);
+    const canonical_url = normalizeCanonicalUrl(body.canonical_url);
     const og_title = cleanText(body.og_title, 120);
     const og_description = cleanText(body.og_description, 200);
     const og_image_url = cleanExternalUrl(body.og_image_url);
@@ -453,7 +484,7 @@ export async function onRequestPost(context) {
       og_image_url
     });
 
-    const createdImages = await insertProductImages(db, newProductId, name, image_urls);
+    const createdImages = await insertProductImages(db, newProductId, name, featured_image_url, image_urls);
 
     const createdProduct = await safeFirst(db, `SELECT * FROM products WHERE product_id = ? LIMIT 1`, [newProductId]);
 
