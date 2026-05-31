@@ -9,6 +9,58 @@ async function getTableColumnSet(db, tableName) {
     return new Set(nr(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
   } catch { return new Set(); }
 }
+async function ensureProductReviewSupportTables(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS product_seo (
+    product_id INTEGER PRIMARY KEY,
+    meta_title TEXT,
+    meta_description TEXT,
+    keywords TEXT,
+    h1_override TEXT,
+    canonical_url TEXT,
+    schema_type TEXT DEFAULT 'Product',
+    og_title TEXT,
+    og_description TEXT,
+    og_image_url TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS product_images (
+    product_image_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    image_url TEXT NOT NULL,
+    alt_text TEXT,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS product_image_annotations (
+    product_image_annotation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    product_image_id INTEGER,
+    image_url TEXT,
+    alt_text TEXT,
+    image_role TEXT,
+    public_use_status TEXT DEFAULT 'internal_review',
+    width_px INTEGER,
+    height_px INTEGER,
+    image_orientation TEXT,
+    merchandising_score INTEGER,
+    first_image_score INTEGER,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS product_review_actions (
+    product_review_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    action_type TEXT NOT NULL,
+    previous_review_status TEXT,
+    new_review_status TEXT,
+    previous_status TEXT,
+    new_status TEXT,
+    actor_user_id INTEGER,
+    note TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+}
+
 async function ensurePublishOverrideTable(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS product_publish_overrides (
     product_publish_override_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,7 +116,27 @@ function buildReadiness(row = {}) {
   const weights = { has_name:10, has_slug:8, has_price:12, has_featured_image:12, has_image_count:12, has_image_alt:8, has_short_description:10, has_meta_title:8, has_meta_description:8, has_category:4, first_image_shape:4, first_image_size:4, first_image_merchandising:6, gallery_merchandising:4, image_roles_documented:8, hero_role_present:6, public_use_allowed:8 };
   const total = Object.values(weights).reduce((sum, value) => sum + value, 0);
   const earned = Object.entries(checks).reduce((sum, [key, ok]) => sum + (ok ? Number(weights[key] || 0) : 0), 0);
+  const labelMap = {
+    has_name: 'product name',
+    has_slug: 'slug',
+    has_price: 'price greater than $0',
+    has_featured_image: 'featured image',
+    has_image_count: 'at least 3 product images',
+    has_image_alt: 'usable alt text on images',
+    has_short_description: 'short description of at least 40 characters',
+    has_meta_title: 'SEO title',
+    has_meta_description: 'SEO meta description',
+    has_category: 'product category',
+    first_image_shape: 'first image must be square or landscape',
+    first_image_size: 'first image should be at least 800×800',
+    first_image_merchandising: 'lead image merchandising score of at least 72%',
+    gallery_merchandising: 'gallery merchandising score of at least 64%',
+    image_roles_documented: 'image roles documented for each image',
+    hero_role_present: 'one image marked Hero/front',
+    public_use_allowed: 'all public images cleared for public use or consent'
+  };
   const failedKeys = Object.entries(checks).filter(([, ok]) => !ok).map(([key]) => key);
+  const failedLabels = failedKeys.map((key) => labelMap[key] || key);
   const publishScore = total > 0 ? Math.round((earned / total) * 100) : 0;
   const imageScore = Math.round(([
     normalizeText(row.featured_image_url).length > 0 ? 1 : 0,
@@ -75,7 +147,7 @@ function buildReadiness(row = {}) {
   ].reduce((sum, v) => sum + v, 0) / 5) * 100);
   return {
     is_ready_for_storefront: failedKeys.length === 0 ? 1 : 0,
-    ready_check_notes: failedKeys.join(", "),
+    ready_check_notes: failedLabels.join(", "),
     missing_image_role_count: missingImageRoleCount,
     hero_image_role_count: heroImageRoleCount,
     blocked_public_use_count: blockedPublicUseCount,
@@ -92,6 +164,7 @@ export async function onRequestPost(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
+  await ensureProductReviewSupportTables(db);
   await ensurePublishOverrideTable(db);
   await ensureProductReadinessColumns(db);
 
@@ -148,6 +221,7 @@ export async function onRequestPost(context) {
   if (action === "request_changes") {
     nextReviewStatus = "needs_changes";
     if (nextStatus === "active") nextStatus = "draft";
+    if (note) readiness.ready_check_notes = note;
   }
   if (action === "publish") {
     if (Number(readiness.is_ready_for_storefront || 0) !== 1) {

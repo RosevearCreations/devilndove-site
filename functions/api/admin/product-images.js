@@ -452,13 +452,11 @@ export async function onRequestPost(context) {
     }
   }
 
-  if (featuredImageUrl) {
-    await db.prepare(`
-      UPDATE products
-      SET featured_image_url = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE product_id = ?
-    `).bind(featuredImageUrl, product_id).run();
-  }
+  await db.prepare(`
+    UPDATE products
+    SET featured_image_url = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE product_id = ?
+  `).bind(featuredImageUrl || null, product_id).run().catch(() => null);
 
   const orderedSavedRows = savedRows.sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
   const summary = summarizeRows(orderedSavedRows);
