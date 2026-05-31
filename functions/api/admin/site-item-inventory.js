@@ -771,7 +771,14 @@ export async function onRequestPost(context) {
       details: { results }
     });
 
-    return json({ ok: true, results });
+    const summary = {
+      affected_items: results.filter((row) => row && row.ok && !row.skipped_reservation).length,
+      skipped_items: results.filter((row) => row && row.skipped_reservation).length,
+      missing_inventory_count: results.filter((row) => row && row.missing_inventory).length,
+      failed_items: results.filter((row) => row && row.ok === false).length
+    };
+    const product = await db.prepare(`SELECT product_id, name FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first().catch(() => null);
+    return json({ ok: true, results, summary, product });
   }
 
   if (action === 'release_product_resources') {
@@ -793,7 +800,14 @@ export async function onRequestPost(context) {
       details: { results }
     });
 
-    return json({ ok: true, results });
+    const summary = {
+      affected_items: results.filter((row) => row && row.ok && !row.skipped_reservation).length,
+      skipped_items: results.filter((row) => row && row.skipped_reservation).length,
+      missing_inventory_count: results.filter((row) => row && row.missing_inventory).length,
+      failed_items: results.filter((row) => row && row.ok === false).length
+    };
+    const product = await db.prepare(`SELECT product_id, name FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first().catch(() => null);
+    return json({ ok: true, results, summary, product });
   }
 
   if (['receive', 'reserve', 'release', 'consume', 'reorder_request'].includes(action)) {
