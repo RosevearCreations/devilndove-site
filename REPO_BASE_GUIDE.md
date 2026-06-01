@@ -230,3 +230,11 @@ Next recommended checks:
 
 Next recommended steps: add a dedicated readiness-preview endpoint for product publishing blockers, add image health counters to the admin dashboard, and add live test notes after deploying Build 161.
 
+## Build 162 — Shop/Creations CSS, Gift Page, and Inventory Image References
+
+- Added `/gift-cards/` as a dedicated public gift-card page so the main shop no longer has the full gift-card form awkwardly placed between filters and products.
+- Changed `/shop/` to show a compact gift-card callout that links to `/gift-cards/`.
+- Repaired the contrast for the `/shop/` Browse by collection direction panel and the `/creations/` browse/filter/cards areas so light panels use dark readable text.
+- Updated Tools & Supplies Inventory Operations to show a live visual image preview beside the Image URL field while keeping the URL editable.
+- Updated the inventory list rows to show a larger thumbnail, the image URL link, and the source/Amazon URL link for easier visual reference.
+- Added `/gift-cards/` to the sitemap. No D1 schema migration is required for this pass.
