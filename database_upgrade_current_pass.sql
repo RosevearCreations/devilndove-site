@@ -1734,3 +1734,11 @@ CREATE INDEX IF NOT EXISTS idx_custom_candle_soap_specs_request ON custom_candle
 
 -- Build 161 note: no new D1 tables required. Public product APIs now enrich products with image arrays from existing product_images rows. Admin catalog work was split into /admin/catalog-media/ and /admin/inventory-operations/. Product detail now has a JSON error wrapper so late query failures do not return HTML to the browser.
 -- Build 162: shop/creations CSS contrast, dedicated gift-card page, and inventory image preview/list URL polish. No D1 schema migration required.
+
+-- Build 163 — product readiness preview, image health counters, and gift-card artwork
+-- No required D1 migration is introduced in this pass.
+-- New endpoint `/api/admin/product-readiness` reads existing tables: products, product_seo, product_images, and product_image_annotations.
+-- Dashboard counters read the same existing product/image/SEO fields and degrade safely through safeCount wrappers.
+-- The new `/admin/readiness/` page is admin-only and noindex/nofollow.
+-- Recommended future schema work: optional persisted readiness snapshots if we want historical blocker trends instead of live reads only.
+

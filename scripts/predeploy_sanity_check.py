@@ -380,6 +380,33 @@ def check_build151_assets(root: Path):
             issues.append({'type': issue_type, 'path': path, 'missing': missing})
     return issues
 
+
+def check_build163_assets(root: Path):
+    issues = []
+    readiness_page = read_text(root / 'admin' / 'readiness' / 'index.html') if (root / 'admin' / 'readiness' / 'index.html').exists() else ''
+    readiness_js = read_text(root / 'public' / 'js' / 'admin-product-readiness.js') if (root / 'public' / 'js' / 'admin-product-readiness.js').exists() else ''
+    readiness_api = read_text(root / 'functions' / 'api' / 'admin' / 'product-readiness.js') if (root / 'functions' / 'api' / 'admin' / 'product-readiness.js').exists() else ''
+    dashboard_html = read_text(root / 'admin' / 'index.html') if (root / 'admin' / 'index.html').exists() else ''
+    dashboard_api = read_text(root / 'functions' / 'api' / 'admin' / 'dashboard-summary.js') if (root / 'functions' / 'api' / 'admin' / 'dashboard-summary.js').exists() else ''
+    gift_page = read_text(root / 'gift-cards' / 'index.html') if (root / 'gift-cards' / 'index.html').exists() else ''
+    css = read_text(root / 'css' / 'styles.css') if (root / 'css' / 'styles.css').exists() else ''
+    checks = [
+        ('build163_readiness_page_missing_assets', 'admin/readiness/index.html', ['Product Readiness', 'productReadinessAdminMount', '/public/js/admin-product-readiness.js'], readiness_page),
+        ('build163_readiness_js_missing_assets', 'public/js/admin-product-readiness.js', ['Product readiness preview', 'productReadinessSummary', 'productReadinessRows', '/api/admin/product-readiness'], readiness_js),
+        ('build163_readiness_api_missing_assets', 'functions/api/admin/product-readiness.js', ['buildReadiness', 'missing_required_roles', 'blocked_public_use', 'Product name'], readiness_api),
+        ('build163_dashboard_image_counters_missing', 'admin/index.html', ['summaryMissingFeaturedImagesCount', 'summaryMissingImageRolesCount', 'summaryBlockedPublicImagesCount'], dashboard_html),
+        ('build163_dashboard_api_image_counters_missing', 'functions/api/admin/dashboard-summary.js', ['products_missing_featured_image_count', 'products_missing_image_roles_count', 'products_blocked_public_images_count'], dashboard_api),
+        ('build163_gift_artwork_missing', 'gift-cards/index.html', ['gift-card-visual-card', '/assets/gift-card-placeholder.svg'], gift_page),
+        ('build163_css_missing', 'css/styles.css', ['.product-readiness-summary', '.gift-card-hero-split', '.product-readiness-score'], css),
+    ]
+    for issue_type, path, tokens, text in checks:
+        missing = [token for token in tokens if token not in text]
+        if missing:
+            issues.append({'type': issue_type, 'path': path, 'missing': missing})
+    if not (root / 'assets' / 'gift-card-placeholder.svg').exists():
+        issues.append({'type': 'build163_gift_placeholder_file_missing', 'path': 'assets/gift-card-placeholder.svg'})
+    return issues
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('root', nargs='?', default='.', help='Build root to check')
@@ -398,7 +425,8 @@ def main(argv=None) -> int:
     product_story_shop_issues = check_product_story_shop_assets(root)
     product_image_role_issues = check_product_image_role_assets(root)
     build151_issues = check_build151_assets(root)
-    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues + product_story_shop_issues + product_image_role_issues + build151_issues
+    build163_issues = check_build163_assets(root)
+    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues + product_story_shop_issues + product_image_role_issues + build151_issues + build163_issues
     report = {
         'ok': not issues,
         'root': str(root),
@@ -437,3 +465,5 @@ if __name__ == '__main__':
 # Build 152 note: predeploy checks include Custom Request reply templates, payment candidates, and HST/GST reminder queue support.
 
 # Build 153 note: predeploy checks include private custom quote previews, customer accept/decline tracking, and reference-image uploads.
+
+# Build 163 note: predeploy checks include product readiness preview, image-health dashboard counters, and gift-card artwork placeholder assets.

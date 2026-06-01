@@ -444,3 +444,52 @@ Next recommended steps: add a dedicated readiness-preview endpoint for product p
 - Updated Tools & Supplies Inventory Operations to show a live visual image preview beside the Image URL field while keeping the URL editable.
 - Updated the inventory list rows to show a larger thumbnail, the image URL link, and the source/Amazon URL link for easier visual reference.
 - Added `/gift-cards/` to the sitemap. No D1 schema migration is required for this pass.
+
+
+## Build 163 — 20-step roadmap/gaps pass: readiness, image health, gifts, and admin clarity
+
+Completed in this pass:
+
+1. Added `/admin/readiness/` as a focused Product Readiness workspace.
+2. Added `/api/admin/product-readiness` so Approve/Publish blockers can be previewed before clicking action buttons.
+3. Added readiness summary counters for total, ready, blocked, missing featured image, missing image roles, missing alt text, blocked public-use images, missing SEO, missing price, and products needing 3 images.
+4. Added per-product blocker cards with direct links back to the product editor and media workspace.
+5. Added dashboard counters for product image/SEO readiness gaps.
+6. Added a Product Readiness department card to the Admin Dashboard.
+7. Added Readiness Preview links to Catalog, Catalog Media, and Inventory Operations workspace navigation.
+8. Added a static gift-card artwork placeholder at `/assets/gift-card-placeholder.svg`.
+9. Added gift-card artwork guidance directly to the `/gift-cards/` hero.
+10. Added Gift Cards to the home navigation so the new gift page is easier to find.
+11. Hardened predeploy sanity checks so the new readiness page, endpoint, dashboard counters, gift artwork, and CSS assets are checked every pass.
+12. Added CSS for readiness cards, readiness score badges, blocker rows, and the split gift-card hero.
+13. Kept the one-H1 rule intact across all scanned exposed pages.
+14. Kept private/admin pages as `noindex,nofollow` where appropriate.
+15. Continued the local SEO habit of clear titles, readable headings, and visible local/product wording.
+16. Kept the new readiness endpoint D1-backed without adding a required migration.
+17. Preserved the split admin structure from the previous pass: Products, Media, Inventory Operations, and now Readiness.
+18. Improved operator visibility before publishing by making missing image roles, missing hero/detail/scale roles, public-use blockers, SEO gaps, and price gaps visible from one place.
+19. Updated active Markdown handoff docs with Build 163 notes.
+20. Updated schema/reference SQL notes with Build 163 status and no-migration guidance.
+
+Next 20 recommended steps:
+
+1. Add inline readiness badges beside each row in the `/admin/catalog/` product table.
+2. Add a one-click “Open first blocker” shortcut from each readiness card.
+3. Add image-role quick-fix buttons from the readiness page.
+4. Add automatic “apply recommended roles” preview before saving image rows.
+5. Add true crop/focal-point visual editing directly on thumbnail cards.
+6. Add visible “image order saved” confirmation that shows featured/gallery order after save.
+7. Add dashboard drilldown links from each image/SEO counter.
+8. Add gift-card admin settings for default amounts, expiry wording, and active/inactive status.
+9. Add a real gift-card image upload field and replace the placeholder artwork.
+10. Add gift-card checkout order-line creation instead of only local draft storage.
+11. Add marketplace image validation before CSV export.
+12. Add channel-specific marketplace CSV presets editing in admin.
+13. Add shop/product API filters for “missing proof image” and “ready for social.”
+14. Add post-publish QA for product detail JSON, image gallery, cart button, and SEO preview.
+15. Add public product page mini-gallery thumbnails below the main image if any product detail page still only shows one image.
+16. Add public proof/trust moderation filters before new trust blocks appear customer-facing.
+17. Add order-stage photo uploads for custom work: planning, making, curing/finishing, ready, pickup/shipping.
+18. Add candle/soap spec editing after product creation: scent, wax/base, colour, ingredients, allergens, and batch number.
+19. Add accountant export checks for missing evidence URLs and missing close notes.
+20. Add a mobile admin landing page that links to phone capture, inventory intake, readiness blockers, and today’s admin actions.
