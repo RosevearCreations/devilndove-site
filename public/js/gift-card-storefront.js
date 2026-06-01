@@ -52,12 +52,31 @@
     const mount = document.getElementById('shopGiftCardStorefrontMount');
     if (!mount) return;
     const saved = readGiftCardPurchase();
+    const mode = String(mount.getAttribute('data-gift-card-mode') || '').trim().toLowerCase();
+    const isFullGiftPage = mode === 'full' || window.location.pathname.replace(/\/+$/, '') === '/gift-cards';
+
+    if (!isFullGiftPage) {
+      mount.innerHTML = `
+        <section class="card storefront-gift-card-card storefront-gift-card-compact">
+          <div>
+            <span class="badge">Gift cards</span>
+            <h2 style="margin:6px 0 0 0">Gift cards for handmade picks</h2>
+            <p class="small" style="margin:6px 0 0 0">Keep gift cards on their own page so the shop can stay focused on product browsing.</p>
+          </div>
+          <div class="storefront-gift-card-compact-actions">
+            ${saved ? `<div class="small">Saved draft: ${escapeHtml(centsToMoney(saved.amount_cents || 0, saved.currency || 'CAD'))} for ${escapeHtml(saved.recipient_name || saved.recipient_email || 'recipient')}</div>` : ''}
+            <a class="btn" href="/gift-cards/">Open gift card page</a>
+          </div>
+        </section>`;
+      return;
+    }
+
     mount.innerHTML = `
-      <section class="card storefront-gift-card-card">
+      <section class="card storefront-gift-card-card storefront-gift-card-full">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
           <div>
             <h2 style="margin:0">Gift cards for handmade picks</h2>
-            <p class="small" style="margin:6px 0 0 0">Buy a Devil n Dove gift card right from the storefront. The purchaser and the recipient can be different people.</p>
+            <p class="small" style="margin:6px 0 0 0">Buy a Devil n Dove gift card from its own page. The purchaser and the recipient can be different people.</p>
           </div>
           ${saved ? `<div class="small">Saved draft: ${escapeHtml(centsToMoney(saved.amount_cents || 0, saved.currency || 'CAD'))} for ${escapeHtml(saved.recipient_name || saved.recipient_email || 'recipient')}</div>` : ''}
         </div>
@@ -83,6 +102,7 @@
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn" type="submit">Save and continue to checkout</button>
             <button class="btn" type="button" id="clearStorefrontGiftCardButton">Clear gift card draft</button>
+            <a class="btn secondary" href="/shop/">Back to shop</a>
           </div>
         </form>
       </section>`;
@@ -138,7 +158,7 @@
     if (!mount) return;
     const saved = readGiftCardPurchase();
     if (!saved) {
-      mount.innerHTML = `<h3 style="margin-top:0">Buying a gift card?</h3><p class="small" style="margin-bottom:0">You can start a gift-card purchase from the shop page. If you already saved one, it will appear here automatically during checkout.</p>`;
+      mount.innerHTML = `<h3 style="margin-top:0">Buying a gift card?</h3><p class="small" style="margin-bottom:0">You can start a gift-card purchase from the gift-card page. If you already saved one, it will appear here automatically during checkout.</p>`;
       return;
     }
     mount.innerHTML = `

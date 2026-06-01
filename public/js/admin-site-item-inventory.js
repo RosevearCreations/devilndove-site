@@ -63,6 +63,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) el.value = value == null ? '' : String(value);
   }
 
+
+  function updateSiteInventoryImagePreview() {
+    const imageUrl = String(document.getElementById('siteInventoryImageUrl')?.value || '').trim();
+    const preview = document.getElementById('siteInventoryImagePreview');
+    if (!preview) return;
+    if (!imageUrl) {
+      preview.innerHTML = '<div class="site-inventory-image-placeholder small">No image URL yet.</div>';
+      return;
+    }
+    preview.innerHTML = `
+      <div class="site-inventory-image-preview-card">
+        <img src="${escapeHtml(imageUrl)}" alt="Inventory item preview" loading="lazy" onerror="this.closest('.site-inventory-image-preview-card').classList.add('is-broken')"/>
+        <a class="small" href="${escapeHtml(imageUrl)}" target="_blank" rel="noopener noreferrer">Open image URL</a>
+      </div>`;
+  }
+
   function syncCategoryPresetSelection(value) {
     const select = document.getElementById('siteInventoryCategoryPreset');
     if (!select) return;
@@ -121,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInputValue('siteInventoryItemName', item.item_name || '');
     setInputValue('siteInventoryCategory', item.category || '');
     setInputValue('siteInventoryImageUrl', item.image_url || '');
+    updateSiteInventoryImagePreview();
     setInputValue('siteInventoryOnHand', Math.max(1, Number(item.on_hand_quantity || 0) || 1));
     setInputValue('siteInventorySourceUrl', item.amazon_url || '');
     setInputValue('siteInventoryAmazonUrl', item.amazon_url || '');
@@ -427,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="grid cols-4" style="gap:12px">
             <div><label class="small" for="siteInventoryCategoryPreset">Existing category</label><select id="siteInventoryCategoryPreset"><option value="">Loading categories…</option></select></div>
             <div><label class="small" for="siteInventoryCategory">Category</label><input id="siteInventoryCategory" type="text" /></div>
-            <div><label class="small" for="siteInventoryImageUrl">Image URL</label><input id="siteInventoryImageUrl" type="url" placeholder="https://..." /></div>
+            <div class="site-inventory-image-field"><label class="small" for="siteInventoryImageUrl">Image URL</label><input id="siteInventoryImageUrl" type="url" placeholder="https://..." /><div id="siteInventoryImagePreview" class="site-inventory-image-preview"><div class="site-inventory-image-placeholder small">No image URL yet.</div></div></div>
             <div><label class="small" for="siteInventoryIsActive">Status</label><select id="siteInventoryIsActive"><option value="1">Active</option><option value="0">Inactive</option></select></div>
           </div>
           <div class="grid cols-3" style="gap:12px">
@@ -544,6 +561,8 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
 
     document.getElementById('siteInventoryForm')?.addEventListener('submit', saveItem);
+    document.getElementById('siteInventoryImageUrl')?.addEventListener('input', updateSiteInventoryImagePreview);
+    updateSiteInventoryImagePreview();
     document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', loadList);
     document.getElementById('siteInventoryStockView')?.addEventListener('change', loadList);
     document.getElementById('siteInventorySourceType')?.addEventListener('change', () => { renderSeedDropdowns(); });
@@ -557,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
     document.getElementById('siteInventorySyncAllButton')?.addEventListener('click', () => syncCatalog(['tool', 'supply']));
     document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(loadList, 250));
-    document.getElementById('siteInventoryResetButton')?.addEventListener('click', () => document.getElementById('siteInventoryForm')?.reset());
+    document.getElementById('siteInventoryResetButton')?.addEventListener('click', () => { document.getElementById('siteInventoryForm')?.reset(); updateSiteInventoryImagePreview(); });
     document.getElementById('siteInventoryBulkCostForm')?.addEventListener('submit', onBulkCostApply);
     document.getElementById('siteInventoryBulkPreviewButton')?.addEventListener('click', onBulkCostPreview);
     document.getElementById('siteInventoryBulkScope')?.addEventListener('change', updateBulkCostScopeHelpers);
@@ -644,6 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const stockUnitEl = document.getElementById('siteInventoryStockUnitLabel'); if (stockUnitEl) stockUnitEl.value = 'unit';
       const usageUnitEl = document.getElementById('siteInventoryUsageUnitLabel'); if (usageUnitEl) usageUnitEl.value = 'unit';
       const usageUnitsEl = document.getElementById('siteInventoryUsageUnitsPerStock'); if (usageUnitsEl) usageUnitsEl.value = '1';
+      updateSiteInventoryImagePreview();
       await loadList();
     } catch (err) {
       setMessage(err.message || 'Failed to save inventory item.', true);
@@ -684,6 +704,7 @@ document.addEventListener('DOMContentLoaded', () => {
     syncCategoryPresetSelection(item.category || '');
     const seedEl = document.getElementById('siteInventorySeedItem');
     if (seedEl) seedEl.value = item.external_key || '';
+    updateSiteInventoryImagePreview();
   }
 
   async function loadList() {
@@ -714,9 +735,15 @@ document.addEventListener('DOMContentLoaded', () => {
         body.innerHTML = items.map((x) => `
           <tr>
             <td style="padding:8px;border-bottom:1px solid #ddd">
-              ${x.image_url ? `<img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;display:block;margin-bottom:8px"/>` : ''}
-              ${x.needs_reorder ? '⚠️ ' : ''}<strong>${escapeHtml(x.item_name)}</strong>
-              <div class="small">#${x.site_item_inventory_id} · ${escapeHtml(x.source_type)} • ${escapeHtml(x.category || '—')}</div>
+              <div class="site-inventory-list-identity">
+                ${x.image_url ? `<a class="site-inventory-list-thumb" href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" loading="lazy"/></a>` : '<div class="site-inventory-list-thumb is-empty small">No image</div>'}
+                <div>
+                  ${x.needs_reorder ? '⚠️ ' : ''}<strong>${escapeHtml(x.item_name)}</strong>
+                  <div class="small">#${x.site_item_inventory_id} · ${escapeHtml(x.source_type)} • ${escapeHtml(x.category || '—')}</div>
+                  ${x.image_url ? `<div class="small site-inventory-url-line">Image: <a href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(x.image_url)}</a></div>` : '<div class="small">Image: not set</div>'}
+                  ${(x.source_url || x.amazon_url) ? `<div class="small site-inventory-url-line">Source: <a href="${escapeHtml(x.source_url || x.amazon_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(x.source_url || x.amazon_url)}</a></div>` : ''}
+                </div>
+              </div>
             </td>
             <td style="padding:8px;border-bottom:1px solid #ddd">On hand ${x.on_hand_quantity} ${escapeHtml(x.stock_unit_label || 'unit')}<div class="small">Reserved ${x.reserved_quantity} • Incoming ${x.incoming_quantity} • Reorder ${x.reorder_level}</div><div class="small">1 ${escapeHtml(x.stock_unit_label || 'unit')} = ${Number(x.usage_units_per_stock_unit || 1)} ${escapeHtml(x.usage_unit_label || 'unit')}</div><div class="small">Preferred reorder ${x.preferred_reorder_quantity || 0}</div></td>
             <td style="padding:8px;border-bottom:1px solid #ddd"><div class="small">${x.is_on_reorder_list ? 'On reorder list' : 'Not queued'}</div><div class="small">${x.do_not_reorder ? 'Do not reorder' : 'Can reorder'}</div><div class="small">${x.do_not_reuse ? 'Do not reuse' : (x.reuse_status || 'Reusable/normal')}</div></td>
