@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderEmpty() {
-    ["summaryUsersCount","summaryProductsCount","summaryOrdersCount","summaryPaymentsCount","summaryLowStockCount","summaryFailedWebhooksCount","summaryOpenDisputesCount","summaryLiveVisitorsCount","summaryRecentSearchesCount","summaryRuntimeIncidentsCount"].forEach((id) => setValue(id, "—"));
+    ["summaryUsersCount","summaryProductsCount","summaryOrdersCount","summaryPaymentsCount","summaryLowStockCount","summaryFailedWebhooksCount","summaryOpenDisputesCount","summaryLiveVisitorsCount","summaryRecentSearchesCount","summaryRuntimeIncidentsCount","summaryMissingFeaturedImagesCount","summaryMissingImageRolesCount","summaryMissingHeroRoleCount","summaryMissingAltTextCount","summaryBlockedPublicImagesCount","summaryMissingSeoCount"].forEach((id) => setValue(id, "—"));
   }
 
   function renderSummary(summary) {
@@ -46,6 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
     setValue("summaryLiveVisitorsCount", formatCount(summary?.active_visitor_sessions_count));
     setValue("summaryRecentSearchesCount", formatCount(summary?.recent_searches_count));
     setValue("summaryRuntimeIncidentsCount", formatCount(summary?.recent_runtime_incidents_count));
+    setValue("summaryMissingFeaturedImagesCount", formatCount(summary?.products_missing_featured_image_count));
+    setValue("summaryMissingImageRolesCount", formatCount(summary?.products_missing_image_roles_count));
+    setValue("summaryMissingHeroRoleCount", formatCount(summary?.products_missing_hero_role_count));
+    setValue("summaryMissingAltTextCount", formatCount(summary?.products_missing_alt_text_count));
+    setValue("summaryBlockedPublicImagesCount", formatCount(summary?.products_blocked_public_images_count));
+    setValue("summaryMissingSeoCount", formatCount(summary?.products_missing_seo_count));
   }
 
   async function fetchSummary() {
