@@ -897,3 +897,16 @@ body.nav-mobile-open{overflow:hidden}
   .site-inventory-list-identity { grid-template-columns: 1fr; }
   .site-inventory-list-thumb { width:100%; max-width:180px; }
 }
+
+
+/* Build 164 admin/readiness/image workflow polish */
+.product-readiness-inline{margin-top:8px;padding:8px 10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.06);display:grid;gap:4px;max-width:320px}
+.product-readiness-inline span{font-size:.86rem;line-height:1.35}.product-readiness-inline.is-good{border-color:rgba(19,124,67,.45);background:rgba(19,124,67,.12)}.product-readiness-inline.is-warning{border-color:rgba(210,137,0,.55);background:rgba(210,137,0,.12)}.product-readiness-inline.is-bad{border-color:rgba(176,0,32,.55);background:rgba(176,0,32,.1)}.product-readiness-inline.is-unknown{opacity:.8}.admin-stat-link{display:block;text-decoration:none;color:inherit}.admin-stat-link:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.32)}
+.product-image-focal-thumb{position:relative;width:76px;height:76px;padding:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:transparent;cursor:crosshair}.product-image-focal-thumb img{width:100%;height:100%;object-fit:cover;display:block}.product-image-focal-dot{position:absolute;width:12px;height:12px;border:2px solid #fff;border-radius:50%;background:#7a2cff;box-shadow:0 0 0 2px rgba(0,0,0,.45);transform:translate(-50%,-50%);pointer-events:none}.product-image-sortable-row.is-dragging{opacity:.6;outline:2px dashed var(--accent, #9b6bff)}
+.product-readiness-actions .btn.small,.btn.small{padding:6px 10px;font-size:.84rem}.status-note.warning{border-color:rgba(210,137,0,.4);background:rgba(210,137,0,.10)}
+.mobile-admin-tree-links .btn.primary[href*="readiness"]{box-shadow:0 0 0 2px rgba(255,255,255,.14)}
+@media(max-width:760px){.product-readiness-inline{max-width:100%}.product-image-sortable-row .grid{grid-template-columns:1fr!important}.admin-stat-link{min-height:92px}}
+
+/* Build 163/164 required readiness and gift-card CSS tokens */
+.product-readiness-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}.product-readiness-score{display:inline-flex;align-items:center;justify-content:center;min-width:74px;min-height:54px;border-radius:16px;border:1px solid var(--border);font-weight:800}.product-readiness-score.is-good{background:rgba(19,124,67,.13);border-color:rgba(19,124,67,.45)}.product-readiness-score.is-warning{background:rgba(210,137,0,.13);border-color:rgba(210,137,0,.55)}.product-readiness-row-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.product-readiness-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.product-readiness-blockers{margin-top:8px}.gift-card-hero-split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);gap:18px;align-items:center}.gift-card-visual-card{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.05)}.gift-card-visual-card img{display:block;width:100%;height:auto}.product-readiness-rows{display:grid;gap:14px;margin-top:14px}
+@media(max-width:760px){.gift-card-hero-split{grid-template-columns:1fr}}
