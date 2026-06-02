@@ -570,3 +570,40 @@ Next 20 recommended steps:
 18. Add candle/soap spec editing after product creation: scent, wax/base, colour, ingredients, allergens, and batch number.
 19. Add accountant export checks for missing evidence URLs and missing close notes.
 20. Add a mobile admin landing page that links to phone capture, inventory intake, readiness blockers, and today’s admin actions.
+
+
+## Build 164 — Roadmap/Gaps Pass Completed
+
+Completed from the requested next-20 pass:
+
+1. Added inline readiness badges beside each product row in `/admin/catalog/`.
+2. Added one-click **Open blocker** shortcuts from product rows and readiness cards.
+3. Added image-role quick-fix buttons from `/admin/readiness/` that apply recommended image roles through the Product Media Workflow endpoint.
+4. Added recommended image-role preview before saving image rows.
+5. Added click-to-set focal point editing directly on Product Media Workflow thumbnail cards.
+6. Added visible “Product images and image order saved” confirmation after saving image rows.
+7. Added Admin Dashboard drilldown links from readiness counters into `/admin/readiness/?filter=...`.
+8. Added gift-card admin quick settings through Operations > Saved App Settings.
+9. Replaced the placeholder gift-card artwork with `/assets/gift-card-art.svg`.
+10. Verified gift-card checkout order-line creation is already supported by `checkout-create-order.js` through `gift_card_purchase` payloads.
+11. Added marketplace image-readiness validation notes/fields before CSV export packs.
+12. Added editable marketplace CSV presets for Etsy, Facebook Marketplace, Pinterest, and manual listings.
+13. Added shop filters for “Ready for social” and “Missing proof image”.
+14. Added `/api/admin/product-publish-qa` for post-publish QA checks covering product detail JSON, gallery, cart basics, and SEO.
+15. Extended product/shop proof signals so product cards and filters can detect proof-image and social-readiness gaps.
+16. Added public trust-block moderation filters by context, item kind, locality, and related product slug.
+17. Added `custom_order_stage_photos` API/table for order-stage photo tracking.
+18. Added candle/soap spec editing after product creation through `/api/admin/candle-soap-specs` and the Catalog Media workspace.
+19. Added accountant export/evidence visibility notes for missing HST/GST evidence URLs.
+20. Improved `/admin/mobile/` as a better mobile admin landing page by adding readiness, inventory operations, and missing accounting-state mount support.
+
+### Build 164 schema/data notes
+
+New tables or schema references added:
+
+- `custom_order_stage_photos`
+- `custom_candle_soap_product_specs`
+- unique index `idx_custom_candle_soap_product_specs_product`
+- marketplace export pack fields for image validation status/notes
+
+No public page should have more than one H1; the sanity pass must keep checking this every build.

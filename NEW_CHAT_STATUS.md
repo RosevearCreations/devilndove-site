@@ -464,3 +464,64 @@ Next 20 recommended steps:
 18. Add candle/soap spec editing after product creation: scent, wax/base, colour, ingredients, allergens, and batch number.
 19. Add accountant export checks for missing evidence URLs and missing close notes.
 20. Add a mobile admin landing page that links to phone capture, inventory intake, readiness blockers, and today’s admin actions.
+
+
+## Build 164 — Roadmap/Gaps Pass Completed
+
+Completed from the requested next-20 pass:
+
+1. Added inline readiness badges beside each product row in `/admin/catalog/`.
+2. Added one-click **Open blocker** shortcuts from product rows and readiness cards.
+3. Added image-role quick-fix buttons from `/admin/readiness/` that apply recommended image roles through the Product Media Workflow endpoint.
+4. Added recommended image-role preview before saving image rows.
+5. Added click-to-set focal point editing directly on Product Media Workflow thumbnail cards.
+6. Added visible “Product images and image order saved” confirmation after saving image rows.
+7. Added Admin Dashboard drilldown links from readiness counters into `/admin/readiness/?filter=...`.
+8. Added gift-card admin quick settings through Operations > Saved App Settings.
+9. Replaced the placeholder gift-card artwork with `/assets/gift-card-art.svg`.
+10. Verified gift-card checkout order-line creation is already supported by `checkout-create-order.js` through `gift_card_purchase` payloads.
+11. Added marketplace image-readiness validation notes/fields before CSV export packs.
+12. Added editable marketplace CSV presets for Etsy, Facebook Marketplace, Pinterest, and manual listings.
+13. Added shop filters for “Ready for social” and “Missing proof image”.
+14. Added `/api/admin/product-publish-qa` for post-publish QA checks covering product detail JSON, gallery, cart basics, and SEO.
+15. Extended product/shop proof signals so product cards and filters can detect proof-image and social-readiness gaps.
+16. Added public trust-block moderation filters by context, item kind, locality, and related product slug.
+17. Added `custom_order_stage_photos` API/table for order-stage photo tracking.
+18. Added candle/soap spec editing after product creation through `/api/admin/candle-soap-specs` and the Catalog Media workspace.
+19. Added accountant export/evidence visibility notes for missing HST/GST evidence URLs.
+20. Improved `/admin/mobile/` as a better mobile admin landing page by adding readiness, inventory operations, and missing accounting-state mount support.
+
+### Build 164 schema/data notes
+
+New tables or schema references added:
+
+- `custom_order_stage_photos`
+- `custom_candle_soap_product_specs`
+- unique index `idx_custom_candle_soap_product_specs_product`
+- marketplace export pack fields for image validation status/notes
+
+No public page should have more than one H1; the sanity pass must keep checking this every build.
+
+
+## Next 20 Recommended Steps After Build 164
+
+1. Add a dedicated admin page for product publish QA results with pass/fail history.
+2. Add one-click fixes from the publish QA report, not only from readiness cards.
+3. Add real crop boxes with draggable handles, not just focal-point clicks.
+4. Save image focal/crop previews as generated derivative image URLs in R2.
+5. Add product image version history so replaced images can be restored.
+6. Add bulk readiness fixes for all products missing hero/detail/scale roles.
+7. Add gift-card settings UI with proper form fields instead of quick preset buttons.
+8. Add gift-card artwork upload to R2 and preview it on `/gift-cards/`.
+9. Add admin gift-card order review, delivery queue, and resend delivery controls.
+10. Add marketplace CSV field mapping per channel, including category ID, shipping profile, materials, tags, and photo columns.
+11. Add marketplace image export selection so only approved images appear in CSV packs.
+12. Add social-readiness badges directly on shop/admin product cards.
+13. Add proof-image requirements by product category, because candles, soap, jewelry, and vintage pieces need different proof shots.
+14. Add public product-detail related-proof sections that explain material/process/locality matches in plain language.
+15. Add moderation queues for public trust blocks with archive, publish, and hide buttons.
+16. Add order-stage photo upload directly in the custom request admin row, including R2 upload.
+17. Add candle/soap label export fields for ingredients, allergens, batch, weight, and safety warnings.
+18. Add accountant export ZIP checks that fail the export package when required evidence is missing.
+19. Add mobile dashboard tiles for readiness blockers, today’s custom requests, and pending order-stage updates.
+20. Add a full regression checklist page that tests shop, product detail, cart, checkout, admin catalog, media workflow, custom requests, and accounting exports before each deploy.

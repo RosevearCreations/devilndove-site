@@ -1755,3 +1755,33 @@ CREATE INDEX IF NOT EXISTS idx_custom_candle_soap_specs_request ON custom_candle
 -- The new `/admin/readiness/` page is admin-only and noindex/nofollow.
 -- Recommended future schema work: optional persisted readiness snapshots if we want historical blocker trends instead of live reads only.
 
+
+
+-- Build 164 additions: custom_order_stage_photos, product-publish QA endpoint, and candle/soap spec editing.
+CREATE TABLE IF NOT EXISTS custom_order_stage_photos (
+  custom_order_stage_photo_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER,
+  order_id INTEGER,
+  stage_key TEXT NOT NULL DEFAULT 'planning',
+  image_url TEXT,
+  image_caption TEXT,
+  public_use_status TEXT NOT NULL DEFAULT 'internal_review',
+  uploaded_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS custom_candle_soap_product_specs (
+  custom_candle_soap_product_spec_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER,
+  custom_request_id INTEGER,
+  product_kind TEXT NOT NULL DEFAULT 'custom',
+  scent_profile TEXT,
+  wax_or_base TEXT,
+  colour_notes TEXT,
+  batch_number TEXT,
+  ingredient_notes TEXT,
+  allergen_safety_notes TEXT,
+  updated_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_candle_soap_product_specs_product ON custom_candle_soap_product_specs(product_id);
