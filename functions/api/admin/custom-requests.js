@@ -425,6 +425,8 @@ async function ensureSchema(db) {
   await ensureColumn(db, 'custom_request_marketplace_export_packs', 'pinterest_csv_row_json', "pinterest_csv_row_json TEXT DEFAULT '{}'");
   await ensureColumn(db, 'custom_request_marketplace_export_packs', 'manual_csv_row_json', "manual_csv_row_json TEXT DEFAULT '{}'");
   await ensureColumn(db, 'custom_request_marketplace_export_packs', 'preset_summary_json', "preset_summary_json TEXT DEFAULT '{}'");
+  await ensureColumn(db, 'custom_request_marketplace_export_packs', 'image_validation_status', "image_validation_status TEXT DEFAULT 'needs_review'");
+  await ensureColumn(db, 'custom_request_marketplace_export_packs', 'image_validation_notes', "image_validation_notes TEXT");
   await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_channel_presets (
     marketplace_channel_preset_id INTEGER PRIMARY KEY AUTOINCREMENT,
     channel TEXT NOT NULL UNIQUE,
@@ -1128,7 +1130,7 @@ async function createMarketplaceExportPack(db, adminUser, requestId) {
     quote?.scope_notes || quoteScope(row),
     '',
     'Please confirm size, material, colour, timing, local pickup/shipping, and reference-image consent before purchase.',
-    'Photos and proof notes must be reviewed before public marketplace posting.'
+    'Images must include a main product photo plus proof/detail image before public marketplace posting.'
   ].join('\n'), 4500);
   const tags = ['Devil n Dove', 'Southern Ontario', row.request_type || 'custom gift', 'handmade', 'local maker'].filter(Boolean);
   await seedMarketplacePresets(db);
@@ -1438,6 +1440,26 @@ function csvResponse(filename, headers, rowsData) {
   const body = [headers.join(','), ...rowsData.map((row) => headers.map((h) => csvEscape(row[h] ?? '')).join(','))].join('\n');
   return new Response(body, { status: 200, headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'no-store' } });
 }
+
+async function saveMarketplacePreset(db, adminUser, payload = {}) {
+  await seedMarketplacePresets(db);
+  const channel = clean(payload.channel || '', 40).toLowerCase();
+  if (!['etsy','facebook','pinterest','manual'].includes(channel)) throw new Error('Choose a supported marketplace channel.');
+  let tags = [];
+  try {
+    const parsed = JSON.parse(clean(payload.default_tags_json || '[]', 1200) || '[]');
+    tags = Array.isArray(parsed) ? parsed.map((item) => clean(item, 60)).filter(Boolean).slice(0, 30) : [];
+  } catch {
+    tags = clean(payload.default_tags_json || '', 1200).split(/[,
+;|]+/).map((item) => clean(item, 60)).filter(Boolean).slice(0, 30);
+  }
+  await db.prepare(`INSERT INTO marketplace_channel_presets (channel, category_label, shipping_profile_label, default_tags_json, default_fields_json, preset_status, created_at, updated_at)
+    VALUES (?, ?, ?, ?, '{}', 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(channel) DO UPDATE SET category_label=excluded.category_label, shipping_profile_label=excluded.shipping_profile_label, default_tags_json=excluded.default_tags_json, preset_status='active', updated_at=CURRENT_TIMESTAMP`)
+    .bind(channel, clean(payload.category_label || '', 120), clean(payload.shipping_profile_label || '', 120), JSON.stringify(tags)).run();
+  return { ok: true, message: `Marketplace preset saved for ${channel}.`, channel, updated_by: adminUser?.email || '' };
+}
+
 async function marketplaceCsv(context, db) {
   await ensureSchema(db);
   await seedMarketplacePresets(db).catch(() => null);
