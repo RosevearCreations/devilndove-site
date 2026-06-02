@@ -27,11 +27,19 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const limit = Math.max(1, Math.min(12, Number(url.searchParams.get('limit') || 4) || 4));
   const contextKey = clean(url.searchParams.get('context') || 'sitewide').toLowerCase() || 'sitewide';
+  const itemKind = clean(url.searchParams.get('item_kind') || '').toLowerCase();
+  const locality = clean(url.searchParams.get('locality') || '').toLowerCase();
+  const productSlug = clean(url.searchParams.get('product_slug') || '').toLowerCase();
   if (!db || !(await tableExists(db, 'trust_block_items'))) {
     return json({ ok: true, authority: 'fallback_empty', items: [], summary: { item_count: 0 } });
   }
   const aliases = contextAliases(contextKey);
   const placeholders = aliases.map(() => '?').join(',');
+  const extraWhere = [];
+  const extraBindings = [];
+  if (itemKind) { extraWhere.push('LOWER(COALESCE(item_kind,'')) = ?'); extraBindings.push(itemKind); }
+  if (locality) { extraWhere.push('LOWER(COALESCE(locality_label,'')) LIKE ?'); extraBindings.push(`%${locality}%`); }
+  if (productSlug) { extraWhere.push('LOWER(COALESCE(related_product_slug,'')) = ?'); extraBindings.push(productSlug); }
   const itemRows = rows(await db.prepare(`
     SELECT trust_block_item_id, source_product_review_id, item_kind, display_context, title, body, attribution_label,
            rating_label, related_product_slug, related_product_name, locality_label, is_featured, sort_order, updated_at
@@ -40,9 +48,10 @@ export async function onRequestGet(context) {
       AND approved_for_public_use=1
       AND privacy_review_status='cleared'
       AND (display_context IN (${placeholders}) OR display_context='sitewide')
+      ${extraWhere.length ? `AND ${extraWhere.join(' AND ')}` : ''}
     ORDER BY is_featured DESC, sort_order ASC, datetime(updated_at) DESC, trust_block_item_id DESC
     LIMIT ?
-  `).bind(...aliases, limit).all().catch(() => ({ results: [] })));
+  `).bind(...aliases, ...extraBindings, limit).all().catch(() => ({ results: [] })));
   return json({
     ok: true,
     authority: 'd1_trust_block_items',
@@ -59,6 +68,6 @@ export async function onRequestGet(context) {
       related_product_name: row.related_product_name || '',
       is_featured: Number(row.is_featured || 0),
     })),
-    summary: { item_count: itemRows.length, context: contextKey }
+    summary: { item_count: itemRows.length, context: contextKey, item_kind: itemKind, locality, product_slug: productSlug }
   });
 }

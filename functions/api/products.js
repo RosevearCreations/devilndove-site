@@ -190,7 +190,11 @@ function normalizeProductRow(row = {}) {
     proof_processes: proofProcesses,
     proof_locality: filterText(proofLocalities),
     proof_localities: proofLocalities,
-    seo_h1: row.h1_override || row.name || "Untitled product"
+    seo_h1: row.h1_override || row.name || "Untitled product",
+    has_proof_image: Number(row.has_proof_image || 0),
+    proof_image_count: Number(row.proof_image_count || 0),
+    blocked_public_image_count: Number(row.blocked_public_image_count || 0),
+    ready_for_social: Number(row.ready_for_social || 0)
   };
 }
 
@@ -324,6 +328,44 @@ async function enrichProductsWithImages(db, products) {
   }
 }
 
+
+async function enrichProductsWithProofSignals(db, products) {
+  const rows = Array.isArray(products) ? products : [];
+  if (!db || !rows.length) return rows;
+  try {
+    const annotationColumns = await getStrictTableColumnSet(db, "product_image_annotations");
+    if (!annotationColumns.has("product_id")) return rows.map((product) => {
+      const imageCount = Number(product.image_count || 0);
+      const hasProof = imageCount >= 3 ? 1 : 0;
+      const ready = imageCount >= 3 && product.short_description && product.meta_title && product.meta_description ? 1 : 0;
+      return { ...product, has_proof_image: hasProof, proof_image_count: hasProof ? 1 : 0, blocked_public_image_count: 0, ready_for_social: ready };
+    });
+    const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 500);
+    if (!ids.length) return rows;
+    const roleExpr = annotationColumns.has('image_role') ? 'image_role' : "''";
+    const statusExpr = annotationColumns.has('public_use_status') ? 'public_use_status' : "''";
+    const signalRows = await runProductQuery(db, `
+      SELECT product_id,
+        SUM(CASE WHEN LOWER(COALESCE(${roleExpr},'')) IN ('material_tool_proof','process_story','scale_context','detail_texture','packaging_pickup') THEN 1 ELSE 0 END) AS proof_image_count,
+        SUM(CASE WHEN LOWER(COALESCE(${statusExpr},'')) IN ('consent_needed','blocked') THEN 1 ELSE 0 END) AS blocked_public_image_count
+      FROM product_image_annotations
+      WHERE product_id IN (${ids.map(() => '?').join(',')})
+      GROUP BY product_id
+    `, ids).catch(() => []);
+    const byId = new Map(signalRows.map((row) => [Number(row.product_id || 0), row]));
+    return rows.map((product) => {
+      const signal = byId.get(Number(product.product_id || 0)) || {};
+      const proofCount = Number(signal.proof_image_count || 0);
+      const blockedCount = Number(signal.blocked_public_image_count || 0);
+      const imageCount = Number(product.image_count || 0);
+      const ready = imageCount >= 3 && proofCount > 0 && blockedCount === 0 && normalizeText(product.short_description) && normalizeText(product.meta_title) && normalizeText(product.meta_description) ? 1 : 0;
+      return { ...product, proof_image_count: proofCount, has_proof_image: proofCount > 0 ? 1 : 0, blocked_public_image_count: blockedCount, ready_for_social: ready };
+    });
+  } catch {
+    return rows.map((product) => ({ ...product, has_proof_image: Number(product.image_count || 0) >= 3 ? 1 : 0, proof_image_count: 0, blocked_public_image_count: 0, ready_for_social: 0 }));
+  }
+}
+
 function buildFilterGroups(products) {
   const group = (values) =>
     Object.entries(values)
@@ -445,6 +487,11 @@ function productMatchesFilters(product, filters) {
   if (filters.requires_shipping === "1" || filters.requires_shipping === "0") {
     if (Number(product.requires_shipping || 0) !== Number(filters.requires_shipping)) return false;
   }
+
+  if (filters.ready_for_social === 'ready' && Number(product.ready_for_social || 0) !== 1) return false;
+  if (filters.ready_for_social === 'not_ready' && Number(product.ready_for_social || 0) === 1) return false;
+  if (filters.missing_proof_image === 'missing' && Number(product.has_proof_image || 0) === 1) return false;
+  if (filters.missing_proof_image === 'present' && Number(product.has_proof_image || 0) !== 1) return false;
 
   return true;
 }
@@ -796,7 +843,9 @@ export async function onRequestGet(context) {
     locality: normalizeText(url.searchParams.get("locality") || url.searchParams.get("proof_locality")).toLowerCase(),
     min_price_cents: parseOptionalInteger(url.searchParams.get("min_price_cents")),
     max_price_cents: parseOptionalInteger(url.searchParams.get("max_price_cents")),
-    requires_shipping: normalizeText(url.searchParams.get("requires_shipping"))
+    requires_shipping: normalizeText(url.searchParams.get("requires_shipping")),
+    ready_for_social: normalizeText(url.searchParams.get("ready_for_social")).toLowerCase(),
+    missing_proof_image: normalizeText(url.searchParams.get("missing_proof_image")).toLowerCase()
   };
 
   const warnings = [];
@@ -829,7 +878,7 @@ export async function onRequestGet(context) {
 
   if (!productColumns.size) {
     try {
-      const products = await enrichProductsWithImages(db, await runUltraProductFallback(db, filters));
+      const products = await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, await runUltraProductFallback(db, filters)));
       warnings.push("schema_columns_unavailable_ultra_fallback_used");
       return json({
         ok: true,
@@ -886,7 +935,7 @@ export async function onRequestGet(context) {
   try {
     const rows = await runProductQuery(db, primarySql, primaryWhere.bindings);
     const storyProducts = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
-    const products = (await enrichProductsWithImages(db, storyProducts)).filter((product) => productMatchesFilters(product, filters));
+    const products = (await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, storyProducts))).filter((product) => productMatchesFilters(product, filters));
     return json({
       ok: true,
       products,
@@ -913,7 +962,7 @@ export async function onRequestGet(context) {
     try {
       const rows = await runProductQuery(db, fallbackSql, fallbackWhere.bindings);
       const storyProducts = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
-      const products = (await enrichProductsWithImages(db, storyProducts)).filter((product) => productMatchesFilters(product, filters));
+      const products = (await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, storyProducts))).filter((product) => productMatchesFilters(product, filters));
       warnings.push("fallback_query_used");
       return json({
         ok: true,
@@ -927,7 +976,7 @@ export async function onRequestGet(context) {
       warnings.push("fallback_query_failed_trying_select_star_fallback");
 
       try {
-        const products = await enrichProductsWithImages(db, await runUltraProductFallback(db, filters));
+        const products = await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, await runUltraProductFallback(db, filters)));
         warnings.push("select_star_fallback_used");
         return json({
           ok: true,
