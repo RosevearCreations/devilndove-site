@@ -463,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="card product-image-sortable-row" data-product-image-row draggable="true" style="margin-top:12px">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
           <strong>Image Row ${index + 1}</strong>
-          ${row.image_url ? `<img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.alt_text || 'Product image preview')}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--border)" />` : ''}
+          ${row.image_url ? `<button class="product-image-focal-thumb" type="button" data-set-focal-from-thumb title="Click the image to set the focal point"><img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.alt_text || 'Product image preview')}"/><span class="product-image-focal-dot" style="left:${escapeHtml(String(Math.round(Number(row.focal_point_x ?? 0.5)*100)))}%;top:${escapeHtml(String(Math.round(Number(row.focal_point_y ?? 0.5)*100)))}%"></span></button>` : ''}
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
             <span class="small" data-score-display>${escapeHtml(String(row.merchandising_score ?? row.first_image_score ?? 0))}% merch</span>
             <span class="small" data-role-display>${escapeHtml(roleLabel(normalizeRole(row.image_role, index)))}</span>
@@ -651,6 +651,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const draftGalleryTrend = lastSaved ? formatTrendDelta(overallScore, Number(lastSaved.gallery_merchandising_score || 0)) : '';
     const savedLeadTrend = lastSaved && priorSaved ? formatTrendDelta(Number(lastSaved.lead_image_score || 0), Number(priorSaved.lead_image_score || 0)) : '';
     const savedGalleryTrend = lastSaved && priorSaved ? formatTrendDelta(Number(lastSaved.gallery_merchandising_score || 0), Number(priorSaved.gallery_merchandising_score || 0)) : '';
+    const recommendedRoles = ['hero_front', 'detail_texture', 'scale_context', 'back_side', 'process_story', 'packaging_pickup', 'material_tool_proof'];
+    const rolePreview = rows.map((row, index) => `${index + 1}. ${roleLabel(normalizeRole(row.image_role || recommendedRoles[index] || 'gallery_support', index))}`).join(' • ');
     const guidance = [
       'Aim for at least 3 images.',
       'Use a square or landscape first image.',
@@ -660,6 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mount.innerHTML = `
       <h4 style="margin-top:0">Photo merchandising before publish</h4>
       <div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • average merchandising score ${overallScore}% • lead image score ${firstImageScore}% • duplicate-angle rows ${duplicateAngleGroups}</div>
+      <div class="small" style="margin-top:6px">Recommended role preview before save: ${escapeHtml(rolePreview || 'Add images to preview roles.')}</div>
       <div class="small" style="margin-top:6px">Roles: ${escapeHtml(roleSummary || 'No roles selected yet.')} ${consentNeeded ? `• ${escapeHtml(String(consentNeeded))} image(s) need consent or are blocked` : ''}</div>
       <div class="small" style="margin-top:6px">${guidance.join(' ')}</div>
       <div class="small" style="margin-top:6px">${overriddenGalleryImages ? `${escapeHtml(String(overriddenGalleryImages))} gallery image(s) are being kept by documented override reason.` : 'No gallery overrides are documented right now.'}${weakUnapprovedGalleryImages ? ` ${escapeHtml(String(weakUnapprovedGalleryImages))} low-scoring gallery image(s) still need an override reason or replacement.` : ''}</div>
@@ -1027,7 +1030,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save product images.');
       latestSavedSummary = data.current_summary && typeof data.current_summary === 'object' ? data.current_summary : null;
       await loadImages();
-      setMessage('Product images saved.');
+      setMessage('Product images and image order saved. The first row is now the lead/featured image candidate.');
       document.dispatchEvent(new CustomEvent('dd:product-updated', { detail: { product_id: productId } }));
     } catch (error) {
       setMessage(error.message || 'Failed to save product images.', true);
@@ -1036,6 +1039,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function onClick(event) {
     const row = event.target.closest('[data-product-image-row]');
+
+    const focalButton = event.target.closest('[data-set-focal-from-thumb]');
+    if (focalButton && row) {
+      const rect = focalButton.getBoundingClientRect();
+      const x = Math.max(0, Math.min(1, (event.clientX - rect.left) / Math.max(1, rect.width)));
+      const y = Math.max(0, Math.min(1, (event.clientY - rect.top) / Math.max(1, rect.height)));
+      const xField = row.querySelector('[data-field="focal_point_x"]');
+      const yField = row.querySelector('[data-field="focal_point_y"]');
+      if (xField) xField.value = x.toFixed(2);
+      if (yField) yField.value = y.toFixed(2);
+      const dot = row.querySelector('.product-image-focal-dot');
+      if (dot) { dot.style.left = `${Math.round(x * 100)}%`; dot.style.top = `${Math.round(y * 100)}%`; }
+      renderQualityScore();
+      setMessage('Focal point updated on the thumbnail. Save images to keep this crop/focus guidance.');
+      return;
+    }
     if (event.target.closest('[data-row-remove]') && row) {
       row.remove();
       if (!document.querySelector('[data-product-image-row]')) addRow();

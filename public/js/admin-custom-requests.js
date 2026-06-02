@@ -173,8 +173,9 @@ Consent/review response link: ${esc(consentPath)}` : ''}</textarea></article>`;
 
   function renderMarketplacePresets(data) {
     const rows = Array.isArray(data.marketplace_presets) ? data.marketplace_presets : [];
-    if (!rows.length) return '<p class="small">Marketplace presets will seed automatically when an export pack is created.</p>';
-    return `<div class="admin-table-wrap"><table><thead><tr><th>Channel</th><th>Category</th><th>Shipping profile</th><th>Tags</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${esc(row.channel || '')}</td><td>${esc(row.category_label || '')}</td><td>${esc(row.shipping_profile_label || '')}</td><td class="small">${esc(row.default_tags_json || '')}</td></tr>`).join('')}</tbody></table></div>`;
+    const starter = ['etsy','facebook','pinterest','manual'].filter((channel) => !rows.some((row) => String(row.channel||'') === channel)).map((channel) => ({ channel, category_label: '', shipping_profile_label: '', default_tags_json: '[]', preset_status: 'active' }));
+    const allRows = [...rows, ...starter];
+    return `<div class="small" style="margin-bottom:8px">Edit category, shipping profile, and channel-specific tags before creating marketplace CSV packs.</div><div class="admin-table-wrap"><table><thead><tr><th>Channel</th><th>Category</th><th>Shipping profile</th><th>Tags JSON</th><th>Action</th></tr></thead><tbody>${allRows.map((row) => `<tr data-marketplace-preset-form="${esc(row.channel || '')}"><td><input class="input" name="channel" value="${esc(row.channel || '')}" readonly></td><td><input class="input" name="category_label" value="${esc(row.category_label || '')}" placeholder="Handmade jewelry"></td><td><input class="input" name="shipping_profile_label" value="${esc(row.shipping_profile_label || '')}" placeholder="Local pickup or parcel"></td><td><textarea class="input" name="default_tags_json" rows="3" placeholder='["handmade", "Ontario"]'>${esc(row.default_tags_json || '[]')}</textarea></td><td><button class="btn small" type="button" data-save-marketplace-preset="${esc(row.channel || '')}">Save preset</button></td></tr>`).join('')}</tbody></table></div>`;
   }
 
 
@@ -251,6 +252,17 @@ Consent/review response link: ${esc(consentPath)}` : ''}</textarea></article>`;
     if (actionButton) runAction(actionButton.getAttribute('data-custom-request-id'), actionButton.getAttribute('data-custom-request-action'));
     const quoteLineButton = event.target.closest('[data-save-quote-line]');
     if (quoteLineButton) saveQuoteLine(quoteLineButton.getAttribute('data-save-quote-line'));
+    const presetButton = event.target.closest('[data-save-marketplace-preset]');
+    if (presetButton) {
+      const channel = presetButton.getAttribute('data-save-marketplace-preset') || '';
+      const row = mount.querySelector(`[data-marketplace-preset-form="${CSS.escape(String(channel))}"]`);
+      if (row) {
+        const payload = { action: 'save_marketplace_preset', channel, category_label: row.querySelector('[name="category_label"]')?.value || '', shipping_profile_label: row.querySelector('[name="shipping_profile_label"]')?.value || '', default_tags_json: row.querySelector('[name="default_tags_json"]')?.value || '[]' };
+        try { setMsg('Saving marketplace preset...'); const data = await readJson(await window.DDAuth.apiFetch('/api/admin/custom-requests', { method: 'POST', body: JSON.stringify(payload) })); render(data); setMsg(data.message || 'Marketplace preset saved.'); }
+        catch (error) { setMsg(error.message || 'Unable to save marketplace preset.', true); }
+      }
+      return;
+    }
     const previewCopyButton = event.target.closest('[data-copy-preview-link]');
     if (previewCopyButton) {
       const path = previewCopyButton.getAttribute('data-copy-preview-link') || '';

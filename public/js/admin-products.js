@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const LOCAL_PENDING_KEY = "dd_admin_product_review_pending_actions_v1";
   let currentSharedPendingActions = [];
   let latestProductRows = [];
+  let latestReadinessByProductId = new Map();
 
   function show(el) {
     if (el) el.style.display = "";
@@ -46,6 +47,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function yesNo(value) {
     return Number(value) === 1 ? "Yes" : "No";
+  }
+
+
+  function normalizeReadinessLabel(value) {
+    return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  }
+
+  function firstBlockerTarget(productId, readiness) {
+    const blockers = Array.isArray(readiness?.blockers) ? readiness.blockers : [];
+    const first = blockers[0] || {};
+    const label = normalizeReadinessLabel(first.label || first.code || '');
+    const imageLabels = ['featured_image','image_count','alt_text','hero_front_role','detail_image_role','scale_context_role','image_roles','public_use_clearance','lead_image_shape','lead_image_size','lead_image_score','gallery_score'];
+    if (imageLabels.some((token) => label.includes(token) || label.includes(token.replace(/_/g, '')))) {
+      return `/admin/catalog-media/?product_id=${encodeURIComponent(productId)}#product-media-workflow`;
+    }
+    if (label.includes('seo')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-seo-fields`;
+    if (label.includes('price')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-pricing-fields`;
+    if (label.includes('description')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-description-fields`;
+    return `/admin/readiness/?product_id=${encodeURIComponent(productId)}`;
+  }
+
+  function readinessBadgeMarkup(product) {
+    const productId = Number(product?.product_id || 0);
+    const readiness = latestReadinessByProductId.get(productId)?.readiness || null;
+    if (!readiness) return '<div class="small product-readiness-inline is-unknown">Readiness preview unavailable</div>';
+    const blockers = Array.isArray(readiness.blockers) ? readiness.blockers : [];
+    const first = blockers[0];
+    const score = Number(readiness.score || 0);
+    const tone = readiness.ready ? 'is-good' : score >= 70 ? 'is-warning' : 'is-bad';
+    return `<div class="product-readiness-inline ${tone}"><strong>${readiness.ready ? 'Ready' : 'Blocked'} ${escapeHtml(String(score))}%</strong>${first ? `<span>${escapeHtml(first.label || 'First blocker')}: ${escapeHtml(first.help || '')}</span>` : '<span>No blockers in preview.</span>'}<button class="btn small" type="button" data-open-first-blocker="${productId}">Open first blocker</button></div>`;
+  }
+
+  async function refreshReadinessPreview() {
+    if (!window.DDAuth?.isLoggedIn()) return;
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/product-readiness?limit=500&show_ready=1');
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Readiness preview unavailable.');
+      latestReadinessByProductId = new Map((Array.isArray(data.products) ? data.products : []).map((product) => [Number(product.product_id || 0), product]));
+    } catch {
+      latestReadinessByProductId = new Map();
+    }
   }
 
 
@@ -228,7 +271,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `
         <tr>
           <td style="padding:8px;border-bottom:1px solid #ddd">${productId}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${name}${colorSummary ? `<div class="small">Colours: ${colorSummary}</div>` : ''}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${name}${colorSummary ? `<div class="small">Colours: ${colorSummary}</div>` : ''}${readinessBadgeMarkup(product)}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${slug}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${sku}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
@@ -240,6 +283,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn" type="button" data-edit-product-id="${productId}">Edit</button>
+              <button class="btn" type="button" data-open-first-blocker="${productId}">Open blocker</button>
               <button class="btn" type="button" data-review-action="approve" data-product-id="${productId}" title="${escapeHtml(approveTitle)}">Approve</button>
               <button class="btn" type="button" data-review-action="request_changes" data-product-id="${productId}">Needs Changes</button>
               <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}" title="${escapeHtml(publishTitle)}">Publish</button>
@@ -393,6 +437,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const products = Array.isArray(data.products) ? data.products : [];
       latestProductRows = products;
+      await refreshReadinessPreview();
       saveSnapshot(products);
       setStatus("");
 
@@ -408,6 +453,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const cached = loadSnapshot();
       if (cached?.products?.length) {
         latestProductRows = cached.products;
+        await refreshReadinessPreview();
         renderProductPicker(cached.products);
         renderRows(cached.products);
         setStatus(`Live product list is unavailable. Showing the last saved snapshot from ${cached.cached_at || "an earlier visit"}.`, "warning");
@@ -599,8 +645,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const socialProductButton = event.target.closest("[data-social-product-id]");
     const retryButton = event.target.closest("[data-product-pending-retry]");
     const dismissButton = event.target.closest("[data-product-pending-dismiss]");
-    if (!reviewButton && !resourceButton && !socialProductButton && !retryButton && !dismissButton) return;
+    const blockerButton = event.target.closest("[data-open-first-blocker]");
+    if (!reviewButton && !resourceButton && !socialProductButton && !retryButton && !dismissButton && !blockerButton) return;
     if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+
+
+    if (blockerButton) {
+      const productId = Number(blockerButton.getAttribute('data-open-first-blocker') || 0);
+      const readiness = latestReadinessByProductId.get(productId)?.readiness || null;
+      window.location.href = firstBlockerTarget(productId, readiness);
+      return;
+    }
 
 
     if (socialProductButton) {
