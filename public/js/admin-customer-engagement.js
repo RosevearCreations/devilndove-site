@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="btn" type="submit">Issue Gift Card</button>
           </form>
           <div class="grid cols-4" style="gap:10px;margin-bottom:10px"><input id="giftCardBoardSearch" type="search" placeholder="Search purchaser, recipient, email, code" /><select id="giftCardBoardStatus"><option value="all">All gift cards</option><option value="active">Active only</option><option value="inactive">Inactive only</option><option value="expired">Expired only</option><option value="pending_activation">Pending activation</option></select><select id="giftCardBoardAudience"><option value="all">All delivery history</option><option value="recipient">Recipient history</option><option value="purchaser">Purchaser history</option></select><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="activateSelectedGiftCardsButton">Activate selected</button><button class="btn" type="button" id="deactivateSelectedGiftCardsButton">Deactivate selected</button></div></div>
-          <div id="customerEngagementGiftCards" class="small">Loading…</div>
+          <div class="gift-card-balance-lookup"><strong>Gift-card balance lookup</strong><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="giftCardBalanceLookupCode" placeholder="Code or email"/><button class="btn" type="button" id="giftCardBalanceLookupButton">Look up balance</button></div><div id="giftCardBalanceLookupResult" class="small"></div></div><div id="customerEngagementGiftCards" class="small">Loading…</div>
         </div>
 
         <div class="grid cols-2" style="gap:18px;margin-top:18px">

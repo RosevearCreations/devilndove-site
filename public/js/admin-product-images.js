@@ -457,19 +457,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function cropBoxStyle(row = {}) {
+    const x = clamp(Number(row.crop_x ?? 0.08), 0, 1);
+    const y = clamp(Number(row.crop_y ?? 0.08), 0, 1);
+    const w = clamp(Number(row.crop_width ?? 0.84), 0.05, 1);
+    const h = clamp(Number(row.crop_height ?? 0.84), 0.05, 1);
+    return `left:${Math.round(x*100)}%;top:${Math.round(y*100)}%;width:${Math.round(w*100)}%;height:${Math.round(h*100)}%`;
+  }
+
   function rowTemplate(row = {}, index = 0) {
     const shotStyle = normalizeText(row.shot_style || 'record').toLowerCase() || 'record';
     return `
       <div class="card product-image-sortable-row" data-product-image-row draggable="true" style="margin-top:12px">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
           <strong>Image Row ${index + 1}</strong>
-          ${row.image_url ? `<button class="product-image-focal-thumb" type="button" data-set-focal-from-thumb title="Click the image to set the focal point"><img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.alt_text || 'Product image preview')}"/><span class="product-image-focal-dot" style="left:${escapeHtml(String(Math.round(Number(row.focal_point_x ?? 0.5)*100)))}%;top:${escapeHtml(String(Math.round(Number(row.focal_point_y ?? 0.5)*100)))}%"></span></button>` : ''}
+          ${row.image_url ? `<button class="product-image-focal-thumb" type="button" data-set-focal-from-thumb title="Click the image to set the focal point"><img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.alt_text || 'Product image preview')}"/><span class="product-image-focal-dot" style="left:${escapeHtml(String(Math.round(Number(row.focal_point_x ?? 0.5)*100)))}%;top:${escapeHtml(String(Math.round(Number(row.focal_point_y ?? 0.5)*100)))}%"></span><span class="product-image-crop-preview" style="${escapeHtml(cropBoxStyle(row))}"></span></button>` : ''}
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
             <span class="small" data-score-display>${escapeHtml(String(row.merchandising_score ?? row.first_image_score ?? 0))}% merch</span>
             <span class="small" data-role-display>${escapeHtml(roleLabel(normalizeRole(row.image_role, index)))}</span>
             <button class="btn" type="button" data-row-drag-handle title="Drag this image to reorder">↕ drag</button>
             <button class="btn" type="button" data-row-move="up">↑</button>
             <button class="btn" type="button" data-row-move="down">↓</button>
+            <button class="btn" type="button" data-row-set-square-crop>Set 1:1 crop</button>
             <button class="btn" type="button" data-row-remove title="Remove this image row. Click Save Images to confirm the delete.">Delete image row</button>
           </div>
         </div>
@@ -703,11 +712,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Product Media Workflow</h3>
         <p class="small" style="margin-top:0">Manage ordered image URLs, direct uploads, asset browsing, alt text, captions, focal points, crop history, and merchandising scores together.</p>
-        <div id="adminProductImagesMessage" class="small" style="display:none;margin-bottom:12px"></div>
+        <div id="adminProductImagesMessage" class="small" style="display:none;margin-bottom:12px"></div><div class="product-image-bulk-bar"><strong>Bulk tools</strong><span class="small">Use compression/resize before upload, then assign roles in order. Drag rows to reorder.</span></div>
         <form id="adminProductImagesForm" class="grid" style="gap:12px">
           <div class="grid cols-2" style="gap:12px">
             <div><label class="small" for="productImagesProductId">Product ID</label><input id="productImagesProductId" type="number" min="1" step="1" required /></div>
-            <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap"><button class="btn" type="button" id="loadProductImagesButton">Load Images</button><button class="btn" type="button" id="addProductImageRowButton">Add Row</button><button class="btn" type="button" id="applyRecommendedImageRolesButton">Apply recommended roles</button><button class="btn" type="submit" id="saveProductImagesButton">Save Images</button></div>
+            <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap"><button class="btn" type="button" id="loadProductImagesButton">Load Images</button><button class="btn" type="button" id="addProductImageRowButton">Add Row</button><button class="btn" type="button" id="applyRecommendedImageRolesButton">Apply recommended roles</button><button class="btn" type="button" id="bulkHeroRolesButton">Bulk roles</button><button class="btn" type="submit" id="saveProductImagesButton">Save Images</button></div>
           </div>
           <div class="card" style="margin-top:4px">
             <h4 style="margin-top:0">Direct Upload to R2</h4>
@@ -734,6 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loadProductImagesButton')?.addEventListener('click', loadImages);
     document.getElementById('addProductImageRowButton')?.addEventListener('click', () => addRow());
     document.getElementById('applyRecommendedImageRolesButton')?.addEventListener('click', applyRecommendedRoles);
+    document.getElementById('bulkHeroRolesButton')?.addEventListener('click', applyRecommendedRoles);
     document.getElementById('uploadProductImageButton')?.addEventListener('click', uploadImage);
     document.getElementById('productImageUploadInput')?.addEventListener('change', async (event) => {
       const file = event.target?.files?.[0];
@@ -1051,8 +1061,33 @@ document.addEventListener('DOMContentLoaded', () => {
       if (yField) yField.value = y.toFixed(2);
       const dot = row.querySelector('.product-image-focal-dot');
       if (dot) { dot.style.left = `${Math.round(x * 100)}%`; dot.style.top = `${Math.round(y * 100)}%`; }
+      const size = 0.84;
+      const cropX = Math.max(0, Math.min(1-size, x - size/2));
+      const cropY = Math.max(0, Math.min(1-size, y - size/2));
+      const cropPair = row.querySelector('[data-field="crop_pair"]');
+      const cropSize = row.querySelector('[data-field="crop_size"]');
+      if (cropPair && !cropPair.value) cropPair.value = `${cropX.toFixed(2)},${cropY.toFixed(2)}`;
+      if (cropSize && !cropSize.value) cropSize.value = `${size.toFixed(2)},${size.toFixed(2)}`;
+      const cropBox = row.querySelector('.product-image-crop-preview');
+      if (cropBox) cropBox.style.cssText = `left:${Math.round(cropX*100)}%;top:${Math.round(cropY*100)}%;width:${Math.round(size*100)}%;height:${Math.round(size*100)}%`;
       renderQualityScore();
       setMessage('Focal point updated on the thumbnail. Save images to keep this crop/focus guidance.');
+      return;
+    }
+    if (event.target.closest('[data-row-set-square-crop]') && row) {
+      const focalX = Number(row.querySelector('[data-field="focal_point_x"]')?.value || 0.5);
+      const focalY = Number(row.querySelector('[data-field="focal_point_y"]')?.value || 0.5);
+      const size = 0.84;
+      const cropX = Math.max(0, Math.min(1-size, focalX - size/2));
+      const cropY = Math.max(0, Math.min(1-size, focalY - size/2));
+      const cropPair = row.querySelector('[data-field="crop_pair"]');
+      const cropSize = row.querySelector('[data-field="crop_size"]');
+      if (cropPair) cropPair.value = `${cropX.toFixed(2)},${cropY.toFixed(2)}`;
+      if (cropSize) cropSize.value = `${size.toFixed(2)},${size.toFixed(2)}`;
+      const cropBox = row.querySelector('.product-image-crop-preview');
+      if (cropBox) cropBox.style.cssText = `left:${Math.round(cropX*100)}%;top:${Math.round(cropY*100)}%;width:${Math.round(size*100)}%;height:${Math.round(size*100)}%`;
+      renderQualityScore();
+      setMessage('Square crop rectangle set from focal point. Save images to keep it.');
       return;
     }
     if (event.target.closest('[data-row-remove]') && row) {

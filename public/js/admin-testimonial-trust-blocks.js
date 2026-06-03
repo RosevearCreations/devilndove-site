@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><input id="trustBlockReviewTitle" placeholder="Optional trust block title" style="min-width:260px"><button class="btn" type="button" id="createTrustFromReviewButton">Create from selected review</button></div>
           <div class="admin-table-wrap"><table><thead><tr><th></th><th>Reviewer</th><th>Text/Product</th><th>Ready</th></tr></thead><tbody>${reviewRows(reviews)}</tbody></table></div>
         </details>
-        <h3>Current trust block items</h3>
+        <div class="trust-placement-control"><h3 style="margin-top:0">Public placement controls by page</h3><p class="small">Use Display context values like <code>sitewide</code>, <code>shop</code>, <code>creations</code>, <code>gift-cards</code>, <code>gallery</code>, <code>about</code>, or a page path. Only items with status approved/published, privacy cleared, and public-use checked appear publicly.</p></div><h3>Current trust block items</h3>
         <div class="admin-table-wrap"><table><thead><tr><th>Title/context</th><th>Copy</th><th>Status</th><th>Action</th></tr></thead><tbody>${itemRows(items)}</tbody></table></div>
       </div>`;
     document.getElementById('trustBlocksRefreshButton')?.addEventListener('click', load);

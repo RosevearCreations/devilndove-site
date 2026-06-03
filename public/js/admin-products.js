@@ -222,6 +222,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     return data;
   }
 
+
+
+  function qaBadgeMarkup(product) {
+    const qa = product._qa || null;
+    if (!qa) return `<div class="product-qa-inline"><strong>Post-publish QA</strong><span class="small">Not run yet.</span><button class="btn small" type="button" data-product-qa-run="${Number(product.product_id || 0)}">Run QA</button></div>`;
+    const checks = Array.isArray(qa.checks) ? qa.checks : [];
+    const failed = Number(qa.failed || checks.filter((row) => !row.ok).length || 0);
+    return `<div class="product-qa-inline ${failed ? 'is-fail' : 'is-pass'}"><strong>Post-publish QA ${failed ? 'needs attention' : 'passed'}</strong><div class="product-qa-badges">${checks.map((check) => `<span class="product-qa-badge ${check.ok ? 'ok' : 'fail'}">${check.ok ? '✓' : '!' } ${escapeHtml(check.code || 'check')}</span>`).join('')}</div>${failed ? `<span class="small">${escapeHtml(checks.find((check) => !check.ok)?.help || 'One or more QA checks failed.')}</span>` : ''}</div>`;
+  }
+
+  async function runProductQA(productId) {
+    const response = await window.DDAuth.apiFetch(`/api/admin/product-publish-qa?product_id=${encodeURIComponent(productId)}`);
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Post-publish QA failed.');
+    latestProductRows = latestProductRows.map((row) => Number(row.product_id || 0) === Number(productId) ? { ...row, _qa: data } : row);
+    renderRows(latestProductRows);
+    setStatus(`QA complete for product #${productId}: ${Number(data.failed || 0)} issue(s).`, Number(data.failed || 0) ? 'warning' : 'success');
+    return data;
+  }
+
   function renderRows(products) {
     if (!tableBody) return;
 
@@ -271,7 +291,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `
         <tr>
           <td style="padding:8px;border-bottom:1px solid #ddd">${productId}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${name}${colorSummary ? `<div class="small">Colours: ${colorSummary}</div>` : ''}${readinessBadgeMarkup(product)}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${name}${colorSummary ? `<div class="small">Colours: ${colorSummary}</div>` : ''}${readinessBadgeMarkup(product)}${qaBadgeMarkup(product)}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${slug}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${sku}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
@@ -284,6 +304,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn" type="button" data-edit-product-id="${productId}">Edit</button>
               <button class="btn" type="button" data-open-first-blocker="${productId}">Open blocker</button>
+              <button class="btn" type="button" data-product-qa-run="${productId}">Run QA</button>
               <button class="btn" type="button" data-review-action="approve" data-product-id="${productId}" title="${escapeHtml(approveTitle)}">Approve</button>
               <button class="btn" type="button" data-review-action="request_changes" data-product-id="${productId}">Needs Changes</button>
               <button class="btn" type="button" data-review-action="publish" data-product-id="${productId}" title="${escapeHtml(publishTitle)}">Publish</button>
@@ -646,9 +667,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const retryButton = event.target.closest("[data-product-pending-retry]");
     const dismissButton = event.target.closest("[data-product-pending-dismiss]");
     const blockerButton = event.target.closest("[data-open-first-blocker]");
-    if (!reviewButton && !resourceButton && !socialProductButton && !retryButton && !dismissButton && !blockerButton) return;
+    const qaButton = event.target.closest("[data-product-qa-run]");
+    if (!reviewButton && !resourceButton && !socialProductButton && !retryButton && !dismissButton && !blockerButton && !qaButton) return;
     if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
 
+
+    if (qaButton) {
+      const productId = Number(qaButton.getAttribute('data-product-qa-run') || 0);
+      if (!productId) return;
+      try { qaButton.disabled = true; await runProductQA(productId); }
+      catch (error) { setStatus(error.message || 'Post-publish QA failed.', 'error'); }
+      finally { qaButton.disabled = false; }
+      return;
+    }
 
     if (blockerButton) {
       const productId = Number(blockerButton.getAttribute('data-open-first-blocker') || 0);

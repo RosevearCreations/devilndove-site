@@ -44,6 +44,17 @@
       return String(blocker.label || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
     }
 
+
+
+    function blockerFixHref(productId, blocker = {}) {
+      const key = blockerKey(blocker);
+      if (key.includes('image') || key.includes('alt') || key.includes('role') || key.includes('public_use')) return `/admin/catalog-media/?product_id=${encodeURIComponent(productId)}#product-media-workflow`;
+      if (key.includes('seo') || key.includes('meta')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-seo-fields`;
+      if (key.includes('price')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-pricing-fields`;
+      if (key.includes('description')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-description-fields`;
+      return `/admin/catalog/?product_id=${encodeURIComponent(productId)}`;
+    }
+
     function productMatchesActiveFilter(product = {}) {
       if (activeProductId && Number(product.product_id || 0) !== activeProductId) return false;
       if (!activeFilter) return true;
@@ -147,7 +158,7 @@
         const blockers = Array.isArray(readiness.blockers) ? readiness.blockers : [];
         const image = readiness.image || {};
         const blockerMarkup = blockers.length
-          ? `<ul class="compact-list product-readiness-blockers">${blockers.map((blocker) => `<li><strong>${esc(blocker.label)}</strong>: ${esc(blocker.help)}</li>`).join('')}</ul>`
+          ? `<ul class="compact-list product-readiness-blockers">${blockers.map((blocker) => `<li class="product-readiness-fix-row"><span><strong>${esc(blocker.label)}</strong>: ${esc(blocker.help)}</span><a class="btn small" href="${blockerFixHref(product.product_id, blocker)}">Fix now</a></li>`).join('')}</ul>`
           : '<p class="small success-text">Ready based on current preview checks.</p>';
         return `
           <article class="card product-readiness-row ${readiness.ready ? 'is-ready' : 'is-blocked'}">
