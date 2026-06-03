@@ -49,6 +49,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productReviewsListEl = document.getElementById("productReviewsList");
   const productRelatedProofCardEl = document.getElementById("productRelatedProofCard");
   const productRelatedProofSummaryEl = document.getElementById("productRelatedProofSummary");
+  const productCandleSoapSafetyCardEl = document.getElementById('productCandleSoapSafetyCard');
+  const productCandleSoapSummaryEl = document.getElementById('productCandleSoapSummary');
+  const productCandleSoapDetailsEl = document.getElementById('productCandleSoapDetails');
   const productRelatedProofListEl = document.getElementById("productRelatedProofList");
   let currentProduct = null;
   let currentTrustSummary = null;
@@ -316,7 +319,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       </article>`).join('');
   }
 
-  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts) {
+
+  function renderCandleSoapSpec(spec) {
+    if (!productCandleSoapSafetyCardEl || !productCandleSoapSummaryEl || !productCandleSoapDetailsEl) return;
+    if (!spec || typeof spec !== 'object') {
+      hide(productCandleSoapSafetyCardEl);
+      return;
+    }
+    const parts = [spec.product_kind, spec.scent_profile ? `Scent: ${spec.scent_profile}` : '', spec.wax_or_base ? `Base: ${spec.wax_or_base}` : '', spec.batch_number ? `Batch: ${spec.batch_number}` : ''].filter(Boolean);
+    productCandleSoapSummaryEl.textContent = parts.length ? parts.join(' • ') : 'Safety, scent, batch, and ingredient notes are available for this candle or soap item.';
+    const detailRows = [
+      ['Colour notes', spec.colour_notes],
+      ['Ingredients', spec.ingredient_notes],
+      ['Allergen / safety notes', spec.allergen_safety_notes || spec.safety_notes],
+      ['Label weight', spec.label_weight],
+      ['Batch recall notes', spec.batch_recall_notes]
+    ].filter(([, value]) => String(value || '').trim());
+    productCandleSoapDetailsEl.innerHTML = detailRows.length
+      ? detailRows.map(([label, value]) => `<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</div>`).join('')
+      : '<div>No extra safety notes have been added yet.</div>';
+    show(productCandleSoapSafetyCardEl);
+  }
+
+  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec) {
     currentProduct = product || null;
     if (productTypeEl) {
       const badges = [product.product_type || ''];
@@ -352,6 +377,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderMarketplaceSupport(product);
     renderProcessLinks(product, resourceLinks);
     renderRelatedProducts(relatedProducts);
+    renderCandleSoapSpec(candleSoapSpec);
     if (addToCartButton) {
       const externalOnly = String(product.sale_channel || 'onsite').toLowerCase() === 'external_only';
       addToCartButton.style.display = externalOnly ? 'none' : '';
@@ -411,7 +437,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       if (!response.ok && !data.ok) throw new Error(data.error || "Failed to load product.");
       if (!data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || []);
+      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null);
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;

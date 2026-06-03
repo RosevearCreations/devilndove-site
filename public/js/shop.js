@@ -200,6 +200,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const colorNames = Array.isArray(product.color_names) ? product.color_names : [];
       const proofBits = [product.proof_material, product.proof_process, product.proof_locality].map((v) => String(v || '').trim()).filter(Boolean).slice(0, 3);
       const proofMarkup = proofBits.length ? `<div class="shop-card-proof small">${proofBits.map((bit) => `<span class="pill">${escapeHtml(bit.split(',')[0])}</span>`).join('')}</div>` : '';
+      const trustBadgeMarkup = Number(product.has_public_trust_block || product.trust_block_count || 0) > 0
+        ? `<div class="shop-card-trust-badges small"><span class="pill trust-proof-pill">Approved proof</span><span class="pill">${escapeHtml(String(product.trust_block_count || 1))} trust note(s)</span></div>`
+        : (Number(product.ready_for_social || 0) === 1 ? `<div class="shop-card-trust-badges small"><span class="pill trust-proof-pill">Social-ready proof</span></div>` : '');
       const originBadge = `<div class="small shop-card-badges"><span class="pill">${origin}</span><span class="pill">${saleChannel}</span>${product.era_label ? `<span class="pill">${escapeHtml(product.era_label)}</span>` : ''}</div>`;
       const swatchMarkup = colorNames.length ? `<div class="small shop-card-swatches">${colorNames.slice(0,5).map((color) => `<span class="pill" title="${escapeHtml(color)}"><span class="shop-swatch" style="background:${swatch(color)}"></span>${escapeHtml(color)}</span>`).join('')}</div>` : '';
       const mainImage = images[0]?.image_url || '';
@@ -221,6 +224,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             ${keywordBadge}
             ${swatchMarkup}
             ${proofMarkup}
+            ${trustBadgeMarkup}
             <p class="small shop-card-description">${shortDescription || longDescription || 'No description available yet.'}</p>
             ${longDescription && longDescription !== shortDescription ? `<details class="shop-card-details"><summary>More details</summary><p class="small">${longDescription}</p></details>` : ''}
             ${storySnippet ? `<div class="shop-card-story small"><strong>${storyHeading}:</strong> ${storySnippet}</div>` : ''}
