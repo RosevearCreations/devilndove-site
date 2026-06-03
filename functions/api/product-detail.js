@@ -500,6 +500,8 @@ async function handleProductDetailRequest(context) {
     }
   } catch {}
 
+  const candle_soap_spec = await db.prepare(`SELECT * FROM custom_candle_soap_product_specs WHERE product_id = ? ORDER BY custom_candle_soap_product_spec_id DESC LIMIT 1`).bind(product.product_id).first().catch(() => null);
+
   const trust_summary = {
     has_multiple_images: storefront_images.length > 1,
     has_maker_story: resource_links.length > 0,
@@ -579,7 +581,7 @@ async function handleProductDetailRequest(context) {
   } catch {}
 
   const related_products = await relatedProductsByProof();
-  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, reviews, review_summary, related_products });
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, candle_soap_spec, reviews, review_summary, related_products });
 }
 
 
