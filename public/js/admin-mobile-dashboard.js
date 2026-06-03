@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const draftStats = document.getElementById('mobileAdminDraftSummary');
   const accountingStats = document.getElementById('mobileAdminAccountingSummary');
   const healthStats = document.getElementById('mobileAdminHealthSummary');
+  const todayTaskStats = document.getElementById('mobileAdminTodayTasks');
   if (!monthInput || !refreshButton || !messageEl || !monthStats || !draftStats || !accountingStats || !healthStats || !window.DDAuth) return;
 
   const SNAPSHOT_KEY = 'dd_mobile_admin_dashboard_snapshot_v2';
@@ -99,6 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
   }
 
+  function renderTodayTasks(payload) {
+    if (!todayTaskStats) return;
+    const tasks = Array.isArray(payload?.tasks) ? payload.tasks : [];
+    todayTaskStats.innerHTML = tasks.length ? `<div class="mobile-summary-list">${tasks.map((task) => `<a class="mobile-summary-list-item" href="${escapeHtml(task.href || '/admin/')}"><strong>${escapeHtml(String(task.count || 0))}</strong><div class="small">${escapeHtml(task.label || task.key || 'Task')}</div></a>`).join('')}</div>` : '<div class="small">No merged task queue is available right now.</div>';
+  }
+
   async function fetchJsonState(url, fallbackLabel) {
     try {
       const response = await window.DDAuth.apiFetch(url);
@@ -115,12 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const month = monthValue();
     const cached = loadSnapshot();
 
-    const [reportState, costState, draftsState, accountingState, dashboardState] = await Promise.all([
+    const [reportState, costState, draftsState, accountingState, dashboardState, todayState] = await Promise.all([
       fetchJsonState(`/api/admin/accounting-profit-loss?month=${encodeURIComponent(month)}`, 'Failed loading accounting snapshot.'),
       fetchJsonState(`/api/admin/accounting-item-costing?month=${encodeURIComponent(month)}`, 'Failed loading costing snapshot.'),
       fetchJsonState('/api/admin/mobile-product-drafts?status=draft&limit=12', 'Failed loading draft products.'),
       fetchJsonState('/api/admin/accounting-summary', 'Failed loading accounting records.'),
-      fetchJsonState('/api/admin/dashboard-summary', 'Failed loading site health snapshot.')
+      fetchJsonState('/api/admin/dashboard-summary', 'Failed loading site health snapshot.'),
+      fetchJsonState('/api/admin/today-tasks', 'Failed loading today task queue.')
     ]);
 
     const effective = {
@@ -130,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
       drafts: draftsState.data || (cached?.drafts ?? null),
       accounting: accountingState.data || (cached?.accounting ?? null),
       dashboard: dashboardState.data || (cached?.dashboard ?? null),
+      today: todayState.data || (cached?.today ?? null),
       cached_at: new Date().toISOString()
     };
 
@@ -145,9 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (effective.dashboard) renderHealthSummary(effective.dashboard.summary || {});
     else healthStats.innerHTML = '<div class="small">Site health snapshot is unavailable right now.</div>';
 
-    if (reportState.ok || costState.ok || draftsState.ok || accountingState.ok || dashboardState.ok) saveSnapshot(effective);
+    if (effective.today) renderTodayTasks(effective.today);
+    else if (todayTaskStats) todayTaskStats.innerHTML = '<div class="small">Today task queue is unavailable right now.</div>';
 
-    const warnings = [reportState, costState, draftsState, accountingState, dashboardState]
+    if (reportState.ok || costState.ok || draftsState.ok || accountingState.ok || dashboardState.ok || todayState.ok) saveSnapshot(effective);
+
+    const warnings = [reportState, costState, draftsState, accountingState, dashboardState, todayState]
       .filter((entry) => !entry.ok)
       .map((entry) => entry.error);
 

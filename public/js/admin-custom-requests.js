@@ -230,16 +230,36 @@ Consent/review response link: ${esc(consentPath)}` : ''}</textarea></article>`;
 
 
   async function addStagePhoto(id) {
-    const image_url = window.prompt('Paste the R2/public image URL for this custom work stage photo:', '');
-    if (!image_url) return;
     const stage_key = window.prompt('Stage key (planning, making, curing_finishing, ready, shipped_pickup, complete):', 'making') || 'making';
     const image_caption = window.prompt('Short customer-safe caption:', '') || '';
+    const useUpload = window.confirm('Upload a stage photo file now? Choose Cancel to paste an existing public image URL instead.');
     try {
       setMsg('Saving order-stage photo...');
-      const response = await window.DDAuth.apiFetch('/api/admin/custom-order-stage-photos', { method: 'POST', body: JSON.stringify({ custom_request_id: Number(id), image_url, stage_key, image_caption, public_use_status: 'customer_private' }) });
+      let response;
+      if (useUpload) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        const file = await new Promise((resolve) => {
+          input.addEventListener('change', () => resolve(input.files?.[0] || null), { once: true });
+          input.click();
+        });
+        if (!file) return setMsg('No stage photo selected.', true);
+        const form = new FormData();
+        form.append('custom_request_id', String(id));
+        form.append('stage_key', stage_key);
+        form.append('image_caption', image_caption);
+        form.append('public_use_status', 'customer_private');
+        form.append('file', file);
+        response = await window.DDAuth.apiFetch('/api/admin/custom-order-stage-photos', { method: 'POST', body: form });
+      } else {
+        const image_url = window.prompt('Paste the R2/public image URL for this custom work stage photo:', '');
+        if (!image_url) return;
+        response = await window.DDAuth.apiFetch('/api/admin/custom-order-stage-photos', { method: 'POST', body: JSON.stringify({ custom_request_id: Number(id), image_url, stage_key, image_caption, public_use_status: 'customer_private', moderation_status: 'approved' }) });
+      }
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Stage photo could not be saved.');
-      setMsg('Order-stage photo saved. It can appear on the private customer order page.');
+      setMsg('Order-stage photo saved. Uploaded files are queued for moderation before public proof use.');
       await load();
     } catch (error) { setMsg(error.message || 'Stage photo could not be saved.', true); }
   }

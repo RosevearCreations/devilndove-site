@@ -18,7 +18,29 @@ document.addEventListener('DOMContentLoaded', () => {
       out.innerHTML = `<p class="small">Missing ${esc(data.summary?.missing || 0)} of ${esc(data.summary?.total || 0)} evidence references.</p><div class="admin-table-wrap"><table><thead><tr><th>Source</th><th>Period</th><th>Status</th><th>Evidence</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${esc(row.source)} #${esc(row.record_id)}</td><td>${esc(row.period_month || '')}</td><td>${row.ok ? '<span class="admin-status-pill ok">ready</span>' : '<span class="admin-status-pill warning">missing</span>'}</td><td class="small">${row.evidence_url ? `<a href="${esc(row.evidence_url)}" target="_blank" rel="noopener">${esc(row.evidence_url)}</a>` : esc(row.issue || 'Missing')}</td></tr>`).join('') || '<tr><td colspan="4">No accounting evidence rows found yet.</td></tr>'}</tbody></table></div>`;
     } catch (error) { out.innerHTML = `<p class="small" style="color:#ffb4c1">${esc(error.message || 'Evidence check failed.')}</p>`; }
   }
-  mount.innerHTML = `<div class="accounting-evidence-check-card"><h2 style="margin-top:0">Accountant evidence URL checker</h2><p class="small">Find HST/GST or accountant export records missing evidence links before packaging the export.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="accountingEvidencePeriod" placeholder="YYYY-MM or blank"/><button class="btn" type="button" id="accountingEvidenceCheckButton">Check evidence</button></div><div id="accountingEvidenceResults" style="margin-top:10px"></div></div>`;
+  mount.innerHTML = `<div class="accounting-evidence-check-card"><h2 style="margin-top:0">Accountant evidence URL checker</h2><p class="small">Find HST/GST or accountant export records missing evidence links before packaging the export.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="accountingEvidencePeriod" placeholder="YYYY-MM or blank"/><button class="btn" type="button" id="accountingEvidenceCheckButton">Check evidence</button></div><form id="accountingEvidenceUploadForm" class="grid cols-4" style="gap:8px;margin-top:10px"><input name="period_month" placeholder="YYYY-MM"><select name="attachment_kind"><option value="tax_filing">Tax filing / HST-GST</option><option value="receipt">Receipt</option><option value="statement">Statement</option><option value="other">Other</option></select><input name="notes" placeholder="Evidence notes"><input name="file" type="file"><button class="btn" type="submit">Upload evidence</button></form><div id="accountingEvidenceResults" style="margin-top:10px"></div></div>`;
   document.getElementById('accountingEvidenceCheckButton')?.addEventListener('click', load);
+
+  document.getElementById('accountingEvidenceUploadForm')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const out = document.getElementById('accountingEvidenceResults');
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    data.set('attachment_scope', 'tax');
+    data.set('attachment_status', 'uploaded');
+    data.set('scope_key', data.get('period_month') || 'general');
+    if (out) out.innerHTML = '<p class="small">Uploading accounting evidence…</p>';
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/accounting-attachments', { method: 'POST', body: data });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.ok) throw new Error(payload?.error || 'Evidence upload failed.');
+      if (out) out.innerHTML = `<p class="small">Uploaded ${esc(payload.attachment?.original_filename || 'evidence file')}.</p>`;
+      form.reset();
+      load();
+    } catch (error) {
+      if (out) out.innerHTML = `<p class="small" style="color:#ffb4c1">${esc(error.message || 'Evidence upload failed.')}</p>`;
+    }
+  });
+
   document.addEventListener('dd:admin-ready', (event) => { if (event?.detail?.ok) load(); });
 });

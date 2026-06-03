@@ -433,6 +433,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  function formatBytes(value) {
+    const bytes = Number(value || 0);
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  }
+
   async function refreshUploadPreview() {
     const file = document.getElementById('productImageUploadInput')?.files?.[0];
     const note = document.getElementById('productImageEditNote');
@@ -447,9 +454,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     try {
       const edited = await buildEditedUpload(file, true);
-      const analysisFile = edited.edited ? (await buildEditedUpload(file, false)).file : file;
+      const fullEdit = edited.edited ? await buildEditedUpload(file, false) : { file, edited: false };
+      const analysisFile = fullEdit.file || file;
       const info = await inspectLocalImageFile(analysisFile);
-      if (note) note.textContent = `${edited.note || 'Original'} • output ${info.width}×${info.height} • ${info.orientation} • estimated score ${info.merchandising_score}%.`;
+      const originalSize = formatBytes(file.size || 0);
+      const outputSize = formatBytes(analysisFile.size || file.size || 0);
+      const savings = file.size && analysisFile.size ? Math.max(0, Math.round((1 - (analysisFile.size / file.size)) * 100)) : 0;
+      if (note) note.textContent = `${edited.note || 'Original'} • output ${info.width}×${info.height} • ${info.orientation} • ${originalSize} → ${outputSize}${savings ? ` (${savings}% smaller)` : ''} • estimated score ${info.merchandising_score}%.`;
       return info;
     } catch (error) {
       if (note) note.textContent = error.message || 'Could not preview this edit.';
@@ -471,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="card product-image-sortable-row" data-product-image-row draggable="true" style="margin-top:12px">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
           <strong>Image Row ${index + 1}</strong>
-          ${row.image_url ? `<button class="product-image-focal-thumb" type="button" data-set-focal-from-thumb title="Click the image to set the focal point"><img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.alt_text || 'Product image preview')}"/><span class="product-image-focal-dot" style="left:${escapeHtml(String(Math.round(Number(row.focal_point_x ?? 0.5)*100)))}%;top:${escapeHtml(String(Math.round(Number(row.focal_point_y ?? 0.5)*100)))}%"></span><span class="product-image-crop-preview" style="${escapeHtml(cropBoxStyle(row))}"></span></button>` : ''}
+          ${row.image_url ? `<button class="product-image-focal-thumb" type="button" data-set-focal-from-thumb title="Click the image to set the focal point"><img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.alt_text || 'Product image preview')}"/><span class="product-image-focal-dot" style="left:${escapeHtml(String(Math.round(Number(row.focal_point_x ?? 0.5)*100)))}%;top:${escapeHtml(String(Math.round(Number(row.focal_point_y ?? 0.5)*100)))}%"></span><span class="product-image-crop-preview" style="${escapeHtml(cropBoxStyle(row))}"><span class="product-image-crop-handle nw" data-crop-handle="nw"></span><span class="product-image-crop-handle ne" data-crop-handle="ne"></span><span class="product-image-crop-handle sw" data-crop-handle="sw"></span><span class="product-image-crop-handle se" data-crop-handle="se"></span></span></button>` : ''}
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
             <span class="small" data-score-display>${escapeHtml(String(row.merchandising_score ?? row.first_image_score ?? 0))}% merch</span>
             <span class="small" data-role-display>${escapeHtml(roleLabel(normalizeRole(row.image_role, index)))}</span>
@@ -1047,8 +1058,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+
+  function updateCropFieldsFromBox(row, x, y, w, h) {
+    const cropPair = row.querySelector('[data-field="crop_pair"]');
+    const cropSize = row.querySelector('[data-field="crop_size"]');
+    if (cropPair) cropPair.value = `${x.toFixed(2)},${y.toFixed(2)}`;
+    if (cropSize) cropSize.value = `${w.toFixed(2)},${h.toFixed(2)}`;
+    const cropBox = row.querySelector('.product-image-crop-preview');
+    if (cropBox) cropBox.style.cssText = `left:${Math.round(x*100)}%;top:${Math.round(y*100)}%;width:${Math.round(w*100)}%;height:${Math.round(h*100)}%`;
+  }
+
+  function startCropHandleDrag(event, row, handle) {
+    const thumb = row.querySelector('[data-set-focal-from-thumb]');
+    if (!thumb) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const startRect = thumb.getBoundingClientRect();
+    const [x0, y0] = String(row.querySelector('[data-field="crop_pair"]')?.value || '0.08,0.08').split(',').map((value) => Number(value));
+    const [w0, h0] = String(row.querySelector('[data-field="crop_size"]')?.value || '0.84,0.84').split(',').map((value) => Number(value));
+    const startX = Number.isFinite(x0) ? x0 : 0.08;
+    const startY = Number.isFinite(y0) ? y0 : 0.08;
+    const startW = Number.isFinite(w0) ? w0 : 0.84;
+    const startH = Number.isFinite(h0) ? h0 : 0.84;
+    const anchor = String(handle.getAttribute('data-crop-handle') || 'se');
+    const move = (moveEvent) => {
+      const px = clamp((moveEvent.clientX - startRect.left) / Math.max(1, startRect.width), 0, 1);
+      const py = clamp((moveEvent.clientY - startRect.top) / Math.max(1, startRect.height), 0, 1);
+      let x = startX, y = startY, w = startW, h = startH;
+      if (anchor.includes('e')) w = clamp(px - startX, 0.12, 1 - startX);
+      if (anchor.includes('s')) h = clamp(py - startY, 0.12, 1 - startY);
+      if (anchor.includes('w')) { const right = startX + startW; x = clamp(px, 0, right - 0.12); w = clamp(right - x, 0.12, 1); }
+      if (anchor.includes('n')) { const bottom = startY + startH; y = clamp(py, 0, bottom - 0.12); h = clamp(bottom - y, 0.12, 1); }
+      updateCropFieldsFromBox(row, x, y, w, h);
+      renderQualityScore();
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      setMessage('Crop rectangle adjusted with drag handles. Save images to keep it.');
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up, { once: true });
+  }
+
   async function onClick(event) {
     const row = event.target.closest('[data-product-image-row]');
+
+    const cropHandle = event.target.closest('[data-crop-handle]');
+    if (cropHandle && row) { startCropHandleDrag(event, row, cropHandle); return; }
 
     const focalButton = event.target.closest('[data-set-focal-from-thumb]');
     if (focalButton && row) {
