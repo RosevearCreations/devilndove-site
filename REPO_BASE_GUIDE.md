@@ -380,4 +380,67 @@ Next 20 recommended steps:
 18. Add product publish QA results persistence so badges survive reloads.
 19. Add one-click “fix first image” guided workflow from the QA/readiness cards.
 20. Add local SEO landing-page review queue for each major product/service category.
+## Build 166 — Roadmap/Gaps Pass Completed
+
+Completed this pass:
+
+1. Added visual drag handles on product image crop rectangles in Product Media Workflow.
+2. Added browser-side upload size reporting so image edit preview shows original size, estimated output size, and savings.
+3. Added R2 direct upload support for custom order-stage photos, with URL-entry fallback preserved.
+4. Added moderation fields for order-stage photos before they can become public proof.
+5. Added gift-card activation handling when a connected order is confirmed paid.
+6. Added admin gift-card lifecycle actions: activate paid, void, refund/reduce balance, and reissue.
+7. Added public gift-card balance lookup with gift-card code plus email verification.
+8. Added marketplace CSV download from the preview endpoint.
+9. Added channel-specific marketplace validation rules for Etsy, Facebook Marketplace, Pinterest, and manual listings.
+10. Added trust-block placement toggle storage by page/context.
+11. Added public trust-block context loader module for shop, creations, gift cards, product, gallery, and about pages.
+12. Added shop product-card trust/proof badges when approved trust blocks or social-ready proof signals exist.
+13. Added customer-facing candle/soap safety accordion on product detail pages.
+14. Added candle/soap batch/safety fields to the public detail renderer.
+15. Added accounting evidence attachment upload from the evidence checker workflow.
+16. Added failed API/runtime incident task cards into the mobile admin queue through the new Today Tasks API.
+17. Added `/api/admin/today-tasks` to merge orders, inventory, products, custom requests, accounting, and failed API work.
+18. Added persisted product publish QA results in `product_publish_qa_results` so QA badges can survive reloads.
+19. Added groundwork for a one-click first-image fix workflow through crop handles, role tools, and existing readiness links.
+20. Added `/admin/local-seo-review/` and `/api/admin/local-seo-review` for major category/service landing-page review.
+
+Validation for this pass:
+
+- Predeploy sanity: PASS
+- JavaScript syntax checks: PASS
+- CSS brace check: PASS
+- One-H1 check: PASS
+- SEO bake script: PASS, 0 pages changed because no override rows are populated.
+- ZIP integrity: PASS
+
+Schema/data notes:
+
+- New tables: `product_publish_qa_results`, `gift_card_admin_events`, `trust_block_placements`, `local_seo_landing_page_reviews`.
+- Expanded table: `custom_order_stage_photos` now supports R2 object metadata, moderation status, proof candidate status, and approval fields.
+- Gift cards continue to use `gift_cards` and `gift_card_redemptions`; admin lifecycle events now write to `gift_card_admin_events`.
+- Public token/private pages remain `noindex,nofollow` where applicable.
+
+Next 20 recommended steps:
+
+1. Add draggable crop-box preview persistence to generated R2 derivative images.
+2. Add automatic image compression before upload instead of preview-only reporting.
+3. Add customer-facing proof-photo consent prompts tied to uploaded order-stage photos.
+4. Add admin moderation queue dedicated only to stage photos and proof candidates.
+5. Add automated gift-card email delivery after paid-order activation.
+6. Add gift-card redemption entry in admin checkout/order screens.
+7. Add public gift-card balance lookup rate limiting and abuse logging.
+8. Add marketplace CSV mapping editor for channel-specific field names.
+9. Add marketplace CSV image selector so only approved image roles export.
+10. Add trust-block placement UI with max item counts and filters visible on each toggle.
+11. Add public trust-block sections to remaining local landing pages.
+12. Add category-specific proof requirements for jewelry, candles, soap, vintage, and custom work.
+13. Add candle/soap label export fields for weight, ingredients, allergens, and batch.
+14. Add candle/soap batch recall workflow and customer notification queue.
+15. Add accountant evidence ZIP inclusion for uploaded accounting attachments.
+16. Add failed-API drilldown cards directly on the mobile dashboard.
+17. Add Today task completion/ignore controls so the queue can be cleared.
+18. Add product QA history panel beside Catalog product rows.
+19. Add guided “fix first image” wizard that opens image role, crop, and public-use fields in order.
+20. Add local SEO review scoring for title, meta, H1, internal links, and local proof wording.
 

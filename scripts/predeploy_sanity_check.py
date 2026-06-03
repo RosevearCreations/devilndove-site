@@ -407,6 +407,41 @@ def check_build163_assets(root: Path):
         issues.append({'type': 'build163_gift_placeholder_file_missing', 'path': 'assets/gift-card-placeholder.svg'})
     return issues
 
+
+
+def check_build166_assets(root: Path):
+    issues = []
+    read_text_safe = lambda path: path.read_text(encoding='utf-8', errors='replace') if path.exists() else ''
+    assets = {
+        'gift_balance_api': read_text_safe(root / 'functions' / 'api' / 'gift-card-balance.js'),
+        'gift_actions_api': read_text_safe(root / 'functions' / 'api' / 'admin' / 'gift-card-actions.js'),
+        'today_tasks_api': read_text_safe(root / 'functions' / 'api' / 'admin' / 'today-tasks.js'),
+        'trust_placements_api': read_text_safe(root / 'functions' / 'api' / 'admin' / 'trust-block-placements.js'),
+        'local_seo_api': read_text_safe(root / 'functions' / 'api' / 'admin' / 'local-seo-review.js'),
+        'trust_context_js': read_text_safe(root / 'public' / 'js' / 'trust-block-context.js'),
+        'local_seo_page': read_text_safe(root / 'admin' / 'local-seo-review' / 'index.html'),
+        'product_qa_api': read_text_safe(root / 'functions' / 'api' / 'admin' / 'product-publish-qa.js'),
+        'order_stage_photos_api': read_text_safe(root / 'functions' / 'api' / 'admin' / 'custom-order-stage-photos.js'),
+        'css': read_text_safe(root / 'css' / 'styles.css'),
+    }
+    checks = [
+        ('build166_gift_balance_api_missing', 'functions/api/gift-card-balance.js', ['gift_cards', 'gift_card_redemptions', 'remaining_amount_cents'], assets['gift_balance_api']),
+        ('build166_gift_actions_api_missing', 'functions/api/admin/gift-card-actions.js', ['activate_paid', 'reissue', 'gift_card_admin_events'], assets['gift_actions_api']),
+        ('build166_today_tasks_api_missing', 'functions/api/admin/today-tasks.js', ['readiness', 'failed_api', 'accounting'], assets['today_tasks_api']),
+        ('build166_trust_placements_api_missing', 'functions/api/admin/trust-block-placements.js', ['trust_block_placements', 'page_context', 'is_enabled'], assets['trust_placements_api']),
+        ('build166_local_seo_api_missing', 'functions/api/admin/local-seo-review.js', ['local_seo_landing_page_reviews', 'target_keyword', 'review_status'], assets['local_seo_api']),
+        ('build166_public_trust_loader_missing', 'public/js/trust-block-context.js', ['/api/trust-blocks', 'public-trust-context-card', 'data-trust-block-context-mount'], assets['trust_context_js']),
+        ('build166_local_seo_page_missing', 'admin/local-seo-review/index.html', ['Local SEO review queue', 'localSeoReviewAdminMount', '/public/js/admin-local-seo-review.js'], assets['local_seo_page']),
+        ('build166_product_qa_persistence_missing', 'functions/api/admin/product-publish-qa.js', ['product_publish_qa_results', 'fix_url', 'checks_json'], assets['product_qa_api']),
+        ('build166_order_stage_photo_moderation_missing', 'functions/api/admin/custom-order-stage-photos.js', ['moderation_status', 'proof_candidate_status', 'multipart/form-data'], assets['order_stage_photos_api']),
+        ('build166_css_missing', 'css/styles.css', ['.product-image-crop-handle', '.trust-proof-pill', '.public-trust-context-card', '.candle-soap-spec-public'], assets['css']),
+    ]
+    for issue_type, path, tokens, text in checks:
+        missing = [token for token in tokens if token not in text]
+        if missing:
+            issues.append({'type': issue_type, 'path': path, 'missing': missing})
+    return issues
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('root', nargs='?', default='.', help='Build root to check')
@@ -426,7 +461,8 @@ def main(argv=None) -> int:
     product_image_role_issues = check_product_image_role_assets(root)
     build151_issues = check_build151_assets(root)
     build163_issues = check_build163_assets(root)
-    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues + product_story_shop_issues + product_image_role_issues + build151_issues + build163_issues
+    build166_issues = check_build166_assets(root)
+    issues = html_issues + ref_issues + css_issues + privacy_issues + mobile_nav_issues + operations_issues + product_editor_issues + product_story_issues + product_story_shop_issues + product_image_role_issues + build151_issues + build163_issues + build166_issues
     report = {
         'ok': not issues,
         'root': str(root),
@@ -467,3 +503,5 @@ if __name__ == '__main__':
 # Build 153 note: predeploy checks include private custom quote previews, customer accept/decline tracking, and reference-image uploads.
 
 # Build 163 note: predeploy checks include product readiness preview, image-health dashboard counters, and gift-card artwork placeholder assets.
+
+# Build 166 note: predeploy checks include gift-card lifecycle endpoints, public trust loader, persisted product QA, local SEO review queue, and order-stage photo moderation.

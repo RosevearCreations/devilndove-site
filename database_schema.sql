@@ -1791,3 +1791,69 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_candle_soap_product_specs_product O
 -- New/confirmed runtime tables used by this pass include gift_cards, gift_card_redemptions, custom_order_stage_photos, custom_candle_soap_product_specs, trust_block_items, and accountant/HST evidence records.
 -- No destructive migration is required; new endpoints create/ensure supporting tables where needed and rely on the existing current-pass schema notes.
 
+
+-- Build 166 additions: gift-card lifecycle controls, public balance lookup, QA persistence, trust placements, local SEO queue, task queue, and moderated order-stage photos.
+ALTER TABLE custom_order_stage_photos ADD COLUMN object_key TEXT;
+ALTER TABLE custom_order_stage_photos ADD COLUMN original_filename TEXT;
+ALTER TABLE custom_order_stage_photos ADD COLUMN mime_type TEXT;
+ALTER TABLE custom_order_stage_photos ADD COLUMN file_size_bytes INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE custom_order_stage_photos ADD COLUMN moderation_status TEXT NOT NULL DEFAULT 'needs_review';
+ALTER TABLE custom_order_stage_photos ADD COLUMN proof_candidate_status TEXT NOT NULL DEFAULT 'not_requested';
+ALTER TABLE custom_order_stage_photos ADD COLUMN approved_by_user_id INTEGER;
+ALTER TABLE custom_order_stage_photos ADD COLUMN approved_at TEXT;
+ALTER TABLE custom_order_stage_photos ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP;
+
+CREATE TABLE IF NOT EXISTS product_publish_qa_results (
+  product_publish_qa_result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  product_slug TEXT,
+  qa_status TEXT NOT NULL DEFAULT 'failed',
+  passed_count INTEGER NOT NULL DEFAULT 0,
+  failed_count INTEGER NOT NULL DEFAULT 0,
+  checks_json TEXT,
+  checked_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_product_publish_qa_results_product ON product_publish_qa_results(product_id, created_at);
+
+CREATE TABLE IF NOT EXISTS gift_card_admin_events (
+  gift_card_admin_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  gift_card_id INTEGER,
+  source_gift_card_id INTEGER,
+  action_key TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  note TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS trust_block_placements (
+  trust_block_placement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  page_context TEXT NOT NULL UNIQUE,
+  placement_label TEXT,
+  is_enabled INTEGER NOT NULL DEFAULT 1,
+  max_items INTEGER NOT NULL DEFAULT 3,
+  item_kind_filter TEXT,
+  locality_filter TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  updated_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS local_seo_landing_page_reviews (
+  local_seo_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  page_path TEXT NOT NULL UNIQUE,
+  page_label TEXT,
+  target_keyword TEXT,
+  target_locality TEXT,
+  review_status TEXT NOT NULL DEFAULT 'needs_review',
+  h1_status TEXT NOT NULL DEFAULT 'unchecked',
+  title_meta_status TEXT NOT NULL DEFAULT 'unchecked',
+  internal_link_status TEXT NOT NULL DEFAULT 'unchecked',
+  notes TEXT,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
