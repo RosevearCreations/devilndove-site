@@ -1012,3 +1012,60 @@ No public page should have more than one H1; the sanity pass must keep checking 
 18. Add accountant export ZIP checks that fail the export package when required evidence is missing.
 19. Add mobile dashboard tiles for readiness blockers, today’s custom requests, and pending order-stage updates.
 20. Add a full regression checklist page that tests shop, product detail, cart, checkout, admin catalog, media workflow, custom requests, and accounting exports before each deploy.
+
+## Build 165 — Roadmap/Gaps Pass Completed
+
+Completed this pass:
+
+1. Restored `functions/api/admin/custom-requests.js` to the full admin custom-request workflow file and repaired the broken marketplace preset tag-splitting regex that blocked Cloudflare Pages Functions deployment.
+2. Repaired dark-theme consistency for the previously light `/shop/` browse-by-collection panels, `/creations/` creation-browse panels, gift-card cards, and inventory image cards.
+3. Added inline post-publish QA buttons and QA badges inside `/admin/catalog/` product rows.
+4. Added `Run QA` action wiring to call `/api/admin/product-publish-qa` directly from product rows.
+5. Added `Fix now` links beside each readiness blocker on `/admin/readiness/`.
+6. Added visible crop rectangle guidance on product image thumbnails.
+7. Added square crop/focal quick controls in Product Media Workflow.
+8. Added bulk recommended image-role assignment controls in Product Media Workflow.
+9. Confirmed the upload workflow keeps client-side resize/compression controls visible before upload.
+10. Added admin gift-card balance lookup endpoint and UI support through the customer engagement workflow.
+11. Added a direct Trust Block Moderation workspace at `/admin/trust-blocks/`.
+12. Added public proof/trust-block placement guidance by page/context.
+13. Added marketplace export preview workspace at `/admin/marketplace-exports/`.
+14. Added `/api/admin/marketplace-export-preview` with image-readiness summaries before CSV export work.
+15. Added customer-facing private order-stage photo gallery support on custom order status links.
+16. Added admin prompt workflow for adding custom order-stage photo URLs.
+17. Added candle/soap spec display support on public product detail pages.
+18. Added safety/allergen note display for candle/soap products.
+19. Added accountant evidence URL checker endpoint and Accounting page UI mount.
+20. Added a compact mobile-admin “Today’s admin tasks” queue linking readiness, failed APIs, inventory, and accounting evidence work.
+
+Validation for this pass:
+
+- Predeploy sanity: PASS
+- JavaScript syntax checks: PASS
+- CSS brace check: PASS
+- One-H1 sanity remains covered by the predeploy pass.
+- SEO bake script: PASS, 0 pages changed because no override rows are populated.
+
+Next 20 recommended steps:
+
+1. Add true visual drag handles for crop rectangles, not just focal-click crop guidance.
+2. Add actual browser-side image compression size reporting before upload.
+3. Add R2 direct upload for order-stage photos instead of URL-only entry.
+4. Add moderation approvals before order-stage photos can become public proof.
+5. Add gift-card activation after confirmed paid order status.
+6. Add gift-card refund/void/reissue controls.
+7. Add gift-card public balance lookup with email/code verification.
+8. Add marketplace CSV download from the new preview screen.
+9. Add channel-specific marketplace validation rules for Etsy/Facebook/Pinterest.
+10. Add trust-block placement toggles per page instead of manual context typing.
+11. Add public page modules that can request trust blocks by page/context.
+12. Add product-card trust/proof badges based on approved trust blocks.
+13. Add customer-facing candle/soap safety accordion on product pages.
+14. Add admin candle/soap batch search and batch recall notes.
+15. Add accountant evidence attachment upload, not only URL checks.
+16. Add failed API cards to the mobile admin queue using runtime incident data.
+17. Add a Today task API that merges orders, inventory, products, requests, and accounting work.
+18. Add product publish QA results persistence so badges survive reloads.
+19. Add one-click “fix first image” guided workflow from the QA/readiness cards.
+20. Add local SEO landing-page review queue for each major product/service category.
+
