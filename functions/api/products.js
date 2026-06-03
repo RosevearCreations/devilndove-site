@@ -366,6 +366,39 @@ async function enrichProductsWithProofSignals(db, products) {
   }
 }
 
+
+async function enrichProductsWithTrustBadges(db, products) {
+  const rows = Array.isArray(products) ? products : [];
+  if (!db || !rows.length) return rows;
+  const slugs = [...new Set(rows.map((product) => normalizeText(product.slug).toLowerCase()).filter(Boolean))].slice(0, 300);
+  if (!slugs.length) return rows;
+  try {
+    const trustRows = await runProductQuery(db, `
+      SELECT LOWER(COALESCE(related_product_slug,'')) AS slug,
+             COUNT(*) AS trust_block_count,
+             SUM(CASE WHEN item_kind IN ('testimonial','local_proof') THEN 1 ELSE 0 END) AS proof_trust_count
+      FROM trust_block_items
+      WHERE status IN ('approved','published')
+        AND approved_for_public_use=1
+        AND privacy_review_status='cleared'
+        AND LOWER(COALESCE(related_product_slug,'')) IN (${slugs.map(() => '?').join(',')})
+      GROUP BY LOWER(COALESCE(related_product_slug,''))
+    `, slugs).catch(() => []);
+    const bySlug = new Map(trustRows.map((row) => [String(row.slug || '').toLowerCase(), row]));
+    return rows.map((product) => {
+      const trust = bySlug.get(normalizeText(product.slug).toLowerCase()) || {};
+      return {
+        ...product,
+        trust_block_count: Number(trust.trust_block_count || 0),
+        proof_trust_count: Number(trust.proof_trust_count || 0),
+        has_public_trust_block: Number(trust.trust_block_count || 0) > 0 ? 1 : 0
+      };
+    });
+  } catch {
+    return rows.map((product) => ({ ...product, trust_block_count: Number(product.trust_block_count || 0), proof_trust_count: 0, has_public_trust_block: 0 }));
+  }
+}
+
 function buildFilterGroups(products) {
   const group = (values) =>
     Object.entries(values)
@@ -878,7 +911,7 @@ export async function onRequestGet(context) {
 
   if (!productColumns.size) {
     try {
-      const products = await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, await runUltraProductFallback(db, filters)));
+      const products = await enrichProductsWithTrustBadges(db, await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, await runUltraProductFallback(db, filters))));
       warnings.push("schema_columns_unavailable_ultra_fallback_used");
       return json({
         ok: true,
@@ -935,7 +968,7 @@ export async function onRequestGet(context) {
   try {
     const rows = await runProductQuery(db, primarySql, primaryWhere.bindings);
     const storyProducts = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
-    const products = (await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, storyProducts))).filter((product) => productMatchesFilters(product, filters));
+    const products = (await enrichProductsWithTrustBadges(db, await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, storyProducts)))).filter((product) => productMatchesFilters(product, filters));
     return json({
       ok: true,
       products,
@@ -962,7 +995,7 @@ export async function onRequestGet(context) {
     try {
       const rows = await runProductQuery(db, fallbackSql, fallbackWhere.bindings);
       const storyProducts = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
-      const products = (await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, storyProducts))).filter((product) => productMatchesFilters(product, filters));
+      const products = (await enrichProductsWithTrustBadges(db, await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, storyProducts)))).filter((product) => productMatchesFilters(product, filters));
       warnings.push("fallback_query_used");
       return json({
         ok: true,
@@ -976,7 +1009,7 @@ export async function onRequestGet(context) {
       warnings.push("fallback_query_failed_trying_select_star_fallback");
 
       try {
-        const products = await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, await runUltraProductFallback(db, filters)));
+        const products = await enrichProductsWithTrustBadges(db, await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, await runUltraProductFallback(db, filters))));
         warnings.push("select_star_fallback_used");
         return json({
           ok: true,
