@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ['channel', 'shopChannelFilter'], ['sale_channel', 'shopChannelFilter'],
       ['type', 'shopTypeFilter'], ['product_type', 'shopTypeFilter'],
       ['color', 'shopColorFilter'], ['color_name', 'shopColorFilter'],
-      ['q', 'shopSearchInput'], ['material', 'shopMaterialFilter'], ['process', 'shopProcessFilter'], ['locality', 'shopLocalityFilter'], ['min_price_cents', 'shopMinPrice'], ['max_price_cents', 'shopMaxPrice']
+      ['q', 'shopSearchInput'], ['material', 'shopMaterialFilter'], ['process', 'shopProcessFilter'], ['locality', 'shopLocalityFilter'], ['ready_for_social', 'shopSocialReadyFilter'], ['missing_proof_image', 'shopProofImageFilter'], ['min_price_cents', 'shopMinPrice'], ['max_price_cents', 'shopMaxPrice']
     ];
     map.forEach(([param, id]) => {
       const value = params.get(param);
@@ -77,7 +77,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       locality: String(document.getElementById('shopLocalityFilter')?.value || '').trim(),
       min_price_cents: String(document.getElementById('shopMinPrice')?.value || '').trim(),
       max_price_cents: String(document.getElementById('shopMaxPrice')?.value || '').trim(),
-      requires_shipping: document.getElementById('shopShippingOnly')?.checked ? '1' : ''
+      requires_shipping: document.getElementById('shopShippingOnly')?.checked ? '1' : '',
+      ready_for_social: String(document.getElementById('shopSocialReadyFilter')?.value || '').trim(),
+      missing_proof_image: String(document.getElementById('shopProofImageFilter')?.value || '').trim()
     };
   }
   function buildUrl() {

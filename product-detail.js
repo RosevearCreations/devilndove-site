@@ -47,6 +47,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productReviewsCardEl = document.getElementById("productReviewsCard");
   const productReviewsSummaryEl = document.getElementById("productReviewsSummary");
   const productReviewsListEl = document.getElementById("productReviewsList");
+  const productRelatedProofCardEl = document.getElementById("productRelatedProofCard");
+  const productRelatedProofSummaryEl = document.getElementById("productRelatedProofSummary");
+  const productRelatedProofListEl = document.getElementById("productRelatedProofList");
   let currentProduct = null;
   let currentTrustSummary = null;
 
@@ -69,38 +72,82 @@ document.addEventListener("DOMContentLoaded", async () => {
   function formatMoney(cents, currency = "CAD") { const amount = Number(cents || 0) / 100; try { return new Intl.NumberFormat(undefined, { style: "currency", currency: currency || "CAD" }).format(amount); } catch { return `${amount.toFixed(2)} ${currency || "CAD"}`; } }
   function yesNo(value) { return Number(value) === 1 ? "Yes" : "No"; }
 
+  function normalizeProductImages(product, images) {
+    const output = [];
+    const push = (entry) => {
+      const imageUrl = String(typeof entry === 'string' ? entry : entry?.image_url || '').trim();
+      if (!imageUrl) return;
+      if (output.some((row) => row.image_url.toLowerCase() === imageUrl.toLowerCase())) return;
+      output.push(typeof entry === 'object' ? { ...entry, image_url: imageUrl } : { image_url: imageUrl, alt_text: product?.name || 'Product image' });
+    };
+    push(product?.featured_image_url || product?.og_image_url || '');
+    (Array.isArray(images) ? images : []).forEach(push);
+    (Array.isArray(product?.images) ? product.images : []).forEach(push);
+    (Array.isArray(product?.image_urls) ? product.image_urls : []).forEach(push);
+    return output;
+  }
+
   function renderMainImage(product, images) {
     if (!productMainImageWrapEl) return;
-    const featured = String(product.featured_image_url || "").trim();
-    const featuredRow = Array.isArray(images) ? images.find((row) => String(row.image_url || '').trim() === featured) : null;
-    const mainRow = featuredRow || (Array.isArray(images) && images.length ? images[0] : null);
-    const mainImageUrl = String(mainRow?.image_url || featured || "").trim();
+    const safeImages = normalizeProductImages(product, images);
+    const mainRow = safeImages[0] || null;
+    const mainImageUrl = String(mainRow?.image_url || '').trim();
     const caption = String(mainRow?.caption || '').trim();
     if (!mainImageUrl) {
-      productMainImageWrapEl.innerHTML = `<div class="card" style="width:100%;aspect-ratio:1 / 1;display:flex;align-items:center;justify-content:center"><span class="small">No Image</span></div>`;
+      productMainImageWrapEl.innerHTML = `<div class="product-detail-main-image product-detail-no-image"><span class="small">No Image</span></div>`;
       return;
     }
     productMainImageWrapEl.innerHTML = `
-      <div>
-        <img src="${escapeHtml(mainImageUrl)}" alt="${escapeHtml(mainRow?.alt_text || product.name || 'Product image')}" style="width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:12px" />
-        ${caption ? `<div class="small" style="margin-top:8px">${escapeHtml(caption)}</div>` : ''}
+      <div class="product-detail-main-image">
+        <img src="${escapeHtml(mainImageUrl)}" alt="${escapeHtml(mainRow?.alt_text || product.name || 'Product image')}" data-product-detail-main-image />
+        <div class="small" data-product-detail-caption ${caption ? '' : 'hidden'}>${escapeHtml(caption)}</div>
       </div>`;
   }
 
   function renderGallery(images, productName) {
     if (!productGalleryEl) return;
-    const safeImages = Array.isArray(images) ? images : [];
+    const safeImages = normalizeProductImages(currentProduct || {}, images);
     if (!safeImages.length) { productGalleryEl.innerHTML = ""; return; }
-    productGalleryEl.innerHTML = safeImages.map((image, index) => `
-      <figure style="margin:0">
-        <img src="${escapeHtml(image.image_url || "")}" alt="${escapeHtml(image.alt_text || `${productName} image ${index + 1}`)}" title="${escapeHtml(image.image_title || image.caption || '')}" style="width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:10px" />
-        ${image.caption ? `<figcaption class="small" style="margin-top:6px">${escapeHtml(image.caption)}</figcaption>` : ''}
-      </figure>`).join("");
+    productGalleryEl.innerHTML = `<div class="product-detail-thumbs">${safeImages.map((image, index) => `
+      <button class="product-detail-thumb ${index === 0 ? 'is-active' : ''}" type="button" data-product-detail-thumb="${escapeHtml(image.image_url || '')}" data-caption="${escapeHtml(image.caption || '')}" aria-label="Show ${escapeHtml(productName)} image ${index + 1}">
+        <img src="${escapeHtml(image.image_url || "")}" alt="${escapeHtml(image.alt_text || `${productName} image ${index + 1}`)}" title="${escapeHtml(image.image_title || image.caption || '')}" loading="lazy" />
+      </button>`).join("")}</div>`;
+    productGalleryEl.querySelectorAll('[data-product-detail-thumb]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const main = document.querySelector('[data-product-detail-main-image]');
+        const captionEl = document.querySelector('[data-product-detail-caption]');
+        const imageUrl = String(button.getAttribute('data-product-detail-thumb') || '').trim();
+        if (main && imageUrl) main.src = imageUrl;
+        const caption = String(button.getAttribute('data-caption') || '').trim();
+        if (captionEl) {
+          captionEl.textContent = caption;
+          captionEl.hidden = !caption;
+        }
+        productGalleryEl.querySelectorAll('.product-detail-thumb').forEach((thumb) => thumb.classList.remove('is-active'));
+        button.classList.add('is-active');
+      });
+    });
   }
 
 
   function titleCaseLabel(value) {
     return String(value || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()).trim();
+  }
+
+
+  function renderCandleSoapSpec(spec) {
+    const existing = document.getElementById('productCandleSoapSpecCard');
+    if (existing) existing.remove();
+    if (!spec || typeof spec !== 'object') return;
+    const rows = [
+      ['Scent profile', spec.scent_profile], ['Wax/base', spec.wax_or_base], ['Colour notes', spec.colour_notes], ['Batch number', spec.batch_number], ['Ingredients', spec.ingredient_notes]
+    ].filter(([, value]) => String(value || '').trim());
+    if (!rows.length && !String(spec.allergen_safety_notes || '').trim()) return;
+    const card = document.createElement('section');
+    card.id = 'productCandleSoapSpecCard';
+    card.className = 'card candle-soap-spec-public';
+    card.innerHTML = `<h2 style="margin-top:0">Candle / soap details</h2>${rows.map(([label, value]) => `<div class="spec-row"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`).join('')}${spec.allergen_safety_notes ? `<div class="safety-note-block"><strong>Safety / allergen notes</strong><p>${escapeHtml(spec.allergen_safety_notes)}</p></div>` : ''}`;
+    detailEl?.appendChild(card);
   }
 
   function renderPublicProductStory(product, storyNotes, resourceLinks, images) {
@@ -249,6 +296,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     productTrustListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
   }
 
+  function renderRelatedProducts(relatedProducts) {
+    if (!productRelatedProofCardEl || !productRelatedProofListEl || !productRelatedProofSummaryEl) return;
+    const rows = Array.isArray(relatedProducts) ? relatedProducts : [];
+    if (!rows.length) {
+      hide(productRelatedProofCardEl);
+      productRelatedProofListEl.innerHTML = '';
+      productRelatedProofSummaryEl.textContent = '';
+      return;
+    }
+    show(productRelatedProofCardEl);
+    productRelatedProofSummaryEl.textContent = 'These pieces share material, process, locality, or product-proof wording with the current listing.';
+    productRelatedProofListEl.innerHTML = rows.map((row) => `<a class="card" href="/shop/product/?slug=${encodeURIComponent(row.slug || '')}" style="text-decoration:none;color:inherit"><div>${row.featured_image_url ? `<img src="${escapeHtml(row.featured_image_url)}" alt="${escapeHtml(row.name || 'Related product')}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px"/>` : '<div class="resource-story-placeholder">Related</div>'}</div><strong style="display:block;margin-top:8px">${escapeHtml(row.name || 'Related piece')}</strong><span class="small">${escapeHtml(row.product_category || '')}</span><br><span class="small">${escapeHtml(formatMoney(row.price_cents || 0, row.currency || 'CAD'))}</span></a>`).join('');
+  }
+
   function renderReviews(reviews, reviewSummary) {
     if (!productReviewsCardEl || !productReviewsSummaryEl || !productReviewsListEl) return;
     const rows = Array.isArray(reviews) ? reviews : [];
@@ -271,7 +332,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       </article>`).join('');
   }
 
-  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes) {
+  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec) {
     currentProduct = product || null;
     if (productTypeEl) {
       const badges = [product.product_type || ''];
@@ -306,6 +367,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderPolicySupport(product, trustSummary, resourceLinks);
     renderMarketplaceSupport(product);
     renderProcessLinks(product, resourceLinks);
+    renderRelatedProducts(relatedProducts);
+    renderCandleSoapSpec(candleSoapSpec);
     if (addToCartButton) {
       const externalOnly = String(product.sale_channel || 'onsite').toLowerCase() === 'external_only';
       addToCartButton.style.display = externalOnly ? 'none' : '';
@@ -316,6 +379,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (productInterestGuestWrap) productInterestGuestWrap.style.display = Number(product.inventory_quantity || 0) > 0 ? 'none' : 'block';
   }
 
+  async function readJsonResponse(response, fallbackMessage) {
+    const rawText = await response.text();
+    const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+    if (rawText.trim().startsWith('<')) {
+      throw new Error(`${fallbackMessage} The server returned an HTML page instead of JSON, so the product API route may be falling through to the static site.`);
+    }
+    try { return JSON.parse(rawText); }
+    catch { throw new Error(`${fallbackMessage} Product data was not valid JSON.`); }
+  }
+
+  async function loadProductFallbackFromProducts(slug) {
+    const response = await fetch(`/api/products?q=${encodeURIComponent(slug)}`, { method: 'GET', headers: { Accept: 'application/json' } });
+    const data = await readJsonResponse(response, 'Fallback shop lookup failed.');
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Fallback shop lookup failed.');
+    const rows = Array.isArray(data.products) ? data.products : [];
+    return rows.find((row) => String(row.slug || '').toLowerCase() === String(slug || '').toLowerCase()) || null;
+  }
+
   async function loadProduct() {
     hide(errorEl);
     hide(detailEl);
@@ -324,10 +405,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       const url = new URL(window.location.href);
       const slug = String(url.searchParams.get("slug") || "").trim();
       if (!slug) throw new Error("No product slug was provided.");
-      const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET" });
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {});
+      const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET", headers: { Accept: "application/json" } });
+      let data = null;
+      try {
+        data = await readJsonResponse(response, "Failed to load product detail.");
+      } catch (detailError) {
+        const fallbackProduct = await loadProductFallbackFromProducts(slug);
+        if (!fallbackProduct) throw detailError;
+        data = {
+          ok: true,
+          product: fallbackProduct,
+          images: Array.isArray(fallbackProduct.images) ? fallbackProduct.images : (Array.isArray(fallbackProduct.image_urls) ? fallbackProduct.image_urls.map((image_url) => ({ image_url, alt_text: fallbackProduct.name || 'Product image' })) : []),
+          resource_links: [],
+          resource_summary: {},
+          trust_summary: { image_count: Number(fallbackProduct.image_count || 0), in_stock: Number(fallbackProduct.inventory_quantity || 0) > 0 },
+          reviews: [],
+          review_summary: {},
+          story_notes: {},
+          related_products: [],
+          warning: detailError.message
+        };
+      }
+      if (!response.ok && !data.ok) throw new Error(data.error || "Failed to load product.");
+      if (!data.ok) throw new Error(data.error || "Failed to load product.");
+      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null);
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;
