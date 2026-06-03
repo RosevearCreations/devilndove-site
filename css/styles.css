@@ -910,3 +910,54 @@ body.nav-mobile-open{overflow:hidden}
 /* Build 163/164 required readiness and gift-card CSS tokens */
 .product-readiness-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}.product-readiness-score{display:inline-flex;align-items:center;justify-content:center;min-width:74px;min-height:54px;border-radius:16px;border:1px solid var(--border);font-weight:800}.product-readiness-score.is-good{background:rgba(19,124,67,.13);border-color:rgba(19,124,67,.45)}.product-readiness-score.is-warning{background:rgba(210,137,0,.13);border-color:rgba(210,137,0,.55)}.product-readiness-row-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.product-readiness-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.product-readiness-blockers{margin-top:8px}.gift-card-hero-split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);gap:18px;align-items:center}.gift-card-visual-card{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.05)}.gift-card-visual-card img{display:block;width:100%;height:auto}.product-readiness-rows{display:grid;gap:14px;margin-top:14px}
 @media(max-width:760px){.gift-card-hero-split{grid-template-columns:1fr}}
+
+
+/* Build 165: dark-theme consistency and admin workflow completion */
+#shopCollectionsMount > .card,
+#shopCollectionsMount .shop-collection-card,
+#shopCollectionsMount .shop-filter-pill-groups > div,
+.creations-contrast-panel,
+.creations-direction-grid .card,
+.storefront-gift-card-compact,
+.storefront-gift-card-full,
+.gift-card-visual-card,
+.site-inventory-image-preview-card,
+.site-inventory-image-placeholder,
+.site-inventory-list-thumb,
+.site-inventory-list-thumb.is-empty {
+  background: linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,207,112,.045)) !important;
+  color: var(--text) !important;
+  border-color: rgba(255,207,112,.24) !important;
+}
+#shopCollectionsMount h2,
+#shopCollectionsMount strong,
+#shopCollectionsMount .shop-collection-card strong,
+#shopCollectionsMount .shop-filter-pill-groups strong,
+.storefront-gift-card-compact h2,
+.storefront-gift-card-full h2,
+.gift-card-visual-card strong { color: var(--text) !important; }
+#shopCollectionsMount .small,
+#shopCollectionsMount p,
+.storefront-gift-card-compact .small,
+.storefront-gift-card-full .small,
+.gift-card-visual-card .small,
+.site-inventory-image-placeholder { color: var(--muted) !important; }
+#shopCollectionsMount .pill,
+.shop-filter-pill-groups .pill {
+  background: rgba(0,0,0,.18) !important;
+  border-color: rgba(255,207,112,.28) !important;
+  color: #ffe39a !important;
+}
+#shopCollectionsMount .btn,
+.storefront-gift-card-card .btn { background: rgba(255,207,112,.12) !important; color: var(--text) !important; border-color: rgba(255,207,112,.36) !important; }
+.product-qa-inline{margin-top:8px;display:grid;gap:5px;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,207,112,.24);background:rgba(255,207,112,.055)}
+.product-qa-inline.is-pass{border-color:rgba(80,180,120,.42);background:rgba(80,180,120,.09)}
+.product-qa-inline.is-fail{border-color:rgba(255,120,150,.38);background:rgba(255,120,150,.08)}
+.product-qa-badges{display:flex;gap:6px;flex-wrap:wrap}.product-qa-badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 8px;font-size:.78rem;border:1px solid var(--border);background:rgba(255,255,255,.06)}.product-qa-badge.ok{border-color:rgba(80,180,120,.4);color:#9ef0b4}.product-qa-badge.fail{border-color:rgba(255,120,150,.4);color:#ffb4c1}
+.product-readiness-fix-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin:.35rem 0}.product-readiness-fix-row .btn{margin-top:-2px}
+.product-image-crop-preview{position:absolute;pointer-events:none;border:2px dashed rgba(255,207,112,.9);box-shadow:0 0 0 999px rgba(0,0,0,.22);border-radius:8px}.product-image-focal-thumb{position:relative;overflow:hidden}.product-image-bulk-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;padding:8px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(0,0,0,.12)}
+.gift-card-balance-lookup{display:grid;gap:10px;margin-top:10px;padding:10px;border:1px solid rgba(255,207,112,.22);border-radius:14px;background:rgba(255,207,112,.05)}
+.trust-placement-control,.marketplace-preview-card,.accounting-evidence-check-card,.today-admin-queue{border:1px solid rgba(255,207,112,.22);border-radius:16px;background:rgba(255,255,255,.045);padding:12px;margin-top:12px}
+.order-stage-photo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:10px}.order-stage-photo-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.04)}.order-stage-photo-card img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}.order-stage-photo-card .small{padding:8px}
+.candle-soap-spec-public{display:grid;gap:8px;margin-top:12px}.candle-soap-spec-public .spec-row{display:flex;gap:8px;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:6px}.safety-note-block{border-left:4px solid rgba(255,207,112,.72);background:rgba(255,207,112,.08);padding:12px;border-radius:12px;margin-top:12px}
+@media(max-width:760px){.product-qa-inline{max-width:100%}.product-image-bulk-bar{display:grid}.order-stage-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
