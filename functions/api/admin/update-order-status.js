@@ -156,6 +156,38 @@ export async function onRequestPost(context) {
     });
   }
 
+
+  if (new_status === 'paid') {
+    try {
+      await db.prepare(`
+        UPDATE gift_cards
+        SET status = 'active', updated_at = CURRENT_TIMESTAMP
+        WHERE order_id = ?
+          AND COALESCE(status, 'pending_activation') IN ('pending_activation','inactive','pending')
+      `).bind(order_id).run();
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS gift_card_admin_events (
+          gift_card_admin_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          gift_card_id INTEGER,
+          source_gift_card_id INTEGER,
+          action_key TEXT NOT NULL,
+          amount_cents INTEGER NOT NULL DEFAULT 0,
+          note TEXT,
+          created_by_user_id INTEGER,
+          created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run().catch(() => null);
+      await db.prepare(`
+        INSERT INTO gift_card_admin_events (gift_card_id, action_key, note, created_by_user_id, created_at)
+        SELECT gift_card_id, 'auto_activate_paid_order', 'Activated automatically when the connected order was marked paid.', ?, CURRENT_TIMESTAMP
+        FROM gift_cards
+        WHERE order_id = ? AND COALESCE(status,'active')='active'
+      `).bind(Number(adminUser.user_id || 0), order_id).run().catch(() => null);
+    } catch (giftCardError) {
+      warnings.push('Order was marked paid, but connected gift-card activation could not be completed automatically.');
+    }
+  }
+
   await auditAdminAction(env, request, adminUser, {
     action_type: 'order_status_update',
     target_type: 'order',
