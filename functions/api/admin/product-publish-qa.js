@@ -24,7 +24,9 @@ export async function onRequestGet(context) {
     { code: 'gallery', ok: imageRows.length >= 1 || !!normalizeText(product.featured_image_url), help: 'At least one product image should render.' },
     { code: 'cart_basics', ok: Number(product.price_cents || 0) >= 0 && !!normalizeText(product.name), help: 'Cart needs a name and valid price.' },
     { code: 'seo_title', ok: !!normalizeText(product.meta_title), help: 'SEO title is missing.' },
-    { code: 'seo_meta', ok: !!normalizeText(product.meta_description), help: 'SEO meta description is missing.' }
+    { code: 'seo_meta', ok: !!normalizeText(product.meta_description), help: 'SEO meta description is missing.' },
+    { code: 'structured_data', ok: !!normalizeText(product.name) && Number(product.price_cents || 0) >= 0, help: 'Product structured data needs name and price.' },
+    { code: 'mini_gallery', ok: imageRows.length > 1 || !!normalizeText(product.featured_image_url), help: 'Mini-gallery should have multiple images when available.' }
   ];
   return json({ ok: true, product_id: productId, product_slug: product.slug || '', checks, passed: checks.filter((row) => row.ok).length, failed: checks.filter((row) => !row.ok).length, images: imageRows });
 }
