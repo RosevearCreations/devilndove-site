@@ -528,3 +528,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await loadProduct();
 });
+
+
+// Build 167: add safety/label helper if candle or soap specs are present in the rendered API payload.
+document.addEventListener('dd:product-detail-rendered', (event) => {
+  const product = event.detail?.product || event.detail || {};
+  const specs = product.candle_soap_specs || product.candle_soap_spec || product.soap_specs || null;
+  if (!specs) return;
+  const mount = document.querySelector('#productCandleSoapSafetyMount') || document.querySelector('#productDetailMeta') || document.querySelector('.product-detail-content');
+  if (!mount || document.getElementById('productCandleSoapSafetyBlock')) return;
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  const el = document.createElement('details');
+  el.id = 'productCandleSoapSafetyBlock';
+  el.className = 'card candle-soap-safety-accordion';
+  el.innerHTML = `<summary><strong>Candle / soap safety notes</strong></summary><div class="small"><p><strong>Scent/base:</strong> ${esc(specs.scent_profile || specs.wax_base || specs.soap_base || 'See listing notes')}</p><p><strong>Ingredients:</strong> ${esc(specs.ingredient_notes || 'Ingredient details pending review.')}</p><p><strong>Allergen/safety:</strong> ${esc(specs.allergen_safety_notes || specs.safety_notes || 'Follow normal candle/soap safety and patch-test handmade products.')}</p><p><strong>Batch:</strong> ${esc(specs.batch_number || 'Unassigned')}</p></div>`;
+  mount.appendChild(el);
+});
