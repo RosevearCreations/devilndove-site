@@ -1852,8 +1852,94 @@ CREATE TABLE IF NOT EXISTS local_seo_landing_page_reviews (
   title_meta_status TEXT NOT NULL DEFAULT 'unchecked',
   internal_link_status TEXT NOT NULL DEFAULT 'unchecked',
   notes TEXT,
+  local_seo_score INTEGER NOT NULL DEFAULT 0,
+  scoring_notes TEXT,
+  scored_at TEXT,
   reviewed_by_user_id INTEGER,
   reviewed_at TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Build 167: image derivatives, stage-photo moderation, gift-card redemption, marketplace CSV mapping, evidence attachments, Today task actions, local SEO scoring, and QA history.
+CREATE TABLE IF NOT EXISTS product_image_derivatives (
+  product_image_derivative_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_image_id INTEGER NOT NULL,
+  product_id INTEGER,
+  derivative_kind TEXT NOT NULL DEFAULT 'preview',
+  target_width INTEGER NOT NULL DEFAULT 1200,
+  target_height INTEGER NOT NULL DEFAULT 1200,
+  crop_x REAL NOT NULL DEFAULT 0,
+  crop_y REAL NOT NULL DEFAULT 0,
+  crop_width REAL NOT NULL DEFAULT 1,
+  crop_height REAL NOT NULL DEFAULT 1,
+  source_image_url TEXT,
+  derivative_url TEXT,
+  derivative_status TEXT NOT NULL DEFAULT 'queued',
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS stage_photo_moderation_events (
+  stage_photo_moderation_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_order_stage_photo_id INTEGER NOT NULL,
+  action_key TEXT NOT NULL,
+  moderation_status TEXT,
+  public_use_status TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS gift_card_lookup_attempts (
+  gift_card_lookup_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code_hint TEXT,
+  email_hash TEXT,
+  client_key TEXT,
+  was_success INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS marketplace_csv_mappings (
+  marketplace_csv_mapping_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel TEXT NOT NULL UNIQUE,
+  mapping_json TEXT NOT NULL DEFAULT '[]',
+  validation_json TEXT NOT NULL DEFAULT '{}',
+  updated_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS accounting_evidence_attachments (
+  accounting_evidence_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_month TEXT,
+  evidence_kind TEXT,
+  title TEXT,
+  evidence_url TEXT,
+  object_key TEXT,
+  original_filename TEXT,
+  mime_type TEXT,
+  file_size_bytes INTEGER NOT NULL DEFAULT 0,
+  attachment_status TEXT NOT NULL DEFAULT 'active',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS today_task_actions (
+  today_task_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  task_key TEXT NOT NULL,
+  task_label TEXT,
+  action_status TEXT NOT NULL DEFAULT 'completed',
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS product_publish_qa_results (
+  product_publish_qa_result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  qa_status TEXT NOT NULL DEFAULT 'unchecked',
+  qa_score INTEGER NOT NULL DEFAULT 0,
+  qa_summary_json TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+-- local_seo_score, scoring_notes, and scored_at are included in the CREATE TABLE above.
+

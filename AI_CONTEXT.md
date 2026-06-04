@@ -528,3 +528,18 @@ Next 20 recommended steps:
 19. Add guided “fix first image” wizard that opens image role, crop, and public-use fields in order.
 20. Add local SEO review scoring for title, meta, H1, internal links, and local proof wording.
 
+## Build 167 update - dark theme, media derivatives, proof moderation, gift cards, marketplace mapping, and SEO scoring
+
+- Repaired the `/creations/` browse panels and main-page Local maker trust block so they stay consistent with the dark Devil n Dove theme instead of using white cards with black text.
+- Added product image derivative/crop preview records so focal/crop work can be queued toward real R2 derivative images.
+- Added stage-photo proof moderation queue before custom order photos can become public proof.
+- Added gift-card redemption endpoint for admin checkout/order workflows, plus public balance lookup attempt logging and rate limiting.
+- Added marketplace CSV mapping editor and endpoint for Etsy, Facebook Marketplace, Pinterest, and manual exports.
+- Added accountant evidence attachment upload/list endpoint for future accountant ZIP packaging.
+- Added Today task complete/ignore persistence and mobile dashboard controls.
+- Added local SEO scoring endpoint for landing-page review rows.
+- Added product QA history endpoint for future catalog-side QA panels.
+
+### Next direction
+Keep moving repeated image proof, marketplace mapping, gift card, evidence, and local SEO review data into D1-backed review queues with safe JSON fallbacks, and keep public pages on one clear H1 with local wording in titles/headings.
+
