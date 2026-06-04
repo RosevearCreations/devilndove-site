@@ -985,3 +985,65 @@ body.nav-mobile-open{overflow:hidden}
   .public-trust-context-grid, .trust-placement-toggle-grid { grid-template-columns: 1fr; }
   .product-image-crop-handle { width:18px; height:18px; }
 }
+
+/* Build 167: dark-theme consistency and next workflow polish */
+:root{--dd-dark-panel:rgba(255,255,255,.045);--dd-dark-panel-strong:linear-gradient(145deg,rgba(28,16,38,.96),rgba(18,10,27,.98));--dd-gold-soft:rgba(255,207,112,.22)}
+#shopCollectionsMount > .card,
+#shopCollectionsMount .shop-collection-card,
+#shopCollectionsMount .shop-filter-pill-groups > div,
+.storefront-gift-card-compact,
+.storefront-gift-card-full,
+.storefront-gift-card-card,
+.gift-card-visual-card,
+.site-inventory-image-preview-card,
+.site-inventory-image-placeholder,
+.site-inventory-list-thumb,
+.dd-local-trust-block,
+.public-trust-context-card,
+.public-trust-context-item,
+.creations-page .panel,
+.creations-page .stat-card,
+.creations-page .creation-card,
+.creations-page .customer-welcome-grid > div,
+.creations-page .muted-box,
+.creations-page .summary,
+.creations-page .video-wrap{
+  background:var(--dd-dark-panel-strong)!important;
+  color:var(--text,#f8edf8)!important;
+  border-color:rgba(255,207,112,.22)!important;
+  box-shadow:0 18px 42px rgba(0,0,0,.24)!important;
+}
+#shopCollectionsMount h2,
+#shopCollectionsMount h3,
+#shopCollectionsMount strong,
+.storefront-gift-card-card h2,
+.storefront-gift-card-card h3,
+.storefront-gift-card-card strong,
+.dd-local-trust-block h2,
+.dd-local-trust-block strong,
+.creations-page .panel h2,
+.creations-page .panel h3,
+.creations-page .panel strong,
+.creations-page .stat-card strong,
+.creations-page .creation-card h2,
+.creations-page .creation-card h3,
+.creations-page .creation-card strong{color:var(--text,#f8edf8)!important}
+#shopCollectionsMount p,
+#shopCollectionsMount .small,
+.storefront-gift-card-card p,
+.storefront-gift-card-card .small,
+.dd-local-trust-block p,
+.dd-local-trust-block .small,
+.creations-page .panel p,
+.creations-page .panel .small,
+.creations-page .stat-card .small,
+.creations-page .creation-card .small,
+.creations-page .summary,
+.creations-page .muted-box{color:var(--muted,#d8c9df)!important}
+.dd-local-trust-kicker,.creations-page .badge,#shopCollectionsMount .badge{color:#ffe39a!important}
+#shopCollectionsMount .pill,.shop-filter-pill-groups .pill,.creations-page .chip,.creations-page .pill{background:rgba(0,0,0,.18)!important;border-color:rgba(255,207,112,.28)!important;color:#ffe39a!important}
+.creations-page input,.creations-page select,.creations-page textarea{background:rgba(0,0,0,.24)!important;color:var(--text,#f8edf8)!important;border-color:rgba(255,255,255,.16)!important}
+.creations-page .btn,#shopCollectionsMount .btn,.storefront-gift-card-card .btn,.dd-local-trust-actions .btn{background:rgba(255,207,112,.14)!important;color:#ffe39a!important;border-color:rgba(255,207,112,.40)!important}
+.creations-page .btn.secondary,#shopCollectionsMount .btn.secondary,.storefront-gift-card-card .btn.secondary,.dd-local-trust-actions .btn:not(.primary){background:rgba(255,255,255,.055)!important;color:var(--text,#f8edf8)!important;border-color:rgba(255,255,255,.16)!important}
+.site-inventory-list-thumb img,.site-inventory-image-preview-card img{background:rgba(0,0,0,.22)!important;border-color:rgba(255,255,255,.12)!important}.site-inventory-url-line a{color:#9bd1ff!important}
+.crop-derivative-card,.stage-photo-moderation-card,.marketplace-mapping-card,.gift-card-redemption-card,.local-seo-score-card,.qa-history-card{border:1px solid rgba(255,207,112,.22);border-radius:16px;background:rgba(255,255,255,.045);padding:12px;margin-top:12px}.stage-photo-moderation-grid,.marketplace-mapping-grid,.local-seo-score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.stage-photo-moderation-card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12)}.task-action-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.task-action-row .btn{padding:7px 10px}.marketplace-image-selector{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}.marketplace-image-selector label{display:grid;gap:6px;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px;background:rgba(255,255,255,.035)}.marketplace-image-selector img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
