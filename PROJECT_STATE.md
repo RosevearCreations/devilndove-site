@@ -1,8 +1,10 @@
-# AI Context
+# Project State
 
 Last refreshed: **2026-06-03a**
 
-Use schema 127 as the current baseline. Keep Markdown, schema files, cache markers, smoke checks, CSS sanity, H1 checks, SEO/local wording, and fallback handling synchronized during every pass.
+The app is at **schema 127** with route-level SEO guardrails, internal-link review rows, CSS token inventory, mobile field action tracking, release manifest checks, and a manual equipment scan fallback.
+
+Current focus remains accounting depth, equipment accountability, mobile-first proof flows, public SEO hygiene, CSS drift reduction, and deploy/smoke guardrails.
 
 ## 2026-06-03a / Schema 128 update
 
