@@ -39,6 +39,15 @@ async function ensureTables(db) {
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`).run().catch(() => null);
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_lookup_attempts (
+    gift_card_lookup_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code_hint TEXT,
+    email_hash TEXT,
+    client_key TEXT,
+    was_success INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
   await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_redemptions (
     gift_card_redemption_id INTEGER PRIMARY KEY AUTOINCREMENT,
     gift_card_id INTEGER NOT NULL,
@@ -69,6 +78,10 @@ export async function onRequestGet(context) {
   const code = clean(url.searchParams.get('code')).toUpperCase();
   const email = clean(url.searchParams.get('email')).toLowerCase();
   if (!code || !email || !email.includes('@')) return json({ ok: false, error: 'Enter the gift-card code and recipient or purchaser email.' }, 400);
+  const ip = context.request.headers.get('cf-connecting-ip') || context.request.headers.get('x-forwarded-for') || 'unknown';
+  const clientKey = `${ip}:${email.slice(0, 80)}`;
+  const recentAttempts = await db.prepare(`SELECT COUNT(*) AS total FROM gift_card_lookup_attempts WHERE client_key=? AND datetime(created_at) >= datetime('now','-15 minutes')`).bind(clientKey).first().catch(() => ({ total: 0 }));
+  if (Number(recentAttempts?.total || 0) >= 12) return json({ ok: false, error: 'Too many balance lookup attempts. Please wait a little while and try again.' }, 429);
   const row = await db.prepare(`
     SELECT * FROM gift_cards
     WHERE UPPER(code)=?
@@ -79,7 +92,8 @@ export async function onRequestGet(context) {
       )
     LIMIT 1
   `).bind(code, email, email, email).first().catch(() => null);
-  if (!row) return json({ ok: false, error: 'No gift card matched that code and email.' }, 404);
+  if (!row) { await db.prepare(`INSERT INTO gift_card_lookup_attempts (code_hint, email_hash, client_key, was_success, created_at) VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP)`).bind(code.slice(0,8), email.slice(0,3), clientKey).run().catch(() => null); return json({ ok: false, error: 'No gift card matched that code and email.' }, 404); }
+  await db.prepare(`INSERT INTO gift_card_lookup_attempts (code_hint, email_hash, client_key, was_success, created_at) VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)`).bind(code.slice(0,8), email.slice(0,3), clientKey).run().catch(() => null);
   const redemptions = rows(await db.prepare(`SELECT redeemed_amount_cents, redeemed_by_email, created_at FROM gift_card_redemptions WHERE gift_card_id=? ORDER BY datetime(created_at) DESC LIMIT 20`).bind(Number(row.gift_card_id || 0)).all().catch(() => ({ results: [] })));
   return json({ ok: true, card: safeCard(row), redemptions });
 }
