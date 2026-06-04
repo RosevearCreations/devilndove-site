@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderTodayTasks(payload) {
     if (!todayTaskStats) return;
     const tasks = Array.isArray(payload?.tasks) ? payload.tasks : [];
-    todayTaskStats.innerHTML = tasks.length ? `<div class="mobile-summary-list">${tasks.map((task) => `<a class="mobile-summary-list-item" href="${escapeHtml(task.href || '/admin/')}"><strong>${escapeHtml(String(task.count || 0))}</strong><div class="small">${escapeHtml(task.label || task.key || 'Task')}</div></a>`).join('')}</div>` : '<div class="small">No merged task queue is available right now.</div>';
+    todayTaskStats.innerHTML = tasks.length ? `<div class="mobile-summary-list">${tasks.map((task) => `<div class="mobile-summary-list-item"><a href="${escapeHtml(task.href || '/admin/')}"><strong>${escapeHtml(String(task.count || 0))}</strong><div class="small">${escapeHtml(task.label || task.key || 'Task')}</div></a><div class="task-action-row"><button class="btn" type="button" data-today-task-action="completed" data-task-key="${escapeHtml(task.key || task.label || 'task')}" data-task-label="${escapeHtml(task.label || task.key || 'Task')}">Done</button><button class="btn secondary" type="button" data-today-task-action="ignored" data-task-key="${escapeHtml(task.key || task.label || 'task')}" data-task-label="${escapeHtml(task.label || task.key || 'Task')}">Ignore</button></div></div>`).join('')}</div>` : '<div class="small">No merged task queue is available right now.</div>';
   }
 
   async function fetchJsonState(url, fallbackLabel) {

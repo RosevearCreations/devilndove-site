@@ -433,6 +433,31 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+
+  async function queueDerivativeForRow(rowEl) {
+    const imageId = Number(rowEl?.getAttribute('data-product-image-id') || rowEl?.querySelector('[data-field="product_image_id"]')?.value || 0);
+    const productId = Number(document.getElementById('productImagesProductId')?.value || 0);
+    const imageUrl = normalizeText(rowEl?.querySelector('[data-field="image_url"]')?.value || '');
+    if (!imageId) { setMessage('Save this image row first, then queue a derivative crop preview.', true); return; }
+    if (!imageUrl) { setMessage('Image URL is required before derivative preview.', true); return; }
+    const body = {
+      product_image_id: imageId,
+      product_id: productId,
+      derivative_kind: 'storefront_square',
+      target_width: 1200,
+      target_height: 1200,
+      crop_x: toOptionalNumber(String((rowEl.querySelector('[data-field="crop_pair"]')?.value || '').split(',')[0] || '').trim()) ?? 0,
+      crop_y: toOptionalNumber(String((rowEl.querySelector('[data-field="crop_pair"]')?.value || '').split(',')[1] || '').trim()) ?? 0,
+      crop_width: toOptionalNumber(String((rowEl.querySelector('[data-field="crop_size"]')?.value || '').split(',')[0] || '').trim()) ?? 1,
+      crop_height: toOptionalNumber(String((rowEl.querySelector('[data-field="crop_size"]')?.value || '').split(',')[1] || '').trim()) ?? 1,
+      notes: 'Queued from Product Media Workflow.'
+    };
+    const response = await window.DDAuth.apiFetch('/api/admin/product-image-derivatives', { method: 'POST', body: JSON.stringify(body) });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Derivative preview failed.');
+    setMessage(data.message || 'Derivative preview queued.');
+  }
+
   function formatBytes(value) {
     const bytes = Number(value || 0);
     if (bytes < 1024) return `${bytes} B`;
@@ -489,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="btn" type="button" data-row-drag-handle title="Drag this image to reorder">↕ drag</button>
             <button class="btn" type="button" data-row-move="up">↑</button>
             <button class="btn" type="button" data-row-move="down">↓</button>
-            <button class="btn" type="button" data-row-set-square-crop>Set 1:1 crop</button>
+            <button class="btn" type="button" data-row-set-square-crop>Set 1:1 crop</button><button class="btn" type="button" data-row-queue-derivative>Queue R2 crop preview</button>
             <button class="btn" type="button" data-row-remove title="Remove this image row. Click Save Images to confirm the delete.">Delete image row</button>
           </div>
         </div>

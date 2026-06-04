@@ -27,3 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   load();
 });
+
+
+// Build 167: scoring controls layered onto existing Local SEO review screen.
+(function(){
+  const mount = document.getElementById('localSeoReviewMount') || document.querySelector('[data-local-seo-review-mount]') || document.querySelector('main + section.card, section.card');
+  if (!mount || document.getElementById('localSeoScoringPanel')) return;
+  const panel=document.createElement('section'); panel.id='localSeoScoringPanel'; panel.className='local-seo-score-card'; panel.innerHTML='<h2 style="margin-top:0">Local SEO scoring</h2><p class="small">Score pages for local phrase, locality, H1, title/meta, and internal-link readiness.</p><button class="btn" id="runLocalSeoScoringButton" type="button">Run scoring</button><div id="localSeoScoringResult" class="small" style="margin-top:10px"></div>'; mount.parentElement?.insertBefore(panel,mount);
+  document.getElementById('runLocalSeoScoringButton')?.addEventListener('click',async()=>{const out=document.getElementById('localSeoScoringResult'); if(out)out.textContent='Scoring...'; try{const res=await (window.DDAuth?.apiFetch||fetch)('/api/admin/local-seo-review-scoring',{method:'POST',body:'{}'}); const data=await res.json().catch(()=>null); if(!res.ok||!data?.ok)throw new Error(data?.error||'Scoring failed.'); if(out)out.textContent=data.message||'Scoring complete.';}catch(e){if(out)out.textContent=e.message||'Scoring failed.';}});
+})();
