@@ -434,6 +434,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
+
+  async function loadDerivativeHistoryForRow(rowEl) {
+    const imageId = Number(rowEl?.getAttribute('data-product-image-id') || rowEl?.querySelector('[data-field="product_image_id"]')?.value || 0);
+    const target = rowEl?.querySelector('[data-derivative-history]');
+    if (!target) return;
+    if (!imageId) { target.textContent = 'Save this image row before derivative history is available.'; return; }
+    target.textContent = 'Loading derivative history...';
+    try {
+      const response = await window.DDAuth.apiFetch(`/api/admin/product-image-derivatives?product_image_id=${encodeURIComponent(imageId)}`);
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Derivative history failed.');
+      const rows = Array.isArray(data.derivatives) ? data.derivatives.slice(0, 6) : [];
+      target.innerHTML = rows.length ? rows.map((item) => `<div class="status-note info" style="margin-top:6px"><strong>${escapeHtml(item.derivative_kind || 'variant')}</strong> ${escapeHtml(item.target_width || '')}×${escapeHtml(item.target_height || '')}<br><a href="${escapeHtml(item.derivative_url || '#')}" target="_blank" rel="noopener">${escapeHtml(item.derivative_status || 'preview')}</a><br><span>${escapeHtml(item.created_at || item.updated_at || '')}</span></div>`).join('') : 'No derivative records yet.';
+    } catch (error) { target.textContent = error.message || 'Derivative history failed.'; }
+  }
+
   async function queueDerivativeForRow(rowEl) {
     const imageId = Number(rowEl?.getAttribute('data-product-image-id') || rowEl?.querySelector('[data-field="product_image_id"]')?.value || 0);
     const productId = Number(document.getElementById('productImagesProductId')?.value || 0);
@@ -456,6 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) throw new Error(data?.error || 'Derivative preview failed.');
     setMessage(data.message || 'Derivative preview queued.');
+    await loadDerivativeHistoryForRow(rowEl);
   }
 
   function formatBytes(value) {
@@ -514,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="btn" type="button" data-row-drag-handle title="Drag this image to reorder">↕ drag</button>
             <button class="btn" type="button" data-row-move="up">↑</button>
             <button class="btn" type="button" data-row-move="down">↓</button>
-            <button class="btn" type="button" data-row-set-square-crop>Set 1:1 crop</button><button class="btn" type="button" data-row-queue-derivative>Queue R2 crop preview</button>
+            <button class="btn" type="button" data-row-set-square-crop>Set 1:1 crop</button><button class="btn" type="button" data-row-queue-derivative>Queue R2 crop file</button><button class="btn" type="button" data-row-load-derivatives>Derivative history</button>
             <button class="btn" type="button" data-row-remove title="Remove this image row. Click Save Images to confirm the delete.">Delete image row</button>
           </div>
         </div>
@@ -1156,6 +1173,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setMessage('Focal point updated on the thumbnail. Save images to keep this crop/focus guidance.');
       return;
     }
+    if (event.target.closest('[data-row-queue-derivative]') && row) { try { await queueDerivativeForRow(row); } catch (error) { setMessage(error.message || 'Derivative failed.', true); } return; }
+    if (event.target.closest('[data-row-load-derivatives]') && row) { await loadDerivativeHistoryForRow(row); return; }
     if (event.target.closest('[data-row-set-square-crop]') && row) {
       const focalX = Number(row.querySelector('[data-field="focal_point_x"]')?.value || 0.5);
       const focalY = Number(row.querySelector('[data-field="focal_point_y"]')?.value || 0.5);

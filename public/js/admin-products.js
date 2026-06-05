@@ -224,6 +224,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
+
+  function qaHistoryMarkup(product) {
+    const productId = Number(product?.product_id || 0);
+    return `<details class="product-qa-history-panel"><summary>QA history</summary><div data-product-qa-history="${productId}" class="small">Open to load QA history.</div><button class="btn small" type="button" data-load-qa-history="${productId}">Load history</button></details>`;
+  }
+
+  async function loadProductQAHistory(productId) {
+    const target = document.querySelector(`[data-product-qa-history="${productId}"]`);
+    if (!target) return;
+    target.textContent = 'Loading QA history...';
+    try {
+      const response = await window.DDAuth.apiFetch(`/api/admin/product-qa-history?product_id=${encodeURIComponent(productId)}`);
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'QA history failed.');
+      const rows = Array.isArray(data.history) ? data.history.slice(0, 5) : [];
+      target.innerHTML = rows.length ? rows.map((row) => `<div class="status-note ${String(row.qa_status || '').includes('pass') ? 'success' : 'warning'}"><strong>${escapeHtml(row.qa_status || 'checked')}</strong> ${escapeHtml(String(row.qa_score || 0))}%<br>${escapeHtml(row.created_at || '')}</div>`).join('') : 'No QA history recorded yet.';
+    } catch (error) { target.textContent = error.message || 'QA history failed.'; }
+  }
+
   function qaBadgeMarkup(product) {
     const qa = product._qa || null;
     if (!qa) return `<div class="product-qa-inline"><strong>Post-publish QA</strong><span class="small">Not run yet.</span><button class="btn small" type="button" data-product-qa-run="${Number(product.product_id || 0)}">Run QA</button></div>`;
@@ -291,7 +310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `
         <tr>
           <td style="padding:8px;border-bottom:1px solid #ddd">${productId}</td>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${name}${colorSummary ? `<div class="small">Colours: ${colorSummary}</div>` : ''}${readinessBadgeMarkup(product)}${qaBadgeMarkup(product)}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${name}${colorSummary ? `<div class="small">Colours: ${colorSummary}</div>` : ''}${readinessBadgeMarkup(product)}${qaBadgeMarkup(product)}${qaHistoryMarkup(product)}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${slug}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${sku}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
@@ -668,10 +687,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const dismissButton = event.target.closest("[data-product-pending-dismiss]");
     const blockerButton = event.target.closest("[data-open-first-blocker]");
     const qaButton = event.target.closest("[data-product-qa-run]");
-    if (!reviewButton && !resourceButton && !socialProductButton && !retryButton && !dismissButton && !blockerButton && !qaButton) return;
+    const qaHistoryButton = event.target.closest("[data-load-qa-history]");
+    if (!reviewButton && !resourceButton && !socialProductButton && !retryButton && !dismissButton && !blockerButton && !qaButton && !qaHistoryButton) return;
     if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
 
 
+    if (qaHistoryButton) {
+      await loadProductQAHistory(Number(qaHistoryButton.getAttribute('data-load-qa-history') || 0));
+      return;
+    }
     if (qaButton) {
       const productId = Number(qaButton.getAttribute('data-product-qa-run') || 0);
       if (!productId) return;

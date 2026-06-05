@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const setMsg = (message, error = false) => { const el = document.getElementById('testimonialTrustBlocksMessage'); if (!el) return; el.textContent = message || ''; el.style.display = message ? 'block' : 'none'; el.style.color = error ? '#b00020' : '#14532d'; };
   async function readJson(response) { const data = await response.json().catch(() => null); if (!response.ok || !data?.ok) throw new Error(data?.error || 'Trust block request failed.'); return data; }
   function renderPlacements(placements = []) {
-    return `<div class="trust-placement-toggle-grid">${placements.map((row) => `<label class="card trust-placement-toggle"><input type="checkbox" data-placement-context="${esc(row.page_context)}" ${Number(row.is_enabled || 0) ? 'checked' : ''}> <strong>${esc(row.placement_label || row.page_context)}</strong><span class="small">${esc(row.page_context)} • max ${esc(row.max_items || 3)}</span></label>`).join('') || '<p class="small">Placement settings will appear here after the first save.</p>'}</div>`;
+    return `<div class="trust-placement-toggle-grid">${placements.map((row) => `<label class="card trust-placement-toggle"><input type="checkbox" data-placement-context="${esc(row.page_context)}" ${Number(row.is_enabled || 0) ? 'checked' : ''}> <strong>${esc(row.placement_label || row.page_context)} <span class="small">(${esc(row.trust_block_count || 0)} here / ${esc(row.sitewide_count || 0)} sitewide)</span></strong><span class="small">${esc(row.page_context)} • max ${esc(row.max_items || 3)}</span></label>`).join('') || '<p class="small">Placement settings will appear here after the first save.</p>'}</div>`;
   }
 
   function reviewRows(reviews) {
@@ -86,11 +86,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><input id="trustBlockReviewTitle" placeholder="Optional trust block title" style="min-width:260px"><button class="btn" type="button" id="createTrustFromReviewButton">Create from selected review</button></div>
           <div class="admin-table-wrap"><table><thead><tr><th></th><th>Reviewer</th><th>Text/Product</th><th>Ready</th></tr></thead><tbody>${reviewRows(reviews)}</tbody></table></div>
         </details>
-        <div class="trust-placement-control"><h3 style="margin-top:0">Public placement controls by page</h3><p class="small">Toggle where public-safe trust blocks are allowed to appear instead of typing contexts from memory.</p><div id="trustBlockPlacementsPanel"><p class="small">Loading placement toggles…</p></div></div><h3>Current trust block items</h3>
+        <div class="trust-placement-control"><h3 style="margin-top:0">Public placement controls by page</h3><p class="small">Toggle where public-safe trust blocks are allowed to appear instead of typing contexts from memory.</p><div id="trustBlockPlacementsPanel"><p class="small">Loading placement toggles…</p></div><div class="card" style="margin-top:10px"><h4 style="margin-top:0">Preview context</h4><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="trustBlockPreviewContext" value="sitewide" placeholder="sitewide, shop, creations"><button class="btn" type="button" id="trustBlockPreviewButton">Preview</button></div><div id="trustBlockPreviewPanel" class="small" style="margin-top:10px"></div></div></div><h3>Current trust block items</h3>
         <div class="admin-table-wrap"><table><thead><tr><th>Title/context</th><th>Copy</th><th>Status</th><th>Action</th></tr></thead><tbody>${itemRows(items)}</tbody></table></div>
       </div>`;
     document.getElementById('trustBlocksRefreshButton')?.addEventListener('click', load);
-    loadPlacements();
+    loadPlacements(); document.getElementById('trustBlockPreviewButton')?.addEventListener('click', previewTrustContext);
     document.getElementById('trustBlockClearButton')?.addEventListener('click', () => fillForm({ display_context: 'sitewide', status: 'draft', privacy_review_status: 'needs_review', locality_label: 'Southern Ontario', sort_order: 0 }));
     document.getElementById('createTrustFromReviewButton')?.addEventListener('click', async () => {
       const selected = document.querySelector('input[name="trustReviewSource"]:checked')?.value || '';
@@ -119,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (row) { fillForm(row); window.scrollTo({ top: mount.offsetTop, behavior: 'smooth' }); }
     }));
   }
+
+  async function previewTrustContext() { const panel=document.getElementById('trustBlockPreviewPanel'); const key=document.getElementById('trustBlockPreviewContext')?.value||'sitewide'; if(!panel)return; try{panel.textContent='Loading preview...'; const data=await readJson(await window.DDAuth.apiFetch(`/api/admin/trust-block-preview?context=${encodeURIComponent(key)}`)); panel.innerHTML=(data.items||[]).length?(data.items||[]).map((item)=>`<div class="status-note info"><strong>${esc(item.title||'Trust block')}</strong><br>${esc(item.body||'')}</div>`).join(''):'No trust blocks for this context yet.';}catch(error){panel.textContent=error.message||'Preview failed.';} }
 
   async function loadPlacements() {
     const panel = document.getElementById('trustBlockPlacementsPanel');
