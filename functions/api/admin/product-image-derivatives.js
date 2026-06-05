@@ -1,11 +1,32 @@
 // File: /functions/api/admin/product-image-derivatives.js
-// Brief description: Admin product image derivative/crop preview records for R2-ready storefront image variants.
+// Brief description: Admin product image derivative/crop records. When an R2 bucket is configured,
+// this creates a real derivative object key in R2 and records the derivative URL/history.
 
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-function json(data, status = 200) { return jsonResponse(data, status); }
+
+function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control': 'no-store' }); }
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function clean(value, limit = 240) { const text = normalizeText(value); return text.length > limit ? text.slice(0, limit).trim() : text; }
 function number(value, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
+function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+function safeExt(url, fallback = 'jpg') {
+  const match = String(url || '').split('?')[0].match(/\.([a-zA-Z0-9]{2,5})$/);
+  return match ? match[1].toLowerCase().replace(/[^a-z0-9]/g, '') : fallback;
+}
+function publicBase(env) {
+  return clean(env.PRODUCT_MEDIA_PUBLIC_BASE_URL || env.R2_PUBLIC_BASE_URL || env.PUBLIC_R2_BASE_URL || env.ASSET_ORIGIN || 'https://assets.devilndove.com', 500).replace(/\/$/, '');
+}
+function makePublicUrl(env, key) {
+  const base = publicBase(env);
+  const cleanKey = clean(key, 1200).replace(/^\/+/, '');
+  return base && cleanKey ? `${base}/${cleanKey}` : cleanKey;
+}
+function previewUrl(sourceUrl, kind, width, height) {
+  const src = clean(sourceUrl, 1200);
+  if (!src) return '';
+  const separator = src.includes('?') ? '&' : '?';
+  return `${src}${separator}dd_variant=${encodeURIComponent(kind)}&w=${encodeURIComponent(width)}&h=${encodeURIComponent(height)}`;
+}
 async function ensureSchema(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS product_image_derivatives (
     product_image_derivative_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,18 +41,49 @@ async function ensureSchema(db) {
     crop_height REAL NOT NULL DEFAULT 1,
     source_image_url TEXT,
     derivative_url TEXT,
+    derivative_object_key TEXT,
     derivative_status TEXT NOT NULL DEFAULT 'queued',
+    file_size_bytes INTEGER NOT NULL DEFAULT 0,
+    generation_method TEXT,
     notes TEXT,
     created_by_user_id INTEGER,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   )`).run();
+  for (const sql of [
+    `ALTER TABLE product_image_derivatives ADD COLUMN derivative_object_key TEXT`,
+    `ALTER TABLE product_image_derivatives ADD COLUMN file_size_bytes INTEGER NOT NULL DEFAULT 0`,
+    `ALTER TABLE product_image_derivatives ADD COLUMN generation_method TEXT`
+  ]) await db.prepare(sql).run().catch(() => null);
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_product_image_derivatives_image ON product_image_derivatives(product_image_id, derivative_status, updated_at)`).run().catch(() => null);
 }
-function derivativeUrl(sourceUrl, kind, width, height) {
-  const src = clean(sourceUrl, 1200);
-  if (!src) return '';
-  const separator = src.includes('?') ? '&' : '?';
-  return `${src}${separator}dd_variant=${encodeURIComponent(kind)}&w=${encodeURIComponent(width)}&h=${encodeURIComponent(height)}`;
+async function createDerivativeObject(env, sourceUrl, image, body, width, height, kind) {
+  const bucket = env.PRODUCT_DERIVATIVE_BUCKET || env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
+  if (!bucket || typeof bucket.put !== 'function') {
+    return { created: false, status: 'preview_ready', url: previewUrl(sourceUrl, kind, width, height), objectKey: '', size: 0, method: 'query_preview_fallback', note: 'No R2 bucket binding was available; saved a query-string crop preview instead.' };
+  }
+  const response = await fetch(sourceUrl).catch(() => null);
+  if (!response || !response.ok) {
+    return { created: false, status: 'source_fetch_failed', url: previewUrl(sourceUrl, kind, width, height), objectKey: '', size: 0, method: 'query_preview_fallback', note: 'Could not fetch the source image for R2 derivative generation; saved preview metadata only.' };
+  }
+  const arrayBuffer = await response.arrayBuffer();
+  const ext = safeExt(sourceUrl, 'jpg');
+  const key = `products/${Number(image.product_id || 0)}/derivatives/${Number(image.product_image_id || 0)}-${kind}-${width}x${height}-${Date.now()}.${ext}`;
+  await bucket.put(key, arrayBuffer, {
+    httpMetadata: { contentType: response.headers.get('content-type') || `image/${ext === 'jpg' ? 'jpeg' : ext}`, cacheControl: 'public, max-age=31536000, immutable' },
+    customMetadata: {
+      product_id: String(image.product_id || ''),
+      product_image_id: String(image.product_image_id || ''),
+      derivative_kind: kind,
+      target_width: String(width),
+      target_height: String(height),
+      crop_x: String(body.crop_x ?? ''),
+      crop_y: String(body.crop_y ?? ''),
+      crop_width: String(body.crop_width ?? ''),
+      crop_height: String(body.crop_height ?? '')
+    }
+  });
+  return { created: true, status: 'r2_created', url: makePublicUrl(env, key), objectKey: key, size: Number(arrayBuffer.byteLength || 0), method: 'r2_copy_with_crop_metadata', note: 'R2 derivative object created with crop metadata. Connect a true image-resizing worker later for pixel-cropped output.' };
 }
 export async function onRequestGet(context) {
   const db = getDb(context.env);
@@ -42,8 +94,8 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const productId = Number(url.searchParams.get('product_id') || 0);
   const imageId = Number(url.searchParams.get('product_image_id') || 0);
-  const items = rows(await db.prepare(`SELECT * FROM product_image_derivatives WHERE (?<=0 OR product_id=?) AND (?<=0 OR product_image_id=?) ORDER BY datetime(updated_at) DESC LIMIT 200`).bind(productId, productId, imageId, imageId).all().catch(() => ({ results: [] })));
-  return json({ ok: true, derivatives: items, summary: { total: items.length, queued: items.filter((r) => String(r.derivative_status || '') === 'queued').length } });
+  const items = rows(await db.prepare(`SELECT * FROM product_image_derivatives WHERE (? <= 0 OR product_id = ?) AND (? <= 0 OR product_image_id = ?) ORDER BY datetime(updated_at) DESC, product_image_derivative_id DESC LIMIT 200`).bind(productId, productId, imageId, imageId).all().catch(() => ({ results: [] })));
+  return json({ ok: true, derivatives: items, summary: { total: items.length, r2_created: items.filter((r) => String(r.derivative_status || '') === 'r2_created').length, preview_ready: items.filter((r) => String(r.derivative_status || '') === 'preview_ready').length } });
 }
 export async function onRequestPost(context) {
   const db = getDb(context.env);
@@ -54,16 +106,16 @@ export async function onRequestPost(context) {
   let body = {}; try { body = await context.request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
   const productImageId = Number(body.product_image_id || 0);
   if (!productImageId) return json({ ok: false, error: 'product_image_id is required.' }, 400);
-  const image = await db.prepare(`SELECT product_image_id, product_id, image_url, crop_x, crop_y, crop_width, crop_height FROM product_images WHERE product_image_id=? LIMIT 1`).bind(productImageId).first().catch(() => null);
+  const image = await db.prepare(`SELECT product_image_id, product_id, image_url, crop_x, crop_y, crop_width, crop_height FROM product_images WHERE product_image_id = ? LIMIT 1`).bind(productImageId).first().catch(() => null);
   if (!image) return json({ ok: false, error: 'Product image was not found.' }, 404);
-  const kind = clean(body.derivative_kind || 'storefront_square', 80);
-  const width = Math.max(300, Math.min(2400, Math.round(number(body.target_width, 1200))));
-  const height = Math.max(300, Math.min(2400, Math.round(number(body.target_height, 1200))));
-  const cropX = Math.max(0, Math.min(1, number(body.crop_x, image.crop_x ?? 0)));
-  const cropY = Math.max(0, Math.min(1, number(body.crop_y, image.crop_y ?? 0)));
-  const cropW = Math.max(0.05, Math.min(1, number(body.crop_width, image.crop_width ?? 1)));
-  const cropH = Math.max(0.05, Math.min(1, number(body.crop_height, image.crop_height ?? 1)));
-  const previewUrl = derivativeUrl(image.image_url, kind, width, height);
-  const result = await db.prepare(`INSERT INTO product_image_derivatives (product_image_id, product_id, derivative_kind, target_width, target_height, crop_x, crop_y, crop_width, crop_height, source_image_url, derivative_url, derivative_status, notes, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'preview_ready', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(productImageId, Number(image.product_id || 0), kind, width, height, cropX, cropY, cropW, cropH, image.image_url || '', previewUrl, clean(body.notes || 'Preview derivative record. Replace query-string preview with real R2 derivative when worker image processing is connected.', 800), Number(adminUser.user_id || 0) || null).run();
-  return json({ ok: true, message: 'Derivative crop preview recorded.', product_image_derivative_id: Number(result?.meta?.last_row_id || 0), derivative_url: previewUrl });
+  const kind = clean(body.derivative_kind || 'storefront_square', 80).replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+  const width = clamp(Math.round(number(body.target_width, 1200)), 300, 2400);
+  const height = clamp(Math.round(number(body.target_height, 1200)), 300, 2400);
+  const cropX = clamp(number(body.crop_x, image.crop_x ?? 0), 0, 1);
+  const cropY = clamp(number(body.crop_y, image.crop_y ?? 0), 0, 1);
+  const cropW = clamp(number(body.crop_width, image.crop_width ?? 1), 0.05, 1);
+  const cropH = clamp(number(body.crop_height, image.crop_height ?? 1), 0.05, 1);
+  const generated = await createDerivativeObject(context.env, image.image_url || '', image, { crop_x: cropX, crop_y: cropY, crop_width: cropW, crop_height: cropH }, width, height, kind);
+  const result = await db.prepare(`INSERT INTO product_image_derivatives (product_image_id, product_id, derivative_kind, target_width, target_height, crop_x, crop_y, crop_width, crop_height, source_image_url, derivative_url, derivative_object_key, derivative_status, file_size_bytes, generation_method, notes, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(productImageId, Number(image.product_id || 0), kind, width, height, cropX, cropY, cropW, cropH, image.image_url || '', generated.url || '', generated.objectKey || '', generated.status || 'preview_ready', generated.size || 0, generated.method || 'query_preview_fallback', clean(body.notes || generated.note || '', 1000), Number(adminUser.user_id || 0) || null).run();
+  return json({ ok: true, message: generated.created ? 'R2 derivative file recorded.' : 'Derivative preview recorded with fallback.', product_image_derivative_id: Number(result?.meta?.last_row_id || 0), derivative_url: generated.url, derivative_object_key: generated.objectKey, derivative_status: generated.status, generation_method: generated.method });
 }

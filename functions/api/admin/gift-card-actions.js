@@ -57,6 +57,35 @@ async function recordEvent(db, adminUser, row, action, amount, note, sourceId = 
   await db.prepare(`INSERT INTO gift_card_admin_events (gift_card_id, source_gift_card_id, action_key, amount_cents, note, created_by_user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
     .bind(Number(row?.gift_card_id || 0) || null, sourceId, action, amount || 0, note || null, Number(adminUser?.user_id || 0) || null).run().catch(() => null);
 }
+
+async function queueGiftCardEmail(db, card, action, adminUser, note = '') {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_outbox (
+    notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_kind TEXT NOT NULL,
+    channel TEXT NOT NULL DEFAULT 'email',
+    destination TEXT,
+    payload_json TEXT,
+    metadata_json TEXT,
+    status TEXT NOT NULL DEFAULT 'queued',
+    attempt_count INTEGER NOT NULL DEFAULT 0,
+    next_attempt_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run().catch(() => null);
+  const destination = clean(card?.recipient_email || card?.issued_to_email || card?.purchaser_email || '', 254);
+  if (!destination) return { queued: false, reason: 'No recipient email on gift-card record.' };
+  const payload = {
+    subject: action === 'reissue' ? 'Your Devil n Dove gift card has been reissued' : 'Your Devil n Dove gift card is active',
+    gift_card_id: Number(card?.gift_card_id || 0),
+    code: card?.code || '',
+    currency: card?.currency || 'CAD',
+    remaining_amount_cents: Number(card?.remaining_amount_cents || 0),
+    note: note || 'Review before sending from the notification outbox.'
+  };
+  const result = await db.prepare(`INSERT INTO notification_outbox (notification_kind, channel, destination, payload_json, metadata_json, status, next_attempt_at, created_at, updated_at) VALUES ('gift_card_delivery', 'email', ?, ?, ?, 'queued', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(destination, JSON.stringify(payload), JSON.stringify({ source: 'gift_card_actions', action, queued_by_user_id: adminUser?.user_id || null })).run();
+  return { queued: true, notification_outbox_id: Number(result?.meta?.last_row_id || 0), destination };
+}
+
 async function loadCard(db, id) {
   return db.prepare(`SELECT * FROM gift_cards WHERE gift_card_id=? LIMIT 1`).bind(id).first();
 }
@@ -107,5 +136,7 @@ export async function onRequestPost(context) {
   }
   await auditAdminAction(env, request, adminUser, { action_type: `gift_card_${action}`, target_type: 'gift_card', target_id: id, target_key: card.code || String(id), details: { note } }).catch(() => null);
   const updated = await loadCard(db, action === 'reissue' ? Number((await db.prepare(`SELECT gift_card_id FROM gift_cards ORDER BY gift_card_id DESC LIMIT 1`).first())?.gift_card_id || id) : id).catch(() => null);
-  return json({ ok: true, message, card: updated });
+  let delivery = { queued: false, reason: 'No delivery needed for this action.' };
+  if (['activate_paid', 'reissue'].includes(action)) delivery = await queueGiftCardEmail(db, updated, action === 'reissue' ? 'reissue' : 'activation', adminUser, note).catch((error) => ({ queued: false, reason: error?.message || 'Gift-card email queue failed.' }));
+  return json({ ok: true, message, card: updated, delivery });
 }
