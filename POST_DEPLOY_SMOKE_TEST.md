@@ -33,3 +33,21 @@ Run this after each Cloudflare Pages deployment.
 - No white card with white/light text in shop, creations, or Local maker trust sections.
 - Product card images do not stretch vertically.
 - Product media table/cards do not force long full-page scrolling for routine edits.
+
+
+## Build 169 D1 smoke-test result storage
+
+The admin endpoint `/api/admin/post-deploy-smoke-tests` stores manual or automated smoke-test results in D1.
+
+Recommended checks to store after deploy:
+
+- `/` homepage returns 200 and dark-theme sections render correctly.
+- `/shop/` returns 200 and product cards fetch JSON successfully.
+- `/creations/` returns 200 and Browse Devil n Dove creations uses dark cards.
+- `/gift-cards/` returns 200 and balance lookup form loads.
+- `/admin/catalog/` loads without function syntax errors.
+- `/api/products` returns JSON.
+- `/api/product-detail?slug=<known-product-slug>` returns JSON, not HTML.
+- `/api/trust-blocks?context=home` returns JSON.
+
+Store results with `build_label`, `page_url`, `result_status`, `http_status`, and `notes`.

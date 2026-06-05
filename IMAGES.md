@@ -437,3 +437,18 @@ Next 20 recommended steps:
 18. Add Today task snooze duration selector.
 19. Add live post-deploy smoke-test result storage in D1.
 20. Add public-page dark-theme screenshot review checklist to `IMAGES.md`.
+
+
+## Build 169 public-page dark-theme screenshot review checklist
+
+Use this checklist after each deploy or major CSS pass. Capture desktop and mobile screenshots before considering the pass complete.
+
+1. `/` — verify the hero, Local maker trust, gift-card callout, and trust/proof blocks use dark cards with readable light text.
+2. `/shop/` — verify Browse by collection direction, filters, product cards, mini galleries, price/status text, and empty states stay dark-theme consistent.
+3. `/creations/` — verify Browse Devil n Dove creations uses dark panel contrast, not white cards with pale text.
+4. `/gift-cards/` — verify artwork, form panels, balance lookup, and helper text match the main site theme.
+5. `/custom-request/` — verify custom request cards, candle/soap options, uploads, and warning/error states are readable.
+6. `/shop/product/?slug=example` — verify image gallery, trust badges, candle/soap safety accordions, and related proof panels remain dark-theme readable.
+7. `/custom-candle-making-ontario/` and `/custom-soap-making-ontario/` — verify one H1, readable intro panels, and local Southern Ontario wording.
+
+A CSS pass is not complete if any public section falls back to a plain white card unless it is intentionally styled as a printable preview.

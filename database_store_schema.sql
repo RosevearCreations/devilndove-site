@@ -2407,3 +2407,115 @@ ALTER TABLE product_image_derivatives ADD COLUMN file_size_bytes INTEGER NOT NUL
 ALTER TABLE product_image_derivatives ADD COLUMN generation_method TEXT;
 ALTER TABLE custom_order_stage_photos ADD COLUMN consent_match_status TEXT NOT NULL DEFAULT 'not_checked';
 ALTER TABLE today_task_actions ADD COLUMN snooze_until TEXT;
+
+
+-- Build 169 schema additions: derivative output, proof candidates, gift delivery, local SEO, QA state, smoke tests.
+CREATE TABLE IF NOT EXISTS gift_card_delivery_templates (
+  gift_card_delivery_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  template_key TEXT NOT NULL UNIQUE,
+  subject TEXT,
+  body TEXT,
+  template_status TEXT NOT NULL DEFAULT 'active',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS gift_card_delivery_queue (
+  gift_card_delivery_queue_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  gift_card_id INTEGER,
+  recipient_email TEXT,
+  delivery_kind TEXT NOT NULL DEFAULT 'activation',
+  template_key TEXT,
+  subject TEXT,
+  body TEXT,
+  delivery_status TEXT NOT NULL DEFAULT 'queued',
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  queued_by_user_id INTEGER,
+  queued_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  sent_at TEXT,
+  notes TEXT
+);
+CREATE TABLE IF NOT EXISTS public_proof_candidates (
+  public_proof_candidate_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  source_kind TEXT NOT NULL DEFAULT 'stage_photo',
+  source_id INTEGER,
+  product_id INTEGER,
+  custom_request_id INTEGER,
+  proof_title TEXT,
+  proof_body TEXT,
+  image_url TEXT,
+  consent_status TEXT NOT NULL DEFAULT 'needs_review',
+  moderation_status TEXT NOT NULL DEFAULT 'needs_review',
+  placement_context TEXT NOT NULL DEFAULT 'sitewide',
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS marketplace_export_history (
+  marketplace_export_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel TEXT NOT NULL,
+  export_format TEXT NOT NULL DEFAULT 'csv',
+  product_count INTEGER NOT NULL DEFAULT 0,
+  ready_count INTEGER NOT NULL DEFAULT 0,
+  blocked_count INTEGER NOT NULL DEFAULT 0,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+CREATE TABLE IF NOT EXISTS product_qa_panel_states (
+  product_qa_panel_state_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  user_id INTEGER,
+  panel_key TEXT NOT NULL DEFAULT 'catalog_qa',
+  panel_state TEXT NOT NULL DEFAULT 'collapsed',
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(product_id,user_id,panel_key)
+);
+CREATE TABLE IF NOT EXISTS local_seo_bake_actions (
+  local_seo_bake_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  page_path TEXT NOT NULL,
+  proposed_title TEXT,
+  proposed_meta_description TEXT,
+  internal_link_notes TEXT,
+  action_status TEXT NOT NULL DEFAULT 'queued',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS local_seo_competitor_phrases (
+  local_seo_competitor_phrase_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  page_path TEXT NOT NULL,
+  phrase TEXT NOT NULL,
+  phrase_kind TEXT NOT NULL DEFAULT 'competitor_phrase',
+  review_status TEXT NOT NULL DEFAULT 'needs_review',
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS candle_soap_recall_notification_queue (
+  candle_soap_recall_notification_queue_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  batch_number TEXT NOT NULL,
+  recipient_email TEXT,
+  notification_status TEXT NOT NULL DEFAULT 'draft',
+  subject TEXT,
+  body TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS post_deploy_smoke_test_results (
+  post_deploy_smoke_test_result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  build_label TEXT,
+  page_url TEXT NOT NULL,
+  check_kind TEXT NOT NULL DEFAULT 'manual',
+  result_status TEXT NOT NULL DEFAULT 'pending',
+  http_status INTEGER,
+  notes TEXT,
+  checked_by_user_id INTEGER,
+  checked_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE product_image_derivatives ADD COLUMN before_image_url TEXT;
+ALTER TABLE product_image_derivatives ADD COLUMN comparison_notes TEXT;

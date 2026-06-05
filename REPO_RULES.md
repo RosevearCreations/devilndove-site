@@ -476,3 +476,29 @@ Next 20 recommended steps:
 18. Add Today task snooze duration selector.
 19. Add live post-deploy smoke-test result storage in D1.
 20. Add public-page dark-theme screenshot review checklist to `IMAGES.md`.
+
+
+## Build 169 pass — derivative output, proof moderation, marketplace history, gift delivery, local SEO bake queue
+
+Completed in this pass:
+
+1. Enhanced product image derivatives with Cloudflare Image Resizing/R2 output support when enabled.
+2. Added before/after derivative comparison panels in Product Media Workflow.
+3. Added marketplace export history per channel.
+4. Added marketplace bulk image selection from product image role order.
+5. Added `/admin/public-proof-candidates/` moderation workspace.
+6. Added public proof candidate API for stage photo/manual proof review.
+7. Added proof-consent status to private custom order links.
+8. Added gift-card delivery template editor and resend queue.
+9. Added `/admin/gift-cards/` operations page.
+10. Added gift-card lookup abuse severity scoring.
+11. Added local SEO bake-action queue for approved title/meta changes.
+12. Added local SEO competitor/local phrase checklist API and quick UI action.
+13. Added persisted product QA panel state endpoint.
+14. Added issue-specific Product QA Fix helper wiring.
+15. Added candle/soap recall notification queue endpoint and recall integration.
+16. Added Today task snooze duration support.
+17. Added post-deploy smoke-test result storage endpoint.
+18. Added public-page dark-theme screenshot checklist to `IMAGES.md`.
+19. Extended dark-theme CSS for new proof/gift/marketplace panels.
+20. Updated schema/reference notes for new D1 tables.
