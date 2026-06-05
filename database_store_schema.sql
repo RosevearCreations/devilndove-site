@@ -2339,3 +2339,71 @@ CREATE TABLE IF NOT EXISTS product_publish_qa_results (
 );
 -- local_seo_score, scoring_notes, and scored_at are included in the CREATE TABLE above.
 
+-- Build 168 schema additions / compatibility notes
+CREATE TABLE IF NOT EXISTS marketplace_export_image_selections (
+  marketplace_export_image_selection_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel TEXT NOT NULL,
+  product_id INTEGER NOT NULL,
+  selected_image_urls_json TEXT,
+  selected_product_image_ids_json TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(channel, product_id)
+);
+CREATE TABLE IF NOT EXISTS custom_request_public_proof_candidates (
+  custom_request_public_proof_candidate_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  custom_request_id INTEGER,
+  order_id INTEGER,
+  source_kind TEXT NOT NULL DEFAULT 'stage_photo',
+  source_record_id INTEGER,
+  image_url TEXT,
+  candidate_title TEXT,
+  candidate_body TEXT,
+  approval_status TEXT NOT NULL DEFAULT 'needs_review',
+  trust_block_item_id INTEGER,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS gift_card_lookup_attempts (
+  gift_card_lookup_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lookup_email TEXT,
+  code_suffix TEXT,
+  ip_hash TEXT,
+  user_agent TEXT,
+  result_status TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS candle_soap_batch_recalls (
+  candle_soap_batch_recall_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  batch_number TEXT NOT NULL,
+  product_kind TEXT,
+  recall_status TEXT NOT NULL DEFAULT 'watch',
+  reason TEXT,
+  customer_notice TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS accounting_evidence_attachments (
+  accounting_evidence_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_month TEXT,
+  evidence_kind TEXT,
+  title TEXT,
+  evidence_url TEXT,
+  object_key TEXT,
+  original_filename TEXT,
+  mime_type TEXT,
+  file_size_bytes INTEGER NOT NULL DEFAULT 0,
+  attachment_status TEXT NOT NULL DEFAULT 'active',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE product_image_derivatives ADD COLUMN derivative_object_key TEXT;
+ALTER TABLE product_image_derivatives ADD COLUMN file_size_bytes INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE product_image_derivatives ADD COLUMN generation_method TEXT;
+ALTER TABLE custom_order_stage_photos ADD COLUMN consent_match_status TEXT NOT NULL DEFAULT 'not_checked';
+ALTER TABLE today_task_actions ADD COLUMN snooze_until TEXT;

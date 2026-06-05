@@ -543,3 +543,54 @@ Next 20 recommended steps:
 ### Next direction
 Keep moving repeated image proof, marketplace mapping, gift card, evidence, and local SEO review data into D1-backed review queues with safe JSON fallbacks, and keep public pages on one clear H1 with local wording in titles/headings.
 
+## Build 168 — Roadmap/Gaps Pass Completed
+
+Build 168 continues the Devil n Dove roadmap/gaps pass with real R2-backed derivative image records, marketplace image selection persistence, consent-aware stage-photo proof moderation, gift-card delivery/redemption/abuse tooling, accountant evidence attachment packaging, local SEO scoring/quick actions, catalog QA history, candle/soap labels and recall review, trust-placement counts/previews, Today task snoozing, failed API drilldowns, stronger dark-theme regression checks, and a post-deploy smoke-test checklist.
+
+Completed Build 168 items:
+
+1. Product image derivative records can now create an R2 derivative object/key when an R2 bucket is available; otherwise they fall back to safe query-string previews.
+2. Marketplace export image selections now persist per product/channel before CSV export.
+3. Stage-photo public proof approval now checks for matching public-use media consent.
+4. Approved public-use stage photos now generate public-proof candidates for admin review.
+5. Order admin screens now include a gift-card redemption panel for order-linked redemptions.
+6. Gift-card activation/reissue actions queue email delivery records in the notification outbox.
+7. Gift-card lookup abuse dashboard endpoint added for repeated failed public lookups.
+8. Accountant export ZIP now includes evidence attachment URL files and attachment rows in the evidence index.
+9. Local SEO review rows now show score badges.
+10. Local SEO review has quick actions for title/meta review and completion.
+11. Product QA history panel was added to catalog product rows.
+12. Product Media Workflow now shows image derivative history beside media rows.
+13. Candle/soap label CSV export endpoint and admin download action were added.
+14. Candle/soap batch recall/watch dashboard endpoint and admin panel were added.
+15. Trust-block placement counts were added to placement data.
+16. Trust-block preview by page context was added.
+17. Today tasks now support snooze, in addition to done/ignore.
+18. Mobile admin Today tasks now show failed API/runtime incident drilldown details.
+19. Stronger dark-theme regression checks were added for public sections.
+20. `POST_DEPLOY_SMOKE_TEST.md` was added for live URL checks after deployment.
+
+Apply `database_upgrade_current_pass.sql` after deployment so the Build 168 D1 tables/columns are available.
+
+Next 20 recommended steps:
+
+1. Add true pixel crop/resizing worker output for derivative images instead of metadata copy fallbacks.
+2. Add visual derivative comparison before/after panels.
+3. Add direct marketplace export history per channel.
+4. Add marketplace image-selection bulk apply from product role order.
+5. Add a dedicated public-proof candidate moderation page.
+6. Add customer-visible proof consent status inside private order links.
+7. Add gift-card delivery template editor.
+8. Add gift-card resend delivery action.
+9. Add gift-card fraud/abuse severity scoring.
+10. Add binary R2 evidence file bundling when Cloudflare zip generation supports it safely.
+11. Add local SEO deploy/bake actions for approved title/meta changes.
+12. Add local SEO competitor phrase checklist per landing page.
+13. Persist product QA panel expanded/collapsed state.
+14. Add product QA issue-specific Fix buttons.
+15. Add candle/soap label print layout preview.
+16. Add candle/soap recall customer notification queue.
+17. Add trust-block A/B placement notes and performance tracking.
+18. Add Today task snooze duration selector.
+19. Add live post-deploy smoke-test result storage in D1.
+20. Add public-page dark-theme screenshot review checklist to `IMAGES.md`.
