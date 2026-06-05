@@ -27,6 +27,7 @@ async function ensureSchema(db) {
     UNIQUE(channel, product_id)
   )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_marketplace_export_image_selections_channel ON marketplace_export_image_selections(channel, product_id)`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_export_history (marketplace_export_history_id INTEGER PRIMARY KEY AUTOINCREMENT, channel TEXT NOT NULL, export_format TEXT NOT NULL DEFAULT 'csv', product_count INTEGER NOT NULL DEFAULT 0, ready_count INTEGER NOT NULL DEFAULT 0, blocked_count INTEGER NOT NULL DEFAULT 0, created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, notes TEXT)`).run();
 }
 function issuesFor(product, imgs, channel, selectedUrls = []) {
   const rule = RULES[channel] || RULES.manual;
@@ -79,6 +80,7 @@ export async function onRequestGet(context) {
   if (!RULES[channel]) return json({ ok: false, error: 'Supported channels: etsy, facebook, pinterest, manual.' }, 400);
   const previews = await buildPreview(db, channel);
   if (url.searchParams.get('format') === 'csv') {
+    await db.prepare(`INSERT INTO marketplace_export_history (channel, export_format, product_count, ready_count, blocked_count, created_by_user_id, created_at, notes) VALUES (?, 'csv', ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)`).bind(channel, previews.length, previews.filter((row) => row.ok).length, previews.filter((row) => !row.ok).length, Number(adminUser.user_id || 0) || null, 'CSV generated from marketplace export preview.').run().catch(() => null);
     const headers = ['channel','ready','product_id','sku','title','slug','price_cents','currency','category','tags','description','image_1','image_2','image_3','image_4','image_5','issues'];
     const lines = [headers.join(',')];
     previews.forEach((row) => {
@@ -87,7 +89,8 @@ export async function onRequestGet(context) {
     });
     return csv(lines.join('\n'), `devilndove-${channel}-marketplace-preview.csv`);
   }
-  return json({ ok: true, channel, rules: RULES[channel], summary: { total: previews.length, ready: previews.filter((row) => row.ok).length, blocked: previews.filter((row) => !row.ok).length, selected_products: previews.filter((row) => row.selected_image_urls.length > 0).length }, previews });
+  const history = rows(await db.prepare(`SELECT * FROM marketplace_export_history WHERE channel = ? ORDER BY datetime(created_at) DESC LIMIT 20`).bind(channel).all().catch(() => ({ results: [] })));
+  return json({ ok: true, channel, rules: RULES[channel], summary: { total: previews.length, ready: previews.filter((row) => row.ok).length, blocked: previews.filter((row) => !row.ok).length, selected_products: previews.filter((row) => row.selected_image_urls.length > 0).length }, previews, history });
 }
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -98,8 +101,20 @@ export async function onRequestPost(context) {
   await ensureSchema(db);
   let body = {}; try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
   const channel = clean(body.channel || 'etsy', 40).toLowerCase();
+  const action = clean(body.action || 'save_selection', 80);
   const productId = Number(body.product_id || 0);
   if (!RULES[channel]) return json({ ok: false, error: 'Supported channels: etsy, facebook, pinterest, manual.' }, 400);
+  if (action === 'bulk_apply_role_order') {
+    const previewRows = await buildPreview(db, channel);
+    let saved = 0;
+    for (const row of previewRows) {
+      const ordered = (row.available_images || []).filter((img) => ['hero_front','detail_texture','scale_context','process_story','gallery_support'].includes(String(img.image_role || '').toLowerCase())).map((img) => img.image_url).slice(0, RULES[channel].maxImages || 10);
+      if (!ordered.length) continue;
+      await db.prepare(`INSERT INTO marketplace_export_image_selections (channel, product_id, selected_image_urls_json, selected_product_image_ids_json, notes, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, '[]', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(channel, product_id) DO UPDATE SET selected_image_urls_json = excluded.selected_image_urls_json, notes = excluded.notes, updated_at = CURRENT_TIMESTAMP`).bind(channel, row.product_id, JSON.stringify(ordered), 'Bulk applied from product image role order.', Number(adminUser.user_id || 0) || null).run().catch(() => null);
+      saved += 1;
+    }
+    return json({ ok: true, message: `Bulk-applied image selections for ${saved} product(s).`, channel, saved });
+  }
   if (!productId) return json({ ok: false, error: 'product_id is required.' }, 400);
   const urls = Array.isArray(body.selected_image_urls) ? body.selected_image_urls.map((url) => clean(url, 1200)).filter(Boolean).slice(0, RULES[channel].maxImages || 10) : [];
   const ids = Array.isArray(body.selected_product_image_ids) ? body.selected_product_image_ids.map((id) => Number(id || 0)).filter(Boolean).slice(0, RULES[channel].maxImages || 10) : [];
