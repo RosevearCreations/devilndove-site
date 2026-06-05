@@ -805,3 +805,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadProducts();
   await refreshPendingActions();
 });
+
+
+// Build 169: lightweight persisted QA state and issue-specific fix buttons for catalog rows.
+(function(){
+  async function saveQaState(productId, panelState){
+    if(!window.DDAuth || !productId) return;
+    try{ await window.DDAuth.apiFetch('/api/admin/product-qa-panel-state',{method:'POST',body:JSON.stringify({product_id:Number(productId),panel_state:panelState})}); }catch{}
+  }
+  document.addEventListener('click', (event)=>{
+    const toggle = event.target?.closest?.('[data-toggle-product-qa-panel]');
+    if(toggle){ const id=toggle.getAttribute('data-toggle-product-qa-panel'); const panel=document.querySelector(`[data-product-qa-panel="${CSS.escape(String(id))}"]`); if(panel){ const open=panel.toggleAttribute('hidden'); saveQaState(id, open?'collapsed':'expanded'); } }
+    const fix = event.target?.closest?.('[data-product-qa-fix]');
+    if(fix){ const issue=fix.getAttribute('data-product-qa-fix')||'issue'; const productId=fix.getAttribute('data-product-id')||''; alert(`Fix helper: ${issue}\n\nOpen the matching editor section for product #${productId} and repair the readiness blocker before publishing.`); }
+  });
+})();
