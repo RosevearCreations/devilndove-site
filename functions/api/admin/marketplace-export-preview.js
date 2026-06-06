@@ -80,6 +80,20 @@ async function buildPreview(db, channel) {
     return { product_id: id, name: product.name || '', slug: product.slug || '', sku: product.sku || '', channel, ok: validated.issues.length === 0, image_count: imgs.length, public_ready_images: validated.publicImgs.length, available_images: validated.publicImgs.map((img) => ({ product_image_id: Number(img.product_image_id || 0), image_url: img.image_url || '', alt_text: img.alt_text || '', image_role: img.image_role || '', width_px: Number(img.width_px || 0), height_px: Number(img.height_px || 0) })).slice(0, 20), selected_image_urls: validated.selectedPublicImgs.map((img) => img.image_url), export_image_urls: validated.selectedPublicImgs.map((img) => img.image_url), tags: validated.tags.slice(0, 13), price_cents: Number(product.price_cents || 0), currency: product.currency || 'CAD', category: product.product_category || '', description: product.description || product.short_description || '', issues: validated.issues, selection_notes: selected.notes || '', selection_saved_at: selected.updated_at || '', field_preview: preview, required_fields: RULES[channel].fields };
   });
 }
+function urlsOf(row) { return Array.isArray(row.selected_image_urls) ? row.selected_image_urls : (Array.isArray(row.export_image_urls) ? row.export_image_urls : []); }
+function marketplaceSnapshotDiff(currentRows, snapshotRows) {
+  const current = new Map((currentRows || []).map((row) => [Number(row.product_id || 0), urlsOf(row)]));
+  const old = new Map((snapshotRows || []).map((row) => [Number(row.product_id || 0), Array.isArray(row.selected_image_urls) ? row.selected_image_urls : []]));
+  const ids = Array.from(new Set([...current.keys(), ...old.keys()])).filter(Boolean).sort((a,b)=>a-b);
+  return ids.map((id) => {
+    const now = current.get(id) || [];
+    const then = old.get(id) || [];
+    const added = now.filter((url) => !then.includes(url));
+    const removed = then.filter((url) => !now.includes(url));
+    return { product_id: id, changed: added.length > 0 || removed.length > 0, current_count: now.length, snapshot_count: then.length, added_urls: added, removed_urls: removed };
+  });
+}
+
 async function saveHistory(db, channel, previews, userId, notes, replayedFrom = null) {
   await db.prepare(`INSERT INTO marketplace_export_history (channel, export_format, product_count, ready_count, blocked_count, created_by_user_id, created_at, notes, snapshot_json, replayed_from_history_id) VALUES (?, 'csv', ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)`).bind(channel, previews.length, previews.filter((row) => row.ok).length, previews.filter((row) => !row.ok).length, userId || null, notes || '', JSON.stringify(previews.map((row) => ({ product_id: row.product_id, selected_image_urls: row.export_image_urls, field_preview: row.field_preview, ok: row.ok, issues: row.issues }))), replayedFrom).run().catch(() => null);
 }
@@ -94,6 +108,14 @@ export async function onRequestGet(context) {
   const channel = clean(url.searchParams.get('channel') || 'etsy', 40).toLowerCase();
   if (!RULES[channel]) return json({ ok: false, error: 'Supported channels: etsy, facebook, pinterest, manual.' }, 400);
   const previews = await buildPreview(db, channel);
+  const diffHistoryId = Number(url.searchParams.get('diff_history_id') || 0);
+  if (diffHistoryId) {
+    const historyRow = await db.prepare(`SELECT * FROM marketplace_export_history WHERE marketplace_export_history_id=? AND channel=? LIMIT 1`).bind(diffHistoryId, channel).first().catch(() => null);
+    if (!historyRow) return json({ ok: false, error: 'Marketplace history snapshot was not found.' }, 404);
+    let snapshot = []; try { snapshot = JSON.parse(historyRow.snapshot_json || '[]'); } catch { snapshot = []; }
+    const diff = marketplaceSnapshotDiff(previews, Array.isArray(snapshot) ? snapshot : []);
+    return json({ ok: true, channel, marketplace_export_history_id: diffHistoryId, diff, summary: { changed: diff.filter((row) => row.changed).length, total: diff.length }, history: historyRow });
+  }
   if (url.searchParams.get('format') === 'csv') {
     await saveHistory(db, channel, previews, Number(adminUser.user_id || 0) || null, 'CSV generated from marketplace export preview.');
     const headers = ['channel','ready','product_id','sku','title','slug','price_cents','currency','category','tags','description','image_1','image_2','image_3','image_4','image_5','issues'];
@@ -145,6 +167,28 @@ export async function onRequestPost(context) {
     }
     await db.prepare(`INSERT INTO marketplace_export_replay_events (channel, source_history_id, action_kind, affected_count, notes, created_by_user_id, created_at) VALUES (?, ?, 'replay_history', ?, ?, ?, CURRENT_TIMESTAMP)`).bind(channel, historyId, saved, clean(body.notes || '', 800), Number(adminUser.user_id || 0) || null).run().catch(() => null);
     return json({ ok: true, message: `Replayed ${saved} product image selections from export history.`, channel, saved });
+  }
+  if (action === 'rollback_channel_export') {
+    const historyId = Number(body.marketplace_export_history_id || 0);
+    if (historyId) {
+      const history = await db.prepare(`SELECT * FROM marketplace_export_history WHERE marketplace_export_history_id = ? AND channel = ? LIMIT 1`).bind(historyId, channel).first().catch(() => null);
+      if (!history) return json({ ok: false, error: 'Marketplace export history row was not found.' }, 404);
+      let snapshot = []; try { snapshot = JSON.parse(history.snapshot_json || '[]'); } catch { snapshot = []; }
+      await db.prepare(`DELETE FROM marketplace_export_image_selections WHERE channel = ?`).bind(channel).run();
+      let restored = 0;
+      for (const row of Array.isArray(snapshot) ? snapshot : []) {
+        const urls = Array.isArray(row.selected_image_urls) ? row.selected_image_urls.map((u) => clean(u, 1200)).filter(Boolean).slice(0, RULES[channel].maxImages || 10) : [];
+        if (!Number(row.product_id || 0) || !urls.length) continue;
+        await db.prepare(`INSERT INTO marketplace_export_image_selections (channel, product_id, selected_image_urls_json, selected_product_image_ids_json, notes, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, '[]', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(channel, Number(row.product_id || 0), JSON.stringify(urls), `Whole-channel rollback from export history ${historyId}.`, Number(adminUser.user_id || 0) || null).run().catch(() => null);
+        restored += 1;
+      }
+      await db.prepare(`INSERT INTO marketplace_export_replay_events (channel, source_history_id, action_kind, affected_count, notes, created_by_user_id, created_at) VALUES (?, ?, 'rollback_channel_export', ?, ?, ?, CURRENT_TIMESTAMP)`).bind(channel, historyId, restored, clean(body.notes || 'Whole channel export rollback.', 800), Number(adminUser.user_id || 0) || null).run().catch(() => null);
+      return json({ ok: true, message: `Whole-channel marketplace export rolled back to history ${historyId}.`, channel, restored });
+    }
+    const deleted = await db.prepare(`DELETE FROM marketplace_export_image_selections WHERE channel = ?`).bind(channel).run().catch(() => null);
+    const count = Number(deleted?.meta?.changes || 0) || 0;
+    await db.prepare(`INSERT INTO marketplace_export_replay_events (channel, action_kind, affected_count, notes, created_by_user_id, created_at) VALUES (?, 'rollback_channel_export_clear', ?, ?, ?, CURRENT_TIMESTAMP)`).bind(channel, count, clean(body.notes || 'Cleared whole-channel marketplace selections.', 800), Number(adminUser.user_id || 0) || null).run().catch(() => null);
+    return json({ ok: true, message: `Cleared ${count} saved image selection(s) for this marketplace channel.`, channel, affected_count: count });
   }
   if (action === 'rollback_selection') {
     if (!productId) return json({ ok: false, error: 'product_id is required for rollback.' }, 400);

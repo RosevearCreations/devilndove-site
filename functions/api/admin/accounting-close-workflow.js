@@ -39,6 +39,11 @@ function dosDateTime(date = new Date()) {
   const d = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
   return { time, date: d };
 }
+function bytesFromFile(file, encoder) {
+  if (file?.bytes instanceof Uint8Array) return file.bytes;
+  if (file?.bytes instanceof ArrayBuffer) return new Uint8Array(file.bytes);
+  return encoder.encode(file?.content || '');
+}
 function buildZip(files) {
   const encoder = textEncoder();
   const chunks = [];
@@ -46,8 +51,9 @@ function buildZip(files) {
   let offset = 0;
   const stamp = dosDateTime();
   for (const file of files) {
-    const nameBytes = encoder.encode(file.name);
-    const dataBytes = encoder.encode(file.content || '');
+    const safeName = String(file.name || 'file.txt').replace(/^\/+/, '').replace(/\.\./g, '.');
+    const nameBytes = encoder.encode(safeName);
+    const dataBytes = bytesFromFile(file, encoder);
     const crc = crc32(dataBytes);
     const local = new Uint8Array([
       ...u32(0x04034b50), ...u16(20), ...u16(0), ...u16(0), ...u16(stamp.time), ...u16(stamp.date), ...u32(crc), ...u32(dataBytes.length), ...u32(dataBytes.length), ...u16(nameBytes.length), ...u16(0)
@@ -72,30 +78,71 @@ function zipResponse(blob, filename) {
   return new Response(blob, { status: 200, headers: { 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'no-store' } });
 }
 function buildEvidenceIndexCsv(data) {
-  const lines = [csvLine(['evidence_type','label','url_or_reference','status','notes'])];
-  lines.push(csvLine(['hst_gst','remittance_evidence_url',data.hst_review?.remittance_evidence_url || '', data.hst_review?.remittance_status || '', data.hst_review?.notes || '']));
-  for (const row of data.export_packages || []) lines.push(csvLine(['export_package', row.package_key || row.accountant_export_package_id || '', '', row.package_status || '', row.notes || '']));
-  for (const row of data.payment?.applied_rows || []) lines.push(csvLine(['payment_application', row.transaction_reference || row.accounting_payment_application_id || '', row.provider || '', row.application_status || '', row.application_notes || '']));
-  for (const row of data.evidence_attachments || []) lines.push(csvLine(['attachment_file', row.title || row.original_filename || row.accounting_evidence_attachment_id || '', row.evidence_url || row.object_key || '', row.attachment_status || 'active', row.evidence_kind || '']));
+  const lines = [csvLine(['evidence_type','label','url_or_reference','status','mime_type','size_bytes','notes'])];
+  lines.push(csvLine(['hst_gst','remittance_evidence_url',data.hst_review?.remittance_evidence_url || '', data.hst_review?.remittance_status || '', '', '', data.hst_review?.notes || '']));
+  for (const row of data.export_packages || []) lines.push(csvLine(['export_package', row.package_key || row.accountant_export_package_id || '', '', row.package_status || '', '', '', row.notes || '']));
+  for (const row of data.payment?.applied_rows || []) lines.push(csvLine(['payment_application', row.transaction_reference || row.accounting_payment_application_id || '', row.provider || '', row.application_status || '', '', '', row.application_notes || '']));
+  for (const row of data.evidence_attachments || []) lines.push(csvLine(['attachment_file', row.title || row.original_filename || row.accounting_evidence_attachment_id || '', row.evidence_url || row.object_key || '', row.attachment_status || 'active', row.mime_type || '', row.file_size_bytes || 0, row.evidence_kind || '']));
   return `${lines.join('\n')}\n`;
 }
-function buildAccountantZip(data) {
+function safeAttachmentName(row, suffix = '') {
+  const base = String(row.original_filename || row.title || row.accounting_evidence_attachment_id || 'evidence').replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120) || 'evidence';
+  return suffix ? `${base}${suffix}` : base;
+}
+function mimeIsBundleSafe(mime) {
+  const m = String(mime || '').toLowerCase();
+  return m === 'application/pdf' || m.startsWith('image/');
+}
+function evidenceBundleSummary(data, includeBinaryEvidence, env = {}) {
+  const max = Math.min(Math.max(Number(env.ACCOUNTANT_EVIDENCE_MAX_BYTES || 5242880) || 5242880, 1), 26214400);
+  const fetchEnabled = String(env.ACCOUNTANT_EVIDENCE_R2_FETCH_ENABLED || '').toLowerCase() === 'true';
+  const rows = data.evidence_attachments || [];
+  const warnings = [];
+  let binary_count = 0; let binary_bytes = 0; let url_only_count = 0;
+  for (const row of rows) {
+    const size = Number(row.file_size_bytes || 0) || 0;
+    if (!row.object_key) { warnings.push(`${row.title || row.original_filename || row.accounting_evidence_attachment_id}: skipped binary bundle because no R2 object_key is stored.`); url_only_count += 1; continue; }
+    if (!mimeIsBundleSafe(row.mime_type)) { warnings.push(`${row.title || row.original_filename || row.accounting_evidence_attachment_id}: skipped binary bundle because mime type is not PDF/image (${row.mime_type || 'unknown'}).`); url_only_count += 1; continue; }
+    if (size > max) { warnings.push(`${row.title || row.original_filename || row.accounting_evidence_attachment_id}: skipped binary bundle because ${size} bytes exceeds ${max} byte limit.`); url_only_count += 1; continue; }
+    binary_count += 1; binary_bytes += size;
+  }
+  if (includeBinaryEvidence && !fetchEnabled) warnings.push('Binary receipt bundling was requested, but ACCOUNTANT_EVIDENCE_R2_FETCH_ENABLED is not true. URL reference files were included instead.');
+  return { total_attachments: rows.length, binary_fetch_enabled: fetchEnabled, binary_requested: !!includeBinaryEvidence, binary_safe_count: binary_count, binary_safe_bytes: binary_bytes, url_only_count, max_bytes_per_file: max, warnings };
+}
+async function fetchEvidenceBytes(context, row, summary) {
+  const bucket = context.env.ACCOUNTING_EVIDENCE_BUCKET || context.env.MEDIA_BUCKET || context.env.PRODUCT_MEDIA_BUCKET || context.env.R2_PRODUCT_MEDIA;
+  if (!bucket || !row.object_key || !summary.binary_fetch_enabled || !mimeIsBundleSafe(row.mime_type)) return null;
+  const size = Number(row.file_size_bytes || 0) || 0;
+  if (size > summary.max_bytes_per_file) return null;
+  const object = await bucket.get(row.object_key).catch(() => null);
+  if (!object) return null;
+  const buffer = await object.arrayBuffer();
+  return new Uint8Array(buffer);
+}
+async function buildAccountantZip(context, data, includeBinaryEvidence = false) {
+  const summary = evidenceBundleSummary(data, includeBinaryEvidence, context.env || {});
   const manifest = {
     package: 'Devil n Dove accountant export',
     period_month: data.period_month,
     generated_at: new Date().toISOString(),
     close_readiness: data.close_readiness,
-    included_files: ['close-summary.csv', 'evidence-index.csv', 'manifest.json'].concat((data.evidence_attachments || []).map((row) => `attachments/${String(row.original_filename || row.title || row.accounting_evidence_attachment_id || 'evidence.txt').replace(/[^a-zA-Z0-9._-]+/g, '-')}.url.txt`)),
-    note: 'Text/CSV export bundle generated by the accounting close workflow. Review before accountant handoff.'
+    evidence_bundle_summary: summary,
+    included_files: ['close-summary.csv', 'evidence-index.csv', 'manifest.json', 'evidence-bundle-warnings.txt'],
+    note: 'Text/CSV accountant package. Binary PDF/image receipts are included only when R2 fetch is explicitly enabled.'
   };
   const files = [
     { name: 'close-summary.csv', content: buildCloseCsv(data) },
     { name: 'evidence-index.csv', content: buildEvidenceIndexCsv(data) },
+    { name: 'evidence-bundle-warnings.txt', content: (summary.warnings.length ? summary.warnings.join('\n') : 'No evidence bundle warnings.') + '\n' },
     { name: 'manifest.json', content: JSON.stringify(manifest, null, 2) + '\n' }
   ];
   for (const row of data.evidence_attachments || []) {
-    const safe = String(row.original_filename || row.title || row.accounting_evidence_attachment_id || 'evidence').replace(/[^a-zA-Z0-9._-]+/g, '-');
-    files.push({ name: `attachments/${safe}.url.txt`, content: `Title: ${row.title || ''}\nKind: ${row.evidence_kind || ''}\nURL: ${row.evidence_url || ''}\nObject key: ${row.object_key || ''}\nStatus: ${row.attachment_status || ''}\nUploaded: ${row.created_at || ''}\n` });
+    const safe = safeAttachmentName(row);
+    files.push({ name: `attachments/references/${safe}.url.txt`, content: `Title: ${row.title || ''}\nKind: ${row.evidence_kind || ''}\nURL: ${row.evidence_url || ''}\nObject key: ${row.object_key || ''}\nMime type: ${row.mime_type || ''}\nSize bytes: ${row.file_size_bytes || 0}\nStatus: ${row.attachment_status || ''}\nUploaded: ${row.created_at || ''}\n` });
+    if (includeBinaryEvidence) {
+      const bytes = await fetchEvidenceBytes(context, row, summary).catch(() => null);
+      if (bytes) files.push({ name: `attachments/binary/${safe}`, bytes });
+    }
   }
   return buildZip(files);
 }
@@ -255,7 +302,9 @@ async function payload(db, periodMonth) {
   const closure = await getAccountingPeriodClosure(db, periodMonth) || { period_month: periodMonth, lock_state: 'open', close_checklist: normalizeChecklistPayload({}), close_notes: '' };
   const packages = await exportPackages(db, periodMonth);
   const evidence_attachments = rows(await db.prepare(`SELECT * FROM accounting_evidence_attachments WHERE period_month=? ORDER BY datetime(created_at) DESC LIMIT 200`).bind(periodMonth).all().catch(() => ({ results: [] })));
-  return { ok: true, period_month: periodMonth, payment, hst_review: hst, closure, export_packages: packages, evidence_attachments, close_readiness: closeReadiness(closure, hst, payment) };
+  const data = { ok: true, period_month: periodMonth, payment, hst_review: hst, closure, export_packages: packages, evidence_attachments, close_readiness: closeReadiness(closure, hst, payment) };
+  data.evidence_bundle_summary = evidenceBundleSummary(data, false, {});
+  return data;
 }
 
 export async function onRequestGet(context) {
@@ -269,7 +318,7 @@ export async function onRequestGet(context) {
   try {
     const data = await payload(db, periodMonth);
     if (format === 'csv') return csvResponse(buildCloseCsv(data), `devilndove-accounting-close-${periodMonth}.csv`);
-    if (format === 'zip') return zipResponse(buildAccountantZip(data), `devilndove-accountant-export-${periodMonth}.zip`);
+    if (format === 'zip') return zipResponse(await buildAccountantZip(context, data, url.searchParams.get('include_binary_evidence') === '1'), `devilndove-accountant-export-${periodMonth}.zip`);
     return jsonResponse(data, 200, { 'Cache-Control': 'no-store' });
   }
   catch (error) {
