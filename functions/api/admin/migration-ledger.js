@@ -70,6 +70,13 @@ const EXPECTED_MIGRATIONS = [
     destructive: false,
     run_order: 173,
   },
+  {
+    migration_key: 'build_174_preflight_detail_manifest',
+    file_name: 'database_build174_deployment_preflight_detail.sql',
+    purpose: 'Build 174 deployment preflight detail drawers, post-deploy confirmations, and release manifest workflow.',
+    destructive: false,
+    run_order: 174,
+  },
 ];
 
 function normalizeResults(result) {

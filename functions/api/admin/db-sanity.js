@@ -69,6 +69,7 @@ const EXPECTED_TABLES = {
   admin_pending_actions: ['admin_pending_action_id'],
   cart_activity: ['cart_activity_id'],
   deployment_preflight_runs: ['deployment_preflight_run_id', 'build_label', 'run_status', 'blocker_count', 'warning_count', 'summary_json'],
+  deployment_post_deploy_confirmations: ['deployment_post_deploy_confirmation_id', 'build_label', 'confirmation_key', 'confirmation_status', 'confirmed_by_user_id', 'confirmed_at'],
 };
 
 async function getTableNames(db) {
