@@ -1,3 +1,16 @@
+# Build 173 Operator Note
+
+This build adds a dedicated Deployment Preflight page at `/admin/deployment-preflight/` plus the additive migration `database_build173_deployment_preflight.sql`.
+
+Use it before deployment to catch:
+- D1 migration ledger drift and missing Build 171/173 markers.
+- Public page H1/title/meta/local wording issues.
+- CSS brace drift.
+- Static JSON fallback parse issues.
+- Core admin page fetch/H1 readiness.
+
+For live D1 databases that already received Build 171 tables/columns but failed on the ledger marker, run `database_build171_ledger_repair.sql` first, then run `database_build173_deployment_preflight.sql`.
+
 # Build 171 Update Note
 
 This build adds admin safety and release-readiness work across accounting evidence bundles, dark-theme evidence review, Product QA focus links, gift-card delivery logs, marketplace export history rollback, R2 derivative health checks, candle/soap recall approval gates, Local SEO bake exports, Today task filters, smoke-test badges, release notes, and safe deploy packaging.

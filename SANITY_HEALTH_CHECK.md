@@ -1,3 +1,23 @@
+# Build 173 Deployment Preflight Sanity Notes
+
+Static package preflight result for this zip:
+- Status: ready.
+- Blockers: 0.
+- Warnings: 0.
+- Public local SEO pages checked: 12.
+- One-H1/title/meta/local wording check: pass.
+- CSS brace balance: pass.
+- Static JSON parse check: pass.
+- Required release/safe-deploy files: pass.
+
+Post-deploy D1 order:
+1. If Build 171 schema additions already ran but the ledger insert failed, run `database_build171_ledger_repair.sql` first.
+2. Run `database_build173_deployment_preflight.sql` once.
+3. Open `/admin/deployment-preflight/`.
+4. Run Preflight.
+5. Save Snapshot.
+6. Review any `blocked` or `review` status before swapping or promoting a live branch.
+
 # Build 171 Deployment Blocker Checklist
 
 Deployment blockers to confirm before live release:

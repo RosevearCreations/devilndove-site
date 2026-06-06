@@ -1,3 +1,17 @@
+# Build 173 Post-Deploy Smoke and Preflight Update
+
+New post-deploy step:
+- Open `/admin/deployment-preflight/` after D1 migrations and before live promotion.
+- Run the preflight check for D1 ledger safety, one-H1/title/meta checks, local wording, CSS drift, static JSON fallbacks, and core admin page fetch health.
+- Save a snapshot so the deployment has a dated admin review record.
+
+Recommended order:
+1. Apply any needed repair migration (`database_build171_ledger_repair.sql`) only if the Build 171 ledger marker failed after schema objects already existed.
+2. Apply `database_build173_deployment_preflight.sql`.
+3. Run `/admin/deployment-preflight/`.
+4. Run `/admin/post-deploy-smoke-tests/`.
+5. Open `/admin/safe-deploy-package/` and confirm required post-deploy actions are documented.
+
 # Post-deploy live URL smoke-test checklist
 
 Run this after each Cloudflare Pages deployment.

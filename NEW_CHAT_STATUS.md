@@ -1,3 +1,14 @@
+# Build 173 Current Status
+
+Latest packaged work adds Deployment Preflight safety for Devil n Dove:
+- `/admin/deployment-preflight/`
+- `/api/admin/deployment-preflight`
+- `database_build173_deployment_preflight.sql`
+- static `scripts/deployment_preflight_static_check.py`
+- `data/site/deployment-preflight.json`
+
+The main operational risk reduced here is accidentally rerunning a large D1 upgrade after the Build 171 schema changes already applied but the ledger marker failed. The correct repair order is documented in README, SANITY_HEALTH_CHECK, DATABASE_SCHEMA_REFERENCE, and RELEASE_NOTES.
+
 # New chat status — Build 159
 
 Latest packaged state: Build 159.

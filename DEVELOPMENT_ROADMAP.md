@@ -1,3 +1,49 @@
+# Build 173 Completed Pass — Deployment Preflight, D1 Safety, and Local SEO Release Guardrails
+
+Completed in this pass:
+1. Added `/admin/deployment-preflight/` as a dedicated deploy-readiness page.
+2. Added `/api/admin/deployment-preflight` to check D1 ledger safety, public SEO basics, CSS drift, static JSON fallbacks, and core admin page health.
+3. Added D1 detection for the exact Build 171 pattern where tables/columns exist but the ledger marker is missing.
+4. Added a safe recommendation to run `database_build171_ledger_repair.sql` instead of rerunning the full upgrade when Build 171 objects already exist.
+5. Added `deployment_preflight_runs` so admins can save preflight snapshots before live deploys.
+6. Added `database_build173_deployment_preflight.sql` as an additive, non-destructive D1 migration.
+7. Added the Build 173 migration marker with `file_name` populated to avoid the previous NOT NULL ledger failure.
+8. Updated `database_schema.sql`, `database_full_schema.sql`, `database_store_schema.sql`, and `database_upgrade_current_pass.sql` with the Build 173 table/reference.
+9. Added `scripts/deployment_preflight_static_check.py` for no-network package validation.
+10. Generated `data/site/deployment-preflight.json` from the static preflight script.
+11. Updated `scripts/generate_release_notes.py` so release notes include post-deploy actions and validation.
+12. Updated Migration Ledger expectations to include Build 171 and Build 173 markers.
+13. Updated Schema Drift and DB Sanity expectations to include `deployment_preflight_runs`.
+14. Added a dashboard card linking directly to Deployment Preflight.
+15. Added an Operations page link and explanation for the preflight workflow.
+16. Added status-pill/table CSS helpers used by the new admin review page.
+17. Rechecked the main public local SEO pages for one H1, title, meta description, and required local/search wording.
+18. Rechecked CSS brace balance and static JSON parse health.
+19. Updated release documentation and post-deploy notes around the safe D1 repair order.
+20. Preserved the existing Build 171/172 hotfix repair path while adding the next safe migration layer.
+
+Next 20 recommended steps:
+1. Add a D1 migration history detail drawer that shows the exact SQL file, marker, and operator notes for each saved migration.
+2. Add a preflight diff between the current live database schema and the expected schema reference file.
+3. Add an admin button that exports the latest preflight result to Markdown for support handoff.
+4. Add preflight checks for every public landing page image alt text and featured image fallback.
+5. Add local SEO title/meta length scoring into the Deployment Preflight page.
+6. Add JSON-to-D1 duplicate ownership checks for Tools, Supplies, featured items, and local SEO bake actions.
+7. Add a safe migration planner that lists which SQL files to run for fresh database vs already-partially-upgraded database.
+8. Add a D1 data-integrity report for product/image/story/trust-block relationships.
+9. Add automatic release-note changed-file detection from the zip contents rather than manually maintained JSON.
+10. Add a public-page schema.org structured-data preview row to the preflight page.
+11. Add canonical URL checks for all exposed local landing pages.
+12. Add mobile layout screenshot checklist rows to the Deployment Preflight page.
+13. Add low-bandwidth/offline fallback checks for shop, product detail, and gallery pages.
+14. Add admin dashboard badges for latest preflight status and latest saved snapshot time.
+15. Add automatic SANITY_HEALTH_CHECK regeneration from `data/site/deployment-preflight.json`.
+16. Add a release package manifest with file hashes for schema, functions, admin pages, and public JS.
+17. Add safer SQL copy blocks for D1 Console with separate fresh-install and repair-only sections.
+18. Add R2 route health checks into the same Deployment Preflight result table.
+19. Add smoke-test quick links that open each failed/warn page in a new tab.
+20. Add a post-deploy confirmation workflow that marks each action done and records the admin user/time.
+
 # Build 171 Completed Pass — Admin Safety, Release Readiness, and Local SEO Controls
 
 Completed this pass:

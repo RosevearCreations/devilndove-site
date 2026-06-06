@@ -2635,3 +2635,16 @@ SELECT
   CURRENT_TIMESTAMP
 WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='schema_migration_ledger')
   AND NOT EXISTS (SELECT 1 FROM schema_migration_ledger WHERE migration_key='build_171_admin_safety_release_readiness');
+
+-- Build 173 deployment preflight and release-run history.
+CREATE TABLE IF NOT EXISTS deployment_preflight_runs (
+  deployment_preflight_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  build_label TEXT,
+  run_status TEXT NOT NULL DEFAULT 'warning',
+  blocker_count INTEGER NOT NULL DEFAULT 0,
+  warning_count INTEGER NOT NULL DEFAULT 0,
+  summary_json TEXT NOT NULL DEFAULT '{}',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_deployment_preflight_runs_status ON deployment_preflight_runs(run_status, created_at DESC);

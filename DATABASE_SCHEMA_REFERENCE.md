@@ -1,3 +1,31 @@
+# Build 173 Schema Reference Additions
+
+## New table: `deployment_preflight_runs`
+
+Purpose: stores saved admin deployment-preflight snapshots so we can prove whether a build was checked before deployment and compare blocker/warning counts over time.
+
+Columns:
+- `deployment_preflight_run_id` — primary key.
+- `build_label` — build/version label entered by the admin UI.
+- `run_status` — `ready`, `review`, or `blocked` result from the preflight summary.
+- `blocker_count` — number of failed checks.
+- `warning_count` — number of warning checks.
+- `summary_json` — captured summary/checklist payload.
+- `created_by_user_id` — admin who saved the snapshot.
+- `created_at` — save timestamp.
+
+Indexes:
+- `idx_deployment_preflight_runs_status` on `(run_status, created_at DESC)`.
+
+Migration files updated:
+- `database_build173_deployment_preflight.sql`
+- `database_upgrade_current_pass.sql`
+- `database_schema.sql`
+- `database_full_schema.sql`
+- `database_store_schema.sql`
+
+D1 safety note: if Build 171 schema objects already exist but the Build 171 ledger marker is missing, run `database_build171_ledger_repair.sql` only. Then run `database_build173_deployment_preflight.sql` once for the new preflight history table. Build 173 also creates `schema_migration_ledger` if it is missing, but a fresh database should still receive the full base schema before using the admin app.
+
 # Build 171 Schema Reference Additions
 
 New or extended persistence areas:

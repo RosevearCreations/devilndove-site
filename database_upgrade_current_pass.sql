@@ -2226,3 +2226,38 @@ SELECT
   CURRENT_TIMESTAMP
 WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='schema_migration_ledger')
   AND NOT EXISTS (SELECT 1 FROM schema_migration_ledger WHERE migration_key='build_171_admin_safety_release_readiness');
+
+-- Build 173 deployment preflight and release-run history.
+CREATE TABLE IF NOT EXISTS deployment_preflight_runs (
+  deployment_preflight_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  build_label TEXT,
+  run_status TEXT NOT NULL DEFAULT 'warning',
+  blocker_count INTEGER NOT NULL DEFAULT 0,
+  warning_count INTEGER NOT NULL DEFAULT 0,
+  summary_json TEXT NOT NULL DEFAULT '{}',
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_deployment_preflight_runs_status ON deployment_preflight_runs(run_status, created_at DESC);
+
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key,
+  file_name,
+  status,
+  destructive,
+  applied_at,
+  notes,
+  created_at,
+  updated_at
+)
+SELECT
+  'build_173_deployment_preflight_release_safety',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  CURRENT_TIMESTAMP,
+  'Deployment preflight run history, D1 rerun warnings, one-H1/local SEO checks, release-document health, and admin safe-deploy visibility.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='schema_migration_ledger')
+  AND NOT EXISTS (SELECT 1 FROM schema_migration_ledger WHERE migration_key='build_173_deployment_preflight_release_safety');
