@@ -68,6 +68,7 @@ const EXPECTED_TABLES = {
   accounting_period_closures: ['accounting_period_closure_id', 'period_month', 'lock_state'],
   admin_pending_actions: ['admin_pending_action_id'],
   cart_activity: ['cart_activity_id'],
+  deployment_preflight_runs: ['deployment_preflight_run_id', 'build_label', 'run_status', 'blocker_count', 'warning_count', 'summary_json'],
 };
 
 async function getTableNames(db) {
