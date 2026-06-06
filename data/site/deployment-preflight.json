@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 173",
+  "build_label": "Build 174",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,7 +7,13 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "7 required files are present.",
+      "detail": "11 required files are present.",
+      "missing": []
+    },
+    {
+      "code": "static_schema_build174",
+      "status": "pass",
+      "detail": "Build 174 schema table and ledger marker found in schema files.",
       "missing": []
     },
     {
@@ -19,97 +25,157 @@
           "path": "index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 59,
+          "meta_description_length": 157,
+          "has_canonical": true,
+          "schema_blocks": 2,
+          "image_count": 1,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "shop/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 66,
+          "meta_description_length": 146,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 1,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "gallery/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 62,
+          "meta_description_length": 162,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 2,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "creations/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 62,
+          "meta_description_length": 154,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 2,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "handmade-jewelry-ontario/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 51,
+          "meta_description_length": 163,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 0,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "polymer-clay-earrings-ontario/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 47,
+          "meta_description_length": 129,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 0,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "custom-gifts-southern-ontario/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 47,
+          "meta_description_length": 157,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 0,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "laser-engraving-ontario/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 50,
+          "meta_description_length": 128,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 0,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "custom-candle-making-ontario/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 55,
+          "meta_description_length": 166,
+          "has_canonical": true,
+          "schema_blocks": 0,
+          "image_count": 1,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "custom-soap-making-ontario/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 53,
+          "meta_description_length": 156,
+          "has_canonical": true,
+          "schema_blocks": 0,
+          "image_count": 1,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "vintage-finds-ontario/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 52,
+          "meta_description_length": 128,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 0,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         },
         {
           "path": "workshop-made-gifts-ontario/index.html",
           "status": "pass",
           "h1_count": 1,
-          "has_title": true,
-          "has_meta_description": true,
-          "missing_terms": []
+          "title_length": 45,
+          "meta_description_length": 152,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 0,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         }
       ]
     },
@@ -121,7 +187,7 @@
     {
       "code": "static_json_parse",
       "status": "pass",
-      "detail": "4 JSON files checked; 0 failed.",
+      "detail": "6 JSON files checked; 0 failed.",
       "rows": [
         {
           "path": "data/site/seo-page-overrides.json",
@@ -135,6 +201,16 @@
         },
         {
           "path": "data/site/release-notes.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/deployment-preflight.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/release-package-manifest.json",
           "ok": true,
           "error": ""
         },

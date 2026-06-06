@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
   <title>Deployment Preflight — Devil n Dove Admin</title>
-  <meta content="Run D1 migration safety, one-H1, CSS, static JSON, release-document, and local SEO preflight checks before deploying Devil n Dove." name="description"/>
+  <meta content="Run D1 migration safety, schema diff, one-H1, CSS, JSON, schema.org, image-alt, canonical, release-manifest, and local SEO preflight checks before deploying Devil n Dove." name="description"/>
   <link href="/css/styles.css" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
 </head>
@@ -21,7 +21,7 @@
     <div class="hero">
       <div>
         <h1>Deployment Preflight</h1>
-        <p>Check the live build for D1 migration ledger safety, public page H1/title/meta health, CSS drift, static JSON fallbacks, and local-search wording before pushing or swapping branches.</p>
+        <p>Check the live build for D1 migration ledger safety, schema drift, public page H1/title/meta/canonical/schema.org/image-alt health, CSS drift, static JSON fallbacks, release manifests, and local-search wording before pushing or swapping branches.</p>
       </div>
     </div>
 
@@ -40,9 +40,12 @@
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
         <button class="btn" id="runDeploymentPreflightButton" type="button">Run Preflight</button>
         <button class="btn secondary" id="saveDeploymentPreflightButton" type="button">Save Snapshot</button>
+        <button class="btn secondary" id="exportDeploymentPreflightButton" type="button">Export Markdown</button>
       </div>
       <div id="deploymentPreflightSummary" style="margin-top:14px"></div>
       <div id="deploymentPreflightChecks" style="margin-top:14px"></div>
+      <div id="deploymentPreflightDetails" style="margin-top:14px"></div>
+      <div id="deploymentPostDeployConfirmations" style="margin-top:14px"></div>
       <div id="deploymentPreflightRuns" style="margin-top:14px"></div>
     </div>
 
