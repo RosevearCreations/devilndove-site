@@ -24,14 +24,18 @@ export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
   await ensure(db);
+  const url = new URL(context.request.url);
+  const categoryFilter = String(url.searchParams.get('category') || '').trim();
+  const minCount = Number(url.searchParams.get('min_count') || 1) || 1;
   const rawTasks = [
-    { key: 'readiness', label: 'Product readiness blockers', count: await scalar(db, `SELECT COUNT(*) FROM products WHERE COALESCE(status,'draft')!='archived' AND (COALESCE(featured_image_url,'')='' OR COALESCE(price_cents,0)<=0 OR COALESCE(short_description,'')='')`), href: '/admin/readiness/' },
-    { key: 'custom_requests', label: 'Custom requests needing review', count: await scalar(db, `SELECT COUNT(*) FROM custom_requests WHERE COALESCE(status,'new') IN ('new','reviewing','quote_needed')`), href: '/admin/operations/#customRequestsAdminMount' },
-    { key: 'orders', label: 'Orders pending payment/fulfillment', count: await scalar(db, `SELECT COUNT(*) FROM orders WHERE COALESCE(order_status,'pending') IN ('pending','paid') OR COALESCE(payment_status,'pending')='pending'`), href: '/admin/orders/' },
-    { key: 'inventory', label: 'Inventory needing reorder/review', count: await scalar(db, `SELECT COUNT(*) FROM site_items WHERE COALESCE(reorder_status,'') IN ('needed','requested') OR COALESCE(on_hand_quantity,0)<=COALESCE(reorder_threshold,0)`), href: '/admin/inventory-operations/' },
-    { key: 'accounting', label: 'Accounting evidence gaps', count: await scalar(db, `SELECT COUNT(*) FROM hst_gst_review_records WHERE COALESCE(remittance_evidence_url,'')='' AND COALESCE(review_status,'draft')!='draft'`), href: '/admin/accounting/#accountingEvidenceCheckMount' },
-    { key: 'failed_api', label: 'Recent failed API/runtime incidents', count: await scalar(db, `SELECT COUNT(*) FROM runtime_incidents WHERE COALESCE(status,'open') NOT IN ('resolved','ignored') AND datetime(created_at) >= datetime('now','-7 days')`), href: '/admin/operations/#runtimeIncidentsAdminMount', details: await failedApiDetails(db) }
+    { key: 'readiness', category: 'catalog', label: 'Product readiness blockers', count: await scalar(db, `SELECT COUNT(*) FROM products WHERE COALESCE(status,'draft')!='archived' AND (COALESCE(featured_image_url,'')='' OR COALESCE(price_cents,0)<=0 OR COALESCE(short_description,'')='')`), href: '/admin/readiness/' },
+    { key: 'custom_requests', category: 'customers', label: 'Custom requests needing review', count: await scalar(db, `SELECT COUNT(*) FROM custom_requests WHERE COALESCE(status,'new') IN ('new','reviewing','quote_needed')`), href: '/admin/operations/#customRequestsAdminMount' },
+    { key: 'orders', category: 'orders', label: 'Orders pending payment/fulfillment', count: await scalar(db, `SELECT COUNT(*) FROM orders WHERE COALESCE(order_status,'pending') IN ('pending','paid') OR COALESCE(payment_status,'pending')='pending'`), href: '/admin/orders/' },
+    { key: 'inventory', category: 'inventory', label: 'Inventory needing reorder/review', count: await scalar(db, `SELECT COUNT(*) FROM site_items WHERE COALESCE(reorder_status,'') IN ('needed','requested') OR COALESCE(on_hand_quantity,0)<=COALESCE(reorder_threshold,0)`), href: '/admin/inventory-operations/' },
+    { key: 'accounting', category: 'accounting', label: 'Accounting evidence gaps', count: await scalar(db, `SELECT COUNT(*) FROM hst_gst_review_records WHERE COALESCE(remittance_evidence_url,'')='' AND COALESCE(review_status,'draft')!='draft'`), href: '/admin/accounting/#accountingEvidenceCheckMount' },
+    { key: 'failed_api', category: 'health', label: 'Recent failed API/runtime incidents', count: await scalar(db, `SELECT COUNT(*) FROM runtime_incidents WHERE COALESCE(status,'open') NOT IN ('resolved','ignored') AND datetime(created_at) >= datetime('now','-7 days')`), href: '/admin/operations/#runtimeIncidentsAdminMount', details: await failedApiDetails(db) }
   ];
-  const tasks=[]; for(const task of rawTasks){ if(Number(task.count||0)>0 && !(await isSuppressed(db,task.key))) tasks.push(task); }
-  return json({ ok: true, tasks, suppressed_count: rawTasks.length - tasks.length, summary: { total_count: tasks.reduce((sum, row) => sum + Number(row.count || 0), 0), generated_at: new Date().toISOString() } });
+  const categories = Array.from(new Set(rawTasks.map((task) => task.category || 'general')));
+  const tasks=[]; for(const task of rawTasks){ if(categoryFilter && task.category !== categoryFilter) continue; if(Number(task.count||0) < minCount) continue; if(Number(task.count||0)>0 && !(await isSuppressed(db,task.key))) tasks.push(task); }
+  return json({ ok: true, tasks, categories, suppressed_count: rawTasks.length - tasks.length, summary: { total_count: tasks.reduce((sum, row) => sum + Number(row.count || 0), 0), generated_at: new Date().toISOString() } });
 }

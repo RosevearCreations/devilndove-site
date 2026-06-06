@@ -3,6 +3,32 @@
 
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 function json(data, status = 200) { return jsonResponse(data, status); }
+
+function fieldForQaCode(code) {
+  const map = {
+    product_active: 'status',
+    review_published: 'review_status',
+    product_detail_json: 'slug',
+    gallery: 'featured_image_url',
+    cart_basics: 'name',
+    seo_title: 'meta_title',
+    seo_meta: 'meta_description',
+    structured_data: 'name',
+    mini_gallery: 'featured_image_url',
+    missing_name: 'name',
+    missing_price: 'price_cents',
+    missing_slug: 'slug',
+    missing_meta_title: 'meta_title',
+    missing_meta_description: 'meta_description',
+    missing_featured_image: 'featured_image_url',
+    missing_image_alt: 'image_alt_1',
+    missing_review_status: 'review_status',
+    missing_status: 'status'
+  };
+  return map[String(code || '').toLowerCase()] || 'name';
+}
+function productEditorFixUrl(productId, field) { return `/admin/catalog/?product_id=${encodeURIComponent(productId || '')}&focus_field=${encodeURIComponent(field || 'name')}`; }
+
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 async function ensureSchema(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS product_publish_qa_results (
@@ -33,7 +59,8 @@ async function runChecks(db, productId) {
     { code: 'structured_data', ok: !!normalizeText(product.name) && Number(product.price_cents || 0) >= 0, help: 'Product structured data needs name and price.', fix_url: `/admin/catalog/?product_id=${productId}` },
     { code: 'mini_gallery', ok: imageRows.length > 1 || !!normalizeText(product.featured_image_url), help: 'Mini-gallery should have multiple images when available.', fix_url: `/admin/catalog-media/?product_id=${productId}` }
   ];
-  return { product, imageRows, checks, passed: checks.filter((row) => row.ok).length, failed: checks.filter((row) => !row.ok).length };
+  const mappedChecks = checks.map((check) => { const field = check.focus_field || fieldForQaCode(check.code); return { ...check, focus_field: field, fix_url: productEditorFixUrl(productId, field) }; });
+  return { product, imageRows, checks: mappedChecks, passed: mappedChecks.filter((row) => row.ok).length, failed: mappedChecks.filter((row) => !row.ok).length };
 }
 export async function onRequestGet(context) {
   const { request, env } = context;
