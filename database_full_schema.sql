@@ -3345,7 +3345,24 @@ ALTER TABLE public_proof_candidates ADD COLUMN consent_source_url TEXT;
 ALTER TABLE public_proof_candidates ADD COLUMN promotion_contexts_json TEXT;
 ALTER TABLE candle_soap_batch_recalls ADD COLUMN send_review_status TEXT NOT NULL DEFAULT 'draft';
 
-INSERT INTO schema_migration_ledger (migration_key, applied_at, notes)
-SELECT 'build_171_admin_safety_release_readiness', CURRENT_TIMESTAMP, 'Admin evidence bundle, gift-card provider logs, marketplace rollback, local SEO history, recalls, and release readiness.'
+INSERT OR IGNORE INTO schema_migration_ledger (
+  migration_key,
+  file_name,
+  status,
+  destructive,
+  applied_at,
+  notes,
+  created_at,
+  updated_at
+)
+SELECT
+  'build_171_admin_safety_release_readiness',
+  'database_upgrade_current_pass.sql',
+  'pending_review',
+  0,
+  CURRENT_TIMESTAMP,
+  'Admin evidence bundle, gift-card provider logs, marketplace rollback, local SEO history, recalls, and release readiness. Build 172 hotfix: file_name is included so the NOT NULL ledger constraint passes.',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
 WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='schema_migration_ledger')
   AND NOT EXISTS (SELECT 1 FROM schema_migration_ledger WHERE migration_key='build_171_admin_safety_release_readiness');

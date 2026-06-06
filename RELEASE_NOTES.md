@@ -1,3 +1,37 @@
+# Build 172 D1 migration ledger hotfix
+
+## Summary
+
+- Fixed the build 171 `schema_migration_ledger` marker insert so it includes the required `file_name` value.
+- Added `database_build171_ledger_repair.sql` for live databases where the build 171 schema additions already ran but the final ledger marker failed.
+- Corrected schema drift expectations from `schema_migration_ledger_id` to the actual `schema_migration_id` column.
+
+## Changed files
+
+- `database_build171_ledger_repair.sql`
+- `database_upgrade_current_pass.sql`
+- `database_schema.sql`
+- `database_full_schema.sql`
+- `database_store_schema.sql`
+- `functions/api/admin/schema-drift-report.js`
+- `DATABASE_SCHEMA_REFERENCE.md`
+- `DEVELOPMENT_ROADMAP.md`
+- `KNOWN_GAPS_AND_RISKS.md`
+- `SANITY_HEALTH_CHECK.md`
+- `RELEASE_NOTES.md`
+- `data/site/release-notes.json`
+
+## D1 migration summary
+
+- No destructive schema change.
+- Run `database_build171_ledger_repair.sql` only if the build 171 D1 console run already created the new tables/columns but stopped at `NOT NULL constraint failed: schema_migration_ledger.file_name`.
+- For a fresh deploy, use the updated `database_upgrade_current_pass.sql`; its build 171 marker now includes `file_name`.
+
+## Required post-deploy actions
+
+- If the live database already received the build 171 schema additions, apply only `database_build171_ledger_repair.sql` rather than rerunning the full upgrade.
+- Reopen `/admin/schema-drift-report/` or the schema sanity area and confirm `schema_migration_ledger` is no longer flagged for the wrong primary-key column.
+
 # Build 171 admin safety and release readiness
 
 ## Summary

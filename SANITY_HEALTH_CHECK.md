@@ -833,3 +833,8 @@ Completed in this pass:
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+
+## Build 172 hotfix note — D1 migration ledger
+
+The build 171 SQL marker for `schema_migration_ledger` was corrected to include the required `file_name` column. A small live repair file, `database_build171_ledger_repair.sql`, is included for databases where the schema additions already ran but the final ledger insert failed. Do not rerun the entire upgrade only to fix the marker if build 171 ALTER TABLE additions already succeeded; repeated ALTER TABLE ADD COLUMN statements can fail on existing columns in SQLite/D1.
