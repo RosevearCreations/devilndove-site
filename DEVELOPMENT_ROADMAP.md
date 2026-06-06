@@ -1,3 +1,51 @@
+# Build 171 Completed Pass — Admin Safety, Release Readiness, and Local SEO Controls
+
+Completed this pass:
+
+1. Added binary-safe accountant ZIP evidence bundling that can include small PDF/image receipts only when R2 fetch is explicitly enabled.
+2. Added accountant bundle totals and skipped-attachment warnings before ZIP download.
+3. Added a dark-theme screenshot evidence admin page with R2 upload, status changes, and public landing-page checklist rows.
+4. Added direct Product QA fix links that open the product editor and focus the exact field tied to the blocker.
+5. Added public-proof candidate consent source linking, placement previews, and promotion-context handling.
+6. Added trust-block placement preview support on the Trust Blocks admin page.
+7. Added gift-card provider adapters/log rows for Resend, SendGrid, Postmark, and manual mode.
+8. Added gift-card customer history cards in both Gift Card Admin and the member/customer admin view.
+9. Added visible gift-card lockout release controls in the Gift Card Admin page.
+10. Added marketplace export snapshot diff, replay, whole-channel rollback, and clear-channel selection controls.
+11. Added R2 derivative worker route settings plus a create/delete tiny-object health check.
+12. Confirmed derivative-to-featured image controls exist in the product image derivative strip and documented the route health check.
+13. Added candle/soap recall customer match preview and an approval gate before notification drafts can queue.
+14. Added Local SEO D1 bake-action JSON export and a static deploy placeholder at `data/site/local-seo-bake-actions.json`.
+15. Added competitor phrase score-history logging and phrase badges on local SEO landing-page rows.
+16. Added desktop Today task filters, min-count filtering, and snooze duration selection.
+17. Added post-deploy smoke-test quick-run support and admin dashboard result badges.
+18. Added deployment-blocker checklist content to `SANITY_HEALTH_CHECK.md`.
+19. Added a release-notes API/page and generated release summary data.
+20. Added a Safe Deploy Package admin page showing schema, changed files, and required post-deploy actions.
+
+Next 20 recommended steps:
+
+1. Add signed, expiring R2 download links for accountant evidence instead of relying on public URLs.
+2. Add per-file checksum rows to accountant ZIP manifest and evidence index.
+3. Add live screenshot capture automation for dark-theme public pages.
+4. Add visual diff thumbnails for dark-theme evidence comparisons.
+5. Add a reusable editor-field registry so every admin QA code maps to one source of truth.
+6. Add bulk Product QA repair queue for common missing SEO/image fields.
+7. Add public-proof preview rendering using the exact destination page component.
+8. Add trust-block A/B placement rotation and performance notes.
+9. Add provider webhook ingestion for gift-card email delivery events.
+10. Add gift-card failed-send retry rules with max attempts and backoff.
+11. Add marketplace export snapshot side-by-side UI instead of alert-only diff summaries.
+12. Add marketplace CSV validation rules per channel with required column status.
+13. Add R2 derivative worker route self-test that validates public URL fetch, not only object create/delete.
+14. Add recall legal/compliance review notes before customer-facing send approval.
+15. Add recall draft preview with exact customer-specific message content.
+16. Add local SEO phrase trend chart from score history.
+17. Add Search Console query import mapping to local SEO bake actions.
+18. Add Today task saved views per admin role.
+19. Add smoke-test screenshots and response body keyword checks.
+20. Add a one-click final release package export that includes release notes, schema migration, smoke results, and changed-file manifest.
+
 # Build 159 roadmap update
 
 Completed in this pass:

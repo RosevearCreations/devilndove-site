@@ -1,3 +1,18 @@
+# Build 171 Schema Reference Additions
+
+New or extended persistence areas:
+
+- `dark_theme_screenshot_evidence`: added R2 object key, original filename, MIME type, size, and checklist key columns.
+- `gift_card_provider_send_logs`: provider-specific gift-card send attempts for Resend, SendGrid, Postmark, and manual mode.
+- `r2_derivative_health_checks`: derivative route health test rows including bucket binding, object key, status, and message.
+- `local_seo_competitor_phrase_score_history`: phrase score history over time for landing-page/local SEO tracking.
+- `marketplace_export_history`: snapshot JSON, replay source ID, and rollback note columns.
+- `marketplace_export_replay_events`: replay/rollback audit events by marketplace channel.
+- `public_proof_candidates`: consent source URL and promotion contexts JSON columns.
+- `candle_soap_batch_recalls`: send review status gate before recall notification draft queueing.
+
+Runtime-created tables are also protected by endpoint-level `CREATE TABLE IF NOT EXISTS` / best-effort `ALTER TABLE` calls for Cloudflare D1 compatibility.
+
 # Build 159 schema reference update
 
 Build 159 is a front-end Catalog Product Editor image workflow repair. No new D1 tables or columns are required. Existing fields used by the visual image cards are:

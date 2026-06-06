@@ -1,3 +1,24 @@
+# Build 171 Deployment Blocker Checklist
+
+Deployment blockers to confirm before live release:
+
+- [ ] D1 schema migration applied for Build 171 tables/columns.
+- [ ] `ACCOUNTANT_EVIDENCE_R2_FETCH_ENABLED` is intentionally set before binary evidence ZIP downloads are used.
+- [ ] Accountant evidence bucket binding is configured if binary evidence is enabled.
+- [ ] Dark-theme evidence R2 bucket binding is configured before direct uploads are used.
+- [ ] R2 derivative worker route health test passes create/get/delete tiny-object check.
+- [ ] Gift-card email provider choice and required API key are configured or provider remains `manual`.
+- [ ] Gift-card send logs are visible after test delivery attempt.
+- [ ] Product QA fix links open `/admin/catalog/` and focus the correct field.
+- [ ] Marketplace export history has new `snapshot_json` rows before diff/rollback is trusted.
+- [ ] Recall notification drafts cannot queue until approval is recorded.
+- [ ] Local SEO bake-action JSON export opens from `/api/admin/local-seo-bake-actions?format=json`.
+- [ ] Post-deploy smoke-test quick-run has been executed from the admin dashboard.
+- [ ] Safe Deploy Package page reviewed at `/admin/safe-deploy-package/`.
+- [ ] Release Notes page reviewed at `/admin/release-notes/`.
+- [ ] No exposed public page has more than one H1.
+- [ ] CSS sanity check passes after dark-theme/focus additions.
+
 # Build 159 sanity additions
 
 After deploy:

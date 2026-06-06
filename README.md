@@ -1,3 +1,15 @@
+# Build 171 Update Note
+
+This build adds admin safety and release-readiness work across accounting evidence bundles, dark-theme evidence review, Product QA focus links, gift-card delivery logs, marketplace export history rollback, R2 derivative health checks, candle/soap recall approval gates, Local SEO bake exports, Today task filters, smoke-test badges, release notes, and safe deploy packaging.
+
+Start post-deploy review with:
+
+1. `/admin/safe-deploy-package/`
+2. `/admin/release-notes/`
+3. `/admin/dark-theme-evidence/`
+4. `/admin/catalog-media/` for R2 derivative health checks
+5. `/api/admin/local-seo-bake-actions?format=json` for D1 bake-action export
+
 # Build 168 summary
 
 Build 166 completes the next roadmap/gaps pass with crop handles, upload size reporting, moderated order-stage photo upload, gift-card lifecycle controls, public gift-card balance lookup, marketplace CSV download, trust-block placement/context modules, product-card proof badges, candle/soap safety display, accounting evidence uploads, Today task API, persisted publish QA results, and a local SEO review queue.

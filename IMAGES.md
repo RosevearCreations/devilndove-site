@@ -1,3 +1,22 @@
+# Build 171 Image and Dark-Theme Checklist Additions
+
+Dark-theme public-page evidence checklist examples now include:
+
+- `/` — hero, navigation, featured cards, forms, proof blocks, and footer.
+- `/shop/` — product cards, filters, price text, CTA buttons, and empty states.
+- `/creations/` — creation cards, captions, image contrast, and hover/focus states.
+- `/gallery/` — gallery grid, proof images, captions, and modal/large-image treatment.
+- `/gift-cards/` — amount cards, purchase form, validation text, and email delivery copy.
+- `/custom-request/` — intake form, upload guidance, consent wording, and error states.
+- Local SEO landing pages — headings, town/service wording, proof cards, CTA blocks, and trust sections.
+
+New admin route: `/admin/dark-theme-evidence/` for upload, review status, contrast status, and R2 evidence storage.
+
+Product image derivative note:
+
+- The existing product-image derivative strip includes a “Use this derivative as featured image” button.
+- New route health testing is available in Catalog Media through the R2 Derivative Worker Route panel.
+
 # Build 159 image workflow note
 
 ## Catalog Product Editor visual image cards

@@ -1,3 +1,26 @@
+# Build 171 Known Issues and Gaps Update
+
+Closed or reduced this pass:
+
+- Accountant evidence bundles now report binary-safe PDF/image totals and skipped attachment warnings before ZIP download.
+- Binary accountant evidence is guarded by `ACCOUNTANT_EVIDENCE_R2_FETCH_ENABLED=true` so normal exports remain URL-reference only.
+- Dark-theme evidence review moved from notes-only tracking to a visible upload/review admin page.
+- Product QA blocker repair now has direct fix URLs with exact editor-field focus.
+- Gift-card provider delivery now records provider-specific send logs.
+- Marketplace export history now supports diff, replay, whole-channel rollback, and clear-channel actions.
+- Candle/soap recall notifications cannot queue until send review has been approved.
+- Local SEO bake actions can export from D1 as JSON and competitor phrase scores now keep history rows.
+- Desktop dashboard now has Today task filters and post-deploy smoke result badges.
+
+Remaining gaps to verify after deployment:
+
+- Confirm the exact R2 bucket bindings used in production for accountant evidence, dark-theme evidence, and derivative objects.
+- Confirm the chosen gift-card email provider and required secret names: Resend, SendGrid, Postmark, or manual.
+- Confirm `gift_card_abuse` lockout release rows include lockout IDs in the current production data; otherwise the UI will show review controls but may need a second mapping pass.
+- Confirm marketplace snapshot rows contain `snapshot_json` from newly generated exports; older history rows may not diff until replayed or regenerated.
+- Confirm the Local SEO bake-action export endpoint is included in deploy smoke testing.
+- Confirm recall approval wording with your real safety/compliance process before sending any customer-facing notices.
+
 # Build 159 gaps and risks update
 
 Closed or reduced in Build 159:

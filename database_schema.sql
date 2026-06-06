@@ -2138,3 +2138,87 @@ ALTER TABLE product_image_derivatives ADD COLUMN comparison_notes TEXT;
 -- candle_soap_recall_customer_matches and candle_soap_recall_notification_queue: recall matching and send-review drafts.
 -- post_deploy_smoke_test_results: live URL smoke-test storage.
 -- dark_theme_screenshot_evidence: dark-theme screenshot/review evidence rows.
+
+
+-- Build 171 admin safety and release readiness schema additions.
+CREATE TABLE IF NOT EXISTS dark_theme_screenshot_evidence (
+  dark_theme_screenshot_evidence_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  page_path TEXT NOT NULL,
+  evidence_url TEXT,
+  object_key TEXT,
+  original_filename TEXT,
+  mime_type TEXT,
+  file_size_bytes INTEGER NOT NULL DEFAULT 0,
+  checklist_key TEXT,
+  section_label TEXT,
+  review_status TEXT NOT NULL DEFAULT 'needs_review',
+  contrast_status TEXT NOT NULL DEFAULT 'unchecked',
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_dark_theme_evidence_review ON dark_theme_screenshot_evidence(page_path, review_status, contrast_status, updated_at);
+
+CREATE TABLE IF NOT EXISTS gift_card_provider_send_logs (
+  gift_card_provider_send_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  gift_card_delivery_queue_id INTEGER,
+  gift_card_id INTEGER,
+  provider TEXT,
+  recipient_email TEXT,
+  provider_message_id TEXT,
+  send_status TEXT NOT NULL DEFAULT 'attempted',
+  request_summary_json TEXT,
+  response_summary_json TEXT,
+  error_text TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_gift_card_provider_send_logs_queue ON gift_card_provider_send_logs(gift_card_delivery_queue_id, created_at);
+
+CREATE TABLE IF NOT EXISTS r2_derivative_health_checks (
+  r2_derivative_health_check_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  check_status TEXT NOT NULL DEFAULT 'unknown',
+  bucket_binding_name TEXT,
+  object_key TEXT,
+  public_base_url TEXT,
+  worker_route TEXT,
+  message TEXT,
+  details_json TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS local_seo_competitor_phrase_score_history (
+  local_seo_competitor_phrase_score_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  local_seo_competitor_phrase_id INTEGER,
+  page_path TEXT,
+  phrase TEXT,
+  phrase_count INTEGER NOT NULL DEFAULT 0,
+  page_score INTEGER NOT NULL DEFAULT 0,
+  scoring_label TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS marketplace_export_replay_events (
+  marketplace_export_replay_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel TEXT NOT NULL,
+  source_history_id INTEGER,
+  action_kind TEXT NOT NULL DEFAULT 'replay',
+  affected_count INTEGER NOT NULL DEFAULT 0,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE marketplace_export_history ADD COLUMN snapshot_json TEXT;
+ALTER TABLE marketplace_export_history ADD COLUMN replayed_from_history_id INTEGER;
+ALTER TABLE marketplace_export_history ADD COLUMN rollback_note TEXT;
+ALTER TABLE public_proof_candidates ADD COLUMN consent_source_url TEXT;
+ALTER TABLE public_proof_candidates ADD COLUMN promotion_contexts_json TEXT;
+ALTER TABLE candle_soap_batch_recalls ADD COLUMN send_review_status TEXT NOT NULL DEFAULT 'draft';
+
+INSERT INTO schema_migration_ledger (migration_key, applied_at, notes)
+SELECT 'build_171_admin_safety_release_readiness', CURRENT_TIMESTAMP, 'Admin evidence bundle, gift-card provider logs, marketplace rollback, local SEO history, recalls, and release readiness.'
+WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='schema_migration_ledger')
+  AND NOT EXISTS (SELECT 1 FROM schema_migration_ledger WHERE migration_key='build_171_admin_safety_release_readiness');
