@@ -56,6 +56,20 @@ const EXPECTED_MIGRATIONS = [
     destructive: false,
     run_order: 60,
   },
+  {
+    migration_key: 'build_171_admin_safety_release_readiness',
+    file_name: 'database_upgrade_current_pass.sql',
+    purpose: 'Build 171 admin evidence, marketplace rollback, recall approval, local SEO, release readiness, and safety controls.',
+    destructive: false,
+    run_order: 171,
+  },
+  {
+    migration_key: 'build_173_deployment_preflight_release_safety',
+    file_name: 'database_build173_deployment_preflight.sql',
+    purpose: 'Build 173 deployment preflight run history and D1 rerun-safety checks.',
+    destructive: false,
+    run_order: 173,
+  },
 ];
 
 function normalizeResults(result) {

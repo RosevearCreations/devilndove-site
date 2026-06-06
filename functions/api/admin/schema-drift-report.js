@@ -120,6 +120,15 @@ const EXPECTED_TABLES = [
     optional: ['destructive', 'applied_by_user_id'],
     why: 'Prevents mystery D1 drift and double-run confusion.'
   },
+
+  {
+    table: 'deployment_preflight_runs',
+    area: 'operations',
+    required: ['deployment_preflight_run_id', 'run_status'],
+    recommended: ['build_label', 'blocker_count', 'warning_count', 'summary_json', 'created_at'],
+    optional: ['created_by_user_id'],
+    why: 'Saved deployment preflight snapshots for safe deploy reviews and release accountability.'
+  },
   {
     table: 'accounting_reconciliation_exceptions',
     area: 'accounting',
