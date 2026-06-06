@@ -115,9 +115,9 @@ const EXPECTED_TABLES = [
   {
     table: 'schema_migration_ledger',
     area: 'operations',
-    required: ['schema_migration_ledger_id', 'file_name', 'status'],
+    required: ['schema_migration_id', 'migration_key', 'file_name', 'status'],
     recommended: ['migration_key', 'checksum', 'notes', 'applied_at', 'created_at'],
-    optional: ['destructive', 'recorded_by_user_id'],
+    optional: ['destructive', 'applied_by_user_id'],
     why: 'Prevents mystery D1 drift and double-run confusion.'
   },
   {
