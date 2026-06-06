@@ -130,6 +130,14 @@ const EXPECTED_TABLES = [
     why: 'Saved deployment preflight snapshots for safe deploy reviews and release accountability.'
   },
   {
+    table: 'deployment_post_deploy_confirmations',
+    area: 'operations',
+    required: ['deployment_post_deploy_confirmation_id', 'confirmation_key', 'confirmation_status'],
+    recommended: ['build_label', 'confirmation_label', 'confirmed_by_user_id', 'confirmed_at', 'updated_at'],
+    optional: ['notes'],
+    why: 'Post-deploy confirmation workflow for marking D1, smoke-test, R2/email, release note, and public-page reviews complete.'
+  },
+  {
     table: 'accounting_reconciliation_exceptions',
     area: 'accounting',
     required: ['accounting_reconciliation_exception_id'],

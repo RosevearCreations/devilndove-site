@@ -1,4 +1,77 @@
 // File: /functions/api/admin/safe-deploy-package.js
+// Brief description: Admin-only safe deploy package summary with schema order, changed files, manifest links, and post-deploy action checklist.
+
 import { getAdminUserFromRequest, jsonResponse } from '../_lib/adminAudit.js';
-const changedFiles = ["DATABASE_SCHEMA_REFERENCE.md", "DEVELOPMENT_ROADMAP.md", "IMAGES.md", "KNOWN_GAPS_AND_RISKS.md", "README.md", "RELEASE_NOTES.md", "SANITY_HEALTH_CHECK.md", "admin/catalog-media/index.html", "admin/dark-theme-evidence/index.html", "admin/index.html", "admin/members/index.html", "admin/release-notes/index.html", "admin/safe-deploy-package/index.html", "admin/trust-blocks/index.html", "css/styles.css", "data/site/local-seo-bake-actions.json", "data/site/release-notes.json", "database_full_schema.sql", "database_schema.sql", "database_store_schema.sql", "database_upgrade_current_pass.sql", "functions/api/admin/accounting-close-workflow.js", "functions/api/admin/candle-soap-recalls.js", "functions/api/admin/dark-theme-evidence.js", "functions/api/admin/gift-card-delivery-send.js", "functions/api/admin/local-seo-bake-actions.js", "functions/api/admin/local-seo-competitor-phrases.js", "functions/api/admin/marketplace-export-preview.js", "functions/api/admin/post-deploy-smoke-tests.js", "functions/api/admin/product-publish-qa.js", "functions/api/admin/public-proof-candidates.js", "functions/api/admin/r2-derivative-settings.js", "functions/api/admin/release-notes.js", "functions/api/admin/safe-deploy-package.js", "functions/api/admin/today-tasks.js", "public/js/admin-accounting-close-workflow.js", "public/js/admin-candle-soap-specs.js", "public/js/admin-dark-theme-evidence.js", "public/js/admin-dashboard-smoke-badges.js", "public/js/admin-edit-product.js", "public/js/admin-gift-card-customer-history.js", "public/js/admin-gift-cards.js", "public/js/admin-local-seo-review.js", "public/js/admin-marketplace-export-preview.js", "public/js/admin-post-deploy-smoke-tests.js", "public/js/admin-products.js", "public/js/admin-public-proof-candidates.js", "public/js/admin-r2-derivative-settings.js", "public/js/admin-release-notes.js", "public/js/admin-safe-deploy-package.js", "public/js/admin-today-tasks.js", "public/js/admin-trust-block-placement-preview.js", "scripts/generate_release_notes.py"];
-export async function onRequestGet(context){const user=await getAdminUserFromRequest(context.request,context.env);if(!user)return jsonResponse({ok:false,error:'Unauthorized.'},401);return jsonResponse({ok:true,package:{build_label:'Build 171 admin safety and release readiness',schema:['Run current pass D1 migrations from database_upgrade_current_pass.sql.','Confirm R2 bucket bindings before binary evidence or derivative tests.'],changed_files:changedFiles,post_deploy_actions:['Run quick smoke tests from the admin dashboard.','Open safe deploy package page and confirm checklist.','Review SANITY_HEALTH_CHECK.md blockers.','Verify local SEO bake actions export.']}},200,{'Cache-Control':'no-store'})}
+
+const changedFiles = [
+  'DEVELOPMENT_ROADMAP.md',
+  'KNOWN_GAPS_AND_RISKS.md',
+  'DATABASE_SCHEMA_REFERENCE.md',
+  'RELEASE_NOTES.md',
+  'SANITY_HEALTH_CHECK.md',
+  'POST_DEPLOY_SMOKE_TEST.md',
+  'NEW_CHAT_STATUS.md',
+  'admin/deployment-preflight/index.html',
+  'admin/index.html',
+  'admin/safe-deploy-package/index.html',
+  'css/styles.css',
+  'data/site/deployment-preflight.json',
+  'data/site/release-notes.json',
+  'data/site/release-package-manifest.json',
+  'database_build174_deployment_preflight_detail.sql',
+  'database_full_schema.sql',
+  'database_schema.sql',
+  'database_store_schema.sql',
+  'database_upgrade_current_pass.sql',
+  'functions/api/admin/dashboard-summary.js',
+  'functions/api/admin/db-sanity.js',
+  'functions/api/admin/deployment-preflight.js',
+  'functions/api/admin/migration-ledger.js',
+  'functions/api/admin/safe-deploy-package.js',
+  'functions/api/admin/schema-drift-report.js',
+  'public/js/admin-dashboard-preflight-badge.js',
+  'public/js/admin-deployment-preflight.js',
+  'public/js/admin-safe-deploy-package.js',
+  'scripts/deployment_preflight_static_check.py',
+  'scripts/generate_release_manifest.py',
+  'scripts/generate_release_notes.py',
+  'scripts/regenerate_sanity_from_preflight.py'
+];
+
+export async function onRequestGet(context) {
+  const user = await getAdminUserFromRequest(context.request, context.env);
+  if (!user) return jsonResponse({ ok: false, error: 'Unauthorized.' }, 401);
+  return jsonResponse({
+    ok: true,
+    package: {
+      build_label: 'Build 174 preflight detail, schema diff, and release manifest',
+      schema: [
+        'Fresh D1: run database_upgrade_current_pass.sql, then database_build173_deployment_preflight.sql, then database_build174_deployment_preflight_detail.sql.',
+        'Partial D1 with Build 171 tables but missing marker: run database_build171_ledger_repair.sql only, then Build 173, then Build 174.',
+        'Do not rerun ALTER TABLE-heavy SQL blocks on a database where those columns already exist.'
+      ],
+      sql_copy_blocks: {
+        fresh_install: [
+          'database_upgrade_current_pass.sql',
+          'database_build173_deployment_preflight.sql',
+          'database_build174_deployment_preflight_detail.sql'
+        ],
+        repair_only: [
+          'database_build171_ledger_repair.sql',
+          'database_build173_deployment_preflight.sql',
+          'database_build174_deployment_preflight_detail.sql'
+        ]
+      },
+      changed_files: changedFiles,
+      manifest: '/data/site/release-package-manifest.json',
+      post_deploy_actions: [
+        'Open /admin/deployment-preflight/ and run Preflight after D1 migration.',
+        'Export the Preflight Markdown handoff if any warning needs support review.',
+        'Save a Preflight snapshot and mark post-deploy confirmation rows as complete after smoke testing.',
+        'Open /admin/post-deploy-smoke-tests/ and run core public/admin URL checks.',
+        'Open /admin/r2-derivative-settings/ or the R2 derivative settings panel and run the live health test if R2 is enabled.',
+        'Review RELEASE_NOTES.md and SANITY_HEALTH_CHECK.md before promoting the branch.'
+      ]
+    }
+  }, 200, { 'Cache-Control': 'no-store' });
+}
