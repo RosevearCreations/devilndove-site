@@ -248,7 +248,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!qa) return `<div class="product-qa-inline"><strong>Post-publish QA</strong><span class="small">Not run yet.</span><button class="btn small" type="button" data-product-qa-run="${Number(product.product_id || 0)}">Run QA</button></div>`;
     const checks = Array.isArray(qa.checks) ? qa.checks : [];
     const failed = Number(qa.failed || checks.filter((row) => !row.ok).length || 0);
-    return `<div class="product-qa-inline ${failed ? 'is-fail' : 'is-pass'}"><strong>Post-publish QA ${failed ? 'needs attention' : 'passed'}</strong><div class="product-qa-badges">${checks.map((check) => `<span class="product-qa-badge ${check.ok ? 'ok' : 'fail'}">${check.ok ? '✓' : '!' } ${escapeHtml(check.code || 'check')}</span>`).join('')}</div>${failed ? `<span class="small">${escapeHtml(checks.find((check) => !check.ok)?.help || 'One or more QA checks failed.')}</span>` : ''}</div>`;
+    return `<div class="product-qa-inline ${failed ? 'is-fail' : 'is-pass'}"><strong>Post-publish QA ${failed ? 'needs attention' : 'passed'}</strong><div class="product-qa-badges">${checks.map((check) => `<span class="product-qa-badge ${check.ok ? 'ok' : 'fail'}">${check.ok ? '✓' : '!' } ${escapeHtml(check.code || 'check')}</span>`).join('')}</div>${failed ? `<span class="small">${escapeHtml(checks.find((check) => !check.ok)?.help || 'One or more QA checks failed.')}</span><div class="product-qa-fix-buttons">${checks.filter((check) => !check.ok).map((check) => `<a class="btn small" href="${escapeHtml(check.fix_url || `/admin/catalog/?product_id=${Number(product.product_id || 0)}&focus_field=${encodeURIComponent(check.focus_field || 'name')}`)}">Fix ${escapeHtml(check.focus_field || check.code || 'field')}</a>`).join('')}</div>` : ''}</div>`;
   }
 
   async function runProductQA(productId) {
@@ -817,6 +817,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const toggle = event.target?.closest?.('[data-toggle-product-qa-panel]');
     if(toggle){ const id=toggle.getAttribute('data-toggle-product-qa-panel'); const panel=document.querySelector(`[data-product-qa-panel="${CSS.escape(String(id))}"]`); if(panel){ const open=panel.toggleAttribute('hidden'); saveQaState(id, open?'collapsed':'expanded'); } }
     const fix = event.target?.closest?.('[data-product-qa-fix]');
-    if(fix){ const issue=fix.getAttribute('data-product-qa-fix')||'issue'; const productId=fix.getAttribute('data-product-id')||''; alert(`Fix helper: ${issue}\n\nOpen the matching editor section for product #${productId} and repair the readiness blocker before publishing.`); }
+    if(fix){ const productId=fix.getAttribute('data-product-id')||''; const field=fix.getAttribute('data-focus-field')||'name'; window.location.href=`/admin/catalog/?product_id=${encodeURIComponent(productId)}&focus_field=${encodeURIComponent(field)}`; }
   });
 })();

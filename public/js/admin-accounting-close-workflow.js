@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const closure = data.closure || { close_checklist: {} };
     const checklist = closure.close_checklist || {};
     const readiness = data.close_readiness || { ready: false, blockers: [] };
+    const evidenceSummary = data.evidence_bundle_summary || {};
+    const zipBase = `/api/admin/accounting-close-workflow?period_month=${encodeURIComponent(data.period_month || monthNow())}&format=zip`;
+    const evidenceWarnings = (evidenceSummary.warnings || []).map((item) => `<li>${esc(item)}</li>`).join('');
     mount.innerHTML = `
       <div class="card" id="accountingCloseWorkflowCard" style="margin-top:18px">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
@@ -57,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </form>
         </details>
         <details style="margin-top:12px" open><summary>Accountant export packaging</summary>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn primary" type="button" id="createExportManifestButton">Create export manifest</button><a class="btn" href="/api/admin/accounting-close-workflow?period_month=${encodeURIComponent(data.period_month || monthNow())}&format=csv" target="_blank" rel="noopener">Download close CSV</a><a class="btn" href="/api/admin/accounting-close-workflow?period_month=${encodeURIComponent(data.period_month || monthNow())}&format=zip" target="_blank" rel="noopener">Download accountant ZIP</a><a class="btn" href="/api/admin/accounting-period-summary-export" target="_blank" rel="noopener">Open period export endpoint</a><a class="btn" href="/api/admin/accounting-year-end-close" target="_blank" rel="noopener">Open year-end bundle endpoint</a></div>
+          <div class="card" style="margin:8px 0"><strong>Evidence bundle check</strong><p class="small">Binary-safe receipt bundle: ${esc(evidenceSummary.binary_safe_count || 0)} PDF/image file(s), ${esc(evidenceSummary.binary_safe_bytes || 0)} bytes eligible. R2 fetch enabled: ${evidenceSummary.binary_fetch_enabled ? 'yes' : 'no'}.</p>${evidenceWarnings ? `<ul class="small compact-list">${evidenceWarnings}</ul>` : '<p class="small">No bundle warnings.</p>'}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><button class="btn primary" type="button" id="createExportManifestButton">Create export manifest</button><a class="btn" href="/api/admin/accounting-close-workflow?period_month=${encodeURIComponent(data.period_month || monthNow())}&format=csv" target="_blank" rel="noopener">Download close CSV</a><a class="btn" href="${zipBase}" target="_blank" rel="noopener">Download accountant ZIP (URL evidence)</a><a class="btn" href="${zipBase}&include_binary_evidence=1" target="_blank" rel="noopener">Download ZIP with binary evidence</a><a class="btn" href="/api/admin/accounting-period-summary-export" target="_blank" rel="noopener">Open period export endpoint</a><a class="btn" href="/api/admin/accounting-year-end-close" target="_blank" rel="noopener">Open year-end bundle endpoint</a></div>
           <div>${renderPackages(data.export_packages || [])}</div>
         </details>
       </div>`;

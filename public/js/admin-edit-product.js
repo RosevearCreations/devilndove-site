@@ -219,6 +219,21 @@ document.addEventListener("DOMContentLoaded", () => {
     document.dispatchEvent(new CustomEvent('dd:product-editor-cleared'));
   }
 
+
+  function focusExactProductEditorField(fieldName, message) {
+    const field = String(fieldName || '').trim();
+    if (!field) return false;
+    const selector = `[name="${field.replace(/"/g, '\\"')}"]`;
+    const input = form?.querySelector?.(selector) || document.getElementById(field) || document.querySelector(`[data-field="${field}"]`);
+    if (!input) return false;
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    input.classList.add('product-editor-field-focus');
+    input.focus?.({ preventScroll: true });
+    setTimeout(() => input.classList.remove('product-editor-field-focus'), 4000);
+    if (message) showMessage(message);
+    return true;
+  }
+
   function resetFormState() {
     form.reset();
     if (existingProductSelect) existingProductSelect.value = '';
@@ -934,7 +949,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  resetFormState();
+
+  async function loadProductFromQueryAndFocus() {
+    const params = new URLSearchParams(window.location.search);
+    const productId = Number(params.get('product_id') || 0);
+    const focusField = params.get('focus_field') || '';
+    if (!productId) return false;
+    try {
+      const data = await loadProduct(productId);
+      fillForm(data.product || data);
+      if (typeof fetchPriceSuggestion === 'function') fetchPriceSuggestion().catch(() => {});
+      if (typeof setFormModeEdit === 'function') setFormModeEdit(productId);
+      window.dispatchEvent(new CustomEvent('dd:product-editor-target', { detail: { product_id: productId, focus_field: focusField } }));
+      setTimeout(() => focusExactProductEditorField(focusField, focusField ? `Focused editor field: ${focusField}` : ''), 250);
+      return true;
+    } catch (error) {
+      showMessage(error?.message || 'Could not open the requested product editor field.', true);
+      return false;
+    }
+  }
+  loadProductFromQueryAndFocus().then((loaded) => { if (!loaded) resetFormState(); });
   if (window.DDProductEditorRequiredState?.sync) window.DDProductEditorRequiredState.sync();
   loadPendingActions();
 });
