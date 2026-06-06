@@ -1,3 +1,7 @@
+# Build 174 update note
+
+This package includes the Build 174 Deployment Preflight detail pass. Use `/admin/deployment-preflight/` before promotion to check D1 migration markers, schema diff, public-page SEO/H1/canonical/schema.org/image-alt status, CSS drift, static JSON fallbacks, R2 visibility, release manifest health, and post-deploy confirmations.
+
 # Build 173 Operator Note
 
 This build adds a dedicated Deployment Preflight page at `/admin/deployment-preflight/` plus the additive migration `database_build173_deployment_preflight.sql`.

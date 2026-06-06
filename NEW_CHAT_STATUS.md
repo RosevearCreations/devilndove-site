@@ -1,3 +1,13 @@
+# Current Build Status — Build 174
+
+Latest pass added richer Deployment Preflight detail, D1 schema diff, migration planner, Markdown export, post-deploy confirmations, release package hash manifest, dashboard preflight badge, and regenerated sanity/release documentation.
+
+D1 order remains:
+
+1. `database_build171_ledger_repair.sql` only if Build 171 schema exists but its ledger marker is missing.
+2. `database_build173_deployment_preflight.sql`.
+3. `database_build174_deployment_preflight_detail.sql`.
+
 # Build 173 Current Status
 
 Latest packaged work adds Deployment Preflight safety for Devil n Dove:

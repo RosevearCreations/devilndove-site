@@ -1,3 +1,7 @@
+# Build 174 local SEO preflight additions
+
+Deployment Preflight now checks practical title/meta length ranges, canonical links, local wording, structured-data presence/validity when present, and image-alt coverage for the core public/local landing pages. Keep one clear H1 per page and continue baking approved D1 local SEO actions into static JSON before deploy.
+
 # Build 159 note
 
 Catalog Product Editor image UX was repaired: existing saved images now appear as draggable thumbnail cards in Product pictures, the first card syncs to the featured image, gallery URL slots are de-duplicated from the featured image, and advanced media metadata remains in Product Media Workflow. No schema migration required for this front-end pass.

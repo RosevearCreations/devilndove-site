@@ -1,3 +1,7 @@
+# Build 174 inventory/data ownership note
+
+Deployment Preflight now includes duplicate ownership checks for catalog and inventory D1 rows so Tools/Supplies imports are less likely to drift between JSON, D1, and admin export workflows. Continue using one D1 owner row per source key and only keep JSON as static fallback/export data.
+
 # Build 159 note
 
 Catalog Product Editor image UX was repaired: existing saved images now appear as draggable thumbnail cards in Product pictures, the first card syncs to the featured image, gallery URL slots are de-duplicated from the featured image, and advanced media metadata remains in Product Media Workflow. No schema migration required for this front-end pass.

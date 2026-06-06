@@ -1,3 +1,7 @@
+# Build 174 image and screenshot checklist additions
+
+Deployment Preflight now reports image-alt coverage for the core public/local landing pages and keeps the dark-theme evidence workflow connected to the public-page review list. Continue using dark-theme evidence uploads for home, shop, gallery, product detail, and every local landing page. Future work should add automatic live screenshot capture.
+
 # Build 171 Image and Dark-Theme Checklist Additions
 
 Dark-theme public-page evidence checklist examples now include:

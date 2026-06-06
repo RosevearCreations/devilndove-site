@@ -1,3 +1,35 @@
+# Build 174 Known Gaps and Risks — Deployment Preflight Detail and Release Manifest
+
+Closed or reduced in Build 174:
+
+- Deployment Preflight now shows page-level SEO, canonical, schema.org, image-alt, and fallback detail instead of only a summary row.
+- D1 migration planning is clearer for fresh installs versus partially upgraded databases.
+- Preflight can export a Markdown handoff for support/debugging.
+- Post-deploy confirmations can be recorded in D1 after smoke tests and release checks.
+- Safe Deploy Package now points to a generated release package manifest with SHA-256 hashes.
+- SANITY_HEALTH_CHECK can now be regenerated from the static preflight JSON.
+
+Still open:
+
+1. Live screenshot capture is still manual; dark-theme evidence upload/review exists but automatic browser capture is not included yet.
+2. The release package manifest is generated before deploy; a future pass should compare it against the deployed static manifest.
+3. Preflight checks page structure and SEO signals, but does not yet verify response-body keywords for every smoke-test URL.
+4. Product-detail preflight uses relationship integrity checks, but does not yet auto-pick a live product slug and open the public detail page.
+5. R2 visibility can detect bindings/settings, but signed evidence-download tests and private-upload tests still need live worker/bucket execution.
+6. Gift-card provider webhooks are not yet ingested; provider logs still mostly cover send attempts.
+7. Marketplace diff exists, but channel-specific required-column validation still needs a fuller rules system.
+8. Recall approvals are gated, but legal/compliance review notes and signatures should be strengthened before any real customer notice campaign.
+9. Mobile admin views exist in several areas, but Preflight/Smoke/Accounting close still need a more compact phone-first saved view.
+10. Search Console/local SEO import data is not yet trended directly on each landing-page row.
+
+Deployment watch items:
+
+- Run `database_build174_deployment_preflight_detail.sql` after Build 173 before expecting post-deploy confirmation rows to save.
+- If Build 171 schema already exists but the marker is missing, use `database_build171_ledger_repair.sql`; do not rerun the ALTER TABLE-heavy current-pass SQL.
+- Open `/admin/deployment-preflight/`, run Preflight, export Markdown if warnings remain, save a snapshot, then mark confirmation rows after smoke tests.
+- Review `/data/site/release-package-manifest.json` and `RELEASE_NOTES.md` before promoting the branch.
+- Continue checking one H1 per exposed page and CSS brace balance every pass.
+
 # Build 173 Known Issues and Gaps Update
 
 Resolved or reduced in this pass:

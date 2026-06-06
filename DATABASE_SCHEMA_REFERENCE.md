@@ -1,3 +1,32 @@
+# Build 174 Schema Reference Additions
+
+## New table: `deployment_post_deploy_confirmations`
+
+Purpose: Records visible post-deploy confirmation items after D1 migrations, preflight snapshot, public page review, smoke tests, release-note review, and R2/email binding checks.
+
+Columns:
+
+- `deployment_post_deploy_confirmation_id` — primary key.
+- `build_label` — release/build label being confirmed.
+- `confirmation_key` — stable checklist key.
+- `confirmation_label` — human-readable checklist label.
+- `confirmation_status` — `pending` by default, normally `confirmed` when completed.
+- `notes` — optional admin notes.
+- `confirmed_by_user_id` — admin user who confirmed the row.
+- `confirmed_at` — timestamp when confirmed.
+- `created_at`, `updated_at` — timestamps.
+
+Indexes and constraints:
+
+- Unique pair: `(build_label, confirmation_key)`.
+- `idx_deploy_confirmations_status` on `(build_label, confirmation_status, updated_at DESC)`.
+
+Migration file:
+
+- `database_build174_deployment_preflight_detail.sql`.
+- Ledger marker: `build_174_preflight_detail_manifest`.
+- Required ledger `file_name`: `database_build174_deployment_preflight_detail.sql`.
+
 # Build 173 Schema Reference Additions
 
 ## New table: `deployment_preflight_runs`

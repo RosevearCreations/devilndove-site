@@ -1,3 +1,7 @@
+# Build 174 competitive/local search note
+
+This pass keeps the local-search habit focused on clean titles, meta descriptions, one clear H1, Ontario/Southern Ontario wording where natural, canonical URLs, structured-data preview, and image alt text. The next strongest competitive step is tying Search Console phrases and competitor phrase history directly into each local landing-page row.
+
 # Build 159 competitive update — better product image operations
 
 Build 159 improves the day-to-day competitiveness of Devil n Dove because product images are now easier to see, reorder, and correct from the Catalog Product Editor. For handmade, custom, vintage, candle, soap, and mixed-media products, the first image is often the biggest trust signal. Making the image order visual reduces listing mistakes and helps keep product pages, marketplace exports, and social posts more consistent.

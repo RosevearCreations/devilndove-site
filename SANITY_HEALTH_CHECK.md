@@ -1,3 +1,19 @@
+<!-- BUILD_174_PREFLIGHT_SANITY_START -->
+# Build 174 Deployment Preflight Sanity Notes
+
+Static package preflight result for this zip: **ready**.
+
+- Blockers: 0.
+- Warnings: 0.
+- Checks: 5.
+- One-H1/title/meta/local wording, CSS brace balance, JSON parse, schema file presence, and release-manifest checks were regenerated from the static preflight data.
+
+Post-deploy order:
+1. Run `database_build171_ledger_repair.sql` only if Build 171 schema already exists but the marker is missing.
+2. Run `database_build173_deployment_preflight.sql`.
+3. Run `database_build174_deployment_preflight_detail.sql`.
+4. Open `/admin/deployment-preflight/`, run Preflight, export Markdown if warnings remain, save snapshot, and confirm post-deploy checklist rows.
+<!-- BUILD_174_PREFLIGHT_SANITY_END -->
 # Build 173 Deployment Preflight Sanity Notes
 
 Static package preflight result for this zip:

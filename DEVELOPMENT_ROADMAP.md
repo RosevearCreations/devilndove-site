@@ -1,3 +1,49 @@
+# Build 174 Completed Pass — Deployment Preflight Detail, Schema Diff, Release Manifest, and Post-Deploy Confirmations
+
+Completed in this pass:
+1. Added richer Deployment Preflight detail drawers for public page SEO, schema.org, canonical, image-alt, and fallback checks.
+2. Added title/meta length scoring to preflight so local landing pages stay inside practical SEO review ranges.
+3. Added canonical URL checks for the public local SEO landing-page set.
+4. Added image alt-text checks and featured/fallback visibility into preflight output.
+5. Added schema.org JSON-LD preview/validation rows for public pages.
+6. Added low-bandwidth/offline fallback signal checks for key public pages.
+7. Added expected live D1 schema diff rows directly into Deployment Preflight.
+8. Added migration history detail output showing expected marker, SQL file, status, and operator notes.
+9. Added a safe SQL planner for fresh database, partially upgraded database, and repair-only workflows.
+10. Added a Markdown export option for Deployment Preflight support handoff.
+11. Added JSON-to-D1 duplicate ownership checks for catalog, inventory, and local SEO bake actions.
+12. Added relationship integrity checks for products, images, SEO rows, public proof candidates, and trust placements.
+13. Added R2 route/bucket visibility checks into the Deployment Preflight result set.
+14. Added post-deploy confirmation workflow rows for D1, preflight, public pages, smoke tests, release notes, and R2/email review.
+15. Added `deployment_post_deploy_confirmations` as an additive Build 174 D1 table.
+16. Added `database_build174_deployment_preflight_detail.sql` with a required `file_name` migration-ledger marker.
+17. Added a generated release package manifest with SHA-256 file hashes for schema, functions, admin pages, public JS, CSS, Markdown, and static site data.
+18. Added automatic SANITY_HEALTH_CHECK regeneration from `data/site/deployment-preflight.json`.
+19. Added a dashboard Preflight badge so the desktop admin dashboard shows latest blocker/warning counts.
+20. Updated schema reference, migration ledger expectations, DB sanity checks, release notes, and safe deploy package guidance for Build 174.
+
+Next 20 recommended steps:
+1. Add live screenshot capture automation for the Deployment Preflight page so dark-theme checks can store before/after images without manual upload.
+2. Add a Cloudflare Pages deployment-history table that records branch, commit, build zip label, deploy URL, and who promoted it.
+3. Add automatic comparison between the release package manifest and the deployed static manifest after upload.
+4. Add preflight response-body keyword checks for the top public URLs, not just HTTP status and HTML structure.
+5. Add product-detail sample URL checks using the newest published product slug and a fallback known-safe slug.
+6. Add collection/category landing-page checks for every exposed product collection.
+7. Add Search Console query import trend summaries directly beside each local SEO page row.
+8. Add automatic local SEO internal-link suggestions from high-traffic pages into the bake-action queue.
+9. Add an admin queue that groups Product QA blockers by fix type and applies safe bulk fixes only after approval.
+10. Add R2 signed download tests for accountant evidence and private customer uploads.
+11. Add evidence-bundle checksum verification after accountant ZIP generation.
+12. Add gift-card provider webhook ingestion for delivery, bounce, complaint, and retry statuses.
+13. Add marketplace export channel-specific required-column validation before each download.
+14. Add visual side-by-side marketplace snapshot diff with exact row/field changes.
+15. Add recall legal/compliance review notes and approval signatures before customer notifications can leave draft status.
+16. Add customer-specific recall notification previews with product/order/batch grouping.
+17. Add mobile admin saved views for Today tasks, Preflight, Smoke Tests, and Accounting close.
+18. Add a one-click “safe deploy export” ZIP containing release notes, preflight Markdown, manifest JSON, schema SQL, and smoke-test results.
+19. Add runtime incident auto-linking from failed preflight checks to the affected admin/public page.
+20. Add a local business structured-data editor with validation and static bake output for Devil n Dove contact/service area details.
+
 # Build 173 Completed Pass — Deployment Preflight, D1 Safety, and Local SEO Release Guardrails
 
 Completed in this pass:

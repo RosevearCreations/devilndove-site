@@ -2,7 +2,8 @@
 """Static deployment preflight for Devil n Dove build zips.
 
 No network and no secrets are required. It validates public HTML title/meta/one-H1 basics,
-CSS brace balance, JSON parse health, key files, and local-search wording signals.
+canonical links, schema.org JSON-LD validity when present, image alt text, CSS brace balance,
+JSON parse health, key files, schema migration files, and local-search wording signals.
 It writes data/site/deployment-preflight.json for the admin release pages.
 """
 from __future__ import annotations
@@ -12,8 +13,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_PAGES = [
-    ('index.html', ['devil', 'dove']),
-    ('shop/index.html', ['shop']),
+    ('index.html', ['devil', 'dove', 'ontario']),
+    ('shop/index.html', ['shop', 'devil', 'dove']),
     ('gallery/index.html', ['gallery']),
     ('creations/index.html', ['creations']),
     ('handmade-jewelry-ontario/index.html', ['handmade', 'jewelry', 'ontario']),
@@ -29,14 +30,20 @@ JSON_FILES = [
     'data/site/seo-page-overrides.json',
     'data/site/local-seo-bake-actions.json',
     'data/site/release-notes.json',
+    'data/site/deployment-preflight.json',
+    'data/site/release-package-manifest.json',
     'data/catalog.json',
 ]
 REQUIRED_FILES = [
     'database_build171_ledger_repair.sql',
     'database_build173_deployment_preflight.sql',
+    'database_build174_deployment_preflight_detail.sql',
     'admin/deployment-preflight/index.html',
     'functions/api/admin/deployment-preflight.js',
     'public/js/admin-deployment-preflight.js',
+    'public/js/admin-dashboard-preflight-badge.js',
+    'scripts/generate_release_manifest.py',
+    'scripts/regenerate_sanity_from_preflight.py',
     'RELEASE_NOTES.md',
     'SANITY_HEALTH_CHECK.md',
 ]
@@ -47,6 +54,42 @@ def read(path: Path) -> str:
 def clean(text: str) -> str:
     return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', text)).strip().lower()
 
+def attr(tag: str, name: str) -> str:
+    m=re.search(rf'{name}\s*=\s*(["\'])(.*?)\1', tag, re.I|re.S)
+    return m.group(2).strip() if m else ''
+
+def title_text(text: str) -> str:
+    m=re.search(r'<title\b[^>]*>(.*?)</title>', text, re.I|re.S)
+    return clean(m.group(1)) if m else ''
+
+def meta_description(text: str) -> str:
+    for tag in re.findall(r'<meta\b[^>]*>', text, re.I|re.S):
+        if attr(tag, 'name').lower() == 'description':
+            return attr(tag, 'content')
+    return ''
+
+def canonical(text: str) -> str:
+    for tag in re.findall(r'<link\b[^>]*>', text, re.I|re.S):
+        if attr(tag, 'rel').lower() == 'canonical':
+            return attr(tag, 'href')
+    return ''
+
+def schema_rows(text: str) -> list[dict]:
+    out=[]
+    for raw in re.findall(r'<script\b[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', text, re.I|re.S):
+        try:
+            data=json.loads(raw.strip())
+            out.append({'valid': True, 'type': data.get('@type') if isinstance(data, dict) else 'array'})
+        except Exception as exc:
+            out.append({'valid': False, 'error': str(exc)})
+    return out
+
+def image_alt_rows(text: str) -> list[dict]:
+    rows=[]
+    for tag in re.findall(r'<img\b[^>]*>', text, re.I|re.S):
+        rows.append({'src': attr(tag, 'src'), 'has_alt': bool(attr(tag, 'alt'))})
+    return rows
+
 def check_pages(checks: list[dict]) -> None:
     page_rows=[]
     for rel, terms in PUBLIC_PAGES:
@@ -54,15 +97,19 @@ def check_pages(checks: list[dict]) -> None:
         text=read(path)
         plain=clean(text)
         h1=len(re.findall(r'<h1\b', text, re.I))
-        has_title=bool(re.search(r'<title\b[^>]*>.*?</title>', text, re.I|re.S))
-        has_meta=bool(re.search(r'<meta\s+[^>]*name=["\']description["\'][^>]*content=', text, re.I)) or bool(re.search(r'<meta\s+[^>]*content=["\'][^"\']+["\'][^>]*name=["\']description["\']', text, re.I))
+        title=title_text(text)
+        meta=meta_description(text)
+        canon=canonical(text)
+        schemas=schema_rows(text)
+        imgs=image_alt_rows(text)
         missing_terms=[term for term in terms if term not in plain]
         status='pass'
-        if not path.exists() or h1 != 1 or not has_title or not has_meta:
-            status='fail'
-        elif missing_terms:
-            status='warn'
-        page_rows.append({'path': rel, 'status': status, 'h1_count': h1, 'has_title': has_title, 'has_meta_description': has_meta, 'missing_terms': missing_terms})
+        notes=[]
+        if not path.exists() or h1 != 1 or not title or not meta:
+            status='fail'; notes.append('missing required title/meta/H1/page')
+        elif missing_terms or not (30 <= len(title) <= 70) or not (80 <= len(meta) <= 170) or not canon or any(not row['has_alt'] for row in imgs) or any(not row['valid'] for row in schemas):
+            status='warn'; notes.append('review SEO length/local/canonical/image/schema details')
+        page_rows.append({'path': rel, 'status': status, 'h1_count': h1, 'title_length': len(title), 'meta_description_length': len(meta), 'has_canonical': bool(canon), 'schema_blocks': len(schemas), 'image_count': len(imgs), 'missing_alt_count': sum(1 for row in imgs if not row['has_alt']), 'missing_terms': missing_terms, 'notes': notes})
     fail=sum(1 for row in page_rows if row['status']=='fail')
     warn=sum(1 for row in page_rows if row['status']=='warn')
     checks.append({'code':'static_public_pages','status':'fail' if fail else ('warn' if warn else 'pass'), 'detail':f'{len(page_rows)} pages checked; {fail} fail, {warn} warn.', 'rows':page_rows})
@@ -91,15 +138,25 @@ def check_required_files(checks: list[dict]) -> None:
     missing=[rel for rel in REQUIRED_FILES if not (ROOT/rel).exists()]
     checks.append({'code':'static_required_files','status':'fail' if missing else 'pass','detail':'Missing: '+', '.join(missing) if missing else f'{len(REQUIRED_FILES)} required files are present.', 'missing':missing})
 
+def check_schema_files(checks: list[dict]) -> None:
+    files=['database_schema.sql','database_full_schema.sql','database_store_schema.sql','database_upgrade_current_pass.sql','database_build174_deployment_preflight_detail.sql']
+    missing=[]
+    for rel in files:
+        text=read(ROOT/rel)
+        if 'deployment_post_deploy_confirmations' not in text or 'build_174_preflight_detail_manifest' not in text:
+            missing.append(rel)
+    checks.append({'code':'static_schema_build174','status':'fail' if missing else 'pass','detail':'Build 174 schema marker missing in: '+', '.join(missing) if missing else 'Build 174 schema table and ledger marker found in schema files.', 'missing':missing})
+
 def main() -> int:
     checks=[]
     check_required_files(checks)
+    check_schema_files(checks)
     check_pages(checks)
     check_css(checks)
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 173','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 174','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')

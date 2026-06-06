@@ -1,3 +1,14 @@
+# Build 174 Post-Deploy Smoke and Confirmation Notes
+
+After applying Build 174:
+
+1. Run `/admin/deployment-preflight/` and review blockers/warnings.
+2. Export the Markdown preflight handoff if anything needs review outside the admin UI.
+3. Save a preflight snapshot.
+4. Run `/admin/post-deploy-smoke-tests/` for the core live URLs.
+5. Return to Deployment Preflight and mark post-deploy confirmation rows complete with notes.
+6. Review `/admin/safe-deploy-package/` and `/data/site/release-package-manifest.json` before promoting live.
+
 # Build 173 Post-Deploy Smoke and Preflight Update
 
 New post-deploy step:

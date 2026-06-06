@@ -1,32 +1,40 @@
-# Build 173 deployment preflight and D1 safety
+# Build 174 preflight detail, schema diff, and release manifest
 
 ## Summary
 
-- Added a dedicated Deployment Preflight admin page for D1 migration safety, public one-H1/title/meta checks, CSS drift checks, static JSON fallback checks, and local SEO wording review.
-- Added an admin-only deployment-preflight API that warns when Build 171 schema objects exist but the Build 171 ledger marker is missing, so we avoid rerunning unsafe ALTER TABLE blocks.
-- Added a safe additive Build 173 D1 migration file for deployment-preflight run history and ledger recording.
-- Added a no-network static deployment preflight script that writes data/site/deployment-preflight.json for release/admin review.
-- Updated schema sanity/drift/migration-ledger expectations to include deployment_preflight_runs and the Build 171/173 migration markers.
-- Updated dashboard and Operations navigation so the new preflight page is easy to find before deploy.
+- Added richer Deployment Preflight detail drawers for public SEO, canonical, schema.org, image-alt, fallback, migration, schema, R2, duplicate ownership, and relationship-integrity checks.
+- Added Markdown export for Deployment Preflight support handoff.
+- Added post-deploy confirmation workflow rows so admins can mark D1 migration, preflight, public-page review, smoke-test, release-note, and R2/email checks complete.
+- Added generated release package manifest support with SHA-256 hashes.
+- Added a desktop admin dashboard badge for latest Deployment Preflight status.
+- Updated D1 schema files, migration ledger expectations, DB sanity, schema drift, safe deploy package, release notes, sanity notes, roadmap, and known gaps.
+
+## Release package manifest
+
+- Static manifest: `data/site/release-package-manifest.json`
+- The manifest is regenerated after release notes so its own hash does not create a documentation loop.
 
 ## Changed files
 
-- `NEW_CHAT_STATUS.md`
+- `AMAZON_MATCHING_NOTES.md`
+- `COMPETITIVE.md`
+- `LOCAL_SEO_PLAYBOOK.md`
+- `IMAGES.md`
+- `README.md`
 - `AI_CONTEXT.md`
 - `DATABASE_SCHEMA_REFERENCE.md`
 - `DEVELOPMENT_ROADMAP.md`
 - `KNOWN_GAPS_AND_RISKS.md`
+- `NEW_CHAT_STATUS.md`
 - `POST_DEPLOY_SMOKE_TEST.md`
-- `README.md`
 - `RELEASE_NOTES.md`
 - `SANITY_HEALTH_CHECK.md`
 - `admin/deployment-preflight/index.html`
 - `admin/index.html`
-- `admin/operations/index.html`
-- `css/styles.css`
 - `data/site/deployment-preflight.json`
 - `data/site/release-notes.json`
-- `database_build173_deployment_preflight.sql`
+- `data/site/release-package-manifest.json`
+- `database_build174_deployment_preflight_detail.sql`
 - `database_full_schema.sql`
 - `database_schema.sql`
 - `database_store_schema.sql`
@@ -34,32 +42,34 @@
 - `functions/api/admin/db-sanity.js`
 - `functions/api/admin/deployment-preflight.js`
 - `functions/api/admin/migration-ledger.js`
+- `functions/api/admin/safe-deploy-package.js`
 - `functions/api/admin/schema-drift-report.js`
+- `public/js/admin-dashboard-preflight-badge.js`
 - `public/js/admin-deployment-preflight.js`
+- `public/js/admin-safe-deploy-package.js`
 - `scripts/deployment_preflight_static_check.py`
+- `scripts/generate_release_manifest.py`
 - `scripts/generate_release_notes.py`
-- `admin/dark-theme-evidence/index.html`
-- `admin/release-notes/index.html`
-- `admin/safe-deploy-package/index.html`
+- `scripts/regenerate_sanity_from_preflight.py`
 
 ## D1 migration summary
 
-- New optional/additive migration file: database_build173_deployment_preflight.sql.
-- Creates deployment_preflight_runs for saved preflight snapshots.
-- Records build_173_deployment_preflight_release_safety in schema_migration_ledger with required file_name populated.
+- New additive migration file: database_build174_deployment_preflight_detail.sql.
+- Creates deployment_post_deploy_confirmations for visible post-deploy checklist confirmations.
+- Records build_174_preflight_detail_manifest in schema_migration_ledger with file_name populated.
 - No destructive schema changes.
-- database_build173_deployment_preflight.sql now creates schema_migration_ledger if missing before recording the Build 173 marker.
 
 ## Required post-deploy actions
 
-- If the live database already received Build 171 schema additions but missed the ledger marker, run database_build171_ledger_repair.sql first.
-- Run database_build173_deployment_preflight.sql once after deploy to enable saved preflight snapshots.
-- Open /admin/deployment-preflight/ and run/save a snapshot before promoting the branch live.
-- Review any warnings for public-page local wording, CSS drift, static JSON fallback health, and missing migration markers.
+- Run database_build171_ledger_repair.sql only if Build 171 schema exists but the ledger marker is missing.
+- Run database_build173_deployment_preflight.sql, then database_build174_deployment_preflight_detail.sql.
+- Open /admin/deployment-preflight/, run Preflight, export Markdown if warnings remain, and save a snapshot.
+- Run /admin/post-deploy-smoke-tests/ and then mark post-deploy confirmation rows complete.
+- Review /admin/safe-deploy-package/ and data/site/release-package-manifest.json before promoting live.
 
 ## Validation
 
-- Static deployment preflight passed with zero blockers and zero warnings in this zip.
-- All JavaScript files added/changed passed node --check during package validation.
-- Public HTML scan confirmed no exposed page has more than one H1.
-- CSS brace balance and JSON parse validation passed before packaging.
+- Static deployment preflight regenerated data/site/deployment-preflight.json.
+- Release package manifest generated with SHA-256 hashes.
+- JavaScript syntax checks passed for changed admin/public/function files.
+- CSS brace balance and one-H1/title/meta checks are included in final validation.
