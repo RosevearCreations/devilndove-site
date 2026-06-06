@@ -1069,3 +1069,5 @@ body.nav-mobile-open{overflow:hidden}
 
 /* Build 170 admin workflow polish */
 .marketplace-field-preview dl{display:grid;grid-template-columns:minmax(90px,160px) 1fr;gap:6px 12px;margin:10px 0 0}.marketplace-field-preview dt{font-weight:800;color:var(--text,#f7edff)}.marketplace-field-preview dd{margin:0;color:var(--muted,#d9c7e8);overflow-wrap:anywhere}.proof-filter-row,.task-filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:10px 0 12px}.derivative-compare-card .btn.small{margin-top:6px}.mobile-summary-list-item[data-task-category="urgent"]{border-color:rgba(255,180,193,.55)}.mobile-summary-list-item[data-task-category="product"]{border-color:rgba(216,178,255,.45)}.mobile-summary-list-item[data-task-category="accounting"]{border-color:rgba(255,214,128,.45)}.mobile-summary-list-item[data-task-category="request"]{border-color:rgba(143,225,255,.45)}
+
+.product-editor-field-focus{outline:3px solid #f7c948!important;box-shadow:0 0 0 6px rgba(247,201,72,.22)!important;transition:box-shadow .2s ease,outline .2s ease}
