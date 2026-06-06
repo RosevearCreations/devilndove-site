@@ -21,6 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OVERRIDES = ROOT / "data" / "site" / "seo-page-overrides.json"
+LOCAL_BAKE_ACTIONS = ROOT / "data" / "site" / "local-seo-bake-actions.json"
 
 
 def page_file(path_value: str) -> Path | None:
@@ -79,10 +80,22 @@ def main() -> int:
         print("No SEO override file found; nothing to bake.")
         return 0
     data = json.loads(OVERRIDES.read_text(encoding="utf-8"))
+    local_actions = {"actions": []}
+    if LOCAL_BAKE_ACTIONS.exists():
+        local_actions = json.loads(LOCAL_BAKE_ACTIONS.read_text(encoding="utf-8"))
     changed = []
-    for row in data.get("overrides", []):
+    override_rows = list(data.get("overrides", []))
+    for action in local_actions.get("actions", []):
+        override_rows.append({
+            "path": action.get("page_path"),
+            "title": action.get("proposed_title"),
+            "meta_description": action.get("proposed_meta_description"),
+            "internal_link_note": action.get("internal_link_notes"),
+            "status": action.get("action_status", "approved")
+        })
+    for row in override_rows:
         status = str(row.get("status") or row.get("review_status") or "approved").lower()
-        if status not in {"approved", "applied", "published"}:
+        if status not in {"approved", "applied", "published", "queued", "ready"}:
             continue
         target = page_file(str(row.get("path") or row.get("page_path") or "/"))
         if not target or not target.exists():

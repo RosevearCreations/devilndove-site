@@ -928,3 +928,49 @@ Completed in this pass:
 18. Added public-page dark-theme screenshot checklist to `IMAGES.md`.
 19. Extended dark-theme CSS for new proof/gift/marketplace panels.
 20. Updated schema/reference notes for new D1 tables.
+
+## Build 170 — deployment blocker hardening, image derivatives, marketplace replay, proof promotion, gift-card lockouts, SEO bake scoring, recall matching, smoke tests
+
+### Completed in this pass
+- Added `/api/image-derivative` worker route for derivative image serving when Cloudflare Image Resizing is available, with safe original-image fallback.
+- Added “Use this derivative as featured image” support to `product-image-derivatives` and Product Media Workflow derivative cards.
+- Added marketplace export history snapshot storage plus replay and rollback actions.
+- Added marketplace CSV field preview per channel/product row in the export preview UI.
+- Connected approved public-proof candidates into `trust_block_items` through a Promote to trust block action.
+- Added source filters for public-proof candidates by status, source kind, consent status, product, and custom request.
+- Added gift-card delivery sender bridge into `notification_outbox` plus sent/failed status controls.
+- Added gift-card delivery history endpoint for order/customer admin views.
+- Added gift-card abuse lockout controls and public lookup lockout enforcement.
+- Extended the static SEO bake script to consume `data/site/local-seo-bake-actions.json` as deploy-bake input.
+- Added competitor/local phrase scoring against live page copy from the local SEO phrase endpoint.
+- Persisted product QA blocker events and blocker-resolution history.
+- Kept Product QA fix targeting tied to exact admin editor destinations and blocker history records.
+- Added candle/soap recall customer matching from orders/order items.
+- Added candle/soap recall send-review and notification-draft queue steps before customer notification.
+- Prepared accountant export evidence attachment bundling notes and kept safe URL/object-key evidence manifests in ZIP output.
+- Added `/admin/post-deploy-smoke-tests/` page with storage for live URL smoke-test results.
+- Added dark-theme screenshot/evidence rows via `/api/admin/dark-theme-evidence`.
+- Added mobile Today task filters for urgent/product/accounting/request work queues.
+- Added `scripts/final_deployment_blocker_check.py` and ran it before packaging.
+
+### Next 20 recommended steps
+1. Add real binary-safe accountant evidence bundling for small PDF/image receipts when R2 fetch is explicitly enabled.
+2. Add an admin page for dark-theme screenshot evidence review and status changes.
+3. Add direct product QA fix buttons that auto-open the exact editor section and focus the target field.
+4. Add one-click promotion from public-proof trust block into selected public page placements.
+5. Add gift-card delivery provider adapters for the chosen email service.
+6. Add gift-card lockout release controls into the visible Gift Card Admin page.
+7. Add marketplace export diff view between current selections and replayed history.
+8. Add marketplace rollback per whole channel export, not only per product selection.
+9. Add public proof candidate customer-consent source linking in the moderation card.
+10. Add R2 derivative worker route settings panel with enabled/disabled health checks.
+11. Add direct derivative-to-featured buttons inside the product editor image strip, not only the Product Media Workflow.
+12. Add recall customer-match preview grouped by product/batch/order before queueing notifications.
+13. Add recall “send approval required” gate before notification drafts can leave draft state.
+14. Add local SEO bake-action export from D1 to `data/site/local-seo-bake-actions.json`.
+15. Add competitor phrase status badges directly on each local SEO landing-page row.
+16. Add today-task filters to the desktop admin dashboard too.
+17. Add post-deploy smoke-test quick-run buttons for core live URLs.
+18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
+19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
+20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.

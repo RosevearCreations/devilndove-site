@@ -1942,3 +1942,18 @@ CREATE TABLE IF NOT EXISTS post_deploy_smoke_test_results (
 );
 ALTER TABLE product_image_derivatives ADD COLUMN before_image_url TEXT;
 ALTER TABLE product_image_derivatives ADD COLUMN comparison_notes TEXT;
+
+-- Build 170 deployment hardening and workflow schema notes
+-- Added/extended by app code as defensive CREATE TABLE/ALTER TABLE calls:
+-- product_image_derivatives: derivative URL worker fallback and featured-image promotion notes.
+-- marketplace_export_history: snapshot_json, replayed_from_history_id, rollback_note.
+-- marketplace_export_replay_events: channel replay/rollback audit.
+-- public_proof_candidates: promoted_trust_block_item_id, promoted_at, source_label.
+-- public_proof_candidate_events: promotion audit trail.
+-- gift_card_delivery_queue: delivery sender/history bridge to notification_outbox.
+-- gift_card_lookup_lockouts: admin lockout controls for public balance lookup abuse.
+-- local_seo_competitor_phrases: last_page_score, phrase_count, last_scored_at.
+-- product_qa_blocker_history: blocker resolution persistence.
+-- candle_soap_recall_customer_matches and candle_soap_recall_notification_queue: recall matching and send-review drafts.
+-- post_deploy_smoke_test_results: live URL smoke-test storage.
+-- dark_theme_screenshot_evidence: dark-theme screenshot/review evidence rows.
