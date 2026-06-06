@@ -100,10 +100,27 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
   }
 
+  function todayTaskCategory(task) {
+    const text = `${task?.key || ''} ${task?.label || ''} ${task?.href || ''}`.toLowerCase();
+    if (text.includes('incident') || text.includes('failed') || text.includes('urgent')) return 'urgent';
+    if (text.includes('product') || text.includes('readiness') || text.includes('qa')) return 'product';
+    if (text.includes('accounting') || text.includes('payment') || text.includes('journal') || text.includes('tax')) return 'accounting';
+    if (text.includes('request') || text.includes('order') || text.includes('custom')) return 'request';
+    return 'general';
+  }
+
   function renderTodayTasks(payload) {
     if (!todayTaskStats) return;
     const tasks = Array.isArray(payload?.tasks) ? payload.tasks : [];
-    todayTaskStats.innerHTML = tasks.length ? `<div class="mobile-summary-list">${tasks.map((task) => { const details = Array.isArray(task.details) && task.details.length ? `<details class="small"><summary>Details</summary>${task.details.map((row) => `<div class="status-note warning" style="margin-top:6px"><strong>${escapeHtml(row.incident_code || row.incident_scope || 'incident')}</strong><br>${escapeHtml(row.message || '')}<br>${escapeHtml(row.request_path || '')} · ${escapeHtml(row.created_at || '')}</div>`).join('')}</details>` : ''; return `<div class="mobile-summary-list-item"><a href="${escapeHtml(task.href || '/admin/')}"><strong>${escapeHtml(String(task.count || 0))}</strong><div class="small">${escapeHtml(task.label || task.key || 'Task')}</div></a>${details}<div class="task-action-row"><button class="btn" type="button" data-today-task-action="completed" data-task-key="${escapeHtml(task.key || task.label || 'task')}" data-task-label="${escapeHtml(task.label || task.key || 'Task')}">Done</button><button class="btn secondary" type="button" data-today-task-action="ignored" data-task-key="${escapeHtml(task.key || task.label || 'task')}" data-task-label="${escapeHtml(task.label || task.key || 'Task')}">Ignore</button><button class="btn secondary" type="button" data-today-task-action="snoozed" data-task-key="${escapeHtml(task.key || task.label || 'task')}" data-task-label="${escapeHtml(task.label || task.key || 'Task')}">Snooze</button></div></div>`; }).join('')}</div>` : '<div class="small">No merged task queue is available right now.</div>';
+    const activeFilter = todayTaskStats.getAttribute('data-task-filter') || 'all';
+    const counts = tasks.reduce((acc, task) => { const key = todayTaskCategory(task); acc[key] = Number(acc[key] || 0) + 1; return acc; }, {});
+    const filteredTasks = activeFilter === 'all' ? tasks : tasks.filter((task) => todayTaskCategory(task) === activeFilter);
+    const filters = ['all', 'urgent', 'product', 'accounting', 'request'].map((key) => `<button class="btn small ${activeFilter === key ? 'primary' : 'secondary'}" type="button" data-mobile-task-filter="${escapeHtml(key)}">${escapeHtml(key)} ${key === 'all' ? tasks.length : Number(counts[key] || 0)}</button>`).join('');
+    todayTaskStats.innerHTML = `<div class="task-filter-row">${filters}</div>` + (filteredTasks.length ? `<div class="mobile-summary-list">${filteredTasks.map((task) => { const details = Array.isArray(task.details) && task.details.length ? `<details class="small"><summary>Details</summary>${task.details.map((row) => `<div class="status-note warning" style="margin-top:6px"><strong>${escapeHtml(row.incident_code || row.incident_scope || 'incident')}</strong><br>${escapeHtml(row.message || '')}<br>${escapeHtml(row.request_path || '')} · ${escapeHtml(row.created_at || '')}</div>`).join('')}</details>` : ''; return `<div class="mobile-summary-list-item" data-task-category="${escapeHtml(todayTaskCategory(task))}"><a href="${escapeHtml(task.href || '/admin/')}"><strong>${escapeHtml(String(task.count || 0))}</strong><div class="small">${escapeHtml(task.label || task.key || 'Task')}</div></a>${details}<div class="task-action-row"><button class="btn" type="button" data-today-task-action="completed" data-task-key="${escapeHtml(task.key || task.label || 'task')}" data-task-label="${escapeHtml(task.label || task.key || 'Task')}">Done</button><button class="btn secondary" type="button" data-today-task-action="ignored" data-task-key="${escapeHtml(task.key || task.label || 'task')}" data-task-label="${escapeHtml(task.label || task.key || 'Task')}">Ignore</button><button class="btn secondary" type="button" data-today-task-action="snoozed" data-task-key="${escapeHtml(task.key || task.label || 'task')}" data-task-label="${escapeHtml(task.label || task.key || 'Task')}">Snooze</button></div></div>`; }).join('')}</div>` : '<div class="small">No tasks match this filter right now.</div>');
+    todayTaskStats.querySelectorAll('[data-mobile-task-filter]').forEach((button) => button.addEventListener('click', () => {
+      todayTaskStats.setAttribute('data-task-filter', button.getAttribute('data-mobile-task-filter') || 'all');
+      renderTodayTasks(payload);
+    }));
     todayTaskStats.querySelectorAll('[data-today-task-action]').forEach((button) => button.addEventListener('click', async () => {
       const action = button.getAttribute('data-today-task-action') || 'completed';
       const payload = { task_key: button.getAttribute('data-task-key') || 'task', task_label: button.getAttribute('data-task-label') || 'Task', action_status: action };

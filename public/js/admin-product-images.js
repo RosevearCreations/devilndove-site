@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Derivative history failed.');
       const rows = Array.isArray(data.derivatives) ? data.derivatives.slice(0, 6) : [];
-      target.innerHTML = rows.length ? rows.map((item) => `<div class="status-note info derivative-compare-card" style="margin-top:6px"><strong>${escapeHtml(item.derivative_kind || 'variant')}</strong> ${escapeHtml(item.target_width || '')}×${escapeHtml(item.target_height || '')}<div class="derivative-compare-grid"><figure><figcaption>Before</figcaption><img src="${escapeHtml(item.before_image_url || item.source_image_url || '')}" alt="Before derivative"></figure><figure><figcaption>After</figcaption><img src="${escapeHtml(item.derivative_url || '')}" alt="Derivative preview"></figure></div><a href="${escapeHtml(item.derivative_url || '#')}" target="_blank" rel="noopener">${escapeHtml(item.derivative_status || 'preview')}</a><br><span>${escapeHtml(item.generation_method || '')} • ${escapeHtml(item.created_at || item.updated_at || '')}</span></div>`).join('') : 'No derivative records yet.';
+      target.innerHTML = rows.length ? rows.map((item) => `<div class="status-note info derivative-compare-card" style="margin-top:6px"><strong>${escapeHtml(item.derivative_kind || 'variant')}</strong> ${escapeHtml(item.target_width || '')}×${escapeHtml(item.target_height || '')}<div class="derivative-compare-grid"><figure><figcaption>Before</figcaption><img src="${escapeHtml(item.before_image_url || item.source_image_url || '')}" alt="Before derivative"></figure><figure><figcaption>After</figcaption><img src="${escapeHtml(item.derivative_url || '')}" alt="Derivative preview"></figure></div><a href="${escapeHtml(item.derivative_url || '#')}" target="_blank" rel="noopener">${escapeHtml(item.derivative_status || 'preview')}</a><br><span>${escapeHtml(item.generation_method || '')} • ${escapeHtml(item.created_at || item.updated_at || '')}</span><div style="margin-top:6px"><button class="btn small" type="button" data-use-derivative-featured="${escapeHtml(item.product_image_derivative_id || '')}" data-derivative-image-id="${escapeHtml(item.product_image_id || '')}" data-derivative-url="${escapeHtml(item.derivative_url || '')}">Use this derivative as featured image</button></div></div>`).join('') : 'No derivative records yet.';
     } catch (error) { target.textContent = error.message || 'Derivative history failed.'; }
   }
 
@@ -1171,6 +1171,23 @@ document.addEventListener('DOMContentLoaded', () => {
       if (cropBox) cropBox.style.cssText = `left:${Math.round(cropX*100)}%;top:${Math.round(cropY*100)}%;width:${Math.round(size*100)}%;height:${Math.round(size*100)}%`;
       renderQualityScore();
       setMessage('Focal point updated on the thumbnail. Save images to keep this crop/focus guidance.');
+      return;
+    }
+    const derivativeButton = event.target.closest('[data-use-derivative-featured]');
+    if (derivativeButton) {
+      try {
+        const imageId = Number(derivativeButton.getAttribute('data-derivative-image-id') || row?.dataset.imageId || 0);
+        const derivativeId = Number(derivativeButton.getAttribute('data-use-derivative-featured') || 0);
+        const derivativeUrl = derivativeButton.getAttribute('data-derivative-url') || '';
+        const response = await window.DDAuth.apiFetch('/api/admin/product-image-derivatives', { method: 'POST', body: JSON.stringify({ action: 'use_as_featured', product_image_id: imageId, product_image_derivative_id: derivativeId, derivative_url: derivativeUrl }) });
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not set derivative as featured.');
+        setMessage(data.message || 'Derivative set as featured image.');
+        if (data.featured_image_url) {
+          const field = document.querySelector('[name="featured_image_url"], #featuredImageUrl, [data-featured-image-url]');
+          if (field) field.value = data.featured_image_url;
+        }
+      } catch (error) { setMessage(error.message || 'Could not set derivative as featured.', true); }
       return;
     }
     if (event.target.closest('[data-row-queue-derivative]') && row) { try { await queueDerivativeForRow(row); } catch (error) { setMessage(error.message || 'Derivative failed.', true); } return; }
