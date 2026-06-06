@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>Deployment Preflight — Devil n Dove Admin</title>
+  <meta content="Run D1 migration safety, one-H1, CSS, static JSON, release-document, and local SEO preflight checks before deploying Devil n Dove." name="description"/>
+  <link href="/css/styles.css" rel="stylesheet"/>
+  <link href="/assets/mark.png" rel="icon" type="image/png"/>
+</head>
+<body>
+  <div class="container admin-shell">
+    <div class="nav">
+      <div class="brand">
+        <img alt="Devil n Dove logo" src="/assets/logo-clear.png"/>
+        <div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Deployment Preflight</div></div>
+      </div>
+      <div class="links"><a href="/">Home</a><a href="/shop/">Shop</a><a href="/admin/">Admin</a><button class="btn" data-nav-logout="" type="button">Logout</button></div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <h1>Deployment Preflight</h1>
+        <p>Check the live build for D1 migration ledger safety, public page H1/title/meta health, CSS drift, static JSON fallbacks, and local-search wording before pushing or swapping branches.</p>
+      </div>
+    </div>
+
+    <div class="admin-department-links card">
+      <a class="btn" href="/admin/">Dashboard</a>
+      <a class="btn" href="/admin/operations/">Operations</a>
+      <a class="btn" href="/admin/safe-deploy-package/">Safe Deploy Package</a>
+      <a class="btn" href="/admin/release-notes/">Release Notes</a>
+      <a class="btn" href="/admin/post-deploy-smoke-tests/">Smoke Tests</a>
+    </div>
+
+    <div class="card" id="deploymentPreflightMount" style="margin-top:18px">
+      <h2 style="margin-top:0">Preflight checks</h2>
+      <p class="small">Use this page before deploy and after D1 schema changes. It does not run destructive changes.</p>
+      <div class="small" id="deploymentPreflightMessage">Waiting for admin session…</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
+        <button class="btn" id="runDeploymentPreflightButton" type="button">Run Preflight</button>
+        <button class="btn secondary" id="saveDeploymentPreflightButton" type="button">Save Snapshot</button>
+      </div>
+      <div id="deploymentPreflightSummary" style="margin-top:14px"></div>
+      <div id="deploymentPreflightChecks" style="margin-top:14px"></div>
+      <div id="deploymentPreflightRuns" style="margin-top:14px"></div>
+    </div>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/site-analytics.js"></script>
+  <script src="/public/js/admin-self-protect.js"></script>
+  <script src="/public/js/admin-deployment-preflight.js"></script>
+</body>
+</html>

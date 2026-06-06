@@ -1071,3 +1071,24 @@ body.nav-mobile-open{overflow:hidden}
 .marketplace-field-preview dl{display:grid;grid-template-columns:minmax(90px,160px) 1fr;gap:6px 12px;margin:10px 0 0}.marketplace-field-preview dt{font-weight:800;color:var(--text,#f7edff)}.marketplace-field-preview dd{margin:0;color:var(--muted,#d9c7e8);overflow-wrap:anywhere}.proof-filter-row,.task-filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:10px 0 12px}.derivative-compare-card .btn.small{margin-top:6px}.mobile-summary-list-item[data-task-category="urgent"]{border-color:rgba(255,180,193,.55)}.mobile-summary-list-item[data-task-category="product"]{border-color:rgba(216,178,255,.45)}.mobile-summary-list-item[data-task-category="accounting"]{border-color:rgba(255,214,128,.45)}.mobile-summary-list-item[data-task-category="request"]{border-color:rgba(143,225,255,.45)}
 
 .product-editor-field-focus{outline:3px solid #f7c948!important;box-shadow:0 0 0 6px rgba(247,201,72,.22)!important;transition:box-shadow .2s ease,outline .2s ease}
+
+/* Build 173 deployment preflight helpers */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+}
+.status-pill-success { color: #baf7c7; border-color: rgba(88, 214, 141, 0.55); }
+.status-pill-warning { color: #ffe2a8; border-color: rgba(255, 196, 87, 0.65); }
+.status-pill-error { color: #ffb4b4; border-color: rgba(255, 100, 100, 0.65); }
+.table-wrap { overflow-x: auto; width: 100%; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th,
+.admin-table td { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 9px 8px; text-align: left; vertical-align: top; }
+.admin-table th { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }

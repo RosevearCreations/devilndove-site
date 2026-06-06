@@ -1,0 +1,149 @@
+{
+  "build_label": "Build 173",
+  "status": "ready",
+  "blocker_count": 0,
+  "warning_count": 0,
+  "checks": [
+    {
+      "code": "static_required_files",
+      "status": "pass",
+      "detail": "7 required files are present.",
+      "missing": []
+    },
+    {
+      "code": "static_public_pages",
+      "status": "pass",
+      "detail": "12 pages checked; 0 fail, 0 warn.",
+      "rows": [
+        {
+          "path": "index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "shop/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "gallery/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "creations/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "handmade-jewelry-ontario/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "polymer-clay-earrings-ontario/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "custom-gifts-southern-ontario/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "laser-engraving-ontario/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "custom-candle-making-ontario/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "custom-soap-making-ontario/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "vintage-finds-ontario/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        },
+        {
+          "path": "workshop-made-gifts-ontario/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "has_title": true,
+          "has_meta_description": true,
+          "missing_terms": []
+        }
+      ]
+    },
+    {
+      "code": "static_css_balance",
+      "status": "pass",
+      "detail": "CSS braces 940/940"
+    },
+    {
+      "code": "static_json_parse",
+      "status": "pass",
+      "detail": "4 JSON files checked; 0 failed.",
+      "rows": [
+        {
+          "path": "data/site/seo-page-overrides.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/local-seo-bake-actions.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/release-notes.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/catalog.json",
+          "ok": true,
+          "error": ""
+        }
+      ]
+    }
+  ]
+}
