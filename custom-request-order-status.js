@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const order = data.order || {};
     const items = Array.isArray(data.items) ? data.items : [];
     const stages = Array.isArray(data.stages) ? data.stages : [];
-    const photos = Array.isArray(data.photos) ? data.photos : [];
     const currentStage = data.link?.order_stage || 'planning';
     mount.innerHTML = `<div class="quote-preview-card">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
@@ -27,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <h3>Custom work stage</h3>
       <div class="quote-preview-breakdown small"><div>Current stage: <strong>${esc(currentStage)}</strong></div><div>${esc(data.link?.stage_notes || '')}</div><div>Stage updated: <strong>${esc(data.link?.stage_updated_at || '—')}</strong></div></div>
       <div class="small" style="margin-top:8px">${stages.map((stage) => `${esc(stage.created_at || '')} • ${esc(stage.stage_label || stage.stage_key || '')} ${stage.stage_notes ? `— ${esc(stage.stage_notes)}` : ''}`).join('<br>') || 'Stage history will appear here after admin updates.'}</div>
-      <h3>Stage photos</h3><div class="order-stage-photo-grid">${photos.map((photo) => `<div class="order-stage-photo-card"><img src="${esc(photo.image_url || '')}" alt="${esc(photo.image_caption || photo.stage_key || 'Custom work stage photo')}"/><div class="small"><strong>${esc(photo.stage_key || 'stage')}</strong><br>${esc(photo.image_caption || '')}</div></div>`).join('') || '<p class="small">No private stage photos have been shared yet.</p>'}</div><h3>Order items</h3>
+      <h3>Order items</h3>
       <div class="admin-table-wrap"><table><thead><tr><th>Item</th><th>Qty</th><th>Amount</th></tr></thead><tbody>${items.map((item) => `<tr><td>${esc(item.product_name || 'Custom item')}<br><span class="small">${esc(item.sku || '')}</span></td><td>${esc(item.quantity || 1)}</td><td>${money(item.line_subtotal_cents || item.unit_price_cents, order.currency || 'CAD')}</td></tr>`).join('') || '<tr><td colspan="3">No item rows are attached yet.</td></tr>'}</tbody></table></div>
       <h3>Notes</h3>
       <pre class="quote-preview-scope">${esc(order.notes || 'No extra order notes yet.')}</pre>

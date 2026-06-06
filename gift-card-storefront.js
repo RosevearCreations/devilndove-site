@@ -48,7 +48,40 @@
     }
   }
 
+  function renderBalanceLookup() {
+    const mount = document.getElementById('giftCardBalancePublicMount');
+    if (!mount) return;
+    mount.innerHTML = `
+      <section class="card storefront-gift-card-card">
+        <h2 style="margin-top:0">Check a gift-card balance</h2>
+        <p class="small">Enter the gift-card code and the recipient or purchaser email. We only show the balance after both match.</p>
+        <form id="publicGiftCardBalanceForm" class="grid cols-3" style="gap:10px;align-items:end">
+          <label><span class="small">Gift-card code</span><input id="publicGiftCardBalanceCode" autocomplete="off" placeholder="DND-XXXX-XXXX-XXXX"></label>
+          <label><span class="small">Recipient or purchaser email</span><input id="publicGiftCardBalanceEmail" type="email" autocomplete="email" placeholder="name@example.com"></label>
+          <button class="btn" type="submit">Check balance</button>
+        </form>
+        <div id="publicGiftCardBalanceResult" class="small" style="margin-top:10px"></div>
+      </section>`;
+    document.getElementById('publicGiftCardBalanceForm')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const out = document.getElementById('publicGiftCardBalanceResult');
+      if (out) out.textContent = 'Checking balance...';
+      const code = String(document.getElementById('publicGiftCardBalanceCode')?.value || '').trim();
+      const email = String(document.getElementById('publicGiftCardBalanceEmail')?.value || '').trim();
+      try {
+        const res = await fetch(`/api/gift-card-balance?code=${encodeURIComponent(code)}&email=${encodeURIComponent(email)}`);
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) throw new Error(data?.error || 'Gift card was not found.');
+        const card = data.card || {};
+        if (out) out.innerHTML = `<strong>Balance:</strong> ${escapeHtml(centsToMoney(card.remaining_amount_cents || 0, card.currency || 'CAD'))} • status ${escapeHtml(card.status || '')}${card.expires_at ? ` • expires ${escapeHtml(card.expires_at)}` : ''}`;
+      } catch (error) {
+        if (out) out.textContent = error.message || 'Balance lookup failed.';
+      }
+    });
+  }
+
   function renderShopGiftCard() {
+    renderBalanceLookup();
     const mount = document.getElementById('shopGiftCardStorefrontMount');
     if (!mount) return;
     const saved = readGiftCardPurchase();
@@ -188,6 +221,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     renderShopGiftCard();
+    renderBalanceLookup();
     renderCheckoutGiftCard();
   });
 })();

@@ -49,6 +49,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productReviewsListEl = document.getElementById("productReviewsList");
   const productRelatedProofCardEl = document.getElementById("productRelatedProofCard");
   const productRelatedProofSummaryEl = document.getElementById("productRelatedProofSummary");
+  const productCandleSoapSafetyCardEl = document.getElementById('productCandleSoapSafetyCard');
+  const productCandleSoapSummaryEl = document.getElementById('productCandleSoapSummary');
+  const productCandleSoapDetailsEl = document.getElementById('productCandleSoapDetails');
   const productRelatedProofListEl = document.getElementById("productRelatedProofList");
   let currentProduct = null;
   let currentTrustSummary = null;
@@ -132,22 +135,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function titleCaseLabel(value) {
     return String(value || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()).trim();
-  }
-
-
-  function renderCandleSoapSpec(spec) {
-    const existing = document.getElementById('productCandleSoapSpecCard');
-    if (existing) existing.remove();
-    if (!spec || typeof spec !== 'object') return;
-    const rows = [
-      ['Scent profile', spec.scent_profile], ['Wax/base', spec.wax_or_base], ['Colour notes', spec.colour_notes], ['Batch number', spec.batch_number], ['Ingredients', spec.ingredient_notes]
-    ].filter(([, value]) => String(value || '').trim());
-    if (!rows.length && !String(spec.allergen_safety_notes || '').trim()) return;
-    const card = document.createElement('section');
-    card.id = 'productCandleSoapSpecCard';
-    card.className = 'card candle-soap-spec-public';
-    card.innerHTML = `<h2 style="margin-top:0">Candle / soap details</h2>${rows.map(([label, value]) => `<div class="spec-row"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`).join('')}${spec.allergen_safety_notes ? `<div class="safety-note-block"><strong>Safety / allergen notes</strong><p>${escapeHtml(spec.allergen_safety_notes)}</p></div>` : ''}`;
-    detailEl?.appendChild(card);
   }
 
   function renderPublicProductStory(product, storyNotes, resourceLinks, images) {
@@ -330,6 +317,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="small" style="margin-top:4px">${escapeHtml(row.review_kind || 'testimonial')} • ${escapeHtml(row.created_at || '')}</div>
         <div style="margin-top:8px">${escapeHtml(row.review_text || '')}</div>
       </article>`).join('');
+  }
+
+
+  function renderCandleSoapSpec(spec) {
+    if (!productCandleSoapSafetyCardEl || !productCandleSoapSummaryEl || !productCandleSoapDetailsEl) return;
+    if (!spec || typeof spec !== 'object') {
+      hide(productCandleSoapSafetyCardEl);
+      return;
+    }
+    const parts = [spec.product_kind, spec.scent_profile ? `Scent: ${spec.scent_profile}` : '', spec.wax_or_base ? `Base: ${spec.wax_or_base}` : '', spec.batch_number ? `Batch: ${spec.batch_number}` : ''].filter(Boolean);
+    productCandleSoapSummaryEl.textContent = parts.length ? parts.join(' • ') : 'Safety, scent, batch, and ingredient notes are available for this candle or soap item.';
+    const detailRows = [
+      ['Colour notes', spec.colour_notes],
+      ['Ingredients', spec.ingredient_notes],
+      ['Allergen / safety notes', spec.allergen_safety_notes || spec.safety_notes],
+      ['Label weight', spec.label_weight],
+      ['Batch recall notes', spec.batch_recall_notes]
+    ].filter(([, value]) => String(value || '').trim());
+    productCandleSoapDetailsEl.innerHTML = detailRows.length
+      ? detailRows.map(([label, value]) => `<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</div>`).join('')
+      : '<div>No extra safety notes have been added yet.</div>';
+    show(productCandleSoapSafetyCardEl);
   }
 
   function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec) {
@@ -518,4 +527,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   productBackInStockButton?.addEventListener('click', requestBackInStock);
 
   await loadProduct();
+});
+
+
+// Build 167: add safety/label helper if candle or soap specs are present in the rendered API payload.
+document.addEventListener('dd:product-detail-rendered', (event) => {
+  const product = event.detail?.product || event.detail || {};
+  const specs = product.candle_soap_specs || product.candle_soap_spec || product.soap_specs || null;
+  if (!specs) return;
+  const mount = document.querySelector('#productCandleSoapSafetyMount') || document.querySelector('#productDetailMeta') || document.querySelector('.product-detail-content');
+  if (!mount || document.getElementById('productCandleSoapSafetyBlock')) return;
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  const el = document.createElement('details');
+  el.id = 'productCandleSoapSafetyBlock';
+  el.className = 'card candle-soap-safety-accordion';
+  el.innerHTML = `<summary><strong>Candle / soap safety notes</strong></summary><div class="small"><p><strong>Scent/base:</strong> ${esc(specs.scent_profile || specs.wax_base || specs.soap_base || 'See listing notes')}</p><p><strong>Ingredients:</strong> ${esc(specs.ingredient_notes || 'Ingredient details pending review.')}</p><p><strong>Allergen/safety:</strong> ${esc(specs.allergen_safety_notes || specs.safety_notes || 'Follow normal candle/soap safety and patch-test handmade products.')}</p><p><strong>Batch:</strong> ${esc(specs.batch_number || 'Unassigned')}</p></div>`;
+  mount.appendChild(el);
 });
