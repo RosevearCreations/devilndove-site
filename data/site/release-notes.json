@@ -84,5 +84,50 @@
         "scripts/deployment_preflight_static_check.py"
       ]
     }
+  ],
+  "notes": [
+    {
+      "build_label": "Build 176",
+      "title": "Safe deploy ZIP, live manifest diff, QA previews, recall locks, and local SEO controls",
+      "summary": "Adds binary-safe safe deploy ZIP support, manifest diff records, QA preview items, marketplace validation previews, recall notification locks, local SEO suggestion/trend tables, richer LocalBusiness schema bake tracking, rollback checklist rows, and Release Control actions.",
+      "schema_files": [
+        "database_build176_release_safety_controls.sql"
+      ],
+      "post_deploy": [
+        "Run database_build176_release_safety_controls.sql after Build 175.",
+        "Open /admin/release-control/ and run Live Manifest Compare.",
+        "Download /api/admin/safe-deploy-package?format=zip.",
+        "Refresh recall locks before sending recall notifications."
+      ],
+      "changed_areas": [
+        "release-control",
+        "safe-deploy",
+        "deployment-preflight",
+        "local-seo",
+        "product-qa",
+        "marketplace",
+        "recalls",
+        "schema"
+      ]
+    },
+    {
+      "build_label": "Build 175",
+      "title": "Build 175 release control, deeper preflight, and local business schema",
+      "date": "2026-06-06",
+      "summary": [
+        "Added release-control admin page and API for deployment history, manifest comparison, screenshot evidence jobs, mobile saved views, safe deploy records, and LocalBusiness schema preview.",
+        "Expanded Deployment Preflight with response-body keyword checks, collection/category page checks, sample product URL checks, Search Console/internal-link visibility, Product QA bulk queue, R2 signed/private tests, accountant checksum rows, gift-card webhooks, marketplace validation/diff rows, recall compliance, mobile views, and runtime incident linking.",
+        "Added additive Build 175 D1 migration and updated schema files, release docs, sanity notes, and safe deploy package guidance."
+      ],
+      "changed_files": [
+        "admin/release-control/index.html",
+        "public/js/admin-release-control.js",
+        "functions/api/admin/release-control.js",
+        "functions/api/admin/deployment-preflight.js",
+        "database_build175_release_control.sql",
+        "data/site/local-business-schema.json",
+        "scripts/deployment_preflight_static_check.py"
+      ]
+    }
   ]
 }
