@@ -40,6 +40,7 @@ REQUIRED_FILES = [
     'database_build173_deployment_preflight.sql',
     'database_build174_deployment_preflight_detail.sql',
     'database_build175_release_control.sql',
+    'database_build176_release_safety_controls.sql',
     'admin/deployment-preflight/index.html',
     'admin/release-control/index.html',
     'functions/api/admin/deployment-preflight.js',
@@ -144,12 +145,13 @@ def check_required_files(checks: list[dict]) -> None:
 
 def check_schema_files(checks: list[dict]) -> None:
     required = {
-        'database_schema.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center'],
-        'database_full_schema.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center'],
-        'database_store_schema.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center'],
-        'database_upgrade_current_pass.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center'],
+        'database_schema.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center', 'build_176_release_safety_controls'],
+        'database_full_schema.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center', 'build_176_release_safety_controls'],
+        'database_store_schema.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center', 'build_176_release_safety_controls'],
+        'database_upgrade_current_pass.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center', 'build_176_release_safety_controls'],
         'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
         'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
+        'database_build176_release_safety_controls.sql': ['safe_deploy_package_downloads', 'local_business_schema_extended_fields', 'build_176_release_safety_controls'],
     }
     missing=[]
     detail=[]
@@ -159,7 +161,7 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_build175','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174/175 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_build176','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174/175/176 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
 
 def main() -> int:
     checks=[]
@@ -170,7 +172,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 175','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 176','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
