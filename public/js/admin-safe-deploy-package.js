@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mount.innerHTML = `
         <section class="card">
           <h2>${esc(p.build_label || 'Safe deploy package')}</h2>
-          <h3>Schema order</h3>
+          <p><a class="btn" href="${esc(p.safe_deploy_zip_url || '/api/admin/safe-deploy-package?format=zip')}">Download Safe Deploy ZIP</a> <a class="btn secondary" href="/admin/release-control/">Open Release Control</a></p><h3>Schema order</h3>
           <ul>${(p.schema || []).map((item) => `<li>${esc(item)}</li>`).join('')}</ul>
           <div class="grid two-col">
             <div class="status-note"><h3>Fresh install SQL order</h3><ol>${(blocks.fresh_install || []).map((item) => `<li><code>${esc(item)}</code></li>`).join('')}</ol></div>
