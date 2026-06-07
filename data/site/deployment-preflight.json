@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 174",
+  "build_label": "Build 175",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,13 +7,13 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "11 required files are present.",
+      "detail": "14 required files are present.",
       "missing": []
     },
     {
-      "code": "static_schema_build174",
+      "code": "static_schema_build175",
       "status": "pass",
-      "detail": "Build 174 schema table and ledger marker found in schema files.",
+      "detail": "Build 174/175 schema tables and ledger markers found in the correct schema files.",
       "missing": []
     },
     {
@@ -187,7 +187,7 @@
     {
       "code": "static_json_parse",
       "status": "pass",
-      "detail": "6 JSON files checked; 0 failed.",
+      "detail": "7 JSON files checked; 0 failed.",
       "rows": [
         {
           "path": "data/site/seo-page-overrides.json",
@@ -211,6 +211,11 @@
         },
         {
           "path": "data/site/release-package-manifest.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/local-business-schema.json",
           "ok": true,
           "error": ""
         },

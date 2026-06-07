@@ -63,5 +63,26 @@
     "Release package manifest generated with SHA-256 hashes.",
     "JavaScript syntax checks passed for changed admin/public/function files.",
     "CSS brace balance and one-H1/title/meta checks are included in final validation."
+  ],
+  "releases": [
+    {
+      "build_label": "Build 175",
+      "title": "Build 175 release control, deeper preflight, and local business schema",
+      "date": "2026-06-06",
+      "summary": [
+        "Added release-control admin page and API for deployment history, manifest comparison, screenshot evidence jobs, mobile saved views, safe deploy records, and LocalBusiness schema preview.",
+        "Expanded Deployment Preflight with response-body keyword checks, collection/category page checks, sample product URL checks, Search Console/internal-link visibility, Product QA bulk queue, R2 signed/private tests, accountant checksum rows, gift-card webhooks, marketplace validation/diff rows, recall compliance, mobile views, and runtime incident linking.",
+        "Added additive Build 175 D1 migration and updated schema files, release docs, sanity notes, and safe deploy package guidance."
+      ],
+      "changed_files": [
+        "admin/release-control/index.html",
+        "public/js/admin-release-control.js",
+        "functions/api/admin/release-control.js",
+        "functions/api/admin/deployment-preflight.js",
+        "database_build175_release_control.sql",
+        "data/site/local-business-schema.json",
+        "scripts/deployment_preflight_static_check.py"
+      ]
+    }
   ]
 }
