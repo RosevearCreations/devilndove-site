@@ -77,6 +77,20 @@ const EXPECTED_MIGRATIONS = [
     destructive: false,
     run_order: 174,
   },
+  {
+    migration_key: 'build_175_release_control_center',
+    file_name: 'database_build175_release_control.sql',
+    purpose: 'Build 175 release control, deployment history, manifest comparisons, screenshot jobs, marketplace validation, recall compliance, and LocalBusiness schema.',
+    destructive: false,
+    run_order: 175,
+  },
+  {
+    migration_key: 'build_176_release_safety_controls',
+    file_name: 'database_build176_release_safety_controls.sql',
+    purpose: 'Build 176 safe deploy ZIP tracking, live manifest diffs, QA previews, recall locks, local SEO links/trends, rollback checklist, and notification routes.',
+    destructive: false,
+    run_order: 176,
+  },
 ];
 
 function normalizeResults(result) {

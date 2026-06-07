@@ -3,7 +3,7 @@
 
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD_LABEL = 'Build 175';
+const BUILD_LABEL = 'Build 176';
 
 const CORE_PUBLIC_PAGES = [
   { path: '/', label: 'Home', requiredTerms: ['devil', 'dove', 'ontario'] },
@@ -61,7 +61,8 @@ const EXPECTED_MIGRATIONS = [
   { migration_key: 'build_171_admin_safety_release_readiness', file_name: 'database_upgrade_current_pass.sql', order: 171, fallback_file: 'database_build171_ledger_repair.sql', note: 'Run repair-only ledger SQL if the Build 171 schema objects already exist.' },
   { migration_key: 'build_173_deployment_preflight_release_safety', file_name: 'database_build173_deployment_preflight.sql', order: 173, fallback_file: '', note: 'Adds deployment_preflight_runs and preflight admin visibility.' },
   { migration_key: 'build_174_preflight_detail_manifest', file_name: 'database_build174_deployment_preflight_detail.sql', order: 174, fallback_file: '', note: 'Adds post-deploy confirmations plus richer preflight/detail manifests.' },
-  { migration_key: 'build_175_release_control_center', file_name: 'database_build175_release_control.sql', order: 175, fallback_file: '', note: 'Adds release control, deployment history, screenshot jobs, provider webhooks, QA queues, marketplace validation, recall compliance, and local business schema.' }
+  { migration_key: 'build_175_release_control_center', file_name: 'database_build175_release_control.sql', order: 175, fallback_file: '', note: 'Adds release control, deployment history, screenshot jobs, provider webhooks, QA queues, marketplace validation, recall compliance, and local business schema.' },
+  { migration_key: 'build_176_release_safety_controls', file_name: 'database_build176_release_safety_controls.sql', order: 176, fallback_file: '', note: 'Adds safe deploy ZIP tracking, live manifest diffs, QA preview items, marketplace validation runs, recall locks, local SEO link/trend rows, LocalBusiness bakes, rollback checklist rows, and notification routes.' }
 ];
 
 const EXPECTED_SCHEMA = [
@@ -92,8 +93,17 @@ const EXPECTED_SCHEMA = [
   { table: 'recall_customer_previews', columns: ['recall_customer_preview_id', 'batch_number', 'customer_email', 'preview_status'], area: 'recalls' },
   { table: 'mobile_admin_saved_views', columns: ['mobile_admin_saved_view_id', 'view_key', 'page_path', 'device_target'], area: 'mobile admin' },
   { table: 'local_business_schema_settings', columns: ['local_business_schema_setting_id', 'business_name', 'area_served_json', 'schema_status'], area: 'local SEO schema' },
+  { table: 'local_business_schema_extended_fields', columns: ['local_business_schema_extended_field_id', 'local_business_schema_setting_id', 'payment_accepted_json', 'price_range'], area: 'local SEO schema' },
   { table: 'safe_deploy_export_records', columns: ['safe_deploy_export_record_id', 'build_label', 'export_status', 'manifest_path'], area: 'safe deploy export' },
-  { table: 'preflight_runtime_incident_links', columns: ['preflight_runtime_incident_link_id', 'deployment_preflight_run_id', 'runtime_incident_id', 'check_code'], area: 'runtime incidents' }
+  { table: 'preflight_runtime_incident_links', columns: ['preflight_runtime_incident_link_id', 'deployment_preflight_run_id', 'runtime_incident_id', 'check_code'], area: 'runtime incidents' },
+  { table: 'safe_deploy_package_downloads', columns: ['safe_deploy_package_download_id', 'build_label', 'zip_sha256', 'total_bytes'], area: 'safe deploy export' },
+  { table: 'release_manifest_live_diffs', columns: ['release_manifest_live_diff_id', 'build_label', 'diff_status', 'missing_file_count'], area: 'release control' },
+  { table: 'product_qa_bulk_fix_preview_items', columns: ['product_qa_bulk_fix_preview_item_id', 'product_id', 'blocker_code', 'fix_url'], area: 'product QA' },
+  { table: 'marketplace_export_validation_runs', columns: ['marketplace_export_validation_run_id', 'channel', 'validation_status', 'blocker_count'], area: 'marketplace exports' },
+  { table: 'recall_notification_locks', columns: ['recall_notification_lock_id', 'batch_number', 'lock_status', 'matching_review_id'], area: 'recalls' },
+  { table: 'local_seo_internal_link_suggestions', columns: ['local_seo_internal_link_suggestion_id', 'source_path', 'target_path', 'score'], area: 'local seo' },
+  { table: 'local_seo_search_console_trends', columns: ['local_seo_search_console_trend_id', 'page_path', 'query_text', 'impressions'], area: 'local seo' },
+  { table: 'deployment_rollback_checklist_rows', columns: ['deployment_rollback_checklist_row_id', 'build_label', 'checklist_key', 'checklist_status'], area: 'rollback safety' }
 ];
 
 const CONFIRMATION_CHECKS = [
@@ -230,6 +240,7 @@ async function inspectMigrationLedger(db, checks) {
   const build171 = expected.find((row) => row.migration_key === 'build_171_admin_safety_release_readiness');
   const build173 = expected.find((row) => row.migration_key === 'build_173_deployment_preflight_release_safety');
   const build174 = expected.find((row) => row.migration_key === 'build_174_preflight_detail_manifest');
+  const build176 = expected.find((row) => row.migration_key === 'build_176_release_safety_controls');
 
   const partialRows = [];
   for (const spec of BUILD_171_TABLES) {
@@ -257,6 +268,9 @@ async function inspectMigrationLedger(db, checks) {
   const build175 = expected.find((row) => row.migration_key === 'build_175_release_control_center');
   if (build175?.recorded) addCheck(checks, 'pass', 'build175_marker_present', 'Build 175 ledger marker', `Build 175 marker is recorded as ${build175.status || 'recorded'}.`, '');
   else addCheck(checks, 'warn', 'build175_marker_missing', 'Build 175 ledger marker', 'Build 175 release-control marker is not recorded yet.', 'Apply database_build175_release_control.sql after Build 174.');
+
+  if (build176?.recorded) addCheck(checks, 'pass', 'build176_marker_present', 'Build 176 ledger marker', `Build 176 marker is recorded as ${build176.status || 'recorded'}.`, '');
+  else addCheck(checks, 'warn', 'build176_marker_missing', 'Build 176 ledger marker', 'Build 176 release-safety marker is not recorded yet.', 'Apply database_build176_release_safety_controls.sql after Build 175.');
 
   const recent = await safeAll(db, `
     SELECT migration_key, file_name, status, destructive, applied_by_user_id, applied_at, notes, created_at, updated_at
@@ -463,6 +477,7 @@ function buildMigrationPlan(ledger) {
       'Run database_build173_deployment_preflight.sql.',
       'Run database_build174_deployment_preflight_detail.sql.',
       'Run database_build175_release_control.sql.',
+      'Run database_build176_release_safety_controls.sql.',
       'Open /admin/deployment-preflight/, run Preflight, then Save Snapshot.'
     ],
     partially_upgraded_database: [
@@ -470,6 +485,7 @@ function buildMigrationPlan(ledger) {
       build173Recorded ? 'Build 173 marker is already recorded.' : 'Run database_build173_deployment_preflight.sql after the Build 171 marker is safe.',
       build174Recorded ? 'Build 174 marker is already recorded.' : 'Run database_build174_deployment_preflight_detail.sql after Build 173.',
       recorded.has('build_175_release_control_center') ? 'Build 175 marker is already recorded.' : 'Run database_build175_release_control.sql after Build 174.',
+      recorded.has('build_176_release_safety_controls') ? 'Build 176 marker is already recorded.' : 'Run database_build176_release_safety_controls.sql after Build 175.',
       'Do not rerun ALTER TABLE-heavy blocks against a database where those columns already exist.'
     ],
     repair_only: [
@@ -557,17 +573,21 @@ async function inspectReleaseControl(db, checks) {
   }
   const history = await safeAll(db, `SELECT deployment_history_id, build_label, branch_name, deploy_url, deployment_status, promoted_at, created_at FROM deployment_history ORDER BY created_at DESC LIMIT 10`);
   const comparisons = await tableExists(db, 'deployment_manifest_comparisons') ? await safeAll(db, `SELECT deployment_manifest_comparison_id, build_label, comparison_status, missing_file_count, changed_file_count, compared_at, created_at FROM deployment_manifest_comparisons ORDER BY COALESCE(compared_at, created_at) DESC LIMIT 10`) : [];
-  const latestBad = comparisons.filter((row) => ['failed','changed','missing'].includes(lc(row.comparison_status)) || Number(row.missing_file_count || 0) || Number(row.changed_file_count || 0));
-  addCheck(checks, latestBad.length ? 'warn' : 'pass', 'release_history_manifest_compare', 'Deployment history and manifest comparison', latestBad.length ? `${latestBad.length} manifest comparison row(s) need review.` : `Release-control tables are present with ${history.length} deployment history row(s) and ${comparisons.length} manifest comparison row(s).`, latestBad.length ? 'Compare the deployed /data/site/release-package-manifest.json with the package manifest before promotion.' : '', { deployment_history: history, manifest_comparisons: comparisons });
-  return { deployment_history: history, manifest_comparisons: comparisons };
+  const liveDiffs = await tableExists(db, 'release_manifest_live_diffs') ? await safeAll(db, `SELECT build_label, diff_status, missing_file_count, changed_file_count, extra_file_count, checked_at FROM release_manifest_live_diffs ORDER BY checked_at DESC LIMIT 10`) : [];
+  const downloads = await tableExists(db, 'safe_deploy_package_downloads') ? await safeAll(db, `SELECT build_label, file_count, total_bytes, zip_sha256, download_status, prepared_at FROM safe_deploy_package_downloads ORDER BY prepared_at DESC LIMIT 10`) : [];
+  const latestBad = [...comparisons, ...liveDiffs].filter((row) => ['failed','changed','missing','review'].includes(lc(row.comparison_status || row.diff_status)) || Number(row.missing_file_count || 0) || Number(row.changed_file_count || 0));
+  addCheck(checks, latestBad.length ? 'warn' : 'pass', 'release_history_manifest_compare', 'Deployment history and manifest comparison', latestBad.length ? `${latestBad.length} manifest comparison/diff row(s) need review.` : `Release-control tables are present with ${history.length} deployment history row(s), ${comparisons.length} stored comparison row(s), ${liveDiffs.length} live diff row(s), and ${downloads.length} safe ZIP download row(s).`, latestBad.length ? 'Compare the deployed /data/site/release-package-manifest.json with the package manifest before promotion.' : '', { deployment_history: history, manifest_comparisons: comparisons, live_manifest_diffs: liveDiffs, safe_downloads: downloads });
+  return { deployment_history: history, manifest_comparisons: comparisons, live_manifest_diffs: liveDiffs, safe_downloads: downloads };
 }
 
 async function inspectSearchConsoleAndInternalLinks(db, checks) {
-  const hasSearch = await tableExists(db, 'search_console_query_imports') || await tableExists(db, 'search_console_import_rows') || await tableExists(db, 'search_console_queries');
+  const hasSearch = await tableExists(db, 'search_console_query_imports') || await tableExists(db, 'search_console_import_rows') || await tableExists(db, 'search_console_queries') || await tableExists(db, 'local_seo_search_console_trends');
   const bakeRows = await tableExists(db, 'local_seo_bake_actions') ? await safeAll(db, `SELECT page_path, action_status, proposed_title, internal_link_notes, updated_at FROM local_seo_bake_actions ORDER BY updated_at DESC LIMIT 20`) : [];
+  const suggestions = await tableExists(db, 'local_seo_internal_link_suggestions') ? await safeAll(db, `SELECT source_path, target_path, suggested_anchor, score, suggestion_status FROM local_seo_internal_link_suggestions ORDER BY score DESC LIMIT 20`) : [];
+  const trends = await tableExists(db, 'local_seo_search_console_trends') ? await safeAll(db, `SELECT page_path, query_text, impressions, clicks, average_position FROM local_seo_search_console_trends ORDER BY impressions DESC LIMIT 20`) : [];
   const readyLinks = bakeRows.filter((row) => normalizeText(row.internal_link_notes));
-  addCheck(checks, hasSearch || readyLinks.length ? 'pass' : 'warn', 'search_console_internal_link_queue', 'Search Console trends and internal-link suggestions', hasSearch ? `Search Console import table appears available; ${readyLinks.length} bake-action row(s) include internal-link notes.` : `${readyLinks.length} bake-action row(s) include internal-link notes; no Search Console import table was detected.`, hasSearch || readyLinks.length ? 'Review Local SEO rows for trending queries and internal-link bake actions.' : 'Add Search Console import rows or queue internal-link suggestions from high-traffic pages.', { has_search_console_table: hasSearch, internal_link_rows: readyLinks });
-  return { has_search_console_table: hasSearch, internal_link_rows: readyLinks };
+  addCheck(checks, hasSearch || readyLinks.length || suggestions.length ? 'pass' : 'warn', 'search_console_internal_link_queue', 'Search Console trends and internal-link suggestions', hasSearch ? `Search Console/trend table appears available; ${suggestions.length} generated suggestion row(s) and ${trends.length} trend row(s) are visible.` : `${readyLinks.length} bake-action row(s) include internal-link notes and ${suggestions.length} generated suggestion row(s) exist; no Search Console trend table was detected.`, hasSearch || readyLinks.length || suggestions.length ? 'Review Local SEO rows for trending queries and internal-link bake actions.' : 'Add Search Console import rows or queue internal-link suggestions from high-traffic pages.', { has_search_console_table: hasSearch, internal_link_rows: readyLinks, suggestions, trends });
+  return { has_search_console_table: hasSearch, internal_link_rows: readyLinks, suggestions, trends };
 }
 
 async function inspectProductQaBulkQueue(db, checks) {
@@ -619,7 +639,7 @@ async function inspectRecallCompliance(db, checks) {
 async function inspectMobileViewsAndLocalBusinessSchema(db, checks) {
   const mobileViews = await tableExists(db, 'mobile_admin_saved_views') ? await safeAll(db, `SELECT view_key, view_label, page_path, device_target, is_default, updated_at FROM mobile_admin_saved_views ORDER BY is_default DESC, updated_at DESC LIMIT 50`) : [];
   const localSchema = await tableExists(db, 'local_business_schema_settings') ? await safeAll(db, `SELECT business_name, canonical_url, telephone, email, area_served_json, service_types_json, schema_status, updated_at FROM local_business_schema_settings ORDER BY updated_at DESC LIMIT 5`) : [];
-  const wanted = new Set(['today_tasks_phone','deployment_preflight_phone','post_deploy_smoke_phone','accounting_close_phone']);
+  const wanted = new Set(['today_tasks_phone','deployment_preflight_phone','post_deploy_smoke_phone','accounting_close_phone','release_control_phone']);
   const have = new Set(mobileViews.map((row) => row.view_key));
   const missingViews = [...wanted].filter((key) => !have.has(key));
   const schemaReady = localSchema.some((row) => ['ready','active','published'].includes(lc(row.schema_status)));

@@ -70,6 +70,15 @@ const EXPECTED_TABLES = {
   cart_activity: ['cart_activity_id'],
   deployment_preflight_runs: ['deployment_preflight_run_id', 'build_label', 'run_status', 'blocker_count', 'warning_count', 'summary_json'],
   deployment_post_deploy_confirmations: ['deployment_post_deploy_confirmation_id', 'build_label', 'confirmation_key', 'confirmation_status', 'confirmed_by_user_id', 'confirmed_at'],
+  deployment_history: ['deployment_history_id', 'build_label', 'deployment_status'],
+  release_manifest_live_diffs: ['release_manifest_live_diff_id', 'build_label', 'diff_status', 'missing_file_count'],
+  safe_deploy_package_downloads: ['safe_deploy_package_download_id', 'build_label', 'zip_sha256', 'total_bytes'],
+  product_qa_bulk_fix_preview_items: ['product_qa_bulk_fix_preview_item_id', 'product_id', 'blocker_code', 'fix_url'],
+  marketplace_export_validation_runs: ['marketplace_export_validation_run_id', 'channel', 'validation_status'],
+  recall_notification_locks: ['recall_notification_lock_id', 'batch_number', 'lock_status'],
+  local_seo_internal_link_suggestions: ['local_seo_internal_link_suggestion_id', 'source_path', 'target_path'],
+  local_business_schema_extended_fields: ['local_business_schema_extended_field_id', 'local_business_schema_setting_id'],
+  deployment_rollback_checklist_rows: ['deployment_rollback_checklist_row_id', 'build_label', 'checklist_key'],
 };
 
 async function getTableNames(db) {
