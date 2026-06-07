@@ -1,3 +1,49 @@
+# Build 176 Completed Pass — Safe Deploy ZIP, Live Manifest Diff, QA Previews, Recall Locks, and Local SEO Controls
+
+Completed in this pass:
+1. Added true binary-safe Safe Deploy ZIP download support at `/api/admin/safe-deploy-package?format=zip` with a package index and SHA-256 response header.
+2. Added D1 tracking for safe deploy package download records, included file counts, byte totals, ZIP SHA-256, and skipped/missing package-file notes.
+3. Added live deployed-manifest comparison from Release Control so `/data/site/release-package-manifest.json` can be compared against a deployed manifest URL.
+4. Added release-manifest live diff storage with missing, changed, and extra file counts.
+5. Added Product QA bulk-fix preview item rows with product IDs, blocker codes, exact focus fields, suggested values, and editor fix URLs.
+6. Added a Release Control action to build Product QA preview cards from the latest failed QA results.
+7. Added marketplace export validation preview runs before CSV generation so required-column rules can be reviewed by channel.
+8. Added visible marketplace snapshot diff and validation tables on `/admin/release-control/`.
+9. Added recall notification lock rows so recall notices remain locked until an approved compliance review exists.
+10. Added a Release Control action to refresh recall locks from candle/soap recall rows and draft notification queues.
+11. Added gift-card webhook signature-check storage for provider signature status, replay-window notes, and event linkage.
+12. Added local SEO internal-link suggestion rows for source path, target path, anchor text, score, and review status.
+13. Added local SEO Search Console trend rows for page/query clicks, impressions, CTR, and average position history.
+14. Expanded LocalBusiness schema support with logo, image, price range, payment methods, opening hours, address, and geo fields through a companion schema-extension table and bake tracking.
+15. Added LocalBusiness schema bake tracking for approved static JSON-LD output into `data/site/local-business-schema.json`.
+16. Added a phone-first Release Control JSON view for compact deployment review.
+17. Added rollback checklist rows linking release history, manifest diffs, smoke tests, R2 checks, D1 migration state, and release notes.
+18. Added Cloudflare deployment import setup checks that safely report missing account/project/token configuration without failing the admin page.
+19. Added admin notification route rows so preflight/release/recall warnings have dashboard destinations.
+20. Updated schema references, deployment preflight expectations, static checks, release package guidance, Markdown handoff files, and local business static JSON for Build 176.
+
+Next 20 recommended steps:
+1. Add a real Cloudflare Pages API deployment import when a scoped API token is present, with branch/commit/build URL matching into `deployment_history`.
+2. Add direct status controls for rollback checklist rows so each required rollback item can be marked passed/blocked with notes.
+3. Add a release manifest visual diff drawer that lists the exact missing/changed/extra file paths from `release_manifest_live_diffs.diff_json`.
+4. Add Product QA preview approval controls that can mark a preview group safe, skipped, or manual-only before any apply action is enabled.
+5. Add the first low-risk Product QA apply action for generated image-alt suggestions only, with before/after logging.
+6. Add channel-specific marketplace validation directly into `/admin/marketplace-exports/` download buttons, not only Release Control.
+7. Add marketplace validation rule editor controls for Etsy, Facebook, Pinterest, and manual CSV columns.
+8. Add recall customer preview generation from actual order/product/batch joins instead of only lock rows and draft queues.
+9. Add recall send-unlock enforcement inside the recall notification API so draft rows cannot be promoted without a matching approved lock.
+10. Add provider-specific signature verification helpers for Resend, SendGrid, and Postmark gift-card webhooks.
+11. Add a live R2 signed-download create/get/delete test for private accountant/customer evidence objects.
+12. Add accountant ZIP checksum writing directly inside the accounting export endpoint and link it to Safe Deploy records.
+13. Add LocalBusiness schema editing controls on Release Control, including opening hours and sameAs social profile entry fields.
+14. Add static JSON-LD injection into the homepage and local SEO landing pages during the bake script.
+15. Add Search Console trend charts per local SEO page row using the new trend table.
+16. Add internal-link suggestion approval that writes approved bake actions into `local_seo_bake_actions`.
+17. Add a compact mobile Release Control page layout that hides long tables and shows only blockers, ZIP download, manifest compare, and recall locks.
+18. Add dashboard notification cards sourced from `admin_notification_routes` and recent preflight/manifest/recall warnings.
+19. Add release package ZIP download history into `/admin/safe-deploy-package/` with SHA-256 copy buttons.
+20. Add a final deploy-readiness score that combines preflight, manifest diff, smoke test results, rollback checklist, and D1 migration markers.
+
 # Build 175 Completed Pass — Release Control, Deeper Preflight, Mobile Saved Views, and LocalBusiness Schema
 
 Completed in this pass:

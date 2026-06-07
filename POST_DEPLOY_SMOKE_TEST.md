@@ -1,3 +1,5 @@
+Build 176 post-deploy addition: after smoke tests, open Release Control, run Live Manifest Compare, download the Safe Deploy ZIP, refresh recall locks, and create rollback checklist rows before promotion.
+
 
 ## Build 175 smoke additions
 

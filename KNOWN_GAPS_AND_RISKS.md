@@ -1,3 +1,46 @@
+# Build 176 known gaps and risks update
+
+Moved forward in Build 176:
+
+- Added true binary-safe Safe Deploy ZIP download support at `/api/admin/safe-deploy-package?format=zip` with a package index and SHA-256 response header.
+- Added D1 tracking for safe deploy package download records, included file counts, byte totals, ZIP SHA-256, and skipped/missing package-file notes.
+- Added live deployed-manifest comparison from Release Control so `/data/site/release-package-manifest.json` can be compared against a deployed manifest URL.
+- Added release-manifest live diff storage with missing, changed, and extra file counts.
+- Added Product QA bulk-fix preview item rows with product IDs, blocker codes, exact focus fields, suggested values, and editor fix URLs.
+- Added a Release Control action to build Product QA preview cards from the latest failed QA results.
+- Added marketplace export validation preview runs before CSV generation so required-column rules can be reviewed by channel.
+- Added visible marketplace snapshot diff and validation tables on `/admin/release-control/`.
+- Added recall notification lock rows so recall notices remain locked until an approved compliance review exists.
+- Added a Release Control action to refresh recall locks from candle/soap recall rows and draft notification queues.
+- Added gift-card webhook signature-check storage for provider signature status, replay-window notes, and event linkage.
+- Added local SEO internal-link suggestion rows for source path, target path, anchor text, score, and review status.
+
+Still open:
+
+1. Add a real Cloudflare Pages API deployment import when a scoped API token is present, with branch/commit/build URL matching into `deployment_history`.
+2. Add direct status controls for rollback checklist rows so each required rollback item can be marked passed/blocked with notes.
+3. Add a release manifest visual diff drawer that lists the exact missing/changed/extra file paths from `release_manifest_live_diffs.diff_json`.
+4. Add Product QA preview approval controls that can mark a preview group safe, skipped, or manual-only before any apply action is enabled.
+5. Add the first low-risk Product QA apply action for generated image-alt suggestions only, with before/after logging.
+6. Add channel-specific marketplace validation directly into `/admin/marketplace-exports/` download buttons, not only Release Control.
+7. Add marketplace validation rule editor controls for Etsy, Facebook, Pinterest, and manual CSV columns.
+8. Add recall customer preview generation from actual order/product/batch joins instead of only lock rows and draft queues.
+9. Add recall send-unlock enforcement inside the recall notification API so draft rows cannot be promoted without a matching approved lock.
+10. Add provider-specific signature verification helpers for Resend, SendGrid, and Postmark gift-card webhooks.
+11. Add a live R2 signed-download create/get/delete test for private accountant/customer evidence objects.
+12. Add accountant ZIP checksum writing directly inside the accounting export endpoint and link it to Safe Deploy records.
+13. Add LocalBusiness schema editing controls on Release Control, including opening hours and sameAs social profile entry fields.
+14. Add static JSON-LD injection into the homepage and local SEO landing pages during the bake script.
+15. Add Search Console trend charts per local SEO page row using the new trend table.
+
+Deployment watch items:
+
+- Run `database_build176_release_safety_controls.sql` after Build 175 before expecting Release Control ZIP/download/diff/lock rows to save.
+- The Safe Deploy ZIP endpoint fetches static files from the deployed origin at request time; if a static file is not deployed, it is included as a missing-file note instead of breaking the ZIP.
+- Live manifest comparison requires a reachable deployed manifest URL. If the URL is wrong or protected, the diff row will be saved as failed for review.
+- Product QA preview rows are preview-only in this build; do not treat them as applied fixes.
+- Recall locks are visible proof rows; the notification-send API still needs enforcement in a future pass.
+
 # Build 175 Known Gaps and Risks — Release Control and Deeper Preflight
 
 Closed or reduced in Build 175:

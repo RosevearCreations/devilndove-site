@@ -1,3 +1,5 @@
+Build 176 image/release note: Safe Deploy ZIPs can package release evidence files, dark-theme screenshot jobs remain queueable from Release Control, and Product QA preview cards now keep exact image/editor fix links for blockers such as missing image alt text.
+
 
 ## Build 175 screenshot evidence addition
 

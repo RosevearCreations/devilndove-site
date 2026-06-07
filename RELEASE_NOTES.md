@@ -1,3 +1,34 @@
+# Build 176 safe deploy ZIP, live manifest diff, QA previews, and recall locks
+
+## Summary
+
+- Added a real binary-safe Safe Deploy ZIP endpoint at `/api/admin/safe-deploy-package?format=zip`.
+- Added live release-manifest comparison, safe package download records, Product QA preview cards, marketplace validation previews, recall notification locks, local SEO link/trend rows, richer LocalBusiness schema bake tracking, rollback checklist rows, and Cloudflare deployment import setup checks.
+- Updated schema files, static preflight checks, Release Control UI/API, local business schema JSON, release notes, roadmap, known gaps, and sanity guidance.
+
+## D1 migration summary
+
+Run after Build 175:
+
+1. `database_build171_ledger_repair.sql` only if the Build 171 schema exists but the marker is missing.
+2. `database_build173_deployment_preflight.sql`
+3. `database_build174_deployment_preflight_detail.sql`
+4. `database_build175_release_control.sql`
+5. `database_build176_release_safety_controls.sql`
+
+## Required post-deploy actions
+
+- Open `/admin/deployment-preflight/`, run Preflight, save a snapshot, and review Build 176 schema/diff rows.
+- Open `/admin/release-control/`, download the Safe Deploy ZIP, run Live Manifest Compare, build QA preview cards, preview marketplace validation, refresh recall locks, seed local SEO links, and create rollback checklist rows.
+- Open `/admin/safe-deploy-package/` and confirm the ZIP endpoint plus changed-file list.
+- Run `/admin/post-deploy-smoke-tests/` after deploying.
+
+## Validation
+
+- Static deployment preflight regenerated.
+- JavaScript syntax checks passed for changed admin/function/public files.
+- CSS brace balance, JSON validation, and one-H1 checks are included in final validation.
+
 # Build 175 release control, deeper preflight, and local business schema
 
 ## Summary

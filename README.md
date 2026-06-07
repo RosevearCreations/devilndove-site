@@ -1,3 +1,5 @@
+Build 176 adds Safe Deploy ZIP download support, live manifest comparison, Product QA preview cards, marketplace validation previews, recall locks, local SEO link/trend rows, richer LocalBusiness schema output, and rollback checklist records. Run `database_build176_release_safety_controls.sql` after Build 175 before using the new Release Control actions.
+
 
 ## Build 175 admin release control
 

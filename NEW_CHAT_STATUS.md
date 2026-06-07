@@ -1,3 +1,5 @@
+Latest build status: Build 176 safe deploy/release-control pass is complete. Use the attached zip as the new baseline. D1 order now ends with `database_build176_release_safety_controls.sql`.
+
 
 ## Latest status — Build 175
 

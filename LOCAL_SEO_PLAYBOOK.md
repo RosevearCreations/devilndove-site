@@ -1,3 +1,5 @@
+Build 176 local SEO update: Release Control can now seed internal-link suggestions, store Search Console trend rows, and preview a richer LocalBusiness schema with area served, services, payment methods, logo/image, and future opening-hours fields.
+
 
 ## Build 175 local SEO addition
 

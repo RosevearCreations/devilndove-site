@@ -1,3 +1,22 @@
+<!-- BUILD_176_PREFLIGHT_SANITY_START -->
+# Build 176 Deployment Preflight Sanity Notes
+
+Static package preflight result for this zip: **ready**.
+
+- Blockers: 0.
+- Warnings: 0.
+- Checks: 5.
+- One-H1/title/meta/local wording, CSS brace balance, JSON parse, schema file presence, release-manifest, and Build 176 release-safety checks were regenerated from the static preflight data.
+
+Post-deploy order:
+1. Run `database_build171_ledger_repair.sql` only if Build 171 schema already exists but the marker is missing.
+2. Run `database_build173_deployment_preflight.sql`.
+3. Run `database_build174_deployment_preflight_detail.sql`.
+4. Run `database_build175_release_control.sql`.
+5. Run `database_build176_release_safety_controls.sql`.
+6. Open `/admin/deployment-preflight/`, run Preflight, export Markdown if warnings remain, save snapshot, and confirm post-deploy checklist rows.
+7. Open `/admin/release-control/` to download the Safe Deploy ZIP, run live manifest compare, seed QA previews, refresh recall locks, and create rollback checklist rows.
+<!-- BUILD_176_PREFLIGHT_SANITY_END -->
 <!-- BUILD_175_PREFLIGHT_SANITY_START -->
 # Build 175 Deployment Preflight Sanity Notes
 
@@ -13,6 +32,7 @@ Post-deploy order:
 2. Run `database_build173_deployment_preflight.sql`.
 3. Run `database_build174_deployment_preflight_detail.sql`.
 4. Run `database_build175_release_control.sql`.
+5. Run `database_build176_release_safety_controls.sql`.
 5. Open `/admin/deployment-preflight/`, run Preflight, export Markdown if warnings remain, save snapshot, and confirm post-deploy checklist rows.
 6. Open `/admin/release-control/` to seed mobile views, queue screenshot jobs, and review LocalBusiness schema.
 <!-- BUILD_175_PREFLIGHT_SANITY_END -->

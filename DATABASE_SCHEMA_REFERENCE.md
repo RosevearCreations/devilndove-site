@@ -1,3 +1,29 @@
+# Build 176 schema update
+
+Added additive migration `database_build176_release_safety_controls.sql`.
+
+New or expanded tables/areas:
+
+- `safe_deploy_package_downloads`
+- `release_manifest_live_diffs`
+- `marketplace_export_validation_runs`
+- `product_qa_bulk_fix_preview_items`
+- `product_qa_bulk_fix_apply_events`
+- `gift_card_webhook_signature_checks`
+- `recall_notification_locks`
+- `local_seo_internal_link_suggestions`
+- `local_seo_search_console_trends`
+- `local_business_schema_bakes`
+- `deployment_rollback_checklist_rows`
+- `cloudflare_deployment_import_runs`
+- `admin_notification_routes`
+
+Added `local_business_schema_extended_fields` as a safer companion table for optional opening-hours, logo/image, payment, price-range, address, and geo fields instead of using repeat-sensitive ALTER TABLE statements.
+
+Migration marker: `build_176_release_safety_controls` with `file_name='database_build176_release_safety_controls.sql'`.
+
+D1 order: Build 171 ledger repair only if needed, then Build 173, Build 174, Build 175, and Build 176.
+
 # Build 175 schema update — release control center
 
 Added additive migration `database_build175_release_control.sql`.
