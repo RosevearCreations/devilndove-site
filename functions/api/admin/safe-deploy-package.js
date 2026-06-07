@@ -35,7 +35,12 @@ const changedFiles = [
   'scripts/deployment_preflight_static_check.py',
   'scripts/generate_release_manifest.py',
   'scripts/generate_release_notes.py',
-  'scripts/regenerate_sanity_from_preflight.py'
+  'scripts/regenerate_sanity_from_preflight.py',
+  'data/site/local-business-schema.json',
+  'database_build175_release_control.sql',
+  'functions/api/admin/release-control.js',
+  'public/js/admin-release-control.js',
+  'admin/release-control/index.html'
 ];
 
 export async function onRequestGet(context) {
@@ -44,22 +49,24 @@ export async function onRequestGet(context) {
   return jsonResponse({
     ok: true,
     package: {
-      build_label: 'Build 174 preflight detail, schema diff, and release manifest',
+      build_label: 'Build 175 release control, deeper preflight, and local business schema',
       schema: [
-        'Fresh D1: run database_upgrade_current_pass.sql, then database_build173_deployment_preflight.sql, then database_build174_deployment_preflight_detail.sql.',
-        'Partial D1 with Build 171 tables but missing marker: run database_build171_ledger_repair.sql only, then Build 173, then Build 174.',
+        'Fresh D1: run database_upgrade_current_pass.sql, then database_build173_deployment_preflight.sql, then database_build174_deployment_preflight_detail.sql, then database_build175_release_control.sql.',
+        'Partial D1 with Build 171 tables but missing marker: run database_build171_ledger_repair.sql only, then Build 173, then Build 174, then Build 175.',
         'Do not rerun ALTER TABLE-heavy SQL blocks on a database where those columns already exist.'
       ],
       sql_copy_blocks: {
         fresh_install: [
           'database_upgrade_current_pass.sql',
           'database_build173_deployment_preflight.sql',
-          'database_build174_deployment_preflight_detail.sql'
+          'database_build174_deployment_preflight_detail.sql',
+          'database_build175_release_control.sql'
         ],
         repair_only: [
           'database_build171_ledger_repair.sql',
           'database_build173_deployment_preflight.sql',
-          'database_build174_deployment_preflight_detail.sql'
+          'database_build174_deployment_preflight_detail.sql',
+          'database_build175_release_control.sql'
         ]
       },
       changed_files: changedFiles,
@@ -69,6 +76,7 @@ export async function onRequestGet(context) {
         'Export the Preflight Markdown handoff if any warning needs support review.',
         'Save a Preflight snapshot and mark post-deploy confirmation rows as complete after smoke testing.',
         'Open /admin/post-deploy-smoke-tests/ and run core public/admin URL checks.',
+        'Open /admin/release-control/ to record deployment history, queue screenshot jobs, seed mobile views, and review LocalBusiness JSON.',
         'Open /admin/r2-derivative-settings/ or the R2 derivative settings panel and run the live health test if R2 is enabled.',
         'Review RELEASE_NOTES.md and SANITY_HEALTH_CHECK.md before promoting the branch.'
       ]
