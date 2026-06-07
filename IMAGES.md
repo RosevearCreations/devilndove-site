@@ -1,3 +1,8 @@
+
+## Build 175 screenshot evidence addition
+
+Dark-theme screenshot evidence can now be queued as `deployment_screenshot_jobs` from Release Control. True automated capture still needs a browser/headless runner; the current build stores page, viewport, theme, evidence URL, and R2 object key for review.
+
 # Build 174 image and screenshot checklist additions
 
 Deployment Preflight now reports image-alt coverage for the core public/local landing pages and keeps the dark-theme evidence workflow connected to the public-page review list. Continue using dark-theme evidence uploads for home, shop, gallery, product detail, and every local landing page. Future work should add automatic live screenshot capture.

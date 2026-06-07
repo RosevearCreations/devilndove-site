@@ -1,3 +1,8 @@
+
+## Latest status — Build 175
+
+Latest pass added Release Control Center, deeper Deployment Preflight checks, Build 175 D1 schema, LocalBusiness schema output, and updated roadmap/gaps/sanity documents.
+
 # Current Build Status — Build 174
 
 Latest pass added richer Deployment Preflight detail, D1 schema diff, migration planner, Markdown export, post-deploy confirmations, release package hash manifest, dashboard preflight badge, and regenerated sanity/release documentation.

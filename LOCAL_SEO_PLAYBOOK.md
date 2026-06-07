@@ -1,3 +1,8 @@
+
+## Build 175 local SEO addition
+
+LocalBusiness structured-data review now has a static output at `data/site/local-business-schema.json` and an admin preview through `/admin/release-control/`. Keep one clear H1 per public page and use local service wording in titles, H1s, intro copy, and internal links.
+
 # Build 174 local SEO preflight additions
 
 Deployment Preflight now checks practical title/meta length ranges, canonical links, local wording, structured-data presence/validity when present, and image-alt coverage for the core public/local landing pages. Keep one clear H1 per page and continue baking approved D1 local SEO actions into static JSON before deploy.

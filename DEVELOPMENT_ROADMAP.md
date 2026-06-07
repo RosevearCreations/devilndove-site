@@ -1,3 +1,49 @@
+# Build 175 Completed Pass — Release Control, Deeper Preflight, Mobile Saved Views, and LocalBusiness Schema
+
+Completed in this pass:
+1. Added `/admin/release-control/` as a release-control center for deployment history, manifest comparison, screenshot jobs, mobile views, safe deploy export records, and LocalBusiness schema preview.
+2. Added `/api/admin/release-control` with guarded admin actions for deployment records, dark-theme screenshot job queueing, phone saved-view seeding, local business schema saving, and safe deploy export records.
+3. Added `database_build175_release_control.sql` as an additive D1 migration with `file_name` populated in the migration ledger marker.
+4. Added deployment history tracking for branch, commit, deploy URL, build ZIP label, manifest hash, promotion status, and notes.
+5. Added deployed-manifest comparison records for expected/deployed file counts, missing files, changed files, and comparison JSON.
+6. Added dark-theme screenshot evidence job rows with page path, viewport, theme, R2 object key, evidence URL, and capture status.
+7. Added response-body keyword checks to Deployment Preflight so top public URLs are checked for required local/search terms, not only H1/title/meta.
+8. Added collection/category landing-page preflight checks for exposed supporting pages.
+9. Added sample public product-detail URL checks using the newest available D1 product slug.
+10. Added Search Console/internal-link visibility checks so local SEO bake actions can surface internal-link opportunities beside page rows.
+11. Added Product QA bulk-fix queue schema and preflight visibility for grouped blocker codes and approval-required safe fixes.
+12. Added R2 signed/private evidence health-test rows and preflight warnings when private-download flags are enabled without a passing test.
+13. Added accountant evidence bundle checksum rows so ZIP hash, byte totals, and verification status can be tracked after export.
+14. Added gift-card provider webhook event storage for delivery, bounce, complaint, retry, and provider message status events.
+15. Added marketplace required-column validation rules and snapshot diff rows for channel-level export safety.
+16. Added recall compliance review rows with legal/compliance notes and approval signatures, plus customer-specific recall preview rows.
+17. Added mobile admin saved views for Today tasks, Deployment Preflight, Smoke Tests, and Accounting close workflows.
+18. Added LocalBusiness structured-data settings plus static `data/site/local-business-schema.json` output for Devil n Dove service-area/local SEO review.
+19. Added safe deploy export records so release notes, preflight Markdown, manifest JSON, schema SQL, and smoke-test results can be packaged and tracked.
+20. Added runtime-incident linking from saved preflight snapshots so failed/warn preflight checks can create reviewable admin incidents.
+
+Next 20 recommended steps:
+1. Add a true browser/headless screenshot capture worker or external GitHub Action to complete screenshot jobs automatically instead of queueing browser-assisted evidence rows.
+2. Add live deployed-manifest fetch/compare action that reads the deployed `/data/site/release-package-manifest.json` and stores the diff automatically.
+3. Add a safe deploy export ZIP endpoint that bundles Markdown, manifest JSON, schema SQL, and smoke-test JSON into one downloadable support package.
+4. Add channel-specific marketplace validation previews directly on the export-download buttons before CSV files are generated.
+5. Add visual marketplace side-by-side diff tables using `marketplace_export_snapshot_diffs.diff_json`.
+6. Add Product QA bulk-fix preview cards that list exact fields/products before approval.
+7. Add approved Product QA bulk-fix apply actions for only low-risk fields such as missing alt text, title casing, and empty status labels.
+8. Add provider-specific webhook signature verification for Resend, SendGrid, and Postmark gift-card delivery events.
+9. Add recall compliance lock so recall notification queue rows cannot move from draft unless a signed review row exists.
+10. Add customer recall preview generation from actual order/product/batch joins.
+11. Add R2 signed-download create/get/delete live action for accountant evidence attachments and private customer uploads.
+12. Add accountant ZIP checksum calculation into the actual export endpoint so hashes are generated at download time.
+13. Add Search Console import trend graphs per local SEO page row.
+14. Add local internal-link suggestion generation from sitemap and page body keyword overlap.
+15. Add LocalBusiness schema editor fields for opening hours, social profiles, logo, pickup/service area, and accepted payment types.
+16. Add static bake output that injects approved LocalBusiness JSON-LD into the homepage and local landing pages.
+17. Add phone-first Release Control view with only the four most important deploy actions.
+18. Add notification routing when preflight creates runtime incidents so blockers show on the dashboard.
+19. Add deployment-history import from Cloudflare Pages API if a token/binding is configured.
+20. Add rollback checklist rows that connect deployment history, manifest comparison, smoke tests, and D1 migration state before reverting.
+
 # Build 174 Completed Pass — Deployment Preflight Detail, Schema Diff, Release Manifest, and Post-Deploy Confirmations
 
 Completed in this pass:

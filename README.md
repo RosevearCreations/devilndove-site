@@ -1,3 +1,8 @@
+
+## Build 175 admin release control
+
+Build 175 adds `/admin/release-control/` for deployment history, manifest comparison records, screenshot evidence jobs, mobile saved views, safe deploy export records, and LocalBusiness schema preview. Run `database_build175_release_control.sql` after Build 174 before using the page.
+
 # Build 174 update note
 
 This package includes the Build 174 Deployment Preflight detail pass. Use `/admin/deployment-preflight/` before promotion to check D1 migration markers, schema diff, public-page SEO/H1/canonical/schema.org/image-alt status, CSS drift, static JSON fallbacks, R2 visibility, release manifest health, and post-deploy confirmations.

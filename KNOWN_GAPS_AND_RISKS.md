@@ -1,3 +1,32 @@
+# Build 175 Known Gaps and Risks — Release Control and Deeper Preflight
+
+Closed or reduced in Build 175:
+
+- Release-control visibility now exists for deployment history, deployed-manifest comparisons, screenshot evidence jobs, safe deploy export records, and LocalBusiness schema preview.
+- Deployment Preflight now checks response-body local/search terms, collection/category pages, sample product-detail URLs, Product QA bulk queues, R2 private test rows, gift-card webhooks, marketplace validation/diffs, recall compliance rows, mobile saved views, and LocalBusiness schema rows.
+- Build 175 schema additions are additive and recorded in `schema_migration_ledger` with `file_name` populated.
+- Saved preflight snapshots can now create runtime incident rows for warnings/blockers so deploy problems do not disappear after a page reload.
+
+Still open:
+
+1. Screenshot evidence jobs are queued and reviewable, but true headless/browser capture still needs an external runner or browser automation service.
+2. Manifest comparison rows exist, but the live fetch-and-diff action still needs to be connected to a deployed URL and stored automatically.
+3. Safe deploy export records exist, but a real binary ZIP endpoint for the full support package is still a future step.
+4. Product QA bulk fix rows are guarded by approval status, but applying safe fixes still needs field-level preview/apply controls.
+5. Gift-card webhook events are stored, but provider signature verification should be added before trusting public webhook calls.
+6. Recall compliance review rows exist, but notification queue status should be hard-locked against unsigned reviews in the next pass.
+7. LocalBusiness schema can be previewed and exported as JSON, but approved JSON-LD still needs to be baked directly into public pages.
+8. R2 signed/private health-test rows exist, but live create/get/delete tests still require production R2 bindings.
+9. Search Console/internal-link visibility is detected, but trend charts and automatic internal-link suggestions still need fuller implementation.
+10. Mobile saved views can be seeded, but the Release Control page still needs a tighter phone-only layout.
+
+Deployment watch items:
+
+- Run `database_build175_release_control.sql` after Build 174 before expecting `/admin/release-control/` rows to save.
+- Open `/admin/deployment-preflight/` after the migration; Build 175 adds more warnings by design so missing optional rows may appear until seeded.
+- Open `/admin/release-control/` and seed phone views/queue screenshot jobs only after confirming the D1 migration ran.
+- Continue checking one H1 per exposed page, CSS brace balance, and JSON parse health before each deploy.
+
 # Build 174 Known Gaps and Risks — Deployment Preflight Detail and Release Manifest
 
 Closed or reduced in Build 174:

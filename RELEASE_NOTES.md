@@ -1,3 +1,33 @@
+# Build 175 release control, deeper preflight, and local business schema
+
+## Summary
+
+- Added `/admin/release-control/` and `/api/admin/release-control` for deployment history, manifest comparison records, screenshot evidence jobs, mobile saved views, safe deploy export records, and LocalBusiness schema preview.
+- Expanded Deployment Preflight with response-body keyword checks, collection/category checks, sample product-detail checks, Product QA bulk queue visibility, R2 private evidence test rows, accountant checksum rows, gift-card provider webhook rows, marketplace validation/diff rows, recall compliance rows, and mobile/local schema checks.
+- Added `database_build175_release_control.sql` and updated schema files, release notes, sanity notes, safe deploy package, roadmap, and known gaps.
+
+## D1 migration summary
+
+Run after Build 174:
+
+1. `database_build171_ledger_repair.sql` only if the Build 171 schema exists but the marker is missing.
+2. `database_build173_deployment_preflight.sql`
+3. `database_build174_deployment_preflight_detail.sql`
+4. `database_build175_release_control.sql`
+
+## Required post-deploy actions
+
+- Open `/admin/deployment-preflight/`, run Preflight, save a snapshot, and review any new Build 175 warnings.
+- Open `/admin/release-control/`, seed phone saved views, queue dark-theme screenshot jobs, and review LocalBusiness JSON.
+- Open `/admin/safe-deploy-package/` and confirm the schema order and changed-file list.
+- Run `/admin/post-deploy-smoke-tests/` after deploying.
+
+## Validation
+
+- Static deployment preflight regenerated.
+- JavaScript syntax checks passed for changed admin/function/public files.
+- CSS brace balance, JSON validation, and one-H1 checks are included in final validation.
+
 # Build 174 preflight detail, schema diff, and release manifest
 
 ## Summary

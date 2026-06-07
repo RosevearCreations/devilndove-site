@@ -1,3 +1,39 @@
+<!-- BUILD_175_PREFLIGHT_SANITY_START -->
+# Build 175 Deployment Preflight Sanity Notes
+
+Static package preflight result for this zip: **ready**.
+
+- Blockers: 0.
+- Warnings: 0.
+- Checks: 5.
+- One-H1/title/meta/local wording, CSS brace balance, JSON parse, schema file presence, release-manifest, and Build 175 release-control checks were regenerated from the static preflight data.
+
+Post-deploy order:
+1. Run `database_build171_ledger_repair.sql` only if Build 171 schema already exists but the marker is missing.
+2. Run `database_build173_deployment_preflight.sql`.
+3. Run `database_build174_deployment_preflight_detail.sql`.
+4. Run `database_build175_release_control.sql`.
+5. Open `/admin/deployment-preflight/`, run Preflight, export Markdown if warnings remain, save snapshot, and confirm post-deploy checklist rows.
+6. Open `/admin/release-control/` to seed mobile views, queue screenshot jobs, and review LocalBusiness schema.
+<!-- BUILD_175_PREFLIGHT_SANITY_END -->
+<!-- BUILD_175_RELEASE_CONTROL_SANITY_START -->
+# Build 175 Release Control Sanity Notes
+
+Static package preflight result for this zip is regenerated during final validation.
+
+Pre-deploy order:
+1. Apply `database_build175_release_control.sql` after Build 174.
+2. Open `/admin/deployment-preflight/` and run Preflight.
+3. Open `/admin/release-control/` and seed phone views/queue screenshot jobs if needed.
+4. Open `/admin/safe-deploy-package/` and verify the Build 175 schema order.
+5. Run `/admin/post-deploy-smoke-tests/` after promotion.
+
+Manual live checks still required:
+- Cloudflare D1/R2 bindings.
+- Gift-card provider webhook signatures.
+- R2 signed/private download tests.
+- Real screenshot evidence upload/capture.
+<!-- BUILD_175_RELEASE_CONTROL_SANITY_END -->
 <!-- BUILD_174_PREFLIGHT_SANITY_START -->
 # Build 174 Deployment Preflight Sanity Notes
 

@@ -1,3 +1,27 @@
+# Build 175 schema update — release control center
+
+Added additive migration `database_build175_release_control.sql`.
+
+New tables:
+- `deployment_history`
+- `deployment_manifest_comparisons`
+- `deployment_screenshot_jobs`
+- `preflight_response_keyword_checks`
+- `product_qa_bulk_fix_queue`
+- `r2_private_health_tests`
+- `accounting_evidence_bundle_checksums`
+- `gift_card_provider_webhook_events`
+- `marketplace_channel_validation_rules`
+- `marketplace_export_snapshot_diffs`
+- `recall_compliance_reviews`
+- `recall_customer_previews`
+- `mobile_admin_saved_views`
+- `local_business_schema_settings`
+- `safe_deploy_export_records`
+- `preflight_runtime_incident_links`
+
+Migration marker: `build_175_release_control_center` with `file_name='database_build175_release_control.sql'`.
+
 # Build 174 Schema Reference Additions
 
 ## New table: `deployment_post_deploy_confirmations`

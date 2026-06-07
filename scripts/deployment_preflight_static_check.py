@@ -32,15 +32,19 @@ JSON_FILES = [
     'data/site/release-notes.json',
     'data/site/deployment-preflight.json',
     'data/site/release-package-manifest.json',
+    'data/site/local-business-schema.json',
     'data/catalog.json',
 ]
 REQUIRED_FILES = [
     'database_build171_ledger_repair.sql',
     'database_build173_deployment_preflight.sql',
     'database_build174_deployment_preflight_detail.sql',
+    'database_build175_release_control.sql',
     'admin/deployment-preflight/index.html',
+    'admin/release-control/index.html',
     'functions/api/admin/deployment-preflight.js',
     'public/js/admin-deployment-preflight.js',
+    'public/js/admin-release-control.js',
     'public/js/admin-dashboard-preflight-badge.js',
     'scripts/generate_release_manifest.py',
     'scripts/regenerate_sanity_from_preflight.py',
@@ -139,13 +143,23 @@ def check_required_files(checks: list[dict]) -> None:
     checks.append({'code':'static_required_files','status':'fail' if missing else 'pass','detail':'Missing: '+', '.join(missing) if missing else f'{len(REQUIRED_FILES)} required files are present.', 'missing':missing})
 
 def check_schema_files(checks: list[dict]) -> None:
-    files=['database_schema.sql','database_full_schema.sql','database_store_schema.sql','database_upgrade_current_pass.sql','database_build174_deployment_preflight_detail.sql']
+    required = {
+        'database_schema.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center'],
+        'database_full_schema.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center'],
+        'database_store_schema.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center'],
+        'database_upgrade_current_pass.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest', 'deployment_history', 'build_175_release_control_center'],
+        'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
+        'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
+    }
     missing=[]
-    for rel in files:
+    detail=[]
+    for rel, needles in required.items():
         text=read(ROOT/rel)
-        if 'deployment_post_deploy_confirmations' not in text or 'build_174_preflight_detail_manifest' not in text:
+        missing_needles=[needle for needle in needles if needle not in text]
+        if missing_needles:
             missing.append(rel)
-    checks.append({'code':'static_schema_build174','status':'fail' if missing else 'pass','detail':'Build 174 schema marker missing in: '+', '.join(missing) if missing else 'Build 174 schema table and ledger marker found in schema files.', 'missing':missing})
+            detail.append(f'{rel}: missing {", ".join(missing_needles)}')
+    checks.append({'code':'static_schema_build175','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174/175 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
 
 def main() -> int:
     checks=[]
@@ -156,7 +170,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 174','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 175','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')

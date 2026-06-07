@@ -1,3 +1,8 @@
+
+## Build 175 smoke additions
+
+After deploying, open `/admin/release-control/`, seed mobile saved views, queue dark-theme screenshot evidence rows, and review `/api/admin/release-control?format=local-business-json`.
+
 # Build 174 Post-Deploy Smoke and Confirmation Notes
 
 After applying Build 174:
