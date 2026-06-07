@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </details>`;
   }
 
-  function renderConfirmations(rows = [], buildLabel = 'Build 174') {
+  function renderConfirmations(rows = [], buildLabel = 'Build 175') {
     if (!confirmationsEl) return;
     confirmationsEl.innerHTML = `
       <section class="card">
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const response = await window.DDAuth.apiFetch('/api/admin/deployment-preflight', {
       method: save ? 'POST' : 'GET',
       headers: save ? { 'Content-Type': 'application/json' } : undefined,
-      body: save ? JSON.stringify({ build_label: 'Build 174', action: 'save_snapshot' }) : undefined,
+      body: save ? JSON.stringify({ build_label: 'Build 175', action: 'save_snapshot' }) : undefined,
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data?.ok === false) throw new Error(data?.error || 'Preflight request failed.');
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await window.DDAuth.apiFetch('/api/admin/deployment-preflight', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ build_label: buildLabel || 'Build 174', action: 'confirm_post_deploy', confirmation_key: key, notes })
+        body: JSON.stringify({ build_label: buildLabel || 'Build 175', action: 'confirm_post_deploy', confirmation_key: key, notes })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || data?.ok === false) throw new Error(data?.error || 'Confirmation failed.');
@@ -210,7 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSummary(data.summary || {});
     renderChecks(data.checks || []);
     renderDetails(data);
-    renderConfirmations(data.post_deploy_confirmations || [], data.build_label || 'Build 174');
+    // Build 175 detail payloads are available in data.release_control, data.response_keyword_results, data.collection_pages, data.sample_product_page, data.marketplace_validation, and data.recall_compliance.
+    renderConfirmations(data.post_deploy_confirmations || [], data.build_label || 'Build 175');
     renderRuns(data.recent_runs || []);
   }
 
