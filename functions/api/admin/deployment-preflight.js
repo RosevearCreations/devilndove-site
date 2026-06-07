@@ -3,7 +3,7 @@
 
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD_LABEL = 'Build 174';
+const BUILD_LABEL = 'Build 175';
 
 const CORE_PUBLIC_PAGES = [
   { path: '/', label: 'Home', requiredTerms: ['devil', 'dove', 'ontario'] },
@@ -20,13 +20,23 @@ const CORE_PUBLIC_PAGES = [
   { path: '/workshop-made-gifts-ontario/', label: 'Workshop Made Gifts Ontario', requiredTerms: ['workshop', 'gifts', 'ontario'] },
 ];
 
+
+const COLLECTION_LANDING_PAGES = [
+  { path: '/collections/', label: 'Collections', requiredTerms: ['collections'] },
+  { path: '/marketplaces/', label: 'Marketplaces', requiredTerms: ['marketplace'] },
+  { path: '/gift-cards/', label: 'Gift Cards', requiredTerms: ['gift', 'card'] },
+  { path: '/events/', label: 'Events', requiredTerms: ['events'] },
+  { path: '/pickup/', label: 'Pickup', requiredTerms: ['pickup'] }
+];
+
 const CORE_ADMIN_PAGES = [
   '/admin/',
   '/admin/operations/',
   '/admin/release-notes/',
   '/admin/safe-deploy-package/',
   '/admin/post-deploy-smoke-tests/',
-  '/admin/deployment-preflight/'
+  '/admin/deployment-preflight/',
+  '/admin/release-control/'
 ];
 
 const STATIC_JSON_FILES = [
@@ -34,7 +44,8 @@ const STATIC_JSON_FILES = [
   '/data/site/local-seo-bake-actions.json',
   '/data/site/release-notes.json',
   '/data/site/deployment-preflight.json',
-  '/data/site/release-package-manifest.json'
+  '/data/site/release-package-manifest.json',
+  '/data/site/local-business-schema.json'
 ];
 
 const BUILD_171_TABLES = [
@@ -49,7 +60,8 @@ const BUILD_171_TABLES = [
 const EXPECTED_MIGRATIONS = [
   { migration_key: 'build_171_admin_safety_release_readiness', file_name: 'database_upgrade_current_pass.sql', order: 171, fallback_file: 'database_build171_ledger_repair.sql', note: 'Run repair-only ledger SQL if the Build 171 schema objects already exist.' },
   { migration_key: 'build_173_deployment_preflight_release_safety', file_name: 'database_build173_deployment_preflight.sql', order: 173, fallback_file: '', note: 'Adds deployment_preflight_runs and preflight admin visibility.' },
-  { migration_key: 'build_174_preflight_detail_manifest', file_name: 'database_build174_deployment_preflight_detail.sql', order: 174, fallback_file: '', note: 'Adds post-deploy confirmations plus richer preflight/detail manifests.' }
+  { migration_key: 'build_174_preflight_detail_manifest', file_name: 'database_build174_deployment_preflight_detail.sql', order: 174, fallback_file: '', note: 'Adds post-deploy confirmations plus richer preflight/detail manifests.' },
+  { migration_key: 'build_175_release_control_center', file_name: 'database_build175_release_control.sql', order: 175, fallback_file: '', note: 'Adds release control, deployment history, screenshot jobs, provider webhooks, QA queues, marketplace validation, recall compliance, and local business schema.' }
 ];
 
 const EXPECTED_SCHEMA = [
@@ -64,7 +76,24 @@ const EXPECTED_SCHEMA = [
   { table: 'catalog_items', columns: ['catalog_item_id', 'item_kind', 'source_key', 'name'], area: 'json to d1 ownership' },
   { table: 'site_item_inventory', columns: ['site_item_inventory_id', 'source_type', 'external_key', 'item_name'], area: 'inventory ownership' },
   { table: 'local_seo_bake_actions', columns: ['local_seo_bake_action_id', 'page_path', 'action_status'], area: 'local seo' },
-  { table: 'r2_derivative_route_settings', columns: ['r2_derivative_route_setting_id', 'route_status'], area: 'r2 derivatives' }
+  { table: 'r2_derivative_route_settings', columns: ['r2_derivative_route_setting_id', 'route_status'], area: 'r2 derivatives' },
+
+  { table: 'deployment_history', columns: ['deployment_history_id', 'build_label', 'branch_name', 'deploy_url', 'deployment_status'], area: 'release control' },
+  { table: 'deployment_manifest_comparisons', columns: ['deployment_manifest_comparison_id', 'build_label', 'comparison_status', 'missing_file_count', 'changed_file_count'], area: 'release control' },
+  { table: 'deployment_screenshot_jobs', columns: ['deployment_screenshot_job_id', 'page_path', 'viewport_width', 'capture_status'], area: 'screenshot evidence' },
+  { table: 'preflight_response_keyword_checks', columns: ['preflight_response_keyword_check_id', 'page_path', 'keyword', 'last_status'], area: 'preflight keyword checks' },
+  { table: 'product_qa_bulk_fix_queue', columns: ['product_qa_bulk_fix_queue_id', 'blocker_code', 'approval_status', 'product_count'], area: 'product QA' },
+  { table: 'r2_private_health_tests', columns: ['r2_private_health_test_id', 'test_kind', 'test_status', 'checksum_sha256'], area: 'R2 private tests' },
+  { table: 'accounting_evidence_bundle_checksums', columns: ['accounting_evidence_bundle_checksum_id', 'period_month', 'zip_sha256', 'verification_status'], area: 'accountant evidence' },
+  { table: 'gift_card_provider_webhook_events', columns: ['gift_card_provider_webhook_event_id', 'provider', 'event_type', 'delivery_status'], area: 'gift card delivery' },
+  { table: 'marketplace_channel_validation_rules', columns: ['marketplace_channel_validation_rule_id', 'channel', 'column_key', 'severity'], area: 'marketplace exports' },
+  { table: 'marketplace_export_snapshot_diffs', columns: ['marketplace_export_snapshot_diff_id', 'channel', 'diff_status', 'changed_field_count'], area: 'marketplace exports' },
+  { table: 'recall_compliance_reviews', columns: ['recall_compliance_review_id', 'batch_number', 'review_status', 'approval_signature'], area: 'recalls' },
+  { table: 'recall_customer_previews', columns: ['recall_customer_preview_id', 'batch_number', 'customer_email', 'preview_status'], area: 'recalls' },
+  { table: 'mobile_admin_saved_views', columns: ['mobile_admin_saved_view_id', 'view_key', 'page_path', 'device_target'], area: 'mobile admin' },
+  { table: 'local_business_schema_settings', columns: ['local_business_schema_setting_id', 'business_name', 'area_served_json', 'schema_status'], area: 'local SEO schema' },
+  { table: 'safe_deploy_export_records', columns: ['safe_deploy_export_record_id', 'build_label', 'export_status', 'manifest_path'], area: 'safe deploy export' },
+  { table: 'preflight_runtime_incident_links', columns: ['preflight_runtime_incident_link_id', 'deployment_preflight_run_id', 'runtime_incident_id', 'check_code'], area: 'runtime incidents' }
 ];
 
 const CONFIRMATION_CHECKS = [
@@ -73,7 +102,10 @@ const CONFIRMATION_CHECKS = [
   { key: 'public_pages_checked', label: 'Public pages checked', detail: 'One-H1, title, meta, canonical, image alt, and local wording checks were reviewed.' },
   { key: 'smoke_tests_run', label: 'Smoke tests run', detail: 'Core public/admin live URLs were checked from the post-deploy smoke-test page.' },
   { key: 'release_notes_reviewed', label: 'Release notes reviewed', detail: 'Release Notes and Safe Deploy Package were reviewed before promotion.' },
-  { key: 'r2_email_bindings_reviewed', label: 'R2/email bindings reviewed', detail: 'R2 derivative/evidence routes and gift-card email provider settings were verified or left in manual mode.' }
+  { key: 'r2_email_bindings_reviewed', label: 'R2/email bindings reviewed', detail: 'R2 derivative/evidence routes and gift-card email provider settings were verified or left in manual mode.' },
+  { key: 'manifest_compared', label: 'Release manifest compared after deploy', detail: 'The generated manifest was compared against the deployed static manifest path.' },
+  { key: 'local_business_schema_reviewed', label: 'Local business schema reviewed', detail: 'The local-business structured data editor/output was reviewed before local SEO bake.' },
+  { key: 'recall_compliance_reviewed', label: 'Recall compliance reviewed', detail: 'Recall notices remain draft-only until compliance notes and approval signature are present.' }
 ];
 
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -221,6 +253,11 @@ async function inspectMigrationLedger(db, checks) {
   if (build174?.recorded) addCheck(checks, 'pass', 'build174_marker_present', 'Build 174 ledger marker', `Build 174 marker is recorded as ${build174.status || 'recorded'}.`, '');
   else addCheck(checks, 'warn', 'build174_marker_missing', 'Build 174 ledger marker', 'Build 174 preflight detail marker is not recorded yet.', 'Apply database_build174_deployment_preflight_detail.sql after Build 173.');
 
+
+  const build175 = expected.find((row) => row.migration_key === 'build_175_release_control_center');
+  if (build175?.recorded) addCheck(checks, 'pass', 'build175_marker_present', 'Build 175 ledger marker', `Build 175 marker is recorded as ${build175.status || 'recorded'}.`, '');
+  else addCheck(checks, 'warn', 'build175_marker_missing', 'Build 175 ledger marker', 'Build 175 release-control marker is not recorded yet.', 'Apply database_build175_release_control.sql after Build 174.');
+
   const recent = await safeAll(db, `
     SELECT migration_key, file_name, status, destructive, applied_by_user_id, applied_at, notes, created_at, updated_at
     FROM schema_migration_ledger
@@ -253,7 +290,7 @@ async function inspectDatabase(db, checks) {
     addCheck(checks, 'pass', 'deployment_preflight_runs_present', 'Deployment preflight run-history table', `deployment_preflight_runs exists with ${Number(count.total || 0)} saved run(s).`, '');
   }
 
-  const requiredTables = ['products', 'product_images', 'product_seo', 'orders', 'order_items', 'site_item_inventory', 'catalog_items', 'accounting_evidence_attachments', 'gift_cards', 'public_proof_candidates', 'marketplace_export_history'];
+  const requiredTables = ['products', 'product_images', 'product_seo', 'orders', 'order_items', 'site_item_inventory', 'catalog_items', 'accounting_evidence_attachments', 'gift_cards', 'public_proof_candidates', 'marketplace_export_history', 'deployment_history', 'local_business_schema_settings'];
   const missing = [];
   for (const table of requiredTables) if (!(await tableExists(db, table))) missing.push(table);
   addCheck(checks, missing.length ? 'fail' : 'pass', 'core_tables_present', 'Core D1 tables for store/admin workflows', missing.length ? `Missing required table(s): ${missing.join(', ')}.` : `${requiredTables.length} core table(s) are present.`, missing.length ? 'Apply the schema migration before deploying this build.' : '');
@@ -425,12 +462,14 @@ function buildMigrationPlan(ledger) {
       'Run database_upgrade_current_pass.sql once on a fresh/empty D1 database.',
       'Run database_build173_deployment_preflight.sql.',
       'Run database_build174_deployment_preflight_detail.sql.',
+      'Run database_build175_release_control.sql.',
       'Open /admin/deployment-preflight/, run Preflight, then Save Snapshot.'
     ],
     partially_upgraded_database: [
       build171Recorded ? 'Build 171 marker is already recorded.' : 'If Build 171 tables/columns already exist, run database_build171_ledger_repair.sql only.',
       build173Recorded ? 'Build 173 marker is already recorded.' : 'Run database_build173_deployment_preflight.sql after the Build 171 marker is safe.',
       build174Recorded ? 'Build 174 marker is already recorded.' : 'Run database_build174_deployment_preflight_detail.sql after Build 173.',
+      recorded.has('build_175_release_control_center') ? 'Build 175 marker is already recorded.' : 'Run database_build175_release_control.sql after Build 174.',
       'Do not rerun ALTER TABLE-heavy blocks against a database where those columns already exist.'
     ],
     repair_only: [
@@ -438,6 +477,177 @@ function buildMigrationPlan(ledger) {
       'Use the preflight schema diff drawer before deciding whether to run full or repair-only SQL.'
     ]
   };
+}
+
+
+function countKeyword(text, keyword) {
+  const plain = lc(cleanHtmlText(text || ''));
+  const needle = lc(keyword || '');
+  if (!needle) return 0;
+  return plain.split(needle).length - 1;
+}
+
+async function inspectResponseKeywordChecks(request, db, pageResults, checks) {
+  const dbRows = await tableExists(db, 'preflight_response_keyword_checks') ? await safeAll(db, `SELECT page_path, keyword, keyword_kind, is_required, last_status, last_count FROM preflight_response_keyword_checks ORDER BY page_path, keyword LIMIT 200`) : [];
+  const configuredByPath = new Map();
+  for (const row of dbRows) {
+    const key = normalizeText(row.page_path);
+    if (!configuredByPath.has(key)) configuredByPath.set(key, []);
+    configuredByPath.get(key).push(row);
+  }
+  const results = [];
+  for (const page of CORE_PUBLIC_PAGES) {
+    const result = await safeFetchText(request, page.path);
+    const configured = configuredByPath.get(page.path) || page.requiredTerms.map((keyword) => ({ page_path: page.path, keyword, keyword_kind: 'roadmap_required', is_required: 1 }));
+    for (const item of configured) {
+      const count = countKeyword(result.text || '', item.keyword);
+      const status = result.ok && (!Number(item.is_required ?? 1) || count > 0) ? 'pass' : 'warn';
+      results.push({ page_path: page.path, keyword: item.keyword, keyword_kind: item.keyword_kind || 'local_search', is_required: Number(item.is_required ?? 1), count, status });
+    }
+  }
+  const warnRows = results.filter((row) => row.status !== 'pass');
+  addCheck(checks, warnRows.length ? 'warn' : 'pass', 'response_body_keyword_checks', 'Response-body keyword checks', warnRows.length ? `${warnRows.length} required page/keyword pair(s) need review.` : `${results.length} page/keyword pair(s) were found in response bodies.`, warnRows.length ? 'Add or adjust local wording in prominent page copy, title, H1, or supporting sections.' : '', { keyword_results: results });
+  return results;
+}
+
+async function inspectCollectionPages(request, checks) {
+  const rowsOut = [];
+  for (const page of COLLECTION_LANDING_PAGES) {
+    const result = await safeFetchText(request, page.path);
+    const text = result.text || '';
+    const plain = cleanHtmlText(text).toLowerCase();
+    const h1Count = (text.match(/<h1\b/gi) || []).length;
+    const missingTerms = page.requiredTerms.filter((term) => !plain.includes(term));
+    let status = 'pass';
+    if (!result.ok || h1Count !== 1) status = 'warn';
+    else if (missingTerms.length || !titleText(text) || !metaContent(text, 'description')) status = 'warn';
+    rowsOut.push({ ...page, status, ok: result.ok, http_status: result.status, h1_count: h1Count, title: titleText(text), meta_description: metaContent(text, 'description'), missing_terms: missingTerms, url: result.url });
+  }
+  const warnRows = rowsOut.filter((row) => row.status !== 'pass');
+  addCheck(checks, warnRows.length ? 'warn' : 'pass', 'collection_landing_pages', 'Collection/category landing-page checks', warnRows.length ? `${warnRows.length} collection/category page(s) need review.` : `${rowsOut.length} collection/category page(s) passed basic fetch/H1/title/meta checks.`, warnRows.length ? 'Review collection/category pages and add clean local wording where useful.' : '', { collection_pages: rowsOut });
+  return rowsOut;
+}
+
+async function inspectSampleProductPage(db, request, checks) {
+  let product = {};
+  if (await tableExists(db, 'products')) {
+    product = await safeFirst(db, `SELECT product_id, slug, name, status FROM products WHERE COALESCE(slug,'') <> '' AND LOWER(COALESCE(status,'active')) NOT IN ('archived','deleted','draft') ORDER BY COALESCE(updated_at, created_at) DESC LIMIT 1`);
+    if (!product?.slug) product = await safeFirst(db, `SELECT product_id, slug, name, status FROM products WHERE COALESCE(slug,'') <> '' ORDER BY product_id DESC LIMIT 1`);
+  }
+  if (!product?.slug) {
+    addCheck(checks, 'warn', 'sample_product_page_missing_slug', 'Sample product-detail URL check', 'No product slug was available in D1 for a sample public product-detail preflight.', 'Publish or keep one known-safe product slug for deploy checks.');
+    return null;
+  }
+  const path = `/shop/product/?slug=${encodeURIComponent(product.slug)}`;
+  const result = await safeFetchText(request, path);
+  const text = result.text || '';
+  const h1Count = (text.match(/<h1\b/gi) || []).length;
+  const hasProductScript = /product-detail\.js|api\/product-detail|product/i.test(text);
+  const status = result.ok && h1Count <= 1 && hasProductScript ? 'pass' : 'warn';
+  const payload = { product_id: product.product_id, slug: product.slug, name: product.name, path, ok: result.ok, http_status: result.status, h1_count: h1Count, has_product_script: hasProductScript };
+  addCheck(checks, status, 'sample_product_detail_page', 'Sample product-detail public URL', status === 'pass' ? `Sample product URL ${path} loaded with product detail signals.` : `Sample product URL ${path} needs review.`, status === 'pass' ? '' : 'Confirm the latest published product slug opens cleanly on /shop/product/.', payload);
+  return payload;
+}
+
+async function inspectReleaseControl(db, checks) {
+  const table = await tableExists(db, 'deployment_history');
+  if (!table) {
+    addCheck(checks, 'warn', 'release_control_tables_missing', 'Release-control tables', 'Build 175 release-control tables are not present yet.', 'Run database_build175_release_control.sql after Build 174.');
+    return { deployment_history: [], manifest_comparisons: [] };
+  }
+  const history = await safeAll(db, `SELECT deployment_history_id, build_label, branch_name, deploy_url, deployment_status, promoted_at, created_at FROM deployment_history ORDER BY created_at DESC LIMIT 10`);
+  const comparisons = await tableExists(db, 'deployment_manifest_comparisons') ? await safeAll(db, `SELECT deployment_manifest_comparison_id, build_label, comparison_status, missing_file_count, changed_file_count, compared_at, created_at FROM deployment_manifest_comparisons ORDER BY COALESCE(compared_at, created_at) DESC LIMIT 10`) : [];
+  const latestBad = comparisons.filter((row) => ['failed','changed','missing'].includes(lc(row.comparison_status)) || Number(row.missing_file_count || 0) || Number(row.changed_file_count || 0));
+  addCheck(checks, latestBad.length ? 'warn' : 'pass', 'release_history_manifest_compare', 'Deployment history and manifest comparison', latestBad.length ? `${latestBad.length} manifest comparison row(s) need review.` : `Release-control tables are present with ${history.length} deployment history row(s) and ${comparisons.length} manifest comparison row(s).`, latestBad.length ? 'Compare the deployed /data/site/release-package-manifest.json with the package manifest before promotion.' : '', { deployment_history: history, manifest_comparisons: comparisons });
+  return { deployment_history: history, manifest_comparisons: comparisons };
+}
+
+async function inspectSearchConsoleAndInternalLinks(db, checks) {
+  const hasSearch = await tableExists(db, 'search_console_query_imports') || await tableExists(db, 'search_console_import_rows') || await tableExists(db, 'search_console_queries');
+  const bakeRows = await tableExists(db, 'local_seo_bake_actions') ? await safeAll(db, `SELECT page_path, action_status, proposed_title, internal_link_notes, updated_at FROM local_seo_bake_actions ORDER BY updated_at DESC LIMIT 20`) : [];
+  const readyLinks = bakeRows.filter((row) => normalizeText(row.internal_link_notes));
+  addCheck(checks, hasSearch || readyLinks.length ? 'pass' : 'warn', 'search_console_internal_link_queue', 'Search Console trends and internal-link suggestions', hasSearch ? `Search Console import table appears available; ${readyLinks.length} bake-action row(s) include internal-link notes.` : `${readyLinks.length} bake-action row(s) include internal-link notes; no Search Console import table was detected.`, hasSearch || readyLinks.length ? 'Review Local SEO rows for trending queries and internal-link bake actions.' : 'Add Search Console import rows or queue internal-link suggestions from high-traffic pages.', { has_search_console_table: hasSearch, internal_link_rows: readyLinks });
+  return { has_search_console_table: hasSearch, internal_link_rows: readyLinks };
+}
+
+async function inspectProductQaBulkQueue(db, checks) {
+  const rowsOut = await tableExists(db, 'product_qa_bulk_fix_queue') ? await safeAll(db, `SELECT blocker_code, fix_type, product_count, approval_status, updated_at FROM product_qa_bulk_fix_queue ORDER BY updated_at DESC LIMIT 30`) : [];
+  const pending = rowsOut.filter((row) => ['needs_approval','queued','preview'].includes(lc(row.approval_status)));
+  addCheck(checks, rowsOut.length ? 'pass' : 'warn', 'product_qa_bulk_fix_queue', 'Product QA bulk-fix queue', rowsOut.length ? `${rowsOut.length} Product QA bulk-fix queue row(s) available; ${pending.length} pending approval.` : 'Product QA bulk-fix queue table has no rows yet.', rowsOut.length ? 'Approve only safe field-level fixes after previewing the affected product IDs.' : 'Use Product QA history to create grouped blocker queues by fix type.', { rows: rowsOut });
+  return rowsOut;
+}
+
+async function inspectR2PrivateEvidenceTests(db, env, checks) {
+  const rowsOut = await tableExists(db, 'r2_private_health_tests') ? await safeAll(db, `SELECT test_kind, bucket_label, test_status, http_status, bytes_tested, checked_at, notes FROM r2_private_health_tests ORDER BY COALESCE(checked_at, created_at) DESC LIMIT 20`) : [];
+  const hasSignedFlag = !!(env?.ACCOUNTANT_EVIDENCE_R2_FETCH_ENABLED || env?.PRIVATE_UPLOAD_R2_SIGNING_ENABLED || env?.R2_SIGNED_DOWNLOADS_ENABLED);
+  const recentPass = rowsOut.some((row) => ['pass','passed','healthy'].includes(lc(row.test_status)));
+  addCheck(checks, recentPass || !hasSignedFlag ? 'pass' : 'warn', 'r2_signed_private_tests', 'R2 signed evidence/private-upload tests', recentPass ? 'At least one recent R2 signed/private health test passed.' : (hasSignedFlag ? 'R2 signed/private mode flag is visible, but no passing private health-test row was found.' : 'R2 signed/private download flags are not enabled; private binary evidence remains guarded/manual.'), recentPass || !hasSignedFlag ? '' : 'Run a signed download/private upload test before relying on binary evidence or customer private uploads.', { enabled_flag_visible: hasSignedFlag, rows: rowsOut });
+  return rowsOut;
+}
+
+async function inspectAccountingBundleChecksums(db, checks) {
+  const rowsOut = await tableExists(db, 'accounting_evidence_bundle_checksums') ? await safeAll(db, `SELECT period_month, export_label, attachment_count, total_bytes, zip_sha256, verification_status, created_at FROM accounting_evidence_bundle_checksums ORDER BY created_at DESC LIMIT 15`) : [];
+  const unverified = rowsOut.filter((row) => lc(row.verification_status) !== 'verified');
+  addCheck(checks, rowsOut.length && !unverified.length ? 'pass' : 'warn', 'accounting_bundle_checksum_verification', 'Accountant ZIP checksum verification', rowsOut.length ? `${rowsOut.length} accountant bundle checksum row(s); ${unverified.length} not verified.` : 'No accountant evidence bundle checksum rows are recorded yet.', rowsOut.length ? 'Verify the ZIP hash after download before sending to the accountant.' : 'Generate a checksum record when accountant evidence ZIPs are prepared.', { rows: rowsOut });
+  return rowsOut;
+}
+
+async function inspectGiftCardWebhooks(db, checks) {
+  const rowsOut = await tableExists(db, 'gift_card_provider_webhook_events') ? await safeAll(db, `SELECT provider, event_type, delivery_status, received_at, processed_at FROM gift_card_provider_webhook_events ORDER BY received_at DESC LIMIT 30`) : [];
+  const failed = rowsOut.filter((row) => ['bounce','bounced','complaint','failed','error'].includes(lc(row.delivery_status)) || ['bounce','complaint'].includes(lc(row.event_type)));
+  addCheck(checks, failed.length ? 'warn' : 'pass', 'gift_card_provider_webhooks', 'Gift-card provider webhooks', failed.length ? `${failed.length} gift-card provider webhook event(s) need attention.` : `${rowsOut.length} gift-card provider webhook event(s) recorded with no bounce/complaint status in the latest rows.`, failed.length ? 'Review provider event payload and delivery log before retrying customer delivery.' : '', { rows: rowsOut });
+  return rowsOut;
+}
+
+async function inspectMarketplaceValidationAndDiffs(db, checks) {
+  const rules = await tableExists(db, 'marketplace_channel_validation_rules') ? await safeAll(db, `SELECT channel, column_key, rule_kind, is_required, rule_status, severity FROM marketplace_channel_validation_rules ORDER BY channel, column_key LIMIT 200`) : [];
+  const diffs = await tableExists(db, 'marketplace_export_snapshot_diffs') ? await safeAll(db, `SELECT channel, previous_history_id, current_history_id, diff_status, changed_row_count, changed_field_count, created_at FROM marketplace_export_snapshot_diffs ORDER BY created_at DESC LIMIT 20`) : [];
+  const activeBlockers = rules.filter((row) => Number(row.is_required || 0) && lc(row.rule_status) === 'active' && lc(row.severity) === 'blocker');
+  addCheck(checks, activeBlockers.length ? 'pass' : 'warn', 'marketplace_required_columns_and_diffs', 'Marketplace required-column validation and visual diff rows', activeBlockers.length ? `${activeBlockers.length} active required-column rule(s); ${diffs.length} snapshot diff row(s).` : 'No active marketplace required-column blocker rules were found yet.', activeBlockers.length ? 'Run validation before downloads and review side-by-side diff rows before rollback.' : 'Seed required-column rules for Etsy, Facebook Marketplace, Pinterest, and manual CSV exports.', { rules, diffs });
+  return { rules, diffs };
+}
+
+async function inspectRecallCompliance(db, checks) {
+  const reviews = await tableExists(db, 'recall_compliance_reviews') ? await safeAll(db, `SELECT batch_number, recall_id, review_status, approval_signature, approved_at, updated_at FROM recall_compliance_reviews ORDER BY updated_at DESC LIMIT 30`) : [];
+  const previews = await tableExists(db, 'recall_customer_previews') ? await safeAll(db, `SELECT batch_number, customer_email, product_summary, order_summary, preview_status, updated_at FROM recall_customer_previews ORDER BY updated_at DESC LIMIT 30`) : [];
+  const unsigned = reviews.filter((row) => ['approved','send_approved'].includes(lc(row.review_status)) && !normalizeText(row.approval_signature));
+  const draftPreviews = previews.filter((row) => lc(row.preview_status) === 'draft');
+  addCheck(checks, unsigned.length ? 'warn' : 'pass', 'recall_compliance_customer_previews', 'Recall compliance signatures and customer previews', unsigned.length ? `${unsigned.length} approved recall review(s) are missing an approval signature.` : `${reviews.length} compliance review row(s) and ${previews.length} customer preview row(s) are available.`, unsigned.length ? 'Require legal/compliance notes and signature before any recall draft leaves draft status.' : '', { reviews, previews, draft_preview_count: draftPreviews.length });
+  return { reviews, previews };
+}
+
+async function inspectMobileViewsAndLocalBusinessSchema(db, checks) {
+  const mobileViews = await tableExists(db, 'mobile_admin_saved_views') ? await safeAll(db, `SELECT view_key, view_label, page_path, device_target, is_default, updated_at FROM mobile_admin_saved_views ORDER BY is_default DESC, updated_at DESC LIMIT 50`) : [];
+  const localSchema = await tableExists(db, 'local_business_schema_settings') ? await safeAll(db, `SELECT business_name, canonical_url, telephone, email, area_served_json, service_types_json, schema_status, updated_at FROM local_business_schema_settings ORDER BY updated_at DESC LIMIT 5`) : [];
+  const wanted = new Set(['today_tasks_phone','deployment_preflight_phone','post_deploy_smoke_phone','accounting_close_phone']);
+  const have = new Set(mobileViews.map((row) => row.view_key));
+  const missingViews = [...wanted].filter((key) => !have.has(key));
+  const schemaReady = localSchema.some((row) => ['ready','active','published'].includes(lc(row.schema_status)));
+  addCheck(checks, missingViews.length || !schemaReady ? 'warn' : 'pass', 'mobile_saved_views_local_business_schema', 'Mobile admin saved views and local business schema', missingViews.length || !schemaReady ? `${missingViews.length} mobile saved view(s) missing; local schema ready=${schemaReady ? 'yes' : 'no'}.` : 'Phone saved views and ready local-business schema rows are available.', missingViews.length || !schemaReady ? 'Seed mobile saved views and review/publish local-business structured data before local SEO bake.' : '', { mobile_views: mobileViews, missing_views: missingViews, local_business_schema: localSchema });
+  return { mobile_views: mobileViews, missing_views: missingViews, local_business_schema: localSchema };
+}
+
+async function recordRuntimeIncidentsForFailedPreflight(db, report, adminUser, buildLabel) {
+  if (!(await tableExists(db, 'runtime_incidents'))) return null;
+  const failed = (report.checks || []).filter((check) => ['fail','warn'].includes(lc(check.status))).slice(0, 20);
+  let inserted = 0;
+  for (const check of failed) {
+    try {
+      await db.prepare(`
+        INSERT INTO runtime_incidents (incident_scope, incident_code, severity, endpoint_path, request_method, message, details_json, related_user_id, user_agent, review_status, created_at)
+        VALUES ('deployment_preflight', ?, ?, ?, 'CHECK', ?, ?, ?, 'deployment-preflight', 'open', CURRENT_TIMESTAMP)
+      `).bind(
+        normalizeText(check.code || 'preflight_check'),
+        lc(check.status) === 'fail' ? 'error' : 'warning',
+        normalizeText(check.evidence?.path || check.evidence?.page_path || ''),
+        normalizeText(check.label || check.code || 'Deployment preflight warning'),
+        JSON.stringify({ build_label: buildLabel, detail: check.detail, action: check.action, evidence: check.evidence || {} }),
+        Number(adminUser?.user_id || 0) || null
+      ).run();
+      inserted += 1;
+    } catch {}
+  }
+  return inserted;
 }
 
 async function buildReport(context) {
@@ -455,16 +665,32 @@ async function buildReport(context) {
   const duplicate_ownership = await inspectDuplicateOwnership(db, checks);
   const data_integrity = await inspectDataIntegrity(db, checks);
   const page_results = await inspectPublicPages(request, checks);
+  const response_keyword_results = await inspectResponseKeywordChecks(request, db, page_results, checks);
+  const collection_pages = await inspectCollectionPages(request, checks);
+  const sample_product_page = await inspectSampleProductPage(db, request, checks);
   await inspectAdminPages(request, checks);
   await inspectStaticFiles(request, checks);
   const r2_health = await inspectR2Health(db, env, checks);
+  const release_control = await inspectReleaseControl(db, checks);
+  const search_console_internal_links = await inspectSearchConsoleAndInternalLinks(db, checks);
+  const product_qa_bulk_queue = await inspectProductQaBulkQueue(db, checks);
+  const r2_private_tests = await inspectR2PrivateEvidenceTests(db, env, checks);
+  const accounting_bundle_checksums = await inspectAccountingBundleChecksums(db, checks);
+  const gift_card_webhooks = await inspectGiftCardWebhooks(db, checks);
+  const marketplace_validation = await inspectMarketplaceValidationAndDiffs(db, checks);
+  const recall_compliance = await inspectRecallCompliance(db, checks);
+  const mobile_local_schema = await inspectMobileViewsAndLocalBusinessSchema(db, checks);
   const post_deploy_confirmations = await inspectPostDeployConfirmations(db, checks);
 
   const summary = checkStatus(checks);
-  return { checks, summary, page_results, ledger, expected_schema, migration_plan: buildMigrationPlan(ledger), duplicate_ownership, data_integrity, r2_health, post_deploy_confirmations };
+  return { checks, summary, page_results, response_keyword_results, collection_pages, sample_product_page, ledger, expected_schema, migration_plan: buildMigrationPlan(ledger), duplicate_ownership, data_integrity, r2_health, release_control, search_console_internal_links, product_qa_bulk_queue, r2_private_tests, accounting_bundle_checksums, gift_card_webhooks, marketplace_validation, recall_compliance, mobile_local_schema, post_deploy_confirmations };
 }
 
 async function ensurePreflightTables(db) {
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS deployment_history (deployment_history_id INTEGER PRIMARY KEY AUTOINCREMENT, build_label TEXT, branch_name TEXT, commit_sha TEXT, deploy_url TEXT, build_zip_label TEXT, package_manifest_hash TEXT, deployment_status TEXT NOT NULL DEFAULT 'planned', promoted_by_user_id INTEGER, promoted_at TEXT, notes TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS deployment_manifest_comparisons (deployment_manifest_comparison_id INTEGER PRIMARY KEY AUTOINCREMENT, build_label TEXT, expected_manifest_path TEXT NOT NULL DEFAULT '/data/site/release-package-manifest.json', deployed_manifest_url TEXT, comparison_status TEXT NOT NULL DEFAULT 'not_run', expected_file_count INTEGER NOT NULL DEFAULT 0, deployed_file_count INTEGER NOT NULL DEFAULT 0, missing_file_count INTEGER NOT NULL DEFAULT 0, changed_file_count INTEGER NOT NULL DEFAULT 0, comparison_json TEXT NOT NULL DEFAULT '{}', compared_by_user_id INTEGER, compared_at TEXT, notes TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS deployment_screenshot_jobs (deployment_screenshot_job_id INTEGER PRIMARY KEY AUTOINCREMENT, build_label TEXT, page_path TEXT NOT NULL, screenshot_kind TEXT NOT NULL DEFAULT 'dark_theme_regression', viewport_width INTEGER NOT NULL DEFAULT 390, viewport_height INTEGER NOT NULL DEFAULT 844, theme TEXT NOT NULL DEFAULT 'dark', capture_status TEXT NOT NULL DEFAULT 'queued', evidence_url TEXT, r2_object_key TEXT, notes TEXT, created_by_user_id INTEGER, captured_by_user_id INTEGER, captured_at TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS deployment_preflight_runs (
       deployment_preflight_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -582,11 +808,13 @@ export async function onRequestPost(context) {
     Number(adminUser.user_id || 0) || null
   ).run();
 
+  const runtime_incident_count = await recordRuntimeIncidentsForFailedPreflight(db, report, adminUser, buildLabel);
+
   await auditAdminAction(context.env, context.request, adminUser, {
     action_type: 'deployment_preflight_snapshot_saved',
     target_type: 'deployment_preflight',
     target_key: buildLabel,
     details: report.summary,
   });
-  return jsonResponse({ ok: true, saved: true, build_label: buildLabel, ...report });
+  return jsonResponse({ ok: true, saved: true, build_label: buildLabel, runtime_incident_count, ...report });
 }
