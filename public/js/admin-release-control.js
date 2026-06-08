@@ -1,5 +1,5 @@
 // File: /public/js/admin-release-control.js
-// Brief description: Renders Build 177 release-control center for deployment safety, manifest diffs, safe ZIP export, QA previews, marketplace validation, recall locks, local SEO, and rollback checks.
+// Brief description: Renders Build 178 release-control center for deployment safety, manifest diffs, safe ZIP export, QA previews, marketplace validation, recall locks, local SEO, and rollback checks.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('releaseControlMount');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function rows(data, key) { return Array.isArray(data?.[key]) ? data[key] : []; }
   function render(data) {
-    const lb = esc(data.build_label || 'Build 177');
+    const lb = esc(data.build_label || 'Build 178');
     const local = rows(data, 'local_business_rows')[0];
     const zipUrl = esc(data.safe_deploy_zip_url || '/api/admin/safe-deploy-package?format=zip');
     mount.innerHTML = `
@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <button class="btn secondary" data-action="approve_internal_links" type="button">Approve link suggestions</button>
         <button class="btn secondary" data-action="create_dashboard_cards" type="button">Create dashboard cards</button>
         <a class="btn secondary" href="/api/admin/release-control?format=local-business-json" target="_blank" rel="noopener">View LocalBusiness JSON</a>
+        <a class="btn secondary" href="/admin/deploy-readiness/">Open Deploy Readiness</a>
       </div>
       <div class="grid four-col">
         <div class="admin-stat"><div class="admin-stat-label">Deployments</div><div class="admin-stat-value">${Number(data.summary?.deployment_count || 0)}</div></div>
