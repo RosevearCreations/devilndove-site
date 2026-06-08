@@ -36,7 +36,8 @@ const CORE_ADMIN_PAGES = [
   '/admin/safe-deploy-package/',
   '/admin/post-deploy-smoke-tests/',
   '/admin/deployment-preflight/',
-  '/admin/release-control/'
+  '/admin/release-control/',
+  '/admin/deploy-readiness/'
 ];
 
 const STATIC_JSON_FILES = [
