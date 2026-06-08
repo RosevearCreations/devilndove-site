@@ -59,6 +59,8 @@ export async function onRequestGet(context) {
     journal_imbalance_count: await safeCount(db, `SELECT COUNT(*) AS count FROM accounting_journal_entries WHERE COALESCE(imbalance_cents,0) != 0`),
     overhead_product_override_count: await safeCount(db, `SELECT COUNT(*) AS count FROM accounting_overhead_product_allocations`),
     movie_catalog_rows_count: await safeCount(db, `SELECT COUNT(*) AS count FROM movie_catalog WHERE COALESCE(status,'active') != 'archived'`),
+    open_dashboard_notification_cards_count: await safeCount(db, `SELECT COUNT(*) AS count FROM dashboard_notification_cards WHERE card_status='open'`),
+    latest_deploy_readiness_score: Number((await safeFirst(db, `SELECT score AS count FROM deployment_readiness_scores ORDER BY scored_at DESC LIMIT 1`))?.count || 0),
   };
 
   return json({

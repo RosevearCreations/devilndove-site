@@ -1,9 +1,41 @@
 // File: /functions/api/admin/candle-soap-recall-notifications.js
-// Brief description: Queue customer notification drafts for candle/soap batch recall records.
+// Brief description: Admin recall notification queue with release-lock enforcement before status can leave draft/review.
+
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-function json(data,status=200){return jsonResponse(data,status,{ 'Cache-Control':'no-store' });}
-function rows(result){return Array.isArray(result?.results)?result.results:[];}
-function clean(value,limit=1200){const text=normalizeText(value);return text.length>limit?text.slice(0,limit).trim():text;}
-async function ensure(db){await db.prepare(`CREATE TABLE IF NOT EXISTS candle_soap_recall_notification_queue (candle_soap_recall_notification_queue_id INTEGER PRIMARY KEY AUTOINCREMENT, batch_number TEXT NOT NULL, recipient_email TEXT, notification_status TEXT NOT NULL DEFAULT 'draft', subject TEXT, body TEXT, created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();}
-export async function onRequestGet(context){const db=getDb(context.env);if(!db)return json({ok:false,error:'Database binding is missing.'},500);const user=await getAdminUserFromRequest(context.request,context.env);if(!user)return json({ok:false,error:'Unauthorized.'},401);await ensure(db);const rowsOut=rows(await db.prepare(`SELECT * FROM candle_soap_recall_notification_queue ORDER BY datetime(created_at) DESC LIMIT 200`).all().catch(()=>({results:[]})));return json({ok:true,notifications:rowsOut,summary:{drafts:rowsOut.filter(r=>r.notification_status==='draft').length,total:rowsOut.length}})}
-export async function onRequestPost(context){const db=getDb(context.env);if(!db)return json({ok:false,error:'Database binding is missing.'},500);const user=await getAdminUserFromRequest(context.request,context.env);if(!user)return json({ok:false,error:'Unauthorized.'},401);await ensure(db);let body={};try{body=await context.request.json()}catch{return json({ok:false,error:'Invalid JSON body.'},400)}const batch=clean(body.batch_number||'',120);if(!batch)return json({ok:false,error:'batch_number is required.'},400);const subject=clean(body.subject||`Devil n Dove safety notice for batch ${batch}`,240);const message=clean(body.body||'We are reviewing this candle/soap batch. Please contact us if you purchased an item from this batch and have questions.',4000);await db.prepare(`INSERT INTO candle_soap_recall_notification_queue (batch_number,recipient_email,notification_status,subject,body,created_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(batch,clean(body.recipient_email||'',240),clean(body.notification_status||'draft',80),subject,message,Number(user.user_id||0)||null).run();return json({ok:true,message:'Recall notification draft queued.'})}
+function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
+function lc(value) { return normalizeText(value).toLowerCase(); }
+function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control': 'no-store' }); }
+async function ensure(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS candle_soap_recall_notification_queue (candle_soap_recall_notification_queue_id INTEGER PRIMARY KEY AUTOINCREMENT, batch_number TEXT NOT NULL, recipient_email TEXT, notification_status TEXT NOT NULL DEFAULT 'draft', subject TEXT, body TEXT, created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS recall_notification_locks (recall_notification_lock_id INTEGER PRIMARY KEY AUTOINCREMENT, batch_number TEXT NOT NULL, recall_id INTEGER, lock_status TEXT NOT NULL DEFAULT 'locked_pending_review', required_review_status TEXT NOT NULL DEFAULT 'approved', matching_review_id INTEGER, last_checked_at TEXT DEFAULT CURRENT_TIMESTAMP, checked_by_user_id INTEGER, notes TEXT, UNIQUE(batch_number, recall_id))`).run().catch(() => null);
+}
+async function hasReleaseLock(db, batchNumber) {
+  const row = await db.prepare(`SELECT lock_status FROM recall_notification_locks WHERE batch_number=? ORDER BY last_checked_at DESC LIMIT 1`).bind(batchNumber).first().catch(() => null);
+  return lc(row?.lock_status) === 'release_allowed';
+}
+export async function onRequestGet(context) {
+  const user = await getAdminUserFromRequest(context.request, context.env); if (!user) return json({ ok:false, error:'Unauthorized.' }, 401);
+  const db = getDb(context.env); if (!db) return json({ ok:false, error:'Database binding is missing.' }, 500);
+  await ensure(db);
+  const queue = rows(await db.prepare(`SELECT * FROM candle_soap_recall_notification_queue ORDER BY updated_at DESC LIMIT 100`).all().catch(() => ({ results: [] })));
+  return json({ ok:true, queue });
+}
+export async function onRequestPost(context) {
+  const user = await getAdminUserFromRequest(context.request, context.env); if (!user) return json({ ok:false, error:'Unauthorized.' }, 401);
+  const db = getDb(context.env); if (!db) return json({ ok:false, error:'Database binding is missing.' }, 500);
+  await ensure(db);
+  let body = {}; try { body = await context.request.json(); } catch { body = {}; }
+  const action = lc(body.action || '');
+  if (action === 'update_status') {
+    const id = Number(body.candle_soap_recall_notification_queue_id || 0);
+    const row = await db.prepare(`SELECT * FROM candle_soap_recall_notification_queue WHERE candle_soap_recall_notification_queue_id=? LIMIT 1`).bind(id).first();
+    if (!row) return json({ ok:false, error:'Notification draft not found.' }, 404);
+    const next = lc(body.notification_status || 'draft');
+    if (!['draft','needs_review','review'].includes(next) && !(await hasReleaseLock(db, row.batch_number))) {
+      return json({ ok:false, error:'Recall notification cannot leave draft/review until Release Control shows release_allowed for this batch.' }, 409);
+    }
+    await db.prepare(`UPDATE candle_soap_recall_notification_queue SET notification_status=?, updated_at=CURRENT_TIMESTAMP WHERE candle_soap_recall_notification_queue_id=?`).bind(next, id).run();
+    return json({ ok:true, notification_status: next });
+  }
+  return json({ ok:false, error:'Unknown action.' }, 400);
+}
