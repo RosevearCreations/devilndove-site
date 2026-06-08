@@ -18,7 +18,8 @@ REQUIRED_FILES = [
     'README.md','DEVELOPMENT_ROADMAP.md','KNOWN_GAPS_AND_RISKS.md','COMPETITIVE.md','IMAGES.md',
     'DATABASE_SCHEMA_REFERENCE.md','SANITY_HEALTH_CHECK.md','POST_DEPLOY_SMOKE_TEST.md',
     'functions/api/image-derivative.js','functions/api/admin/post-deploy-smoke-tests.js',
-    'functions/api/admin/dark-theme-evidence.js','admin/post-deploy-smoke-tests/index.html'
+    'functions/api/admin/dark-theme-evidence.js','admin/post-deploy-smoke-tests/index.html',
+    'database_build177_deploy_score_and_controls.sql','scripts/bake_localbusiness_jsonld.py'
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 
