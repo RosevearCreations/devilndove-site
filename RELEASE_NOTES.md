@@ -1,3 +1,47 @@
+# Build 177 deploy score, exact manifest diffs, QA approvals, and JSON-LD bake
+
+## Summary
+
+- Added Build 177 D1 migration `database_build177_deploy_score_and_controls.sql`.
+- Added deploy-readiness scoring across preflight, manifest diffs, smoke tests, rollback checklist rows, and D1 migration markers.
+- Added real Cloudflare Pages deployment import support when scoped token bindings are present, with safe not-configured fallback rows.
+- Added exact manifest diff item rows so missing/changed/extra file paths can be reviewed in Release Control.
+- Added Product QA preview approvals and the first low-risk auto-apply path for missing image alt text only.
+- Added marketplace validation rule editor rows and Release Control visibility.
+- Added recall customer match previews and API-level recall notification lock enforcement.
+- Added R2 private evidence create/get/delete health test rows.
+- Added LocalBusiness JSON-LD injection targets and baked managed JSON-LD blocks into key public/local pages.
+- Added dashboard notification cards for release, manifest, recall, and readiness warnings.
+
+## D1 migration summary
+
+Run after Build 176:
+
+1. `database_build171_ledger_repair.sql` only if Build 171 schema exists but the marker is missing.
+2. `database_build173_deployment_preflight.sql`
+3. `database_build174_deployment_preflight_detail.sql`
+4. `database_build175_release_control.sql`
+5. `database_build176_release_safety_controls.sql`
+6. `database_build177_deploy_score_and_controls.sql`
+
+## Required post-deploy actions
+
+- Open `/admin/deployment-preflight/` and run Preflight.
+- Open `/admin/release-control/`, run live manifest compare, create rollback checklist, and calculate deploy-readiness score.
+- Run the R2 private evidence health test only after the private bucket binding is configured.
+- Review Product QA preview groups before approving any alt-text apply action.
+- Review recall locks and customer previews before notification drafts move forward.
+- Open `/admin/safe-deploy-package/` and download the Build 177 Safe Deploy ZIP for handoff.
+- Run `/admin/post-deploy-smoke-tests/` and then recalculate deploy-readiness.
+
+## Validation
+
+- Static LocalBusiness JSON-LD bake completed for homepage and key local landing pages.
+- JavaScript syntax checks passed for changed admin/function/public files.
+- Python scripts compiled.
+- Build 177 SQL migration smoke test passed in SQLite with prior Build 175 and Build 176 migration files.
+- One-H1 check, CSS brace check, JSON validation, and zip integrity checks are included in final validation.
+
 # Build 176 safe deploy ZIP, live manifest diff, QA previews, and recall locks
 
 ## Summary

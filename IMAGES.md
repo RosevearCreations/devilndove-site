@@ -1,3 +1,9 @@
+# Build 177 image/QA update
+
+- Product QA bulk fixes now require an approval record before any apply action.
+- The only automatic apply action added in Build 177 is missing image alt text, and it logs an apply event.
+- All other Product QA blockers remain manual/editor-focused until safer field-specific workflows are added.
+
 Build 176 image/release note: Safe Deploy ZIPs can package release evidence files, dark-theme screenshot jobs remain queueable from Release Control, and Product QA preview cards now keep exact image/editor fix links for blockers such as missing image alt text.
 
 

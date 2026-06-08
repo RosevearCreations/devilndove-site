@@ -1,3 +1,49 @@
+# Build 177 Completed Pass — Deploy Score, Exact Manifest Diff, QA Approval, Recall Customer Preview, and JSON-LD Bake
+
+Completed in this pass:
+1. Added real Cloudflare Pages deployment import support when account, project, and scoped API token bindings are present.
+2. Kept Cloudflare import fully guarded when bindings or token are missing, with visible admin setup rows instead of hard failures.
+3. Added direct rollback checklist status controls in Release Control so rows can be marked passed, blocked, or left for review.
+4. Added exact release manifest diff item rows for missing, changed, and extra file paths.
+5. Added Release Control visual tables for exact manifest path-level differences.
+6. Added Product QA preview approval records so each bulk-fix group can be marked safe, skipped, or manual-only before apply.
+7. Added the first low-risk Product QA apply action for missing image alt text only, with apply-event logging.
+8. Added marketplace validation rule editor rows for Etsy, Facebook, Pinterest, and manual CSV columns.
+9. Added recall customer match preview rows from product batch/order joins where data exists.
+10. Added recall notification API enforcement so notices cannot leave draft/review unless the batch has a release_allowed lock.
+11. Added provider-safe webhook/signature tracking groundwork retained from Build 176 and expanded release-control visibility around related safety checks.
+12. Added live R2 private evidence create/get/delete health test rows, guarded behind available private bucket bindings.
+13. Added accounting ZIP checksum link table for connecting accounting evidence bundle hashes to package/download records.
+14. Added LocalBusiness JSON-LD injection targets for homepage and local landing pages.
+15. Added a static JSON-LD bake script and injected managed LocalBusiness JSON-LD blocks into key public/local pages.
+16. Added internal-link suggestion approval action that writes approved rows into local SEO bake actions.
+17. Added dashboard notification cards sourced from release, manifest, recall, and deploy-readiness status.
+18. Added deploy-readiness scoring that combines preflight blockers/warnings, manifest differences, smoke-test results, rollback checklist rows, and D1 migration markers.
+19. Updated Safe Deploy ZIP metadata and D1 order to include Build 177.
+20. Updated schema SQL, schema references, roadmap, known gaps, release notes, sanity notes, local SEO notes, README, and build handoff documentation for Build 177.
+
+Next 20 recommended steps:
+1. Add a dedicated `/admin/deploy-readiness/` page with score history charts and drilldowns by blocker source.
+2. Add per-row buttons beside rollback checklist rows instead of the current API-level status action.
+3. Add direct path filters and copy buttons to the exact manifest diff table.
+4. Add a confirmation modal before applying Product QA alt text fixes.
+5. Expand safe Product QA apply actions to SEO title casing and empty status labels only after preview approval.
+6. Move marketplace rule editing into `/admin/marketplace-exports/` and show rule failures directly beside CSV download buttons.
+7. Add marketplace validation against real export row payloads, not just required-column rules.
+8. Add customer-facing recall preview copy review cards before notification drafts can queue.
+9. Add recall compliance signature upload/evidence attachment support.
+10. Add provider-specific webhook signature verification math for Resend, SendGrid, and Postmark using stored secrets.
+11. Add R2 signed URL generation verification, not just create/get/delete object checks.
+12. Link accountant ZIP checksum rows directly from the accounting export endpoint.
+13. Add Search Console trend mini charts beside each local SEO review row.
+14. Add a visual internal-link map showing source and target landing pages.
+15. Add LocalBusiness schema editing fields directly in Release Control instead of JSON-only preview.
+16. Add schema.org validation hints for Product, LocalBusiness, BreadcrumbList, and FAQ JSON-LD blocks.
+17. Add deploy package comparison against the previous uploaded zip for a human-friendly changed-file summary.
+18. Add dashboard notification card dismiss/snooze controls.
+19. Add mobile-only Release Control cards for deploy score, manifest diff, recall locks, and ZIP download.
+20. Add a final “promote live” guarded checklist requiring score, smoke tests, rollback, D1 markers, and manifest diff to pass.
+
 # Build 176 Completed Pass — Safe Deploy ZIP, Live Manifest Diff, QA Previews, Recall Locks, and Local SEO Controls
 
 Completed in this pass:

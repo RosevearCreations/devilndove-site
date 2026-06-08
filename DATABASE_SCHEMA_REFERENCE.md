@@ -1,3 +1,21 @@
+# Build 177 schema update
+
+New migration file: `database_build177_deploy_score_and_controls.sql`.
+
+New tables added:
+
+- `release_manifest_diff_items` — exact file-path rows for live manifest missing/changed/extra differences.
+- `deployment_readiness_scores` — scored release readiness snapshots.
+- `product_qa_bulk_fix_approvals` — approval history before Product QA bulk apply actions.
+- `marketplace_channel_validation_rule_edits` — admin-edited marketplace column validation rules.
+- `recall_customer_match_previews` — per-customer recall preview rows from batch/order/product joins.
+- `r2_signed_download_health_tests` — private R2 evidence object create/get/delete health rows.
+- `accounting_zip_checksum_links` — links between accounting evidence ZIP hashes and package/download rows.
+- `local_business_schema_injection_targets` — static JSON-LD injection page targets.
+- `dashboard_notification_cards` — visible dashboard release/preflight/recall/readiness cards.
+
+The migration is additive and includes a populated `schema_migration_ledger.file_name` marker.
+
 # Build 176 schema update
 
 Added additive migration `database_build176_release_safety_controls.sql`.

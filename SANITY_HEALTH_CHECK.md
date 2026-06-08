@@ -1,3 +1,13 @@
+# Build 177 sanity health check
+
+Latest pass expectations:
+
+- `database_build177_deploy_score_and_controls.sql` is present and listed in the D1 order.
+- Release Control shows deploy-readiness score rows, exact manifest diff items, QA approval rows, marketplace rule rows, recall customer matches, R2 private evidence tests, LocalBusiness injection targets, and dashboard notification cards.
+- Public/local pages have no more than one H1 each.
+- Managed LocalBusiness JSON-LD blocks are present on the homepage and main local landing pages.
+- CSS brace balance, JSON parse checks, JS syntax checks, Python compile checks, and SQL smoke tests pass before packaging.
+
 <!-- BUILD_176_PREFLIGHT_SANITY_START -->
 # Build 176 Deployment Preflight Sanity Notes
 

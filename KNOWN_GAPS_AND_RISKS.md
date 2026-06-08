@@ -1,3 +1,49 @@
+# Build 177 known gaps and risks update
+
+Moved forward in Build 177:
+1. Deployment readiness now has a stored score instead of relying on separate manual checks.
+2. Live manifest diffs now store exact file-path rows for missing, changed, and extra files.
+3. Product QA bulk fixes now require approval state before the low-risk alt-text apply action can run.
+4. Recall notifications now have API-level lock enforcement before status can leave draft/review.
+5. Cloudflare deployment import can call the Pages API when scoped token bindings are present and safely records setup gaps when not configured.
+6. R2 private evidence testing now records create/get/delete status rows, while signed URL verification remains a future step.
+7. LocalBusiness JSON-LD is now statically baked into key public/local pages through a managed script block.
+8. Dashboard cards can surface release/manifest/recall/readiness warnings.
+
+Still outstanding after Build 177:
+1. Cloudflare import depends on a scoped token and cannot be live-tested from a build zip.
+2. Product QA auto-apply is intentionally limited to image alt text; SEO/status auto-fixes still need their own approval-safe implementation.
+3. Marketplace validation rules exist, but full row-by-row validation against generated marketplace payloads still needs to be added to the export page.
+4. Recall customer previews depend on complete order item/product batch joins; older rows without batch/order data may still require manual matching.
+5. R2 private evidence checks confirm object lifecycle, but signed URL expiration/access verification is still not complete.
+6. Accountant ZIP checksum rows are available, but the accounting export endpoint still needs direct write-through linking.
+7. Search Console trend rows are stored, but chart display on local SEO rows is still pending.
+8. Dashboard notification cards are created, but dismiss/snooze controls still need to be added.
+9. LocalBusiness field editing is API-ready but still needs a friendlier admin form.
+10. Final promote-live gate is not yet a hard blocker; it is still an admin review workflow.
+
+Next 20 recommended steps:
+1. Build the dedicated deploy-readiness page.
+2. Add rollback row pass/block buttons.
+3. Add path filters for manifest diff items.
+4. Add QA apply confirmation modal.
+5. Add low-risk SEO title/status fixes.
+6. Move marketplace rule editor to marketplace exports.
+7. Validate actual marketplace CSV rows.
+8. Add recall copy review cards.
+9. Add recall signature evidence uploads.
+10. Add provider webhook HMAC verification helpers.
+11. Add signed URL expiry/access verification.
+12. Write accounting checksum rows during accounting ZIP export.
+13. Add Search Console charts.
+14. Add internal-link map visualization.
+15. Add LocalBusiness form editing.
+16. Add schema validation hints.
+17. Add package-to-package diff summary.
+18. Add notification dismiss/snooze.
+19. Add mobile Release Control cards.
+20. Add guarded promote-live checklist.
+
 # Build 176 known gaps and risks update
 
 Moved forward in Build 176:

@@ -1,3 +1,10 @@
+# Build 177 local SEO update
+
+- LocalBusiness JSON-LD is now baked into the homepage and key Ontario/local landing pages with the managed marker `dd-local-business-jsonld`.
+- `scripts/bake_localbusiness_jsonld.py` reads `data/site/local-business-schema.json` and safely replaces the managed block without adding another H1.
+- Release Control can seed JSON-LD injection targets and approve internal-link suggestions into `local_seo_bake_actions`.
+- Next SEO priority is Search Console trend charts per local SEO row and a visual internal-link map.
+
 Build 176 local SEO update: Release Control can now seed internal-link suggestions, store Search Console trend rows, and preview a richer LocalBusiness schema with area served, services, payment methods, logo/image, and future opening-hours fields.
 
 

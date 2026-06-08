@@ -1,3 +1,7 @@
+# Build 177 handoff note
+
+This build adds release-readiness scoring, Cloudflare deployment import support, exact manifest diff rows, Product QA approval controls, recall notification lock enforcement, LocalBusiness JSON-LD bake support, and the Build 177 D1 migration. Run migrations in order through `database_build177_deploy_score_and_controls.sql`, then run Deployment Preflight and Release Control before promotion.
+
 # Current Build Status — Build 174
 
 Latest pass added richer Deployment Preflight detail, D1 schema diff, migration planner, Markdown export, post-deploy confirmations, release package hash manifest, dashboard preflight badge, and regenerated sanity/release documentation.

@@ -1,3 +1,15 @@
+# Build 177 post-deploy smoke-test additions
+
+After deploying Build 177:
+
+1. Run D1 migrations through `database_build177_deploy_score_and_controls.sql`.
+2. Open `/admin/release-control/` and click **Import Cloudflare deployments** after configuring `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_PAGES_PROJECT`, and a scoped token.
+3. Run **Live Manifest Compare** against the live `/data/site/release-package-manifest.json`.
+4. Run **Create Rollback Checklist** and mark rows manually before promotion.
+5. Run **Calculate deploy score** after smoke tests.
+6. Verify recall notification status changes remain blocked unless release locks say `release_allowed`.
+7. Confirm LocalBusiness JSON-LD exists on homepage and local landing pages.
+
 Build 176 post-deploy addition: after smoke tests, open Release Control, run Live Manifest Compare, download the Safe Deploy ZIP, refresh recall locks, and create rollback checklist rows before promotion.
 
 
