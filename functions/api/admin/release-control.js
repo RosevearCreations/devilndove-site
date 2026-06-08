@@ -3,7 +3,7 @@
 
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD_LABEL = 'Build 176';
+const BUILD_LABEL = 'Build 177';
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function lc(value) { return normalizeText(value).toLowerCase(); }
 async function tableExists(db, tableName) { try { return !!(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1").bind(tableName).first()); } catch { return false; } }
@@ -32,6 +32,16 @@ async function ensureTables(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS local_business_schema_bakes (local_business_schema_bake_id INTEGER PRIMARY KEY AUTOINCREMENT, source_setting_id INTEGER, bake_status TEXT NOT NULL DEFAULT 'draft', target_paths_json TEXT NOT NULL DEFAULT '[]', schema_json TEXT NOT NULL DEFAULT '{}', output_path TEXT DEFAULT 'data/site/local-business-schema.json', baked_by_user_id INTEGER, baked_at TEXT DEFAULT CURRENT_TIMESTAMP, notes TEXT)`).run();
   await db.prepare(`CREATE TABLE IF NOT EXISTS deployment_rollback_checklist_rows (deployment_rollback_checklist_row_id INTEGER PRIMARY KEY AUTOINCREMENT, deployment_history_id INTEGER, build_label TEXT, checklist_key TEXT NOT NULL, checklist_label TEXT NOT NULL, checklist_status TEXT NOT NULL DEFAULT 'not_checked', required_before_rollback INTEGER NOT NULL DEFAULT 1, notes TEXT, created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(build_label, checklist_key))`).run();
   await db.prepare(`CREATE TABLE IF NOT EXISTS cloudflare_deployment_import_runs (cloudflare_deployment_import_run_id INTEGER PRIMARY KEY AUTOINCREMENT, import_status TEXT NOT NULL DEFAULT 'not_configured', account_id_present INTEGER NOT NULL DEFAULT 0, project_name_present INTEGER NOT NULL DEFAULT 0, imported_count INTEGER NOT NULL DEFAULT 0, response_json TEXT NOT NULL DEFAULT '{}', created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, notes TEXT)`).run();
+
+  await db.prepare(`CREATE TABLE IF NOT EXISTS release_manifest_diff_items (release_manifest_diff_item_id INTEGER PRIMARY KEY AUTOINCREMENT, release_manifest_live_diff_id INTEGER, build_label TEXT, file_path TEXT NOT NULL, diff_kind TEXT NOT NULL DEFAULT 'changed', expected_sha256 TEXT, deployed_sha256 TEXT, item_status TEXT NOT NULL DEFAULT 'open', created_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS deployment_readiness_scores (deployment_readiness_score_id INTEGER PRIMARY KEY AUTOINCREMENT, build_label TEXT, score INTEGER NOT NULL DEFAULT 0, score_status TEXT NOT NULL DEFAULT 'not_ready', blocker_count INTEGER NOT NULL DEFAULT 0, warning_count INTEGER NOT NULL DEFAULT 0, manifest_blocker_count INTEGER NOT NULL DEFAULT 0, smoke_blocker_count INTEGER NOT NULL DEFAULT 0, rollback_blocker_count INTEGER NOT NULL DEFAULT 0, d1_marker_count INTEGER NOT NULL DEFAULT 0, score_json TEXT NOT NULL DEFAULT '{}', scored_by_user_id INTEGER, scored_at TEXT DEFAULT CURRENT_TIMESTAMP, notes TEXT)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS product_qa_bulk_fix_approvals (product_qa_bulk_fix_approval_id INTEGER PRIMARY KEY AUTOINCREMENT, product_qa_bulk_fix_queue_id INTEGER NOT NULL, approval_status TEXT NOT NULL DEFAULT 'manual_only', approval_scope TEXT NOT NULL DEFAULT 'preview_group', approval_notes TEXT, approved_by_user_id INTEGER, approved_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_channel_validation_rule_edits (marketplace_channel_validation_rule_edit_id INTEGER PRIMARY KEY AUTOINCREMENT, channel TEXT NOT NULL, column_key TEXT NOT NULL, rule_kind TEXT NOT NULL DEFAULT 'required_column', is_required INTEGER NOT NULL DEFAULT 1, severity TEXT NOT NULL DEFAULT 'blocker', rule_status TEXT NOT NULL DEFAULT 'active', edited_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(channel, column_key, rule_kind))`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS recall_customer_match_previews (recall_customer_match_preview_id INTEGER PRIMARY KEY AUTOINCREMENT, batch_number TEXT NOT NULL, product_id INTEGER, order_id INTEGER, customer_email TEXT, customer_name TEXT, match_source TEXT NOT NULL DEFAULT 'order_product_batch', preview_status TEXT NOT NULL DEFAULT 'needs_review', notification_subject TEXT, notification_body TEXT, created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS r2_signed_download_health_tests (r2_signed_download_health_test_id INTEGER PRIMARY KEY AUTOINCREMENT, test_kind TEXT NOT NULL DEFAULT 'create_get_delete', bucket_label TEXT, object_key TEXT, create_status TEXT NOT NULL DEFAULT 'not_run', get_status TEXT NOT NULL DEFAULT 'not_run', delete_status TEXT NOT NULL DEFAULT 'not_run', checksum_sha256 TEXT, bytes_tested INTEGER NOT NULL DEFAULT 0, notes TEXT, checked_by_user_id INTEGER, checked_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_zip_checksum_links (accounting_zip_checksum_link_id INTEGER PRIMARY KEY AUTOINCREMENT, accounting_evidence_bundle_checksum_id INTEGER, safe_deploy_package_download_id INTEGER, period_month TEXT, zip_sha256 TEXT, link_status TEXT NOT NULL DEFAULT 'linked', created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, notes TEXT)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS local_business_schema_injection_targets (local_business_schema_injection_target_id INTEGER PRIMARY KEY AUTOINCREMENT, page_path TEXT NOT NULL UNIQUE, injection_status TEXT NOT NULL DEFAULT 'queued', schema_source TEXT NOT NULL DEFAULT 'data/site/local-business-schema.json', last_baked_at TEXT, notes TEXT, created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS dashboard_notification_cards (dashboard_notification_card_id INTEGER PRIMARY KEY AUTOINCREMENT, source_kind TEXT NOT NULL, source_id INTEGER, card_title TEXT NOT NULL, card_body TEXT, severity TEXT NOT NULL DEFAULT 'info', destination_page TEXT NOT NULL DEFAULT '/admin/', card_status TEXT NOT NULL DEFAULT 'open', created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
   await db.prepare(`CREATE TABLE IF NOT EXISTS admin_notification_routes (admin_notification_route_id INTEGER PRIMARY KEY AUTOINCREMENT, route_key TEXT NOT NULL UNIQUE, route_label TEXT NOT NULL, source_kind TEXT NOT NULL DEFAULT 'preflight', destination_page TEXT NOT NULL DEFAULT '/admin/', min_severity TEXT NOT NULL DEFAULT 'warn', route_status TEXT NOT NULL DEFAULT 'active', created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run();
 }
 
@@ -112,6 +122,15 @@ async function buildSummary(db, user) {
   const rollback_rows = await safeAll(db, `SELECT build_label, checklist_key, checklist_label, checklist_status, required_before_rollback, updated_at FROM deployment_rollback_checklist_rows ORDER BY build_label DESC, checklist_key LIMIT 30`);
   const cf_imports = await safeAll(db, `SELECT import_status, account_id_present, project_name_present, imported_count, created_at, notes FROM cloudflare_deployment_import_runs ORDER BY created_at DESC LIMIT 10`);
   const notification_routes = await safeAll(db, `SELECT route_key, route_label, source_kind, destination_page, min_severity, route_status FROM admin_notification_routes ORDER BY route_status, source_kind LIMIT 20`);
+  const diff_items = await safeAll(db, `SELECT release_manifest_diff_item_id, release_manifest_live_diff_id, file_path, diff_kind, item_status, expected_sha256, deployed_sha256 FROM release_manifest_diff_items ORDER BY release_manifest_diff_item_id DESC LIMIT 120`);
+  const readiness_scores = await safeAll(db, `SELECT deployment_readiness_score_id, build_label, score, score_status, blocker_count, warning_count, manifest_blocker_count, smoke_blocker_count, rollback_blocker_count, d1_marker_count, scored_at, notes FROM deployment_readiness_scores ORDER BY scored_at DESC LIMIT 10`);
+  const qa_approvals = await safeAll(db, `SELECT product_qa_bulk_fix_approval_id, product_qa_bulk_fix_queue_id, approval_status, approval_scope, approval_notes, approved_at FROM product_qa_bulk_fix_approvals ORDER BY approved_at DESC LIMIT 30`);
+  const rule_edits = await safeAll(db, `SELECT channel, column_key, rule_kind, is_required, severity, rule_status, updated_at FROM marketplace_channel_validation_rule_edits ORDER BY channel, column_key LIMIT 80`);
+  const recall_matches = await safeAll(db, `SELECT recall_customer_match_preview_id, batch_number, product_id, order_id, customer_email, customer_name, match_source, preview_status, created_at FROM recall_customer_match_previews ORDER BY created_at DESC LIMIT 40`);
+  const r2_signed_tests = await safeAll(db, `SELECT r2_signed_download_health_test_id, test_kind, bucket_label, object_key, create_status, get_status, delete_status, bytes_tested, checked_at, notes FROM r2_signed_download_health_tests ORDER BY checked_at DESC LIMIT 12`);
+  const checksum_links = await safeAll(db, `SELECT accounting_zip_checksum_link_id, period_month, zip_sha256, link_status, created_at, notes FROM accounting_zip_checksum_links ORDER BY created_at DESC LIMIT 20`);
+  const injection_targets = await safeAll(db, `SELECT page_path, injection_status, schema_source, last_baked_at, notes FROM local_business_schema_injection_targets ORDER BY page_path LIMIT 30`);
+  const dashboard_cards = await safeAll(db, `SELECT dashboard_notification_card_id, source_kind, card_title, card_body, severity, destination_page, card_status, created_at FROM dashboard_notification_cards ORDER BY created_at DESC LIMIT 20`);
   return {
     deployment_history,
     manifest_comparisons,
@@ -134,6 +153,15 @@ async function buildSummary(db, user) {
     rollback_rows,
     cf_imports,
     notification_routes,
+    diff_items,
+    readiness_scores,
+    qa_approvals,
+    rule_edits,
+    recall_matches,
+    r2_signed_tests,
+    checksum_links,
+    injection_targets,
+    dashboard_cards,
     summary: {
       deployment_count: deployment_history.length,
       manifest_comparison_count: manifest_comparisons.length + live_manifest_diffs.length,
@@ -143,7 +171,9 @@ async function buildSummary(db, user) {
       safe_export_count: safe_exports.length + safe_downloads.length,
       qa_preview_count: qa_preview_items.length,
       recall_lock_count: recall_locks.length,
-      rollback_open_count: rollback_rows.filter((row) => lc(row.checklist_status) !== 'passed').length
+      rollback_open_count: rollback_rows.filter((row) => lc(row.checklist_status) !== 'passed').length,
+      dashboard_card_count: dashboard_cards.filter((row) => lc(row.card_status) === 'open').length,
+      readiness_score: readiness_scores[0]?.score || 0
     }
   };
 }
@@ -187,6 +217,70 @@ async function seedQaPreview(db, user) {
   }
 }
 
+
+function shaFromMap(manifest, path) {
+  const file = (manifest?.files || []).find((row) => row?.path === path);
+  return file?.sha256 || '';
+}
+async function recordDiffItems(db, diffId, buildLabel, diff, expected, deployed) {
+  if (!diffId) return;
+  const items = [
+    ...(diff.missing || []).map((path) => ({ path, kind: 'missing', expected: shaFromMap(expected, path), deployed: '' })),
+    ...(diff.changed || []).map((path) => ({ path, kind: 'changed', expected: shaFromMap(expected, path), deployed: shaFromMap(deployed, path) })),
+    ...(diff.extra || []).map((path) => ({ path, kind: 'extra', expected: '', deployed: shaFromMap(deployed, path) }))
+  ];
+  for (const item of items.slice(0, 300)) {
+    await db.prepare(`INSERT INTO release_manifest_diff_items (release_manifest_live_diff_id, build_label, file_path, diff_kind, expected_sha256, deployed_sha256, item_status, created_at) VALUES (?, ?, ?, ?, ?, ?, 'open', CURRENT_TIMESTAMP)`).bind(diffId, buildLabel, item.path, item.kind, item.expected, item.deployed).run().catch(() => null);
+  }
+}
+async function calculateReadinessScore(db, buildLabel, userId) {
+  const preflight = await safeFirst(db, `SELECT blocker_count, warning_count, status FROM deployment_preflight_runs ORDER BY created_at DESC LIMIT 1`, [], {});
+  const manifest = await safeFirst(db, `SELECT missing_file_count, changed_file_count, extra_file_count, diff_status FROM release_manifest_live_diffs ORDER BY checked_at DESC LIMIT 1`, [], {});
+  const smoke = await safeFirst(db, `SELECT SUM(CASE WHEN LOWER(COALESCE(result_status,'')) IN ('failed','fail','blocked') THEN 1 ELSE 0 END) AS blockers, SUM(CASE WHEN LOWER(COALESCE(result_status,'')) IN ('warning','warn','pending') THEN 1 ELSE 0 END) AS warnings FROM post_deploy_smoke_test_results`, [], {});
+  const rollback = await safeFirst(db, `SELECT COUNT(*) AS open_count FROM deployment_rollback_checklist_rows WHERE build_label=? AND required_before_rollback=1 AND LOWER(COALESCE(checklist_status,''))!='passed'`, [buildLabel], {});
+  const d1 = await safeFirst(db, `SELECT COUNT(*) AS marker_count FROM schema_migration_ledger WHERE migration_key IN ('build_173_deployment_preflight','build_174_preflight_detail_manifest','build_175_release_control','build_176_release_safety_controls','build_177_deploy_score_and_controls')`, [], {});
+  const blockerCount = Number(preflight?.blocker_count || 0);
+  const warningCount = Number(preflight?.warning_count || 0);
+  const manifestBlockers = Number(manifest?.missing_file_count || 0) + Number(manifest?.changed_file_count || 0);
+  const smokeBlockers = Number(smoke?.blockers || 0);
+  const rollbackBlockers = Number(rollback?.open_count || 0);
+  const d1Markers = Number(d1?.marker_count || 0);
+  let score = 100 - (blockerCount * 25) - (manifestBlockers * 10) - (smokeBlockers * 20) - (rollbackBlockers * 8) - Math.max(0, 5 - d1Markers) * 5 - (warningCount * 2);
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  const status = score >= 90 ? 'ready' : score >= 70 ? 'review' : 'not_ready';
+  const payload = { preflight, manifest, smoke, rollback, d1, score };
+  await db.prepare(`INSERT INTO deployment_readiness_scores (build_label, score, score_status, blocker_count, warning_count, manifest_blocker_count, smoke_blocker_count, rollback_blocker_count, d1_marker_count, score_json, scored_by_user_id, scored_at, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)`).bind(buildLabel, score, status, blockerCount, warningCount, manifestBlockers, smokeBlockers, rollbackBlockers, d1Markers, JSON.stringify(payload), userId, status === 'ready' ? 'Ready based on latest saved checks.' : 'Review release blockers before promotion.').run();
+}
+async function importCloudflareDeployments(context, db, user, body) {
+  const env = context.env || {};
+  const account = normalizeText(env.CLOUDFLARE_ACCOUNT_ID);
+  const project = normalizeText(env.CLOUDFLARE_PAGES_PROJECT || env.CLOUDFLARE_PAGES_PROJECT_NAME);
+  const token = normalizeText(env.CLOUDFLARE_API_TOKEN || env.CF_API_TOKEN);
+  if (!account || !project || !token) {
+    await db.prepare(`INSERT INTO cloudflare_deployment_import_runs (import_status, account_id_present, project_name_present, imported_count, response_json, created_by_user_id, created_at, notes) VALUES (?, ?, ?, 0, '{}', ?, CURRENT_TIMESTAMP, ?)`).bind(account && project ? 'token_required' : 'not_configured', account ? 1 : 0, project ? 1 : 0, Number(user.user_id || 0) || null, account && project ? 'Cloudflare project configured; token missing.' : 'Cloudflare account/project bindings are missing.').run();
+    return;
+  }
+  const endpoint = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(account)}/pages/projects/${encodeURIComponent(project)}/deployments?per_page=10`;
+  let imported = 0;
+  let responseJson = {};
+  try {
+    const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+    responseJson = await response.json().catch(() => ({ success: false, status: response.status }));
+    const deployments = Array.isArray(responseJson?.result) ? responseJson.result : [];
+    for (const dep of deployments) {
+      const buildLabel = normalizeText(body.build_label || BUILD_LABEL);
+      const commitSha = normalizeText(dep?.deployment_trigger?.metadata?.commit_hash || dep?.source?.config?.commit_hash || dep?.id || '');
+      const branch = normalizeText(dep?.deployment_trigger?.metadata?.branch || dep?.source?.config?.branch || '');
+      const url = normalizeText(dep?.url || dep?.aliases?.[0] || '');
+      const status = lc(dep?.latest_stage?.status || dep?.env_vars?.status || dep?.production_branch ? 'deployed' : 'imported') || 'imported';
+      await db.prepare(`INSERT INTO deployment_history (build_label, branch_name, commit_sha, deploy_url, build_zip_label, deployment_status, promoted_by_user_id, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(buildLabel, branch, commitSha, url, normalizeText(body.build_zip_label || ''), status, Number(user.user_id || 0) || null, `Imported from Cloudflare Pages deployment id ${normalizeText(dep?.id)}`).run().catch(() => null);
+      imported += 1;
+    }
+    await db.prepare(`INSERT INTO cloudflare_deployment_import_runs (import_status, account_id_present, project_name_present, imported_count, response_json, created_by_user_id, created_at, notes) VALUES (?, 1, 1, ?, ?, ?, CURRENT_TIMESTAMP, ?)`).bind(responseJson?.success === false ? 'api_error' : 'imported', imported, JSON.stringify({ success: responseJson?.success, errors: responseJson?.errors || [], count: imported }), Number(user.user_id || 0) || null, imported ? 'Imported recent Cloudflare Pages deployments.' : 'API call completed but no deployments were returned.').run();
+  } catch (error) {
+    await db.prepare(`INSERT INTO cloudflare_deployment_import_runs (import_status, account_id_present, project_name_present, imported_count, response_json, created_by_user_id, created_at, notes) VALUES ('api_error', 1, 1, 0, ?, ?, CURRENT_TIMESTAMP, ?)`).bind(JSON.stringify(responseJson || {}), Number(user.user_id || 0) || null, error.message || 'Cloudflare import failed.').run();
+  }
+}
 export async function onRequestPost(context) {
   const user = await getAdminUserFromRequest(context.request, context.env);
   if (!user) return jsonResponse({ ok: false, error: 'Unauthorized.' }, 401);
@@ -213,7 +307,8 @@ export async function onRequestPost(context) {
       status = 'failed';
       notes = error.message || 'Manifest compare failed.';
     }
-    await db.prepare(`INSERT INTO release_manifest_live_diffs (build_label, expected_manifest_url, deployed_manifest_url, diff_status, expected_file_count, deployed_file_count, missing_file_count, changed_file_count, extra_file_count, diff_json, checked_by_user_id, checked_at, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)`).bind(normalizeText(body.build_label || BUILD_LABEL), expectedUrl, deployedUrl, status, diff.expected_file_count, diff.deployed_file_count, diff.missing.length, diff.changed.length, diff.extra.length, JSON.stringify(diff), Number(user.user_id || 0) || null, notes).run();
+    const ins = await db.prepare(`INSERT INTO release_manifest_live_diffs (build_label, expected_manifest_url, deployed_manifest_url, diff_status, expected_file_count, deployed_file_count, missing_file_count, changed_file_count, extra_file_count, diff_json, checked_by_user_id, checked_at, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)`).bind(normalizeText(body.build_label || BUILD_LABEL), expectedUrl, deployedUrl, status, diff.expected_file_count, diff.deployed_file_count, diff.missing.length, diff.changed.length, diff.extra.length, JSON.stringify(diff), Number(user.user_id || 0) || null, notes).run();
+    try { await recordDiffItems(db, Number(ins?.meta?.last_row_id || 0), normalizeText(body.build_label || BUILD_LABEL), diff, await fetchJson(expectedUrl).catch(() => ({})), await fetchJson(deployedUrl).catch(() => ({}))); } catch {}
   } else if (action === 'queue_screenshot_jobs') {
     const pages = Array.isArray(body.pages) && body.pages.length ? body.pages : ['/', '/shop/', '/gallery/', '/handmade-jewelry-ontario/', '/custom-gifts-southern-ontario/', '/laser-engraving-ontario/'];
     for (const page of pages) await db.prepare(`INSERT INTO deployment_screenshot_jobs (build_label, page_path, viewport_width, viewport_height, theme, capture_status, notes, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'queued', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(normalizeText(body.build_label || BUILD_LABEL), normalizeText(page), Number(body.viewport_width || 390), Number(body.viewport_height || 844), normalizeText(body.theme || 'dark'), normalizeText(body.notes || 'Queued from release-control page.'), Number(user.user_id || 0) || null).run();
@@ -261,9 +356,72 @@ export async function onRequestPost(context) {
     const items = [['manifest_diff_reviewed', 'Manifest diff reviewed'], ['smoke_tests_exported', 'Smoke tests exported'], ['d1_migration_state_checked', 'D1 migration state checked'], ['r2_assets_verified', 'R2 assets verified'], ['release_notes_saved', 'Release notes saved']];
     for (const [key, label] of items) await db.prepare(`INSERT OR IGNORE INTO deployment_rollback_checklist_rows (build_label, checklist_key, checklist_label, checklist_status, required_before_rollback, notes, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, 'not_checked', 1, 'Required before reverting or promoting a previous deploy.', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(normalizeText(body.build_label || BUILD_LABEL), key, label, Number(user.user_id || 0) || null).run();
   } else if (action === 'import_cloudflare_deployments') {
-    const hasAccount = !!normalizeText(context.env.CLOUDFLARE_ACCOUNT_ID);
-    const hasProject = !!normalizeText(context.env.CLOUDFLARE_PAGES_PROJECT);
-    await db.prepare(`INSERT INTO cloudflare_deployment_import_runs (import_status, account_id_present, project_name_present, imported_count, response_json, created_by_user_id, created_at, notes) VALUES (?, ?, ?, 0, '{}', ?, CURRENT_TIMESTAMP, ?)`).bind(hasAccount && hasProject ? 'token_required' : 'not_configured', hasAccount ? 1 : 0, hasProject ? 1 : 0, Number(user.user_id || 0) || null, hasAccount && hasProject ? 'Cloudflare identifiers found; add a scoped API token before live import.' : 'Cloudflare account/project bindings are not configured.').run();
+    await importCloudflareDeployments(context, db, user, body);
+  } else if (action === 'update_rollback_status') {
+    await db.prepare(`UPDATE deployment_rollback_checklist_rows SET checklist_status=?, notes=COALESCE(NULLIF(?, ''), notes), updated_at=CURRENT_TIMESTAMP WHERE deployment_rollback_checklist_row_id=?`).bind(normalizeText(body.checklist_status || 'not_checked'), normalizeText(body.notes), Number(body.deployment_rollback_checklist_row_id || 0)).run();
+  } else if (action === 'approve_qa_preview') {
+    const queueId = Number(body.product_qa_bulk_fix_queue_id || 0);
+    const status = lc(body.approval_status || 'manual_only');
+    await db.prepare(`UPDATE product_qa_bulk_fix_queue SET approval_status=?, approved_by_user_id=?, approved_at=CASE WHEN ? IN ('safe','approved') THEN CURRENT_TIMESTAMP ELSE approved_at END, notes=COALESCE(NULLIF(?, ''), notes), updated_at=CURRENT_TIMESTAMP WHERE product_qa_bulk_fix_queue_id=?`).bind(status, Number(user.user_id || 0) || null, status, normalizeText(body.notes), queueId).run();
+    await db.prepare(`INSERT INTO product_qa_bulk_fix_approvals (product_qa_bulk_fix_queue_id, approval_status, approval_scope, approval_notes, approved_by_user_id, approved_at) VALUES (?, ?, 'preview_group', ?, ?, CURRENT_TIMESTAMP)`).bind(queueId, status, normalizeText(body.notes), Number(user.user_id || 0) || null).run();
+  } else if (action === 'apply_qa_alt_text') {
+    const queueId = Number(body.product_qa_bulk_fix_queue_id || 0);
+    const queue = await safeFirst(db, `SELECT blocker_code, approval_status FROM product_qa_bulk_fix_queue WHERE product_qa_bulk_fix_queue_id=? LIMIT 1`, [queueId], null);
+    if (!queue || lc(queue.blocker_code) !== 'missing_image_alt' || !['safe','approved'].includes(lc(queue.approval_status))) return jsonResponse({ ok: false, error: 'Only approved missing_image_alt preview groups can be auto-applied.' }, 400);
+    const items = await safeAll(db, `SELECT product_id, suggested_value FROM product_qa_bulk_fix_preview_items WHERE product_qa_bulk_fix_queue_id=? AND preview_status='needs_review' LIMIT 100`, [queueId]);
+    let applied = 0, skipped = 0, events = [];
+    for (const item of items) {
+      const product = await safeFirst(db, `SELECT name FROM products WHERE product_id=? LIMIT 1`, [item.product_id], {});
+      const alt = normalizeText(item.suggested_value || `${product?.name || 'Devil n Dove product'} handmade item photo`).slice(0, 180);
+      const result = await db.prepare(`UPDATE product_images SET alt_text=? WHERE product_image_id IN (SELECT product_image_id FROM product_images WHERE product_id=? AND LENGTH(TRIM(COALESCE(alt_text,''))) < 5 ORDER BY sort_order ASC LIMIT 1)`).bind(alt, Number(item.product_id || 0)).run().catch(() => null);
+      const changed = Number(result?.meta?.changes || 0);
+      if (changed) { applied += changed; events.push({ product_id: item.product_id, alt }); }
+      else skipped += 1;
+    }
+    await db.prepare(`INSERT INTO product_qa_bulk_fix_apply_events (product_qa_bulk_fix_queue_id, apply_status, applied_field, applied_count, skipped_count, event_json, approved_by_user_id, applied_by_user_id, created_at) VALUES (?, 'applied', 'product_images.alt_text', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(queueId, applied, skipped, JSON.stringify({ events }), Number(user.user_id || 0) || null, Number(user.user_id || 0) || null).run();
+    await db.prepare(`UPDATE product_qa_bulk_fix_queue SET applied_at=CURRENT_TIMESTAMP, approval_status='applied', updated_at=CURRENT_TIMESTAMP WHERE product_qa_bulk_fix_queue_id=?`).bind(queueId).run();
+  } else if (action === 'save_marketplace_rule') {
+    await db.prepare(`INSERT INTO marketplace_channel_validation_rule_edits (channel, column_key, rule_kind, is_required, severity, rule_status, edited_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(channel, column_key, rule_kind) DO UPDATE SET is_required=excluded.is_required, severity=excluded.severity, rule_status=excluded.rule_status, edited_by_user_id=excluded.edited_by_user_id, updated_at=CURRENT_TIMESTAMP`).bind(lc(body.channel || 'manual'), normalizeText(body.column_key), normalizeText(body.rule_kind || 'required_column'), Number(body.is_required || 0) ? 1 : 0, lc(body.severity || 'blocker'), lc(body.rule_status || 'active'), Number(user.user_id || 0) || null).run();
+  } else if (action === 'generate_recall_customer_previews') {
+    const batches = await safeAll(db, `SELECT DISTINCT batch_number FROM candle_soap_batch_recalls UNION SELECT DISTINCT batch_number FROM candle_soap_recall_notification_queue`);
+    for (const b of batches) {
+      const batch = normalizeText(b.batch_number); if (!batch) continue;
+      const matches = await safeAll(db, `SELECT DISTINCT p.product_id, o.order_id, o.customer_email, o.customer_name FROM products p LEFT JOIN order_items oi ON oi.product_id=p.product_id LEFT JOIN orders o ON o.order_id=oi.order_id WHERE COALESCE(p.batch_number,'')=? AND COALESCE(o.customer_email,'')!='' LIMIT 100`, [batch]);
+      for (const m of matches) await db.prepare(`INSERT INTO recall_customer_match_previews (batch_number, product_id, order_id, customer_email, customer_name, match_source, preview_status, notification_subject, notification_body, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'order_product_batch', 'needs_review', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(batch, m.product_id || null, m.order_id || null, m.customer_email || '', m.customer_name || '', `Important notice about Devil n Dove batch ${batch}`, `We are reviewing a product batch connected to your order. Please contact us before using or gifting this item while we complete the review.`, Number(user.user_id || 0) || null).run().catch(() => null);
+    }
+  } else if (action === 'run_r2_signed_download_test') {
+    const bucket = context.env.ACCOUNTING_EVIDENCE_BUCKET || context.env.PRIVATE_EVIDENCE_BUCKET || context.env.R2_BUCKET || null;
+    let createStatus = 'not_configured', getStatus = 'not_configured', deleteStatus = 'not_configured', notes = 'No private R2 bucket binding was configured.', bytes = 0;
+    const objectKey = `health-tests/build-177-${Date.now()}.txt`;
+    if (bucket?.put && bucket?.get && bucket?.delete) {
+      const bodyText = `Devil n Dove R2 signed-download health test ${new Date().toISOString()}
+`;
+      bytes = new TextEncoder().encode(bodyText).length;
+      try { await bucket.put(objectKey, bodyText, { httpMetadata: { contentType: 'text/plain' } }); createStatus = 'passed'; } catch (e) { createStatus = 'failed'; notes = e.message || notes; }
+      try { const obj = await bucket.get(objectKey); getStatus = obj ? 'passed' : 'failed'; } catch (e) { getStatus = 'failed'; notes = e.message || notes; }
+      try { await bucket.delete(objectKey); deleteStatus = 'passed'; } catch (e) { deleteStatus = 'failed'; notes = e.message || notes; }
+      if (createStatus === 'passed' && getStatus === 'passed' && deleteStatus === 'passed') notes = 'R2 create/get/delete private evidence health test passed.';
+    }
+    await db.prepare(`INSERT INTO r2_signed_download_health_tests (test_kind, bucket_label, object_key, create_status, get_status, delete_status, bytes_tested, notes, checked_by_user_id, checked_at) VALUES ('create_get_delete', ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(bucket ? 'private_evidence_bucket' : 'missing_bucket', objectKey, createStatus, getStatus, deleteStatus, bytes, notes, Number(user.user_id || 0) || null).run();
+  } else if (action === 'seed_local_business_injection_targets') {
+    for (const page of ['/', '/handmade-jewelry-ontario/', '/custom-gifts-southern-ontario/', '/laser-engraving-ontario/', '/custom-candles-ontario/', '/custom-soap-ontario/']) await db.prepare(`INSERT INTO local_business_schema_injection_targets (page_path, injection_status, schema_source, notes, created_by_user_id, created_at, updated_at) VALUES (?, 'queued', 'data/site/local-business-schema.json', 'Queued for static JSON-LD bake injection.', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(page_path) DO UPDATE SET injection_status='queued', updated_at=CURRENT_TIMESTAMP`).bind(page, Number(user.user_id || 0) || null).run();
+  } else if (action === 'approve_internal_links') {
+    const links = await safeAll(db, `SELECT source_path, target_path, suggested_anchor, reason FROM local_seo_internal_link_suggestions WHERE suggestion_status='needs_review' ORDER BY score DESC LIMIT 50`);
+    for (const link of links) {
+      await db.prepare(`INSERT INTO local_seo_bake_actions (page_path, internal_link_notes, action_status, created_by_user_id, created_at, updated_at) VALUES (?, ?, 'queued', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(link.source_path, `Add link to ${link.target_path} using anchor "${link.suggested_anchor}". Reason: ${link.reason || 'local SEO relevance'}`, Number(user.user_id || 0) || null).run().catch(() => null);
+      await db.prepare(`UPDATE local_seo_internal_link_suggestions SET suggestion_status='approved', updated_at=CURRENT_TIMESTAMP WHERE source_path=? AND target_path=? AND suggested_anchor=?`).bind(link.source_path, link.target_path, link.suggested_anchor).run().catch(() => null);
+    }
+  } else if (action === 'create_dashboard_cards') {
+    const latestManifest = await safeFirst(db, `SELECT release_manifest_live_diff_id, diff_status, missing_file_count, changed_file_count FROM release_manifest_live_diffs ORDER BY checked_at DESC LIMIT 1`, [], {});
+    const openLocks = await safeFirst(db, `SELECT COUNT(*) AS count FROM recall_notification_locks WHERE lock_status!='release_allowed'`, [], {});
+    const latestScore = await safeFirst(db, `SELECT score, score_status FROM deployment_readiness_scores ORDER BY scored_at DESC LIMIT 1`, [], {});
+    const cards = [];
+    if (latestManifest?.release_manifest_live_diff_id) cards.push(['release', latestManifest.release_manifest_live_diff_id, 'Manifest diff needs review', `${latestManifest.missing_file_count || 0} missing and ${latestManifest.changed_file_count || 0} changed file(s).`, latestManifest.diff_status === 'passed' ? 'info' : 'warn', '/admin/release-control/']);
+    if (Number(openLocks?.count || 0)) cards.push(['recall', 0, 'Recall notices locked', `${openLocks.count} recall lock row(s) require compliance approval.`, 'warn', '/admin/release-control/#recall-locks']);
+    if (latestScore?.score_status) cards.push(['readiness', 0, 'Deploy readiness score', `Latest release score is ${latestScore.score || 0}/100 (${latestScore.score_status}).`, latestScore.score_status === 'ready' ? 'info' : 'warn', '/admin/release-control/']);
+    for (const card of cards) await db.prepare(`INSERT INTO dashboard_notification_cards (source_kind, source_id, card_title, card_body, severity, destination_page, card_status, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'open', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(...card, Number(user.user_id || 0) || null).run();
+  } else if (action === 'calculate_deploy_readiness') {
+    await calculateReadinessScore(db, normalizeText(body.build_label || BUILD_LABEL), Number(user.user_id || 0) || null);
   } else {
     return jsonResponse({ ok: false, error: 'Unknown action.' }, 400);
   }
