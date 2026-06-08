@@ -1,13 +1,13 @@
 {
-  "build_label": "Build 176",
+  "build_label": "Build 177",
   "generated_by": "scripts/generate_release_manifest.py",
-  "file_count": 431,
-  "total_size_bytes": 6981175,
+  "file_count": 432,
+  "total_size_bytes": 7067380,
   "files": [
     {
       "path": "AI_CONTEXT.md",
-      "size_bytes": 55046,
-      "sha256": "94fecf10519a501c1522977bbe9b80b8977403674f259811d3a32d7fb10ddb07"
+      "size_bytes": 55467,
+      "sha256": "086fc9745e4e3f2d558a99608f77bbcd8d044c85931a50b89519e334aa51ff56"
     },
     {
       "path": "AMAZON_MATCHING_NOTES.md",
@@ -21,48 +21,48 @@
     },
     {
       "path": "DATABASE_SCHEMA_REFERENCE.md",
-      "size_bytes": 66130,
-      "sha256": "f7102ed284df3d3a8eb34934d2729df2e94ffd3417f7b2f0f52ffe5b2bae56dd"
+      "size_bytes": 67216,
+      "sha256": "fe049664a9cb43731fc2e4b8c87158a5c60fac6136fef4966b217c671aaa3e1f"
     },
     {
       "path": "DEVELOPMENT_ROADMAP.md",
-      "size_bytes": 145868,
-      "sha256": "340e4f39bab6ead6e06f98fe516431eeb627d1f9622971fc103294b08a4a1051"
+      "size_bytes": 150316,
+      "sha256": "81fc91b71886d03b3d94045c2f58a93fabe83867f33a5ded4ac48f21048e2296"
     },
     {
       "path": "IMAGES.md",
-      "size_bytes": 43775,
-      "sha256": "a3b256b240516b6203a8559a9912af947586c687c0219848ca1f43c7ebeacd97"
+      "size_bytes": 44102,
+      "sha256": "79bc0e68626f703813b9efa8cec4ed948a0e77f6935d31d8bc36b2b91f424abb"
     },
     {
       "path": "KNOWN_GAPS_AND_RISKS.md",
-      "size_bytes": 91653,
-      "sha256": "7e4425f96344bdcd995aed2dca413334db94ffcd7ca4e325e5aa78c9249bd1bc"
+      "size_bytes": 94625,
+      "sha256": "f2ecf60ef17cd64f72c04516a38ea17f3b1868fc86d37033392c4d82af3e9189"
     },
     {
       "path": "LOCAL_SEO_PLAYBOOK.md",
-      "size_bytes": 51214,
-      "sha256": "3fe439b693733d63bc3e5b003d41744954ffd72751b35cbbef672253a81b6e23"
+      "size_bytes": 51762,
+      "sha256": "3e4dcdf35763b04b291aa5274bb6b3cb8fe0c071c40c99f45c2a20286fcd3556"
     },
     {
       "path": "NEW_CHAT_STATUS.md",
-      "size_bytes": 60561,
-      "sha256": "24405be1bee4e3d8e5515153e4aefb30a4456aececc5da20914269b0597cbba9"
+      "size_bytes": 60982,
+      "sha256": "e922e6247c816dda631871b6491d362b93bbe984f4de4745efc91cf2006dda4b"
     },
     {
       "path": "POST_DEPLOY_SMOKE_TEST.md",
-      "size_bytes": 8180,
-      "sha256": "2a0533d01d88a929c5350115dd11d15ad1dfc4f7ba39de468a8fcca84da80200"
+      "size_bytes": 8910,
+      "sha256": "340a71c74b7efca8d03a6aaca037782e31a39dc99e3f5cdd2890c82c0d8cd49a"
     },
     {
       "path": "README.md",
-      "size_bytes": 58562,
-      "sha256": "e9167db955480d6f62575167b9ba6962d1534a3477de68c238add7929e336286"
+      "size_bytes": 58983,
+      "sha256": "ca8adf9f057c9db8010d361adb0b773cd5c45f9eac13304ac0d0385a4d102214"
     },
     {
       "path": "RELEASE_NOTES.md",
-      "size_bytes": 6904,
-      "sha256": "13c7f1e5d6be8861260627bdc15c2c62e3a5a8b10377ead1eff8b9c73105d9db"
+      "size_bytes": 9469,
+      "sha256": "93ecfbe20e4b6a5eaa3a346e29676eb1565f7055ced241a8c096dc747fc8711d"
     },
     {
       "path": "REPO_BASE_GUIDE.md",
@@ -76,8 +76,8 @@
     },
     {
       "path": "SANITY_HEALTH_CHECK.md",
-      "size_bytes": 64468,
-      "sha256": "ca29f81968d817da069871f2560a68076e051bfeb0099b9ee16ffee3f88fc7fd"
+      "size_bytes": 65133,
+      "sha256": "e9ae051f4bfbe421a170071bdff31dd7040c343eba0aaddaf40ad22c94c38c87"
     },
     {
       "path": "admin/accounting/index.html",
@@ -231,8 +231,8 @@
     },
     {
       "path": "css/styles.css",
-      "size_bytes": 91383,
-      "sha256": "eb9836e5c65e1b7855b75a67ab2d4e84fa887470d14aa212c72a10c9c76701ae"
+      "size_bytes": 91970,
+      "sha256": "534bddfab2765973e075df94547a3934258e0241ee1e937832414e31c5aff711"
     },
     {
       "path": "data/accounting_templates/README.md",
@@ -246,8 +246,8 @@
     },
     {
       "path": "data/site/deployment-preflight.json",
-      "size_bytes": 6214,
-      "sha256": "ebdffd56ea3f6f0dbfc2dd93b336c13c3d091fed729db1fa7c4253f98b09c0ed"
+      "size_bytes": 6218,
+      "sha256": "c8ddf4c40cf4969efcac093133112ce8964230bd51450b94e4b021d69a4db1ca"
     },
     {
       "path": "data/site/featured-items.json",
@@ -271,8 +271,8 @@
     },
     {
       "path": "data/site/release-notes.json",
-      "size_bytes": 7113,
-      "sha256": "a94be4b6b82b6e8ec007cc33dfcffdd4e5aa47af9e333dde1005a27a8e39309f"
+      "size_bytes": 4514,
+      "sha256": "86977b75192a75c80a9846a73041c410830ac40587a6df4a3a470d83854e63e1"
     },
     {
       "path": "data/site/seo-page-overrides.json",
@@ -325,9 +325,14 @@
       "sha256": "fcb7501ae3917c3c53ce93ea284feeadfa74901fd638e465a2666bec428d36fc"
     },
     {
+      "path": "database_build177_deploy_score_and_controls.sql",
+      "size_bytes": 7912,
+      "sha256": "adf0bc03d7a9324b999048314cbe9c8f993000f58071a35ef147975d17dc6af6"
+    },
+    {
       "path": "database_full_schema.sql",
-      "size_bytes": 179504,
-      "sha256": "1c2664b0483adc9b46820fc87172b084c0955280661d6f42b04bcb4e44bc63ce"
+      "size_bytes": 187418,
+      "sha256": "57e865a76a3237bad02b87287a874225591fc0311f3d1b8ededa5bdd307b4c89"
     },
     {
       "path": "database_growth_analytics_seo_extension.sql",
@@ -351,18 +356,18 @@
     },
     {
       "path": "database_schema.sql",
-      "size_bytes": 130985,
-      "sha256": "190e92ca61fc56696b515b28ebad0f6d60c1766c9a11c5a590f29643946b6548"
+      "size_bytes": 138899,
+      "sha256": "559501bfa9b04c14a6f0685899ee2687441fe18f0609ee370f463d05dc2cab9e"
     },
     {
       "path": "database_store_schema.sql",
-      "size_bytes": 148229,
-      "sha256": "403963bd0d3b7f707b3c3678c682e8c55a7e05ccffd703ef74b7c6b90e1fed6e"
+      "size_bytes": 156143,
+      "sha256": "42e3031288bf5970a9ec3608bacabf2940ab5faca03b14c4afdffcad6754504a"
     },
     {
       "path": "database_upgrade_current_pass.sql",
-      "size_bytes": 129736,
-      "sha256": "b62a3704e49fef9e32d7cbdab3c16e7d7a1b813cce480083ae6e71f65d3ab332"
+      "size_bytes": 137650,
+      "sha256": "3b2a74a547c48311e78745de350402f8536c5f32d9dae6f8f9a7fa5c848914d9"
     },
     {
       "path": "functions/api/_communityContent.js",
@@ -646,8 +651,8 @@
     },
     {
       "path": "functions/api/admin/candle-soap-recall-notifications.js",
-      "size_bytes": 2809,
-      "sha256": "79d33eed36a796858e72a8178506a0f8db2ebfab1ee6b85edda410bacc4c7d2b"
+      "size_bytes": 3748,
+      "sha256": "9eee46136ca38b2778f8423631969f739ff5ad5569415bb6fb4b9515e23f8641"
     },
     {
       "path": "functions/api/admin/candle-soap-recalls.js",
@@ -716,8 +721,8 @@
     },
     {
       "path": "functions/api/admin/dashboard-summary.js",
-      "size_bytes": 10132,
-      "sha256": "b788d028bd141a7641e0fd66d85bce5d9cb7c4dbfc5b5bf353da12a069716175"
+      "size_bytes": 10453,
+      "sha256": "ab3098c30be837fa7cb5c844dfc102c5a16e2e43b94b964e0ae11d872d17c474"
     },
     {
       "path": "functions/api/admin/db-sanity.js",
@@ -1036,8 +1041,8 @@
     },
     {
       "path": "functions/api/admin/release-control.js",
-      "size_bytes": 40520,
-      "sha256": "bb8263343b7368978252abbf2b608dba3c7e6a12bffe9ad7f971d806ea7bb567"
+      "size_bytes": 65515,
+      "sha256": "d9d68d250be3bfe54784f9544bc756f6539820f505fd31bf79440b40625b3173"
     },
     {
       "path": "functions/api/admin/release-notes.js",
@@ -1066,8 +1071,8 @@
     },
     {
       "path": "functions/api/admin/safe-deploy-package.js",
-      "size_bytes": 10010,
-      "sha256": "9d3cafaffdcf16e411022e41a76f1a95cd94ef90587c7c8c8e6164ad885ed8bd"
+      "size_bytes": 10403,
+      "sha256": "700aefeb8ebebc75cfd81d578b2f6c3b10e0320722a4527098d482b2e8ee7297"
     },
     {
       "path": "functions/api/admin/schema-drift-report.js",
@@ -1611,8 +1616,8 @@
     },
     {
       "path": "public/js/admin-dashboard-preflight-badge.js",
-      "size_bytes": 1455,
-      "sha256": "6a39792b482f5d28033bfd67b0067dacfb541216f9e305eca65197cd51daadab"
+      "size_bytes": 2203,
+      "sha256": "680bbb37fd889a85eb5828f1db32058a929d86a29dacffdf8f341643573a4b9e"
     },
     {
       "path": "public/js/admin-dashboard-smoke-badges.js",
@@ -1826,8 +1831,8 @@
     },
     {
       "path": "public/js/admin-release-control.js",
-      "size_bytes": 11203,
-      "sha256": "4d96d2489eb18fa4c41f47ed6ede5f154ba4b5b0676a7a3d4246b01539dc84d7"
+      "size_bytes": 17848,
+      "sha256": "d7f9f8748b0fa94b1ee87a027cf38da89039a5515c0c9e60b8df84e3651ec845"
     },
     {
       "path": "public/js/admin-release-notes.js",

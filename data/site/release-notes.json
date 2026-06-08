@@ -1,133 +1,76 @@
 {
-  "build_label": "Build 174 preflight detail, schema diff, and release manifest",
+  "build_label": "Build 177 deploy score, exact manifest diff, QA approvals, and JSON-LD bake",
   "summary": [
-    "Added richer Deployment Preflight detail drawers for public SEO, canonical, schema.org, image-alt, fallback, migration, schema, R2, duplicate ownership, and relationship-integrity checks.",
-    "Added Markdown export for Deployment Preflight support handoff.",
-    "Added post-deploy confirmation workflow rows so admins can mark D1 migration, preflight, public-page review, smoke-test, release-note, and R2/email checks complete.",
-    "Added generated release package manifest support with SHA-256 hashes.",
-    "Added a desktop admin dashboard badge for latest Deployment Preflight status.",
-    "Updated D1 schema files, migration ledger expectations, DB sanity, schema drift, safe deploy package, release notes, sanity notes, roadmap, and known gaps."
+    "Added deploy-readiness score records across preflight, manifest, smoke-test, rollback, and D1 migration marker state.",
+    "Added Cloudflare Pages deployment import when a scoped API token and project bindings are configured, with safe not-configured fallbacks.",
+    "Added exact manifest diff item rows for missing, changed, and extra file paths.",
+    "Added Product QA preview approval controls and the first low-risk image-alt apply action with event logging.",
+    "Added marketplace validation rule editor rows, recall customer preview rows, R2 private evidence health-test rows, accounting checksum link rows, and dashboard notification cards.",
+    "Baked managed LocalBusiness JSON-LD into key public/local landing pages without adding extra H1 headings.",
+    "Updated Markdown handoff files, schema references, schema SQL files, safe deploy metadata, preflight checks, and release package manifest."
   ],
   "changed_files": [
-    "AMAZON_MATCHING_NOTES.md",
-    "COMPETITIVE.md",
+    "DEVELOPMENT_ROADMAP.md",
+    "KNOWN_GAPS_AND_RISKS.md",
+    "DATABASE_SCHEMA_REFERENCE.md",
+    "RELEASE_NOTES.md",
+    "SANITY_HEALTH_CHECK.md",
+    "POST_DEPLOY_SMOKE_TEST.md",
     "LOCAL_SEO_PLAYBOOK.md",
     "IMAGES.md",
     "README.md",
-    "AI_CONTEXT.md",
-    "DATABASE_SCHEMA_REFERENCE.md",
-    "DEVELOPMENT_ROADMAP.md",
-    "KNOWN_GAPS_AND_RISKS.md",
     "NEW_CHAT_STATUS.md",
-    "POST_DEPLOY_SMOKE_TEST.md",
-    "RELEASE_NOTES.md",
-    "SANITY_HEALTH_CHECK.md",
-    "admin/deployment-preflight/index.html",
-    "admin/index.html",
+    "AI_CONTEXT.md",
+    "admin/release-control/index.html",
+    "css/styles.css",
     "data/site/deployment-preflight.json",
     "data/site/release-notes.json",
     "data/site/release-package-manifest.json",
-    "database_build174_deployment_preflight_detail.sql",
+    "database_build177_deploy_score_and_controls.sql",
     "database_full_schema.sql",
     "database_schema.sql",
     "database_store_schema.sql",
     "database_upgrade_current_pass.sql",
-    "functions/api/admin/db-sanity.js",
-    "functions/api/admin/deployment-preflight.js",
-    "functions/api/admin/migration-ledger.js",
+    "functions/api/admin/candle-soap-recall-notifications.js",
+    "functions/api/admin/dashboard-summary.js",
+    "functions/api/admin/release-control.js",
     "functions/api/admin/safe-deploy-package.js",
-    "functions/api/admin/schema-drift-report.js",
     "public/js/admin-dashboard-preflight-badge.js",
-    "public/js/admin-deployment-preflight.js",
-    "public/js/admin-safe-deploy-package.js",
+    "public/js/admin-release-control.js",
+    "scripts/bake_localbusiness_jsonld.py",
     "scripts/deployment_preflight_static_check.py",
+    "scripts/final_deployment_blocker_check.py",
     "scripts/generate_release_manifest.py",
-    "scripts/generate_release_notes.py",
-    "scripts/regenerate_sanity_from_preflight.py"
+    "index.html",
+    "handmade-jewelry-ontario/index.html",
+    "custom-gifts-southern-ontario/index.html",
+    "laser-engraving-ontario/index.html",
+    "custom-candle-making-ontario/index.html",
+    "custom-soap-making-ontario/index.html",
+    "polymer-clay-earrings-ontario/index.html",
+    "vintage-finds-ontario/index.html",
+    "workshop-made-gifts-ontario/index.html"
   ],
   "d1_migrations": [
-    "New additive migration file: database_build174_deployment_preflight_detail.sql.",
-    "Creates deployment_post_deploy_confirmations for visible post-deploy checklist confirmations.",
-    "Records build_174_preflight_detail_manifest in schema_migration_ledger with file_name populated.",
+    "New additive migration file: database_build177_deploy_score_and_controls.sql.",
+    "Creates deployment_readiness_scores, release_manifest_diff_items, product_qa_bulk_fix_approvals, marketplace_channel_validation_rule_edits, recall_customer_match_previews, r2_signed_download_health_tests, accounting_zip_checksum_links, local_business_schema_injection_targets, and dashboard_notification_cards.",
+    "Records build_177_deploy_score_and_controls in schema_migration_ledger with file_name populated.",
     "No destructive schema changes."
   ],
   "post_deploy_actions": [
-    "Run database_build171_ledger_repair.sql only if Build 171 schema exists but the ledger marker is missing.",
-    "Run database_build173_deployment_preflight.sql, then database_build174_deployment_preflight_detail.sql.",
-    "Open /admin/deployment-preflight/, run Preflight, export Markdown if warnings remain, and save a snapshot.",
-    "Run /admin/post-deploy-smoke-tests/ and then mark post-deploy confirmation rows complete.",
-    "Review /admin/safe-deploy-package/ and data/site/release-package-manifest.json before promoting live."
+    "Run database_build171_ledger_repair.sql only if Build 171 schema exists but the marker is missing.",
+    "Run database_build173_deployment_preflight.sql, database_build174_deployment_preflight_detail.sql, database_build175_release_control.sql, database_build176_release_safety_controls.sql, and database_build177_deploy_score_and_controls.sql.",
+    "Open /admin/deployment-preflight/ and run Preflight.",
+    "Open /admin/release-control/, run live manifest compare, import Cloudflare deployments if configured, refresh recall locks, generate recall customer previews, and calculate deploy score.",
+    "Open /admin/safe-deploy-package/ and download the Build 177 Safe Deploy ZIP.",
+    "Run /admin/post-deploy-smoke-tests/ and recalculate deploy score before promotion."
   ],
   "validation": [
-    "Static deployment preflight regenerated data/site/deployment-preflight.json.",
-    "Release package manifest generated with SHA-256 hashes.",
-    "JavaScript syntax checks passed for changed admin/public/function files.",
-    "CSS brace balance and one-H1/title/meta checks are included in final validation."
-  ],
-  "releases": [
-    {
-      "build_label": "Build 175",
-      "title": "Build 175 release control, deeper preflight, and local business schema",
-      "date": "2026-06-06",
-      "summary": [
-        "Added release-control admin page and API for deployment history, manifest comparison, screenshot evidence jobs, mobile saved views, safe deploy records, and LocalBusiness schema preview.",
-        "Expanded Deployment Preflight with response-body keyword checks, collection/category page checks, sample product URL checks, Search Console/internal-link visibility, Product QA bulk queue, R2 signed/private tests, accountant checksum rows, gift-card webhooks, marketplace validation/diff rows, recall compliance, mobile views, and runtime incident linking.",
-        "Added additive Build 175 D1 migration and updated schema files, release docs, sanity notes, and safe deploy package guidance."
-      ],
-      "changed_files": [
-        "admin/release-control/index.html",
-        "public/js/admin-release-control.js",
-        "functions/api/admin/release-control.js",
-        "functions/api/admin/deployment-preflight.js",
-        "database_build175_release_control.sql",
-        "data/site/local-business-schema.json",
-        "scripts/deployment_preflight_static_check.py"
-      ]
-    }
-  ],
-  "notes": [
-    {
-      "build_label": "Build 176",
-      "title": "Safe deploy ZIP, live manifest diff, QA previews, recall locks, and local SEO controls",
-      "summary": "Adds binary-safe safe deploy ZIP support, manifest diff records, QA preview items, marketplace validation previews, recall notification locks, local SEO suggestion/trend tables, richer LocalBusiness schema bake tracking, rollback checklist rows, and Release Control actions.",
-      "schema_files": [
-        "database_build176_release_safety_controls.sql"
-      ],
-      "post_deploy": [
-        "Run database_build176_release_safety_controls.sql after Build 175.",
-        "Open /admin/release-control/ and run Live Manifest Compare.",
-        "Download /api/admin/safe-deploy-package?format=zip.",
-        "Refresh recall locks before sending recall notifications."
-      ],
-      "changed_areas": [
-        "release-control",
-        "safe-deploy",
-        "deployment-preflight",
-        "local-seo",
-        "product-qa",
-        "marketplace",
-        "recalls",
-        "schema"
-      ]
-    },
-    {
-      "build_label": "Build 175",
-      "title": "Build 175 release control, deeper preflight, and local business schema",
-      "date": "2026-06-06",
-      "summary": [
-        "Added release-control admin page and API for deployment history, manifest comparison, screenshot evidence jobs, mobile saved views, safe deploy records, and LocalBusiness schema preview.",
-        "Expanded Deployment Preflight with response-body keyword checks, collection/category page checks, sample product URL checks, Search Console/internal-link visibility, Product QA bulk queue, R2 signed/private tests, accountant checksum rows, gift-card webhooks, marketplace validation/diff rows, recall compliance, mobile views, and runtime incident linking.",
-        "Added additive Build 175 D1 migration and updated schema files, release docs, sanity notes, and safe deploy package guidance."
-      ],
-      "changed_files": [
-        "admin/release-control/index.html",
-        "public/js/admin-release-control.js",
-        "functions/api/admin/release-control.js",
-        "functions/api/admin/deployment-preflight.js",
-        "database_build175_release_control.sql",
-        "data/site/local-business-schema.json",
-        "scripts/deployment_preflight_static_check.py"
-      ]
-    }
+    "Static deployment preflight regenerated data/site/deployment-preflight.json with zero blockers and zero warnings.",
+    "LocalBusiness JSON-LD bake script completed for homepage and key local landing pages.",
+    "JavaScript syntax checks passed for changed function and public JS files.",
+    "Python scripts compiled successfully.",
+    "Build 175, Build 176, and Build 177 migration smoke test passed in SQLite.",
+    "CSS brace balance, one-H1 checks, JSON validation, and zip integrity checks passed."
   ]
 }

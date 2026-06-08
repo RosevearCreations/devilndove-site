@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 176",
+  "build_label": "Build 177",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,13 +7,13 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "15 required files are present.",
+      "detail": "16 required files are present.",
       "missing": []
     },
     {
-      "code": "static_schema_build176",
+      "code": "static_schema_build177",
       "status": "pass",
-      "detail": "Build 174/175/176 schema tables and ledger markers found in the correct schema files.",
+      "detail": "Build 174/175/176/177 schema tables and ledger markers found in the correct schema files.",
       "missing": []
     },
     {
@@ -28,7 +28,7 @@
           "title_length": 59,
           "meta_description_length": 157,
           "has_canonical": true,
-          "schema_blocks": 2,
+          "schema_blocks": 3,
           "image_count": 1,
           "missing_alt_count": 0,
           "missing_terms": [],
@@ -80,7 +80,7 @@
           "title_length": 51,
           "meta_description_length": 163,
           "has_canonical": true,
-          "schema_blocks": 1,
+          "schema_blocks": 2,
           "image_count": 0,
           "missing_alt_count": 0,
           "missing_terms": [],
@@ -93,7 +93,7 @@
           "title_length": 47,
           "meta_description_length": 129,
           "has_canonical": true,
-          "schema_blocks": 1,
+          "schema_blocks": 2,
           "image_count": 0,
           "missing_alt_count": 0,
           "missing_terms": [],
@@ -106,7 +106,7 @@
           "title_length": 47,
           "meta_description_length": 157,
           "has_canonical": true,
-          "schema_blocks": 1,
+          "schema_blocks": 2,
           "image_count": 0,
           "missing_alt_count": 0,
           "missing_terms": [],
@@ -119,7 +119,7 @@
           "title_length": 50,
           "meta_description_length": 128,
           "has_canonical": true,
-          "schema_blocks": 1,
+          "schema_blocks": 2,
           "image_count": 0,
           "missing_alt_count": 0,
           "missing_terms": [],
@@ -132,7 +132,7 @@
           "title_length": 55,
           "meta_description_length": 166,
           "has_canonical": true,
-          "schema_blocks": 0,
+          "schema_blocks": 1,
           "image_count": 1,
           "missing_alt_count": 0,
           "missing_terms": [],
@@ -145,7 +145,7 @@
           "title_length": 53,
           "meta_description_length": 156,
           "has_canonical": true,
-          "schema_blocks": 0,
+          "schema_blocks": 1,
           "image_count": 1,
           "missing_alt_count": 0,
           "missing_terms": [],
@@ -158,7 +158,7 @@
           "title_length": 52,
           "meta_description_length": 128,
           "has_canonical": true,
-          "schema_blocks": 1,
+          "schema_blocks": 2,
           "image_count": 0,
           "missing_alt_count": 0,
           "missing_terms": [],
@@ -171,7 +171,7 @@
           "title_length": 45,
           "meta_description_length": 152,
           "has_canonical": true,
-          "schema_blocks": 1,
+          "schema_blocks": 2,
           "image_count": 0,
           "missing_alt_count": 0,
           "missing_terms": [],
@@ -182,7 +182,7 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 940/940"
+      "detail": "CSS braces 946/946"
     },
     {
       "code": "static_json_parse",

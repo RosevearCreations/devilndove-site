@@ -1092,3 +1092,22 @@ body.nav-mobile-open{overflow:hidden}
 .admin-table th,
 .admin-table td { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 9px 8px; text-align: left; vertical-align: top; }
 .admin-table th { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
+
+/* Build 177 release-control helper forms and compact safety rows */
+.inline-form{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem;
+  align-items:center;
+  margin:.75rem 0 1rem;
+}
+.inline-form input,.inline-form select{
+  min-width:160px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:12px;
+  padding:.62rem .75rem;
+  background:rgba(255,255,255,.07);
+  color:inherit;
+}
+.inline-form .btn.small{padding:.55rem .75rem;font-size:.9rem}
+@media (max-width:640px){.inline-form{align-items:stretch}.inline-form input,.inline-form select,.inline-form button{width:100%;min-width:0}}
