@@ -23,6 +23,7 @@ async function ensureSchema(db) {
     `ALTER TABLE marketplace_export_history ADD COLUMN rollback_note TEXT`
   ]) await db.prepare(sql).run().catch(() => null);
   await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_export_replay_events (marketplace_export_replay_event_id INTEGER PRIMARY KEY AUTOINCREMENT, channel TEXT NOT NULL, source_history_id INTEGER, action_kind TEXT NOT NULL DEFAULT 'replay', affected_count INTEGER NOT NULL DEFAULT 0, notes TEXT, created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_export_row_validation_results (marketplace_export_row_validation_result_id INTEGER PRIMARY KEY AUTOINCREMENT, channel TEXT NOT NULL, product_id INTEGER, validation_status TEXT NOT NULL DEFAULT 'needs_review', blocker_count INTEGER NOT NULL DEFAULT 0, warning_count INTEGER NOT NULL DEFAULT 0, missing_fields_json TEXT NOT NULL DEFAULT '[]', row_payload_json TEXT NOT NULL DEFAULT '{}', created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run().catch(() => null);
 }
 function issuesFor(product, imgs, channel, selectedUrls = []) {
   const rule = RULES[channel] || RULES.manual;
@@ -80,6 +81,25 @@ async function buildPreview(db, channel) {
     return { product_id: id, name: product.name || '', slug: product.slug || '', sku: product.sku || '', channel, ok: validated.issues.length === 0, image_count: imgs.length, public_ready_images: validated.publicImgs.length, available_images: validated.publicImgs.map((img) => ({ product_image_id: Number(img.product_image_id || 0), image_url: img.image_url || '', alt_text: img.alt_text || '', image_role: img.image_role || '', width_px: Number(img.width_px || 0), height_px: Number(img.height_px || 0) })).slice(0, 20), selected_image_urls: validated.selectedPublicImgs.map((img) => img.image_url), export_image_urls: validated.selectedPublicImgs.map((img) => img.image_url), tags: validated.tags.slice(0, 13), price_cents: Number(product.price_cents || 0), currency: product.currency || 'CAD', category: product.product_category || '', description: product.description || product.short_description || '', issues: validated.issues, selection_notes: selected.notes || '', selection_saved_at: selected.updated_at || '', field_preview: preview, required_fields: RULES[channel].fields };
   });
 }
+
+function validatePreviewRows(previews, channel) {
+  const required = (RULES[channel]?.fields || []).filter((field) => !/^image_\d+$/.test(field) || ['image_1','image_2','image_3'].includes(field));
+  return previews.map((row) => {
+    const payload = row.field_preview || {};
+    const missing = required.filter((field) => {
+      if (field === 'quantity') return false;
+      if (field === 'materials') return false;
+      if (field === 'condition') return false;
+      if (field === 'board') return false;
+      if (field === 'notes') return false;
+      const value = payload[field];
+      return Array.isArray(value) ? value.length === 0 : !String(value || '').trim();
+    });
+    const blockers = missing.length + (row.ok ? 0 : Math.max(1, (row.issues || []).length));
+    return { product_id: row.product_id, channel, validation_status: blockers ? 'blocked' : 'passed', blocker_count: blockers, warning_count: row.ok ? 0 : (row.issues || []).length, missing_fields: missing, row_payload: payload };
+  });
+}
+
 function urlsOf(row) { return Array.isArray(row.selected_image_urls) ? row.selected_image_urls : (Array.isArray(row.export_image_urls) ? row.export_image_urls : []); }
 function marketplaceSnapshotDiff(currentRows, snapshotRows) {
   const current = new Map((currentRows || []).map((row) => [Number(row.product_id || 0), urlsOf(row)]));
@@ -141,6 +161,13 @@ export async function onRequestPost(context) {
   const action = clean(body.action || 'save_selection', 80);
   const productId = Number(body.product_id || 0);
   if (!RULES[channel]) return json({ ok: false, error: 'Supported channels: etsy, facebook, pinterest, manual.' }, 400);
+  if (action === 'validate_export_rows') {
+    const previewRows = await buildPreview(db, channel);
+    const validations = validatePreviewRows(previewRows, channel);
+    await db.prepare(`DELETE FROM marketplace_export_row_validation_results WHERE channel = ?`).bind(channel).run().catch(() => null);
+    for (const row of validations) await db.prepare(`INSERT INTO marketplace_export_row_validation_results (channel, product_id, validation_status, blocker_count, warning_count, missing_fields_json, row_payload_json, created_by_user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(channel, row.product_id || null, row.validation_status, row.blocker_count, row.warning_count, JSON.stringify(row.missing_fields), JSON.stringify(row.row_payload), Number(adminUser.user_id || 0) || null).run().catch(() => null);
+    return json({ ok: true, message: `Validated ${validations.length} ${channel} export row(s).`, channel, summary: { total: validations.length, blocked: validations.filter((row) => row.validation_status === 'blocked').length, passed: validations.filter((row) => row.validation_status === 'passed').length }, validations });
+  }
   if (action === 'bulk_apply_role_order') {
     const previewRows = await buildPreview(db, channel);
     let saved = 0;

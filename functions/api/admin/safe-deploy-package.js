@@ -3,7 +3,7 @@
 
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 
-const BUILD_LABEL = 'Build 177 deploy score and controls';
+const BUILD_LABEL = 'Build 178 deploy readiness and promote live controls';
 const changedFiles = [
   'DEVELOPMENT_ROADMAP.md',
   'KNOWN_GAPS_AND_RISKS.md',
@@ -18,6 +18,10 @@ const changedFiles = [
   'admin/deployment-preflight/index.html',
   'admin/index.html',
   'admin/release-control/index.html',
+  'database_build178_promote_live_controls.sql',
+  'public/js/admin-deploy-readiness.js',
+  'functions/api/admin/deploy-readiness.js',
+  'admin/deploy-readiness/index.html',
   'admin/safe-deploy-package/index.html',
   'css/styles.css',
   'data/site/deployment-preflight.json',
@@ -43,6 +47,9 @@ const changedFiles = [
   'public/js/admin-deployment-preflight.js',
   'public/js/admin-release-control.js',
   'public/js/admin-safe-deploy-package.js',
+  'data/site/build178-release-controls.json',
+  'public/js/admin-marketplace-export-preview.js',
+  'functions/api/admin/marketplace-export-preview.js',
   'scripts/deployment_preflight_static_check.py',
   'scripts/generate_release_manifest.py',
   'scripts/generate_release_notes.py',
@@ -64,7 +71,8 @@ const defaultPackageFiles = [
   'database_build174_deployment_preflight_detail.sql',
   'database_build175_release_control.sql',
   'database_build176_release_safety_controls.sql',
-  'database_build177_deploy_score_and_controls.sql'
+  'database_build177_deploy_score_and_controls.sql',
+  'database_build178_promote_live_controls.sql'
 ];
 function le16(value) { const b = new Uint8Array(2); new DataView(b.buffer).setUint16(0, value, true); return b; }
 function le32(value) { const b = new Uint8Array(4); new DataView(b.buffer).setUint32(0, value >>> 0, true); return b; }
@@ -117,7 +125,7 @@ async function buildZip(request) {
     package_kind: 'safe_deploy_zip',
     included_files: fetched.map((row) => ({ path: row.name, ok: row.ok, bytes: encoder.encode(row.text).length })),
     skipped_files: fetched.filter((row) => !row.ok).map((row) => row.name),
-    post_deploy_order: ['database_build171_ledger_repair.sql if needed only', 'database_build173_deployment_preflight.sql', 'database_build174_deployment_preflight_detail.sql', 'database_build175_release_control.sql', 'database_build176_release_safety_controls.sql', 'database_build177_deploy_score_and_controls.sql']
+    post_deploy_order: ['database_build171_ledger_repair.sql if needed only', 'database_build173_deployment_preflight.sql', 'database_build174_deployment_preflight_detail.sql', 'database_build175_release_control.sql', 'database_build176_release_safety_controls.sql', 'database_build177_deploy_score_and_controls.sql', 'database_build178_promote_live_controls.sql']
   };
   const files = [{ name: 'SAFE_DEPLOY_PACKAGE_INDEX.json', bytes: encoder.encode(JSON.stringify(index, null, 2) + '\n') }, ...fetched.map((row) => ({ name: row.name, bytes: encoder.encode(row.text) }))];
   const bytes = zipStore(files);
@@ -135,13 +143,13 @@ function packagePayload() {
   return {
     build_label: BUILD_LABEL,
     schema: [
-      'Fresh D1: run database_upgrade_current_pass.sql, then database_build173_deployment_preflight.sql, then database_build174_deployment_preflight_detail.sql, then database_build175_release_control.sql, then database_build176_release_safety_controls.sql, then database_build177_deploy_score_and_controls.sql.',
-      'Partial D1 with Build 171 tables but missing marker: run database_build171_ledger_repair.sql only, then Build 173, Build 174, Build 175, Build 176, and Build 177.',
+      'Fresh D1: run database_upgrade_current_pass.sql, then database_build173_deployment_preflight.sql, then database_build174_deployment_preflight_detail.sql, then database_build175_release_control.sql, then database_build176_release_safety_controls.sql, then database_build177_deploy_score_and_controls.sql, then database_build178_promote_live_controls.sql.',
+      'Partial D1 with Build 171 tables but missing marker: run database_build171_ledger_repair.sql only, then Build 173, Build 174, Build 175, Build 176, Build 177, and Build 178.',
       'Do not rerun ALTER TABLE-heavy SQL blocks on a database where those columns already exist.'
     ],
     sql_copy_blocks: {
-      fresh_install: ['database_upgrade_current_pass.sql', 'database_build173_deployment_preflight.sql', 'database_build174_deployment_preflight_detail.sql', 'database_build175_release_control.sql', 'database_build176_release_safety_controls.sql', 'database_build177_deploy_score_and_controls.sql'],
-      repair_only: ['database_build171_ledger_repair.sql', 'database_build173_deployment_preflight.sql', 'database_build174_deployment_preflight_detail.sql', 'database_build175_release_control.sql', 'database_build176_release_safety_controls.sql', 'database_build177_deploy_score_and_controls.sql']
+      fresh_install: ['database_upgrade_current_pass.sql', 'database_build173_deployment_preflight.sql', 'database_build174_deployment_preflight_detail.sql', 'database_build175_release_control.sql', 'database_build176_release_safety_controls.sql', 'database_build177_deploy_score_and_controls.sql', 'database_build178_promote_live_controls.sql'],
+      repair_only: ['database_build171_ledger_repair.sql', 'database_build173_deployment_preflight.sql', 'database_build174_deployment_preflight_detail.sql', 'database_build175_release_control.sql', 'database_build176_release_safety_controls.sql', 'database_build177_deploy_score_and_controls.sql', 'database_build178_promote_live_controls.sql']
     },
     changed_files: changedFiles,
     safe_deploy_zip_url: '/api/admin/safe-deploy-package?format=zip',
@@ -153,7 +161,7 @@ function packagePayload() {
       'Review Product QA bulk preview cards, approve the group, then apply only low-risk image-alt fixes.',
       'Review marketplace validation previews before generating CSV exports.',
       'Confirm recall locks are released only after a signed compliance review exists.',
-      'Calculate the deploy-readiness score, run /admin/post-deploy-smoke-tests/, and confirm dashboard/preflight badges before promotion.'
+      'Calculate the deploy-readiness score, run /admin/post-deploy-smoke-tests/, and confirm dashboard/preflight badges, then open /admin/deploy-readiness/ and pass/block the promote-live checklist before promotion.'
     ]
   };
 }
@@ -168,7 +176,7 @@ export async function onRequestGet(context) {
       status: 200,
       headers: {
         'Content-Type': 'application/zip',
-        'Content-Disposition': 'attachment; filename="devilndove-safe-deploy-build177.zip"',
+        'Content-Disposition': 'attachment; filename="devilndove-safe-deploy-build178.zip"',
         'X-Safe-Deploy-SHA256': pack.sha256,
         'Cache-Control': 'no-store'
       }

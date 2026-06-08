@@ -3,7 +3,7 @@
 
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD_LABEL = 'Build 177';
+const BUILD_LABEL = 'Build 178';
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function lc(value) { return normalizeText(value).toLowerCase(); }
 async function tableExists(db, tableName) { try { return !!(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1").bind(tableName).first()); } catch { return false; } }
