@@ -691,3 +691,8 @@ Completed in this pass:
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+## Build 178 context
+
+Current build focus: final deploy-readiness page, promote-live checklist rows, marketplace row validation, recall copy review/signature placeholders, provider/R2 verification logs, local SEO chart/map storage, LocalBusiness draft rows, structured-data hints, and mobile release cards.
+
