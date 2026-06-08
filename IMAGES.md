@@ -534,3 +534,9 @@ A CSS pass is not complete if any public section falls back to a plain white car
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+## Build 178 image and evidence notes
+
+- Deploy Readiness can track recall signature evidence placeholders and R2 signed URL verification results.
+- Dark-theme/admin evidence remains reviewed through existing evidence pages; Build 178 focuses on final readiness visibility.
+

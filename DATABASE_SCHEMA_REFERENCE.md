@@ -1010,3 +1010,17 @@ Completed in this pass:
 ## Build 172 hotfix note — D1 migration ledger
 
 The build 171 SQL marker for `schema_migration_ledger` was corrected to include the required `file_name` column. A small live repair file, `database_build171_ledger_repair.sql`, is included for databases where the schema additions already ran but the final ledger insert failed. Do not rerun the entire upgrade only to fix the marker if build 171 ALTER TABLE additions already succeeded; repeated ALTER TABLE ADD COLUMN statements can fail on existing columns in SQLite/D1.
+
+## Build 178 schema additions
+
+- `deployment_promote_live_checklist` — final required promote-live pass/block rows.
+- `deployment_readiness_drilldown_rows` — blocker-source drilldown rows for Deploy Readiness.
+- `release_manifest_diff_view_filters` — reusable path filters for manifest rows.
+- `product_qa_bulk_fix_apply_confirmations` and `product_qa_safe_apply_events` — confirmation and audit support for safe Product QA fixes.
+- `marketplace_export_row_validation_results` — real export-row payload validation storage.
+- `recall_customer_notification_copy_reviews` and `recall_compliance_signature_attachments` — recall copy/signature approval support.
+- `gift_card_webhook_signature_verification_logs` and `r2_signed_url_verification_results` — provider/R2 verification rows.
+- `local_seo_search_console_chart_points` and `internal_link_map_edges` — local SEO chart/map storage.
+- `local_business_schema_edit_drafts` and `structured_data_validation_hints` — structured-data review support.
+- `release_package_previous_zip_comparisons`, `dashboard_notification_card_snoozes`, and `mobile_release_control_cards` — deploy comparison, snooze, and phone-card support.
+

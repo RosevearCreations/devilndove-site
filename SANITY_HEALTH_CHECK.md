@@ -940,3 +940,12 @@ Completed in this pass:
 ## Build 172 hotfix note — D1 migration ledger
 
 The build 171 SQL marker for `schema_migration_ledger` was corrected to include the required `file_name` column. A small live repair file, `database_build171_ledger_repair.sql`, is included for databases where the schema additions already ran but the final ledger insert failed. Do not rerun the entire upgrade only to fix the marker if build 171 ALTER TABLE additions already succeeded; repeated ALTER TABLE ADD COLUMN statements can fail on existing columns in SQLite/D1.
+
+## Build 178 sanity notes
+
+- `/admin/deploy-readiness/` is the final promote-live review page.
+- Run Build 178 D1 migration after Build 177 and confirm the ledger marker `build_178_promote_live_controls`.
+- Keep one H1 per exposed HTML page; this pass validates the new admin page and existing public/admin pages.
+- Marketplace CSV downloads should be preceded by the real export-row validation button.
+- Recall notifications should not leave draft status until copy review and signature evidence rows are approved.
+

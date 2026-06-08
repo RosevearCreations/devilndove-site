@@ -661,3 +661,11 @@ Completed in this pass:
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+## Build 178 local SEO controls
+
+- Search Console imports can now be copied into chart-point rows for local-page mini charting.
+- Internal-link suggestions can be mirrored into `internal_link_map_edges` for a source/target map.
+- Structured-data hints now track LocalBusiness, Product, BreadcrumbList, and FAQPage review items per key page.
+- Continue using clear local wording in titles, headings, meta descriptions, and visible copy for Southern Ontario/Oxford/Norfolk searches.
+

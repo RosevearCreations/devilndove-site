@@ -1,3 +1,47 @@
+# Build 178 deploy readiness, promote-live guardrails, marketplace validation, and recall copy review
+
+## Summary
+
+- Added a dedicated `/admin/deploy-readiness/` page with score history, source drilldowns, final checklist, manifest path rows, QA confirmations, recall copy review, provider checks, LocalBusiness drafts, schema hints, and mobile release cards.
+- Added `/api/admin/deploy-readiness` for deploy-readiness summaries, final promote-live checklist seeding, drilldown rows, QA apply confirmations, recall copy review rows, signature placeholders, provider/R2 checks, local SEO visuals, LocalBusiness drafts, schema hints, and notification snoozes.
+- Added `database_build178_promote_live_controls.sql` with safe new tables only, avoiding risky repeat `ALTER TABLE ADD COLUMN` statements.
+- Added final promote-live checklist storage in `deployment_promote_live_checklist` with required/pass/block controls.
+- Added deploy-readiness drilldown rows so blockers can be grouped by preflight, manifest, smoke test, rollback, and D1 marker source.
+- Added manifest diff view filters and copy buttons so changed/missing paths are easier to inspect and hand off.
+- Added Product QA apply confirmation rows before approved groups can move toward automatic apply.
+- Added marketplace real export-row validation results and a validation button inside Marketplace Export Preview.
+- Added recall customer notification copy review rows before recall drafts are queued.
+- Added recall compliance signature evidence placeholder rows for batch-level approval support.
+- Added gift-card provider webhook verification log rows for Resend, SendGrid, and Postmark signature-review setup.
+- Added R2 signed URL verification result rows with guarded live bucket checks.
+
+## D1 migration summary
+
+Run after Build 177:
+
+1. `database_build171_ledger_repair.sql` only if Build 171 schema exists but the marker is missing.
+2. `database_build173_deployment_preflight.sql`
+3. `database_build174_deployment_preflight_detail.sql`
+4. `database_build175_release_control.sql`
+5. `database_build176_release_safety_controls.sql`
+6. `database_build177_deploy_score_and_controls.sql`
+7. `database_build178_promote_live_controls.sql`
+
+## Required post-deploy actions
+
+- Open `/admin/deployment-preflight/` and run Preflight.
+- Open `/admin/release-control/` and refresh live manifest, deploy score, R2 checks, and dashboard cards.
+- Open `/admin/deploy-readiness/`, build the promote-live checklist, refresh drilldowns, and pass/block each required row.
+- Use Marketplace Export Preview's real row validation button before downloading channel CSVs.
+- Seed recall copy reviews and signature placeholders before recall notices leave draft status.
+- Run `/admin/post-deploy-smoke-tests/`, then recalculate readiness.
+
+## Validation
+
+- JavaScript syntax checks passed for changed admin/function/public files.
+- SQL migration smoke test passed with Build 175, 176, 177, and 178 migration files.
+- One-H1, CSS brace balance, JSON validation, Python compile checks, and zip integrity checks were run.
+
 # Build 177 deploy score, exact manifest diffs, QA approvals, and JSON-LD bake
 
 ## Summary

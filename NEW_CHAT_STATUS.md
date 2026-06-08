@@ -815,3 +815,8 @@ Completed in this pass:
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+## Latest handoff — Build 178
+
+The latest build adds Deploy Readiness and Promote Live controls. Next chat should continue with Product QA confirmed apply actions, real webhook signature verification, signed URL worker route checks, LocalBusiness approve-and-bake, and dashboard snooze rendering.
+

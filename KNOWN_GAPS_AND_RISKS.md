@@ -1,3 +1,50 @@
+# Build 178 Completed Pass — Deploy Readiness Page, Promote-Live Guardrails, Marketplace Validation, Recall Copy Review, and Structured-Data Hints
+
+Completed in this pass:
+1. Added a dedicated `/admin/deploy-readiness/` page with score history, source drilldowns, final checklist, manifest path rows, QA confirmations, recall copy review, provider checks, LocalBusiness drafts, schema hints, and mobile release cards.
+2. Added `/api/admin/deploy-readiness` for deploy-readiness summaries, final promote-live checklist seeding, drilldown rows, QA apply confirmations, recall copy review rows, signature placeholders, provider/R2 checks, local SEO visuals, LocalBusiness drafts, schema hints, and notification snoozes.
+3. Added `database_build178_promote_live_controls.sql` with safe new tables only, avoiding risky repeat `ALTER TABLE ADD COLUMN` statements.
+4. Added final promote-live checklist storage in `deployment_promote_live_checklist` with required/pass/block controls.
+5. Added deploy-readiness drilldown rows so blockers can be grouped by preflight, manifest, smoke test, rollback, and D1 marker source.
+6. Added manifest diff view filters and copy buttons so changed/missing paths are easier to inspect and hand off.
+7. Added Product QA apply confirmation rows before approved groups can move toward automatic apply.
+8. Added marketplace real export-row validation results and a validation button inside Marketplace Export Preview.
+9. Added recall customer notification copy review rows before recall drafts are queued.
+10. Added recall compliance signature evidence placeholder rows for batch-level approval support.
+11. Added gift-card provider webhook verification log rows for Resend, SendGrid, and Postmark signature-review setup.
+12. Added R2 signed URL verification result rows with guarded live bucket checks.
+13. Added local SEO chart-point rows and internal-link map edges from Search Console/imported suggestion data.
+14. Added LocalBusiness schema edit draft rows so structured-data changes can be reviewed before baking.
+15. Added structured-data validation hints for LocalBusiness, Product, BreadcrumbList, and FAQPage blocks.
+16. Added previous ZIP comparison storage for future uploaded-build comparison summaries.
+17. Added dashboard notification snooze storage groundwork.
+18. Added mobile Release Control card rows for deploy score, manifest diff, recall locks, ZIP download, and promote-live checklist.
+19. Updated admin navigation, Release Control links, Safe Deploy package contents, schema SQL files, schema references, and handoff documentation for Build 178.
+20. Ran validation for JavaScript syntax, Python scripts, SQL migration smoke tests, one-H1, CSS brace balance, JSON parsing, and zip integrity.
+
+Next 20 recommended steps:
+1. Wire Product QA apply actions so SEO title casing and empty status-label fixes require Build 178 confirmation rows before applying.
+2. Add a real visual mini-chart component for Search Console trend rows instead of table-only chart-point output.
+3. Add a true interactive internal-link graph view with source/target clustering and missing-link suggestions.
+4. Connect LocalBusiness edit drafts to an approve-and-bake action that updates `data/site/local-business-schema.json` and injection targets.
+5. Add provider-specific webhook signature verification using deployed secrets and real Resend/SendGrid/Postmark headers.
+6. Add a signed URL worker route test that verifies URL generation and access expiry, not only R2 object operations.
+7. Connect recall signature evidence uploads directly to R2 from the deploy-readiness or recall admin page.
+8. Require approved recall copy reviews before any candle/soap recall notification leaves draft status.
+9. Link accountant ZIP checksum rows directly to the accountant export download response and Safe Deploy records.
+10. Add previous uploaded zip comparison import so Build 178 comparison rows are populated from the actual prior artifact manifest.
+11. Add dismiss/snooze buttons directly on dashboard notification cards and hide active snoozes until expiry.
+12. Add mobile-only Release Control card rendering with compact buttons and large tap targets.
+13. Add schema.org validation preview details per public page with page-specific JSON-LD excerpts.
+14. Add marketplace validation result badges beside each CSV download button and block downloads with hard blockers unless manually overridden.
+15. Add per-row rollback checklist buttons inside Release Control, matching the promote-live checklist controls.
+16. Add exact manifest path filters to Release Control UI using `release_manifest_diff_view_filters`.
+17. Add deployment readiness score trend charts and exportable Markdown summaries.
+18. Add Cloudflare Pages deployment-to-release matching by branch, commit SHA, and manifest hash.
+19. Add final Promote Live action that remains disabled until score, smoke, rollback, D1 markers, manifest, R2/email, and release notes are passed.
+20. Add a post-promotion incident watcher that creates runtime incident rows for 404/500 spikes and failed provider webhooks.
+
+
 # Build 177 known gaps and risks update
 
 Moved forward in Build 177:

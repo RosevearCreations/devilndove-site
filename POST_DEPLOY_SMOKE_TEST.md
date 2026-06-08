@@ -141,3 +141,9 @@ Store results with `build_label`, `page_url`, `result_status`, `http_status`, an
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+## Build 178 smoke-test additions
+
+- After standard smoke tests, open `/admin/deploy-readiness/`, seed drilldowns, and build the promote-live checklist.
+- Confirm marketplace row validation, recall copy review, R2 signed URL check, and provider webhook signature setup rows.
+

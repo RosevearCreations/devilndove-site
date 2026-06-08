@@ -744,3 +744,8 @@ Completed in this pass:
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+## Build 178 admin addition
+
+Build 178 adds `/admin/deploy-readiness/` as the final promotion guard page. Run migrations through `database_build178_promote_live_controls.sql`, then use Deployment Preflight, Release Control, Safe Deploy Package, and Deploy Readiness together before promoting the site live.
+
