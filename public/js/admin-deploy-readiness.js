@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <button class="btn secondary" data-action="seed_local_business_draft" type="button">Create LocalBusiness draft</button>
         <button class="btn secondary" data-action="seed_schema_hints" type="button">Seed schema hints</button>
         <a class="btn" href="${esc(data.safe_deploy_zip_url || '/api/admin/safe-deploy-package?format=zip')}">Download Safe Deploy ZIP</a>
+        <a class="btn secondary" href="/admin/promotion-control/">Open Promotion Control</a>
       </div>
       <div class="grid four-col">
         <div class="admin-stat"><div class="admin-stat-label">Score</div><div class="admin-stat-value">${Number(summary.score || 0)}</div></div>

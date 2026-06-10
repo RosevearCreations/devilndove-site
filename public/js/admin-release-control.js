@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <button class="btn secondary" data-action="create_dashboard_cards" type="button">Create dashboard cards</button>
         <a class="btn secondary" href="/api/admin/release-control?format=local-business-json" target="_blank" rel="noopener">View LocalBusiness JSON</a>
         <a class="btn secondary" href="/admin/deploy-readiness/">Open Deploy Readiness</a>
+        <a class="btn secondary" href="/admin/promotion-control/">Open Promotion Control</a>
       </div>
       <div class="grid four-col">
         <div class="admin-stat"><div class="admin-stat-label">Deployments</div><div class="admin-stat-value">${Number(data.summary?.deployment_count || 0)}</div></div>
