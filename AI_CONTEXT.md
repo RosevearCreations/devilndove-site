@@ -1,3 +1,7 @@
+# Build 180 AI context
+
+Continue from Build 180. Maintain schema/Markdown parity, one-H1 checks, CSS drift checks, local SEO wording, and direct endpoint gate enforcement for marketplace, recall, and promotion controls.
+
 # Build 179 handoff note
 
 Use `/admin/promotion-control/` after `/admin/release-control/` and `/admin/deploy-readiness/`. It is the final go-live gate for Product QA safe applies, LocalBusiness JSON-LD bake approvals, marketplace download gates, recall release gates, provider/R2 verification, Cloudflare deployment-release matching, Promote Live attempts, and post-promotion incident watch.
