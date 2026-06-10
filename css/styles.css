@@ -1111,3 +1111,32 @@ body.nav-mobile-open{overflow:hidden}
 }
 .inline-form .btn.small{padding:.55rem .75rem;font-size:.9rem}
 @media (max-width:640px){.inline-form{align-items:stretch}.inline-form input,.inline-form select,.inline-form button{width:100%;min-width:0}}
+
+/* Build 179 Promotion Control mini chart and mobile release controls */
+.mini-chart {
+  align-items: end;
+  display: inline-flex;
+  gap: 3px;
+  height: 48px;
+  min-width: 86px;
+  vertical-align: middle;
+}
+.mini-chart span {
+  background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.28));
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 999px 999px 3px 3px;
+  display: inline-block;
+  width: 10px;
+}
+@media (max-width: 720px) {
+  .admin-page .admin-actions .btn,
+  .admin-page .admin-actions a.btn {
+    min-height: 44px;
+  }
+  .mobile-release-card,
+  .promotion-control-card {
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 14px;
+    padding: 14px;
+  }
+}
