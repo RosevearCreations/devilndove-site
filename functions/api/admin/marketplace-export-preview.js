@@ -24,6 +24,8 @@ async function ensureSchema(db) {
   ]) await db.prepare(sql).run().catch(() => null);
   await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_export_replay_events (marketplace_export_replay_event_id INTEGER PRIMARY KEY AUTOINCREMENT, channel TEXT NOT NULL, source_history_id INTEGER, action_kind TEXT NOT NULL DEFAULT 'replay', affected_count INTEGER NOT NULL DEFAULT 0, notes TEXT, created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run().catch(() => null);
   await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_export_row_validation_results (marketplace_export_row_validation_result_id INTEGER PRIMARY KEY AUTOINCREMENT, channel TEXT NOT NULL, product_id INTEGER, validation_status TEXT NOT NULL DEFAULT 'needs_review', blocker_count INTEGER NOT NULL DEFAULT 0, warning_count INTEGER NOT NULL DEFAULT 0, missing_fields_json TEXT NOT NULL DEFAULT '[]', row_payload_json TEXT NOT NULL DEFAULT '{}', created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_export_download_gates (marketplace_export_download_gate_id INTEGER PRIMARY KEY AUTOINCREMENT, channel TEXT NOT NULL, export_history_id INTEGER, validation_run_id INTEGER, gate_status TEXT NOT NULL DEFAULT 'blocked_pending_validation', hard_blocker_count INTEGER NOT NULL DEFAULT 0, manual_override_required INTEGER NOT NULL DEFAULT 0, override_by_user_id INTEGER, override_at TEXT, gate_notes TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, UNIQUE(channel, export_history_id))`).run().catch(() => null);
+  await db.prepare(`CREATE TABLE IF NOT EXISTS marketplace_download_block_events (marketplace_download_block_event_id INTEGER PRIMARY KEY AUTOINCREMENT, channel TEXT NOT NULL, gate_status TEXT NOT NULL, hard_blocker_count INTEGER NOT NULL DEFAULT 0, blocked INTEGER NOT NULL DEFAULT 1, requested_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, notes TEXT)`).run().catch(() => null);
 }
 function issuesFor(product, imgs, channel, selectedUrls = []) {
   const rule = RULES[channel] || RULES.manual;
@@ -137,7 +139,13 @@ export async function onRequestGet(context) {
     return json({ ok: true, channel, marketplace_export_history_id: diffHistoryId, diff, summary: { changed: diff.filter((row) => row.changed).length, total: diff.length }, history: historyRow });
   }
   if (url.searchParams.get('format') === 'csv') {
-    await saveHistory(db, channel, previews, Number(adminUser.user_id || 0) || null, 'CSV generated from marketplace export preview.');
+    const gate = await db.prepare(`SELECT gate_status, hard_blocker_count, manual_override_required FROM marketplace_export_download_gates WHERE channel=? ORDER BY updated_at DESC LIMIT 1`).bind(channel).first().catch(() => null);
+    const gateBlocked = gate && ['blocked','blocked_pending_validation'].includes(String(gate.gate_status || '').toLowerCase()) && Number(gate.hard_blocker_count || 0) > 0 && !Number(gate.manual_override_required || 0);
+    if (gateBlocked) {
+      await db.prepare(`INSERT INTO marketplace_download_block_events (channel, gate_status, hard_blocker_count, blocked, requested_by_user_id, created_at, notes) VALUES (?, ?, ?, 1, ?, CURRENT_TIMESTAMP, 'CSV download blocked by Build 180 marketplace_export_download_gates hard blocker.')`).bind(channel, gate.gate_status || 'blocked', Number(gate.hard_blocker_count || 0), Number(adminUser.user_id || 0) || null).run().catch(() => null);
+      return json({ ok: false, error: `CSV download is blocked for ${channel} until marketplace validation hard blockers are resolved or overridden.`, gate }, 409);
+    }
+    await saveHistory(db, channel, previews, Number(adminUser.user_id || 0) || null, 'CSV generated from marketplace export preview after Build 180 gate check.');
     const headers = ['channel','ready','product_id','sku','title','slug','price_cents','currency','category','tags','description','image_1','image_2','image_3','image_4','image_5','issues'];
     const lines = [headers.join(',')];
     previews.forEach((row) => {
