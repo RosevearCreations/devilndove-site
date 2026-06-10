@@ -1,3 +1,7 @@
+# Build 179 local SEO promotion controls
+
+Build 179 adds D1-backed chart config rows and internal-link graph snapshots so local SEO checks can move from static tables toward visual review. The next pass should render these rows directly in Local SEO Review and connect approved internal-link edges to page edits/bake actions.
+
 # Build 177 local SEO update
 
 - LocalBusiness JSON-LD is now baked into the homepage and key Ontario/local landing pages with the managed marker `dd-local-business-jsonld`.

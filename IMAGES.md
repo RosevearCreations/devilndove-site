@@ -1,3 +1,7 @@
+# Build 179 image/evidence note
+
+Promotion Control adds recall signature evidence upload records with direct R2 upload support when a private evidence bucket is bound. Keep evidence uploads small, named clearly by batch, and review dark-theme screenshot evidence before promotion.
+
 # Build 177 image/QA update
 
 - Product QA bulk fixes now require an approval record before any apply action.

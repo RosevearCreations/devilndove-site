@@ -1,3 +1,19 @@
+# Build 179 schema additions
+
+Build 179 adds final promotion-control tables only; no destructive migrations are included. Run `database_build179_promotion_control.sql` after Build 178.
+
+New tables:
+
+- `product_qa_safe_apply_rules` — confirmation-gated Product QA auto-apply rules for low-risk fixes.
+- `local_seo_visual_chart_configs` and `internal_link_graph_snapshots` — local SEO mini-chart and graph data.
+- `local_business_schema_bake_approvals` — approved LocalBusiness JSON-LD bake rows.
+- `provider_webhook_signature_secret_checks` and `r2_signed_url_expiry_tests` — provider/R2 verification rows.
+- `recall_signature_evidence_uploads` and `recall_notification_release_gates` — recall evidence and send-release controls.
+- `accounting_zip_export_links` and `previous_zip_manifest_imports` — accountant ZIP and prior artifact comparison records.
+- `dashboard_notification_card_actions` and `mobile_release_control_render_preferences` — dismiss/snooze and phone-card preferences.
+- `structured_data_page_previews`, `marketplace_export_download_gates`, `release_rollback_row_actions`, and `release_manifest_path_filter_runs` — structured data, marketplace, rollback, and manifest review gates.
+- `deployment_readiness_markdown_exports`, `cloudflare_deployment_release_matches`, `promote_live_attempts`, and `post_promotion_incident_watch_runs` — final promotion and post-promotion tracking.
+
 # Build 177 schema update
 
 New migration file: `database_build177_deploy_score_and_controls.sql`.

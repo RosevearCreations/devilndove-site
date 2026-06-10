@@ -1,3 +1,7 @@
+# Build 179 handoff note
+
+Use `/admin/promotion-control/` after `/admin/release-control/` and `/admin/deploy-readiness/`. It is the final go-live gate for Product QA safe applies, LocalBusiness JSON-LD bake approvals, marketplace download gates, recall release gates, provider/R2 verification, Cloudflare deployment-release matching, Promote Live attempts, and post-promotion incident watch.
+
 # Build 177 handoff note
 
 This build adds release-readiness scoring, Cloudflare deployment import support, exact manifest diff rows, Product QA approval controls, recall notification lock enforcement, LocalBusiness JSON-LD bake support, and the Build 177 D1 migration. Run migrations in order through `database_build177_deploy_score_and_controls.sql`, then run Deployment Preflight and Release Control before promotion.

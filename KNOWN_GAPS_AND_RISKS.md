@@ -1,3 +1,49 @@
+# Build 179 Completed Pass — Promotion Control, Final Go-Live Gates, Local SEO Visuals, Recall Release Gates, and Post-Promotion Watch
+
+Completed in this pass:
+1. Added `/admin/promotion-control/` as the final go-live gate after Release Control and Deploy Readiness.
+2. Added `/api/admin/promotion-control` with guarded admin actions for Build 179 controls.
+3. Added `database_build179_promotion_control.sql` and updated aggregate schema files with the same additive tables.
+4. Added Product QA safe-apply rules for SEO title casing, empty status labels, and existing alt-text fixes, all confirmation-gated.
+5. Added local SEO mini-chart configuration rows for Search Console trend visuals.
+6. Added internal-link graph snapshot storage with node/edge/missing-link counts.
+7. Added LocalBusiness draft approve-and-bake rows tied to `data/site/local-business-schema.json` and injection targets.
+8. Added provider webhook signature setup checks for Resend, SendGrid, and Postmark bindings/headers.
+9. Added R2 signed URL expiry test rows that separate object lifecycle from signed-route expiry verification.
+10. Added recall signature evidence upload records with direct R2 upload support when an evidence bucket is bound.
+11. Added recall notification release gates requiring copy review, signature evidence, and customer match review before notices can release.
+12. Added accounting ZIP export links that connect ZIP checksums, safe deploy downloads, and accountant evidence traceability.
+13. Added previous ZIP manifest import comparison records for prior artifact diff handoff.
+14. Added dashboard notification card action rows for dismiss/snooze behaviour.
+15. Added mobile release-control rendering preferences for compact phone-first cards and large tap targets.
+16. Added structured-data page preview rows with page-specific JSON-LD excerpts and issue counts.
+17. Added marketplace export download gates so CSV download buttons can be blocked by hard validation failures.
+18. Added rollback row action records plus manifest path filter run records for more exact release review.
+19. Added readiness Markdown export rows and Cloudflare deployment-to-release match rows by build/branch/commit/manifest.
+20. Added Promote Live attempt rows and post-promotion incident watcher rows for 404/500/provider follow-up.
+
+Next 20 recommended steps:
+1. Wire the Product QA safe-apply rules into the actual catalog update endpoint for SEO-title casing and empty status labels.
+2. Add a real chart drawing layer on Local SEO Review using the Build 179 chart config rows and Search Console trend points.
+3. Add an interactive internal-link graph canvas with click-through source/target page filters.
+4. Add a static bake script that consumes approved LocalBusiness bake rows and rewrites `data/site/local-business-schema.json` from exported D1 data.
+5. Complete cryptographic webhook signature verification in the deployed webhook endpoints for Resend, SendGrid, and Postmark.
+6. Add a real signed-download Worker route with expiry enforcement and connect it to `r2_signed_url_expiry_tests`.
+7. Add drag-and-drop recall signature evidence upload UI to the recall admin page, not only Promotion Control.
+8. Enforce `recall_notification_release_gates.release_status='release_allowed'` directly inside every recall notification send endpoint.
+9. Write accounting ZIP export rows directly from the accountant export endpoint whenever the ZIP is generated.
+10. Add previous uploaded ZIP binary comparison in the build tooling so the manifest import no longer depends on pasted JSON.
+11. Render dashboard notification snooze/dismiss buttons directly on the main admin dashboard cards.
+12. Add a phone-only Release Control layout using the mobile render preferences and saved card list.
+13. Add structured-data preview excerpts directly beside each public-page row in Deployment Preflight.
+14. Block marketplace CSV downloads from the export endpoint when `marketplace_export_download_gates` has hard blockers.
+15. Add per-row rollback pass/block buttons directly on the Release Control table.
+16. Add a manifest filter drawer to Release Control using `release_manifest_path_filter_runs` results.
+17. Add visible deploy-readiness score trend charts and one-click Markdown download from the latest export row.
+18. Match Cloudflare deployments to release records automatically after each deployment import.
+19. Disable the final Promote Live button in the UI until the latest attempt would pass all gates.
+20. Schedule or manually run the post-promotion incident watcher from the smoke-test page after each live promotion.
+
 # Build 178 Completed Pass — Deploy Readiness Page, Promote-Live Guardrails, Marketplace Validation, Recall Copy Review, and Structured-Data Hints
 
 Completed in this pass:
