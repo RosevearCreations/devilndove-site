@@ -1,3 +1,7 @@
+# Build 180 sanity health check
+
+Build 180 validation includes one-H1 scan, CSS brace check, JSON validation, JavaScript syntax checks, SQL migration smoke testing, and zip integrity. Marketplace CSV and recall notification endpoints now include direct gate checks.
+
 # Build 179 sanity health check
 
 Status: PASS after static validation.

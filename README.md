@@ -1,3 +1,7 @@
+# Build 180 handoff note
+
+Latest build adds Go-Live Execution controls and should run after Build 179 migration. Use the admin release pages before promoting live.
+
 # Build 179 handoff note
 
 Use `/admin/promotion-control/` after `/admin/release-control/` and `/admin/deploy-readiness/`. It is the final go-live gate for Product QA safe applies, LocalBusiness JSON-LD bake approvals, marketplace download gates, recall release gates, provider/R2 verification, Cloudflare deployment-release matching, Promote Live attempts, and post-promotion incident watch.

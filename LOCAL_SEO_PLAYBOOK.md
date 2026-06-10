@@ -1,3 +1,7 @@
+# Build 180 local SEO notes
+
+Build 180 keeps one clear H1 per public page, adds Local SEO SVG trend chart rendering, stores internal-link graph interactions, and keeps prominent Southern Ontario service wording queued through review/bake controls.
+
 # Build 179 local SEO promotion controls
 
 Build 179 adds D1-backed chart config rows and internal-link graph snapshots so local SEO checks can move from static tables toward visual review. The next pass should render these rows directly in Local SEO Review and connect approved internal-link edges to page edits/bake actions.

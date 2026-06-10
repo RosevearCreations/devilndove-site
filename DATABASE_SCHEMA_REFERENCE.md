@@ -1,3 +1,19 @@
+# Build 180 schema additions
+
+Build 180 adds go-live execution tables only; no destructive migrations are included. Run `database_build180_go_live_execution.sql` after Build 179.
+
+New tables:
+
+- `product_qa_safe_apply_runs` — actual gated preview/apply records for approved SEO-title-case and empty-status Product QA fixes.
+- `local_seo_chart_render_runs` and `internal_link_graph_interactions` — visual Local SEO chart output and internal-link click/filter rows.
+- `local_business_d1_export_bakes` — D1-export-to-JSON LocalBusiness bake handoff rows.
+- `provider_webhook_verification_runs` and `r2_signed_download_route_tests` — live provider/R2 signed-route verification records.
+- `recall_evidence_ui_uploads` and `recall_endpoint_gate_checks` — recall admin upload placeholders and send-endpoint gate proof.
+- `accountant_zip_endpoint_logs` and `previous_zip_binary_comparisons` — accountant export and prior ZIP comparison rows.
+- `dashboard_notification_visibility_states` and `mobile_release_control_layout_runs` — visible dashboard snooze/dismiss and phone layout records.
+- `deployment_preflight_structured_data_excerpts`, `marketplace_download_block_events`, `release_control_row_status_actions`, and `release_manifest_filter_drawer_runs` — direct public-page schema excerpts, CSV blocking, per-row release decisions, and manifest drawer filters.
+- `deploy_readiness_score_trend_exports`, `cloudflare_deployment_auto_matches`, `promote_live_ui_gate_states`, and `post_promotion_watcher_schedule_runs` — readiness trend exports, deployment matching, promote-button state, and watcher scheduling.
+
 # Build 179 schema additions
 
 Build 179 adds final promotion-control tables only; no destructive migrations are included. Run `database_build179_promotion_control.sql` after Build 178.

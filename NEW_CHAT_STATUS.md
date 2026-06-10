@@ -1,3 +1,7 @@
+# Build 180 current status
+
+Current build: Build 180. Main new page: `/admin/go-live-execution/`. New migration: `database_build180_go_live_execution.sql`.
+
 # Build 179 handoff note
 
 Use `/admin/promotion-control/` after `/admin/release-control/` and `/admin/deploy-readiness/`. It is the final go-live gate for Product QA safe applies, LocalBusiness JSON-LD bake approvals, marketplace download gates, recall release gates, provider/R2 verification, Cloudflare deployment-release matching, Promote Live attempts, and post-promotion incident watch.

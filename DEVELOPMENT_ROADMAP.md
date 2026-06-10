@@ -1,3 +1,49 @@
+# Build 180 Completed Pass — Go-Live Execution, Direct Endpoint Gates, SEO Visuals, and Final Release Controls
+
+Completed in this pass:
+1. Added `/admin/go-live-execution/` as the Build 180 final execution page after Promotion Control.
+2. Added `/api/admin/go-live-execution` with guarded actions for safe catalog fixes, SEO chart rendering, LocalBusiness D1 bakes, recall endpoint gates, marketplace blocks, and watcher scheduling.
+3. Added `database_build180_go_live_execution.sql` and updated aggregate schema SQL files with the same safe additive tables.
+4. Wired approved Product QA safe-apply execution for SEO-title casing and empty product status labels with preview/apply modes.
+5. Added real Local SEO SVG mini-chart rendering rows and displayed chart output on the Local SEO Review page.
+6. Added internal-link graph interaction storage so source/target click filters can be captured from the admin UI.
+7. Added a static `scripts/bake_localbusiness_from_d1_export.py` path to rewrite `data/site/local-business-schema.json` from exported D1 data.
+8. Added provider webhook verification run rows for Resend, SendGrid, and Postmark endpoint/header setup.
+9. Added signed-download Worker route test rows for expiry/token/download verification handoff.
+10. Added recall evidence upload placeholder rows for recall admin UI use.
+11. Strengthened recall notification send-status changes so both legacy locks and Build 179 release gates must allow release.
+12. Added accountant ZIP endpoint log rows and linked latest evidence checksum data when available.
+13. Added previous ZIP binary comparison schema groundwork for future uploaded artifact comparison.
+14. Added dashboard notification visibility storage and a dashboard helper action for snooze/dismiss state.
+15. Added mobile Release Control layout run storage for phone-first release cards.
+16. Added structured-data excerpt rows for Deployment Preflight page-by-page previews.
+17. Blocked marketplace CSV downloads from the export endpoint when hard download gates are active.
+18. Added release-control row status action rows for pass/block decisions.
+19. Added manifest filter drawer runs and readiness score trend Markdown export rows.
+20. Added promote-live UI gate state rows and post-promotion watcher schedule rows.
+
+Next 20 recommended steps:
+1. Build the actual signed-download Worker route `/api/admin/private-evidence-download` with HMAC token validation and expiry enforcement.
+2. Add a drag-and-drop evidence upload widget directly inside the candle/soap recall admin page and connect it to `recall_evidence_ui_uploads`.
+3. Expose Product QA safe-apply preview counts directly beside each blocker in the Catalog QA panel.
+4. Add a clickable internal-link graph canvas that posts selected source/target filters into `internal_link_graph_interactions`.
+5. Export LocalBusiness D1 rows from the admin UI and feed them into the new static bake script automatically during safe deploy package creation.
+6. Add provider-specific cryptographic verification code to live Resend, SendGrid, and Postmark webhook endpoints, not only setup rows.
+7. Add visible marketplace gate badges beside each CSV download button and show the exact hard blocker reason before download.
+8. Add a manual override workflow for marketplace export gates with audit logging and expiry dates.
+9. Write accountant ZIP endpoint logs directly from every accounting ZIP/export endpoint response.
+10. Add binary comparison against the immediately previous uploaded zip in the build tooling and populate `previous_zip_binary_comparisons`.
+11. Render dashboard notification snooze/dismiss buttons on every real warning card, not only the helper panel.
+12. Add phone-only Release Control cards to `/admin/release-control/` using `mobile_release_control_layout_runs`.
+13. Show structured-data excerpts beside each public URL row on `/admin/deployment-preflight/`.
+14. Add release-control per-row pass/block buttons directly to rollback, manifest, Cloudflare match, and smoke-test tables.
+15. Add a manifest drawer UI with filters for `admin`, `functions`, `schema`, `data/site`, and public HTML paths.
+16. Add visible deploy-readiness score trend charts beside the Markdown export button.
+17. Auto-match Cloudflare deployments immediately after deployment import and mirror rows into `cloudflare_deployment_auto_matches`.
+18. Disable the final Promote Live button visually using `promote_live_ui_gate_states` before the action is submitted.
+19. Add a one-click run from Post-Deploy Smoke Tests that queues and then executes the post-promotion watcher.
+20. Add a public-page content refresh pass for more Southern Ontario handmade gift, custom jewelry, laser engraving, candle, and soap phrases without adding extra H1 tags.
+
 # Build 179 Completed Pass — Promotion Control, Final Go-Live Gates, Local SEO Visuals, Recall Release Gates, and Post-Promotion Watch
 
 Completed in this pass:

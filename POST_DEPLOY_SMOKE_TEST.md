@@ -1,3 +1,7 @@
+# Build 180 post-deploy smoke notes
+
+After deploy, run Deployment Preflight, Release Control, Deploy Readiness, Promotion Control, Go-Live Execution, and Post-Deploy Smoke Tests. Then queue the post-promotion watcher from Go-Live Execution.
+
 # Build 179 post-deploy checks
 
 After running the Build 179 D1 migration, open `/admin/promotion-control/` and run these checks:

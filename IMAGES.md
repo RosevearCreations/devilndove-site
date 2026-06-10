@@ -1,3 +1,7 @@
+# Build 180 image and evidence notes
+
+Build 180 adds recall evidence upload placeholders, signed-download route test rows, and stronger marketplace CSV gate enforcement for public-ready images.
+
 # Build 179 image/evidence note
 
 Promotion Control adds recall signature evidence upload records with direct R2 upload support when a private evidence bucket is bound. Keep evidence uploads small, named clearly by batch, and review dark-theme screenshot evidence before promotion.
