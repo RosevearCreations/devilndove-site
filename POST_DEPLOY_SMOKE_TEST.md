@@ -1,3 +1,15 @@
+# Build 179 post-deploy checks
+
+After running the Build 179 D1 migration, open `/admin/promotion-control/` and run these checks:
+
+1. Seed/refresh all final controls.
+2. Confirm Product QA safe-apply rules are approval-gated.
+3. Confirm marketplace download gates are not blocking required exports unexpectedly.
+4. Confirm recall release gates stay blocked until copy, signature evidence, and customer match review are present.
+5. Run provider signature setup checks and R2 signed URL expiry checks in the deployed environment.
+6. Attempt Promote Live only after Release Control, Deploy Readiness, Safe Deploy, Smoke Tests, D1 markers, R2/email, recall, marketplace, and release notes are clear.
+7. Run the post-promotion incident watcher after live promotion.
+
 # Build 177 post-deploy smoke-test additions
 
 After deploying Build 177:

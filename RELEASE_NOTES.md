@@ -1,162 +1,10 @@
-# Build 178 deploy readiness, promote-live guardrails, marketplace validation, and recall copy review
+# Build 179
 
 ## Summary
 
-- Added a dedicated `/admin/deploy-readiness/` page with score history, source drilldowns, final checklist, manifest path rows, QA confirmations, recall copy review, provider checks, LocalBusiness drafts, schema hints, and mobile release cards.
-- Added `/api/admin/deploy-readiness` for deploy-readiness summaries, final promote-live checklist seeding, drilldown rows, QA apply confirmations, recall copy review rows, signature placeholders, provider/R2 checks, local SEO visuals, LocalBusiness drafts, schema hints, and notification snoozes.
-- Added `database_build178_promote_live_controls.sql` with safe new tables only, avoiding risky repeat `ALTER TABLE ADD COLUMN` statements.
-- Added final promote-live checklist storage in `deployment_promote_live_checklist` with required/pass/block controls.
-- Added deploy-readiness drilldown rows so blockers can be grouped by preflight, manifest, smoke test, rollback, and D1 marker source.
-- Added manifest diff view filters and copy buttons so changed/missing paths are easier to inspect and hand off.
-- Added Product QA apply confirmation rows before approved groups can move toward automatic apply.
-- Added marketplace real export-row validation results and a validation button inside Marketplace Export Preview.
-- Added recall customer notification copy review rows before recall drafts are queued.
-- Added recall compliance signature evidence placeholder rows for batch-level approval support.
-- Added gift-card provider webhook verification log rows for Resend, SendGrid, and Postmark signature-review setup.
-- Added R2 signed URL verification result rows with guarded live bucket checks.
-
-## D1 migration summary
-
-Run after Build 177:
-
-1. `database_build171_ledger_repair.sql` only if Build 171 schema exists but the marker is missing.
-2. `database_build173_deployment_preflight.sql`
-3. `database_build174_deployment_preflight_detail.sql`
-4. `database_build175_release_control.sql`
-5. `database_build176_release_safety_controls.sql`
-6. `database_build177_deploy_score_and_controls.sql`
-7. `database_build178_promote_live_controls.sql`
-
-## Required post-deploy actions
-
-- Open `/admin/deployment-preflight/` and run Preflight.
-- Open `/admin/release-control/` and refresh live manifest, deploy score, R2 checks, and dashboard cards.
-- Open `/admin/deploy-readiness/`, build the promote-live checklist, refresh drilldowns, and pass/block each required row.
-- Use Marketplace Export Preview's real row validation button before downloading channel CSVs.
-- Seed recall copy reviews and signature placeholders before recall notices leave draft status.
-- Run `/admin/post-deploy-smoke-tests/`, then recalculate readiness.
-
-## Validation
-
-- JavaScript syntax checks passed for changed admin/function/public files.
-- SQL migration smoke test passed with Build 175, 176, 177, and 178 migration files.
-- One-H1, CSS brace balance, JSON validation, Python compile checks, and zip integrity checks were run.
-
-# Build 177 deploy score, exact manifest diffs, QA approvals, and JSON-LD bake
-
-## Summary
-
-- Added Build 177 D1 migration `database_build177_deploy_score_and_controls.sql`.
-- Added deploy-readiness scoring across preflight, manifest diffs, smoke tests, rollback checklist rows, and D1 migration markers.
-- Added real Cloudflare Pages deployment import support when scoped token bindings are present, with safe not-configured fallback rows.
-- Added exact manifest diff item rows so missing/changed/extra file paths can be reviewed in Release Control.
-- Added Product QA preview approvals and the first low-risk auto-apply path for missing image alt text only.
-- Added marketplace validation rule editor rows and Release Control visibility.
-- Added recall customer match previews and API-level recall notification lock enforcement.
-- Added R2 private evidence create/get/delete health test rows.
-- Added LocalBusiness JSON-LD injection targets and baked managed JSON-LD blocks into key public/local pages.
-- Added dashboard notification cards for release, manifest, recall, and readiness warnings.
-
-## D1 migration summary
-
-Run after Build 176:
-
-1. `database_build171_ledger_repair.sql` only if Build 171 schema exists but the marker is missing.
-2. `database_build173_deployment_preflight.sql`
-3. `database_build174_deployment_preflight_detail.sql`
-4. `database_build175_release_control.sql`
-5. `database_build176_release_safety_controls.sql`
-6. `database_build177_deploy_score_and_controls.sql`
-
-## Required post-deploy actions
-
-- Open `/admin/deployment-preflight/` and run Preflight.
-- Open `/admin/release-control/`, run live manifest compare, create rollback checklist, and calculate deploy-readiness score.
-- Run the R2 private evidence health test only after the private bucket binding is configured.
-- Review Product QA preview groups before approving any alt-text apply action.
-- Review recall locks and customer previews before notification drafts move forward.
-- Open `/admin/safe-deploy-package/` and download the Build 177 Safe Deploy ZIP for handoff.
-- Run `/admin/post-deploy-smoke-tests/` and then recalculate deploy-readiness.
-
-## Validation
-
-- Static LocalBusiness JSON-LD bake completed for homepage and key local landing pages.
-- JavaScript syntax checks passed for changed admin/function/public files.
-- Python scripts compiled.
-- Build 177 SQL migration smoke test passed in SQLite with prior Build 175 and Build 176 migration files.
-- One-H1 check, CSS brace check, JSON validation, and zip integrity checks are included in final validation.
-
-# Build 176 safe deploy ZIP, live manifest diff, QA previews, and recall locks
-
-## Summary
-
-- Added a real binary-safe Safe Deploy ZIP endpoint at `/api/admin/safe-deploy-package?format=zip`.
-- Added live release-manifest comparison, safe package download records, Product QA preview cards, marketplace validation previews, recall notification locks, local SEO link/trend rows, richer LocalBusiness schema bake tracking, rollback checklist rows, and Cloudflare deployment import setup checks.
-- Updated schema files, static preflight checks, Release Control UI/API, local business schema JSON, release notes, roadmap, known gaps, and sanity guidance.
-
-## D1 migration summary
-
-Run after Build 175:
-
-1. `database_build171_ledger_repair.sql` only if the Build 171 schema exists but the marker is missing.
-2. `database_build173_deployment_preflight.sql`
-3. `database_build174_deployment_preflight_detail.sql`
-4. `database_build175_release_control.sql`
-5. `database_build176_release_safety_controls.sql`
-
-## Required post-deploy actions
-
-- Open `/admin/deployment-preflight/`, run Preflight, save a snapshot, and review Build 176 schema/diff rows.
-- Open `/admin/release-control/`, download the Safe Deploy ZIP, run Live Manifest Compare, build QA preview cards, preview marketplace validation, refresh recall locks, seed local SEO links, and create rollback checklist rows.
-- Open `/admin/safe-deploy-package/` and confirm the ZIP endpoint plus changed-file list.
-- Run `/admin/post-deploy-smoke-tests/` after deploying.
-
-## Validation
-
-- Static deployment preflight regenerated.
-- JavaScript syntax checks passed for changed admin/function/public files.
-- CSS brace balance, JSON validation, and one-H1 checks are included in final validation.
-
-# Build 175 release control, deeper preflight, and local business schema
-
-## Summary
-
-- Added `/admin/release-control/` and `/api/admin/release-control` for deployment history, manifest comparison records, screenshot evidence jobs, mobile saved views, safe deploy export records, and LocalBusiness schema preview.
-- Expanded Deployment Preflight with response-body keyword checks, collection/category checks, sample product-detail checks, Product QA bulk queue visibility, R2 private evidence test rows, accountant checksum rows, gift-card provider webhook rows, marketplace validation/diff rows, recall compliance rows, and mobile/local schema checks.
-- Added `database_build175_release_control.sql` and updated schema files, release notes, sanity notes, safe deploy package, roadmap, and known gaps.
-
-## D1 migration summary
-
-Run after Build 174:
-
-1. `database_build171_ledger_repair.sql` only if the Build 171 schema exists but the marker is missing.
-2. `database_build173_deployment_preflight.sql`
-3. `database_build174_deployment_preflight_detail.sql`
-4. `database_build175_release_control.sql`
-
-## Required post-deploy actions
-
-- Open `/admin/deployment-preflight/`, run Preflight, save a snapshot, and review any new Build 175 warnings.
-- Open `/admin/release-control/`, seed phone saved views, queue dark-theme screenshot jobs, and review LocalBusiness JSON.
-- Open `/admin/safe-deploy-package/` and confirm the schema order and changed-file list.
-- Run `/admin/post-deploy-smoke-tests/` after deploying.
-
-## Validation
-
-- Static deployment preflight regenerated.
-- JavaScript syntax checks passed for changed admin/function/public files.
-- CSS brace balance, JSON validation, and one-H1 checks are included in final validation.
-
-# Build 174 preflight detail, schema diff, and release manifest
-
-## Summary
-
-- Added richer Deployment Preflight detail drawers for public SEO, canonical, schema.org, image-alt, fallback, migration, schema, R2, duplicate ownership, and relationship-integrity checks.
-- Added Markdown export for Deployment Preflight support handoff.
-- Added post-deploy confirmation workflow rows so admins can mark D1 migration, preflight, public-page review, smoke-test, release-note, and R2/email checks complete.
-- Added generated release package manifest support with SHA-256 hashes.
-- Added a desktop admin dashboard badge for latest Deployment Preflight status.
-- Updated D1 schema files, migration ledger expectations, DB sanity, schema drift, safe deploy package, release notes, sanity notes, roadmap, and known gaps.
+- Added the Promotion Control admin page and API as the final go-live gate after Release Control and Deploy Readiness.
+- Added additive D1 tables for QA safe-apply rules, LocalBusiness bake approvals, provider/R2 verification, recall release gates, marketplace download gates, release matching, and post-promotion incident watch.
+- Updated Markdown, schema files, admin navigation, CSS, release manifest, and sanity notes for the Build 179 pass.
 
 ## Release package manifest
 
@@ -165,60 +13,53 @@ Run after Build 174:
 
 ## Changed files
 
-- `AMAZON_MATCHING_NOTES.md`
-- `COMPETITIVE.md`
+- `admin/promotion-control/index.html`
+- `functions/api/admin/promotion-control.js`
+- `public/js/admin-promotion-control.js`
+- `database_build179_promotion_control.sql`
+- `database_upgrade_current_pass.sql`
+- `database_schema.sql`
+- `database_full_schema.sql`
+- `database_store_schema.sql`
+- `css/styles.css`
+- `admin/index.html`
+- `admin/operations/index.html`
+- `admin/release-control/index.html`
+- `admin/deploy-readiness/index.html`
+- `DEVELOPMENT_ROADMAP.md`
+- `KNOWN_GAPS_AND_RISKS.md`
+- `DATABASE_SCHEMA_REFERENCE.md`
+- `SANITY_HEALTH_CHECK.md`
+- `POST_DEPLOY_SMOKE_TEST.md`
 - `LOCAL_SEO_PLAYBOOK.md`
 - `IMAGES.md`
 - `README.md`
-- `AI_CONTEXT.md`
-- `DATABASE_SCHEMA_REFERENCE.md`
-- `DEVELOPMENT_ROADMAP.md`
-- `KNOWN_GAPS_AND_RISKS.md`
 - `NEW_CHAT_STATUS.md`
-- `POST_DEPLOY_SMOKE_TEST.md`
-- `RELEASE_NOTES.md`
-- `SANITY_HEALTH_CHECK.md`
-- `admin/deployment-preflight/index.html`
-- `admin/index.html`
-- `data/site/deployment-preflight.json`
+- `AI_CONTEXT.md`
+- `data/site/build179-promotion-control.json`
 - `data/site/release-notes.json`
 - `data/site/release-package-manifest.json`
-- `database_build174_deployment_preflight_detail.sql`
-- `database_full_schema.sql`
-- `database_schema.sql`
-- `database_store_schema.sql`
-- `database_upgrade_current_pass.sql`
-- `functions/api/admin/db-sanity.js`
-- `functions/api/admin/deployment-preflight.js`
-- `functions/api/admin/migration-ledger.js`
-- `functions/api/admin/safe-deploy-package.js`
-- `functions/api/admin/schema-drift-report.js`
-- `public/js/admin-dashboard-preflight-badge.js`
-- `public/js/admin-deployment-preflight.js`
-- `public/js/admin-safe-deploy-package.js`
-- `scripts/deployment_preflight_static_check.py`
-- `scripts/generate_release_manifest.py`
-- `scripts/generate_release_notes.py`
-- `scripts/regenerate_sanity_from_preflight.py`
 
 ## D1 migration summary
 
-- New additive migration file: database_build174_deployment_preflight_detail.sql.
-- Creates deployment_post_deploy_confirmations for visible post-deploy checklist confirmations.
-- Records build_174_preflight_detail_manifest in schema_migration_ledger with file_name populated.
-- No destructive schema changes.
+- Run `database_build171_ledger_repair.sql` only if Build 171 schema exists but the ledger marker is missing.
+- Run `database_build173_deployment_preflight.sql`.
+- Run `database_build174_deployment_preflight_detail.sql`.
+- Run `database_build175_release_control.sql`.
+- Run `database_build176_release_safety_controls.sql`.
+- Run `database_build177_deploy_score_and_controls.sql`.
+- Run `database_build178_promote_live_controls.sql`.
+- Run `database_build179_promotion_control.sql`.
 
 ## Required post-deploy actions
 
-- Run database_build171_ledger_repair.sql only if Build 171 schema exists but the ledger marker is missing.
-- Run database_build173_deployment_preflight.sql, then database_build174_deployment_preflight_detail.sql.
-- Open /admin/deployment-preflight/, run Preflight, export Markdown if warnings remain, and save a snapshot.
-- Run /admin/post-deploy-smoke-tests/ and then mark post-deploy confirmation rows complete.
-- Review /admin/safe-deploy-package/ and data/site/release-package-manifest.json before promoting live.
+- Open `/admin/promotion-control/` after Release Control and Deploy Readiness.
+- Click Seed/refresh all final controls and review any recall, marketplace, provider, R2, or promote-live blockers.
+- Do not use Promote Live until the latest Promote Live attempt returns `ready_to_promote`.
+- Run the post-promotion incident watcher after live smoke tests.
 
 ## Validation
 
-- Static deployment preflight regenerated data/site/deployment-preflight.json.
-- Release package manifest generated with SHA-256 hashes.
-- JavaScript syntax checks passed for changed admin/public/function files.
-- CSS brace balance and one-H1/title/meta checks are included in final validation.
+- JavaScript syntax checks passed for changed admin/API/public files.
+- Build 175 through Build 179 SQL smoke test passed.
+- One-H1, JSON, CSS brace balance, and zip integrity checks passed.

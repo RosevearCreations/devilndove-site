@@ -1,3 +1,14 @@
+# Build 179 sanity health check
+
+Status: PASS after static validation.
+
+- One H1 per exposed HTML page checked.
+- CSS brace balance checked after Promotion Control mini-chart additions.
+- JSON files validated.
+- JavaScript files touched by Build 179 passed syntax checks.
+- Build 175, 176, 177, 178, and 179 D1 migrations smoke-tested together in SQLite.
+- New final gate page: `/admin/promotion-control/`.
+
 # Build 177 sanity health check
 
 Latest pass expectations:
