@@ -1,3 +1,9 @@
+# Build 181 AI Context
+
+- Current priority is live-ops follow-through after go-live execution.
+- Use Build 181 schema and Markdown as the latest source of truth.
+- Keep one H1 per public page and continue local SEO body-copy improvements without keyword stuffing.
+
 # Build 180 AI context
 
 Continue from Build 180. Maintain schema/Markdown parity, one-H1 checks, CSS drift checks, local SEO wording, and direct endpoint gate enforcement for marketplace, recall, and promotion controls.

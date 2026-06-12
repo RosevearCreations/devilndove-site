@@ -1,3 +1,19 @@
+# Build 181 Release Notes
+
+- Added `/admin/live-ops-followthrough/` as the Build 181 follow-through admin page after Go-Live Execution.
+- Added `/api/admin/live-ops-followthrough` for QA blocker counts, marketplace gate badges, override requests, recall upload requests, LocalBusiness export rows, content-refresh logs, notification buttons, and watcher snapshots.
+- Added `/api/admin/private-evidence-download` with HMAC-signed R2 download tokens, expiry enforcement, audit logging, and guarded bucket selection.
+- Added `database_build181_live_ops_followthrough.sql` and updated aggregate schema files with the same additive tables.
+- Added private evidence download token and audit tables for accountant/customer/recall evidence objects.
+- Added Product QA blocker preview count rows for Catalog QA badges beside blocker groups.
+- Added marketplace gate badge snapshots so CSV export buttons can show ready/blocked reasons before download.
+- Added marketplace export gate override requests with reason and expiry timestamps for temporary audited overrides.
+- Added recall evidence upload request rows with R2 target prefixes for candle/soap recall evidence widgets.
+- Added LocalBusiness admin export run rows so D1 settings can feed `data/site/local-business-schema.json` during safe deploy packaging.
+- Added public page content refresh tracking rows tied to local SEO phrases and static page copy updates.
+- Added provider webhook crypto test-vector notes for Resend, SendGrid, and Postmark verification work.
+- D1 order now includes `database_build181_live_ops_followthrough.sql` after Build 180.
+
 # Build 180 — Go-Live Execution, Direct Endpoint Gates, SEO Visuals, and Final Release Controls
 
 Highlights:

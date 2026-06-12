@@ -1,3 +1,10 @@
+# Build 181 Sanity Health Check Addendum
+
+- Static checks passed for Build 181 files.
+- One-H1 validation remained clean after public local copy refreshes.
+- CSS brace balance passed after live-ops style additions.
+- Build 181 SQL migration smoke test passed in SQLite with prior Build 175–180 migrations.
+
 # Build 180 sanity health check
 
 Build 180 validation includes one-H1 scan, CSS brace check, JSON validation, JavaScript syntax checks, SQL migration smoke testing, and zip integrity. Marketplace CSV and recall notification endpoints now include direct gate checks.

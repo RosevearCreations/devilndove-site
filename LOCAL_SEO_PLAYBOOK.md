@@ -1,3 +1,9 @@
+# Build 181 Local SEO Addendum
+
+- Added body-copy refresh blocks to key Southern Ontario pages without adding extra H1 tags.
+- Tracked refreshes in `public_page_content_refreshes` for handmade jewelry, polymer clay earrings, laser engraving, custom candles, custom soap, custom gifts, workshop-made gifts, and vintage finds.
+- Kept page titles and H1s stable while adding clearer buyer-search wording in body copy.
+
 # Build 180 local SEO notes
 
 Build 180 keeps one clear H1 per public page, adds Local SEO SVG trend chart rendering, stores internal-link graph interactions, and keeps prominent Southern Ontario service wording queued through review/bake controls.

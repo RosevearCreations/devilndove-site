@@ -1,3 +1,9 @@
+# Build 181 Schema Reference Addendum
+
+- New migration: `database_build181_live_ops_followthrough.sql`.
+- New signed evidence tables: `private_evidence_download_tokens`, `private_evidence_download_audit_events`.
+- New operational rows: QA blocker counts, marketplace override/badge snapshots, recall evidence upload requests, LocalBusiness export runs, webhook crypto test vectors, manifest saved filters, notification action buttons, and watcher execution logs.
+
 # Build 180 schema additions
 
 Build 180 adds go-live execution tables only; no destructive migrations are included. Run `database_build180_go_live_execution.sql` after Build 179.

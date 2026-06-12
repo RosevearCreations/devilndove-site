@@ -253,6 +253,6 @@ CREATE TABLE IF NOT EXISTS post_promotion_watcher_schedule_runs (
   notes TEXT
 );
 
-INSERT INTO schema_migration_ledger (migration_key, file_name, migration_label, applied_at, notes)
-VALUES ('build_180_go_live_execution', 'database_build180_go_live_execution.sql', 'Build 180 go-live execution controls', CURRENT_TIMESTAMP, 'Safe additive Build 180 schema for direct gated apply/download/send/visibility controls.')
-ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name, migration_label=excluded.migration_label, notes=excluded.notes;
+INSERT INTO schema_migration_ledger (migration_key, file_name, applied_at, notes)
+VALUES ('build_180_go_live_execution', 'database_build180_go_live_execution.sql', CURRENT_TIMESTAMP, 'Safe additive Build 180 schema for direct gated apply/download/send/visibility controls.')
+ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name, notes=excluded.notes;

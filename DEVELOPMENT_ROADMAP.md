@@ -1,3 +1,49 @@
+# Build 181 Completed Pass — Live Ops Follow-through, Signed Evidence Downloads, Marketplace Overrides, and SEO Copy Refresh
+
+Completed in this pass:
+1. Added `/admin/live-ops-followthrough/` as the Build 181 follow-through admin page after Go-Live Execution.
+2. Added `/api/admin/live-ops-followthrough` for QA blocker counts, marketplace gate badges, override requests, recall upload requests, LocalBusiness export rows, content-refresh logs, notification buttons, and watcher snapshots.
+3. Added `/api/admin/private-evidence-download` with HMAC-signed R2 download tokens, expiry enforcement, audit logging, and guarded bucket selection.
+4. Added `database_build181_live_ops_followthrough.sql` and updated aggregate schema files with the same additive tables.
+5. Added private evidence download token and audit tables for accountant/customer/recall evidence objects.
+6. Added Product QA blocker preview count rows for Catalog QA badges beside blocker groups.
+7. Added marketplace gate badge snapshots so CSV export buttons can show ready/blocked reasons before download.
+8. Added marketplace export gate override requests with reason and expiry timestamps for temporary audited overrides.
+9. Added recall evidence upload request rows with R2 target prefixes for candle/soap recall evidence widgets.
+10. Added LocalBusiness admin export run rows so D1 settings can feed `data/site/local-business-schema.json` during safe deploy packaging.
+11. Added public page content refresh tracking rows tied to local SEO phrases and static page copy updates.
+12. Added provider webhook crypto test-vector notes for Resend, SendGrid, and Postmark verification work.
+13. Added manifest drawer saved filters for admin, functions, schema, and local SEO data paths.
+14. Added dashboard notification action button rows for snooze/dismiss rendering.
+15. Added post-promotion watcher execution log rows that summarize smoke-test and runtime-incident state.
+16. Updated admin dashboard, Operations, and Go-Live Execution navigation for Live Ops Follow-through.
+17. Added Southern Ontario handmade gift, jewelry, engraving, candle, soap, workshop gift, and vintage-find body-copy refreshes without adding extra H1 tags.
+18. Updated CSS for Build 181 admin controls, status pills, and local-search refresh blocks.
+19. Updated Markdown handoff files, schema references, release notes, sanity notes, local SEO notes, image/evidence notes, README, and AI context for Build 181.
+20. Ran syntax, JSON, H1, CSS, SQL, manifest, and zip validation for the Build 181 package.
+
+Next 20 recommended steps:
+1. Wire the recall evidence upload request rows into the actual candle/soap recall admin page with drag-and-drop R2 uploads.
+2. Render Product QA blocker preview counts directly beside each blocker group in the Catalog QA panel.
+3. Show marketplace gate badges beside every real CSV/download button and display blocker reasons inline.
+4. Add approval/deny controls for marketplace override requests with automatic expiry enforcement in export endpoints.
+5. Use `/api/admin/private-evidence-download` from accounting, recall, and customer evidence rows instead of exposing raw private R2 object paths.
+6. Add one-time-use enforcement for signed evidence downloads by checking max download count before streaming.
+7. Add provider-specific live cryptographic webhook verification for Resend, SendGrid, and Postmark using deployed secrets.
+8. Add LocalBusiness export button to Release Control that downloads the exact JSON used by the bake script.
+9. Add automatic safe-deploy step that consumes the latest LocalBusiness export row and rewrites `data/site/local-business-schema.json`.
+10. Add visual manifest drawer tabs using the new saved filters for admin, functions, schema, data/site, and public HTML.
+11. Render dashboard snooze/dismiss buttons on live notification cards and update `dashboard_notification_visibility_states` on click.
+12. Run the post-promotion watcher against live URLs and write real HTTP status results into watcher execution logs.
+13. Add previous-ZIP binary diff tooling that accepts the prior uploaded zip and fills `previous_zip_binary_comparisons`.
+14. Add structured-data preview cards beside each public URL row on Deployment Preflight.
+15. Add local SEO mini-chart click-through from each local page row into Search Console trend detail.
+16. Add internal-link graph canvas interactions that store source/target clicks in the existing graph interaction table.
+17. Add accountant ZIP endpoint integration so each export writes checksum and private evidence download token rows automatically.
+18. Add mobile Live Ops Follow-through cards for evidence, recall, marketplace gates, and watcher logs.
+19. Add public-page copy refresh checklist rows for future seasonal gift pages without changing H1 structure.
+20. Add a final deployment report that merges Release Control, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through into one printable Markdown handoff.
+
 # Build 180 Completed Pass — Go-Live Execution, Direct Endpoint Gates, SEO Visuals, and Final Release Controls
 
 Completed in this pass:

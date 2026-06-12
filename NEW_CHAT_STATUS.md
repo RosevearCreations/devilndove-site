@@ -1,3 +1,9 @@
+# Build 181 New Chat Status
+
+- Latest package is Build 181.
+- Continue with the Build 181 next-20 list in `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md`.
+- Do not rerun old additive migrations unless the target D1 state needs them.
+
 # Build 180 current status
 
 Current build: Build 180. Main new page: `/admin/go-live-execution/`. New migration: `database_build180_go_live_execution.sql`.

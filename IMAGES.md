@@ -1,3 +1,9 @@
+# Build 181 Evidence and Image Addendum
+
+- Private evidence downloads now have a signed route for R2 object keys when the proper bucket and signing secret are configured.
+- Recall evidence upload request rows now store target R2 prefixes before the drag-and-drop UI is connected.
+- Do not expose raw private R2 object URLs on public/admin pages when signed evidence links can be created.
+
 # Build 180 image and evidence notes
 
 Build 180 adds recall evidence upload placeholders, signed-download route test rows, and stronger marketplace CSV gate enforcement for public-ready images.

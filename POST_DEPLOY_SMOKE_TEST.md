@@ -1,3 +1,9 @@
+# Build 181 Post-Deploy Addendum
+
+- After deploy, open `/admin/live-ops-followthrough/` and run Refresh all Build 181 rows.
+- Create one short-expiry signed evidence link against a harmless test R2 object and confirm expiry/download behaviour.
+- Check marketplace gate badges, recall upload requests, dashboard action buttons, and watcher execution snapshot rows.
+
 # Build 180 post-deploy smoke notes
 
 After deploy, run Deployment Preflight, Release Control, Deploy Readiness, Promotion Control, Go-Live Execution, and Post-Deploy Smoke Tests. Then queue the post-promotion watcher from Go-Live Execution.
