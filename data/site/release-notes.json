@@ -1,11 +1,17 @@
 {
   "latest": {
-    "build": "Build 180",
-    "title": "Go-Live Execution, Direct Endpoint Gates, SEO Visuals, and Final Release Controls",
-    "date": "2026-06-10",
-    "summary": "Adds final go-live execution admin/API, safe Product QA applies, marketplace/recall endpoint gates, Local SEO chart renders, structured-data excerpts, promote UI state, and watcher scheduling."
+    "build": "Build 181",
+    "title": "Live Ops Follow-through, Signed Evidence Downloads, Marketplace Overrides, and SEO Copy Refresh",
+    "date": "2026-06-11",
+    "summary": "Adds Build 181 follow-through controls for signed private R2 evidence downloads, recall evidence upload requests, Product QA blocker counts, marketplace gate badges and override requests, LocalBusiness export rows, dashboard action buttons, watcher logs, and local SEO body-copy refreshes."
   },
   "history": [
+    {
+      "build": "Build 181",
+      "title": "Live Ops Follow-through, Signed Evidence Downloads, Marketplace Overrides, and SEO Copy Refresh",
+      "date": "2026-06-11",
+      "summary": "Adds Build 181 follow-through controls for signed private R2 evidence downloads, recall evidence upload requests, Product QA blocker counts, marketplace gate badges and override requests, LocalBusiness export rows, dashboard action buttons, watcher logs, and local SEO body-copy refreshes."
+    },
     {
       "build": "Build 180",
       "title": "Go-Live Execution, Direct Endpoint Gates, SEO Visuals, and Final Release Controls",

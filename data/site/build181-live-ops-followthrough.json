@@ -1,0 +1,36 @@
+{
+  "build_label": "Build 181",
+  "title": "Live Ops Follow-through, Signed Evidence Downloads, Marketplace Overrides, and SEO Copy Refresh",
+  "completed": [
+    "Added `/admin/live-ops-followthrough/` as the Build 181 follow-through admin page after Go-Live Execution.",
+    "Added `/api/admin/live-ops-followthrough` for QA blocker counts, marketplace gate badges, override requests, recall upload requests, LocalBusiness export rows, content-refresh logs, notification buttons, and watcher snapshots.",
+    "Added `/api/admin/private-evidence-download` with HMAC-signed R2 download tokens, expiry enforcement, audit logging, and guarded bucket selection.",
+    "Added `database_build181_live_ops_followthrough.sql` and updated aggregate schema files with the same additive tables.",
+    "Added private evidence download token and audit tables for accountant/customer/recall evidence objects.",
+    "Added Product QA blocker preview count rows for Catalog QA badges beside blocker groups.",
+    "Added marketplace gate badge snapshots so CSV export buttons can show ready/blocked reasons before download.",
+    "Added marketplace export gate override requests with reason and expiry timestamps for temporary audited overrides.",
+    "Added recall evidence upload request rows with R2 target prefixes for candle/soap recall evidence widgets.",
+    " Added LocalBusiness admin export run rows so D1 settings can feed `data/site/local-business-schema.json` during safe deploy packaging.",
+    " Added public page content refresh tracking rows tied to local SEO phrases and static page copy updates.",
+    " Added provider webhook crypto test-vector notes for Resend, SendGrid, and Postmark verification work.",
+    " Added manifest drawer saved filters for admin, functions, schema, and local SEO data paths.",
+    " Added dashboard notification action button rows for snooze/dismiss rendering.",
+    " Added post-promotion watcher execution log rows that summarize smoke-test and runtime-incident state.",
+    " Updated admin dashboard, Operations, and Go-Live Execution navigation for Live Ops Follow-through.",
+    " Added Southern Ontario handmade gift, jewelry, engraving, candle, soap, workshop gift, and vintage-find body-copy refreshes without adding extra H1 tags.",
+    " Updated CSS for Build 181 admin controls, status pills, and local-search refresh blocks.",
+    " Updated Markdown handoff files, schema references, release notes, sanity notes, local SEO notes, image/evidence notes, README, and AI context for Build 181.",
+    " Ran syntax, JSON, H1, CSS, SQL, manifest, and zip validation for the Build 181 package."
+  ],
+  "admin_pages": [
+    "/admin/live-ops-followthrough/"
+  ],
+  "api_routes": [
+    "/api/admin/live-ops-followthrough",
+    "/api/admin/private-evidence-download"
+  ],
+  "d1_migration": "database_build181_live_ops_followthrough.sql",
+  "validation_status": "ready",
+  "created_at": "2026-06-11"
+}
