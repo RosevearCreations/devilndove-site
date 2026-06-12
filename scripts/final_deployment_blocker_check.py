@@ -19,7 +19,11 @@ REQUIRED_FILES = [
     'DATABASE_SCHEMA_REFERENCE.md','SANITY_HEALTH_CHECK.md','POST_DEPLOY_SMOKE_TEST.md',
     'functions/api/image-derivative.js','functions/api/admin/post-deploy-smoke-tests.js',
     'functions/api/admin/dark-theme-evidence.js','admin/post-deploy-smoke-tests/index.html',
-    'database_build177_deploy_score_and_controls.sql','scripts/bake_localbusiness_jsonld.py'
+    'database_build177_deploy_score_and_controls.sql','scripts/bake_localbusiness_jsonld.py',
+    'admin/live-ops-followthrough/index.html',
+    'functions/api/admin/live-ops-followthrough.js',
+    'functions/api/admin/private-evidence-download.js',
+    'database_build181_live_ops_followthrough.sql'
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 
