@@ -1,3 +1,7 @@
+# Build 182 AI handoff context
+
+The current build includes `/admin/visual-polish/` and `/api/admin/visual-polish` for desktop/mobile parity, visual enrichment candidates, motion-safe effects, route fallback reviews, schema validation queues, and JSON-to-D1 ownership decisions. Continue updating Markdown/schema files each pass and preserve one H1 per public page.
+
 # Build 181 AI Context
 
 - Current priority is live-ops follow-through after go-live execution.

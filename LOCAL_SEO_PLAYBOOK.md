@@ -1,3 +1,9 @@
+# Build 182 local SEO visual polish notes
+
+- Local pages now have a shared visual polish support strip that reinforces Southern Ontario phrases in body copy without changing H1 structure.
+- Use Visual Polish candidate rows to plan approved images for handmade jewelry, custom gifts, laser engraving, candles, soap, vintage finds, and workshop-made gifts.
+- Keep titles/meta/main headings clear and locally relevant; use visual candidates for supporting images rather than keyword-stuffing headings.
+
 # Build 181 Local SEO Addendum
 
 - Added body-copy refresh blocks to key Southern Ontario pages without adding extra H1 tags.

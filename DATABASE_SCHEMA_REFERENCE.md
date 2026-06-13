@@ -1,3 +1,24 @@
+# Build 182 schema additions — visual polish, mobile parity, and fallback safety
+
+New migration: `database_build182_mobile_visual_polish.sql`.
+
+New tables:
+
+- `desktop_mobile_parity_checks` — public page desktop/mobile viewport review rows.
+- `visual_enrichment_candidates` — approved-media candidate rows with placement, asset, alt text, local phrase, and reduced-motion notes.
+- `visual_effect_safety_reviews` — allowed visual effects with reduced-motion and contrast review status.
+- `mobile_nav_touch_target_audits` — mobile navigation/button target-size review rows.
+- `css_drift_review_runs` — CSS drift package/admin review rows.
+- `public_page_visual_asset_budgets` — per-page limits for new images/effects and lazy-loading expectations.
+- `route_fallback_review_rows` — readable fallback/error-state review rows for key API routes.
+- `schema_markup_validation_queue` — structured-data validation queue rows for LocalBusiness, WebSite, Product, and related markup.
+- `json_db_migration_candidates` — JSON-to-D1 ownership decisions for duplicated fallback/static data.
+- `visual_polish_admin_preferences` — admin preferences for viewport pairs, motion policy, and visual density.
+
+Migration marker: `build_182_mobile_visual_polish` with `file_name='database_build182_mobile_visual_polish.sql'`.
+
+D1 order: Build 171 repair only if needed, then Build 173 through Build 182 in order.
+
 # Build 181 Schema Reference Addendum
 
 - New migration: `database_build181_live_ops_followthrough.sql`.

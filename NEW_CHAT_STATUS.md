@@ -1,3 +1,7 @@
+# Current status after Build 182
+
+Build 182 adds Visual Polish & Mobile Parity after Live Ops Follow-through. Run migrations through `database_build182_mobile_visual_polish.sql`, then open `/admin/visual-polish/` and seed the review rows before final public checks.
+
 # Build 181 New Chat Status
 
 - Latest package is Build 181.

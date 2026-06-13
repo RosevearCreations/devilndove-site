@@ -1,3 +1,9 @@
+# Build 182 sanity update
+
+- Added Visual Polish & Mobile Parity to static required-file checks.
+- Re-ran one-H1, title/meta, JSON, CSS, JS, Python, SQL smoke, preflight, final blocker, and zip validation.
+- Public visual polish strip uses H2/H3 only and does not add extra H1 headings.
+
 # Build 181 Sanity Health Check Addendum
 
 - Static checks passed for Build 181 files.

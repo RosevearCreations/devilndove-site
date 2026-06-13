@@ -1,3 +1,9 @@
+# Build 182 post-deploy smoke-test additions
+
+- Open `/admin/visual-polish/` after Live Ops and run **Refresh all Build 182 rows**.
+- Review desktop/mobile parity rows, visual candidates, fallback rows, schema queue rows, and JSON-to-D1 candidates.
+- Check public pages on phone and desktop for hero/card polish, no horizontal scroll, readable contrast, and one clear H1.
+
 # Build 181 Post-Deploy Addendum
 
 - After deploy, open `/admin/live-ops-followthrough/` and run Refresh all Build 181 rows.

@@ -1,3 +1,9 @@
+# Build 182 image and visual enrichment notes
+
+- New `visual_enrichment_candidates` rows track page, placement, asset hint, alt text hint, local phrase, and motion-safety.
+- New visual asset budgets limit image additions and require lazy loading for future public media.
+- Future image promotions should use existing approved R2/product media when possible and avoid raw private object paths.
+
 # Build 181 Evidence and Image Addendum
 
 - Private evidence downloads now have a signed route for R2 object keys when the proper bucket and signing secret are configured.

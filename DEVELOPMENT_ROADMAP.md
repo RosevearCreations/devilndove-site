@@ -1,3 +1,50 @@
+# Build 182 Completed Pass — Visual Polish, Desktop/Mobile Parity, SEO Enrichment, and Fallback Safety
+
+Completed in this pass:
+1. Added `/admin/visual-polish/` as the Build 182 desktop/mobile polish and enrichment review page.
+2. Added `/api/admin/visual-polish` for parity rows, visual candidates, effect safety, fallback reviews, schema queue rows, and JSON-to-D1 ownership candidates.
+3. Added `database_build182_mobile_visual_polish.sql` and appended the same additive schema to aggregate schema files.
+4. Added desktop/mobile parity check rows for key public and local SEO pages.
+5. Added mobile navigation touch-target audit rows using a 44px minimum target guideline inside the admin review workflow.
+6. Added visual enrichment candidate rows for local pages, image slots, asset hints, alt text hints, and reduced-motion-safe placement notes.
+7. Added visual-effect safety review rows for hero glow, card lift, visual ribbons, and product-image depth.
+8. Added public-page visual asset budget rows to limit new images/effects and require lazy loading for future media additions.
+9. Added route fallback review rows for core admin and public APIs so blank panels can be replaced with readable retry/error states.
+10. Added structured-data validation queue rows for LocalBusiness, WebSite, and Product markup review after page updates.
+11. Added JSON-to-D1 migration candidate rows for catalog, SEO overrides, LocalBusiness, release notes, and local SEO bake actions.
+12. Added visual-polish admin preferences for default viewport pairs and motion policy.
+13. Added a shared visual polish strip on the homepage and local pages without adding any extra H1 headings.
+14. Added motion-safe CSS for sharper cards, visual tiles, admin controls, and phone-friendly button sizing.
+15. Added `data/site/build182-mobile-visual-polish.json` as a static handoff artifact for this pass.
+16. Updated admin dashboard and Operations navigation with Visual Polish & Mobile Parity links.
+17. Updated static preflight and final blocker scripts to require the new Build 182 page, API, JS, migration, and handoff JSON.
+18. Updated the release manifest generator to emit Build 182 metadata.
+19. Updated Markdown handoff files, schema references, release notes, sanity notes, local SEO notes, image/evidence notes, README, and AI context.
+20. Ran syntax, JSON, H1, CSS, SQL, preflight, final blocker, and zip validation for the Build 182 package.
+
+Next 20 recommended steps:
+1. Connect Visual Polish candidates to real product/R2 media picker thumbnails so approved image slots can choose an existing asset.
+2. Add side-by-side screenshot uploads for desktop and mobile parity rows.
+3. Add automated screenshot capture after deploy for the Visual Polish page using the existing dark-theme evidence queue.
+4. Show Visual Polish candidate badges directly on Local SEO Review rows.
+5. Create a public page image-slot editor that writes approved candidates back to page sections without changing H1 structure.
+6. Add a media compression budget report that flags large images before they are promoted to public pages.
+7. Add visual diff overlays for previous/current screenshot pairs.
+8. Add one-click alt-text copy generation from approved visual candidates.
+9. Add schema validation result import rows from Rich Results/Schema validators after manual checks.
+10. Move `data/catalog.json` fallback ownership decisions into a visible JSON→D1 migration admin panel.
+11. Add public API fallback preview cards that show the exact customer-facing error message before deployment.
+12. Add phone-only admin quick cards for Visual Polish candidate approval.
+13. Add seasonal visual campaign rows for Christmas, Mother’s Day, Father’s Day, markets, and custom gift events.
+14. Add a gallery hero-image rotation queue using approved media only.
+15. Add product detail visual polish checks for thumbnail strip, featured image, image roles, and mobile zoom controls.
+16. Add CSS token checks for contrast, spacing, card radius, and button height drift.
+17. Add visual accessibility notes for motion, contrast, text-over-image, and touch target review.
+18. Add real D1-export-to-static JSON ownership status inside Safe Deploy package metadata.
+19. Add a customer-facing low-bandwidth mode toggle or lighter media preference.
+20. Merge Visual Polish status into the final printable deployment report alongside Release Control and Live Ops.
+
+
 # Build 181 Completed Pass — Live Ops Follow-through, Signed Evidence Downloads, Marketplace Overrides, and SEO Copy Refresh
 
 Completed in this pass:

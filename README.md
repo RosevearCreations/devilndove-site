@@ -1,3 +1,10 @@
+# Build 182 update
+
+- New admin page: `/admin/visual-polish/`.
+- New API route: `/api/admin/visual-polish`.
+- New migration: `database_build182_mobile_visual_polish.sql`.
+- Focus: desktop website polish, mobile parity, visual enrichment candidates, CSS drift, route fallbacks, structured-data validation queue, and JSON-to-D1 ownership candidates.
+
 # Build 181 Handoff
 
 - New admin page: `/admin/live-ops-followthrough/`.
