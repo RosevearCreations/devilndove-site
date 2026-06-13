@@ -23,7 +23,11 @@ REQUIRED_FILES = [
     'admin/live-ops-followthrough/index.html',
     'functions/api/admin/live-ops-followthrough.js',
     'functions/api/admin/private-evidence-download.js',
-    'database_build181_live_ops_followthrough.sql'
+    'database_build181_live_ops_followthrough.sql',
+    'database_build182_mobile_visual_polish.sql',
+    'admin/visual-polish/index.html',
+    'functions/api/admin/visual-polish.js',
+    'public/js/admin-visual-polish.js'
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 
