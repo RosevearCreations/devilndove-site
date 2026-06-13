@@ -7,7 +7,7 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "31 required files are present.",
+      "detail": "35 required files are present.",
       "missing": []
     },
     {
@@ -182,12 +182,12 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 965/965"
+      "detail": "CSS braces 992/992"
     },
     {
       "code": "static_json_parse",
       "status": "pass",
-      "detail": "7 JSON files checked; 0 failed.",
+      "detail": "8 JSON files checked; 0 failed.",
       "rows": [
         {
           "path": "data/site/seo-page-overrides.json",
@@ -221,6 +221,11 @@
         },
         {
           "path": "data/catalog.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build182-mobile-visual-polish.json",
           "ok": true,
           "error": ""
         }

@@ -18,5 +18,22 @@
       "date": "2026-06-10",
       "summary": "Adds final go-live execution admin/API, safe Product QA applies, marketplace/recall endpoint gates, Local SEO chart renders, structured-data excerpts, promote UI state, and watcher scheduling."
     }
-  ]
+  ],
+  "items": [
+    {
+      "build_label": "Build 182",
+      "title": "Visual Polish, Mobile Parity, and SEO Enrichment",
+      "summary": "Added visual polish admin controls, mobile/desktop parity rows, visual enrichment candidates, fallback review rows, schema validation queue, JSON-to-D1 ownership candidates, and motion-safe public support strips.",
+      "files": [
+        "admin/visual-polish/index.html",
+        "functions/api/admin/visual-polish.js",
+        "public/js/admin-visual-polish.js",
+        "database_build182_mobile_visual_polish.sql",
+        "data/site/build182-mobile-visual-polish.json",
+        "css/styles.css",
+        "js/main.js"
+      ]
+    }
+  ],
+  "build_label": "Build 182"
 }

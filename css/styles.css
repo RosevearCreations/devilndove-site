@@ -1150,3 +1150,17 @@ body.nav-mobile-open{overflow:hidden}
 .status-pill.available,.status-pill.ready,.status-pill.applied_static{background:rgba(34,197,94,.16);color:#166534}
 .status-pill.requested,.status-pill.needs_upload,.status-pill.documented{background:rgba(234,179,8,.18);color:#854d0e}
 .status-pill.blocked,.status-pill.invalid_signature,.status-pill.expired{background:rgba(239,68,68,.16);color:#991b1b}
+
+
+/* Build 182 visual polish, desktop/mobile parity, and motion-safe professional accents */
+.visual-polish-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.visual-polish-strip .visual-tile{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:16px;background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.035));box-shadow:0 16px 40px rgba(0,0,0,.12)}
+.visual-polish-strip .visual-tile::after{content:"";position:absolute;inset:auto -20% -40% auto;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);pointer-events:none}
+.visual-polish-strip .visual-kicker{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;opacity:.76;font-weight:800}
+.visual-polish-strip h2,.visual-polish-strip h3{margin:.35rem 0 .45rem}
+.hero.visual-admin-hero,.hero.visual-polished-hero{position:relative;overflow:hidden}
+.hero.visual-admin-hero::after,.hero.visual-polished-hero::after{content:"";position:absolute;inset:-40% -10% auto auto;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),transparent 68%);pointer-events:none}
+.visual-polish-toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.visual-polish-toolbar .btn{min-height:42px}.visual-polish-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.visual-polish-grid .card{min-width:0}.btn.small{padding:.45rem .65rem;font-size:.86rem}.status-pill.approved-for-next-media-pass,.status-pill.allowed-with-reduced-motion,.status-pill.passed-static,.status-pill.prepared,.status-pill.prepared-static-package-check{background:rgba(34,197,94,.16);color:#166534}.status-pill.needs-review,.status-pill.queued,.status-pill.needs-live-review,.status-pill.needs-decision{background:rgba(234,179,8,.18);color:#854d0e}
+.card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.card:hover{border-color:rgba(255,255,255,.2)}@media (hover:hover) and (pointer:fine){.card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(0,0,0,.14)}}
+@media (max-width:760px){.visual-polish-strip,.visual-polish-grid{grid-template-columns:1fr}.visual-polish-toolbar .btn,.visual-polish-grid .btn{width:100%}.hero.visual-admin-hero::after,.hero.visual-polished-hero::after{width:180px;height:180px}.nav a,.nav button,.btn{min-height:44px;align-items:center}}
+@media (prefers-reduced-motion:reduce){.card,.visual-polish-strip .visual-tile{transition:none!important}.card:hover{transform:none!important}.hero.visual-admin-hero::after,.hero.visual-polished-hero::after{display:none}}
