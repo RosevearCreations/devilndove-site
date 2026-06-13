@@ -1,3 +1,10 @@
+# Build 183 — Visual Enrichment Studio and Professional Visual Controls
+
+- Added `/admin/visual-enrichment-studio/`, `/api/admin/visual-enrichment-studio`, and `database_build183_visual_enrichment_studio.sql`.
+- Added visual media-picker asset rows, desktop/mobile screenshot pairs, dark-theme screenshot job placeholders, Local SEO visual badges, page image-slot assignments that preserve one-H1 structure, image compression budget rows, visual diff overlays, alt-text suggestions, schema validator import rows, JSON→D1 ownership decisions, public API fallback previews, mobile quick cards, seasonal campaign rows, gallery hero rotation, product detail visual polish checks, CSS token drift rows, accessibility notes, low-bandwidth preference rows, and final visual deployment report rows.
+- Added a customer-facing lighter-visual toggle that reduces nonessential visual effects without changing content or H1 structure.
+- Updated schema files, deployment preflight script, final blocker script, manifest generation, roadmap, known gaps, Local SEO notes, image notes, post-deploy smoke-test notes, README, AI context, and new-chat handoff.
+
 # Build 182 Completed Pass — Visual Polish, Desktop/Mobile Parity, SEO Enrichment, and Fallback Safety
 
 Completed in this pass:

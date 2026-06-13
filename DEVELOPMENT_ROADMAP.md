@@ -1,3 +1,49 @@
+# Build 183 Completed Pass — Visual Enrichment Studio, Media Picker Rows, Screenshot Pairs, Low-Bandwidth Mode, and Final Visual Report
+
+Completed in this pass:
+1. Added `/admin/visual-enrichment-studio/` for the Build 183 image/effect refinement workflow.
+2. Added `/api/admin/visual-enrichment-studio` for media-picker assets, screenshot rows, alt-text suggestions, visual budgets, schema imports, and report rows.
+3. Added `database_build183_visual_enrichment_studio.sql` and updated all main schema SQL files plus `database_upgrade_current_pass.sql`.
+4. Connected approved Visual Polish candidates to `visual_candidate_media_assets` rows with product-image/static fallback thumbnail support.
+5. Added desktop/mobile screenshot pair rows and automated visual screenshot job placeholders tied to dark-theme evidence review.
+6. Added Local SEO visual candidate badges and page image-slot assignments that explicitly block H1 changes.
+7. Added media compression budget reports before public image promotion.
+8. Added visual diff overlay rows for previous/current screenshot comparisons.
+9. Added one-click alt-text suggestion rows for approved visual candidates.
+10. Added schema validation result import rows for manual Rich Results/Schema validator checks.
+11. Moved JSON→D1 ownership decisions into visible `json_db_ownership_decisions` rows.
+12. Added public API fallback preview cards with exact customer-facing fallback messages.
+13. Added phone-only visual candidate quick-card rows for mobile approvals.
+14. Added seasonal visual campaign rows for Christmas, Mother’s Day, Father’s Day, local markets, and custom gift events.
+15. Added gallery hero-image rotation queue using approved media only.
+16. Added product detail visual polish checks for thumbnail strip, featured image, image roles, and mobile zoom controls.
+17. Added CSS token drift rows for contrast, spacing, card radius, focus outline, and button/touch height review.
+18. Added visual accessibility notes for motion, contrast, text-over-image, and touch target review.
+19. Added Safe Deploy JSON ownership export rows plus static `data/site/build183-visual-enrichment-studio.json`.
+20. Added a customer-facing lighter-visual/low-bandwidth toggle and final visual deployment report rows.
+
+Next 20 recommended steps:
+1. Wire the Visual Enrichment media picker to direct R2 browser uploads with signed object keys.
+2. Add real screenshot upload controls to the Visual Enrichment Studio page rather than seeded URL placeholders.
+3. Generate visual diff thumbnails from uploaded screenshot pairs and store a computed difference score.
+4. Show Local SEO visual candidate badges directly inside `/admin/local-seo-review/` rows.
+5. Add a guarded publish button that writes selected image-slot assignments into generated static page JSON.
+6. Enforce image budget warnings inside product/image upload and public promotion endpoints.
+7. Add alt-text suggestion acceptance that writes back to product images or page image-slot rows.
+8. Add manual validator paste/import forms for schema validation result rows.
+9. Add a JSON→D1 migration admin panel for reviewing and approving individual source files.
+10. Add endpoint failure simulators so public API fallback preview cards can be live-tested safely.
+11. Add phone quick approval cards to the mobile admin dashboard.
+12. Add seasonal campaign public preview cards before campaign images/copy are published.
+13. Add gallery hero rotation preview and reorder controls.
+14. Add product detail visual polish badges directly in the product editor image strip.
+15. Add CSS token extraction from `css/styles.css` so drift checks compare actual values, not placeholders.
+16. Add accessibility screenshot annotations for text-over-image contrast and tap target spacing.
+17. Add low-bandwidth preference sync for logged-in members.
+18. Merge final visual deployment report rows into Safe Deploy ZIP metadata and printable release report.
+19. Add per-page professional image/effect recommendations based on current public content density.
+20. Add a post-deploy visual smoke-test dashboard that combines screenshots, H1, CSS, and local SEO checks.
+
 # Build 182 Completed Pass — Visual Polish, Desktop/Mobile Parity, SEO Enrichment, and Fallback Safety
 
 Completed in this pass:

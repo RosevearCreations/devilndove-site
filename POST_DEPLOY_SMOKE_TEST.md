@@ -1,3 +1,7 @@
+# Build 183 post-deploy visual smoke-test notes
+
+After deploy, open `/admin/visual-enrichment-studio/`, seed the Build 183 rows, then review screenshot pairs, image-slot assignments, compression budgets, low-bandwidth toggle behaviour, and final visual deployment report rows. Confirm public pages still show one H1 and that the lighter visual toggle does not hide core content.
+
 # Build 182 post-deploy smoke-test additions
 
 - Open `/admin/visual-polish/` after Live Ops and run **Refresh all Build 182 rows**.

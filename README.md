@@ -1,3 +1,7 @@
+## Build 183 admin addition
+
+Build 183 adds `/admin/visual-enrichment-studio/` for approved-media visual enrichment, desktop/mobile screenshot pairs, visual diffs, image budgets, alt-text suggestions, seasonal visual campaigns, product detail visual checks, low-bandwidth mode, and final visual release-report rows.
+
 # Build 182 update
 
 - New admin page: `/admin/visual-polish/`.

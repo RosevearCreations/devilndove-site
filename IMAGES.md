@@ -1,3 +1,7 @@
+# Build 183 image and visual-enrichment notes
+
+Use `/admin/visual-enrichment-studio/` to review media picker rows, image-slot assignments, screenshot pairs, visual diffs, compression budgets, alt-text suggestions, gallery hero rotation, and low-bandwidth mode. Public images should stay lazy-loaded, under the image budget where possible, and reviewed for alt text before promotion.
+
 # Build 182 image and visual enrichment notes
 
 - New `visual_enrichment_candidates` rows track page, placement, asset hint, alt text hint, local phrase, and motion-safety.

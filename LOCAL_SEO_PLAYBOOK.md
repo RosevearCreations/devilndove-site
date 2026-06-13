@@ -1,3 +1,7 @@
+# Build 183 local SEO visual enrichment notes
+
+Build 183 adds Local SEO visual candidate badge rows and page image-slot assignments. These support local discovery by keeping visual improvements tied to page paths and local phrases while preserving a single H1 per public page. Image slots are explicitly marked with `h1_change_allowed = 0` so visual upgrades do not drift into heading/title confusion.
+
 # Build 182 local SEO visual polish notes
 
 - Local pages now have a shared visual polish support strip that reinforces Southern Ontario phrases in body copy without changing H1 structure.

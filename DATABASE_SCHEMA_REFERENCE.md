@@ -1,3 +1,11 @@
+# Build 183 schema reference update
+
+New migration: `database_build183_visual_enrichment_studio.sql`.
+
+New Build 183 tables: `visual_candidate_media_assets`, `visual_parity_screenshot_pairs`, `visual_polish_screenshot_jobs`, `local_seo_visual_candidate_badges`, `public_page_image_slot_assignments`, `media_compression_budget_reports`, `visual_diff_overlay_pairs`, `visual_candidate_alt_text_suggestions`, `schema_validation_result_imports`, `json_db_ownership_decisions`, `public_api_fallback_preview_cards`, `mobile_visual_candidate_quick_cards`, `seasonal_visual_campaigns`, `gallery_hero_rotation_queue`, `product_detail_visual_polish_checks`, `css_token_drift_checks`, `visual_accessibility_notes`, `safe_deploy_json_ownership_exports`, `public_low_bandwidth_preferences`, and `final_visual_deployment_report_rows`.
+
+The migration is additive and writes ledger key `build_183_visual_enrichment_studio` with non-null `file_name`.
+
 # Build 182 schema additions — visual polish, mobile parity, and fallback safety
 
 New migration: `database_build182_mobile_visual_polish.sql`.

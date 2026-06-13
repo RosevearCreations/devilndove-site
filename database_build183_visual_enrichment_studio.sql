@@ -1,4 +1,3 @@
-
 -- Devil n Dove Build 183 — Visual Enrichment Studio, approved-media slots, screenshot pairs, alt-text suggestions, and low-bandwidth polish controls
 -- Safe additive D1 migration. Run after database_build182_mobile_visual_polish.sql.
 

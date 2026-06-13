@@ -1,3 +1,9 @@
+# Build 183 sanity update
+
+Build 183 adds Visual Enrichment Studio checks to the normal deployment sanity flow. Required files now include `admin/visual-enrichment-studio/index.html`, `functions/api/admin/visual-enrichment-studio.js`, `public/js/admin-visual-enrichment-studio.js`, `database_build183_visual_enrichment_studio.sql`, and `data/site/build183-visual-enrichment-studio.json`.
+
+Run order now includes `database_build183_visual_enrichment_studio.sql` after Build 182. The final blocker script validates the new page/API/JS/migration/static handoff file plus the usual one-H1, CSS brace, JavaScript syntax, JSON parse, and schema marker checks.
+
 # Build 182 sanity update
 
 - Added Visual Polish & Mobile Parity to static required-file checks.
