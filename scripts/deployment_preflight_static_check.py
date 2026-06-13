@@ -35,6 +35,7 @@ JSON_FILES = [
     'data/site/local-business-schema.json',
     'data/catalog.json',
     'data/site/build182-mobile-visual-polish.json',
+    'data/site/build183-visual-enrichment-studio.json',
 ]
 REQUIRED_FILES = [
     'database_build171_ledger_repair.sql',
@@ -72,6 +73,10 @@ REQUIRED_FILES = [
     'scripts/regenerate_sanity_from_preflight.py',
     'RELEASE_NOTES.md',
     'SANITY_HEALTH_CHECK.md',
+    'database_build183_visual_enrichment_studio.sql',
+    'admin/visual-enrichment-studio/index.html',
+    'functions/api/admin/visual-enrichment-studio.js',
+    'public/js/admin-visual-enrichment-studio.js',
 ]
 
 def read(path: Path) -> str:
@@ -181,12 +186,14 @@ def check_schema_files(checks: list[dict]) -> None:
         'build_181_live_ops_followthrough',
         'private_evidence_download_tokens',
         'marketplace_export_gate_overrides',
+        'build_183_visual_enrichment_studio',
+        'visual_candidate_media_assets',
     ]
     required = {
         'database_schema.sql': schema_needles,
         'database_full_schema.sql': schema_needles,
         'database_store_schema.sql': schema_needles,
-        'database_upgrade_current_pass.sql': schema_needles,
+        'database_upgrade_current_pass.sql': ['visual_candidate_media_assets', 'public_page_image_slot_assignments', 'build_183_visual_enrichment_studio'],
         'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
         'database_build182_mobile_visual_polish.sql': ['desktop_mobile_parity_checks', 'visual_enrichment_candidates', 'build_182_mobile_visual_polish'],
         'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
@@ -196,6 +203,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build179_promotion_control.sql': ['promote_live_attempts', 'recall_notification_release_gates', 'build_179_promotion_control'],
         'database_build180_go_live_execution.sql': ['product_qa_safe_apply_runs', 'build_180_go_live_execution'],
         'database_build181_live_ops_followthrough.sql': ['private_evidence_download_tokens', 'marketplace_export_gate_overrides', 'build_181_live_ops_followthrough'],
+        'database_build183_visual_enrichment_studio.sql': ['visual_candidate_media_assets', 'public_page_image_slot_assignments', 'build_183_visual_enrichment_studio'],
     }
     missing=[]
     detail=[]
@@ -205,7 +213,7 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_build181','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174/175/176/177/178/179/180/181 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_build181','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174/175/176/177/178/179/180/181/183 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
 
 def main() -> int:
     checks=[]
@@ -216,7 +224,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 181','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 183','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')

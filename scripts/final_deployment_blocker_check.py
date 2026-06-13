@@ -11,6 +11,7 @@ This is intentionally no-network. It catches the recurring release blockers befo
 from __future__ import annotations
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,7 +28,12 @@ REQUIRED_FILES = [
     'database_build182_mobile_visual_polish.sql',
     'admin/visual-polish/index.html',
     'functions/api/admin/visual-polish.js',
-    'public/js/admin-visual-polish.js'
+    'public/js/admin-visual-polish.js',
+    'database_build183_visual_enrichment_studio.sql',
+    'admin/visual-enrichment-studio/index.html',
+    'functions/api/admin/visual-enrichment-studio.js',
+    'public/js/admin-visual-enrichment-studio.js',
+    'data/site/build183-visual-enrichment-studio.json'
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 
@@ -39,12 +45,24 @@ def iter_files(*suffixes: str):
             yield path
 
 def js_syntax():
-    issues=[]
-    for path in list((ROOT/'functions').rglob('*.js'))+list((ROOT/'public/js').rglob('*.js'))+list((ROOT/'js').rglob('*.js')):
-        result=subprocess.run(['node','--check',str(path)],cwd=ROOT,capture_output=True,text=True)
+    paths = list((ROOT/'functions').rglob('*.js')) + list((ROOT/'public/js').rglob('*.js')) + list((ROOT/'js').rglob('*.js'))
+    def check(path: Path):
+        try:
+            result = subprocess.run(['node','--check',str(path)], cwd=ROOT, capture_output=True, text=True, timeout=12)
+        except subprocess.TimeoutExpired:
+            return f'JS syntax timeout: {path.relative_to(ROOT)}'
         if result.returncode:
-            issues.append(f'JS syntax: {path.relative_to(ROOT)}\n{result.stderr.strip()}')
-    return issues
+            return f'JS syntax: {path.relative_to(ROOT)}\n{result.stderr.strip()}'
+        return None
+    issues=[]
+    workers = min(16, max(1, len(paths)))
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = [executor.submit(check, path) for path in paths]
+        for future in as_completed(futures):
+            issue = future.result()
+            if issue:
+                issues.append(issue)
+    return sorted(issues)
 
 def html_checks():
     issues=[]

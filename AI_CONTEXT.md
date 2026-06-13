@@ -1,3 +1,7 @@
+# Build 183 AI context update
+
+The latest Devil n Dove build now includes Visual Enrichment Studio for media picker rows, screenshot pairs, image-slot assignments, visual diffs, alt-text suggestions, JSON→D1 ownership decisions, low-bandwidth mode, and final visual deployment report rows. Continue preserving one H1 per public page and updating Markdown/schema files every pass.
+
 # Build 182 AI handoff context
 
 The current build includes `/admin/visual-polish/` and `/api/admin/visual-polish` for desktop/mobile parity, visual enrichment candidates, motion-safe effects, route fallback reviews, schema validation queues, and JSON-to-D1 ownership decisions. Continue updating Markdown/schema files each pass and preserve one H1 per public page.
