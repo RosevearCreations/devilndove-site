@@ -35,5 +35,20 @@
       ]
     }
   ],
-  "build_label": "Build 182"
+  "build_label": "Build 183",
+  "notes": [
+    {
+      "build_label": "Build 183",
+      "title": "Visual Enrichment Studio and professional visual controls",
+      "summary": "Added media picker asset rows, screenshot pairs, image-slot assignments, visual diffs, alt-text suggestions, seasonal campaigns, low-bandwidth mode, and final visual deployment report rows.",
+      "migration": "database_build183_visual_enrichment_studio.sql",
+      "admin_pages": [
+        "/admin/visual-enrichment-studio/"
+      ],
+      "api_routes": [
+        "/api/admin/visual-enrichment-studio"
+      ],
+      "created_at": "2026-06-12"
+    }
+  ]
 }
