@@ -315,6 +315,35 @@
   }
 
 
+
+
+  function visualPolishMeta(pathname) {
+    const path = String(pathname || location.pathname || '/').toLowerCase();
+    if (path.includes('custom-gifts')) return { heading:'Custom gifts with clearer workshop context', kicker:'Southern Ontario gift ideas', bullets:['Handmade, engraved, candle, soap, and vintage paths stay separated for easier browsing.','Visual review rows now track where better approved product photos or process images can go.','The layout remains phone-first while desktop cards keep a sharper professional look.'] };
+    if (path.includes('handmade-jewelry')) return { heading:'Handmade jewelry details at a glance', kicker:'Jewelry and maker story', bullets:['Cards can highlight material, process, local pickup, and gift-fit signals without crowding the H1.','Visual candidates now track image slots and alt text hints before new photos go live.','Motion stays subtle and respects reduced-motion settings.'] };
+    if (path.includes('laser-engraving')) return { heading:'Engraving process clarity', kicker:'Laser engraving Ontario', bullets:['Future image slots can show before/after examples, approved materials, and finished gift details.','Schema and fallback rows help keep service pages readable even when live admin data is unavailable.','Mobile touch targets stay large enough for phone browsing.'] };
+    if (path.includes('candle')) return { heading:'Candle colour and scent story', kicker:'Custom candles Ontario', bullets:['Visual candidates can reserve spots for bright colour photos and raised-detail closeups.','Recall and evidence controls stay separate in admin while public copy remains simple.','One clear H1 is preserved for title-link clarity.'] };
+    if (path.includes('soap')) return { heading:'Soap colour, scent, and gift clarity', kicker:'Custom soap Ontario', bullets:['Future approved photos can show texture, bars, packaging, and gift sets.','Structured-data queue rows help verify page markup after content changes.','Desktop and mobile review rows keep both versions aligned.'] };
+    if (path.includes('vintage')) return { heading:'Vintage finds with better visual proof', kicker:'Ontario vintage finds', bullets:['Candidate rows can track detail photos, condition images, and provenance hints.','Image budgets keep visual polish sharp without slowing the page.','Fallback notes help prevent blank states if listing data is unavailable.'] };
+    if (path.includes('workshop-made')) return { heading:'Workshop-made gifts with more visual polish', kicker:'Maker gifts Southern Ontario', bullets:['Visual enrichment keeps the making process and finished result easier to understand.','Local phrases stay in body copy and headings without adding extra H1 tags.','Mobile and desktop parity rows keep the site usable for both browsing styles.'] };
+    if (path === '/' || path === '/index.html') return { heading:'Sharper browsing on desktop and phone', kicker:'Build 182 visual polish', bullets:['Desktop cards get a cleaner, more professional visual rhythm.','Mobile review rows keep menus, buttons, and product paths easy to tap.','Visual enrichment is queued before photos/effects go live so pages stay polished, fast, and accessible.'] };
+    return null;
+  }
+
+  function injectVisualPolishStrip() {
+    const meta = visualPolishMeta(location.pathname);
+    if (!meta || document.getElementById('visualPolishStrip')) return;
+    const container = document.querySelector('.container') || document.body;
+    const anchor = container.querySelector('.customer-welcome, .hero');
+    if (!container || !anchor) return;
+    const section = document.createElement('section');
+    section.id = 'visualPolishStrip';
+    section.className = 'visual-polish-strip';
+    section.setAttribute('aria-label', meta.kicker || 'Visual polish notes');
+    section.innerHTML = meta.bullets.map((bullet, index) => `<article class="visual-tile"><div class="visual-kicker">${escapeHtml(index === 0 ? meta.kicker : (index === 1 ? 'Mobile friendly' : 'Polished fallback'))}</div><h2>${escapeHtml(index === 0 ? meta.heading : (index === 1 ? 'Phone and desktop ready' : 'Fast, clear, accessible'))}</h2><p class="small">${escapeHtml(bullet)}</p></article>`).join('');
+    anchor.parentNode.insertBefore(section, anchor.nextSibling);
+  }
+
   function shouldShowTrustSupportBlock(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
     return ['/', '/index.html', '/shop/', '/shop/index.html', '/collections/', '/collections/index.html', '/marketplaces/', '/marketplaces/index.html', '/events/', '/events/index.html', '/pickup/', '/pickup/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/search/', '/search/index.html'].includes(path);
@@ -451,6 +480,7 @@
     hydrateFooterSocials();
     injectFeaturedTestimonials();
     injectTrustSupportBlock();
+    injectVisualPolishStrip();
     ensureGlobalScript('/public/js/auth.js');
     ensureGlobalScript('/public/js/site-auth-ui.js');
     ensureGlobalScript('/public/js/site-analytics.js');
