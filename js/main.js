@@ -344,6 +344,32 @@
     anchor.parentNode.insertBefore(section, anchor.nextSibling);
   }
 
+
+  function injectLowBandwidthToggle() {
+    const eligible = document.querySelector('.visual-polish-strip, .hero, .product-grid, .cards, .collection-grid');
+    if (!eligible || document.getElementById('lowBandwidthToggle')) return;
+    const saved = localStorage.getItem('dd_low_bandwidth') || 'auto';
+    const apply = (mode) => {
+      const enabled = mode === 'on' || (mode === 'auto' && window.matchMedia && window.matchMedia('(prefers-reduced-data: reduce)').matches);
+      document.documentElement.classList.toggle('low-bandwidth', enabled);
+      localStorage.setItem('dd_low_bandwidth', mode);
+      const label = document.querySelector('#lowBandwidthToggle button');
+      if (label) label.textContent = enabled ? 'Lighter visuals: on' : 'Lighter visuals: auto/off';
+    };
+    const wrap = document.createElement('div');
+    wrap.id = 'lowBandwidthToggle';
+    wrap.className = 'low-bandwidth-toggle';
+    wrap.innerHTML = '<button type="button" aria-pressed="false">Lighter visuals: auto/off</button>';
+    wrap.querySelector('button').addEventListener('click', () => {
+      const current = localStorage.getItem('dd_low_bandwidth') || 'auto';
+      apply(current === 'on' ? 'off' : 'on');
+      wrap.querySelector('button').setAttribute('aria-pressed', document.documentElement.classList.contains('low-bandwidth') ? 'true' : 'false');
+    });
+    document.body.appendChild(wrap);
+    apply(saved);
+    wrap.querySelector('button').setAttribute('aria-pressed', document.documentElement.classList.contains('low-bandwidth') ? 'true' : 'false');
+  }
+
   function shouldShowTrustSupportBlock(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
     return ['/', '/index.html', '/shop/', '/shop/index.html', '/collections/', '/collections/index.html', '/marketplaces/', '/marketplaces/index.html', '/events/', '/events/index.html', '/pickup/', '/pickup/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/search/', '/search/index.html'].includes(path);
@@ -481,6 +507,7 @@
     injectFeaturedTestimonials();
     injectTrustSupportBlock();
     injectVisualPolishStrip();
+    injectLowBandwidthToggle();
     ensureGlobalScript('/public/js/auth.js');
     ensureGlobalScript('/public/js/site-auth-ui.js');
     ensureGlobalScript('/public/js/site-analytics.js');
