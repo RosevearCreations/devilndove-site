@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+<title>Vintage condition placeholder</title><desc>Vintage condition placeholder for approved future visual enrichment.</desc>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a3e2b"/><stop offset="1" stop-color="#15111c"/></linearGradient><radialGradient id="r" cx="70%" cy="20%" r="50%"><stop offset="0" stop-color="#e8c99b" stop-opacity=".72"/><stop offset="1" stop-color="#e8c99b" stop-opacity="0"/></radialGradient></defs>
+<rect width="1200" height="800" fill="url(#g)"/><rect width="1200" height="800" fill="url(#r)"/>
+<circle cx="220" cy="180" r="96" fill="#e8c99b" opacity=".18"/><circle cx="980" cy="620" r="150" fill="#e8c99b" opacity=".14"/>
+<path d="M145 560 C 310 430, 430 640, 610 505 S 895 415, 1045 552" fill="none" stroke="#e8c99b" stroke-width="18" stroke-linecap="round" opacity=".42"/>
+<rect x="118" y="118" width="964" height="564" rx="44" fill="none" stroke="rgba(255,255,255,.38)" stroke-width="8" stroke-dasharray="22 18"/>
+<text x="600" y="372" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="800" fill="#fff">Vintage condition slot</text>
+<text x="600" y="430" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="rgba(255,255,255,.78)">Replace with approved Devil n Dove media</text>
+</svg>
