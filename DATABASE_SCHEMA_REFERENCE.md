@@ -1112,3 +1112,8 @@ Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two pr
 ## Build 186 schema addition
 
 Added `database_build186_markdown_consolidation_visual_placeholders.sql` for Markdown consolidation rows, value enhancement execution rows, visual placeholder rows, desktop/mobile surface audit rows, CSS drift/overlap rows, and next-step sanity rows.
+
+
+## Build 187 schema note
+
+No schema migration is required. Build 187 is an auth route/environment configuration hotfix. The live deployment must still have the D1 binding named `DB`, and the database must already include the current auth tables (`users`, `sessions`) from prior migrations/bootstrap.

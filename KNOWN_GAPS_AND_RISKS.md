@@ -1545,3 +1545,8 @@ Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two pr
 ## Build 186 remaining sanity concerns
 
 The app is now powerful but broad. The next risk is admin overload, duplicated documentation, and placeholders staying placeholder forever. The next highest-value work is live rollups, real approved media, conversion measurement, customer timeline cards, and performance measurements.
+
+
+## Build 187 remaining risk — Cloudflare environment setup
+
+The app needs more than the two visible secrets reported by the user. Some required resources are Cloudflare bindings rather than secrets, especially `DB` for D1 and `PRODUCT_MEDIA_BUCKET` for R2. Until those are verified in the deployed Pages project, login, admin, products, uploads, evidence, checkout recovery, and Command Center pages may show fallback/errors.

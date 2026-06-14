@@ -574,3 +574,14 @@ Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two pr
 ## Build 186 — Markdown Consolidation, Visual Placeholders, and Value Backlog Execution
 
 Added Markdown Sanity admin/API, two canonical Markdown files, visual graphic placeholder assets and public injection, value-enhancement execution rows, desktop/mobile surface checks, CSS drift rows, schema updates, and updated handoff documentation.
+
+
+## Build 187 — login 405 and Cloudflare environment checklist
+
+- Hardened `/api/auth/login` with an all-method Pages Function router so GET/HEAD/OPTIONS return controlled JSON responses and POST remains the login method.
+- Added flat fallback route `/api/auth-login` for deployments where nested Pages routing returns 405.
+- Updated the shared auth client to retry the fallback route only after a 405 from `/api/auth/login`.
+- Patched legacy health/bootstrap checks to use the primary `DB` D1 binding before the older `DD_DB` alias.
+- Added `CLOUDFLARE_ENVIRONMENT_CHECKLIST.md` to document required bindings, secrets, and optional provider variables.
+
+No D1 schema migration is required for Build 187.

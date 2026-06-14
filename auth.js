@@ -132,13 +132,25 @@
     return data;
   }
 
-  async function login(email, password) {
-    const response = await fetch('/api/auth/login', {
+  async function postLoginTo(endpoint, email, password) {
+    return fetch(endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       credentials: 'same-origin',
+      cache: 'no-store',
       body: JSON.stringify({ email: normalizeText(email).toLowerCase(), password: String(password || '') })
     });
+  }
+
+  async function login(email, password) {
+    let response = await postLoginTo('/api/auth/login', email, password);
+
+    // Build 187: recover from a Cloudflare Pages 405 method-route edge case by
+    // retrying a flat compatibility endpoint that exports the same login handler.
+    if (response.status === 405) {
+      response = await postLoginTo('/api/auth-login', email, password);
+    }
+
     return handleAuthResponse(response);
   }
 

@@ -65,3 +65,8 @@ Supporting references remain available: `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AN
 ## Live-only checks still required after deployment
 
 Cloudflare D1, R2, email providers, payment providers, Search Console import, Google Business Profile observations, and any direct R2/private evidence actions must be tested in the deployed environment with real bindings/secrets.
+
+
+## Build 187 handoff note
+
+The user reported `api/auth/login` returning 405 and said Cloudflare currently shows only `FACEBOOK_PAGE_ID` and `STRIPE_SECRET_KEY`. Build 187 patches `/api/auth/login`, adds `/api/auth-login`, updates `auth.js` fallback behavior, patches `health` and legacy `admin/bootstrap` to prefer `DB`, and adds `CLOUDFLARE_ENVIRONMENT_CHECKLIST.md`. No D1 migration is required.

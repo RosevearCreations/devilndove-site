@@ -1002,3 +1002,18 @@ Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two pr
 ## Build 186 validation summary
 
 Static checks confirmed JS syntax, JSON parsing, one-H1 public page scan, CSS brace balance, and SQL smoke testing for the Build 186 migration chain. Live Cloudflare bindings still require deployed checks.
+
+
+## Build 187 — login 405 and environment sanity check
+
+Reported live issue: `api/auth/login` returned HTTP 405. The route now has a unified method handler and `/api/auth-login` compatibility alias.
+
+Post-deploy checks:
+
+1. Open `/api/auth/login` directly. It should return JSON with `status: ready`, not a platform 405.
+2. Try the login page in a private/incognito window.
+3. Confirm Cloudflare Pages has a D1 binding named `DB`.
+4. Confirm the D1 database has `users` and `sessions` tables.
+5. Confirm `/api/health` returns `ok: true`.
+
+Current Cloudflare secret list seen by the user only contains `FACEBOOK_PAGE_ID` and `STRIPE_SECRET_KEY`; that is not enough for full live operation. See `CLOUDFLARE_ENVIRONMENT_CHECKLIST.md`.

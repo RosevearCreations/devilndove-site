@@ -57,3 +57,10 @@ Keep one clear H1 on each exposed page. Keep titles, meta descriptions, headings
 ## Markdown consolidation rule
 
 Use this file for the current roadmap and business direction. Use `AI_HANDOFF.md` for new chat handoff and exact migration order. Keep old Markdown files for details/history until a later cleanup can safely archive them.
+
+
+## Build 187 operational note — Cloudflare variables and login route
+
+The live login 405 indicates either route-method handling or deployment binding/routing drift. Build 187 hardens the route and documents the real Cloudflare binding/secret checklist. The top priority before adding more storefront features is confirming `DB` is bound to the D1 database in Cloudflare Pages and that product media R2 binding/public URL variables are present.
+
+Next value-added step: add an Auth + Environment Health card to `/admin/command-center/` showing DB binding, auth route status, bootstrap status, session table status, media bucket status, and missing optional provider secrets.
