@@ -1,3 +1,7 @@
+# Build 184 AI context update
+
+The app is mature enough that the best next work is simplification, measurement, product readiness, customer trust, and real visual proof rather than isolated admin-page growth.
+
 # Build 183 AI context update
 
 The latest Devil n Dove build now includes Visual Enrichment Studio for media picker rows, screenshot pairs, image-slot assignments, visual diffs, alt-text suggestions, JSON→D1 ownership decisions, low-bandwidth mode, and final visual deployment report rows. Continue preserving one H1 per public page and updating Markdown/schema files every pass.

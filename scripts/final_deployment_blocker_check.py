@@ -33,7 +33,12 @@ REQUIRED_FILES = [
     'admin/visual-enrichment-studio/index.html',
     'functions/api/admin/visual-enrichment-studio.js',
     'public/js/admin-visual-enrichment-studio.js',
-    'data/site/build183-visual-enrichment-studio.json'
+    'data/site/build183-visual-enrichment-studio.json',
+    'database_build184_sanity_check_and_value_roadmap.sql',
+    'admin/application-sanity/index.html',
+    'functions/api/admin/application-sanity.js',
+    'public/js/admin-application-sanity.js',
+    'data/site/build184-application-sanity.json'
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 

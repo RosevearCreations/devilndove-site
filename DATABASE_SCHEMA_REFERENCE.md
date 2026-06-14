@@ -1,3 +1,11 @@
+# Build 184 schema reference update
+
+Build 184 adds the application sanity and value-roadmap layer. New tables: `application_sanity_snapshots`, `application_module_status_rows`, `value_added_modification_candidates`, `seo_search_criteria_review_rows`, `desktop_mobile_value_checks`, `sanity_action_plan_rows`, and `visual_value_enrichment_rows`.
+
+Run order now includes `database_build184_sanity_check_and_value_roadmap.sql` after `database_build183_visual_enrichment_studio.sql`. The migration is additive and includes a ledger marker `build_184_sanity_check_and_value_roadmap`.
+
+No destructive schema changes were made in Build 184.
+
 # Build 183 schema reference update
 
 New migration: `database_build183_visual_enrichment_studio.sql`.

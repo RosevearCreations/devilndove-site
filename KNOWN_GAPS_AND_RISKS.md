@@ -1,3 +1,26 @@
+# Build 184 known gaps and risks update
+
+Moved forward in Build 184:
+1. Application Sanity now gives a single page for current state, value-added priorities, SEO search criteria, desktop/mobile parity, and visual enrichment direction.
+2. The roadmap now separates true value work from repeated control-page expansion.
+3. SEO review rows are tied to page paths and phrases without permitting extra H1 changes.
+4. Visual enrichment rows explicitly keep reduced-motion safety and H1 lock defaults.
+5. The build remains additive and avoids destructive schema operations.
+
+Still outstanding after Build 184:
+1. The admin area is now very capable but too spread out for everyday use; an Admin Command Center is the strongest next usability improvement.
+2. First-page local search cannot be guaranteed by code alone; live reviews, photos, GBP activity, Search Console data, backlinks, and content freshness still matter.
+3. Product publish readiness needs one consolidated scoreboard instead of scattered QA rows.
+4. Visual polish needs real approved images, screenshots, and before/after proof content.
+5. Conversion funnel measurement is still needed to know which changes create sales.
+6. Live Cloudflare D1/R2/email/payment/provider checks still require deployed secrets and bindings.
+7. Re-running older migrations out of order can still cause D1 errors; use the documented order and repair script only when needed.
+8. Compliance wording for recalls, gift cards, refunds, candles, soaps, and custom work should still receive owner/legal review before public use.
+9. JSON-to-D1 ownership decisions are planned but not fully migrated; avoid duplicating truth across files and tables.
+10. Mobile admin pages need ongoing phone testing, especially product creation, image review, recalls, and go-live gates.
+
+Recommended direction: focus the next pass on simplification, measurement, product readiness, customer trust, and real visual proof rather than adding more isolated admin pages.
+
 # Build 183 known gaps and risks update
 
 Moved forward in Build 183:

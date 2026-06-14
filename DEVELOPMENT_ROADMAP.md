@@ -1,3 +1,49 @@
+# Build 184 Completed Pass — Application Sanity Check, Value Roadmap, Desktop/Mobile Review, and SEO/Visual Direction
+
+1. Added `/admin/application-sanity/` as the sanity-check page for where the application stands now.
+2. Added `/api/admin/application-sanity` to seed and display module status, value-added candidates, SEO criteria, desktop/mobile checks, visual enrichment rows, and sanity snapshots.
+3. Added `database_build184_sanity_check_and_value_roadmap.sql` as a safe additive D1 migration.
+4. Added `application_sanity_snapshots` for saved deployed sanity snapshots.
+5. Added `application_module_status_rows` to summarize storefront, admin ops, schema, SEO, visual brand, and compliance readiness.
+6. Added `value_added_modification_candidates` with ranked future work by value, effort, risk, and priority.
+7. Added `seo_search_criteria_review_rows` to keep local search phrases tied to page paths without changing H1 structure.
+8. Added `desktop_mobile_value_checks` so desktop and mobile parity can be reviewed as value work, not only visual cleanup.
+9. Added `visual_value_enrichment_rows` for reduced-motion-safe visual effects/images that do not allow H1 changes.
+10. Added `sanity_action_plan_rows` so the top value-added items can be promoted into future build plans.
+11. Added `data/site/build184-application-sanity.json` as the static sanity handoff report.
+12. Updated the admin dashboard and Operations page with Application Sanity links.
+13. Updated schema files and schema references for Build 184.
+14. Updated deployment preflight and final blocker scripts to require the Build 184 page/API/JS/migration/static report.
+15. Updated release manifest generation to Build 184.
+16. Confirmed one-H1 and title/meta habits remain locked across exposed HTML.
+17. Confirmed CSS drift remains guarded by brace checks.
+18. Confirmed the next roadmap should focus on value-added simplification, measurement, product readiness, and real approved visuals.
+19. Kept this pass additive and non-destructive to avoid D1 rerun risk.
+20. Packaged Build 184 with updated Markdown, schema references, release notes, sanity notes, and validation output.
+
+## Next 20 recommended steps after Build 184
+
+1. Build the Admin Command Center that groups daily work into Today, Products, SEO, Visuals, Orders, Accounting, and Deploy cards.
+2. Add storefront conversion funnel tracking from local landing page to product view, cart, checkout, and order completion.
+3. Create a Product Readiness Scoreboard that combines QA, image roles, price, story, shipping, inventory, and marketplace status.
+4. Add a monthly Local SEO scorecard using Search Console, Google Business Profile observations, manual ranking checks, and page freshness.
+5. Build before/after and maker-process gallery templates using approved images only.
+6. Create a customer story builder for consented custom orders, trust blocks, product stories, and social captions.
+7. Improve phone-first product add with autosave, image-role prompts, and recovery from upload/API failures.
+8. Connect inventory tools/supplies to product/job cost estimates and marketplace profit previews.
+9. Unify customer/member history for orders, gift cards, recalls, custom requests, proof approvals, and notes.
+10. Add public performance budgets for images, scripts, CSS, and low-bandwidth visual mode.
+11. Build a structured-data lab for Product, LocalBusiness, BreadcrumbList, FAQPage, and Organization previews.
+12. Add a plain-language policy center for returns, custom work approvals, pickup, gift cards, and recalls.
+13. Add a content calendar for seasonal campaigns, markets, product launches, blog posts, and social snippets.
+14. Plan privacy-safe abandoned-cart and saved-cart follow-up only after consent rules are clear.
+15. Add maker/process profile sections that explain the workshop story without distracting from products.
+16. Build an error recovery center for failed API, upload, payment, R2, and provider tasks.
+17. Add marketplace profit preview after fees, shipping, taxes, materials, and packaging.
+18. Add a mobile photo shot-list for product, trust proof, and local SEO images.
+19. Add a periodic landing-page refresh queue for titles, meta descriptions, body copy, alt text, and internal links.
+20. Add training/simulation mode for deploy, rollback, recall, and gift-card provider actions before live customer impact.
+
 # Build 183 Completed Pass — Visual Enrichment Studio, Media Picker Rows, Screenshot Pairs, Low-Bandwidth Mode, and Final Visual Report
 
 Completed in this pass:

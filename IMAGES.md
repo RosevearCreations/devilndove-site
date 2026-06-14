@@ -1,3 +1,7 @@
+# Build 184 visual value note
+
+Build 184 separates visual enrichment ideas from approved image placement. Future visual effects should remain reduced-motion safe, low-bandwidth aware, and locked against H1 changes.
+
 # Build 183 image and visual-enrichment notes
 
 Use `/admin/visual-enrichment-studio/` to review media picker rows, image-slot assignments, screenshot pairs, visual diffs, compression budgets, alt-text suggestions, gallery hero rotation, and low-bandwidth mode. Public images should stay lazy-loaded, under the image budget where possible, and reviewed for alt text before promotion.

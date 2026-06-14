@@ -1,3 +1,7 @@
+# Build 184 local SEO sanity note
+
+Build 184 keeps the local SEO direction focused on searchable phrases in titles/main headings/body copy, one H1 per page, descriptive alt text, useful internal links, complete local business information, and fresh proof images.
+
 # Build 183 local SEO visual enrichment notes
 
 Build 183 adds Local SEO visual candidate badge rows and page image-slot assignments. These support local discovery by keeping visual improvements tied to page paths and local phrases while preserving a single H1 per public page. Image slots are explicitly marked with `h1_change_allowed = 0` so visual upgrades do not drift into heading/title confusion.
