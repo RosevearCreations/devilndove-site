@@ -38,19 +38,7 @@ REQUIRED_FILES = [
     'admin/application-sanity/index.html',
     'functions/api/admin/application-sanity.js',
     'public/js/admin-application-sanity.js',
-    'data/site/build184-application-sanity.json',
-    'database_build185_admin_command_center_value_dashboards.sql',
-        'database_build186_markdown_consolidation_visual_placeholders.sql',
-    'admin/command-center/index.html',
-    'functions/api/admin/command-center.js',
-    'public/js/admin-command-center.js',
-    'data/site/build185-command-center.json',
-    'admin/markdown-sanity/index.html',
-    'functions/api/admin/markdown-sanity.js',
-    'public/js/admin-markdown-sanity.js',
-    'data/site/build186-markdown-sanity.json',
-    'PROJECT_STATUS_AND_ROADMAP.md',
-    'AI_HANDOFF.md'
+    'data/site/build184-application-sanity.json'
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 

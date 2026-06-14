@@ -37,8 +37,6 @@ JSON_FILES = [
     'data/site/build182-mobile-visual-polish.json',
     'data/site/build183-visual-enrichment-studio.json',
     'data/site/build184-application-sanity.json',
-    'data/site/build185-command-center.json',
-    'data/site/build186-markdown-sanity.json',
 ]
 REQUIRED_FILES = [
     'database_build171_ledger_repair.sql',
@@ -84,17 +82,6 @@ REQUIRED_FILES = [
     'admin/application-sanity/index.html',
     'functions/api/admin/application-sanity.js',
     'public/js/admin-application-sanity.js',
-    'database_build185_admin_command_center_value_dashboards.sql',
-        'database_build186_markdown_consolidation_visual_placeholders.sql',
-    'admin/command-center/index.html',
-    'functions/api/admin/command-center.js',
-    'public/js/admin-command-center.js',
-    'admin/markdown-sanity/index.html',
-    'functions/api/admin/markdown-sanity.js',
-    'public/js/admin-markdown-sanity.js',
-    'data/site/build186-markdown-sanity.json',
-    'PROJECT_STATUS_AND_ROADMAP.md',
-    'AI_HANDOFF.md',
 ]
 
 def read(path: Path) -> str:
@@ -208,8 +195,6 @@ def check_schema_files(checks: list[dict]) -> None:
         'visual_candidate_media_assets',
         'build_184_sanity_check_and_value_roadmap',
         'application_sanity_snapshots',
-        'build_185_admin_command_center_value_dashboards',
-        'admin_command_center_cards',
     ]
     required = {
         'database_schema.sql': schema_needles,
@@ -227,8 +212,6 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build181_live_ops_followthrough.sql': ['private_evidence_download_tokens', 'marketplace_export_gate_overrides', 'build_181_live_ops_followthrough'],
         'database_build183_visual_enrichment_studio.sql': ['visual_candidate_media_assets', 'public_page_image_slot_assignments', 'build_183_visual_enrichment_studio'],
         'database_build184_sanity_check_and_value_roadmap.sql': ['application_sanity_snapshots', 'value_added_modification_candidates', 'build_184_sanity_check_and_value_roadmap'],
-        'database_build185_admin_command_center_value_dashboards.sql': ['admin_command_center_cards', 'conversion_funnel_scorecard_rows', 'build_185_admin_command_center_value_dashboards'],
-        'database_build186_markdown_consolidation_visual_placeholders.sql': ['markdown_file_status_rows', 'visual_graphic_placeholder_rows', 'build_186_markdown_consolidation_visual_placeholders'],
     }
     missing=[]
     detail=[]
@@ -238,7 +221,7 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_build184','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174/175/176/177/178/179/180/181/183/184/185/186 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_build184','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174/175/176/177/178/179/180/181/183/184 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
 
 def main() -> int:
     checks=[]
@@ -249,7 +232,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 186','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 184','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')

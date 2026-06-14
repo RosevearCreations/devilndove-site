@@ -1,7 +1,3 @@
-# Build 185 quick status
-
-Build 185 adds the Admin Command Center at `/admin/command-center/` as the daily operating layer above the specialized admin tools. It does not replace Application Sanity, Visual Enrichment, Product Readiness, Release Control, or Go-Live; it gives them a calmer launch point and value-added tracking rows.
-
 # Build 184 AI context update
 
 The app is mature enough that the best next work is simplification, measurement, product readiness, customer trust, and real visual proof rather than isolated admin-page growth.
@@ -726,6 +722,3 @@ Completed in this pass:
 
 Current build focus: final deploy-readiness page, promote-live checklist rows, marketplace row validation, recall copy review/signature placeholders, provider/R2 verification logs, local SEO chart/map storage, LocalBusiness draft rows, structured-data hints, and mobile release cards.
 
-# Build 186 consolidation note
-
-Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
