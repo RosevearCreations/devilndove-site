@@ -1,11 +1,10 @@
-# Build 185 — Admin Command Center and Value-Added Dashboards
 
-Build 185 adds `/admin/command-center/`, `/api/admin/command-center`, `database_build185_admin_command_center_value_dashboards.sql`, and `data/site/build185-command-center.json`.
 
-This pass turns the Build 184 sanity-check recommendations into a calmer daily operating screen covering Product Readiness, Orders/Today, Local SEO, Visual Enrichment, Customer Stories, Mobile Quick Add, Inventory/Job Costing, Customer History, Performance Budgets, and Deploy Safety.
+## Build 188 — Login 405 Route Activation Hotfix
 
-No destructive schema changes were made. The new D1 migration is additive and should run after Build 184.
+The live Pages URL showed `GET /api/auth/login` serving the public homepage and `POST /api/auth/login` returning 405. That means Cloudflare Pages Functions were not being invoked for `/api/*`; static fallback handling was answering instead. Build 188 adds root `_routes.json` with `include: ["/api/*"]`, hardens `/functions/api/auth/login.js` for GET/HEAD/OPTIONS/POST, adds `/api/auth-login` as a flat fallback route, and updates both `auth.js` copies so the client retries the fallback only after a 405.
 
+Post-deploy check: open `/api/auth/login`. It must return JSON with `functions_active: true`. If it returns the public homepage HTML, the Pages deployment is still not deploying Functions from the `functions/` directory or the wrong branch/build output is live.
 # Build 184 — Application Sanity Check and Value Roadmap
 
 Build 184 adds a sanity-check layer instead of another broad feature expansion. It provides `/admin/application-sanity/`, `/api/admin/application-sanity`, `database_build184_sanity_check_and_value_roadmap.sql`, and `data/site/build184-application-sanity.json`.
@@ -567,21 +566,3 @@ Validation summary:
 
 ## D1 migration summary
 
-# Build 186 consolidation note
-
-Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
-
-## Build 186 — Markdown Consolidation, Visual Placeholders, and Value Backlog Execution
-
-Added Markdown Sanity admin/API, two canonical Markdown files, visual graphic placeholder assets and public injection, value-enhancement execution rows, desktop/mobile surface checks, CSS drift rows, schema updates, and updated handoff documentation.
-
-
-## Build 187 — login 405 and Cloudflare environment checklist
-
-- Hardened `/api/auth/login` with an all-method Pages Function router so GET/HEAD/OPTIONS return controlled JSON responses and POST remains the login method.
-- Added flat fallback route `/api/auth-login` for deployments where nested Pages routing returns 405.
-- Updated the shared auth client to retry the fallback route only after a 405 from `/api/auth/login`.
-- Patched legacy health/bootstrap checks to use the primary `DB` D1 binding before the older `DD_DB` alias.
-- Added `CLOUDFLARE_ENVIRONMENT_CHECKLIST.md` to document required bindings, secrets, and optional provider variables.
-
-No D1 schema migration is required for Build 187.

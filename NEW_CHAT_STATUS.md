@@ -1,7 +1,10 @@
-# Build 185 quick status
 
-Build 185 adds the Admin Command Center at `/admin/command-center/` as the daily operating layer above the specialized admin tools. It does not replace Application Sanity, Visual Enrichment, Product Readiness, Release Control, or Go-Live; it gives them a calmer launch point and value-added tracking rows.
 
+## Build 188 — Login 405 Route Activation Hotfix
+
+The live Pages URL showed `GET /api/auth/login` serving the public homepage and `POST /api/auth/login` returning 405. That means Cloudflare Pages Functions were not being invoked for `/api/*`; static fallback handling was answering instead. Build 188 adds root `_routes.json` with `include: ["/api/*"]`, hardens `/functions/api/auth/login.js` for GET/HEAD/OPTIONS/POST, adds `/api/auth-login` as a flat fallback route, and updates both `auth.js` copies so the client retries the fallback only after a 405.
+
+Post-deploy check: open `/api/auth/login`. It must return JSON with `functions_active: true`. If it returns the public homepage HTML, the Pages deployment is still not deploying Functions from the `functions/` directory or the wrong branch/build output is live.
 # Build 184 status
 
 Latest build adds Application Sanity Check and Value Roadmap. Next strongest direction is Admin Command Center, conversion measurement, product readiness scoreboard, local SEO scorecards, and real approved visual proof.
@@ -850,6 +853,3 @@ Completed in this pass:
 
 The latest build adds Deploy Readiness and Promote Live controls. Next chat should continue with Product QA confirmed apply actions, real webhook signature verification, signed URL worker route checks, LocalBusiness approve-and-bake, and dashboard snooze rendering.
 
-# Build 186 consolidation note
-
-Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.

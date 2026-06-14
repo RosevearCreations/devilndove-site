@@ -1,51 +1,3 @@
-# Build 185 Completed Pass — Admin Command Center and Value-Added Dashboards
-
-Completed in this pass:
-
-1. Added `/admin/command-center/` as the calmer daily dashboard for Products, Orders, SEO, Visuals, Deploy, Accounting, Recalls, Today tasks, mobile capture, costing, customers, and performance budgets.
-2. Added `/api/admin/command-center` with guarded D1 table creation, seed rows, live summary counts where tables exist, and daily snapshot saving.
-3. Added `database_build185_admin_command_center_value_dashboards.sql` as a safe additive migration after Build 184.
-4. Added Admin Command Center cards for Product Readiness, Orders/Today, Local SEO, Visual Enrichment, Customer Stories, Mobile Quick Add, Costing, Customer History, Performance, and Deploy Safety.
-5. Added Product Readiness Scoreboard snapshot storage for image roles, alt text, price, story, shipping, marketplace, inventory, and blockers.
-6. Added conversion funnel scorecard rows for landing page view, product view, add to cart, checkout start, and order complete.
-7. Added Local SEO value scorecard rows for core Southern Ontario landing pages.
-8. Added before/after maker gallery value rows for workshop proof, jewelry macros, custom gifts, and engraving examples.
-9. Added Customer Story Builder rows for product stories, custom request proof, maker notes, and approved reviews.
-10. Added Mobile Quick Product Add check rows for phone upload/autosave, image role prompts, quick price/story fields, and failure recovery.
-11. Added Inventory and Job Costing value rows to connect materials, labour, packaging, tools, and marketplace fees to pricing decisions.
-12. Added Unified Customer/Member History review rows for orders, gift cards, recalls, custom requests, proof approvals, and notes.
-13. Added Performance Budget rows for homepage, shop, product detail, gallery, and custom gift pages.
-14. Added `data/site/build185-command-center.json` as the handoff report for this pass.
-15. Added responsive Admin Command Center CSS with reduced-motion-safe hover effects.
-16. Added Command Center links to the main admin dashboard, Operations page, and Application Sanity page.
-17. Updated static preflight and final blocker scripts to require the Build 185 page, API, JS, migration, and JSON handoff.
-18. Updated schema SQL files and schema reference with the Build 185 tables and migration marker.
-19. Updated Markdown handoff files, release notes, sanity notes, local SEO notes, images/visual notes, README, new-chat status, and AI context.
-20. Ran JavaScript, Python, JSON, SQL, one-H1, CSS, preflight, final blocker, and zip validation for the Build 185 package.
-
-Next 20 recommended steps after Build 185:
-
-1. Connect Admin Command Center cards to configurable saved views so daily work can be customized by role.
-2. Add a live Product Readiness “save snapshot from current results” button that writes actual per-product scores into the scoreboard table.
-3. Add privacy-safe storefront analytics events for funnel steps without storing personal customer data.
-4. Add manual Search Console/GBP import forms to feed Local SEO scorecard rows.
-5. Add real approved before/after gallery uploads with consent/public-use locks before public placement.
-6. Add Customer Story Builder approve/publish actions that create trust blocks and social snippets.
-7. Add Mobile Quick Product Add offline draft recovery using local browser storage plus server sync.
-8. Add costing formulas that calculate suggested price from materials, labour, packaging, fees, and target margin.
-9. Add a unified customer/member profile tab that joins orders, gift cards, custom requests, recalls, and proof approvals.
-10. Add automated performance budget measurement during safe deploy package generation.
-11. Add low-bandwidth image-slot recommendations when visual candidates exceed page budget.
-12. Add a “focus this task” mode on the Command Center for phone use.
-13. Add direct snooze/dismiss buttons on Command Center cards that write to notification action rows.
-14. Add command-center alerts when recall, marketplace, accounting, or deploy gates are blocking.
-15. Add conversion funnel chart cards once real analytics rows exist.
-16. Add local ranking check history rows for each target phrase and town/region.
-17. Add maker gallery layout previews for desktop and mobile before public publish.
-18. Add social caption templates connected to approved customer stories.
-19. Add product pricing confidence badges based on costing completeness and marketplace fee preview.
-20. Add a monthly value report summarizing traffic, product readiness, SEO movement, visual proof additions, and sales conversion progress.
-
 # Build 184 known gaps and risks update
 
 Moved forward in Build 184:
@@ -1537,16 +1489,3 @@ Completed in this pass:
 ## Build 172 hotfix note — D1 migration ledger
 
 The build 171 SQL marker for `schema_migration_ledger` was corrected to include the required `file_name` column. A small live repair file, `database_build171_ledger_repair.sql`, is included for databases where the schema additions already ran but the final ledger insert failed. Do not rerun the entire upgrade only to fix the marker if build 171 ALTER TABLE additions already succeeded; repeated ALTER TABLE ADD COLUMN statements can fail on existing columns in SQLite/D1.
-
-# Build 186 consolidation note
-
-Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
-
-## Build 186 remaining sanity concerns
-
-The app is now powerful but broad. The next risk is admin overload, duplicated documentation, and placeholders staying placeholder forever. The next highest-value work is live rollups, real approved media, conversion measurement, customer timeline cards, and performance measurements.
-
-
-## Build 187 remaining risk — Cloudflare environment setup
-
-The app needs more than the two visible secrets reported by the user. Some required resources are Cloudflare bindings rather than secrets, especially `DB` for D1 and `PRODUCT_MEDIA_BUCKET` for R2. Until those are verified in the deployed Pages project, login, admin, products, uploads, evidence, checkout recovery, and Command Center pages may show fallback/errors.

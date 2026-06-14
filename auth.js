@@ -145,8 +145,7 @@
   async function login(email, password) {
     let response = await postLoginTo('/api/auth/login', email, password);
 
-    // Build 187: recover from a Cloudflare Pages 405 method-route edge case by
-    // retrying a flat compatibility endpoint that exports the same login handler.
+    // Build 188: retry the flat alias if the nested route returns a platform/static 405.
     if (response.status === 405) {
       response = await postLoginTo('/api/auth-login', email, password);
     }

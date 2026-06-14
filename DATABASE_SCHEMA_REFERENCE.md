@@ -1,9 +1,3 @@
-# Build 185 schema reference update
-
-Build 185 adds the Admin Command Center and value-added dashboard layer. New tables: `admin_command_center_daily_snapshots`, `admin_command_center_cards`, `product_readiness_scoreboard_snapshots`, `conversion_funnel_scorecard_rows`, `local_seo_value_scorecard_rows`, `maker_gallery_value_rows`, `customer_story_builder_rows`, `mobile_quick_product_add_checks`, `inventory_job_costing_value_rows`, `unified_customer_member_history_rows`, and `performance_budget_value_rows`.
-
-Run `database_build185_admin_command_center_value_dashboards.sql` after `database_build184_sanity_check_and_value_roadmap.sql`. No destructive schema changes were made.
-
 # Build 184 schema reference update
 
 Build 184 adds the application sanity and value-roadmap layer. New tables: `application_sanity_snapshots`, `application_module_status_rows`, `value_added_modification_candidates`, `seo_search_criteria_review_rows`, `desktop_mobile_value_checks`, `sanity_action_plan_rows`, and `visual_value_enrichment_rows`.
@@ -1105,15 +1099,3 @@ The build 171 SQL marker for `schema_migration_ledger` was corrected to include 
 - `local_business_schema_edit_drafts` and `structured_data_validation_hints` — structured-data review support.
 - `release_package_previous_zip_comparisons`, `dashboard_notification_card_snoozes`, and `mobile_release_control_cards` — deploy comparison, snooze, and phone-card support.
 
-# Build 186 consolidation note
-
-Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
-
-## Build 186 schema addition
-
-Added `database_build186_markdown_consolidation_visual_placeholders.sql` for Markdown consolidation rows, value enhancement execution rows, visual placeholder rows, desktop/mobile surface audit rows, CSS drift/overlap rows, and next-step sanity rows.
-
-
-## Build 187 schema note
-
-No schema migration is required. Build 187 is an auth route/environment configuration hotfix. The live deployment must still have the D1 binding named `DB`, and the database must already include the current auth tables (`users`, `sessions`) from prior migrations/bootstrap.

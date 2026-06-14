@@ -1,9 +1,10 @@
-# Build 185 sanity update
 
-Build 185 adds Admin Command Center checks to the deployment sanity flow. Required files now include `admin/command-center/index.html`, `functions/api/admin/command-center.js`, `public/js/admin-command-center.js`, `database_build185_admin_command_center_value_dashboards.sql`, and `data/site/build185-command-center.json`.
 
-The one-H1 rule still applies to every exposed HTML page. The Command Center has one `<h1>` only and is marked admin/noindex. CSS additions include responsive desktop/mobile layout and reduced-motion-safe hover behaviour.
+## Build 188 — Login 405 Route Activation Hotfix
 
+The live Pages URL showed `GET /api/auth/login` serving the public homepage and `POST /api/auth/login` returning 405. That means Cloudflare Pages Functions were not being invoked for `/api/*`; static fallback handling was answering instead. Build 188 adds root `_routes.json` with `include: ["/api/*"]`, hardens `/functions/api/auth/login.js` for GET/HEAD/OPTIONS/POST, adds `/api/auth-login` as a flat fallback route, and updates both `auth.js` copies so the client retries the fallback only after a 405.
+
+Post-deploy check: open `/api/auth/login`. It must return JSON with `functions_active: true`. If it returns the public homepage HTML, the Pages deployment is still not deploying Functions from the `functions/` directory or the wrong branch/build output is live.
 # Build 184 sanity update
 
 Build 184 adds Application Sanity as the review layer for the whole app. Required files now include `admin/application-sanity/index.html`, `functions/api/admin/application-sanity.js`, `public/js/admin-application-sanity.js`, `database_build184_sanity_check_and_value_roadmap.sql`, and `data/site/build184-application-sanity.json`.
@@ -995,25 +996,3 @@ The build 171 SQL marker for `schema_migration_ledger` was corrected to include 
 - Marketplace CSV downloads should be preceded by the real export-row validation button.
 - Recall notifications should not leave draft status until copy review and signature evidence rows are approved.
 
-# Build 186 consolidation note
-
-Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
-
-## Build 186 validation summary
-
-Static checks confirmed JS syntax, JSON parsing, one-H1 public page scan, CSS brace balance, and SQL smoke testing for the Build 186 migration chain. Live Cloudflare bindings still require deployed checks.
-
-
-## Build 187 — login 405 and environment sanity check
-
-Reported live issue: `api/auth/login` returned HTTP 405. The route now has a unified method handler and `/api/auth-login` compatibility alias.
-
-Post-deploy checks:
-
-1. Open `/api/auth/login` directly. It should return JSON with `status: ready`, not a platform 405.
-2. Try the login page in a private/incognito window.
-3. Confirm Cloudflare Pages has a D1 binding named `DB`.
-4. Confirm the D1 database has `users` and `sessions` tables.
-5. Confirm `/api/health` returns `ok: true`.
-
-Current Cloudflare secret list seen by the user only contains `FACEBOOK_PAGE_ID` and `STRIPE_SECRET_KEY`; that is not enough for full live operation. See `CLOUDFLARE_ENVIRONMENT_CHECKLIST.md`.

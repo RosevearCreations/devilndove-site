@@ -1,7 +1,3 @@
-# Build 185 post-deploy check
-
-After deploying Build 185, run the D1 migration, open `/admin/command-center/`, click Refresh, then save one daily snapshot. Confirm the Product Readiness, Local SEO, Visual Enrichment, Mobile Quick Add, Costing, Customer History, Performance, and Deploy Safety cards load without live binding errors.
-
 # Build 184 post-deploy sanity check
 
 After deploy, open `/admin/application-sanity/`, seed rows, save a sanity snapshot, then compare it with Deployment Preflight, Go-Live Execution, Visual Enrichment, and Post-Deploy Smoke Tests.
@@ -187,6 +183,3 @@ Store results with `build_label`, `page_url`, `result_status`, `http_status`, an
 - After standard smoke tests, open `/admin/deploy-readiness/`, seed drilldowns, and build the promote-live checklist.
 - Confirm marketplace row validation, recall copy review, R2 signed URL check, and provider webhook signature setup rows.
 
-# Build 186 consolidation note
-
-Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.

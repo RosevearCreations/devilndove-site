@@ -1,9 +1,3 @@
-# Build 185 local SEO value scorecard note
-
-Build 185 adds `local_seo_value_scorecard_rows` so local search work can move beyond static checklist items into a scorecard covering Search Console imports, Google Business Profile observations, manual ranking checks, content freshness, and approved image proof.
-
-The continuing search criteria remain: clear local page titles, one clear main heading, locally relevant body copy, useful alt text, internal links, and real proof images.
-
 # Build 184 local SEO sanity note
 
 Build 184 keeps the local SEO direction focused on searchable phrases in titles/main headings/body copy, one H1 per page, descriptive alt text, useful internal links, complete local business information, and fresh proof images.
@@ -703,10 +697,3 @@ Completed in this pass:
 - Structured-data hints now track LocalBusiness, Product, BreadcrumbList, and FAQPage review items per key page.
 - Continue using clear local wording in titles, headings, meta descriptions, and visible copy for Southern Ontario/Oxford/Norfolk searches.
 
-# Build 186 consolidation note
-
-Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
-
-## Build 186 SEO sanity
-
-Key local pages now receive visual proof placeholders without new H1 tags. Treat these slots as proof targets: replace with real approved workshop, product detail, before/after, condition, or material images that support the page phrase naturally.
