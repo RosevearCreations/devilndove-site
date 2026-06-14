@@ -3,8 +3,23 @@
 // creates a fresh session token, and returns the user plus session data expected
 // by the shared public/js/auth.js helper.
 
+// Build 187 login route hardening: Cloudflare Pages should route POST here, but
+// the live site reported a 405. Keep one all-method router plus method-specific
+// wrappers so OPTIONS/GET/HEAD do not surface a generic platform 405.
+const AUTH_ROUTE_HEADERS = {
+  "Content-Type": "application/json",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Cache-Control": "no-store, no-cache, must-revalidate",
+  "Allow": "OPTIONS, GET, HEAD, POST"
+};
+
 function json(data, status = 200, headers = {}) {
-  return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin", ...headers } });
+  return new Response(JSON.stringify(data), { status, headers: { ...AUTH_ROUTE_HEADERS, ...headers } });
+}
+
+function empty(status = 204, headers = {}) {
+  return new Response(null, { status, headers: { ...AUTH_ROUTE_HEADERS, ...headers } });
 }
 
 function normalizeText(value) { return String(value || "").trim(); }
@@ -64,7 +79,7 @@ function clearSessionCookie(request) {
   return buildSessionCookie(request, '', 0);
 }
 
-export async function onRequestPost(context) {
+async function handleLoginPost(context) {
   const { request, env } = context;
   let body;
   try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON body." }, 400); }
@@ -90,3 +105,46 @@ export async function onRequestPost(context) {
     user: { user_id: Number(user.user_id || 0), email: user.email || email, display_name: user.display_name || "", role: user.role || "member", is_active: Number(user.is_active || 0), created_at: user.created_at || null, updated_at: user.updated_at || null }
   }, 200, { "Set-Cookie": buildSessionCookie(request, session?.session_token || sessionToken) });
 }
+
+
+export async function onRequest(context) {
+  const method = String(context?.request?.method || "GET").toUpperCase();
+
+  if (method === "OPTIONS") {
+    return empty(204);
+  }
+
+  if (method === "POST") {
+    try {
+      return await handleLoginPost(context);
+    } catch (error) {
+      console.error("auth_login_failed", error);
+      return json({
+        ok: false,
+        error: "Login is temporarily unavailable. Check the DB binding and auth tables, then try again.",
+        detail: String(error?.message || error || "Unknown login error")
+      }, 500);
+    }
+  }
+
+  if (method === "GET" || method === "HEAD") {
+    return json({
+      ok: true,
+      route: "/api/auth/login",
+      status: "ready",
+      accepts: ["POST"],
+      note: "Submit login credentials with POST JSON: { email, password }."
+    }, 200);
+  }
+
+  return json({
+    ok: false,
+    error: `Method ${method} is not allowed for login.`,
+    allowed_methods: ["OPTIONS", "GET", "HEAD", "POST"]
+  }, 405);
+}
+
+export async function onRequestOptions(context) { return onRequest(context); }
+export async function onRequestGet(context) { return onRequest(context); }
+export async function onRequestHead(context) { return onRequest(context); }
+export async function onRequestPost(context) { return onRequest(context); }

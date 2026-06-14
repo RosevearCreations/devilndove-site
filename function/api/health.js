@@ -13,13 +13,13 @@ export async function onRequestGet(context) {
   const started = Date.now();
 
   // D1 binding from Pages -> Settings -> Functions -> Bindings
-  const db = context.env.DD_DB;
+  const db = context.env.DB || context.env.DD_DB;
   if (!db) {
     return json(
       {
         ok: false,
         error:
-          "Missing D1 binding: DD_DB. In Cloudflare Pages: Settings -> Functions -> Bindings -> add D1 binding named DD_DB.",
+          "Missing D1 binding: DB. In Cloudflare Pages: Settings -> Functions -> Bindings -> add D1 binding named DB.",
       },
       500
     );
