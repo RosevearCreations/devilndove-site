@@ -370,6 +370,69 @@
     wrap.querySelector('button').setAttribute('aria-pressed', document.documentElement.classList.contains('low-bandwidth') ? 'true' : 'false');
   }
 
+
+
+  function visualGraphicPlaceholderMeta(pathname) {
+    const path = String(pathname || location.pathname || '/').toLowerCase();
+    const common = { kicker: 'Visual proof placeholder', intro: 'These placeholders mark approved future image slots so the page feels more complete now while keeping real public-use media review, compression, and consent checks in place.' };
+    const map = {
+      '/': { ...common, heading: 'Workshop visuals coming next', cards: [
+        ['Workshop process', '/assets/visual-placeholders/workshop-process.svg', 'Placeholder for an approved Devil n Dove workshop process photo.', 'Use for bench shots, tool work, making steps, or careful packaging.'],
+        ['Product detail', '/assets/visual-placeholders/product-detail.svg', 'Placeholder for approved Devil n Dove product detail photography.', 'Use for closeups that explain texture, material, size, and finish.'],
+        ['Before / after proof', '/assets/visual-placeholders/before-after.svg', 'Placeholder for approved before and after workshop images.', 'Use for transformation proof after consent and public-use review.'] ] },
+      '/shop/': { ...common, heading: 'Sharper product proof slots', cards: [
+        ['Product detail', '/assets/visual-placeholders/product-detail.svg', 'Placeholder for approved product detail photography.', 'Replace with sharp square or landscape product images.'],
+        ['Jewelry / small-item macro', '/assets/visual-placeholders/jewelry-macro.svg', 'Placeholder for approved close-up product image.', 'Use detail images that make handmade finish and scale easier to understand.'],
+        ['Story proof', '/assets/visual-placeholders/workshop-process.svg', 'Placeholder for approved product story process image.', 'Use process images that support the product story without cluttering the buy path.'] ] },
+      '/gallery/': { ...common, heading: 'Maker gallery proof slots', cards: [
+        ['Before / after', '/assets/visual-placeholders/before-after.svg', 'Placeholder for approved before and after maker images.', 'Use paired images to show transformation or repair-style work.'],
+        ['Workshop process', '/assets/visual-placeholders/workshop-process.svg', 'Placeholder for approved workshop process image.', 'Use honest making photos to build trust.'],
+        ['Finished detail', '/assets/visual-placeholders/product-detail.svg', 'Placeholder for approved finished product detail image.', 'Use clean finished photos with alt text and compression.'] ] },
+      '/handmade-jewelry-ontario/': { ...common, heading: 'Jewelry close-up slots', cards: [
+        ['Macro detail', '/assets/visual-placeholders/jewelry-macro.svg', 'Placeholder for approved handmade jewelry close-up image.', 'Show wire, stone, clay, ring, or pendant detail.'],
+        ['Scale proof', '/assets/visual-placeholders/product-detail.svg', 'Placeholder for approved jewelry scale photo.', 'Show size honestly for local gift shoppers.'],
+        ['Making process', '/assets/visual-placeholders/workshop-process.svg', 'Placeholder for approved jewelry making process photo.', 'Use process proof to support handmade value.'] ] },
+      '/custom-candle-making-ontario/': { ...common, heading: 'Candle colour and scent slots', cards: [
+        ['Colour proof', '/assets/visual-placeholders/candle-colour.svg', 'Placeholder for approved custom candle colour image.', 'Show colour, raised details, containers, and gift-ready presentation.'],
+        ['Process proof', '/assets/visual-placeholders/workshop-process.svg', 'Placeholder for approved candle making process photo.', 'Keep safety and batch notes clear.'],
+        ['Finished detail', '/assets/visual-placeholders/product-detail.svg', 'Placeholder for approved finished candle detail photo.', 'Use closeups that show texture and finish.'] ] },
+      '/custom-soap-making-ontario/': { ...common, heading: 'Soap texture and gift slots', cards: [
+        ['Texture proof', '/assets/visual-placeholders/soap-texture.svg', 'Placeholder for approved custom soap texture image.', 'Show colour, texture, shape, and packaging.'],
+        ['Ingredient clarity', '/assets/visual-placeholders/product-detail.svg', 'Placeholder for approved soap ingredient/detail image.', 'Keep allergen and ingredient notes clear without medical claims.'],
+        ['Process proof', '/assets/visual-placeholders/workshop-process.svg', 'Placeholder for approved soap process photo.', 'Show handmade process after approval.'] ] },
+      '/laser-engraving-ontario/': { ...common, heading: 'Engraving proof slots', cards: [
+        ['Material proof', '/assets/visual-placeholders/engraving-proof.svg', 'Placeholder for approved laser engraving material proof image.', 'Show wood, metal, acrylic, or finished examples.'],
+        ['Before / after', '/assets/visual-placeholders/before-after.svg', 'Placeholder for approved engraving before and after image.', 'Use paired proof where it helps customer decisions.'],
+        ['Finished gift', '/assets/visual-placeholders/product-detail.svg', 'Placeholder for approved engraved gift detail photo.', 'Show readable engraving and scale.'] ] },
+      '/vintage-finds-ontario/': { ...common, heading: 'Vintage condition proof slots', cards: [
+        ['Condition detail', '/assets/visual-placeholders/vintage-condition.svg', 'Placeholder for approved vintage condition detail image.', 'Show condition honestly and separate vintage from handmade.'],
+        ['Scale and underside', '/assets/visual-placeholders/product-detail.svg', 'Placeholder for approved vintage detail photo.', 'Use closeups for marks, stamps, underside, or material.'],
+        ['Story context', '/assets/visual-placeholders/workshop-process.svg', 'Placeholder for approved vintage story/context image.', 'Use provenance-style notes only where known.'] ] },
+      '/workshop-made-gifts-ontario/': { ...common, heading: 'Workshop-made gift slots', cards: [
+        ['Making process', '/assets/visual-placeholders/workshop-process.svg', 'Placeholder for approved workshop-made gift process image.', 'Show mixed-media making without overclaiming quality.'],
+        ['Finished detail', '/assets/visual-placeholders/product-detail.svg', 'Placeholder for approved workshop-made gift detail image.', 'Show a clear finished detail for gift shoppers.'],
+        ['Before / after proof', '/assets/visual-placeholders/before-after.svg', 'Placeholder for approved workshop before and after image.', 'Use transformation proof after consent/public-use review.'] ] }
+    };
+    return map[path] || null;
+  }
+
+  function injectVisualGraphicPlaceholders() {
+    const meta = visualGraphicPlaceholderMeta(location.pathname);
+    if (!meta || document.getElementById('visualGraphicPlaceholders')) return;
+    const container = document.querySelector('.container') || document.body;
+    const footer = container.querySelector('footer.footer, .footer');
+    const anchor = container.querySelector('#visualPolishStrip, .customer-welcome, .hero');
+    if (!container || !anchor) return;
+    const section = document.createElement('section');
+    section.id = 'visualGraphicPlaceholders';
+    section.className = 'card visual-placeholder-section';
+    section.setAttribute('aria-label', meta.heading || 'Visual placeholder gallery');
+    section.innerHTML = `<div class="visual-placeholder-heading"><div><div class="visual-kicker">${escapeHtml(meta.kicker || 'Visual placeholders')}</div><h2>${escapeHtml(meta.heading || 'Visual placeholders')}</h2><p class="small">${escapeHtml(meta.intro || '')}</p></div><a class="btn secondary" href="/gallery/">See gallery</a></div><div class="visual-placeholder-gallery">${meta.cards.map((card) => `<figure class="visual-placeholder-card"><img src="${escapeHtml(card[1])}" alt="${escapeHtml(card[2])}" loading="lazy" decoding="async"/><figcaption><strong>${escapeHtml(card[0])}</strong><span>${escapeHtml(card[3])}</span></figcaption></figure>`).join('')}</div><p class="small" style="margin-top:10px">These are lightweight graphic placeholders. Replace them from Visual Enrichment Studio only after image approval, alt text, consent/public-use, compression, and mobile checks pass.</p>`;
+    if (footer && footer.parentNode === container) container.insertBefore(section, footer);
+    else anchor.parentNode.insertBefore(section, anchor.nextSibling);
+  }
+
+
   function shouldShowTrustSupportBlock(pathname) {
     const path = String(pathname || location.pathname || '/').toLowerCase();
     return ['/', '/index.html', '/shop/', '/shop/index.html', '/collections/', '/collections/index.html', '/marketplaces/', '/marketplaces/index.html', '/events/', '/events/index.html', '/pickup/', '/pickup/index.html', '/gallery/', '/gallery/index.html', '/creations/', '/creations/index.html', '/tools/', '/tools/index.html', '/supplies/', '/supplies/index.html', '/search/', '/search/index.html'].includes(path);
@@ -507,6 +570,7 @@
     injectFeaturedTestimonials();
     injectTrustSupportBlock();
     injectVisualPolishStrip();
+    injectVisualGraphicPlaceholders();
     injectLowBandwidthToggle();
     ensureGlobalScript('/public/js/auth.js');
     ensureGlobalScript('/public/js/site-auth-ui.js');
