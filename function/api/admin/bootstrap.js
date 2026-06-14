@@ -21,8 +21,9 @@ export async function onRequestGet({ request, env }) {
   if (!providedToken || providedToken !== expectedToken) {
     return json({ ok: false, error: "Unauthorized." }, 401);
   }
-  if (!env.DD_DB) {
-    return json({ ok: false, error: "Missing D1 binding DD_DB. Check Pages > Settings > Functions > D1 bindings." }, 500);
+  const db = env.DB || env.DD_DB;
+  if (!db) {
+    return json({ ok: false, error: "Missing D1 binding DB. Check Pages > Settings > Functions > D1 bindings." }, 500);
   }
 
   // --- Schema (SQLite / D1) ---
@@ -210,7 +211,7 @@ export async function onRequestGet({ request, env }) {
     if (!cleaned) continue;
 
     try {
-      await env.DD_DB.exec(cleaned);
+      await db.exec(cleaned);
     } catch (err) {
       return json(
         {
