@@ -1,3 +1,7 @@
+# Build 184 handoff note
+
+Open `/admin/application-sanity/` after deployment to review the overall app state, value-added backlog, SEO criteria rows, desktop/mobile checks, and visual enrichment direction before starting the next build pass.
+
 ## Build 183 admin addition
 
 Build 183 adds `/admin/visual-enrichment-studio/` for approved-media visual enrichment, desktop/mobile screenshot pairs, visual diffs, image budgets, alt-text suggestions, seasonal visual campaigns, product detail visual checks, low-bandwidth mode, and final visual release-report rows.

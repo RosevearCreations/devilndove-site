@@ -1,3 +1,7 @@
+# Build 184 post-deploy sanity check
+
+After deploy, open `/admin/application-sanity/`, seed rows, save a sanity snapshot, then compare it with Deployment Preflight, Go-Live Execution, Visual Enrichment, and Post-Deploy Smoke Tests.
+
 # Build 183 post-deploy visual smoke-test notes
 
 After deploy, open `/admin/visual-enrichment-studio/`, seed the Build 183 rows, then review screenshot pairs, image-slot assignments, compression budgets, low-bandwidth toggle behaviour, and final visual deployment report rows. Confirm public pages still show one H1 and that the lighter visual toggle does not hide core content.

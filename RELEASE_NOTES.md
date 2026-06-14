@@ -1,3 +1,9 @@
+# Build 184 — Application Sanity Check and Value Roadmap
+
+Build 184 adds a sanity-check layer instead of another broad feature expansion. It provides `/admin/application-sanity/`, `/api/admin/application-sanity`, `database_build184_sanity_check_and_value_roadmap.sql`, and `data/site/build184-application-sanity.json`.
+
+The pass documents where the application stands now, which areas are strongest, which risks still matter, and which value-added modifications should come next. It also updates schema references, deployment checks, release manifest generation, Markdown handoff files, SEO/local guidance notes, and validation output.
+
 # Build 183 — Visual Enrichment Studio and Professional Visual Controls
 
 - Added `/admin/visual-enrichment-studio/`, `/api/admin/visual-enrichment-studio`, and `database_build183_visual_enrichment_studio.sql`.

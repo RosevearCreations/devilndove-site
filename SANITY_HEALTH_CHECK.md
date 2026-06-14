@@ -1,3 +1,9 @@
+# Build 184 sanity update
+
+Build 184 adds Application Sanity as the review layer for the whole app. Required files now include `admin/application-sanity/index.html`, `functions/api/admin/application-sanity.js`, `public/js/admin-application-sanity.js`, `database_build184_sanity_check_and_value_roadmap.sql`, and `data/site/build184-application-sanity.json`.
+
+Static checks still cover one-H1/title/meta, CSS brace balance, JavaScript syntax, JSON parse health, schema marker checks, release manifest output, and zip integrity.
+
 # Build 183 sanity update
 
 Build 183 adds Visual Enrichment Studio checks to the normal deployment sanity flow. Required files now include `admin/visual-enrichment-studio/index.html`, `functions/api/admin/visual-enrichment-studio.js`, `public/js/admin-visual-enrichment-studio.js`, `database_build183_visual_enrichment_studio.sql`, and `data/site/build183-visual-enrichment-studio.json`.
