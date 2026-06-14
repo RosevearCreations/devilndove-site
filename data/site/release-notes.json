@@ -38,6 +38,15 @@
   "build_label": "Build 183",
   "notes": [
     {
+      "build_label": "Build 184",
+      "title": "Application Sanity Check and Value Roadmap",
+      "summary": "Adds application-wide sanity review, value-added backlog, SEO criteria rows, desktop/mobile checks, visual enrichment direction, and updated schema/Markdown validation.",
+      "migration": "database_build184_sanity_check_and_value_roadmap.sql",
+      "admin_pages": [
+        "/admin/application-sanity/"
+      ]
+    },
+    {
       "build_label": "Build 183",
       "title": "Visual Enrichment Studio and professional visual controls",
       "summary": "Added media picker asset rows, screenshot pairs, image-slot assignments, visual diffs, alt-text suggestions, seasonal campaigns, low-bandwidth mode, and final visual deployment report rows.",
