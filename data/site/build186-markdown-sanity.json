@@ -1,0 +1,83 @@
+{
+  "build_label": "Build 186",
+  "date": "2026-06-14",
+  "title": "Markdown Consolidation, Value Backlog Execution, and Visual Placeholder Enrichment",
+  "canonical_markdown": [
+    "PROJECT_STATUS_AND_ROADMAP.md",
+    "AI_HANDOFF.md"
+  ],
+  "supporting_markdown": [
+    "DEVELOPMENT_ROADMAP.md",
+    "KNOWN_GAPS_AND_RISKS.md",
+    "DATABASE_SCHEMA_REFERENCE.md",
+    "RELEASE_NOTES.md",
+    "SANITY_HEALTH_CHECK.md",
+    "LOCAL_SEO_PLAYBOOK.md",
+    "IMAGES.md",
+    "COMPETITIVE.md",
+    "README.md"
+  ],
+  "admin_routes_added": [
+    "/admin/markdown-sanity/"
+  ],
+  "api_routes_added": [
+    "/api/admin/markdown-sanity"
+  ],
+  "visual_placeholders": [
+    {
+      "key": "workshop",
+      "asset": "/assets/visual-placeholders/workshop-process.svg"
+    },
+    {
+      "key": "product",
+      "asset": "/assets/visual-placeholders/product-detail.svg"
+    },
+    {
+      "key": "before_after",
+      "asset": "/assets/visual-placeholders/before-after.svg"
+    },
+    {
+      "key": "jewelry",
+      "asset": "/assets/visual-placeholders/jewelry-macro.svg"
+    },
+    {
+      "key": "candle",
+      "asset": "/assets/visual-placeholders/candle-colour.svg"
+    },
+    {
+      "key": "soap",
+      "asset": "/assets/visual-placeholders/soap-texture.svg"
+    },
+    {
+      "key": "engraving",
+      "asset": "/assets/visual-placeholders/engraving-proof.svg"
+    },
+    {
+      "key": "vintage",
+      "asset": "/assets/visual-placeholders/vintage-condition.svg"
+    }
+  ],
+  "seo_guidance": "Preserve one H1 per page, use searchable phrases in titles/headings/body/alt text, keep local relevance and proof content visible, and avoid keyword stuffing.",
+  "next_20": [
+    "Connect live rollups into Command Center",
+    "Add more safe Product QA applies",
+    "Replace placeholders with approved media",
+    "Build customer story wizard",
+    "Add mobile product autosave",
+    "Connect conversion event pipeline",
+    "Add GBP observation log",
+    "Create customer/member timeline cards",
+    "Add costing margin cards",
+    "Import performance measurements",
+    "Add image slot publish controls",
+    "Add visual diff thumbnails",
+    "Add Search Console landing-page deltas",
+    "Add public proof placement testing",
+    "Add local review request workflow",
+    "Add bundle/gift-set builder",
+    "Add marketplace listing health cards",
+    "Add low-stock product readiness warnings",
+    "Add abandoned-cart recovery notes",
+    "Add seasonal campaign planner"
+  ]
+}

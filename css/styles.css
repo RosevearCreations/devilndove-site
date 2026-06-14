@@ -1197,3 +1197,17 @@ body.nav-mobile-open{overflow:hidden}
   .command-center-card { transition:none; }
   .command-center-card:hover { transform:none; }
 }
+
+/* Build 186 Markdown sanity, visual placeholders, and desktop/mobile consolidation */
+.markdown-sanity-hero{
+  background:
+    radial-gradient(circle at 12% 18%, rgba(191,162,91,.20), transparent 30%),
+    radial-gradient(circle at 88% 20%, rgba(167,139,250,.16), transparent 28%),
+    linear-gradient(135deg, rgba(31,20,43,.98), rgba(11,10,16,.98));
+  border:1px solid rgba(255,255,255,.14);
+}
+.markdown-sanity-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0}
+.markdown-sanity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0}
+.visual-placeholder-section{margin-top:18px;overflow:hidden;position:relative}
+.visual-placeholder-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px}
+.visual-placeholder-heading h2{margin:.25rem 0 .35rem}.visual-placeholder-gallery,.visual-placeholder-admin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.visual-placeholder-card{margin:0;border:1px solid rgba(255,255,255,.14);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));overflow:hidden;min-width:0}.visual-placeholder-card img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;background:rgba(0,0,0,.25)}.visual-placeholder-card figcaption,.visual-placeholder-card>div{display:grid;gap:5px;padding:12px}.visual-placeholder-card figcaption span{font-size:.9rem;opacity:.82;line-height:1.35}.visual-placeholder-card strong{line-height:1.2}.low-bandwidth .visual-placeholder-card{box-shadow:none}.low-bandwidth .visual-placeholder-card img{filter:none}.status-pill.primary-canonical,.status-pill.active,.status-pill.aligned,.status-pill.visible-placeholder,.status-pill.lazy-loaded-svg{background:rgba(34,197,94,.16);color:#166534}.status-pill.supporting-reference,.status-pill.handoff-reference,.status-pill.awaiting-approved-media,.status-pill.needs-live-device-check,.status-pill.watch{background:rgba(234,179,8,.18);color:#854d0e}@media(max-width:880px){.visual-placeholder-gallery,.visual-placeholder-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.markdown-sanity-grid{grid-template-columns:1fr}}@media(max-width:620px){.visual-placeholder-gallery,.visual-placeholder-admin-grid{grid-template-columns:1fr}.markdown-sanity-actions .btn,.visual-placeholder-heading .btn{width:100%;justify-content:center}.visual-placeholder-card figcaption,.visual-placeholder-card>div{padding:11px}.visual-placeholder-section{padding:14px}}@media(prefers-reduced-motion:reduce){.visual-placeholder-card{transition:none!important}}

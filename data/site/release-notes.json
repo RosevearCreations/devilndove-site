@@ -1,11 +1,17 @@
 {
   "latest": {
-    "build": "Build 181",
-    "title": "Live Ops Follow-through, Signed Evidence Downloads, Marketplace Overrides, and SEO Copy Refresh",
-    "date": "2026-06-11",
-    "summary": "Adds Build 181 follow-through controls for signed private R2 evidence downloads, recall evidence upload requests, Product QA blocker counts, marketplace gate badges and override requests, LocalBusiness export rows, dashboard action buttons, watcher logs, and local SEO body-copy refreshes."
+    "build": "Build 186",
+    "title": "Markdown Consolidation, Visual Placeholders, and Value Backlog Execution",
+    "date": "2026-06-14",
+    "summary": "Adds Markdown Sanity admin/API, two canonical Markdown files, visual graphic placeholders across key public pages, value enhancement execution rows, desktop/mobile sanity rows, CSS drift review rows, and Build 186 schema updates."
   },
   "history": [
+    {
+      "build": "Build 186",
+      "title": "Markdown Consolidation, Visual Placeholders, and Value Backlog Execution",
+      "date": "2026-06-14",
+      "summary": "Adds Markdown Sanity admin/API, two canonical Markdown files, visual graphic placeholders across key public pages, value enhancement execution rows, desktop/mobile sanity rows, CSS drift review rows, and Build 186 schema updates."
+    },
     {
       "build": "Build 181",
       "title": "Live Ops Follow-through, Signed Evidence Downloads, Marketplace Overrides, and SEO Copy Refresh",
@@ -21,6 +27,22 @@
   ],
   "items": [
     {
+      "build_label": "Build 186",
+      "title": "Markdown Consolidation, Visual Placeholders, and Value Backlog Execution",
+      "summary": "Adds Markdown Sanity admin/API, two canonical Markdown files, visual graphic placeholders across key public pages, value enhancement execution rows, desktop/mobile sanity rows, CSS drift review rows, and Build 186 schema updates.",
+      "files": [
+        "admin/markdown-sanity/index.html",
+        "functions/api/admin/markdown-sanity.js",
+        "public/js/admin-markdown-sanity.js",
+        "database_build186_markdown_consolidation_visual_placeholders.sql",
+        "PROJECT_STATUS_AND_ROADMAP.md",
+        "AI_HANDOFF.md",
+        "js/main.js",
+        "css/styles.css",
+        "assets/visual-placeholders/*.svg"
+      ]
+    },
+    {
       "build_label": "Build 182",
       "title": "Visual Polish, Mobile Parity, and SEO Enrichment",
       "summary": "Added visual polish admin controls, mobile/desktop parity rows, visual enrichment candidates, fallback review rows, schema validation queue, JSON-to-D1 ownership candidates, and motion-safe public support strips.",
@@ -35,7 +57,7 @@
       ]
     }
   ],
-  "build_label": "Build 183",
+  "build_label": "Build 186",
   "notes": [
     {
       "build_label": "Build 184",
