@@ -1,3 +1,9 @@
+# Build 185 local SEO value scorecard note
+
+Build 185 adds `local_seo_value_scorecard_rows` so local search work can move beyond static checklist items into a scorecard covering Search Console imports, Google Business Profile observations, manual ranking checks, content freshness, and approved image proof.
+
+The continuing search criteria remain: clear local page titles, one clear main heading, locally relevant body copy, useful alt text, internal links, and real proof images.
+
 # Build 184 local SEO sanity note
 
 Build 184 keeps the local SEO direction focused on searchable phrases in titles/main headings/body copy, one H1 per page, descriptive alt text, useful internal links, complete local business information, and fresh proof images.

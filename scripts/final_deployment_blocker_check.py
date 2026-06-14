@@ -38,7 +38,12 @@ REQUIRED_FILES = [
     'admin/application-sanity/index.html',
     'functions/api/admin/application-sanity.js',
     'public/js/admin-application-sanity.js',
-    'data/site/build184-application-sanity.json'
+    'data/site/build184-application-sanity.json',
+    'database_build185_admin_command_center_value_dashboards.sql',
+    'admin/command-center/index.html',
+    'functions/api/admin/command-center.js',
+    'public/js/admin-command-center.js',
+    'data/site/build185-command-center.json'
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 

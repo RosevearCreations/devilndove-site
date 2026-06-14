@@ -1,3 +1,9 @@
+# Build 185 schema reference update
+
+Build 185 adds the Admin Command Center and value-added dashboard layer. New tables: `admin_command_center_daily_snapshots`, `admin_command_center_cards`, `product_readiness_scoreboard_snapshots`, `conversion_funnel_scorecard_rows`, `local_seo_value_scorecard_rows`, `maker_gallery_value_rows`, `customer_story_builder_rows`, `mobile_quick_product_add_checks`, `inventory_job_costing_value_rows`, `unified_customer_member_history_rows`, and `performance_budget_value_rows`.
+
+Run `database_build185_admin_command_center_value_dashboards.sql` after `database_build184_sanity_check_and_value_roadmap.sql`. No destructive schema changes were made.
+
 # Build 184 schema reference update
 
 Build 184 adds the application sanity and value-roadmap layer. New tables: `application_sanity_snapshots`, `application_module_status_rows`, `value_added_modification_candidates`, `seo_search_criteria_review_rows`, `desktop_mobile_value_checks`, `sanity_action_plan_rows`, and `visual_value_enrichment_rows`.

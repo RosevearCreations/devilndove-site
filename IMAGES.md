@@ -1,3 +1,7 @@
+# Build 185 visual/professional polish note
+
+Build 185 adds maker-gallery value rows and performance budget rows so new visual effects/images stay professional without making pages slow. Before/after and process gallery ideas must still use approved public-use media, clear alt text, reduced-motion-safe behaviour, and low-bandwidth fallbacks.
+
 # Build 184 visual value note
 
 Build 184 separates visual enrichment ideas from approved image placement. Future visual effects should remain reduced-motion safe, low-bandwidth aware, and locked against H1 changes.

@@ -37,6 +37,7 @@ JSON_FILES = [
     'data/site/build182-mobile-visual-polish.json',
     'data/site/build183-visual-enrichment-studio.json',
     'data/site/build184-application-sanity.json',
+    'data/site/build185-command-center.json',
 ]
 REQUIRED_FILES = [
     'database_build171_ledger_repair.sql',
@@ -82,6 +83,10 @@ REQUIRED_FILES = [
     'admin/application-sanity/index.html',
     'functions/api/admin/application-sanity.js',
     'public/js/admin-application-sanity.js',
+    'database_build185_admin_command_center_value_dashboards.sql',
+    'admin/command-center/index.html',
+    'functions/api/admin/command-center.js',
+    'public/js/admin-command-center.js',
 ]
 
 def read(path: Path) -> str:
@@ -195,6 +200,8 @@ def check_schema_files(checks: list[dict]) -> None:
         'visual_candidate_media_assets',
         'build_184_sanity_check_and_value_roadmap',
         'application_sanity_snapshots',
+        'build_185_admin_command_center_value_dashboards',
+        'admin_command_center_cards',
     ]
     required = {
         'database_schema.sql': schema_needles,
@@ -212,6 +219,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build181_live_ops_followthrough.sql': ['private_evidence_download_tokens', 'marketplace_export_gate_overrides', 'build_181_live_ops_followthrough'],
         'database_build183_visual_enrichment_studio.sql': ['visual_candidate_media_assets', 'public_page_image_slot_assignments', 'build_183_visual_enrichment_studio'],
         'database_build184_sanity_check_and_value_roadmap.sql': ['application_sanity_snapshots', 'value_added_modification_candidates', 'build_184_sanity_check_and_value_roadmap'],
+        'database_build185_admin_command_center_value_dashboards.sql': ['admin_command_center_cards', 'conversion_funnel_scorecard_rows', 'build_185_admin_command_center_value_dashboards'],
     }
     missing=[]
     detail=[]
