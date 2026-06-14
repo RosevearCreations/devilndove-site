@@ -187,3 +187,6 @@ Store results with `build_label`, `page_url`, `result_status`, `http_status`, an
 - After standard smoke tests, open `/admin/deploy-readiness/`, seed drilldowns, and build the promote-live checklist.
 - Confirm marketplace row validation, recall copy review, R2 signed URL check, and provider webhook signature setup rows.
 
+# Build 186 consolidation note
+
+Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.

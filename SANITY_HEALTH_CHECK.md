@@ -995,3 +995,10 @@ The build 171 SQL marker for `schema_migration_ledger` was corrected to include 
 - Marketplace CSV downloads should be preceded by the real export-row validation button.
 - Recall notifications should not leave draft status until copy review and signature evidence rows are approved.
 
+# Build 186 consolidation note
+
+Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
+
+## Build 186 validation summary
+
+Static checks confirmed JS syntax, JSON parsing, one-H1 public page scan, CSS brace balance, and SQL smoke testing for the Build 186 migration chain. Live Cloudflare bindings still require deployed checks.

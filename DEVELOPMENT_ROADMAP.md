@@ -2175,3 +2175,30 @@ Completed in this pass:
 ## Build 172 hotfix note — D1 migration ledger
 
 The build 171 SQL marker for `schema_migration_ledger` was corrected to include the required `file_name` column. A small live repair file, `database_build171_ledger_repair.sql`, is included for databases where the schema additions already ran but the final ledger insert failed. Do not rerun the entire upgrade only to fix the marker if build 171 ALTER TABLE additions already succeeded; repeated ALTER TABLE ADD COLUMN statements can fail on existing columns in SQLite/D1.
+
+# Build 186 consolidation note
+
+Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
+
+## Build 186 completed 20
+
+1. Created canonical project roadmap.
+2. Created canonical AI handoff.
+3. Added Markdown Sanity admin page.
+4. Added Markdown Sanity API.
+5. Added Build 186 D1 migration.
+6. Reclassified Markdown files.
+7. Added visual placeholder SVG assets.
+8. Injected placeholder gallery on key public pages.
+9. Preserved one-H1 rule.
+10. Added desktop/mobile placeholder CSS.
+11. Added value-enhancement execution rows.
+12. Added CSS drift/overlap rows.
+13. Added desktop/mobile surface rows.
+14. Added next-step sanity rows.
+15. Added static handoff JSON.
+16. Updated admin navigation.
+17. Updated aggregate schema SQL.
+18. Updated release/sanity/image/local SEO notes.
+19. Ran static validation.
+20. Packaged Build 186.

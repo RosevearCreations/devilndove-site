@@ -1274,3 +1274,7 @@ Completed in this pass:
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+# Build 186 consolidation note
+
+Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.

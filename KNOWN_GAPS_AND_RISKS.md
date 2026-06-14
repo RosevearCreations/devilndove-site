@@ -1537,3 +1537,11 @@ Completed in this pass:
 ## Build 172 hotfix note — D1 migration ledger
 
 The build 171 SQL marker for `schema_migration_ledger` was corrected to include the required `file_name` column. A small live repair file, `database_build171_ledger_repair.sql`, is included for databases where the schema additions already ran but the final ledger insert failed. Do not rerun the entire upgrade only to fix the marker if build 171 ALTER TABLE additions already succeeded; repeated ALTER TABLE ADD COLUMN statements can fail on existing columns in SQLite/D1.
+
+# Build 186 consolidation note
+
+Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
+
+## Build 186 remaining sanity concerns
+
+The app is now powerful but broad. The next risk is admin overload, duplicated documentation, and placeholders staying placeholder forever. The next highest-value work is live rollups, real approved media, conversion measurement, customer timeline cards, and performance measurements.

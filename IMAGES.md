@@ -572,3 +572,10 @@ A CSS pass is not complete if any public section falls back to a plain white car
 - Deploy Readiness can track recall signature evidence placeholders and R2 signed URL verification results.
 - Dark-theme/admin evidence remains reviewed through existing evidence pages; Build 178 focuses on final readiness visibility.
 
+# Build 186 consolidation note
+
+Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
+
+## Build 186 visual placeholder rule
+
+Public placeholders live under `/assets/visual-placeholders/` and are injected only as temporary, lightweight SVG image slots. Replace them only after public-use/consent approval, alt text, compression, mobile review, and performance budget checks.

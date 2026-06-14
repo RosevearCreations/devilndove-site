@@ -1105,3 +1105,10 @@ The build 171 SQL marker for `schema_migration_ledger` was corrected to include 
 - `local_business_schema_edit_drafts` and `structured_data_validation_hints` — structured-data review support.
 - `release_package_previous_zip_comparisons`, `dashboard_notification_card_snoozes`, and `mobile_release_control_cards` — deploy comparison, snooze, and phone-card support.
 
+# Build 186 consolidation note
+
+Build 186 adds `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two primary starting files for future work. This file remains as a supporting reference for detailed history, implementation notes, or specialized context. Build 186 also adds `/admin/markdown-sanity/`, visual graphic placeholders across key public pages, desktop/mobile sanity rows, CSS drift/overlap rows, and a new migration: `database_build186_markdown_consolidation_visual_placeholders.sql`.
+
+## Build 186 schema addition
+
+Added `database_build186_markdown_consolidation_visual_placeholders.sql` for Markdown consolidation rows, value enhancement execution rows, visual placeholder rows, desktop/mobile surface audit rows, CSS drift/overlap rows, and next-step sanity rows.
