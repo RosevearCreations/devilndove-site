@@ -27,6 +27,20 @@
   ],
   "items": [
     {
+      "build": "187",
+      "title": "Login 405 and Cloudflare environment checklist",
+      "summary": "Hardened /api/auth/login, added /api/auth-login fallback, patched DB/DD_DB health checks, and documented required Cloudflare bindings/secrets.",
+      "migration_required": false,
+      "files": [
+        "functions/api/auth/login.js",
+        "functions/api/auth-login.js",
+        "auth.js",
+        "functions/api/health.js",
+        "functions/api/admin/bootstrap.js",
+        "CLOUDFLARE_ENVIRONMENT_CHECKLIST.md"
+      ]
+    },
+    {
       "build_label": "Build 186",
       "title": "Markdown Consolidation, Visual Placeholders, and Value Backlog Execution",
       "summary": "Adds Markdown Sanity admin/API, two canonical Markdown files, visual graphic placeholders across key public pages, value enhancement execution rows, desktop/mobile sanity rows, CSS drift review rows, and Build 186 schema updates.",
@@ -81,5 +95,6 @@
       ],
       "created_at": "2026-06-12"
     }
-  ]
+  ],
+  "latest_build": "187"
 }
