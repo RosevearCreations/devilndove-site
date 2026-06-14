@@ -1,3 +1,7 @@
+# Build 185 quick status
+
+Build 185 adds the Admin Command Center at `/admin/command-center/` as the daily operating layer above the specialized admin tools. It does not replace Application Sanity, Visual Enrichment, Product Readiness, Release Control, or Go-Live; it gives them a calmer launch point and value-added tracking rows.
+
 # Build 184 handoff note
 
 Open `/admin/application-sanity/` after deployment to review the overall app state, value-added backlog, SEO criteria rows, desktop/mobile checks, and visual enrichment direction before starting the next build pass.

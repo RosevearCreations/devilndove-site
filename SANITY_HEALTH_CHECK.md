@@ -1,3 +1,9 @@
+# Build 185 sanity update
+
+Build 185 adds Admin Command Center checks to the deployment sanity flow. Required files now include `admin/command-center/index.html`, `functions/api/admin/command-center.js`, `public/js/admin-command-center.js`, `database_build185_admin_command_center_value_dashboards.sql`, and `data/site/build185-command-center.json`.
+
+The one-H1 rule still applies to every exposed HTML page. The Command Center has one `<h1>` only and is marked admin/noindex. CSS additions include responsive desktop/mobile layout and reduced-motion-safe hover behaviour.
+
 # Build 184 sanity update
 
 Build 184 adds Application Sanity as the review layer for the whole app. Required files now include `admin/application-sanity/index.html`, `functions/api/admin/application-sanity.js`, `public/js/admin-application-sanity.js`, `database_build184_sanity_check_and_value_roadmap.sql`, and `data/site/build184-application-sanity.json`.

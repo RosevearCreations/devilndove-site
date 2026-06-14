@@ -1,3 +1,7 @@
+# Build 185 post-deploy check
+
+After deploying Build 185, run the D1 migration, open `/admin/command-center/`, click Refresh, then save one daily snapshot. Confirm the Product Readiness, Local SEO, Visual Enrichment, Mobile Quick Add, Costing, Customer History, Performance, and Deploy Safety cards load without live binding errors.
+
 # Build 184 post-deploy sanity check
 
 After deploy, open `/admin/application-sanity/`, seed rows, save a sanity snapshot, then compare it with Deployment Preflight, Go-Live Execution, Visual Enrichment, and Post-Deploy Smoke Tests.

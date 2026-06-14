@@ -1,3 +1,11 @@
+# Build 185 — Admin Command Center and Value-Added Dashboards
+
+Build 185 adds `/admin/command-center/`, `/api/admin/command-center`, `database_build185_admin_command_center_value_dashboards.sql`, and `data/site/build185-command-center.json`.
+
+This pass turns the Build 184 sanity-check recommendations into a calmer daily operating screen covering Product Readiness, Orders/Today, Local SEO, Visual Enrichment, Customer Stories, Mobile Quick Add, Inventory/Job Costing, Customer History, Performance Budgets, and Deploy Safety.
+
+No destructive schema changes were made. The new D1 migration is additive and should run after Build 184.
+
 # Build 184 — Application Sanity Check and Value Roadmap
 
 Build 184 adds a sanity-check layer instead of another broad feature expansion. It provides `/admin/application-sanity/`, `/api/admin/application-sanity`, `database_build184_sanity_check_and_value_roadmap.sql`, and `data/site/build184-application-sanity.json`.
