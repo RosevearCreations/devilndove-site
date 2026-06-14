@@ -1,21 +1,9 @@
-// File: /functions/api/gift-card-balance.js
-// Brief description: Public gift-card balance lookup with code and email verification.
+// File: /functions/api/admin/gift-card-balance.js
+// Brief description: Admin-only gift-card balance lookup for support and redemption checks.
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff'
-    }
-  });
-}
-function clean(value, limit = 180) {
-  const text = String(value || '').trim();
-  return text.length > limit ? text.slice(0, limit).trim() : text;
-}
-function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
+import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+function json(data, status = 200) { return jsonResponse(data, status); }
+function clean(value) { return normalizeText(value).trim(); }
 async function ensureTables(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS gift_cards (
     gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,42 +13,13 @@ async function ensureTables(db) {
     remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
     issued_to_email TEXT,
     issued_to_name TEXT,
-    recipient_email TEXT,
-    recipient_name TEXT,
-    purchaser_email TEXT,
-    purchaser_name TEXT,
     note TEXT,
-    recipient_note TEXT,
     status TEXT NOT NULL DEFAULT 'active',
     expires_at TEXT,
     last_redeemed_at TEXT,
-    order_id INTEGER,
-    purchase_source TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`).run().catch(() => null);
-
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_lookup_attempts (
-    gift_card_lookup_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code_hint TEXT,
-    email_hash TEXT,
-    client_key TEXT,
-    lookup_email TEXT,
-    code_suffix TEXT,
-    ip_hash TEXT,
-    user_agent TEXT,
-    result_status TEXT,
-    was_success INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-  for (const sql of [
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN lookup_email TEXT`,
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN code_suffix TEXT`,
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN ip_hash TEXT`,
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN user_agent TEXT`,
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN result_status TEXT`
-  ]) await db.prepare(sql).run().catch(() => null);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_lookup_lockouts (gift_card_lookup_lockout_id INTEGER PRIMARY KEY AUTOINCREMENT, lookup_email TEXT, code_suffix TEXT, ip_hash TEXT, lockout_status TEXT NOT NULL DEFAULT 'active', lockout_reason TEXT, locked_by_user_id INTEGER, locked_at TEXT DEFAULT CURRENT_TIMESTAMP, expires_at TEXT, released_at TEXT, notes TEXT)`).run().catch(() => null);
   await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_redemptions (
     gift_card_redemption_id INTEGER PRIMARY KEY AUTOINCREMENT,
     gift_card_id INTEGER NOT NULL,
@@ -70,48 +29,30 @@ async function ensureTables(db) {
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`).run().catch(() => null);
 }
-function safeCard(row) {
-  return {
-    code: String(row.code || '').replace(/^(.{4}).+(.{4})$/, '$1••••$2'),
-    currency: row.currency || 'CAD',
-    initial_amount_cents: Number(row.initial_amount_cents || 0),
-    remaining_amount_cents: Number(row.remaining_amount_cents || 0),
-    status: row.status || 'active',
-    expires_at: row.expires_at || '',
-    last_redeemed_at: row.last_redeemed_at || '',
-    issued_to_name: row.issued_to_name || row.recipient_name || '',
-    purchase_source: row.purchase_source || ''
-  };
-}
 export async function onRequestGet(context) {
-  const db = context.env.DB || context.env.DD_DB;
-  if (!db) return json({ ok: false, error: 'Gift-card lookup is unavailable right now.' }, 503);
+  const { request, env } = context;
+  const db = getDb(env);
+  if (!db) return json({ ok: false, error: 'Database binding is missing.' }, 500);
+  const adminUser = await getAdminUserFromRequest(request, env);
+  if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
   await ensureTables(db);
-  const url = new URL(context.request.url);
+  const url = new URL(request.url);
   const code = clean(url.searchParams.get('code')).toUpperCase();
   const email = clean(url.searchParams.get('email')).toLowerCase();
-  if (!code || !email || !email.includes('@')) return json({ ok: false, error: 'Enter the gift-card code and recipient or purchaser email.' }, 400);
-  const ip = context.request.headers.get('cf-connecting-ip') || context.request.headers.get('x-forwarded-for') || 'unknown';
-  const userAgent = context.request.headers.get('user-agent') || '';
-  const ipHash = String(ip || 'unknown').slice(0, 120);
-  const codeSuffix = code.slice(-4);
-  const clientKey = `${ip}:${email.slice(0, 80)}`;
-  const lockout = await db.prepare(`SELECT * FROM gift_card_lookup_lockouts WHERE lockout_status='active' AND (LOWER(COALESCE(lookup_email,''))=LOWER(?) OR code_suffix=? OR ip_hash=?) AND (expires_at IS NULL OR datetime(expires_at) > datetime('now')) LIMIT 1`).bind(email, codeSuffix, ipHash).first().catch(() => null);
-  if (lockout) return json({ ok: false, error: 'Gift-card lookup is temporarily locked for safety. Please contact Devil n Dove if this is your card.' }, 423);
-  const recentAttempts = await db.prepare(`SELECT COUNT(*) AS total FROM gift_card_lookup_attempts WHERE client_key=? AND datetime(created_at) >= datetime('now','-15 minutes')`).bind(clientKey).first().catch(() => ({ total: 0 }));
-  if (Number(recentAttempts?.total || 0) >= 12) return json({ ok: false, error: 'Too many balance lookup attempts. Please wait a little while and try again.' }, 429);
-  const row = await db.prepare(`
+  if (!code && !email) return json({ ok: false, error: 'Enter a gift-card code or recipient/purchaser email.' }, 400);
+  const cards = await db.prepare(`
     SELECT * FROM gift_cards
-    WHERE UPPER(code)=?
-      AND (
-        LOWER(COALESCE(recipient_email, issued_to_email, ''))=?
-        OR LOWER(COALESCE(purchaser_email, ''))=?
-        OR LOWER(COALESCE(issued_to_email, ''))=?
-      )
-    LIMIT 1
-  `).bind(code, email, email, email).first().catch(() => null);
-  if (!row) { await db.prepare(`INSERT INTO gift_card_lookup_attempts (code_hint, email_hash, client_key, lookup_email, code_suffix, ip_hash, user_agent, result_status, was_success, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'failed', 0, CURRENT_TIMESTAMP)`).bind(code.slice(0,8), email.slice(0,3), clientKey, email, codeSuffix, ipHash, userAgent.slice(0,240)).run().catch(() => null); return json({ ok: false, error: 'No gift card matched that code and email.' }, 404); }
-  await db.prepare(`INSERT INTO gift_card_lookup_attempts (code_hint, email_hash, client_key, lookup_email, code_suffix, ip_hash, user_agent, result_status, was_success, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'ok', 1, CURRENT_TIMESTAMP)`).bind(code.slice(0,8), email.slice(0,3), clientKey, email, codeSuffix, ipHash, userAgent.slice(0,240)).run().catch(() => null);
-  const redemptions = rows(await db.prepare(`SELECT redeemed_amount_cents, redeemed_by_email, created_at FROM gift_card_redemptions WHERE gift_card_id=? ORDER BY datetime(created_at) DESC LIMIT 20`).bind(Number(row.gift_card_id || 0)).all().catch(() => ({ results: [] })));
-  return json({ ok: true, card: safeCard(row), redemptions });
+    WHERE (? = '' OR UPPER(code) = ?)
+       OR (? = '' OR LOWER(COALESCE(recipient_email, issued_to_email, '')) = ? OR LOWER(COALESCE(purchaser_email, '')) = ?)
+    ORDER BY datetime(created_at) DESC, gift_card_id DESC
+    LIMIT 20
+  `).bind(code, code, email, email, email).all().catch(() => ({ results: [] }));
+  const rows = Array.isArray(cards?.results) ? cards.results : [];
+  const ids = rows.map((row) => Number(row.gift_card_id || 0)).filter(Boolean);
+  let redemptions = [];
+  if (ids.length) {
+    const placeholders = ids.map(() => '?').join(',');
+    redemptions = (await db.prepare(`SELECT * FROM gift_card_redemptions WHERE gift_card_id IN (${placeholders}) ORDER BY datetime(created_at) DESC LIMIT 60`).bind(...ids).all().catch(() => ({ results: [] }))).results || [];
+  }
+  return json({ ok: true, cards: rows, redemptions, count: rows.length });
 }
