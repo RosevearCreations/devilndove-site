@@ -1174,3 +1174,26 @@ body.nav-mobile-open{overflow:hidden}
 .sanity-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
 .status-pill{display:inline-flex;align-items:center;border-radius:999px;padding:3px 9px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);font-size:.82rem;line-height:1.2;text-transform:capitalize}
 @media (max-width:720px){.sanity-toolbar .btn{width:100%;justify-content:center}.admin-table td,.admin-table th{font-size:.82rem}.sanity-hero p{font-size:.95rem}}
+
+
+/* Build 185 Admin Command Center */
+.command-center-hero {
+  background:
+    radial-gradient(circle at 10% 20%, rgba(191, 162, 91, .18), transparent 32%),
+    linear-gradient(135deg, rgba(36, 21, 46, .96), rgba(13, 11, 18, .98));
+}
+.command-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:18px 0; }
+.command-center-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; margin:18px 0; }
+.command-center-card { display:block; text-decoration:none; color:inherit; border:1px solid rgba(191,162,91,.18); transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.command-center-card:hover { transform:translateY(-2px); border-color:rgba(191,162,91,.45); box-shadow:0 12px 28px rgba(0,0,0,.22); }
+.command-center-card h2 { margin:.55rem 0 .35rem; }
+.command-metric { font-size:1rem; margin:.2rem 0 .8rem; }
+.command-metric strong { font-size:1.55rem; }
+@media (max-width: 760px) {
+  .command-center-grid { grid-template-columns:1fr; }
+  .command-toolbar .btn { width:100%; justify-content:center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .command-center-card { transition:none; }
+  .command-center-card:hover { transform:none; }
+}

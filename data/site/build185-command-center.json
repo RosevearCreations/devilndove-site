@@ -1,0 +1,24 @@
+{
+  "build_label": "Build 185",
+  "page": "/admin/command-center/",
+  "api": "/api/admin/command-center",
+  "migration": "database_build185_admin_command_center_value_dashboards.sql",
+  "value_areas": [
+    "Admin Command Center",
+    "Product Readiness Scoreboard",
+    "Conversion funnel tracking",
+    "Local SEO scorecard",
+    "Before/after maker gallery",
+    "Customer story builder",
+    "Mobile quick product add",
+    "Inventory/job costing",
+    "Unified customer/member history",
+    "Performance budgets"
+  ],
+  "seo_guardrails": [
+    "one H1 per exposed HTML page",
+    "title/meta/local wording remains checked",
+    "visual polish must keep reduced-motion and low-bandwidth options"
+  ],
+  "created_by": "Build 185 pass"
+}
