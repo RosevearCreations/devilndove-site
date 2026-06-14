@@ -1,18 +1,13 @@
 {
-  "build_label": "Build 186",
+  "build_label": "Build 184",
   "generated_by": "scripts/generate_release_manifest.py",
-  "file_count": 481,
-  "total_size_bytes": 8032851,
+  "file_count": 469,
+  "total_size_bytes": 7722343,
   "files": [
     {
       "path": "AI_CONTEXT.md",
-      "size_bytes": 58450,
-      "sha256": "3cc0136d71f41128b51556c860450aee37d74f5c3551de8b16ae2c30b9380039"
-    },
-    {
-      "path": "AI_HANDOFF.md",
-      "size_bytes": 3007,
-      "sha256": "143f35c594dca29e3257ad2102fd9c232d331cabe612fc7feaa50fd2deac86e1"
+      "size_bytes": 57614,
+      "sha256": "77f6feb99ca9f2d771d7bfe0f1210b48229c81f5d5842a80c7c641567838b700"
     },
     {
       "path": "AMAZON_MATCHING_NOTES.md",
@@ -21,58 +16,53 @@
     },
     {
       "path": "COMPETITIVE.md",
-      "size_bytes": 84645,
-      "sha256": "a7f906daca12b537ac5eb25021e8485bce86fe36c2a1b086b067875619fbe9a3"
+      "size_bytes": 84141,
+      "sha256": "ccd78da8610fbaff6d09f87554a9ee6fd1b7fcf2d41b215d12e54baea095d673"
     },
     {
       "path": "DATABASE_SCHEMA_REFERENCE.md",
-      "size_bytes": 76359,
-      "sha256": "fb1a0ddf273c2ba81055118862602524adde0d4a25b764042b9ac350beff0c02"
+      "size_bytes": 74892,
+      "sha256": "e65c69d0163ed5a535fd91e91348c94fd81bc84d28b78cf7b0055a8fe6f04794"
     },
     {
       "path": "DEVELOPMENT_ROADMAP.md",
-      "size_bytes": 188623,
-      "sha256": "f7821994d37e0db5ca6e0d0fe458d8ed91588b587e1473ef4ab94b656e2b150a"
+      "size_bytes": 182709,
+      "sha256": "4285937f67c68abdc9ad82baf365edb3f59eadd36148f9ea61b4f02a1d89d93c"
     },
     {
       "path": "IMAGES.md",
-      "size_bytes": 47374,
-      "sha256": "51bcf5b6cf0a633ce92b6d662d5db039daef2c26e86f298bf3130de6429df16e"
+      "size_bytes": 46238,
+      "sha256": "d2aab78e03dce2d0d921bfcef23760e4d13394b05d30d21874a1055188baa966"
     },
     {
       "path": "KNOWN_GAPS_AND_RISKS.md",
-      "size_bytes": 131045,
-      "sha256": "39345331c45858c48c0406c9e17e5ba10de90ec0374b4f72f1bddb04747191ab"
+      "size_bytes": 125543,
+      "sha256": "5188812d0443a9b188a58d66f9aab016762d254adffc6aacfc84ab745fcff5aa"
     },
     {
       "path": "LOCAL_SEO_PLAYBOOK.md",
-      "size_bytes": 55663,
-      "sha256": "36e85212889eb2559dc6caf385ae9365b02c03a6b437449db02b2e3d9043b7d8"
+      "size_bytes": 54404,
+      "sha256": "f18155397958cd1177a98742ef1dab7e971a8ae32ed3e29fdc1a13678e19c894"
     },
     {
       "path": "NEW_CHAT_STATUS.md",
-      "size_bytes": 63597,
-      "sha256": "0f8e7812235ab975ab94317a96d71b8eb41461f2d744ce3212781e682ab07bba"
+      "size_bytes": 62761,
+      "sha256": "2267976ceee0b70f4c1f8fad495c2157bfda258f53beda3ef851d7ac1797aef0"
     },
     {
       "path": "POST_DEPLOY_SMOKE_TEST.md",
-      "size_bytes": 12378,
-      "sha256": "4d85fec4d23dc73dd3d869afaf4d6d239f06543e2108d2d75218cf42aea2af3e"
-    },
-    {
-      "path": "PROJECT_STATUS_AND_ROADMAP.md",
-      "size_bytes": 4273,
-      "sha256": "d9276c16c32739d9513367791e9d8c1eb5494f0bcfe5f909b34868c8f206897a"
+      "size_bytes": 11541,
+      "sha256": "518c243773e53afc3cd9ec692fa9f88edfbd4052b7567c79947d4e46e51e2d3e"
     },
     {
       "path": "README.md",
-      "size_bytes": 61869,
-      "sha256": "e8e3329c8ee10cb45b5ff61d017541ffcd48a0a14b8315e3a5814d89332a378f"
+      "size_bytes": 61033,
+      "sha256": "88f3b9a5050140d045ee490d0da19881fc5d0e8c948830708a9d0d9a76270b6b"
     },
     {
       "path": "RELEASE_NOTES.md",
-      "size_bytes": 28917,
-      "sha256": "7f2ea7d3ade31273a59d87461c6e7cbc119e47c4facaba8a3c8f2fd3ae12244d"
+      "size_bytes": 27433,
+      "sha256": "3510a95f5a77cba764570836aa76d825ef655f2ef6911fa5c122e566c8b39582"
     },
     {
       "path": "REPO_BASE_GUIDE.md",
@@ -86,8 +76,8 @@
     },
     {
       "path": "SANITY_HEALTH_CHECK.md",
-      "size_bytes": 69423,
-      "sha256": "9cc7c3caf24f9e075a99e9da2e4b6fad78783f9313b803957b8ba09452a00f73"
+      "size_bytes": 68106,
+      "sha256": "5e5c068f336fd5d9bbafcae84e121130aee3b299d6b8eaf39d4ff6e34b045eeb"
     },
     {
       "path": "admin/accounting/index.html",
@@ -101,8 +91,8 @@
     },
     {
       "path": "admin/application-sanity/index.html",
-      "size_bytes": 1851,
-      "sha256": "ce5bea1aea60a4cdff4d3b517174004a7ab924b66dfb9f06735fc014910baff5"
+      "size_bytes": 1800,
+      "sha256": "4e52c3b6210b5175587500f5c3022e8b7987d6fd04b12cb82779c9bfd264f987"
     },
     {
       "path": "admin/catalog/index.html",
@@ -113,11 +103,6 @@
       "path": "admin/catalog-media/index.html",
       "size_bytes": 3070,
       "sha256": "3ea4413a68aa277ae6668ea661117e0b1b0a9dbd757a3aaae187f0b76e9ddd5e"
-    },
-    {
-      "path": "admin/command-center/index.html",
-      "size_bytes": 2203,
-      "sha256": "0d7f492513c2d292036305466d9de61609714fbb75e85b5d17162bc5b69c70f2"
     },
     {
       "path": "admin/dark-theme-evidence/index.html",
@@ -146,8 +131,8 @@
     },
     {
       "path": "admin/index.html",
-      "size_bytes": 10745,
-      "sha256": "94e353c16c6746eba5f07ba917bf259b2d0ff754b17dda0527316d5d837dc690"
+      "size_bytes": 10167,
+      "sha256": "446c439018b9bad7811414d98b394e8c2293994f6ad1b6d269ed5846c1b51e64"
     },
     {
       "path": "admin/inventory-operations/index.html",
@@ -163,11 +148,6 @@
       "path": "admin/local-seo-review/index.html",
       "size_bytes": 1512,
       "sha256": "930adf66da0b97790501bd0a67b400f1ffd05a262e28f45240ad2a6de95ec78c"
-    },
-    {
-      "path": "admin/markdown-sanity/index.html",
-      "size_bytes": 2202,
-      "sha256": "3e9ee9f7638d8eb50e8aa8b1cb4e1b53eddb387885e39ed2ee9c2ceea453d0f1"
     },
     {
       "path": "admin/marketplace-exports/index.html",
@@ -211,8 +191,8 @@
     },
     {
       "path": "admin/operations/index.html",
-      "size_bytes": 6538,
-      "sha256": "caffc87f8611d5f83caf55a827f88d1968015bf488fb42de2cf57140d1514ef3"
+      "size_bytes": 6250,
+      "sha256": "8821b57a0c89eeabffb225180cba916ec1dbf9d58791dd4025374e186b07ed66"
     },
     {
       "path": "admin/orders/index.html",
@@ -286,8 +266,8 @@
     },
     {
       "path": "css/styles.css",
-      "size_bytes": 102900,
-      "sha256": "6e0fbe62db07090b68aedf4b28f47782f522803826f51c7e7b4f83f73d8a6cbc"
+      "size_bytes": 99053,
+      "sha256": "6f9933aa9052b03ccb2da56b20216c9b443fe7faf3d1f61bab7f2c100350c9ff"
     },
     {
       "path": "data/accounting_templates/README.md",
@@ -330,24 +310,14 @@
       "sha256": "03e4b2733671d2c2e833726acc0047bba8d1c6dce9fc394deaf7a165185034cf"
     },
     {
-      "path": "data/site/build185-command-center.json",
-      "size_bytes": 740,
-      "sha256": "6beb7a380e47ab7b7ac78908f9f15017f31588e4351c41e83347ef52468cbebe"
-    },
-    {
-      "path": "data/site/build186-markdown-sanity.json",
-      "size_bytes": 2474,
-      "sha256": "7584e3c9c035b034ad5f5a0937d44da94e81752a89df5d1cba87048dbda66174"
-    },
-    {
       "path": "data/site/competitive-opportunities.json",
       "size_bytes": 16265,
       "sha256": "19781a9f1012a4ce7c7068f3dc4343f9a862eb12a0acce64d8cb305551c11b48"
     },
     {
       "path": "data/site/deployment-preflight.json",
-      "size_bytes": 6899,
-      "sha256": "5fc1e6d36d53b35fad3ab530dc6f24bbeca892701ff272126149c0412aeb70ba"
+      "size_bytes": 6506,
+      "sha256": "b04f7dee10d95e43aa66ee98338935c385f33dd6b396ccc4e455d63224c1e350"
     },
     {
       "path": "data/site/featured-items.json",
@@ -371,8 +341,8 @@
     },
     {
       "path": "data/site/release-notes.json",
-      "size_bytes": 4250,
-      "sha256": "9142f9ea1e3c3d28edfdfba60730da08c7df0d7e4da7ee5f7d98a12676089094"
+      "size_bytes": 3139,
+      "sha256": "ac818f74efd1d3b7eefd88d899c2d72fd894370949dceb3c6fe6e757093e7a71"
     },
     {
       "path": "data/site/seo-page-overrides.json",
@@ -465,19 +435,9 @@
       "sha256": "27388db3f0c9cc7bfee0046aa4eac5ed5445727ba6a1954434a32de0cbe439bd"
     },
     {
-      "path": "database_build185_admin_command_center_value_dashboards.sql",
-      "size_bytes": 21341,
-      "sha256": "17ba7a46d20d2f7346789528a1ceb67fb6320bb11fcbed956484cb7c2798d3bf"
-    },
-    {
-      "path": "database_build186_markdown_consolidation_visual_placeholders.sql",
-      "size_bytes": 18459,
-      "sha256": "97d94fc4c82f0b42112967014ef1e842f59a8019d30d80cf84347ff7c909238a"
-    },
-    {
       "path": "database_full_schema.sql",
-      "size_bytes": 309664,
-      "sha256": "f6cc5cdec0b6187e3ea99999ba17adc19ff020228164dd3a07528d7b969afde3"
+      "size_bytes": 269794,
+      "sha256": "1de03a162b60db5f2e6d448b1424febd01d5c5894933e4258c5a4085421fd511"
     },
     {
       "path": "database_growth_analytics_seo_extension.sql",
@@ -501,18 +461,18 @@
     },
     {
       "path": "database_schema.sql",
-      "size_bytes": 261145,
-      "sha256": "0ba19e6e07f43e825852f5a3f2455d281f8fd63afe90fe38c3259b64e63b670c"
+      "size_bytes": 221275,
+      "sha256": "501f04a5be83a0ca212e50e8ce9156ca7f0db283f03a71c03c2fe987bc36e9c6"
     },
     {
       "path": "database_store_schema.sql",
-      "size_bytes": 278389,
-      "sha256": "fe26fd7bb69d118ad61bfeb7789c81b17da30cbdc9f8aa052d7e692d51aec69f"
+      "size_bytes": 238519,
+      "sha256": "7ef336dae8d0575896e08b809e59c7ed7b61e1e0983ea582b71274db586b6ca5"
     },
     {
       "path": "database_upgrade_current_pass.sql",
-      "size_bytes": 60371,
-      "sha256": "b32df51a21c504e44d396f6344c8d7f73257c5d6416f120e6e20d6975024bc21"
+      "size_bytes": 20501,
+      "sha256": "27388db3f0c9cc7bfee0046aa4eac5ed5445727ba6a1954434a32de0cbe439bd"
     },
     {
       "path": "functions/api/_communityContent.js",
@@ -830,11 +790,6 @@
       "sha256": "d8ab25e110828f4446e9ad2468333e10a9db175e913512e3c87f039922cc5011"
     },
     {
-      "path": "functions/api/admin/command-center.js",
-      "size_bytes": 27472,
-      "sha256": "490f5a4d8cb3ae23348e35d807f2a115493f46c9e360a71d3657cbfa828b19b9"
-    },
-    {
       "path": "functions/api/admin/community-content.js",
       "size_bytes": 12622,
       "sha256": "55d6f1824bcce9d16ceb1b6bb6c6c1a41f8faf0fb467143475db8614ba8c10ea"
@@ -988,11 +943,6 @@
       "path": "functions/api/admin/local-seo-review.js",
       "size_bytes": 4735,
       "sha256": "a1513fbd59070ca0284dbf219481dc2e65ddf2f6c38024d569447c6792e5f29e"
-    },
-    {
-      "path": "functions/api/admin/markdown-sanity.js",
-      "size_bytes": 16470,
-      "sha256": "6182c6fdfbe057cec34d0e5b4247f194b5ff768f37891feedd6921a392a34d97"
     },
     {
       "path": "functions/api/admin/marketplace-csv-mapping.js",
@@ -1671,8 +1621,8 @@
     },
     {
       "path": "js/main.js",
-      "size_bytes": 43627,
-      "sha256": "c45c412f9343ddf6cf7d4ae6d4781bad4a730d12070ef4c8e2f3fa2e66d99b0b"
+      "size_bytes": 35271,
+      "sha256": "7c220c82476398aa4735d5884bdfedaa0dc66bc8d83f0261f0ab2f59a8164e89"
     },
     {
       "path": "public/js/account-help.js",
@@ -1778,11 +1728,6 @@
       "path": "public/js/admin-cleanup-sessions.js",
       "size_bytes": 5382,
       "sha256": "18eed16e900f11686ca333028f325aff36183a32b5ad206449adbe018a5da5c1"
-    },
-    {
-      "path": "public/js/admin-command-center.js",
-      "size_bytes": 9148,
-      "sha256": "a72f5dbf6cccca807f52152b8a238024dbf692f8e9a45273e3fc1a9653cc7b2b"
     },
     {
       "path": "public/js/admin-community.js",
@@ -1903,11 +1848,6 @@
       "path": "public/js/admin-local-seo-review.js",
       "size_bytes": 8869,
       "sha256": "1071c6565fb4a678a7a0a74d04cabde5a3a104bc9cba42b8ba84cf706760cbbf"
-    },
-    {
-      "path": "public/js/admin-markdown-sanity.js",
-      "size_bytes": 6687,
-      "sha256": "e4a7dd6865366531a094ce8833c8306f85d7de7dfaf5bed4057cde52338232aa"
     },
     {
       "path": "public/js/admin-marketplace-export-preview.js",
@@ -2409,6 +2349,5 @@
       "size_bytes": 2458,
       "sha256": "8e38a90c0cbcc558bdb3e622651b38dec64d74d2575571fdb6585bd1a957ce8a"
     }
-  ],
-  "notes": "Build 186 manifest after Markdown Sanity, visual placeholders, and value backlog execution updates."
+  ]
 }
