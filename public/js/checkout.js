@@ -392,6 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const orderData = await createOrder(payload);
       const order = orderData.order || null;
       if (!order?.order_id) throw new Error("Order was created, but the response did not include an order id.");
+      try { window.DDAnalytics?.trackCart?.('order_created', { order_id: order.order_id, meta: { source: 'checkout_create_order' } }); } catch {}
 
       setMessage("Order created. Preparing payment...");
       const paymentData = await preparePayment(order.order_id, formData.payment_method || "paypal");
@@ -441,6 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fillFormFromSavedData();
   renderSummary();
+  try { window.DDAnalytics?.trackCart?.('checkout_started', { meta: { source: 'checkout_ready' } }); } catch {}
   bindAutoSaveAndRecovery();
 
   form?.addEventListener("submit", handleSubmit);
