@@ -1174,3 +1174,36 @@ body.nav-mobile-open{overflow:hidden}
 .sanity-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
 .status-pill{display:inline-flex;align-items:center;border-radius:999px;padding:3px 9px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);font-size:.82rem;line-height:1.2;text-transform:capitalize}
 @media (max-width:720px){.sanity-toolbar .btn{width:100%;justify-content:center}.admin-table td,.admin-table th{font-size:.82rem}.sanity-hero p{font-size:.95rem}}
+
+
+/* Build 189: value-ops dashboards, visual placeholder bands, and mobile recovery polish */
+.visual-placeholder-band {
+  display: grid;
+  grid-template-columns: minmax(120px, 220px) 1fr;
+  gap: 18px;
+  align-items: center;
+  overflow: hidden;
+}
+.visual-placeholder-band img {
+  width: 100%;
+  max-width: 220px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 12px 30px rgba(0,0,0,.08);
+}
+.visual-placeholder-band h2 { margin-top: 0; }
+.command-toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.command-center-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin:18px 0; }
+.command-center-card { display:block; text-decoration:none; }
+.command-center-card h2 { margin:10px 0 4px; font-size:1.05rem; }
+.command-metric { margin:8px 0; }
+.command-metric strong { font-size:1.7rem; }
+.mobile-recovery-note, .mobile-recovery-restore { margin: 10px 0; }
+@media (max-width: 680px) {
+  .visual-placeholder-band { grid-template-columns: 1fr; }
+  .visual-placeholder-band img { max-width: 100%; }
+  .command-toolbar .btn { width:100%; justify-content:center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .visual-placeholder-band img { transition:none; }
+}

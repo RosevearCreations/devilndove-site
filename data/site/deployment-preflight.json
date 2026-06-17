@@ -7,7 +7,7 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "43 required files are present.",
+      "detail": "44 required files are present.",
       "missing": []
     },
     {
@@ -29,7 +29,7 @@
           "meta_description_length": 157,
           "has_canonical": true,
           "schema_blocks": 3,
-          "image_count": 1,
+          "image_count": 2,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -42,7 +42,7 @@
           "meta_description_length": 146,
           "has_canonical": true,
           "schema_blocks": 1,
-          "image_count": 1,
+          "image_count": 2,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -55,7 +55,7 @@
           "meta_description_length": 162,
           "has_canonical": true,
           "schema_blocks": 1,
-          "image_count": 2,
+          "image_count": 3,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -81,7 +81,7 @@
           "meta_description_length": 163,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 0,
+          "image_count": 1,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -107,7 +107,7 @@
           "meta_description_length": 157,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 0,
+          "image_count": 1,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -120,7 +120,7 @@
           "meta_description_length": 128,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 0,
+          "image_count": 1,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -133,7 +133,7 @@
           "meta_description_length": 166,
           "has_canonical": true,
           "schema_blocks": 1,
-          "image_count": 1,
+          "image_count": 2,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -146,7 +146,7 @@
           "meta_description_length": 156,
           "has_canonical": true,
           "schema_blocks": 1,
-          "image_count": 1,
+          "image_count": 2,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -159,7 +159,7 @@
           "meta_description_length": 128,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 0,
+          "image_count": 1,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -182,12 +182,12 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 1018/1018"
+      "detail": "CSS braces 1034/1034"
     },
     {
       "code": "static_json_parse",
       "status": "pass",
-      "detail": "10 JSON files checked; 0 failed.",
+      "detail": "13 JSON files checked; 0 failed.",
       "rows": [
         {
           "path": "data/site/seo-page-overrides.json",
@@ -236,6 +236,21 @@
         },
         {
           "path": "data/site/build184-application-sanity.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build185-command-center.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build186-markdown-sanity.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build189-value-ops.json",
           "ok": true,
           "error": ""
         }

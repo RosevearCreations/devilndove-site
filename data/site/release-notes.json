@@ -1,11 +1,17 @@
 {
   "latest": {
-    "build": "Build 181",
-    "title": "Live Ops Follow-through, Signed Evidence Downloads, Marketplace Overrides, and SEO Copy Refresh",
-    "date": "2026-06-11",
-    "summary": "Adds Build 181 follow-through controls for signed private R2 evidence downloads, recall evidence upload requests, Product QA blocker counts, marketplace gate badges and override requests, LocalBusiness export rows, dashboard action buttons, watcher logs, and local SEO body-copy refreshes."
+    "build": "Build 189",
+    "title": "Value Ops live counts, funnel tracking, mobile recovery, and visual replacement plan",
+    "date": "2026-06-14",
+    "summary": "Adds a real Command Center API with live counts, storefront funnel events, mobile product autosave/recovery, visual placeholder replacement candidates, local SEO observation rows, and product cost/margin review rows."
   },
   "history": [
+    {
+      "build": "Build 189",
+      "title": "Value Ops live counts, funnel tracking, mobile recovery, and visual replacement plan",
+      "date": "2026-06-14",
+      "summary": "Adds a real Command Center API with live counts, storefront funnel events, mobile product autosave/recovery, visual placeholder replacement candidates, local SEO observation rows, and product cost/margin review rows."
+    },
     {
       "build": "Build 181",
       "title": "Live Ops Follow-through, Signed Evidence Downloads, Marketplace Overrides, and SEO Copy Refresh",
@@ -35,8 +41,21 @@
       ]
     }
   ],
-  "build_label": "Build 183",
+  "build_label": "Build 189",
   "notes": [
+    {
+      "build_label": "Build 189",
+      "title": "Value Ops live counts, funnel tracking, mobile recovery, and visual replacement plan",
+      "summary": "Adds a real Command Center API with live counts, storefront funnel events, mobile product autosave/recovery, visual placeholder replacement candidates, local SEO observation rows, and product cost/margin review rows.",
+      "migration": "database_build189_value_ops_live_counts.sql",
+      "admin_pages": [
+        "/admin/command-center/"
+      ],
+      "api_routes": [
+        "/api/admin/command-center"
+      ],
+      "created_at": "2026-06-14"
+    },
     {
       "build": "188",
       "summary": "Login 405 route activation hotfix: added _routes.json for /api/*, hardened login route, patched auth client fallback."

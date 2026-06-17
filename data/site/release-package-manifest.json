@@ -1,8 +1,8 @@
 {
   "build_label": "Build 184",
   "generated_by": "scripts/generate_release_manifest.py",
-  "file_count": 469,
-  "total_size_bytes": 7722343,
+  "file_count": 487,
+  "total_size_bytes": 7916958,
   "files": [
     {
       "path": "AI_CONTEXT.md",
@@ -10,9 +10,19 @@
       "sha256": "77f6feb99ca9f2d771d7bfe0f1210b48229c81f5d5842a80c7c641567838b700"
     },
     {
+      "path": "AI_HANDOFF.md",
+      "size_bytes": 6574,
+      "sha256": "239b8d03a0d48c4a37143072b470a7d2075ae9437a2fb6096b1709f12a40b953"
+    },
+    {
       "path": "AMAZON_MATCHING_NOTES.md",
       "size_bytes": 41242,
       "sha256": "b678f77bf6437c52dd0e61e47eb2bc85b74303edfc0a36a935002022d880dd14"
+    },
+    {
+      "path": "CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md",
+      "size_bytes": 19502,
+      "sha256": "4c79e76dd4824f500932a7c112e9ba4e12499c3108d64b4e16352cdbc0b0ef1f"
     },
     {
       "path": "COMPETITIVE.md",
@@ -21,48 +31,53 @@
     },
     {
       "path": "DATABASE_SCHEMA_REFERENCE.md",
-      "size_bytes": 74892,
-      "sha256": "e65c69d0163ed5a535fd91e91348c94fd81bc84d28b78cf7b0055a8fe6f04794"
+      "size_bytes": 75195,
+      "sha256": "3571046060439b54d9133eb32fcf68d9b27de51eb3e2042cf415aad5efb2499f"
     },
     {
       "path": "DEVELOPMENT_ROADMAP.md",
-      "size_bytes": 182709,
-      "sha256": "4285937f67c68abdc9ad82baf365edb3f59eadd36148f9ea61b4f02a1d89d93c"
+      "size_bytes": 185876,
+      "sha256": "c7564f0f86de0325f186b1c925381fdad24851da95c24075067aa199d59a23ea"
     },
     {
       "path": "IMAGES.md",
-      "size_bytes": 46238,
-      "sha256": "d2aab78e03dce2d0d921bfcef23760e4d13394b05d30d21874a1055188baa966"
+      "size_bytes": 46525,
+      "sha256": "513616d84837be36c60e216893a818722e1c319154f6d15f44a9d410dcd042aa"
     },
     {
       "path": "KNOWN_GAPS_AND_RISKS.md",
-      "size_bytes": 125543,
-      "sha256": "5188812d0443a9b188a58d66f9aab016762d254adffc6aacfc84ab745fcff5aa"
+      "size_bytes": 128710,
+      "sha256": "edaaf267a51034e0c388bb5ff04831501bac8b0ebdecf517b1bba458f406e659"
     },
     {
       "path": "LOCAL_SEO_PLAYBOOK.md",
-      "size_bytes": 54404,
-      "sha256": "f18155397958cd1177a98742ef1dab7e971a8ae32ed3e29fdc1a13678e19c894"
+      "size_bytes": 54691,
+      "sha256": "da396c6bc19d763854edbf7d1bb7be8359ff0f60394926640097420ffc08f3f6"
     },
     {
       "path": "NEW_CHAT_STATUS.md",
-      "size_bytes": 62761,
-      "sha256": "2267976ceee0b70f4c1f8fad495c2157bfda258f53beda3ef851d7ac1797aef0"
+      "size_bytes": 63871,
+      "sha256": "623f51dab7dbb9d677d827e7b1d0e072c0e7a6db5899990793487328209a51be"
     },
     {
       "path": "POST_DEPLOY_SMOKE_TEST.md",
-      "size_bytes": 11541,
-      "sha256": "518c243773e53afc3cd9ec692fa9f88edfbd4052b7567c79947d4e46e51e2d3e"
+      "size_bytes": 11828,
+      "sha256": "c191569501d7acc9296888e99b096ebb4b20badcbce2b04609e84c724a07ae27"
+    },
+    {
+      "path": "PROJECT_STATUS_AND_ROADMAP.md",
+      "size_bytes": 8117,
+      "sha256": "9e45e6d102e294e813e4bec01505ccbbd63d6f5ccded598b54f44d9832f9b09a"
     },
     {
       "path": "README.md",
-      "size_bytes": 61033,
-      "sha256": "88f3b9a5050140d045ee490d0da19881fc5d0e8c948830708a9d0d9a76270b6b"
+      "size_bytes": 62143,
+      "sha256": "117aedf9e8eced7ddd12aed99bc448fd4e14cc56b9cc7d7c9863d9ac91529c20"
     },
     {
       "path": "RELEASE_NOTES.md",
-      "size_bytes": 27433,
-      "sha256": "3510a95f5a77cba764570836aa76d825ef655f2ef6911fa5c122e566c8b39582"
+      "size_bytes": 28739,
+      "sha256": "9b4fb8bcc0f384a61c01e1273e98e64b7aaea9f86cb8aeaed5a77bda8341bf0c"
     },
     {
       "path": "REPO_BASE_GUIDE.md",
@@ -76,8 +91,8 @@
     },
     {
       "path": "SANITY_HEALTH_CHECK.md",
-      "size_bytes": 68106,
-      "sha256": "5e5c068f336fd5d9bbafcae84e121130aee3b299d6b8eaf39d4ff6e34b045eeb"
+      "size_bytes": 69261,
+      "sha256": "3817158436f49ef68f35a3643344df018ee30498088238438d8bc0e7ba29e087"
     },
     {
       "path": "admin/accounting/index.html",
@@ -103,6 +118,11 @@
       "path": "admin/catalog-media/index.html",
       "size_bytes": 3070,
       "sha256": "3ea4413a68aa277ae6668ea661117e0b1b0a9dbd757a3aaae187f0b76e9ddd5e"
+    },
+    {
+      "path": "admin/command-center/index.html",
+      "size_bytes": 2203,
+      "sha256": "0d7f492513c2d292036305466d9de61609714fbb75e85b5d17162bc5b69c70f2"
     },
     {
       "path": "admin/dark-theme-evidence/index.html",
@@ -150,6 +170,11 @@
       "sha256": "930adf66da0b97790501bd0a67b400f1ffd05a262e28f45240ad2a6de95ec78c"
     },
     {
+      "path": "admin/markdown-sanity/index.html",
+      "size_bytes": 2202,
+      "sha256": "3e9ee9f7638d8eb50e8aa8b1cb4e1b53eddb387885e39ed2ee9c2ceea453d0f1"
+    },
+    {
       "path": "admin/marketplace-exports/index.html",
       "size_bytes": 1603,
       "sha256": "a3ac38319a0e6cda190558a808516eb8993922e1cf6c4046a1224fa0e94a8461"
@@ -181,8 +206,8 @@
     },
     {
       "path": "admin/mobile-product/index.html",
-      "size_bytes": 16120,
-      "sha256": "1d4a5a8bbfcc014c6cee1ee1eb7d74e1f899475f28a4423f4b1393f427de411f"
+      "size_bytes": 16190,
+      "sha256": "c392f0d02a426a2af602fe59c5a5e6761545bda6a8106a39b30fabf14d60ae69"
     },
     {
       "path": "admin/movies/index.html",
@@ -266,8 +291,8 @@
     },
     {
       "path": "css/styles.css",
-      "size_bytes": 99053,
-      "sha256": "6f9933aa9052b03ccb2da56b20216c9b443fe7faf3d1f61bab7f2c100350c9ff"
+      "size_bytes": 100300,
+      "sha256": "3062605f8d1b35e6e816c8043b619b76887be53f044aee2bdffcfc44919c4145"
     },
     {
       "path": "data/accounting_templates/README.md",
@@ -310,14 +335,29 @@
       "sha256": "03e4b2733671d2c2e833726acc0047bba8d1c6dce9fc394deaf7a165185034cf"
     },
     {
+      "path": "data/site/build185-command-center.json",
+      "size_bytes": 740,
+      "sha256": "6beb7a380e47ab7b7ac78908f9f15017f31588e4351c41e83347ef52468cbebe"
+    },
+    {
+      "path": "data/site/build186-markdown-sanity.json",
+      "size_bytes": 2474,
+      "sha256": "7584e3c9c035b034ad5f5a0937d44da94e81752a89df5d1cba87048dbda66174"
+    },
+    {
+      "path": "data/site/build189-value-ops.json",
+      "size_bytes": 838,
+      "sha256": "b193e364f8d46d1f0c29cc39261e03c8a853387012400487cf0d750427c49bd6"
+    },
+    {
       "path": "data/site/competitive-opportunities.json",
       "size_bytes": 16265,
       "sha256": "19781a9f1012a4ce7c7068f3dc4343f9a862eb12a0acce64d8cb305551c11b48"
     },
     {
       "path": "data/site/deployment-preflight.json",
-      "size_bytes": 6506,
-      "sha256": "b04f7dee10d95e43aa66ee98338935c385f33dd6b396ccc4e455d63224c1e350"
+      "size_bytes": 7011,
+      "sha256": "abf2aab8d0a3ad0b64c573b5bc53334c4155438e99d90bb38278d0ad4f5525d4"
     },
     {
       "path": "data/site/featured-items.json",
@@ -341,8 +381,8 @@
     },
     {
       "path": "data/site/release-notes.json",
-      "size_bytes": 3139,
-      "sha256": "ac818f74efd1d3b7eefd88d899c2d72fd894370949dceb3c6fe6e757093e7a71"
+      "size_bytes": 3328,
+      "sha256": "824d47f334f088960ca262c41eba31a630d757b2c2e9b45fc4710e4d78108804"
     },
     {
       "path": "data/site/seo-page-overrides.json",
@@ -435,9 +475,24 @@
       "sha256": "27388db3f0c9cc7bfee0046aa4eac5ed5445727ba6a1954434a32de0cbe439bd"
     },
     {
+      "path": "database_build185_admin_command_center_value_dashboards.sql",
+      "size_bytes": 21341,
+      "sha256": "17ba7a46d20d2f7346789528a1ceb67fb6320bb11fcbed956484cb7c2798d3bf"
+    },
+    {
+      "path": "database_build186_markdown_consolidation_visual_placeholders.sql",
+      "size_bytes": 18459,
+      "sha256": "97d94fc4c82f0b42112967014ef1e842f59a8019d30d80cf84347ff7c909238a"
+    },
+    {
+      "path": "database_build189_value_ops_live_counts.sql",
+      "size_bytes": 7446,
+      "sha256": "75cdf2d955893cad150cae9956be307b4d08eb76261fc343c75e9faf738ae762"
+    },
+    {
       "path": "database_full_schema.sql",
-      "size_bytes": 269794,
-      "sha256": "1de03a162b60db5f2e6d448b1424febd01d5c5894933e4258c5a4085421fd511"
+      "size_bytes": 277304,
+      "sha256": "971c667ace937ec17f2980efce477678c65ff5e2731b894bc12cd411ce304da1"
     },
     {
       "path": "database_growth_analytics_seo_extension.sql",
@@ -461,18 +516,18 @@
     },
     {
       "path": "database_schema.sql",
-      "size_bytes": 221275,
-      "sha256": "501f04a5be83a0ca212e50e8ce9156ca7f0db283f03a71c03c2fe987bc36e9c6"
+      "size_bytes": 228785,
+      "sha256": "c7eddf2c8197f8a2f8bc849610ab3637595d56206e3815d0a254b991757b2131"
     },
     {
       "path": "database_store_schema.sql",
-      "size_bytes": 238519,
-      "sha256": "7ef336dae8d0575896e08b809e59c7ed7b61e1e0983ea582b71274db586b6ca5"
+      "size_bytes": 246029,
+      "sha256": "33ae723ff79ccc9dabb41bf10e615fcfd24a4eb4e79538b86e2bfc250ec94bcf"
     },
     {
       "path": "database_upgrade_current_pass.sql",
-      "size_bytes": 20501,
-      "sha256": "27388db3f0c9cc7bfee0046aa4eac5ed5445727ba6a1954434a32de0cbe439bd"
+      "size_bytes": 28011,
+      "sha256": "7f8f1cdeece8384251e2b4f75fb0238f95492aa0c4e78fd700762849dec3f156"
     },
     {
       "path": "functions/api/_communityContent.js",
@@ -788,6 +843,11 @@
       "path": "functions/api/admin/cleanup-sessions.js",
       "size_bytes": 5219,
       "sha256": "d8ab25e110828f4446e9ad2468333e10a9db175e913512e3c87f039922cc5011"
+    },
+    {
+      "path": "functions/api/admin/command-center.js",
+      "size_bytes": 37418,
+      "sha256": "3362140f8a68779b911925c9e5d9189aa069325ae4ddb174ccde2f983585e0e2"
     },
     {
       "path": "functions/api/admin/community-content.js",
@@ -1310,6 +1370,11 @@
       "sha256": "927004d876f88f471eb60e1b39d7ce6d2e92880351b437f235debc8905cfb7ba"
     },
     {
+      "path": "functions/api/admin/updated.md",
+      "size_bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
       "path": "functions/api/admin/user-access-tiers.js",
       "size_bytes": 2770,
       "sha256": "165c080ecae44ea92eaf93e6ee266597b6a6332706e3e677258a740bd4711bec"
@@ -1376,8 +1441,8 @@
     },
     {
       "path": "functions/api/auth/login.js",
-      "size_bytes": 5147,
-      "sha256": "987767ffa3b77ba71b89e4dc5313f4cddeb6c3cb2d7ad964bea873843c8d18f4"
+      "size_bytes": 7178,
+      "sha256": "adea31da0a596121dc503935a36088cde6217804f9f5e8a7a1ad02b53b3188b8"
     },
     {
       "path": "functions/api/auth/logout-all.js",
@@ -1403,6 +1468,11 @@
       "path": "functions/api/auth/session-info.js",
       "size_bytes": 3580,
       "sha256": "983e366aa9788a646cc3a54cdcf5537a753e5d2185e450ca25254add62db0b1d"
+    },
+    {
+      "path": "functions/api/auth-login.js",
+      "size_bytes": 289,
+      "sha256": "82011c0a63850e90c887314c2acf6f2a2da891e9adf31d56363740d121db2065"
     },
     {
       "path": "functions/api/catalog-items.js",
@@ -1620,6 +1690,11 @@
       "sha256": "ee2654de1e0b933229c2d5975078a3c487978ab31c608ff1d6fc2013035803e3"
     },
     {
+      "path": "functions/api/updated.md",
+      "size_bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
       "path": "js/main.js",
       "size_bytes": 35271,
       "sha256": "7c220c82476398aa4735d5884bdfedaa0dc66bc8d83f0261f0ab2f59a8164e89"
@@ -1728,6 +1803,11 @@
       "path": "public/js/admin-cleanup-sessions.js",
       "size_bytes": 5382,
       "sha256": "18eed16e900f11686ca333028f325aff36183a32b5ad206449adbe018a5da5c1"
+    },
+    {
+      "path": "public/js/admin-command-center.js",
+      "size_bytes": 9148,
+      "sha256": "a72f5dbf6cccca807f52152b8a238024dbf692f8e9a45273e3fc1a9653cc7b2b"
     },
     {
       "path": "public/js/admin-community.js",
@@ -1850,6 +1930,11 @@
       "sha256": "1071c6565fb4a678a7a0a74d04cabde5a3a104bc9cba42b8ba84cf706760cbbf"
     },
     {
+      "path": "public/js/admin-markdown-sanity.js",
+      "size_bytes": 6687,
+      "sha256": "e4a7dd6865366531a094ce8833c8306f85d7de7dfaf5bed4057cde52338232aa"
+    },
+    {
       "path": "public/js/admin-marketplace-export-preview.js",
       "size_bytes": 9684,
       "sha256": "8ffc956654d9de9855597a0c32a7abbc4da6c038c9c427ab4dfac25943f4e8c3"
@@ -1883,6 +1968,11 @@
       "path": "public/js/admin-mobile-product-augment.js",
       "size_bytes": 17357,
       "sha256": "e458a795802df61e4c0687add980313ce59ba22e7a527eb146f1c5cc020d6f1e"
+    },
+    {
+      "path": "public/js/admin-mobile-product-recovery.js",
+      "size_bytes": 3560,
+      "sha256": "1a5918d416bed3fe6c6a0a0b509bcfb286904742d22d191c8c1535972b07e6b8"
     },
     {
       "path": "public/js/admin-mobile-product.js",
@@ -2156,8 +2246,8 @@
     },
     {
       "path": "public/js/auth.js",
-      "size_bytes": 8129,
-      "sha256": "1012106f01095698d9d1aca14e50c7b869c8024cde8e6469a418f2530b00ef6f"
+      "size_bytes": 8501,
+      "sha256": "9685ddd65af0102f3c4f0ab3dfe18f504f85380186be01cec0f2d7eaaf41eddf"
     },
     {
       "path": "public/js/bootstrap-admin.js",
@@ -2186,8 +2276,8 @@
     },
     {
       "path": "public/js/checkout.js",
-      "size_bytes": 16632,
-      "sha256": "edee37f44e51f0cb1313db8a2c45bedba6033f3f92e25d019f910b31c27710b2"
+      "size_bytes": 16890,
+      "sha256": "438704a4f0cc04c6d980baf1c356cc8fbbc45f350f2b5ccef812181163597bc9"
     },
     {
       "path": "public/js/custom-request-consent.js",
@@ -2301,8 +2391,8 @@
     },
     {
       "path": "public/js/product-detail.js",
-      "size_bytes": 39115,
-      "sha256": "cf8f34c9bd0644a74ae2a84b4f119bd589a9c3e06eefc9c04364f368265d98f4"
+      "size_bytes": 39461,
+      "sha256": "2557df7cc8566d6ca762af04b10ca826c4209096e5a0c6cccb08887e302391cd"
     },
     {
       "path": "public/js/register.js",
@@ -2321,13 +2411,13 @@
     },
     {
       "path": "public/js/shop.js",
-      "size_bytes": 22903,
-      "sha256": "503ccf0f8006feeec507a870882922cabb7d1d20a11dfd3e376fd30271f7f124"
+      "size_bytes": 22902,
+      "sha256": "9a458a243516b62a59082a9d97faec7038918dfd42c52597b215b3f0db7b3f0f"
     },
     {
       "path": "public/js/site-analytics.js",
-      "size_bytes": 3018,
-      "sha256": "81de2c4f8c96aea600117d42b43d02cefd7ebd4cdb662769e2450ff93acace82"
+      "size_bytes": 3397,
+      "sha256": "6aef2b9e9a5fcb2004a712f4e7f1541a90d4d55f182b20dc04fb9a2edf5dc2cd"
     },
     {
       "path": "public/js/site-auth-ui.js",
