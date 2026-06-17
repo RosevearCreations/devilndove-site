@@ -1,10 +1,10 @@
-# Devil n Dove AI Handoff — Build 186
+# Devil n Dove AI Handoff — Build 189
 
 Use this file first when opening a new AI chat or handing the repository to another assistant.
 
 ## Current build
 
-Build 186: Markdown consolidation, value-backlog tracking, visual graphic placeholders, desktop/mobile sanity rows, and CSS drift review rows.
+Build 189: Markdown consolidation, value-backlog tracking, visual graphic placeholders, desktop/mobile sanity rows, and CSS drift review rows.
 
 ## Important route additions
 
@@ -70,3 +70,43 @@ Cloudflare D1, R2, email providers, payment providers, Search Console import, Go
 ## Build 187 handoff note
 
 The user reported `api/auth/login` returning 405 and said Cloudflare currently shows only `FACEBOOK_PAGE_ID` and `STRIPE_SECRET_KEY`. Build 187 patches `/api/auth/login`, adds `/api/auth-login`, updates `auth.js` fallback behavior, patches `health` and legacy `admin/bootstrap` to prefer `DB`, and adds `CLOUDFLARE_ENVIRONMENT_CHECKLIST.md`. No D1 migration is required.
+
+
+## Build 189 — Value Ops live counts, funnel events, mobile recovery, and visual replacement plan
+
+Completed in this pass:
+
+1. Added the missing `/api/admin/command-center` endpoint so the Admin Command Center can load real live counts instead of being only a static page.
+2. Connected live Product Readiness counts from products/product images/product gaps into the Command Center.
+3. Added live conversion funnel rollups: landing page view → product view → add to cart → checkout start → order.
+4. Added explicit public funnel events for product detail views, add-to-cart actions, checkout starts, and order creation.
+5. Added mobile product browser autosave/recovery so phone-entered draft text survives refresh/session/upload failures.
+6. Added visual placeholder bands to high-value public pages without adding extra H1 tags.
+7. Added visual replacement candidate rows so placeholders can be replaced only after public-use/consent/compression review.
+8. Added local SEO observation rows to pair Search Console data with Google Business Profile/manual ranking notes.
+9. Added product cost/margin review rows for product pricing and marketplace-profit review.
+10. Updated schema files, release notes, sanity notes, handoff docs, and static Build 189 report.
+
+Next 20 recommended steps after Build 189:
+
+1. Replace placeholder graphics with approved real compressed photos, starting with homepage, shop, custom gifts, jewelry, and gallery.
+2. Import the first Search Console export and connect real clicks/impressions to Local SEO scorecards.
+3. Add manual Google Business Profile observation notes monthly for important pages and products.
+4. Add product material/labour/package cost defaults for major product families.
+5. Add customer/member timeline cards that combine orders, custom requests, gift cards, recalls, proof approvals, and notes.
+6. Add a phone-tested Mobile Quick Add recovery checklist with screenshots from a real device.
+7. Connect approved customer stories directly into product cards and local landing trust blocks.
+8. Add a product margin warning before marketplace export when estimated margin is too low.
+9. Add a simple dashboard for real media waiting on consent/public-use review.
+10. Add product-detail visual proof modules that show process, scale, material, and care notes.
+11. Add admin command-center saved views for Owner, Product, SEO, Accounting, and Deploy mode.
+12. Add a low-bandwidth preview toggle to more public pages.
+13. Add image compression reports for all public placeholder replacement candidates.
+14. Add “missing real photo” badges on Product Readiness rows.
+15. Add conversion funnel date filters and source/UTM filters.
+16. Add cart recovery/customer follow-up review rows before emailing anyone.
+17. Add Search Console opportunity buttons that create title/meta/internal-link actions.
+18. Add a customer story approval screen grouped by source product/order/custom request.
+19. Add performance-budget badges directly beside visual placeholder candidates.
+20. Retire or archive duplicate Markdown once `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` stay complete for two more build passes.
+

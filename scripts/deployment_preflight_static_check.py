@@ -37,6 +37,9 @@ JSON_FILES = [
     'data/site/build182-mobile-visual-polish.json',
     'data/site/build183-visual-enrichment-studio.json',
     'data/site/build184-application-sanity.json',
+    'data/site/build185-command-center.json',
+    'data/site/build186-markdown-sanity.json',
+    'data/site/build189-value-ops.json',
 ]
 REQUIRED_FILES = [
     'database_build171_ledger_repair.sql',
@@ -82,6 +85,7 @@ REQUIRED_FILES = [
     'admin/application-sanity/index.html',
     'functions/api/admin/application-sanity.js',
     'public/js/admin-application-sanity.js',
+    'database_build185_admin_command_center_value_dashboards.sql',
 ]
 
 def read(path: Path) -> str:
@@ -212,6 +216,9 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build181_live_ops_followthrough.sql': ['private_evidence_download_tokens', 'marketplace_export_gate_overrides', 'build_181_live_ops_followthrough'],
         'database_build183_visual_enrichment_studio.sql': ['visual_candidate_media_assets', 'public_page_image_slot_assignments', 'build_183_visual_enrichment_studio'],
         'database_build184_sanity_check_and_value_roadmap.sql': ['application_sanity_snapshots', 'value_added_modification_candidates', 'build_184_sanity_check_and_value_roadmap'],
+        'database_build185_admin_command_center_value_dashboards.sql': ['admin_command_center_daily_snapshots', 'product_readiness_scoreboard_snapshots', 'build_185_admin_command_center_value_dashboards'],
+        'database_build186_markdown_consolidation_visual_placeholders.sql': ['markdown_consolidation_runs', 'visual_graphic_placeholder_rows', 'build_186_markdown_consolidation_visual_placeholders'],
+        'database_build189_value_ops_live_counts.sql': ['command_center_live_count_runs', 'approved_visual_replacement_candidates', 'build_189_value_ops_live_counts'],
     }
     missing=[]
     detail=[]
