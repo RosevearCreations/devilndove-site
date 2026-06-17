@@ -853,3 +853,8 @@ Completed in this pass:
 
 The latest build adds Deploy Readiness and Promote Live controls. Next chat should continue with Product QA confirmed apply actions, real webhook signature verification, signed URL worker route checks, LocalBusiness approve-and-bake, and dashboard snooze rendering.
 
+
+
+## Build 189 value ops note
+
+Use `/admin/command-center/` after deploy to refresh live counts. Run `database_build189_value_ops_live_counts.sql` after the existing Build 186 migration. Placeholder images are still placeholders; replace only with approved, compressed public-use media.

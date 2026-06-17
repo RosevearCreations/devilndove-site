@@ -1,109 +1,21 @@
-
-
-## Build 188 — Login 405 Route Activation Hotfix
-
-The live Pages URL showed `GET /api/auth/login` serving the public homepage and `POST /api/auth/login` returning 405. That means Cloudflare Pages Functions were not being invoked for `/api/*`; static fallback handling was answering instead. Build 188 adds root `_routes.json` with `include: ["/api/*"]`, hardens `/functions/api/auth/login.js` for GET/HEAD/OPTIONS/POST, adds `/api/auth-login` as a flat fallback route, and updates both `auth.js` copies so the client retries the fallback only after a 405.
-
-Post-deploy check: open `/api/auth/login`. It must return JSON with `functions_active: true`. If it returns the public homepage HTML, the Pages deployment is still not deploying Functions from the `functions/` directory or the wrong branch/build output is live.
-# Build 184 — Application Sanity Check and Value Roadmap
-
-Build 184 adds a sanity-check layer instead of another broad feature expansion. It provides `/admin/application-sanity/`, `/api/admin/application-sanity`, `database_build184_sanity_check_and_value_roadmap.sql`, and `data/site/build184-application-sanity.json`.
-
-The pass documents where the application stands now, which areas are strongest, which risks still matter, and which value-added modifications should come next. It also updates schema references, deployment checks, release manifest generation, Markdown handoff files, SEO/local guidance notes, and validation output.
-
-# Build 183 — Visual Enrichment Studio and Professional Visual Controls
-
-- Added `/admin/visual-enrichment-studio/`, `/api/admin/visual-enrichment-studio`, and `database_build183_visual_enrichment_studio.sql`.
-- Added visual media-picker asset rows, desktop/mobile screenshot pairs, dark-theme screenshot job placeholders, Local SEO visual badges, page image-slot assignments that preserve one-H1 structure, image compression budget rows, visual diff overlays, alt-text suggestions, schema validator import rows, JSON→D1 ownership decisions, public API fallback previews, mobile quick cards, seasonal campaign rows, gallery hero rotation, product detail visual polish checks, CSS token drift rows, accessibility notes, low-bandwidth preference rows, and final visual deployment report rows.
-- Added a customer-facing lighter-visual toggle that reduces nonessential visual effects without changing content or H1 structure.
-- Updated schema files, deployment preflight script, final blocker script, manifest generation, roadmap, known gaps, Local SEO notes, image notes, post-deploy smoke-test notes, README, AI context, and new-chat handoff.
-
-# Build 182 Completed Pass — Visual Polish, Desktop/Mobile Parity, SEO Enrichment, and Fallback Safety
-
-Completed in this pass:
-1. Added `/admin/visual-polish/` as the Build 182 desktop/mobile polish and enrichment review page.
-2. Added `/api/admin/visual-polish` for parity rows, visual candidates, effect safety, fallback reviews, schema queue rows, and JSON-to-D1 ownership candidates.
-3. Added `database_build182_mobile_visual_polish.sql` and appended the same additive schema to aggregate schema files.
-4. Added desktop/mobile parity check rows for key public and local SEO pages.
-5. Added mobile navigation touch-target audit rows using a 44px minimum target guideline inside the admin review workflow.
-6. Added visual enrichment candidate rows for local pages, image slots, asset hints, alt text hints, and reduced-motion-safe placement notes.
-7. Added visual-effect safety review rows for hero glow, card lift, visual ribbons, and product-image depth.
-8. Added public-page visual asset budget rows to limit new images/effects and require lazy loading for future media additions.
-9. Added route fallback review rows for core admin and public APIs so blank panels can be replaced with readable retry/error states.
-10. Added structured-data validation queue rows for LocalBusiness, WebSite, and Product markup review after page updates.
-11. Added JSON-to-D1 migration candidate rows for catalog, SEO overrides, LocalBusiness, release notes, and local SEO bake actions.
-12. Added visual-polish admin preferences for default viewport pairs and motion policy.
-13. Added a shared visual polish strip on the homepage and local pages without adding any extra H1 headings.
-14. Added motion-safe CSS for sharper cards, visual tiles, admin controls, and phone-friendly button sizing.
-15. Added `data/site/build182-mobile-visual-polish.json` as a static handoff artifact for this pass.
-16. Updated admin dashboard and Operations navigation with Visual Polish & Mobile Parity links.
-17. Updated static preflight and final blocker scripts to require the new Build 182 page, API, JS, migration, and handoff JSON.
-18. Updated the release manifest generator to emit Build 182 metadata.
-19. Updated Markdown handoff files, schema references, release notes, sanity notes, local SEO notes, image/evidence notes, README, and AI context.
-20. Ran syntax, JSON, H1, CSS, SQL, preflight, final blocker, and zip validation for the Build 182 package.
-
-Next 20 recommended steps:
-1. Connect Visual Polish candidates to real product/R2 media picker thumbnails so approved image slots can choose an existing asset.
-2. Add side-by-side screenshot uploads for desktop and mobile parity rows.
-3. Add automated screenshot capture after deploy for the Visual Polish page using the existing dark-theme evidence queue.
-4. Show Visual Polish candidate badges directly on Local SEO Review rows.
-5. Create a public page image-slot editor that writes approved candidates back to page sections without changing H1 structure.
-6. Add a media compression budget report that flags large images before they are promoted to public pages.
-7. Add visual diff overlays for previous/current screenshot pairs.
-8. Add one-click alt-text copy generation from approved visual candidates.
-9. Add schema validation result import rows from Rich Results/Schema validators after manual checks.
-10. Move `data/catalog.json` fallback ownership decisions into a visible JSON→D1 migration admin panel.
-11. Add public API fallback preview cards that show the exact customer-facing error message before deployment.
-12. Add phone-only admin quick cards for Visual Polish candidate approval.
-13. Add seasonal visual campaign rows for Christmas, Mother’s Day, Father’s Day, markets, and custom gift events.
-14. Add a gallery hero-image rotation queue using approved media only.
-15. Add product detail visual polish checks for thumbnail strip, featured image, image roles, and mobile zoom controls.
-16. Add CSS token checks for contrast, spacing, card radius, and button height drift.
-17. Add visual accessibility notes for motion, contrast, text-over-image, and touch target review.
-18. Add real D1-export-to-static JSON ownership status inside Safe Deploy package metadata.
-19. Add a customer-facing low-bandwidth mode toggle or lighter media preference.
-20. Merge Visual Polish status into the final printable deployment report alongside Release Control and Live Ops.
-
-
-# Build 181 Release Notes
-
-- Added `/admin/live-ops-followthrough/` as the Build 181 follow-through admin page after Go-Live Execution.
-- Added `/api/admin/live-ops-followthrough` for QA blocker counts, marketplace gate badges, override requests, recall upload requests, LocalBusiness export rows, content-refresh logs, notification buttons, and watcher snapshots.
-- Added `/api/admin/private-evidence-download` with HMAC-signed R2 download tokens, expiry enforcement, audit logging, and guarded bucket selection.
-- Added `database_build181_live_ops_followthrough.sql` and updated aggregate schema files with the same additive tables.
-- Added private evidence download token and audit tables for accountant/customer/recall evidence objects.
-- Added Product QA blocker preview count rows for Catalog QA badges beside blocker groups.
-- Added marketplace gate badge snapshots so CSV export buttons can show ready/blocked reasons before download.
-- Added marketplace export gate override requests with reason and expiry timestamps for temporary audited overrides.
-- Added recall evidence upload request rows with R2 target prefixes for candle/soap recall evidence widgets.
-- Added LocalBusiness admin export run rows so D1 settings can feed `data/site/local-business-schema.json` during safe deploy packaging.
-- Added public page content refresh tracking rows tied to local SEO phrases and static page copy updates.
-- Added provider webhook crypto test-vector notes for Resend, SendGrid, and Postmark verification work.
-- D1 order now includes `database_build181_live_ops_followthrough.sql` after Build 180.
-
-# Build 180 — Go-Live Execution, Direct Endpoint Gates, SEO Visuals, and Final Release Controls
-
-Highlights:
-
-- Added `/admin/go-live-execution/` and `/api/admin/go-live-execution`.
-- Added `database_build180_go_live_execution.sql` and updated aggregate schema files.
-- Added gated Product QA safe applies for SEO-title casing and empty product status labels.
-- Rendered Local SEO SVG chart rows and surfaced them on Local SEO Review.
-- Blocked marketplace CSV downloads when hard export gates are active.
-- Strengthened recall notification status changes so both recall lock systems must allow release.
-- Added structured-data excerpt rows, manifest drawer runs, readiness score trend exports, promote-button state rows, and post-promotion watcher scheduling.
-
-Validation summary:
-
-- Static deployment preflight: ready, 0 blockers, 0 warnings.
-- Final deployment blocker check: PASS.
-- JavaScript syntax checks: passed.
-- JSON validation: passed.
-- One-H1 check: passed.
-- CSS brace balance: passed.
-- Build 180 SQL smoke test: passed.
-
 # Release Notes
+
+## Build 189 — Value Ops live counts, funnel tracking, mobile recovery, and visual replacement plan
+
+- Added `/api/admin/command-center` so `/admin/command-center/` can show live operational counts instead of only static seeded rows.
+- Added Build 189 schema migration: `database_build189_value_ops_live_counts.sql`.
+- Added live Product Readiness rollups using product records, product images, price/story gaps, and marketplace/inventory hints.
+- Added conversion-funnel rollups and explicit storefront events for product views, add-to-cart, checkout starts, and order creation.
+- Added mobile product browser autosave/recovery to protect phone-entered draft text during refresh, failed upload, or session interruption.
+- Added visual placeholder bands to key public pages without creating extra H1 tags.
+- Added approved visual replacement candidate rows, local SEO observation rows, and product cost/margin review rows.
+- Updated Markdown handoff files, schema references, sanity notes, deployment checks, and release manifest.
+
+### D1 order update
+
+Run `database_build189_value_ops_live_counts.sql` after `database_build186_markdown_consolidation_visual_placeholders.sql`.
+
+# Build 183
 
 ## Summary
 
@@ -116,7 +28,9 @@ Validation summary:
 ## Changed files
 
 - `AI_CONTEXT.md`
+- `AI_HANDOFF.md`
 - `AMAZON_MATCHING_NOTES.md`
+- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md`
 - `COMPETITIVE.md`
 - `DATABASE_SCHEMA_REFERENCE.md`
 - `DEVELOPMENT_ROADMAP.md`
@@ -125,6 +39,7 @@ Validation summary:
 - `LOCAL_SEO_PLAYBOOK.md`
 - `NEW_CHAT_STATUS.md`
 - `POST_DEPLOY_SMOKE_TEST.md`
+- `PROJECT_STATUS_AND_ROADMAP.md`
 - `README.md`
 - `RELEASE_NOTES.md`
 - `REPO_BASE_GUIDE.md`
@@ -132,8 +47,10 @@ Validation summary:
 - `SANITY_HEALTH_CHECK.md`
 - `admin/accounting/index.html`
 - `admin/analytics/index.html`
+- `admin/application-sanity/index.html`
 - `admin/catalog/index.html`
 - `admin/catalog-media/index.html`
+- `admin/command-center/index.html`
 - `admin/dark-theme-evidence/index.html`
 - `admin/deploy-readiness/index.html`
 - `admin/deployment-preflight/index.html`
@@ -141,7 +58,9 @@ Validation summary:
 - `admin/go-live-execution/index.html`
 - `admin/index.html`
 - `admin/inventory-operations/index.html`
+- `admin/live-ops-followthrough/index.html`
 - `admin/local-seo-review/index.html`
+- `admin/markdown-sanity/index.html`
 - `admin/marketplace-exports/index.html`
 - `admin/marketplace-mapping/index.html`
 - `admin/members/index.html`
@@ -163,11 +82,20 @@ Validation summary:
 - `admin/stage-photo-moderation/index.html`
 - `admin/trust-blocks/index.html`
 - `admin/users/index.html`
+- `admin/visual-enrichment-studio/index.html`
+- `admin/visual-polish/index.html`
 - `css/styles.css`
 - `data/accounting_templates/README.md`
 - `data/site/build178-release-controls.json`
 - `data/site/build179-promotion-control.json`
 - `data/site/build180-go-live-execution.json`
+- `data/site/build181-live-ops-followthrough.json`
+- `data/site/build182-mobile-visual-polish.json`
+- `data/site/build183-visual-enrichment-studio.json`
+- `data/site/build184-application-sanity.json`
+- `data/site/build185-command-center.json`
+- `data/site/build186-markdown-sanity.json`
+- `data/site/build189-value-ops.json`
 - `data/site/competitive-opportunities.json`
 - `data/site/deployment-preflight.json`
 - `data/site/featured-items.json`
@@ -189,6 +117,13 @@ Validation summary:
 - `database_build178_promote_live_controls.sql`
 - `database_build179_promotion_control.sql`
 - `database_build180_go_live_execution.sql`
+- `database_build181_live_ops_followthrough.sql`
+- `database_build182_mobile_visual_polish.sql`
+- `database_build183_visual_enrichment_studio.sql`
+- `database_build184_sanity_check_and_value_roadmap.sql`
+- `database_build185_admin_command_center_value_dashboards.sql`
+- `database_build186_markdown_consolidation_visual_placeholders.sql`
+- `database_build189_value_ops_live_counts.sql`
 - `database_full_schema.sql`
 - `database_growth_analytics_seo_extension.sql`
 - `database_inventory_stock_unit_quick_fix.sql`
@@ -245,6 +180,7 @@ Validation summary:
 - `functions/api/admin/amazon-purchase-import.js`
 - `functions/api/admin/amazon-purchase-review.js`
 - `functions/api/admin/app-settings.js`
+- `functions/api/admin/application-sanity.js`
 - `functions/api/admin/archive-product.js`
 - `functions/api/admin/assign-user-access-tier.js`
 - `functions/api/admin/audit-log.js`
@@ -259,6 +195,7 @@ Validation summary:
 - `functions/api/admin/catalog-option-sets.js`
 - `functions/api/admin/catalog-sync.js`
 - `functions/api/admin/cleanup-sessions.js`
+- `functions/api/admin/command-center.js`
 - `functions/api/admin/community-content.js`
 - `functions/api/admin/competitive-roadmap.js`
 - `functions/api/admin/create-product.js`
@@ -285,6 +222,7 @@ Validation summary:
 - `functions/api/admin/import-products-preview.js`
 - `functions/api/admin/import-products.js`
 - `functions/api/admin/live-activity.js`
+- `functions/api/admin/live-ops-followthrough.js`
 - `functions/api/admin/local-seo-bake-actions.js`
 - `functions/api/admin/local-seo-competitor-phrases.js`
 - `functions/api/admin/local-seo-review-scoring.js`
@@ -309,6 +247,7 @@ Validation summary:
 - `functions/api/admin/pending-actions-status.js`
 - `functions/api/admin/pending-actions.js`
 - `functions/api/admin/post-deploy-smoke-tests.js`
+- `functions/api/admin/private-evidence-download.js`
 - `functions/api/admin/product-cost-rollups.js`
 - `functions/api/admin/product-costs.js`
 - `functions/api/admin/product-detail.js`
@@ -361,11 +300,14 @@ Validation summary:
 - `functions/api/admin/trust-block-preview.js`
 - `functions/api/admin/update-order-status.js`
 - `functions/api/admin/update-product.js`
+- `functions/api/admin/updated.md`
 - `functions/api/admin/user-access-tiers.js`
 - `functions/api/admin/user-profile.js`
 - `functions/api/admin/user-update.js`
 - `functions/api/admin/users.js`
 - `functions/api/admin/visitor-analytics.js`
+- `functions/api/admin/visual-enrichment-studio.js`
+- `functions/api/admin/visual-polish.js`
 - `functions/api/admin/webhook-dispatch.js`
 - `functions/api/admin/webhook-events.js`
 - `functions/api/auth/account-help-request.js`
@@ -378,6 +320,7 @@ Validation summary:
 - `functions/api/auth/me.js`
 - `functions/api/auth/register.js`
 - `functions/api/auth/session-info.js`
+- `functions/api/auth-login.js`
 - `functions/api/catalog-items.js`
 - `functions/api/checkout-create-order.js`
 - `functions/api/checkout-prepare-payment.js`
@@ -421,6 +364,7 @@ Validation summary:
 - `functions/api/track/cart.js`
 - `functions/api/track/visit.js`
 - `functions/api/trust-blocks.js`
+- `functions/api/updated.md`
 - `js/main.js`
 - `public/js/account-help.js`
 - `public/js/admin-access-tiers.js`
@@ -436,12 +380,14 @@ Validation summary:
 - `public/js/admin-amazon-purchase-import.js`
 - `public/js/admin-amazon-purchase-review.js`
 - `public/js/admin-app-settings.js`
+- `public/js/admin-application-sanity.js`
 - `public/js/admin-archive-product.js`
 - `public/js/admin-brand-content.js`
 - `public/js/admin-candle-soap-specs.js`
 - `public/js/admin-catalog-option-manager.js`
 - `public/js/admin-catalog-sync.js`
 - `public/js/admin-cleanup-sessions.js`
+- `public/js/admin-command-center.js`
 - `public/js/admin-community.js`
 - `public/js/admin-competitive-roadmap.js`
 - `public/js/admin-create-product.js`
@@ -464,7 +410,9 @@ Validation summary:
 - `public/js/admin-go-live-execution.js`
 - `public/js/admin-import-products.js`
 - `public/js/admin-live-activity.js`
+- `public/js/admin-live-ops-followthrough.js`
 - `public/js/admin-local-seo-review.js`
+- `public/js/admin-markdown-sanity.js`
 - `public/js/admin-marketplace-export-preview.js`
 - `public/js/admin-marketplace-mapping.js`
 - `public/js/admin-media-consent-records.js`
@@ -472,6 +420,7 @@ Validation summary:
 - `public/js/admin-migration-ledger.js`
 - `public/js/admin-mobile-dashboard.js`
 - `public/js/admin-mobile-product-augment.js`
+- `public/js/admin-mobile-product-recovery.js`
 - `public/js/admin-mobile-product.js`
 - `public/js/admin-movie-catalog.js`
 - `public/js/admin-notifications.js`
@@ -522,6 +471,8 @@ Validation summary:
 - `public/js/admin-user-update.js`
 - `public/js/admin-users.js`
 - `public/js/admin-visitor-analytics.js`
+- `public/js/admin-visual-enrichment-studio.js`
+- `public/js/admin-visual-polish.js`
 - `public/js/admin-webhook-events.js`
 - `public/js/admin.js`
 - `public/js/auth.js`

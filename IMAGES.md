@@ -568,3 +568,8 @@ A CSS pass is not complete if any public section falls back to a plain white car
 - Deploy Readiness can track recall signature evidence placeholders and R2 signed URL verification results.
 - Dark-theme/admin evidence remains reviewed through existing evidence pages; Build 178 focuses on final readiness visibility.
 
+
+
+## Build 189 value ops note
+
+Use `/admin/command-center/` after deploy to refresh live counts. Run `database_build189_value_ops_live_counts.sql` after the existing Build 186 migration. Placeholder images are still placeholders; replace only with approved, compressed public-use media.

@@ -697,3 +697,8 @@ Completed in this pass:
 - Structured-data hints now track LocalBusiness, Product, BreadcrumbList, and FAQPage review items per key page.
 - Continue using clear local wording in titles, headings, meta descriptions, and visible copy for Southern Ontario/Oxford/Norfolk searches.
 
+
+
+## Build 189 value ops note
+
+Use `/admin/command-center/` after deploy to refresh live counts. Run `database_build189_value_ops_live_counts.sql` after the existing Build 186 migration. Placeholder images are still placeholders; replace only with approved, compressed public-use media.

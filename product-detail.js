@@ -343,6 +343,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec) {
     currentProduct = product || null;
+    try { window.DDAnalytics?.trackFunnel?.('product_view', { source: 'product_detail', product_id: currentProduct?.product_id || null, slug: currentProduct?.slug || '' }); } catch {}
     if (productTypeEl) {
       const badges = [product.product_type || ''];
       if (product.merchandise_origin) badges.push(product.merchandise_origin);
@@ -516,6 +517,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!Number.isInteger(quantity) || quantity <= 0) return setCartMessage("Please enter a valid quantity.", true);
       try {
         window.DDCart.addToCart(currentProduct, quantity);
+        try { window.DDAnalytics?.trackCart?.('add_to_cart', { meta: { source: 'product_detail', product_id: currentProduct.product_id, quantity } }); } catch {}
         setCartMessage("Added to cart successfully.");
         if (productQuantityEl) productQuantityEl.value = "1";
       } catch (error) {

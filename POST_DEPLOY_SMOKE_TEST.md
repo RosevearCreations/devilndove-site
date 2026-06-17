@@ -183,3 +183,8 @@ Store results with `build_label`, `page_url`, `result_status`, `http_status`, an
 - After standard smoke tests, open `/admin/deploy-readiness/`, seed drilldowns, and build the promote-live checklist.
 - Confirm marketplace row validation, recall copy review, R2 signed URL check, and provider webhook signature setup rows.
 
+
+
+## Build 189 value ops note
+
+Use `/admin/command-center/` after deploy to refresh live counts. Run `database_build189_value_ops_live_counts.sql` after the existing Build 186 migration. Placeholder images are still placeholders; replace only with approved, compressed public-use media.

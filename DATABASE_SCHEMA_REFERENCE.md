@@ -1099,3 +1099,8 @@ The build 171 SQL marker for `schema_migration_ledger` was corrected to include 
 - `local_business_schema_edit_drafts` and `structured_data_validation_hints` — structured-data review support.
 - `release_package_previous_zip_comparisons`, `dashboard_notification_card_snoozes`, and `mobile_release_control_cards` — deploy comparison, snooze, and phone-card support.
 
+
+
+## Build 189 schema additions
+
+Run `database_build189_value_ops_live_counts.sql` after Build 186. New tables: `command_center_live_count_runs`, `mobile_product_autosave_recovery_snapshots`, `approved_visual_replacement_candidates`, `local_seo_observation_rows`, and `product_cost_margin_review_rows`.

@@ -996,3 +996,11 @@ The build 171 SQL marker for `schema_migration_ledger` was corrected to include 
 - Marketplace CSV downloads should be preceded by the real export-row validation button.
 - Recall notifications should not leave draft status until copy review and signature evidence rows are approved.
 
+
+
+## Build 189 sanity result
+
+- Command Center now has a real API endpoint and live-count rollups.
+- Public pages received lightweight visual placeholder bands without adding extra H1 tags.
+- Mobile product entry has browser recovery support.
+- D1 migration `database_build189_value_ops_live_counts.sql` should run after Build 186.

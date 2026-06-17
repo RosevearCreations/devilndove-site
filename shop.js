@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!product) return alert('Product could not be added.');
         try {
           window.DDCart.addToCart(product, 1);
-          window.DDAnalytics?.trackCart('cart_updated', { meta: { source: 'shop', product_id: productId } });
+          window.DDAnalytics?.trackCart('add_to_cart', { meta: { source: 'shop', product_id: productId } });
           alert('Added to cart.');
         } catch (error) { alert(error.message || 'Failed to add item to cart.'); }
       });

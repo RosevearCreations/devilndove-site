@@ -785,3 +785,8 @@ Completed in this pass:
 
 Build 178 adds `/admin/deploy-readiness/` as the final promotion guard page. Run migrations through `database_build178_promote_live_controls.sql`, then use Deployment Preflight, Release Control, Safe Deploy Package, and Deploy Readiness together before promoting the site live.
 
+
+
+## Build 189 value ops note
+
+Use `/admin/command-center/` after deploy to refresh live counts. Run `database_build189_value_ops_live_counts.sql` after the existing Build 186 migration. Placeholder images are still placeholders; replace only with approved, compressed public-use media.
