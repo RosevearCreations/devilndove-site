@@ -862,3 +862,9 @@ PayPal:
 Meta:
 
 - Graph API Explorer: https://developers.facebook.com/tools/explorer/
+
+## Build 190 environment-health panel
+
+After deploying Build 190, open `/admin/command-center/`. The **Auth and environment health** table reports whether the following are configured without exposing their values: `DB`, `PRODUCT_MEDIA_BUCKET`, `PUBLIC_SITE_URL`, `SITE_ORIGIN`, `SESSION_SECRET`, `PRIVATE_EVIDENCE_DOWNLOAD_SECRET`, Stripe keys, email provider mode, and Cloudflare release token.
+
+A public-ish value may still be stored encrypted if Cloudflare only enables encrypted variables. D1 and R2 must remain resource bindings, not ordinary secrets.

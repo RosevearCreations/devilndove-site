@@ -547,3 +547,7 @@ Completed in this pass:
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+## Build 190 documentation status
+
+This remains a supporting inventory/import reference. Current project direction and next work are in `PROJECT_STATUS_AND_ROADMAP.md`; technical handoff is in `AI_HANDOFF.md`.

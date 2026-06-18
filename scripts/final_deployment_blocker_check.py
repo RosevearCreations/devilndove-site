@@ -40,6 +40,15 @@ REQUIRED_FILES = [
     'public/js/admin-application-sanity.js',
     'data/site/build184-application-sanity.json',
     'database_build185_admin_command_center_value_dashboards.sql',
+    'database_build189_value_ops_live_counts.sql',
+    'database_build190_integrated_value_operations.sql',
+    'functions/api/admin/value-ops.js',
+    'public/js/admin-value-ops.js',
+    'public/js/admin-member-timeline.js',
+    'public/js/admin-local-seo-value-ops.js',
+    'data/site/build190-performance-report.json',
+    'data/site/build190-integrated-value-ops.json',
+    'MARKDOWN_INDEX.md',
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 

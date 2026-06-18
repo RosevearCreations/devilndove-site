@@ -1274,3 +1274,34 @@ Completed in this pass:
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+## Build 190 current competitive review — June 2026
+
+Current official and platform guidance supports the direction already chosen:
+
+- Google emphasizes useful content, clear titles/headings, crawlable descriptive links, high-quality relevant images, descriptive alt text, and structured data that matches visible content.
+- Google Business Profile continues to explain local results through relevance, distance, and prominence/popularity; website code cannot guarantee first-page placement.
+- Etsy’s Seller Handbook continues to emphasize cohesive shop branding, a clear maker/manufacturing story, strong product photography, listing detail, reviews, and buyer trust.
+- Shopify’s current ecommerce guidance continues to emphasize clear calls to action, strong/lifestyle product photography, social proof, reduced buyer anxiety, and measuring conversion steps.
+
+Practical competitive priorities for Devil n Dove:
+
+1. Real approved photography and honest process/condition proof.
+2. Product pages that answer size, material, care, timing, shipping/pickup, customization, and one-of-a-kind questions.
+3. Customer stories/reviews tied to the relevant product or local page, with consent.
+4. Conversion measurement from landing page to order.
+5. Margin visibility before marketplace export.
+6. A coherent handmade/vintage/custom-gift story rather than trying to look like a mass retailer.
+7. Fast mobile pages with accessible controls and lighter-visual mode.
+
+Sources:
+
+- https://developers.google.com/search/docs/fundamentals/seo-starter-guide
+- https://developers.google.com/search/docs/appearance/google-images
+- https://support.google.com/business/answer/7091?hl=en
+- https://www.etsy.com/seller-handbook/article/39525144574
+- https://www.etsy.com/seller-handbook/article/26127532688
+- https://www.etsy.com/seller-handbook/article/358680450619
+- https://www.shopify.com/blog/12206313-the-ultimate-diy-guide-to-beautiful-product-photography
+- https://www.shopify.com/blog/conversion-centered-design
+- https://www.shopify.com/blog/ecommerce-conversion-rate
