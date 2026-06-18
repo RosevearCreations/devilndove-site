@@ -868,3 +868,7 @@ Meta:
 After deploying Build 190, open `/admin/command-center/`. The **Auth and environment health** table reports whether the following are configured without exposing their values: `DB`, `PRODUCT_MEDIA_BUCKET`, `PUBLIC_SITE_URL`, `SITE_ORIGIN`, `SESSION_SECRET`, `PRIVATE_EVIDENCE_DOWNLOAD_SECRET`, Stripe keys, email provider mode, and Cloudflare release token.
 
 A public-ish value may still be stored encrypted if Cloudflare only enables encrypted variables. D1 and R2 must remain resource bindings, not ordinary secrets.
+
+## Build 191 in-app verification
+
+After the environment variables/bindings are saved and the site is redeployed, open `/admin/command-center/` and use **Verify environment settings**. This records whether D1, R2, Stripe, Stripe webhook secret, email-provider configuration, Cloudflare API settings, public URL, and session secret appear configured. It does not expose secret values and does not replace live provider tests.

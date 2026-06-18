@@ -551,3 +551,7 @@ Completed in this pass:
 ## Build 190 documentation status
 
 This remains a supporting inventory/import reference. Current project direction and next work are in `PROJECT_STATUS_AND_ROADMAP.md`; technical handoff is in `AI_HANDOFF.md`.
+
+---
+
+_Build 191 documentation sanity review: retained as a specialized supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current direction._

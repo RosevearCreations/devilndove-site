@@ -49,6 +49,14 @@ REQUIRED_FILES = [
     'data/site/build190-performance-report.json',
     'data/site/build190-integrated-value-ops.json',
     'MARKDOWN_INDEX.md',
+    'database_build191_value_operations_followthrough.sql',
+    'functions/api/admin/value-ops-followthrough.js',
+    'public/js/admin-value-ops-followthrough.js',
+    'public/js/admin-product-image-role-prompts.js',
+    'functions/api/before-after-gallery.js',
+    'public/js/before-after-gallery.js',
+    'data/site/build191-value-operations-followthrough.json',
+    'data/site/build191-validation.json',
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 

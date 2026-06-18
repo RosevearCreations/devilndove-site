@@ -1305,3 +1305,19 @@ Sources:
 - https://www.shopify.com/blog/12206313-the-ultimate-diy-guide-to-beautiful-product-photography
 - https://www.shopify.com/blog/conversion-centered-design
 - https://www.shopify.com/blog/ecommerce-conversion-rate
+
+## Build 191 current-direction review
+
+Current external guidance continues to support the project direction:
+
+- Google Search Console provides CSV/Excel/Sheets exports, so import mapping should be reviewed rather than hard-coded.
+- Google local results remain mainly influenced by relevance, distance, and prominence/popularity.
+- Etsy recommends telling the workshop/shop origin story and using strong behind-the-scenes photography/video.
+- Shopify emphasizes clear product details, strong imagery, social proof/reviews, mobile usability, page speed, and conversion measurement.
+
+Sources reviewed for Build 191:
+- https://support.google.com/webmasters/answer/12919797
+- https://developers.google.com/search/blog/2020/02/data-export
+- https://support.google.com/business/answer/7091
+- https://www.etsy.com/seller-handbook/article/22636178725
+- https://www.shopify.com/sg/blog/ecommerce-product-page-seo

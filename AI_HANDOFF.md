@@ -1,35 +1,37 @@
-# Devil n Dove AI Handoff — Build 190
+# Devil n Dove AI Handoff — Build 191
 
-Use this file first when opening a new AI chat or handing the repository to another assistant. Then read `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`.
+Read this file first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`.
 
 ## Current build
 
-Build 190 integrates the Build 189 dashboards into practical owner workflows: saved Command Center views, environment health, filtered conversion funnels, product margin/photo/stock warnings, customer timelines, Search Console/GBP actions, visual publication review, guarded cart recovery, seasonal campaigns, real asset optimization, and Markdown retirement.
+Build 191 turns Build 190 review dashboards into working owner controls: configurable channel fees, family cost defaults, margin gates/overrides, private customer notes, customer-story output drafts, Search Console mapping previews, monthly GBP tasks, review eligibility, approved before/after galleries, image-role prompts, D1 mobile drafts, deployed performance evidence, responsive-image jobs, Owner Daily exports, campaign readiness, local freshness, real-device QA, and live-environment configuration checks.
 
 ## Primary admin routes
 
-- `/admin/command-center/` — daily owner dashboard plus Build 190 value operations.
-- `/admin/members/` — users, engagement, gift-card history, and unified customer/member timelines.
-- `/admin/local-seo-review/` — landing-page review plus Search Console opportunities and GBP observations.
-- `/admin/readiness/` — product publish readiness.
-- `/admin/visual-enrichment-studio/` — approved media, placeholders, screenshots, alt text, and budgets.
-- `/admin/deployment-preflight/` — static/live release checks.
-- `/admin/post-deploy-smoke-tests/` — live URL verification.
+- `/admin/command-center/` — daily dashboard plus Build 190 and Build 191 integrated operations.
+- `/admin/products/` — desktop product editor with image-role prompts.
+- `/admin/mobile-product/` — phone capture with local + D1 field recovery.
+- `/admin/members/` — member/customer views and existing timelines.
+- `/admin/local-seo-review/` — local pages, Search Console, and GBP review.
+- `/admin/marketplace-exports/` — exports now hard-blocked by margin/validation gates.
+- `/admin/deployment-preflight/` — release checks.
+- `/admin/post-deploy-smoke-tests/` — live verification.
 
 ## Important APIs
 
-- `/api/admin/command-center` — existing Build 189 live summary and snapshots.
-- `/api/admin/value-ops` — Build 190 integrated value operations.
-- `/api/admin/local-seo-review` — local landing-page review rows.
-- `/api/admin/search-console-import` — Search Console import groundwork.
-- `/api/auth/login` — login route; `_routes.json` must include `/api/*`.
+- `/api/admin/value-ops` — Build 190 funnel, readiness, customer, visual, SEO, and campaign summary; Build 191 now uses configured fee/cost settings.
+- `/api/admin/value-ops-followthrough` — Build 191 settings, approvals, imports, D1 drafts, evidence, and owner summaries.
+- `/api/before-after-gallery` — public read-only approved/consented gallery proof.
+- `/api/admin/marketplace-export-preview` — CSV download now enforces margin gates.
+- `/api/admin/search-console-import` — full Search Console import/action workflow.
+- `/api/auth/login` — login; root `_routes.json` must include `/api/*`.
 
-## Build 190 D1 migration
+## D1 migration order
 
-Run only missing migrations. Do not blindly rerun old non-idempotent `ALTER TABLE` migrations.
+Run only missing migrations. Do not blindly rerun old non-idempotent migrations.
 
 ```text
-database_build171_ledger_repair.sql only if Build 171 schema exists but the ledger marker is missing
+database_build171_ledger_repair.sql only if Build 171 schema exists but the marker is missing
 database_build173_deployment_preflight.sql
 database_build174_deployment_preflight_detail.sql
 database_build175_release_control.sql
@@ -46,54 +48,46 @@ database_build185_admin_command_center_value_dashboards.sql
 database_build186_markdown_consolidation_visual_placeholders.sql
 database_build189_value_ops_live_counts.sql
 database_build190_integrated_value_operations.sql
+database_build191_value_operations_followthrough.sql
 ```
 
-Build 187 and Build 188 were routing/environment hotfixes and did not require a D1 migration.
+Builds 187 and 188 were routing/environment hotfixes without D1 migrations.
 
 ## Documentation policy
 
 Canonical files:
 
-1. `PROJECT_STATUS_AND_ROADMAP.md` — current business/application state and next work.
-2. `AI_HANDOFF.md` — technical handoff and deployment order.
+1. `PROJECT_STATUS_AND_ROADMAP.md`
+2. `AI_HANDOFF.md`
 
-Use `MARKDOWN_INDEX.md` to locate supporting references. Historical roadmap/gap/context files through Build 189 are under `docs/archive/`.
+Use `MARKDOWN_INDEX.md` for supporting references. Historical roadmap/gap/context content remains in `docs/archive/`.
 
-## SEO rules
+## Safety and business rules
 
-- No more than one H1 per exposed page.
-- Keep each page title and meta description specific and useful.
-- Use natural customer language in headings/body/internal links; do not repeat location phrases unnaturally.
-- Put high-quality images near relevant text and use descriptive alt text.
-- Structured data must match visible content and real product/business facts.
-- Local ranking cannot be guaranteed; website relevance must be paired with complete Google Business Profile information, reviews, photos, links, activity, and real customer proof.
-
-## Visual/media rules
-
-- Placeholders are layout scaffolding, not finished trust proof.
-- Replace a placeholder only after consent/public-use review, descriptive alt text, compression, mobile crop review, and performance-budget review.
-- Build 190 includes optimized display variants for shared logo/banner/collage assets while retaining originals for rollback/metadata compatibility.
-- Product detail now has prepared process, scale, material, and care visual slots without adding a second H1.
-
-## Customer/privacy rules
-
-- Customer timelines are admin-only aggregations.
-- Cart recovery is human-review only; no automatic sending from Build 190.
-- Customer stories/public proof remain blocked until consent is approved.
-- Recall, gift-card, accounting evidence, and private downloads retain their separate approval/security gates.
+- One H1 maximum per exposed public/admin page.
+- Never claim guaranteed local ranking.
+- Do not calculate automated margins from unreviewed fee/cost defaults.
+- Marketplace downloads stay blocked for unhealthy/unknown margin unless an active approved override exists.
+- Review eligibility is not permission to contact.
+- Customer stories and gallery proof require consent and public-use approval.
+- Placeholders are layout scaffolding, not real proof.
+- Mobile D1 recovery stores form fields, not image file bytes.
+- Environment checks do not reveal secret values.
 
 ## Live checks after deployment
 
-1. Run `database_build190_integrated_value_operations.sql` if missing.
-2. Open `/api/auth/login` and confirm JSON, not homepage HTML.
-3. Open `/admin/command-center/` and verify both the original Command Center and Build 190 integrated panels load.
-4. Test funnel filters, customer timeline sync, GBP observation save, and SEO action creation.
-5. Open `/admin/members/` and verify timeline cards.
-6. Open `/admin/local-seo-review/` and verify GBP/Search Console helper rows.
-7. Test product detail on desktop and phone widths.
-8. Run `/admin/deployment-preflight/` and `/admin/post-deploy-smoke-tests/`.
-9. Verify D1, R2, Stripe, email provider mode, and Cloudflare token status in the environment health panel.
+1. Apply `database_build191_value_operations_followthrough.sql`.
+2. Confirm `/api/auth/login` returns JSON.
+3. Open `/admin/command-center/` and verify Build 190 and Build 191 panels.
+4. Enter at least one reviewed channel fee and one family cost default.
+5. Refresh Product Readiness and confirm fee/cost configuration affects margin status.
+6. Test marketplace CSV blocking and a temporary approved override.
+7. Test Search Console mapping preview with a real export sample.
+8. Save a phone draft, reload another device/session, and verify D1 field recovery.
+9. Add one approved consented gallery item and confirm `/api/before-after-gallery`.
+10. Record mobile/desktop performance and real-device QA evidence.
+11. Run environment verification, deployment preflight, and smoke tests.
 
-## Immediate next priorities
+## Immediate priorities
 
-Upload approved real photos, establish product-family cost defaults, import real Search Console data, perform monthly GBP observations, refine marketplace fee rules, and run a real-device mobile QA pass.
+Enter real channel fees and product costs, upload approved real photos, test live Stripe/email/R2 connections, import real Search Console data, complete the first GBP monthly task cycle, and capture real-device screenshots.
