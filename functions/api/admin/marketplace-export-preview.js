@@ -139,13 +139,32 @@ export async function onRequestGet(context) {
     return json({ ok: true, channel, marketplace_export_history_id: diffHistoryId, diff, summary: { changed: diff.filter((row) => row.changed).length, total: diff.length }, history: historyRow });
   }
   if (url.searchParams.get('format') === 'csv') {
+    const marginChannel = channel === 'facebook' ? 'facebook_meta' : channel === 'manual' ? 'manual_local' : channel;
+    const marginWarnings = rows(await db.prepare(`SELECT product_id,warning_status,marketplace_export_status,estimated_margin_cents,estimated_margin_percent
+      FROM product_margin_warning_rows WHERE marketplace_export_status <> 'allowed' OR warning_status <> 'healthy_margin'`).all().catch(() => ({ results: [] })));
+    const overrideRows = rows(await db.prepare(`SELECT product_id,channel_key,approval_status,expires_at
+      FROM marketplace_margin_override_history
+      WHERE approval_status='approved' AND channel_key=? AND (expires_at IS NULL OR date(expires_at) >= date('now'))`)
+      .bind(marginChannel).all().catch(() => ({ results: [] })));
+    const overrideIds = new Set(overrideRows.map((row) => Number(row.product_id || 0)));
+    const previewIds = new Set(previews.map((row) => Number(row.product_id || 0)));
+    const marginBlocked = marginWarnings.filter((row) => previewIds.has(Number(row.product_id || 0)) && !overrideIds.has(Number(row.product_id || 0)));
+    if (marginBlocked.length) {
+      await db.prepare(`INSERT INTO marketplace_download_block_events
+        (channel,gate_status,hard_blocker_count,blocked,requested_by_user_id,created_at,notes)
+        VALUES (?,'blocked_margin',?,1,?,CURRENT_TIMESTAMP,?)`)
+        .bind(channel,marginBlocked.length,Number(adminUser.user_id || 0) || null,
+          `Build 191 blocked CSV: ${marginBlocked.length} product(s) have unknown/low/negative margin without an active approved channel override.`)
+        .run().catch(() => null);
+      return json({ ok:false, error:`CSV download is blocked: ${marginBlocked.length} product(s) need configured costs/channel fees, a healthy margin, or an approved temporary override.`, channel, margin_channel:marginChannel, margin_blockers:marginBlocked },409);
+    }
     const gate = await db.prepare(`SELECT gate_status, hard_blocker_count, manual_override_required FROM marketplace_export_download_gates WHERE channel=? ORDER BY updated_at DESC LIMIT 1`).bind(channel).first().catch(() => null);
     const gateBlocked = gate && ['blocked','blocked_pending_validation'].includes(String(gate.gate_status || '').toLowerCase()) && Number(gate.hard_blocker_count || 0) > 0 && !Number(gate.manual_override_required || 0);
     if (gateBlocked) {
       await db.prepare(`INSERT INTO marketplace_download_block_events (channel, gate_status, hard_blocker_count, blocked, requested_by_user_id, created_at, notes) VALUES (?, ?, ?, 1, ?, CURRENT_TIMESTAMP, 'CSV download blocked by Build 180 marketplace_export_download_gates hard blocker.')`).bind(channel, gate.gate_status || 'blocked', Number(gate.hard_blocker_count || 0), Number(adminUser.user_id || 0) || null).run().catch(() => null);
       return json({ ok: false, error: `CSV download is blocked for ${channel} until marketplace validation hard blockers are resolved or overridden.`, gate }, 409);
     }
-    await saveHistory(db, channel, previews, Number(adminUser.user_id || 0) || null, 'CSV generated from marketplace export preview after Build 180 gate check.');
+    await saveHistory(db, channel, previews, Number(adminUser.user_id || 0) || null, 'CSV generated after Build 191 margin gate plus existing marketplace validation gate.');
     const headers = ['channel','ready','product_id','sku','title','slug','price_cents','currency','category','tags','description','image_1','image_2','image_3','image_4','image_5','issues'];
     const lines = [headers.join(',')];
     previews.forEach((row) => {
