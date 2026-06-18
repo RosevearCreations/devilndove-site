@@ -216,3 +216,17 @@ Use `/admin/command-center/` after deploy to refresh live counts. Run `database_
 9. Confirm cart-recovery rows do not send email automatically.
 10. Run Deployment Preflight and record the deployed result before promotion.
 
+
+## Build 191 post-deploy checks
+
+1. Apply `database_build191_value_operations_followthrough.sql`.
+2. Open `/admin/command-center/` and confirm the Build 191 panels load.
+3. Save one fee setting and one cost default.
+4. Confirm Product Readiness reports channel/family configuration.
+5. Verify marketplace CSV is blocked for unhealthy/unknown margin.
+6. Approve a temporary margin override and verify the intended product/channel can proceed.
+7. Preview a real Search Console CSV export.
+8. Save a mobile product field draft, reload, and verify D1 recovery.
+9. Add one consented approved before/after item and confirm `/api/before-after-gallery`.
+10. Save mobile and desktop performance/QA evidence.
+11. Run environment verification; then test Stripe webhook, email delivery, and R2 separately.

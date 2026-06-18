@@ -1124,3 +1124,31 @@ New tables:
 - `markdown_retirement_registry`
 
 The migration is additive and records `build_190_integrated_value_operations` in `schema_migration_ledger`. Product margin rows are operational estimates until real product-family costs and channel-specific fees are configured. Customer timeline rows are admin-only. Cart recovery rows never send automatically.
+
+
+## Build 191 value-operations follow-through
+
+Migration: `database_build191_value_operations_followthrough.sql`
+
+New operational tables:
+
+- `marketplace_channel_fee_settings`
+- `product_family_cost_defaults`
+- `marketplace_margin_override_history`
+- `customer_timeline_admin_notes`
+- `customer_story_output_drafts`
+- `search_console_mapping_previews`
+- `gbp_monthly_task_reminders`
+- `review_request_eligibility_rows`
+- `approved_before_after_gallery_items`
+- `product_image_role_requirements`
+- `mobile_product_server_drafts`
+- `deployed_performance_measurements`
+- `responsive_image_publication_jobs`
+- `owner_daily_summary_exports`
+- `campaign_readiness_check_rows`
+- `local_page_freshness_rows`
+- `real_device_qa_evidence`
+- `live_environment_verification_runs`
+
+Build 191 is additive and avoids `ALTER TABLE` statements. The migration is idempotent through `CREATE TABLE IF NOT EXISTS`, unique keys, and conflict-aware seed rows.

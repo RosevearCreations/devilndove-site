@@ -552,3 +552,7 @@ Completed in this pass:
 ## Build 190 documentation rule
 
 Every build must update the two canonical handoff files (`PROJECT_STATUS_AND_ROADMAP.md`, `AI_HANDOFF.md`), schema reference, release notes, sanity health check, and migration order. Historical archived Markdown must not be treated as the active backlog.
+
+---
+
+_Build 191 documentation sanity review: retained as a specialized supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current direction._

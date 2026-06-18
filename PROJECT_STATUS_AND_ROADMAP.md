@@ -1,85 +1,98 @@
-# Devil n Dove Project Status and Roadmap — Build 190
+# Devil n Dove Project Status and Roadmap — Build 191
 
-This is the primary human-readable project file. For technical handoff and migration order, use `AI_HANDOFF.md`.
+This is the primary human-readable project file. For deployment order and technical handoff, read `AI_HANDOFF.md`. `MARKDOWN_INDEX.md` explains the remaining supporting files.
 
 ## Executive sanity check
 
-Devil n Dove is now a broad small-business platform rather than a basic storefront. It includes public shopping, handmade/vintage separation, custom request intake, member/customer tools, product and media workflows, accounting groundwork, gift cards, marketplace exports, recalls, local SEO, visual proof, analytics, deployment controls, and mobile admin surfaces.
+Devil n Dove is now a broad small-business operating platform rather than a simple storefront. It includes public shopping, handmade/vintage separation, custom requests, member tools, product/media workflows, accounting groundwork, gift cards, marketplace exports, recalls, local SEO, analytics, deployment controls, mobile capture, and consent-controlled public proof.
 
-The application’s strongest next value is **not more isolated admin pages**. The strongest value is using the existing system to publish trustworthy products faster, understand customer behaviour, protect margins, strengthen local proof, and simplify daily operation.
+Build 191 deliberately improves **integration and real operating controls** rather than creating another isolated admin department. The strongest remaining business value comes from entering accurate real data, publishing approved real photography, testing live provider connections, and simplifying daily owner use.
 
-## Current strengths
+## Build 191 completed — 20 value-added steps
+
+1. Added editable channel-specific marketplace fee settings without assuming account-specific rates.
+2. Added product-family cost defaults for materials, labour, packaging, overhead, and waste.
+3. Updated Product Readiness margin calculations to use configured cost defaults/direct costs and channel fee settings.
+4. Added marketplace CSV hard blocking for unknown/low/negative margin.
+5. Added temporary margin override requests with approval, expiry, and audit history.
+6. Added customer timeline search and private admin notes.
+7. Added a customer-story wizard that creates product-story, trust-block, gallery-caption, and social-snippet drafts.
+8. Added direct consent-evidence URLs to customer-story output records.
+9. Added Search Console CSV header mapping and sample-row preview before import.
+10. Added monthly Google Business Profile task reminders for accuracy, photos, reviews, posts, and local-page freshness.
+11. Added fulfilled/paid review-request eligibility rows while keeping permission and cooldown separate.
+12. Added an approved before/after/process gallery data model, public read endpoint, and public progressive-enhancement module.
+13. Added product image-role prompts to both phone and desktop product editors.
+14. Upgraded mobile product recovery from browser-only storage to authenticated D1-backed field snapshots.
+15. Added deployed performance measurement imports for mobile/desktop route evidence.
+16. Added a guarded responsive-image derivative publication queue and `srcset`/`sizes` storage.
+17. Added one-click Owner Daily summary generation and history.
+18. Added campaign readiness checks for inventory, real media, SEO, pickup/shipping, and social work.
+19. Added local-page freshness reminders plus real-device screenshot/QA evidence records.
+20. Added live-environment configuration verification for D1, R2, Stripe, webhooks, email mode, and Cloudflare API setup.
+
+## Current application strengths
 
 - One-H1, title/meta, canonical, image-alt, structured-data, sitemap, and local-page guardrails.
-- D1-backed products, orders, users, custom requests, gift cards, media consent, SEO actions, accounting, and release-control records.
-- Desktop and mobile admin paths, phone product capture, browser recovery, touch-target CSS, and responsive tables/cards.
-- Product readiness, image workflows, story/proof moderation, marketplace export controls, and costing groundwork.
-- Deployment preflight, safe package, release notes, smoke tests, rollback planning, and runtime incident logging.
-- Two canonical Markdown handoff files with archived historical context.
-
-## Build 190 completed
-
-Build 190 completed the 20 current roadmap items listed in `DEVELOPMENT_ROADMAP.md`, including:
-
-- saved Command Center views and environment health;
-- filtered conversion funnel reporting;
-- product missing-photo, low-stock, cost, margin, and marketplace warnings;
-- unified customer/member timeline cards;
-- Search Console opportunity actions and Google Business Profile observation entry;
-- media publication review and performance status;
-- product process/scale/material/care visual proof placeholders;
-- guarded cart recovery review and seasonal campaign planning;
-- image compression reporting and optimized shared WebP display assets;
-- Markdown retirement into two canonical files plus archived history;
-- responsive CSS fixes for admin navigation, wide tables, timeline cards, and product proof modules.
+- D1-backed products, orders, customers, custom requests, gift cards, evidence, SEO actions, costing, and release controls.
+- Responsive desktop/mobile admin surfaces and phone product capture.
+- Product readiness, channel-aware cost/margin review, marketplace validation, and approval gates.
+- Consent-controlled customer stories, public proof, and before/after gallery groundwork.
+- Deployment preflight, safe packages, smoke tests, rollback controls, and environment checks.
+- Two canonical Markdown files with archived historical context.
 
 ## Current business-value gaps
 
-1. Real approved photos are still the biggest trust and visual-search gap.
-2. Product cost data is incomplete, so margin reporting is advisory until material/labour/packaging/overhead defaults are entered.
-3. Marketplace fee estimates need channel-specific rules.
-4. Search Console and Google Business Profile panels need real monthly data.
-5. Customer story/public proof needs a guided approval wizard and linked consent evidence.
-6. Mobile recovery is strong locally but still needs browser-to-D1 draft synchronization.
-7. Performance budgets need measurements from deployed pages, not only static file size checks.
-8. Real-device screenshots are still needed for phone/tablet/desktop QA.
+1. Real approved photographs still provide more trust and image-search value than placeholders.
+2. Fee and cost rows remain advisory until actual account-specific values are entered.
+3. Search Console import is manual CSV preview/import; it is not yet an OAuth/API connection.
+4. GBP activity remains a manual observation/task process because Google does not provide a simple public ranking-position feed.
+5. Mobile D1 recovery saves form fields but not selected image file bytes.
+6. Responsive derivative jobs are queued but still need a real R2 image worker.
+7. Review eligibility is not customer-contact permission.
+8. Real-device QA requires actual devices/screenshots.
+9. Environment verification currently checks configuration presence; live transactions/provider signatures still need deployed tests.
+10. The number of older admin pages remains high, although Command Center now aggregates most daily work.
 
-## Competitive/current direction
+## Current SEO and competitive direction
 
-Current Google guidance still favours useful people-first content, clear title links/headings, crawlable descriptive links, relevant high-quality images with descriptive alt text, and structured data that matches visible content. Google Business Profile continues to describe local results around relevance, distance, and prominence/popularity. Etsy’s seller guidance continues to emphasize cohesive branding, product photography, shop/manufacturing story, and buyer trust. Current Shopify guidance continues to emphasize strong product photography, social proof, clear calls to action, and reducing purchase anxiety.
+Google Search Console supports exporting report data to CSV, Excel, or Google Sheets; Build 191 therefore validates headers and samples before import rather than assuming one fixed file shape.
 
-The practical Devil n Dove response is:
+Google Business Profile continues to describe local results primarily around relevance, distance, and prominence/popularity. No code change can guarantee first-page placement. The practical work remains accurate profile details, useful local pages, current products, real photographs, reviews, links, and consistent proof.
 
-- show real pieces and honest process/condition images;
-- explain materials, size, care, timing, pickup/shipping, and one-of-a-kind limitations;
-- connect consented customer proof to relevant products/pages;
-- measure the landing → product → cart → checkout → order path;
-- avoid generic/duplicated local copy and unsupported claims;
-- keep pages fast enough that visual polish does not undermine usability.
+Current Etsy guidance continues to emphasize a compelling origin/workshop story and strong behind-the-scenes photos/video. Current Shopify guidance emphasizes product details, imagery, reviews/social proof, clear calls to action, mobile usability, page speed, and measuring conversion changes.
 
-## Next 20 recommended steps
+Primary verification sources:
 
-1. Replace homepage and shop placeholders with approved compressed workshop/product photos.
-2. Add channel-specific fee settings for Etsy, Facebook/Meta, onsite Stripe, and other enabled channels.
-3. Add product-family cost defaults for jewelry, engraving, candles, soap, vintage, and mixed media.
-4. Add expected waste/scrap and overhead allocation to product margin cards.
-5. Enforce a marketplace export margin gate with approved override history.
-6. Add customer timeline search, merge suggestions, and private admin notes.
-7. Build the customer-story wizard with consent evidence and multi-output drafts.
-8. Add approved before/after/process gallery modules to public pages.
-9. Add Search Console CSV mapping preview and import validation.
-10. Add monthly GBP task reminders and photo/review/post observation fields.
-11. Add review-request eligibility and cooldown controls.
-12. Add responsive image derivatives and `srcset` for approved media.
-13. Sync mobile product autosave snapshots into D1.
-14. Add product image-role prompts for process, scale, material, care, packaging, and condition.
-15. Add deployed performance imports and route-level budget history.
-16. Add an Owner Daily printable/exportable summary.
-17. Add campaign readiness checks for inventory, images, SEO, pickup timing, and social posts.
-18. Add local-page content freshness reminders based on last proof/product update.
-19. Run a real-device accessibility/mobile QA pass and attach evidence screenshots.
-20. After two stable live releases, remove unused legacy assets and obsolete route aliases.
+- https://support.google.com/webmasters/answer/12919797
+- https://developers.google.com/search/blog/2020/02/data-export
+- https://support.google.com/business/answer/7091
+- https://www.etsy.com/seller-handbook/article/22636178725
+- https://www.shopify.com/sg/blog/ecommerce-product-page-seo
+
+## Next 20 recommended steps after Build 191
+
+1. Enter actual reviewed fee settings for every enabled sales channel.
+2. Enter actual cost defaults, then override individual products where needed.
+3. Connect cost defaults to product editor preview cards and accounting cost rollups.
+4. Add effective-date/version history for fee and cost changes.
+5. Add an R2 derivative worker that creates WebP/AVIF widths and writes final `srcset`.
+6. Add resumable/retryable mobile image uploads separate from field autosave.
+7. Add browser/D1 draft conflict detection and a choose-local/choose-server merge screen.
+8. Add approved gallery placement controls by public route and product family.
+9. Add public product/customer story blocks only after consent and placement approval.
+10. Connect Search Console through its API or scheduled export workflow after OAuth/service credentials are chosen.
+11. Add GBP task completion trends and monthly evidence summaries.
+12. Add customer duplicate/merge suggestions with reversible audit history.
+13. Add review-request opt-in/permission evidence and send cooldowns before outbox queueing.
+14. Add route-level Cloudflare Web Analytics import.
+15. Add PageSpeed Insights/Lighthouse import automation for mobile and desktop.
+16. Add real-device QA templates for narrow phone, large phone, tablet, laptop, and large desktop.
+17. Run live Stripe webhook signature tests and store pass/fail evidence.
+18. Run live email provider test-send/delivery-log verification while customer automation remains disabled.
+19. Run live R2 upload, signed-read, derivative, and delete health tests.
+20. After stable usage telemetry, consolidate or retire low-use legacy admin destinations.
 
 ## Release readiness opinion
 
-The application is structurally advanced, but a release should be judged by real data and proof: working bindings, complete products, real images, tested payments/email, accurate costs, consented proof, mobile screenshots, and successful smoke tests. Code readiness alone is not business readiness.
+Build 191 is structurally ready for deployment after its D1 migration and normal preflight checks. Business readiness still depends on accurate costs/fees, approved real media, live payment/email/R2 tests, consent evidence, and real-device screenshots.

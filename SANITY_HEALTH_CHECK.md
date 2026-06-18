@@ -1031,3 +1031,35 @@ The build 171 SQL marker for `schema_migration_ledger` was corrected to include 
 - Release comparison: **93 existing files changed, 22 files added, and 10 generated Python cache files removed** relative to the uploaded build. See `data/site/build190-changed-files.json`.
 - Live-only work still required: Cloudflare D1/R2 bindings, provider keys/webhooks, real email delivery, real payments, Search Console exports, Google Business Profile observations, and real-device screenshot review.
 
+
+## Build 191 sanity scope
+
+Build 191 must pass:
+
+- JavaScript syntax checks for all Functions and public scripts.
+- JSON parsing for all data/site files.
+- One-H1 scan for exposed HTML.
+- CSS brace/comment balance and basic overflow checks.
+- Empty-database consolidated schema execution.
+- Build 190 → Build 191 migration execution.
+- Build 191 migration rerun/idempotency check.
+- Static deployment preflight and final blocker check.
+- ZIP integrity verification.
+
+Business readiness still requires real fee/cost entry, approved real media, provider tests, and real-device screenshots.
+
+## Build 191 completed validation — 2026-06-17
+
+- JavaScript syntax: **388 files passed** with `node --check`.
+- Python compile: **11 files passed**.
+- JSON parsing: **35 files passed** before final manifest regeneration.
+- HTML one-H1 scan: **82 pages checked; 0 pages with multiple H1 elements**.
+- CSS balance: **passed** for the shared stylesheet.
+- Static deployment preflight: **ready, 0 blockers, 0 warnings**.
+- Final deployment blocker check: **PASS**.
+- Consolidated `database_full_schema.sql`: **passed** on an empty SQLite database with **322 tables** and one Build 191 ledger marker.
+- Uploaded Build 190 full schema followed by Build 191 migration: **passed**.
+- Build 191 migration rerun/idempotency: **passed** with one migration marker.
+- Exact machine-readable validation: `data/site/build191-validation.json`.
+- Live-only work still required: actual account fees/costs, real approved media, Search Console exports, GBP observations, Stripe webhook, email delivery, R2 worker/permissions, Cloudflare API permissions, and real-device screenshots.
+

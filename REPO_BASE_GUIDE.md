@@ -586,3 +586,7 @@ Completed in this pass:
 ## Build 190 documentation status
 
 This remains a supporting repository-layout reference. Use `PROJECT_STATUS_AND_ROADMAP.md`, `AI_HANDOFF.md`, and `MARKDOWN_INDEX.md` as the current first-read files.
+
+---
+
+_Build 191 documentation sanity review: retained as a specialized supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current direction._

@@ -800,3 +800,13 @@ Read these files first:
 3. `MARKDOWN_INDEX.md`
 
 Build 190 adds `/api/admin/value-ops` and enhances `/admin/command-center/`, `/admin/members/`, `/admin/local-seo-review/`, and product detail pages with integrated owner operations, customer timelines, SEO/GBP actions, product margin/photo/stock warnings, visual publication review, cart-recovery review, seasonal campaigns, and responsive visual-proof modules.
+
+## Build 191 quick start
+
+After deploying the Build 191 files:
+
+1. Apply `database_build191_value_operations_followthrough.sql`.
+2. Open `/admin/command-center/`.
+3. Configure real channel fees and family costs.
+4. Test margin blocking, Search Console preview, mobile D1 recovery, gallery approval, performance/QA evidence, and environment verification.
+5. Run deployment preflight and post-deploy smoke tests.

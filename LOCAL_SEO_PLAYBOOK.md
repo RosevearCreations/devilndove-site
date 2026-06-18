@@ -720,3 +720,16 @@ Current official references reviewed June 2026:
 - Google image SEO guidance: https://developers.google.com/search/docs/appearance/google-images
 - Google link best practices: https://developers.google.com/search/docs/crawling-indexing/links-crawlable
 - Google Business Profile local ranking guidance: https://support.google.com/business/answer/7091?hl=en
+
+## Build 191 Search Console and GBP workflow
+
+- Use Search Console’s Export button to download CSV/Excel/Sheets data.
+- Run the Build 191 mapping preview before import because exported files/tabs can differ.
+- Track monthly GBP profile accuracy, approved photos, reviews/responses, posts, and local-page freshness.
+- Do not treat a manual ranking observation as a guaranteed or stable position.
+- Keep local copy useful and distinct; pair it with current products, approved proof, internal links, and accurate profile information.
+
+Verification:
+- https://support.google.com/webmasters/answer/12919797
+- https://developers.google.com/search/blog/2020/02/data-export
+- https://support.google.com/business/answer/7091

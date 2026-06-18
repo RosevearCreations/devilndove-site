@@ -586,3 +586,11 @@ Use `/admin/command-center/` after deploy to refresh live counts. Run `database_
   - `/assets/mark-display.webp`
 - Keep original assets temporarily for rollback and existing metadata/external references.
 - Use real product photography near relevant text. Include honest condition/detail images for vintage items and avoid cosmetic editing that hides flaws.
+
+## Build 191 image and proof workflow
+
+- Phone and desktop product editors now show role prompts for hero, scale, material, process, care, condition, and before/after images.
+- Public before/after items require approved consent and public-use status.
+- D1 mobile recovery stores field data and image count only; image files must be reselected.
+- Responsive image jobs store target widths, output format, `sizes`, and eventual `srcset`; a real R2 worker remains outstanding.
+- Placeholders remain visible until approved real media is available.
