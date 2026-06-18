@@ -1004,3 +1004,30 @@ The build 171 SQL marker for `schema_migration_ledger` was corrected to include 
 - Public pages received lightweight visual placeholder bands without adding extra H1 tags.
 - Mobile product entry has browser recovery support.
 - D1 migration `database_build189_value_ops_live_counts.sql` should run after Build 186.
+
+## Build 190 sanity summary
+
+- Documentation is consolidated around `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md`; historical roadmap/gap/context files are archived.
+- Build 190 adds integrated owner workflows instead of another large isolated department page.
+- Environment health reports only configured/missing status and never exposes secret values.
+- Funnel filters support date range and source/referrer/UTM review.
+- Product margin values are estimates until real cost defaults and channel fees are configured.
+- Customer timeline data is admin-only; cart recovery remains manual-review only.
+- Product detail keeps one H1 and adds only H3-based visual proof modules.
+- Optimized display variants materially reduce repeated navigation/about image payloads.
+- Live Cloudflare bindings, R2 access, payment webhooks, provider email delivery, real Search Console imports, and real-device screenshots still require deployed testing.
+## Build 190 completed validation — 2026-06-17
+
+- JavaScript syntax: **424 files passed** with `node --check`.
+- Python compile: **passed** for project scripts/functions.
+- JSON parsing: **32 files passed** before final manifest regeneration.
+- HTML one-H1 scan: **82 pages checked; 0 pages with multiple H1 elements**.
+- CSS balance: **passed**; no unbalanced brace result.
+- Static deployment preflight: **ready, 0 blockers, 0 warnings**.
+- Final deployment blocker check: **PASS**.
+- Consolidated `database_full_schema.sql`: **passed on an empty SQLite database** with 304 tables and the Build 190 ledger marker.
+- Build 189 → Build 190 upgrade path: **passed** using the uploaded Build 189 full schema followed by `database_build190_integrated_value_operations.sql`.
+- Build 190 migration idempotence: **passed twice** on an empty SQLite database; one ledger marker remained.
+- Release comparison: **93 existing files changed, 22 files added, and 10 generated Python cache files removed** relative to the uploaded build. See `data/site/build190-changed-files.json`.
+- Live-only work still required: Cloudflare D1/R2 bindings, provider keys/webhooks, real email delivery, real payments, Search Console exports, Google Business Profile observations, and real-device screenshot review.
+

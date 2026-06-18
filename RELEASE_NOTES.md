@@ -1,5 +1,34 @@
 # Release Notes
 
+## Build 190 — Integrated value operations and documentation retirement
+
+### Added
+
+- `/api/admin/value-ops`
+- saved Command Center views and environment-health checks
+- 7/30/90/365-day funnel filters plus source/referrer/UTM filtering
+- product real-photo, alt-text, low-stock, cost, margin, and marketplace-review warnings
+- unified customer/member timeline cards on Command Center and Members
+- Search Console opportunity actions and Google Business Profile observation entry
+- media publication review queue for consent, public use, compression, alt text, and performance
+- guarded cart recovery review rows and seasonal campaign planner
+- product-detail process, scale, materials, and care visual placeholders
+- `scripts/build190_performance_report.py`
+- optimized WebP display assets for navigation logo, about banner, collage, and display mark
+- `MARKDOWN_INDEX.md` and archived historical roadmap/gap/context files
+- `database_build190_integrated_value_operations.sql`
+
+### Changed
+
+- `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` are the two canonical handoff files.
+- `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` are concise current files with archived full histories.
+- Command Center, Members, Local SEO Review, product detail, admin navigation, and responsive CSS were enhanced.
+- Shared navigation logos now use a much smaller WebP display variant while original PNG assets remain for rollback/metadata compatibility.
+
+### Validation target
+
+Run static preflight, JavaScript syntax checks, JSON parsing, one-H1 scan, CSS brace/balance checks, Build 173–190 SQL smoke test, and ZIP integrity verification before deployment.
+
 ## Build 189 — Value Ops live counts, funnel tracking, mobile recovery, and visual replacement plan
 
 - Added `/api/admin/command-center` so `/admin/command-center/` can show live operational counts instead of only static seeded rows.
@@ -516,4 +545,3 @@ Run `database_build189_value_ops_live_counts.sql` after `database_build186_markd
 - `public/js/trust-block-context.js`
 
 ## D1 migration summary
-

@@ -548,3 +548,7 @@ Completed in this pass:
 18. Add deployment-blocker checklist output into `SANITY_HEALTH_CHECK.md` automatically.
 19. Add stronger public-page dark-theme screenshot checklist examples into `IMAGES.md` as real sample rows.
 20. Add a release notes generator so each zip includes exact changed-file and D1 migration summaries.
+
+## Build 190 documentation rule
+
+Every build must update the two canonical handoff files (`PROJECT_STATUS_AND_ROADMAP.md`, `AI_HANDOFF.md`), schema reference, release notes, sanity health check, and migration order. Historical archived Markdown must not be treated as the active backlog.

@@ -188,3 +188,31 @@ Store results with `build_label`, `page_url`, `result_status`, `http_status`, an
 ## Build 189 value ops note
 
 Use `/admin/command-center/` after deploy to refresh live counts. Run `database_build189_value_ops_live_counts.sql` after the existing Build 186 migration. Placeholder images are still placeholders; replace only with approved, compressed public-use media.
+
+## Build 190 deployed checks
+
+1. Apply `database_build190_integrated_value_operations.sql` if the ledger marker is missing.
+2. Open `/admin/command-center/`; confirm the original cards and Build 190 integrated panels both load.
+3. Select 7/30/90/365-day funnel filters and test a source value such as `facebook` or `google`.
+4. Confirm Auth/Environment Health reports `DB` as configured and does not display secret values.
+5. Confirm product rows show real-photo, alt, low-stock, cost, margin, and export-review statuses.
+6. Click **Sync customer timeline** and confirm `/admin/members/` shows timeline cards.
+7. Save a Google Business Profile observation and create a Search Console opportunity action.
+8. Review the media-publication queue; no placeholder should be marked publish-ready without consent, public-use, alt-text, compression, and performance review.
+9. Confirm cart-recovery review does not send email.
+10. Open a product detail page on phone and desktop widths; process/scale/material/care modules must not overlap and the page must still contain one H1.
+11. Verify optimized assets return 200: `/assets/logo-clear-nav.webp`, `/assets/banner-spicing-it-up.webp`, `/assets/mainpage-collage.webp`.
+12. Run Deployment Preflight and Post-Deploy Smoke Tests before promotion.
+## Build 190 post-deploy checks
+
+1. Open `/api/auth/login` with GET and confirm JSON, not homepage HTML.
+2. Sign in and open `/admin/command-center/`; confirm Build 190 panels load.
+3. Change the funnel period and source filter; confirm the API returns without exposing secret values.
+4. Open `/admin/members/`; confirm customer timeline cards render or show a safe empty state.
+5. Open `/admin/local-seo-review/`; save one manual Google Business Profile observation.
+6. Open a product detail page on desktop and mobile; verify process/scale/material/care placeholders do not create a second H1.
+7. Check the browser console for failed image/CSS/JS requests.
+8. Confirm `/assets/logo-clear-nav.webp` and other optimized display assets return HTTP 200.
+9. Confirm cart-recovery rows do not send email automatically.
+10. Run Deployment Preflight and record the deployed result before promotion.
+

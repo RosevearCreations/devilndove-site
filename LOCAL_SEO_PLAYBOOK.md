@@ -702,3 +702,21 @@ Completed in this pass:
 ## Build 189 value ops note
 
 Use `/admin/command-center/` after deploy to refresh live counts. Run `database_build189_value_ops_live_counts.sql` after the existing Build 186 migration. Placeholder images are still placeholders; replace only with approved, compressed public-use media.
+
+## Build 190 local SEO operating loop
+
+1. Import real Search Console page/query data rather than estimating clicks or positions.
+2. Use `/admin/local-seo-review/` to identify pages with impressions but weak clicks, average positions near page one/two, missing image proof, or stale content.
+3. Record one monthly Google Business Profile observation per priority page/phrase. Notes can include calls, website clicks, direction requests, photo views, review count, and what appeared in Search/Maps.
+4. Create a title/meta/internal-link/image-proof action only when it improves visitor clarity. Do not promise a specific ranking.
+5. Keep local wording natural. Clearly describe Southern Ontario/Ontario service or pickup context without creating unsupported storefront/location claims.
+6. Real approved product/process images are stronger local trust evidence than decorative placeholders.
+7. Structured data must match visible content and actual business/product facts.
+
+Current official references reviewed June 2026:
+
+- Google SEO Starter Guide: https://developers.google.com/search/docs/fundamentals/seo-starter-guide
+- Google title-link guidance: https://developers.google.com/search/docs/appearance/title-link
+- Google image SEO guidance: https://developers.google.com/search/docs/appearance/google-images
+- Google link best practices: https://developers.google.com/search/docs/crawling-indexing/links-crawlable
+- Google Business Profile local ranking guidance: https://support.google.com/business/answer/7091?hl=en

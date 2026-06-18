@@ -573,3 +573,16 @@ A CSS pass is not complete if any public section falls back to a plain white car
 ## Build 189 value ops note
 
 Use `/admin/command-center/` after deploy to refresh live counts. Run `database_build189_value_ops_live_counts.sql` after the existing Build 186 migration. Placeholder images are still placeholders; replace only with approved, compressed public-use media.
+
+## Build 190 image and visual-proof rules
+
+- Product detail now reserves four approved image roles: process, scale, material/texture, and care/storage.
+- Placeholder SVGs may remain until real media passes consent/public-use, descriptive alt text, compression, crop, mobile, and performance review.
+- Use `data/site/build190-performance-report.json` and `/admin/command-center/` image-compression rows to identify oversized shared assets.
+- New optimized display variants:
+  - `/assets/logo-clear-nav.webp`
+  - `/assets/banner-spicing-it-up.webp`
+  - `/assets/mainpage-collage.webp`
+  - `/assets/mark-display.webp`
+- Keep original assets temporarily for rollback and existing metadata/external references.
+- Use real product photography near relevant text. Include honest condition/detail images for vintage items and avoid cosmetic editing that hides flaws.

@@ -1,106 +1,85 @@
-# Devil n Dove Project Status and Roadmap — Build 189
+# Devil n Dove Project Status and Roadmap — Build 190
 
-This is now the primary human-readable project file. Start here before reading the longer historical Markdown files.
+This is the primary human-readable project file. For technical handoff and migration order, use `AI_HANDOFF.md`.
 
-## Current application position
+## Executive sanity check
 
-Devil n Dove is now a broad small-business platform for handmade, workshop-made, custom, gift-card, vintage/collectible, media, accounting, SEO, release-control, and visual-proof workflows. The strongest value is no longer adding isolated admin screens. The strongest value is making the existing system easier to operate, easier to trust, easier to publish from, and easier to measure.
+Devil n Dove is now a broad small-business platform rather than a basic storefront. It includes public shopping, handmade/vintage separation, custom request intake, member/customer tools, product and media workflows, accounting groundwork, gift cards, marketplace exports, recalls, local SEO, visual proof, analytics, deployment controls, and mobile admin surfaces.
 
-## Primary admin entry points
+The application’s strongest next value is **not more isolated admin pages**. The strongest value is using the existing system to publish trustworthy products faster, understand customer behaviour, protect margins, strengthen local proof, and simplify daily operation.
 
-- `/admin/command-center/` — daily operating dashboard.
-- `/admin/markdown-sanity/` — documentation consolidation and value-backlog sanity.
-- `/admin/application-sanity/` — broad application status and risk review.
-- `/admin/visual-enrichment-studio/` — approved media, placeholders, screenshots, alt text, and visual polish planning.
-- `/admin/deployment-preflight/`, `/admin/deploy-readiness/`, `/admin/promotion-control/`, `/admin/go-live-execution/` — release safety chain.
+## Current strengths
 
-## SEO direction
+- One-H1, title/meta, canonical, image-alt, structured-data, sitemap, and local-page guardrails.
+- D1-backed products, orders, users, custom requests, gift cards, media consent, SEO actions, accounting, and release-control records.
+- Desktop and mobile admin paths, phone product capture, browser recovery, touch-target CSS, and responsive tables/cards.
+- Product readiness, image workflows, story/proof moderation, marketplace export controls, and costing groundwork.
+- Deployment preflight, safe package, release notes, smoke tests, rollback planning, and runtime incident logging.
+- Two canonical Markdown handoff files with archived historical context.
 
-Keep one clear H1 on each exposed page. Keep titles, meta descriptions, headings, internal links, body copy, image alt text, and structured data aligned with what customers actually search for. Local pages should keep Southern Ontario/Ontario wording natural and useful, with proof images, trust blocks, product examples, and real business information. Local ranking still depends on relevance, distance, and prominence; code improves relevance and clarity, but reviews, photos, GBP activity, links, and customer trust are also needed.
+## Build 190 completed
 
-## Build 189 completed
+Build 190 completed the 20 current roadmap items listed in `DEVELOPMENT_ROADMAP.md`, including:
 
-1. Added `/admin/markdown-sanity/` and `/api/admin/markdown-sanity`.
-2. Created two primary Markdown files: `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md`.
-3. Reclassified the existing Markdown files as supporting references rather than deleting them.
-4. Added `database_build186_markdown_consolidation_visual_placeholders.sql`.
-5. Added visual placeholder SVG assets for workshop, product detail, before/after, jewelry, candle, soap, engraving, and vintage condition slots.
-6. Added public visual placeholder injection on key storefront/local pages without changing H1 tags.
-7. Added desktop/mobile placeholder CSS with reduced-motion and low-bandwidth compatibility.
-8. Added value-enhancement execution rows for the top business priorities.
-9. Added Markdown file sanity rows, CSS drift rows, desktop/mobile surface rows, and next-step sanity rows.
-10. Updated schema, release, sanity, image, local SEO, roadmap, gaps, README, and AI handoff files.
+- saved Command Center views and environment health;
+- filtered conversion funnel reporting;
+- product missing-photo, low-stock, cost, margin, and marketplace warnings;
+- unified customer/member timeline cards;
+- Search Console opportunity actions and Google Business Profile observation entry;
+- media publication review and performance status;
+- product process/scale/material/care visual proof placeholders;
+- guarded cart recovery review and seasonal campaign planning;
+- image compression reporting and optimized shared WebP display assets;
+- Markdown retirement into two canonical files plus archived history;
+- responsive CSS fixes for admin navigation, wide tables, timeline cards, and product proof modules.
+
+## Current business-value gaps
+
+1. Real approved photos are still the biggest trust and visual-search gap.
+2. Product cost data is incomplete, so margin reporting is advisory until material/labour/packaging/overhead defaults are entered.
+3. Marketplace fee estimates need channel-specific rules.
+4. Search Console and Google Business Profile panels need real monthly data.
+5. Customer story/public proof needs a guided approval wizard and linked consent evidence.
+6. Mobile recovery is strong locally but still needs browser-to-D1 draft synchronization.
+7. Performance budgets need measurements from deployed pages, not only static file size checks.
+8. Real-device screenshots are still needed for phone/tablet/desktop QA.
+
+## Competitive/current direction
+
+Current Google guidance still favours useful people-first content, clear title links/headings, crawlable descriptive links, relevant high-quality images with descriptive alt text, and structured data that matches visible content. Google Business Profile continues to describe local results around relevance, distance, and prominence/popularity. Etsy’s seller guidance continues to emphasize cohesive branding, product photography, shop/manufacturing story, and buyer trust. Current Shopify guidance continues to emphasize strong product photography, social proof, clear calls to action, and reducing purchase anxiety.
+
+The practical Devil n Dove response is:
+
+- show real pieces and honest process/condition images;
+- explain materials, size, care, timing, pickup/shipping, and one-of-a-kind limitations;
+- connect consented customer proof to relevant products/pages;
+- measure the landing → product → cart → checkout → order path;
+- avoid generic/duplicated local copy and unsupported claims;
+- keep pages fast enough that visual polish does not undermine usability.
 
 ## Next 20 recommended steps
 
-1. Connect real live counts into Admin Command Center cards.
-2. Add more safe Product QA apply buttons, limited to low-risk fields.
-3. Replace Build 189 visual placeholders with approved compressed media.
-4. Add a customer story wizard for trust blocks, product stories, and social snippets.
-5. Add mobile product autosave with recovery after failed upload/network loss.
-6. Connect conversion funnel events from page view to order.
-7. Add Google Business Profile observation logging to Local SEO Review.
-8. Add unified customer/member timeline cards.
-9. Add product costing margin cards tied to supplies/tools and marketplace fees.
-10. Import measured page performance budgets.
-11. Add guarded image-slot publish controls for selected public pages.
-12. Generate visual diff thumbnails from screenshot pairs.
-13. Add Search Console landing-page trend deltas.
-14. Add public proof placement testing and preview comparison.
-15. Add review request workflow with local/service/product tags.
-16. Add bundle/gift-set builder for seasonal handmade and vintage combinations.
-17. Add marketplace listing health cards by channel.
-18. Add low-stock warnings directly into product readiness.
-19. Add abandoned-cart recovery notes and gift-card reminder opportunities.
-20. Add seasonal campaign planner for local markets, holidays, and gift moments.
+1. Replace homepage and shop placeholders with approved compressed workshop/product photos.
+2. Add channel-specific fee settings for Etsy, Facebook/Meta, onsite Stripe, and other enabled channels.
+3. Add product-family cost defaults for jewelry, engraving, candles, soap, vintage, and mixed media.
+4. Add expected waste/scrap and overhead allocation to product margin cards.
+5. Enforce a marketplace export margin gate with approved override history.
+6. Add customer timeline search, merge suggestions, and private admin notes.
+7. Build the customer-story wizard with consent evidence and multi-output drafts.
+8. Add approved before/after/process gallery modules to public pages.
+9. Add Search Console CSV mapping preview and import validation.
+10. Add monthly GBP task reminders and photo/review/post observation fields.
+11. Add review-request eligibility and cooldown controls.
+12. Add responsive image derivatives and `srcset` for approved media.
+13. Sync mobile product autosave snapshots into D1.
+14. Add product image-role prompts for process, scale, material, care, packaging, and condition.
+15. Add deployed performance imports and route-level budget history.
+16. Add an Owner Daily printable/exportable summary.
+17. Add campaign readiness checks for inventory, images, SEO, pickup timing, and social posts.
+18. Add local-page content freshness reminders based on last proof/product update.
+19. Run a real-device accessibility/mobile QA pass and attach evidence screenshots.
+20. After two stable live releases, remove unused legacy assets and obsolete route aliases.
 
-## Markdown consolidation rule
+## Release readiness opinion
 
-Use this file for the current roadmap and business direction. Use `AI_HANDOFF.md` for new chat handoff and exact migration order. Keep old Markdown files for details/history until a later cleanup can safely archive them.
-
-
-## Build 187 operational note — Cloudflare variables and login route
-
-The live login 405 indicates either route-method handling or deployment binding/routing drift. Build 187 hardens the route and documents the real Cloudflare binding/secret checklist. The top priority before adding more storefront features is confirming `DB` is bound to the D1 database in Cloudflare Pages and that product media R2 binding/public URL variables are present.
-
-Next value-added step: add an Auth + Environment Health card to `/admin/command-center/` showing DB binding, auth route status, bootstrap status, session table status, media bucket status, and missing optional provider secrets.
-
-
-## Build 189 — Value Ops live counts, funnel events, mobile recovery, and visual replacement plan
-
-Completed in this pass:
-
-1. Added the missing `/api/admin/command-center` endpoint so the Admin Command Center can load real live counts instead of being only a static page.
-2. Connected live Product Readiness counts from products/product images/product gaps into the Command Center.
-3. Added live conversion funnel rollups: landing page view → product view → add to cart → checkout start → order.
-4. Added explicit public funnel events for product detail views, add-to-cart actions, checkout starts, and order creation.
-5. Added mobile product browser autosave/recovery so phone-entered draft text survives refresh/session/upload failures.
-6. Added visual placeholder bands to high-value public pages without adding extra H1 tags.
-7. Added visual replacement candidate rows so placeholders can be replaced only after public-use/consent/compression review.
-8. Added local SEO observation rows to pair Search Console data with Google Business Profile/manual ranking notes.
-9. Added product cost/margin review rows for product pricing and marketplace-profit review.
-10. Updated schema files, release notes, sanity notes, handoff docs, and static Build 189 report.
-
-Next 20 recommended steps after Build 189:
-
-1. Replace placeholder graphics with approved real compressed photos, starting with homepage, shop, custom gifts, jewelry, and gallery.
-2. Import the first Search Console export and connect real clicks/impressions to Local SEO scorecards.
-3. Add manual Google Business Profile observation notes monthly for important pages and products.
-4. Add product material/labour/package cost defaults for major product families.
-5. Add customer/member timeline cards that combine orders, custom requests, gift cards, recalls, proof approvals, and notes.
-6. Add a phone-tested Mobile Quick Add recovery checklist with screenshots from a real device.
-7. Connect approved customer stories directly into product cards and local landing trust blocks.
-8. Add a product margin warning before marketplace export when estimated margin is too low.
-9. Add a simple dashboard for real media waiting on consent/public-use review.
-10. Add product-detail visual proof modules that show process, scale, material, and care notes.
-11. Add admin command-center saved views for Owner, Product, SEO, Accounting, and Deploy mode.
-12. Add a low-bandwidth preview toggle to more public pages.
-13. Add image compression reports for all public placeholder replacement candidates.
-14. Add “missing real photo” badges on Product Readiness rows.
-15. Add conversion funnel date filters and source/UTM filters.
-16. Add cart recovery/customer follow-up review rows before emailing anyone.
-17. Add Search Console opportunity buttons that create title/meta/internal-link actions.
-18. Add a customer story approval screen grouped by source product/order/custom request.
-19. Add performance-budget badges directly beside visual placeholder candidates.
-20. Retire or archive duplicate Markdown once `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` stay complete for two more build passes.
-
+The application is structurally advanced, but a release should be judged by real data and proof: working bindings, complete products, real images, tested payments/email, accurate costs, consented proof, mobile screenshots, and successful smoke tests. Code readiness alone is not business readiness.

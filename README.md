@@ -790,3 +790,13 @@ Build 178 adds `/admin/deploy-readiness/` as the final promotion guard page. Run
 ## Build 189 value ops note
 
 Use `/admin/command-center/` after deploy to refresh live counts. Run `database_build189_value_ops_live_counts.sql` after the existing Build 186 migration. Placeholder images are still placeholders; replace only with approved, compressed public-use media.
+
+## Build 190 start here
+
+Read these files first:
+
+1. `PROJECT_STATUS_AND_ROADMAP.md`
+2. `AI_HANDOFF.md`
+3. `MARKDOWN_INDEX.md`
+
+Build 190 adds `/api/admin/value-ops` and enhances `/admin/command-center/`, `/admin/members/`, `/admin/local-seo-review/`, and product detail pages with integrated owner operations, customer timelines, SEO/GBP actions, product margin/photo/stock warnings, visual publication review, cart-recovery review, seasonal campaigns, and responsive visual-proof modules.
