@@ -270,7 +270,7 @@ async function funnelMetrics(db, days, source) {
 
 async function productReadinessAndMargins(db) {
   if (!(await tableExists(db,'products'))) return [];
-  const products = await safeAll(db, `SELECT product_id,product_number,sku,name,slug,status,price_cents,featured_image_url,short_description,description,inventory_tracking,inventory_quantity FROM products WHERE lower(COALESCE(status,'draft')) <> 'archived' ORDER BY COALESCE(updated_at,created_at) DESC LIMIT 250`);
+  const products = await safeAll(db, `SELECT product_id,product_number,sku,name,slug,status,price_cents,featured_image_url,short_description,description,inventory_tracking,inventory_quantity,product_category,merchandise_origin,sale_channel,external_listing_label FROM products WHERE lower(COALESCE(status,'draft')) <> 'archived' ORDER BY COALESCE(updated_at,created_at) DESC LIMIT 250`);
   const imageMap = new Map();
   if (await tableExists(db,'product_images')) {
     for (const row of await safeAll(db, `SELECT product_id,COUNT(*) AS image_count,SUM(CASE WHEN COALESCE(alt_text,'')='' THEN 1 ELSE 0 END) AS missing_alt FROM product_images GROUP BY product_id`)) imageMap.set(int(row.product_id), {count:int(row.image_count),missingAlt:int(row.missing_alt)});
@@ -285,23 +285,66 @@ async function productReadinessAndMargins(db) {
   if (await tableExists(db,'product_cost_margin_review_rows')) {
     for (const row of await safeAll(db, `SELECT * FROM product_cost_margin_review_rows ORDER BY updated_at DESC`)) if (row.product_id && !reviewMap.has(int(row.product_id))) reviewMap.set(int(row.product_id), row);
   }
+  const feeSettings = new Map();
+  if (await tableExists(db,'marketplace_channel_fee_settings')) {
+    for (const row of await safeAll(db, `SELECT * FROM marketplace_channel_fee_settings`)) feeSettings.set(String(row.channel_key || ''), row);
+  }
+  const familyDefaults = new Map();
+  if (await tableExists(db,'product_family_cost_defaults')) {
+    for (const row of await safeAll(db, `SELECT * FROM product_family_cost_defaults`)) familyDefaults.set(String(row.family_key || ''), row);
+  }
+  const familyFor = (product) => {
+    const category = lower(product.product_category);
+    const origin = lower(product.merchandise_origin);
+    if (['vintage','collectible','antique','oddity','prebuilt'].includes(origin)) return 'vintage';
+    if (category.includes('candle')) return 'candles';
+    if (category.includes('soap')) return 'soap';
+    if (category.includes('engraving') || category.includes('laser')) return 'engraving';
+    if (category.includes('jewel') || category.includes('ring') || category.includes('pendant') || category.includes('bracelet') || category.includes('earring')) return 'jewelry';
+    if (category.includes('custom')) return 'custom';
+    return 'mixed_media';
+  };
+  const channelFor = (product) => {
+    const label = lower(product.external_listing_label);
+    if (label.includes('etsy')) return 'etsy';
+    if (label.includes('facebook') || label.includes('meta')) return 'facebook_meta';
+    if (label.includes('paypal')) return 'paypal';
+    if (label.includes('local') || label.includes('pickup')) return 'manual_local';
+    return lower(product.sale_channel) === 'external_only' ? 'manual_local' : 'onsite_stripe';
+  };
   const result = [];
   for (const product of products) {
     const id = int(product.product_id);
     const image = imageMap.get(id) || {count:product.featured_image_url?1:0,missingAlt:0};
-    const estimatedCost = costMap.get(String(product.product_number || '')) || int(reviewMap.get(id)?.material_cost_cents) + int(reviewMap.get(id)?.labour_cost_cents) + int(reviewMap.get(id)?.marketplace_fee_cents);
+    const familyKey = familyFor(product);
+    const familyDefault = familyDefaults.get(familyKey) || {};
+    const directReviewCost = int(reviewMap.get(id)?.material_cost_cents) + int(reviewMap.get(id)?.labour_cost_cents);
+    const defaultMaterial = int(familyDefault.material_cost_cents);
+    const defaultLabour = Math.round((int(familyDefault.labour_minutes) / 60) * int(familyDefault.labour_rate_cents_per_hour));
+    const defaultWaste = Math.round(defaultMaterial * Number(familyDefault.waste_percent || 0) / 100);
+    const defaultBase = defaultMaterial + defaultLabour + int(familyDefault.packaging_cost_cents) + defaultWaste;
+    const defaultOverhead = Math.round(defaultBase * Number(familyDefault.overhead_percent || 0) / 100);
+    const defaultCost = defaultBase + defaultOverhead;
+    const directCost = costMap.get(String(product.product_number || '')) || directReviewCost;
+    const estimatedCost = directCost || defaultCost;
+    const costConfigured = !!directCost || String(familyDefault.calculation_status || '') === 'reviewed';
     const price = int(product.price_cents);
-    const estimatedFee = Math.round(price * 0.12);
+    const channelKey = channelFor(product);
+    const feeSetting = feeSettings.get(channelKey) || {};
+    const feeConfigured = ['reviewed','active','configured'].includes(lower(feeSetting.calculation_status));
+    const percentRate = Number(feeSetting.percent_rate || 0) + Number(feeSetting.payment_percent_rate || 0) + Number(feeSetting.advertising_percent_rate || 0) + Number(feeSetting.reserve_percent_rate || 0);
+    const estimatedFee = feeConfigured ? Math.round(price * percentRate / 100) + int(feeSetting.fixed_fee_cents) + int(feeSetting.payment_fixed_fee_cents) : 0;
     const margin = price - estimatedCost - estimatedFee;
     const marginPercent = percent(margin, price);
     const missingPhoto = image.count < 1 ? 1 : 0;
     const missingAlt = image.missingAlt;
     const missingStory = String(product.short_description || product.description || '').trim().length < 40 ? 1 : 0;
     const lowStock = int(product.inventory_tracking) === 1 && int(product.inventory_quantity) <= 1 ? 1 : 0;
-    const warningStatus = !estimatedCost ? 'needs_costs' : margin <= 0 ? 'negative_margin' : marginPercent < 30 ? 'low_margin' : 'healthy_margin';
-    await safeRun(db, `INSERT INTO product_margin_warning_rows (product_id,product_label,current_price_cents,estimated_cost_cents,estimated_marketplace_fee_cents,estimated_margin_cents,estimated_margin_percent,warning_status,marketplace_export_status,notes) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(product_id) DO UPDATE SET product_label=excluded.product_label,current_price_cents=excluded.current_price_cents,estimated_cost_cents=excluded.estimated_cost_cents,estimated_marketplace_fee_cents=excluded.estimated_marketplace_fee_cents,estimated_margin_cents=excluded.estimated_margin_cents,estimated_margin_percent=excluded.estimated_margin_percent,warning_status=excluded.warning_status,marketplace_export_status=excluded.marketplace_export_status,updated_at=CURRENT_TIMESTAMP,notes=excluded.notes`, [id,product.name,price,estimatedCost,estimatedFee,margin,marginPercent,warningStatus,warningStatus==='healthy_margin'?'allowed':'review_required','Build 190 calculated warning; fees are an estimate and must be reviewed per channel.']);
+    const warningStatus = !costConfigured ? 'needs_costs' : !feeConfigured ? 'needs_channel_fees' : margin <= 0 ? 'negative_margin' : marginPercent < 30 ? 'low_margin' : 'healthy_margin';
+    const exportAllowed = warningStatus === 'healthy_margin';
+    await safeRun(db, `INSERT INTO product_margin_warning_rows (product_id,product_label,current_price_cents,estimated_cost_cents,estimated_marketplace_fee_cents,estimated_margin_cents,estimated_margin_percent,warning_status,marketplace_export_status,notes) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(product_id) DO UPDATE SET product_label=excluded.product_label,current_price_cents=excluded.current_price_cents,estimated_cost_cents=excluded.estimated_cost_cents,estimated_marketplace_fee_cents=excluded.estimated_marketplace_fee_cents,estimated_margin_cents=excluded.estimated_margin_cents,estimated_margin_percent=excluded.estimated_margin_percent,warning_status=excluded.warning_status,marketplace_export_status=excluded.marketplace_export_status,updated_at=CURRENT_TIMESTAMP,notes=excluded.notes`, [id,product.name,price,estimatedCost,estimatedFee,margin,marginPercent,warningStatus,exportAllowed?'allowed':'review_required',`Build 191 calculation using ${familyKey} cost defaults/direct costs and ${channelKey} fee settings. Unconfigured values remain review-required.`]);
     result.push({
-      product_id:id,product_name:product.name,product_slug:product.slug,price_cents:price,image_count:image.count,missing_real_photo:missingPhoto,missing_alt_text:missingAlt,missing_story:missingStory,low_stock:lowStock,inventory_quantity:int(product.inventory_quantity),estimated_cost_cents:estimatedCost,estimated_marketplace_fee_cents:estimatedFee,estimated_margin_cents:margin,estimated_margin_percent:marginPercent,margin_status:warningStatus,marketplace_export_status:warningStatus==='healthy_margin'?'allowed':'review_required',readiness_status:(missingPhoto||missingAlt||missingStory||lowStock||warningStatus!=='healthy_margin')?'needs_review':'ready'
+      product_id:id,product_name:product.name,product_slug:product.slug,price_cents:price,image_count:image.count,missing_real_photo:missingPhoto,missing_alt_text:missingAlt,missing_story:missingStory,low_stock:lowStock,inventory_quantity:int(product.inventory_quantity),product_family_key:familyKey,channel_key:channelKey,cost_configured:costConfigured,fee_configured:feeConfigured,estimated_cost_cents:estimatedCost,estimated_marketplace_fee_cents:estimatedFee,estimated_margin_cents:margin,estimated_margin_percent:marginPercent,margin_status:warningStatus,marketplace_export_status:exportAllowed?'allowed':'review_required',readiness_status:(missingPhoto||missingAlt||missingStory||lowStock||!exportAllowed)?'needs_review':'ready'
     });
   }
   return result;
