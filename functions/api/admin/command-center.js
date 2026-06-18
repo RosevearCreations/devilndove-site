@@ -1,9 +1,9 @@
 // File: /functions/api/admin/command-center.js
-// Brief description: Build 189 Command Center API with live counts, product readiness rollups, funnel rows, local SEO scorecard rows, visual proof queues, costing placeholders, customer history, and performance budgets.
+// Brief description: Build 190 Command Center API with live counts, product readiness rollups, funnel rows, local SEO scorecard rows, visual proof queues, costing placeholders, customer history, and performance budgets.
 
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD_LABEL = 'Build 189';
+const BUILD_LABEL = 'Build 190';
 function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control': 'no-store' }); }
 function resultRows(result) { return Array.isArray(result?.results) ? result.results : []; }
 async function safeAll(db, sql, bindings = []) { try { return resultRows(await db.prepare(sql).bind(...bindings).all()); } catch { return []; } }
@@ -171,7 +171,7 @@ async function refreshFunnel(db) {
     const count = Number(counts[key] || 0);
     const rate = previous > 0 ? toPercent((count / previous) * 100) : (order === 1 ? 100 : 0);
     const status = count > 0 ? 'tracked' : 'needs_tracking';
-    await safeRun(db, `INSERT INTO conversion_funnel_scorecard_rows (funnel_step,step_label,step_order,source_kind,event_count,previous_step_count,conversion_rate_percent,review_status,dropoff_note,notes) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(funnel_step) DO UPDATE SET event_count=excluded.event_count,previous_step_count=excluded.previous_step_count,conversion_rate_percent=excluded.conversion_rate_percent,review_status=excluded.review_status,dropoff_note=excluded.dropoff_note,updated_at=CURRENT_TIMESTAMP`, [key, labels[key], order, 'live_analytics_rollup', count, previous, rate, status, count ? 'Live count connected into Command Center.' : 'No live events yet; keep tracking script deployed.', 'Build 189 live funnel rollup']);
+    await safeRun(db, `INSERT INTO conversion_funnel_scorecard_rows (funnel_step,step_label,step_order,source_kind,event_count,previous_step_count,conversion_rate_percent,review_status,dropoff_note,notes) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(funnel_step) DO UPDATE SET event_count=excluded.event_count,previous_step_count=excluded.previous_step_count,conversion_rate_percent=excluded.conversion_rate_percent,review_status=excluded.review_status,dropoff_note=excluded.dropoff_note,updated_at=CURRENT_TIMESTAMP`, [key, labels[key], order, 'live_analytics_rollup', count, previous, rate, status, count ? 'Live count connected into Command Center.' : 'No live events yet; keep tracking script deployed.', 'Build 190 live funnel rollup']);
     previous = count; order += 1;
   }
 }
@@ -200,10 +200,10 @@ async function updateSeoScores(db) {
 
 async function saveSnapshots(db, summary, adminUser = {}) {
   const userId = Number(adminUser?.user_id || 0) || null;
-  await safeRun(db, `INSERT INTO admin_command_center_daily_snapshots (build_label,snapshot_status,total_products,ready_products,blocked_products,open_orders,open_recalls,seo_pages_needing_review,visual_items_needing_review,marketplace_items_blocked,performance_items_over_budget,summary_json,created_by_user_id,notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'Build 189 daily snapshot with live count rollups.')`, [BUILD_LABEL, summary.blocked_products ? 'needs_review' : 'ready', summary.total_products, summary.ready_products, summary.blocked_products, summary.open_orders, summary.open_recalls, summary.seo_pages_needing_review, summary.visual_items_needing_review, summary.marketplace_items_blocked, summary.performance_items_over_budget, JSON.stringify(summary), userId]);
+  await safeRun(db, `INSERT INTO admin_command_center_daily_snapshots (build_label,snapshot_status,total_products,ready_products,blocked_products,open_orders,open_recalls,seo_pages_needing_review,visual_items_needing_review,marketplace_items_blocked,performance_items_over_budget,summary_json,created_by_user_id,notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'Build 190 daily snapshot with integrated value-ops companion panels.')`, [BUILD_LABEL, summary.blocked_products ? 'needs_review' : 'ready', summary.total_products, summary.ready_products, summary.blocked_products, summary.open_orders, summary.open_recalls, summary.seo_pages_needing_review, summary.visual_items_needing_review, summary.marketplace_items_blocked, summary.performance_items_over_budget, JSON.stringify(summary), userId]);
   await safeRun(db, `INSERT INTO command_center_live_count_runs (build_label,run_status,total_products,blocked_products,open_orders,checkout_starts,orders_created,seo_rows,visual_rows,performance_rows,summary_json,created_by_user_id,notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?, 'Live-count refresh saved from Command Center.')`, [BUILD_LABEL, 'ok', summary.total_products, summary.blocked_products, summary.open_orders, summary.checkout_starts, summary.orders_created, summary.seo_pages_needing_review, summary.visual_items_needing_review, summary.performance_items_over_budget, JSON.stringify(summary), userId]);
   for (const r of summary.readiness.slice(0, 50)) {
-    await safeRun(db, `INSERT INTO product_readiness_scoreboard_snapshots (build_label,product_id,product_name,product_slug,readiness_score,missing_image_roles,missing_alt_text,missing_price,missing_story,missing_shipping,marketplace_blockers,inventory_blockers,readiness_status,recommended_next_action,created_by_user_id,notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, 'Saved from Build 189 live Product Readiness rollup.')`, [BUILD_LABEL, r.product_id, r.product_name, r.product_slug, r.readiness_score, r.missing_image_roles, r.missing_alt_text, r.missing_price, r.missing_story, r.missing_shipping, r.marketplace_blockers, r.inventory_blockers, r.readiness_status, r.recommended_next_action, userId]);
+    await safeRun(db, `INSERT INTO product_readiness_scoreboard_snapshots (build_label,product_id,product_name,product_slug,readiness_score,missing_image_roles,missing_alt_text,missing_price,missing_story,missing_shipping,marketplace_blockers,inventory_blockers,readiness_status,recommended_next_action,created_by_user_id,notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, 'Saved from Build 190 live Product Readiness rollup.')`, [BUILD_LABEL, r.product_id, r.product_name, r.product_slug, r.readiness_score, r.missing_image_roles, r.missing_alt_text, r.missing_price, r.missing_story, r.missing_shipping, r.marketplace_blockers, r.inventory_blockers, r.readiness_status, r.recommended_next_action, userId]);
   }
 }
 
