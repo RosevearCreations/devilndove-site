@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 184",
+  "build_label": "Build 190",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,13 +7,13 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "44 required files are present.",
+      "detail": "51 required files are present.",
       "missing": []
     },
     {
       "code": "static_schema_build184",
       "status": "pass",
-      "detail": "Build 174/175/176/177/178/179/180/181/183/184 schema tables and ledger markers found in the correct schema files.",
+      "detail": "Build 174 through Build 190 schema tables and ledger markers found in the correct schema files.",
       "missing": []
     },
     {
@@ -182,12 +182,12 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 1034/1034"
+      "detail": "CSS braces 1086/1086"
     },
     {
       "code": "static_json_parse",
       "status": "pass",
-      "detail": "13 JSON files checked; 0 failed.",
+      "detail": "15 JSON files checked; 0 failed.",
       "rows": [
         {
           "path": "data/site/seo-page-overrides.json",
@@ -251,6 +251,16 @@
         },
         {
           "path": "data/site/build189-value-ops.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build190-performance-report.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build190-integrated-value-ops.json",
           "ok": true,
           "error": ""
         }

@@ -1207,3 +1207,29 @@ body.nav-mobile-open{overflow:hidden}
 @media (prefers-reduced-motion: reduce) {
   .visual-placeholder-band img { transition:none; }
 }
+
+/* Build 190 integrated value operations, product proof modules, and responsive overlap fixes */
+.value-ops-toolbar-card{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(58,37,73,.96),rgba(18,15,25,.98))}
+.value-ops-toolbar-card::after{content:"";position:absolute;right:-70px;top:-90px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(240,212,154,.16),transparent 68%);pointer-events:none}
+.value-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.value-card-head h2,.value-card-head h3{margin-top:0}
+.value-saved-views{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.value-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end;margin:12px 0 18px}
+.value-form-grid input,.value-form-grid select,.value-form-grid textarea{width:100%;min-width:0}
+.value-customer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.value-customer-card{min-width:0;margin:0}
+.customer-counts{margin:.5rem 0 .8rem;overflow-wrap:anywhere}
+.timeline-list{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px}
+.timeline-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;padding:9px 10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.035)}
+.timeline-list strong{min-width:0;overflow-wrap:anywhere}.timeline-list span{font-size:.82rem;color:var(--muted,#d6c7e8);text-align:right}.timeline-list time{grid-column:1/-1;font-size:.75rem;color:var(--muted,#d6c7e8)}
+.product-visual-proof{overflow:hidden}.product-proof-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.product-proof-grid figure{margin:0;border:1px solid rgba(255,255,255,.14);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.035)}.product-proof-grid img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}.product-proof-grid figcaption{display:grid;gap:2px;padding:10px}.product-proof-grid figcaption span{font-size:.82rem;color:var(--muted,#d6c7e8)}
+.status-missing-required,.status-negative-margin,.status-low-margin,.status-review-required,.status-missing-real-photo{background:rgba(239,68,68,.16)!important;color:#ffb7b7!important;border-color:rgba(239,68,68,.42)!important}
+.status-configured,.status-healthy-margin,.status-allowed,.status-photo-present,.status-gbp-recorded{background:rgba(34,197,94,.16)!important;color:#b9f6cb!important;border-color:rgba(34,197,94,.42)!important}
+.status-not-configured,.status-needs-costs,.status-gbp-needed,.status-manual-permission-check-required{background:rgba(234,179,8,.16)!important;color:#ffe29a!important;border-color:rgba(234,179,8,.42)!important}
+.admin-table td,.admin-table th{overflow-wrap:anywhere}.table-wrap{max-width:100%;-webkit-overflow-scrolling:touch}
+.nav .links{min-width:0}.nav .links a,.nav .links button{white-space:normal;text-align:center}
+.low-bandwidth .product-proof-grid img,.low-bandwidth .visual-placeholder-band img{opacity:.82}.low-bandwidth .value-ops-toolbar-card::after{display:none}
+@media(max-width:900px){.product-proof-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.value-customer-grid{grid-template-columns:1fr}.admin-table{min-width:760px}}
+@media(max-width:680px){.value-card-head{display:block}.value-card-head .btn{width:100%;margin-top:8px}.value-saved-views .btn{flex:1 1 45%;min-height:44px}.value-form-grid{grid-template-columns:1fr}.product-proof-grid{grid-template-columns:1fr 1fr}.timeline-list li{grid-template-columns:1fr}.timeline-list span{text-align:left}.admin-shell .nav{align-items:flex-start}.admin-shell .nav .links{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.admin-shell .nav .links a,.admin-shell .nav .links button{width:100%;min-width:0}.card{max-width:100%}}
+@media(max-width:420px){.product-proof-grid{grid-template-columns:1fr}.value-saved-views .btn{flex-basis:100%}.admin-shell .nav .links{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.value-ops-toolbar-card::after{display:none}}

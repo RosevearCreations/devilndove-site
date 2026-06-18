@@ -1,11 +1,17 @@
 {
   "latest": {
-    "build": "Build 189",
-    "title": "Value Ops live counts, funnel tracking, mobile recovery, and visual replacement plan",
-    "date": "2026-06-14",
-    "summary": "Adds a real Command Center API with live counts, storefront funnel events, mobile product autosave/recovery, visual placeholder replacement candidates, local SEO observation rows, and product cost/margin review rows."
+    "build": "Build 190",
+    "title": "Integrated value operations, customer timelines, SEO/GBP actions, margin warnings, and Markdown retirement",
+    "date": "2026-06-17",
+    "summary": "Adds saved Command Center views, environment health, filtered funnels, product margin/photo/stock warnings, customer timelines, SEO/GBP actions, media publication review, cart recovery review, seasonal planning, optimized shared assets, and two-file Markdown consolidation."
   },
   "history": [
+    {
+      "build": "Build 190",
+      "title": "Integrated value operations, customer timelines, SEO/GBP actions, margin warnings, and Markdown retirement",
+      "date": "2026-06-17",
+      "summary": "Adds saved Command Center views, environment health, filtered funnels, product margin/photo/stock warnings, customer timelines, SEO/GBP actions, media publication review, cart recovery review, seasonal planning, optimized shared assets, and two-file Markdown consolidation."
+    },
     {
       "build": "Build 189",
       "title": "Value Ops live counts, funnel tracking, mobile recovery, and visual replacement plan",
@@ -26,23 +32,20 @@
     }
   ],
   "items": [
-    {
-      "build_label": "Build 182",
-      "title": "Visual Polish, Mobile Parity, and SEO Enrichment",
-      "summary": "Added visual polish admin controls, mobile/desktop parity rows, visual enrichment candidates, fallback review rows, schema validation queue, JSON-to-D1 ownership candidates, and motion-safe public support strips.",
-      "files": [
-        "admin/visual-polish/index.html",
-        "functions/api/admin/visual-polish.js",
-        "public/js/admin-visual-polish.js",
-        "database_build182_mobile_visual_polish.sql",
-        "data/site/build182-mobile-visual-polish.json",
-        "css/styles.css",
-        "js/main.js"
-      ]
-    }
+    "Saved Command Center views and environment health",
+    "Filtered conversion funnel reporting",
+    "Product real-photo, low-stock, cost, margin, and export warnings",
+    "Unified customer/member timelines",
+    "Search Console opportunities and GBP observations",
+    "Media publication review and performance status",
+    "Guarded cart recovery and seasonal campaigns",
+    "Product process/scale/material/care placeholders",
+    "Optimized WebP display assets",
+    "Markdown consolidation and archive"
   ],
-  "build_label": "Build 189",
+  "build_label": "Build 190",
   "notes": [
+    "Build 190 keeps PROJECT_STATUS_AND_ROADMAP.md and AI_HANDOFF.md canonical; historical roadmap/gap/context files are archived.",
     {
       "build_label": "Build 189",
       "title": "Value Ops live counts, funnel tracking, mobile recovery, and visual replacement plan",
@@ -83,5 +86,12 @@
       "created_at": "2026-06-12"
     }
   ],
-  "releases": []
+  "releases": [
+    {
+      "build": "Build 190",
+      "title": "Integrated value operations, customer timelines, SEO/GBP actions, margin warnings, and Markdown retirement",
+      "date": "2026-06-17",
+      "summary": "Adds saved Command Center views, environment health, filtered funnels, product margin/photo/stock warnings, customer timelines, SEO/GBP actions, media publication review, cart recovery review, seasonal planning, optimized shared assets, and two-file Markdown consolidation."
+    }
+  ]
 }
