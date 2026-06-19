@@ -35,3 +35,8 @@ Historical files through Build 189 are under `docs/archive/`. Do not use archive
 ## Documentation rule
 
 Every build updates the two canonical files, this index, schema reference, release notes, sanity health check, smoke-test instructions, and any operational reference affected by the change. Avoid creating a new Markdown file unless it has a distinct long-term purpose.
+
+
+## Build 192 note
+
+The project still uses `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two main handoff files. Supporting Markdown files remain for specialized detail until real Command Center usage shows which documents can be safely retired.
