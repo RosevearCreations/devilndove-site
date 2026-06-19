@@ -443,7 +443,15 @@
           <section class="area-block">
             <div class="area-head"><h2>${escHtml(area)}</h2><div class="muted">${groups[area].length} item${groups[area].length === 1 ? '' : 's'}</div></div>
             <div class="subgrid">${groups[area].map((item) => buildToolCard(item, reorderKeys)).join('')}</div>
-          </section>`).join('');
+          </section>
+<section class="card visual-placeholder-band dd-build189-visual-placeholder build192-added" aria-label="Tool proof placeholder">
+  <img src="/assets/visual-placeholders/engraving-proof.svg" alt="Tool proof placeholder" loading="lazy"/>
+  <div>
+    <h2>Tool proof placeholder</h2>
+    <p class="small">A real tool/process image can show capability without overstating production scale.</p>
+  </div>
+</section>
+`).join('');
         Array.from(gridEl.querySelectorAll('[data-add-reorder]')).forEach((btn) => btn.addEventListener('click', () => {
           const key = btn.getAttribute('data-add-reorder');
           const item = allTools.find((entry) => toolKey(entry) === key);

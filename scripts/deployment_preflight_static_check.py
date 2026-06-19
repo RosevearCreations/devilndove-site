@@ -44,6 +44,8 @@ JSON_FILES = [
     'data/site/build190-integrated-value-ops.json',
     'data/site/build191-value-operations-followthrough.json',
     'data/site/build191-validation.json',
+    'data/site/build192-operational-data-connection.json',
+    'data/site/build192-validation.json',
 ]
 REQUIRED_FILES = [
     'database_build171_ledger_repair.sql',
@@ -98,6 +100,7 @@ REQUIRED_FILES = [
     'public/js/admin-local-seo-value-ops.js',
     'MARKDOWN_INDEX.md',
     'database_build191_value_operations_followthrough.sql',
+    'database_build192_operational_data_connection.sql',
     'functions/api/admin/value-ops-followthrough.js',
     'public/js/admin-value-ops-followthrough.js',
     'public/js/admin-product-image-role-prompts.js',
@@ -223,6 +226,10 @@ def check_schema_files(checks: list[dict]) -> None:
         'marketplace_channel_fee_settings',
         'mobile_product_server_drafts',
         'build_191_value_operations_followthrough',
+        'r2_derivative_worker_readiness_checks',
+        'mobile_resumable_upload_sessions',
+        'customer_duplicate_merge_candidates',
+        'build_192_operational_data_connection',
     ]
     required = {
         'database_schema.sql': schema_needles,
@@ -245,6 +252,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build189_value_ops_live_counts.sql': ['command_center_live_count_runs', 'approved_visual_replacement_candidates', 'build_189_value_ops_live_counts'],
         'database_build190_integrated_value_operations.sql': ['admin_command_center_saved_views', 'customer_timeline_events', 'product_margin_warning_rows', 'build_190_integrated_value_operations'],
         'database_build191_value_operations_followthrough.sql': ['marketplace_channel_fee_settings', 'mobile_product_server_drafts', 'approved_before_after_gallery_items', 'build_191_value_operations_followthrough'],
+        'database_build192_operational_data_connection.sql': ['r2_derivative_worker_readiness_checks', 'mobile_resumable_upload_sessions', 'customer_duplicate_merge_candidates', 'build_192_operational_data_connection'],
     }
     missing=[]
     detail=[]
@@ -254,7 +262,7 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 191 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 192 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
 
 def main() -> int:
     checks=[]
@@ -265,7 +273,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 191','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 192','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
