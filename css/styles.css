@@ -1239,3 +1239,13 @@ body.nav-mobile-open{overflow:hidden}
 @media(max-width:760px){.build191-actions .btn{width:100%}.approved-proof-images{grid-template-columns:1fr}.value-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.product-image-role-grid{grid-template-columns:1fr}.approved-proof-grid{grid-template-columns:1fr}.build191-header::after{width:180px;height:180px}}
 @media(max-width:420px){.value-metric-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.build191-header::after{display:none}.approved-proof-card,.product-image-role-item{transition:none!important}}
+
+
+/* Build 192 operational data connection and mobile/desktop consolidation polish */
+.build192-header{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(38,42,72,.96),rgba(14,15,23,.98))}
+.build192-header::after{content:"";position:absolute;left:-90px;bottom:-110px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(116,185,255,.14),transparent 68%);pointer-events:none}
+.build192-header .value-card-head,.build192-header .status-note{position:relative;z-index:1}
+.admin-table code{white-space:normal;overflow-wrap:anywhere}
+.visual-placeholder-band.build192-added{border-style:dashed;border-color:rgba(240,212,154,.34)}
+.value-form-grid button{min-height:44px}
+@media(max-width:760px){.build192-header .build191-actions{display:grid;gap:8px}.build192-header .btn{width:100%}.admin-table{font-size:.9rem}.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}}
