@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 191",
+  "build_label": "Build 192",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,13 +7,13 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "57 required files are present.",
+      "detail": "58 required files are present.",
       "missing": []
     },
     {
       "code": "static_schema_current",
       "status": "pass",
-      "detail": "Build 174 through Build 191 schema tables and ledger markers found in the correct schema files.",
+      "detail": "Build 174 through Build 192 schema tables and ledger markers found in the correct schema files.",
       "missing": []
     },
     {
@@ -68,7 +68,7 @@
           "meta_description_length": 154,
           "has_canonical": true,
           "schema_blocks": 1,
-          "image_count": 2,
+          "image_count": 3,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -94,7 +94,7 @@
           "meta_description_length": 129,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 0,
+          "image_count": 1,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -172,7 +172,7 @@
           "meta_description_length": 152,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 0,
+          "image_count": 1,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -182,12 +182,12 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 1124/1124"
+      "detail": "CSS braces 1135/1135"
     },
     {
       "code": "static_json_parse",
       "status": "pass",
-      "detail": "17 JSON files checked; 0 failed.",
+      "detail": "19 JSON files checked; 0 failed.",
       "rows": [
         {
           "path": "data/site/seo-page-overrides.json",
@@ -271,6 +271,16 @@
         },
         {
           "path": "data/site/build191-validation.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build192-operational-data-connection.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build192-validation.json",
           "ok": true,
           "error": ""
         }
