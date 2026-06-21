@@ -1,3 +1,13 @@
+# Release Notes — Devil n Dove
+
+## Build 193 — Live readiness playbook and resumable mobile media
+
+- Added Command Center live-readiness cases with detailed owner instructions, evidence links, status, and run history.
+- Added R2 multipart/resume mobile media API and phone UI.
+- Added safe product-image attachment after completed multipart uploads.
+- Added Command Center usage telemetry for evidence-based legacy admin consolidation.
+- Added `LIVE_TESTING_GUIDE.md` and refreshed the canonical roadmap/handoff documents.
+
 # Build 191
 
 ## Summary

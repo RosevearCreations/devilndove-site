@@ -35,3 +35,6 @@ Run after Build 191:
 ```text
 database_build192_operational_data_connection.sql
 ```
+
+
+Build 193: Read `AI_HANDOFF.md`, then `PROJECT_STATUS_AND_ROADMAP.md`. Live-only test steps are now in `LIVE_TESTING_GUIDE.md` and inside `/admin/command-center/`.

@@ -763,3 +763,8 @@ Run after Build 191:
 ```text
 database_build192_operational_data_connection.sql
 ```
+
+
+## Build 193 live evidence rule
+
+Use the Live Readiness Playbook for the Search Console CSV and monthly GBP record. Save the actual date/source/evidence link; do not write a ranking guarantee. Google local visibility work should improve controllable relevance and prominence signals, but distance and searcher context remain outside the application.

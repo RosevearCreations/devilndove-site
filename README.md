@@ -840,3 +840,8 @@ Run after Build 191:
 ```text
 database_build192_operational_data_connection.sql
 ```
+
+
+## Build 193 operator testing
+
+Use `LIVE_TESTING_GUIDE.md` after deployment for the exact manual tests that require Cloudflare bindings, real devices, Stripe, email, R2, Search Console, or Google Business Profile.

@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 191
+# Devil n Dove Markdown Index — Build 193
 
 ## Canonical first-read files
 
@@ -10,6 +10,7 @@ These are the only two files that should be treated as the primary current proje
 ## Active operational references
 
 - `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — where bindings, variables, and self-generated secrets come from.
+- `LIVE_TESTING_GUIDE.md` — step-by-step owner tests for live D1/R2/Stripe/email/Search Console/GBP/device verification.
 - `DATABASE_SCHEMA_REFERENCE.md` — current schema and migration summary.
 - `SANITY_HEALTH_CHECK.md` — validation history and live-only limitations.
 - `POST_DEPLOY_SMOKE_TEST.md` — deployed verification steps.
@@ -37,6 +38,6 @@ Historical files through Build 189 are under `docs/archive/`. Do not use archive
 Every build updates the two canonical files, this index, schema reference, release notes, sanity health check, smoke-test instructions, and any operational reference affected by the change. Avoid creating a new Markdown file unless it has a distinct long-term purpose.
 
 
-## Build 192 note
+## Build 193 note
 
-The project still uses `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two main handoff files. Supporting Markdown files remain for specialized detail until real Command Center usage shows which documents can be safely retired.
+The project still uses `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two main handoff files. `LIVE_TESTING_GUIDE.md` is the operational companion for live-only verification. Supporting Markdown files remain for specialized detail until real Command Center usage shows which documents can be safely retired.

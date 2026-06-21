@@ -624,3 +624,8 @@ Run after Build 191:
 ```text
 database_build192_operational_data_connection.sql
 ```
+
+
+## Build 193 — mobile resume and real-media replacement
+
+For large or unreliable-phone image uploads, first save/reopen a text-only draft and use the Resumable image upload panel. It stores R2 multipart progress, not browser image bytes. After a reload, reselect the same file to continue. Replace placeholders only after ownership/consent, alt text, compression, mobile review, and publication approval.
