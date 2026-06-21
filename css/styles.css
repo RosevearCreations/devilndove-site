@@ -1249,3 +1249,48 @@ body.nav-mobile-open{overflow:hidden}
 .visual-placeholder-band.build192-added{border-style:dashed;border-color:rgba(240,212,154,.34)}
 .value-form-grid button{min-height:44px}
 @media(max-width:760px){.build192-header .build191-actions{display:grid;gap:8px}.build192-header .btn{width:100%}.admin-table{font-size:.9rem}.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}}
+
+
+/* Build 193: live readiness playbook and resumable mobile media upload */
+.build193-header{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(29,58,75,.96),rgba(13,19,27,.98))}
+.build193-header::after{content:"";position:absolute;right:-88px;bottom:-110px;width:270px;height:270px;border-radius:50%;background:radial-gradient(circle,rgba(112,212,204,.15),transparent 68%);pointer-events:none}
+.build193-header .value-card-head,.build193-header .small{position:relative;z-index:1}
+.live-test-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:16px 0}
+.live-test-card{display:grid;gap:12px;min-width:0;padding:16px;border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(255,255,255,.035)}
+.live-test-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.live-test-card h3{margin:4px 0 0;font-size:1.05rem;overflow-wrap:anywhere}
+.live-test-card details{border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;background:rgba(0,0,0,.08)}
+.live-test-card summary{cursor:pointer;font-weight:700}
+.live-test-steps{margin:10px 0;line-height:1.55;overflow-wrap:anywhere}
+.live-test-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end}
+.live-test-form label{display:grid;gap:5px;min-width:0}
+.live-test-form label span{font-size:.8rem;color:var(--muted,#d6c7e8)}
+.live-test-form label:nth-of-type(2),.live-test-form label:nth-of-type(4){grid-column:span 2}
+.live-test-form textarea{resize:vertical}
+.mobile-resumable-upload-card{display:grid;gap:12px;padding:14px;border:1px dashed rgba(112,212,204,.55);border-radius:16px;background:linear-gradient(135deg,rgba(32,73,80,.18),rgba(255,255,255,.03))}
+.mobile-resumable-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.mobile-resumable-art{width:96px;aspect-ratio:1/1;object-fit:cover;border-radius:14px;border:1px solid rgba(112,212,204,.38);background:rgba(0,0,0,.12);flex:0 0 auto}
+.mobile-resumable-heading h2{margin:0 0 4px;font-size:1.05rem}
+.mobile-resumable-heading p{margin:0;font-size:.9rem;color:var(--muted,#d6c7e8)}
+.mobile-resumable-actions{display:flex;gap:10px;flex-wrap:wrap}
+.mobile-resumable-guidance{padding:9px 10px;border-radius:10px;background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.24)}
+.mobile-resumable-file-list,.mobile-resumable-session-list{display:grid;gap:7px}
+.mobile-resumable-file-list>div,.mobile-resumable-session{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 10px;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:rgba(0,0,0,.07);min-width:0}
+.mobile-resumable-file-list strong,.mobile-resumable-session strong{overflow-wrap:anywhere}
+.mobile-resumable-file-list span,.mobile-resumable-session span{font-size:.8rem;color:var(--muted,#d6c7e8)}
+.mobile-resumable-file-list em{font-size:.8rem;color:#ffb7b7;font-style:normal}
+@media(max-width:760px){
+  .live-test-grid{grid-template-columns:1fr}
+  .live-test-form{grid-template-columns:1fr}
+  .live-test-form label:nth-of-type(2),.live-test-form label:nth-of-type(4){grid-column:auto}
+  .live-test-form .btn{width:100%;min-height:44px}
+  .mobile-resumable-heading{display:block}
+  .mobile-resumable-art{width:100%;max-width:180px;margin-bottom:10px}
+  .mobile-resumable-heading .status-pill{margin-top:8px}
+  .mobile-resumable-actions{display:grid;grid-template-columns:1fr}
+  .mobile-resumable-actions .btn{width:100%;min-height:44px}
+  .mobile-resumable-file-list>div,.mobile-resumable-session{display:grid;grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  .build193-header::after{display:none}
+}
