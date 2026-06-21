@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 193",
+    "date": "2026-06-20",
+    "title": "Live readiness playbook and resumable mobile media",
+    "summary": "Added detailed Command Center live test cases/evidence, actual R2 multipart/resume mobile image upload, product attachment, route usage telemetry, visual upload placeholder, and a dedicated owner testing guide."
+  },
+  {
     "build": "Build 192",
     "date": "2026-06-19",
     "title": "Operational data connection and live proof follow-through",

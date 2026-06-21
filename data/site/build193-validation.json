@@ -1,0 +1,46 @@
+{
+  "build_label": "Build 193",
+  "status": "passed",
+  "generated_at": "2026-06-20T00:00:00Z",
+  "js_files_checked": 395,
+  "js_errors": [],
+  "python_files_checked": 12,
+  "python_errors": [],
+  "json_files_checked": 32,
+  "json_errors": [],
+  "html_files_checked": 82,
+  "h1_issues": [],
+  "css_files_checked": 1,
+  "css_errors": [],
+  "sql_results": [
+    {
+      "file": "database_full_schema.sql",
+      "status": "passed",
+      "tables": 341,
+      "build193_marker_count": 1
+    },
+    {
+      "file": "Build 192 base -> Build 193 twice",
+      "status": "passed",
+      "build193_marker_first": 1,
+      "build193_marker_second": 1,
+      "new_tables": [
+        "command_center_usage_events",
+        "live_readiness_test_cases",
+        "live_readiness_test_runs",
+        "mobile_resumable_upload_parts",
+        "mobile_resumable_upload_runtime_rows"
+      ]
+    }
+  ],
+  "preflight": {
+    "status": "ready",
+    "blockers": 0,
+    "warnings": 0
+  },
+  "final_blocker_check": "PASS",
+  "notes": [
+    "Live Cloudflare D1/R2/Stripe/email/provider actions still require the Build 193 owner test guide.",
+    "Static checks do not validate actual R2 multipart object writes in Cloudflare."
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 192",
+  "build_label": "Build 193",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,13 +7,13 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "58 required files are present.",
+      "detail": "64 required files are present.",
       "missing": []
     },
     {
       "code": "static_schema_current",
       "status": "pass",
-      "detail": "Build 174 through Build 192 schema tables and ledger markers found in the correct schema files.",
+      "detail": "Build 174 through Build 193 schema tables and ledger markers found in the correct schema files.",
       "missing": []
     },
     {
@@ -182,12 +182,12 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 1135/1135"
+      "detail": "CSS braces 1175/1175"
     },
     {
       "code": "static_json_parse",
       "status": "pass",
-      "detail": "19 JSON files checked; 0 failed.",
+      "detail": "21 JSON files checked; 0 failed.",
       "rows": [
         {
           "path": "data/site/seo-page-overrides.json",
@@ -281,6 +281,16 @@
         },
         {
           "path": "data/site/build192-validation.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build193-live-readiness-playbook.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build193-validation.json",
           "ok": true,
           "error": ""
         }
