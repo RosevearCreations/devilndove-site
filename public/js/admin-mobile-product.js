@@ -536,6 +536,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+
+  document.addEventListener('dd:mobile-resumable-upload-completed', async (event) => {
+    const productId = String(event?.detail?.product_id || draftProductIdInput?.value || '');
+    if (imageInput) imageInput.value = '';
+    renderImages();
+    renderDraftReadiness(loadedDraft);
+    await loadBootstrap(productId || null);
+    if (productId) {
+      const recovered = drafts.find((row) => String(row.product_id) === productId);
+      if (recovered) applyDraft(recovered);
+    }
+  });
+
   loadBootstrap();
   renderDraftReadiness(null);
 });
