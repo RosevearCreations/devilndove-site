@@ -1,30 +1,35 @@
-# Devil n Dove AI Handoff — Build 191
+# Devil n Dove AI Handoff — Build 193
 
-Read this file first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`.
+Read this first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, and `LIVE_TESTING_GUIDE.md`.
 
 ## Current build
 
-Build 191 turns Build 190 review dashboards into working owner controls: configurable channel fees, family cost defaults, margin gates/overrides, private customer notes, customer-story output drafts, Search Console mapping previews, monthly GBP tasks, review eligibility, approved before/after galleries, image-role prompts, D1 mobile drafts, deployed performance evidence, responsive-image jobs, Owner Daily exports, campaign readiness, local freshness, real-device QA, and live-environment configuration checks.
+Build 193 adds two important integrations:
 
-## Primary admin routes
+1. `/api/admin/live-readiness-playbook` and `public/js/admin-live-readiness-playbook.js`, shown inside `/admin/command-center/`. It provides detailed live-only testing steps, status recording, evidence URLs, runs, Markdown export, and usage telemetry.
+2. `/api/admin/mobile-resumable-upload` and `public/js/admin-mobile-resumable-upload.js`, shown inside `/admin/mobile-product/`. It uses R2 multipart uploads so completed image chunks are not resent after a connection interruption.
 
-- `/admin/command-center/` — daily dashboard plus Build 190 and Build 191 integrated operations.
-- `/admin/products/` — desktop product editor with image-role prompts.
-- `/admin/mobile-product/` — phone capture with local + D1 field recovery.
-- `/admin/members/` — member/customer views and existing timelines.
-- `/admin/local-seo-review/` — local pages, Search Console, and GBP review.
-- `/admin/marketplace-exports/` — exports now hard-blocked by margin/validation gates.
-- `/admin/deployment-preflight/` — release checks.
-- `/admin/post-deploy-smoke-tests/` — live verification.
+## Primary routes
+
+- `/admin/command-center/` — daily operations plus Build 190–193 integrated panels.
+- `/admin/mobile-product/` — phone product draft capture and the Build 193 safer large-photo uploader.
+- `/admin/products/` — desktop product editor.
+- `/admin/local-seo-review/` — Search Console and local SEO review.
+- `/admin/marketplace-exports/` — channel exports with margin gates.
+- `/admin/visual-enrichment-studio/` — visual/media controls.
+- `/admin/live-ops-followthrough/` — provider/R2/live configuration records.
+- `/admin/post-deploy-smoke-tests/` — deployed checks.
 
 ## Important APIs
 
-- `/api/admin/value-ops` — Build 190 funnel, readiness, customer, visual, SEO, and campaign summary; Build 191 now uses configured fee/cost settings.
-- `/api/admin/value-ops-followthrough` — Build 191 settings, approvals, imports, D1 drafts, evidence, and owner summaries.
+- `/api/auth/login` — must return JSON; root `_routes.json` must include `/api/*`.
+- `/api/admin/value-ops` — Build 190 integrated values.
+- `/api/admin/value-ops-followthrough` — Build 191 settings, approvals, imports, D1 draft and evidence workflows.
+- `/api/admin/value-ops-next` — Build 192 schedules, readiness checks, GBP evidence, duplicate candidates, provider checks.
+- `/api/admin/live-readiness-playbook` — Build 193 detailed test cases/runs/evidence.
+- `/api/admin/mobile-resumable-upload` — Build 193 R2 multipart mobile image upload.
 - `/api/before-after-gallery` — public read-only approved/consented gallery proof.
-- `/api/admin/marketplace-export-preview` — CSV download now enforces margin gates.
-- `/api/admin/search-console-import` — full Search Console import/action workflow.
-- `/api/auth/login` — login; root `_routes.json` must include `/api/*`.
+- `/api/admin/marketplace-export-preview` — marketplace CSV with margin enforcement.
 
 ## D1 migration order
 
@@ -49,9 +54,35 @@ database_build186_markdown_consolidation_visual_placeholders.sql
 database_build189_value_ops_live_counts.sql
 database_build190_integrated_value_operations.sql
 database_build191_value_operations_followthrough.sql
+database_build192_operational_data_connection.sql
+database_build193_live_readiness_playbook.sql
 ```
 
 Builds 187 and 188 were routing/environment hotfixes without D1 migrations.
+
+## Key business rules
+
+- One H1 maximum per exposed page.
+- Never promise first-page or local-pack placement.
+- Fee/cost defaults are not financial truth until owner-reviewed.
+- Marketplace exports stay blocked for unhealthy/unknown margin unless a current reviewed override exists.
+- Review eligibility is not permission to contact.
+- Customer stories, gallery proof, and customer photographs require consent/public-use approval.
+- Placeholders are layout scaffolding, not real proof.
+- Mobile recovery stores fields; user must reselect image files after browser reload.
+- Resumable image uploads require an R2 binding and an already-saved product draft.
+- Environment views must never reveal secret values.
+- Do not merge customer duplicates automatically.
+
+## Live deployment/testing order
+
+1. Apply `database_build193_live_readiness_playbook.sql` after Build 192.
+2. Confirm `/api/auth/login` returns JSON.
+3. Confirm `DB` and `PRODUCT_MEDIA_BUCKET` bindings in Cloudflare Pages.
+4. Open `/admin/command-center/` and record the first cost/fee, marketplace, and local SEO checks.
+5. Open `/admin/mobile-product/`; save/reopen a text-only draft, then test a non-sensitive resumable image.
+6. Use `LIVE_TESTING_GUIDE.md` or the Command Center playbook for all live-only verification.
+7. Run deployment preflight and smoke tests before promotion.
 
 ## Documentation policy
 
@@ -60,64 +91,4 @@ Canonical files:
 1. `PROJECT_STATUS_AND_ROADMAP.md`
 2. `AI_HANDOFF.md`
 
-Use `MARKDOWN_INDEX.md` for supporting references. Historical roadmap/gap/context content remains in `docs/archive/`.
-
-## Safety and business rules
-
-- One H1 maximum per exposed public/admin page.
-- Never claim guaranteed local ranking.
-- Do not calculate automated margins from unreviewed fee/cost defaults.
-- Marketplace downloads stay blocked for unhealthy/unknown margin unless an active approved override exists.
-- Review eligibility is not permission to contact.
-- Customer stories and gallery proof require consent and public-use approval.
-- Placeholders are layout scaffolding, not real proof.
-- Mobile D1 recovery stores form fields, not image file bytes.
-- Environment checks do not reveal secret values.
-
-## Live checks after deployment
-
-1. Apply `database_build191_value_operations_followthrough.sql`.
-2. Confirm `/api/auth/login` returns JSON.
-3. Open `/admin/command-center/` and verify Build 190 and Build 191 panels.
-4. Enter at least one reviewed channel fee and one family cost default.
-5. Refresh Product Readiness and confirm fee/cost configuration affects margin status.
-6. Test marketplace CSV blocking and a temporary approved override.
-7. Test Search Console mapping preview with a real export sample.
-8. Save a phone draft, reload another device/session, and verify D1 field recovery.
-9. Add one approved consented gallery item and confirm `/api/before-after-gallery`.
-10. Record mobile/desktop performance and real-device QA evidence.
-11. Run environment verification, deployment preflight, and smoke tests.
-
-## Immediate priorities
-
-Enter real channel fees and product costs, upload approved real photos, test live Stripe/email/R2 connections, import real Search Console data, complete the first GBP monthly task cycle, and capture real-device screenshots.
-
-
-## Build 192 — Operational data connection and live proof follow-through
-
-Build 192 keeps the project moving toward real business usefulness instead of adding another disconnected admin page. The new work is integrated into `/admin/command-center/` through `/api/admin/value-ops-next` and `public/js/admin-value-ops-next.js`.
-
-Completed in this pass:
-
-1. Added fee/cost change-audit rows so actual Stripe/Etsy/PayPal/local fee changes can be recorded with a reason and effective date.
-2. Added R2 derivative worker readiness checks for bindings, WebP, AVIF, srcset writeback, and cleanup.
-3. Added resumable mobile upload session rows and draft-conflict review rows beyond browser-only autosave.
-4. Added approved real-media replacement plan rows for key public placeholders.
-5. Added scheduled Search Console import rows for monthly pages/queries, weekly top pages, and quarterly image-search review.
-6. Added Google Business Profile evidence records for monthly observations, photos, reviews, posts, and local-page proof.
-7. Added customer duplicate/merge candidate rows and a Command Center action to refresh duplicate email candidates.
-8. Added live provider test records for Stripe, email, R2, and Cloudflare checks without exposing secret values.
-9. Added Lighthouse/PageSpeed import schedules for mobile and desktop routes.
-10. Added legacy admin usage and consolidation recommendation rows so older admin pages are not retired until real usage data supports it.
-11. Added extra visual placeholders to business-relevant public pages that still lacked visual enrichment.
-12. Updated schema, release, roadmap, handoff, SEO, image, sanity, and deployment documentation.
-
-Current opinion: the app is now past the “add structure” stage. The next business value comes from entering real costs/fees, uploading approved photographs, importing live evidence, and using the Command Center daily.
-
-### Build 192 D1 migration
-
-Run after Build 191:
-
-```text
-database_build192_operational_data_connection.sql
-```
+Supporting documents exist only for specialist detail. Historical context remains in `docs/archive/`.

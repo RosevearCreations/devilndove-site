@@ -39,3 +39,6 @@ Run after Build 191:
 ```text
 database_build192_operational_data_connection.sql
 ```
+
+
+Build 193 context: the app now has a detailed live-readiness playbook and R2 multipart mobile upload support. Canonical current context is `AI_HANDOFF.md`; use `LIVE_TESTING_GUIDE.md` for manual verification.

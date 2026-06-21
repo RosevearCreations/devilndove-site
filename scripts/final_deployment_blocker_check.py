@@ -63,6 +63,14 @@ REQUIRED_FILES = [
     'public/js/admin-value-ops-next.js',
     'data/site/build192-operational-data-connection.json',
     'data/site/build192-validation.json',
+    'database_build193_live_readiness_playbook.sql',
+    'functions/api/admin/live-readiness-playbook.js',
+    'public/js/admin-live-readiness-playbook.js',
+    'functions/api/admin/mobile-resumable-upload.js',
+    'public/js/admin-mobile-resumable-upload.js',
+    'LIVE_TESTING_GUIDE.md',
+    'data/site/build193-live-readiness-playbook.json',
+    'data/site/build193-validation.json',
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 
