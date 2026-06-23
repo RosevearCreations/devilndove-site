@@ -18,6 +18,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productTaxClassEl = document.getElementById("productTaxClass");
   const productInventoryEl = document.getElementById("productInventory");
   const productDescriptionEl = document.getElementById("productDescription");
+  const productQuickFactsCardEl = document.getElementById("productQuickFactsCard");
+  const productQuickFactsEl = document.getElementById("productQuickFacts");
+  const productVideoCardEl = document.getElementById("productVideoCard");
+  const productVideoMountEl = document.getElementById("productVideoMount");
   const productStoryCardEl = document.getElementById("productStoryCard");
   const productPublicStoryCardEl = document.getElementById("productPublicStoryCard");
   const productPublicStoryKickerEl = document.getElementById("productPublicStoryKicker");
@@ -221,6 +225,61 @@ document.addEventListener("DOMContentLoaded", async () => {
     productPolicyListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
   }
 
+  function safeHttpsUrl(value) {
+    try { const url = new URL(String(value || '').trim()); return url.protocol === 'https:' ? url.toString() : ''; } catch { return ''; }
+  }
+
+  function renderQuickFacts(product, storyNotes, listingProfile) {
+    if (!productQuickFactsCardEl || !productQuickFactsEl) return;
+    const profile = listingProfile && typeof listingProfile === 'object' ? listingProfile : {};
+    const story = storyNotes && typeof storyNotes === 'object' ? storyNotes : {};
+    const materials = String(profile.materials_text || product?.proof_material || product?.material_tags || product?.primary_material || product?.material || '').trim();
+    const process = String(product?.proof_process || story.process_notes || '').trim();
+    const rows = [
+      ['Best for', profile.best_for_text],
+      ['Materials', materials],
+      ['Finish / condition', profile.finish_text || product?.condition_summary],
+      ['Size / dimensions', profile.dimensions_text || (Number(product?.weight_grams || 0) > 0 ? `${Number(product.weight_grams)} g` : '')],
+      ['Care', profile.care_summary || story.care_notes],
+      ['Availability', profile.availability_note || (Number(product?.inventory_tracking || 0) === 1 ? (Number(product?.inventory_quantity || 0) > 0 ? 'Current stock shown above.' : 'Follow this item for restock or availability.') : '')],
+      ['Shipping / pickup', profile.shipping_pickup_note || story.local_pickup_note],
+      ['Handmade note', profile.handmade_variation_note || (String(product?.merchandise_origin || '').toLowerCase() === 'handmade' ? 'Each handmade piece may have small, honest variations in pattern, placement, or finish.' : '')]
+    ].filter(([, value]) => String(value || '').trim());
+    if (!rows.length) { hide(productQuickFactsCardEl); productQuickFactsEl.innerHTML = ''; return; }
+    productQuickFactsEl.innerHTML = rows.map(([label, value]) => `<div class="product-quick-fact"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`).join('');
+    show(productQuickFactsCardEl);
+    const videoUrl = safeHttpsUrl(profile.product_video_url);
+    if (!productVideoCardEl || !productVideoMountEl) return;
+    if (!videoUrl) { hide(productVideoCardEl); productVideoMountEl.innerHTML = ''; return; }
+    const file = videoUrl.toLowerCase();
+    productVideoMountEl.innerHTML = /\.(mp4|webm|ogg)(?:\?|$)/.test(file)
+      ? `<video controls preload="metadata" playsinline src="${escapeHtml(videoUrl)}">Your browser cannot play this video. <a href="${escapeHtml(videoUrl)}" target="_blank" rel="noopener">Open the video</a>.</video>`
+      : `<a class="btn" href="${escapeHtml(videoUrl)}" target="_blank" rel="noopener">Open approved product video</a>`;
+    show(productVideoCardEl);
+  }
+
+  function renderVisualProofModules(images) {
+    const root = document.getElementById('productVisualProofModules');
+    if (!root) return;
+    const safeImages = Array.isArray(images) ? images : [];
+    const slots = [
+      ['process', ['process_story','process'], 'Process'],
+      ['scale', ['scale_context','scale'], 'Scale'],
+      ['materials', ['material_tool_proof','detail_texture','close_up'], 'Materials'],
+      ['care', ['packaging_pickup','packaging','back_side','back_or_side'], 'Care']
+    ];
+    slots.forEach(([slot, roles, label]) => {
+      const figure = root.querySelector(`[data-product-proof-slot="${slot}"]`);
+      const match = safeImages.find((image) => roles.includes(String(image?.image_role || '').toLowerCase()));
+      if (!figure || !match?.image_url) return;
+      const image = figure.querySelector('img');
+      const note = figure.querySelector('figcaption span');
+      if (image) { image.src = match.image_url; image.alt = match.alt_text || `${label} view for ${currentProduct?.name || 'product'}`; image.classList.add('is-approved-product-proof'); }
+      if (note) note.textContent = match.caption || `${label} view from this listing.`;
+      figure.classList.add('has-approved-product-proof');
+    });
+  }
+
   function renderProcessLinks(product, resourceLinks) {
     if (!productProcessSummaryEl || !productProcessLinksEl) return;
     const hasStory = (resourceLinks?.length || 0) > 0;
@@ -229,6 +288,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       : 'Not every listing has full process links yet, so these shortcuts help buyers see the broader workshop story, gallery, and maker pages.';
     const links = [
       { href: '/gallery/', label: 'Gallery & media' },
+      { href: '/workshop-journal/', label: 'Workshop Journal' },
       { href: '/about/', label: 'About the workshop' },
       { href: '/creations/', label: 'Creations overview' },
       { href: '/events/', label: 'Events & markets' },
@@ -341,7 +401,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     show(productCandleSoapSafetyCardEl);
   }
 
-  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec) {
+  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec, listingProfile) {
     currentProduct = product || null;
     try { window.DDAnalytics?.trackFunnel?.('product_view', { source: 'product_detail', product_id: currentProduct?.product_id || null, slug: currentProduct?.slug || '' }); } catch {}
     if (productTypeEl) {
@@ -371,6 +431,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     renderMainImage(product, images);
     renderGallery(images, product.name || "Product");
+    renderQuickFacts(product, storyNotes, listingProfile);
+    renderVisualProofModules(images);
+    try { window.DDRecentlyViewed?.add?.(product); } catch {}
     renderResourceStory(resourceLinks, resourceSummary);
     renderReviews(reviews, reviewSummary);
     renderTrustSummary(product, trustSummary, images, resourceLinks);
@@ -438,7 +501,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       if (!response.ok && !data.ok) throw new Error(data.error || "Failed to load product.");
       if (!data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null);
+      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null, data.listing_profile || null);
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;

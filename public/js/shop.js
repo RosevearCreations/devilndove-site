@@ -308,6 +308,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } finally { hide(loadingEl); }
   }
+  document.querySelectorAll('[data-shop-quick]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const key = String(button.getAttribute('data-shop-quick') || '');
+      const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value; };
+      if (key === 'handmade') { set('shopOriginFilter','handmade'); set('shopSearchInput',''); }
+      if (key === 'vintage') { set('shopOriginFilter','vintage'); set('shopSearchInput',''); }
+      if (key === 'under25') { set('shopMinPrice',''); set('shopMaxPrice','2500'); }
+      if (key === 'gifts') { set('shopSearchInput','gift'); }
+      loadProducts();
+    });
+  });
+  try { window.DDRecentlyViewed?.render?.(document.getElementById('shopRecentlyViewedMount'), { limit: 4 }); } catch {}
   document.getElementById('shopSearchButton')?.addEventListener('click', loadProducts);
   document.getElementById('shopResetButton')?.addEventListener('click', () => {
     ['shopSearchInput','shopTypeFilter','shopOriginFilter','shopChannelFilter','shopColorFilter','shopMinPrice','shopMaxPrice'].forEach((id) => { const el=document.getElementById(id); if (el) el.value=''; });
