@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+<title id="title">Workshop collection discovery placeholder</title><desc id="desc">A decorative placeholder showing a handmade jewelry shape, engraving line work, a candle, and a vintage tag.</desc>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#26213c"/><stop offset="1" stop-color="#8e5a7d"/></linearGradient><pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2" fill="#fff" opacity=".15"/></pattern></defs>
+<rect width="1200" height="720" rx="36" fill="url(#g)"/><rect width="1200" height="720" rx="36" fill="url(#dots)"/>
+<g fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity=".92"><path d="M225 454c0-102 82-184 184-184s184 82 184 184c0 102-82 184-184 184S225 556 225 454Z"/><path d="M409 270v-88m-62 64 62-64 62 64"/><path d="M731 238h234v278H731z"/><path d="M770 302h156M770 372h156M770 442h156"/><path d="M772 548c74 22 130 22 186 0"/><path d="M645 574c-36-12-63-38-78-75"/></g>
+<g fill="#fff" opacity=".95"><circle cx="409" cy="454" r="43"/><path d="M1012 164l54 54-76 76-54-54z"/><path d="M1004 356l72 72-72 72-72-72z"/></g>
+<text x="90" y="95" fill="#fff" font-family="system-ui,Segoe UI,sans-serif" font-size="38" font-weight="700">Approved real workshop photography will replace this visual guide.</text>
+</svg>
