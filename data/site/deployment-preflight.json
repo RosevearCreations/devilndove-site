@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 193",
+  "build_label": "Build 194",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,19 +7,19 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "64 required files are present.",
+      "detail": "74 required files are present.",
       "missing": []
     },
     {
       "code": "static_schema_current",
       "status": "pass",
-      "detail": "Build 174 through Build 193 schema tables and ledger markers found in the correct schema files.",
+      "detail": "Build 174 through Build 194 schema tables and ledger markers found in the correct schema files.",
       "missing": []
     },
     {
       "code": "static_public_pages",
       "status": "pass",
-      "detail": "12 pages checked; 0 fail, 0 warn.",
+      "detail": "16 pages checked; 0 fail, 0 warn.",
       "rows": [
         {
           "path": "index.html",
@@ -29,7 +29,7 @@
           "meta_description_length": 157,
           "has_canonical": true,
           "schema_blocks": 3,
-          "image_count": 2,
+          "image_count": 3,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -176,18 +176,70 @@
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
+        },
+        {
+          "path": "workshop-journal/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "title_length": 51,
+          "meta_description_length": 136,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 2,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
+        },
+        {
+          "path": "workshop-journal/polymer-clay-earring-care/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "title_length": 57,
+          "meta_description_length": 94,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 0,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
+        },
+        {
+          "path": "workshop-journal/coin-and-spoon-ring-care/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "title_length": 54,
+          "meta_description_length": 90,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 0,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
+        },
+        {
+          "path": "workshop-journal/handmade-vintage-sourced-guide/index.html",
+          "status": "pass",
+          "h1_count": 1,
+          "title_length": 65,
+          "meta_description_length": 115,
+          "has_canonical": true,
+          "schema_blocks": 1,
+          "image_count": 0,
+          "missing_alt_count": 0,
+          "missing_terms": [],
+          "notes": []
         }
       ]
     },
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 1175/1175"
+      "detail": "CSS braces 1240/1240"
     },
     {
       "code": "static_json_parse",
       "status": "pass",
-      "detail": "21 JSON files checked; 0 failed.",
+      "detail": "23 JSON files checked; 0 failed.",
       "rows": [
         {
           "path": "data/site/seo-page-overrides.json",
@@ -291,6 +343,16 @@
         },
         {
           "path": "data/site/build193-validation.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build194-storefront-discovery.json",
+          "ok": true,
+          "error": ""
+        },
+        {
+          "path": "data/site/build194-validation.json",
           "ok": true,
           "error": ""
         }

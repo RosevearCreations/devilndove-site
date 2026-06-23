@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 194",
+    "date": "2026-06-22",
+    "title": "Storefront discovery, product facts, and media-role clarity",
+    "summary": "Added homepage discovery and process storytelling, featured product cards, Shop quick filters, browser-local recently viewed items, Workshop Journal routes, approved product Quick Facts, HTTPS video support, product media-role scoring, visual placeholders, schema audit rows, canonical Markdown cleanup, and owner test instructions."
+  },
+  {
     "build": "Build 193",
     "date": "2026-06-20",
     "title": "Live readiness playbook and resumable mobile media",
