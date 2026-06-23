@@ -462,6 +462,25 @@ async function handleProductDetailRequest(context) {
     };
   });
 
+  // Build 194: explicit buyer-facing photo roles are stored separately from raw gallery rows.
+  try {
+    const roleRows = normalizeResults(await db.prepare(`
+      SELECT role_key, product_image_id, image_url
+      FROM product_media_role_assignments
+      WHERE product_id = ? AND COALESCE(assignment_status,'assigned') = 'assigned'
+    `).bind(product.product_id).all());
+    const roleMap = new Map();
+    roleRows.forEach((row) => {
+      const key = Number(row.product_image_id || 0) ? `id:${Number(row.product_image_id || 0)}` : `url:${String(row.image_url || '').trim()}`;
+      if (key) roleMap.set(key, String(row.role_key || '').trim());
+    });
+    const publicRole = { main:'hero_front', close_up:'detail_texture', scale:'scale_context', back_or_side:'back_side', process:'process_story', packaging:'packaging_pickup', social_share:'social_share' };
+    storefront_images.forEach((image) => {
+      const role = roleMap.get(`id:${Number(image.product_image_id || 0)}`) || roleMap.get(`url:${String(image.image_url || '').trim()}`) || '';
+      if (role && publicRole[role]) image.image_role = publicRole[role];
+    });
+  } catch {}
+
   const image_groups = {
     featured: storefront_images.find((row) => row.image_url === product.featured_image_url) || storefront_images.find((row) => row.image_group === 'featured') || storefront_images[0] || null,
     detail: storefront_images.filter((row) => row.image_group === 'detail'),
@@ -498,6 +517,19 @@ async function handleProductDetailRequest(context) {
         LIMIT 1
       `).bind(product.product_id).first().catch(() => ({})) || {};
     }
+  } catch {}
+
+  let listing_profile = null;
+  try {
+    listing_profile = await db.prepare(`
+      SELECT product_listing_profile_id, product_id, best_for_text, materials_text, finish_text,
+             dimensions_text, care_summary, handmade_variation_note, availability_note,
+             shipping_pickup_note, product_video_url, profile_status, updated_at
+      FROM product_listing_profiles
+      WHERE product_id = ? AND COALESCE(profile_status,'draft') IN ('approved','published')
+      ORDER BY datetime(COALESCE(updated_at,created_at,CURRENT_TIMESTAMP)) DESC
+      LIMIT 1
+    `).bind(product.product_id).first().catch(() => null);
   } catch {}
 
   const candle_soap_spec = await db.prepare(`SELECT * FROM custom_candle_soap_product_specs WHERE product_id = ? ORDER BY custom_candle_soap_product_spec_id DESC LIMIT 1`).bind(product.product_id).first().catch(() => null);
@@ -581,7 +613,7 @@ async function handleProductDetailRequest(context) {
   } catch {}
 
   const related_products = await relatedProductsByProof();
-  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, candle_soap_spec, reviews, review_summary, related_products });
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, listing_profile, candle_soap_spec, reviews, review_summary, related_products });
 }
 
 
