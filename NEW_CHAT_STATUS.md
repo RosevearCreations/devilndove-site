@@ -38,3 +38,7 @@ database_build192_operational_data_connection.sql
 
 
 Build 193: Read `AI_HANDOFF.md`, then `PROJECT_STATUS_AND_ROADMAP.md`. Live-only test steps are now in `LIVE_TESTING_GUIDE.md` and inside `/admin/command-center/`.
+
+## Build 194 alignment
+
+This is a supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current decisions; preserve this document for specialist history and handoff detail.

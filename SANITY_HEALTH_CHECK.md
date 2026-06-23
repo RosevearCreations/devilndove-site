@@ -1,36 +1,42 @@
-# Sanity Health Check — Build 193
+# Sanity Health Check — Build 194
 
 ## Build status
 
-Build 193 passed local static validation and is ready for deployment after its D1 migration.
+Build 194 passed local static and schema validation and is ready for deployment after its D1 migration.
 
 | Check | Result |
 |---|---:|
-| JavaScript syntax | 395 source files passed |
+| JavaScript syntax | 402 source files passed |
 | Python compilation | 12 scripts passed |
-| JSON parsing | 32 files passed |
-| HTML pages scanned | 82 |
+| JSON parsing | 44 files passed |
+| HTML pages scanned | 86 |
 | Pages with more than one H1 | 0 |
-| CSS braces | 1175 / 1175 |
-| Full schema test | Passed; 341 tables |
-| Build 192 → 193 migration test | Passed twice; one ledger marker |
+| Missing title/meta on scanned pages | 0 |
+| CSS braces | 1240 / 1240 |
+| Predeploy sanity | PASS — 0 issues |
+| Full standalone schema | Passed; 344 tables |
+| Build 193 → 194 migration test | Passed twice; one ledger marker |
 | Static deployment preflight | Ready; 0 blockers, 0 warnings |
 | Final deployment blocker check | PASS |
 | ZIP integrity | Pending final packaging check |
 
-## Build 193 specific checks
+## Build 194 specific checks
 
-- Live readiness playbook API and Command Center script passed syntax checks.
-- Mobile R2 multipart/resume API and phone client passed syntax checks.
-- Resumable upload tables are additive and safe to rerun.
-- R2 multipart completion, signed reads, Stripe/webhook, email delivery, and real-device tests require deployed evidence; use `LIVE_TESTING_GUIDE.md`.
+- Homepage discovery cards, Shop quick filters, Workshop Journal routes, product Quick Facts, recently viewed local storage, and Catalog Media role/profile scripts passed syntax checks.
+- Product facts are public only after `approved` or `published` profile status.
+- Decorative placeholder images are intentionally empty-alt/aria-hidden; meaningful product photos still require descriptive alt text.
+- The fresh-database source is `database_full_schema.sql`. `database_schema.sql` and `database_store_schema.sql` remain layered reference/schema files and should not be treated as independent fresh-database installers.
 
 ## Deployment action
 
-Run only after Build 192:
+Run after Build 193:
 
 ```text
-database_build193_live_readiness_playbook.sql
+database_build194_storefront_discovery_product_facts_media_roles.sql
 ```
 
-Then open `/admin/command-center/`, use the Live Readiness Playbook, and record factual evidence for each test.
+Then follow `BUILD194_TESTING_GUIDE.md` for storefront, listing-profile, media-role, and SEO/H1 checks. Use `LIVE_TESTING_GUIDE.md` for R2, provider, Search Console, GBP, and device evidence.
+
+## Live-only limits
+
+R2 bindings, derivative worker output, Stripe webhook signatures, email delivery, real Search Console imports, GBP evidence, and real-device behaviour still require deployed proof. Do not mark any of those complete until evidence is saved in the Command Center or deployment workflow.

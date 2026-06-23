@@ -556,3 +556,7 @@ Every build must update the two canonical handoff files (`PROJECT_STATUS_AND_ROA
 ---
 
 _Build 191 documentation sanity review: retained as a specialized supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current direction._
+
+## Build 194 alignment
+
+This is a supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current decisions; preserve this document for specialist history and handoff detail.

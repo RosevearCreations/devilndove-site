@@ -1,3 +1,24 @@
+# Build 194 Release Notes
+
+## Summary
+
+- Added customer-facing storefront discovery: clearer homepage hero and calls to action, What We Make cards, workshop process strip, featured creations, and Workshop Journal guides.
+- Added buyer-question product listing profiles and public Quick Facts gated behind approved/published status.
+- Added media-role coverage scoring and safe role-to-public-placeholder replacement inside Catalog Media.
+- Added mobile-friendly shop quick filters and browser-local recently viewed items.
+- Added `database_build194_storefront_discovery_product_facts_media_roles.sql`, Build 194 audit rows, canonical Markdown consolidation, and detailed owner testing steps.
+
+## Required post-deploy action
+
+- Run `database_build194_storefront_discovery_product_facts_media_roles.sql` after Build 193.
+- Follow `BUILD194_TESTING_GUIDE.md` before treating customer-facing facts or photo roles as complete.
+
+## Validation
+
+- Static deployment preflight, final blocker, predeploy sanity, JavaScript/Python/JSON/HTML/CSS checks, full schema, and Build 193→194 migration rerun are recorded in `data/site/build194-validation.json`.
+
+---
+
 # Release Notes — Devil n Dove
 
 ## Build 193 — Live readiness playbook and resumable mobile media
@@ -126,3 +147,18 @@ Run after Build 191:
 ```text
 database_build192_operational_data_connection.sql
 ```
+
+## Build 194 alignment
+
+## Build 194 — Storefront Discovery, Product Facts & Media Roles
+
+- Added homepage discovery/process/featured creations, Workshop Journal, recently viewed, and shop quick filters.
+- Added approved public listing profiles, product video support, media-role scoring, and role-driven public proof slots.
+- Added `database_build194_storefront_discovery_product_facts_media_roles.sql`.
+- Updated canonical handoff/roadmap, schema references, visual notes, local SEO notes, and sanity checks.
+
+
+
+## Build 194 testing reference
+
+Use `BUILD194_TESTING_GUIDE.md` after deployment for the homepage, shop quick filters, product listing facts, media-role scoring, workshop journal, visual placeholders, and SEO/H1 verification.

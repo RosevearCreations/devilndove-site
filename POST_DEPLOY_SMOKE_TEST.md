@@ -265,3 +265,7 @@ database_build192_operational_data_connection.sql
 ## Build 193 detailed owner testing
 
 After normal preflight, open `/admin/command-center/` and work through the **Live readiness and testing playbook**. The downloadable companion is `LIVE_TESTING_GUIDE.md`. Start with fee/cost configuration, marketplace margin gate, mobile draft recovery, R2 multipart media, then Stripe/email/R2 environment tests.
+
+## Build 194 alignment
+
+This is a supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current decisions; preserve this document for specialist history and handoff detail.

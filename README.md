@@ -845,3 +845,12 @@ database_build192_operational_data_connection.sql
 ## Build 193 operator testing
 
 Use `LIVE_TESTING_GUIDE.md` after deployment for the exact manual tests that require Cloudflare bindings, real devices, Stripe, email, R2, Search Console, or Google Business Profile.
+
+## Build 194 alignment
+
+
+
+## Build 194 note
+
+Public discovery additions include `/workshop-journal/`, featured creations, Shop quick filters, product Quick Facts, and role-driven media proof. Run `database_build194_storefront_discovery_product_facts_media_roles.sql` after Build 193.
+

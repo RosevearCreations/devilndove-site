@@ -1,101 +1,100 @@
-# Devil n Dove Project Status and Roadmap — Build 193
+# Devil n Dove Project Status and Roadmap — Build 194
 
-This is the primary human/business roadmap. Read `AI_HANDOFF.md` for technical deployment details and `MARKDOWN_INDEX.md` for the remaining specialist references.
+This is the primary human/business roadmap. Read `AI_HANDOFF.md` for technical deployment details and `MARKDOWN_INDEX.md` for specialist references.
 
 ## Executive sanity check
 
-Devil n Dove is a full small-business operating platform: storefront, handmade/vintage presentation, custom requests, product/media workflows, inventory and cost groundwork, marketplace exports, gift cards, local SEO, customer proof, accounting support, and deployment controls.
+Devil n Dove is now a full small-business operating platform: storefront, handmade/vintage presentation, custom requests, product/media workflows, inventory and cost groundwork, marketplace exports, gift cards, local SEO, customer proof, accounting support, and deployment controls.
 
-The app is now structurally broad enough. The biggest value is no longer more isolated dashboards. It is **real operational data, approved photographs, live verification, and a calmer daily workflow**.
+The app is structurally broad enough. The best value now comes from **truthful product data, approved real photography, live verification, and a calm daily workflow**, not from more disconnected admin pages.
 
-Build 193 converts the remaining live-only work into a tracked, evidence-based playbook inside `/admin/command-center/`. It also adds an R2 multipart/resume workflow for larger mobile images so poor connectivity does not force a full restart.
+## Build 194 completed — customer-facing discovery and listing clarity
 
-## Build 193 completed — 20 practical improvements
-
-1. Added a Command Center Live Readiness Playbook with detailed owner test steps.
-2. Added 15 prioritized live-readiness cases covering costs, margins, mobile, R2, SEO, GBP, Stripe, email, performance, and legacy admin consolidation.
-3. Added status, notes, evidence-link, and run-history records for every live test.
-4. Added Markdown export of the current live testing playbook.
-5. Added a no-secret test evidence rule in the admin workflow.
-6. Added actual R2 multipart upload session metadata.
-7. Added multipart part tracking so completed mobile upload parts are not resent.
-8. Added secure admin-only upload-session creation, progress, completion, and abort actions.
-9. Added product-image attachment after a resumable R2 upload completes.
-10. Added featured-image fallback when a completed resumable upload is the first image.
-11. Added a phone-facing “Safer large-photo upload” panel.
-12. Added clear recovery instructions: save/reopen a text-only draft, reselect the same file, resume.
-13. Added 50 MB file protection and 5 MB chunk sizing for the mobile resume path.
-14. Added Command Center usage events to support evidence-based legacy-page consolidation.
-15. Added responsive CSS for test cards, evidence forms, and mobile upload status.
-16. Preserved one-H1 rules: new operational panels use H2/H3 only.
-17. Updated all main schema files and current upgrade SQL with Build 193 additions.
-18. Updated the canonical roadmap/handoff and specialist documentation.
-19. Added a dedicated `LIVE_TESTING_GUIDE.md` for step-by-step owner testing.
-20. Added static Build 193 test-plan/report files for future AI/developer handoff.
+1. Rewrote the homepage hero around handmade mixed media, art, gifts, and vintage finds.
+2. Added clear homepage paths to shop, workshop notes, vintage/found items, and custom requests.
+3. Added a visual “What we make” discovery grid with product/category paths.
+4. Added a five-step workshop process strip explaining how a piece moves from idea to listing.
+5. Added approved active product cards to the homepage through `/api/featured-products`.
+6. Added privacy-friendly recently viewed products stored only in the visitor’s browser.
+7. Added mobile-friendly quick filters for handmade, vintage/found, under CAD $25, and gift searches.
+8. Added a Workshop Journal hub and three evergreen guides: polymer-clay earring care, coin/spoon ring care, and handmade-vintage-sourced buying guidance.
+9. Added public product listing profiles for best-for, materials, finish, dimensions, care, variation, availability, and shipping/pickup information.
+10. Added an approved-only Quick Facts card to product pages.
+11. Added optional approved HTTPS product-video support.
+12. Added an admin listing-facts editor inside Catalog Media.
+13. Added buyer-question media roles: main, close-up, scale, back/side, process, packaging, social/share, and video.
+14. Added a visible Product Media Role Score inside Catalog Media.
+15. Connected approved assigned media roles to product-page proof modules.
+16. Kept professional placeholders until matching approved real media is assigned.
+17. Added workshop discovery, workshop journal, and media-role planning placeholder visuals.
+18. Added responsive desktop/mobile styling for discovery cards, journal cards, quick facts, and media controls.
+19. Added storefront discovery audit rows for owner review.
+20. Updated schema references, release controls, Markdown handoff, and testing instructions.
 
 ## Current strengths
 
-- One-H1, title/meta, canonical, descriptive image-alt, structured-data, sitemap, and local-page guardrails.
+- One-H1, title/meta, canonical, structured-data, and local-page guardrails.
 - Product readiness, cost/margin gates, marketplace validation, and reviewed temporary overrides.
-- Mobile and desktop product administration with D1 field recovery.
+- Buyer-facing product stories, quick facts, care, pickup/shipping, and media-role workflows.
+- Mobile and desktop product administration with D1 field recovery and resumable media foundations.
 - Consent-controlled public proof, customer stories, and before/after gallery foundations.
-- Responsive visual placeholders, low-bandwidth support, reduced-motion handling, and image-role guidance.
-- Search Console CSV mapping, GBP evidence records, local freshness tasks, and performance schedules.
+- Search Console CSV mapping, GBP evidence rows, local freshness tasks, and performance schedules.
 - Deployment preflight, release control, smoke tests, fallback handling, and Cloudflare environment checks.
-- A two-file canonical Markdown handoff system with historical archives retained.
+- Two canonical Markdown handoff files with specialist/historical references retained.
 
-## Current risks and limitations
+## Current limits
 
-1. Actual fee and cost values still need owner entry before margins become reliable.
-2. R2 multipart upload and derivative generation require a deployed R2 binding for real verification.
-3. The derivative worker still needs to create real WebP/AVIF files and write final `srcset`.
-4. Browser security requires reselecting a file after a page reload; the server remembers completed parts, not browser file bytes.
-5. Real workshop/product photography remains more valuable than any placeholder.
-6. Search Console remains export/scheduled-import based until OAuth/API credentials are deliberately chosen.
-7. GBP evidence is manual by design; the app cannot query or promise a local ranking position.
-8. Customer duplicate suggestions require a human review; shared household emails must not be merged automatically.
-9. Stripe webhook, email delivery, R2 signed reads, and Cloudflare API actions require live test evidence.
-10. Low-use admin pages should not be removed until usage data shows the Command Center is a safe replacement.
+1. Actual fee and cost values still need owner entry before margin warnings become reliable.
+2. Listing profiles and media roles need truthful per-product data before they appear publicly.
+3. R2 derivative generation must still create real WebP/AVIF files and final `srcset` output in the deployed environment.
+4. Real workshop/product photography remains more valuable than any placeholder.
+5. Search Console imports and Google Business Profile evidence need real recurring owner input.
+6. Stripe webhook, email delivery, R2 signed reads, and Cloudflare API actions require live evidence.
+7. Customer duplicate suggestions must always remain human-reviewed.
+8. Low-use admin pages should not be removed until Command Center usage evidence supports consolidation.
 
 ## SEO and competitive direction
 
-Google recommends clear, useful titles and headings, relevant on-page text around images, descriptive alt text, crawlable links, and a mobile page experience with content parity. Google Business Profile says local results are mainly based on relevance, distance, and prominence, so the app improves controllable signals but cannot guarantee first-page placement. Etsy guidance continues to emphasize accurate first photos, clear listing information, real product context, and trust-building presentation.
+Keep these public-site habits:
 
-Keep the public-site habits:
-
-- One visible H1 per route.
-- A clear unique page title and useful meta description.
-- Descriptive alt text that explains the actual image.
+- One visible H1 per public route.
+- One clear, unique page title and useful meta description.
+- Descriptive alt text for meaningful images; empty alt text for decorative art.
 - Real approved images near relevant copy.
-- Accurate local/service wording—never fake location coverage.
-- Structured data that matches the visible page and true price/stock facts.
-- Mobile content parity with desktop.
+- Accurate local wording; never imply locations or services we do not offer.
+- Product structured data that matches visible price, stock, and product facts.
+- Equivalent useful content on mobile and desktop.
+- Helpful product facts in scannable sections rather than dense unstructured paragraphs.
 
 ## Next 20 highest-value steps
 
-1. Enter reviewed Stripe, Etsy, PayPal, marketplace, and local-sale fee settings.
-2. Enter actual material, labour, packaging, overhead, and waste costs for the main product families.
-3. Review individual high-value or custom products with product-specific costs.
-4. Run the marketplace unhealthy-margin gate using a disposable test draft.
-5. Run the mobile D1 draft-recovery test on a phone.
-6. Run the new resumable R2 upload test with a non-sensitive test photo.
-7. Deploy and verify a real R2 WebP/AVIF derivative worker.
-8. Replace the homepage workshop placeholder with one approved real workshop image.
-9. Replace one product/listing placeholder with an approved real product/scale photo.
-10. Add one approved consented before/after gallery item.
-11. Export and import one real Search Console report after checking headers and sample rows.
-12. Complete the first monthly GBP evidence record.
-13. Review customer duplicate candidates manually and record outcomes.
-14. Run a Stripe dashboard test webhook and verify de-duplication.
-15. Run an owner-only email provider test send while customer automation remains disabled.
-16. Run R2 upload, signed-read, expiry, and delete verification.
-17. Record mobile and desktop Lighthouse/PageSpeed measurements.
-18. Capture real-device evidence for narrow phone, large phone, tablet, laptop, and large desktop.
-19. Use Command Center daily for several weeks and collect usage events.
-20. Review legacy page usage before redirecting, consolidating, or retiring any destination.
+1. Run `database_build194_storefront_discovery_product_facts_media_roles.sql` after Build 193.
+2. Review the homepage hero and primary choices on a real phone and desktop.
+3. Add one approved listing profile for a real handmade product.
+4. Enter dimensions, materials, care, availability, and pickup/shipping wording from the actual item.
+5. Assign main, close-up, scale, back/side, process, packaging, and social roles for one well-photographed item.
+6. Confirm roles replace only the matching product placeholders.
+7. Add one approved HTTPS video and confirm it behaves correctly on phone and desktop.
+8. Add truthful product-specific scale and process photos.
+9. Replace the homepage and Workshop Journal placeholders only with approved real media.
+10. Add one active approved product to Featured Creations and confirm it is accurate.
+11. Review recently viewed behaviour on a shared household device and clear local browser storage when needed.
+12. Enter actual marketplace/payment fee values and product-family cost defaults.
+13. Test marketplace export blocking on an incomplete or unhealthy-margin test product.
+14. Import one real Search Console export and create one evidence-based SEO action.
+15. Complete one monthly GBP evidence record using only factual business information.
+16. Capture mobile/tablet/laptop/desktop evidence for homepage, shop, journal, product facts, and Catalog Media.
+17. Run a real R2 upload, signed-read, derivative, and delete test.
+18. Run Stripe webhook signature and email-provider delivery tests.
+19. Use Command Center usage data to identify genuinely low-use legacy admin pages.
+20. Review all buyer-facing care/product claims annually and whenever materials/processes change.
+
+## Deployment/testing references
+
+- `BUILD194_TESTING_GUIDE.md` — exact owner steps for homepage, shop filters, product Quick Facts, media roles, Workshop Journal, and SEO checks.
+- `LIVE_TESTING_GUIDE.md` — live R2, Stripe, email, Search Console, GBP, and real-device test procedures.
+- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — bindings, environment variables, secrets, and where their values come from.
 
 ## Release readiness opinion
 
-Build 193 is ready for deployment after its D1 migration and normal preflight checks. Business readiness depends on the live-playbook steps: real data, approved media, provider tests, actual devices, and evidence-based use of the Command Center.
-
-Do not claim guaranteed local rankings, automated financial accuracy, or completed live provider checks until supporting evidence is saved.
+Build 194 is ready for deployment after its D1 migration and normal preflight checks. Business readiness depends on real data, approved media, and saved live evidence. Do not claim guaranteed local rankings, automated financial accuracy, or completed provider checks until supporting evidence exists.
