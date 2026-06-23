@@ -1187,3 +1187,7 @@ database_build192_operational_data_connection.sql
 ## Build 193
 
 `database_build193_live_readiness_playbook.sql` adds `live_readiness_test_cases`, `live_readiness_test_runs`, R2 multipart mobile upload runtime/part/event records, and Command Center usage telemetry. The upload tables are additive and retain only metadata/part ETags; browser file bytes are not stored in D1.
+
+## Build 194 alignment
+
+Build 194 adds `product_listing_profiles`, `product_media_role_assignments`, and `storefront_discovery_audit_rows` through `database_build194_storefront_discovery_product_facts_media_roles.sql`.

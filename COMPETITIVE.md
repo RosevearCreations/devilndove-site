@@ -1321,3 +1321,7 @@ Sources reviewed for Build 191:
 - https://support.google.com/business/answer/7091
 - https://www.etsy.com/seller-handbook/article/22636178725
 - https://www.shopify.com/sg/blog/ecommerce-product-page-seo
+
+## Build 194 alignment
+
+This is a supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current decisions; preserve this document for specialist history and handoff detail.

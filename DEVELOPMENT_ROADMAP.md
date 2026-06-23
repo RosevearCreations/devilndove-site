@@ -13,3 +13,7 @@ Canonical next work is maintained in `PROJECT_STATUS_AND_ROADMAP.md`.
 ## Roadmap rule
 
 Prefer improvements that integrate into Command Center, Products, Mobile Product Add, Members, Local SEO, Marketplace, Visual, or Deployment surfaces. Do not add a new admin page unless it serves a unique owner workflow that cannot fit an existing surface.
+
+## Build 194 alignment
+
+Build 194 completed storefront discovery, Workshop Journal, buyer-facing product profiles, media-role scoring, featured creations, recently viewed, and quick shop filters. The next step is real profile/media data plus live device verification; see PROJECT_STATUS_AND_ROADMAP.md.

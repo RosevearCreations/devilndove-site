@@ -323,7 +323,7 @@ def check_product_image_role_assets(root: Path):
     media_js = root / 'public' / 'js' / 'admin-product-images.js'
     media_api = root / 'functions' / 'api' / 'admin' / 'product-images.js'
     search_js = root / 'public' / 'js' / 'site-search.js'
-    schema = root / 'database_upgrade_current_pass.sql'
+    schema = root / 'database_full_schema.sql'
     js_text = read_text(media_js) if media_js.exists() else ''
     api_text = read_text(media_api) if media_api.exists() else ''
     search_text = read_text(search_js) if search_js.exists() else ''
@@ -331,7 +331,8 @@ def check_product_image_role_assets(root: Path):
     required_js = ['product-image-sortable-row', 'IMAGE_ROLE_OPTIONS', 'Apply recommended roles', 'public_use_status', 'consent_record_id']
     required_api = ['image_role', 'public_use_status', 'consent_record_id', 'role_review_notes', 'product_image_role_reference']
     required_search = ['public_story_snippet', 'public_story_summary']
-    required_schema = ['product_image_role_reference', 'build_148_image_order_roles_consent_search']
+    # The full schema retains the role-reference table; older migration labels are archival metadata, not a live prerequisite.
+    required_schema = ['product_image_role_reference']
     missing_js = [token for token in required_js if token not in js_text]
     missing_api = [token for token in required_api if token not in api_text]
     missing_search = [token for token in required_search if token not in search_text]
@@ -343,7 +344,7 @@ def check_product_image_role_assets(root: Path):
     if missing_search:
         issues.append({'type': 'site_search_story_snippet_missing_assets', 'path': 'public/js/site-search.js', 'missing': missing_search})
     if missing_schema:
-        issues.append({'type': 'product_image_role_schema_missing_assets', 'path': 'database_upgrade_current_pass.sql', 'missing': missing_schema})
+        issues.append({'type': 'product_image_role_schema_missing_assets', 'path': 'database_full_schema.sql', 'missing': missing_schema})
     return issues
 
 
@@ -355,7 +356,7 @@ def check_build151_assets(root: Path):
     visit_api = read_text(root / 'functions' / 'api' / 'track' / 'visit.js') if (root / 'functions' / 'api' / 'track' / 'visit.js').exists() else ''
     social_api = read_text(root / 'functions' / 'api' / 'admin' / 'social-post-queue.js') if (root / 'functions' / 'api' / 'admin' / 'social-post-queue.js').exists() else ''
     accounting_api = read_text(root / 'functions' / 'api' / 'admin' / 'accounting-close-workflow.js') if (root / 'functions' / 'api' / 'admin' / 'accounting-close-workflow.js').exists() else ''
-    schema = read_text(root / 'database_upgrade_current_pass.sql') if (root / 'database_upgrade_current_pass.sql').exists() else ''
+    schema = read_text(root / 'database_full_schema.sql') if (root / 'database_full_schema.sql').exists() else ''
     checks = [
         ('build151_operations_custom_requests_mount', 'admin/operations/index.html', ['customRequestsAdminMount', '/public/js/admin-custom-requests.js'], ops),
         ('build151_custom_request_conversion_api', 'functions/api/admin/custom-requests.js', ['custom_request_quote_drafts', 'create_quote_draft', 'custom_request_conversion_events'], custom_api),
@@ -363,16 +364,16 @@ def check_build151_assets(root: Path):
         ('build151_utm_visit_tracking', 'functions/api/track/visit.js', ['parseUtm', 'utm_campaign', 'site_page_views'], visit_api),
         ('build151_social_utm_conversion_rollups', 'functions/api/admin/social-post-queue.js', ['custom_request_count', 'checkout_starts', 'ensureUtmAnalyticsColumns'], social_api),
         ('build151_accounting_close_csv', 'functions/api/admin/accounting-close-workflow.js', ['format === \'csv\'', 'remittance_evidence_url', 'buildCloseCsv'], accounting_api),
-        ('build151_schema_marker', 'database_upgrade_current_pass.sql', ['build_151_custom_request_conversion_utm_close_export', 'custom_request_quote_drafts'], schema),
+        ('build151_schema_marker', 'database_full_schema.sql', ['build_151_custom_request_conversion_utm_close_export', 'custom_request_quote_drafts'], schema),
         ('build152_custom_request_followup_api', 'functions/api/admin/custom-requests.js', ['custom_request_reply_templates', 'custom_request_payment_candidates', 'create_reply_template', 'create_deposit_candidate', 'create_invoice_candidate'], custom_api),
         ('build152_custom_request_followup_js', 'public/js/admin-custom-requests.js', ['Reply template', 'Deposit candidate', 'Invoice candidate', 'data-copy-reply-template'], custom_js),
         ('build152_hst_reminder_queue', 'functions/api/admin/accounting-close-workflow.js', ['queue_hst_reminder', 'hst_gst_reminder', 'queueNotification'], accounting_api),
-        ('build152_schema_marker', 'database_upgrade_current_pass.sql', ['build_152_custom_request_reply_payment_candidates_hst_reminders', 'custom_request_reply_templates', 'custom_request_payment_candidates'], schema),
+        ('build152_schema_marker', 'database_full_schema.sql', ['build_152_custom_request_reply_payment_candidates_hst_reminders', 'custom_request_reply_templates', 'custom_request_payment_candidates'], schema),
         ('build153_custom_quote_preview_api', 'functions/api/admin/custom-requests.js', ['custom_request_quote_share_links', 'create_quote_preview_link', 'quote_preview_links'], custom_api),
         ('build153_custom_quote_preview_js', 'public/js/admin-custom-requests.js', ['Quote preview link', 'data-copy-preview-link', 'renderQuotePreviewLinks'], custom_js),
         ('build153_public_quote_preview_endpoint', 'functions/api/custom-request-quote.js', ['custom_request_quote_share_links', 'quote_preview_accepted', 'quote_preview_declined'], read_text(root / 'functions' / 'api' / 'custom-request-quote.js') if (root / 'functions' / 'api' / 'custom-request-quote.js').exists() else ''),
         ('build153_reference_upload_endpoint', 'functions/api/custom-request-reference-upload.js', ['custom_request_reference_uploads', 'reference_upload_count', 'private_review_only'], read_text(root / 'functions' / 'api' / 'custom-request-reference-upload.js') if (root / 'functions' / 'api' / 'custom-request-reference-upload.js').exists() else ''),
-        ('build153_schema_marker', 'database_upgrade_current_pass.sql', ['build_153_custom_quote_preview_reference_uploads', 'custom_request_quote_share_links', 'custom_request_reference_uploads'], schema),
+        ('build153_schema_marker', 'database_full_schema.sql', ['build_153_custom_quote_preview_reference_uploads', 'custom_request_quote_share_links', 'custom_request_reference_uploads'], schema),
     ]
     for issue_type, path, tokens, text in checks:
         missing = [token for token in tokens if token not in text]

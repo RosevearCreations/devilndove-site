@@ -1,43 +1,37 @@
-# Devil n Dove Markdown Index — Build 193
+# Devil n Dove Markdown Index — Build 194
 
 ## Canonical first-read files
 
-1. `PROJECT_STATUS_AND_ROADMAP.md` — human/business roadmap, current state, completed work, risks, and next steps.
-2. `AI_HANDOFF.md` — technical handoff, architecture, migration order, live checks, and next-AI instructions.
+1. `PROJECT_STATUS_AND_ROADMAP.md` — human/business roadmap, completed work, risks, and next steps.
+2. `AI_HANDOFF.md` — technical handoff, architecture, migration order, routes, rules, and next-AI instructions.
 
-These are the only two files that should be treated as the primary current project direction.
+These are the only two files that define the current project direction.
 
 ## Active operational references
 
-- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — where bindings, variables, and self-generated secrets come from.
-- `LIVE_TESTING_GUIDE.md` — step-by-step owner tests for live D1/R2/Stripe/email/Search Console/GBP/device verification.
-- `DATABASE_SCHEMA_REFERENCE.md` — current schema and migration summary.
-- `SANITY_HEALTH_CHECK.md` — validation history and live-only limitations.
+- `BUILD194_TESTING_GUIDE.md` — owner checks for homepage, shop, Quick Facts, media roles, Workshop Journal, and SEO basics.
+- `LIVE_TESTING_GUIDE.md` — owner checks for live D1/R2/Stripe/email/Search Console/GBP/device verification.
+- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — bindings, variables, self-generated secrets, and where values come from.
+- `DATABASE_SCHEMA_REFERENCE.md` — full schema/migration reference. Use `database_full_schema.sql` as the standalone fresh-database source; core/extension files are layered references.
+- `SANITY_HEALTH_CHECK.md` — current local validation and live-only limits.
 - `POST_DEPLOY_SMOKE_TEST.md` — deployed verification steps.
 - `LOCAL_SEO_PLAYBOOK.md` — local-search content, Search Console, GBP, and evidence rules.
 - `IMAGES.md` — consent, image roles, compression, alt text, visual QA, approved gallery proof, and placeholder replacement.
-- `COMPETITIVE.md` — supporting current market/platform research.
+- `COMPETITIVE.md` — supporting market/platform research.
 - `RELEASE_NOTES.md` — release history.
 - `README.md` — repository entry point.
-- `REPO_RULES.md` and `REPO_BASE_GUIDE.md` — repository handling rules.
-- `AMAZON_MATCHING_NOTES.md` — inventory matching reference only.
 
-## Retired root pointers
+## Pointer/legacy reference files
 
-- `DEVELOPMENT_ROADMAP.md` — concise Build 191 completion pointer; canonical next work is in `PROJECT_STATUS_AND_ROADMAP.md`.
-- `KNOWN_GAPS_AND_RISKS.md` — concise current risk pointer.
-- `AI_CONTEXT.md` — pointer to `AI_HANDOFF.md`.
-- `NEW_CHAT_STATUS.md` — pointer to `AI_HANDOFF.md`.
+- `DEVELOPMENT_ROADMAP.md` — brief pointer to the canonical roadmap.
+- `KNOWN_GAPS_AND_RISKS.md` — concise risk pointer.
+- `AI_CONTEXT.md` and `NEW_CHAT_STATUS.md` — pointers to `AI_HANDOFF.md`.
+- `REPO_RULES.md`, `REPO_BASE_GUIDE.md`, and `AMAZON_MATCHING_NOTES.md` — specialist repository/inventory references.
 
 ## Historical archive
 
-Historical files through Build 189 are under `docs/archive/`. Do not use archived lists as the current backlog unless researching why a feature exists.
+Historical planning files through Build 189 are under `docs/archive/`. Do not use archived lists as a current backlog unless researching why a feature exists.
 
 ## Documentation rule
 
-Every build updates the two canonical files, this index, schema reference, release notes, sanity health check, smoke-test instructions, and any operational reference affected by the change. Avoid creating a new Markdown file unless it has a distinct long-term purpose.
-
-
-## Build 193 note
-
-The project still uses `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` as the two main handoff files. `LIVE_TESTING_GUIDE.md` is the operational companion for live-only verification. Supporting Markdown files remain for specialized detail until real Command Center usage shows which documents can be safely retired.
+Every build updates the two canonical files, this index, schema reference, release notes, sanity health check, smoke-test instructions, and any operational reference affected by the change. Do not create a new Markdown file unless it has a distinct long-term owner/testing purpose.

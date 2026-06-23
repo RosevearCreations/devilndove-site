@@ -629,3 +629,7 @@ database_build192_operational_data_connection.sql
 ## Build 193 — mobile resume and real-media replacement
 
 For large or unreliable-phone image uploads, first save/reopen a text-only draft and use the Resumable image upload panel. It stores R2 multipart progress, not browser image bytes. After a reload, reselect the same file to continue. Replace placeholders only after ownership/consent, alt text, compression, mobile review, and publication approval.
+
+## Build 194 alignment
+
+Build 194 adds media roles: main, close-up, scale, back/side, process, packaging, social share, and optional video. Assign them in /admin/catalog-media/; only assigned approved real media replaces matching public proof placeholders.

@@ -71,6 +71,18 @@ REQUIRED_FILES = [
     'LIVE_TESTING_GUIDE.md',
     'data/site/build193-live-readiness-playbook.json',
     'data/site/build193-validation.json',
+    'database_build194_storefront_discovery_product_facts_media_roles.sql',
+    'functions/api/featured-products.js',
+    'functions/api/admin/product-listing-profiles.js',
+    'functions/api/admin/product-media-score.js',
+    'public/js/home-featured-products.js',
+    'public/js/recently-viewed-products.js',
+    'public/js/admin-product-listing-profiles.js',
+    'public/js/admin-product-media-score.js',
+    'workshop-journal/index.html',
+    'BUILD194_TESTING_GUIDE.md',
+    'data/site/build194-storefront-discovery.json',
+    'data/site/build194-validation.json',
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 

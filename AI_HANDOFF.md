@@ -1,39 +1,65 @@
-# Devil n Dove AI Handoff — Build 193
+# Devil n Dove AI Handoff — Build 194
 
-Read this first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, and `LIVE_TESTING_GUIDE.md`.
+Read this first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, `BUILD194_TESTING_GUIDE.md`, and `LIVE_TESTING_GUIDE.md`.
 
 ## Current build
 
-Build 193 adds two important integrations:
+Build 194 improves customer-facing store discovery and buyer-question clarity without bypassing existing consent, product QA, or release-control workflows.
 
-1. `/api/admin/live-readiness-playbook` and `public/js/admin-live-readiness-playbook.js`, shown inside `/admin/command-center/`. It provides detailed live-only testing steps, status recording, evidence URLs, runs, Markdown export, and usage telemetry.
-2. `/api/admin/mobile-resumable-upload` and `public/js/admin-mobile-resumable-upload.js`, shown inside `/admin/mobile-product/`. It uses R2 multipart uploads so completed image chunks are not resent after a connection interruption.
+New public routes:
+
+- `/workshop-journal/`
+- `/workshop-journal/polymer-clay-earring-care/`
+- `/workshop-journal/coin-and-spoon-ring-care/`
+- `/workshop-journal/handmade-vintage-sourced-guide/`
+
+New APIs:
+
+- `/api/featured-products`
+- `/api/admin/product-listing-profiles`
+- `/api/admin/product-media-score`
+
+New D1 migration:
+
+```text
+database_build194_storefront_discovery_product_facts_media_roles.sql
+```
+
+Public rules:
+
+- Only listing profiles with `profile_status` `approved` or `published` render as public Quick Facts.
+- Only explicitly assigned media roles replace public placeholders.
+- Product video must be HTTPS and suitable for public viewing.
+- Customer media remains private until consent/public-use approval exists.
+- Recently viewed data is browser-local only; do not turn it into cross-device tracking without a future privacy review.
 
 ## Primary routes
 
-- `/admin/command-center/` — daily operations plus Build 190–193 integrated panels.
-- `/admin/mobile-product/` — phone product draft capture and the Build 193 safer large-photo uploader.
+- `/admin/command-center/` — daily operations, live readiness, cost/fee, SEO, media, and consolidation evidence.
+- `/admin/catalog-media/` — product image health, listing facts, and Build 194 media-role scoring.
+- `/admin/mobile-product/` — phone product draft capture and resumable large-photo uploader.
 - `/admin/products/` — desktop product editor.
 - `/admin/local-seo-review/` — Search Console and local SEO review.
 - `/admin/marketplace-exports/` — channel exports with margin gates.
-- `/admin/visual-enrichment-studio/` — visual/media controls.
-- `/admin/live-ops-followthrough/` — provider/R2/live configuration records.
-- `/admin/post-deploy-smoke-tests/` — deployed checks.
+- `/admin/visual-enrichment-studio/` — visual/media governance.
+- `/admin/deployment-preflight/` — static and release checks.
 
 ## Important APIs
 
 - `/api/auth/login` — must return JSON; root `_routes.json` must include `/api/*`.
-- `/api/admin/value-ops` — Build 190 integrated values.
-- `/api/admin/value-ops-followthrough` — Build 191 settings, approvals, imports, D1 draft and evidence workflows.
-- `/api/admin/value-ops-next` — Build 192 schedules, readiness checks, GBP evidence, duplicate candidates, provider checks.
-- `/api/admin/live-readiness-playbook` — Build 193 detailed test cases/runs/evidence.
-- `/api/admin/mobile-resumable-upload` — Build 193 R2 multipart mobile image upload.
-- `/api/before-after-gallery` — public read-only approved/consented gallery proof.
+- `/api/featured-products` — public approved active featured product cards; safe empty fallback.
+- `/api/product-detail` — returns approved listing profile only.
+- `/api/admin/product-listing-profiles` — admin listing facts workflow.
+- `/api/admin/product-media-score` — admin image-role assignment and score workflow.
+- `/api/admin/value-ops` — integrated command-center operations.
+- `/api/admin/live-readiness-playbook` — detailed live test cases/runs/evidence.
+- `/api/admin/mobile-resumable-upload` — R2 multipart mobile upload.
+- `/api/before-after-gallery` — public approved/consented gallery proof only.
 - `/api/admin/marketplace-export-preview` — marketplace CSV with margin enforcement.
 
 ## D1 migration order
 
-Run only missing migrations. Do not blindly rerun old non-idempotent migrations.
+Run only missing migrations. Do not blindly rerun older non-idempotent migrations.
 
 ```text
 database_build171_ledger_repair.sql only if Build 171 schema exists but the marker is missing
@@ -56,6 +82,7 @@ database_build190_integrated_value_operations.sql
 database_build191_value_operations_followthrough.sql
 database_build192_operational_data_connection.sql
 database_build193_live_readiness_playbook.sql
+database_build194_storefront_discovery_product_facts_media_roles.sql
 ```
 
 Builds 187 and 188 were routing/environment hotfixes without D1 migrations.
@@ -68,21 +95,22 @@ Builds 187 and 188 were routing/environment hotfixes without D1 migrations.
 - Marketplace exports stay blocked for unhealthy/unknown margin unless a current reviewed override exists.
 - Review eligibility is not permission to contact.
 - Customer stories, gallery proof, and customer photographs require consent/public-use approval.
-- Placeholders are layout scaffolding, not real proof.
+- Placeholders are layout scaffolding, not proof.
 - Mobile recovery stores fields; user must reselect image files after browser reload.
 - Resumable image uploads require an R2 binding and an already-saved product draft.
 - Environment views must never reveal secret values.
 - Do not merge customer duplicates automatically.
 
-## Live deployment/testing order
+## Build 194 owner test order
 
-1. Apply `database_build193_live_readiness_playbook.sql` after Build 192.
+1. Apply `database_build194_storefront_discovery_product_facts_media_roles.sql` after Build 193.
 2. Confirm `/api/auth/login` returns JSON.
 3. Confirm `DB` and `PRODUCT_MEDIA_BUCKET` bindings in Cloudflare Pages.
-4. Open `/admin/command-center/` and record the first cost/fee, marketplace, and local SEO checks.
-5. Open `/admin/mobile-product/`; save/reopen a text-only draft, then test a non-sensitive resumable image.
-6. Use `LIVE_TESTING_GUIDE.md` or the Command Center playbook for all live-only verification.
-7. Run deployment preflight and smoke tests before promotion.
+4. Open `/admin/catalog-media/` and create one draft listing profile for a test product.
+5. Confirm draft Quick Facts do not appear publicly; approve only correct facts.
+6. Assign media roles for a well-photographed test product and confirm public proof slots change safely.
+7. Test homepage Featured Creations, Shop quick filters, recently viewed items, and Workshop Journal pages on phone and desktop.
+8. Run `/admin/deployment-preflight/` and record evidence using `BUILD194_TESTING_GUIDE.md`.
 
 ## Documentation policy
 

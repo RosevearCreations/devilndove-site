@@ -28,3 +28,7 @@ Canonical direction: read `PROJECT_STATUS_AND_ROADMAP.md` first. Use `LIVE_TESTI
 ## Documentation rule
 
 The two canonical files are `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md`. `MARKDOWN_INDEX.md` identifies supporting references; do not create another general roadmap file.
+
+## Build 194 alignment
+
+Build 194 note: placeholders are intentionally still present until real images have consent, descriptive alt text, compression, role assignment, and device/performance review. Product Quick Facts remain hidden until an admin profile is approved.

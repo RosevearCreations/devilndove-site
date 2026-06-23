@@ -236,3 +236,12 @@ The same test cards are available inside:
 - Etsy Seller Handbook listing photography and title guidance
 
 See `LOCAL_SEO_PLAYBOOK.md` and `COMPETITIVE.md` for project-specific notes.
+
+## Build 194 alignment
+
+This is a supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current decisions; preserve this document for specialist history and handoff detail.
+
+
+## Build 194 testing reference
+
+Use `BUILD194_TESTING_GUIDE.md` after deployment for the homepage, shop quick filters, product listing facts, media-role scoring, workshop journal, visual placeholders, and SEO/H1 verification.

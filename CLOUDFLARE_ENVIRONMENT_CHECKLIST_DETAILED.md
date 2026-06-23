@@ -872,3 +872,7 @@ A public-ish value may still be stored encrypted if Cloudflare only enables encr
 ## Build 191 in-app verification
 
 After the environment variables/bindings are saved and the site is redeployed, open `/admin/command-center/` and use **Verify environment settings**. This records whether D1, R2, Stripe, Stripe webhook secret, email-provider configuration, Cloudflare API settings, public URL, and session secret appear configured. It does not expose secret values and does not replace live provider tests.
+
+## Build 194 alignment
+
+This is a supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current decisions; preserve this document for specialist history and handoff detail.

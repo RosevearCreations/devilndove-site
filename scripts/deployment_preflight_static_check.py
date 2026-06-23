@@ -25,6 +25,10 @@ PUBLIC_PAGES = [
     ('custom-soap-making-ontario/index.html', ['soap', 'ontario']),
     ('vintage-finds-ontario/index.html', ['vintage', 'ontario']),
     ('workshop-made-gifts-ontario/index.html', ['workshop', 'gifts', 'ontario']),
+    ('workshop-journal/index.html', ['workshop', 'journal']),
+    ('workshop-journal/polymer-clay-earring-care/index.html', ['polymer', 'clay', 'care']),
+    ('workshop-journal/coin-and-spoon-ring-care/index.html', ['coin', 'spoon', 'ring', 'care']),
+    ('workshop-journal/handmade-vintage-sourced-guide/index.html', ['handmade', 'vintage', 'sourced']),
 ]
 JSON_FILES = [
     'data/site/seo-page-overrides.json',
@@ -48,6 +52,8 @@ JSON_FILES = [
     'data/site/build192-validation.json',
     'data/site/build193-live-readiness-playbook.json',
     'data/site/build193-validation.json',
+    'data/site/build194-storefront-discovery.json',
+    'data/site/build194-validation.json',
 ]
 REQUIRED_FILES = [
     'database_build171_ledger_repair.sql',
@@ -114,6 +120,16 @@ REQUIRED_FILES = [
     'functions/api/admin/mobile-resumable-upload.js',
     'public/js/admin-mobile-resumable-upload.js',
     'LIVE_TESTING_GUIDE.md',
+    'BUILD194_TESTING_GUIDE.md',
+    'database_build194_storefront_discovery_product_facts_media_roles.sql',
+    'functions/api/featured-products.js',
+    'functions/api/admin/product-listing-profiles.js',
+    'functions/api/admin/product-media-score.js',
+    'public/js/home-featured-products.js',
+    'public/js/recently-viewed-products.js',
+    'public/js/admin-product-listing-profiles.js',
+    'public/js/admin-product-media-score.js',
+    'workshop-journal/index.html',
 ]
 
 def read(path: Path) -> str:
@@ -155,7 +171,9 @@ def schema_rows(text: str) -> list[dict]:
 def image_alt_rows(text: str) -> list[dict]:
     rows=[]
     for tag in re.findall(r'<img\b[^>]*>', text, re.I|re.S):
-        rows.append({'src': attr(tag, 'src'), 'has_alt': bool(attr(tag, 'alt'))})
+        alt_value=attr(tag, 'alt')
+        decorative=bool(re.search(r'aria-hidden\s*=\s*(["\'])true\1', tag, re.I)) or bool(re.search(r'role\s*=\s*(["\'])(presentation|none)\1', tag, re.I))
+        rows.append({'src': attr(tag, 'src'), 'has_alt': bool(alt_value) or decorative, 'decorative': decorative})
     return rows
 
 def check_pages(checks: list[dict]) -> None:
@@ -242,6 +260,10 @@ def check_schema_files(checks: list[dict]) -> None:
         'live_readiness_test_cases',
         'mobile_resumable_upload_runtime_rows',
         'mobile_resumable_upload_parts',
+        'build_194_storefront_discovery_product_facts_media_roles',
+        'product_listing_profiles',
+        'product_media_role_assignments',
+        'storefront_discovery_audit_rows',
     ]
     required = {
         'database_schema.sql': schema_needles,
@@ -266,6 +288,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build191_value_operations_followthrough.sql': ['marketplace_channel_fee_settings', 'mobile_product_server_drafts', 'approved_before_after_gallery_items', 'build_191_value_operations_followthrough'],
         'database_build192_operational_data_connection.sql': ['r2_derivative_worker_readiness_checks', 'mobile_resumable_upload_sessions', 'customer_duplicate_merge_candidates', 'build_192_operational_data_connection'],
         'database_build193_live_readiness_playbook.sql': ['live_readiness_test_cases', 'live_readiness_test_runs', 'mobile_resumable_upload_runtime_rows', 'mobile_resumable_upload_parts', 'build_193_live_readiness_playbook'],
+        'database_build194_storefront_discovery_product_facts_media_roles.sql': ['product_listing_profiles', 'product_media_role_assignments', 'storefront_discovery_audit_rows', 'build_194_storefront_discovery_product_facts_media_roles'],
     }
     missing=[]
     detail=[]
@@ -275,7 +298,7 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 193 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 194 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
 
 def main() -> int:
     checks=[]
@@ -286,7 +309,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 193','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 194','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
