@@ -277,12 +277,14 @@ def check_schema_files(checks: list[dict]) -> None:
         'product_deletion_audit',
         'site_inventory_item_descriptions',
         'build_195_product_lifecycle_sku_inventory_cards',
+        'product_material_return_audit',
+        'build_196_product_correction_material_returns',
     ]
     required = {
         'database_schema.sql': schema_needles,
         'database_full_schema.sql': schema_needles,
         'database_store_schema.sql': schema_needles,
-        'database_upgrade_current_pass.sql': ['application_sanity_snapshots', 'value_added_modification_candidates', 'build_184_sanity_check_and_value_roadmap', 'catalog_product_number_sequence', 'product_deletion_audit', 'site_inventory_item_descriptions', 'build_195_product_lifecycle_sku_inventory_cards'],
+        'database_upgrade_current_pass.sql': ['application_sanity_snapshots', 'value_added_modification_candidates', 'build_184_sanity_check_and_value_roadmap', 'catalog_product_number_sequence', 'product_deletion_audit', 'site_inventory_item_descriptions', 'build_195_product_lifecycle_sku_inventory_cards', 'product_material_return_audit', 'build_196_product_correction_material_returns'],
         'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
         'database_build182_mobile_visual_polish.sql': ['desktop_mobile_parity_checks', 'visual_enrichment_candidates', 'build_182_mobile_visual_polish'],
         'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
@@ -303,6 +305,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build193_live_readiness_playbook.sql': ['live_readiness_test_cases', 'live_readiness_test_runs', 'mobile_resumable_upload_runtime_rows', 'mobile_resumable_upload_parts', 'build_193_live_readiness_playbook'],
         'database_build194_storefront_discovery_product_facts_media_roles.sql': ['product_listing_profiles', 'product_media_role_assignments', 'storefront_discovery_audit_rows', 'build_194_storefront_discovery_product_facts_media_roles'],
         'database_build195_product_lifecycle_sku_inventory_cards.sql': ['catalog_product_number_sequence', 'product_deletion_audit', 'site_inventory_item_descriptions', 'build_195_product_lifecycle_sku_inventory_cards'],
+        'database_build196_product_correction_material_returns.sql': ['product_material_return_audit', 'build_196_product_correction_material_returns'],
     }
     missing=[]
     detail=[]

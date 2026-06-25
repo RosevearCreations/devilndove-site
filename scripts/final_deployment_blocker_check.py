@@ -92,6 +92,12 @@ REQUIRED_FILES = [
     'BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md',
     'data/site/build195-product-lifecycle.json',
     'data/site/build195-validation.json',
+    'database_build196_product_correction_material_returns.sql',
+    'functions/api/admin/delete-product.js',
+    'public/js/admin-product-correction.js',
+    'BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md',
+    'data/site/build196-product-correction-material-return.json',
+    'data/site/build196-validation.json',
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 

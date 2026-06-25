@@ -1,15 +1,17 @@
-# Devil n Dove AI Handoff — Build 195
+# Devil n Dove AI Handoff — Build 196
 
-Read this first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md`, `BUILD194_TESTING_GUIDE.md`, and `LIVE_TESTING_GUIDE.md`.
+Read this first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md`, `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md`, `BUILD194_TESTING_GUIDE.md`, and `LIVE_TESTING_GUIDE.md`.
 
 ## Current build
 
-Build 195 fixes practical product and inventory administration pain points without bypassing existing product QA, consent, release, or data-retention safeguards.
+Build 196 corrects the visible product-correction path: an editor-level panel now previews linked raw inventory and requires explicit reviewed reservation-release or physical-return quantities before unused-product deletion. It also returns the inventory display to a single item name directly below each image.
 
 New D1 migration:
 
 ```text
 database_build195_product_lifecycle_sku_inventory_cards.sql
+database_build196_product_correction_material_returns.sql
+database_build196_product_correction_material_returns.sql
 ```
 
 New operating rules:
@@ -21,13 +23,15 @@ New operating rules:
 - Incorrect unused products can be permanently deleted only after admin step-up password, exact `DELETE PRODUCT` phrase, and a reason.
 - Products with order/history/reference records are blocked from deletion and must be archived.
 - Permanent deletion writes a factual `product_deletion_audit` record.
-- Tool/supply long names remain the title; a separate `site_inventory_item_descriptions` record supplies readable text below the image.
+- Tool/supply item names now render directly below their image. Legacy `site_inventory_item_descriptions` data is retained but no longer rendered or overwritten by ordinary edits.
+- `/api/admin/delete-product` now supports a GET correction preview plus explicit `material_actions` in the guarded POST delete flow.
+- `product_material_return_audit` records every reviewed reservation release or returned raw supply quantity.
 
 ## Primary routes
 
-- `/admin/products/` — desktop product editor and guarded delete/archiving direction.
+- `/admin/products/` — desktop product editor with visible **Correct / return raw inventory** panel after loading an existing product.
 - `/admin/catalog/` — catalog/product administration and System #/SKU explanation.
-- `/admin/site-item-inventory/` — tools/consumables inventory; description appears below image.
+- `/admin/site-item-inventory/` — tools/consumables inventory; item name appears directly below image.
 - `/admin/command-center/` — daily operations, cost/fee, SEO, media, live readiness, and consolidation evidence.
 - `/admin/catalog-media/` — product image health, listing facts, and media-role scoring.
 - `/admin/mobile-product/` — phone product draft capture and resumable large-photo uploader.
@@ -39,7 +43,7 @@ New operating rules:
 - `/api/auth/login` — must return JSON; root `_routes.json` must include `/api/*`.
 - `/api/admin/create-product` — desktop product creation with permanent system number and automatic SKU when blank.
 - `/api/admin/mobile-create-product` — mobile product creation with same sequence rules.
-- `/api/admin/delete-product` — POST only; requires admin step-up, confirmation phrase, and reason; blocks referenced products.
+- `/api/admin/delete-product` — GET previews linked raw inventory; POST requires admin step-up, confirmation phrase, and reason; it can apply explicit reviewed material actions before deleting an unused product.
 - `/api/admin/site-item-inventory` — tools/supplies inventory including `item_description` sidecar data.
 - `/api/admin/product-listing-profiles` — admin listing facts workflow.
 - `/api/admin/product-media-score` — admin image-role assignment and score workflow.
@@ -99,8 +103,8 @@ Builds 187 and 188 were routing/environment hotfixes without D1 migrations.
 3. Create one clearly marked test draft with blank SKU and record its System #/automatic SKU.
 4. Use **Delete unused** on that product: password, reason, phrase `DELETE PRODUCT`.
 5. Create a second test draft and verify System # increased rather than reused.
-6. Add/edit an inventory description and confirm it appears below the picture on desktop and phone.
-7. Use `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md` for detailed expected results and cleanup.
+6. Confirm the item name appears directly below the picture on desktop and phone; no short-description block is shown.
+7. Use `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md`, `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` for detailed expected results and cleanup.
 8. Run `/admin/deployment-preflight/` and save evidence.
 
 ## Documentation policy
