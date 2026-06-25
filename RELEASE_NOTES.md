@@ -1,48 +1,8 @@
-# Build 194 Release Notes
+# Build 195
 
 ## Summary
 
-- Added customer-facing storefront discovery: clearer homepage hero and calls to action, What We Make cards, workshop process strip, featured creations, and Workshop Journal guides.
-- Added buyer-question product listing profiles and public Quick Facts gated behind approved/published status.
-- Added media-role coverage scoring and safe role-to-public-placeholder replacement inside Catalog Media.
-- Added mobile-friendly shop quick filters and browser-local recently viewed items.
-- Added `database_build194_storefront_discovery_product_facts_media_roles.sql`, Build 194 audit rows, canonical Markdown consolidation, and detailed owner testing steps.
-
-## Required post-deploy action
-
-- Run `database_build194_storefront_discovery_product_facts_media_roles.sql` after Build 193.
-- Follow `BUILD194_TESTING_GUIDE.md` before treating customer-facing facts or photo roles as complete.
-
-## Validation
-
-- Static deployment preflight, final blocker, predeploy sanity, JavaScript/Python/JSON/HTML/CSS checks, full schema, and Build 193→194 migration rerun are recorded in `data/site/build194-validation.json`.
-
----
-
-# Release Notes — Devil n Dove
-
-## Build 193 — Live readiness playbook and resumable mobile media
-
-- Added Command Center live-readiness cases with detailed owner instructions, evidence links, status, and run history.
-- Added R2 multipart/resume mobile media API and phone UI.
-- Added safe product-image attachment after completed multipart uploads.
-- Added Command Center usage telemetry for evidence-based legacy admin consolidation.
-- Added `LIVE_TESTING_GUIDE.md` and refreshed the canonical roadmap/handoff documents.
-
-# Build 191
-
-## Summary
-
-- Configurable marketplace fee settings and product-family cost defaults
-- Hard margin gates with temporary approval history
-- Customer timeline notes and story-output drafts
-- Search Console CSV mapping previews and GBP monthly tasks
-- Review-request eligibility checks
-- Consented before/after gallery publication workflow
-- D1-backed mobile product draft recovery
-- Deployed performance imports and responsive-image job queue
-- Owner Daily summary exports and campaign readiness
-- Real-device QA and live-environment verification
+- Added guarded unused-product deletion with audit trail and archive fallback, persistent product-number sequencing, automatic DND SKU defaults when blank, and separate inventory descriptions shown below item photos with responsive long-name layout.
 
 ## Release package manifest
 
@@ -54,12 +14,15 @@
 - `AI_CONTEXT.md`
 - `AI_HANDOFF.md`
 - `AMAZON_MATCHING_NOTES.md`
+- `BUILD194_TESTING_GUIDE.md`
+- `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md`
 - `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md`
 - `COMPETITIVE.md`
 - `DATABASE_SCHEMA_REFERENCE.md`
 - `DEVELOPMENT_ROADMAP.md`
 - `IMAGES.md`
 - `KNOWN_GAPS_AND_RISKS.md`
+- `LIVE_TESTING_GUIDE.md`
 - `LOCAL_SEO_PLAYBOOK.md`
 - `MARKDOWN_INDEX.md`
 - `NEW_CHAT_STATUS.md`
@@ -70,95 +33,555 @@
 - `REPO_BASE_GUIDE.md`
 - `REPO_RULES.md`
 - `SANITY_HEALTH_CHECK.md`
+- `admin/accounting/index.html`
+- `admin/analytics/index.html`
+- `admin/application-sanity/index.html`
+- `admin/catalog/index.html`
+- `admin/catalog-media/index.html`
 - `admin/command-center/index.html`
+- `admin/dark-theme-evidence/index.html`
+- `admin/deploy-readiness/index.html`
+- `admin/deployment-preflight/index.html`
+- `admin/gift-cards/index.html`
+- `admin/go-live-execution/index.html`
+- `admin/index.html`
+- `admin/inventory-operations/index.html`
+- `admin/live-ops-followthrough/index.html`
+- `admin/local-seo-review/index.html`
+- `admin/markdown-sanity/index.html`
+- `admin/marketplace-exports/index.html`
+- `admin/marketplace-mapping/index.html`
+- `admin/members/index.html`
+- `admin/membership/index.html`
+- `admin/mobile/index.html`
+- `admin/mobile-inventory/index.html`
 - `admin/mobile-product/index.html`
+- `admin/movies/index.html`
+- `admin/operations/index.html`
+- `admin/orders/index.html`
+- `admin/post-deploy-smoke-tests/index.html`
 - `admin/products/index.html`
+- `admin/promotion-control/index.html`
+- `admin/public-proof-candidates/index.html`
+- `admin/readiness/index.html`
+- `admin/release-control/index.html`
+- `admin/release-notes/index.html`
+- `admin/safe-deploy-package/index.html`
+- `admin/stage-photo-moderation/index.html`
+- `admin/trust-blocks/index.html`
+- `admin/users/index.html`
+- `admin/visual-enrichment-studio/index.html`
+- `admin/visual-polish/index.html`
+- `assets/banner-spicing-it-up.png`
+- `assets/banner-spicing-it-up.webp`
+- `assets/free-shipping.png`
+- `assets/gift-card-art.svg`
+- `assets/gift-card-placeholder.svg`
+- `assets/hero-workshop.webp`
+- `assets/icons/icon-180.png`
+- `assets/icons/icon-192.png`
+- `assets/icons/icon-512.png`
+- `assets/logo-clear-nav.webp`
+- `assets/logo-clear.png`
+- `assets/logo-full.png`
+- `assets/logo.png`
+- `assets/mainpage-collage.jpeg`
+- `assets/mainpage-collage.webp`
+- `assets/mark-display.webp`
+- `assets/mark.png`
+- `assets/visual-placeholders/before-after.svg`
+- `assets/visual-placeholders/candle-colour.svg`
+- `assets/visual-placeholders/engraving-proof.svg`
+- `assets/visual-placeholders/jewelry-macro.svg`
+- `assets/visual-placeholders/mobile-upload-safety.svg`
+- `assets/visual-placeholders/product-care.svg`
+- `assets/visual-placeholders/product-detail.svg`
+- `assets/visual-placeholders/product-material.svg`
+- `assets/visual-placeholders/product-media-roles.svg`
+- `assets/visual-placeholders/product-process.svg`
+- `assets/visual-placeholders/product-scale.svg`
+- `assets/visual-placeholders/soap-texture.svg`
+- `assets/visual-placeholders/vintage-condition.svg`
+- `assets/visual-placeholders/workshop-discovery.svg`
+- `assets/visual-placeholders/workshop-journal.svg`
+- `assets/visual-placeholders/workshop-process.svg`
 - `css/styles.css`
-- `custom-gifts-southern-ontario/index.html`
+- `data/accounting_templates/README.md`
+- `data/site/build178-release-controls.json`
+- `data/site/build179-promotion-control.json`
+- `data/site/build180-go-live-execution.json`
+- `data/site/build181-live-ops-followthrough.json`
+- `data/site/build182-mobile-visual-polish.json`
+- `data/site/build183-visual-enrichment-studio.json`
+- `data/site/build184-application-sanity.json`
+- `data/site/build185-command-center.json`
+- `data/site/build186-markdown-sanity.json`
+- `data/site/build189-value-ops.json`
+- `data/site/build190-changed-files.json`
+- `data/site/build190-integrated-value-ops.json`
+- `data/site/build190-performance-report.json`
 - `data/site/build191-changed-files.json`
 - `data/site/build191-validation.json`
 - `data/site/build191-value-operations-followthrough.json`
+- `data/site/build192-changed-files.json`
+- `data/site/build192-operational-data-connection.json`
+- `data/site/build192-validation.json`
+- `data/site/build193-changed-files.json`
+- `data/site/build193-live-readiness-playbook.json`
+- `data/site/build193-validation.json`
+- `data/site/build194-changed-files.json`
+- `data/site/build194-storefront-discovery.json`
+- `data/site/build194-validation.json`
+- `data/site/build195-product-lifecycle.json`
+- `data/site/build195-validation.json`
+- `data/site/competitive-opportunities.json`
 - `data/site/deployment-preflight.json`
+- `data/site/featured-items.json`
+- `data/site/local-business-schema.json`
+- `data/site/local-seo-bake-actions.json`
+- `data/site/local-trust.json`
 - `data/site/release-notes.json`
-- `data/site/release-package-manifest.json`
+- `data/site/seo-page-overrides.json`
+- `data/site/social-feed.json`
+- `data/site/workshop-journal-topics.json`
+- `database_access_tiers.sql`
+- `database_admin_seed_template.sql`
+- `database_amazon_purchase_import_staging.sql`
+- `database_build171_ledger_repair.sql`
+- `database_build173_deployment_preflight.sql`
+- `database_build174_deployment_preflight_detail.sql`
+- `database_build175_release_control.sql`
+- `database_build176_release_safety_controls.sql`
+- `database_build177_deploy_score_and_controls.sql`
+- `database_build178_promote_live_controls.sql`
+- `database_build179_promotion_control.sql`
+- `database_build180_go_live_execution.sql`
+- `database_build181_live_ops_followthrough.sql`
+- `database_build182_mobile_visual_polish.sql`
+- `database_build183_visual_enrichment_studio.sql`
+- `database_build184_sanity_check_and_value_roadmap.sql`
+- `database_build185_admin_command_center_value_dashboards.sql`
+- `database_build186_markdown_consolidation_visual_placeholders.sql`
+- `database_build189_value_ops_live_counts.sql`
+- `database_build190_integrated_value_operations.sql`
 - `database_build191_value_operations_followthrough.sql`
+- `database_build192_operational_data_connection.sql`
+- `database_build193_live_readiness_playbook.sql`
+- `database_build194_storefront_discovery_product_facts_media_roles.sql`
+- `database_build195_product_lifecycle_sku_inventory_cards.sql`
 - `database_full_schema.sql`
+- `database_growth_analytics_seo_extension.sql`
+- `database_inventory_stock_unit_quick_fix.sql`
+- `database_payments_extension.sql`
+- `database_profiles_extension.sql`
 - `database_schema.sql`
 - `database_store_schema.sql`
 - `database_upgrade_current_pass.sql`
+- `functions/api/_communityContent.js`
+- `functions/api/_lib/accounting.js`
+- `functions/api/_lib/adminAudit.js`
+- `functions/api/_lib/adminStepUp.js`
+- `functions/api/_lib/notificationOutbox.js`
+- `functions/api/_lib/passwordHash.js`
+- `functions/api/admin/_accountingAttachments.js`
+- `functions/api/admin/_accountingGifi.js`
+- `functions/api/admin/_accountingPeriods.js`
+- `functions/api/admin/_accountingReconciliation.js`
+- `functions/api/admin/_accountingStatementImports.js`
+- `functions/api/admin/_accountingVendors.js`
+- `functions/api/admin/_amazonInventoryMatches.js`
+- `functions/api/admin/_catalog-options.js`
+- `functions/api/admin/_costing.js`
+- `functions/api/admin/_inventoryCostHistory.js`
+- `functions/api/admin/_product-numbering.js`
+- `functions/api/admin/access-tiers.js`
+- `functions/api/admin/accounting-attachments.js`
+- `functions/api/admin/accounting-close-workflow.js`
+- `functions/api/admin/accounting-evidence-attachments.js`
+- `functions/api/admin/accounting-evidence-check.js`
+- `functions/api/admin/accounting-expenses.js`
+- `functions/api/admin/accounting-fixed-assets.js`
+- `functions/api/admin/accounting-gifi-notes.js`
+- `functions/api/admin/accounting-gifi-summary.js`
+- `functions/api/admin/accounting-item-costing.js`
+- `functions/api/admin/accounting-journal.js`
+- `functions/api/admin/accounting-monthly-summary-export.js`
+- `functions/api/admin/accounting-overhead-allocations.js`
+- `functions/api/admin/accounting-overhead-product-allocations.js`
+- `functions/api/admin/accounting-period-locks.js`
+- `functions/api/admin/accounting-period-summary-export.js`
+- `functions/api/admin/accounting-profit-loss.js`
+- `functions/api/admin/accounting-reconciliation-exceptions.js`
+- `functions/api/admin/accounting-reconciliation.js`
+- `functions/api/admin/accounting-recurring-expense-rules.js`
+- `functions/api/admin/accounting-sales-tax-filing.js`
+- `functions/api/admin/accounting-statement-imports.js`
+- `functions/api/admin/accounting-statement-provider-profiles.js`
+- `functions/api/admin/accounting-summary.js`
+- `functions/api/admin/accounting-vendor-statements.js`
+- `functions/api/admin/accounting-vendors.js`
+- `functions/api/admin/accounting-writeoffs.js`
+- `functions/api/admin/accounting-year-end-close.js`
+- `functions/api/admin/amazon-purchase-import.js`
+- `functions/api/admin/amazon-purchase-review.js`
+- `functions/api/admin/app-settings.js`
+- `functions/api/admin/application-sanity.js`
+- `functions/api/admin/archive-product.js`
+- `functions/api/admin/assign-user-access-tier.js`
+- `functions/api/admin/audit-log.js`
+- `functions/api/admin/bootstrap.js`
+- `functions/api/admin/bulk-update-products.js`
+- `functions/api/admin/bulk-update-site-inventory.js`
+- `functions/api/admin/candle-soap-label-export.js`
+- `functions/api/admin/candle-soap-labels.js`
+- `functions/api/admin/candle-soap-recall-notifications.js`
+- `functions/api/admin/candle-soap-recalls.js`
+- `functions/api/admin/candle-soap-specs.js`
+- `functions/api/admin/catalog-option-sets.js`
+- `functions/api/admin/catalog-sync.js`
+- `functions/api/admin/cleanup-sessions.js`
+- `functions/api/admin/command-center.js`
+- `functions/api/admin/community-content.js`
+- `functions/api/admin/competitive-roadmap.js`
+- `functions/api/admin/create-product.js`
+- `functions/api/admin/create-user.js`
+- `functions/api/admin/custom-order-stage-photos.js`
+- `functions/api/admin/custom-requests.js`
+- `functions/api/admin/customer-engagement.js`
+- `functions/api/admin/dark-theme-evidence.js`
+- `functions/api/admin/dashboard-summary.js`
+- `functions/api/admin/db-sanity.js`
+- `functions/api/admin/delete-product.js`
+- `functions/api/admin/delete-user.js`
+- `functions/api/admin/deploy-readiness.js`
+- `functions/api/admin/deployment-preflight.js`
+- `functions/api/admin/general-ledger-accounts.js`
+- `functions/api/admin/gift-card-abuse.js`
+- `functions/api/admin/gift-card-actions.js`
+- `functions/api/admin/gift-card-balance.js`
+- `functions/api/admin/gift-card-delivery-history.js`
+- `functions/api/admin/gift-card-delivery-send.js`
+- `functions/api/admin/gift-card-delivery-templates.js`
+- `functions/api/admin/gift-card-redemptions.js`
+- `functions/api/admin/go-live-execution.js`
+- `functions/api/admin/import-products-preview.js`
+- `functions/api/admin/import-products.js`
+- `functions/api/admin/live-activity.js`
+- `functions/api/admin/live-ops-followthrough.js`
+- `functions/api/admin/live-readiness-playbook.js`
+- `functions/api/admin/local-seo-bake-actions.js`
+- `functions/api/admin/local-seo-competitor-phrases.js`
+- `functions/api/admin/local-seo-review-scoring.js`
+- `functions/api/admin/local-seo-review.js`
+- `functions/api/admin/marketplace-csv-mapping.js`
 - `functions/api/admin/marketplace-export-preview.js`
+- `functions/api/admin/media-assets.js`
+- `functions/api/admin/media-consent-records.js`
+- `functions/api/admin/media-diagnostics.js`
+- `functions/api/admin/media-upload.js`
+- `functions/api/admin/migrate.js`
+- `functions/api/admin/migration-ledger.js`
+- `functions/api/admin/mobile-create-product.js`
+- `functions/api/admin/mobile-product-drafts.js`
+- `functions/api/admin/mobile-resumable-upload.js`
+- `functions/api/admin/movies.js`
+- `functions/api/admin/notification-outbox.js`
+- `functions/api/admin/notifications.js`
+- `functions/api/admin/order-detail.js`
+- `functions/api/admin/order-payments.js`
+- `functions/api/admin/orders.js`
+- `functions/api/admin/payment-actions.js`
+- `functions/api/admin/pending-actions-status.js`
+- `functions/api/admin/pending-actions.js`
+- `functions/api/admin/post-deploy-smoke-tests.js`
+- `functions/api/admin/private-evidence-download.js`
+- `functions/api/admin/product-cost-rollups.js`
+- `functions/api/admin/product-costs.js`
+- `functions/api/admin/product-detail.js`
+- `functions/api/admin/product-image-annotations.js`
+- `functions/api/admin/product-image-derivatives.js`
+- `functions/api/admin/product-image-health.js`
+- `functions/api/admin/product-images.js`
+- `functions/api/admin/product-listing-profiles.js`
+- `functions/api/admin/product-media-score.js`
+- `functions/api/admin/product-mobile-bootstrap.js`
+- `functions/api/admin/product-price-suggestions.js`
+- `functions/api/admin/product-publish-qa.js`
+- `functions/api/admin/product-qa-history.js`
+- `functions/api/admin/product-qa-panel-state.js`
+- `functions/api/admin/product-readiness.js`
+- `functions/api/admin/product-resources.js`
+- `functions/api/admin/product-review-actions.js`
+- `functions/api/admin/product-seo.js`
+- `functions/api/admin/product-stock-report.js`
+- `functions/api/admin/product-story-notes.js`
+- `functions/api/admin/products.js`
+- `functions/api/admin/promotion-control.js`
+- `functions/api/admin/public-api-health.js`
+- `functions/api/admin/public-proof-candidates.js`
+- `functions/api/admin/purchase-orders.js`
+- `functions/api/admin/r2-derivative-settings.js`
+- `functions/api/admin/record-payment.js`
+- `functions/api/admin/release-control.js`
+- `functions/api/admin/release-notes.js`
+- `functions/api/admin/release-sanity.js`
+- `functions/api/admin/remove-user-access-tier.js`
+- `functions/api/admin/reset-password.js`
+- `functions/api/admin/runtime-incidents.js`
+- `functions/api/admin/safe-deploy-package.js`
+- `functions/api/admin/schema-drift-report.js`
+- `functions/api/admin/search-console-import.js`
+- `functions/api/admin/security-summary.js`
+- `functions/api/admin/site-item-inventory.js`
+- `functions/api/admin/sitemap-preview.js`
+- `functions/api/admin/social-media-privacy-guard.js`
+- `functions/api/admin/social-post-queue.js`
+- `functions/api/admin/stage-photo-moderation.js`
+- `functions/api/admin/storefront-schema-repair.js`
+- `functions/api/admin/storefront-value-backfill.js`
+- `functions/api/admin/structured-data-health.js`
+- `functions/api/admin/tax-classes.js`
+- `functions/api/admin/testimonial-trust-blocks.js`
+- `functions/api/admin/tier-policies.js`
+- `functions/api/admin/today-task-actions.js`
+- `functions/api/admin/today-tasks.js`
+- `functions/api/admin/trust-block-placements.js`
+- `functions/api/admin/trust-block-preview.js`
+- `functions/api/admin/update-order-status.js`
+- `functions/api/admin/update-product.js`
+- `functions/api/admin/updated.md`
+- `functions/api/admin/user-access-tiers.js`
+- `functions/api/admin/user-profile.js`
+- `functions/api/admin/user-update.js`
+- `functions/api/admin/users.js`
 - `functions/api/admin/value-ops-followthrough.js`
+- `functions/api/admin/value-ops-next.js`
 - `functions/api/admin/value-ops.js`
+- `functions/api/admin/visitor-analytics.js`
+- `functions/api/admin/visual-enrichment-studio.js`
+- `functions/api/admin/visual-polish.js`
+- `functions/api/admin/webhook-dispatch.js`
+- `functions/api/admin/webhook-events.js`
+- `functions/api/auth/account-help-request.js`
+- `functions/api/auth/bootstrap-admin.js`
+- `functions/api/auth/bootstrap-status.js`
+- `functions/api/auth/change-password.js`
+- `functions/api/auth/login.js`
+- `functions/api/auth/logout-all.js`
+- `functions/api/auth/logout.js`
+- `functions/api/auth/me.js`
+- `functions/api/auth/register.js`
+- `functions/api/auth/session-info.js`
+- `functions/api/auth-login.js`
 - `functions/api/before-after-gallery.js`
-- `gallery/index.html`
+- `functions/api/catalog-items.js`
+- `functions/api/checkout-create-order.js`
+- `functions/api/checkout-prepare-payment.js`
+- `functions/api/checkout-recovery-lead.js`
+- `functions/api/community-content.js`
+- `functions/api/creations.js`
+- `functions/api/custom-request-consent.js`
+- `functions/api/custom-request-order.js`
+- `functions/api/custom-request-payment.js`
+- `functions/api/custom-request-quote.js`
+- `functions/api/custom-request-reference-upload.js`
+- `functions/api/custom-request.js`
+- `functions/api/featured-products.js`
+- `functions/api/gift-card-balance.js`
+- `functions/api/gift-card-quote.js`
+- `functions/api/health.js`
+- `functions/api/image-derivative.js`
+- `functions/api/me.js`
+- `functions/api/member/downloads.js`
+- `functions/api/member/order-detail.js`
+- `functions/api/member/orders.js`
+- `functions/api/member/profile.js`
+- `functions/api/member/reviews.js`
+- `functions/api/member/tier-policies.js`
+- `functions/api/member/wishlist.js`
+- `functions/api/movies.js`
+- `functions/api/payment-providers.js`
+- `functions/api/paypal-return.js`
+- `functions/api/paypal-webhook.js`
+- `functions/api/product-detail.js`
+- `functions/api/product-interest.js`
+- `functions/api/product-reviews.js`
+- `functions/api/products.js`
+- `functions/api/readme.md`
+- `functions/api/seo-page-overrides.js`
+- `functions/api/site-search-event.js`
+- `functions/api/social-feed.js`
+- `functions/api/stripe-return.js`
+- `functions/api/stripe-webhook.js`
+- `functions/api/supplies.js`
+- `functions/api/tools.js`
+- `functions/api/track/cart.js`
+- `functions/api/track/visit.js`
+- `functions/api/trust-blocks.js`
+- `functions/api/updated.md`
+- `js/main.js`
+- `public/js/account-help.js`
+- `public/js/admin-access-tiers.js`
+- `public/js/admin-accounting-advanced.js`
+- `public/js/admin-accounting-backend.js`
+- `public/js/admin-accounting-close-workflow.js`
+- `public/js/admin-accounting-evidence-check.js`
+- `public/js/admin-accounting-imports.js`
+- `public/js/admin-accounting-report.js`
+- `public/js/admin-accounting-statement-profiles.js`
+- `public/js/admin-accounting-t2-presets.js`
+- `public/js/admin-accounting.js`
+- `public/js/admin-amazon-purchase-import.js`
+- `public/js/admin-amazon-purchase-review.js`
+- `public/js/admin-app-settings.js`
+- `public/js/admin-application-sanity.js`
+- `public/js/admin-archive-product.js`
+- `public/js/admin-brand-content.js`
+- `public/js/admin-candle-soap-specs.js`
+- `public/js/admin-catalog-option-manager.js`
+- `public/js/admin-catalog-sync.js`
+- `public/js/admin-cleanup-sessions.js`
+- `public/js/admin-command-center.js`
+- `public/js/admin-community.js`
+- `public/js/admin-competitive-roadmap.js`
+- `public/js/admin-create-product.js`
+- `public/js/admin-create-user.js`
+- `public/js/admin-custom-requests.js`
+- `public/js/admin-customer-engagement.js`
+- `public/js/admin-dark-theme-evidence.js`
+- `public/js/admin-dashboard-notification-actions.js`
+- `public/js/admin-dashboard-preflight-badge.js`
+- `public/js/admin-dashboard-smoke-badges.js`
+- `public/js/admin-dashboard-summary.js`
+- `public/js/admin-delete-product.js`
+- `public/js/admin-delete-user.js`
+- `public/js/admin-deploy-readiness.js`
+- `public/js/admin-deployment-preflight.js`
+- `public/js/admin-edit-product.js`
+- `public/js/admin-gift-card-customer-history.js`
+- `public/js/admin-gift-card-order-redemption.js`
+- `public/js/admin-gift-cards.js`
+- `public/js/admin-go-live-execution.js`
+- `public/js/admin-import-products.js`
+- `public/js/admin-live-activity.js`
+- `public/js/admin-live-ops-followthrough.js`
+- `public/js/admin-live-readiness-playbook.js`
+- `public/js/admin-local-seo-review.js`
+- `public/js/admin-local-seo-value-ops.js`
+- `public/js/admin-markdown-sanity.js`
+- `public/js/admin-marketplace-export-preview.js`
+- `public/js/admin-marketplace-mapping.js`
+- `public/js/admin-media-consent-records.js`
+- `public/js/admin-media-diagnostics.js`
+- `public/js/admin-member-timeline.js`
+- `public/js/admin-migration-ledger.js`
+- `public/js/admin-mobile-dashboard.js`
+- `public/js/admin-mobile-product-augment.js`
 - `public/js/admin-mobile-product-recovery.js`
+- `public/js/admin-mobile-product.js`
+- `public/js/admin-mobile-resumable-upload.js`
+- `public/js/admin-movie-catalog.js`
+- `public/js/admin-notifications.js`
+- `public/js/admin-order-detail.js`
+- `public/js/admin-orders.js`
+- `public/js/admin-panel-routing.js`
+- `public/js/admin-post-deploy-smoke-tests.js`
+- `public/js/admin-product-bulk-tools.js`
+- `public/js/admin-product-draft-checklist.js`
+- `public/js/admin-product-image-annotations.js`
+- `public/js/admin-product-image-health.js`
 - `public/js/admin-product-image-role-prompts.js`
+- `public/js/admin-product-images.js`
+- `public/js/admin-product-listing-profiles.js`
+- `public/js/admin-product-media-score.js`
+- `public/js/admin-product-price-suggestions.js`
+- `public/js/admin-product-readiness.js`
+- `public/js/admin-product-resources.js`
+- `public/js/admin-product-seo.js`
+- `public/js/admin-product-stock-report.js`
+- `public/js/admin-product-story-notes.js`
+- `public/js/admin-products-enhancements.js`
+- `public/js/admin-products.js`
+- `public/js/admin-promotion-control.js`
+- `public/js/admin-public-api-health.js`
+- `public/js/admin-public-proof-candidates.js`
+- `public/js/admin-r2-derivative-settings.js`
+- `public/js/admin-release-control.js`
+- `public/js/admin-release-notes.js`
+- `public/js/admin-release-sanity.js`
+- `public/js/admin-reset-password.js`
+- `public/js/admin-route-usage.js`
+- `public/js/admin-runtime-incidents.js`
+- `public/js/admin-safe-deploy-package.js`
+- `public/js/admin-schema-drift-report.js`
+- `public/js/admin-search-console-import.js`
+- `public/js/admin-security-summary.js`
+- `public/js/admin-self-protect.js`
+- `public/js/admin-site-item-inventory.js`
+- `public/js/admin-sitemap-preview.js`
+- `public/js/admin-social-media-privacy-guard.js`
+- `public/js/admin-social-post-queue.js`
+- `public/js/admin-stage-photo-moderation.js`
+- `public/js/admin-storefront-schema-repair.js`
+- `public/js/admin-storefront-value-backfill.js`
+- `public/js/admin-structured-data-health.js`
+- `public/js/admin-testimonial-trust-blocks.js`
+- `public/js/admin-tier-policy.js`
+- `public/js/admin-today-tasks.js`
+- `public/js/admin-trust-block-placement-preview.js`
+- `public/js/admin-user-profiles.js`
+- `public/js/admin-user-update.js`
+- `public/js/admin-users.js`
 - `public/js/admin-value-ops-followthrough.js`
+- `public/js/admin-value-ops-next.js`
 - `public/js/admin-value-ops.js`
+- `public/js/admin-visitor-analytics.js`
+- `public/js/admin-visual-enrichment-studio.js`
+- `public/js/admin-visual-polish.js`
+- `public/js/admin-webhook-events.js`
+- `public/js/admin.js`
+- `public/js/auth.js`
 - `public/js/before-after-gallery.js`
-- `scripts/deployment_preflight_static_check.py`
-- `scripts/final_deployment_blocker_check.py`
-- `scripts/generate_release_manifest.py`
+- `public/js/bootstrap-admin.js`
+- `public/js/cart-badge.js`
+- `public/js/cart-page.js`
+- `public/js/cart.js`
+- `public/js/change-password.js`
+- `public/js/checkout.js`
+- `public/js/custom-request-consent.js`
+- `public/js/custom-request-intake.js`
+- `public/js/custom-request-order-status.js`
+- `public/js/custom-request-payment.js`
+- `public/js/custom-request-quote-preview.js`
+- `public/js/events-page.js`
+- `public/js/gift-card-storefront.js`
+- `public/js/home-featured-products.js`
+- `public/js/local-trust-block.js`
+- `public/js/login.js`
+- `public/js/logout-all.js`
+- `public/js/member-account-tools.js`
+- `public/js/member-downloads.js`
+- `public/js/member-order-detail.js`
+- `public/js/member-orders.js`
+- `public/js/member-profile.js`
+- `public/js/member-reviews.js`
+- `public/js/member-wishlist.js`
+- `public/js/members-self-protect.js`
+- `public/js/members.js`
+- `public/js/order-confirmation.js`
+- `public/js/payment-options.js`
+- `public/js/pickup-page.js`
+- `public/js/product-detail.js`
+- `public/js/recently-viewed-products.js`
+- `public/js/register.js`
+- `public/js/seo-page-overrides.js`
+- `public/js/session-info.js`
+- `public/js/shop.js`
+- `public/js/site-analytics.js`
+- `public/js/site-auth-ui.js`
+- `public/js/site-search.js`
+- `public/js/social-hub.js`
+- `public/js/trust-block-context.js`
 
 ## D1 migration summary
 
-- Run `database_build191_value_operations_followthrough.sql` after Build 190. The migration is additive and safe to rerun.
-
-## Required post-deploy actions
-
-- Run `database_build191_value_operations_followthrough.sql` in the production D1 database.
-- Open `/admin/command-center/` and configure actual channel fees and product-family costs before relying on margin gates.
-- Verify `/api/admin/value-ops-followthrough` while logged in as an admin.
-- Test mobile product draft save/restore on a real phone.
-- Import one Search Console CSV sample and one real deployed performance measurement.
-- Confirm R2, Stripe webhook, email-provider, and Cloudflare API status in the environment verification card.
-- Approve gallery items only after consent, public-use, alt text, and image accuracy are verified.
-
-## Validation
-
-- JavaScript syntax, JSON parsing, one-H1, CSS balance, Python compile, D1 upgrade, idempotency, preflight, blocker, and ZIP integrity checks completed for Build 191.
-
-
-## Build 192 — Operational data connection and live proof follow-through
-
-Build 192 keeps the project moving toward real business usefulness instead of adding another disconnected admin page. The new work is integrated into `/admin/command-center/` through `/api/admin/value-ops-next` and `public/js/admin-value-ops-next.js`.
-
-Completed in this pass:
-
-1. Added fee/cost change-audit rows so actual Stripe/Etsy/PayPal/local fee changes can be recorded with a reason and effective date.
-2. Added R2 derivative worker readiness checks for bindings, WebP, AVIF, srcset writeback, and cleanup.
-3. Added resumable mobile upload session rows and draft-conflict review rows beyond browser-only autosave.
-4. Added approved real-media replacement plan rows for key public placeholders.
-5. Added scheduled Search Console import rows for monthly pages/queries, weekly top pages, and quarterly image-search review.
-6. Added Google Business Profile evidence records for monthly observations, photos, reviews, posts, and local-page proof.
-7. Added customer duplicate/merge candidate rows and a Command Center action to refresh duplicate email candidates.
-8. Added live provider test records for Stripe, email, R2, and Cloudflare checks without exposing secret values.
-9. Added Lighthouse/PageSpeed import schedules for mobile and desktop routes.
-10. Added legacy admin usage and consolidation recommendation rows so older admin pages are not retired until real usage data supports it.
-11. Added extra visual placeholders to business-relevant public pages that still lacked visual enrichment.
-12. Updated schema, release, roadmap, handoff, SEO, image, sanity, and deployment documentation.
-
-Current opinion: the app is now past the “add structure” stage. The next business value comes from entering real costs/fees, uploading approved photographs, importing live evidence, and using the Command Center daily.
-
-### Build 192 D1 migration
-
-Run after Build 191:
-
-```text
-database_build192_operational_data_connection.sql
-```
-
-## Build 194 alignment
-
-## Build 194 — Storefront Discovery, Product Facts & Media Roles
-
-- Added homepage discovery/process/featured creations, Workshop Journal, recently viewed, and shop quick filters.
-- Added approved public listing profiles, product video support, media-role scoring, and role-driven public proof slots.
-- Added `database_build194_storefront_discovery_product_facts_media_roles.sql`.
-- Updated canonical handoff/roadmap, schema references, visual notes, local SEO notes, and sanity checks.
-
-
-
-## Build 194 testing reference
-
-Use `BUILD194_TESTING_GUIDE.md` after deployment for the homepage, shop quick filters, product listing facts, media-role scoring, workshop journal, visual placeholders, and SEO/H1 verification.

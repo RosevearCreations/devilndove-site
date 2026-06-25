@@ -1,56 +1,56 @@
-# Devil n Dove Project Status and Roadmap — Build 194
+# Devil n Dove Project Status and Roadmap — Build 195
 
 This is the primary human/business roadmap. Read `AI_HANDOFF.md` for technical deployment details and `MARKDOWN_INDEX.md` for specialist references.
 
 ## Executive sanity check
 
-Devil n Dove is now a full small-business operating platform: storefront, handmade/vintage presentation, custom requests, product/media workflows, inventory and cost groundwork, marketplace exports, gift cards, local SEO, customer proof, accounting support, and deployment controls.
+Devil n Dove is now a full small-business platform: storefront, handmade/vintage presentation, product/media workflows, inventory/cost groundwork, marketplace exports, customer proof, local SEO, deployment controls, and mobile/desktop administration.
 
-The app is structurally broad enough. The best value now comes from **truthful product data, approved real photography, live verification, and a calm daily workflow**, not from more disconnected admin pages.
+The strongest remaining value is **calm daily use and truthful real data**. Build 195 removes three recurring points of confusion: incorrect-product cleanup, system numbering/SKU behaviour, and unreadable inventory item cards.
 
-## Build 194 completed — customer-facing discovery and listing clarity
+## Build 195 completed — product lifecycle and readable inventory
 
-1. Rewrote the homepage hero around handmade mixed media, art, gifts, and vintage finds.
-2. Added clear homepage paths to shop, workshop notes, vintage/found items, and custom requests.
-3. Added a visual “What we make” discovery grid with product/category paths.
-4. Added a five-step workshop process strip explaining how a piece moves from idea to listing.
-5. Added approved active product cards to the homepage through `/api/featured-products`.
-6. Added privacy-friendly recently viewed products stored only in the visitor’s browser.
-7. Added mobile-friendly quick filters for handmade, vintage/found, under CAD $25, and gift searches.
-8. Added a Workshop Journal hub and three evergreen guides: polymer-clay earring care, coin/spoon ring care, and handmade-vintage-sourced buying guidance.
-9. Added public product listing profiles for best-for, materials, finish, dimensions, care, variation, availability, and shipping/pickup information.
-10. Added an approved-only Quick Facts card to product pages.
-11. Added optional approved HTTPS product-video support.
-12. Added an admin listing-facts editor inside Catalog Media.
-13. Added buyer-question media roles: main, close-up, scale, back/side, process, packaging, social/share, and video.
-14. Added a visible Product Media Role Score inside Catalog Media.
-15. Connected approved assigned media roles to product-page proof modules.
-16. Kept professional placeholders until matching approved real media is assigned.
-17. Added workshop discovery, workshop journal, and media-role planning placeholder visuals.
-18. Added responsive desktop/mobile styling for discovery cards, journal cards, quick facts, and media controls.
-19. Added storefront discovery audit rows for owner review.
-20. Updated schema references, release controls, Markdown handoff, and testing instructions.
+1. Added a safe **Delete unused** flow for mistakenly entered products.
+2. Permanent deletion now requires current admin password, reason, and exact `DELETE PRODUCT` confirmation.
+3. Any product referenced by orders or other business/history tables is blocked from deletion and must be archived instead.
+4. Added `product_deletion_audit` so an intentional delete retains an internal factual record without restoring the product to storefront data.
+5. Added persistent `catalog_product_number_sequence` so product system numbers do not move backwards or get reused after a delete.
+6. Kept `products.product_number` unique and made blank SKU entry generate a readable unique `DND-xxxxx` SKU.
+7. Made desktop and mobile creation use the same permanent-number allocation path.
+8. Improved product editor wording so staff can distinguish internal System # from SKU.
+9. Added a plain-language product lifecycle guide inside desktop catalog/product screens.
+10. Added `site_inventory_item_descriptions` as a safe sidecar table rather than duplicating inventory names.
+11. Added an inventory description field that renders below the item image.
+12. Reworked tool/consumable table layout so long names wrap as normal readable phrases rather than one word per row.
+13. Added mobile responsive behaviour for inventory cards/table scrolling.
+14. Preserved current one-H1, title/meta, canonical, alt-text, and local-page checks.
+15. Preserved approved-media/placeholders and did not claim placeholder art is real product proof.
+16. Updated all current schema references and migration controls for Build 195.
+17. Updated command-center and handoff documentation with lifecycle and inventory test priorities.
+18. Added a detailed owner test guide for deletion, numbering, SKU, inventory descriptions, phone, and desktop checks.
+19. Kept historical Markdown as archive/specialist reference rather than deleting context needed by a future AI.
+20. Revalidated JS, JSON, public-page H1, CSS balance, full schema, migration rerun, preflight, blockers, and ZIP integrity.
 
 ## Current strengths
 
-- One-H1, title/meta, canonical, structured-data, and local-page guardrails.
-- Product readiness, cost/margin gates, marketplace validation, and reviewed temporary overrides.
-- Buyer-facing product stories, quick facts, care, pickup/shipping, and media-role workflows.
-- Mobile and desktop product administration with D1 field recovery and resumable media foundations.
-- Consent-controlled public proof, customer stories, and before/after gallery foundations.
-- Search Console CSV mapping, GBP evidence rows, local freshness tasks, and performance schedules.
-- Deployment preflight, release control, smoke tests, fallback handling, and Cloudflare environment checks.
+- One-H1, title/meta, canonical, structured-data, image-alt, and local-page guardrails.
+- Product readiness, cost/margin gates, marketplace validation, and reviewed override foundations.
+- Buyer-facing product stories, care, quick facts, pickup/shipping notes, and media roles.
+- Mobile and desktop product administration with D1 draft recovery and resumable media foundations.
+- Consent-controlled public proof, customer stories, workshop journal, before/after, and real-media review foundations.
+- Inventory tracking now supports concise descriptions beneath pictures instead of forcing long names into narrow cells.
+- Deployment preflight, release control, smoke tests, fallback handling, and Cloudflare environment checklists.
 - Two canonical Markdown handoff files with specialist/historical references retained.
 
 ## Current limits
 
-1. Actual fee and cost values still need owner entry before margin warnings become reliable.
-2. Listing profiles and media roles need truthful per-product data before they appear publicly.
-3. R2 derivative generation must still create real WebP/AVIF files and final `srcset` output in the deployed environment.
-4. Real workshop/product photography remains more valuable than any placeholder.
-5. Search Console imports and Google Business Profile evidence need real recurring owner input.
+1. Actual payment/marketplace fees and real material/labour/packaging/overhead/waste costs still need owner entry.
+2. Product listing profiles, media roles, and inventory descriptions need truthful item-by-item data.
+3. R2 derivative generation must still create real WebP/AVIF files and final `srcset` output in deployed Cloudflare.
+4. Real workshop/product photography remains more valuable than placeholder graphics.
+5. Search Console imports and Google Business Profile evidence need regular real owner input.
 6. Stripe webhook, email delivery, R2 signed reads, and Cloudflare API actions require live evidence.
-7. Customer duplicate suggestions must always remain human-reviewed.
+7. Customer duplicate suggestions must remain human-reviewed.
 8. Low-use admin pages should not be removed until Command Center usage evidence supports consolidation.
 
 ## SEO and competitive direction
@@ -68,33 +68,34 @@ Keep these public-site habits:
 
 ## Next 20 highest-value steps
 
-1. Run `database_build194_storefront_discovery_product_facts_media_roles.sql` after Build 193.
-2. Review the homepage hero and primary choices on a real phone and desktop.
-3. Add one approved listing profile for a real handmade product.
-4. Enter dimensions, materials, care, availability, and pickup/shipping wording from the actual item.
-5. Assign main, close-up, scale, back/side, process, packaging, and social roles for one well-photographed item.
-6. Confirm roles replace only the matching product placeholders.
-7. Add one approved HTTPS video and confirm it behaves correctly on phone and desktop.
-8. Add truthful product-specific scale and process photos.
-9. Replace the homepage and Workshop Journal placeholders only with approved real media.
-10. Add one active approved product to Featured Creations and confirm it is accurate.
-11. Review recently viewed behaviour on a shared household device and clear local browser storage when needed.
-12. Enter actual marketplace/payment fee values and product-family cost defaults.
-13. Test marketplace export blocking on an incomplete or unhealthy-margin test product.
-14. Import one real Search Console export and create one evidence-based SEO action.
-15. Complete one monthly GBP evidence record using only factual business information.
-16. Capture mobile/tablet/laptop/desktop evidence for homepage, shop, journal, product facts, and Catalog Media.
-17. Run a real R2 upload, signed-read, derivative, and delete test.
-18. Run Stripe webhook signature and email-provider delivery tests.
-19. Use Command Center usage data to identify genuinely low-use legacy admin pages.
-20. Review all buyer-facing care/product claims annually and whenever materials/processes change.
+1. Run `database_build195_product_lifecycle_sku_inventory_cards.sql` after Build 194.
+2. Create one clearly marked test product, leave SKU blank, and confirm its System # and automatic `DND-xxxxx` SKU.
+3. Delete that unused test product through the guarded UI and verify the audit row exists.
+4. Create a second test product and confirm its System # is higher, not reused.
+5. Add a description to one long-name tool/supply and verify it sits below the photo on desktop and phone.
+6. Record actual payment and marketplace fees with effective dates.
+7. Enter real material, labour, packaging, overhead, and waste costs for one product family.
+8. Test a low-margin marketplace export and a time-limited reviewed override.
+9. Add one approved product listing profile with truthful materials, dimensions, care, and pickup/shipping details.
+10. Assign complete roles for one well-photographed product: main, close-up, scale, process, packaging, and social/share.
+11. Replace one placeholder only with an approved real product/workshop image.
+12. Run one real mobile saved-draft and resumable upload test.
+13. Run one R2 derivative, signed-read, and cleanup check in Cloudflare.
+14. Import one real Search Console export and create one evidence-based content action.
+15. Complete one monthly Google Business Profile evidence record using factual business information.
+16. Test Stripe webhook signatures and a manual email-provider send to an owner address.
+17. Capture narrow-phone, tablet, laptop, and large-desktop screenshots for catalog and inventory views.
+18. Review low-use admin page data in Command Center before retiring any route.
+19. Review every public product claim and care note annually or when materials/processes change.
+20. Keep the two canonical Markdown files current and move only historical superseded detail into `docs/archive/`.
 
 ## Deployment/testing references
 
-- `BUILD194_TESTING_GUIDE.md` — exact owner steps for homepage, shop filters, product Quick Facts, media roles, Workshop Journal, and SEO checks.
+- `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md` — exact owner steps for deletion, archive vs delete, System #, automatic SKU, and inventory descriptions.
+- `BUILD194_TESTING_GUIDE.md` — homepage, shop filters, product Quick Facts, media roles, Workshop Journal, and SEO checks.
 - `LIVE_TESTING_GUIDE.md` — live R2, Stripe, email, Search Console, GBP, and real-device test procedures.
-- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — bindings, environment variables, secrets, and where their values come from.
+- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — bindings, encrypted variables/secrets, and where values come from.
 
 ## Release readiness opinion
 
-Build 194 is ready for deployment after its D1 migration and normal preflight checks. Business readiness depends on real data, approved media, and saved live evidence. Do not claim guaranteed local rankings, automated financial accuracy, or completed provider checks until supporting evidence exists.
+Build 195 is ready for deployment after its D1 migration and normal preflight checks. Business readiness still depends on real costs, approved media, and saved live evidence. Do not claim guaranteed local rankings, automated financial accuracy, or completed provider checks without supporting evidence.
