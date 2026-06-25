@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 196",
+    "date": "2026-06-24",
+    "title": "Visible product correction, reviewed raw-material return, and inventory image-name layout",
+    "summary": "Added a visible product-correction panel beside Update Product, reviewed reservation-release and raw-supply return actions with audit history, and restored raw inventory/tools cards to item name directly below picture without rendering short descriptions."
+  },
+  {
     "build": "Build 195",
     "date": "2026-06-23",
     "title": "Product lifecycle safety, permanent System # values, and readable inventory cards",

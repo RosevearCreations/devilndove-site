@@ -18,5 +18,6 @@
     "Do not delete products with order/history references; archive them.",
     "Default SKUs are DND-xxxxx only when SKU is blank.",
     "Descriptions are separate from source inventory names and appear below the image."
-  ]
+  ],
+  "superseded_by": "Build 196 visible product correction/material return workflow"
 }

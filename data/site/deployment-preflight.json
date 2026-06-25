@@ -234,7 +234,7 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 1259/1259"
+      "detail": "CSS braces 1263/1263"
     },
     {
       "code": "static_json_parse",
