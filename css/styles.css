@@ -1396,3 +1396,20 @@ body.nav-mobile-open{overflow:hidden}
     grid-template-columns: 132px minmax(220px, 1fr);
   }
 }
+
+/* Build 196 inventory readability: keep a single truthful item name directly below the image.
+   Older optional description sidecar data remains preserved but is no longer rendered here. */
+.site-inventory-media-name {
+  display: block;
+  width: 124px;
+  font-size: .88rem;
+  line-height: 1.32;
+  font-weight: 800;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.site-inventory-list-description { display: none !important; }
+@media (max-width: 760px) {
+  .site-inventory-media-name { width: 132px; }
+}
