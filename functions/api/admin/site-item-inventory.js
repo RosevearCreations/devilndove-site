@@ -27,6 +27,34 @@ async function ensureUsageColumns(db) {
   }
 }
 
+async function ensureInventoryDescriptionSchema(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS site_inventory_item_descriptions (
+      site_inventory_item_description_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      site_item_inventory_id INTEGER NOT NULL UNIQUE,
+      item_description TEXT NOT NULL DEFAULT '',
+      updated_by_user_id INTEGER,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE
+    )
+  `).run().catch(() => null);
+}
+
+async function saveItemDescription(db, siteItemInventoryId, description, userId = null) {
+  const clean = normalizeText(description).slice(0, 600);
+  if (!siteItemInventoryId) return;
+  await db.prepare(`
+    INSERT INTO site_inventory_item_descriptions (
+      site_item_inventory_id, item_description, updated_by_user_id, created_at, updated_at
+    ) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(site_item_inventory_id) DO UPDATE SET
+      item_description = excluded.item_description,
+      updated_by_user_id = excluded.updated_by_user_id,
+      updated_at = CURRENT_TIMESTAMP
+  `).bind(Number(siteItemInventoryId), clean, Number(userId || 0) || null).run().catch(() => null);
+}
+
 async function ensureSiteInventorySchema(db) {
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS site_item_inventory (
@@ -100,6 +128,7 @@ async function ensureSiteInventorySchema(db) {
 
   await db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_site_item_inventory_source_key_unique ON site_item_inventory(source_type, external_key)`).run().catch(() => null);
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_site_item_inventory_source ON site_item_inventory(source_type, category)`).run().catch(() => null);
+  await ensureInventoryDescriptionSchema(db).catch(() => null);
   await ensureInventoryCostHistoryTable(db).catch(() => null);
 }
 
@@ -114,6 +143,7 @@ function shape(row = {}) {
     source_type: row.source_type || '',
     external_key: row.external_key || '',
     item_name: row.item_name || '',
+    item_description: row.item_description || '',
     category: row.category || '',
     source_url: row.source_url || '',
     amazon_url: row.amazon_url || '',
@@ -204,9 +234,12 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
   const items = normalizeResults(await db.prepare(`
     SELECT
       sii.*,
+      COALESCE(siid.item_description, '') AS item_description,
       COUNT(DISTINCT prl.product_id) AS linked_product_count,
       GROUP_CONCAT(DISTINCT p.name) AS linked_product_names
     FROM site_item_inventory sii
+    LEFT JOIN site_inventory_item_descriptions siid
+      ON siid.site_item_inventory_id = sii.site_item_inventory_id
     LEFT JOIN product_resource_links prl
       ON prl.resource_kind = sii.source_type
      AND prl.source_key = sii.external_key
@@ -216,6 +249,7 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
       ? = ''
       OR LOWER(COALESCE(sii.item_name, '')) LIKE ?
       OR LOWER(COALESCE(sii.category, '')) LIKE ?
+      OR LOWER(COALESCE(siid.item_description, '')) LIKE ?
       OR LOWER(COALESCE(sii.supplier_name, '')) LIKE ?
       OR LOWER(COALESCE(sii.supplier_sku, '')) LIKE ?
     )
@@ -228,7 +262,7 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
     )
     GROUP BY sii.site_item_inventory_id
     ORDER BY LOWER(COALESCE(sii.item_name, '')) ASC
-  `).bind(q, like, like, like, like, stockView, stockView, stockView, stockView, stockView).all().catch(() => ({ results: [] })));
+  `).bind(q, like, like, like, like, like, stockView, stockView, stockView, stockView, stockView).all().catch(() => ({ results: [] })));
 
   const summary = {
     total_items: items.length,
@@ -881,7 +915,15 @@ export async function onRequestPost(context) {
   ).run();
 
   const newId = Number(insert?.meta?.last_row_id || 0);
-  const saved = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(newId).first();
+  await saveItemDescription(db, newId, body.item_description, adminUser.user_id);
+  const saved = await db.prepare(`
+    SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
+    FROM site_item_inventory sii
+    LEFT JOIN site_inventory_item_descriptions siid
+      ON siid.site_item_inventory_id = sii.site_item_inventory_id
+    WHERE sii.site_item_inventory_id = ?
+    LIMIT 1
+  `).bind(newId).first();
 
   await recordInventoryCostHistory(db, {
     site_item_inventory_id: newId,
@@ -945,9 +987,11 @@ export async function onRequestPatch(context) {
 
   try {
     const existing = await db.prepare(`
-      SELECT *
-      FROM site_item_inventory
-      WHERE site_item_inventory_id = ?
+      SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
+      FROM site_item_inventory sii
+      LEFT JOIN site_inventory_item_descriptions siid
+        ON siid.site_item_inventory_id = sii.site_item_inventory_id
+      WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
 
@@ -957,6 +1001,7 @@ export async function onRequestPatch(context) {
       ...existing,
       ...body,
       item_name: normalizeText(body.item_name || existing.item_name),
+      item_description: normalizeText(body.item_description ?? existing.item_description),
       category: normalizeText(body.category ?? existing.category),
       source_url: normalizeText(body.source_url ?? existing.source_url),
       amazon_url: normalizeText(body.amazon_url ?? existing.amazon_url),
@@ -1030,10 +1075,14 @@ export async function onRequestPatch(context) {
       actor_user_id: adminUser.user_id
     });
 
+    await saveItemDescription(db, id, merged.item_description, adminUser.user_id);
+
     const saved = await db.prepare(`
-      SELECT *
-      FROM site_item_inventory
-      WHERE site_item_inventory_id = ?
+      SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
+      FROM site_item_inventory sii
+      LEFT JOIN site_inventory_item_descriptions siid
+        ON siid.site_item_inventory_id = sii.site_item_inventory_id
+      WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
 
