@@ -9,7 +9,20 @@ import json
 from pathlib import Path
 
 root=Path(__file__).resolve().parents[1]
-data=json.loads((root/'data/site/release-notes.json').read_text(encoding='utf-8'))
+raw_data=json.loads((root/'data/site/release-notes.json').read_text(encoding='utf-8'))
+# Historical release data is stored as a list; the generator accepts either the legacy
+# detail dictionary or that list and renders the newest item safely.
+if isinstance(raw_data, list):
+    newest = raw_data[0] if raw_data and isinstance(raw_data[0], dict) else {}
+    data = {
+        'build_label': newest.get('build', 'Release Notes'),
+        'summary': [newest.get('summary', '')] if newest.get('summary') else [],
+        'changed_files': [],
+        'd1_migrations': [],
+        'post_deploy_actions': []
+    }
+else:
+    data = raw_data if isinstance(raw_data, dict) else {}
 manifest_path=root/'data/site/release-package-manifest.json'
 manifest={}
 if manifest_path.exists():

@@ -83,6 +83,15 @@ REQUIRED_FILES = [
     'BUILD194_TESTING_GUIDE.md',
     'data/site/build194-storefront-discovery.json',
     'data/site/build194-validation.json',
+    'database_build195_product_lifecycle_sku_inventory_cards.sql',
+    'functions/api/admin/delete-product.js',
+    'functions/api/admin/_product-numbering.js',
+    'functions/api/admin/site-item-inventory.js',
+    'public/js/admin-delete-product.js',
+    'public/js/admin-site-item-inventory.js',
+    'BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md',
+    'data/site/build195-product-lifecycle.json',
+    'data/site/build195-validation.json',
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 

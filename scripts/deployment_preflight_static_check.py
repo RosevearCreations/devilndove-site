@@ -54,6 +54,8 @@ JSON_FILES = [
     'data/site/build193-validation.json',
     'data/site/build194-storefront-discovery.json',
     'data/site/build194-validation.json',
+    'data/site/build195-product-lifecycle.json',
+    'data/site/build195-validation.json',
 ]
 REQUIRED_FILES = [
     'database_build171_ledger_repair.sql',
@@ -130,6 +132,13 @@ REQUIRED_FILES = [
     'public/js/admin-product-listing-profiles.js',
     'public/js/admin-product-media-score.js',
     'workshop-journal/index.html',
+    'database_build195_product_lifecycle_sku_inventory_cards.sql',
+    'functions/api/admin/delete-product.js',
+    'functions/api/admin/_product-numbering.js',
+    'functions/api/admin/site-item-inventory.js',
+    'public/js/admin-delete-product.js',
+    'public/js/admin-site-item-inventory.js',
+    'BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md',
 ]
 
 def read(path: Path) -> str:
@@ -264,12 +273,16 @@ def check_schema_files(checks: list[dict]) -> None:
         'product_listing_profiles',
         'product_media_role_assignments',
         'storefront_discovery_audit_rows',
+        'catalog_product_number_sequence',
+        'product_deletion_audit',
+        'site_inventory_item_descriptions',
+        'build_195_product_lifecycle_sku_inventory_cards',
     ]
     required = {
         'database_schema.sql': schema_needles,
         'database_full_schema.sql': schema_needles,
         'database_store_schema.sql': schema_needles,
-        'database_upgrade_current_pass.sql': ['application_sanity_snapshots', 'value_added_modification_candidates', 'build_184_sanity_check_and_value_roadmap'],
+        'database_upgrade_current_pass.sql': ['application_sanity_snapshots', 'value_added_modification_candidates', 'build_184_sanity_check_and_value_roadmap', 'catalog_product_number_sequence', 'product_deletion_audit', 'site_inventory_item_descriptions', 'build_195_product_lifecycle_sku_inventory_cards'],
         'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
         'database_build182_mobile_visual_polish.sql': ['desktop_mobile_parity_checks', 'visual_enrichment_candidates', 'build_182_mobile_visual_polish'],
         'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
@@ -289,6 +302,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build192_operational_data_connection.sql': ['r2_derivative_worker_readiness_checks', 'mobile_resumable_upload_sessions', 'customer_duplicate_merge_candidates', 'build_192_operational_data_connection'],
         'database_build193_live_readiness_playbook.sql': ['live_readiness_test_cases', 'live_readiness_test_runs', 'mobile_resumable_upload_runtime_rows', 'mobile_resumable_upload_parts', 'build_193_live_readiness_playbook'],
         'database_build194_storefront_discovery_product_facts_media_roles.sql': ['product_listing_profiles', 'product_media_role_assignments', 'storefront_discovery_audit_rows', 'build_194_storefront_discovery_product_facts_media_roles'],
+        'database_build195_product_lifecycle_sku_inventory_cards.sql': ['catalog_product_number_sequence', 'product_deletion_audit', 'site_inventory_item_descriptions', 'build_195_product_lifecycle_sku_inventory_cards'],
     }
     missing=[]
     detail=[]
@@ -298,7 +312,7 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 194 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 195 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
 
 def main() -> int:
     checks=[]
@@ -309,7 +323,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 194','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 195','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
