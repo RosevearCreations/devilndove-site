@@ -35,6 +35,24 @@
     </div>
 
     <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
+    <details class="card product-lifecycle-guide" open>
+      <summary>Product correction, deletion, and SKU numbers</summary>
+      <div class="product-lifecycle-guide-grid">
+        <div class="lifecycle-rule">
+          <strong>Incorrect unused product</strong>
+          <span class="small">Use <b>Delete unused</b> only when the product has no order or saved business history. The system asks for your password, a reason, and the exact words <code>DELETE PRODUCT</code>.</span>
+        </div>
+        <div class="lifecycle-rule">
+          <strong>Product already ordered or referenced</strong>
+          <span class="small">Use <b>Archive</b>. It removes the item from active storefront use while preserving order, accounting, and customer history.</span>
+        </div>
+        <div class="lifecycle-rule">
+          <strong>Automatic numbers</strong>
+          <span class="small">Product numbers move forward permanently. Leave SKU blank to receive a unique automatic SKU such as <code>DND-01000</code>; custom SKUs are allowed but must also be unique.</span>
+        </div>
+      </div>
+    </details>
+
 
     <div class="admin-department-links card" style="margin-bottom:18px">
       <a class="btn" href="/admin/">Dashboard</a>
@@ -90,7 +108,7 @@
         <div class="grid cols-3" style="gap:10px">
           <label><span class="small">Product name</span><input class="input" type="text" name="name" maxlength="160"/></label>
           <label><span class="small">Slug</span><input class="input" type="text" name="slug" maxlength="180"/></label>
-          <label><span class="small">SKU</span><input class="input" type="text" name="sku" maxlength="80"/></label>
+          <label><span class="small">SKU</span><input class="input" type="text" name="sku" maxlength="80" placeholder="Leave blank for automatic DND SKU"/><span class="small">Optional custom SKU. Blank creates a unique automatic SKU.</span></label>
         </div>
         <div class="grid cols-3" style="gap:10px;margin-top:12px">
           <label><span class="small">Category</span><select class="input" name="product_category" id="create_product_category"><option value="">Loading categories…</option></select></label>
@@ -179,7 +197,7 @@
         <table class="products-admin-table">
           <thead>
             <tr>
-              <th style="padding:8px;border-bottom:1px solid #ddd">ID</th>
+              <th style="padding:8px;border-bottom:1px solid #ddd">System #</th>
               <th style="padding:8px;border-bottom:1px solid #ddd">Name</th>
               <th style="padding:8px;border-bottom:1px solid #ddd">Slug</th>
               <th style="padding:8px;border-bottom:1px solid #ddd">SKU</th>
