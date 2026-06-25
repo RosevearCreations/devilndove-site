@@ -322,6 +322,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td style="padding:8px;border-bottom:1px solid #ddd">
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn" type="button" data-edit-product-id="${productId}">Edit</button>
+              <button class="btn danger" type="button" data-open-product-correction="${productId}" title="Open the visible correction panel with linked raw inventory return choices.">Correct / remove</button>
               <button class="btn" type="button" data-open-first-blocker="${productId}">Open blocker</button>
               <button class="btn" type="button" data-product-qa-run="${productId}">Run QA</button>
               <button class="btn" type="button" data-review-action="approve" data-product-id="${productId}" title="${escapeHtml(approveTitle)}">Approve</button>
