@@ -1,4 +1,4 @@
-import { getNextProductNumber } from './_product-numbering.js';
+import { allocateNextProductNumber, ensureProductNumberSequenceAtLeast, formatDefaultSku, getNextProductNumber } from './_product-numbering.js';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 
 function json(data, status = 200) {
@@ -300,13 +300,13 @@ export async function onRequestPost(context) {
     }
 
     const requested_product_number = parseOptionalInteger(body.product_number);
-    const generatedProductNumber = productColumns.has("product_number")
+    const previewProductNumber = productColumns.has("product_number")
       ? (requested_product_number == null ? await getNextProductNumber(db) : requested_product_number)
       : null;
 
     const name = cleanText(body.name, 160) || "";
-    const slug = await ensureUniqueSlug(db, productColumns, body.slug, name, generatedProductNumber);
-    const sku = cleanText(body.sku, 80);
+    let slug = await ensureUniqueSlug(db, productColumns, body.slug, name, previewProductNumber);
+    let sku = cleanText(body.sku, 80);
     const product_category = cleanText(body.product_category, 120);
     const color_name = cleanText(body.color_name, 80);
     const color_names = normalizeColorNamesInput(
@@ -398,10 +398,23 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: "Add an external listing URL before activating hybrid or external-only items. Drafts can skip this." }, 400);
     }
 
+    // Reserve the internal product number only after the draft has passed its basic validation.
+    // This makes the number permanent and prevents a deleted highest-numbered item from being reused.
+    const generatedProductNumber = productColumns.has("product_number")
+      ? (requested_product_number == null ? await allocateNextProductNumber(db) : requested_product_number)
+      : null;
+
     if (productColumns.has("product_number") && generatedProductNumber !== null) {
       const existingProductNumber = await safeFirst(db, `SELECT product_id FROM products WHERE product_number = ? LIMIT 1`, [generatedProductNumber]);
       if (existingProductNumber) return json({ ok: false, error: "That product number already exists." }, 409);
+      // Rebuild an automatic slug against the allocated number if the request did not supply one.
+      if (!cleanText(body.slug, 180)) {
+        slug = await ensureUniqueSlug(db, productColumns, '', name, generatedProductNumber);
+      }
     }
+
+    // A custom SKU remains allowed, but a blank SKU now receives a readable unique default.
+    if (!sku && generatedProductNumber !== null) sku = formatDefaultSku(generatedProductNumber);
 
     if (sku && productColumns.has("sku")) {
       const existingSku = await safeFirst(db, `SELECT product_id FROM products WHERE sku = ? LIMIT 1`, [sku]);
@@ -472,6 +485,10 @@ export async function onRequestPost(context) {
       .run();
 
     const newProductId = Number(insertResult?.meta?.last_row_id || 0);
+
+    if (generatedProductNumber !== null) {
+      await ensureProductNumberSequenceAtLeast(db, Number(generatedProductNumber) + 1);
+    }
 
     await upsertProductSeo(db, newProductId, {
       meta_title,

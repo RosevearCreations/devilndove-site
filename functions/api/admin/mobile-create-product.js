@@ -5,7 +5,7 @@
 // and keeps optional image/SEO/resource side effects from turning a partial mobile save into a hard 500.
 
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
-import { DEFAULT_PRODUCT_NUMBER_START, getNextProductNumber } from "./_product-numbering.js";
+import { DEFAULT_PRODUCT_NUMBER_START, allocateNextProductNumber, ensureProductNumberSequenceAtLeast, getNextProductNumber } from "./_product-numbering.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -703,7 +703,7 @@ export async function onRequestPost(context) {
         .bind(...bindings)
         .run();
     } else {
-      productNumber = await getNextProductNumber(db);
+      productNumber = await allocateNextProductNumber(db);
       resolvedName = name || captureReference || `Draft product ${productNumber}`;
 
       const identity = await resolveNewProductIdentity({
@@ -789,13 +789,14 @@ export async function onRequestPost(context) {
           if (!isSqliteUniqueConstraint(error)) throw error;
           lastUniqueError = error;
 
+          const retryProductNumber = await allocateNextProductNumber(db);
           const identityRetry = await resolveNewProductIdentity({
             db,
             productColumns,
-            preferredProductNumber: productNumber + insertAttempt + 1,
+            preferredProductNumber: retryProductNumber,
             resolvedName,
-            slugCandidate: slugify(`${resolvedName}-${productNumber + insertAttempt + 1}`) || `product-${productNumber + insertAttempt + 1}`,
-            skuCandidate: skuOverride ? `${normalizeSku(skuOverride)}-${insertAttempt + 2}` : buildDefaultSku(productNumber + insertAttempt + 1, productNumber + insertAttempt + 1)
+            slugCandidate: slugify(`${resolvedName}-${retryProductNumber}`) || `product-${retryProductNumber}`,
+            skuCandidate: skuOverride ? `${normalizeSku(skuOverride)}-${insertAttempt + 2}` : buildDefaultSku(retryProductNumber, retryProductNumber)
           });
 
           productNumber = identityRetry.productNumber || productNumber + insertAttempt + 1;
@@ -827,6 +828,7 @@ export async function onRequestPost(context) {
 
       resolvedProductId = Number(insertResult?.meta?.last_row_id || 0);
       if (!resolvedProductId) return json({ ok: false, error: "Product could not be created." }, 500);
+      await ensureProductNumberSequenceAtLeast(db, Number(productNumber || 0) + 1);
     }
 
     const uploaded = await uploadImages({ db, env, files, productId: resolvedProductId, resolvedName, adminUser });
