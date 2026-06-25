@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="grid cols-4" style="gap:12px">
             <div><label class="small" for="siteInventoryCategoryPreset">Existing category</label><select id="siteInventoryCategoryPreset"><option value="">Loading categories…</option></select></div>
             <div><label class="small" for="siteInventoryCategory">Category</label><input id="siteInventoryCategory" type="text" /></div>
-            <div class="site-inventory-image-field"><label class="small" for="siteInventoryImageUrl">Image URL</label><input id="siteInventoryImageUrl" type="url" placeholder="https://..." /><div id="siteInventoryImagePreview" class="site-inventory-image-preview"><div class="site-inventory-image-placeholder small">No image URL yet.</div></div><label class="small" for="siteInventoryItemDescription" style="margin-top:10px;display:block">Item description shown below picture</label><textarea id="siteInventoryItemDescription" rows="3" maxlength="600" placeholder="Plain-language description: what it is, size/packaging, and how we use it."></textarea></div>
+            <div class="site-inventory-image-field"><label class="small" for="siteInventoryImageUrl">Image URL</label><input id="siteInventoryImageUrl" type="url" placeholder="https://..." /><div id="siteInventoryImagePreview" class="site-inventory-image-preview"><div class="site-inventory-image-placeholder small">No image URL yet.</div></div><div class="small">The item name is displayed directly under the picture in the inventory list.</div></div>
             <div><label class="small" for="siteInventoryIsActive">Status</label><select id="siteInventoryIsActive"><option value="1">Active</option><option value="0">Inactive</option></select></div>
           </div>
           <div class="grid cols-3" style="gap:12px">
@@ -557,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div id="siteInventoryBulkCostPreview" class="small" style="display:none;margin-top:12px"></div>
         </div>
 
-        <div class="admin-table-wrap" style="margin-top:12px"><table class="site-inventory-admin-table"><thead><tr><th>Item &amp; description</th><th>Stock</th><th>Rules</th><th>Supplier</th><th>Linked Products</th><th>Cost</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
+        <div class="admin-table-wrap" style="margin-top:12px"><table class="site-inventory-admin-table"><thead><tr><th>Item image &amp; name</th><th>Stock</th><th>Rules</th><th>Supplier</th><th>Linked Products</th><th>Cost</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
         <div class="card" style="margin-top:16px"><h4 style="margin-top:0">Recent Inventory Movements</h4><div class="admin-table-wrap"><table><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Loading movement history...</td></tr></tbody></table></div></div>
       </div>`;
 
@@ -592,7 +592,6 @@ document.addEventListener('DOMContentLoaded', () => {
       source_type: document.getElementById('siteInventorySourceType')?.value || 'other',
       external_key: document.getElementById('siteInventoryExternalKey')?.value || '',
       item_name: document.getElementById('siteInventoryItemName')?.value || '',
-      item_description: document.getElementById('siteInventoryItemDescription')?.value || '',
       category: document.getElementById('siteInventoryCategory')?.value || '',
       image_url: document.getElementById('siteInventoryImageUrl')?.value || '',
       source_url: document.getElementById('siteInventorySourceUrl')?.value || '',
@@ -678,7 +677,6 @@ document.addEventListener('DOMContentLoaded', () => {
       siteInventorySourceType: item.source_type || 'other',
       siteInventoryExternalKey: item.external_key || '',
       siteInventoryItemName: item.item_name || '',
-      siteInventoryItemDescription: item.item_description || '',
       siteInventoryCategory: item.category || '',
       siteInventoryImageUrl: item.image_url || '',
       siteInventorySourceUrl: item.source_url || '',
@@ -741,10 +739,9 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="site-inventory-list-identity">
                 <div class="site-inventory-media-stack">
                   ${x.image_url ? `<a class="site-inventory-list-thumb" href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" loading="lazy"/></a>` : '<div class="site-inventory-list-thumb is-empty small">No image</div>'}
-                  <div class="site-inventory-list-description">${escapeHtml(x.item_description || 'Add a short inventory description under this picture.')}</div>
+                  <strong class="site-inventory-media-name">${x.needs_reorder ? '⚠️ ' : ''}${escapeHtml(x.item_name)}</strong>
                 </div>
                 <div class="site-inventory-list-copy">
-                  ${x.needs_reorder ? '⚠️ ' : ''}<strong class="site-inventory-item-name">${escapeHtml(x.item_name)}</strong>
                   <div class="small">#${x.site_item_inventory_id} · ${escapeHtml(x.source_type)} • ${escapeHtml(x.category || '—')}</div>
                   ${x.image_url ? `<div class="small site-inventory-url-line">Image: <a href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer">open image</a></div>` : '<div class="small">Image: not set</div>'}
                   ${(x.source_url || x.amazon_url) ? `<div class="small site-inventory-url-line">Source: <a href="${escapeHtml(x.source_url || x.amazon_url)}" target="_blank" rel="noopener noreferrer">open source</a></div>` : ''}
