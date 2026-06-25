@@ -309,7 +309,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       return `
         <tr>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${productId}</td>
+          <td style="padding:8px;border-bottom:1px solid #ddd"><strong>DD${escapeHtml(String(product.product_number || productId))}</strong><div class="small">Row ID ${productId}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${name}${colorSummary ? `<div class="small">Colours: ${colorSummary}</div>` : ''}${readinessBadgeMarkup(product)}${qaBadgeMarkup(product)}${qaHistoryMarkup(product)}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${slug}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${sku}</td>
@@ -332,7 +332,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <button class="btn" type="button" data-resource-action="reserve" data-product-id="${productId}">Reserve Resources</button>
               <button class="btn" type="button" data-resource-action="release" data-product-id="${productId}">Release Resources</button>
               <button class="btn" type="button" data-archive-product-id="${productId}" ${isArchived ? "disabled" : ""}>Archive</button>
-              <button class="btn" type="button" data-delete-product-id="${productId}">Delete</button>
+              <button class="btn danger" type="button" data-delete-product-id="${productId}" data-product-name="${name}" data-product-number="${escapeHtml(String(product.product_number || ''))}" data-product-sku="${sku}" title="Permanently delete only an unused incorrect/test product. Ordered or referenced products must be archived.">Delete unused</button>
             </div>
           </td>
         </tr>

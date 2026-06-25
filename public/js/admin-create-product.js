@@ -927,7 +927,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const data = await saveProductPayload(payload, { autosave: false });
-      setMessage(data.message || "Product draft saved successfully.");
+      const savedProduct = data?.product || {};
+      const savedNumber = Number(savedProduct.product_number || 0);
+      const savedSku = normalizeText(savedProduct.sku || "");
+      const identityLabel = [savedNumber ? `DD${savedNumber}` : "", savedSku].filter(Boolean).join(" · ");
+      setMessage(`${data.message || "Product draft saved successfully."}${identityLabel ? ` Saved as ${identityLabel}.` : ""}`);
       lastAutosaveFingerprint = JSON.stringify(collectProductPayload({ forceDraft: true }));
       setAutosaveStatus("Saved. You can continue editing this draft or clear the editor.", "saved");
       document.dispatchEvent(new CustomEvent("dd:product-created", { detail: { product: data.product || null } }));
