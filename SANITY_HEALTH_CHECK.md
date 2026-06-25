@@ -1,31 +1,18 @@
-# Sanity Health Check — Build 195
-
-## Build status
-
-Build 195 is ready for deployment after its D1 migration. It resolves practical catalog and inventory friction without weakening history retention, SKU uniqueness, or public-page SEO rules.
-
-| Check | Result |
-|---|---:|
-| JavaScript syntax | Recorded in `data/site/build195-validation.json` |
-| Python compilation | Recorded in `data/site/build195-validation.json` |
-| JSON parsing | Recorded in `data/site/build195-validation.json` |
-| Public-page one-H1 check | Recorded in `data/site/build195-validation.json` |
-| CSS balance | Recorded in `data/site/build195-validation.json` |
-| Full standalone schema | Recorded in `data/site/build195-validation.json` |
-| Build 194 → 195 migration rerun | Recorded in `data/site/build195-validation.json` |
-| Static deployment preflight | Recorded in `data/site/deployment-preflight.json` |
-| Final deployment blocker check | Recorded in `data/site/build195-validation.json` |
+# Sanity Health Check — Build 196
 
 ## Practical result
 
-- Incorrect unused product: guarded permanent delete with audit record.
-- Ordered/referenced product: archive, never delete.
-- System #: unique and never reused after a delete.
-- Blank SKU: automatic unique `DND-xxxxx` value.
-- Long tools/consumables name: readable title; useful description sits below its picture.
+- Incorrect unused product: load it into the editor, open **Correct / return raw inventory**, review linked materials, choose factual reservation release and/or raw supply return quantities, then confirm deletion.
+- Ordered/referenced product: archive, never permanently delete.
+- Reservation release: decreases reserved stock only.
+- Physical raw-supply return: increases on-hand stock only after explicit review.
+- Inventory cards: item name appears below image; the old description block is not rendered.
 
-## Remaining live-only work
+## Owner testing
 
-- Enter factual fees/costs.
-- Test live R2, Stripe webhooks, email delivery, Search Console, GBP evidence, and real devices.
-- Replace visual placeholders only with approved real media.
+Follow `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` after applying Build 196 migration and redeploying.
+
+## Still live-only
+
+- Verify real raw stock counts before any physical return.
+- Verify R2/media, Stripe, email, Search Console, GBP, and real-device evidence in the deployed site.

@@ -1,4 +1,4 @@
-# Devil n Dove Project Status and Roadmap — Build 195
+# Devil n Dove Project Status and Roadmap — Build 196
 
 This is the primary human/business roadmap. Read `AI_HANDOFF.md` for technical deployment details and `MARKDOWN_INDEX.md` for specialist references.
 
@@ -6,7 +6,7 @@ This is the primary human/business roadmap. Read `AI_HANDOFF.md` for technical d
 
 Devil n Dove is now a full small-business platform: storefront, handmade/vintage presentation, product/media workflows, inventory/cost groundwork, marketplace exports, customer proof, local SEO, deployment controls, and mobile/desktop administration.
 
-The strongest remaining value is **calm daily use and truthful real data**. Build 195 removes three recurring points of confusion: incorrect-product cleanup, system numbering/SKU behaviour, and unreadable inventory item cards.
+The strongest remaining value is **calm daily use and truthful real data**. Build 196 resolves the remaining practical confusion in incorrect-product cleanup: the deletion/correction flow is now visible beside the product update action and handles reviewed raw-inventory return choices. It also restores the requested inventory layout with the item name directly below its picture.
 
 ## Build 195 completed — product lifecycle and readable inventory
 
@@ -20,7 +20,7 @@ The strongest remaining value is **calm daily use and truthful real data**. Buil
 8. Improved product editor wording so staff can distinguish internal System # from SKU.
 9. Added a plain-language product lifecycle guide inside desktop catalog/product screens.
 10. Added `site_inventory_item_descriptions` as a safe sidecar table rather than duplicating inventory names.
-11. Added an inventory description field that renders below the item image.
+11. Build 195 description display was superseded by Build 196 at the owner’s request; legacy data remains retained.
 12. Reworked tool/consumable table layout so long names wrap as normal readable phrases rather than one word per row.
 13. Added mobile responsive behaviour for inventory cards/table scrolling.
 14. Preserved current one-H1, title/meta, canonical, alt-text, and local-page checks.
@@ -30,6 +30,29 @@ The strongest remaining value is **calm daily use and truthful real data**. Buil
 18. Added a detailed owner test guide for deletion, numbering, SKU, inventory descriptions, phone, and desktop checks.
 19. Kept historical Markdown as archive/specialist reference rather than deleting context needed by a future AI.
 20. Revalidated JS, JSON, public-page H1, CSS balance, full schema, migration rerun, preflight, blockers, and ZIP integrity.
+
+## Build 196 completed — visible product correction and reviewed raw-material returns
+
+1. Added a visible **Correct / return raw inventory** button beside **Update Product** when an existing product is loaded.
+2. Added a correction panel that previews linked raw inventory before deleting an unused incorrect product.
+3. Separated reservation release from physical material return so stock is never silently guessed or changed.
+4. Reservation release now makes already-reserved raw inventory available again without changing on-hand stock.
+5. Physical return increases on-hand stock only for reviewed linked supply quantities entered by the admin.
+6. Added `product_material_return_audit` for factual material-return and reservation-release history.
+7. Products with business/history references remain blocked from permanent deletion and must be archived.
+8. Preserved permanent System # allocation and independent unique SKU behavior.
+9. Restored inventory presentation to show the long item name directly beneath its image.
+10. Removed the short-description block from raw inventory/tools display without deleting legacy description data.
+11. Stopped ordinary inventory edits from overwriting hidden legacy description data.
+12. Added responsive correction-panel and image/name inventory styling.
+13. Updated all schema files and migration controls.
+14. Updated product correction owner instructions.
+15. Preserved one-H1, SEO, title/meta, and visual-placeholder safeguards.
+16. Preserved mobile/desktop inventory behavior.
+17. Added explicit raw-material return notes to the product delete audit snapshot.
+18. Kept R2 media deletion manual because image files can be reused.
+19. Retained specialist Markdown and canonical two-file handoff model.
+20. Revalidated syntax, schema, migration rerun, preflight, blockers, and ZIP integrity.
 
 ## Current strengths
 
@@ -72,7 +95,7 @@ Keep these public-site habits:
 2. Create one clearly marked test product, leave SKU blank, and confirm its System # and automatic `DND-xxxxx` SKU.
 3. Delete that unused test product through the guarded UI and verify the audit row exists.
 4. Create a second test product and confirm its System # is higher, not reused.
-5. Add a description to one long-name tool/supply and verify it sits below the photo on desktop and phone.
+5. Confirm a long-name tool/supply displays its actual item name directly below the image on desktop and phone.
 6. Record actual payment and marketplace fees with effective dates.
 7. Enter real material, labour, packaging, overhead, and waste costs for one product family.
 8. Test a low-margin marketplace export and a time-limited reviewed override.

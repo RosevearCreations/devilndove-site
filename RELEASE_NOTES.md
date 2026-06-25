@@ -1,8 +1,8 @@
-# Build 195
+# Build 196
 
 ## Summary
 
-- Added guarded unused-product deletion with audit trail and archive fallback, persistent product-number sequencing, automatic DND SKU defaults when blank, and separate inventory descriptions shown below item photos with responsive long-name layout.
+- Added a visible product-correction panel beside Update Product, reviewed reservation-release and raw-supply return actions with audit history, and restored raw inventory/tools cards to item name directly below picture without rendering short descriptions.
 
 ## Release package manifest
 
@@ -16,6 +16,7 @@
 - `AMAZON_MATCHING_NOTES.md`
 - `BUILD194_TESTING_GUIDE.md`
 - `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md`
+- `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md`
 - `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md`
 - `COMPETITIVE.md`
 - `DATABASE_SCHEMA_REFERENCE.md`
@@ -132,8 +133,11 @@
 - `data/site/build194-changed-files.json`
 - `data/site/build194-storefront-discovery.json`
 - `data/site/build194-validation.json`
+- `data/site/build195-changed-files.json`
 - `data/site/build195-product-lifecycle.json`
 - `data/site/build195-validation.json`
+- `data/site/build196-product-correction-material-return.json`
+- `data/site/build196-validation.json`
 - `data/site/competitive-opportunities.json`
 - `data/site/deployment-preflight.json`
 - `data/site/featured-items.json`
@@ -169,6 +173,7 @@
 - `database_build193_live_readiness_playbook.sql`
 - `database_build194_storefront_discovery_product_facts_media_roles.sql`
 - `database_build195_product_lifecycle_sku_inventory_cards.sql`
+- `database_build196_product_correction_material_returns.sql`
 - `database_full_schema.sql`
 - `database_growth_analytics_seo_extension.sql`
 - `database_inventory_stock_unit_quick_fix.sql`
@@ -487,6 +492,7 @@
 - `public/js/admin-panel-routing.js`
 - `public/js/admin-post-deploy-smoke-tests.js`
 - `public/js/admin-product-bulk-tools.js`
+- `public/js/admin-product-correction.js`
 - `public/js/admin-product-draft-checklist.js`
 - `public/js/admin-product-image-annotations.js`
 - `public/js/admin-product-image-health.js`
