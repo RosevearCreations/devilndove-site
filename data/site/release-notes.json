@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 195",
+    "date": "2026-06-23",
+    "title": "Product lifecycle safety, permanent System # values, and readable inventory cards",
+    "summary": "Added guarded unused-product deletion with audit trail and archive fallback, persistent product-number sequencing, automatic DND SKU defaults when blank, and separate inventory descriptions shown below item photos with responsive long-name layout."
+  },
+  {
     "build": "Build 194",
     "date": "2026-06-22",
     "title": "Storefront discovery, product facts, and media-role clarity",

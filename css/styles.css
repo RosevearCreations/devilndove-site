@@ -1307,3 +1307,92 @@ body.nav-mobile-open{overflow:hidden}
 @media (max-width:980px){.what-we-make-grid,.featured-creations-grid,.workshop-journal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.workshop-process-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.section-heading-row>img{width:min(100%,280px)}}
 @media (max-width:680px){.hero-actions .btn,.shop-quick-chips .btn{flex:1 1 calc(50% - 8px);text-align:center}.what-we-make-grid,.featured-creations-grid,.workshop-journal-grid,.product-quick-facts,.listing-profile-grid{grid-template-columns:1fr}.workshop-process-grid{grid-template-columns:1fr}.workshop-process-grid>div{min-height:auto}.recently-viewed-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.workshop-journal-hero{grid-template-columns:1fr}.workshop-journal-hero>img{max-height:260px;object-fit:cover}.section-heading-row>img{width:100%;order:-1}.admin-table-wrap{overflow-x:auto}.admin-table-wrap table{min-width:720px}}
 @media (prefers-reduced-motion:reduce){.what-we-make-card{transition:none}.what-we-make-card:hover,.what-we-make-card:focus-visible{transform:none}}
+
+
+/* Build 195 — inventory readability and safe product-lifecycle controls */
+.product-lifecycle-guide {
+  margin: 0 0 16px;
+  border-left: 4px solid rgba(161, 112, 44, .75);
+}
+.product-lifecycle-guide summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+.product-lifecycle-guide .product-lifecycle-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.product-lifecycle-guide .lifecycle-rule {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,.025);
+}
+.product-lifecycle-guide .lifecycle-rule strong {
+  display: block;
+  margin-bottom: 5px;
+}
+.site-inventory-admin-table {
+  min-width: 1180px;
+  table-layout: auto !important;
+}
+.site-inventory-admin-table th:first-child,
+.site-inventory-admin-table td:first-child {
+  min-width: 330px;
+  width: 34%;
+}
+.site-inventory-list-identity {
+  grid-template-columns: 124px minmax(220px, 1fr);
+  align-items: start;
+}
+.site-inventory-media-stack {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.site-inventory-list-thumb {
+  width: 124px;
+  min-height: 112px;
+}
+.site-inventory-list-thumb img {
+  height: 112px;
+  object-fit: contain;
+  background: rgba(255,255,255,.04);
+}
+.site-inventory-list-description {
+  font-size: .78rem;
+  line-height: 1.35;
+  color: var(--muted);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.site-inventory-list-copy {
+  min-width: 0;
+}
+.site-inventory-item-name {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.site-inventory-url-line a {
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .product-lifecycle-guide .product-lifecycle-guide-grid {
+    grid-template-columns: 1fr;
+  }
+  .site-inventory-admin-table {
+    min-width: 960px;
+  }
+  .site-inventory-list-identity {
+    grid-template-columns: 132px minmax(220px, 1fr);
+  }
+}
