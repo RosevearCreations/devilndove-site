@@ -915,7 +915,9 @@ export async function onRequestPost(context) {
   ).run();
 
   const newId = Number(insert?.meta?.last_row_id || 0);
-  await saveItemDescription(db, newId, body.item_description, adminUser.user_id);
+  if (Object.prototype.hasOwnProperty.call(body, 'item_description')) {
+    await saveItemDescription(db, newId, body.item_description, adminUser.user_id);
+  }
   const saved = await db.prepare(`
     SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
     FROM site_item_inventory sii
@@ -1075,7 +1077,9 @@ export async function onRequestPatch(context) {
       actor_user_id: adminUser.user_id
     });
 
-    await saveItemDescription(db, id, merged.item_description, adminUser.user_id);
+    if (Object.prototype.hasOwnProperty.call(body, 'item_description')) {
+      await saveItemDescription(db, id, merged.item_description, adminUser.user_id);
+    }
 
     const saved = await db.prepare(`
       SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
