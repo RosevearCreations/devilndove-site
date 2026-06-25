@@ -1,19 +1,3 @@
-# Development Roadmap — Build 193
+# Development Roadmap — Build 195
 
-Canonical next work is maintained in `PROJECT_STATUS_AND_ROADMAP.md`.
-
-## Build 193 completed
-
-- Added a Command Center evidence-based Live Readiness Playbook.
-- Added detailed live test instructions and run history.
-- Added R2 multipart/resume mobile upload workflow and product image attachment.
-- Added Command Center usage telemetry for future legacy-page consolidation.
-- Updated schema, migration, CSS, documentation, and validation workflows.
-
-## Roadmap rule
-
-Prefer improvements that integrate into Command Center, Products, Mobile Product Add, Members, Local SEO, Marketplace, Visual, or Deployment surfaces. Do not add a new admin page unless it serves a unique owner workflow that cannot fit an existing surface.
-
-## Build 194 alignment
-
-Build 194 completed storefront discovery, Workshop Journal, buyer-facing product profiles, media-role scoring, featured creations, recently viewed, and quick shop filters. The next step is real profile/media data plus live device verification; see PROJECT_STATUS_AND_ROADMAP.md.
+Build 195 completes product lifecycle safety and inventory card readability. See `PROJECT_STATUS_AND_ROADMAP.md` for the current 20-step plan. Next operational focus: real costs/fees, approved real media, live integrations, and measured admin consolidation.

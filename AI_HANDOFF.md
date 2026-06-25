@@ -1,61 +1,49 @@
-# Devil n Dove AI Handoff — Build 194
+# Devil n Dove AI Handoff — Build 195
 
-Read this first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, `BUILD194_TESTING_GUIDE.md`, and `LIVE_TESTING_GUIDE.md`.
+Read this first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md`, `BUILD194_TESTING_GUIDE.md`, and `LIVE_TESTING_GUIDE.md`.
 
 ## Current build
 
-Build 194 improves customer-facing store discovery and buyer-question clarity without bypassing existing consent, product QA, or release-control workflows.
-
-New public routes:
-
-- `/workshop-journal/`
-- `/workshop-journal/polymer-clay-earring-care/`
-- `/workshop-journal/coin-and-spoon-ring-care/`
-- `/workshop-journal/handmade-vintage-sourced-guide/`
-
-New APIs:
-
-- `/api/featured-products`
-- `/api/admin/product-listing-profiles`
-- `/api/admin/product-media-score`
+Build 195 fixes practical product and inventory administration pain points without bypassing existing product QA, consent, release, or data-retention safeguards.
 
 New D1 migration:
 
 ```text
-database_build194_storefront_discovery_product_facts_media_roles.sql
+database_build195_product_lifecycle_sku_inventory_cards.sql
 ```
 
-Public rules:
+New operating rules:
 
-- Only listing profiles with `profile_status` `approved` or `published` render as public Quick Facts.
-- Only explicitly assigned media roles replace public placeholders.
-- Product video must be HTTPS and suitable for public viewing.
-- Customer media remains private until consent/public-use approval exists.
-- Recently viewed data is browser-local only; do not turn it into cross-device tracking without a future privacy review.
+- `products.product_number` is the internal **System #** and stays unique.
+- Product numbers are allocated from `catalog_product_number_sequence`; a deleted product number is not reused.
+- A blank SKU is automatically generated as `DND-xxxxx` from the permanent system number.
+- A custom SKU remains allowed but must be unique.
+- Incorrect unused products can be permanently deleted only after admin step-up password, exact `DELETE PRODUCT` phrase, and a reason.
+- Products with order/history/reference records are blocked from deletion and must be archived.
+- Permanent deletion writes a factual `product_deletion_audit` record.
+- Tool/supply long names remain the title; a separate `site_inventory_item_descriptions` record supplies readable text below the image.
 
 ## Primary routes
 
-- `/admin/command-center/` — daily operations, live readiness, cost/fee, SEO, media, and consolidation evidence.
-- `/admin/catalog-media/` — product image health, listing facts, and Build 194 media-role scoring.
+- `/admin/products/` — desktop product editor and guarded delete/archiving direction.
+- `/admin/catalog/` — catalog/product administration and System #/SKU explanation.
+- `/admin/site-item-inventory/` — tools/consumables inventory; description appears below image.
+- `/admin/command-center/` — daily operations, cost/fee, SEO, media, live readiness, and consolidation evidence.
+- `/admin/catalog-media/` — product image health, listing facts, and media-role scoring.
 - `/admin/mobile-product/` — phone product draft capture and resumable large-photo uploader.
-- `/admin/products/` — desktop product editor.
 - `/admin/local-seo-review/` — Search Console and local SEO review.
-- `/admin/marketplace-exports/` — channel exports with margin gates.
-- `/admin/visual-enrichment-studio/` — visual/media governance.
 - `/admin/deployment-preflight/` — static and release checks.
 
 ## Important APIs
 
 - `/api/auth/login` — must return JSON; root `_routes.json` must include `/api/*`.
-- `/api/featured-products` — public approved active featured product cards; safe empty fallback.
-- `/api/product-detail` — returns approved listing profile only.
+- `/api/admin/create-product` — desktop product creation with permanent system number and automatic SKU when blank.
+- `/api/admin/mobile-create-product` — mobile product creation with same sequence rules.
+- `/api/admin/delete-product` — POST only; requires admin step-up, confirmation phrase, and reason; blocks referenced products.
+- `/api/admin/site-item-inventory` — tools/supplies inventory including `item_description` sidecar data.
 - `/api/admin/product-listing-profiles` — admin listing facts workflow.
 - `/api/admin/product-media-score` — admin image-role assignment and score workflow.
-- `/api/admin/value-ops` — integrated command-center operations.
-- `/api/admin/live-readiness-playbook` — detailed live test cases/runs/evidence.
-- `/api/admin/mobile-resumable-upload` — R2 multipart mobile upload.
-- `/api/before-after-gallery` — public approved/consented gallery proof only.
-- `/api/admin/marketplace-export-preview` — marketplace CSV with margin enforcement.
+- `/api/admin/value-ops` — integrated Command Center operations.
 
 ## D1 migration order
 
@@ -83,6 +71,7 @@ database_build191_value_operations_followthrough.sql
 database_build192_operational_data_connection.sql
 database_build193_live_readiness_playbook.sql
 database_build194_storefront_discovery_product_facts_media_roles.sql
+database_build195_product_lifecycle_sku_inventory_cards.sql
 ```
 
 Builds 187 and 188 were routing/environment hotfixes without D1 migrations.
@@ -100,17 +89,19 @@ Builds 187 and 188 were routing/environment hotfixes without D1 migrations.
 - Resumable image uploads require an R2 binding and an already-saved product draft.
 - Environment views must never reveal secret values.
 - Do not merge customer duplicates automatically.
+- Do not permanently delete a product with order/history references; archive it instead.
+- Do not reuse a deleted System # or custom SKU.
 
-## Build 194 owner test order
+## Build 195 owner test order
 
-1. Apply `database_build194_storefront_discovery_product_facts_media_roles.sql` after Build 193.
-2. Confirm `/api/auth/login` returns JSON.
-3. Confirm `DB` and `PRODUCT_MEDIA_BUCKET` bindings in Cloudflare Pages.
-4. Open `/admin/catalog-media/` and create one draft listing profile for a test product.
-5. Confirm draft Quick Facts do not appear publicly; approve only correct facts.
-6. Assign media roles for a well-photographed test product and confirm public proof slots change safely.
-7. Test homepage Featured Creations, Shop quick filters, recently viewed items, and Workshop Journal pages on phone and desktop.
-8. Run `/admin/deployment-preflight/` and record evidence using `BUILD194_TESTING_GUIDE.md`.
+1. Apply `database_build195_product_lifecycle_sku_inventory_cards.sql` after Build 194.
+2. Confirm `/api/auth/login` returns JSON and `DB` remains a D1 binding.
+3. Create one clearly marked test draft with blank SKU and record its System #/automatic SKU.
+4. Use **Delete unused** on that product: password, reason, phrase `DELETE PRODUCT`.
+5. Create a second test draft and verify System # increased rather than reused.
+6. Add/edit an inventory description and confirm it appears below the picture on desktop and phone.
+7. Use `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md` for detailed expected results and cleanup.
+8. Run `/admin/deployment-preflight/` and save evidence.
 
 ## Documentation policy
 

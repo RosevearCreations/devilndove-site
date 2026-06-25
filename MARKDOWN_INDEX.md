@@ -35,3 +35,10 @@ Historical planning files through Build 189 are under `docs/archive/`. Do not us
 ## Documentation rule
 
 Every build updates the two canonical files, this index, schema reference, release notes, sanity health check, smoke-test instructions, and any operational reference affected by the change. Do not create a new Markdown file unless it has a distinct long-term owner/testing purpose.
+
+## Build 195 current additions
+
+- `PROJECT_STATUS_AND_ROADMAP.md` — canonical human/business source for Build 195 priorities and next steps.
+- `AI_HANDOFF.md` — canonical technical continuation file for Build 195.
+- `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md` — owner test steps for unused-product delete, archive vs delete, permanent System #, automatic SKU, and inventory descriptions below media.
+- Historical and specialist files remain as references; do not delete them until their information has been captured in the two canonical files or `docs/archive/`.
