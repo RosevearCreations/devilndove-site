@@ -1,5 +1,3 @@
-# AI Context — Build 196
+# Devil n Dove Context Pointer — Build 197
 
-Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. Build 196 establishes permanent product System # allocation, automatic `DND-xxxxx` SKU defaults, safe unused-product delete/archiving rules, and visible product correction/raw-material return workflow and item names below images.
-
-Use `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` for the current visible product correction and raw-material return workflow.
+Read `AI_HANDOFF.md` first, then `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`. Build 197 focuses on resilient admin reads, non-destructive product media, product/category fixes, shop cards, and phone navigation.

@@ -1,60 +1,37 @@
-# Devil n Dove AI Handoff — Build 196
+# Devil n Dove AI Handoff — Build 197
 
-Read this first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md`, `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md`, `BUILD194_TESTING_GUIDE.md`, and `LIVE_TESTING_GUIDE.md`.
+Read this file first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`. Those are the two canonical sources of present direction. Specialist guides remain for deployment and owner testing; historical files stay retained rather than deleted.
 
-## Current build
+## What Build 197 changes
 
-Build 196 corrects the visible product-correction path: an editor-level panel now previews linked raw inventory and requires explicit reviewed reservation-release or physical-return quantities before unused-product deletion. It also returns the inventory display to a single item name directly below each image.
+Build 197 targets the live admin failures and the product-entry problems reported from the deployed Pages site.
 
-New D1 migration:
+- The product detail API now reads schema variations safely instead of assuming every newer media/SEO column exists.
+- Community Content, Custom Requests, Social Post Queue, and Live Readiness dashboard reads now avoid routine schema/seed work where possible and return a stable degraded response instead of breaking the page when optional data is not yet ready.
+- Product update 409 conflicts are treated as permanent review items, not transient outages. The editor no longer places duplicate SKU, slug, or system-number conflicts into its retry queue.
+- The unused-product correction panel now keeps its handlers scoped to the currently loaded product, preventing a stale first deletion action from disabling later corrections.
+- A normal product save preserves existing media. The dedicated media editor now removes only rows that the admin explicitly deletes and confirms with Save Images; ordinary saves, sorting, featured-image selection, SEO/OG changes, and partial editor views do not clear unrelated media.
+- Product-media audit records are added by `database_build197_application_resilience_media_catalog.sql`.
+- Additional Colours accepts the editor field name and normalizes a simple comma/newline list.
+- Soap and Candles are included in default categories. `/admin/catalog/` now has **Manage product categories**, which writes reusable category choices to `app_settings`.
+- Shop product cards are image-first with the facts, price, and actions beneath the picture. Missing product imagery uses a labelled visual placeholder, not a fake product photograph.
+- Phone navigation is a compact popup with closed accordion groups rather than a full-height list.
 
-```text
-database_build195_product_lifecycle_sku_inventory_cards.sql
-database_build196_product_correction_material_returns.sql
-database_build196_product_correction_material_returns.sql
-```
+## Deployable files and order
 
-New operating rules:
-
-- `products.product_number` is the internal **System #** and stays unique.
-- Product numbers are allocated from `catalog_product_number_sequence`; a deleted product number is not reused.
-- A blank SKU is automatically generated as `DND-xxxxx` from the permanent system number.
-- A custom SKU remains allowed but must be unique.
-- Incorrect unused products can be permanently deleted only after admin step-up password, exact `DELETE PRODUCT` phrase, and a reason.
-- Products with order/history/reference records are blocked from deletion and must be archived.
-- Permanent deletion writes a factual `product_deletion_audit` record.
-- Tool/supply item names now render directly below their image. Legacy `site_inventory_item_descriptions` data is retained but no longer rendered or overwritten by ordinary edits.
-- `/api/admin/delete-product` now supports a GET correction preview plus explicit `material_actions` in the guarded POST delete flow.
-- `product_material_return_audit` records every reviewed reservation release or returned raw supply quantity.
-
-## Primary routes
-
-- `/admin/products/` — desktop product editor with visible **Correct / return raw inventory** panel after loading an existing product.
-- `/admin/catalog/` — catalog/product administration and System #/SKU explanation.
-- `/admin/site-item-inventory/` — tools/consumables inventory; item name appears directly below image.
-- `/admin/command-center/` — daily operations, cost/fee, SEO, media, live readiness, and consolidation evidence.
-- `/admin/catalog-media/` — product image health, listing facts, and media-role scoring.
-- `/admin/mobile-product/` — phone product draft capture and resumable large-photo uploader.
-- `/admin/local-seo-review/` — Search Console and local SEO review.
-- `/admin/deployment-preflight/` — static and release checks.
-
-## Important APIs
-
-- `/api/auth/login` — must return JSON; root `_routes.json` must include `/api/*`.
-- `/api/admin/create-product` — desktop product creation with permanent system number and automatic SKU when blank.
-- `/api/admin/mobile-create-product` — mobile product creation with same sequence rules.
-- `/api/admin/delete-product` — GET previews linked raw inventory; POST requires admin step-up, confirmation phrase, and reason; it can apply explicit reviewed material actions before deleting an unused product.
-- `/api/admin/site-item-inventory` — tools/supplies inventory including `item_description` sidecar data.
-- `/api/admin/product-listing-profiles` — admin listing facts workflow.
-- `/api/admin/product-media-score` — admin image-role assignment and score workflow.
-- `/api/admin/value-ops` — integrated Command Center operations.
+1. Back up the production D1 database.
+2. Confirm Build 196 is applied.
+3. Run `database_build197_application_resilience_media_catalog.sql` once. It is safe to rerun.
+4. Deploy this complete Pages build, including static files and `functions/`.
+5. Purge only normal edge/browser cache if the old JavaScript is still served; do not delete R2 media as part of this release.
+6. Run `POST_DEPLOY_SMOKE_TEST.md` before treating the fixes as live.
 
 ## D1 migration order
 
-Run only missing migrations. Do not blindly rerun older non-idempotent migrations.
+Run only migrations that the production migration ledger does not already list. Do not rerun older non-idempotent migrations merely because this list exists.
 
 ```text
-database_build171_ledger_repair.sql only if Build 171 schema exists but the marker is missing
+database_build171_ledger_repair.sql only when its schema exists but its marker is missing
 database_build173_deployment_preflight.sql
 database_build174_deployment_preflight_detail.sql
 database_build175_release_control.sql
@@ -76,42 +53,59 @@ database_build192_operational_data_connection.sql
 database_build193_live_readiness_playbook.sql
 database_build194_storefront_discovery_product_facts_media_roles.sql
 database_build195_product_lifecycle_sku_inventory_cards.sql
+database_build196_product_correction_material_returns.sql
+database_build197_application_resilience_media_catalog.sql
 ```
 
-Builds 187 and 188 were routing/environment hotfixes without D1 migrations.
+Builds 187 and 188 were routing/environment hotfixes without a D1 migration.
 
-## Key business rules
+## Immediate verification targets
 
-- One H1 maximum per exposed page.
-- Never promise first-page or local-pack placement.
-- Fee/cost defaults are not financial truth until owner-reviewed.
-- Marketplace exports stay blocked for unhealthy/unknown margin unless a current reviewed override exists.
-- Review eligibility is not permission to contact.
-- Customer stories, gallery proof, and customer photographs require consent/public-use approval.
-- Placeholders are layout scaffolding, not proof.
-- Mobile recovery stores fields; user must reselect image files after browser reload.
-- Resumable image uploads require an R2 binding and an already-saved product draft.
-- Environment views must never reveal secret values.
-- Do not merge customer duplicates automatically.
-- Do not permanently delete a product with order/history references; archive it instead.
-- Do not reuse a deleted System # or custom SKU.
+The following deployed calls should return JSON and a status appropriate to authentication/data state—not a Cloudflare Pages 503:
 
-## Build 195 owner test order
+```text
+GET  /api/admin/community-content
+POST /api/admin/live-readiness-playbook (action: record_usage)
+GET  /api/admin/custom-requests
+GET  /api/admin/social-post-queue
+GET  /api/admin/product-detail?product_id=<known product ID>
+```
 
-1. Apply `database_build195_product_lifecycle_sku_inventory_cards.sql` after Build 194.
-2. Confirm `/api/auth/login` returns JSON and `DB` remains a D1 binding.
-3. Create one clearly marked test draft with blank SKU and record its System #/automatic SKU.
-4. Use **Delete unused** on that product: password, reason, phrase `DELETE PRODUCT`.
-5. Create a second test draft and verify System # increased rather than reused.
-6. Confirm the item name appears directly below the picture on desktop and phone; no short-description block is shown.
-7. Use `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md`, `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` for detailed expected results and cleanup.
-8. Run `/admin/deployment-preflight/` and save evidence.
+A 401 while signed out is expected. A 200 with `degraded: true` is an intentional safe dashboard fallback and should be followed by checking migration/deployment logs; it is preferable to an unusable admin page.
+
+## Product and media rules
+
+- `products.product_number` is the permanent internal **System #**. Do not reuse it after deletion.
+- A blank SKU is generated as `DND-xxxxx`; a custom SKU must still be unique.
+- Products with customer, order, or other business history are archived rather than deleted.
+- Permanent unused-product correction requires password, reason, confirmation phrase, and reviewed material actions.
+- `product_images` represents product image records. A normal save may add or update them but may not remove an existing record unless `media_sync_mode: explicit_remove` and an approved `removed_image_ids` list are supplied.
+- Do not delete source R2 files automatically: a file may be referenced elsewhere. R2 deletion stays an explicit asset-library action.
+- Treat videos independently from images. Editing an OG/featured image must not overwrite a product video URL.
+- First image remains the preferred featured candidate; visual scoring is guidance, not evidence that a photo is accurate.
+
+## Category administration
+
+Open `/admin/catalog/`, expand **Manage product categories**, add one category per line, and save. Categories are stored in `app_settings` under `site.catalog.product_category_options`, combined with existing product categories, and then appear in the product editor. Soap and Candles are already supplied as defaults.
+
+## SEO and storefront rules
+
+- One visible H1 per public route; it should state the page’s main purpose.
+- Keep title, meta description, canonical URL, visible price/availability, and product structured data aligned.
+- Use descriptive alt text for meaningful product images and empty alt text for decorative placeholder art.
+- Mobile and desktop must expose the same meaningful product facts and paths to purchase.
+- Product cards should show the image, name, price, short truthful facts, and a clear action together.
+- Never present a placeholder as a finished product or proof of a service.
+
+## Current limits / not yet claimed complete
+
+This build fixes the failure paths and improves the visible workflows, but deployment is still required before a live 503 can be declared resolved. External systems also need live owner evidence: R2 derivative generation, Stripe webhooks, transactional email, Search Console/GBP imports, real fee/cost data, marketplace delivery, and device screenshots. Do not claim these as completed merely because UI foundations exist.
 
 ## Documentation policy
 
 Canonical files:
 
-1. `PROJECT_STATUS_AND_ROADMAP.md`
-2. `AI_HANDOFF.md`
+1. `PROJECT_STATUS_AND_ROADMAP.md` — human/business priority and release decision source.
+2. `AI_HANDOFF.md` — technical current-state and deployment source.
 
-Supporting documents exist only for specialist detail. Historical context remains in `docs/archive/`.
+Keep specialist markdowns until their unique instructions have either been moved into these two files or archived. Do not create more general-roadmap files; update the canonical pair instead.
