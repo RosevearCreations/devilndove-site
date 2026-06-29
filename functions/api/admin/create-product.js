@@ -330,9 +330,12 @@ export async function onRequestPost(context) {
     const inventory_tracking = Number(body.inventory_tracking) === 1 ? 1 : 0;
     const inventory_quantity = parseInteger(body.inventory_quantity, 0);
     const digital_file_url = cleanExternalUrl(body.digital_file_url);
-    const featured_image_url = cleanExternalUrl(body.featured_image_url);
+    const requested_featured_image_url = cleanExternalUrl(body.featured_image_url);
     const sort_order = parseInteger(body.sort_order, 0);
     const image_urls = normalizeImageUrls(body.image_urls);
+    // The first retained gallery image is the default storefront/featured image.
+    // This keeps a draft visually complete even when the editor leaves the separate field blank.
+    const featured_image_url = requested_featured_image_url || image_urls[0] || null;
     const meta_title = cleanText(body.meta_title, 70);
     const meta_description = cleanText(body.meta_description, 180);
     const keywords = cleanText(body.keywords, 255);
@@ -340,7 +343,7 @@ export async function onRequestPost(context) {
     const canonical_url = normalizeCanonicalUrl(body.canonical_url);
     const og_title = cleanText(body.og_title, 120);
     const og_description = cleanText(body.og_description, 200);
-    const og_image_url = cleanExternalUrl(body.og_image_url);
+    const og_image_url = cleanExternalUrl(body.og_image_url) || featured_image_url;
     const merchandise_origin = cleanMerchandiseOrigin(body.merchandise_origin);
     const sale_channel = cleanSaleChannel(body.sale_channel);
     const external_listing_url = cleanExternalUrl(body.external_listing_url);
@@ -454,7 +457,7 @@ export async function onRequestPost(context) {
     addColumnValue(columns, values, productColumns, "inventory_tracking", inventory_tracking);
     addColumnValue(columns, values, productColumns, "inventory_quantity", inventory_quantity);
     addColumnValue(columns, values, productColumns, "digital_file_url", digital_file_url);
-    addColumnValue(columns, values, productColumns, "featured_image_url", featured_image_url || image_urls[0] || null);
+    addColumnValue(columns, values, productColumns, "featured_image_url", featured_image_url);
     addColumnValue(columns, values, productColumns, "merchandise_origin", merchandise_origin);
     addColumnValue(columns, values, productColumns, "sale_channel", sale_channel);
     addColumnValue(columns, values, productColumns, "external_listing_url", external_listing_url);
