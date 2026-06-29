@@ -536,7 +536,7 @@ async function ensureSchema(db) {
   }
 }
 async function summarize(db, env = {}) {
-  await ensureSchema(db);
+  // Build 197: dashboard reads do not run a large DDL/seed pass. The deployment migration owns schema changes.
   const summary = await db.prepare(`SELECT
     COUNT(*) AS total,
     SUM(CASE WHEN post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
@@ -1061,7 +1061,7 @@ export async function onRequestGet(context) {
       details: { error: String(error?.stack || error?.message || error) },
       related_user_id: adminUser.user_id
     });
-    return jsonResponse({ ok: false, error: error?.message || 'Social queue failed to load.' }, 500);
+    return jsonResponse({ ok: true, degraded: true, backend_warning: error?.message || 'Social queue is temporarily unavailable. Refresh after the database migration completes.', summary: { total: 0, open_count: 0, needs_review_count: 0, posted_count: 0, scheduled_count: 0, due_count: 0, duplicate_warning_count: 0 }, queue: [], platforms: [], attempts: [], templates: [], calendar: [], utm_rollups: [], mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
   }
 }
 

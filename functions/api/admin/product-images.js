@@ -81,6 +81,16 @@ async function ensureProductImageTables(db) {
     )
   `).run().catch(() => null);
 
+  // Some early databases used a display-order field or had no order field at all.
+  // Give the media editor one stable order column before it reads or updates rows.
+  let imageCols = await getTableColumnSet(db, 'product_images');
+  if (!imageCols.has('sort_order')) {
+    imageCols = await ensureColumn(db, 'product_images', 'sort_order', 'ALTER TABLE product_images ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0', imageCols);
+    if (imageCols.has('display_order')) {
+      await db.prepare('UPDATE product_images SET sort_order = COALESCE(display_order, sort_order, 0) WHERE sort_order IS NULL OR sort_order = 0').run().catch(() => null);
+    }
+  }
+
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS product_image_annotations (
       product_image_annotation_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -361,10 +371,53 @@ export async function onRequestPost(context) {
   const product = await db.prepare(`SELECT product_id, name, featured_image_url FROM products WHERE product_id = ? LIMIT 1`).bind(product_id).first().catch(() => null);
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
 
-  await db.prepare(`DELETE FROM product_image_annotations WHERE product_id = ?`).bind(product_id).run();
-  await db.prepare(`DELETE FROM product_images WHERE product_id = ?`).bind(product_id).run();
+  const requestedRemovedIds = Array.isArray(body.removed_image_ids)
+    ? [...new Set(body.removed_image_ids.map((value) => Number(value)).filter((value) => Number.isInteger(value) && value > 0))]
+    : [];
+  const allowExplicitRemoval = String(body.media_sync_mode || '').toLowerCase() === 'explicit_remove';
 
-  let featuredImageUrl = null;
+  const existingResult = await db.prepare(`
+    SELECT product_image_id, product_id, image_url, alt_text, sort_order
+    FROM product_images
+    WHERE product_id = ?
+    ORDER BY sort_order ASC, product_image_id ASC
+  `).bind(product_id).all().catch(() => ({ results: [] }));
+  const existingRows = normalizeResults(existingResult);
+  const existingById = new Map(existingRows.map((row) => [Number(row.product_image_id || 0), row]));
+  const existingByUrl = new Map();
+  existingRows.forEach((row) => {
+    const key = normalizeText(row.image_url).toLowerCase();
+    if (key && !existingByUrl.has(key)) existingByUrl.set(key, row);
+  });
+
+  // Destructive work is deliberately opt-in. A regular save updates rows/adds new rows,
+  // but leaves any media that is not shown in the current editor intact.
+  const removedIds = allowExplicitRemoval
+    ? requestedRemovedIds.filter((imageId) => existingById.has(imageId))
+    : [];
+  if (removedIds.length) {
+    const placeholders = removedIds.map(() => '?').join(', ');
+    await db.prepare(`DELETE FROM product_image_annotations WHERE product_id = ? AND product_image_id IN (${placeholders})`).bind(product_id, ...removedIds).run();
+    await db.prepare(`DELETE FROM product_images WHERE product_id = ? AND product_image_id IN (${placeholders})`).bind(product_id, ...removedIds).run();
+    for (const imageId of removedIds) {
+      const removed = existingRows.find((row) => Number(row.product_image_id || 0) === imageId);
+      await db.prepare(`
+        INSERT INTO product_media_change_audit (
+          product_id, product_image_id, action_key, media_kind, media_url, details_json, created_by_user_id, created_at
+        ) VALUES (?, ?, ?, 'image', ?, ?, ?, CURRENT_TIMESTAMP)
+      `).bind(
+        product_id,
+        imageId,
+        'explicit_media_remove',
+        normalizeText(removed?.image_url) || null,
+        JSON.stringify({ source: 'admin_product_images', media_sync_mode: 'explicit_remove' }),
+        Number(adminUser.user_id || 0) || null
+      ).run().catch(() => null);
+    }
+    removedIds.forEach((imageId) => existingById.delete(imageId));
+  }
+
+  const touchedIds = new Set();
   const savedRows = [];
   for (let i = 0; i < images.length; i += 1) {
     const row = images[i] || {};
@@ -380,12 +433,28 @@ export async function onRequestPost(context) {
     const consentRecordId = parseOptionalNumber(row.consent_record_id);
     const roleReviewNotes = normalizeText(row.role_review_notes);
 
-    const insert = await db.prepare(`
-      INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
-      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `).bind(product_id, imageUrl, altText, sortOrder).run();
+    const requestedId = Number(row.product_image_id || 0);
+    const matched = existingById.get(requestedId) || existingByUrl.get(imageUrl.toLowerCase()) || null;
+    let productImageId = Number(matched?.product_image_id || 0);
 
-    const productImageId = Number(insert?.meta?.last_row_id || 0);
+    if (productImageId) {
+      await db.prepare(`
+        UPDATE product_images
+        SET image_url = ?, alt_text = ?, sort_order = ?
+        WHERE product_id = ? AND product_image_id = ?
+      `).bind(imageUrl, altText, sortOrder, product_id, productImageId).run();
+    } else {
+      const insert = await db.prepare(`
+        INSERT INTO product_images (product_id, image_url, alt_text, sort_order, created_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).bind(product_id, imageUrl, altText, sortOrder).run();
+      productImageId = Number(insert?.meta?.last_row_id || 0);
+    }
+    if (!productImageId) continue;
+    touchedIds.add(productImageId);
+
+    // Annotation metadata is scoped to one retained media row, never the whole product.
+    await db.prepare(`DELETE FROM product_image_annotations WHERE product_id = ? AND product_image_id = ?`).bind(product_id, productImageId).run();
     await db.prepare(`
       INSERT INTO product_image_annotations (
         product_id, product_image_id, image_url, alt_text, image_title, caption,
@@ -401,7 +470,7 @@ export async function onRequestPost(context) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `).bind(
       product_id,
-      productImageId || null,
+      productImageId,
       imageUrl,
       altText,
       normalizeText(row.image_title) || null,
@@ -435,6 +504,7 @@ export async function onRequestPost(context) {
 
     savedRows.push({
       ...row,
+      product_image_id: productImageId,
       sort_order: sortOrder,
       image_url: imageUrl,
       alt_text: altText,
@@ -446,12 +516,15 @@ export async function onRequestPost(context) {
       consent_record_id: consentRecordId,
       role_review_notes: roleReviewNotes
     });
-
-    if (featuredImageUrl == null || Number(sortOrder) === 0) {
-      featuredImageUrl = imageUrl;
-    }
   }
 
+  const remainingRows = normalizeResults(await db.prepare(`
+    SELECT product_image_id, image_url, alt_text, sort_order
+    FROM product_images
+    WHERE product_id = ?
+    ORDER BY sort_order ASC, product_image_id ASC
+  `).bind(product_id).all().catch(() => ({ results: [] })));
+  const featuredImageUrl = normalizeText(remainingRows[0]?.image_url) || null;
   await db.prepare(`
     UPDATE products
     SET featured_image_url = ?, updated_at = CURRENT_TIMESTAMP
@@ -460,6 +533,17 @@ export async function onRequestPost(context) {
 
   const orderedSavedRows = savedRows.sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
   const summary = summarizeRows(orderedSavedRows);
+  await db.prepare(`
+    INSERT INTO product_media_change_audit (
+      product_id, action_key, media_kind, media_url, details_json, created_by_user_id, created_at
+    ) VALUES (?, ?, 'image', ?, ?, ?, CURRENT_TIMESTAMP)
+  `).bind(
+    product_id,
+    'product_media_save',
+    featuredImageUrl || null,
+    JSON.stringify({ media_sync_mode: allowExplicitRemoval ? 'explicit_remove' : 'preserve_existing', saved_rows: savedRows.length, removed_rows: removedIds.length, remaining_rows: remainingRows.length }),
+    Number(adminUser.user_id || 0) || null
+  ).run().catch(() => null);
   await db.prepare(`
     INSERT INTO product_media_score_history (
       product_id, actor_user_id, image_count, lead_image_score, gallery_merchandising_score,
@@ -481,6 +565,9 @@ export async function onRequestPost(context) {
   return json({
     ok: true,
     message: 'Product images saved.',
+    media_notice: removedIds.length
+      ? `${removedIds.length} selected image${removedIds.length === 1 ? '' : 's'} removed. All other product media was preserved.`
+      : 'Product media saved. Existing photos and videos were preserved unless explicitly removed.',
     featured_image_url: featuredImageUrl || product.featured_image_url || null,
     current_summary: summary
   });

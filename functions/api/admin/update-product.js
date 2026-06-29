@@ -53,7 +53,7 @@ function uniqueProductImageUrls(featuredImageUrl, imageUrls = []) {
   return urls.slice(0, 7);
 }
 
-async function syncProductImages(db, productId, name, featuredImageUrl, imageUrls = []) {
+async function syncProductImages(db, productId, name, featuredImageUrl, imageUrls = [], { replaceExisting = false } = {}) {
   const rows = [];
   const urls = uniqueProductImageUrls(featuredImageUrl, imageUrls);
   const imageColumns = await getTableColumnSet(db, "product_images");
@@ -83,6 +83,7 @@ async function syncProductImages(db, productId, name, featuredImageUrl, imageUrl
       const binds = [];
       if (imageColumns.has("image_url")) { assignments.push("image_url = ?"); binds.push(imageUrl); }
       if (imageColumns.has("sort_order")) { assignments.push("sort_order = ?"); binds.push(index); }
+      else if (imageColumns.has("display_order")) { assignments.push("display_order = ?"); binds.push(index); }
       if (imageColumns.has("alt_text")) { assignments.push("alt_text = COALESCE(NULLIF(alt_text, ''), ?)"); binds.push(fallbackAlt); }
       if (imageColumns.has("updated_at")) assignments.push("updated_at = CURRENT_TIMESTAMP");
       if (assignments.length) {
@@ -96,6 +97,7 @@ async function syncProductImages(db, productId, name, featuredImageUrl, imageUrl
       const binds = [productId, imageUrl];
       if (imageColumns.has("alt_text")) { columns.push("alt_text"); placeholders.push("?"); binds.push(fallbackAlt); }
       if (imageColumns.has("sort_order")) { columns.push("sort_order"); placeholders.push("?"); binds.push(index); }
+      else if (imageColumns.has("display_order")) { columns.push("display_order"); placeholders.push("?"); binds.push(index); }
       if (imageColumns.has("created_at")) { columns.push("created_at"); placeholders.push("CURRENT_TIMESTAMP"); }
       if (imageColumns.has("updated_at")) { columns.push("updated_at"); placeholders.push("CURRENT_TIMESTAMP"); }
       const inserted = await db.prepare(`INSERT INTO product_images (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`).bind(...binds).run().catch(() => null);
@@ -104,19 +106,20 @@ async function syncProductImages(db, productId, name, featuredImageUrl, imageUrl
     }
   }
 
-  if (imageColumns.has("product_image_id")) {
+  // A normal product save is additive/preserving. It must never erase an image or video
+  // merely because the editor currently shows a shorter list or the OG image changed.
+  // Destructive replacement is only permitted by an explicit future media-management action.
+  if (replaceExisting && imageColumns.has("product_image_id")) {
     if (keptIds.length) {
       const placeholders = keptIds.map(() => "?").join(", ");
       await db.prepare(`DELETE FROM product_images WHERE product_id = ? AND product_image_id NOT IN (${placeholders})`).bind(productId, ...keptIds).run().catch(() => null);
     } else {
       await db.prepare(`DELETE FROM product_images WHERE product_id = ?`).bind(productId).run().catch(() => null);
     }
-  } else if (!urls.length) {
-    await db.prepare(`DELETE FROM product_images WHERE product_id = ?`).bind(productId).run().catch(() => null);
   }
 
-  const orderSql = imageColumns.has("sort_order") ? "sort_order ASC," : "";
-  const updated = await db.prepare(`SELECT * FROM product_images WHERE product_id = ? ORDER BY ${orderSql} product_image_id ASC`).bind(productId).all().catch(() => ({ results: [] }));
+  const orderingColumn = imageColumns.has("sort_order") ? "sort_order" : imageColumns.has("display_order") ? "display_order" : "product_image_id";
+  const updated = await db.prepare(`SELECT * FROM product_images WHERE product_id = ? ORDER BY ${orderingColumn} ASC, product_image_id ASC`).bind(productId).all().catch(() => ({ results: [] }));
   return Array.isArray(updated?.results) ? updated.results : [];
 }
 
@@ -238,7 +241,7 @@ export async function onRequestPost(context) {
     const product_category = String(body.product_category || "").trim() || null;
     const color_name = String(body.color_name || "").trim() || null;
     const color_names = normalizeColorNamesInput(
-      body.color_names ?? body.color_names_json ?? body.colour_names,
+      body.color_names ?? body.color_names_json ?? body.color_names_text ?? body.colour_names,
       color_name
     );
     const color_names_json = JSON.stringify(color_names);
@@ -355,7 +358,7 @@ export async function onRequestPost(context) {
         .bind(product_number, product_id)
         .first();
       if (existingProductNumber) {
-        return json({ ok: false, error: "That product number already exists." }, 409);
+        return json({ ok: false, code: "duplicate_product_number", error: "That product number already exists." }, 409);
       }
     }
 
@@ -363,14 +366,14 @@ export async function onRequestPost(context) {
       .prepare(`SELECT product_id FROM products WHERE slug = ? AND product_id != ? LIMIT 1`)
       .bind(slug, product_id)
       .first();
-    if (existingSlug) return json({ ok: false, error: "That product slug already exists." }, 409);
+    if (existingSlug) return json({ ok: false, code: "duplicate_slug", error: "That product slug already exists." }, 409);
 
     if (sku) {
       const existingSku = await db
         .prepare(`SELECT product_id FROM products WHERE sku = ? AND product_id != ? LIMIT 1`)
         .bind(sku, product_id)
         .first();
-      if (existingSku) return json({ ok: false, error: "That SKU already exists." }, 409);
+      if (existingSku) return json({ ok: false, code: "duplicate_sku", error: "That SKU already exists." }, 409);
     }
 
     if (tax_class_id !== null) {
@@ -470,7 +473,9 @@ export async function onRequestPost(context) {
         .run();
     } catch {}
 
-    const syncedImages = await syncProductImages(db, product_id, name, featured_image_url, image_urls);
+    const syncedImages = await syncProductImages(db, product_id, name, featured_image_url, image_urls, {
+      replaceExisting: String(body.media_sync_mode || "").toLowerCase() === "replace"
+    });
 
     const updatedProduct = await db
       .prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`)
@@ -478,6 +483,18 @@ export async function onRequestPost(context) {
       .first();
 
     const updatedImagesResult = { results: syncedImages };
+
+    await db.prepare(`
+      INSERT INTO product_media_change_audit (
+        product_id, action_key, media_kind, media_url, details_json, created_by_user_id, created_at
+      ) VALUES (?, ?, 'image', ?, ?, ?, CURRENT_TIMESTAMP)
+    `).bind(
+      product_id,
+      'product_update_preserved_media',
+      featured_image_url || null,
+      JSON.stringify({ media_sync_mode: 'preserve_existing', requested_image_count: uniqueProductImageUrls(featured_image_url, image_urls).length, retained_image_count: syncedImages.length }),
+      Number(authCheck.sessionUser?.user_id || 0) || null
+    ).run().catch(() => null);
 
     await auditAdminAction(env, request, authCheck.sessionUser, {
       action_type: "product_update",
@@ -493,7 +510,8 @@ export async function onRequestPost(context) {
         merchandise_origin,
         sale_channel,
         has_external_listing: !!external_listing_url,
-        color_names
+        color_names,
+        media_sync_mode: "preserve_existing"
       }
     });
 
@@ -501,7 +519,9 @@ export async function onRequestPost(context) {
       ok: true,
       message: "Product updated successfully.",
       product: updatedProduct,
-      images: updatedImagesResult.results || []
+      images: updatedImagesResult.results || [],
+      media_sync_mode: "preserve_existing",
+      media_notice: "Existing product media was preserved. Use an explicit media delete control to remove a file."
     });
   } catch (error) {
     await captureRuntimeIncident(env, request, {
