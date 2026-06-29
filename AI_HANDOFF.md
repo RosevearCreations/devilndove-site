@@ -1,7 +1,30 @@
-# Devil n Dove AI Handoff — Build 197
+# Devil n Dove AI Handoff — Build 198
 
-Read this file first in a new chat. Then read `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`. Those are the two canonical sources of present direction. Specialist guides remain for deployment and owner testing; historical files stay retained rather than deleted.
+Read this file first in a new chat, then `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`. Those two files remain the canonical current direction; retain specialist runbooks and historical context rather than deleting it.
 
+## What Build 198 changes
+
+Build 198 resolves the reported Tools & Supplies Inventory editing failure and closes the featured-image loss path.
+
+- **Inventory is now a true full-record editor.** `Edit full record` is visible inside the first table column as well as in the action area. On narrow phones the hidden far-right action column no longer prevents editing.
+- **Save now uses the correct operation.** Loading an item into the form sets edit mode and sends `PATCH`; adding a new item sends `POST` and leaves the new record open for additional edits instead of clearing the form.
+- **Full operational fields are editable:** name, description, category, image/source URLs, on-hand/reserved/incoming quantities, reorder controls, unit costs, units, supplier details, reuse status, notes, and active status. Source type and external key remain stable after creation to avoid breaking existing product-resource links.
+- **First retained product image is canonical.** Create/update paths set a blank featured URL to the first image. Product updates preserve omitted media and reorder retained rows after an explicit featured image so only one first image is authoritative.
+- **Approval repairs, rather than loses, a missing featured field.** Before product review, a blank `products.featured_image_url` is recovered from the first retained `product_images` row. No photo/video row or R2 file is removed.
+- `database_build198_inventory_editor_featured_media_integrity.sql` safely backfills blank featured image fields in D1 and adds an ordering index.
+
+## Deployable files and order
+
+1. Back up production D1.
+2. Confirm Builds 196 and 197 are applied.
+3. Run `database_build198_inventory_editor_featured_media_integrity.sql`. It is safe to rerun.
+4. Deploy this complete Pages build, including `functions/` and static assets.
+5. Use `POST_DEPLOY_SMOKE_TEST.md` before calling the live site fixed.
+
+
+---
+
+## Build 197 retained context
 ## What Build 197 changes
 
 Build 197 targets the live admin failures and the product-entry problems reported from the deployed Pages site.
