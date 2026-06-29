@@ -103,6 +103,13 @@
         <div class="small" id="existingProductHelp" style="display:flex;align-items:end">Use this picker when the product table is long or you already know which record you want to edit.</div>
       </div>
       <div class="small" style="margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03)">Draft mode is intentionally light: SEO title/description, external listing URLs, pricing, and images are readiness items, not blockers. Switch status from Draft only when the product is ready for storefront review.</div>
+      <details class="catalog-category-manager" id="catalogCategoryManager">
+        <summary>Manage product categories (for example: Soap and Candles)</summary>
+        <p class="small">These choices feed the Category list in this editor and the phone product workflow. Put one category on each line or separate them with commas. Existing product categories remain available; this only adds or manages the reusable list.</p>
+        <label><span class="small">Category choices</span><textarea class="input" id="catalogCategoryValues" rows="8" placeholder="Rings&#10;Soap&#10;Candles"></textarea></label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn primary" type="button" id="saveCatalogCategoriesButton">Save category choices</button><button class="btn" type="button" id="refreshCatalogCategoriesButton">Refresh categories</button></div>
+        <div id="catalogCategoryMessage" class="small" style="display:none;margin-top:10px"></div>
+      </details>
       <div id="createProductMessage" class="small" style="display:none;margin-bottom:12px"></div>
       <form id="createProductForm">
         <div class="grid cols-3" style="gap:10px">
@@ -240,7 +247,7 @@
   <script src="/public/js/admin.js"></script>
   <script src="/public/js/admin-products.js"></script>
   <script src="/public/js/admin-products-enhancements.js"></script>
-  <script src="/public/js/admin-create-product.js"></script><script src="/public/js/admin-product-draft-checklist.js"></script>
+  <script src="/public/js/admin-create-product.js"></script><script src="/public/js/admin-catalog-options.js"></script><script src="/public/js/admin-product-draft-checklist.js"></script>
   <script src="/public/js/admin-edit-product.js"></script>
   <script src="/public/js/admin-delete-product.js"></script>
   <script src="/public/js/admin-product-correction.js"></script>
