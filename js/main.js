@@ -101,11 +101,11 @@
 
   function mobileNavGroupsMarkup() {
     const groupOrder = ["Essentials", "Shop & Browse", "Workshop", "Community", "Account", "Local pages"];
-    return groupOrder.map((group, index) => {
+    return groupOrder.map((group) => {
       const rows = NAV_LINKS.filter((link) => link.group === group);
       if (!rows.length) return "";
       return `
-        <details class="nav-mobile-group" ${index < 2 ? "open" : ""}>
+        <details class="nav-mobile-group">
           <summary>${escapeHtml(group)} <span>${rows.length}</span></summary>
           <div class="nav-mobile-group-links">${rows.map(navAnchorMarkup).join('')}</div>
         </details>`;
@@ -264,6 +264,15 @@
     });
     closeBtn?.addEventListener('click', () => close({ restoreFocus: true }));
     panel.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => close()));
+    // Keep this a compact popup rather than a long scrolling page of links.
+    panel.querySelectorAll('details.nav-mobile-group').forEach((group) => {
+      group.addEventListener('toggle', () => {
+        if (!group.open) return;
+        panel.querySelectorAll('details.nav-mobile-group').forEach((other) => {
+          if (other !== group) other.open = false;
+        });
+      });
+    });
     document.addEventListener('click', (event) => {
       if (panel.hidden) return;
       if (nav.contains(event.target)) return;
