@@ -1,8 +1,10 @@
-# Known Gaps and Risks — Build 195
+# Known Gaps and Risks — Build 197
 
-Current risks are live-only verification and incomplete factual data: actual cost/fee values, R2 derivative operation, Stripe/email tests, Search Console/GBP evidence, approved media, and real-device screenshots. Product deletion is intentionally limited: referenced products must be archived, not deleted.
+Read `PROJECT_STATUS_AND_ROADMAP.md` for the current prioritized list. This retained pointer lists only active release risks:
 
-
-## Build 196 note
-
-Use `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` to test visible product correction, reservation release, physical raw-supply return, archive fallback, and inventory name-under-image layout after deployment.
+- Build 197 has not fixed the live site until the D1 migration and Pages deployment are completed and smoke-tested.
+- A degraded 200 admin dashboard response is safer than a 503 but still signals that optional data/schema should be reviewed.
+- Real cost, fee, labour, packaging, overhead, and waste figures remain owner-entered facts.
+- R2 derivatives, Stripe/email/webhook delivery, Search Console/GBP inputs, and device screenshots need live evidence.
+- Only explicit image row removal deletes product-image records. Source R2 files are intentionally not automatically deleted because they may be reused.
+- Historic documents remain retained; the two canonical files control current direction.

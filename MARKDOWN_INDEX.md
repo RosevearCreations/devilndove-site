@@ -1,45 +1,38 @@
-# Devil n Dove Markdown Index — Build 196
+# Devil n Dove Markdown Index — Build 197
 
 ## Canonical first-read files
 
-1. `PROJECT_STATUS_AND_ROADMAP.md` — human/business roadmap, completed work, risks, and next steps.
-2. `AI_HANDOFF.md` — technical handoff, architecture, migration order, routes, rules, and next-AI instructions.
+1. `PROJECT_STATUS_AND_ROADMAP.md` — business priorities, completed work, limits, test order, and release opinion.
+2. `AI_HANDOFF.md` — technical state, migration order, operational rules, and next-AI continuation notes.
 
-These are the only two files that define the current project direction.
+These two files define the current project direction. Update them each build.
 
-## Active operational references
+## Active runbooks and references
 
-- `BUILD194_TESTING_GUIDE.md` — owner checks for homepage, shop, Quick Facts, media roles, Workshop Journal, and SEO basics.
-- `LIVE_TESTING_GUIDE.md` — owner checks for live D1/R2/Stripe/email/Search Console/GBP/device verification.
-- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — bindings, variables, self-generated secrets, and where values come from.
-- `DATABASE_SCHEMA_REFERENCE.md` — full schema/migration reference. Use `database_full_schema.sql` as the standalone fresh-database source; core/extension files are layered references.
-- `SANITY_HEALTH_CHECK.md` — current local validation and live-only limits.
-- `POST_DEPLOY_SMOKE_TEST.md` — deployed verification steps.
-- `LOCAL_SEO_PLAYBOOK.md` — local-search content, Search Console, GBP, and evidence rules.
-- `IMAGES.md` — consent, image roles, compression, alt text, visual QA, approved gallery proof, and placeholder replacement.
-- `COMPETITIVE.md` — supporting market/platform research.
+- `POST_DEPLOY_SMOKE_TEST.md` — deployment checks for Build 197, including the reported 503 paths and media preservation.
+- `SANITY_HEALTH_CHECK.md` — local validation evidence and live-only limits.
+- `LIVE_TESTING_GUIDE.md` — R2, Stripe, email, Search Console, GBP, and real-device checks.
+- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — bindings, encrypted variables, and safe handling of secrets.
+- `DATABASE_SCHEMA_REFERENCE.md` — schema/migration orientation; `database_full_schema.sql` is the fresh database source.
+- `BUILD194_TESTING_GUIDE.md` — storefront, product facts, media roles, Workshop Journal, and SEO checks.
+- `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md` — system number, SKU, archive/delete, and inventory rules.
+- `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` — correction preview, reservation release, physical return, and product-deletion limits.
+- `IMAGES.md` — consent, image roles, alt text, visual QA, and placeholders.
+- `LOCAL_SEO_PLAYBOOK.md` — local-search evidence process.
+- `COMPETITIVE.md` — market/reference research.
 - `RELEASE_NOTES.md` — release history.
-- `README.md` — repository entry point.
 
-## Pointer/legacy reference files
+## Pointer and retained specialist files
 
-- `DEVELOPMENT_ROADMAP.md` — brief pointer to the canonical roadmap.
-- `KNOWN_GAPS_AND_RISKS.md` — concise risk pointer.
-- `AI_CONTEXT.md` and `NEW_CHAT_STATUS.md` — pointers to `AI_HANDOFF.md`.
-- `REPO_RULES.md`, `REPO_BASE_GUIDE.md`, and `AMAZON_MATCHING_NOTES.md` — specialist repository/inventory references.
+- `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AND_RISKS.md`, `AI_CONTEXT.md`, and `NEW_CHAT_STATUS.md` point to the canonical pair.
+- `REPO_RULES.md`, `REPO_BASE_GUIDE.md`, `AMAZON_MATCHING_NOTES.md`, and database extension files remain specialist references.
+- Historical planning stays in `docs/archive/`; do not revive an old task only because it appears in an archived file.
 
-## Historical archive
+## Consolidation rule
 
-Historical planning files through Build 189 are under `docs/archive/`. Do not use archived lists as a current backlog unless researching why a feature exists.
+Do not delete useful context merely to reduce file count. Keep these two canonical files current, preserve narrow specialist runbooks, and turn superseded general planning files into pointers or archive entries. Avoid creating a new general roadmap markdown.
 
-## Documentation rule
+## Build 197 additions
 
-Every build updates the two canonical files, this index, schema reference, release notes, sanity health check, smoke-test instructions, and any operational reference affected by the change. Do not create a new Markdown file unless it has a distinct long-term owner/testing purpose.
-
-## Build 196 current additions
-
-- `PROJECT_STATUS_AND_ROADMAP.md` — canonical human/business source for Build 196 priorities and next steps.
-- `AI_HANDOFF.md` — canonical technical continuation file for Build 196.
-- `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md` — earlier product/SKU lifecycle reference.
-- `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` — current owner steps for visible correction/delete, reservation release, reviewed raw-supply return, archive fallback, and inventory name-under-image display.
-- Historical and specialist files remain as references; do not delete them until their information has been captured in the two canonical files or `docs/archive/`.
+- `database_build197_application_resilience_media_catalog.sql` — safe rerunnable D1 migration for media audit/indexes and Build 197 ledger.
+- Build 197 details are consolidated into the canonical pair, smoke test, sanity check, and release notes instead of a new permanent general-purpose guide.

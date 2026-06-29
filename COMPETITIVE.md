@@ -1325,3 +1325,11 @@ Sources reviewed for Build 191:
 ## Build 194 alignment
 
 This is a supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current decisions; preserve this document for specialist history and handoff detail.
+
+## Build 197 current storefront direction (June 2026 research note)
+
+The current implementation keeps the Shop layout aligned with familiar small-maker retail patterns: image first, then a compact product title, price, supporting facts, and action in the same card. This is the same basic buyer orientation used by current handmade/home-fragrance storefronts, without copying their text or design.
+
+The catalog now supports practical category groupings such as jewelry, Soap, Candles, gifts, workshop-made items, vintage, and other truthful inventory distinctions. Categories should describe what is actually for sale, not manufacture artificial landing pages or claims.
+
+SEO choices remain evidence-based: one clear visible H1, useful title/meta, descriptive product images, and product structured data that matches rendered price, availability, and facts. Mobile and desktop should provide equivalent meaningful content and buying paths. Reference sources used for this direction are Google Search Central guidance on product structured data, title links, image SEO, helpful content, and mobile-first indexing; current independent maker/shop storefront patterns were used only as UI comparison, not copied content.

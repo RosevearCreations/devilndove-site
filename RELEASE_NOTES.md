@@ -591,3 +591,17 @@
 
 ## D1 migration summary
 
+
+## Build 197 — Admin resilience, non-destructive media, catalog categories, and storefront card/mobile polish
+
+- Hardened product-detail and high-use admin helper reads against schema/readiness failures.
+- Returned stable degraded JSON for optional dashboard reads rather than leaving admin pages unusable.
+- Prevented 409 duplicate conflicts from entering the offline/retry queue.
+- Fixed correction-panel stale state when switching to another product.
+- Changed standard product and dedicated media saves to preserve existing media unless deletion is explicit.
+- Added product media audit migration, indexes, and runtime audit writes where available.
+- Fixed Additional Colours input mapping.
+- Added reusable Soap/Candles category choices and category management in Admin Catalog.
+- Made shop cards image-first and the phone menu a compact accordion popup.
+- Added accessible visual placeholder for missing product imagery.
+- Consolidated current handoff/roadmap documentation and expanded deployment smoke tests.

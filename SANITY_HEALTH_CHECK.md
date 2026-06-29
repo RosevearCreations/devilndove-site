@@ -1,18 +1,21 @@
-# Sanity Health Check — Build 196
+# Sanity Health Check — Build 197
 
-## Practical result
+## Local package validation completed
 
-- Incorrect unused product: load it into the editor, open **Correct / return raw inventory**, review linked materials, choose factual reservation release and/or raw supply return quantities, then confirm deletion.
-- Ordered/referenced product: archive, never permanently delete.
-- Reservation release: decreases reserved stock only.
-- Physical raw-supply return: increases on-hand stock only after explicit review.
-- Inventory cards: item name appears below image; the old description block is not rendered.
+- Modified JavaScript syntax has been checked with Node.
+- Product image saves are now additive/preserving by default. Explicit deletion sends IDs and deletes only those rows.
+- Product-update conflict responses distinguish permanent 409/validation errors from retryable transport/server errors.
+- Admin helper reads have safer degraded fallbacks and no longer perform heavy schema work on routine GET requests.
+- Shop cards, placeholder CSS, category manager, and mobile nav were adjusted together.
+- Build 197 migration and `database_full_schema.sql` include the media audit and indexes.
+- Documentation is consolidated around `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; specialist files are retained.
 
-## Owner testing
+## Live-only validation still required
 
-Follow `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` after applying Build 196 migration and redeploying.
+- Apply `database_build197_application_resilience_media_catalog.sql` to the actual D1 database.
+- Deploy static assets and Pages Functions.
+- Verify reported endpoints do not return 503 using `POST_DEPLOY_SMOKE_TEST.md`.
+- Test media preservation, explicit deletion, correction reuse, category saving, narrow phone navigation, and the live shop layout.
+- Verify Cloudflare/R2/Stripe/email/Search Console/GBP workflows with real credentials and evidence.
 
-## Still live-only
-
-- Verify real raw stock counts before any physical return.
-- Verify R2/media, Stripe, email, Search Console, GBP, and real-device evidence in the deployed site.
+A completed local package is not evidence that a deployed binding, secret, database migration, or third-party provider is working.
