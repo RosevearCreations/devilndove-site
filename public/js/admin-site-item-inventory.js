@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let catalogSeedOptions = [];
   let categorySeedOptions = [];
   let seedSearchText = '';
+  let editingSiteInventoryId = 0;
+
 
   function setMessage(message, isError = false) {
     const el = document.getElementById('siteInventoryMessage');
@@ -417,6 +419,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function setInventoryEditMode(item = {}) {
+    editingSiteInventoryId = Number(item.site_item_inventory_id || 0) || 0;
+    const status = document.getElementById('siteInventoryEditState');
+    const saveButton = document.getElementById('siteInventorySaveButton');
+    const resetButton = document.getElementById('siteInventoryResetButton');
+    if (editingSiteInventoryId) {
+      if (status) {
+        status.hidden = false;
+        status.textContent = `Editing #${editingSiteInventoryId}: ${item.item_name || 'inventory item'}. Save changes updates this record; it does not create another item.`;
+      }
+      if (saveButton) saveButton.textContent = 'Save Changes to This Item';
+      if (resetButton) resetButton.textContent = 'Start New Item';
+    } else {
+      if (status) { status.hidden = true; status.textContent = ''; }
+      if (saveButton) saveButton.textContent = 'Add Inventory Item';
+      if (resetButton) resetButton.textContent = 'Reset Form';
+    }
+  }
+
+  function resetInventoryForm() {
+    const form = document.getElementById('siteInventoryForm');
+    form?.reset();
+    editingSiteInventoryId = 0;
+    const seedEl = document.getElementById('siteInventorySeedItem'); if (seedEl) seedEl.value = '';
+    const categoryPresetEl = document.getElementById('siteInventoryCategoryPreset'); if (categoryPresetEl) categoryPresetEl.value = '';
+    const onHandEl = document.getElementById('siteInventoryOnHand'); if (onHandEl) onHandEl.value = '1';
+    const unitCostEl = document.getElementById('siteInventoryUnitCost'); if (unitCostEl) unitCostEl.value = '0.00';
+    const stockUnitEl = document.getElementById('siteInventoryStockUnitLabel'); if (stockUnitEl) stockUnitEl.value = 'unit';
+    const usageUnitEl = document.getElementById('siteInventoryUsageUnitLabel'); if (usageUnitEl) usageUnitEl.value = 'unit';
+    const usageUnitsEl = document.getElementById('siteInventoryUsageUnitsPerStock'); if (usageUnitsEl) usageUnitsEl.value = '1';
+    setInventoryEditMode({});
+    const sourceTypeEl = document.getElementById('siteInventorySourceType'); if (sourceTypeEl) sourceTypeEl.disabled = false;
+    const externalKeyEl = document.getElementById('siteInventoryExternalKey'); if (externalKeyEl) externalKeyEl.readOnly = false;
+    updateSiteInventoryImagePreview();
+  }
+
   function render() {
     if (rendered) return;
     rendered = true;
@@ -435,6 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <form id="siteInventoryForm" class="grid" style="gap:12px">
+          <div id="siteInventoryEditState" class="site-inventory-edit-state small" hidden aria-live="polite"></div>
           <div class="grid cols-5" style="gap:12px">
             <div><label class="small" for="siteInventorySourceType">Source Type</label><select id="siteInventorySourceType"><option value="tool">Tool</option><option value="supply">Supply</option><option value="product">Product</option><option value="other">Other</option></select></div>
             <div><label class="small" for="siteInventorySeedSearch">Search existing tool / supply</label><input id="siteInventorySeedSearch" type="search" placeholder="type name, category, ASIN, Amazon title" /></div>
@@ -480,10 +519,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <div></div>
           </div>
           <div class="grid cols-2" style="gap:12px">
+            <div><label class="small" for="siteInventoryItemDescription">Item Description</label><textarea id="siteInventoryItemDescription" rows="3" placeholder="Purpose, material, size, or safe-use details..."></textarea></div>
             <div><label class="small" for="siteInventoryNotes">Reorder / Usage Notes</label><input id="siteInventoryNotes" type="text" /></div>
-            <div><label class="small" for="siteInventoryMovementNote">Movement Note</label><input id="siteInventoryMovementNote" type="text" placeholder="restock, count correction, incoming order..." /></div>
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="submit">Save Inventory Item</button><button class="btn" type="button" id="siteInventoryResetButton">Reset Form</button></div>
+          <div class="grid cols-2" style="gap:12px">
+            <div><label class="small" for="siteInventoryMovementNote">Movement Note</label><input id="siteInventoryMovementNote" type="text" placeholder="restock, count correction, incoming order..." /></div>
+            <div class="small" style="align-self:end">Full editing is available for every record. The source type and external key stay fixed after creation to protect existing product-resource links.</div>
+          </div>
+          <div class="site-inventory-form-actions"><button class="btn primary" type="submit" id="siteInventorySaveButton">Add Inventory Item</button><button class="btn" type="button" id="siteInventoryResetButton">Reset Form</button></div>
         </form>
 
         <div id="siteInventorySyncResult" class="small card" style="display:none;margin-top:12px"></div>
@@ -577,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
     document.getElementById('siteInventorySyncAllButton')?.addEventListener('click', () => syncCatalog(['tool', 'supply']));
     document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(loadList, 250));
-    document.getElementById('siteInventoryResetButton')?.addEventListener('click', () => { document.getElementById('siteInventoryForm')?.reset(); updateSiteInventoryImagePreview(); });
+    document.getElementById('siteInventoryResetButton')?.addEventListener('click', resetInventoryForm);
     document.getElementById('siteInventoryBulkCostForm')?.addEventListener('submit', onBulkCostApply);
     document.getElementById('siteInventoryBulkPreviewButton')?.addEventListener('click', onBulkCostPreview);
     document.getElementById('siteInventoryBulkScope')?.addEventListener('change', updateBulkCostScopeHelpers);
@@ -589,9 +632,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function readForm() {
     return {
+      site_item_inventory_id: editingSiteInventoryId || undefined,
       source_type: document.getElementById('siteInventorySourceType')?.value || 'other',
       external_key: document.getElementById('siteInventoryExternalKey')?.value || '',
       item_name: document.getElementById('siteInventoryItemName')?.value || '',
+      item_description: document.getElementById('siteInventoryItemDescription')?.value || '',
       category: document.getElementById('siteInventoryCategory')?.value || '',
       image_url: document.getElementById('siteInventoryImageUrl')?.value || '',
       source_url: document.getElementById('siteInventorySourceUrl')?.value || '',
@@ -648,23 +693,17 @@ document.addEventListener('DOMContentLoaded', () => {
   async function saveItem(event) {
     event.preventDefault();
     try {
-      setMessage('Saving inventory item...');
+      const payload = readForm();
+      const isEditing = Number(payload.site_item_inventory_id || 0) > 0;
+      setMessage(isEditing ? 'Saving changes to this inventory item...' : 'Adding inventory item...');
       const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', {
-        method: 'POST',
-        body: JSON.stringify(readForm())
+        method: isEditing ? 'PATCH' : 'POST',
+        body: JSON.stringify(payload)
       });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save inventory item.');
-      setMessage('Inventory item saved.');
-      document.getElementById('siteInventoryForm')?.reset();
-      const seedEl = document.getElementById('siteInventorySeedItem'); if (seedEl) seedEl.value = '';
-      const categoryPresetEl = document.getElementById('siteInventoryCategoryPreset'); if (categoryPresetEl) categoryPresetEl.value = '';
-      const onHandEl = document.getElementById('siteInventoryOnHand'); if (onHandEl) onHandEl.value = '1';
-      const unitCostEl = document.getElementById('siteInventoryUnitCost'); if (unitCostEl) unitCostEl.value = '0.00';
-      const stockUnitEl = document.getElementById('siteInventoryStockUnitLabel'); if (stockUnitEl) stockUnitEl.value = 'unit';
-      const usageUnitEl = document.getElementById('siteInventoryUsageUnitLabel'); if (usageUnitEl) usageUnitEl.value = 'unit';
-      const usageUnitsEl = document.getElementById('siteInventoryUsageUnitsPerStock'); if (usageUnitsEl) usageUnitsEl.value = '1';
-      updateSiteInventoryImagePreview();
+      if (data?.item) populateFormFromItem(data.item);
+      setMessage(isEditing ? 'Inventory item changes saved.' : 'Inventory item added. It remains open here for full editing.');
       await loadList();
     } catch (err) {
       setMessage(err.message || 'Failed to save inventory item.', true);
@@ -673,10 +712,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function populateFormFromItem(item = {}) {
     const mapping = {
-      siteInventoryId: item.site_item_inventory_id || '',
       siteInventorySourceType: item.source_type || 'other',
       siteInventoryExternalKey: item.external_key || '',
       siteInventoryItemName: item.item_name || '',
+      siteInventoryItemDescription: item.item_description || '',
       siteInventoryCategory: item.category || '',
       siteInventoryImageUrl: item.image_url || '',
       siteInventorySourceUrl: item.source_url || '',
@@ -706,6 +745,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const seedEl = document.getElementById('siteInventorySeedItem');
     if (seedEl) seedEl.value = item.external_key || '';
     updateSiteInventoryImagePreview();
+    setInventoryEditMode(item);
+    const sourceTypeEl = document.getElementById('siteInventorySourceType');
+    const externalKeyEl = document.getElementById('siteInventoryExternalKey');
+    if (sourceTypeEl) sourceTypeEl.disabled = editingSiteInventoryId > 0;
+    if (externalKeyEl) externalKeyEl.readOnly = editingSiteInventoryId > 0;
   }
 
   async function loadList() {
@@ -745,6 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   <div class="small">#${x.site_item_inventory_id} · ${escapeHtml(x.source_type)} • ${escapeHtml(x.category || '—')}</div>
                   ${x.image_url ? `<div class="small site-inventory-url-line">Image: <a href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer">open image</a></div>` : '<div class="small">Image: not set</div>'}
                   ${(x.source_url || x.amazon_url) ? `<div class="small site-inventory-url-line">Source: <a href="${escapeHtml(x.source_url || x.amazon_url)}" target="_blank" rel="noopener noreferrer">open source</a></div>` : ''}
+                  <button class="btn small site-inventory-full-edit" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Edit full record</button>
                 </div>
               </div>
             </td>
@@ -753,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(x.supplier_name || '—')}<div class="small">${escapeHtml(x.supplier_sku || '')}</div><div class="small">${escapeHtml(x.supplier_contact || '')}</div></td>
             <td style="padding:8px;border-bottom:1px solid #ddd">${Number(x.linked_product_count || 0)}<div class="small">${escapeHtml(x.linked_product_names || '')}</div></td>
             <td style="padding:8px;border-bottom:1px solid #ddd">${fmtMoney(x.unit_cost_cents || 0)}<div class="small">per ${escapeHtml(x.stock_unit_label || 'unit')}</div><div class="small">≈ ${fmtMoney(Math.round((Number(x.unit_cost_cents || 0)) / Math.max(1, Number(x.usage_units_per_stock_unit || 1))))} per ${escapeHtml(x.usage_unit_label || 'unit')}</div></td>
-            <td style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick Update</button> <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Load Form</button> <button class="btn" type="button" data-adjust-action="reserve" data-id="${x.site_item_inventory_id}">Reserve</button> <button class="btn" type="button" data-adjust-action="release" data-id="${x.site_item_inventory_id}">Release</button> <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button> <button class="btn" type="button" data-adjust-action="consume" data-id="${x.site_item_inventory_id}">Consume</button> <button class="btn" type="button" data-adjust-action="reorder_request" data-id="${x.site_item_inventory_id}">Reorder</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td>
+            <td class="site-inventory-row-actions" style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Edit full record</button> <button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick stock / cost</button> <button class="btn" type="button" data-adjust-action="reserve" data-id="${x.site_item_inventory_id}">Reserve</button> <button class="btn" type="button" data-adjust-action="release" data-id="${x.site_item_inventory_id}">Release</button> <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button> <button class="btn" type="button" data-adjust-action="consume" data-id="${x.site_item_inventory_id}">Consume</button> <button class="btn" type="button" data-adjust-action="reorder_request" data-id="${x.site_item_inventory_id}">Reorder</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td>
           </tr>
         `).join('');
       }
