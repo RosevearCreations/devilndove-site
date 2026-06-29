@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 197
+# Devil n Dove Markdown Index — Build 198
 
 ## Canonical first-read files
 
@@ -9,7 +9,7 @@ These two files define the current project direction. Update them each build.
 
 ## Active runbooks and references
 
-- `POST_DEPLOY_SMOKE_TEST.md` — deployment checks for Build 197, including the reported 503 paths and media preservation.
+- `POST_DEPLOY_SMOKE_TEST.md` — deployment checks for Build 198: inventory PATCH editing, first-image recovery, approval media preservation, and earlier 503 safeguards.
 - `SANITY_HEALTH_CHECK.md` — local validation evidence and live-only limits.
 - `LIVE_TESTING_GUIDE.md` — R2, Stripe, email, Search Console, GBP, and real-device checks.
 - `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — bindings, encrypted variables, and safe handling of secrets.
@@ -31,6 +31,11 @@ These two files define the current project direction. Update them each build.
 ## Consolidation rule
 
 Do not delete useful context merely to reduce file count. Keep these two canonical files current, preserve narrow specialist runbooks, and turn superseded general planning files into pointers or archive entries. Avoid creating a new general roadmap markdown.
+
+## Build 198 additions
+
+- `database_build198_inventory_editor_featured_media_integrity.sql` — safe rerunnable D1 migration that fills only blank featured image fields from retained first media and adds a supporting index.
+- Build 198 details are consolidated in the canonical pair, smoke test, sanity check, and release notes; specialist Markdown remains retained.
 
 ## Build 197 additions
 

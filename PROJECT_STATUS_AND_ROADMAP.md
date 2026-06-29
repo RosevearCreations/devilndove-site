@@ -1,7 +1,36 @@
-# Devil n Dove Project Status and Roadmap — Build 197
+# Devil n Dove Project Status and Roadmap — Build 198
 
-This is the primary business and release-readiness source. Read `AI_HANDOFF.md` for technical deployment order and `MARKDOWN_INDEX.md` for retained specialist documentation.
+This is the primary business/release-readiness source. Read `AI_HANDOFF.md` for deployment order and `MARKDOWN_INDEX.md` for retained specialist documentation.
 
+## Executive sanity check
+
+Build 198 addresses the two remaining daily catalog blockers reported after Build 197: inventory records could be loaded but then saved as new records, and retained product media could leave a blank Featured Image URL after approval or partial editing. The source package is deployment-ready, but the live result is not proven until the D1 migration, Pages deployment, and smoke tests are complete.
+
+## Build 198 completed
+
+1. Added a real edit state to Tools & Supplies Inventory Operations, with PATCH for updates and POST only for new records.
+2. Added an always-reachable **Edit full record** button in the first table cell and responsive CSS that keeps full editing available on mobile.
+3. Kept a newly created inventory record open for immediate full editing; added item description to the form.
+4. Preserved source identity after creation while allowing full editing of operational stock, cost, supplier, and reorder information.
+5. Made the first retained product image the default featured image in create/update flows.
+6. Preserved all omitted media during normal saves and normalized image sort order so an explicit featured image becomes the first gallery image.
+7. Added review-time and migration-time recovery for blank featured fields using retained first image data; no image/video records or R2 source objects are deleted.
+8. Retained Build 197 shop-card, mobile-nav, category, 503 resilience, conflict handling, and non-destructive media safeguards.
+9. Kept `AI_HANDOFF.md` and this file as the canonical two-file project direction; all specialist Markdown remains retained for future chats.
+
+## Immediate live verification priorities
+
+1. Deploy Build 198 after the Build 198 migration.
+2. In Tools & Supplies Inventory Operations, edit an existing tool/supply, change several fields including quantity and cost, save, reload, and confirm the same ID changed with no duplicate row.
+3. Add a fresh inventory item, save once, then change supplier/cost/quantity in the still-open form and save again; confirm it stays one record.
+4. Use an existing product with three images: blank the feature field only, save, reload, and confirm the first retained image fills it. Then approve the product and verify all media remains.
+5. Verify a product with a deliberately selected first image retains that selection after Update Product and after approval.
+6. Recheck Shop at phone, tablet, and desktop widths; image-first cards and compact phone navigation remain intact.
+
+
+---
+
+## Build 197 retained context
 ## Executive sanity check
 
 Devil n Dove has the core shape of a credible small creative-business platform: a storefront, product and inventory tools, handmade/vintage presentation, custom-request and community foundations, media/consent workflows, local SEO guardrails, and mobile administration.

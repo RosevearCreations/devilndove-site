@@ -1,21 +1,21 @@
-# Sanity Health Check — Build 197
+# Sanity Health Check — Build 198
 
-## Local package validation completed
+## Local package validation scope
 
-- Modified JavaScript syntax has been checked with Node.
-- Product image saves are now additive/preserving by default. Explicit deletion sends IDs and deletes only those rows.
-- Product-update conflict responses distinguish permanent 409/validation errors from retryable transport/server errors.
-- Admin helper reads have safer degraded fallbacks and no longer perform heavy schema work on routine GET requests.
-- Shop cards, placeholder CSS, category manager, and mobile nav were adjusted together.
-- Build 197 migration and `database_full_schema.sql` include the media audit and indexes.
-- Documentation is consolidated around `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; specialist files are retained.
+- Inventory Operations has a genuine edit state: loading a record changes the save method from POST to PATCH; adding a new record remains available as a separate flow.
+- A full-record edit control is in the first table column and responsive CSS keeps it reachable on narrow screens.
+- Inventory descriptions now round-trip through the existing description sidecar table.
+- Product create/update selects the first retained image when the featured field is blank, and update media ordering makes that row canonical.
+- Product approval and the Build 198 migration repair blank feature fields from retained first media without deleting image/video records or R2 source objects.
+- The update path remains schema-aware for `product_images` tables that do not have an `updated_at` column.
+- Build 198 migration was designed to be rerunnable; it only fills blank fields and adds an index.
+- Current project direction is consolidated in `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; all specialist Markdown remains retained.
 
 ## Live-only validation still required
 
-- Apply `database_build197_application_resilience_media_catalog.sql` to the actual D1 database.
-- Deploy static assets and Pages Functions.
-- Verify reported endpoints do not return 503 using `POST_DEPLOY_SMOKE_TEST.md`.
-- Test media preservation, explicit deletion, correction reuse, category saving, narrow phone navigation, and the live shop layout.
-- Verify Cloudflare/R2/Stripe/email/Search Console/GBP workflows with real credentials and evidence.
+- Back up and migrate actual D1 through Build 198.
+- Deploy Pages Functions/static files and run `POST_DEPLOY_SMOKE_TEST.md`.
+- Verify edited inventory records do not duplicate, first-image feature recovery works, approval preserves all media, and mobile edit controls are reachable on real devices.
+- Recheck real Cloudflare/R2/Stripe/email/Search Console/GBP integrations with credentials and evidence.
 
 A completed local package is not evidence that a deployed binding, secret, database migration, or third-party provider is working.

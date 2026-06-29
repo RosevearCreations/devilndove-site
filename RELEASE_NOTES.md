@@ -1,3 +1,25 @@
+# Build 198
+
+## Summary
+
+- Rebuilt Tools & Supplies Inventory Operations into a true full-record editor: **Edit full record** stays reachable in the first table column, loaded records PATCH rather than create duplicates, and newly created records remain open for immediate editing.
+- Protected product images across create, update, and approval: a blank featured field uses the first retained product image, normal saves preserve omitted media, and approval repairs a missing featured field without deleting image/video rows or R2 objects.
+- Added `database_build198_inventory_editor_featured_media_integrity.sql`, updated the fresh full schema, responsive inventory CSS, canonical project handoff files, and the Build 198 smoke test.
+
+## Primary changed files
+
+- `public/js/admin-site-item-inventory.js`
+- `functions/api/admin/site-item-inventory.js` (existing PATCH path now used by the editor)
+- `functions/api/admin/create-product.js`
+- `functions/api/admin/update-product.js`
+- `functions/api/admin/product-review-actions.js`
+- `css/styles.css`
+- `database_build198_inventory_editor_featured_media_integrity.sql`
+- `database_full_schema.sql`
+- `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, `POST_DEPLOY_SMOKE_TEST.md`, `SANITY_HEALTH_CHECK.md`
+
+---
+
 # Build 196
 
 ## Summary
