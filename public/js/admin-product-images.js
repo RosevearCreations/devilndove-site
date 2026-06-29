@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let rendered = false;
   let currentScoreHistory = [];
   let latestSavedSummary = null;
+  // A row is only deleted on the server when the user explicitly removes it and saves.
+  let removedImageIds = new Set();
 
   function setMessage(message, isError = false) {
     const el = document.getElementById('adminProductImagesMessage');
@@ -521,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function rowTemplate(row = {}, index = 0) {
     const shotStyle = normalizeText(row.shot_style || 'record').toLowerCase() || 'record';
     return `
-      <div class="card product-image-sortable-row" data-product-image-row draggable="true" style="margin-top:12px">
+      <div class="card product-image-sortable-row" data-product-image-row data-product-image-id="${Number(row.product_image_id || 0) || ''}" draggable="true" style="margin-top:12px">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
           <strong>Image Row ${index + 1}</strong>
           ${row.image_url ? `<button class="product-image-focal-thumb" type="button" data-set-focal-from-thumb title="Click the image to set the focal point"><img src="${escapeHtml(row.image_url)}" alt="${escapeHtml(row.alt_text || 'Product image preview')}"/><span class="product-image-focal-dot" style="left:${escapeHtml(String(Math.round(Number(row.focal_point_x ?? 0.5)*100)))}%;top:${escapeHtml(String(Math.round(Number(row.focal_point_y ?? 0.5)*100)))}%"></span><span class="product-image-crop-preview" style="${escapeHtml(cropBoxStyle(row))}"><span class="product-image-crop-handle nw" data-crop-handle="nw"></span><span class="product-image-crop-handle ne" data-crop-handle="ne"></span><span class="product-image-crop-handle sw" data-crop-handle="sw"></span><span class="product-image-crop-handle se" data-crop-handle="se"></span></span></button>` : ''}
@@ -616,6 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return Array.from(document.querySelectorAll('[data-product-image-row]')).map((row, index) => {
       const value = (field) => row.querySelector(`[data-field="${field}"]`)?.value ?? '';
       return {
+        product_image_id: Number(row.getAttribute('data-product-image-id') || 0) || null,
         image_url: normalizeText(value('image_url')),
         alt_text: normalizeText(value('alt_text')),
         image_title: normalizeText(value('image_title')),
@@ -898,6 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (assetList) assetList.textContent = 'Load a product first to browse uploaded media.';
     currentScoreHistory = [];
     latestSavedSummary = null;
+    removedImageIds = new Set();
     setMessage('Product image editor cleared.');
   }
 
@@ -911,6 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load product images.');
       currentScoreHistory = Array.isArray(data.score_history) ? data.score_history : [];
       latestSavedSummary = data.current_summary && typeof data.current_summary === 'object' ? data.current_summary : null;
+      removedImageIds = new Set();
       const wrap = document.getElementById('productImagesRows');
       if (wrap) wrap.innerHTML = '';
       const rows = Array.isArray(data.images) ? data.images : [];
@@ -1085,15 +1090,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!productId) return setMessage('Enter a valid product ID.', true);
     try {
       setMessage('Saving product images...');
-      const payload = { product_id: productId, images: collectRows() };
+      const payload = {
+        product_id: productId,
+        images: collectRows(),
+        removed_image_ids: [...removedImageIds],
+        media_sync_mode: removedImageIds.size ? 'explicit_remove' : 'preserve_existing'
+      };
       const firstImageCheck = validateFirstImageForSave(payload.images);
       if (!firstImageCheck.ok) throw new Error(firstImageCheck.message);
       const response = await window.DDAuth.apiFetch('/api/admin/product-images', { method: 'POST', body: JSON.stringify(payload) });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save product images.');
       latestSavedSummary = data.current_summary && typeof data.current_summary === 'object' ? data.current_summary : null;
+      removedImageIds = new Set();
       await loadImages();
-      setMessage('Product images and image order saved. The first row is now the lead/featured image candidate.');
+      setMessage(data.media_notice || 'Product images and image order saved. Existing media was preserved unless you explicitly removed it.');
       document.dispatchEvent(new CustomEvent('dd:product-updated', { detail: { product_id: productId } }));
     } catch (error) {
       setMessage(error.message || 'Failed to save product images.', true);
@@ -1209,6 +1220,8 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     if (event.target.closest('[data-row-remove]') && row) {
+      const imageId = Number(row.getAttribute('data-product-image-id') || 0);
+      if (imageId > 0) removedImageIds.add(imageId);
       row.remove();
       if (!document.querySelector('[data-product-image-row]')) addRow();
       reindexRows();

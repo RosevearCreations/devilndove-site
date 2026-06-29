@@ -538,10 +538,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function liveUpdateProduct(payload) {
-    const response = await window.DDAuth.apiFetch("/api/admin/update-product", { method: "POST", body: JSON.stringify(payload) });
+    let response;
+    try {
+      response = await window.DDAuth.apiFetch("/api/admin/update-product", { method: "POST", body: JSON.stringify(payload) });
+    } catch (cause) {
+      const error = new Error(cause?.message || "Network error while updating product.");
+      error.httpStatus = 0;
+      error.isRetryable = true;
+      throw error;
+    }
     const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to update product.");
+    if (!response.ok || !data?.ok) {
+      const error = new Error(data?.error || "Failed to update product.");
+      error.httpStatus = Number(response.status || 0);
+      error.code = String(data?.code || "").trim();
+      // Validation, duplicate and authorization failures need human correction, not background retries.
+      error.isRetryable = response.status === 0 || response.status === 408 || response.status === 429 || response.status >= 500;
+      throw error;
+    }
     return data;
+  }
+
+  function isRetryableUpdateError(error) {
+    return error?.isRetryable === true || [0, 408, 429, 500, 502, 503, 504].includes(Number(error?.httpStatus || 0));
   }
 
   function buildClientActionId(productId) { return ['product-update', Number(productId || 0), Date.now()].join(':'); }
@@ -678,10 +697,14 @@ document.addEventListener("DOMContentLoaded", () => {
       document.dispatchEvent(new CustomEvent('dd:product-updated', { detail: { product: result.product || null } }));
       return result;
     } catch (error) {
+      const status = isRetryableUpdateError(error) ? 'failed' : 'needs_review';
+      const note = isRetryableUpdateError(error)
+        ? (error.message || 'Replay failed.')
+        : `${error.message || 'This update conflicts with current data.'} Review the live product and correct the conflict before retrying.`;
       if (action.source === 'shared') {
-        await updateSharedPendingActionStatus(action, 'failed', error.message || 'Replay failed.', true).catch(() => null);
+        await updateSharedPendingActionStatus(action, status, note, isRetryableUpdateError(error)).catch(() => null);
       } else {
-        upsertLocalPendingAction({ ...action, queue_status: 'failed', last_error: error.message || 'Replay failed.' });
+        upsertLocalPendingAction({ ...action, queue_status: status, last_error: note });
       }
       currentSharedPendingActions = await fetchSharedPendingActions();
       renderPendingActions();
@@ -837,8 +860,13 @@ document.addEventListener("DOMContentLoaded", () => {
       document.dispatchEvent(new CustomEvent('dd:product-editor-target', { detail: { product: data.product || null, product_id: Number(data?.product?.product_id || 0) } }));
       await loadPendingActions();
     } catch (error) {
-      const queued = await queueProductUpdate(payload, error.message || 'Failed to update product.');
-      setMessage(`${error.message || 'Failed to update product.'} The edit was saved to ${queued.shared ? 'the shared replay queue' : 'this browser only'} for later retry.`, true);
+      if (isRetryableUpdateError(error)) {
+        const queued = await queueProductUpdate(payload, error.message || 'Failed to update product.');
+        setMessage(`${error.message || 'Failed to update product.'} The edit was saved to ${queued.shared ? 'the shared replay queue' : 'this browser only'} for later retry.`, true);
+      } else {
+        const detail = error?.code ? ` (${error.code.replaceAll('_', ' ')})` : '';
+        setMessage(`${error.message || 'Product update needs correction.'}${detail} It was not queued because retrying will not solve this conflict.`, true);
+      }
       if (submitButton) { submitButton.disabled = false; submitButton.textContent = "Update Product"; }
     }
   });

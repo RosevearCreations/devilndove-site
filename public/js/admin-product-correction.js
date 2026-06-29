@@ -31,9 +31,11 @@
     let currentProduct = null;
     let preview = null;
     let mount = document.getElementById('productCorrectionMount');
+    let previewRequestNumber = 0;
+    let deleteInFlight = false;
 
     function ensureMount() {
-      if (mount) return mount;
+      if (mount && mount.isConnected) return mount;
       mount = document.createElement('section');
       mount.id = 'productCorrectionMount';
       mount.className = 'card product-correction-card';
@@ -145,17 +147,12 @@
         </div>
         <div id="productCorrectionMessage" class="small" style="display:none;margin-top:10px"></div>
       `;
-      document.getElementById('productCorrectionRefreshButton')?.addEventListener('click', () => loadPreview(true));
-      document.getElementById('productCorrectionDeleteButton')?.addEventListener('click', submitCorrectionDelete);
-      document.getElementById('productCorrectionArchiveButton')?.addEventListener('click', () => {
-        const archiveButton = document.querySelector(`[data-archive-product-id="${selectedProductId()}"]`);
-        if (archiveButton) archiveButton.click();
-        else setMessage('Archive control was not found. Use status = Archived in the product editor, then save.', true);
-      });
+      // Click handling is delegated once below. The panel is re-rendered for each product,
+      // so direct listeners here used to become stale after the first correction.
     }
 
     function setMessage(message, isError = false) {
-      const node = document.getElementById('productCorrectionMessage');
+      const node = ensureMount().querySelector('#productCorrectionMessage');
       if (!node) return;
       node.textContent = message || '';
       node.style.display = message ? 'block' : 'none';
@@ -165,22 +162,25 @@
     async function loadPreview(force = false) {
       const productId = selectedProductId();
       if (!productId) { renderEmpty(); return; }
+      const requestNumber = ++previewRequestNumber;
       const target = ensureMount();
       target.innerHTML = `<h3 style="margin-top:0">Correct or remove product</h3><p class="small">Loading linked raw inventory…</p>`;
       try {
         const response = await window.DDAuth.apiFetch(`/api/admin/delete-product?product_id=${encodeURIComponent(productId)}`, { method: 'GET' });
         const data = await response.json().catch(() => null);
+        if (requestNumber !== previewRequestNumber || productId !== selectedProductId()) return;
         if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load product correction details.');
         preview = data;
         renderPreview();
         if (force) setMessage('Linked raw inventory refreshed.');
       } catch (error) {
+        if (requestNumber !== previewRequestNumber || productId !== selectedProductId()) return;
         target.innerHTML = `<h3 style="margin-top:0">Correct or remove product</h3><p class="small" style="color:#b91c1c">${escapeHtml(error.message || 'Could not load product correction details.')}</p>`;
       }
     }
 
     function collectMaterialActions() {
-      return Array.from(document.querySelectorAll('#productCorrectionMount [data-resource-link-id]')).map((node) => ({
+      return Array.from(ensureMount().querySelectorAll('[data-resource-link-id]')).map((node) => ({
         product_resource_link_id: Number(node.getAttribute('data-resource-link-id') || 0),
         site_item_inventory_id: Number(node.getAttribute('data-inventory-id') || 0),
         release_quantity: toSafeInteger(node.querySelector('[data-release-quantity]')?.value, 0),
@@ -190,7 +190,9 @@
 
     async function submitCorrectionDelete() {
       const productId = selectedProductId();
-      if (!productId) return;
+      if (!productId || deleteInFlight) return;
+      const activePreviewProductId = Number(preview?.product?.product_id || preview?.product_id || productId);
+      if (activePreviewProductId !== productId) { setMessage('This correction panel is still loading the selected product. Refresh it, then try again.', true); return; }
       const productName = String((preview?.product || currentProduct || {}).name || 'this product');
       const actions = collectMaterialActions();
       const summary = actions.length
@@ -200,11 +202,12 @@
       if (!proceed) return;
       const phrase = window.prompt('Type DELETE PRODUCT exactly to continue.');
       if (phrase === null) return;
-      const reason = String(document.getElementById('productCorrectionReason')?.value || '').trim() || 'Incorrect or duplicate product entry';
+      const reason = String(ensureMount().querySelector('#productCorrectionReason')?.value || '').trim() || 'Incorrect or duplicate product entry';
       const password = window.prompt('Enter your current admin password to confirm this correction and deletion.');
       if (password === null) return;
-      const button = document.getElementById('productCorrectionDeleteButton');
+      const button = ensureMount().querySelector('#productCorrectionDeleteButton');
       const originalText = button?.textContent || '';
+      deleteInFlight = true;
       try {
         if (button) { button.disabled = true; button.textContent = 'Applying correction…'; }
         const response = await window.DDAuth.apiFetch('/api/admin/delete-product', {
@@ -230,13 +233,28 @@
       } catch (error) {
         setMessage(error.message || 'Product correction/delete failed.', true);
       } finally {
-        if (button) { button.disabled = false; button.textContent = originalText; }
+        deleteInFlight = false;
+        if (button?.isConnected) { button.disabled = false; button.textContent = originalText; }
       }
     }
+
+    ensureMount().addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      if (!button) return;
+      if (button.id === 'productCorrectionRefreshButton') { loadPreview(true); return; }
+      if (button.id === 'productCorrectionDeleteButton') { submitCorrectionDelete(); return; }
+      if (button.id === 'productCorrectionArchiveButton') {
+        const archiveButton = document.querySelector(`[data-archive-product-id="${selectedProductId()}"]`);
+        if (archiveButton) archiveButton.click();
+        else setMessage('Archive control was not found. Use status = Archived in the product editor, then save.', true);
+      }
+    });
 
     document.addEventListener('dd:product-editor-target', (event) => {
       currentProduct = event?.detail?.product || { product_id: Number(event?.detail?.product_id || 0) };
       preview = null;
+      deleteInFlight = false;
+      previewRequestNumber += 1;
       const shortcut = ensureShortcutButton();
       if (shortcut) shortcut.style.display = '';
       loadPreview();
@@ -245,6 +263,8 @@
     document.addEventListener('dd:product-editor-cleared', () => {
       currentProduct = null;
       preview = null;
+      deleteInFlight = false;
+      previewRequestNumber += 1;
       const shortcut = document.getElementById('productCorrectionJumpButton');
       if (shortcut) shortcut.style.display = 'none';
       renderEmpty();
