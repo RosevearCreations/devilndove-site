@@ -59,8 +59,9 @@ async function syncProductImages(db, productId, name, featuredImageUrl, imageUrl
   const imageColumns = await getTableColumnSet(db, "product_images");
   if (!productId || !imageColumns.has("product_id") || !imageColumns.has("image_url")) return rows;
 
+  const orderingColumn = imageColumns.has("sort_order") ? "sort_order" : imageColumns.has("display_order") ? "display_order" : "product_image_id";
   const existingResult = await db
-    .prepare(`SELECT * FROM product_images WHERE product_id = ?`)
+    .prepare(`SELECT * FROM product_images WHERE product_id = ? ORDER BY ${orderingColumn} ASC, product_image_id ASC`)
     .bind(productId)
     .all()
     .catch(() => ({ results: [] }));
@@ -72,24 +73,25 @@ async function syncProductImages(db, productId, name, featuredImageUrl, imageUrl
   });
 
   const keptIds = [];
+  const explicitKeys = new Set();
   for (let index = 0; index < urls.length; index += 1) {
     const imageUrl = urls[index];
-    const existing = existingByUrl.get(normalizeImageKey(imageUrl));
+    const key = normalizeImageKey(imageUrl);
+    explicitKeys.add(key);
+    const existing = existingByUrl.get(key);
     const existingId = Number(existing?.product_image_id || 0);
     const fallbackAlt = name || (index === 0 ? "Featured product image" : `Product image ${index + 1}`);
 
     if (existingId && imageColumns.has("product_image_id")) {
       const assignments = [];
       const binds = [];
-      if (imageColumns.has("image_url")) { assignments.push("image_url = ?"); binds.push(imageUrl); }
+      assignments.push("image_url = ?"); binds.push(imageUrl);
       if (imageColumns.has("sort_order")) { assignments.push("sort_order = ?"); binds.push(index); }
       else if (imageColumns.has("display_order")) { assignments.push("display_order = ?"); binds.push(index); }
       if (imageColumns.has("alt_text")) { assignments.push("alt_text = COALESCE(NULLIF(alt_text, ''), ?)"); binds.push(fallbackAlt); }
       if (imageColumns.has("updated_at")) assignments.push("updated_at = CURRENT_TIMESTAMP");
-      if (assignments.length) {
-        binds.push(existingId);
-        await db.prepare(`UPDATE product_images SET ${assignments.join(", ")} WHERE product_image_id = ?`).bind(...binds).run().catch(() => null);
-      }
+      binds.push(existingId);
+      await db.prepare(`UPDATE product_images SET ${assignments.join(", ")} WHERE product_image_id = ?`).bind(...binds).run().catch(() => null);
       keptIds.push(existingId);
     } else {
       const columns = ["product_id", "image_url"];
@@ -106,9 +108,26 @@ async function syncProductImages(db, productId, name, featuredImageUrl, imageUrl
     }
   }
 
-  // A normal product save is additive/preserving. It must never erase an image or video
-  // merely because the editor currently shows a shorter list or the OG image changed.
-  // Destructive replacement is only permitted by an explicit future media-management action.
+  // Normal saves preserve media omitted by partial editors. Re-number those retained rows
+  // after the requested/featured set, so exactly one first image remains authoritative.
+  if (!replaceExisting && (imageColumns.has("sort_order") || imageColumns.has("display_order"))) {
+    let retainedOrder = urls.length;
+    for (const row of existingRows) {
+      const rowId = Number(row?.product_image_id || 0);
+      const key = normalizeImageKey(row?.image_url);
+      if (!rowId || explicitKeys.has(key)) continue;
+      const orderColumn = imageColumns.has("sort_order") ? "sort_order" : "display_order";
+      const orderAssignments = [`${orderColumn} = ?`];
+      if (imageColumns.has("updated_at")) orderAssignments.push("updated_at = CURRENT_TIMESTAMP");
+      await db.prepare(`UPDATE product_images SET ${orderAssignments.join(", ")} WHERE product_image_id = ?`)
+        .bind(retainedOrder, rowId)
+        .run()
+        .catch(() => null);
+      retainedOrder += 1;
+    }
+  }
+
+  // Destructive replacement remains opt-in only for an explicit media-management action.
   if (replaceExisting && imageColumns.has("product_image_id")) {
     if (keptIds.length) {
       const placeholders = keptIds.map(() => "?").join(", ");
@@ -118,7 +137,6 @@ async function syncProductImages(db, productId, name, featuredImageUrl, imageUrl
     }
   }
 
-  const orderingColumn = imageColumns.has("sort_order") ? "sort_order" : imageColumns.has("display_order") ? "display_order" : "product_image_id";
   const updated = await db.prepare(`SELECT * FROM product_images WHERE product_id = ? ORDER BY ${orderingColumn} ASC, product_image_id ASC`).bind(productId).all().catch(() => ({ results: [] }));
   return Array.isArray(updated?.results) ? updated.results : [];
 }
@@ -269,7 +287,7 @@ export async function onRequestPost(context) {
         ? 0
         : Number(body.inventory_quantity);
     const digital_file_url = String(body.digital_file_url || "").trim() || null;
-    const featured_image_url = String(body.featured_image_url || "").trim() || null;
+    const requested_featured_image_url = String(body.featured_image_url || "").trim() || null;
     const sort_order = body.sort_order == null || body.sort_order === "" ? 0 : Number(body.sort_order);
     const image_urls = normalizeImageUrls(body.image_urls);
     const meta_title = String(body.meta_title || "").trim() || null;
@@ -279,7 +297,7 @@ export async function onRequestPost(context) {
     const canonical_url = normalizeCanonicalUrl(body.canonical_url);
     const og_title = String(body.og_title || "").trim() || null;
     const og_description = String(body.og_description || "").trim() || null;
-    const og_image_url = String(body.og_image_url || "").trim() || null;
+    const requested_og_image_url = String(body.og_image_url || "").trim() || null;
     const merchandise_origin = cleanMerchandiseOrigin(body.merchandise_origin);
     const sale_channel = cleanSaleChannel(body.sale_channel);
     const external_listing_url = cleanExternalUrl(body.external_listing_url);
@@ -287,16 +305,6 @@ export async function onRequestPost(context) {
     const condition_summary = cleanText(body.condition_summary, 255);
     const era_label = cleanText(body.era_label, 120);
     const sourcing_notes = cleanText(body.sourcing_notes, 2000);
-
-    const readiness = computeReadiness({
-      name,
-      slug,
-      price_cents,
-      featured_image_url,
-      product_category,
-      meta_title,
-      meta_description
-    });
 
     if (!Number.isInteger(product_id) || product_id <= 0) {
       return json({ ok: false, error: "A valid product_id is required." }, 400);
@@ -347,10 +355,21 @@ export async function onRequestPost(context) {
     }
 
     const existingProduct = await db
-      .prepare(`SELECT product_id, slug, sku FROM products WHERE product_id = ? LIMIT 1`)
+      .prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`)
       .bind(product_id)
       .first();
     if (!existingProduct) return json({ ok: false, error: "Product not found." }, 404);
+
+    const existingImagesResult = await db
+      .prepare(`SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, product_image_id ASC`)
+      .bind(product_id)
+      .all()
+      .catch(() => ({ results: [] }));
+    const existingImages = Array.isArray(existingImagesResult?.results) ? existingImagesResult.results : [];
+    const existingPrimaryImageUrl = String(existingImages[0]?.image_url || "").trim() || null;
+    // A blank field means “keep the product's current primary image”, not “erase it”.
+    // For a new list, first gallery image becomes the canonical featured image.
+    const resolvedFeaturedImageUrl = requested_featured_image_url || image_urls[0] || existingPrimaryImageUrl || String(existingProduct.featured_image_url || "").trim() || null;
 
     if (product_number !== null) {
       const existingProductNumber = await db
@@ -383,6 +402,22 @@ export async function onRequestPost(context) {
         .first();
       if (!taxClass) return json({ ok: false, error: "Selected tax class was not found." }, 400);
     }
+
+    const syncedImages = await syncProductImages(db, product_id, name, resolvedFeaturedImageUrl, image_urls, {
+      replaceExisting: String(body.media_sync_mode || "").toLowerCase() === "replace"
+    });
+    // sort_order zero is authoritative: products.featured_image_url mirrors the first retained image.
+    const featured_image_url = String(syncedImages[0]?.image_url || resolvedFeaturedImageUrl || "").trim() || null;
+    const og_image_url = requested_og_image_url || featured_image_url;
+    const readiness = computeReadiness({
+      name,
+      slug,
+      price_cents,
+      featured_image_url,
+      product_category,
+      meta_title,
+      meta_description
+    });
 
     const assignments = [];
     const bindValues = [];
@@ -472,10 +507,6 @@ export async function onRequestPost(context) {
         )
         .run();
     } catch {}
-
-    const syncedImages = await syncProductImages(db, product_id, name, featured_image_url, image_urls, {
-      replaceExisting: String(body.media_sync_mode || "").toLowerCase() === "replace"
-    });
 
     const updatedProduct = await db
       .prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`)

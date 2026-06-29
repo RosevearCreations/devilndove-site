@@ -184,6 +184,27 @@ export async function onRequestPost(context) {
     if (!stepUp.ok) return stepUp.response;
   }
 
+  // Approval must not leave an otherwise retained gallery without its storefront lead image.
+  // This is a repair only: it fills a blank product field from sort_order zero and never deletes media.
+  await db.prepare(`
+    UPDATE products
+    SET featured_image_url = (
+      SELECT pi.image_url
+      FROM product_images pi
+      WHERE pi.product_id = products.product_id
+        AND TRIM(COALESCE(pi.image_url, '')) <> ''
+      ORDER BY COALESCE(pi.sort_order, 0) ASC, pi.product_image_id ASC
+      LIMIT 1
+    ), updated_at = CURRENT_TIMESTAMP
+    WHERE product_id = ?
+      AND TRIM(COALESCE(featured_image_url, '')) = ''
+      AND EXISTS (
+        SELECT 1 FROM product_images pi
+        WHERE pi.product_id = products.product_id
+          AND TRIM(COALESCE(pi.image_url, '')) <> ''
+      )
+  `).bind(productId).run().catch(() => null);
+
   const annotationCols = await getTableColumnSet(db, 'product_image_annotations');
   const row = await db.prepare(`
     SELECT p.*, ps.meta_title, ps.meta_description,
