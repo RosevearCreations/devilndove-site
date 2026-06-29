@@ -1429,3 +1429,28 @@ body.nav-mobile-open{overflow:hidden}
 .catalog-category-manager summary{cursor:pointer;font-weight:800}
 .catalog-category-manager p{max-width:80ch}
 @media (max-width:860px){.nav-mobile-panel{width:auto;max-width:560px;margin:0 auto}.nav-mobile-group-links{max-height:48dvh;overflow:auto}.nav-mobile-group summary{min-height:44px}#shopProducts .shop-card-main-image img{aspect-ratio:1/1}}
+
+/* Build 198: inventory full editor stays reachable on desktop and mobile. */
+.site-inventory-edit-state{
+  padding:10px 12px;
+  border:1px solid rgba(46,168,255,.42);
+  border-left:4px solid var(--accent, #2ea8ff);
+  border-radius:12px;
+  background:rgba(46,168,255,.08);
+  color:var(--text);
+}
+.site-inventory-form-actions{display:flex;gap:10px;flex-wrap:wrap;position:sticky;bottom:0;z-index:3;padding:10px 0 2px;background:linear-gradient(to bottom,rgba(255,255,255,0),var(--surface,#fff) 28%)}
+.site-inventory-full-edit{margin-top:9px;width:max-content;max-width:100%}
+.site-inventory-row-actions{min-width:190px;white-space:normal}
+.site-inventory-row-actions .btn{margin:2px 2px 2px 0}
+.site-inventory-admin-table th:last-child,.site-inventory-admin-table td:last-child{position:sticky;right:0;z-index:2;background:var(--surface,#fffaf5);box-shadow:-8px 0 12px rgba(31,41,55,.06)}
+.site-inventory-admin-table th:last-child{z-index:4}
+@media (max-width:760px){
+  .site-inventory-admin-table{min-width:720px}
+  .site-inventory-admin-table th:last-child,.site-inventory-admin-table td:last-child{display:none}
+  .site-inventory-list-identity{grid-template-columns:112px minmax(170px,1fr)}
+  .site-inventory-list-thumb,.site-inventory-media-name{width:112px}
+  .site-inventory-list-thumb{min-height:96px}
+  .site-inventory-list-thumb img{height:96px}
+  .site-inventory-form-actions{padding-bottom:10px}
+}
