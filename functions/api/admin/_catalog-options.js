@@ -12,6 +12,8 @@ export const DEFAULT_CATEGORY_OPTIONS = [
   'Laser Engraved Items',
   'Polymer Clay Items',
   'Home Decor',
+  'Soap',
+  'Candles',
   'Accessories',
   'Other'
 ];

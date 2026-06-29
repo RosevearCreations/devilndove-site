@@ -13,32 +13,42 @@ function safeUrl(value) {
   return '';
 }
 
+function emptyCommunityPayload(message = '') {
+  return jsonResponse({
+    ok: true,
+    degraded: true,
+    backend_warning: message || 'Community content is temporarily unavailable. Refresh after the database migration has finished.',
+    events: [], pickup_profiles: [], vendor_applications: [],
+    summary: { event_count: 0, recurring_event_count: 0, application_enabled_count: 0, vendor_application_count: 0, open_vendor_application_count: 0 }
+  }, 200, { 'Cache-Control': 'no-store' });
+}
+
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await ensureCommunityEventsTable(db);
-  await ensurePickupProfilesTable(db);
-  await ensureEventVendorApplicationsTable(db);
-  const [events, pickup_profiles, vendor_applications] = await Promise.all([
-    listCommunityEvents(db, { includeInactive: true }),
-    listPickupProfiles(db, { includeInactive: true }),
-    listVendorApplications(db, { status: 'all', limit: 300 }),
-  ]);
-  return jsonResponse({
-    ok: true,
-    events,
-    pickup_profiles,
-    vendor_applications,
-    summary: {
-      event_count: events.length,
-      recurring_event_count: events.filter((row) => row.recurrence_rule && row.recurrence_rule !== 'none').length,
-      application_enabled_count: events.filter((row) => row.application_mode && row.application_mode !== 'closed').length,
-      vendor_application_count: vendor_applications.length,
-      open_vendor_application_count: vendor_applications.filter((row) => ['submitted', 'reviewing'].includes(row.application_status)).length,
-    }
-  });
+  try {
+    // Read-only admin views must not run migrations/DDL on every page load.
+    // Missing optional tables fall through to the stable degraded payload below.
+    const [events, pickup_profiles, vendor_applications] = await Promise.all([
+      listCommunityEvents(db, { includeInactive: true }),
+      listPickupProfiles(db, { includeInactive: true }),
+      listVendorApplications(db, { status: 'all', limit: 300 }),
+    ]);
+    return jsonResponse({
+      ok: true, events, pickup_profiles, vendor_applications,
+      summary: {
+        event_count: events.length,
+        recurring_event_count: events.filter((row) => row.recurrence_rule && row.recurrence_rule !== 'none').length,
+        application_enabled_count: events.filter((row) => row.application_mode && row.application_mode !== 'closed').length,
+        vendor_application_count: vendor_applications.length,
+        open_vendor_application_count: vendor_applications.filter((row) => ['submitted', 'reviewing'].includes(row.application_status)).length,
+      }
+    }, 200, { 'Cache-Control': 'no-store' });
+  } catch (error) {
+    return emptyCommunityPayload(error?.message || 'Community content service unavailable.');
+  }
 }
 
 export async function onRequestPost(context) {
@@ -46,9 +56,13 @@ export async function onRequestPost(context) {
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await ensureCommunityEventsTable(db);
-  await ensurePickupProfilesTable(db);
-  await ensureEventVendorApplicationsTable(db);
+  try {
+    await ensureCommunityEventsTable(db);
+    await ensurePickupProfilesTable(db);
+    await ensureEventVendorApplicationsTable(db);
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error?.message || 'Community content database is not ready yet.' }, 503);
+  }
 
   let body = {};
   try { body = await context.request.json(); } catch { return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400); }

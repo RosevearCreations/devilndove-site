@@ -82,13 +82,21 @@ function summaryMarkdown(cases) {
   return lines.join('\n');
 }
 
-export async function onRequestGet(context) {
-  const db = getDb(context.env);
-  if (!db) return json({ ok:false, error:'Database binding is not configured.' }, 500);
-  const admin = await getAdminUserFromRequest(context.request, context.env);
-  if (!admin) return json({ ok:false, error:'Unauthorized.' }, 401);
-  await ensure(db); await seed(db);
+function emptyPlaybook(message = '') {
+  return {
+    ok: true,
+    degraded: true,
+    backend_warning: message || 'Live readiness data is temporarily unavailable. The page remains usable and will retry on refresh.',
+    build_label: 'Build 197',
+    cases: [],
+    recent_runs: [],
+    usage: [],
+    stats: { total: 0, passed: 0, failed: 0, open: 0, live_required: 0 },
+    markdown: ''
+  };
+}
 
+async function readPlaybook(db) {
   const cases = await safeAll(db, `SELECT * FROM live_readiness_test_cases ORDER BY priority_rank ASC, test_key ASC`);
   const recentRuns = await safeAll(db, `SELECT * FROM live_readiness_test_runs ORDER BY tested_at DESC, live_readiness_test_run_id DESC LIMIT 40`);
   const usage = await safeAll(db, `SELECT route_path, COUNT(*) AS event_count, MAX(created_at) AS last_used_at FROM command_center_usage_events WHERE created_at >= datetime('now','-30 days') GROUP BY route_path ORDER BY event_count DESC, route_path ASC LIMIT 30`);
@@ -99,7 +107,21 @@ export async function onRequestGet(context) {
     open: cases.filter((row) => !['passed','not_applicable'].includes(row.test_status)).length,
     live_required: cases.filter((row) => Number(row.requires_live_binding || 0) === 1).length
   };
-  return json({ ok:true, build_label:'Build 193', cases, recent_runs:recentRuns, usage, stats, markdown:summaryMarkdown(cases) });
+  return { ok: true, build_label: 'Build 197', cases, recent_runs: recentRuns, usage, stats, markdown: summaryMarkdown(cases) };
+}
+
+export async function onRequestGet(context) {
+  const db = getDb(context.env);
+  if (!db) return json({ ok:false, error:'Database binding is not configured.' }, 500);
+  const admin = await getAdminUserFromRequest(context.request, context.env);
+  if (!admin) return json({ ok:false, error:'Unauthorized.' }, 401);
+  try {
+    // This is a read-only dashboard. Avoid DDL/seeding during ordinary admin page visits.
+    return json(await readPlaybook(db));
+  } catch (error) {
+    // This dashboard is non-critical telemetry; do not make every admin page look broken if its optional tables are unavailable.
+    return json(emptyPlaybook(error?.message || 'Live readiness service is temporarily unavailable.'));
+  }
 }
 
 export async function onRequestPost(context) {
@@ -107,41 +129,52 @@ export async function onRequestPost(context) {
   if (!db) return json({ ok:false, error:'Database binding is not configured.' }, 500);
   const admin = await getAdminUserFromRequest(context.request, context.env);
   if (!admin) return json({ ok:false, error:'Unauthorized.' }, 401);
-  await ensure(db); await seed(db);
 
   let body = {};
   try { body = await context.request.json(); } catch { return json({ ok:false, error:'Expected JSON request body.' }, 400); }
   const action = normalizeText(body.action).toLowerCase();
 
-  if (action === 'seed_cases') {
-    await seed(db);
-  } else if (action === 'record_usage') {
+  // Every admin page records this lightweight telemetry. Do not run the full table seed on every page view.
+  // If D1 is briefly unavailable, treat usage recording as optional instead of causing a 503 in unrelated admin screens.
+  if (action === 'record_usage') {
     const routePath = normalizeText(body.route_path);
     if (!routePath.startsWith('/admin/')) return json({ ok:false, error:'A valid admin route is required.' }, 400);
-    await safeRun(db, `INSERT INTO command_center_usage_events (route_path,event_kind,source_route,user_id,session_key,notes) VALUES (?,?,?,?,?,?)`,
-      [routePath, normalizeText(body.event_kind) || 'view', normalizeText(body.source_route) || '/admin/command-center/', Number(admin.user_id || 0) || null, normalizeText(body.session_key) || null, normalizeText(body.notes) || null]);
-  } else if (action === 'record_run') {
-    const testKey = normalizeText(body.test_key);
-    const nextStatus = status(body.run_status || body.test_status);
-    const existing = await safeFirst(db, `SELECT test_key FROM live_readiness_test_cases WHERE test_key=?`, [testKey]);
-    if (!existing) return json({ ok:false, error:'Unknown test case.' }, 404);
-    const resultSummary = normalizeText(body.result_summary).slice(0, 2000);
-    const evidenceUrl = safeUrl(body.evidence_url);
-    const notes = normalizeText(body.notes).slice(0, 5000);
-    await safeRun(db, `INSERT INTO live_readiness_test_runs (test_key,run_status,result_summary,evidence_url,tested_by_user_id,notes) VALUES (?,?,?,?,?,?)`,
-      [testKey, nextStatus, resultSummary || null, evidenceUrl || null, Number(admin.user_id || 0) || null, notes || null]);
-    await safeRun(db, `UPDATE live_readiness_test_cases SET test_status=?,evidence_url=?,evidence_notes=?,last_run_at=CURRENT_TIMESTAMP,last_run_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE test_key=?`,
-      [nextStatus, evidenceUrl || null, resultSummary || notes || null, Number(admin.user_id || 0) || null, testKey]);
-    await auditAdminAction(db, admin, 'live_readiness_test_recorded', 'live_readiness_test_case', null, { test_key:testKey, test_status:nextStatus, evidence_url:!!evidenceUrl }).catch(() => null);
-  } else if (action === 'export_markdown') {
-    // GET response includes markdown; keeping this action lets the UI refresh the same reviewed source.
-  } else {
-    return json({ ok:false, error:'Unsupported playbook action.' }, 400);
+    try {
+      await safeRun(db, `CREATE TABLE IF NOT EXISTS command_center_usage_events (command_center_usage_event_id INTEGER PRIMARY KEY AUTOINCREMENT,route_path TEXT NOT NULL,event_kind TEXT NOT NULL DEFAULT 'view',source_route TEXT,user_id INTEGER,session_key TEXT,created_at TEXT DEFAULT CURRENT_TIMESTAMP,notes TEXT)`);
+      await safeRun(db, `INSERT INTO command_center_usage_events (route_path,event_kind,source_route,user_id,session_key,notes) VALUES (?,?,?,?,?,?)`,
+        [routePath, normalizeText(body.event_kind) || 'view', normalizeText(body.source_route) || '/admin/command-center/', Number(admin.user_id || 0) || null, normalizeText(body.session_key) || null, normalizeText(body.notes) || null]);
+      return json({ ok:true, recorded:true });
+    } catch (error) {
+      return json({ ok:true, recorded:false, degraded:true, backend_warning:error?.message || 'Usage telemetry will retry on a later page visit.' });
+    }
   }
 
-  const cases = await safeAll(db, `SELECT * FROM live_readiness_test_cases ORDER BY priority_rank ASC, test_key ASC`);
-  const recentRuns = await safeAll(db, `SELECT * FROM live_readiness_test_runs ORDER BY tested_at DESC, live_readiness_test_run_id DESC LIMIT 40`);
-  const usage = await safeAll(db, `SELECT route_path, COUNT(*) AS event_count, MAX(created_at) AS last_used_at FROM command_center_usage_events WHERE created_at >= datetime('now','-30 days') GROUP BY route_path ORDER BY event_count DESC, route_path ASC LIMIT 30`);
-  const stats = { total:cases.length, passed:cases.filter(r=>r.test_status==='passed').length, failed:cases.filter(r=>r.test_status==='failed').length, open:cases.filter(r=>!['passed','not_applicable'].includes(r.test_status)).length, live_required:cases.filter(r=>Number(r.requires_live_binding||0)===1).length };
-  return json({ ok:true, message:'Live readiness playbook updated.', cases, recent_runs:recentRuns, usage, stats, markdown:summaryMarkdown(cases) });
+  try {
+    await ensure(db);
+    await seed(db);
+    if (action === 'seed_cases') {
+      await seed(db);
+    } else if (action === 'record_run') {
+      const testKey = normalizeText(body.test_key);
+      const nextStatus = status(body.run_status || body.test_status);
+      const existing = await safeFirst(db, `SELECT test_key FROM live_readiness_test_cases WHERE test_key=?`, [testKey]);
+      if (!existing) return json({ ok:false, error:'Unknown test case.' }, 404);
+      const resultSummary = normalizeText(body.result_summary).slice(0, 2000);
+      const evidenceUrl = safeUrl(body.evidence_url);
+      const notes = normalizeText(body.notes).slice(0, 5000);
+      await safeRun(db, `INSERT INTO live_readiness_test_runs (test_key,run_status,result_summary,evidence_url,tested_by_user_id,notes) VALUES (?,?,?,?,?,?)`,
+        [testKey, nextStatus, resultSummary || null, evidenceUrl || null, Number(admin.user_id || 0) || null, notes || null]);
+      await safeRun(db, `UPDATE live_readiness_test_cases SET test_status=?,evidence_url=?,evidence_notes=?,last_run_at=CURRENT_TIMESTAMP,last_run_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE test_key=?`,
+        [nextStatus, evidenceUrl || null, resultSummary || notes || null, Number(admin.user_id || 0) || null, testKey]);
+      await auditAdminAction(context.env, context.request, admin, {
+        action_type: 'live_readiness_test_recorded', target_type: 'live_readiness_test_case', target_key: testKey,
+        details: { test_status: nextStatus, evidence_url: !!evidenceUrl }
+      }).catch(() => null);
+    } else if (action !== 'export_markdown') {
+      return json({ ok:false, error:'Unsupported playbook action.' }, 400);
+    }
+    return json({ ...(await readPlaybook(db)), message: 'Live readiness playbook updated.' });
+  } catch (error) {
+    return json(emptyPlaybook(error?.message || 'Could not update the live readiness playbook.'));
+  }
 }

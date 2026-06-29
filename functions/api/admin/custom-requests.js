@@ -579,7 +579,8 @@ function quoteScope(row) {
 }
 
 async function listPayload(db) {
-  await ensureSchema(db);
+  // Build 197: normal dashboard reads never perform a large schema migration at request time.
+  // Each query below safely returns an empty list until the deployed migration is present.
   const requests = rows(await db.prepare(`SELECT * FROM custom_requests ORDER BY datetime(created_at) DESC, custom_request_id DESC LIMIT 100`).all().catch(() => ({ results: [] })));
   const summary = await db.prepare(`SELECT
     COUNT(*) AS total,
@@ -1515,7 +1516,7 @@ export async function onRequestGet(context) {
   }
   catch (error) {
     await captureRuntimeIncident(context.env, context.request, { incident_scope: 'admin_custom_requests', incident_code: 'custom_requests_list_failed', severity: 'error', message: error?.message || 'Custom request list failed.', details: { error: String(error?.stack || error?.message || error) }, related_user_id: adminUser.user_id }).catch(() => null);
-    return jsonResponse({ ok: false, error: error?.message || 'Could not load custom requests.' }, 500);
+    return jsonResponse({ ok: true, degraded: true, backend_warning: error?.message || 'Custom requests are temporarily unavailable. Refresh after the database migration completes.', requests: [], summary: { total: 0, open_count: 0, quote_needed_count: 0, accepted_count: 0 }, quote_drafts: [], quote_line_items: [], quote_revisions: [], payment_request_drafts: [], order_drafts: [], payment_links: [], payment_gates: [], checkout_records: [], order_status_links: [], order_stage_events: [], marketplace_export_packs: [], marketplace_presets: [], fulfillment_prompts: [], public_proof_candidates: [], payment_provider_tests: [], job_drafts: [], product_drafts: [], reply_templates: [], payment_candidates: [], quote_preview_links: [], reference_uploads: [], conversion_events: [], customer_history: [] }, 200, { 'Cache-Control': 'no-store' });
   }
 }
 
