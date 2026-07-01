@@ -1,3 +1,31 @@
+# Build 200
+
+## Summary
+
+- Added the review-first Content Release Board at `/admin/content-publications/`. It turns approved Content Studio blog/gallery deliverables into one Workshop Journal draft and one website-gallery draft per content project.
+- Added required public-release checks: approved source deliverable, factual visible copy, selected public-allowed media, lead image/alt text, stable slug, and search title/description fields.
+- Added explicit draft → approve → publish → unpublish workflow, copy locking, audit events, and explainable manual metrics. No content is automatically published.
+- Added public `/api/workshop-journal`, Workshop Journal released-story cards, website-gallery released features, and a safe public story view.
+- Added `database_build200_content_publication_release_board.sql` and updated every current schema/roadmap/handoff/smoke-test document.
+- Validation: 455 JavaScript files passed syntax checks; 48 public HTML pages passed the one-H1 check; CSS braces are balanced; Build 199 → Build 200 migrations ran twice successfully in a fresh SQLite test; seeded release-flow checks confirmed published gallery records can link to their related Journal story and no source media rows change on unpublish or publication deletion.
+- Bumped the service-worker shell cache to `v5` so deployed CSS, scripts, and new public routes do not remain stale behind the previous shell cache.
+
+## Primary changed files
+
+- `functions/api/_lib/contentPublications.js`
+- `functions/api/admin/content-publications.js`
+- `functions/api/workshop-journal.js`
+- `admin/content-publications/index.html`
+- `public/js/admin-content-publications.js`
+- `public/js/workshop-journal-publications.js`
+- `public/js/workshop-journal-story.js`
+- `public/js/published-gallery-features.js`
+- `workshop-journal/story/index.html`
+- `database_build200_content_publication_release_board.sql`
+- `css/styles.css`
+
+---
+
 # Build 199
 
 ## Summary

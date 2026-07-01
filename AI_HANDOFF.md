@@ -1,73 +1,67 @@
-# Devil n Dove AI Handoff — Build 199
+# Devil n Dove AI Handoff — Build 200
 
+Read this file first in a new chat, then `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`. They are the only canonical direction set. Specialist runbooks remain only to preserve implementation evidence and do not override this file.
 
-**Automatic trigger paths:** dedicated review approval, direct product creation with Approved/Published status, and an editor save that changes a product from an unapproved review status to Approved/Published.
+## Current release in one sentence
 
-**Source gate:** only a product with review status **approved** or **published** can create or refresh a Content Automation Studio package.
-Read this file first in a new chat, then `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`. The two canonical files remain the current direction; retain specialist runbooks and history rather than deleting useful implementation context.
+Build 200 closes the next safe gap after content planning: an approved finished-product content package can now create **review-first Workshop Journal and website-gallery drafts**, pass factual/public-media/source-approval checks, and be manually approved, published, unpublished, or measured without ever moving or deleting original media.
 
-## What Build 199 changes
+## What works now
 
-Build 199 adds the **Content Automation Studio**, a review-first workflow that turns one approved finished product into a structured source-media archive and a complete multi-channel content package.
+- Build 199 automatically creates one source-linked Content Automation Studio package when a finished product becomes Approved/Published. It keeps images/videos in their original `product_images`, `media_assets`, and R2 locations.
+- Build 200 adds `/admin/content-publications/`, the **Content Release Board**.
+- One Content Studio package can prepare two public drafts: one Workshop Journal article and one website-gallery feature.
+- A public release requires all of the following: approved source deliverable, visible factual title/summary/body, at least one selected `public_allowed` media reference, lead image + descriptive alt text, stable slug, and prepared title/description fields.
+- Publication copy can be explicitly locked so a later Content Studio source refresh does not overwrite edited public copy.
+- Publishing is an explicit separate button; unpublish is available immediately and does not delete the source package or media.
+- `/api/workshop-journal` exposes **published items only** with a cache-safe public fallback. The Workshop Journal and Gallery progressively show released items after the Build 200 migration.
+- A Workshop Journal story page exists at `/workshop-journal/story/?story=<slug>` and safely renders published copy and Article/ImageGallery JSON-LD that matches visible content.
+- Manual views/clicks/saves/enquiries can be recorded with a source note. This is not a fabricated analytics connection and must not be treated as sales attribution.
 
-- Product **Approve**, **Publish**, and **Override Publish** actions prepare/refresh a content project automatically. A content-package preparation error is recorded as a warning and does not reverse the product approval.
-- `/admin/content-studio/` is a responsive dedicated workspace. It supports approved-product selection, structured source-media archive review, manual media selection, lead-source selection, public-use review labels, project controls, downloadable JSON manifests, and per-deliverable copy/production editing.
-- The package creates exactly 1 YouTube landscape long-form plan, 3 Facebook short video plans, 5 Instagram Reel plans, 5 TikTok plans, a website gallery plan, Google Business Profile photo plan, SEO asset pack, blog draft, thumbnail brief, and caption bundle.
-- Source media is linked by reference in D1. This build does not move, copy, overwrite, or delete `product_images`, `media_assets`, or R2 objects.
-- Copy is generated from existing factual product/story fields. Saving changed deliverable copy sets `copy_locked=1`, preventing later factual refreshes from overwriting it.
-- Completed output files remain external/manual at this stage: a real media URL must be added before an approved social deliverable can move to the existing Social Post Queue.
-- `database_build199_content_automation_studio.sql` adds content projects, source archive rows, deliverables, render handoff rows, events, indexes, and the migration ledger entry. It is additive and safe to rerun.
-- `CONTENT_AUTOMATION_STUDIO.md` is the implementation/owner runbook. Do not treat it as a third general roadmap.
+## Build 200 routes and files
 
-## Deployable files and order
+- `GET/POST /api/admin/content-publications`
+- `GET /api/workshop-journal`
+- `/admin/content-publications/`
+- `/workshop-journal/story/?story=<slug>`
+- `functions/api/_lib/contentPublications.js`
+- `functions/api/admin/content-publications.js`
+- `functions/api/workshop-journal.js`
+- `public/js/admin-content-publications.js`
+- `public/js/workshop-journal-publications.js`
+- `public/js/published-gallery-features.js`
+- `public/js/workshop-journal-story.js`
+- `database_build200_content_publication_release_board.sql`
 
-1. Back up production D1.
-2. Confirm Builds 196, 197, and 198 are applied.
-3. Run `database_build199_content_automation_studio.sql`. It is safe to rerun.
-4. Deploy the full Pages build, including static assets and `functions/`.
-5. Test the workflow in `POST_DEPLOY_SMOKE_TEST.md` before describing it as live.
+## Deployment order
 
-## Build 199 routes and files
+1. Back up D1.
+2. Confirm production has Build 199 in `schema_migration_ledger`.
+3. Run `database_build200_content_publication_release_board.sql` once; it is additive and safe to rerun.
+4. Deploy the full Pages bundle, including `/functions`, new public scripts, and static admin/public pages.
+5. Use `POST_DEPLOY_SMOKE_TEST.md` on the deployed site before calling the release live.
 
-- `GET/POST /api/admin/content-studio`
-- `/admin/content-studio/`
-- `functions/api/_lib/contentAutomationStudio.js`
-- `functions/api/admin/content-studio.js`
-- `public/js/admin-content-studio.js`
-- `database_build199_content_automation_studio.sql`
-- `CONTENT_AUTOMATION_STUDIO.md`
+## Non-negotiable operating rules
 
-## D1 migration order
+- **Never auto-publish.** A prepared draft, source package, video handoff, or rendered URL is not permission to release anything publicly.
+- **Never infer consent.** Only selected `public_allowed` source media can satisfy public-release readiness. Content Studio labels are review aids, not a replacement for source consent records.
+- **Never claim a render exists when it does not.** Build 200 still does not encode MP4 videos or upload to YouTube, Meta, TikTok, or Google Business Profile.
+- **Never let content publishing alter product media.** Featured product image, source gallery order, `product_images`, `media_assets`, and R2 source objects stay separate from public-release records.
+- **Never make claims absent from the visible page and source record.** Product name, materials, price/availability, image, title/meta, structured data, copy, and captions must agree.
+- **Do not call manual metrics automated performance data.** Record the source and date; do not turn views or clicks into claimed revenue without evidence.
 
-Run only migrations missing from the production migration ledger. Do not rerun older non-idempotent migrations simply because they appear here.
+## Current limits / honest state
 
-```text
-...
-database_build196_product_correction_material_returns.sql
-database_build197_application_resilience_media_catalog.sql
-database_build198_inventory_editor_featured_media_integrity.sql
-database_build199_content_automation_studio.sql
-```
+- Build 200 publishes website content through the Devil n Dove public API and journal/gallery UI only. It does not have a persistent server-rendered per-article path or automatic sitemap submission; after live publication, inspect actual rendered content and add only truthful URLs to the sitemap process when appropriate.
+- Dynamic Workshop Journal story copy is generated client-side from published D1 records. It is intentionally review-first; evaluate Search Console indexing before relying on it as the primary long-term article delivery path.
+- The existing video renderer remains `manual_export`; actual render provider adapter, signed source transfer, output verification, retry/recovery, and quota/cost guardrails remain future work.
+- OAuth-backed YouTube/Facebook/Instagram/TikTok/Google Business Profile posting remains separate and must retain preview, permissions, consent, rate-limit, and owner approval gates.
+- Existing live concerns remain: D1/R2/Pages environment validation, real device testing, Stripe/email/webhook testing, stock/cost evidence, Search Console, Merchant Center/GBP verification, and real accessibility checks.
 
-## Operational rules
+## Strongest next work after Build 200
 
-- Product featured media and content-package lead media are separate concepts. Never let changing a content lead source overwrite `products.featured_image_url`.
-- The content archive is an index of source references, not a destructive R2 reorganization task.
-- "Public allowed" in Content Studio is a package-level reviewer decision and does not replace source consent/annotation records.
-- A deliverable must be **Approved** and have an actual `output_url` before it can enter the Social Post Queue.
-- Never say a render brief is a completed video. The worker creates plans and export handoff rows, not encoded MP4s.
-- Never auto-publish. Every channel has platform-preview, account-permission, and final-human-review requirements.
-- For future detailing jobs, preserve the same client-visible/detailer-only/consent controls used by the planned live job media workflow.
-
-## Current limits / not yet claimed complete
-
-Provider-dependent work still needs live owner evidence: video rendering, platform OAuth/publishing, YouTube upload, Meta/TikTok posting, Google Business Profile photo upload, article/gallery publishing, performance analytics, and real-device tests. Existing R2, Stripe, email, Search Console, and Google Business Profile integrations also remain live-only checks where they were previously open.
-
-## Documentation policy
-
-Canonical current files:
-
-1. `PROJECT_STATUS_AND_ROADMAP.md` — business priorities and release decision source.
-2. `AI_HANDOFF.md` — technical state, migration order, operational rules, and new-chat continuation source.
-
-Keep specialist Markdown until its unique instructions are migrated to these canonical files or archived. Do not add another general-roadmap Markdown.
+1. Deploy Build 200 and prove one real product → content package → public draft → approval → published Workshop Journal card → unpublish loop without media loss.
+2. Build a renderer-provider adapter around `content_render_jobs` with manual-export fallback, signed job payloads, output verification, budget/timeout limits, and error recovery.
+3. Add a server-rendered or pre-generated public story delivery/sitemap path once real publication volume exists; do not create thin/duplicate pages.
+4. Connect actual platform publishing only after each OAuth provider/account is configured and preview/error/permissions evidence is captured.
+5. Add only consented, future detailing-job source adapters with client-visible/detailer-only media and privacy controls.

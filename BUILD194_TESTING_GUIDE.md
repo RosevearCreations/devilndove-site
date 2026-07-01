@@ -1,4 +1,8 @@
-# Build 194 Owner Testing Guide — Storefront Discovery, Product Facts & Media Roles
+# Retired reference — Build 200
+
+This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+
+## Build 194 Owner Testing Guide — Storefront Discovery, Product Facts & Media Roles
 
 **Purpose:** Verify the Build 194 storefront improvements after the D1 migration and Pages deployment.
 

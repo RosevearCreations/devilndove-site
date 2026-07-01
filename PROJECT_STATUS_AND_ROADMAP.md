@@ -1,53 +1,50 @@
-# Devil n Dove Project Status and Roadmap — Build 199
+# Devil n Dove Project Status and Roadmap — Build 200
 
-
-**Automatic trigger paths:** dedicated review approval, direct product creation with Approved/Published status, and an editor save that changes a product from an unapproved review status to Approved/Published.
-
-**Source gate:** only a product with review status **approved** or **published** can create or refresh a Content Automation Studio package.
-This is the primary business and release-readiness source. Read `AI_HANDOFF.md` for technical deployment instructions and `MARKDOWN_INDEX.md` for retained specialist runbooks.
+This is the primary business and release-readiness source. `AI_HANDOFF.md` explains technical deployment and operating rules. `MARKDOWN_INDEX.md` identifies the retained specialist references.
 
 ## Executive sanity check
 
-Build 199 introduces the strongest next business system after product/media integrity: **one approved finished product becomes one review-ready content package**. It gives Devil n Dove a repeatable way to turn real workshop media into long-form and short-form video plans, gallery choices, Google Business Profile photo preparation, SEO copy, a blog draft, thumbnail instructions, and captions without losing original files or publishing anything by accident.
+Devil n Dove now has a safe, practical content loop: **finished product → source-linked content package → reviewed website/public draft → deliberate release → explainable observation**.
 
-The system is complete as a **content operations foundation**, not as a complete video-production or auto-posting service. The platform now prepares, records, protects, and queues the work; external rendering and platform publishing still require connected providers, credentials, and live validation.
+Build 200 does not pretend that an editorial draft is a published video, that a metric is a sale, or that a product photo is cleared for public use merely because it exists. That restraint protects the business from the two biggest operational failures already seen in the app: lost media and accidental public claims.
 
 ## What now works
 
-1. Approving a finished product creates or refreshes its source-linked content package automatically.
-2. Every retained product image/video source is represented in a structured archive without moving or deleting original R2/product records.
-3. The archive scores media from recorded source order, role, media type, and existing metadata. The score is transparent review assistance, not a claim of visual truth.
-4. Every package contains an exact output plan: 1 YouTube long-form, 3 Facebook videos, 5 Instagram Reels, 5 TikToks, website/gallery images, Google Business Profile photo plan, SEO assets, blog draft, thumbnail, and captions.
-5. Content Studio works on phone and desktop widths. It includes source preview cards, mobile-safe controls, deliverable editors, review state, output/thumbnail fields, manifest export, and handoff to the Social Post Queue.
-6. Edited copy remains protected from automatic refresh; source media remains protected from automatic deletion.
-7. Existing product-metadata, image role, consent, SEO, social queue, and product story work is reused instead of duplicated.
+1. Approved/published finished products automatically create or refresh one Content Studio package without moving original image/video records.
+2. Every package still contains the complete 1 YouTube / 3 Facebook / 5 Instagram Reel / 5 TikTok plan plus gallery, GBP, SEO, blog, thumbnail, and caption work.
+3. The new **Content Release Board** turns the existing blog/gallery deliverables into two governed public drafts: Workshop Journal and website gallery.
+4. The board shows actionable release checks: source approval, visible factual title/summary/body, public-cleared selection, lead image alt text, stable path, and search snippet preparation.
+5. Reviewers can edit and lock public copy, approve it, publish it, unpublish it, and record a small manual performance note without touching source product media.
+6. Published Workshop Journal content appears progressively on the public Journal and website-gallery features. The original evergreen care guides and gallery remain available if D1 is unavailable.
+7. Mobile and desktop release views have responsive controls, compact cards, and no mobile-only hidden action path.
+8. SEO safeguards remain: one visible H1 per public route; public structured data corresponds to content actually displayed; only indexable public media URLs should be referenced; visual placeholders are decorative and do not claim product facts.
 
-## Business value
+## Why this advances the business model
 
-- A completed workshop project no longer leaves photos, clips, and story notes scattered across phones, R2, product records, and social ideas.
-- The workflow creates consistent content volume while retaining human judgment, humour, accuracy, and maker voice.
-- The system can power the same content model for future completed Rosie Dazzlers detailing jobs without rebuilding the archive/review/publishing framework.
-- The output supports the strongest honest discovery loop: completed item → useful images/video → product/gallery/blog context → social distribution → review and repeat visibility.
+- It turns real workshop work into a repeatable publication process rather than one-off social ideas that disappear into a phone folder.
+- It adds honest “why this exists / what happened / what was finished” story material that can help a buyer understand handmade, vintage, sourced, experimental, custom, and giftable work.
+- It keeps the active storefront distinct from the workshop story while linking related product pages only when those listings are verified.
+- It creates a useful feedback loop without encouraging vanity reporting: published content can record views/clicks/saves/enquiries with a source note, then be judged against actual time and business value.
 
 ## SEO and public-content guardrails
 
-- Use only truthful, visibly supported product facts. Product title, price, availability, page copy, metadata, structured data, images, captions, and video claims must agree.
-- Use descriptive, content-specific image alt text. Decorative graphic placeholders remain non-descriptive.
-- Keep one visible H1 per public route. The Content Studio is admin-only and excluded from indexing.
-- Make final media/image URLs stable and crawlable before putting them into public structured data or pages.
-- Do not manufacture before/after or transformation claims where the archived source media does not show that progression.
-- For future detailing-job projects, never expose identifying customer, vehicle, home, or location information without appropriate approval/consent.
+- Search metadata and schema must describe visible public content, never a hidden or invented claim. Product and image URLs used in structured data must be relevant and crawlable.
+- Do not publish empty/stub articles merely to add keywords. One useful real project story is worth more than a cluster of thin pages.
+- Each publication needs a visible truthful title, useful summary, content-specific copy, public-cleared media, concise descriptive alt text, and an accurate linked product path if applicable.
+- Visual placeholders remain neutral/decorative until real content passes review; do not give a generic placeholder a keyword-stuffed alt attribute.
+- Google Business Profile exports remain manual. Use only real, in-focus, recognizable, accurately representative images; do not fill a GBP photo set with graphic placeholders, heavy text overlays, or misleading before/after implications.
+
+Official references retained for verification: Google image SEO and product structured-data guidance, Google’s structured data policies, Business Profile photo/video policies, local-ranking guidance, and current Search documentation updates are listed in `LOCAL_SEO_PLAYBOOK.md`.
+
+## Release readiness opinion
+
+Build 200 is ready for the new D1 migration and Cloudflare Pages deployment after local validation. It is a content-publication **foundation**, not a fully automated social/video/GBP publishing system. Its first live proof should be one disposable product with public-cleared images, followed by a careful inspection of both public output and the original product media records.
 
 ## Highest-value next work
 
-1. Deploy Build 199 and run the content-studio smoke test on a disposable approved product with multiple images and one video/link.
-2. Select a secure video-rendering provider and build a provider adapter around `content_render_jobs`; keep manual export available as the failure-safe option.
-3. Add reviewed website-gallery and Workshop Journal publishing from individual approved deliverables.
-4. Add the future detailed-job source adapter: real-time photos/videos/notes, client-visible controls, detailer-only notes, consent gates, and customer approval states.
-5. Add native social/YouTube/GBP publishing only after OAuth, platform permissions, preview, rate limits, error recovery, and owner test evidence are complete.
-6. Add approved content-performance rollups linked to source project and channel without turning low-quality vanity metrics into business decisions.
-7. Continue core business hygiene: real materials/costs, product facts, accessibility, Search Console/GBP evidence, provider testing, and real-device screenshots.
-
-## Release-readiness opinion
-
-Build 199 is ready for D1 migration and Pages deployment after local checks. It should not be called a fully automated video/publishing system until actual render jobs and platform publishing have been tested with real credentials and outputs. The review-first archive and content-plan foundation can safely go live first.
+1. Deploy Build 200 and run the full product-to-public-draft smoke test using one real but safe test product.
+2. Complete the renderer adapter with provider configuration, signed inputs, output verification, job retries, cost limits, and a manual export fallback.
+3. Establish an owner-reviewed article publication cadence and indexing evidence process before expanding the Workshop Journal into many generated pages.
+4. Add direct external publishing only provider by provider, retaining platform preview, client/media consent, account permissions, rate limits, and final owner approval.
+5. Add future detailing-job support only after live job/media/privacy controls exist. Reuse the same source archive and public-release gates; do not rebuild a second content system.
+6. Continue core hygiene: accurate material/cost records, stock data, image roles/alt text, accessibility, performance budgets, Search Console/GBP/Merchant Center checks, and phone/desktop evidence.

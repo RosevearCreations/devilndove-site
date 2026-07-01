@@ -1,4 +1,8 @@
-# Build 174 inventory/data ownership note
+# Retired reference — Build 200
+
+This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+
+## Build 174 inventory/data ownership note
 
 Deployment Preflight now includes duplicate ownership checks for catalog and inventory D1 rows so Tools/Supplies imports are less likely to drift between JSON, D1, and admin export workflows. Continue using one D1 owner row per source key and only keep JSON as static fallback/export data.
 

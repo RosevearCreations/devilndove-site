@@ -1,37 +1,35 @@
-# Devil n Dove Markdown Index — Build 199
+# Devil n Dove Markdown Index — Build 200
 
-## Canonical first-read files
+## Read these two first
 
-1. `PROJECT_STATUS_AND_ROADMAP.md` — business priorities, completed work, limits, test order, and release opinion.
-2. `AI_HANDOFF.md` — technical state, migration order, operational rules, and next-AI continuation notes.
+1. `PROJECT_STATUS_AND_ROADMAP.md` — current business direction, completed work, non-negotiable public-content guardrails, and next priorities.
+2. `AI_HANDOFF.md` — build/migration order, exact routes/files, operating rules, known limits, and continuation instructions.
 
-These two files define current project direction. Update them each build.
+They are the **only canonical planning documents**. Do not create another general roadmap, backlog, or “new chat status” file without first updating these two files.
 
-## Active specialist runbooks and references
+## Active operating references
 
-- `CONTENT_AUTOMATION_STUDIO.md` — Build 199 source archive, content package, review, output, and future renderer/publisher integration rules.
-- `POST_DEPLOY_SMOKE_TEST.md` — Build 199 deployment checks, including automatic approved-product package creation and media integrity.
-- `SANITY_HEALTH_CHECK.md` — local validation evidence and live-only limits.
-- `LIVE_TESTING_GUIDE.md` — R2, Stripe, email, Search Console, GBP, and real-device checks.
-- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — bindings, encrypted variables, and safe handling of secrets.
-- `DATABASE_SCHEMA_REFERENCE.md` — schema/migration orientation; `database_full_schema.sql` is the fresh database source.
-- `IMAGES.md` — consent, image roles, content archive safety, alt text, visual QA, and placeholders.
-- `LOCAL_SEO_PLAYBOOK.md` — local-search evidence process.
-- `COMPETITIVE.md` — market/reference research.
-- `RELEASE_NOTES.md` — release history.
+- `POST_DEPLOY_SMOKE_TEST.md` — required deployed proof steps for Builds 197–200.
+- `CONTENT_AUTOMATION_STUDIO.md` — source archive/content-package/release-board operating guide.
+- `DATABASE_SCHEMA_REFERENCE.md` — migration/schema orientation; `database_full_schema.sql` is the fresh-install source.
+- `LOCAL_SEO_PLAYBOOK.md` — truthful local/discovery/image/structured-data evidence checks and official reference links.
+- `SANITY_HEALTH_CHECK.md` — latest local validation evidence and live-only caveats.
+- `RELEASE_NOTES.md` — concise release history.
 
-## Pointer and retained specialist files
+## Retired planning/reference files
 
-- `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AND_RISKS.md`, `AI_CONTEXT.md`, and `NEW_CHAT_STATUS.md` point to the canonical pair.
-- `REPO_RULES.md`, `REPO_BASE_GUIDE.md`, `AMAZON_MATCHING_NOTES.md`, and database extension files remain specialist references.
-- Historical planning stays in `docs/archive/`; do not revive an old task only because it appears in an archived file.
+The following documents are retained for specialist/history context, but they are **not current direction** and must not override the canonical pair: `AI_CONTEXT.md`, `AMAZON_MATCHING_NOTES.md`, `BUILD194_TESTING_GUIDE.md`, `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md`, `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md`, `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md`, `COMPETITIVE.md`, `DEVELOPMENT_ROADMAP.md`, `IMAGES.md`, `KNOWN_GAPS_AND_RISKS.md`, `LIVE_TESTING_GUIDE.md`, `NEW_CHAT_STATUS.md`, `README.md`, `REPO_BASE_GUIDE.md`, and `REPO_RULES.md`.
+
+Historical detailed planning belongs in `docs/archive/`. Do not revive a task simply because it appears in an old guide or release list.
+
+## Build 200 additions
+
+- `database_build200_content_publication_release_board.sql`
+- `functions/api/_lib/contentPublications.js`
+- `/admin/content-publications/` and `/api/admin/content-publications`
+- `/api/workshop-journal`
+- public Workshop Journal story view and published-gallery progressive enhancements
 
 ## Consolidation rule
 
-Do not delete useful context merely to reduce file count. Keep the canonical pair current, preserve narrow specialist runbooks, and turn superseded general planning files into pointers or archive entries. Avoid creating a new general roadmap Markdown.
-
-## Build 199 additions
-
-- `database_build199_content_automation_studio.sql` — safe rerunnable Content Automation Studio migration.
-- `CONTENT_AUTOMATION_STUDIO.md` — the dedicated operating/implementation guide.
-- Build 199 details are consolidated in the canonical pair, smoke test, sanity check, release notes, and schema reference.
+Preserve implementation evidence, but add general status/roadmap decisions only to the two canonical files. Narrow runbooks should remain narrow. This keeps a new AI or new chat oriented without duplicating or contradicting the plan.

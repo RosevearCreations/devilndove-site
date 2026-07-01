@@ -1,4 +1,8 @@
-# Build 199 competitive update — completed work becomes discoverable content
+# Retired reference — Build 200
+
+This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+
+## Build 199 competitive update — completed work becomes discoverable content
 
 Content Automation Studio creates a practical advantage for a small workshop: a completed approved item can become a consistent set of truthful review-ready content instead of a handful of forgotten photos. The competitive distinction is not automation for its own sake; it is an honest maker story, organised proof, and repeatable visibility across product pages, galleries, local discovery, blog content, and social channels.
 

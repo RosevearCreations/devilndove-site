@@ -1,4 +1,8 @@
-# Devil n Dove Live Testing Guide — Build 193
+# Retired reference — Build 200
+
+This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+
+## Devil n Dove Live Testing Guide — Build 193
 
 Use this document after deploying Build 193. It explains the owner tests that cannot be completed from a local zip because they require Cloudflare bindings, real provider accounts, real devices, or real business data.
 

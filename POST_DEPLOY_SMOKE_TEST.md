@@ -1,45 +1,41 @@
-# Post-Deploy Smoke Test — Build 199
+# Post-Deploy Smoke Test — Build 200
 
-
-**Automatic trigger paths:** dedicated review approval, direct product creation with Approved/Published status, and an editor save that changes a product from an unapproved review status to Approved/Published.
-
-**Source gate:** only a product with review status **approved** or **published** can create or refresh a Content Automation Studio package.
-Run after the Build 199 D1 migration and Pages deployment. Test on the deployed domain while signed in as an administrator. Record date, user, browser/device width, product/inventory test IDs, and any Cloudflare request/error IDs.
+Run after `database_build200_content_publication_release_board.sql` and the complete Pages deployment. Test on the deployed domain while signed in as an administrator. Record the date, user, browser/device width, test product/content-project/publication IDs, and Cloudflare request/error IDs.
 
 ## 1. Migration and safe start
 
-1. Confirm `schema_migration_ledger` contains `build_199_content_automation_studio`.
-2. Confirm `/admin/content-studio/` loads as an authenticated admin and `/api/admin/content-studio` returns JSON rather than a Pages 503.
-3. Confirm the page is noindex and ordinary public pages retain their one-H1 checks.
+1. Confirm `schema_migration_ledger` contains `build_200_content_publication_release_board`.
+2. Confirm `/admin/content-studio/` and `/admin/content-publications/` load as authenticated admin pages and their APIs return JSON rather than 503.
+3. Confirm `/api/workshop-journal` returns `{ ok: true }` with an empty list before any published release rather than an error.
+4. Confirm public pages retain one visible H1 each and new admin pages are `noindex,nofollow`.
 
-## 2. Automatic product-to-content package
+## 2. Content package and source-media integrity
 
-1. Choose a disposable product with at least three retained images; add a known test video/link when available.
-2. Approve the product through the existing product-review action.
-3. Confirm the response says a content package was prepared, then open `/admin/content-studio/`.
-4. Confirm one package appears for that product with exactly: 1 YouTube item, 3 Facebook items, 5 Instagram items, 5 TikTok items, gallery, GBP photo, SEO, blog, thumbnail, and caption deliverables.
-5. Re-approve or refresh the same product. Confirm it updates the same package rather than creating a second package.
+1. Use a disposable approved product with at least three retained images. Record product-image/media URLs and the product Featured Image URL first.
+2. Confirm the product has one Content Studio package and correct 1/3/5/5 deliverable plan.
+3. In Content Studio, set at least two real test image references to selected + `Public allowed`; choose one lead source. Approve the Blog Article and Website Gallery deliverables.
+4. Refresh the content package. Confirm original `product_images`, `media_assets`, R2 objects, feature URL, gallery order, and video URLs remain unchanged.
 
-## 3. Media integrity and review gate
+## 3. Public drafting and release gate
 
-1. Compare the product’s original `product_images` and/or `media_assets` URLs before and after creating/refeshing the package. No source URL, image row, R2 object, product featured image, or video link may disappear.
-2. In Content Studio, unselect one source media item, choose one lead source, and mark one item **Internal only**. Save each choice and reload.
-3. Confirm the original product gallery order and Featured Image URL did not change.
-4. Confirm the project manifest contains only source references/archive paths and no destructive-media instruction.
-5. Confirm content/media with unknown or needs-review status is not considered automatically published.
+1. Open `/admin/content-publications/`, select the content project, and select **Prepare / refresh website drafts**.
+2. Confirm exactly two release drafts appear: one Workshop Journal article and one website-gallery feature.
+3. Confirm the release checklist shows source approval, visible copy, public-cleared media, lead image/alt text, slug, and meta fields.
+4. Edit the Journal title/summary/body, enable **Keep this edited public copy**, then prepare/refresh again. Confirm edited copy remains intact.
+5. Try **Approve public copy** with a missing required item. Confirm it is blocked with an actionable error.
+6. Restore all required fields, approve each public draft, and confirm it is still not publicly returned by `/api/workshop-journal`.
+7. Select **Publish after approval**. Confirm the Journal record appears in `/api/workshop-journal?destination=workshop_journal` and the gallery record appears from `destination=website_gallery`.
+8. Visit `/workshop-journal/`, `/gallery/`, and `/workshop-journal/story/?story=<published-slug>` at about 360 px, 768 px, 1024 px, and desktop. Ensure cards, buttons, details/accordions, source links, and text stay readable and reachable.
+9. Select **Unpublish now** for one record. Confirm it disappears from the public API/UI and the source product/media still remain intact.
 
-## 4. Deliverables and Social Queue handoff
-
-1. Edit one caption and one blog or SEO item, save, then use **Refresh only unlocked factual copy**. The edited deliverable must remain unchanged.
-2. For one social deliverable, set **Approved** but leave Output URL blank. **Send approved file to social queue** must be blocked.
-3. Add a disposable real finished test-media URL, keep approval at Approved, then send it to the Social Post Queue.
-4. Confirm one matching review-queue row appears, still as draft/review-first—not automatically posted.
-5. Test Content Studio at approximately 360 px, 768 px, 1024 px, and desktop width. Archive cards, source controls, project controls, and deliverable fields must remain reachable.
-
-## 5. Existing Build 197/198 protections
+## 4. Existing Build 197–199 protections
 
 1. Edit an existing inventory item and confirm the original inventory ID updates instead of a duplicate record.
 2. Confirm a blank product Featured Image URL repairs from the first retained image without removing photos/videos.
-3. Confirm Shop cards remain image-first and the mobile menu opens compactly rather than displaying a long static list.
+3. Confirm Shop cards remain image-first and the mobile menu is a compact accordion/popup—not a long visible page list.
+4. Approve a product, then refresh Content Studio. Confirm only one content project exists and source files are reference-only.
+5. A social deliverable cannot enter the Social Queue until it is Approved and contains a real finished output URL.
 
-A locally successful package does not prove Cloudflare bindings, D1 data, R2 access, actual media rendering, OAuth/API publishing, Stripe, email, Search Console, Google Business Profile, or cross-device performance. Those need live evidence.
+## 5. Live-only evidence still required
+
+Local tests cannot prove Cloudflare D1/R2 bindings, remote public media resolution, real renderer behavior, OAuth publishing, Google Business Profile acceptance, Search Console indexing, Merchant Center eligibility, Stripe/email/webhook flows, assistive technology, or device performance. Keep all of those as separate live evidence tasks.

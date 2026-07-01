@@ -1,4 +1,8 @@
-# Images and Media Notes — Build 199
+# Retired reference — Build 200
+
+This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+
+## Images and Media Notes — Build 199
 
 Public visual placeholders remain placeholders until replaced by approved real media with accurate alt text, consent where applicable, compression, and desktop/mobile review.
 

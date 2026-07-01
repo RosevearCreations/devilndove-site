@@ -1,4 +1,8 @@
-# Build 196 — Product Correction, Raw Material Return, and Inventory Display Guide
+# Retired reference — Build 200
+
+This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+
+## Build 196 — Product Correction, Raw Material Return, and Inventory Display Guide
 
 Use this guide when a finished product was created by mistake, is unfinished, or needs to be removed before it has any customer/order history.
 

@@ -1,4 +1,8 @@
-# Build 195 Product Lifecycle, System Number, SKU, and Inventory Description Testing Guide
+# Retired reference — Build 200
+
+This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+
+## Build 195 Product Lifecycle, System Number, SKU, and Inventory Description Testing Guide
 
 Use this after deploying Build 195 and running `database_build195_product_lifecycle_sku_inventory_cards.sql`.
 

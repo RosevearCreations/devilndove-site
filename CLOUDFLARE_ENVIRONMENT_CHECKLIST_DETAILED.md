@@ -1,4 +1,8 @@
-# Cloudflare Environment Checklist — Devil n Dove
+# Retired reference — Build 200
+
+This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+
+## Cloudflare Environment Checklist — Devil n Dove
 
 _Last updated: Build 188/189 environment clarification after login route fix_
 

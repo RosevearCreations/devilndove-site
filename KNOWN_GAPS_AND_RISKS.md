@@ -1,4 +1,8 @@
-# Known Gaps and Risks — Build 199
+# Retired reference — Build 200
+
+This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+
+## Known Gaps and Risks — Build 199
 
 Read `PROJECT_STATUS_AND_ROADMAP.md` for current priorities. Active risks:
 

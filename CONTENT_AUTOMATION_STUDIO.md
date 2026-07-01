@@ -1,16 +1,12 @@
-# Content Automation Studio — Build 199
+# Content Automation Studio and Release Board — Build 200
 
-
-**Automatic trigger paths:** dedicated review approval, direct product creation with Approved/Published status, and an editor save that changes a product from an unapproved review status to Approved/Published.
-
-**Source gate:** only a product with review status **approved** or **published** can create or refresh a Content Automation Studio package.
-This specialist runbook describes the review-first system that turns one approved finished product into an organised content package. `PROJECT_STATUS_AND_ROADMAP.md` remains the business priority source, and `AI_HANDOFF.md` remains the technical/deployment source.
+This specialist runbook describes the review-first content system. The canonical business priority source is `PROJECT_STATUS_AND_ROADMAP.md`; the technical deployment source is `AI_HANDOFF.md`.
 
 ## Outcome target per completed project
 
-A package prepares exactly:
+Every approved finished product creates a reviewable package preparing:
 
-- 1 landscape YouTube long-form video plan
+- 1 landscape YouTube long-form plan
 - 3 Facebook video plans
 - 5 Instagram Reel plans
 - 5 TikTok plans
@@ -20,60 +16,55 @@ A package prepares exactly:
 - one blog draft
 - one thumbnail plan
 - captions and production directions for every social item
+- Build 200 release drafts: one Workshop Journal article and one website-gallery feature
 
-The same data structure supports future detailing-job sources. In Build 199, the live source is an approved Devil n Dove product; a future job record can use the same `content_projects` model through `source_type` and `source_id` without duplicating media architecture.
+The structure can later accept detailing-job source records. In Builds 199–200, live sources are Devil n Dove approved products.
 
-## What Build 199 actually automates
+## What is automated now
 
-1. On product **Approve**, `/api/admin/product-review-actions` prepares or refreshes the product's content package.
-2. It links every retained product image and media-asset URL into `content_project_media`. The archive is referential: no R2 source object is moved, replaced, deleted, or copied by this step.
-3. It assigns a transparent selection score using source order, existing image role, media type, and recorded merchandising/quality metadata. This is only a review aid.
-4. It creates deliverable briefs and factual template copy in `content_project_deliverables`.
-5. It keeps every deliverable in a review-first state. No website, social, Google Business Profile, video service, or external API post is triggered automatically.
-6. A finished output URL may be added after real rendering. A social deliverable can enter the existing Social Post Queue only after both **Approved** status and a real finished media URL are present.
+1. Product approval creates/refreshes one Content Studio source archive by reference only.
+2. Content Studio creates the factual, review-first deliverable plan and preserves explicitly edited/locked copy.
+3. Content Release Board prepares website gallery and Workshop Journal drafts from the approved package. It uses selected `public_allowed` source media only.
+4. The Board validates public release requirements, allows public-copy editing/locking, then requires separate **Approve public copy** and **Publish after approval** actions.
+5. Publishing exposes only the final published record through `/api/workshop-journal`; the public Journal/Gallery UI consumes that read-only endpoint.
+6. Unpublishing removes the item from public results immediately but retains all source records and audit history.
 
 ## What is deliberately not claimed complete
 
-- Build 199 does **not** render or edit actual MP4 files. Cloudflare Pages/Workers is not the appropriate place to execute a video encoder. `content_render_jobs` stores a provider-neutral render brief so an approved renderer can be connected later.
-- It does not upload directly to YouTube, Facebook, Instagram, TikTok, Google Business Profile, or the website gallery.
-- It does not declare a photo safe for public use. Existing public-use/consent status is imported as a starting signal, and the reviewer decides package use.
-- It does not invent performance claims, transformation claims, product availability, materials, or customer testimonials.
+- No encoded MP4/video file is rendered. `content_render_jobs` remains a provider-neutral/manual-export handoff.
+- No direct upload to YouTube, Facebook, Instagram, TikTok, Google Business Profile, or external website CMS occurs.
+- No consent is inferred. A source must be selected and `public_allowed`; project-level review labels do not replace media consent records.
+- No product media is copied, reordered, replaced, deleted, or made featured by Content Studio or the Release Board.
+- No manual metric is an automatic integration or confirmed sale.
+- Client-rendered public Journal story pages are an initial publication surface. Confirm real indexing/crawl results before scaling the number of content pages.
 
-## Admin workflow
+## Release Board workflow
 
-1. Complete the product record and retain all intended photos/videos.
-2. Approve the product. The content project is created automatically.
-3. Open `/admin/content-studio/`.
-4. Review the structured source-media archive. Set each item to **Public allowed**, **Needs review**, **Internal only**, or **Blocked**. Select the usable source media and one lead image/video.
-5. Review each output plan and edit captions, script directions, SEO copy, or the blog draft. Saving edited text locks it so a later factual refresh cannot overwrite it.
-6. Use the real video editor/render service to make the outputs from the prepared brief. Paste the finished file URL and thumbnail URL into the corresponding deliverable.
-7. Approve each deliverable. Send approved Facebook, Instagram, TikTok, or YouTube entries with a finished file URL to the existing Social Post Queue for platform-preview and final publishing review.
-8. Download the JSON project manifest for an external editor, an archive, or future rendering integration.
+1. Complete product facts, media, consent/public-use review, and Content Studio deliverables.
+2. Ensure the relevant Blog and Website Gallery deliverables are approved in Content Studio.
+3. Open `/admin/content-publications/`; choose the content project and select **Prepare / refresh website drafts**.
+4. Review the release checklist. Fix every blocker, especially source approval, factual visible content, public-cleared media, lead image alt text, stable slug, and meta copy.
+5. Edit any public text. Turn on the copy lock after substantial manual editing.
+6. Select **Approve public copy**. This does not make it public.
+7. Inspect the public path preview, then select **Publish after approval**.
+8. Visit `/workshop-journal/`, `/gallery/`, and the story path. Check public content, original product media, mobile rendering, and stop/unpublish behavior.
+9. Later, record a small manual metric snapshot with source/date. Prefer quality/enquiries/order evidence over raw views.
 
 ## Data model
 
-- `content_projects`: one source-linked content package per `source_type` + `source_id`.
-- `content_project_media`: immutable-reference archive rows and review selection state.
-- `content_project_deliverables`: the exact channel/output plans, copy, scripts, output URLs, approval state, and social queue link.
-- `content_render_jobs`: provider-neutral rendering handoff records; `manual_export` is the safe default.
-- `content_project_events`: audit-friendly project activity log.
+- `content_projects` — one content package per source.
+- `content_project_media` — non-destructive source archive rows and media review selection.
+- `content_project_deliverables` — channel plans, copy, render/output fields, and review state.
+- `content_render_jobs` — future rendering/export work.
+- `content_project_events` — package audit events.
+- `content_publications` — public release drafts and their title/copy/media references/status/metrics.
+- `content_publication_events` — publication preparation, edit, approval, publish, unpublish, and manual-metric audit entries.
 
-## Safety and media rules
+## SEO and visual rules
 
-- Original product and R2 media remains intact unless a separate explicit media-management action deletes it.
-- A "lead source" only controls this content package. It does not change the product's featured image.
-- Marking **Public allowed** in this studio means reviewed package suitability. It does not replace the underlying consent record or public-use annotation system.
-- Do not mark content as published in the studio until the actual destination and output have been manually verified.
-- For a customer vehicle/detailing job, customer identity, plate numbers, house numbers, private documents, location-sensitive details, and identifiable people must remain blocked or receive appropriate review/consent before public use.
-
-## Production format assumptions
-
-The package plans landscape 16:9 for the long-form YouTube output and vertical 9:16 for Facebook, Instagram Reels, and TikTok short-form plans. This aligns with current platform guidance but should be rechecked during every future external-rendering/platform integration because platform requirements change. YouTube currently categorizes square or vertical videos up to three minutes as Shorts; long-form plans therefore remain 16:9. Google also expects image URLs used in structured data to be relevant and crawlable, and public image text should be descriptive and accurate.
-
-## Next engineering steps after Build 199
-
-1. Attach a chosen hosted video-rendering provider through a secure job queue and a provider adapter; preserve manual export as a fallback.
-2. Add direct upload/publish adapters only after each platform's OAuth, account permissions, platform preview, and failure/retry behaviour have been tested live.
-3. Add actual static blog/article publishing and public gallery insertion after individual item approval.
-4. Add a detailing-job source adapter that links real-time job photos, clips, notes, client-visible permissions, and detailer-only notes to the same project model.
-5. Add accurate performance analytics by channel and deliverable after tracking/privacy disclosures are in place.
+- Public structured data must match visible content on the same page.
+- Use real, crawlable public media URLs only. Do not reference a raw internal, deleted, or consent-blocked object.
+- Lead image alt text should describe the actual finished item or shown workshop detail—not repeat a generic phrase across every story.
+- Keep articles useful. Add material/process/care/condition context only when the source record or visible media supports it.
+- Placeholder SVGs are decorative and never count as product proof, a GBP photo, or public-cleared content media.
+- For Google Business Profile, prepare images manually and review the platform’s current photo/video policies before uploading.
