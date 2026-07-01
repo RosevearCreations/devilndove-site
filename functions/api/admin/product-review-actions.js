@@ -1,5 +1,6 @@
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { requireAdminStepUp } from "../_lib/adminStepUp.js";
+import { createOrRefreshContentProjectForProduct } from "../_lib/contentAutomationStudio.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function nr(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -311,6 +312,24 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: `Failed to ${action.replace(/_/g, " ")} product right now.` }, 500);
   }
 
+  // Approval starts a source-linked Content Automation Studio package automatically.
+  // This preparation is non-destructive and review-first; it does not change public status.
+  let contentProject = null;
+  if (['approve', 'publish', 'publish_override'].includes(action)) {
+    try {
+      contentProject = await createOrRefreshContentProjectForProduct(db, productId, Number(adminUser.user_id || 0));
+    } catch (contentError) {
+      await captureRuntimeIncident(env, request, {
+        incident_scope: 'content_automation_studio',
+        incident_code: 'approval_content_package_prepare_failed',
+        severity: 'warning',
+        message: 'Product approval succeeded, but its content package could not be prepared automatically.',
+        related_user_id: Number(adminUser.user_id || 0),
+        details: { product_id: productId, action, error: String(contentError?.message || contentError || 'Unknown content package error') }
+      });
+    }
+  }
+
   await auditAdminAction(env, request, adminUser, {
     action_type: `product_${action}`,
     target_type: "product",
@@ -324,10 +343,22 @@ export async function onRequestPost(context) {
       note: note || null,
       ready_check_notes: readiness.ready_check_notes || null,
       publish_readiness_score: Number(readiness.publish_readiness_score || 0),
-      image_quality_score: Number(readiness.image_quality_score || 0)
+      image_quality_score: Number(readiness.image_quality_score || 0),
+      content_project_id: contentProject?.project?.content_project_id || null
     }
   });
 
   const updated = await db.prepare(`SELECT product_id, slug, name, review_status, status, is_ready_for_storefront, ready_check_notes, publish_readiness_score, image_quality_score, updated_at FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
-  return json({ ok: true, message: `Product ${action.replace("_", " ")} complete.`, product: updated });
+  return json({
+    ok: true,
+    message: `Product ${action.replace("_", " ")} complete.${contentProject ? ' Content package prepared for review.' : ''}`,
+    product: updated,
+    content_project: contentProject ? {
+      content_project_id: contentProject.project?.content_project_id || null,
+      content_project_key: contentProject.project?.content_project_key || null,
+      archived_count: Number(contentProject.archived_count || 0),
+      deliverables_created: Number(contentProject.deliverables_created || 0),
+      review_first: true
+    } : null
+  });
 }

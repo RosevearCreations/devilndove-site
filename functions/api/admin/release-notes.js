@@ -1,4 +1,50 @@
 // File: /functions/api/admin/release-notes.js
 import { getAdminUserFromRequest, jsonResponse } from '../_lib/adminAudit.js';
-const notes = { build_label:'Build 171 admin safety and release readiness', generated_at:'2026-06-05T00:00:00-04:00', source:'/data/site/release-notes.json', summary:["Binary-safe accountant evidence ZIP support with explicit R2 fetch flag.", "Dark-theme evidence review/upload admin page.", "Product QA direct editor focus links.", "Gift-card provider adapter logs and customer history cards.", "Marketplace export diff, replay, and whole-channel rollback controls.", "R2 derivative route health check panel.", "Recall approval gate before customer notification drafts.", "Local SEO bake JSON export and competitor phrase score history.", "Desktop Today filters and smoke-test dashboard badges.", "Release notes and safe deploy package admin pages."], changed_files:["DATABASE_SCHEMA_REFERENCE.md", "DEVELOPMENT_ROADMAP.md", "IMAGES.md", "KNOWN_GAPS_AND_RISKS.md", "README.md", "RELEASE_NOTES.md", "SANITY_HEALTH_CHECK.md", "admin/catalog-media/index.html", "admin/dark-theme-evidence/index.html", "admin/index.html", "admin/members/index.html", "admin/release-notes/index.html", "admin/safe-deploy-package/index.html", "admin/trust-blocks/index.html", "css/styles.css", "data/site/local-seo-bake-actions.json", "data/site/release-notes.json", "database_full_schema.sql", "database_schema.sql", "database_store_schema.sql", "database_upgrade_current_pass.sql", "functions/api/admin/accounting-close-workflow.js", "functions/api/admin/candle-soap-recalls.js", "functions/api/admin/dark-theme-evidence.js", "functions/api/admin/gift-card-delivery-send.js", "functions/api/admin/local-seo-bake-actions.js", "functions/api/admin/local-seo-competitor-phrases.js", "functions/api/admin/marketplace-export-preview.js", "functions/api/admin/post-deploy-smoke-tests.js", "functions/api/admin/product-publish-qa.js", "functions/api/admin/public-proof-candidates.js", "functions/api/admin/r2-derivative-settings.js", "functions/api/admin/release-notes.js", "functions/api/admin/safe-deploy-package.js", "functions/api/admin/today-tasks.js", "public/js/admin-accounting-close-workflow.js", "public/js/admin-candle-soap-specs.js", "public/js/admin-dark-theme-evidence.js", "public/js/admin-dashboard-smoke-badges.js", "public/js/admin-edit-product.js", "public/js/admin-gift-card-customer-history.js", "public/js/admin-gift-cards.js", "public/js/admin-local-seo-review.js", "public/js/admin-marketplace-export-preview.js", "public/js/admin-post-deploy-smoke-tests.js", "public/js/admin-products.js", "public/js/admin-public-proof-candidates.js", "public/js/admin-r2-derivative-settings.js", "public/js/admin-release-notes.js", "public/js/admin-safe-deploy-package.js", "public/js/admin-today-tasks.js", "public/js/admin-trust-block-placement-preview.js", "scripts/generate_release_notes.py"], d1_migrations:["dark_theme_screenshot_evidence columns", "gift_card_provider_send_logs", "r2_derivative_health_checks", "local_seo_competitor_phrase_score_history", "marketplace rollback/history columns", "public proof consent/promotion columns", "candle/soap recall send_review_status"] };
-export async function onRequestGet(context){const user=await getAdminUserFromRequest(context.request,context.env);if(!user)return jsonResponse({ok:false,error:'Unauthorized.'},401);return jsonResponse({ok:true,release_notes:notes},200,{'Cache-Control':'no-store'})}
+
+const notes = {
+  build_label: 'Build 199 — Content Automation Studio',
+  generated_at: '2026-06-30T00:00:00-04:00',
+  source: '/data/site/release-notes.json',
+  summary: [
+    'Added a review-first Content Automation Studio for approved finished products.',
+    'Approved product workflows now prepare a structured source-media archive and exactly 1 YouTube, 3 Facebook, 5 Instagram Reel, and 5 TikTok production plans, plus website gallery, Google Business Profile photo, SEO, blog, thumbnail, and caption deliverables.',
+    'Source media is reference-linked only: no product image, media asset, R2 object, or original video is moved, overwritten, or deleted by content-package preparation.',
+    'Added a responsive admin workspace with media selection/safety review, editable content plans, protected copy refresh, JSON manifest export, and a gated handoff to the existing social review queue.',
+    'Added direct-create and editor-transition triggers so an approved product gets the same content-package handoff regardless of where approval occurred.',
+    'Preserved Build 197/198 media-integrity, featured-image, inventory-editing, storefront-card, mobile-navigation, and canonical Markdown protections.'
+  ],
+  changed_files: [
+    'admin/content-studio/index.html',
+    'public/js/admin-content-studio.js',
+    'css/styles.css',
+    'functions/api/_lib/contentAutomationStudio.js',
+    'functions/api/admin/content-studio.js',
+    'functions/api/admin/create-product.js',
+    'functions/api/admin/update-product.js',
+    'functions/api/admin/product-review-actions.js',
+    'database_build199_content_automation_studio.sql',
+    'database_full_schema.sql',
+    'database_schema.sql',
+    'database_store_schema.sql',
+    'database_upgrade_current_pass.sql',
+    'CONTENT_AUTOMATION_STUDIO.md',
+    'AI_HANDOFF.md',
+    'PROJECT_STATUS_AND_ROADMAP.md',
+    'POST_DEPLOY_SMOKE_TEST.md',
+    'data/site/release-notes.json'
+  ],
+  d1_migrations: [
+    'content_projects',
+    'content_project_media',
+    'content_project_deliverables',
+    'content_render_jobs',
+    'content_project_events',
+    'Build 199 migration ledger entry'
+  ]
+};
+
+export async function onRequestGet(context) {
+  const user = await getAdminUserFromRequest(context.request, context.env);
+  if (!user) return jsonResponse({ ok: false, error: 'Unauthorized.' }, 401);
+  return jsonResponse({ ok: true, release_notes: notes }, 200, { 'Cache-Control': 'no-store' });
+}

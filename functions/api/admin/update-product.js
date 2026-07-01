@@ -1,4 +1,5 @@
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
+import { createOrRefreshContentProjectForProduct } from "../_lib/contentAutomationStudio.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -513,6 +514,28 @@ export async function onRequestPost(context) {
       .bind(product_id)
       .first();
 
+    // An editor-based approval must receive the same automation handoff as the
+    // dedicated review screen. Only the transition starts the package; later
+    // edits can be refreshed deliberately from Content Automation Studio.
+    let contentProject = null;
+    const previousReviewStatus = String(existingProduct?.review_status || '').trim().toLowerCase();
+    const isApprovedNow = ['approved', 'published'].includes(review_status);
+    const wasApproved = ['approved', 'published'].includes(previousReviewStatus);
+    if (isApprovedNow && !wasApproved) {
+      try {
+        contentProject = await createOrRefreshContentProjectForProduct(db, product_id, Number(authCheck.sessionUser?.user_id || 0));
+      } catch (contentError) {
+        await captureRuntimeIncident(env, request, {
+          incident_scope: 'content_automation_studio',
+          incident_code: 'editor_approval_content_package_prepare_failed',
+          severity: 'warning',
+          message: 'Product update succeeded, but the approval content package could not be prepared automatically.',
+          related_user_id: Number(authCheck.sessionUser?.user_id || 0),
+          details: { product_id, previous_review_status: previousReviewStatus, new_review_status: review_status, error: String(contentError?.message || contentError || 'Unknown content package error') }
+        }).catch(() => null);
+      }
+    }
+
     const updatedImagesResult = { results: syncedImages };
 
     await db.prepare(`
@@ -542,7 +565,9 @@ export async function onRequestPost(context) {
         sale_channel,
         has_external_listing: !!external_listing_url,
         color_names,
-        media_sync_mode: "preserve_existing"
+        media_sync_mode: "preserve_existing",
+        content_project_id: contentProject?.project?.content_project_id || null,
+        content_package_prepared_on_approval: Boolean(contentProject)
       }
     });
 
@@ -552,7 +577,13 @@ export async function onRequestPost(context) {
       product: updatedProduct,
       images: updatedImagesResult.results || [],
       media_sync_mode: "preserve_existing",
-      media_notice: "Existing product media was preserved. Use an explicit media delete control to remove a file."
+      media_notice: "Existing product media was preserved. Use an explicit media delete control to remove a file.",
+      content_project: contentProject ? {
+        content_project_id: contentProject.project?.content_project_id || null,
+        content_project_key: contentProject.project?.content_project_key || null,
+        archived_count: Number(contentProject.archived_count || 0),
+        deliverables_created: Number(contentProject.deliverables_created || 0)
+      } : null
     });
   } catch (error) {
     await captureRuntimeIncident(env, request, {
