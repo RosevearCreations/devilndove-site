@@ -67,6 +67,7 @@
     { href: "/cart/index.html", nav: "/cart/", label: "Cart", desktop: true, group: "Shop & Browse" },
     { href: "/gallery/index.html", nav: "/gallery/", label: "Art", desktop: true, group: "Workshop" },
     { href: "/creations/index.html", nav: "/creations/", label: "Creations", desktop: true, group: "Workshop" },
+    { href: "/workshop-journal/index.html", nav: "/workshop-journal/", label: "Workshop Journal", desktop: false, group: "Workshop" },
     { href: "/tools/index.html", nav: "/tools/", label: "Tools", desktop: true, group: "Workshop" },
     { href: "/supplies/index.html", nav: "/supplies/", label: "Supplies", desktop: true, group: "Workshop" },
     { href: "/movies/index.html", nav: "/movies/", label: "Movies", desktop: true, group: "Workshop" },
@@ -165,6 +166,7 @@
             <a href="/pickup/index.html">Pickup</a>
             <a href="/gallery/index.html">Gallery</a>
             <a href="/creations/index.html">Creations</a>
+            <a href="/workshop-journal/index.html">Workshop Journal</a>
             <a href="/tools/index.html">Tools</a>
             <a href="/supplies/index.html">Supplies</a>
             <a href="/movies/index.html">Movies</a>
