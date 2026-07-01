@@ -1,5 +1,6 @@
 import { allocateNextProductNumber, ensureProductNumberSequenceAtLeast, formatDefaultSku, getNextProductNumber } from './_product-numbering.js';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
+import { createOrRefreshContentProjectForProduct } from "../_lib/contentAutomationStudio.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -508,6 +509,24 @@ export async function onRequestPost(context) {
 
     const createdProduct = await safeFirst(db, `SELECT * FROM products WHERE product_id = ? LIMIT 1`, [newProductId]);
 
+    // Supports the direct “create and approve” workflow without making the
+    // operator revisit the product solely to start the content package.
+    let contentProject = null;
+    if (['approved', 'published'].includes(review_status)) {
+      try {
+        contentProject = await createOrRefreshContentProjectForProduct(db, newProductId, Number(authCheck.sessionUser?.user_id || 0));
+      } catch (contentError) {
+        await captureRuntimeIncident(env, request, {
+          incident_scope: 'content_automation_studio',
+          incident_code: 'create_approved_content_package_prepare_failed',
+          severity: 'warning',
+          message: 'Approved product was created, but its content package could not be prepared automatically.',
+          related_user_id: Number(authCheck.sessionUser?.user_id || 0),
+          details: { product_id: newProductId, review_status, error: String(contentError?.message || contentError || 'Unknown content package error') }
+        }).catch(() => null);
+      }
+    }
+
     await auditAdminAction(env, request, authCheck.sessionUser, {
       action_type: "product_create",
       target_type: "product",
@@ -523,7 +542,9 @@ export async function onRequestPost(context) {
         has_external_listing: !!external_listing_url,
         color_names,
         image_url_count: image_urls.length,
-        draft_mode_relaxed: status === "draft"
+        draft_mode_relaxed: status === "draft",
+        content_project_id: contentProject?.project?.content_project_id || null,
+        content_package_prepared_on_approval: Boolean(contentProject)
       }
     });
 
@@ -534,7 +555,13 @@ export async function onRequestPost(context) {
         product: createdProduct || { product_id: newProductId, slug, name, status, review_status },
         images: createdImages || [],
         readiness,
-        draft_mode_relaxed: status === "draft"
+        draft_mode_relaxed: status === "draft",
+        content_project: contentProject ? {
+          content_project_id: contentProject.project?.content_project_id || null,
+          content_project_key: contentProject.project?.content_project_key || null,
+          archived_count: Number(contentProject.archived_count || 0),
+          deliverables_created: Number(contentProject.deliverables_created || 0)
+        } : null
       },
       201
     );
