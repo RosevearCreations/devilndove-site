@@ -1,22 +1,34 @@
-# Sanity Health Check — Build 199
+# Sanity Health Check — Build 200
 
-## Local package validation scope
+## Local static/implementation status
 
-- Build 199 includes a review-first Content Automation Studio rather than a claim of fully automatic video production.
-- Product approval can prepare one source-linked content package without blocking the underlying product approval if content preparation encounters an error.
-- Archive rows reference product/R2 source media; the code contains no automatic media-delete, move, replace, or feature-image rewrite path.
-- The deliverable generator creates exact target counts: 1 YouTube long-form, 3 Facebook, 5 Instagram Reels, 5 TikToks, plus gallery, GBP photo, SEO, blog, thumbnail, and caption outputs.
-- Content outputs are controlled by explicit status/approval values. Social Queue handoff requires Approved + actual output URL.
-- Deliberate copy edits set a copy lock so later factual refreshes do not overwrite reviewed writing.
-- New page/API use the existing authenticated admin wrapper and responsive CSS. Admin-only page metadata excludes it from indexing.
-- The canonical direction remains `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; `CONTENT_AUTOMATION_STUDIO.md` is the specialist runbook.
+- Build 200 adds a review-first Content Release Board and public Workshop Journal/Gallery output path on top of the Build 199 source-linked content package.
+- The publication layer stores only public copy/settings and references to selected public-allowed source media. It has no media deletion, R2 move, automatic social posting, or video encoding path.
+- The public API returns published content only and provides an empty safe fallback before the Build 200 migration is applied.
+- The Workshop Journal and Gallery use progressive enhancement: original static content remains visible when D1/public content is unavailable.
+- New mobile CSS keeps release controls, status chips, publication previews, checklists, editors, and metric forms reachable at phone width.
 
-## Live-only validation still required
+## Local validation completed
 
-- Back up and migrate D1 through Build 199.
-- Deploy Pages Functions/static files and run `POST_DEPLOY_SMOKE_TEST.md`.
-- Verify original product/R2 media persists after approval/package refresh against actual deployed data.
-- Test real external video render service, final output URLs, social OAuth/publishing, YouTube upload, GBP upload, and website/blog publication separately before calling any platform automation complete.
-- Recheck real Cloudflare/R2/Stripe/email/Search Console/GBP integrations with credentials and owner evidence.
+- 455 JavaScript files passed `node --check`.
+- 48 public HTML files passed the one-H1 check.
+- The stylesheet brace count is balanced (1,472 opening and 1,472 closing braces).
+- Build 199 followed by Build 200 ran twice successfully in a fresh SQLite migration test, leaving one ledger row for each release.
+- A seeded release-flow test confirmed a published gallery record resolves its related Workshop Journal path, and source-media rows stay unchanged after unpublish or deletion of a publication record.
+- Service-worker shell cache is now `devilndove-shell-v5`.
 
-A completed local package is not evidence that a deployed binding, secret, database migration, external renderer, or third-party publisher is working.
+## Required deployment proof
+
+- Run Build 200 migration and record the ledger row.
+- Prove product source media has not changed before/after preparing/releasing a publication.
+- Prove draft, approve, publish, public visibility, and unpublish behaviors on one disposable product.
+- Inspect public image URLs, alt text, source/product link, canonical path, Article/ImageGallery JSON-LD, page H1, and noindex admin pages on the deployed domain.
+- Inspect Cloudflare Function logs for Content Studio, Content Release Board, and public Workshop Journal endpoints.
+
+## Explicit gaps
+
+- No actual MP4 rendering/provider execution yet.
+- No OAuth direct social/YouTube/GBP publishing.
+- No server-rendered per-story HTML or automatic sitemap submission yet; verify Search Console before expecting scalable article indexing.
+- No remote media dimension/file-validation at publication time; final GBP and platform media checks remain manual.
+- No claim that manual metrics are automatic analytics or sales data.
