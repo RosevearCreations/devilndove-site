@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 200",
+    "date": "2026-06-30",
+    "title": "Review-first public release board for Workshop Journal and website gallery",
+    "summary": "Approved finished-product Content Studio packages can now prepare two separately reviewed website drafts: a Workshop Journal story and an image-led gallery feature. Release requires source-deliverable approval, factual visible copy, selected public-allowed media, descriptive lead-image text, stable paths, and SEO fields. Publishing and unpublishing are deliberate, source media stays untouched, and optional metrics remain manual and explainable."
+  },
+  {
     "build": "Build 199",
     "date": "2026-06-30",
     "title": "Review-first Content Automation Studio and protected source-media archive",
