@@ -1,4 +1,4 @@
-const CACHE_NAME = 'devilndove-shell-v3';
+const CACHE_NAME = 'devilndove-shell-v4';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

@@ -1,8 +1,5 @@
-# Devil n Dove — Build 195
+# Devil n Dove — Build 199
 
-Build 195 adds guarded unused-product deletion, permanent unique System # allocation, automatic `DND-xxxxx` SKU defaults, and readable tools/consumables descriptions beneath item images. See `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current guidance.
+Build 199 adds the review-first **Content Automation Studio**: approving a finished product creates one source-linked archive and a complete content package for YouTube, Facebook, Instagram Reels, TikTok, gallery/GBP assets, SEO, blog, thumbnails, captions, and human review. It does not delete original media, auto-publish, or claim to render MP4 files without a connected renderer.
 
-
-## Build 196 note
-
-Use `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` to test visible product correction, reservation release, physical raw-supply return, archive fallback, and inventory name-under-image layout after deployment.
+Read `PROJECT_STATUS_AND_ROADMAP.md`, `AI_HANDOFF.md`, and `CONTENT_AUTOMATION_STUDIO.md` for current direction and deployment/testing instructions.

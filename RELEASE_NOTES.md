@@ -1,3 +1,26 @@
+# Build 199
+
+## Summary
+
+- Added the review-first Content Automation Studio. Approving a finished product now prepares a source-linked archive and 1 YouTube, 3 Facebook, 5 Instagram Reel, 5 TikTok, gallery, GBP, SEO, blog, thumbnail, and caption deliverables.
+- Added responsive `/admin/content-studio/`, authenticated Content Studio APIs, source-media safety/selection controls, factual-template copy with edit locks, output/thumbnail fields, JSON manifest export, and safe handoff of approved finished social assets to the existing Social Post Queue.
+- Added `database_build199_content_automation_studio.sql`, Build 199 schema documentation, full smoke test coverage, and automatic non-blocking package preparation on product approval/publish.
+- The build does not auto-publish, move/delete R2 media, or render real MP4s without a later connected renderer/provider.
+
+## Primary changed files
+
+- `functions/api/_lib/contentAutomationStudio.js`
+- `functions/api/admin/content-studio.js`
+- `functions/api/admin/product-review-actions.js`
+- `admin/content-studio/index.html`
+- `public/js/admin-content-studio.js`
+- `css/styles.css`
+- `database_build199_content_automation_studio.sql`
+- `database_full_schema.sql`
+- `CONTENT_AUTOMATION_STUDIO.md`, `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `POST_DEPLOY_SMOKE_TEST.md`, `SANITY_HEALTH_CHECK.md`
+
+---
+
 # Build 198
 
 ## Summary

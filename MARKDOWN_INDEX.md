@@ -1,23 +1,21 @@
-# Devil n Dove Markdown Index — Build 198
+# Devil n Dove Markdown Index — Build 199
 
 ## Canonical first-read files
 
 1. `PROJECT_STATUS_AND_ROADMAP.md` — business priorities, completed work, limits, test order, and release opinion.
 2. `AI_HANDOFF.md` — technical state, migration order, operational rules, and next-AI continuation notes.
 
-These two files define the current project direction. Update them each build.
+These two files define current project direction. Update them each build.
 
-## Active runbooks and references
+## Active specialist runbooks and references
 
-- `POST_DEPLOY_SMOKE_TEST.md` — deployment checks for Build 198: inventory PATCH editing, first-image recovery, approval media preservation, and earlier 503 safeguards.
+- `CONTENT_AUTOMATION_STUDIO.md` — Build 199 source archive, content package, review, output, and future renderer/publisher integration rules.
+- `POST_DEPLOY_SMOKE_TEST.md` — Build 199 deployment checks, including automatic approved-product package creation and media integrity.
 - `SANITY_HEALTH_CHECK.md` — local validation evidence and live-only limits.
 - `LIVE_TESTING_GUIDE.md` — R2, Stripe, email, Search Console, GBP, and real-device checks.
 - `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — bindings, encrypted variables, and safe handling of secrets.
 - `DATABASE_SCHEMA_REFERENCE.md` — schema/migration orientation; `database_full_schema.sql` is the fresh database source.
-- `BUILD194_TESTING_GUIDE.md` — storefront, product facts, media roles, Workshop Journal, and SEO checks.
-- `BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md` — system number, SKU, archive/delete, and inventory rules.
-- `BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md` — correction preview, reservation release, physical return, and product-deletion limits.
-- `IMAGES.md` — consent, image roles, alt text, visual QA, and placeholders.
+- `IMAGES.md` — consent, image roles, content archive safety, alt text, visual QA, and placeholders.
 - `LOCAL_SEO_PLAYBOOK.md` — local-search evidence process.
 - `COMPETITIVE.md` — market/reference research.
 - `RELEASE_NOTES.md` — release history.
@@ -30,14 +28,10 @@ These two files define the current project direction. Update them each build.
 
 ## Consolidation rule
 
-Do not delete useful context merely to reduce file count. Keep these two canonical files current, preserve narrow specialist runbooks, and turn superseded general planning files into pointers or archive entries. Avoid creating a new general roadmap markdown.
+Do not delete useful context merely to reduce file count. Keep the canonical pair current, preserve narrow specialist runbooks, and turn superseded general planning files into pointers or archive entries. Avoid creating a new general roadmap Markdown.
 
-## Build 198 additions
+## Build 199 additions
 
-- `database_build198_inventory_editor_featured_media_integrity.sql` — safe rerunnable D1 migration that fills only blank featured image fields from retained first media and adds a supporting index.
-- Build 198 details are consolidated in the canonical pair, smoke test, sanity check, and release notes; specialist Markdown remains retained.
-
-## Build 197 additions
-
-- `database_build197_application_resilience_media_catalog.sql` — safe rerunnable D1 migration for media audit/indexes and Build 197 ledger.
-- Build 197 details are consolidated into the canonical pair, smoke test, sanity check, and release notes instead of a new permanent general-purpose guide.
+- `database_build199_content_automation_studio.sql` — safe rerunnable Content Automation Studio migration.
+- `CONTENT_AUTOMATION_STUDIO.md` — the dedicated operating/implementation guide.
+- Build 199 details are consolidated in the canonical pair, smoke test, sanity check, release notes, and schema reference.

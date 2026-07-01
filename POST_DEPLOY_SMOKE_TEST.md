@@ -1,34 +1,45 @@
-# Post-Deploy Smoke Test — Build 198
+# Post-Deploy Smoke Test — Build 199
 
-Run after the Build 198 D1 migration and Pages deployment. Test on the deployed domain while signed in as an administrator. Record date, user, browser/device width, product/inventory test IDs, and any Cloudflare request/error IDs.
 
-## 1. Migration and admin resilience
+**Automatic trigger paths:** dedicated review approval, direct product creation with Approved/Published status, and an editor save that changes a product from an unapproved review status to Approved/Published.
 
-1. Confirm `schema_migration_ledger` contains `build_198_inventory_editor_featured_media_integrity`.
-2. Open `/admin/operations/`. The earlier helper calls (`community-content`, `live-readiness-playbook`, `custom-requests`, and `social-post-queue`) must return JSON, not Cloudflare 503. A signed-out 401 is normal; a `degraded: true` response means investigate optional data/schema rather than treating the screen as broken.
+**Source gate:** only a product with review status **approved** or **published** can create or refresh a Content Automation Studio package.
+Run after the Build 199 D1 migration and Pages deployment. Test on the deployed domain while signed in as an administrator. Record date, user, browser/device width, product/inventory test IDs, and any Cloudflare request/error IDs.
 
-## 2. Full inventory editing — desktop and phone
+## 1. Migration and safe start
 
-1. Open `/admin/inventory-operations/` and select a disposable existing item.
-2. Use **Edit full record** in the first item column. At phone width, this button must remain available even though the far-right action column is hidden.
-3. Change item description, on-hand quantity, unit cost, supplier, reorder rules, and image URL. Press **Save Changes to This Item**.
-4. Reload/search the list and confirm the same `site_item_inventory_id` changed. There must be no duplicate inventory row.
-5. Add one disposable item. After the first save, confirm it remains in full edit mode. Change quantity/cost and save again; confirm it remains one record.
-6. Confirm source type and external key are stable for an existing record, protecting linked finished-product resource history.
+1. Confirm `schema_migration_ledger` contains `build_199_content_automation_studio`.
+2. Confirm `/admin/content-studio/` loads as an authenticated admin and `/api/admin/content-studio` returns JSON rather than a Pages 503.
+3. Confirm the page is noindex and ordinary public pages retain their one-H1 checks.
 
-## 3. Featured image and preserved media
+## 2. Automatic product-to-content package
 
-1. Pick a product with at least three retained image rows. Note its current image URLs and order.
-2. In Catalog, leave the Featured Image URL blank and save without deleting media. Reload the product: the first retained image must now populate Featured Image URL.
-3. Explicitly set a different existing gallery image as featured, save, and reload. It must be first in the returned gallery order and match `products.featured_image_url`.
-4. Approve the product. Reload it and verify the featured field is still present and every photo/video/link remains.
-5. Use the dedicated media editor to remove exactly one disposable image row and save. Reload and confirm only that selected row disappeared. Confirm no R2 source object was automatically deleted.
+1. Choose a disposable product with at least three retained images; add a known test video/link when available.
+2. Approve the product through the existing product-review action.
+3. Confirm the response says a content package was prepared, then open `/admin/content-studio/`.
+4. Confirm one package appears for that product with exactly: 1 YouTube item, 3 Facebook items, 5 Instagram items, 5 TikTok items, gallery, GBP photo, SEO, blog, thumbnail, and caption deliverables.
+5. Re-approve or refresh the same product. Confirm it updates the same package rather than creating a second package.
 
-## 4. Existing Build 197 protections
+## 3. Media integrity and review gate
 
-1. Change Additional Colours to `Blue, Green`, save, and reload.
-2. Try a duplicate SKU/slug on a disposable draft; the editor should show a resolvable conflict without continuously retrying.
-3. Check Shop at approximately 360 px, 768 px, 1024 px, and desktop width. Product facts remain below the image and phone navigation opens as a compact accordion/popup.
-4. For one public product, confirm one visible H1, truthful visible price/availability, canonical URL, useful title/meta description, and meaningful lead-image alt text.
+1. Compare the product’s original `product_images` and/or `media_assets` URLs before and after creating/refeshing the package. No source URL, image row, R2 object, product featured image, or video link may disappear.
+2. In Content Studio, unselect one source media item, choose one lead source, and mark one item **Internal only**. Save each choice and reload.
+3. Confirm the original product gallery order and Featured Image URL did not change.
+4. Confirm the project manifest contains only source references/archive paths and no destructive-media instruction.
+5. Confirm content/media with unknown or needs-review status is not considered automatically published.
 
-A locally successful package is not proof of Cloudflare bindings, D1 data, R2 access, Stripe, email, Search Console, or Google Business Profile behaviour. Those need live evidence.
+## 4. Deliverables and Social Queue handoff
+
+1. Edit one caption and one blog or SEO item, save, then use **Refresh only unlocked factual copy**. The edited deliverable must remain unchanged.
+2. For one social deliverable, set **Approved** but leave Output URL blank. **Send approved file to social queue** must be blocked.
+3. Add a disposable real finished test-media URL, keep approval at Approved, then send it to the Social Post Queue.
+4. Confirm one matching review-queue row appears, still as draft/review-first—not automatically posted.
+5. Test Content Studio at approximately 360 px, 768 px, 1024 px, and desktop width. Archive cards, source controls, project controls, and deliverable fields must remain reachable.
+
+## 5. Existing Build 197/198 protections
+
+1. Edit an existing inventory item and confirm the original inventory ID updates instead of a duplicate record.
+2. Confirm a blank product Featured Image URL repairs from the first retained image without removing photos/videos.
+3. Confirm Shop cards remain image-first and the mobile menu opens compactly rather than displaying a long static list.
+
+A locally successful package does not prove Cloudflare bindings, D1 data, R2 access, actual media rendering, OAuth/API publishing, Stripe, email, Search Console, Google Business Profile, or cross-device performance. Those need live evidence.

@@ -1,14 +1,19 @@
-# Database Schema Reference — Build 196
+# Database Schema Reference — Build 199
 
-Build 196 adds `product_material_return_audit`. Apply `database_build196_product_correction_material_returns.sql` after Build 195.
+Use `database_full_schema.sql` for a fresh database. Use numbered build migrations in order for an existing deployed database. The current build migration is:
 
-- `catalog_product_number_sequence` keeps internal product System # values permanent and non-reusable.
-- `product_deletion_audit` records factual deleted-product information.
-- `product_material_return_audit` records every reviewed reservation release or raw-supply on-hand return chosen during an unused-product correction/delete.
-- `site_inventory_item_descriptions` remains for legacy data compatibility but is no longer displayed below raw inventory/tool images or overwritten by normal edits.
+```text
+database_build199_content_automation_studio.sql
+```
 
-Use `database_full_schema.sql` for a fresh database. Use the numbered build migration files in order for an existing deployed database.
+Apply Build 199 after Builds 196, 197, and 198. The migration is additive and safe to rerun.
 
-## Build 197
+## Content Automation Studio tables
 
-Apply `database_build197_application_resilience_media_catalog.sql` after Build 196. It adds `product_media_change_audit` and query indexes for product-image/annotation reads. The full fresh schema includes the same additions. Normal product/media saves preserve existing records; only explicit media removal should delete product-image rows.
+- `content_projects` — one review-first content package per source (`product` now; a future detailing job can use another source type).
+- `content_project_media` — source-linked archive records, selection score, reviewer safety state, and product/media references. These rows do not delete or relocate source media.
+- `content_project_deliverables` — exact platform/output plans, copy, scripts, output URLs, review states, and Social Queue link.
+- `content_render_jobs` — provider-neutral rendering/export handoffs. Build 199 uses `manual_export`; it does not encode MP4 files.
+- `content_project_events` — audit-friendly package activity.
+
+The established product-media integrity rules remain: ordinary product saves preserve media; only explicit media deletion can remove a product-image row; R2 source deletion remains a separate explicit asset-library action.
