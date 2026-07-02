@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<section class="content-studio-detail">
       <div class="content-studio-detail-header card">
         <div><p class="eyebrow">${esc(project.content_project_key || '')}</p><h2>${esc(project.project_title || 'Content package')}</h2><p class="small">Source references are archived without moving or deleting the original R2/product files. Every public asset remains review-first.</p></div>
-        <div class="content-studio-toolbar"><button class="btn" type="button" id="refreshContentArchive">Refresh archive and preserve edits</button><button class="btn" type="button" id="refreshContentCopy">Refresh only unlocked factual copy</button><button class="btn secondary" type="button" id="downloadContentManifest">Download project manifest</button></div>
+        <div class="content-studio-toolbar"><a class="btn secondary" href="/admin/creative-assets/?content_project_id=${esc(project.content_project_id)}">Open CAIP</a><button class="btn" type="button" id="refreshContentArchive">Refresh archive and preserve edits</button><button class="btn" type="button" id="refreshContentCopy">Refresh only unlocked factual copy</button><button class="btn secondary" type="button" id="downloadContentManifest">Download project manifest</button></div>
       </div>
       <div class="content-metric-grid">${deliverableSummary(detail)}</div>
       <section class="card content-project-settings">
