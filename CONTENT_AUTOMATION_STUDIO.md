@@ -1,70 +1,52 @@
-# Content Automation Studio and Release Board — Build 200
+# Content Automation Studio — Build 201 Operating Guide
 
-This specialist runbook describes the review-first content system. The canonical business priority source is `PROJECT_STATUS_AND_ROADMAP.md`; the technical deployment source is `AI_HANDOFF.md`.
+Content Automation Studio (Build 199) remains the source-linked package and deliverable planner. Content Release Board (Build 200) remains the public-release authority. Creative Asset Intelligence Platform (Build 201) is the governed intelligence/evidence layer between them.
 
-## Outcome target per completed project
+```text
+Approved Product
+→ Content Automation Studio package
+→ CAIP asset/evidence/story project
+→ Content Release Board draft
+→ explicit approval and publish action
+```
 
-Every approved finished product creates a reviewable package preparing:
+## Which system owns which decision
 
-- 1 landscape YouTube long-form plan
-- 3 Facebook video plans
-- 5 Instagram Reel plans
-- 5 TikTok plans
-- completed-image and website-gallery selections
-- a Google Business Profile photo plan
-- SEO page assets
-- one blog draft
-- one thumbnail plan
-- captions and production directions for every social item
-- Build 200 release drafts: one Workshop Journal article and one website-gallery feature
+| System | Owns | Must not do |
+|---|---|---|
+| Product/catalog | Product fields, listing facts, product images, review state | Treat generated copy as source truth |
+| Content Studio | Source-linked archive, media selection/review, deliverable plans | Publish externally or delete source media |
+| CAIP | Canonical asset references, rights inheritance, evidence, story segments, recommendations, policy signals, manifest | Copy/move/delete source media, infer consent, publish, render, invent claims |
+| Content Release Board | Workshop Journal/gallery public draft, public release checks, publish/unpublish | Alter source asset ownership or bypass consent |
+| Social Queue | Approved finished deliverable scheduling/queueing | Claim an unpublished/unfinished render exists |
 
-The structure can later accept detailing-job source records. In Builds 199–200, live sources are Devil n Dove approved products.
+## CAIP integration
 
-## What is automated now
+When a finished product is created as Approved/Published, moved to Approved/Published, or approved in the review screen, Content Studio prepares its one package and CAIP then mirrors it into one `creative_project`. Content Studio create/refresh and source-media review also request a CAIP refresh.
 
-1. Product approval creates/refreshes one Content Studio source archive by reference only.
-2. Content Studio creates the factual, review-first deliverable plan and preserves explicitly edited/locked copy.
-3. Content Release Board prepares website gallery and Workshop Journal drafts from the approved package. It uses selected `public_allowed` source media only.
-4. The Board validates public release requirements, allows public-copy editing/locking, then requires separate **Approve public copy** and **Publish after approval** actions.
-5. Publishing exposes only the final published record through `/api/workshop-journal`; the public Journal/Gallery UI consumes that read-only endpoint.
-6. Unpublishing removes the item from public results immediately but retains all source records and audit history.
+A CAIP error is non-blocking. It is recorded as a warning and cannot undo product approval or remove a Content Studio package. From `/admin/creative-assets/`, choose the matching Content Studio project and use **Sync / refresh CAIP** to retry.
 
-## What is deliberately not claimed complete
+## CAIP operating rules
 
-- No encoded MP4/video file is rendered. `content_render_jobs` remains a provider-neutral/manual-export handoff.
-- No direct upload to YouTube, Facebook, Instagram, TikTok, Google Business Profile, or external website CMS occurs.
-- No consent is inferred. A source must be selected and `public_allowed`; project-level review labels do not replace media consent records.
-- No product media is copied, reordered, replaced, deleted, or made featured by Content Studio or the Release Board.
-- No manual metric is an automatic integration or confirmed sale.
-- Client-rendered public Journal story pages are an initial publication surface. Confirm real indexing/crawl results before scaling the number of content pages.
+- CAIP carries a source URL/ID/fingerprint and logical archive path. It does not create a new copy of the original photo/video.
+- An upstream `public_allowed` source may be considered for public-review candidates; a non-public source may not be elevated to public by CAIP.
+- Score components are deterministic metadata review aids. They are not image recognition, legal clearance, “best photo” certification, accessibility text, or a claim about what occurred.
+- Evidence records preserve product/Content Studio source facts. Story segments can be edited and locked, but public copy still passes downstream Content Release Board checks.
+- CAIP internal approval means the project has been reviewed for its own internal decision. It is not publication approval and does not send anything to a social platform.
 
-## Release Board workflow
+## Routine workflow
 
-1. Complete product facts, media, consent/public-use review, and Content Studio deliverables.
-2. Ensure the relevant Blog and Website Gallery deliverables are approved in Content Studio.
-3. Open `/admin/content-publications/`; choose the content project and select **Prepare / refresh website drafts**.
-4. Review the release checklist. Fix every blocker, especially source approval, factual visible content, public-cleared media, lead image alt text, stable slug, and meta copy.
-5. Edit any public text. Turn on the copy lock after substantial manual editing.
-6. Select **Approve public copy**. This does not make it public.
-7. Inspect the public path preview, then select **Publish after approval**.
-8. Visit `/workshop-journal/`, `/gallery/`, and the story path. Check public content, original product media, mobile rendering, and stop/unpublish behavior.
-9. Later, record a small manual metric snapshot with source/date. Prefer quality/enquiries/order evidence over raw views.
+1. Finish and approve the product.
+2. In Content Studio, review source media, mark only suitable assets as selected/public allowed, and approve the relevant deliverable planning records.
+3. Open CAIP, select the Content Studio package, and review asset source/rights/score reasons.
+4. Add/tighten rights and review notes; never turn a non-public source into a public asset without actual upstream consent.
+5. Review evidence facts and story spine. Correct/lock wording as needed.
+6. Review reusable hero/gallery/thumbnail/short-video candidates.
+7. Export the CAIP manifest if an approved future editor/renderer needs a controlled input package.
+8. Continue to Content Release Board for public Website/Workshop Journal draft preparation and its separate approval/publish gate.
 
-## Data model
+## Honest current boundary
 
-- `content_projects` — one content package per source.
-- `content_project_media` — non-destructive source archive rows and media review selection.
-- `content_project_deliverables` — channel plans, copy, render/output fields, and review state.
-- `content_render_jobs` — future rendering/export work.
-- `content_project_events` — package audit events.
-- `content_publications` — public release drafts and their title/copy/media references/status/metrics.
-- `content_publication_events` — publication preparation, edit, approval, publish, unpublish, and manual-metric audit entries.
+The system does not yet render MP4s, generate thumbnail files, use an AI model, transcribe recordings, upload to platforms, retrieve metrics, create derivatives, or use signed private R2 transfers. Those future adapters must follow the CAIP contract and be separately verified.
 
-## SEO and visual rules
-
-- Public structured data must match visible content on the same page.
-- Use real, crawlable public media URLs only. Do not reference a raw internal, deleted, or consent-blocked object.
-- Lead image alt text should describe the actual finished item or shown workshop detail—not repeat a generic phrase across every story.
-- Keep articles useful. Add material/process/care/condition context only when the source record or visible media supports it.
-- Placeholder SVGs are decorative and never count as product proof, a GBP photo, or public-cleared content media.
-- For Google Business Profile, prepare images manually and review the platform’s current photo/video policies before uploading.
+For detailed CAIP architecture, source controls, storage, governance, provider rules, APIs, operations, migration safety, and acceptance criteria, use `docs/creative-asset-intelligence-platform/README.md`.
