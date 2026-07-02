@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 201",
+    "date": "2026-07-01",
+    "title": "Creative Asset Intelligence Platform: governed asset, evidence, and story control layer",
+    "summary": "Added a reference-only CAIP project for each Content Studio package, source-asset registry, inherited rights controls, explainable metadata review aids, evidence/story records, reuse candidates, policy/run/event audit trail, internal review, and a manifest export. CAIP neither changes original media nor publishes anything automatically."
+  },
+  {
     "build": "Build 200",
     "date": "2026-06-30",
     "title": "Review-first public release board for Workshop Journal and website gallery",

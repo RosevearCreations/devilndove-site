@@ -1,0 +1,37 @@
+{
+  "build": "Build 201",
+  "date": "2026-07-01",
+  "title": "Creative Asset Intelligence Platform enterprise foundation",
+  "migration": "database_build201_creative_asset_intelligence_platform.sql",
+  "routes": [
+    "/admin/creative-assets/",
+    "/api/admin/creative-assets"
+  ],
+  "capabilities": [
+    "one reference-only creative project per Content Studio project",
+    "canonical source asset references and logical archive paths",
+    "rights/safety inheritance with no implicit public-rights elevation",
+    "transparent metadata review scores and reasons",
+    "evidence ledger, lockable story segments, reuse recommendations, policy signals, run/event audit",
+    "internal approval and JSON manifest export",
+    "automatic non-blocking synchronization from product approval and Content Studio events"
+  ],
+  "non_goals": [
+    "no source-media copy/move/delete/reorder/feature",
+    "no external AI or render provider",
+    "no automatic public release or social publishing",
+    "no inferred consent or factual verification"
+  ],
+  "validation": {
+    "javascript_files_node_check": 458,
+    "public_html_exactly_one_h1": 48,
+    "css_braces_balanced": true,
+    "migration_repeat_safe": true,
+    "fresh_schema_contains_caip": true,
+    "d1_compatible_runtime_test": true,
+    "predeploy_pages_checked": 90,
+    "predeploy_issues": 0,
+    "service_worker_cache": "devilndove-shell-v6"
+  },
+  "authoritative_spec": "docs/creative-asset-intelligence-platform/README.md"
+}

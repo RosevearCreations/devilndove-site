@@ -1,5 +1,90 @@
-# Creative Asset Intelligence Platform (CAIP)
+# Creative Asset Intelligence Platform (CAIP) — Authoritative Design Specification
 
-Version 1.0
+**Current implementation:** Build 201 foundation  
+**Design status:** authoritative subsystem specification  
+**Primary business roadmap:** `../../PROJECT_STATUS_AND_ROADMAP.md`  
+**Technical deployment handoff:** `../../AI_HANDOFF.md`
 
-Mission: Capture every creative journey and transform each project into reusable knowledge, educational content, marketing assets, and product content.
+## Purpose
+
+CAIP is Devil n Dove’s governed creative-asset layer. It turns a completed Content Studio package into a searchable project record that explains:
+
+- which source photo/video references exist;
+- where each source comes from and why CAIP believes it may suit a role;
+- whether a source is blocked, internal-only, needs review, or may be considered for public use;
+- which factual statements support a story, caption, SEO field, or publication draft;
+- how a project can become a reusable set of gallery, article, thumbnail, video, and educational candidates without re-uploading or mutating original files.
+
+CAIP is **not** a second media library, a public publisher, a content-claim generator, an AI provider, a video renderer, or a permission engine that can invent consent.
+
+## Governing principles
+
+1. **Reference, do not duplicate.** CAIP stores source URLs, source IDs, fingerprints, and logical archive paths only. It does not copy, move, delete, overwrite, reorder, or feature product/R2 media.
+2. **Source consent is authoritative.** CAIP can preserve or tighten a source restriction, but it cannot create public rights where Content Studio/source consent is not public-cleared.
+3. **Evidence before prose.** Claims, scripts, captions, blog sections, SEO text, and public releases must trace to a product field, consent record, selected source media, or manually confirmed evidence.
+4. **Recommendation is not decision.** Metadata scores are transparent review aids, not visual truth, legal clearance, quality certification, or a promise of performance.
+5. **Human approval remains explicit.** CAIP internal approval does not publish a product, public page, image, social post, video, or Google Business Profile item.
+6. **One system of record per concern.** Product records remain product truth; Content Studio remains package/deliverable truth; CAIP remains asset/evidence/intelligence truth; Content Release Board remains public-release truth.
+7. **Operational honesty.** Do not show an encoded file, AI analysis, SEO result, consent, sale, or published post as complete unless a real provider/process has completed and been verified.
+
+## Current Build 201 scope
+
+Implemented:
+
+- one CAIP project linked one-to-one to a Content Studio project;
+- canonical, non-destructive asset references for existing `content_project_media`;
+- deterministic metadata-only analysis with transparent component scores and reasons;
+- source-rights inheritance and stricter manual CAIP handling;
+- evidence ledger, editable/lockable story spine, policy signals, audit events, and JSON manifest;
+- destination-specific reuse candidates for website hero/gallery, YouTube thumbnail, and short-video roles;
+- mobile and desktop admin console at `/admin/creative-assets/`;
+- automatic CAIP refresh when an approved product creates/refreshes a Content Studio package or when its source media review changes.
+
+Not implemented and deliberately not claimed:
+
+- external AI vision/transcription/LLM execution;
+- file copies, proxies, derivatives, transcoding, background removal, or video rendering;
+- direct public publishing or platform OAuth;
+- automatic consent inference, copyright clearance, claim validation, or SEO-indexing guarantees;
+- signed upload/download URLs, retention workers, or private-media transfer jobs.
+
+## Architecture at a glance
+
+```text
+Product / source records
+        ↓  (existing source ownership)
+Content Automation Studio
+        ↓  (source-linked package + deliverable plans)
+CAIP
+  ├─ Creative project identity
+  ├─ Canonical source-asset references
+  ├─ Rights / safety inheritance
+  ├─ Metadata evidence & transparent scoring
+  ├─ Story evidence + segments
+  ├─ Reuse recommendations
+  ├─ Policy/readiness signals + audit trail
+  └─ Exportable CAIP manifest
+        ↓  (human chooses approved candidates)
+Content Release Board / Social Queue / future renderer adapters
+```
+
+## Required reading order
+
+1. This README for CAIP boundaries and current implementation.
+2. `00_Project_Charter.md` through `12_Testing_and_Acceptance.md` for the detailed design.
+3. `../../AI_HANDOFF.md` for deployment/migration order.
+4. `../../PROJECT_STATUS_AND_ROADMAP.md` for current business priority and the active 20-step plan.
+
+## Official external design references
+
+The design uses current official guidance as constraints rather than as a promise of ranking or platform approval:
+
+- Google image SEO: <https://developers.google.com/search/docs/appearance/google-images>
+- Google structured-data policies: <https://developers.google.com/search/docs/appearance/structured-data/sd-policies>
+- Google mobile-first indexing: <https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing>
+- Cloudflare R2 Workers metadata: <https://developers.cloudflare.com/r2/api/workers/workers-api-reference/>
+- Cloudflare R2 presigned URLs: <https://developers.cloudflare.com/r2/api/s3/presigned-urls/>
+- YouTube thumbnails policy: <https://support.google.com/youtube/answer/9229980>
+- YouTube altered/synthetic-content disclosure: <https://support.google.com/youtube/answer/14328491>
+
+CAIP does not automatically perform actions based on any of these sources; they inform its future governance and provider-adapter requirements.
