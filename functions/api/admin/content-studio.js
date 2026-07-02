@@ -1,4 +1,4 @@
-// Build 199 — admin API for the review-first Content Automation Studio.
+// Build 201 — admin API for the review-first Content Automation Studio with CAIP mirror handoff.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import {
   CONTENT_STUDIO_BUILD,
@@ -12,6 +12,7 @@ import {
   updateContentProject,
   updateContentProjectMedia
 } from '../_lib/contentAutomationStudio.js';
+import { syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 
 function json(data, status = 200, headers = {}) { return jsonResponse(data, status, { 'Cache-Control': 'no-store', ...headers }); }
 function number(value) { const parsed = Number(value || 0); return Number.isInteger(parsed) && parsed > 0 ? parsed : 0; }
@@ -63,7 +64,17 @@ export async function onRequestPost(context) {
       const productId = number(body.product_id);
       if (!productId) throw new Error('Choose an approved product first.');
       const created = await createOrRefreshContentProjectForProduct(db, productId, adminUser.user_id, { refresh_copy: action === 'refresh_archive' && Number(body.refresh_copy) === 1 });
-      result = { content_project_id: created.project.content_project_id, archived_count: created.archived_count, deliverables_created: created.deliverables_created };
+      // Build 201: keep CAIP in step with the same reference-only source archive.
+      // A CAIP sync failure must not undo a successful Content Studio archive operation.
+      let caip = null;
+      try { caip = await syncCreativeProjectFromContentProject(db, created.project.content_project_id, adminUser.user_id, { trigger: 'content_studio_create_or_refresh' }); } catch (caipError) {
+        await captureRuntimeIncident(context.env, context.request, {
+          incident_scope: 'creative_asset_intelligence', incident_code: 'caip_sync_after_content_studio_failed', severity: 'warning',
+          message: caipError?.message || 'CAIP source sync did not complete.', related_user_id: adminUser.user_id,
+          details: { content_project_id: created.project.content_project_id, error: String(caipError?.stack || caipError?.message || caipError) }
+        });
+      }
+      result = { content_project_id: created.project.content_project_id, archived_count: created.archived_count, deliverables_created: created.deliverables_created, creative_project_id: caip?.project?.creative_project_id || null };
       detail = await getContentProjectDetail(db, created.project.content_project_id);
     } else if (action === 'update_project') {
       if (!projectId) throw new Error('Content project is required.');
@@ -72,7 +83,15 @@ export async function onRequestPost(context) {
     } else if (action === 'update_media') {
       if (!projectId || !number(body.content_project_media_id)) throw new Error('Content project and archive media item are required.');
       detail = await updateContentProjectMedia(db, projectId, number(body.content_project_media_id), body, adminUser.user_id);
-      result = { content_project_id: projectId, content_project_media_id: number(body.content_project_media_id) };
+      let caip = null;
+      try { caip = await syncCreativeProjectFromContentProject(db, projectId, adminUser.user_id, { trigger: 'content_studio_media_review' }); } catch (caipError) {
+        await captureRuntimeIncident(context.env, context.request, {
+          incident_scope: 'creative_asset_intelligence', incident_code: 'caip_sync_after_media_review_failed', severity: 'warning',
+          message: caipError?.message || 'CAIP media sync did not complete.', related_user_id: adminUser.user_id,
+          details: { content_project_id: projectId, error: String(caipError?.stack || caipError?.message || caipError) }
+        });
+      }
+      result = { content_project_id: projectId, content_project_media_id: number(body.content_project_media_id), creative_project_id: caip?.project?.creative_project_id || null };
     } else if (action === 'update_deliverable') {
       if (!projectId || !number(body.content_project_deliverable_id)) throw new Error('Content project and deliverable are required.');
       detail = await updateContentDeliverable(db, projectId, number(body.content_project_deliverable_id), body, adminUser.user_id);

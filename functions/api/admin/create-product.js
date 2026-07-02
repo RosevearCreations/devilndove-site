@@ -1,6 +1,7 @@
 import { allocateNextProductNumber, ensureProductNumberSequenceAtLeast, formatDefaultSku, getNextProductNumber } from './_product-numbering.js';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 import { createOrRefreshContentProjectForProduct } from "../_lib/contentAutomationStudio.js";
+import { syncCreativeProjectFromContentProject } from "../_lib/creativeAssetIntelligence.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -515,6 +516,18 @@ export async function onRequestPost(context) {
     if (['approved', 'published'].includes(review_status)) {
       try {
         contentProject = await createOrRefreshContentProjectForProduct(db, newProductId, Number(authCheck.sessionUser?.user_id || 0));
+        try {
+          await syncCreativeProjectFromContentProject(db, contentProject.project.content_project_id, Number(authCheck.sessionUser?.user_id || 0), { trigger: 'product_approval' });
+        } catch (caipError) {
+          await captureRuntimeIncident(env, request, {
+            incident_scope: 'creative_asset_intelligence',
+            incident_code: 'create_approved_caip_sync_failed',
+            severity: 'warning',
+            message: 'Approved product content package was created, but its CAIP mirror could not sync automatically.',
+            related_user_id: Number(authCheck.sessionUser?.user_id || 0),
+            details: { product_id: newProductId, content_project_id: contentProject?.project?.content_project_id || null, error: String(caipError?.message || caipError || 'Unknown CAIP sync error') }
+          }).catch(() => null);
+        }
       } catch (contentError) {
         await captureRuntimeIncident(env, request, {
           incident_scope: 'content_automation_studio',
