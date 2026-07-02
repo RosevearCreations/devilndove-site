@@ -1,3 +1,16 @@
+# Build 201
+
+## Creative Asset Intelligence Platform (CAIP) foundation and enterprise specification
+
+- Added CAIP as a reference-only asset/evidence/intelligence subsystem between Content Automation Studio and Content Release Board.
+- Added one canonical `creative_projects` record per Content Studio project, source-linked `creative_assets`, analyses, recommendations, evidence, story segments, policy signals, runs, events, and manifest export.
+- Added `/admin/creative-assets/` and `GET/POST /api/admin/creative-assets` with responsive review controls and neutral visual placeholders.
+- Added transparent local metadata score/rationale controls for technical/story/reuse/confidence review. No external AI provider, renderer, or publishing service is represented as active.
+- Enforced source-rights inheritance: CAIP cannot elevate a needs-review/blocked upstream source to public use; blocked sources stay blocked.
+- Connected CAIP synchronization to product approval, Content Studio create/refresh, and Content Studio source-media review. A CAIP warning no longer prevents a valid approved product/content package from existing.
+- Added `database_build201_creative_asset_intelligence_platform.sql`, fresh-schema updates, expanded smoke tests, and a complete authoritative CAIP specification in `docs/creative-asset-intelligence-platform/`.
+- Validation: 458 JavaScript files passed syntax checks; 48 public HTML pages passed the one-H1 check; CSS braces are balanced; Build 199 → 200 → 201 migrations reran safely; a D1-compatible CAIP runtime test confirmed source-rights elevation is blocked and manifests are reference-only/non-publishing; 90-page predeploy sanity passed with 0 issues.
+
 # Build 200
 
 ## Summary

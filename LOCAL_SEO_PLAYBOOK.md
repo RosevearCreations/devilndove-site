@@ -41,3 +41,8 @@ Before releasing a Workshop Journal article or website-gallery feature, confirm:
 ## What remains manual
 
 Search Console, Merchant Center, GBP photo/uploads, sitemap submission, social preview testing, indexability checks, customer privacy/consent, and any paid/automated provider integration. Record actual outcomes and failures; do not convert a local passing check into a claim that Google/platforms accepted or indexed the content.
+
+
+## Build 201 CAIP content-source guardrail
+
+CAIP recommendations, metadata scores, and future provider outputs are internal review aids only. Before any public use, Content Release Board must still verify that the visible page has useful unique copy, selected public-cleared source media, truthful title/meta/structured data, and descriptive real-image text. Do not publish a CAIP placeholder, score, inferred caption, or derived asset as a factual search claim without source and human review evidence.
