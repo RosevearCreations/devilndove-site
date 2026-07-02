@@ -1,6 +1,7 @@
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { requireAdminStepUp } from "../_lib/adminStepUp.js";
 import { createOrRefreshContentProjectForProduct } from "../_lib/contentAutomationStudio.js";
+import { syncCreativeProjectFromContentProject } from "../_lib/creativeAssetIntelligence.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function nr(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -318,6 +319,18 @@ export async function onRequestPost(context) {
   if (['approve', 'publish', 'publish_override'].includes(action)) {
     try {
       contentProject = await createOrRefreshContentProjectForProduct(db, productId, Number(adminUser.user_id || 0));
+      try {
+        await syncCreativeProjectFromContentProject(db, contentProject.project.content_project_id, Number(adminUser.user_id || 0), { trigger: 'product_approval' });
+      } catch (caipError) {
+        await captureRuntimeIncident(env, request, {
+          incident_scope: 'creative_asset_intelligence',
+          incident_code: 'product_review_caip_sync_failed',
+          severity: 'warning',
+          message: 'Product approval created its content package, but the CAIP mirror could not sync automatically.',
+          related_user_id: Number(adminUser.user_id || 0),
+          details: { product_id: productId, action, content_project_id: contentProject?.project?.content_project_id || null, error: String(caipError?.message || caipError || 'Unknown CAIP sync error') }
+        });
+      }
     } catch (contentError) {
       await captureRuntimeIncident(env, request, {
         incident_scope: 'content_automation_studio',
