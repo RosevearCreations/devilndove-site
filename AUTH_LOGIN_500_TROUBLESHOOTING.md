@@ -53,3 +53,10 @@ The login page now displays the server `code` and safe `hint`. For a remaining `
 4. Select the failed `auth/login` request and open **Response**.
 5. Copy the JSON `code`, `hint`, and `detail`; do not copy session tokens, passwords, or cookie values.
 6. Open Cloudflare **Workers & Pages → devilndove-site → Logs**, find the matching `auth_login_failed` entry, and compare its error.
+
+
+## Build 205 correction: D1 Console repair execution
+
+The prior Build 204 legacy-schema repair script must **not** be run in the Cloudflare D1 Console because it started with `PRAGMA foreign_keys = OFF`. D1 keeps foreign-key enforcement enabled inside its implicit transactions; use the replacement file `database_auth_legacy_to_current_repair_d1_console.sql` instead.
+
+Run its numbered blocks separately: precheck, member copy, session-table swap, then postcheck. Do not use `BEGIN TRANSACTION`, `COMMIT`, or `PRAGMA foreign_keys = OFF` in the D1 Console for this repair. The browser login form now displays the safe server `detail` field, and the Function returns `AUTH_SESSION_CREATE_FAILED` or `AUTH_SESSION_READ_FAILED` if D1 reaches a session-table error after password verification.

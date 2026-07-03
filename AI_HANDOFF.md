@@ -66,3 +66,6 @@ Build 202 extends CAIP from a reference-only intelligence record into a governed
 3. Add actual technical extraction (duration/codec/dimensions) only with a versioned, consent-aware, cost-capped provider/worker and evidence capture.
 4. Add a true derivative worker with isolated output namespace, input/output checksums, before/after review, accessible output verification, and manual fallback.
 5. Add renderer/export integration, signed manifest, template/disclosure policy, budget controls, retries/reconciliation, and only later OAuth preview-and-confirm publishing.
+
+
+Build 205 auth correction: the Build 204 D1-console repair used PRAGMA foreign_keys = OFF, which D1 does not permit within its implicit transaction. Replace it with database_auth_legacy_to_current_repair_d1_console.sql and execute its numbered blocks separately. Login errors now render the safe Function detail and classify session create/read failures.

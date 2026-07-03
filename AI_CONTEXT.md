@@ -13,3 +13,6 @@ Current technical context is in `AI_HANDOFF.md`. Current business/roadmap contex
 - A historic bootstrap still exists in source that created `members` and an incompatible hashed-token `sessions` table. The current app expects `users` and `sessions(user_id, session_token, token, ...)`.
 - Build 204 detects that state as `AUTH_LEGACY_SCHEMA` before it performs a query/insert, returns a safe actionable code/hint, and exposes those values in the browser login message.
 - `database_auth_legacy_to_current_repair.sql` is a one-time, preservation-first migration: it copies `members` to `users`, archives the old `sessions` table, creates current sessions, and intentionally requires fresh sign-in because raw legacy session tokens cannot be recovered from hashes.
+
+
+Build 205 auth correction: the Build 204 D1-console repair used PRAGMA foreign_keys = OFF, which D1 does not permit within its implicit transaction. Replace it with database_auth_legacy_to_current_repair_d1_console.sql and execute its numbered blocks separately. Login errors now render the safe Function detail and classify session create/read failures.

@@ -124,7 +124,8 @@
       const parts = [
         data?.error || `Request failed (${response.status}).`,
         data?.code ? `[${data.code}]` : '',
-        data?.hint || ''
+        data?.hint || '',
+        data?.detail ? `Detail: ${data.detail}` : ''
       ].filter(Boolean);
       const error = new Error(parts.join(' '));
       error.code = data?.code || '';
