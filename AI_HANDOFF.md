@@ -1,71 +1,71 @@
-# Devil n Dove AI Handoff — Build 202
+# Devil n Dove AI Handoff — Build 206
 
-Read this file first, then `PROJECT_STATUS_AND_ROADMAP.md`, then `MARKDOWN_INDEX.md`. Those are the two canonical cross-project planning sources. `docs/creative-asset-intelligence-platform/README.md` and `13_Media_Operations_Secure_Review.md` are the authoritative CAIP subsystem specification.
+## Start here
 
-## Current release in one sentence
+Use only these two cross-project documents for new work:
 
-Build 202 extends CAIP from a reference-only intelligence record into a governed media-operations foundation: it can inspect existing catalog/bound-R2 object metadata, create immutable derivative plans, and issue short-lived administrator-bound review links—without copying, deleting, transforming, publishing, or granting rights to source media.
+1. `AI_HANDOFF.md` — technical operating boundaries, deployment/testing, current incident notes, and release rules.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — business priorities, product/SEO rules, completed work, and the active backlog.
 
-## What works now
+`MARKDOWN_INDEX.md` explains which specialized documents remain authoritative. Do not promote older Build 154–205 notes above this handoff unless a live deployment needs historical context.
 
-- Build 199 creates a review-first Content Studio package for an approved/published finished product, including the 1 YouTube / 3 Facebook / 5 Instagram Reels / 5 TikTok plan, website gallery, GBP, SEO, blog, thumbnail, captions, and review package.
-- Build 200 creates review-first Workshop Journal and Gallery releases with public-copy/media/title/meta/slug gates, publish/unpublish controls, and source-media protection.
-- Build 201 creates a CAIP project per Content Studio package, canonical source reference rows, inherited rights, explainable metadata scoring, evidence, story segments, candidates, policies, and JSON manifest.
-- Build 202 adds technical observations from catalog metadata and bound R2 object headers only; it never fetches arbitrary URLs or reads media bytes for content inference.
-- Build 202 adds immutable derivative recipes and planned outputs. Blank output fields and `not_created` status mean exactly that: no derivative exists and no provider was called.
-- Build 202 adds four reviewable output briefs: website gallery WebP, vertical social MP4, YouTube thumbnail WebP, and internal review preview WebP.
-- Build 202 adds a same-origin secure review proxy. Grants are short-lived, session-bound to the issuing admin, capped, revocable, audited, no-store, and stored as hashes only. They do not make R2 objects public.
-- Build 202 includes disabled, non-secret provider and budget-control records. There is no renderer, vision AI, transcription, thumbnail generator, S3 presigner, OAuth publisher, or paid provider active.
-- CAIP is at `/admin/creative-assets/`; Content Studio is `/admin/content-studio/`; Release Board is `/admin/content-publications/`.
+## Current release
 
-## Build 202 routes and files
+Build 206 fixes the catalog-media handoff without a D1 migration:
 
-- `GET/POST /api/admin/creative-assets`
-- `GET /api/admin/creative-asset-review?token=<opaque>`
-- `/admin/creative-assets/`
-- `functions/api/_lib/creativeAssetIntelligence.js`
-- `functions/api/_lib/creativeAssetOperations.js`
-- `functions/api/admin/creative-assets.js`
-- `functions/api/admin/creative-asset-review.js`
-- `public/js/admin-creative-assets.js`
-- `database_build202_caip_media_operations_secure_review.sql`
-- `docs/creative-asset-intelligence-platform/13_Media_Operations_Secure_Review.md`
+- `/admin/catalog/` can filter and sort the existing-product picker by store status, review status, product ID/name/SKU/slug, recent update, and image attention.
+- Loading a product now resolves its featured-image field from the product record first, then its ordered product-image gallery, then its non-deleted `media_assets` record. The editor visibly says where the image came from and shows a local preview.
+- `/admin/catalog-media/?product_id=<id>#product-media-workflow` now opens with a persistent product context card: product ID, name, SKU, slug, status, tax summary, media counts, featured-image source, search, and direct Product Editor / CAIP / storefront preview links.
+- The media context broadcasts its selection to product-images, annotations, role scoring, listing facts, story, and SEO panels.
+- `/admin/creative-assets/?product_id=<id>` now resolves an existing CAIP project for that product when one exists and shows a return link to the media workspace. It does not auto-create, alter, render, publish, or grant rights to source media.
+- Tax APIs now normalize historic whole-number values such as `13` and current fraction values such as `0.13` to one consistent API contract: `tax_rate` is a fraction and `rate_percent` is the display percentage.
 
-## Deployment order
+## Architecture and deployment facts
 
-1. Back up D1.
-2. Confirm Builds 199, 200, and 201 appear in `schema_migration_ledger`.
-3. Run `database_build202_caip_media_operations_secure_review.sql`. It is additive and rerunnable.
-4. Deploy the complete Pages bundle, including functions, CAIP admin UI, CSS, placeholder SVG, service worker/cache updates, documentation, and schema reference.
-5. Use `POST_DEPLOY_SMOKE_TEST.md` on the deployed domain before treating Build 202 as live.
+- Hosting: Cloudflare Pages + Pages Functions.
+- Database: Cloudflare D1 binding `DB`.
+- Media: R2 binding `PRODUCT_MEDIA_BUCKET`.
+- Cloudflare project files must deploy from a root that directly contains `functions/`, `index.html`, `_routes.json`, and `wrangler.toml`.
+- Product media remains source-led: `products.featured_image_url`, `product_images`, and `media_assets` may coexist. Build 206 reads safely across them; saving the Product Editor writes the resolved URL back to the product record when appropriate.
 
-## Non-negotiable operating rules
+## No-migration rule for Build 206
 
-- **Reference, never duplicate/mutate sources.** CAIP cannot move, delete, overwrite, reorder, feature, transform, or publish a `product_images`, `media_assets`, `content_project_media`, R2 source, or product-gallery item.
-- **No implicit rights.** A technical probe, high score, derivative plan, internal approval, or secure review grant does not create consent/public rights. Upstream source consent/status remains authoritative.
-- **Evidence before prose.** No score, metadata value, future vision output, transcript, or render plan is proof of a material, condition, transformation, availability, price, or customer claim.
-- **No automatic publishing.** CAIP approval, derivative-plan approval, and secure review remain internal. Release Board and Social Queue stay separate human gates.
-- **No implied external capability.** Never say a file was analyzed by AI, rendered, transformed, published, uploaded, or verified unless a real provider run/output record proves it.
-- **Secure reviews are internal.** Raw review tokens never enter D1/logs/public files; review URLs are neither public media URLs nor SEO/structured-data values.
-- **Source failures stay isolated.** A probe/grant/plan failure must not undo product approval, Content Studio records, source media, or a live publication.
-- **Search truth remains mandatory.** Visible page copy, actual image/video URLs, titles/meta, alt text, schema, captions, and public claims must agree.
+Build 206 has **no required D1 SQL migration**. The live D1 table listing already confirmed current `users` and `sessions` tables. Do not rename or rebuild the authentication tables because of a catalog-media update.
 
-## Honest current limits
+## Login incident — accurate current state
 
-- Technical probes do not decode media or establish duration, codec, frame rate, sharpness, content, duplicate-frame, or rights truth unless already present in source metadata.
-- No derivative is generated in Build 202. No output R2 key, URL, checksum, thumbnail, video, or visual AI result exists until a later provider writes and verifies it.
-- The secure review proxy requires a bound R2 key and the issuing administrator’s authenticated session; catalog-only/public-URL assets cannot be proxy-served by Build 202.
-- No S3 presigned R2 direct-link service is configured; Build 202 intentionally uses a same-origin proxy.
-- No OAuth or direct publish integration exists for YouTube, Facebook, Instagram, TikTok, or Google Business Profile.
-- Existing production work remains: D1/R2/Pages proof, source-media integrity, mobile real-device checks, consent validation, Stripe/email/webhook tests, accessibility, Search Console/GBP evidence, and observable runtime errors.
+The known `POST /api/auth/login` 500 remains a separate issue. The confirmed D1 schema contains current `users` and `sessions` tables; there is no `members` table in the selected database. Do not run an old `members` migration or any `PRAGMA foreign_keys = OFF` batch. The next evidence needed is the sanitized response JSON from the failed POST or the matching Cloudflare Function log; never include passwords, cookies, Bearer tokens, or session values in notes.
 
-## Strongest next work after Build 202
+## Public-content / SEO guardrails
 
-1. Deploy Build 202 and prove a real finished product through Content Studio → CAIP probe → derivative plan → secure review → revoke with no source-media changes.
-2. Add durable source checksum verification through a bounded worker design with full R2 operation/cost logging.
-3. Add actual technical extraction (duration/codec/dimensions) only with a versioned, consent-aware, cost-capped provider/worker and evidence capture.
-4. Add a true derivative worker with isolated output namespace, input/output checksums, before/after review, accessible output verification, and manual fallback.
-5. Add renderer/export integration, signed manifest, template/disclosure policy, budget controls, retries/reconciliation, and only later OAuth preview-and-confirm publishing.
+- Exactly one visible H1 per public page.
+- Use plain search language in page titles, H1s, product names, headings, and descriptions where it genuinely describes the item.
+- Keep title/meta/visible copy/canonical URL/structured data/price/availability/featured image/alt text consistent.
+- Use contextual, descriptive image alt text; do not stuff keyword lists into alt text.
+- Only approved, public-use-cleared real product media may replace public placeholders or be included in product schema, Open Graph images, Gallery, Release Board, Content Studio, or social handoffs.
+- Admin pages stay `noindex,nofollow`.
 
+## CAIP operating rules
 
-Build 205 auth correction: the Build 204 D1-console repair used PRAGMA foreign_keys = OFF, which D1 does not permit within its implicit transaction. Replace it with database_auth_legacy_to_current_repair_d1_console.sql and execute its numbered blocks separately. Login errors now render the safe Function detail and classify session create/read failures.
+- CAIP is reference-only and review-first. It does not modify a source image, video, R2 object, gallery order, listing field, or publication.
+- A media score, derivative plan, technical probe, or CAIP approval never creates public rights.
+- Evidence precedes public prose. A future renderer/OAuth publishing connection needs its own budget, consent, preview/approval, output-verification, retry, and rollback design.
+- Build 206 adds a catalog-to-CAIP context bridge only. It does not activate providers or output media.
+
+## Required post-deploy proof
+
+1. Open `/admin/catalog/`, search `34`, and filter by Draft / Revision / Approved / Archived.
+2. Load a product with a `media_assets` image but blank `products.featured_image_url`; confirm the field fills, its source label says Media library asset, and the preview is visible.
+3. Save the product once; reopen it and confirm the product record has the featured URL.
+4. Open `/admin/catalog-media/?product_id=34#product-media-workflow`; confirm every panel sees Product ID 34 and the context card gives the right product name/media counts.
+5. Confirm the tax dropdown and product table display HST as `13%`, not `0.13%` or `1300%`.
+6. Open `/admin/creative-assets/?product_id=34`; confirm it selects a linked CAIP project if present, otherwise clearly says that no project exists yet.
+7. Re-run all product/login smoke tests in `POST_DEPLOY_SMOKE_TEST.md`.
+
+## First next work after Build 206
+
+1. Capture the actual safe login response/log code and fix only that verified route fault.
+2. Add an explicit “sync resolved featured image” action/indicator in the Product Editor only if operators want a separate save from normal product updates.
+3. Extend public product list/detail endpoints to use a safe approved-media fallback after live verification and consent checks.
+4. Add Content Studio → CAIP creation status to the catalog-media context card.
+5. Add a real controlled derivative worker only after source checksum, rights, output namespace, cost, review, and verification controls are approved.

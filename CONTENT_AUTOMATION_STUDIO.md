@@ -1,3 +1,9 @@
+# Retained reference — current pointer refreshed in Build 206
+
+For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 206 catalog-media, tax, CAIP, deployment, or auth rules.
+
+---
+
 # Content Automation Studio — Build 201 Operating Guide
 
 Content Automation Studio (Build 199) remains the source-linked package and deliverable planner. Content Release Board (Build 200) remains the public-release authority. Creative Asset Intelligence Platform (Build 201) is the governed intelligence/evidence layer between them.
