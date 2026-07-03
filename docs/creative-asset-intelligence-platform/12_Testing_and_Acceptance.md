@@ -31,3 +31,16 @@
 ## Definition of done for Build 201
 
 Build 201 is ready only when a deployed user can safely synchronize a real product package, review CAIP assets/evidence/segments, return to Content Studio/Release Board, and prove that no original product/R2 media was changed by CAIP.
+
+## Build 202 acceptance tests
+
+1. Apply Builds 199–202 twice in a fresh SQLite/D1-compatible test database; verify one Build 202 ledger row and all eight Build 202 tables.
+2. Seed a CAIP asset linked to a bound R2 object key; run a probe with fake R2 `head()` response and verify only metadata records change.
+3. Repeat with no bucket binding and with an R2 missing object; verify `metadata_only`/`missing` record without deleting or modifying the CAIP source asset.
+4. Create each derivative template; verify output URL/key/checksum are blank and `verification_status = not_created`.
+5. Approve a plan; verify the status becomes internally approved but no provider run is created.
+6. Create a secure review grant; verify D1 has a SHA-256 hash, no raw token, bounded expiry/view count, and audit row.
+7. Verify secure review fails without admin auth, from another administrator, after expiry, after max views, and after revoke.
+8. Verify a successful review proxy response is `private, no-store`, same-origin only, no-referrer, no-frame, and streams the original object.
+9. Confirm existing Content Studio package, CAIP asset/evidence/story data, Release Board draft, product image order, and R2 source object remain unchanged.
+10. Run JavaScript syntax, one-H1, local-reference, CSS brace, service-worker/cache, mobile-layout, and package-integrity checks.

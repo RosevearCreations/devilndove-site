@@ -47,3 +47,18 @@ creative_assets (0..1) ──── (0..n) recommendations/evidence references
 - New provider fields should be nullable/additive and versioned.
 - Version provider output JSON rather than silently changing its meaning.
 - Any planned retention/deletion feature must write a separate, reviewable lifecycle event and must never piggyback on a CAIP sync.
+
+## Build 202 operational records
+
+The following tables are part of the authoritative CAIP schema after Build 202:
+
+- `creative_asset_probe_jobs` — bounded metadata/R2-head work history, inputs, outcomes, retry ceiling, and source fingerprint.
+- `creative_asset_technical_observations` — latest technical observation per asset/probe version. This is metadata evidence, not a content-analysis result.
+- `creative_derivative_recipes` — immutable source-specific transformation intent with target role/dimensions/format/policy snapshot.
+- `creative_asset_derivatives` — planned or future verified output lineage. Blank `output_*` fields plus `not_created` mean no file exists.
+- `creative_asset_access_grants` — hash-only opaque secure-review grants, expiry, view limit, session-bound admin identity, and revocation state.
+- `creative_asset_access_audit` — safe grant lifecycle/use history without raw token values.
+- `creative_provider_profiles` — non-secret disabled capability registry only.
+- `creative_execution_budget_controls` — disabled per-capability/project caps in CAD for future provider operations.
+
+New records are additive and foreign-keyed to the existing CAIP project/asset spine. They do not modify the ownership or deletion semantics of `media_assets`, `product_images`, `content_project_media`, or R2 objects.

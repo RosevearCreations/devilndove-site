@@ -46,3 +46,17 @@ Cloudflare documents that presigned URLs grant time-limited permission to a spec
 ## Integrity posture
 
 CAIP detects a changing source fingerprint on refresh but does not overwrite history or “repair” a source object. Any future copy/derivative must carry `derived_from_asset_id`, recipe version, operator/provider, timestamp, and immutable output fingerprint.
+
+## Build 202 secure review and derivative namespace policy
+
+Build 202 does not create derivative objects. It reserves the design for a later provider:
+
+```text
+caip/{creative_project_key}/derivatives/{recipe_key}/{derivative_key}/...
+```
+
+No later adapter may write into `products/`, `creations/`, `social/`, or existing source paths. Source and output namespaces must remain distinct, with a generated output checksum and a source-fingerprint binding.
+
+Internal review uses a same-origin Pages/Workers proxy against the existing bound bucket. The proxy serves bytes only after an authenticated administrator and hash-verified grant pass. It must not redirect to a public object URL, enable permissive CORS, cache the response, or create a public alias.
+
+This design is deliberately different from an S3-style presigned URL because the current project does not have a configured S3 signing credential service. A future direct-presign adapter must be separately documented, secret-managed, audited, and expiry-tested before replacement.

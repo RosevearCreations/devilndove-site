@@ -43,3 +43,16 @@ Build 201 calculates small metadata-only scores synchronously. Future high-volum
 ## Backup/recovery posture
 
 Database records are recoverable metadata, not the only copy of source media. R2/source backup, database backup, migration ledger, output manifests, audit events, and provider output lineage must all be part of release recovery planning before any destructive lifecycle automation is enabled.
+
+## Build 202 observability additions
+
+Track at minimum:
+
+- probe status by scope (`complete`, `metadata_only`, `partial`, `missing`);
+- R2 binding availability and object-missing counts;
+- derivative plans by `planned`/`approved_plan`/future verified state;
+- secure-review grants created, served, expired, denied, and revoked;
+- attempts to use a grant from the wrong account or after expiry;
+- any future provider being enabled while its budget control remains disabled/zero.
+
+Never log raw secure-review tokens, R2 credentials, cookies, authorization headers, original customer filenames when sensitive, or full source URLs in public telemetry. Runtime incidents record `raw_token_not_logged: true` for proxy errors.

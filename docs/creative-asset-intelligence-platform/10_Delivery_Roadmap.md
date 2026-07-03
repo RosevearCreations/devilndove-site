@@ -47,3 +47,39 @@ This is the CAIP subsystem execution list. It is synchronized with Build 201 and
 18. Add public content rendering/sitemap strategy only after real indexing and content-quality evidence.
 19. Add analytics ingestion with source/date provenance; reconcile views/clicks/enquiries against actual business evidence.
 20. Add detailing-job/custom-order adapters only after consent and client-visibility controls are deployed and tested.
+
+## Build 202 — completed operational safety steps
+
+21. Added metadata-only technical observation records and bounded probe-job history. ✅
+22. Limited probe inputs to saved catalog metadata and bound R2 `head()` only. ✅
+23. Prohibited arbitrary source-URL fetches and binary/visual analysis in the first operations layer. ✅
+24. Added source-fingerprint-bound observations and missing/partial/no-binding statuses. ✅
+25. Added immutable derivative recipe records with policy snapshots. ✅
+26. Added explicit planned-derivative records that remain `not_created` without a provider. ✅
+27. Added four reviewable target briefs: gallery WebP, vertical social MP4, YouTube thumbnail WebP, internal preview WebP. ✅
+28. Added internal plan approval that does not schedule or imply renderer work. ✅
+29. Added disabled provider registry and CAD budget-control schema with no secrets. ✅
+30. Added same-origin administrator-bound secure review grants with hash-only storage. ✅
+31. Added expiry, view caps, revocation, access audit, no-store response rules, and no public redirect. ✅
+32. Added CAIP workspace controls for probe, plan, approve plan, secure review, and revoke. ✅
+33. Expanded JSON manifest contract with sanitized operations state. ✅
+34. Added mobile/desktop responsive operations panels and a visual planning placeholder. ✅
+35. Added Build 202 migrations, runtime fallback schema setup, smoke tests, and acceptance criteria. ✅
+36. Updated the authoritative specification and current handoff docs. ✅
+37. Kept Content Studio/Release Board/source-media failure isolation intact. ✅
+38. Kept public SEO/release gates separate from technical plans. ✅
+39. Added explicit no-secret/no-raw-token database rules. ✅
+40. Added the next constrained provider/renderer/retention roadmap. ✅
+
+## Next implementation wave — ordered, not yet complete
+
+1. Deploy Build 202 and demonstrate one real product through probe, plan, secure review, and revoke without source-media changes.
+2. Add source checksum verification using a bounded worker path and explicit object-read costs.
+3. Add a bounded technical extractor for actual duration/codec/pixel metadata with versioned provider evidence.
+4. Add a true derivative worker with separate output namespace, checksums, before/after comparison, and output verification.
+5. Add legal hold, retention review, recovery and human-delete workflow before lifecycle automation.
+6. Add renderer/export execution with signed input manifest, budget enforcement, retries, idempotency, output verification, disclosure/template policy, and manual fallback.
+7. Add real thumbnail generation only after visual/title factual review remains enforceable.
+8. Add final per-platform export validation immediately before a human publish confirmation.
+9. Add OAuth publishing adapters only after connected-account proof, consent, preview/confirm, rollback, delivery evidence, and security review.
+10. Consider server-rendered story pages/sitemap expansion only after genuinely published, substantive content and Search Console evidence.

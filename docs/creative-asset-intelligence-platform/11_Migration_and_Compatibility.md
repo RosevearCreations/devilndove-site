@@ -33,3 +33,9 @@ Build 201 schema definitions must stay synchronized in:
 - `../../DATABASE_SCHEMA_REFERENCE.md`
 
 Any future CAIP table change requires all five artifacts plus this specification, the migration ledger, release notes, handoff, roadmap, and smoke tests to be updated together.
+
+## Build 202 migration
+
+Run `database_build202_caip_media_operations_secure_review.sql` after Build 201. It is additive and rerunnable. It creates operational metadata/control tables only and does not write media objects or change existing source asset rows.
+
+Rollback is operational, not destructive: disable/remove the Build 202 Pages code path, revoke outstanding secure review grants, and leave historical records for audit. Do not drop operational tables without a reviewed retention/export decision; they are evidence of review/planning activity, not source files.

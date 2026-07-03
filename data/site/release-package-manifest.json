@@ -1,8 +1,8 @@
 {
-  "build_label": "Build 201",
+  "build_label": "Build 202",
   "generated_by": "scripts/generate_release_manifest.py",
-  "file_count": 619,
-  "total_size_bytes": 30981283,
+  "file_count": 625,
+  "total_size_bytes": 31129882,
   "files": [
     {
       "path": "AI_CONTEXT.md",
@@ -11,8 +11,8 @@
     },
     {
       "path": "AI_HANDOFF.md",
-      "size_bytes": 6438,
-      "sha256": "c6d3b43bae23cd3d7acd27514f6d5f3591c111e3cdd8561d9260dca5a5d0719f"
+      "size_bytes": 6721,
+      "sha256": "2852a0c35ef771d7a8f4c1cb5fcd3685c500aeb09d97d909fb2bdf98c5baff72"
     },
     {
       "path": "AMAZON_MATCHING_NOTES.md",
@@ -46,13 +46,13 @@
     },
     {
       "path": "CONTENT_AUTOMATION_STUDIO.md",
-      "size_bytes": 4046,
-      "sha256": "b7ad6ef3389fddfff7169fd66980a36be138c282f715f63173eb699253a0c656"
+      "size_bytes": 4335,
+      "sha256": "3194ed9a5a01d95c5bfd1536cedf8026d135978ebe7f8a9525432058969ebd86"
     },
     {
       "path": "DATABASE_SCHEMA_REFERENCE.md",
-      "size_bytes": 3490,
-      "sha256": "998feff497b83011f5e43b8dcf349825da61e28d1f95f082f27f3acdc9a38307"
+      "size_bytes": 5069,
+      "sha256": "9f92dfda4d5e81ffeec3f61ffa2192f042d2e7374f8ecb277a9663e291dfb588"
     },
     {
       "path": "DEVELOPMENT_ROADMAP.md",
@@ -81,8 +81,8 @@
     },
     {
       "path": "MARKDOWN_INDEX.md",
-      "size_bytes": 3442,
-      "sha256": "5d49a5fe0c79bf7b936bdb256657f716885626643cee0cae53e1617f4feeaac3"
+      "size_bytes": 1951,
+      "sha256": "995fc33cd0c5bafb9957d7cbc1e841a862f02594f9c7f6f27a1d2531dbd4076c"
     },
     {
       "path": "NEW_CHAT_STATUS.md",
@@ -91,13 +91,13 @@
     },
     {
       "path": "POST_DEPLOY_SMOKE_TEST.md",
-      "size_bytes": 4800,
-      "sha256": "b860959ec9cb9d0f8395fa78101a83fae4702c9831516f41ccb7582895a02196"
+      "size_bytes": 6425,
+      "sha256": "3d433608044131626afdde5d17a87bb7e9d5626d38d2d16004f7812f1297d224"
     },
     {
       "path": "PROJECT_STATUS_AND_ROADMAP.md",
-      "size_bytes": 7172,
-      "sha256": "89528341c88b8e4701427bf4dbc8f8d53371c4b1a842300787c1119137fe79ee"
+      "size_bytes": 7232,
+      "sha256": "d7488654dd2cae81d02e5496bf566d0d04e3f177dee13d22a0da636734535f2b"
     },
     {
       "path": "README.md",
@@ -106,8 +106,8 @@
     },
     {
       "path": "RELEASE_NOTES.md",
-      "size_bytes": 31758,
-      "sha256": "081cc0e42b1c8b804a58b0141b7bc11b098c46715ef3e19aa4dc47c74f8f3bd3"
+      "size_bytes": 34873,
+      "sha256": "c6e88ce521912f9be1925fe32495e284f13c81d6cc4988f448e6736f37408c62"
     },
     {
       "path": "REPO_BASE_GUIDE.md",
@@ -121,8 +121,8 @@
     },
     {
       "path": "SANITY_HEALTH_CHECK.md",
-      "size_bytes": 3539,
-      "sha256": "31303f7004f9c293a9e69b5542d97ebcfa797d867b089f81e66783906d923db3"
+      "size_bytes": 3828,
+      "sha256": "16d6ecc307ffb82e8696b05b2996d78bb969d74a10346a628e97d1b1e9aa37da"
     },
     {
       "path": "admin/accounting/index.html",
@@ -166,8 +166,8 @@
     },
     {
       "path": "admin/creative-assets/index.html",
-      "size_bytes": 2413,
-      "sha256": "8d6c046e3c1538473444a57c16c7d2fdab0708c3e11106046c6874c407615b92"
+      "size_bytes": 2560,
+      "sha256": "72669b2b7240abed32df0169ad8af356e53df21f2f10b0c03c96cdb772181d46"
     },
     {
       "path": "admin/dark-theme-evidence/index.html",
@@ -345,6 +345,11 @@
       "sha256": "6ae953db376441786920638abe4fbedc524c614dea617307038cf79a218a3e26"
     },
     {
+      "path": "assets/caip-planning-placeholder.svg",
+      "size_bytes": 1398,
+      "sha256": "92a309ff9dd4e505d5e0e08b7f81f6100c76dc9cf913ae2ecf9da1d6fa917af4"
+    },
+    {
       "path": "assets/free-shipping.png",
       "size_bytes": 4323246,
       "sha256": "e89247608e5c3ad3f332097a2ad591906689a622c1c93f58352a70b3db86f01c"
@@ -511,8 +516,8 @@
     },
     {
       "path": "css/styles.css",
-      "size_bytes": 145770,
-      "sha256": "1c3e5a7f4e157410ba69f2c5ef336321fc87648c95dbe3e5ef210540098fbb23"
+      "size_bytes": 151751,
+      "sha256": "d231b18ee4eedf1256ffe886d9702a1f1b2dd4405879875f79bdf31bdbe9aaf9"
     },
     {
       "path": "data/accounting_templates/README.md",
@@ -685,6 +690,11 @@
       "sha256": "51ea6883bee08219de8b08218061545f0f62874d972b20a1be9936cf54d99a93"
     },
     {
+      "path": "data/site/build202-caip-media-operations-secure-review.json",
+      "size_bytes": 1347,
+      "sha256": "f0b2cb6d4ae06268fa1f3c538db4421ac2307e83f996bc500f1f913beadfff70"
+    },
+    {
       "path": "data/site/competitive-opportunities.json",
       "size_bytes": 16265,
       "sha256": "19781a9f1012a4ce7c7068f3dc4343f9a862eb12a0acce64d8cb305551c11b48"
@@ -716,8 +726,8 @@
     },
     {
       "path": "data/site/release-notes.json",
-      "size_bytes": 3859,
-      "sha256": "af46788e0c8256f2d43fdb9aa2c10dd180eb30d25a42cbd9c0de5b650a5d4630"
+      "size_bytes": 4456,
+      "sha256": "8f69c0520c094c1df5546c03862779afa38e1a357afc7325d551a5f14a05d8cc"
     },
     {
       "path": "data/site/seo-page-overrides.json",
@@ -890,9 +900,14 @@
       "sha256": "ae36e060322c44bce82348239cd906b53948eef041fdef32e89be68668acb1bd"
     },
     {
+      "path": "database_build202_caip_media_operations_secure_review.sql",
+      "size_bytes": 10432,
+      "sha256": "3d417c8736e7feba9238c8637f9cfb0a27a5b6f39ce65ee98678eb8f34e9eafc"
+    },
+    {
       "path": "database_full_schema.sql",
-      "size_bytes": 377583,
-      "sha256": "cf8a335302e676f3e6af3d8c7d7f62a955ceadd35e1a41bb8a910ce8d073b8b5"
+      "size_bytes": 388217,
+      "sha256": "e550cd557d009d6f0e000976ac1c21c336490a78a87394779003b4811dd9c70e"
     },
     {
       "path": "database_growth_analytics_seo_extension.sql",
@@ -916,18 +931,18 @@
     },
     {
       "path": "database_schema.sql",
-      "size_bytes": 328512,
-      "sha256": "7dab3a42400f72270baef5b5fe70d63075cd53918b55ac2e85c5f029783498ee"
+      "size_bytes": 339146,
+      "sha256": "a22ad734660b62d9fe5749ae8e95588c1d97c653417b1f01905b623fe1b29260"
     },
     {
       "path": "database_store_schema.sql",
-      "size_bytes": 343209,
-      "sha256": "ef04c04c9388a561ebf36219cb8083e36ac9586f63638ea63526d49a2ae3aea0"
+      "size_bytes": 353843,
+      "sha256": "bec6cc9eacb178198f0d2d8bff0fc812034d15608c5a87f4f408b7684260c8f9"
     },
     {
       "path": "database_upgrade_current_pass.sql",
-      "size_bytes": 125191,
-      "sha256": "086fdbfc579c67f8ac1a8e40224a20afc7cffa344ae73d5cb767a24c343a72a4"
+      "size_bytes": 135825,
+      "sha256": "9321f13220c3e6bbe3c468c4f9450819d66464760931ee4d42adee0c82435ec5"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/00_Project_Charter.md",
@@ -941,23 +956,23 @@
     },
     {
       "path": "docs/creative-asset-intelligence-platform/02_Database_Architecture.md",
-      "size_bytes": 2819,
-      "sha256": "06352a2c8304575dd6dbb14e0c2ab7c951d94acc57852a8d0ccbbe25d62ed772"
+      "size_bytes": 4162,
+      "sha256": "b5768cbf9aba4e0330b6ff131b38d9aba0cc52f41546170beef0b5305fe01340"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/03_Storage_Architecture.md",
-      "size_bytes": 2603,
-      "sha256": "e900bce2c4853f281ba95395bbe94552330e7bf6dc3202a09f67082f5c321bbd"
+      "size_bytes": 3640,
+      "sha256": "e92c5c25a13995c58eef1790e0686d5ea4c9e830c7cb7ad4c4048a2caf5f801c"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/04_Project_Ingestion_Pipeline.md",
-      "size_bytes": 2889,
-      "sha256": "7e978a02e20cd91bd1ef1d14d6ed03210c27f18cee54843d5603f3e1a3919890"
+      "size_bytes": 3593,
+      "sha256": "cd2b996bb4dffbcb56153829ee17a09e596ea2b1a0e3c4503427977b82e8e427"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/05_Governance_Rights_Privacy.md",
-      "size_bytes": 2518,
-      "sha256": "6686906d79fa49cc0b20bafb91f8f3555461357804e50518f3b296a96c359a98"
+      "size_bytes": 3441,
+      "sha256": "a62d72da7eba27dd41a64004d34c3a6536642305460c3cc2a0287d5c7bc2a502"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/06_Intelligence_and_Story_Model.md",
@@ -971,33 +986,38 @@
     },
     {
       "path": "docs/creative-asset-intelligence-platform/08_API_Event_and_Manifest_Contracts.md",
-      "size_bytes": 2190,
-      "sha256": "be11ddaf48ca6c515a525ed72a31124f9757c33a4e45f64f7e2063194f9c5b16"
+      "size_bytes": 3377,
+      "sha256": "f11a791fe35015f931e75ff4b630f4d4cdfe4bd6793168e4716e142037837770"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/09_Operations_Reliability_and_Observability.md",
-      "size_bytes": 2303,
-      "sha256": "30f53b460e5e85d11b68e04f4fed981977056b05d0e288cb996f1f4124eb30a6"
+      "size_bytes": 3024,
+      "sha256": "179ffd27ea79c94bcfaea06ebf6e9dff18bcb770e344890f9abe1d5e7f06f24b"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/10_Delivery_Roadmap.md",
-      "size_bytes": 4583,
-      "sha256": "1335304be3cab5b333980a29c382c7d156dfaeccd926b2c2e292820f8bd69162"
+      "size_bytes": 7668,
+      "sha256": "c25295739547cc929c61d623e2781add8353e47f0887ddc2fa2b858def3ce74f"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/11_Migration_and_Compatibility.md",
-      "size_bytes": 1726,
-      "sha256": "77f3c7fd9bbe1f0da72cff6380a5539cc36b364fe533b43ff0d0512f7745cd5e"
+      "size_bytes": 2298,
+      "sha256": "d54e001b273860637315733bd269f90c5bec433e53cc42218541926a56c02077"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/12_Testing_and_Acceptance.md",
-      "size_bytes": 2611,
-      "sha256": "36638c7bc28f45d4eba27bf7285d9f44e139940c65c8756459df9c054c36d0ad"
+      "size_bytes": 3972,
+      "sha256": "d34a98049660f177b1bb78e5bce9be132a8fcaef155d7808cd5a994a21f978ae"
+    },
+    {
+      "path": "docs/creative-asset-intelligence-platform/13_Media_Operations_Secure_Review.md",
+      "size_bytes": 12694,
+      "sha256": "9d4d400067e4afa09eae734fdc93a9a274cc5e894fb59337f9027d5bab22de5a"
     },
     {
       "path": "docs/creative-asset-intelligence-platform/README.md",
-      "size_bytes": 5633,
-      "sha256": "fa55b53bc81dcf9c3fbe9ec0188145b83f3893229416967319c732c7a7ed99d9"
+      "size_bytes": 6927,
+      "sha256": "0fcfbab8d1120af33856204df0fed79e52850652219ad77c7003cbca0f5232c6"
     },
     {
       "path": "functions/api/_communityContent.js",
@@ -1033,6 +1053,11 @@
       "path": "functions/api/_lib/creativeAssetIntelligence.js",
       "size_bytes": 50556,
       "sha256": "929e9f14776e487a68aedbfabfee8aaa9b14e652f29cadca76d0c5d2c2e6a160"
+    },
+    {
+      "path": "functions/api/_lib/creativeAssetOperations.js",
+      "size_bytes": 42617,
+      "sha256": "e85da9235e4aa35c38be27a5eede39c010ad8d45ede5da0c519156f91f9350df"
     },
     {
       "path": "functions/api/_lib/notificationOutbox.js",
@@ -1365,9 +1390,14 @@
       "sha256": "7347a658eb2d7a420942cbc8b1aff47d1983f27192bd2effbe2ed07e8e735c97"
     },
     {
+      "path": "functions/api/admin/creative-asset-review.js",
+      "size_bytes": 3065,
+      "sha256": "bfd4f510fc9e82ab6e464d1c6a8c37cbfda2f89bec6473b8a43233fbe6dcf3d4"
+    },
+    {
       "path": "functions/api/admin/creative-assets.js",
-      "size_bytes": 6958,
-      "sha256": "daf65dcb2a4458069973f4a9014cc51e4c3a47134d80149f6286a7d500c28202"
+      "size_bytes": 10299,
+      "sha256": "271b71bf86032b3a22cc360f396f614a227875ea3cfcbb31c3c647b679ee0045"
     },
     {
       "path": "functions/api/admin/custom-order-stage-photos.js",
@@ -2396,8 +2426,8 @@
     },
     {
       "path": "public/js/admin-creative-assets.js",
-      "size_bytes": 21596,
-      "sha256": "b39776544ef724c2a4aa3d34c74fffdacabc7310c302524e810fc570edd8c2dd"
+      "size_bytes": 28064,
+      "sha256": "8072765b8863654ca17d42e6666ff7f6057c0272b49db969603b63dd96a2d120"
     },
     {
       "path": "public/js/admin-custom-requests.js",

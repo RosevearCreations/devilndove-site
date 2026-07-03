@@ -29,3 +29,11 @@ Future CAIP provider adapters must mark generated/meaningfully altered visual or
 ## Audit and change expectations
 
 Any rights change, evidence approval/rejection, segment approval, policy override, provider run, render request, public release handoff, or deletion/retention action must produce an actor, timestamp, reason/evidence, before/after meaningful state, and correlation/project ID.
+
+## Build 202 operational safeguards
+
+Technical probe success does not create consent, public rights, or a content claim. A derivative plan may be created internally for a non-blocked source, but a public destination remains forbidden unless upstream source safety and consent allow it.
+
+Secure review grants are classified as internal operational controls. They must be user-bound, time-limited, revocable, no-store, same-origin, and hash-only at rest. Raw tokens, R2 credentials, provider secrets, signed provider manifests, customer data, and privacy-sensitive labels must never be written to public static files, URL logs, or D1 event details.
+
+A later visual/AI provider must attach: policy version, prompt/model/provider version, evidence links, cost, retry record, data destination, retention terms, output disclosure, and human review state. It must never elevate an unverified asset into factual or public status.

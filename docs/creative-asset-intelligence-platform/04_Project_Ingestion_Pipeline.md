@@ -44,3 +44,13 @@ Approved/published product
 ## Failure contract
 
 An ingestion failure must leave existing source media, product records, Content Studio deliverables, and public releases untouched. CAIP records a failure/run event and offers a retry; it never substitutes a fallback image or makes an output look complete.
+
+## Build 202 operational branch
+
+After the reference-only ingestion sync, a reviewer may take one of three non-destructive actions:
+
+1. **Probe** — record catalog metadata and optional R2 `head()` metadata for the linked object.
+2. **Plan** — create a deterministic immutable derivative recipe/plan for a chosen CAIP asset.
+3. **Review securely** — issue a short-lived, same-administrator proxy grant for a bound R2 object.
+
+All three actions are independent from Content Studio selection and Release Board publication. A failure in any action must be visible in CAIP history but must not roll back product approval, Content Studio archive records, source-media rows, or existing public releases.

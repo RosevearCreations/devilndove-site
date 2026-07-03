@@ -1,6 +1,6 @@
 # Creative Asset Intelligence Platform (CAIP) — Authoritative Design Specification
 
-**Current implementation:** Build 201 foundation  
+**Current implementation:** Build 202 governed media-operations and secure-review foundation  
 **Design status:** authoritative subsystem specification  
 **Primary business roadmap:** `../../PROJECT_STATUS_AND_ROADMAP.md`  
 **Technical deployment handoff:** `../../AI_HANDOFF.md`
@@ -27,7 +27,7 @@ CAIP is **not** a second media library, a public publisher, a content-claim gene
 6. **One system of record per concern.** Product records remain product truth; Content Studio remains package/deliverable truth; CAIP remains asset/evidence/intelligence truth; Content Release Board remains public-release truth.
 7. **Operational honesty.** Do not show an encoded file, AI analysis, SEO result, consent, sale, or published post as complete unless a real provider/process has completed and been verified.
 
-## Current Build 201 scope
+## Current implementation scope — Builds 201–202
 
 Implemented:
 
@@ -88,3 +88,16 @@ The design uses current official guidance as constraints rather than as a promis
 - YouTube altered/synthetic-content disclosure: <https://support.google.com/youtube/answer/14328491>
 
 CAIP does not automatically perform actions based on any of these sources; they inform its future governance and provider-adapter requirements.
+
+## Build 202 — media operations and secure review extension
+
+Build 202 makes the design executable beyond the initial intelligence layer without turning CAIP into a media store or an ungoverned automation tool. Read `13_Media_Operations_Secure_Review.md` after the core architecture documents.
+
+The current authoritative CAIP implementation has four layers:
+
+1. **Source/intelligence:** Content Studio references, canonical CAIP assets, rights inheritance, evidence, story segments, and recommendations.
+2. **Technical observation:** catalog metadata plus optional bound-R2 object headers only; no arbitrary URL fetching or binary visual inference.
+3. **Future-output planning:** immutable derivative recipes and planned outputs with no output URL/object until a verified provider actually produces one.
+4. **Internal secure review:** short-lived same-origin, authenticated-admin proxy grants; raw tokens never enter D1 and do not make R2 objects public.
+
+The Build 202 routes and records are documented in `13_Media_Operations_Secure_Review.md`, `02_Database_Architecture.md`, `03_Storage_Architecture.md`, `05_Governance_Rights_Privacy.md`, `08_API_Event_and_Manifest_Contracts.md`, and `12_Testing_and_Acceptance.md`.

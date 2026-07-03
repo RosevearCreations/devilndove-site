@@ -54,3 +54,13 @@ Future export manifests require additional fields for provider configuration, so
 - Source refreshes preserve locked CAIP editorial text.
 - CAIP must not create duplicate projects during product approval/retry.
 - External provider/publish adapters must use explicit idempotency keys and must show existing output state before retrying.
+
+## Build 202 API extension
+
+`GET /api/admin/creative-assets?creative_project_id=<id>` includes an `operations` object. It contains technical observations, probe history, recipe/derivative plan state, safe grant metadata, disabled provider registry, budget-control rows, and client-safe templates.
+
+`POST /api/admin/creative-assets` supports `probe_asset`, `create_derivative_plan`, `approve_derivative_plan`, `create_secure_review_link`, and `revoke_secure_review_link`. All must return source-media-unchanged semantics. `create_secure_review_link` is the only action that returns a raw token-derived value; it returns it once as a same-origin URL and must never persist it in D1 or a manifest.
+
+`GET /api/admin/creative-asset-review?token=<opaque>` is an internal media proxy. It requires an authenticated administrator and valid bound grant. It streams the existing R2 object, with no caching and no public redirect.
+
+The Build 202 manifest may include sanitized technical observations, plans, grant expiry/use metadata, and provider registry state. It must never include a raw review token, token hash, provider secret, direct private object credential, or an unverified output URL.

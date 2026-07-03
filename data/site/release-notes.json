@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 202",
+    "date": "2026-07-02",
+    "title": "CAIP media operations foundation: safe technical evidence, immutable plans, and secure internal review",
+    "summary": "Expanded Creative Asset Intelligence Platform with metadata-only/bound-R2-header probe records, immutable derivative recipes and planned outputs, disabled provider and budget controls, and short-lived administrator-bound same-origin review links. The build does not read source media bodies for inference, generate derivatives, make R2 public, publish content, or delete/copy/reorder original files."
+  },
+  {
     "build": "Build 201",
     "date": "2026-07-01",
     "title": "Creative Asset Intelligence Platform: governed asset, evidence, and story control layer",
