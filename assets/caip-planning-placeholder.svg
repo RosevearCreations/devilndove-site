@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Creative asset planning placeholder</title>
+  <desc id="desc">Abstract frame, film strip, spark, and review card used while a creative asset has no preview.</desc>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#795a9f"/><stop offset="1" stop-color="#e8b65c"/></linearGradient></defs>
+  <rect width="1200" height="800" fill="#f4eef7"/><rect x="130" y="115" width="610" height="480" rx="35" fill="url(#g)" opacity=".9"/>
+  <rect x="190" y="170" width="490" height="370" rx="22" fill="#fff" opacity=".92"/>
+  <circle cx="435" cy="315" r="88" fill="#d3c1e0"/><path d="M245 500l120-118 84 78 65-55 120 95z" fill="#e8b65c"/>
+  <rect x="760" y="180" width="260" height="360" rx="22" fill="#2f2637"/><g fill="#f5d28b"><rect x="790" y="215" width="40" height="20" rx="4"/><rect x="950" y="215" width="40" height="20" rx="4"/><rect x="790" y="485" width="40" height="20" rx="4"/><rect x="950" y="485" width="40" height="20" rx="4"/></g><path d="M855 285l105 75-105 75z" fill="#fff"/>
+  <rect x="270" y="630" width="630" height="48" rx="24" fill="#ffffff"/><circle cx="310" cy="654" r="12" fill="#795a9f"/><rect x="345" y="643" width="300" height="22" rx="11" fill="#d3c1e0"/><rect x="675" y="643" width="180" height="22" rx="11" fill="#f0c56f"/>
+</svg>
