@@ -37,3 +37,8 @@
 - No video/thumbnail renderer, output verification, brand templates, disclosure injection, or cost/timeout enforcement.
 - No OAuth direct social/YouTube/GBP publishing, publish ledger, platform metrics ingestion, or automated replies.
 - No server-rendered per-story public page/sitemap expansion, automatic analytics attribution, or detail-job/custom-order source adapter.
+
+
+## Build 202 CAIP media-operations note
+
+CAIP now records safe metadata/R2-header observations, immutable future-output plans, and short-lived administrator-bound internal review grants. It still does not create derivatives or publish media; source-media preservation remains mandatory.

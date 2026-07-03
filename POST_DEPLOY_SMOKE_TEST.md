@@ -45,3 +45,17 @@ At about 360 px, 768 px, 1024 px, and desktop, test `/admin/creative-assets/`, C
 ## 6. Live-only evidence still required
 
 Local tests cannot prove Cloudflare D1/R2 bindings, remote public media resolution, signed R2 access, object retention, actual rendering, OAuth publishing, Google Business Profile acceptance, Search Console indexing, Merchant Center eligibility, Stripe/email/webhook flows, assistive technology, or device performance. Keep these as separate live evidence tasks.
+
+## Build 202 — CAIP media operations and secure review
+
+1. Confirm Builds 199–202 appear once each in `schema_migration_ledger`.
+2. Sign in as admin and open `/admin/creative-assets/`. Confirm projects load and mobile/desktop panels do not overflow.
+3. Select one CAIP asset already linked to an R2 upload. Click **Run safe probe**. Confirm the technical observation records a status and no product image/media rows, gallery order, or R2 source key changes.
+4. Test an asset without an R2 object key. Confirm it reports `metadata only`/warning instead of a 500 error or external URL fetch.
+5. Create every derivative plan type. Confirm output URL/object/checksum are blank and each record says planned/not created.
+6. Approve one derivative plan. Confirm it becomes internal approved only; no provider job, output, social post, or public release appears.
+7. Create a secure review link for a bound R2 asset. Confirm it opens while signed in as the issuing admin, streams the original file, and has no-store/same-origin/no-referrer headers.
+8. Use another admin account or signed-out browser if available. Confirm the same link is denied.
+9. Revoke the grant and confirm the link fails immediately. Create a new grant with a short expiry and confirm expiry denial after the time passes.
+10. Confirm `GET /api/admin/creative-assets` never returns a raw token/token hash, and the downloaded manifest contains only sanitized grant metadata.
+11. Recheck `/admin/content-studio/`, `/admin/content-publications/`, `/gallery/`, and `/workshop-journal/`; confirm no source media disappeared and existing releases stay unchanged.

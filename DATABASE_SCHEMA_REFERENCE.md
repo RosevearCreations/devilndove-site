@@ -1,12 +1,13 @@
-# Database Schema Reference — Build 201
+# Database Schema Reference — Build 202
 
-Use `database_full_schema.sql` for a fresh database. Use numbered migrations in order for an existing production database. The current migration is:
+Use `database_full_schema.sql` for a fresh database. Use numbered migrations in order for an existing production database. The current migrations are:
 
 ```text
 database_build201_creative_asset_intelligence_platform.sql
+database_build202_caip_media_operations_secure_review.sql
 ```
 
-Apply Build 201 after Build 199 and Build 200. The migration is additive and safe to rerun. It creates reference/control records only; it does not copy, move, delete, overwrite, reorder, feature, or publish product/R2/media records.
+Apply Build 201 after Builds 199 and 200, then apply Build 202. Both are additive and safe to rerun. Build 202 does not convert, move, copy, publish, or delete source media. It creates reference/control records only; it does not copy, move, delete, overwrite, reorder, feature, or publish product/R2/media records.
 
 ## Build 199 Content Automation Studio
 
@@ -38,3 +39,16 @@ Apply Build 201 after Build 199 and Build 200. The migration is additive and saf
 `creative_assets` is **not** a media-file table. It is a reference/control layer. A source is never deleted when a CAIP asset is updated, a project is refreshed, an analysis is rerun, a recommendation is rejected, a story is edited, or a CAIP project is unapproved.
 
 The established product-media integrity rules remain: ordinary product saves preserve media; only explicit media deletion can remove a product-image row; R2 source deletion remains a separate explicit asset-library action.
+
+## Build 202 — CAIP media operations and secure review
+
+- `creative_asset_probe_jobs` — bounded record of metadata/R2-head probe intent, status, retry ceiling, sanitized input/output evidence, and source fingerprint.
+- `creative_asset_technical_observations` — latest recorded technical observation for a CAIP asset/probe version; no media-body/visual inference implied.
+- `creative_derivative_recipes` — immutable source-specific future-output specification, including dimensions, aspect ratio, format, policy snapshot, and recipe hash.
+- `creative_asset_derivatives` — planned/future verified output lineage. In Build 202, output object/URL/checksum are intentionally empty and `verification_status` is `not_created`.
+- `creative_asset_access_grants` — SHA-256 hash-only short-lived authenticated review grants, expiry, view cap, user binding, and revocation state. Raw review tokens are never stored.
+- `creative_asset_access_audit` — secure-review grant events/outcomes without raw token or credential data.
+- `creative_provider_profiles` — disabled non-secret provider/capability registry. A row is not an active integration.
+- `creative_execution_budget_controls` — disabled CAD per-project/per-capability budget policy records for future provider work.
+
+The Build 202 schema is additive. It does not change the source-media ownership of `product_images`, `media_assets`, `content_project_media`, or R2 objects.

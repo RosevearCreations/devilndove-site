@@ -1,3 +1,28 @@
+# Build 202
+
+## CAIP media operations and secure internal review
+
+- Added the next CAIP foundation: metadata-only/catalog and bound-R2-header technical observations, immutable derivative recipes/plans, disabled non-secret provider profiles, disabled CAD budget controls, and administrator-bound secure review grants.
+- Added safe CAIP actions for probing an existing bound asset, creating/approving an immutable future-output plan, issuing/revoking a short-lived review link, and exporting a manifest that omits raw review tokens and token hashes.
+- Added the same-origin `/api/admin/creative-asset-review` proxy. It requires the issuing administrator session and a valid unrevoked grant, uses no-store/private response headers, and audits grant use without logging a raw token.
+- No derivative renderer, image/video AI, transcription service, thumbnail generator, direct R2 presigning, OAuth publishing adapter, or paid provider is enabled. A `planned` derivative with `not_created` verification status is intentionally not a created output.
+- Source integrity remains protected: Build 202 does not copy, transform, publish, move, reorder, make public, or delete original product media, Content Studio media references, or R2 source objects.
+- Added `database_build202_caip_media_operations_secure_review.sql`, updated all aggregate schemas, expanded `docs/creative-asset-intelligence-platform/` through `13_Media_Operations_Secure_Review.md`, and refreshed the two authoritative cross-project handoff documents.
+
+## Primary changed files
+
+- `functions/api/_lib/creativeAssetOperations.js`
+- `functions/api/admin/creative-assets.js`
+- `functions/api/admin/creative-asset-review.js`
+- `public/js/admin-creative-assets.js`
+- `admin/creative-assets/index.html`
+- `database_build202_caip_media_operations_secure_review.sql`
+- `database_full_schema.sql`, `database_schema.sql`, `database_store_schema.sql`, `database_upgrade_current_pass.sql`
+- `docs/creative-asset-intelligence-platform/13_Media_Operations_Secure_Review.md`
+- `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `POST_DEPLOY_SMOKE_TEST.md`
+
+---
+
 # Build 201
 
 ## Creative Asset Intelligence Platform (CAIP) foundation and enterprise specification
@@ -691,3 +716,12 @@
 - Made shop cards image-first and the phone menu a compact accordion popup.
 - Added accessible visual placeholder for missing product imagery.
 - Consolidated current handoff/roadmap documentation and expanded deployment smoke tests.
+
+## Build 202 — CAIP Media Operations and Secure Review
+
+- Added metadata-only/bound-R2-head CAIP probes with no arbitrary URL fetches, content inference, source modification, or output generation.
+- Added immutable derivative recipes and explicit planned-output records for website gallery, vertical social, YouTube thumbnail, and internal preview targets.
+- Added internal derivative-plan approval, disabled provider registry, and disabled CAD budget-control foundation.
+- Added short-lived, administrator-bound, hash-only secure review grants and same-origin R2 review proxy with expiry, access cap, revocation, no-store/no-referrer/same-origin/no-frame headers, and audit trail.
+- Added CAIP responsive operations panels, planning placeholder artwork, sanitized operational manifest content, Build 202 migration, and authoritative CAIP specification updates.
+- No rendering, thumbnail generation, vision/transcription AI, direct R2 public/presigned URLs, social OAuth, or auto publishing was enabled.
