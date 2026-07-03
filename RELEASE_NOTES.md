@@ -1,3 +1,19 @@
+# Build 206
+
+## Catalog media continuity, tax-rate normalization, and CAIP product bridge
+
+- Added searchable/filterable/sortable existing-product controls on `/admin/catalog/` for Product ID, name, SKU, slug, store state, review state, newest records, and media attention.
+- Fixed admin featured-image loading so it resolves product-record image → ordered product gallery → non-deleted linked media-library asset, with a visible source label and preview in the Product Editor.
+- Added a persistent product reference/context card to `/admin/catalog-media/?product_id=<id>#product-media-workflow`; it synchronizes Product ID to image, annotation, media-score, listing-profile, story, and SEO tooling.
+- Added Product ID/name/SKU/slug media-workspace search and direct Product Editor, CAIP, and storefront-preview links.
+- Normalized admin tax APIs so historic `13` and current `0.13` records display consistently as `13%`.
+- Extended CAIP GET loading with an optional `product_id`, selecting an already-linked CAIP project when present; no source media is copied, rendered, altered, published, or rights-elevated.
+- Added responsive CSS and an internal product-media placeholder SVG. Placeholders remain admin-only until real approved media is selected.
+- Consolidated current guidance into `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; retained older Markdown files as historical/specialist references via `MARKDOWN_INDEX.md`.
+- No D1 migration is required for Build 206. The separate login 500 remains evidence-first and is not claimed fixed without the returned Function detail/log.
+
+---
+
 # Build 202
 
 ## CAIP media operations and secure internal review

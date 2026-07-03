@@ -1,3 +1,9 @@
+# Build 206 media resolution note
+
+For Product Editor display, a featured image is resolved from the product record, ordered gallery, then a linked non-deleted media-library asset. The visual source label prevents operators from mistaking a valid media asset for a missing product image. The admin placeholder is never a public/catalog image and must not be placed into product schema or public Open Graph fields.
+
+---
+
 # Retired reference — Build 200
 
 This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.

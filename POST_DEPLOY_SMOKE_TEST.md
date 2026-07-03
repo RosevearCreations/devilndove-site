@@ -1,3 +1,14 @@
+# Build 206 — Catalog/Media/CAIP smoke test
+
+1. Sign in as admin. On `/admin/catalog/`, search a known Product ID and test Draft, Revision / needs changes, Approved, and Archived filters plus each sort option.
+2. Load a product with a populated `media_assets.public_url` and an empty `products.featured_image_url`. Confirm the Featured image URL field is filled, source-labelled, and previewed. Save, reload, and confirm it persists.
+3. Open `/admin/catalog-media/?product_id=34#product-media-workflow` (replace `34` with a real record). Confirm the top reference card matches the product and downstream panels show the same Product ID.
+4. Confirm HST/tax class displays as `13%` in product dropdowns, taxonomy manager, and table rows.
+5. Use the CAIP link. Confirm `/admin/creative-assets/?product_id=<id>` opens an already-linked project if one exists; otherwise it clearly reports no linked project and does not auto-create one.
+6. Do not treat these tests as login proof. Run the separate sanitized login response/log process in `AUTH_LOGIN_500_TROUBLESHOOTING.md`.
+
+---
+
 # Post-Deploy Smoke Test — Build 201
 
 Run after `database_build201_creative_asset_intelligence_platform.sql` and the complete Pages deployment. Test on the deployed domain while signed in as an administrator. Record date, user, browser/device width, product/content-project/creative-project IDs, public URLs, and Cloudflare request/error IDs.

@@ -1,3 +1,9 @@
+# Build 206 schema note
+
+Build 206 does not require D1 migration. Catalog APIs normalize a tax class stored as a fraction (`0.13`) or a historic whole percentage (`13`) into `tax_rate` (fraction) and `rate_percent` (display). Product-detail reads existing `products.featured_image_url`, `product_images`, and non-deleted `media_assets` safely; it does not create, delete, or change media rows on read.
+
+---
+
 # Database Schema Reference — Build 202
 
 Use `database_full_schema.sql` for a fresh database. Use numbered migrations in order for an existing production database. The current migrations are:

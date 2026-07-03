@@ -1,33 +1,29 @@
-# Devil n Dove Markdown Index — Build 202
+# Devil n Dove Markdown Index — Build 206
 
-## Start here: current authoritative cross-project documents
+## Read only these two first
 
-1. `AI_HANDOFF.md` — deployment order, active system boundaries, non-negotiable rules, known limits, and next implementation work.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — business/readiness status, completed Build 202 work, SEO guardrails, and prioritized roadmap.
+1. `AI_HANDOFF.md` — current technical truth, operating rules, deployment proof, current auth incident, and exact Build 206 tests.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — current business direction, completed work, search/media guardrails, and priority backlog.
 
-## Authoritative CAIP specification
+These are the canonical pair. All other root Markdown files are either specialist references or retained historical evidence.
 
-Read these after the two primary documents when working on Content Studio, CAIP, derivative/media operations, secure review, rendering, publishing, or source-media governance:
+## Active specialist references
 
-- `docs/creative-asset-intelligence-platform/README.md`
-- `00_Project_Charter.md` through `12_Testing_and_Acceptance.md`
-- `13_Media_Operations_Secure_Review.md` — Build 202 technical observation, derivative plan, secure-review, provider/budget, and acceptance specification.
+- `POST_DEPLOY_SMOKE_TEST.md` — production validation sequence.
+- `DATABASE_SCHEMA_REFERENCE.md` — database/table contract and no-migration notes.
+- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — Pages/D1/R2 configuration checklist.
+- `LOCAL_SEO_PLAYBOOK.md` — public-page/local-discovery quality controls.
+- `AUTH_LOGIN_500_TROUBLESHOOTING.md` — current evidence-first login debugging rules.
+- `docs/creative-asset-intelligence-platform/README.md` and `14_Catalog_Media_CAIP_Bridge.md` — CAIP architecture and Build 206 bridge contract.
+- `REPO_RULES.md` — security, privacy, source-media, and release boundaries.
+- `RELEASE_NOTES.md` — chronological build record.
 
-## Active operational references
+## Retained/historical reference
 
-- `DATABASE_SCHEMA_REFERENCE.md` — current schema reference including Build 202 CAIP records.
-- `POST_DEPLOY_SMOKE_TEST.md` — release proof steps, including Build 202 secure-review tests.
-- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — Pages/D1/R2 environment variables and bindings.
-- `REPO_RULES.md` — security, source-media, private-data, SEO, and release constraints.
-- `RELEASE_NOTES.md` — Build history and customer-visible/internal change summary.
-- `LIVE_TESTING_GUIDE.md` — broader browser/device tests.
+`AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AND_RISKS.md`, `COMPETITIVE.md`, prior build guides, and archived notes remain for evidence. They do not override the canonical pair.
 
-## Historical / retained reference
+## Markdown consolidation result
 
-The following remain for evidence and older implementation details only. They must not override the two primary documents or CAIP specification:
-
-- `AI_CONTEXT.md`, `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AND_RISKS.md`, `NEW_CHAT_STATUS.md`, `COMPETITIVE.md`
-- prior build testing/guidance documents
-- `docs/archive/*`
-
-Use the current primary documents for all new work. Do not delete historical guidance unless it has been superseded, archived, and verified against a live deployment.
+- Canonical active planning: **2 documents**.
+- Specialist operational documentation: linked only where needed.
+- Historical Markdown: retained instead of deleted, with this index preventing accidental use as current instructions.

@@ -1,3 +1,13 @@
+# Build 206 sanity checkpoint
+
+- Catalog featured media has a read-only three-layer resolver and visible source label.
+- Tax rate display is normalized at API and UI boundaries; no D1 rate migration is required.
+- Catalog Media has one product-context selector and mobile-first fallback layout.
+- CAIP receives optional product context but remains reference-only.
+- Outstanding separate incident: login POST 500 needs the safe response/log detail; current D1 `users`/`sessions` schema is already confirmed.
+
+---
+
 # Sanity Health Check — Build 201
 
 ## Local static/implementation status
