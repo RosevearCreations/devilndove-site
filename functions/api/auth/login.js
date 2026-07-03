@@ -176,8 +176,30 @@ async function handleLoginPost(context) {
   if (!(await verifyStoredPasswordHash(password, user.password_hash))) return json({ ok: false, error: "Invalid email or password.", code: "AUTH_INVALID_CREDENTIALS" }, 401);
 
   const sessionToken = makeSessionToken();
-  await env.DB.prepare("INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) VALUES (?, ?, ?, datetime('now', '+30 days'), CURRENT_TIMESTAMP)").bind(Number(user.user_id || 0), sessionToken, sessionToken).run();
-  const session = await env.DB.prepare("SELECT session_id, user_id, session_token, token, expires_at, created_at FROM sessions WHERE user_id = ? ORDER BY session_id DESC LIMIT 1").bind(Number(user.user_id || 0)).first();
+  try {
+    await env.DB.prepare("INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) VALUES (?, ?, ?, datetime('now', '+30 days'), CURRENT_TIMESTAMP)").bind(Number(user.user_id || 0), sessionToken, sessionToken).run();
+  } catch (error) {
+    return json({
+      ok: false,
+      error: "Login is temporarily unavailable.",
+      code: "AUTH_SESSION_CREATE_FAILED",
+      hint: "The account was verified, but D1 could not create its login session. Check the sessions table columns and the response detail.",
+      detail: compactError(error)
+    }, 503, { "X-DD-Auth-Code": "AUTH_SESSION_CREATE_FAILED" });
+  }
+
+  let session;
+  try {
+    session = await env.DB.prepare("SELECT session_id, user_id, session_token, token, expires_at, created_at FROM sessions WHERE user_id = ? ORDER BY session_id DESC LIMIT 1").bind(Number(user.user_id || 0)).first();
+  } catch (error) {
+    return json({
+      ok: false,
+      error: "Login is temporarily unavailable.",
+      code: "AUTH_SESSION_READ_FAILED",
+      hint: "D1 created a session but could not read it back. Check the sessions table columns and the response detail.",
+      detail: compactError(error)
+    }, 503, { "X-DD-Auth-Code": "AUTH_SESSION_READ_FAILED" });
+  }
   await env.DB.prepare("UPDATE users SET last_login_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE user_id=?").bind(Number(user.user_id || 0)).run().catch(() => null);
 
   return json({
