@@ -50,3 +50,8 @@ A CAIP error is non-blocking. It is recorded as a warning and cannot undo produc
 The system does not yet render MP4s, generate thumbnail files, use an AI model, transcribe recordings, upload to platforms, retrieve metrics, create derivatives, or use signed private R2 transfers. Those future adapters must follow the CAIP contract and be separately verified.
 
 For detailed CAIP architecture, source controls, storage, governance, provider rules, APIs, operations, migration safety, and acceptance criteria, use `docs/creative-asset-intelligence-platform/README.md`.
+
+
+## Build 202 CAIP media-operations note
+
+CAIP now records safe metadata/R2-header observations, immutable future-output plans, and short-lived administrator-bound internal review grants. It still does not create derivatives or publish media; source-media preservation remains mandatory.
