@@ -6,10 +6,10 @@ This file is preserved as historical implementation evidence only. It does not d
 
 Current technical context is in `AI_HANDOFF.md`. Current business/roadmap context is in `PROJECT_STATUS_AND_ROADMAP.md`. Content Automation Studio details are in `CONTENT_AUTOMATION_STUDIO.md`. Retained history remains under `docs/archive/`.
 
-## Build 203 login reliability repair (July 3, 2026)
+## Build 204 authentication schema compatibility safeguard — 2026-07-03
 
-- Devil n Dove authentication is Cloudflare Pages Functions + D1 (`DB` binding), not Supabase.
-- `/functions/api/auth/login.js` now exposes safe runtime readiness on GET and stable response codes/hints on POST.
-- A live diagnostic showed the preview endpoint serving homepage HTML at `/api/auth/login`; that indicates Pages Functions were not active from the deployed project root.
-- Deploy from the folder that directly contains `functions/`, `_routes.json`, `wrangler.toml`, and `index.html`; do not leave these inside an extra archive folder unless Cloudflare Root directory is set to that folder.
-- Added `AUTH_LOGIN_500_TROUBLESHOOTING.md` and `database_auth_runtime_diagnostics.sql`.
+- Devil n Dove auth uses Cloudflare Pages Functions plus D1 binding `DB`; it does not use Supabase.
+- The observed `POST /api/auth/login 500` is past route activation: the live GET probe confirms Functions and `DB` exist.
+- A historic bootstrap still exists in source that created `members` and an incompatible hashed-token `sessions` table. The current app expects `users` and `sessions(user_id, session_token, token, ...)`.
+- Build 204 detects that state as `AUTH_LEGACY_SCHEMA` before it performs a query/insert, returns a safe actionable code/hint, and exposes those values in the browser login message.
+- `database_auth_legacy_to_current_repair.sql` is a one-time, preservation-first migration: it copies `members` to `users`, archives the old `sessions` table, creates current sessions, and intentionally requires fresh sign-in because raw legacy session tokens cannot be recovered from hashes.

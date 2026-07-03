@@ -1,99 +1,55 @@
-# Devil n Dove login 500 troubleshooting
+# Devil n Dove login failure troubleshooting — Build 204
 
-## Scope
+## What the current browser error means
 
-Devil n Dove login uses **Cloudflare Pages Functions plus Cloudflare D1**. It does not use Supabase.
-
-The login route is:
+A browser entry such as:
 
 ```text
-/api/auth/login
+auth.js:136 POST /api/auth/login 500 (Internal Server Error)
 ```
 
-The required D1 binding is:
+means the browser reached the Cloudflare Pages Function. It does **not** mean that the password field, browser cache, or login button caused the fault.
+
+Devil n Dove uses **Cloudflare Pages Functions + Cloudflare D1**, with the D1 binding named `DB`. It does not use Supabase.
+
+## First check: safely identify the database layout
+
+Open this URL in a signed-out browser after deploying this build:
 
 ```text
-DB
+https://devilndove-site.pages.dev/api/auth/login
 ```
 
-The required D1 database tables are:
+Expected JSON includes an `auth_database.code` value:
 
-```text
-users
-sessions
-```
-
-## First check: are Pages Functions active?
-
-Open this URL while signed out:
-
-```text
-https://devilndove.com/api/auth/login
-```
-
-Expected response: JSON with all of the following:
-
-```json
-{
-  "functions_active": true,
-  "has_db_binding": true,
-  "status": "ready"
-}
-```
-
-If the URL shows the public home page instead of JSON, Cloudflare is serving a static fallback. The `functions` directory is not being deployed from the active project root.
-
-### Cloudflare root-directory check
-
-In **Cloudflare Dashboard → Workers & Pages → devilndove-site → Settings → Builds & deployments**:
-
-1. Confirm **Root directory** points to the folder that directly contains all of these entries:
-   - `functions/`
-   - `_routes.json`
-   - `wrangler.toml`
-   - `index.html`
-2. Confirm **Build output directory** is `.` for this static Pages project.
-3. Trigger a fresh production deployment.
-4. Re-open `/api/auth/login` before attempting another login.
-
-> The `functions` directory must be at the Pages project root. A nested archive folder such as `devilndove-site-main/functions/` will not work unless Cloudflare's Root directory is explicitly set to `devilndove-site-main`.
-
-## Second check: D1 binding and schema
-
-When `/api/auth/login` responds with JSON, look at `auth_database`:
-
-| Result | Meaning | Action |
+| Code | Meaning | Correct action |
 |---|---|---|
-| `AUTH_READY` | Function, binding, and core tables are reachable. | Retry the login and inspect the failed request response only if it still fails. |
-| `AUTH_DB_BINDING_MISSING` | The function ran, but Production does not expose `env.DB`. | Add/reconnect the D1 binding named `DB`. |
-| `AUTH_SCHEMA_INCOMPLETE` | D1 is reachable but `users` or `sessions` is missing. | Run the current application schema, then recheck. |
-| `AUTH_DB_UNREACHABLE` | The binding could not query D1. | Inspect Cloudflare Function logs and D1 status/configuration. |
+| `AUTH_READY` | Pages Function, D1 binding, and current auth columns are available. | Retry login. If it fails, use the `detail` field in the failed response plus the Pages Function log. |
+| `AUTH_DB_BINDING_MISSING` | The Function cannot access `env.DB`. | In Pages > Settings > Bindings, connect the Production D1 database with the exact binding name `DB`. |
+| `AUTH_LEGACY_SCHEMA` | The original `members` table and hashed-token `sessions` layout are still active. | Run `database_auth_legacy_to_current_repair.sql` exactly once after a D1 backup/export. |
+| `AUTH_SCHEMA_INCOMPLETE` | Current tables are missing required columns. | Run `database_auth_runtime_diagnostics.sql`, then use the reviewed current D1 schema or a targeted repair. |
+| `AUTH_DB_UNREACHABLE` | The D1 binding exists but D1 did not answer a query. | Check the Function log and D1 status/binding. |
 
-Run `database_auth_runtime_diagnostics.sql` in **Cloudflare Dashboard → Storage & Databases → D1 → devilndove-prod → Console**. It is read-only and does not disclose passwords, tokens, or email addresses.
+## Confirmed legacy-layout repair
 
-## Third check: capture the actual login result
+Run this only when the endpoint returns `AUTH_LEGACY_SCHEMA`.
 
-On the login page:
+1. Open **Cloudflare Dashboard → Storage & Databases → D1 → `devilndove-prod` → Console**.
+2. Export or back up the database first.
+3. Run `database_auth_runtime_diagnostics.sql` and save the output.
+4. Run `database_auth_legacy_to_current_repair.sql` once.
+5. Reopen `/api/auth/login`. It should show `AUTH_READY`.
+6. Login again. Legacy sessions are archived and users must sign in afresh, but existing user email addresses and password hashes are retained.
 
-1. Press `F12`.
-2. Open **Network**.
-3. Check **Preserve log**.
-4. Submit the login once.
-5. Select the failed `auth/login` request.
-6. Open **Response**.
-7. Copy the `code`, `hint`, and `detail` fields.
+Do not use this repair if `sessions` is already the current table shape. It deliberately renames a legacy `sessions` table to `sessions_legacy_build204` so the old audit information remains available.
 
-The expected non-500 cases are:
+## Capture an unexpected failure
 
-| HTTP status | Code | Meaning |
-|---:|---|---|
-| 400 | `AUTH_EMAIL_REQUIRED`, `AUTH_PASSWORD_REQUIRED`, or `AUTH_INVALID_JSON` | Form/request problem. |
-| 401 | `AUTH_INVALID_CREDENTIALS` | Email/password did not match. |
-| 403 | `AUTH_ACCOUNT_INACTIVE` | Account exists but is disabled. |
-| 500 | `AUTH_DB_*` or `AUTH_LOGIN_UNEXPECTED_FAILURE` | Deployment, D1, schema, or unexpected function error. |
+The login page now displays the server `code` and safe `hint`. For a remaining `AUTH_LOGIN_UNEXPECTED_FAILURE`:
 
-## Do not do these things
-
-- Do not add `DB` as an encrypted text secret. It must be a **D1 database binding**.
-- Do not paste a D1 token, password hash, or session token into the browser console or a public ticket.
-- Do not create a second `users` or `sessions` table with a different structure. Use the schema included in this project.
+1. Press `F12` → **Network**.
+2. Enable **Preserve log**.
+3. Attempt login once.
+4. Select the failed `auth/login` request and open **Response**.
+5. Copy the JSON `code`, `hint`, and `detail`; do not copy session tokens, passwords, or cookie values.
+6. Open Cloudflare **Workers & Pages → devilndove-site → Logs**, find the matching `auth_login_failed` entry, and compare its error.
