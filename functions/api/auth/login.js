@@ -2,12 +2,13 @@
 // Brief description: Logs an existing user in, validates the stored password hash,
 // creates a fresh session token, and returns the user plus session data expected
 // by the shared public/js/auth.js helper.
+//
+// Build 203 reliability note:
+// - Devil n Dove authentication uses Cloudflare D1 (binding name: DB), not Supabase.
+// - GET exposes a safe, no-secret readiness result so a deployment-root or D1-schema
+//   problem is identifiable before a visitor submits credentials.
+// - POST returns stable error codes and a useful non-secret hint instead of a generic 500.
 
-// Build 188 route activation hotfix: the live deployment served the public
-// homepage HTML for GET /api/auth/login and returned 405 for POST. That means
-// Pages Functions were not being invoked for /api/* on that deployment. This
-// handler stays method-safe once Functions are active, while _routes.json tells
-// Cloudflare Pages to invoke Functions for /api/*.
 const AUTH_ROUTE_HEADERS = {
   "Content-Type": "application/json",
   "X-Content-Type-Options": "nosniff",
@@ -67,37 +68,96 @@ function buildSessionCookie(request, token, maxAgeSeconds = 60 * 60 * 24 * 30) {
   const host = String(url.hostname || "").toLowerCase();
   const parts = [
     `dd_auth_token=${encodeURIComponent(String(token || ""))}`,
-    'Path=/',
+    "Path=/",
     `Max-Age=${Number(maxAgeSeconds || 0)}`,
-    'HttpOnly',
-    'SameSite=Lax'
+    "HttpOnly",
+    "SameSite=Lax"
   ];
-  if (secure) parts.push('Secure');
-  if (host === 'devilndove.com' || host.endsWith('.devilndove.com')) parts.push('Domain=.devilndove.com');
-  return parts.join('; ');
+  if (secure) parts.push("Secure");
+  if (host === "devilndove.com" || host.endsWith(".devilndove.com")) parts.push("Domain=.devilndove.com");
+  return parts.join("; ");
+}
+
+function compactError(error) {
+  const text = String(error?.message || error || "Unknown error").replace(/\s+/g, " ").trim();
+  return text.slice(0, 240) || "Unknown error";
+}
+
+async function inspectAuthDatabase(env) {
+  const db = env?.DB;
+  if (!db || typeof db.prepare !== "function") {
+    return {
+      binding_available: false,
+      ping: "not_run",
+      users_table: false,
+      sessions_table: false,
+      ready: false,
+      code: "AUTH_DB_BINDING_MISSING",
+      hint: "Add the Production D1 binding named DB to the Pages project."
+    };
+  }
+
+  try {
+    await db.prepare("SELECT 1 AS ok").first();
+    const tableResult = await db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('users', 'sessions')").all();
+    const tableNames = new Set((tableResult?.results || []).map((row) => String(row?.name || "").toLowerCase()));
+    const usersTable = tableNames.has("users");
+    const sessionsTable = tableNames.has("sessions");
+    const ready = usersTable && sessionsTable;
+    return {
+      binding_available: true,
+      ping: "ok",
+      users_table: usersTable,
+      sessions_table: sessionsTable,
+      ready,
+      code: ready ? "AUTH_READY" : "AUTH_SCHEMA_INCOMPLETE",
+      hint: ready
+        ? "The D1 binding and core authentication tables are reachable."
+        : "Run the current Devil n Dove D1 schema against the bound production database."
+    };
+  } catch (error) {
+    return {
+      binding_available: true,
+      ping: "failed",
+      users_table: false,
+      sessions_table: false,
+      ready: false,
+      code: "AUTH_DB_UNREACHABLE",
+      hint: "Check the DB binding, D1 database availability, and the Pages deployment log.",
+      detail: compactError(error)
+    };
+  }
+}
+
+function loginUnavailable(authDatabase) {
+  return json({
+    ok: false,
+    error: "Login is temporarily unavailable.",
+    code: authDatabase.code || "AUTH_DB_UNAVAILABLE",
+    hint: authDatabase.hint || "Check the D1 DB binding and authentication tables."
+  }, 500, { "X-DD-Auth-Code": authDatabase.code || "AUTH_DB_UNAVAILABLE" });
 }
 
 async function handleLoginPost(context) {
   const { request, env } = context;
-  if (!env?.DB) {
-    return json({ ok: false, error: "D1 binding DB is not available on this deployment." }, 500);
-  }
+  const authDatabase = await inspectAuthDatabase(env);
+  if (!authDatabase.ready) return loginUnavailable(authDatabase);
 
   let body;
-  try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON body." }, 400); }
+  try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON body.", code: "AUTH_INVALID_JSON" }, 400); }
   const email = normalizeEmail(body.email);
   const password = String(body.password || "");
-  if (!email) return json({ ok: false, error: "Email is required." }, 400);
-  if (!password) return json({ ok: false, error: "Password is required." }, 400);
+  if (!email) return json({ ok: false, error: "Email is required.", code: "AUTH_EMAIL_REQUIRED" }, 400);
+  if (!password) return json({ ok: false, error: "Password is required.", code: "AUTH_PASSWORD_REQUIRED" }, 400);
 
-  const user = await env.DB.prepare(`SELECT user_id, email, password_hash, display_name, role, is_active, created_at, updated_at FROM users WHERE LOWER(email)=LOWER(?) LIMIT 1`).bind(email).first();
-  if (!user) return json({ ok: false, error: "Invalid email or password." }, 401);
-  if (Number(user.is_active || 0) !== 1) return json({ ok: false, error: "This account is inactive." }, 403);
-  if (!(await verifyStoredPasswordHash(password, user.password_hash))) return json({ ok: false, error: "Invalid email or password." }, 401);
+  const user = await env.DB.prepare("SELECT user_id, email, password_hash, display_name, role, is_active, created_at, updated_at FROM users WHERE LOWER(email)=LOWER(?) LIMIT 1").bind(email).first();
+  if (!user) return json({ ok: false, error: "Invalid email or password.", code: "AUTH_INVALID_CREDENTIALS" }, 401);
+  if (Number(user.is_active || 0) !== 1) return json({ ok: false, error: "This account is inactive.", code: "AUTH_ACCOUNT_INACTIVE" }, 403);
+  if (!(await verifyStoredPasswordHash(password, user.password_hash))) return json({ ok: false, error: "Invalid email or password.", code: "AUTH_INVALID_CREDENTIALS" }, 401);
 
   const sessionToken = makeSessionToken();
-  await env.DB.prepare(`INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) VALUES (?, ?, ?, datetime('now', '+30 days'), CURRENT_TIMESTAMP)`).bind(Number(user.user_id || 0), sessionToken, sessionToken).run();
-  const session = await env.DB.prepare(`SELECT session_id, user_id, session_token, token, expires_at, created_at FROM sessions WHERE user_id = ? ORDER BY session_id DESC LIMIT 1`).bind(Number(user.user_id || 0)).first();
+  await env.DB.prepare("INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) VALUES (?, ?, ?, datetime('now', '+30 days'), CURRENT_TIMESTAMP)").bind(Number(user.user_id || 0), sessionToken, sessionToken).run();
+  const session = await env.DB.prepare("SELECT session_id, user_id, session_token, token, expires_at, created_at FROM sessions WHERE user_id = ? ORDER BY session_id DESC LIMIT 1").bind(Number(user.user_id || 0)).first();
   return json({
     ok: true,
     message: "Login successful.",
@@ -114,13 +174,15 @@ export async function onRequest(context) {
   if (method === "OPTIONS") return empty(204);
 
   if (method === "GET" || method === "HEAD") {
+    const authDatabase = await inspectAuthDatabase(context?.env);
     return json({
       ok: true,
       route: "/api/auth/login",
-      status: "ready",
+      status: authDatabase.ready ? "ready" : "needs_configuration",
       accepts: ["POST"],
       functions_active: true,
-      has_db_binding: !!context?.env?.DB,
+      has_db_binding: authDatabase.binding_available,
+      auth_database: authDatabase,
       note: "Submit login credentials with POST JSON: { email, password }."
     }, 200);
   }
@@ -129,12 +191,15 @@ export async function onRequest(context) {
     try {
       return await handleLoginPost(context);
     } catch (error) {
-      console.error("auth_login_failed", error);
+      const detail = compactError(error);
+      console.error("auth_login_failed", { detail });
       return json({
         ok: false,
-        error: "Login is temporarily unavailable. Check the DB binding and auth tables, then try again.",
-        detail: String(error?.message || error || "Unknown login error")
-      }, 500);
+        error: "Login is temporarily unavailable.",
+        code: "AUTH_LOGIN_UNEXPECTED_FAILURE",
+        hint: "Open the failed request Response tab and the Cloudflare Pages Function log; compare the error with AUTH_LOGIN_500_TROUBLESHOOTING.md.",
+        detail
+      }, 500, { "X-DD-Auth-Code": "AUTH_LOGIN_UNEXPECTED_FAILURE" });
     }
   }
 
