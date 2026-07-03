@@ -733,3 +733,6 @@
 - Updated both shared copies of `auth.js` so login error messages show server code and safe remediation hint.
 - Added `database_auth_legacy_to_current_repair.sql`, `database_auth_runtime_diagnostics.sql`, and `AUTH_LOGIN_500_TROUBLESHOOTING.md`.
 - The legacy repair preserves legacy member records/password hashes and archives incompatible hashed session rows. Existing browser sessions are invalidated safely and users sign in again.
+
+
+Build 205 auth correction: the Build 204 D1-console repair used PRAGMA foreign_keys = OFF, which D1 does not permit within its implicit transaction. Replace it with database_auth_legacy_to_current_repair_d1_console.sql and execute its numbered blocks separately. Login errors now render the safe Function detail and classify session create/read failures.
