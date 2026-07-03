@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentSharedPendingActions = [];
   let latestProductRows = [];
   let latestReadinessByProductId = new Map();
+  bindProductPickerControls();
 
   function show(el) {
     if (el) el.style.display = "";
@@ -160,19 +161,75 @@ document.addEventListener("DOMContentLoaded", async () => {
     else hide(errorEl);
   }
 
+  function pickerText(product) {
+    return [
+      product?.product_id,
+      product?.product_number,
+      product?.name,
+      product?.slug,
+      product?.sku,
+      product?.color_names_text,
+      product?.color_name,
+      product?.status,
+      product?.review_status
+    ].map((value) => String(value || '').toLowerCase()).join(' ');
+  }
+
+  function pickerRows(products) {
+    const search = String(document.getElementById('existingProductSearch')?.value || '').trim().toLowerCase();
+    const status = String(document.getElementById('existingProductStatusFilter')?.value || 'all').toLowerCase();
+    const review = String(document.getElementById('existingProductReviewFilter')?.value || 'all').toLowerCase();
+    const sort = String(document.getElementById('existingProductSort')?.value || 'updated_desc');
+    const rows = (Array.isArray(products) ? products : []).filter((product) => {
+      if (status !== 'all' && String(product?.status || '').toLowerCase() !== status) return false;
+      if (review !== 'all' && String(product?.review_status || '').toLowerCase() !== review) return false;
+      return !search || pickerText(product).includes(search);
+    });
+    const valueDate = (value) => {
+      const parsed = Date.parse(String(value || ''));
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+    return rows.sort((left, right) => {
+      if (sort === 'name_asc') return String(left?.name || '').localeCompare(String(right?.name || ''), undefined, { sensitivity: 'base' });
+      if (sort === 'id_desc') return Number(right?.product_id || 0) - Number(left?.product_id || 0);
+      if (sort === 'created_desc') return valueDate(right?.created_at) - valueDate(left?.created_at) || Number(right?.product_id || 0) - Number(left?.product_id || 0);
+      if (sort === 'media_attention') {
+        const leftMissing = String(left?.featured_image_url || '').trim() ? 0 : 1;
+        const rightMissing = String(right?.featured_image_url || '').trim() ? 0 : 1;
+        return rightMissing - leftMissing || Number(left?.image_count || 0) - Number(right?.image_count || 0) || String(left?.name || '').localeCompare(String(right?.name || ''));
+      }
+      return valueDate(right?.updated_at || right?.created_at) - valueDate(left?.updated_at || left?.created_at) || Number(right?.product_id || 0) - Number(left?.product_id || 0);
+    });
+  }
+
   function renderProductPicker(products) {
     const select = document.getElementById("existingProductSelect");
     if (!select) return;
-    const rows = Array.isArray(products) ? products : [];
+    const previouslySelected = String(select.value || '');
+    const allRows = Array.isArray(products) ? products : [];
+    const rows = pickerRows(allRows);
     select.innerHTML = `<option value="">Choose an existing product...</option>` + rows.map((product) => {
       const productId = Number(product.product_id || 0);
       const name = escapeHtml(product.name || `Product #${productId}`);
       const slug = escapeHtml(product.slug || '');
       const sku = escapeHtml(product.sku || '');
-      const colour = escapeHtml(product.color_names_text || product.color_name || '');
-      const suffix = [slug, sku, colour].filter(Boolean).join(' • ');
-      return `<option value="${productId}">${name}${suffix ? ` — ${suffix}` : ''}</option>`;
+      const workflow = [product.status, product.review_status].filter(Boolean).map((value) => String(value).replace(/_/g, ' ')).join(' / ');
+      const suffix = [slug, sku, workflow].filter(Boolean).join(' • ');
+      return `<option value="${productId}">#${productId} — ${name}${suffix ? ` — ${suffix}` : ''}</option>`;
     }).join('');
+    if (previouslySelected && rows.some((product) => String(product.product_id) === previouslySelected)) select.value = previouslySelected;
+    const count = document.getElementById('existingProductCount');
+    if (count) count.textContent = `${rows.length} of ${allRows.length} product${allRows.length === 1 ? '' : 's'} available in this picker.`;
+  }
+
+  function bindProductPickerControls() {
+    const rerender = () => renderProductPicker(latestProductRows);
+    ['existingProductSearch', 'existingProductStatusFilter', 'existingProductReviewFilter', 'existingProductSort'].forEach((id) => {
+      const field = document.getElementById(id);
+      if (!field || field.dataset.ddPickerBound === '1') return;
+      field.dataset.ddPickerBound = '1';
+      field.addEventListener(field.tagName === 'INPUT' ? 'input' : 'change', rerender);
+    });
   }
 
 
@@ -276,7 +333,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const inventoryQty = Number(product.inventory_quantity || 0);
       const inventory = escapeHtml(String(inventoryQty));
       const shipping = escapeHtml(yesNo(product.requires_shipping));
-      const taxClass = escapeHtml(product.tax_class_name || product.tax_class_code || "");
+      const taxClassName = escapeHtml(product.tax_class_name || product.tax_class_code || "");
+      const rawTaxRate = Number(product.rate_percent ?? product.tax_rate ?? 0);
+      const taxRatePercent = rawTaxRate > 1 ? rawTaxRate : Number((rawTaxRate * 100).toFixed(3));
+      const taxClass = Number(product.taxable) === 0
+        ? 'Non-taxable'
+        : (taxClassName ? `${taxClassName}${Number.isFinite(taxRatePercent) ? ` (${escapeHtml(String(taxRatePercent))}%)` : ''}` : 'Tax class not assigned');
       const isArchived = String(product.status || "").toLowerCase() === "archived";
       const lowStock = Number(product.low_stock_flag || 0) === 1;
       const ready = Number(product.is_ready_for_storefront || 0) === 1;

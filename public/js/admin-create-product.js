@@ -184,8 +184,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (taxClassSelect) {
         const currentValue = normalizeText(taxClassSelect.value);
         taxClassSelect.innerHTML = `<option value="">Select tax class</option>` + (Array.isArray(data.tax_classes) ? data.tax_classes : []).map((taxClass) => {
-          const ratePercent = Number(taxClass.tax_rate || taxClass.rate_percent || 0);
-          const friendlyRate = ratePercent > 1 ? ratePercent : Math.round(ratePercent * 100);
+          const rawRate = Number(taxClass.rate_percent ?? taxClass.tax_rate ?? 0);
+          const friendlyRate = rawRate > 1 ? rawRate : Number((rawRate * 100).toFixed(3));
           return `<option value="${Number(taxClass.tax_class_id || 0)}">${String(taxClass.name || "Tax class")} (${friendlyRate}%)</option>`;
         }).join("");
         if (currentValue) taxClassSelect.value = currentValue;

@@ -830,6 +830,12 @@ document.addEventListener('DOMContentLoaded', () => {
       await loadImages();
     });
     document.addEventListener('dd:product-editor-cleared', clearImagesPanel);
+    const contextProductId = Number(window.DDProductMediaContext?.getProductId?.() || new URLSearchParams(window.location.search).get('product_id') || 0);
+    if (contextProductId) {
+      const field = document.getElementById('productImagesProductId');
+      if (field) field.value = String(contextProductId);
+      loadImages();
+    }
     mountEl.addEventListener('click', onClick);
     mountEl.addEventListener('input', (event) => {
       if (event.target?.closest?.('[data-product-image-row]')) {

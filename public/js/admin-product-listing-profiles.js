@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const mount=document.getElementById('productListingProfileAdminMount'); if(!mount || !window.DDAuth) return;
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  let rows=[]; let selectedId=0;
+  let rows=[]; let selectedId=Number(window.DDProductMediaContext?.getProductId?.() || new URLSearchParams(window.location.search).get('product_id') || 0) || 0;
   function msg(text,error=false){const el=mount.querySelector('[data-listing-profile-msg]'); if(!el)return;el.textContent=text||'';el.className=`small status-note ${error?'danger':'success'}`;el.style.display=text?'block':'none';}
   async function request(method='GET',body=null){const res=await window.DDAuth.apiFetch('/api/admin/product-listing-profiles',{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});const data=await res.json().catch(()=>({}));if(!res.ok||data?.ok===false)throw new Error(data?.error||'Listing profile request failed.');return data;}
   function field(name,label,rows=3,help=''){return `<label class="small admin-field-label"><span>${esc(label)}</span><textarea rows="${rows}" data-lp-field="${esc(name)}" placeholder="${esc(help)}"></textarea></label>`;}
@@ -12,5 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function form(){const values={product_id:selectedId};mount.querySelectorAll('[data-lp-field]').forEach((el)=>values[el.getAttribute('data-lp-field')]=el.value||'');return values;}
   function bind(){mount.querySelector('[data-lp-product]')?.addEventListener('change',(event)=>{selectedId=Number(event.target.value||0); render({products:rows,summary:{total_products:rows.length,with_profile:rows.filter((row)=>Number(row.product_listing_profile_id||0)>0).length}});});mount.querySelector('[data-lp-refresh]')?.addEventListener('click',load);mount.querySelector('[data-lp-save]')?.addEventListener('click',async()=>{try{msg('Saving buyer-facing listing facts...');const data=await request('POST',form());render(data);msg(data.message||'Listing facts saved.');}catch(error){msg(error.message||'Unable to save listing facts.',true);}});}
   async function load(){try{msg('Loading listing profiles...');const data=await request();render(data);msg('Listing profiles loaded.');}catch(error){mount.innerHTML=`<div class="status-note danger">${esc(error.message||'Unable to load listing profiles.')}</div>`;}}
+  document.addEventListener('dd:product-media-context-changed',(event)=>{ const productId=Number(event?.detail?.product_id||0); if(!productId) return; selectedId=productId; if(rows.length) render({products:rows,summary:{total_products:rows.length,with_profile:rows.filter((row)=>Number(row.product_listing_profile_id||0)>0).length}}); });
   load();
 });

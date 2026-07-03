@@ -5,6 +5,7 @@
   if (!mount) return;
   const query = new URLSearchParams(window.location.search);
   const requestedProjectId = Number(query.get('creative_project_id') || query.get('project_id') || 0);
+  const requestedProductId = Number(query.get('product_id') || 0);
   const state = { projects: [], contentProjects: [], detail: null, operations: null, busy: false, reviewLink: null };
 
   const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
@@ -35,7 +36,10 @@
   }
 
   async function api(payload = null, projectId = 0) {
-    const path = projectId ? `/api/admin/creative-assets?creative_project_id=${encodeURIComponent(projectId)}` : '/api/admin/creative-assets';
+    const params = new URLSearchParams();
+    if (projectId) params.set('creative_project_id', String(projectId));
+    else if (requestedProductId) params.set('product_id', String(requestedProductId));
+    const path = `/api/admin/creative-assets${params.toString() ? `?${params.toString()}` : ''}`;
     const response = await window.DDAuth.apiFetch(path, payload ? { method: 'POST', body: JSON.stringify(payload) } : {});
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.ok === false) throw new Error(data.error || 'CAIP request failed.');
@@ -166,7 +170,7 @@
 
   function render() {
     const currentContentId = num(state.detail?.project?.content_project_id);
-    mount.innerHTML = `<div class="caip-page-grid">
+    mount.innerHTML = `${requestedProductId ? `<div class="card caip-product-bridge"><strong>Catalog product ${esc(String(requestedProductId))}</strong><span class="small">CAIP opened from the catalog media workspace. ${state.detail?.project ? 'Its linked creative intelligence record is selected below.' : 'No linked CAIP record exists yet; choose a reviewed Content Studio package to create one.'}</span><a class="btn secondary" href="/admin/catalog-media/?product_id=${encodeURIComponent(requestedProductId)}#product-media-workflow">Return to media workspace</a></div>` : ''}<div class="caip-page-grid">
       <aside class="card caip-sidebar"><h2>Creative projects</h2><p class="small">Sync an approved Content Studio package into CAIP. Existing source media stays in place.</p><label>Content Studio package<select class="input" id="caipContentProject">${contentOptions()}</select></label><div class="caip-sidebar-actions"><button class="btn" type="button" id="caipSync">Create or refresh CAIP</button><button class="btn secondary" type="button" id="caipRefresh">Refresh list</button></div><div class="caip-project-list">${projectsList()}</div></aside>
       <main class="caip-main"><div id="caipMessage" class="content-studio-message" hidden></div>${renderDetail()}</main>
     </div>`;

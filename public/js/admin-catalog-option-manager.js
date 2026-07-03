@@ -30,15 +30,21 @@ document.addEventListener('DOMContentLoaded', () => {
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   }
 
-  function formatPercent(value) {
+  function taxFraction(value) {
     const numeric = Number(value || 0);
-    return Number.isFinite(numeric) ? (numeric * 100).toFixed(3).replace(/\.0+$|(?<=\.\d*[1-9])0+$/g, '') : '0';
+    if (!Number.isFinite(numeric) || numeric < 0) return 0;
+    return numeric > 1 ? numeric / 100 : numeric;
+  }
+
+  function formatPercent(value) {
+    return (taxFraction(value) * 100).toFixed(3).replace(/\.0+$|(?<=\.\d*[1-9])0+$/g, '');
   }
 
   function taxRateFromPercentInput(value) {
     const numeric = Number(value || 0);
     if (!Number.isFinite(numeric) || numeric < 0) return 0;
-    return numeric > 1 ? numeric / 100 : numeric;
+    // The admin field is labelled Rate %, so an entered 13 means 13% / 0.13 stored.
+    return numeric / 100;
   }
 
   async function readJsonResponse(response, fallbackMessage) {

@@ -93,8 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (taxSelect) {
         const currentValue = String(taxSelect.value || '').trim();
         taxSelect.innerHTML = `<option value="">Select tax class</option>` + (Array.isArray(data.tax_classes) ? data.tax_classes : []).map((taxClass) => {
-          const ratePercent = Number(taxClass.tax_rate || 0);
-          const friendlyRate = ratePercent > 1 ? ratePercent : Math.round(ratePercent * 100);
+          const fraction = Number(taxClass.tax_rate || 0);
+          const displayRate = Number(taxClass.rate_percent);
+          const friendlyRate = Number.isFinite(displayRate) && displayRate >= 0
+            ? displayRate
+            : (fraction > 1 ? fraction : Number((fraction * 100).toFixed(3)));
           return `<option value="${Number(taxClass.tax_class_id || 0)}">${escapeHtml(taxClass.name || '')} (${escapeHtml(String(friendlyRate))}%)</option>`;
         }).join('');
         if (currentValue) taxSelect.value = currentValue;
@@ -201,6 +204,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return output;
   }
 
+  function updateFeaturedImageResolution(product, imageUrl) {
+    const hint = document.getElementById('featuredImageResolutionHint');
+    const preview = document.getElementById('featuredImagePreview');
+    const previewImage = preview?.querySelector('img');
+    const source = String(product?.featured_image_source_label || '').trim();
+    const needsSync = Number(product?.featured_image_needs_sync || 0) === 1;
+    if (hint) {
+      if (imageUrl) {
+        hint.textContent = `${source || 'Product media'} supplied this featured image.${needsSync ? ' Saving the product will store this resolved URL on the product record.' : ''}`;
+      } else {
+        hint.textContent = 'No featured image was found in the product record, gallery, or approved media library.';
+      }
+    }
+    if (!preview || !previewImage) return;
+    if (!imageUrl) {
+      preview.hidden = true;
+      previewImage.removeAttribute('src');
+      return;
+    }
+    preview.hidden = false;
+    previewImage.src = imageUrl;
+    previewImage.alt = `Current featured image for ${String(product?.name || 'this product')}`;
+    previewImage.onerror = () => {
+      preview.hidden = true;
+      if (hint) hint.textContent = 'A featured URL was found, but this browser could not load it. Check the asset URL or public media permission.';
+    };
+  }
+
   function resetImageUrlFields() {
     [form.elements.namedItem("featured_image_url"), ...getImageUrlFields()]
       .filter(Boolean)
@@ -238,6 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
     if (existingProductSelect) existingProductSelect.value = '';
     clearEditorImageManagers();
+    updateFeaturedImageResolution({}, '');
     editingProductId = null;
     latestPriceSuggestion = null;
     form.dataset.mode = "create";
@@ -469,6 +501,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ensureCancelButton().style.display = "";
   }
 
+  document.getElementById('featuredImageUrl')?.addEventListener('input', (event) => {
+    const preview = document.getElementById('featuredImagePreview');
+    const image = preview?.querySelector('img');
+    const value = String(event.target?.value || '').trim();
+    if (!preview || !image) return;
+    preview.hidden = !value;
+    if (value) image.src = value;
+  });
+
   async function fillForm(product, images) {
     form.dataset.productId = String(product.product_id || editingProductId || "");
     window.DDCurrentProductEditorId = Number(product.product_id || editingProductId || 0);
@@ -485,6 +526,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const uniqueLoadedImages = uniqueImageRows(Array.isArray(images) ? images : []);
     const resolvedFeaturedImageUrl = product.featured_image_url || uniqueLoadedImages[0]?.image_url || "";
     setField("featured_image_url", resolvedFeaturedImageUrl);
+    updateFeaturedImageResolution(product, resolvedFeaturedImageUrl);
     setField("sort_order", product.sort_order == null ? "0" : product.sort_order);
     setField("meta_title", product.meta_title || "");
     setField("meta_description", product.meta_description || "");
