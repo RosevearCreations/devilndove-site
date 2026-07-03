@@ -101,3 +101,8 @@ The current authoritative CAIP implementation has four layers:
 4. **Internal secure review:** short-lived same-origin, authenticated-admin proxy grants; raw tokens never enter D1 and do not make R2 objects public.
 
 The Build 202 routes and records are documented in `13_Media_Operations_Secure_Review.md`, `02_Database_Architecture.md`, `03_Storage_Architecture.md`, `05_Governance_Rights_Privacy.md`, `08_API_Event_and_Manifest_Contracts.md`, and `12_Testing_and_Acceptance.md`.
+
+
+## Build 206 catalog-media bridge
+
+- `14_Catalog_Media_CAIP_Bridge.md` — product-context handoff from Catalog Media to CAIP. It is read-only/reference-first and does not create or modify source media.
