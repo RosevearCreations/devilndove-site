@@ -117,8 +117,21 @@
   }
 
   async function parseJson(response) {
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Request failed.');
+    const raw = await response.text().catch(() => '');
+    let data = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch {}
+    if (!response.ok || !data?.ok) {
+      const parts = [
+        data?.error || `Request failed (${response.status}).`,
+        data?.code ? `[${data.code}]` : '',
+        data?.hint || ''
+      ].filter(Boolean);
+      const error = new Error(parts.join(' '));
+      error.code = data?.code || '';
+      error.hint = data?.hint || '';
+      error.detail = data?.detail || '';
+      throw error;
+    }
     return data;
   }
 
