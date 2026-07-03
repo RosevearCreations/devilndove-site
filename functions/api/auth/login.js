@@ -1,13 +1,11 @@
 // File: /functions/api/auth/login.js
-// Brief description: Logs an existing user in, validates the stored password hash,
-// creates a fresh session token, and returns the user plus session data expected
-// by the shared public/js/auth.js helper.
+// Devil n Dove Cloudflare Pages + D1 login endpoint.
 //
-// Build 203 reliability note:
-// - Devil n Dove authentication uses Cloudflare D1 (binding name: DB), not Supabase.
-// - GET exposes a safe, no-secret readiness result so a deployment-root or D1-schema
-//   problem is identifiable before a visitor submits credentials.
-// - POST returns stable error codes and a useful non-secret hint instead of a generic 500.
+// Build 204 auth compatibility safeguard:
+// - Auth uses the Pages D1 binding named DB.
+// - A legacy bootstrap used members + a different sessions table; this endpoint
+//   detects that schema before authenticating and returns a precise safe code.
+// - The paired SQL repair preserves member rows and archives legacy sessions.
 
 const AUTH_ROUTE_HEADERS = {
   "Content-Type": "application/json",
@@ -15,6 +13,11 @@ const AUTH_ROUTE_HEADERS = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Cache-Control": "no-store, no-cache, must-revalidate",
   "Allow": "OPTIONS, GET, HEAD, POST"
+};
+
+const REQUIRED_AUTH_COLUMNS = {
+  users: ["user_id", "email", "password_hash", "display_name", "role", "is_active", "created_at", "updated_at"],
+  sessions: ["session_id", "user_id", "session_token", "token", "expires_at", "created_at"]
 };
 
 function json(data, status = 200, headers = {}) {
@@ -36,31 +39,6 @@ async function verifyStoredPasswordHash(password, storedHash) {
   return false;
 }
 function makeSessionToken() { return `${crypto.randomUUID()}${crypto.randomUUID().replace(/-/g, "")}`; }
-function parseCookies(request) {
-  const raw = request.headers.get("Cookie") || "";
-  return raw.split(/;\s*/).reduce((acc, part) => {
-    if (!part) return acc;
-    const eq = part.indexOf("=");
-    if (eq === -1) return acc;
-    const key = part.slice(0, eq).trim();
-    const value = part.slice(eq + 1).trim();
-    try { acc[key] = decodeURIComponent(value); } catch { acc[key] = value; }
-    return acc;
-  }, {});
-}
-
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
-
-function getRequestToken(request) {
-  const bearer = getBearerToken(request);
-  if (bearer) return bearer;
-  const cookies = parseCookies(request);
-  return String(cookies.dd_auth_token || "").trim();
-}
 
 function buildSessionCookie(request, token, maxAgeSeconds = 60 * 60 * 24 * 30) {
   const url = new URL(request.url);
@@ -83,47 +61,89 @@ function compactError(error) {
   return text.slice(0, 240) || "Unknown error";
 }
 
+function missingColumns(columns, requiredColumns) {
+  return requiredColumns.filter((column) => !columns.has(column));
+}
+
 async function inspectAuthDatabase(env) {
   const db = env?.DB;
   if (!db || typeof db.prepare !== "function") {
     return {
       binding_available: false,
       ping: "not_run",
-      users_table: false,
-      sessions_table: false,
       ready: false,
       code: "AUTH_DB_BINDING_MISSING",
-      hint: "Add the Production D1 binding named DB to the Pages project."
+      hint: "Connect the Production Cloudflare D1 binding named DB to this Pages project."
     };
   }
 
   try {
     await db.prepare("SELECT 1 AS ok").first();
-    const tableResult = await db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('users', 'sessions')").all();
+    const tableResult = await db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('users', 'sessions', 'members')").all();
     const tableNames = new Set((tableResult?.results || []).map((row) => String(row?.name || "").toLowerCase()));
-    const usersTable = tableNames.has("users");
-    const sessionsTable = tableNames.has("sessions");
-    const ready = usersTable && sessionsTable;
+
+    const columnsFor = async (tableName) => {
+      if (!tableNames.has(tableName)) return new Set();
+      const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+      return new Set((result?.results || []).map((row) => String(row?.name || "").toLowerCase()));
+    };
+
+    const usersColumns = await columnsFor("users");
+    const sessionsColumns = await columnsFor("sessions");
+    const membersColumns = await columnsFor("members");
+    const missingUsersColumns = missingColumns(usersColumns, REQUIRED_AUTH_COLUMNS.users);
+    const missingSessionsColumns = missingColumns(sessionsColumns, REQUIRED_AUTH_COLUMNS.sessions);
+    const legacySessionsShape = sessionsColumns.has("member_id") || sessionsColumns.has("token_hash");
+    const legacyMembersShape = membersColumns.has("member_id") && membersColumns.has("email") && membersColumns.has("password_hash");
+    const currentSchemaReady = tableNames.has("users") && tableNames.has("sessions") && !missingUsersColumns.length && !missingSessionsColumns.length;
+
+    if (legacyMembersShape && (!tableNames.has("users") || legacySessionsShape || !currentSchemaReady)) {
+      return {
+        binding_available: true,
+        ping: "ok",
+        users_table: tableNames.has("users"),
+        sessions_table: tableNames.has("sessions"),
+        members_table: true,
+        users_missing_columns: missingUsersColumns,
+        sessions_missing_columns: missingSessionsColumns,
+        ready: false,
+        code: "AUTH_LEGACY_SCHEMA",
+        hint: "Legacy members/sessions tables were found. Run database_auth_legacy_to_current_repair.sql once in the devilndove-prod D1 console; it preserves member records and archives legacy sessions."
+      };
+    }
+
+    if (!currentSchemaReady) {
+      return {
+        binding_available: true,
+        ping: "ok",
+        users_table: tableNames.has("users"),
+        sessions_table: tableNames.has("sessions"),
+        members_table: tableNames.has("members"),
+        users_missing_columns: missingUsersColumns,
+        sessions_missing_columns: missingSessionsColumns,
+        ready: false,
+        code: "AUTH_SCHEMA_INCOMPLETE",
+        hint: "Run the current Devil n Dove D1 schema or the targeted auth repair after confirming the table layout in database_auth_runtime_diagnostics.sql."
+      };
+    }
+
     return {
       binding_available: true,
       ping: "ok",
-      users_table: usersTable,
-      sessions_table: sessionsTable,
-      ready,
-      code: ready ? "AUTH_READY" : "AUTH_SCHEMA_INCOMPLETE",
-      hint: ready
-        ? "The D1 binding and core authentication tables are reachable."
-        : "Run the current Devil n Dove D1 schema against the bound production database."
+      users_table: true,
+      sessions_table: true,
+      members_table: tableNames.has("members"),
+      ready: true,
+      code: "AUTH_READY",
+      hint: "The D1 binding and current authentication schema are reachable."
     };
   } catch (error) {
     return {
       binding_available: true,
       ping: "failed",
-      users_table: false,
-      sessions_table: false,
       ready: false,
       code: "AUTH_DB_UNREACHABLE",
-      hint: "Check the DB binding, D1 database availability, and the Pages deployment log.",
+      hint: "Check the D1 binding, D1 availability, and the Cloudflare Pages Function log.",
       detail: compactError(error)
     };
   }
@@ -135,7 +155,7 @@ function loginUnavailable(authDatabase) {
     error: "Login is temporarily unavailable.",
     code: authDatabase.code || "AUTH_DB_UNAVAILABLE",
     hint: authDatabase.hint || "Check the D1 DB binding and authentication tables."
-  }, 500, { "X-DD-Auth-Code": authDatabase.code || "AUTH_DB_UNAVAILABLE" });
+  }, 503, { "X-DD-Auth-Code": authDatabase.code || "AUTH_DB_UNAVAILABLE" });
 }
 
 async function handleLoginPost(context) {
@@ -158,6 +178,8 @@ async function handleLoginPost(context) {
   const sessionToken = makeSessionToken();
   await env.DB.prepare("INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) VALUES (?, ?, ?, datetime('now', '+30 days'), CURRENT_TIMESTAMP)").bind(Number(user.user_id || 0), sessionToken, sessionToken).run();
   const session = await env.DB.prepare("SELECT session_id, user_id, session_token, token, expires_at, created_at FROM sessions WHERE user_id = ? ORDER BY session_id DESC LIMIT 1").bind(Number(user.user_id || 0)).first();
+  await env.DB.prepare("UPDATE users SET last_login_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE user_id=?").bind(Number(user.user_id || 0)).run().catch(() => null);
+
   return json({
     ok: true,
     message: "Login successful.",
@@ -170,7 +192,6 @@ async function handleLoginPost(context) {
 
 export async function onRequest(context) {
   const method = String(context?.request?.method || "GET").toUpperCase();
-
   if (method === "OPTIONS") return empty(204);
 
   if (method === "GET" || method === "HEAD") {
@@ -197,7 +218,7 @@ export async function onRequest(context) {
         ok: false,
         error: "Login is temporarily unavailable.",
         code: "AUTH_LOGIN_UNEXPECTED_FAILURE",
-        hint: "Open the failed request Response tab and the Cloudflare Pages Function log; compare the error with AUTH_LOGIN_500_TROUBLESHOOTING.md.",
+        hint: "Open the failed request Response tab and the Cloudflare Pages Function log. The response detail is safe to share for troubleshooting.",
         detail
       }, 500, { "X-DD-Auth-Code": "AUTH_LOGIN_UNEXPECTED_FAILURE" });
     }
