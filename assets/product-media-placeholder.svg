@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Product media placeholder</title>
+  <desc id="desc">A neutral product media reference card used only inside the admin workspace.</desc>
+  <rect width="800" height="600" fill="#f8f1e8"/>
+  <rect x="78" y="70" width="644" height="460" rx="32" fill="#fffaf5" stroke="#b87d43" stroke-width="8" stroke-dasharray="18 16"/>
+  <circle cx="400" cy="255" r="88" fill="#f3d4a9"/>
+  <path d="M210 452c29-96 105-143 190-143s161 47 190 143" fill="#d6b27d"/>
+  <path d="M318 205l40 40 76-91" fill="none" stroke="#6b4a2d" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="400" y="505" font-family="Arial, sans-serif" font-size="28" text-anchor="middle" fill="#6b4a2d">Product media reference</text>
+</svg>

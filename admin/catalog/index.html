@@ -89,19 +89,55 @@
     <div class="card" style="margin-bottom:18px">
       <h2 style="margin-top:0">Product editor</h2>
       <p class="small" style="margin-top:0">Create a quick draft with only the product name and type, then fill in price, SEO, images, resources, and publishing details when ready. Existing records can also be opened from the table below.</p>
-      <div class="grid cols-3" style="gap:10px;margin-bottom:12px">
+      <div class="catalog-product-picker-toolbar" aria-label="Existing product filters">
+        <label>
+          <span class="small">Find by product ID, name, SKU or slug</span>
+          <input class="input" id="existingProductSearch" type="search" placeholder="Example: 34, candle, DND-034" autocomplete="off"/>
+        </label>
+        <label>
+          <span class="small">Store status</span>
+          <select class="input" id="existingProductStatusFilter">
+            <option value="all">All statuses</option>
+            <option value="draft">Drafts</option>
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
+        </label>
+        <label>
+          <span class="small">Review status</span>
+          <select class="input" id="existingProductReviewFilter">
+            <option value="all">All review states</option>
+            <option value="pending_review">Pending review</option>
+            <option value="needs_changes">Revision / needs changes</option>
+            <option value="approved">Approved</option>
+            <option value="published">Published</option>
+          </select>
+        </label>
+        <label>
+          <span class="small">Sort results</span>
+          <select class="input" id="existingProductSort">
+            <option value="updated_desc">Recently updated</option>
+            <option value="created_desc">Newest created</option>
+            <option value="name_asc">Name A–Z</option>
+            <option value="id_desc">Product ID (newest first)</option>
+            <option value="media_attention">Media needs attention</option>
+          </select>
+        </label>
+      </div>
+      <div class="catalog-product-picker-load-row">
         <label>
           <span class="small">Load existing product</span>
           <select class="input" id="existingProductSelect">
             <option value="">Loading products…</option>
           </select>
         </label>
-        <div style="display:flex;align-items:end;gap:8px;flex-wrap:wrap">
+        <div class="catalog-product-picker-actions">
           <button class="btn" type="button" id="loadExistingProductButton">Load product into editor</button>
           <button class="btn" type="button" id="clearExistingProductButton">Clear editor</button>
         </div>
-        <div class="small" id="existingProductHelp" style="display:flex;align-items:end">Use this picker when the product table is long or you already know which record you want to edit.</div>
+        <div class="small" id="existingProductHelp">Search works with Product ID, name, SKU and slug. Filter drafts, revisions, approved products, or archived records before loading.</div>
       </div>
+      <div class="small catalog-product-picker-count" id="existingProductCount" aria-live="polite"></div>
       <div class="small" style="margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03)">Draft mode is intentionally light: SEO title/description, external listing URLs, pricing, and images are readiness items, not blockers. Switch status from Draft only when the product is ready for storefront review.</div>
       <details class="catalog-category-manager" id="catalogCategoryManager">
         <summary>Manage product categories (for example: Soap and Candles)</summary>
@@ -159,7 +195,7 @@
         </div>
         <label style="display:block;margin-top:12px"><span class="small">Sourcing notes</span><textarea class="input" name="sourcing_notes" rows="3"></textarea></label>
         <div class="grid cols-2" style="gap:10px;margin-top:12px">
-          <label><span class="small">Featured image URL</span><input class="input" type="url" name="featured_image_url"/></label>
+          <label class="catalog-featured-image-field"><span class="small">Featured image URL</span><input class="input" id="featuredImageUrl" type="url" name="featured_image_url"/><span class="small" id="featuredImageResolutionHint" aria-live="polite">A saved product image or approved media asset will appear here when the product is loaded.</span><span class="catalog-featured-image-preview" id="featuredImagePreview" hidden><img alt="Current featured product preview"/></span></label>
           <label><span class="small">Image URL 1</span><input class="input" type="url" name="image_url_1"/></label>
         </div>
         <div class="grid cols-4" style="gap:10px;margin-top:12px">
