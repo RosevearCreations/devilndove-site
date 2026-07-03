@@ -14,3 +14,7 @@ Read `PROJECT_STATUS_AND_ROADMAP.md` for current priorities. Active risks:
 - Social Queue handoff requires a real `output_url` and an Approved deliverable. Do not bypass this gate.
 - Existing live risks remain: real costs/fees/labour evidence, R2 derivatives, Stripe/email/webhook testing, Search Console/Google Business Profile evidence, and real device testing.
 - Specialist Markdown is retained. `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the canonical pair.
+
+## Build 204 temporary operational requirement — D1 auth schema confirmation
+
+The deployed D1 database must be verified through `/api/auth/login` after Build 204. If it reports `AUTH_LEGACY_SCHEMA`, take a D1 backup/export and run `database_auth_legacy_to_current_repair.sql` once. This migration intentionally invalidates legacy sessions because their raw tokens were never stored; it preserves member account rows and password hashes.

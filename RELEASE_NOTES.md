@@ -725,3 +725,11 @@
 - Added short-lived, administrator-bound, hash-only secure review grants and same-origin R2 review proxy with expiry, access cap, revocation, no-store/no-referrer/same-origin/no-frame headers, and audit trail.
 - Added CAIP responsive operations panels, planning placeholder artwork, sanitized operational manifest content, Build 202 migration, and authoritative CAIP specification updates.
 - No rendering, thumbnail generation, vision/transcription AI, direct R2 public/presigned URLs, social OAuth, or auto publishing was enabled.
+
+## Build 204 — login schema compatibility and visible diagnostics
+
+- Added current-vs-legacy D1 authentication schema inspection to `/api/auth/login`.
+- Returns `AUTH_LEGACY_SCHEMA`, `AUTH_SCHEMA_INCOMPLETE`, binding, and connectivity codes before a schema mismatch can become an opaque login `500`.
+- Updated both shared copies of `auth.js` so login error messages show server code and safe remediation hint.
+- Added `database_auth_legacy_to_current_repair.sql`, `database_auth_runtime_diagnostics.sql`, and `AUTH_LOGIN_500_TROUBLESHOOTING.md`.
+- The legacy repair preserves legacy member records/password hashes and archives incompatible hashed session rows. Existing browser sessions are invalidated safely and users sign in again.
