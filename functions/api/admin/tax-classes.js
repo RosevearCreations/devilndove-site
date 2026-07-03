@@ -22,6 +22,8 @@ function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+import { normalizeTaxRateFraction, taxRatePercent } from "./_tax-rate.js";
+
 async function getAdminUserFromRequest(request, env) {
   const token = getBearerToken(request);
   if (!token) return null;
@@ -79,8 +81,8 @@ export async function onRequestGet(context) {
     code: row.code || '',
     name: row.name || '',
     description: row.description || '',
-    tax_rate: Number(row.tax_rate || 0),
-    rate_percent: Number(row.tax_rate || 0),
+    tax_rate: normalizeTaxRateFraction(row.tax_rate, row.rate_percent),
+    rate_percent: taxRatePercent(row.tax_rate, row.rate_percent),
     is_active: Number(row.is_active || 0),
     created_at: row.created_at || null,
     updated_at: row.updated_at || null

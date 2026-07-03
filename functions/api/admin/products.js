@@ -1,4 +1,5 @@
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+import { normalizeTaxRateFraction, taxRatePercent } from "./_tax-rate.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -308,8 +309,11 @@ export async function onRequestGet(context) {
     const linkedResourceCost = Number(row.linked_resource_cost_cents || 0);
     const priceCents = Number(row.price_cents || 0);
     const colorNames = parseColorNamesJson(row.color_names_json, row.color_name || '');
+    const normalizedTaxRate = normalizeTaxRateFraction(row.tax_rate, row.rate_percent);
     return {
       ...row,
+      tax_rate: normalizedTaxRate,
+      rate_percent: taxRatePercent(normalizedTaxRate),
       color_names: colorNames,
       color_names_text: colorNames.join(', '),
       low_stock_flag: Number(row.low_stock_flag || 0),
