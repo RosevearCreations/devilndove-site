@@ -1,5 +1,6 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { loadCatalogOptionSets, saveCatalogOptionSet, uniqueSortedOptions } from "./_catalog-options.js";
+import { normalizeTaxRateFraction, taxRatePercent } from "./_tax-rate.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -36,7 +37,8 @@ async function loadTaxClasses(db) {
     code: row.code || '',
     name: row.name || '',
     description: row.description || '',
-    tax_rate: Number(row.tax_rate || 0),
+    tax_rate: normalizeTaxRateFraction(row.tax_rate, row.rate_percent),
+    rate_percent: taxRatePercent(row.tax_rate, row.rate_percent),
     is_active: Number(row.is_active || 0),
     created_at: row.created_at || null,
   }));

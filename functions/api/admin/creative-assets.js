@@ -45,14 +45,16 @@ export async function onRequestGet(context) {
   const state = await access(context);
   if (state.error) return state.error;
   const params = new URL(context.request.url).searchParams;
-  const creativeProjectId = number(params.get('creative_project_id') || params.get('project_id'));
+  const requestedCreativeProjectId = number(params.get('creative_project_id') || params.get('project_id'));
+  const requestedProductId = number(params.get('product_id'));
   try {
     await ensureCreativeAssetIntelligenceSchema(state.db);
     await ensureCreativeAssetOperationsSchema(state.db);
     const listing = await listCreativeAssetProjects(state.db);
-    const { detail, operations } = await detailBundle(state.db, creativeProjectId);
-    if (creativeProjectId && !detail) return json({ ok: false, error: 'CAIP project not found.' }, 404);
-    return json({ ok: true, build: `${CAIP_BUILD} + ${CAIP_OPERATIONS_BUILD}`, ...listing, detail, operations, mode: 'reference_only_review_first' });
+    const resolvedCreativeProjectId = requestedCreativeProjectId || number((Array.isArray(listing.projects) ? listing.projects : []).find((project) => number(project.product_id) === requestedProductId)?.creative_project_id);
+    const { detail, operations } = await detailBundle(state.db, resolvedCreativeProjectId);
+    if (requestedCreativeProjectId && !detail) return json({ ok: false, error: 'CAIP project not found.' }, 404);
+    return json({ ok: true, build: `${CAIP_BUILD} + ${CAIP_OPERATIONS_BUILD}`, ...listing, detail, operations, requested_product_id: requestedProductId || null, resolved_creative_project_id: resolvedCreativeProjectId || null, mode: 'reference_only_review_first' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'creative_asset_intelligence', incident_code: 'caip_get_failed', severity: 'error',
