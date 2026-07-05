@@ -1,17 +1,21 @@
-# Retained reference — current pointer refreshed in Build 206
+# Retained new-chat pointer — refreshed in Build 207
 
-For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 206 catalog-media, tax, CAIP, deployment, or auth rules.
+## Start in this order
 
----
+1. Read `AI_HANDOFF.md`.
+2. Read `PROJECT_STATUS_AND_ROADMAP.md`.
+3. Use `MARKDOWN_INDEX.md` to open only the specialist reference needed for the task.
 
-# Retired reference — Build 200
+This file is a compact orientation note, not an additional roadmap.
 
-This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+## Current status
 
-## New Chat Status — Build 199
+- Current build: **Build 207**.
+- Core release direction: accurate product data → approved real media → catalog review → Content Studio / CAIP review package → explicit release approval.
+- CAIP remains evidence-led, rights-aware, reference-only, and human-reviewed. It has no active external vision, rendering, social publishing, or paid provider integration.
+- The Catalog Media workspace now shows the selected product’s Content Studio / CAIP state, counts, and safe direct links. Explicit refresh actions leave source media and public release unchanged.
+- The canonical unresolved incident is the Devil n Dove login `POST /api/auth/login` 500. Capture its sanitized JSON response or Cloudflare Function log before changing code or D1 schema.
 
-Start with `AI_HANDOFF.md`, then `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md`.
+## Immediate next validation
 
-The current release is Build 199. The highest-value new system is the review-first Content Automation Studio: approved products create a source-linked media archive plus an exact multi-channel content package. Deploy `database_build199_content_automation_studio.sql` after Build 198, then run the Content Studio sections in `POST_DEPLOY_SMOKE_TEST.md`.
-
-Do not claim that video rendering or social/YouTube/GBP publishing is complete until a real provider, credentials, output URLs, and live tests exist. See `CONTENT_AUTOMATION_STUDIO.md` for the exact workflow and safe next integration point.
+Deploy Build 207, then follow `BUILD207_VALIDATION.md` and `POST_DEPLOY_SMOKE_TEST.md`. Verify the public media gate using approved, blocked, consent-needed, unannotated, and explicitly public-use-permitted media examples.

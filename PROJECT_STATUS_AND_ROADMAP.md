@@ -1,10 +1,10 @@
-# Devil n Dove Project Status and Roadmap — Build 206
+# Devil n Dove Project Status and Roadmap — Build 207
 
 ## Purpose
 
 This is the business and release-readiness source for the Devil n Dove storefront/workshop system. `AI_HANDOFF.md` is the technical and operational companion. Specialist documents remain reference material unless `MARKDOWN_INDEX.md` lists them as active.
 
-## What Build 206 completes
+## What Build 207 completes
 
 ### Catalog accuracy and operator speed
 
@@ -30,7 +30,22 @@ The Product Editor shows the source and a preview. A normal product save can per
 
 ### CAIP progression
 
-CAIP remains review-first and source-safe. Build 206 adds a useful handoff rather than a risky automation: media workspace links can open CAIP for the same product, and CAIP will select that product’s existing project when found. No source media is copied, rendered, altered, publicly released, or rights-elevated by this bridge.
+CAIP remains review-first and source-safe. Builds 206–207 add useful handoffs rather than a risky automation: media workspace links can open CAIP for the same product, and CAIP will select that product’s existing project when found. No source media is copied, rendered, altered, publicly released, or rights-elevated by this bridge.
+
+### Product media → Content Studio → CAIP visibility
+
+Build 207 closes the operator visibility gap between the selected product and its downstream review records. The catalog-media workspace now reports whether the product has no package, a Content Studio package, or a linked CAIP project. It shows source-media counts, approved/public-cleared review counts, deliverable counts, governance status, and direct workspace links.
+
+Operators choose the action deliberately:
+
+- **Create content package + CAIP** only for an Approved/Published finished product.
+- **Refresh CAIP only** only after a Content Studio package exists.
+
+Both actions are logged. Neither is a publication, image transformation, rights grant, or source-media change.
+
+### Public media safety and storefront consistency
+
+Public product-list and featured-product responses now reject product images that were explicitly marked `blocked` or `consent_needed`. Where a media consent record is attached, the record must permit public use before the image is included. Existing unannotated first-party product images remain compatible until real operator review data says otherwise.
 
 ## Search and competitive direction
 
@@ -60,10 +75,10 @@ Make / source item
 ## Highest-value next work
 
 1. **Login evidence and repair:** capture the safe response from the current `POST /api/auth/login` 500 before changing any D1 schema.
-2. **Featured-media live proof:** test products that have only `media_assets`, only `product_images`, both, and neither; confirm correct save/reopen behavior.
-3. **Public media fallback:** once consent/public-use rules are verified, extend the same resolution logic to public storefront cards/detail pages and product structured data.
-4. **Catalog-to-CAIP visibility:** show whether the selected product already has a Content Studio package and CAIP project, with human-controlled create/refresh actions.
-5. **Real device tests:** test Product Editor and Catalog Media on a phone, tablet, and desktop browser with slow network conditions.
+2. **Build 207 public-media proof:** run real data through approved, blocked, consent-needed, no-annotation, and clearly permitted image cases.
+3. **Featured-media live proof:** test products that have only `media_assets`, only `product_images`, both, and neither; confirm correct save/reopen behavior.
+4. **Release-preflight workflow:** build a concise operator checklist from catalog facts, image roles, consent, Content Studio deliverables, CAIP evidence, and Release Board approval conditions.
+5. **Real device tests:** test Product Editor, Catalog Media, Content Studio, and CAIP on a phone, tablet, and desktop browser with slow network conditions.
 6. **Release evidence:** keep Search Console/GBP/marketplace performance observations separate from assumptions; change public SEO only after reviewed evidence.
 7. **CAIP operations:** only later add checksum, controlled technical extraction, derivative output namespace, human review, cost limits, and verified renderer/publishing adapters.
 

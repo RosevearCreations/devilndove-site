@@ -52,3 +52,5 @@
 ## Build 202 CAIP media-operations note
 
 CAIP now records safe metadata/R2-header observations, immutable future-output plans, and short-lived administrator-bound internal review grants. It still does not create derivatives or publish media; source-media preservation remains mandatory.
+
+> Build 207 note: current release checks are in `BUILD207_VALIDATION.md`; the login 500 remains evidence-first and separate from catalog/media work.

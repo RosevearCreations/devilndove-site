@@ -1,6 +1,6 @@
-# Devil n Dove — Build 206 entry point
+# Devil n Dove — Build 207 entry point
 
-For current work, read `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` first. `MARKDOWN_INDEX.md` identifies active specialist references.
+For current work, read `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` first. `MARKDOWN_INDEX.md` identifies specialist references. Build 207 adds the explicit, source-safe Product Media → Content Studio → CAIP handoff and consent-aware public product-card media selection.
 
 ---
 

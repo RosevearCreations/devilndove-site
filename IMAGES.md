@@ -18,3 +18,5 @@ Build 199 Content Automation Studio rules:
 - A Content Studio **Lead source** is separate from a product’s Featured Image URL.
 - Existing public-use/consent metadata is imported as review context. It does not replace the underlying consent record or make unknown media public automatically.
 - Any final public page, gallery, blog, social post, or Google Business Profile photo needs a real approved asset, accurate descriptive alt/caption text where relevant, and a stable accessible URL.
+
+> Build 207 note: public product-card and featured-product image selection now excludes explicitly blocked or consent-needed reviewed images; linked consent must permit public use.

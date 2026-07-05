@@ -1,6 +1,6 @@
-# Retained reference — current pointer refreshed in Build 206
+# Retained reference — current pointer refreshed in Build 207
 
-For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 206 catalog-media, tax, CAIP, deployment, or auth rules.
+For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 207 catalog-media, public-media consent, CAIP, deployment, or auth rules.
 
 ---
 
@@ -23,4 +23,4 @@ Read `PROJECT_STATUS_AND_ROADMAP.md` for current priorities. Active risks:
 
 ## Build 204 temporary operational requirement — D1 auth schema confirmation
 
-The deployed D1 database must be verified through `/api/auth/login` after Build 204. If it reports `AUTH_LEGACY_SCHEMA`, take a D1 backup/export and run `database_auth_legacy_to_current_repair.sql` once. This migration intentionally invalidates legacy sessions because their raw tokens were never stored; it preserves member account rows and password hashes.
+The deployed D1 database must be verified through `/api/auth/login` with a safe error response and matching Cloudflare Function log. The old `database_auth_legacy_to_current_repair*.sql` filenames are now Build 207 safety stubs: do not run a schema migration from a generic login error. The confirmed live database has current `users` and `sessions` tables and no `members` table.
