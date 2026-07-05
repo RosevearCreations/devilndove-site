@@ -1,6 +1,6 @@
 # Creative Asset Intelligence Platform (CAIP) — Authoritative Design Specification
 
-**Current implementation:** Build 202 governed media-operations and secure-review foundation  
+**Current implementation:** Build 208 governed media-operations, secure review, and read-only product release-preflight foundation  
 **Design status:** authoritative subsystem specification  
 **Primary business roadmap:** `../../PROJECT_STATUS_AND_ROADMAP.md`  
 **Technical deployment handoff:** `../../AI_HANDOFF.md`
@@ -27,7 +27,7 @@ CAIP is **not** a second media library, a public publisher, a content-claim gene
 6. **One system of record per concern.** Product records remain product truth; Content Studio remains package/deliverable truth; CAIP remains asset/evidence/intelligence truth; Content Release Board remains public-release truth.
 7. **Operational honesty.** Do not show an encoded file, AI analysis, SEO result, consent, sale, or published post as complete unless a real provider/process has completed and been verified.
 
-## Current implementation scope — Builds 201–202
+## Current implementation scope — Builds 201–208
 
 Implemented:
 
@@ -103,6 +103,7 @@ The current authoritative CAIP implementation has four layers:
 The Build 202 routes and records are documented in `13_Media_Operations_Secure_Review.md`, `02_Database_Architecture.md`, `03_Storage_Architecture.md`, `05_Governance_Rights_Privacy.md`, `08_API_Event_and_Manifest_Contracts.md`, and `12_Testing_and_Acceptance.md`.
 
 
-## Build 206 catalog-media bridge
+## Build 206–208 catalog-media and release bridge
 
 - `14_Catalog_Media_CAIP_Bridge.md` — product-context handoff from Catalog Media to CAIP. It is read-only/reference-first and does not create or modify source media.
+- `15_Product_Release_Preflight.md` — a read-only operator checklist across catalog, source media, Content Studio, CAIP evidence, and Release Board conditions. It does not approve, publish, mutate source media, or create rights.

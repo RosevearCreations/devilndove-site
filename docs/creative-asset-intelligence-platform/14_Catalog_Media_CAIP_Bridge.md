@@ -40,3 +40,14 @@ The resolved source is shown to the operator. A normal intentional Product Edito
 - Image, annotation, score, listing facts, story, and SEO panels receive the same selected product ID.
 - CAIP selects an existing linked project only; it stays blank/explicitly absent when no project exists.
 - No R2 object, `product_images` row, `media_assets` row, CAIP source record, or public release changes from simply opening the bridge.
+
+
+## Build 208 release-preflight handoff
+
+Catalog Media is the owner screen for selecting/reviewing source product media. After the product, media, Content Studio, and CAIP records exist, an operator can open:
+
+```text
+/admin/release-preflight/?product_id=<id>
+```
+
+The preflight is read-only and reports whether the records are ready to pass to the Release Board or ready for a human publication decision. See `15_Product_Release_Preflight.md`.
