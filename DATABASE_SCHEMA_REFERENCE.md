@@ -1,3 +1,9 @@
+# Build 208 schema note
+
+Build 208 does not require a D1 migration. `/api/admin/product-release-preflight` is read-only and detects absent optional Content Studio, CAIP, and Content Release Board tables rather than creating them. `/api/admin/product-featured-image-sync` updates only `products.featured_image_url` after an explicit administrator request and an existing retained `product_images`/`media_assets` candidate match. It does not change source-media rows, annotations, consent, Content Studio, CAIP, or publication state.
+
+---
+
 # Build 206 schema note
 
 Build 206 does not require D1 migration. Catalog APIs normalize a tax class stored as a fraction (`0.13`) or a historic whole percentage (`13`) into `tax_rate` (fraction) and `rate_percent` (display). Product-detail reads existing `products.featured_image_url`, `product_images`, and non-deleted `media_assets` safely; it does not create, delete, or change media rows on read.
@@ -60,3 +66,7 @@ The established product-media integrity rules remain: ordinary product saves pre
 The Build 202 schema is additive. It does not change the source-media ownership of `product_images`, `media_assets`, `content_project_media`, or R2 objects.
 
 > Build 207 note: no D1 migration is required. The product-content bridge uses existing additive Content Studio/CAIP schema routines only after an administrator explicitly invokes a package action.
+
+## Build 208 release-preflight schema boundary
+
+Build 208 adds **no mandatory D1 migration**. `/api/admin/product-release-preflight` detects and reads available existing catalog, media, Content Studio, CAIP, and Release Board tables. `/api/admin/product-featured-image-sync` updates only `products.featured_image_url` after an explicit admin request using an already retained product/media URL.

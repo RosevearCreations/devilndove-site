@@ -1,6 +1,6 @@
-# Retained reference — current pointer refreshed in Build 207
+# Retained reference — current pointer refreshed in Build 208
 
-For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 207 catalog-media, public-media consent, CAIP, deployment, or auth rules.
+For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 208 release-preflight, catalog-media, public-media consent, CAIP, deployment, or auth rules.
 
 ---
 
@@ -12,8 +12,6 @@ This file is preserved as historical implementation evidence only. It does not d
 
 The current roadmap is `PROJECT_STATUS_AND_ROADMAP.md`. Build 199 adds the review-first Content Automation Studio, documented operationally in `CONTENT_AUTOMATION_STUDIO.md`. Keep this short pointer so future chats do not treat older detailed lists as the active backlog.
 
-## Build 204 completion — authentication compatibility
+## Historical Build 204 authentication note — superseded
 
-Completed: explicit D1 auth readiness/legacy-schema detection, user-visible stable error codes, and a reviewed one-time migration path from the historic `members`/hashed-session structure to the current `users`/session-token structure.
-
-Required live action: deploy Build 204, visit `/api/auth/login`, and only run the legacy repair SQL if the endpoint reports `AUTH_LEGACY_SCHEMA`. Do not rerun the repair once the endpoint reports `AUTH_READY`.
+The live Devil n Dove database was later confirmed to have the current `users` and `sessions` structure and no `members` table. The old `database_auth_legacy_to_current_repair*.sql` files are retained only as Build 207 safety stubs and must **not** be used to change the schema. Investigate any remaining login `500` from the sanitized HTTP response and matching Cloudflare Function log only.

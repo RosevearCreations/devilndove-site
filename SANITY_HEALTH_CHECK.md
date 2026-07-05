@@ -1,3 +1,13 @@
+# Build 208 sanity checkpoint
+
+- Product Release Preflight is a protected, read-only decision view: catalog → media → Content Studio → CAIP → Release Board.
+- It reports two distinct outcomes: package handoff readiness and destination-aware publish readiness.
+- Featured Image Sync is explicit/confirmed/audited and updates only `products.featured_image_url` from an existing gallery/media-library candidate.
+- No D1 migration is required for Build 208.
+- Outstanding separate incident: login POST 500 needs a safe response/log detail; live `users`/`sessions` schema is already confirmed.
+
+---
+
 # Build 206 sanity checkpoint
 
 - Catalog featured media has a read-only three-layer resolver and visible source label.
@@ -54,3 +64,7 @@
 CAIP now records safe metadata/R2-header observations, immutable future-output plans, and short-lived administrator-bound internal review grants. It still does not create derivatives or publish media; source-media preservation remains mandatory.
 
 > Build 207 note: current release checks are in `BUILD207_VALIDATION.md`; the login 500 remains evidence-first and separate from catalog/media work.
+
+## Build 208 check
+
+Verify `/admin/release-preflight/?product_id=<known-id>` as an authenticated admin. Confirm that its request is GET-only, the stage links resolve, and loading it leaves source media, product status, consent, CAIP, and publication records unchanged. Test featured-image synchronization separately and confirm only `products.featured_image_url` changes.

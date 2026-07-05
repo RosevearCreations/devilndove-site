@@ -1,4 +1,4 @@
-# Retained new-chat pointer — refreshed in Build 207
+# Retained new-chat pointer — refreshed in Build 208
 
 ## Start in this order
 
@@ -10,12 +10,12 @@ This file is a compact orientation note, not an additional roadmap.
 
 ## Current status
 
-- Current build: **Build 207**.
-- Core release direction: accurate product data → approved real media → catalog review → Content Studio / CAIP review package → explicit release approval.
-- CAIP remains evidence-led, rights-aware, reference-only, and human-reviewed. It has no active external vision, rendering, social publishing, or paid provider integration.
-- The Catalog Media workspace now shows the selected product’s Content Studio / CAIP state, counts, and safe direct links. Explicit refresh actions leave source media and public release unchanged.
-- The canonical unresolved incident is the Devil n Dove login `POST /api/auth/login` 500. Capture its sanitized JSON response or Cloudflare Function log before changing code or D1 schema.
+- Current build: **Build 208**.
+- Core release direction: accurate catalog → approved real media/rights review → Content Studio package → CAIP evidence/governance → Release Preflight → explicit Release Board action.
+- New Release Preflight is read-only. It does not create packages, approve work, publish, render, grant rights, or connect to providers.
+- The explicit Featured Image Sync writes only a known existing resolved URL back into `products.featured_image_url` after confirmation/audit.
+- The canonical unresolved incident remains `POST /api/auth/login` 500; capture its sanitized JSON response or Cloudflare Function log before changing code/D1 schema.
 
 ## Immediate next validation
 
-Deploy Build 207, then follow `BUILD207_VALIDATION.md` and `POST_DEPLOY_SMOKE_TEST.md`. Verify the public media gate using approved, blocked, consent-needed, unannotated, and explicitly public-use-permitted media examples.
+Deploy Build 208, follow `BUILD208_VALIDATION.md`, then re-run `POST_DEPLOY_SMOKE_TEST.md` and the Build 206/207 catalog/media consent checks.

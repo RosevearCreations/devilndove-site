@@ -1,32 +1,40 @@
-# Release Notes — Build 207
+# Build 208 — Product Release Preflight
 
-## Product-media workflow
+- Added read-only cross-workflow product release preflight.
+- Added explicit audited featured-image URL synchronization from existing retained media.
+- Added Build 208 CAIP release-preflight specification and validation guidance.
+- No mandatory schema migration is included.
+- Legacy D1 login migration files remain inert safety stubs; do not run schema repair from a generic login error.
 
-- Added a product-specific Content Studio → CAIP status card to Catalog Media.
-- Added explicit, audited create/refresh and CAIP-refresh actions for Approved/Published products.
-- Kept all actions reference-only: no public publishing, source-media overwrite, file movement, rights elevation, gallery reorder, or derivative generation.
+---
 
-## Storefront media safety
+# Release Notes — Build 208
 
-- Public product-card and featured-product selections now omit images explicitly marked blocked or consent-needed.
-- Where a consent record exists, it must permit public use before the associated image is selected.
+## Product Release Preflight
 
-## Mobile and documentation
+- Added `/admin/release-preflight/`, a protected, read-only product release checklist.
+- It combines catalog facts, product-media review/consent signals, Content Studio package state, CAIP governance/evidence, and Content Release Board checks.
+- It distinguishes **Ready to pass to Release Board** from **Ready to publish** so a finished upstream package is never misrepresented as a live public item.
+- Destination-aware publication checks support Workshop Journal, Website Gallery, or both.
+- Each blocker links to its owner workflow; the preflight itself does not create, approve, publish, transform, or grant rights.
 
-- Added a responsive two-column-to-one-column layout for the new bridge card.
-- Added a private admin visual placeholder for the package-review handoff.
-- Updated the two main handoff documents and added `BUILD207_VALIDATION.md`.
+## Featured-image resilience
+
+- Added explicit `product-featured-image-sync` for the existing three-layer catalog-media resolver.
+- The Catalog Media button appears only when a known gallery/media-library source resolves but `products.featured_image_url` is empty.
+- Confirmation and audit are required. Only the product field changes; source media, R2 objects, image order, roles, annotations, consent, Content Studio, CAIP, and publication state remain untouched.
+
+## Mobile, visual, and documentation
+
+- Added responsive mobile/tablet/desktop layout for the new decision workspace.
+- Added an admin-only release-preflight placeholder SVG.
+- Consolidated Build 208 technical and business state in `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
+- Added `BUILD208_VALIDATION.md`.
 
 ## Deployment note
 
-No D1 migration is required for Build 207 deployment. The package creation control only calls existing additive Content Studio / CAIP schema routines after an administrator explicitly selects an eligible product.
+No D1 migration is required for Build 208.
 
-## Remaining known issue
+## Known separate incident
 
-The login `POST /api/auth/login` 500 remains intentionally separate until its response body or Cloudflare Function log supplies an exact safe error code.
-
-
-## Build 206 retained highlight
-
-- Added catalog filtering/sorting, Product ID search, featured-image resolution across product/media layers, tax-rate display normalization, and product context in Catalog Media.
-- The Build 207 handoff extends these controls; it does not replace the Build 206 validation checks.
+The login `POST /api/auth/login` 500 remains evidence-first. Do not run a legacy auth migration without the sanitized endpoint response or matching Cloudflare log.

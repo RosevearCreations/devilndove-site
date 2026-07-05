@@ -1,90 +1,74 @@
-# Devil n Dove Project Status and Roadmap — Build 207
+# Devil n Dove Project Status and Roadmap — Build 208
 
 ## Purpose
 
-This is the business and release-readiness source for the Devil n Dove storefront/workshop system. `AI_HANDOFF.md` is the technical and operational companion. Specialist documents remain reference material unless `MARKDOWN_INDEX.md` lists them as active.
+This is the business and release-readiness source for the Devil n Dove storefront/workshop application. `AI_HANDOFF.md` is the technical companion. Specialist Markdown is reference material unless `MARKDOWN_INDEX.md` says otherwise.
 
-## What Build 207 completes
+## What Build 208 completes
 
-### Catalog accuracy and operator speed
+### One practical product release decision
 
-- Existing products can be found by Product ID, product number, name, SKU, or slug.
-- Picker filters now surface Draft, Active, Archived, Pending review, Revision/needs changes, Approved, and Published work without forcing a table reload.
-- Picker sorting supports recent updates, newest records, alphabetical name, newest Product ID, and media-attention order.
-- Product ID is searchable in both the product editor and media workspace.
-- The catalog product table displays tax class plus a normalized display rate, avoiding the historic `0.13%`/`1300%` confusion.
+The operating flow now has a product-level decision point between Content Studio/CAIP work and a public Release Board action:
 
-### Featured media integrity
+```text
+Make/source item
+→ truthful catalog facts, tax, price, stock and SEO
+→ approved real media with roles and actual public-use status
+→ Catalog approval
+→ Content Studio package
+→ CAIP evidence/governance review
+→ Product Release Preflight
+→ explicit Release Board approval
+→ explicit publication / marketplace action
+```
 
-A featured field no longer looks empty merely because the valid image lives in a different catalog media layer. The resolution order is intentionally explicit:
+`/admin/release-preflight/` lets an operator search by Product ID, product number, name, SKU, or slug. It separates two questions that must not be blended:
 
-1. Product record `featured_image_url`.
-2. Ordered `product_images` gallery.
-3. Non-deleted `media_assets` record linked to the product.
+- **Can this package move to the Release Board?**
+- **Is the selected public destination actually ready to publish?**
 
-The Product Editor shows the source and a preview. A normal product save can persist the resolved URL to the product record. This reduces accidental blank listing cards while retaining the original media rows.
+The first question can pass while the second remains blocked because no Workshop Journal/Gallery public draft exists yet. This prevents the system from claiming a product is public just because upstream catalog or CAIP work is finished.
 
-### Focused product-media workspace
+### Product-media resilience
 
-`/admin/catalog-media/?product_id=<id>#product-media-workflow` now has a working-product reference at the top. It acts as the single context selector for images, annotations, media roles, buyer-facing facts, story notes, and SEO. The workspace is responsive; controls collapse to one column on narrow screens instead of overflowing.
+The original three-layer featured-image resolver remains:
+
+1. `products.featured_image_url`.
+2. Ordered `product_images`.
+3. Non-deleted linked `media_assets`.
+
+Build 208 adds an optional, administrator-confirmed sync when a real existing source resolves but the stored product field is empty. This reduces repeated blank-editor confusion without making a background job silently choose or overwrite media.
 
 ### CAIP progression
 
-CAIP remains review-first and source-safe. Builds 206–207 add useful handoffs rather than a risky automation: media workspace links can open CAIP for the same product, and CAIP will select that product’s existing project when found. No source media is copied, rendered, altered, publicly released, or rights-elevated by this bridge.
+CAIP remains reference-only and human-reviewed. Build 208 reads its governance status, source-rights signals, evidence rows, and story approval signals in the release preflight. It does not activate a renderer, AI vision model, social connection, marketplace publisher, or paid provider.
 
-### Product media → Content Studio → CAIP visibility
+### Current competitive/SEO direction
 
-Build 207 closes the operator visibility gap between the selected product and its downstream review records. The catalog-media workspace now reports whether the product has no package, a Content Studio package, or a linked CAIP project. It shows source-media counts, approved/public-cleared review counts, deliverable counts, governance status, and direct workspace links.
+The application is built around the signals that matter for handmade and one-of-a-kind commerce: truthful listing facts, a clear primary image, useful contextual alternative text, strong evidence behind public copy, category specificity, and a human decision before release. Google requires structured data to describe the visible page content, while Shopify and Etsy documentation emphasize product media, descriptive alt text, useful primary images, and listing quality. These principles are now represented as review checks rather than decorative or automated claims.
 
-Operators choose the action deliberately:
+## Search and public content rules
 
-- **Create content package + CAIP** only for an Approved/Published finished product.
-- **Refresh CAIP only** only after a Content Studio package exists.
-
-Both actions are logged. Neither is a publication, image transformation, rights grant, or source-media change.
-
-### Public media safety and storefront consistency
-
-Public product-list and featured-product responses now reject product images that were explicitly marked `blocked` or `consent_needed`. Where a media consent record is attached, the record must permit public use before the image is included. Existing unannotated first-party product images remain compatible until real operator review data says otherwise.
-
-## Search and competitive direction
-
-Devil n Dove’s defensible lane is not generic high-volume content. It is accurate Southern Ontario maker commerce: clear product facts, honest handmade/one-of-a-kind notes, strong real photos, local pickup/shipping clarity, safe custom requests, and source-backed workshop stories.
-
-Current public-page requirements:
-
-- One H1 per page.
-- Product title and main heading should describe the actual piece in language a buyer would use.
-- Product schema, visible price/availability, title/meta, image URLs, and alt text must agree.
-- Use real, approved images with useful contextual alt text; placeholders remain admin-only until valid media is assigned.
-- Never imply that a future CAIP plan, derivative, social draft, or AI review is a published image/video or verified claim.
-
-## Active business workflow
-
-```text
-Make / source item
-→ capture product and resources
-→ add approved real media and factual descriptions
-→ price/tax/stock/SEO review
-→ catalog approval
-→ Content Studio / CAIP review package
-→ explicit public release or marketplace/social approval
-→ sale / fulfillment / customer consent / repeat relationship
-```
+- One visible H1 per public page.
+- Titles, headings, descriptions, canonical URLs, schema, price, stock, and media must describe the actual listing.
+- Placeholders are admin-only until a real approved asset is available.
+- Do not use an unverified CAIP inference as public factual copy.
+- Do not treat a draft, render plan, rights review, or internal approval as a published social/video/image output.
+- Keep marketplace, Search Console, Google Business Profile, and storefront observations separate from assumptions.
 
 ## Highest-value next work
 
-1. **Login evidence and repair:** capture the safe response from the current `POST /api/auth/login` 500 before changing any D1 schema.
-2. **Build 207 public-media proof:** run real data through approved, blocked, consent-needed, no-annotation, and clearly permitted image cases.
-3. **Featured-media live proof:** test products that have only `media_assets`, only `product_images`, both, and neither; confirm correct save/reopen behavior.
-4. **Release-preflight workflow:** build a concise operator checklist from catalog facts, image roles, consent, Content Studio deliverables, CAIP evidence, and Release Board approval conditions.
-5. **Real device tests:** test Product Editor, Catalog Media, Content Studio, and CAIP on a phone, tablet, and desktop browser with slow network conditions.
-6. **Release evidence:** keep Search Console/GBP/marketplace performance observations separate from assumptions; change public SEO only after reviewed evidence.
-7. **CAIP operations:** only later add checksum, controlled technical extraction, derivative output namespace, human review, cost limits, and verified renderer/publishing adapters.
+1. **Login evidence and repair:** obtain the safe `POST /api/auth/login` response/log code and change only that verified failure path.
+2. **Build 208 production proof:** test the new preflight with representative real records and confirm it never writes on load.
+3. **Public-media proof:** test approved, blocked, consent-needed, legacy-unannotated, and explicitly public-permitted media through the public catalog/featured-product endpoints.
+4. **Featured-media proof:** verify products with only `media_assets`, only `product_images`, both, and neither. Confirm the explicit sync changes only `products.featured_image_url`.
+5. **Real-device proof:** test Product Editor, Catalog Media, Release Preflight, Content Studio, CAIP, and Release Board on phone/tablet/desktop and a slow network.
+6. **Release evidence:** use actual published results and performance observations to improve visible copy, internal links, and product structured data.
+7. **Future CAIP operations:** only after policy approval, add checksums, controlled technical extraction, derivative output namespace, cost budgets, preview/review, output verification, retry, and rollback.
 
 ## Deliberately not represented as complete
 
-- The current login 500 is not claimed fixed without the returned error code/log.
-- No external AI vision, video render, thumbnail provider, OAuth social publisher, or paid provider is active through CAIP.
-- No real product-media derivative is created by a CAIP plan.
-- Stripe/email/webhook, public SEO, live marketplace, R2, D1, and mobile tests still need deployment evidence.
+- The login 500 is not claimed fixed.
+- Build 208 does not create an output file, thumbnail, MP4, social post, marketplace listing, or provider call.
+- CAIP does not grant rights, create consent, or make source media public.
+- Stripe/email/webhooks, public SEO effects, R2/D1 live behavior, marketplace sync, and mobile reliability still need deployed proof.
