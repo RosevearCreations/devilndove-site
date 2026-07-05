@@ -1,6 +1,6 @@
-# Retained reference — current pointer refreshed in Build 206
+# Retained reference — current pointer refreshed in Build 207
 
-For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 206 catalog-media, tax, CAIP, deployment, or auth rules.
+For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 207 catalog-media, public-media consent, CAIP, deployment, or auth rules.
 
 ---
 

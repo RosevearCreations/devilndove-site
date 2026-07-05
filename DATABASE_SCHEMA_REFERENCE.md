@@ -58,3 +58,5 @@ The established product-media integrity rules remain: ordinary product saves pre
 - `creative_execution_budget_controls` — disabled CAD per-project/per-capability budget policy records for future provider work.
 
 The Build 202 schema is additive. It does not change the source-media ownership of `product_images`, `media_assets`, `content_project_media`, or R2 objects.
+
+> Build 207 note: no D1 migration is required. The product-content bridge uses existing additive Content Studio/CAIP schema routines only after an administrator explicitly invokes a package action.

@@ -1,24 +1,23 @@
-# Retained reference — current pointer refreshed in Build 206
+# Retained reference — current pointer refreshed in Build 207
 
-For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 206 catalog-media, tax, CAIP, deployment, or auth rules.
+## Use this first
 
----
+For all active planning and implementation, start with:
 
-# Retired reference — Build 200
+1. `AI_HANDOFF.md` — current technical boundaries, deployment checks, security rules, and known live incidents.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — current business direction, release readiness, SEO/media guardrails, completed work, and priority backlog.
 
-This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
+`MARKDOWN_INDEX.md` explains which specialist files matter for a specific task. This retained note is deliberately not a third planning source.
 
-## AI Context Pointer — Build 199
+## Build 207 pointer
 
-Current technical context is in `AI_HANDOFF.md`. Current business/roadmap context is in `PROJECT_STATUS_AND_ROADMAP.md`. Content Automation Studio details are in `CONTENT_AUTOMATION_STUDIO.md`. Retained history remains under `docs/archive/`.
+- The current catalog-media workspace now has a product-level **Content Studio → CAIP** handoff card.
+- The bridge is read-only on load. Only explicit, audited administrator actions create/refresh a Content Studio package or refresh its CAIP reference project.
+- Build 207 does not publish content, change original media, create derivatives, grant public rights, or require a D1 migration.
+- Current public image selection is consent-aware: explicitly blocked or consent-needed images are excluded, while unannotated first-party product images remain compatible until reviewed data says otherwise.
 
-## Build 204 authentication schema compatibility safeguard — 2026-07-03
+## Keep this accurate
 
-- Devil n Dove auth uses Cloudflare Pages Functions plus D1 binding `DB`; it does not use Supabase.
-- The observed `POST /api/auth/login 500` is past route activation: the live GET probe confirms Functions and `DB` exist.
-- A historic bootstrap still exists in source that created `members` and an incompatible hashed-token `sessions` table. The current app expects `users` and `sessions(user_id, session_token, token, ...)`.
-- Build 204 detects that state as `AUTH_LEGACY_SCHEMA` before it performs a query/insert, returns a safe actionable code/hint, and exposes those values in the browser login message.
-- `database_auth_legacy_to_current_repair.sql` is a one-time, preservation-first migration: it copies `members` to `users`, archives the old `sessions` table, creates current sessions, and intentionally requires fresh sign-in because raw legacy session tokens cannot be recovered from hashes.
-
-
-Build 205 auth correction: the Build 204 D1-console repair used PRAGMA foreign_keys = OFF, which D1 does not permit within its implicit transaction. Replace it with database_auth_legacy_to_current_repair_d1_console.sql and execute its numbered blocks separately. Login errors now render the safe Function detail and classify session create/read failures.
+- Devil n Dove uses Cloudflare Pages Functions + Cloudflare D1 (`DB`), not Supabase.
+- The unresolved `POST /api/auth/login` 500 needs the safe response body or matching Cloudflare Function log before any auth/database changes are attempted.
+- Do not run legacy `members` migration scripts or `PRAGMA foreign_keys = OFF` batches; the selected live D1 database was confirmed to have current `users` and `sessions` tables and no `members` table.
