@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h2>${esc(displayName)}</h2>
             <p class="small">Search by Product ID, name, SKU, or slug. Every workspace below follows this selection.</p>
           </div>
-          ${selected ? `<div class="product-media-context-actions"><a class="btn" href="/admin/catalog/?product_id=${num(selected.product_id)}">Open product editor</a><a class="btn secondary" href="/admin/creative-assets/?product_id=${num(selected.product_id)}">Open CAIP</a><a class="btn secondary" href="${esc(publicPreviewUrl(selected))}" target="_blank" rel="noopener">Preview storefront</a></div>` : ''}
+          ${selected ? `<div class="product-media-context-actions"><a class="btn" href="/admin/catalog/?product_id=${num(selected.product_id)}">Open product editor</a><a class="btn secondary" href="/admin/release-preflight/?product_id=${num(selected.product_id)}">Release preflight</a><a class="btn secondary" href="/admin/creative-assets/?product_id=${num(selected.product_id)}">Open CAIP</a><a class="btn secondary" href="${esc(publicPreviewUrl(selected))}" target="_blank" rel="noopener">Preview storefront</a>${selected.featured_image_needs_sync ? `<button class="btn secondary" type="button" data-sync-featured-image="${num(selected.product_id)}">Sync resolved featured image</button>` : ''}</div>` : ''}
         </div>
         <div class="product-media-context-search-row">
           <label><span class="small">Find product</span><input class="input" id="productMediaContextSearch" type="search" placeholder="Example: 34, pendant, DND-034" value="${esc(document.getElementById('productMediaContextSearch')?.value || '')}" autocomplete="off"/></label>
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="product-media-context-details">
             <div class="product-media-context-chip-row"><span class="status-note small">Product ID ${num(selected.product_id)}</span><span class="status-note small">${esc(workflow)}</span>${selected.taxable == 0 ? '<span class="status-note small">Non-taxable</span>' : `<span class="status-note small">${esc(selected.tax_class_name || selected.tax_class_code || 'Tax class not assigned')} · ${esc(formatRate(selected))}</span>`}</div>
             <p><strong>${esc(selected.name || '')}</strong>${selected.sku ? ` · SKU ${esc(selected.sku)}` : ''}${selected.slug ? ` · /${esc(selected.slug)}` : ''}</p>
-            <p class="small">Featured image source: ${esc(source || 'No image source')}. ${selected.featured_image_needs_sync ? 'Saving the product editor will copy this resolved media URL into the product field.' : ''}</p>
+            <p class="small">Featured image source: ${esc(source || 'No image source')}. ${selected.featured_image_needs_sync ? 'This resolved media URL is not yet stored on the product record. Use the explicit sync button only after checking the selected source.' : ''}</p>
             <p class="small">Media library assets: ${num(selected.media_asset_count)} · product-gallery rows: ${num(selected.product_image_count)}. This reference card does not publish or alter media.</p>
           </div>
         </div>` : ''}
@@ -111,6 +111,30 @@ document.addEventListener('DOMContentLoaded', () => {
       const host = event.currentTarget.parentElement;
       if (host) host.innerHTML = '<span class="product-media-context-placeholder-copy">Featured URL could not be loaded</span>';
     });
+    mount.querySelector('[data-sync-featured-image]')?.addEventListener('click', () => syncResolvedFeaturedImage());
+  }
+
+  async function syncResolvedFeaturedImage() {
+    const selected = current?.product;
+    const id = num(selected?.product_id || productId);
+    if (!id || !selected?.featured_image_needs_sync) return;
+    const url = text(selected.featured_image_url);
+    if (!url) { lastError = 'No resolved media URL is available to sync.'; render(); return; }
+    if (!window.confirm('Store the currently resolved featured image URL on this product? This does not modify source media, gallery order, image roles, consent records, or publication status.')) return;
+    lastError = 'Syncing the resolved featured image URL…'; render();
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/product-featured-image-sync', {
+        method: 'POST', body: JSON.stringify({ product_id: id, candidate_url: url })
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not sync the featured image URL.');
+      current = await api(`/api/admin/product-detail?product_id=${encodeURIComponent(id)}`);
+      lastError = data.message || 'Featured image URL synced.';
+      synchronizeOtherPanels(current);
+    } catch (error) {
+      lastError = error?.message || 'Could not sync the featured image URL.';
+    }
+    render();
   }
 
   async function loadProduct(id) {
