@@ -61,3 +61,7 @@ For detailed CAIP architecture, source controls, storage, governance, provider r
 ## Build 202 CAIP media-operations note
 
 CAIP now records safe metadata/R2-header observations, immutable future-output plans, and short-lived administrator-bound internal review grants. It still does not create derivatives or publish media; source-media preservation remains mandatory.
+
+## Build 208 release-preflight integration
+
+Product Release Preflight reads existing Content Studio package, source-media, and deliverable records as one stage in a wider review. It does not modify a package, select media, alter rights, approve a deliverable, or create/publish a Release Board record. See `docs/creative-asset-intelligence-platform/15_Product_Release_Preflight.md`.

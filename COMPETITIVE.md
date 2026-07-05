@@ -1,6 +1,20 @@
-# Retained reference — current pointer refreshed in Build 207
+# Retained reference — current pointer refreshed in Build 208
 
-For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 207 catalog-media, public-media consent, CAIP, deployment, or auth rules.
+For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 208 release-preflight, catalog-media, public-media consent, CAIP, deployment, or auth rules.
+
+---
+
+## Build 208 competitive implementation note — verified release quality
+
+The current practical differentiator is a reliable, review-led product release flow rather than more unattended automation. Product Release Preflight now checks the information customers and search systems need to agree on: a real product, a usable lead image, factual catalog data, source-media safeguards, human-reviewed Content Studio material, CAIP evidence, and an explicit Release Board decision.
+
+External design constraints used for this direction:
+
+- Google structured data must represent the page content visitors can actually see; do not manufacture schema-only facts.
+- Shopify product-media guidance favors useful product media and concise descriptive alt text.
+- Etsy search-visibility guidance emphasizes clear, well-lit primary listing photos and accurate categories/listing details.
+
+Build 208 response: keep source evidence and buyer-facing facts aligned, make unresolved gaps visible before release, and never imply a listing, gallery, story, consent record, or platform publication is complete without a real reviewed record. This is an operational quality control, not a ranking guarantee.
 
 ---
 
