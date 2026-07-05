@@ -108,7 +108,7 @@ async function inspectAuthDatabase(env) {
         sessions_missing_columns: missingSessionsColumns,
         ready: false,
         code: "AUTH_LEGACY_SCHEMA",
-        hint: "Legacy members/sessions tables were found. Run database_auth_legacy_to_current_repair.sql once in the devilndove-prod D1 console; it preserves member records and archives legacy sessions."
+        hint: "Collect the safe schema diagnostic and Cloudflare Function log before any D1 change. Do not run a legacy migration unless the deployed database and route fault are independently verified."
       };
     }
 

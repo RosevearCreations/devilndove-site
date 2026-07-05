@@ -16,6 +16,8 @@ function json(data, status = 200) {
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function clean(value) { return String(value || '').trim(); }
 function positiveInt(value, fallback, max) { const num = Number(value); return Number.isInteger(num) && num > 0 ? Math.min(num, max) : fallback; }
+async function tableExists(db, tableName) { return Boolean(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1").bind(tableName).first().catch(() => null)); }
+async function tableColumns(db, tableName) { try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean)); } catch { return new Set(); } }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -37,12 +39,48 @@ export async function onRequestGet(context) {
       LIMIT ?
     `).bind(limit).all());
     const ids = productRows.map((row) => Number(row.product_id || 0)).filter(Boolean);
+    // Build 207: never use an image that the product-media review has explicitly
+    // blocked or marked consent-needed. A linked consent record must authorize public use.
+    const [hasAnnotations, hasConsent] = await Promise.all([tableExists(db, 'product_image_annotations'), tableExists(db, 'media_consent_records')]);
+    const annotationColumns = hasAnnotations ? await tableColumns(db, 'product_image_annotations') : new Set();
+    const consentColumns = hasConsent ? await tableColumns(db, 'media_consent_records') : new Set();
+    const canJoinAnnotations = annotationColumns.has('product_image_id');
+    const canJoinConsent = canJoinAnnotations && annotationColumns.has('consent_record_id') && consentColumns.has('consent_record_id');
+    const annotationStatus = canJoinAnnotations && annotationColumns.has('public_use_status') ? "COALESCE(pia.public_use_status,'internal_review')" : "'internal_review'";
+    const consentAllowed = canJoinConsent && consentColumns.has('public_use_allowed') ? 'COALESCE(mcr.public_use_allowed,0)=1' : '0=1';
+    const consentGranted = canJoinConsent && consentColumns.has('consent_status') && consentColumns.has('consent_scope')
+      ? "(LOWER(COALESCE(mcr.consent_status,'')) IN ('granted','not_required') AND LOWER(COALESCE(mcr.consent_scope,'')) IN ('product_page','website_gallery','all_public'))"
+      : '0=1';
+    const annotationConsentId = canJoinAnnotations && annotationColumns.has('consent_record_id') ? 'COALESCE(pia.consent_record_id,0)' : '0';
+    const imageSafetyClause = canJoinAnnotations
+      ? `AND LOWER(${annotationStatus}) NOT IN ('blocked','consent_needed') AND (${annotationConsentId}=0 OR ${consentAllowed} OR ${consentGranted})`
+      : '';
     const images = ids.length ? rows(await db.prepare(`
-      SELECT product_id, image_url, alt_text, sort_order
-      FROM product_images
-      WHERE product_id IN (${ids.map(() => '?').join(',')})
-        AND COALESCE(image_url,'') <> ''
-      ORDER BY product_id ASC, COALESCE(sort_order,0) ASC, product_image_id ASC
+      SELECT pi.product_id, pi.image_url,
+             ${canJoinAnnotations && annotationColumns.has('alt_text') ? "COALESCE(pia.alt_text, pi.alt_text, '')" : "COALESCE(pi.alt_text, '')"} AS alt_text,
+             pi.sort_order
+      FROM product_images pi
+      ${canJoinAnnotations ? 'LEFT JOIN product_image_annotations pia ON pia.product_image_id=pi.product_image_id' : ''}
+      ${canJoinConsent ? 'LEFT JOIN media_consent_records mcr ON mcr.consent_record_id=pia.consent_record_id' : ''}
+      WHERE pi.product_id IN (${ids.map(() => '?').join(',')})
+        AND COALESCE(pi.image_url,'') <> ''
+        ${imageSafetyClause}
+      ORDER BY pi.product_id ASC, COALESCE(pi.sort_order,0) ASC, pi.product_image_id ASC
+    `).bind(...ids).all().catch(() => ({ results: [] }))) : [];
+    // A product can still carry a legacy featured_image_url. If it points to a
+    // reviewed gallery image that is blocked or lacks a required public-use consent,
+    // never let that legacy field bypass the image gate.
+    const unsafeImageRows = ids.length && canJoinAnnotations ? rows(await db.prepare(`
+      SELECT pi.product_id, pi.image_url
+      FROM product_images pi
+      LEFT JOIN product_image_annotations pia ON pia.product_image_id=pi.product_image_id
+      ${canJoinConsent ? 'LEFT JOIN media_consent_records mcr ON mcr.consent_record_id=pia.consent_record_id' : ''}
+      WHERE pi.product_id IN (${ids.map(() => '?').join(',')})
+        AND COALESCE(pi.image_url,'') <> ''
+        AND (
+          LOWER(${annotationStatus}) IN ('blocked','consent_needed')
+          OR (${annotationConsentId}<>0 AND NOT (${consentAllowed} OR ${consentGranted}))
+        )
     `).bind(...ids).all().catch(() => ({ results: [] }))) : [];
     const stories = ids.length ? rows(await db.prepare(`
       SELECT product_id, story_heading, story_summary
@@ -54,12 +92,22 @@ export async function onRequestGet(context) {
     `).bind(...ids).all().catch(() => ({ results: [] }))) : [];
     const firstImageByProduct = new Map();
     images.forEach((row) => { if (!firstImageByProduct.has(Number(row.product_id || 0))) firstImageByProduct.set(Number(row.product_id || 0), row); });
+    const unsafeUrlsByProduct = new Map();
+    unsafeImageRows.forEach((row) => {
+      const productId = Number(row.product_id || 0);
+      const imageUrl = clean(row.image_url).toLowerCase();
+      if (!productId || !imageUrl) return;
+      if (!unsafeUrlsByProduct.has(productId)) unsafeUrlsByProduct.set(productId, new Set());
+      unsafeUrlsByProduct.get(productId).add(imageUrl);
+    });
     const firstStoryByProduct = new Map();
     stories.forEach((row) => { if (!firstStoryByProduct.has(Number(row.product_id || 0))) firstStoryByProduct.set(Number(row.product_id || 0), row); });
     const products = productRows.map((row) => {
       const productId = Number(row.product_id || 0);
       const image = firstImageByProduct.get(productId) || {};
       const story = firstStoryByProduct.get(productId) || {};
+      const storedFeatured = clean(row.featured_image_url);
+      const storedFeaturedIsUnsafe = Boolean(storedFeatured && unsafeUrlsByProduct.get(productId)?.has(storedFeatured.toLowerCase()));
       return {
         product_id: productId,
         slug: clean(row.slug),
@@ -68,7 +116,7 @@ export async function onRequestGet(context) {
         short_description: clean(row.short_description),
         price_cents: Number(row.price_cents || 0),
         currency: clean(row.currency) || 'CAD',
-        image_url: clean(row.featured_image_url) || clean(image.image_url),
+        image_url: clean(image.image_url) || (storedFeaturedIsUnsafe ? '' : storedFeatured),
         alt_text: clean(image.alt_text) || clean(row.name) || 'Devil n Dove product',
         merchandise_origin: clean(row.merchandise_origin) || 'handmade',
         sale_channel: clean(row.sale_channel) || 'onsite',

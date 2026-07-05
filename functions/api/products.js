@@ -266,6 +266,9 @@ async function enrichProductsWithStoryNotes(db, products) {
   }
 }
 
+// Build 207: public catalog cards use the same conservative consent gate as the
+// product-detail endpoint. A block/consent-needed annotation never reaches the
+// public listing; a linked consent record must explicitly permit public use.
 async function enrichProductsWithImages(db, products) {
   const rows = Array.isArray(products) ? products : [];
   if (!db || !rows.length) return rows;
@@ -274,6 +277,7 @@ async function enrichProductsWithImages(db, products) {
     if (!imageColumns.has("product_id") || !imageColumns.has("image_url")) return rows;
     const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 500);
     if (!ids.length) return rows;
+
     const selectList = [
       imageColumns.has("product_image_id") ? "product_image_id" : "NULL AS product_image_id",
       "product_id",
@@ -288,22 +292,92 @@ async function enrichProductsWithImages(db, products) {
       WHERE product_id IN (${ids.map(() => "?").join(",")})
       ORDER BY product_id ASC, COALESCE(sort_order,0) ASC, COALESCE(product_image_id,0) ASC
     `, ids);
+
+    const annotationColumns = await getStrictTableColumnSet(db, 'product_image_annotations');
+    const annotationsById = new Map();
+    const annotationsByUrl = new Map();
+    const consentIds = new Set();
+    if (annotationColumns.has('product_id')) {
+      const annotationSelect = [
+        annotationColumns.has('product_image_id') ? 'product_image_id' : 'NULL AS product_image_id',
+        annotationColumns.has('image_url') ? 'image_url' : "'' AS image_url",
+        annotationColumns.has('alt_text') ? 'alt_text' : "'' AS alt_text",
+        annotationColumns.has('public_use_status') ? 'public_use_status' : "'internal_review' AS public_use_status",
+        annotationColumns.has('consent_record_id') ? 'consent_record_id' : 'NULL AS consent_record_id'
+      ];
+      const annotationRows = await runProductQuery(db, `
+        SELECT ${annotationSelect.join(', ')}
+        FROM product_image_annotations
+        WHERE product_id IN (${ids.map(() => '?').join(',')})
+      `, ids).catch(() => []);
+      annotationRows.forEach((annotation) => {
+        const id = Number(annotation.product_image_id || 0);
+        const url = normalizeText(annotation.image_url).toLowerCase();
+        if (id && !annotationsById.has(id)) annotationsById.set(id, annotation);
+        if (url && !annotationsByUrl.has(url)) annotationsByUrl.set(url, annotation);
+        const consentId = Number(annotation.consent_record_id || 0);
+        if (consentId) consentIds.add(consentId);
+      });
+    }
+
+    const consentById = new Map();
+    if (consentIds.size) {
+      const consentColumns = await getStrictTableColumnSet(db, 'media_consent_records');
+      if (consentColumns.has('consent_record_id')) {
+        const idsForConsent = [...consentIds];
+        const consentSelect = [
+          'consent_record_id',
+          consentColumns.has('consent_status') ? 'consent_status' : "'' AS consent_status",
+          consentColumns.has('consent_scope') ? 'consent_scope' : "'' AS consent_scope",
+          consentColumns.has('public_use_allowed') ? 'public_use_allowed' : '0 AS public_use_allowed'
+        ];
+        const consentRows = await runProductQuery(db, `
+          SELECT ${consentSelect.join(', ')}
+          FROM media_consent_records
+          WHERE consent_record_id IN (${idsForConsent.map(() => '?').join(',')})
+        `, idsForConsent).catch(() => []);
+        consentRows.forEach((consent) => consentById.set(Number(consent.consent_record_id || 0), consent));
+      }
+    }
+
+    const safeForPublic = (image) => {
+      const annotation = annotationsById.get(Number(image.product_image_id || 0)) || annotationsByUrl.get(normalizeText(image.image_url).toLowerCase()) || null;
+      if (!annotation) return { allowed: true, annotation: null };
+      const publicUse = normalizeText(annotation.public_use_status).toLowerCase();
+      if (['blocked', 'consent_needed'].includes(publicUse)) return { allowed: false, annotation };
+      const consentId = Number(annotation.consent_record_id || 0);
+      if (!consentId) return { allowed: true, annotation };
+      const consent = consentById.get(consentId);
+      const hasPublicAllowance = Number(consent?.public_use_allowed || 0) === 1;
+      const consentStatus = normalizeText(consent?.consent_status).toLowerCase();
+      const consentScope = normalizeText(consent?.consent_scope).toLowerCase();
+      const allowed = hasPublicAllowance || (
+        ['granted', 'not_required'].includes(consentStatus)
+        && ['product_page', 'website_gallery', 'all_public'].includes(consentScope)
+      );
+      return { allowed, annotation };
+    };
+
     const byProductId = new Map();
     imageRows.forEach((image) => {
       const productId = Number(image.product_id || 0);
       const imageUrl = normalizeText(image.image_url);
       if (!productId || !imageUrl) return;
+      const gate = safeForPublic(image);
+      if (!gate.allowed) return;
       if (!byProductId.has(productId)) byProductId.set(productId, []);
       const list = byProductId.get(productId);
       if (list.some((row) => String(row.image_url || '').trim().toLowerCase() === imageUrl.toLowerCase())) return;
       list.push({
         product_image_id: Number(image.product_image_id || 0),
         image_url: imageUrl,
-        alt_text: normalizeText(image.alt_text),
+        alt_text: normalizeText(gate.annotation?.alt_text) || normalizeText(image.alt_text),
         sort_order: Number(image.sort_order || 0),
-        created_at: normalizeText(image.created_at)
+        created_at: normalizeText(image.created_at),
+        public_use_status: normalizeText(gate.annotation?.public_use_status) || 'internal_review'
       });
     });
+
     return rows.map((product) => {
       const savedImages = byProductId.get(Number(product.product_id || 0)) || [];
       const allImages = [];
@@ -313,21 +387,27 @@ async function enrichProductsWithImages(db, products) {
         if (allImages.some((row) => String(row.image_url || '').trim().toLowerCase() === imageUrl.toLowerCase())) return;
         allImages.push(typeof image === 'object' ? { ...image, image_url: imageUrl } : { image_url: imageUrl, alt_text: product.name || '' });
       };
-      push(product.featured_image_url);
+      const storedFeatured = normalizeText(product.featured_image_url);
+      const storedFeaturedIsBlocked = storedFeatured && imageRows.some((row) => (
+        Number(row.product_id || 0) === Number(product.product_id || 0)
+        && normalizeText(row.image_url).toLowerCase() === storedFeatured.toLowerCase()
+        && !safeForPublic(row).allowed
+      ));
+      if (!storedFeaturedIsBlocked) push(storedFeatured);
       savedImages.forEach(push);
       return {
         ...product,
         image_urls: allImages.map((image) => image.image_url),
         images: allImages.slice(0, 12),
         image_count: allImages.length,
-        featured_image_url: product.featured_image_url || allImages[0]?.image_url || ''
+        featured_image_url: (!storedFeaturedIsBlocked && storedFeatured) || allImages[0]?.image_url || '',
+        public_media_gate: 'annotation_and_consent_checked'
       };
     });
   } catch {
     return rows;
   }
 }
-
 
 async function enrichProductsWithProofSignals(db, products) {
   const rows = Array.isArray(products) ? products : [];
