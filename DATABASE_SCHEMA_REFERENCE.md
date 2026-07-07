@@ -70,3 +70,16 @@ The Build 202 schema is additive. It does not change the source-media ownership 
 ## Build 208 release-preflight schema boundary
 
 Build 208 adds **no mandatory D1 migration**. `/api/admin/product-release-preflight` detects and reads available existing catalog, media, Content Studio, CAIP, and Release Board tables. `/api/admin/product-featured-image-sync` updates only `products.featured_image_url` after an explicit admin request using an already retained product/media URL.
+
+
+## Build 210 — Product social draft automation
+
+`product_social_automation_settings` is a singleton configuration table (`settings_id=1`) for optional **review-first** product social drafts.
+
+- Defaults to `auto_queue_enabled = 0`.
+- Controls the eligible review status, active/image prerequisites, default destinations, hashtag set, caption-template key, and UTM campaign.
+- It does not contain platform credentials.
+- Product-triggered queue rows use `source_type='product'` and `source_id=<product_id>`.
+- New rows must start as `approval_status='needs_review'`, `post_status='draft'`, `privacy_status='needs_review'`, and `approved_for_public_post=0`.
+
+Platform tokens, client secrets, OAuth codes, Page tokens, and refresh tokens remain Cloudflare encrypted Secrets, not D1 schema data.

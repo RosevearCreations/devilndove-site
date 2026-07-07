@@ -1,76 +1,105 @@
-# Devil n Dove Project Status and Roadmap — Build 209
+# Devil n Dove Project Status and Roadmap — Build 210
 
 ## Purpose
 
-This is the business, operations, SEO, and release-readiness source of truth. `AI_HANDOFF.md` is its technical companion. Together, these two files replace the need to read the older root Markdown files first.
+This is the business, operations, SEO, and release-readiness source of truth. `AI_HANDOFF.md` is its technical companion. Together, these two documents replace the need to read older root Markdown files first.
 
 ## Current operating flow
 
 ```text
 Make/source item
 → truthful catalog facts, price, tax, stock and SEO
-→ approved real media with roles and actual public-use status
+→ approved real media with roles and public-use/consent review
 → product resource / inventory context
-→ Catalog approval
-→ Content Studio package
-→ CAIP evidence and governance
-→ Product Release Preflight
+→ Content Studio
+→ CAIP evidence/governance
+→ destination-aware Release Preflight
 → explicit Release Board approval
-→ explicit publication or marketplace action
+→ optional review-first social draft
+→ explicit platform posting or manual publishing
+→ UTM measurement and learning
 ```
 
-Inventory context is useful for making, restocking, and honest operational planning. It is not a substitute for customer-facing availability, legal material claims, CAIP evidence, media consent, or Release Board approval.
+## Build 210 business outcome
 
-## Build 209 complete
+Build 210 connects the product workflow to social planning without treating social media as a blind autopilot.
 
-### Inventory Operations Desk
+An administrator can enable **Automatic Product Social Drafts** in `/admin/social-publishing/`. An eligible Active + Approved/Published product with a usable image then creates one social queue draft linked to the product. The draft includes a UTM-tagged product link and default platforms/hashtags but remains unapproved until a person verifies it.
 
-`/admin/inventory-operations/` is now more usable as a real workshop desk:
+This is the right starting point for a small workshop brand: a new piece appears in the social work queue automatically, while we still retain control over wording, photos, privacy, timing, and platform choice.
 
-- readable dark-theme panels, inputs, messages, tables, and action controls;
-- no white nested card backgrounds with low-contrast writing;
-- action columns are visually contained instead of blending into tables;
-- mobile table-to-card fallbacks keep actions within the page;
-- the page can receive `?product_id=<id>` from Product Release Preflight and select the matching product in its resource-link workspace;
-- internal inventory visuals are admin-only and never become storefront, Open Graph, schema, or product images.
+## Social publishing policy
 
-### Release-preflight inventory context
+- A tracking pixel is not a posting integration.
+- No automatic public post is enabled in Build 210.
+- No post may claim availability, price, material, origin, or shipping terms that do not match the visible product listing.
+- No post may use a customer, family, third-party, or unclear-rights image without explicit review.
+- A product social draft must not change the product, its gallery, CAIP record, Content Studio status, Release Preflight, or Release Board outcome.
+- TikTok and YouTube remain manual until dedicated OAuth/video upload integrations are completed.
+- Product hashtags and local references must remain truthful; do not use fake locality, material, or trend claims merely to chase reach.
 
-Product Release Preflight now reads existing product tracking and linked tool/supply records as a transparent **context stage**:
+## Current direct-publishing candidates
 
-- finished-product tracking quantity;
-- number of linked tools/supplies;
-- number of linked items with inventory records;
-- unmatched linked inputs;
-- internal reorder pressure;
-- do-not-reuse signals.
+1. **Facebook Page** — useful for local followers, makers, customer updates, and workshop stories.
+2. **Instagram Professional** — useful for finished-product images and maker process; single-image feed support first.
+3. **Pinterest** — useful for evergreen product discovery, visual search, and jewellery/craft inspiration.
+4. **X** — optional short workshop/product updates, not a priority image storefront.
+5. **TikTok/YouTube** — reserve for video once a reliable scripted content habit, consent guard, and dedicated upload flows are established.
 
-The stage does not block a release decision and it does not write anything. This avoids inventing a supply-chain claim or converting a stock note into a customer promise.
+## SEO and social alignment
 
-### SEO and buyer trust direction
+Social captions should be human-first. The content must match the actual public product page:
 
-Public pages retain the existing guardrails:
+- one clear, factual product name;
+- a real product image;
+- visible price/availability only if currently accurate;
+- correct materials/origin language;
+- useful descriptive alt text for the web listing;
+- canonical product link with source/medium/campaign parameters;
+- no keyword stuffing or unearned claims.
 
-- one visible H1 per public page;
-- truthful visible title, price, stock, primary image, description, alt text, canonical URL, and structured data;
-- placeholders remain internal until replaced with approved real assets;
-- source rights, consent, CAIP review, Content Studio status, and Release Board status stay separate;
-- no schema-only, AI-only, or internal-inference facts should become public copy without source evidence and human review.
+This supports social traffic without creating a mismatch between the social post, visible product listing, and product structured data.
 
-Google’s product structured-data guidance is still the right model: rich product information needs to describe the actual product page and remain eligible under Google’s quality rules. Shopify’s current product-media guidance likewise treats media and alternative text as useful buyer and accessibility information, not keyword padding. citeturn610719search1turn610719search14turn610719search6turn610719search26
+## Documentation structure
 
-## Canonical next work
+Read these first:
 
-1. **Login evidence and repair.** Capture the sanitized failed login response or Cloudflare Function log. Do not run a generic D1 repair.
-2. **Build 209 real-device proof.** Test inventory operations on phone, tablet, and desktop, including long item names, no-image records, many action buttons, and slow loading.
-3. **Release-preflight proof.** Verify approved, blocked, consent-needed, legacy-unannotated, explicitly public-permitted, and no-media products.
-4. **Inventory quality.** Use the new view to fill real supplier, unit, reorder, and source fields; do not mass-fill uncertain data.
-5. **Release evidence.** Use actual public-page/Search Console/marketplace results to improve factual product copy, title/meta, internal links, and structured data.
-6. **Future CAIP operations.** Only after an explicit design approval, add controlled derivative processing with checksum, rights, namespace, budget, review, output verification, retry, and rollback.
+1. `AI_HANDOFF.md` — technical/source/deployment truth.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — business/release/SEO truth.
+
+Task-specific Build 210 reference:
+
+- `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md` — connection steps, protected secret names, provider scopes/limitations, and launch sequence.
+
+All other Markdown files are specialist references or retained history. They do not override this pair.
+
+## Immediate validation after deployment
+
+1. Open `/admin/social-publishing/`.
+2. Verify no secrets are shown.
+3. Turn on automatic draft creation only.
+4. Create/approve one safe test product with a real public product image.
+5. Verify exactly one social queue draft is created.
+6. Verify the draft is still Needs Review and has no public post attempt.
+7. Run the privacy guard, then dry-run only.
+8. With one configured account, publish one test post.
+9. Check UTM visits and the attempt record.
+10. Repeat only after the first platform behaves correctly.
+
+## Highest-value next work
+
+1. Complete documented Meta Page/Instagram connection and run one safe low-risk test post each.
+2. Add a visual post preview and platform media validator (aspect, file type, public HTTPS, caption limits).
+3. Add a safe optional scheduler only after platform connection proof and a visible “auto publish allowed” control with per-platform confirmation.
+4. Add TikTok Direct Post only after full required OAuth/creator/media-transfer work.
+5. Add YouTube resumable upload only after a channel release workflow exists.
+6. Finish the evidence-first login 500 repair.
 
 ## Deliberately not complete
 
 - The login `500` is not claimed fixed.
-- Build 209 does not create reservations, stock movements, Content Studio packages, CAIP evidence, derivative files, publication drafts, social posts, or marketplace listings on page load.
-- Inventory notes are not public stock promises.
+- Build 210 does not automatically publish any social post.
+- TikTok and YouTube API publishing are not implemented.
+- There is no OAuth callback/refresh-token vault yet; encrypted Cloudflare secrets are the only supported active credential configuration.
+- Social platform account setup/app approval cannot be performed by the application or inferred from a browser pixel.
 - Stripe/email/webhooks, R2/D1 live behavior, Search Console/Google Business Profile evidence, marketplace sync, and full real-device reliability still need deployed proof.
