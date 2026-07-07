@@ -49,7 +49,7 @@ function check(checkKey, label, pass, detail, { required = true, href = '' } = {
   };
 }
 
-function stage(stageKey, label, checks, description = '') {
+function stage(stageKey, label, checks, description = '', { informational = false } = {}) {
   const blockers = checks.filter((item) => item.required && !item.pass);
   const warnings = checks.filter((item) => !item.required && !item.pass);
   return {
@@ -57,6 +57,7 @@ function stage(stageKey, label, checks, description = '') {
     label,
     description: text(description, 320),
     checks,
+    informational: Boolean(informational),
     ready: blockers.length === 0,
     blocker_count: blockers.length,
     warning_count: warnings.length,
@@ -110,6 +111,8 @@ async function loadProduct(db, productId, support) {
     field(productColumns, 'status', 'status', 'p.'),
     field(productColumns, 'review_status', 'review_status', 'p.'),
     field(productColumns, 'price_cents', 'price_cents', 'p.'),
+    field(productColumns, 'inventory_tracking', 'inventory_tracking', 'p.'),
+    field(productColumns, 'inventory_quantity', 'inventory_quantity', 'p.'),
     field(productColumns, 'short_description', 'short_description', 'p.'),
     field(productColumns, 'description', 'description', 'p.'),
     field(productColumns, 'featured_image_url', 'featured_image_url', 'p.'),
@@ -132,6 +135,8 @@ async function loadProduct(db, productId, support) {
     status: key(row.status) || 'draft',
     review_status: key(row.review_status) || 'pending_review',
     price_cents: Number(row.price_cents || 0),
+    inventory_tracking: Number(row.inventory_tracking || 0) === 1,
+    inventory_quantity: Number(row.inventory_quantity || 0),
     short_description: text(row.short_description),
     description: text(row.description),
     featured_image_url: text(row.featured_image_url),
@@ -363,6 +368,130 @@ async function loadPublications(db, contentProjectId, support) {
   };
 }
 
+async function loadInventoryContext(db, product, support) {
+  const trackingEnabled = Boolean(product?.inventory_tracking);
+  const productQuantity = Number(product?.inventory_quantity || 0);
+  const schemaReady = Boolean(support.tables.product_resource_links && support.tables.site_item_inventory);
+  if (!schemaReady) {
+    return {
+      schema_ready: false,
+      product_tracking_enabled: trackingEnabled,
+      product_quantity: productQuantity,
+      linked_resource_count: 0,
+      matched_inventory_count: 0,
+      missing_inventory_count: 0,
+      reorder_pressure_count: 0,
+      do_not_reuse_count: 0,
+      rows: []
+    };
+  }
+
+  const links = support.columns.product_resource_links;
+  const inventory = support.columns.site_item_inventory;
+  if (!links.has('product_id') || !links.has('resource_kind') || !links.has('source_key')
+    || !inventory.has('source_type') || !inventory.has('external_key')) {
+    return {
+      schema_ready: false,
+      product_tracking_enabled: trackingEnabled,
+      product_quantity: productQuantity,
+      linked_resource_count: 0,
+      matched_inventory_count: 0,
+      missing_inventory_count: 0,
+      reorder_pressure_count: 0,
+      do_not_reuse_count: 0,
+      rows: []
+    };
+  }
+
+  const safeField = (column, alias, fallback = 'NULL') => inventory.has(column) ? `si.${column} AS ${alias}` : `${fallback} AS ${alias}`;
+  const linkOrder = links.has('sort_order') ? 'prl.sort_order' : (links.has('product_resource_link_id') ? 'prl.product_resource_link_id' : 'prl.rowid');
+  const query = `SELECT
+      prl.resource_kind AS resource_kind,
+      prl.source_key AS source_key,
+      ${links.has('quantity_used') ? 'prl.quantity_used' : '1'} AS quantity_used,
+      ${links.has('consumption_mode') ? "prl.consumption_mode" : "'per_unit'"} AS consumption_mode,
+      ${links.has('lot_size_units') ? 'prl.lot_size_units' : '1'} AS lot_size_units,
+      ${safeField('site_item_inventory_id', 'site_item_inventory_id')},
+      ${safeField('item_name', 'item_name', "''")},
+      ${safeField('is_active', 'is_active', '1')},
+      ${safeField('on_hand_quantity', 'on_hand_quantity', '0')},
+      ${safeField('reserved_quantity', 'reserved_quantity', '0')},
+      ${safeField('incoming_quantity', 'incoming_quantity', '0')},
+      ${safeField('reorder_level', 'reorder_level', '0')},
+      ${safeField('do_not_reorder', 'do_not_reorder', '0')},
+      ${safeField('do_not_reuse', 'do_not_reuse', '0')},
+      ${safeField('stock_unit_label', 'stock_unit_label', "'unit'")}
+    FROM product_resource_links prl
+    LEFT JOIN site_item_inventory si
+      ON si.source_type=prl.resource_kind
+     AND si.external_key=prl.source_key
+    WHERE prl.product_id=?
+    ORDER BY ${linkOrder} ASC`;
+  const inventoryRows = rows(await db.prepare(query).bind(number(product?.product_id)).all().catch(() => ({ results: [] })));
+  const normalized = inventoryRows.map((row) => {
+    const hasRecord = number(row.site_item_inventory_id) > 0;
+    const onHand = Number(row.on_hand_quantity || 0);
+    const reserved = Number(row.reserved_quantity || 0);
+    const incoming = Number(row.incoming_quantity || 0);
+    const reorderLevel = Number(row.reorder_level || 0);
+    const availableNow = Math.max(0, onHand - reserved);
+    const isActive = Number(row.is_active ?? 1) !== 0;
+    const doNotReorder = Number(row.do_not_reorder || 0) === 1;
+    const doNotReuse = Number(row.do_not_reuse || 0) === 1;
+    const hasPressure = hasRecord && isActive && !doNotReorder && availableNow <= reorderLevel;
+    return {
+      resource_kind: key(row.resource_kind) || 'supply',
+      source_key: text(row.source_key),
+      item_name: text(row.item_name) || text(row.source_key),
+      quantity_used: Math.max(1, Number(row.quantity_used || 1)),
+      consumption_mode: key(row.consumption_mode) || 'per_unit',
+      lot_size_units: Math.max(1, Number(row.lot_size_units || 1)),
+      has_inventory_record: hasRecord,
+      on_hand_quantity: onHand,
+      reserved_quantity: reserved,
+      incoming_quantity: incoming,
+      available_now: availableNow,
+      reorder_level: reorderLevel,
+      stock_unit_label: text(row.stock_unit_label) || 'unit',
+      active: isActive,
+      do_not_reorder: doNotReorder,
+      do_not_reuse: doNotReuse,
+      reorder_pressure: hasPressure
+    };
+  });
+  return {
+    schema_ready: true,
+    product_tracking_enabled: trackingEnabled,
+    product_quantity: productQuantity,
+    linked_resource_count: normalized.length,
+    matched_inventory_count: normalized.filter((row) => row.has_inventory_record).length,
+    missing_inventory_count: normalized.filter((row) => !row.has_inventory_record).length,
+    reorder_pressure_count: normalized.filter((row) => row.reorder_pressure).length,
+    do_not_reuse_count: normalized.filter((row) => row.do_not_reuse).length,
+    rows: normalized
+  };
+}
+
+function buildInventoryContextStage(product, inventory) {
+  const productLink = `/admin/inventory-operations/?product_id=${product.product_id}`;
+  const schemaReady = Boolean(inventory?.schema_ready);
+  const links = Number(inventory?.linked_resource_count || 0);
+  const coverage = Number(inventory?.matched_inventory_count || 0);
+  const missing = Number(inventory?.missing_inventory_count || 0);
+  const pressure = Number(inventory?.reorder_pressure_count || 0);
+  const doNotReuse = Number(inventory?.do_not_reuse_count || 0);
+  const trackingEnabled = Boolean(inventory?.product_tracking_enabled);
+  const productQuantity = Number(inventory?.product_quantity || 0);
+  return stage('inventory_context', 'Inventory & maker-input context', [
+    check('inventory_schema', 'Inventory records available', schemaReady, schemaReady ? 'Product-resource and site inventory records are available for internal context.' : 'Inventory context is not available in this database yet.', { required: false, href: productLink }),
+    check('finished_stock', 'Finished-product stock context', !trackingEnabled || productQuantity > 0, trackingEnabled ? (productQuantity > 0 ? `${productQuantity} finished item${productQuantity === 1 ? '' : 's'} recorded on hand.` : 'Product inventory tracking is enabled but no finished quantity is on hand.') : 'Finished-product tracking is not enabled; this may be correct for a made-to-order or one-of-a-kind item.', { required: false, href: `/admin/catalog/?product_id=${product.product_id}` }),
+    check('resource_links', 'Linked maker inputs', links > 0, links > 0 ? `${links} tool/supply link${links === 1 ? '' : 's'} is recorded for internal build context.` : 'No product-resource links are recorded yet.', { required: false, href: productLink }),
+    check('resource_coverage', 'Inventory coverage for linked inputs', links === 0 || missing === 0, links === 0 ? 'No linked inputs are available to match yet.' : (missing === 0 ? `${coverage}/${links} linked maker inputs match an inventory record.` : `${coverage}/${links} linked maker inputs match inventory; ${missing} still need an inventory record.`), { required: false, href: productLink }),
+    check('resource_pressure', 'Reorder pressure', pressure === 0, pressure === 0 ? 'No matched linked input is at or below its internal reorder level.' : `${pressure} linked input${pressure === 1 ? '' : 's'} is at or below its internal reorder level.`, { required: false, href: productLink }),
+    check('reuse_note', 'Do-not-reuse signal', doNotReuse === 0, doNotReuse === 0 ? 'No linked input is marked do not reuse.' : `${doNotReuse} linked input${doNotReuse === 1 ? '' : 's'} is flagged do not reuse; verify the planned build before reserving materials.`, { required: false, href: productLink })
+  ], 'Internal stock and maker-input context only. It never changes inventory, builds, reservations, costs, rights, public copy, or release readiness.', { informational: true });
+}
+
 function buildCatalogStage(product) {
   return stage('catalog', 'Catalog facts', [
     check('product_exists', 'Product record', Boolean(product), product ? 'The selected product exists.' : 'Choose a valid product record.', { href: '/admin/catalog/' }),
@@ -452,7 +581,7 @@ async function supportState(db) {
     'products', 'product_seo', 'product_images', 'product_image_annotations', 'media_assets', 'media_consent_records',
     'content_projects', 'content_project_media', 'content_project_deliverables',
     'creative_projects', 'creative_assets', 'creative_story_evidence', 'creative_story_segments',
-    'content_publications'
+    'content_publications', 'product_resource_links', 'site_item_inventory'
   ];
   const entries = await Promise.all(required.map(async (name) => [name, await tableExists(db, name)]));
   const tables = Object.fromEntries(entries);
@@ -481,9 +610,10 @@ export async function onRequestGet(context) {
     const product = await loadProduct(db, productId, support);
     if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
 
-    const [media, content] = await Promise.all([
+    const [media, content, inventory] = await Promise.all([
       loadProductMedia(db, product, support),
-      loadContent(db, productId, support)
+      loadContent(db, productId, support),
+      loadInventoryContext(db, product, support)
     ]);
     const [caip, publications] = await Promise.all([
       loadCaip(db, productId, number(content.project?.content_project_id), support),
@@ -492,6 +622,7 @@ export async function onRequestGet(context) {
 
     const catalog = buildCatalogStage(product);
     const mediaStage = buildMediaStage(product, media);
+    const inventoryStage = buildInventoryContextStage(product, inventory);
     const contentStage = buildContentStage(product, content, destination);
     const caipStage = buildCaipStage(product, caip);
     const handoffStages = { catalog, media: mediaStage, content_studio: contentStage, caip: caipStage };
@@ -502,7 +633,7 @@ export async function onRequestGet(context) {
 
     return json({
       ok: true,
-      build: 'Build 208',
+      build: 'Build 209',
       mode: { destination, read_only: true },
       product,
       media: {
@@ -513,6 +644,7 @@ export async function onRequestGet(context) {
         featured_source: media.find((item) => item.url === product.featured_image_url)?.source || (product.featured_image_url ? 'product_record' : 'none')
       },
       content,
+      inventory,
       caip,
       publications,
       handoff: {
@@ -525,7 +657,7 @@ export async function onRequestGet(context) {
         label: destination === 'both' ? 'Ready to publish both destinations' : `Ready to publish ${destination === 'website_gallery' ? 'Website gallery' : 'Workshop Journal'}`,
         first_next_action: publish.blockers[0] ? { label: publish.blockers[0].label, detail: publish.blockers[0].detail, href: publish.blockers[0].href } : null
       },
-      stages: { ...handoffStages, release_board: releaseBoard },
+      stages: { catalog, media: mediaStage, inventory_context: inventoryStage, content_studio: contentStage, caip: caipStage, release_board: releaseBoard },
       generated_at: new Date().toISOString(),
       requested_by: { user_id: number(adminUser.user_id), email: text(adminUser.email, 180) }
     });
