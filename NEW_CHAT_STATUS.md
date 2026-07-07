@@ -1,21 +1,16 @@
-# Retained new-chat pointer — refreshed in Build 208
+# New Chat Status — Build 209
 
-## Start in this order
-
-1. Read `AI_HANDOFF.md`.
-2. Read `PROJECT_STATUS_AND_ROADMAP.md`.
-3. Use `MARKDOWN_INDEX.md` to open only the specialist reference needed for the task.
-
-This file is a compact orientation note, not an additional roadmap.
+Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
 
 ## Current status
 
-- Current build: **Build 208**.
-- Core release direction: accurate catalog → approved real media/rights review → Content Studio package → CAIP evidence/governance → Release Preflight → explicit Release Board action.
-- New Release Preflight is read-only. It does not create packages, approve work, publish, render, grant rights, or connect to providers.
-- The explicit Featured Image Sync writes only a known existing resolved URL back into `products.featured_image_url` after confirmation/audit.
-- The canonical unresolved incident remains `POST /api/auth/login` 500; capture its sanitized JSON response or Cloudflare Function log before changing code/D1 schema.
+- Current build: **Build 209**.
+- Core workflow: factual catalog → approved real media/rights review → product-resource/inventory context → Content Studio → CAIP evidence/governance → Release Preflight → explicit Release Board action.
+- `/admin/inventory-operations/` has a scoped dark-theme contrast and mobile repair. It supports `?product_id=<id>` to open the matching product resource context.
+- Product Release Preflight reads inventory/maker-input information only as a non-blocking context stage. It does not write stock, create reservations, change costs, create CAIP evidence, grant rights, or affect release scores.
+- The explicit Featured Image Sync still writes only a resolved existing URL to `products.featured_image_url` after confirmation/audit.
+- The canonical unresolved incident remains `POST /api/auth/login` `500`; obtain its sanitized JSON response or Cloudflare Function log before changing login code or D1 schema.
 
-## Immediate next validation
+## Immediate validation
 
-Deploy Build 208, follow `BUILD208_VALIDATION.md`, then re-run `POST_DEPLOY_SMOKE_TEST.md` and the Build 206/207 catalog/media consent checks.
+Deploy Build 209. Follow `BUILD209_VALIDATION.md`, re-run `POST_DEPLOY_SMOKE_TEST.md`, Build 206/207 media-consent checks, and Build 208 destination-aware preflight checks.

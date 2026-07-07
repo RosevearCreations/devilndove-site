@@ -1,3 +1,16 @@
+# Build 209 — Inventory Operations Desk and Read-only Maker-input Context
+
+- Repaired `/admin/inventory-operations/` contrast, nested-card backgrounds, table/action-column visibility, and responsive overflow behavior.
+- Added desktop-contained tables plus labelled mobile inventory, movement, and stock-report cards.
+- Added product context support through `/admin/inventory-operations/?product_id=<id>`.
+- Added a non-blocking Inventory & maker-input context stage to Product Release Preflight.
+- Added `assets/inventory-operations-placeholder.svg` for internal admin use only.
+- Added `BUILD209_VALIDATION.md`.
+- No D1 migration is included.
+- The evidence-first login incident remains separate and unresolved.
+
+---
+
 # Build 208 — Product Release Preflight
 
 - Added read-only cross-workflow product release preflight.
