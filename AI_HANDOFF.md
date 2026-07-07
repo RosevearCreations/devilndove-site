@@ -1,4 +1,4 @@
-# Devil n Dove AI Handoff — Build 209
+# Devil n Dove AI Handoff — Build 210
 
 ## Read this first
 
@@ -6,50 +6,97 @@ This is the technical/deployment source of truth. Pair it with `PROJECT_STATUS_A
 
 ## Current build
 
-**Build 209** focuses on the internal Inventory Operations workspace and a safe stock/maker-input context inside Product Release Preflight.
+**Build 210** adds a dedicated Social Publishing workspace and a safe product-to-social automation handoff.
 
 ### What changed
 
-- `/admin/inventory-operations/` received a scoped contrast, responsive-layout, and action-column repair.
-  - Nested inventory cards no longer fall back to white backgrounds with light text.
-  - Inputs, selects, buttons, message banners, table headers, table cells, and action columns have readable dark-theme colors.
-  - Inventory actions are contained in visible two-column desktop groups and one-column mobile groups.
-  - The inventory, movement, and product-stock reports become labelled mobile cards instead of forcing a wide desktop table off-screen.
-  - The inventory page accepts `?product_id=<id>` and opens that product in the Tools & Supplies link editor.
-- `/admin/release-preflight/` now includes a **non-blocking Inventory & maker-input context** stage.
-  - It reads existing finished-product tracking and linked resource/inventory records.
-  - It flags missing inventory matches, reorder pressure, and do-not-reuse signals as internal notes only.
-  - It never writes stock, creates reservations, changes costs, changes a product, changes rights, or affects pass/fail release readiness.
-- Added the admin-only visual: `assets/inventory-operations-placeholder.svg`.
-- Added Build 209 validation guidance and refreshed the canonical documentation pair.
+- Added `/admin/social-publishing/` with:
+  - Product-to-social draft settings.
+  - Live, secret-safe connection status for Facebook, Instagram, Pinterest, X, TikTok, and YouTube.
+  - The existing social queue and Social Media Privacy Guard in one focused workspace.
+  - Detailed in-app setup guidance that distinguishes tracking pixels from account publishing authorization.
+- Added `functions/api/admin/social-product-automation.js`.
+- Added `functions/api/_lib/productSocialAutomation.js`.
+- Added `database_build210_social_publishing_product_automation.sql`.
+- Approved/Published Active products can now automatically create **one linked review-first social queue draft** when the administrator explicitly enables the setting.
+- Added a public product link with UTM parameters to the generated draft.
+- Changed the Meta Graph API default in the existing social queue from `v20.0` to `v25.0`; use the `META_GRAPH_API_VERSION` Cloudflare secret only when an intentional supported override is needed.
+- Added `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md`.
 
-## Safety boundaries
+## Critical safety boundary
 
-- No database migration is included or required.
-- Inventory context is internal operational information, not a public availability, provenance, sustainability, or material claim.
-- Product Release Preflight remains read-only. Its inventory context is deliberately excluded from Release Board handoff and publication scores.
-- CAIP remains source-preserving and evidence-led. It does not create consent, rights, public copy, derivatives, provider jobs, or publications.
-- The unresolved `POST /api/auth/login` 500 remains evidence-first. Do not run any legacy D1 migration. The live D1 database was already confirmed to have current `users` and `sessions` tables.
+Build 210 **does not auto-publish** a product to any network.
 
-## Required deployed proof
+The optional product trigger creates a queue item only. Generated items start:
 
-1. Sign in as admin and open `/admin/inventory-operations/` on phone, tablet, and desktop.
-2. Confirm the page has no white-on-light nested cards, no horizontal page overflow, and no clipped action buttons.
-3. On a narrow phone width, confirm the inventory and stock-report tables display labelled rows/cards; action buttons must remain visible and tappable.
-4. Open `/admin/inventory-operations/?product_id=<known-product-id>` and confirm the Product Tools & Supplies selector chooses the matching record.
-5. Use a test record to open **Edit full record**, then cancel/reset; confirm no change occurs until Save.
-6. Test one Reserve, Release, Receive, and Consume action in a safe test record and verify a movement history row appears.
-7. Open `/admin/release-preflight/?product_id=<known-product-id>` and confirm the new Inventory & maker-input context stage is labelled context-only.
-8. Confirm inventory notes do not change the handoff score or the publication score.
-9. Re-run `POST_DEPLOY_SMOKE_TEST.md`, Build 206/207 media-consent checks, and Build 208 preflight checks.
+```text
+approval_status = needs_review
+post_status = draft
+privacy_status = needs_review
+approved_for_public_post = 0
+api_publish_mode = review_first
+```
 
-## Current priority order
+The trigger does not bypass Social Media Privacy Guard, modify original media, make a product claim, change CAIP evidence/governance, add a Release Board approval, call a platform API, or place credentials in D1/browser code.
 
-1. Capture the safe response body or matching Cloudflare Function log for the verified login `500`, then repair only the proven code path.
-2. Deploy and prove Build 209 inventory contrast/mobile behavior on real devices.
-3. Complete Build 208 release-preflight proof using real approved, blocked, consent-needed, legacy-unannotated, and public-permitted media examples.
-4. Use evidence from live product pages and actual search/marketplace performance to improve factual titles, alt text, descriptions, internal links, and structured data.
-5. Only after explicit policy approval, design CAIP derivative controls with source checksum, rights, namespace, budget, human review, output verification, retry, and rollback.
+## Platform status
+
+| Platform | Queue draft | Current direct API path | Required next safe action |
+|---|---:|---:|---|
+| Facebook Page | Yes | Existing review-first Page feed/photo path | Add Page ID/token, dry run, privacy-review, test post |
+| Instagram Professional | Yes | Existing review-first single-image path | Add IG account ID/token, dry run, privacy-review, test post |
+| Pinterest | Yes | Existing review-first image-Pin path | Add access token/board ID, dry run, test Pin |
+| X | Yes | Existing review-first text/link path | Add write-capable user token, dry run, test post |
+| TikTok | Yes | Manual only | Build approved OAuth, creator-info, and upload/Direct Post flow |
+| YouTube | Yes | Manual only | Build Google OAuth + resumable `videos.insert` upload flow |
+
+Do not call a platform “connected” merely because a pixel is installed. A pixel measures site events; organic posting requires platform app permissions and server-side credentials.
+
+## Cloudflare secrets
+
+Use **Pages → Settings → Variables and Secrets** and add secrets only as encrypted values:
+
+```text
+FACEBOOK_PAGE_ID
+FACEBOOK_PAGE_ACCESS_TOKEN
+INSTAGRAM_USER_ID
+INSTAGRAM_ACCESS_TOKEN
+META_GRAPH_API_VERSION             # optional; Build 210 defaults to v25.0
+X_USER_ACCESS_TOKEN
+PINTEREST_ACCESS_TOKEN
+PINTEREST_BOARD_ID
+TIKTOK_ACCESS_TOKEN                # future dedicated direct-post integration only
+YOUTUBE_ACCESS_TOKEN               # future dedicated upload integration only
+```
+
+`DB` remains a D1 binding, not a secret variable.
+
+Never store social access tokens, OAuth codes, client secrets, refresh tokens, or Page tokens in public code, D1, R2 metadata, Git, Markdown, screenshots, browser storage, or product fields.
+
+## Immediate deployment and validation
+
+1. Deploy the flattened Build 210 archive.
+2. If not using the runtime auto-create fallback, apply `database_build210_social_publishing_product_automation.sql` to the existing D1 database. It is additive and leaves automation disabled.
+3. Sign in as admin and open `/admin/social-publishing/`.
+4. Confirm platform cards show only secret names, never secret values.
+5. Keep product draft automation disabled until a low-risk test product exists.
+6. Enable draft automation, create or approve one Active product with a usable image, and confirm exactly one linked queue item appears.
+7. Confirm that the queue item remains Draft/Needs review and that no network API call or public post occurs.
+8. Complete privacy review, Dry run the payload, and test a single configured platform only.
+9. Confirm the public product page, product facts, media, CAIP, Release Preflight, and Release Board were not modified by draft creation.
+
+## Main unresolved incident
+
+The login `POST /api/auth/login` `500` is still not claimed fixed. The database has current `users` and `sessions` tables. Obtain the sanitized response body or matching Cloudflare Function log before changing login logic or schema.
+
+## Best next engineering work
+
+1. Deploy and prove the Build 210 Facebook/Instagram/Pinterest/X test paths with one safe draft each.
+2. Add secure OAuth callback/token-refresh storage only for platforms we actually connect, using encrypted environment secrets and a documented rotation plan.
+3. Implement a dedicated TikTok upload/Direct Post flow only after required app approval, scopes, creator-info, media transfer, and UX rules are documented.
+4. Implement YouTube OAuth + resumable upload only after a deliberate channel/video release workflow exists.
+5. Add a pre-publish visual preview and per-platform media sizing/format validator before expanding direct publishing.
+6. Continue resolving the login 500 evidence-first.
 
 ## Deployment shape
 
