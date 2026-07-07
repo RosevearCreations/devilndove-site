@@ -2021,3 +2021,272 @@ body.nav-mobile-open{overflow:hidden}
   border-color:rgba(191,232,255,.42);
   background:rgba(46,168,255,.14);
 }
+
+
+/* Build 210 — Social publishing and product-draft automation.
+   Scoped to the admin workspace to avoid storefront CSS drift. */
+.social-publishing-page {
+  max-width: 1240px;
+}
+.social-publishing-page .social-product-automation-panel,
+.social-publishing-page .social-connections-panel,
+.social-publishing-page .social-setup-guide,
+.social-publishing-page .social-automation-boundaries {
+  margin-top: 18px;
+  background: linear-gradient(145deg, rgba(24, 29, 41, .98), rgba(35, 26, 44, .98));
+  color: var(--text, #f6f3f8);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 12px 34px rgba(0,0,0,.20);
+}
+.social-publishing-page .social-product-automation-panel p,
+.social-publishing-page .social-connections-panel p,
+.social-publishing-page .social-setup-guide p,
+.social-publishing-page .social-automation-boundaries p,
+.social-publishing-page .social-setup-guide li,
+.social-publishing-page .social-automation-boundaries li {
+  color: rgba(249,246,251,.88);
+}
+.social-publishing-page .eyebrow {
+  margin: 0 0 4px;
+  font-size: .76rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #f2cbed;
+}
+.social-automation-heading {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.social-automation-heading h2,
+.social-setup-guide h2,
+.social-automation-boundaries h2 {
+  margin: 0;
+}
+.social-automation-heading p {
+  margin: 8px 0 0;
+  max-width: 860px;
+}
+.social-policy-callout {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-left: 4px solid #e7b6ff;
+  border-radius: 8px;
+  background: rgba(97, 64, 121, .44);
+  color: #fff7ff;
+}
+.social-automation-form-grid,
+.social-setup-grid,
+.social-connection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.social-publishing-page label,
+.social-publishing-page legend {
+  color: #fff;
+  font-weight: 700;
+}
+.social-publishing-page input,
+.social-publishing-page textarea,
+.social-publishing-page select {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
+  min-height: 40px;
+  background: rgba(10, 13, 21, .88);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.26);
+}
+.social-publishing-page textarea {
+  min-height: 88px;
+}
+.social-publishing-page input:focus,
+.social-publishing-page textarea:focus,
+.social-publishing-page select:focus {
+  outline: 3px solid rgba(232, 174, 255, .45);
+  outline-offset: 1px;
+}
+.social-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-height: 58px;
+  padding: 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.13);
+  background: rgba(0,0,0,.18);
+}
+.social-toggle input {
+  width: auto;
+  min-height: auto;
+  margin: 3px 0 0;
+  accent-color: #e2a6ff;
+}
+.social-toggle small {
+  display: block;
+  margin-top: 3px;
+  color: rgba(249,246,251,.72);
+  font-weight: 400;
+}
+.social-platform-selector {
+  margin: 16px 0 0;
+  padding: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 9px;
+}
+.social-platform-selector legend {
+  padding: 0 6px;
+}
+.social-platform-selector label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+}
+.social-platform-selector input {
+  width: auto;
+  min-height: auto;
+  margin: 0;
+  accent-color: #e2a6ff;
+}
+.social-full-field {
+  display: block;
+  margin-top: 14px;
+}
+.social-automation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.social-automation-message {
+  margin: 13px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+.social-automation-message.is-ok {
+  color: #e4ffe9;
+  background: rgba(30, 111, 70, .42);
+  border: 1px solid rgba(138, 255, 186, .34);
+}
+.social-automation-message.is-error {
+  color: #ffe8ec;
+  background: rgba(142, 33, 48, .42);
+  border: 1px solid rgba(255, 155, 167, .35);
+}
+.social-connection-grid {
+  margin-top: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.social-connection-card {
+  min-width: 0;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(7, 10, 18, .47);
+}
+.social-connection-card.is-connected {
+  border-color: rgba(121, 231, 163, .5);
+  background: rgba(17, 89, 54, .28);
+}
+.social-connection-card.is-unconfigured {
+  border-color: rgba(242, 202, 125, .36);
+}
+.social-connection-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.social-connection-card h3 {
+  margin: 0;
+  color: #fff;
+  text-transform: capitalize;
+}
+.social-connection-card code,
+.social-setup-guide code {
+  overflow-wrap: anywhere;
+  color: #ffdd9b;
+  background: rgba(0,0,0,.35);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.social-setup-grid {
+  margin-top: 16px;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
+.social-setup-grid article {
+  min-width: 0;
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,.20);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.social-setup-grid h3 {
+  margin-top: 0;
+  color: #fff;
+}
+.social-setup-grid ol,
+.social-automation-boundaries ol {
+  margin: 10px 0 0;
+  padding-left: 22px;
+}
+.social-setup-grid li,
+.social-automation-boundaries li {
+  margin: 7px 0;
+}
+@media (max-width: 920px) {
+  .social-publishing-page .social-automation-form-grid,
+  .social-publishing-page .social-connection-grid,
+  .social-publishing-page .social-setup-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 660px) {
+  .social-publishing-page .social-automation-form-grid,
+  .social-publishing-page .social-connection-grid,
+  .social-publishing-page .social-setup-grid {
+    grid-template-columns: 1fr;
+  }
+  .social-automation-heading {
+    display: block;
+  }
+  .social-automation-heading .btn {
+    margin-top: 10px;
+    width: 100%;
+  }
+  .social-publishing-page .social-platform-selector {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+  .social-automation-actions .btn {
+    width: 100%;
+  }
+}
+
+
+.social-publishing-page .social-workflow-visual {
+  margin: 18px 0 0;
+  padding: 10px;
+  background: rgba(22, 25, 37, .96);
+  border: 1px solid rgba(255,255,255,.14);
+}
+.social-publishing-page .social-workflow-visual img {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.social-publishing-page .social-workflow-visual figcaption {
+  margin: 9px 4px 2px;
+  color: rgba(249,246,251,.78);
+}
