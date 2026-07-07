@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!el) return;
     el.textContent = message || '';
     el.style.display = message ? 'block' : 'none';
-    el.style.color = isError ? '#b00020' : '#0a7a2f';
+    el.classList.toggle('is-error', Boolean(message && isError));
+    el.classList.toggle('is-success', Boolean(message && !isError));
   }
 
   function splitLines(value) {

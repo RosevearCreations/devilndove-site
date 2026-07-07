@@ -6,11 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const mountEl = document.getElementById('productResourcesAdminMount');
   if (!mountEl) return;
 
+  const requestedProductId = Number(new URLSearchParams(window.location.search).get('product_id') || 0);
   const state = {
     products: [],
     resources: [],
     links: [],
-    selectedProductId: 0,
+    selectedProductId: Number.isInteger(requestedProductId) && requestedProductId > 0 ? requestedProductId : 0,
     selectedLinkIndex: -1,
     selectedAvailableKey: ''
   };
@@ -29,7 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!el) return;
     el.textContent = msg || '';
     el.style.display = msg ? 'block' : 'none';
-    el.style.color = err ? '#ff9c9c' : '#8cf0b3';
+    el.classList.toggle('is-error', Boolean(msg && err));
+    el.classList.toggle('is-success', Boolean(msg && !err));
   }
 
   async function readJsonResponse(response, fallbackMessage) {
@@ -332,6 +334,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function onProductChange(event) {
     state.selectedProductId = Number(event.target.value || 0);
+    const url = new URL(window.location.href);
+    if (state.selectedProductId > 0) url.searchParams.set('product_id', String(state.selectedProductId));
+    else url.searchParams.delete('product_id');
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
     loadData();
   }
 

@@ -1,4 +1,4 @@
-// Build 208 — read-only operator decision panel for Product Release Preflight.
+// Build 209 — read-only operator decision panel for Product Release Preflight.
 // It consumes the protected preflight API and provides links to the owning workflow.
 
 (() => {
@@ -49,6 +49,11 @@
 
     function statusClass(ready) { return ready ? 'is-ready' : 'is-blocked'; }
     function statusLabel(ready) { return ready ? 'Ready' : 'Needs attention'; }
+    function stageStatusClass(item) { return item?.informational ? 'is-info' : statusClass(item?.ready); }
+    function stageStatusLabel(item) {
+      if (item?.informational) return Number(item.warning_count || 0) ? 'Context notes' : 'Context';
+      return statusLabel(item?.ready);
+    }
 
     function checkItem(item) {
       const kind = item.pass ? 'pass' : (item.required ? 'block' : 'warn');
@@ -59,8 +64,8 @@
     }
 
     function stageCard(item) {
-      return `<article class="release-preflight-stage ${statusClass(item.ready)}">
-        <div class="release-preflight-stage-head"><div><p class="eyebrow">${esc(item.key.replace(/_/g, ' '))}</p><h3>${esc(item.label)}</h3><p>${esc(item.description)}</p></div><span class="release-preflight-badge ${statusClass(item.ready)}">${esc(statusLabel(item.ready))}</span></div>
+      return `<article class="release-preflight-stage ${stageStatusClass(item)}">
+        <div class="release-preflight-stage-head"><div><p class="eyebrow">${esc(item.key.replace(/_/g, ' '))}</p><h3>${esc(item.label)}</h3><p>${esc(item.description)}</p></div><span class="release-preflight-badge ${stageStatusClass(item)}">${esc(stageStatusLabel(item))}</span></div>
         <div class="release-preflight-counts"><span>${Number(item.blocker_count || 0)} blocker${Number(item.blocker_count || 0) === 1 ? '' : 's'}</span><span>${Number(item.warning_count || 0)} note${Number(item.warning_count || 0) === 1 ? '' : 's'}</span></div>
         <ul class="release-preflight-check-list">${(item.checks || []).map(checkItem).join('')}</ul>
       </article>`;
@@ -90,8 +95,8 @@
         </section>
         ${state.data ? `<section class="card release-preflight-product-summary">
           <div class="release-preflight-product-art">${featured ? `<img src="${esc(featured)}" alt="Current featured media for ${esc(selected.name || 'selected product')}">` : `<img src="/assets/release-preflight-placeholder.svg" alt="Admin-only product release preflight placeholder">`}</div>
-          <div><p class="eyebrow">Selected product</p><h2>${esc(productLabel(selected))}</h2><p class="small">${esc([selected.status, selected.review_status, selected.sku, selected.product_category].filter(Boolean).join(' · ').replace(/_/g, ' '))}</p><div class="release-preflight-product-links"><a class="btn" href="/admin/catalog/?product_id=${num(selected.product_id)}">Product Editor</a><a class="btn" href="/admin/catalog-media/?product_id=${num(selected.product_id)}#product-media-workflow">Catalog Media</a><a class="btn" href="/admin/content-studio/">Content Studio</a><a class="btn" href="/admin/creative-assets/?product_id=${num(selected.product_id)}">CAIP</a><a class="btn" href="/admin/content-publications/">Release Board</a></div></div>
-          <div class="release-preflight-mini-stats"><span><b>${Number(state.data.media?.total || 0)}</b> product media</span><span><b>${Number(state.data.content?.media?.selected_public_allowed || 0)}</b> selected public sources</span><span><b>${Number(state.data.caip?.evidence_count || 0)}</b> CAIP evidence rows</span></div>
+          <div><p class="eyebrow">Selected product</p><h2>${esc(productLabel(selected))}</h2><p class="small">${esc([selected.status, selected.review_status, selected.sku, selected.product_category].filter(Boolean).join(' · ').replace(/_/g, ' '))}</p><div class="release-preflight-product-links"><a class="btn" href="/admin/catalog/?product_id=${num(selected.product_id)}">Product Editor</a><a class="btn" href="/admin/catalog-media/?product_id=${num(selected.product_id)}#product-media-workflow">Catalog Media</a><a class="btn" href="/admin/content-studio/">Content Studio</a><a class="btn" href="/admin/creative-assets/?product_id=${num(selected.product_id)}">CAIP</a><a class="btn" href="/admin/inventory-operations/?product_id=${num(selected.product_id)}">Inventory Ops</a><a class="btn" href="/admin/content-publications/">Release Board</a></div></div>
+          <div class="release-preflight-mini-stats"><span><b>${Number(state.data.media?.total || 0)}</b> product media</span><span><b>${Number(state.data.content?.media?.selected_public_allowed || 0)}</b> selected public sources</span><span><b>${Number(state.data.caip?.evidence_count || 0)}</b> CAIP evidence rows</span><span><b>${Number(state.data.inventory?.linked_resource_count || 0)}</b> linked maker inputs</span></div>
         </section>
         ${decisionCard(state.data.handoff || {}, 'handoff')}
         ${decisionCard(state.data.publish || {}, 'publish')}
