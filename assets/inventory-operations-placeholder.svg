@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Inventory operations workspace placeholder</title>
+  <desc id="desc">A calm abstract illustration of a storage shelf, tools, labels, and a stock checklist for the internal inventory workspace.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#171126"/>
+      <stop offset="1" stop-color="#0e2430"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" x2="1">
+      <stop offset="0" stop-color="#2d2148"/>
+      <stop offset="1" stop-color="#173344"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="420" rx="34" fill="url(#bg)"/>
+  <circle cx="610" cy="72" r="96" fill="#2ea8ff" opacity=".14"/>
+  <circle cx="122" cy="360" r="124" fill="#ff7a18" opacity=".12"/>
+  <rect x="72" y="72" width="350" height="268" rx="22" fill="url(#panel)" stroke="#8fd7ff" stroke-opacity=".32" stroke-width="3"/>
+  <rect x="99" y="102" width="298" height="16" rx="8" fill="#bfe8ff" opacity=".75"/>
+  <rect x="108" y="148" width="74" height="128" rx="10" fill="#ffb020" opacity=".86"/>
+  <rect x="195" y="172" width="75" height="104" rx="10" fill="#2ea8ff" opacity=".78"/>
+  <rect x="284" y="135" width="78" height="141" rx="10" fill="#d68df5" opacity=".80"/>
+  <rect x="100" y="292" width="296" height="14" rx="7" fill="#bfe8ff" opacity=".42"/>
+  <rect x="455" y="108" width="180" height="214" rx="20" fill="#111d2b" stroke="#bfe8ff" stroke-opacity=".34" stroke-width="3"/>
+  <rect x="480" y="140" width="128" height="16" rx="8" fill="#bfe8ff" opacity=".70"/>
+  <rect x="480" y="181" width="20" height="20" rx="5" fill="#8cf0b3"/>
+  <path d="M485 191l6 6 12-13" fill="none" stroke="#102018" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="515" y="184" width="78" height="13" rx="6.5" fill="#cfc2f3" opacity=".74"/>
+  <rect x="480" y="226" width="20" height="20" rx="5" fill="#ffb020"/>
+  <path d="M484 235h12" stroke="#29210b" stroke-width="4" stroke-linecap="round"/>
+  <rect x="515" y="229" width="65" height="13" rx="6.5" fill="#cfc2f3" opacity=".74"/>
+  <rect x="480" y="270" width="20" height="20" rx="5" fill="#ff9c9c"/>
+  <path d="M486 276l9 9m0-9l-9 9" stroke="#371015" stroke-width="3.5" stroke-linecap="round"/>
+  <rect x="515" y="273" width="85" height="13" rx="6.5" fill="#cfc2f3" opacity=".74"/>
+  <path d="M452 340c18-28 41-44 68-47 31-4 57 9 76 38" fill="none" stroke="#ffb020" stroke-width="8" stroke-linecap="round" opacity=".78"/>
+  <circle cx="455" cy="340" r="10" fill="#ffb020"/>
+  <circle cx="598" cy="331" r="10" fill="#ffb020"/>
+</svg>

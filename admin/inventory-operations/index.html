@@ -9,18 +9,34 @@
   <meta name="robots" content="noindex,nofollow"/>
   <meta name="description" content="Focused inventory operations workspace for Devil n Dove tools, supplies, product resource reservations, and catalog sync."/>
 </head>
-<body data-admin-page="products">
+<body data-admin-page="products" class="inventory-operations-page">
   <div class="container admin-shell">
     <div class="nav">
       <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Admin Department</div></div></div>
       <div class="links"><a href="/admin/">Dashboard</a><a href="/admin/catalog/">Products</a><a href="/admin/catalog-media/">Media</a><a href="/admin/inventory-operations/">Inventory Ops</a><a href="/admin/mobile-product/">Phone Capture</a></div>
     </div>
-    <div class="hero compact-hero"><div><h1>Tools & Supplies Inventory Operations</h1><p>Manage tools, supplies, inventory stock, product resource reservations, and catalog sync without the long product editor page.</p></div></div>
+    <div class="hero compact-hero inventory-operations-hero">
+      <div>
+        <p class="inventory-operations-eyebrow">Admin workspace</p>
+        <h1>Tools & Supplies Inventory Operations</h1>
+        <p>Manage tools, supplies, stock, product resource reservations, and catalog sync without the long product editor page.</p>
+        <p class="small inventory-operations-hero-note">Use this workspace for internal stock control only. Product facts, public images, consent, Content Studio, CAIP, and Release Board approvals stay in their own deliberate workflows.</p>
+      </div>
+      <div class="inventory-operations-hero-art" aria-hidden="true">
+        <img src="/assets/inventory-operations-placeholder.svg" alt=""/>
+      </div>
+    </div>
     <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
-    <div class="admin-department-links card" style="margin-bottom:18px"><a class="btn" href="/admin/catalog/">Products & publishing</a><a class="btn" href="/admin/catalog-media/">Media & product images</a><a class="btn" href="/admin/inventory-operations/">Tools & supplies inventory operations</a></div>
-    <div class="card catalog-workspace-panel">
-      <h2 style="margin-top:0">Tools & Supplies Inventory Operations</h2>
-      <p class="small">Focused workspace for product resources, reserve/release, supply/tool inventory, stock reporting, catalog sync, and option sets.</p>
+    <div class="admin-department-links card inventory-operations-links" style="margin-bottom:18px"><a class="btn" href="/admin/catalog/">Products & publishing</a><a class="btn" href="/admin/catalog-media/">Media & product images</a><a class="btn active" href="/admin/inventory-operations/" aria-current="page">Tools & supplies inventory operations</a><a class="btn" href="/admin/release-preflight/">Release preflight</a></div>
+    <div class="card catalog-workspace-panel inventory-operations-workspace">
+      <div class="inventory-operations-workspace-heading">
+        <div>
+          <p class="inventory-operations-eyebrow">Stock, tools & supplies</p>
+          <h2>Inventory Operations Desk</h2>
+          <p class="small">Focused workspace for product resources, reserve/release, supply/tool inventory, stock reporting, catalog sync, and option sets.</p>
+        </div>
+        <a class="btn" href="#siteInventoryForm">Add or edit inventory item</a>
+      </div>
       <div id="productResourcesAdminMount"></div>
       <div id="siteInventoryAdminMount"></div>
       <div id="productStockReportMount"></div>
