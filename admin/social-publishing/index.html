@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width,initial-scale=1" name="viewport">
+  <meta name="robots" content="noindex,nofollow">
+  <link href="/css/styles.css" rel="stylesheet">
+  <link href="/assets/mark.png" rel="icon" type="image/png">
+  <title>Social Publishing — Devil n Dove Admin</title>
+  <meta content="Review-first social publishing, product social drafts, platform setup, privacy checks, and UTM tracking." name="description">
+</head>
+<body>
+  <div class="container admin-shell social-publishing-page">
+    <div class="nav">
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Social Publishing</div></div></div>
+      <div class="links"><a href="/">Home</a><a href="/shop/">Shop</a><a href="/admin/">Admin</a><a href="/admin/operations/">Operations</a><button class="btn" data-nav-logout type="button">Logout</button></div>
+    </div>
+    <div class="hero">
+      <div>
+        <h1>Social Publishing & Product Automation</h1>
+        <p>Turn approved products into reviewable social drafts, keep privacy checks in front of publishing, and connect platform accounts using protected server-side credentials.</p>
+      </div>
+    </div>
+
+    <figure class="card social-workflow-visual" aria-label="Social publishing workflow placeholder">
+      <img src="/assets/social-publishing-placeholder.svg" alt="Admin-only workflow showing approved product, social draft, privacy review, and explicit publish step.">
+      <figcaption class="small">Planning placeholder only. It is not used on product pages, social posts, Open Graph cards, or structured data.</figcaption>
+    </figure>
+    <nav class="admin-department-links card social-publishing-links" aria-label="Social publishing navigation">
+      <a class="btn" href="/admin/">Dashboard</a>
+      <a class="btn" href="/admin/catalog/">Catalog</a>
+      <a class="btn" href="/admin/catalog-media/">Catalog Media</a>
+      <a class="btn" href="/admin/content-studio/">Content Studio</a>
+      <a class="btn" href="/admin/creative-assets/">CAIP</a>
+      <a class="btn" href="/admin/release-preflight/">Release Preflight</a>
+      <a class="btn" href="/admin/operations/">Operations</a>
+    </nav>
+
+    <div id="socialProductAutomationMount"></div>
+    <div id="socialPostQueueAdminMount"></div>
+    <div id="socialMediaPrivacyGuardAdminMount"></div>
+
+    <section id="setup-guide" class="card social-setup-guide">
+      <p class="eyebrow">Connection guide</p>
+      <h2>What “connected” means</h2>
+      <p><strong>A pixel is tracking, not publishing.</strong> Meta Pixel/CAPI, Pinterest Tag, TikTok Pixel, and Google/YouTube tags measure visits and conversions. To create an organic post, each platform also needs its own developer app, authorization permissions, account/page identity, and server-side token. Put secrets in Cloudflare only; never paste them into product forms, Git, browser JavaScript, or the D1 database.</p>
+
+      <div class="social-setup-grid">
+        <article>
+          <h3>1. Meta: Facebook Page + Instagram</h3>
+          <ol>
+            <li>Create a Meta developer app, add the Facebook Login/Graph API products required for your access model, and set the exact production redirect URL only if using OAuth later.</li>
+            <li>Ensure the Facebook Page is managed by the Meta account and that Instagram is a Professional account connected to that Page.</li>
+            <li>Request only the permissions the app needs. Page publishing normally needs Page management/posting access; Instagram publishing needs the publishing permission for the connected business/creator account.</li>
+            <li>Use Graph API Explorer or your app’s token flow to obtain a Page access token, then identify the Page ID and Instagram professional account ID.</li>
+            <li>In Cloudflare Pages → Settings → Variables and Secrets, add encrypted secrets: <code>FACEBOOK_PAGE_ID</code>, <code>FACEBOOK_PAGE_ACCESS_TOKEN</code>, <code>INSTAGRAM_USER_ID</code>, and optionally <code>INSTAGRAM_ACCESS_TOKEN</code>. You may also add <code>META_GRAPH_API_VERSION</code> if you need a later approved version.</li>
+            <li>Return here, confirm both cards say configured, dry-run a product draft, then publish one non-sensitive test post.</li>
+          </ol>
+          <p class="small">The current app supports Facebook Page image/link posts and Instagram single-image feed posts through its review-first queue. Reels, carousels, and video uploads need their own tested media path before being automated.</p>
+        </article>
+        <article>
+          <h3>2. X</h3>
+          <ol>
+            <li>Create an X developer project/app and enable OAuth user authentication with write capability.</li>
+            <li>Use OAuth 2.0 Authorization Code with PKCE or an approved account-token method. Request at least <code>tweet.read</code>, <code>tweet.write</code>, and <code>users.read</code>; add <code>offline.access</code> only when you implement secure token refresh.</li>
+            <li>Store a valid user posting token as the encrypted Cloudflare secret <code>X_USER_ACCESS_TOKEN</code>.</li>
+            <li>Dry-run a short post first. The app trims X copy to its platform limit and sends text/link posts only; it does not upload media to X in this build.</li>
+          </ol>
+        </article>
+        <article>
+          <h3>3. Pinterest</h3>
+          <ol>
+            <li>Create a Pinterest developer app and choose OAuth access suitable for creating Pins on your own business account.</li>
+            <li>Authorize the account with the pin/board scopes needed for the boards you will use. Select a board dedicated to Devil n Dove product discovery.</li>
+            <li>Save encrypted Cloudflare secrets <code>PINTEREST_ACCESS_TOKEN</code> and <code>PINTEREST_BOARD_ID</code>.</li>
+            <li>Use an HTTPS public product image and product landing URL. Dry-run before creating the first Pin.</li>
+          </ol>
+        </article>
+        <article>
+          <h3>4. TikTok</h3>
+          <ol>
+            <li>Create a TikTok for Developers app and request the Content Posting API scopes appropriate to your goal: Direct Post needs the approved <code>video.publish</code> scope; upload-only needs <code>video.upload</code>.</li>
+            <li>Build and approve the required user OAuth flow, then query creator info before rendering a post/export experience.</li>
+            <li>Use a tested video/photo transfer flow and respect the creator’s account/video limits.</li>
+            <li>Keep <code>TIKTOK_ACCESS_TOKEN</code> encrypted in Cloudflare only after the dedicated flow exists.</li>
+          </ol>
+          <p class="small">TikTok remains manual/review-first here. The queue can prepare captions/media, but it intentionally does not attempt Direct Post until that required OAuth/upload implementation is complete.</p>
+        </article>
+        <article>
+          <h3>5. YouTube</h3>
+          <ol>
+            <li>Create a Google Cloud project, enable YouTube Data API v3, configure the OAuth consent screen, and create web-app OAuth credentials.</li>
+            <li>Implement an OAuth flow requesting <code>https://www.googleapis.com/auth/youtube.upload</code> for video upload.</li>
+            <li>Use resumable upload, record the returned video ID/URL, and set privacy deliberately. New unverified projects may have upload restrictions.</li>
+            <li>Keep refresh/access tokens encrypted in Cloudflare, never in the browser or D1.</li>
+          </ol>
+          <p class="small">YouTube remains preparation/manual-review only in this build; a real upload must use the dedicated resumable upload flow.</p>
+        </article>
+        <article>
+          <h3>6. Measurement and campaigns</h3>
+          <ol>
+            <li>Install browser tags only after consent and privacy policy review: Meta Pixel/CAPI, Pinterest Tag, TikTok Pixel, and Google Analytics/YouTube measurement as appropriate.</li>
+            <li>Use the social queue’s UTM fields. Product drafts use <code>utm_source=devilndove_social</code>, <code>utm_medium=social</code>, and a campaign such as <code>new_product</code>.</li>
+            <li>Review visits, checkout starts, custom requests, and post attempts in the existing social queue analytics before spending on ads.</li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
+    <section class="card social-automation-boundaries">
+      <h2>How a new product becomes a social post</h2>
+      <ol>
+        <li>Product is saved as Active and Approved/Published, with a usable product image.</li>
+        <li>When the “Create a social draft” setting above is enabled, the app creates one draft linked to that product.</li>
+        <li>Open the queue to review copy, media, platform choices, UTM link, duplicate warning, and Social Media Privacy Guard result.</li>
+        <li>Approve/ready the queue item, dry-run the platform payload, then use Publish only for configured platforms. TikTok and YouTube stay manual until their required upload/OAuth implementation is completed.</li>
+      </ol>
+      <p><strong>Important:</strong> Automatic drafting is enabled only by your admin setting. Automatic publishing is deliberately not enabled, because every final post can expose names, addresses, private workshop details, customer information, copyright-protected material, or an unfinished product claim.</p>
+    </section>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/admin-route-usage.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/admin-self-protect.js"></script>
+  <script src="/public/js/admin-social-product-automation.js"></script>
+  <script src="/public/js/admin-social-post-queue.js"></script>
+  <script src="/public/js/admin-social-media-privacy-guard.js"></script>
+</body>
+</html>

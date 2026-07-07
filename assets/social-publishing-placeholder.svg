@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Social publishing workflow placeholder</title>
+  <desc id="desc">Admin-only visual placeholder illustrating approved product to social draft to privacy review to publish workflow.</desc>
+  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#251d3b"/><stop offset="1" stop-color="#472650"/></linearGradient></defs>
+  <rect width="1200" height="630" rx="28" fill="url(#g)"/>
+  <text x="64" y="88" fill="#fff" font-family="system-ui, sans-serif" font-size="42" font-weight="800">Social publishing workflow</text>
+  <text x="64" y="126" fill="#eadcef" font-family="system-ui, sans-serif" font-size="22">Admin-only planning visual — never used as a public product image.</text>
+  <g font-family="system-ui, sans-serif" text-anchor="middle">
+    <g transform="translate(64 220)">
+      <rect width="220" height="170" rx="18" fill="#1d2131" stroke="#f1c1ff" stroke-width="3"/>
+      <text x="110" y="70" fill="#fff" font-size="28" font-weight="700">Approved</text><text x="110" y="105" fill="#fff" font-size="28" font-weight="700">product</text>
+      <text x="110" y="140" fill="#d8ddec" font-size="17">facts + real image</text>
+    </g>
+    <path d="M304 305h88" stroke="#f1c1ff" stroke-width="8" stroke-linecap="round"/><path d="M378 289l24 16-24 16" fill="none" stroke="#f1c1ff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(420 220)">
+      <rect width="220" height="170" rx="18" fill="#1d2131" stroke="#f1c1ff" stroke-width="3"/>
+      <text x="110" y="70" fill="#fff" font-size="28" font-weight="700">Review-first</text><text x="110" y="105" fill="#fff" font-size="28" font-weight="700">social draft</text>
+      <text x="110" y="140" fill="#d8ddec" font-size="17">caption + UTM link</text>
+    </g>
+    <path d="M660 305h88" stroke="#f1c1ff" stroke-width="8" stroke-linecap="round"/><path d="M734 289l24 16-24 16" fill="none" stroke="#f1c1ff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(776 220)">
+      <rect width="220" height="170" rx="18" fill="#1d2131" stroke="#f1c1ff" stroke-width="3"/>
+      <text x="110" y="70" fill="#fff" font-size="28" font-weight="700">Privacy</text><text x="110" y="105" fill="#fff" font-size="28" font-weight="700">review</text>
+      <text x="110" y="140" fill="#d8ddec" font-size="17">human approval</text>
+    </g>
+    <path d="M1016 305h64" stroke="#f1c1ff" stroke-width="8" stroke-linecap="round"/><path d="M1066 289l24 16-24 16" fill="none" stroke="#f1c1ff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="64" y="525" fill="#fff" font-family="system-ui, sans-serif" font-size="26" font-weight="700">Publishing is an explicit final step — not automatic.</text>
+  <text x="64" y="568" fill="#eadcef" font-family="system-ui, sans-serif" font-size="20">Protect real people, customer details, rights, and product accuracy first.</text>
+</svg>
