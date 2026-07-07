@@ -387,8 +387,8 @@ function platformPayload(row, platform, env = {}) {
   const link = absolutePostUrl(row, platform);
   const readiness = getPlatformReadiness(env)[platform] || { api_ready: 0, missing_env: [] };
   const base = { platform, api_ready: !!readiness.api_ready, missing_env: readiness.missing_env || [], caption, link_url: link || '', image_count: images.length, first_image_url: images[0] || '' };
-  if (platform === 'facebook') return { ...base, method: 'POST', endpoint_template: 'https://graph.facebook.com/v19.0/{FACEBOOK_PAGE_ID}/feed or /photos', body_preview: { message: caption, link: link || undefined, url: images[0] || undefined } };
-  if (platform === 'instagram') return { ...base, method: 'POST', endpoint_template: 'https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/media then /media_publish', body_preview: { image_url: images[0] || '', caption } };
+  if (platform === 'facebook') return { ...base, method: 'POST', endpoint_template: 'https://graph.facebook.com/v25.0/{FACEBOOK_PAGE_ID}/feed or /photos', body_preview: { message: caption, link: link || undefined, url: images[0] || undefined } };
+  if (platform === 'instagram') return { ...base, method: 'POST', endpoint_template: 'https://graph.facebook.com/v25.0/{INSTAGRAM_USER_ID}/media then /media_publish', body_preview: { image_url: images[0] || '', caption } };
   if (platform === 'x') return { ...base, method: 'POST', endpoint_template: 'https://api.x.com/2/tweets', body_preview: { text: caption } };
   if (platform === 'pinterest') return { ...base, method: 'POST', endpoint_template: 'https://api.pinterest.com/v5/pins', body_preview: { board_id: '{PINTEREST_BOARD_ID}', title: trimTo(row.title || 'Devil n Dove workshop update', 100), description: caption, link: link || undefined, media_source: images[0] ? { source_type: 'image_url', url: images[0] } : undefined } };
   return { ...base, method: 'manual', endpoint_template: 'manual/copy-paste for now', body_preview: { caption, media: images, video_url: row.video_url || '' } };
@@ -768,7 +768,7 @@ async function publishToFacebook(env, row, images) {
   const token = envText(env, 'FACEBOOK_PAGE_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN');
   if (!pageId || !token) throw new Error('Facebook API credentials are missing. Add FACEBOOK_PAGE_ID and FACEBOOK_PAGE_ACCESS_TOKEN.');
   const caption = platformCaption(row, 'facebook');
-  const version = envText(env, 'META_GRAPH_API_VERSION') || 'v20.0';
+  const version = envText(env, 'META_GRAPH_API_VERSION') || 'v25.0';
   const url = images[0]
     ? `https://graph.facebook.com/${version}/${encodeURIComponent(pageId)}/photos`
     : `https://graph.facebook.com/${version}/${encodeURIComponent(pageId)}/feed`;
@@ -789,7 +789,7 @@ async function publishToInstagram(env, row, images) {
   const token = envText(env, 'INSTAGRAM_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN', 'FACEBOOK_PAGE_ACCESS_TOKEN');
   if (!igUserId || !token) throw new Error('Instagram API credentials are missing. Add INSTAGRAM_USER_ID and INSTAGRAM_ACCESS_TOKEN or FACEBOOK_PAGE_ACCESS_TOKEN.');
   if (!images[0]) throw new Error('Instagram publishing needs at least one public image URL.');
-  const version = envText(env, 'META_GRAPH_API_VERSION') || 'v20.0';
+  const version = envText(env, 'META_GRAPH_API_VERSION') || 'v25.0';
   const createBody = new URLSearchParams();
   createBody.set('access_token', token);
   createBody.set('image_url', images[0]);

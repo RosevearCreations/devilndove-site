@@ -1,6 +1,7 @@
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 import { createOrRefreshContentProjectForProduct } from "../_lib/contentAutomationStudio.js";
 import { syncCreativeProjectFromContentProject } from "../_lib/creativeAssetIntelligence.js";
+import { maybeQueueApprovedProductSocialPost } from "../_lib/productSocialAutomation.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -549,6 +550,27 @@ export async function onRequestPost(context) {
       }
     }
 
+    // Build 210 — optional review-first social draft after the product update.
+    // The helper is idempotent and will not publish or create a duplicate queue item.
+    let socialDraft = null;
+    try {
+      socialDraft = await maybeQueueApprovedProductSocialPost(
+        db,
+        updatedProduct || { product_id, name, slug, status, review_status, featured_image_url, short_description, description },
+        Number(authCheck.sessionUser?.user_id || 0),
+        env
+      );
+    } catch (socialError) {
+      await captureRuntimeIncident(env, request, {
+        incident_scope: "social_product_automation",
+        incident_code: "product_update_social_draft_failed",
+        severity: "warning",
+        message: "Product update succeeded, but its optional social draft could not be prepared.",
+        related_user_id: Number(authCheck.sessionUser?.user_id || 0),
+        details: { product_id, error: String(socialError?.message || socialError || "Unknown social draft error") }
+      }).catch(() => null);
+    }
+
     const updatedImagesResult = { results: syncedImages };
 
     await db.prepare(`
@@ -580,7 +602,9 @@ export async function onRequestPost(context) {
         color_names,
         media_sync_mode: "preserve_existing",
         content_project_id: contentProject?.project?.content_project_id || null,
-        content_package_prepared_on_approval: Boolean(contentProject)
+        content_package_prepared_on_approval: Boolean(contentProject),
+        social_draft_code: socialDraft?.code || null,
+        social_post_queue_id: socialDraft?.social_post_queue_id || null
       }
     });
 
@@ -596,6 +620,11 @@ export async function onRequestPost(context) {
         content_project_key: contentProject.project?.content_project_key || null,
         archived_count: Number(contentProject.archived_count || 0),
         deliverables_created: Number(contentProject.deliverables_created || 0)
+      } : null,
+      social_draft: socialDraft ? {
+        code: socialDraft.code,
+        queued: Boolean(socialDraft.queued),
+        social_post_queue_id: socialDraft.social_post_queue_id || null
       } : null
     });
   } catch (error) {
