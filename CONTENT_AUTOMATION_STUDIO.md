@@ -1,6 +1,6 @@
-# Retained reference — current pointer refreshed in Build 207
+# Retained reference — current pointer refreshed in Build 209
 
-For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 207 catalog-media, public-media consent, CAIP, deployment, or auth rules.
+For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 209 inventory context, release-preflight, catalog-media, public-media consent, CAIP, deployment, or auth rules.
 
 ---
 
@@ -65,3 +65,8 @@ CAIP now records safe metadata/R2-header observations, immutable future-output p
 ## Build 208 release-preflight integration
 
 Product Release Preflight reads existing Content Studio package, source-media, and deliverable records as one stage in a wider review. It does not modify a package, select media, alter rights, approve a deliverable, or create/publish a Release Board record. See `docs/creative-asset-intelligence-platform/15_Product_Release_Preflight.md`.
+
+
+## Build 209 inventory-context clarification
+
+Product Release Preflight can now read internal product-resource and inventory signals as a non-blocking context stage. Content Studio and CAIP must not treat that context as a material claim, rights evidence, public-stock promise, or proof that a product can be published. Existing source-media, consent, deliverable, CAIP evidence, and Release Board checks remain separately owned.

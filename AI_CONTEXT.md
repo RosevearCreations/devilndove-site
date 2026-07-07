@@ -1,23 +1,16 @@
-# Retained reference — current pointer refreshed in Build 208
+# Devil n Dove AI Context — Build 209
 
-## Use this first
+This retained context file is not a third roadmap. Start with:
 
-For all active planning and implementation, start with:
+1. `AI_HANDOFF.md` for technical/deployment facts and safety boundaries.
+2. `PROJECT_STATUS_AND_ROADMAP.md` for business, SEO, operations, and release priorities.
+3. `MARKDOWN_INDEX.md` for specialist references.
 
-1. `AI_HANDOFF.md` — technical boundaries, deployment proof, security rules, and active incidents.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — business direction, public media/SEO rules, completed work, and priority backlog.
+## Build 209 snapshot
 
-`MARKDOWN_INDEX.md` explains specialist references. This retained note is not a third planning source.
-
-## Build 208 pointer
-
-- Product Release Preflight now brings catalog facts, media status, Content Studio approval, CAIP evidence/governance, and Release Board conditions into a protected read-only workspace.
-- It distinguishes release-package handoff from publication readiness and does not create or publish anything.
-- Catalog Media now offers an explicit, audited Featured Image Sync only when a real existing gallery/media-library asset resolves but the stored product URL is blank.
-- Build 208 has no required D1 migration.
-
-## Keep this accurate
-
-- Devil n Dove uses Cloudflare Pages Functions + Cloudflare D1 (`DB`), not Supabase.
-- The unresolved `POST /api/auth/login` 500 needs the safe response body or matching Cloudflare Function log before any auth/database change is attempted.
-- Do not run legacy `members` migrations or `PRAGMA foreign_keys = OFF` batches. The selected live D1 database was confirmed to have current `users` and `sessions` tables and no `members` table.
+- Inventory Operations received scoped contrast, action-column, and responsive mobile/tablet/desktop repairs.
+- `/admin/inventory-operations/?product_id=<id>` opens that product in the product-resource workflow.
+- Product Release Preflight now includes a non-blocking inventory/maker-input context stage.
+- No D1 migration is included.
+- CAIP remains reference-only, source-preserving, and human-reviewed.
+- The outstanding login `500` remains evidence-first; do not run any legacy database migration based only on the browser error.

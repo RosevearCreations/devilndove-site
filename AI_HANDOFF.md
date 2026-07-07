@@ -1,86 +1,65 @@
-# Devil n Dove AI Handoff — Build 208
+# Devil n Dove AI Handoff — Build 209
 
 ## Read this first
 
-Use only these two documents for current cross-project decisions:
+This is the technical/deployment source of truth. Pair it with `PROJECT_STATUS_AND_ROADMAP.md` for business, workflow, SEO, and release direction. Use `MARKDOWN_INDEX.md` to open only task-specific references.
 
-1. `AI_HANDOFF.md` — technical boundaries, live incidents, deployment/testing rules, and implementation state.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — business workflow, public SEO/media rules, completed work, and priority backlog.
+## Current build
 
-`MARKDOWN_INDEX.md` identifies specialist documents. Historical Build 154–207 notes are retained as evidence only and do not override this handoff.
+**Build 209** focuses on the internal Inventory Operations workspace and a safe stock/maker-input context inside Product Release Preflight.
 
-## Current Build 208 release
+### What changed
 
-Build 208 adds a **read-only Product Release Preflight** for a selected product:
+- `/admin/inventory-operations/` received a scoped contrast, responsive-layout, and action-column repair.
+  - Nested inventory cards no longer fall back to white backgrounds with light text.
+  - Inputs, selects, buttons, message banners, table headers, table cells, and action columns have readable dark-theme colors.
+  - Inventory actions are contained in visible two-column desktop groups and one-column mobile groups.
+  - The inventory, movement, and product-stock reports become labelled mobile cards instead of forcing a wide desktop table off-screen.
+  - The inventory page accepts `?product_id=<id>` and opens that product in the Tools & Supplies link editor.
+- `/admin/release-preflight/` now includes a **non-blocking Inventory & maker-input context** stage.
+  - It reads existing finished-product tracking and linked resource/inventory records.
+  - It flags missing inventory matches, reorder pressure, and do-not-reuse signals as internal notes only.
+  - It never writes stock, creates reservations, changes costs, changes a product, changes rights, or affects pass/fail release readiness.
+- Added the admin-only visual: `assets/inventory-operations-placeholder.svg`.
+- Added Build 209 validation guidance and refreshed the canonical documentation pair.
 
-- New protected workspace: `/admin/release-preflight/?product_id=<id>`.
-- New protected API: `/api/admin/product-release-preflight?product_id=<id>&destination=both|workshop_journal|website_gallery`.
-- It combines five real workflow stages in one operator decision view:
-  1. catalog facts and approval state;
-  2. featured image, media role, and existing consent/review signals;
-  3. Content Studio package/source-media/selected-destination deliverable approval;
-  4. CAIP project/governance/evidence/right-status signals;
-  5. Content Release Board draft/readiness/approval checks for the chosen destination.
-- It returns two distinct results:
-  - **Ready to pass to Release Board** — checks the upstream handoff only.
-  - **Ready to publish destination(s)** — adds the public-draft/release checks.
-- The preflight is read-only. It does not create or approve a package, CAIP project, evidence, rights record, public draft, publication, derivative, external post, or provider job.
-- Every failed check links to the owner page that can correct it.
+## Safety boundaries
 
-### Explicit featured-image sync
+- No database migration is included or required.
+- Inventory context is internal operational information, not a public availability, provenance, sustainability, or material claim.
+- Product Release Preflight remains read-only. Its inventory context is deliberately excluded from Release Board handoff and publication scores.
+- CAIP remains source-preserving and evidence-led. It does not create consent, rights, public copy, derivatives, provider jobs, or publications.
+- The unresolved `POST /api/auth/login` 500 remains evidence-first. Do not run any legacy D1 migration. The live D1 database was already confirmed to have current `users` and `sessions` tables.
 
-Build 208 also adds `/api/admin/product-featured-image-sync` and a **Sync resolved featured image** control inside Catalog Media. It appears only when `product-detail` resolved a legitimate gallery/media-library image but `products.featured_image_url` is blank.
+## Required deployed proof
 
-The action is confirmation-gated and audited. It only writes the selected existing URL to `products.featured_image_url`. It does **not** change source files, R2 objects, gallery order, annotations, roles, consent records, Content Studio, CAIP, or release status.
+1. Sign in as admin and open `/admin/inventory-operations/` on phone, tablet, and desktop.
+2. Confirm the page has no white-on-light nested cards, no horizontal page overflow, and no clipped action buttons.
+3. On a narrow phone width, confirm the inventory and stock-report tables display labelled rows/cards; action buttons must remain visible and tappable.
+4. Open `/admin/inventory-operations/?product_id=<known-product-id>` and confirm the Product Tools & Supplies selector chooses the matching record.
+5. Use a test record to open **Edit full record**, then cancel/reset; confirm no change occurs until Save.
+6. Test one Reserve, Release, Receive, and Consume action in a safe test record and verify a movement history row appears.
+7. Open `/admin/release-preflight/?product_id=<known-product-id>` and confirm the new Inventory & maker-input context stage is labelled context-only.
+8. Confirm inventory notes do not change the handoff score or the publication score.
+9. Re-run `POST_DEPLOY_SMOKE_TEST.md`, Build 206/207 media-consent checks, and Build 208 preflight checks.
 
-## Architecture and deployment facts
+## Current priority order
 
-- Hosting: Cloudflare Pages + Pages Functions.
-- Database: Cloudflare D1 binding `DB`.
-- Media: R2 binding `PRODUCT_MEDIA_BUCKET`.
-- Project root must directly contain `functions/`, `index.html`, `_routes.json`, and `wrangler.toml` when deployed to Pages.
-- Admin routes are `noindex,nofollow`. Public pages require one visible H1.
-- Product media remains source-led. `products.featured_image_url`, `product_images`, and non-deleted `media_assets` may coexist. Build 206 resolves them safely; Build 208 allows only an explicit administrator to mirror a known resolved URL back into the product field.
+1. Capture the safe response body or matching Cloudflare Function log for the verified login `500`, then repair only the proven code path.
+2. Deploy and prove Build 209 inventory contrast/mobile behavior on real devices.
+3. Complete Build 208 release-preflight proof using real approved, blocked, consent-needed, legacy-unannotated, and public-permitted media examples.
+4. Use evidence from live product pages and actual search/marketplace performance to improve factual titles, alt text, descriptions, internal links, and structured data.
+5. Only after explicit policy approval, design CAIP derivative controls with source checksum, rights, namespace, budget, human review, output verification, retry, and rollback.
 
-## No D1 migration rule for Build 208
+## Deployment shape
 
-No D1 migration is required for Build 208. The new preflight detects missing optional Content Studio/CAIP/Release Board tables and reports the appropriate owner step; it does not run `CREATE`, `ALTER`, migrations, or repairs on page load.
+The deployment archive must have these at its root:
 
-Do not rename or rebuild D1 auth tables because of catalog/media/release work.
+```text
+index.html
+_routes.json
+wrangler.toml
+functions/
+```
 
-## Login incident — accurate current state
-
-The unresolved `POST /api/auth/login` 500 is a separate incident. The selected live D1 database was confirmed to contain current `users` and `sessions` tables and no `members` table.
-
-Do not run an old `members` migration or a `PRAGMA foreign_keys = OFF` batch. The only next evidence for the auth incident is the sanitized failed-response JSON body or matching Cloudflare Pages Function log. Never share passwords, cookies, session tokens, Authorization headers, or raw request bodies.
-
-## Public SEO and source-media guardrails
-
-- One visible H1 per public page.
-- Use buyer language only where it accurately describes the actual item.
-- Keep visible product facts, title/meta, canonical URL, Product schema, price/availability, featured image, and alt text consistent.
-- Use real, approved imagery. Admin-only placeholders never become storefront/schema/Open Graph/marketplace images.
-- Descriptive contextual alt text is required; keyword lists are not alt text.
-- `blocked` / `consent_needed` media remains non-public. CAIP never creates consent or public rights.
-- A CAIP score, technical observation, derivative plan, or internal CAIP approval is not publication approval.
-
-## Required post-deploy proof for Build 208
-
-1. Sign in as an administrator and open `/admin/release-preflight/?product_id=<known-product-id>`.
-2. Verify the product summary and featured-image preview identify the correct record.
-3. Test a Draft/Revision product: the Catalog stage must block handoff.
-4. Test an Approved/Active product lacking a Content Studio package: Catalog/Media can pass while Content Studio blocks handoff.
-5. Test one package with public-allowed source media but no CAIP governance/evidence: CAIP must block handoff.
-6. Test a fully prepared package without a public draft: **handoff** can pass while **publish** still blocks on Release Board.
-7. Choose Workshop Journal, Website gallery, and Both; confirm only the selected release destination checks affect the publish decision.
-8. On a product that resolves an image from `product_images` or `media_assets` but has an empty stored featured URL, use **Sync resolved featured image** once. Confirm only `products.featured_image_url` changes and the product-media audit/admin audit record appears.
-9. Confirm no action in the preflight creates a new Content Studio package, CAIP project, evidence row, derivative, publication, provider job, or public post.
-10. Re-run Build 206/207 catalog-media and public-image consent tests, plus `POST_DEPLOY_SMOKE_TEST.md`.
-
-## First next work after Build 208
-
-1. Capture and fix the verified login failure code/log only.
-2. Perform the required live Build 208 preflight proof using actual approved, blocked, consent-needed, legacy-unannotated, and explicitly permitted media examples.
-3. Use release-preflight results to harden only proven weak points in existing product records; do not auto-fill claims or rights.
-4. Add separate, explicitly approved derivative-worker controls only after source checksum, rights, output namespace, cost budget, human review, output verification, retry, and rollback controls are accepted.
-5. Add public-page evidence only from actual published output and Search Console/marketplace observations.
+Cloudflare Pages must bind the existing D1 database as `DB`. Do not create `DB` as a text secret.
