@@ -16,9 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function setMessage(message, isError = false) {
     const el = document.getElementById('siteInventoryMessage');
     if (!el) return;
-    el.textContent = message;
+    el.textContent = message || '';
     el.style.display = message ? 'block' : 'none';
-    el.style.color = isError ? '#b00020' : '#0a7a2f';
+    el.classList.toggle('is-error', Boolean(message && isError));
+    el.classList.toggle('is-success', Boolean(message && !isError));
   }
 
   function fmtMoney(cents) {
@@ -465,14 +466,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="siteInventoryMessage" class="small" style="display:none;margin-bottom:12px"></div>
         <div class="grid cols-6" style="gap:12px;margin-bottom:12px">
           <div class="card"><div class="small">Items</div><div id="siteInventoryTotalItems" style="font-size:1.15rem;font-weight:800">—</div></div>
-          <div class="card"><div class="small">Active</div><div id="siteInventoryActiveItems" style="font-size:1.15rem;font-weight:800">—</div></div>
-          <div class="card"><div class="small">Low Stock</div><div id="siteInventoryLowStock" style="font-size:1.15rem;font-weight:800">—</div></div>
-          <div class="card"><div class="small">Reserved</div><div id="siteInventoryReserved" style="font-size:1.15rem;font-weight:800">—</div></div>
-          <div class="card"><div class="small">Incoming</div><div id="siteInventoryIncoming" style="font-size:1.15rem;font-weight:800">—</div></div>
-          <div class="card"><div class="small">Reorder List</div><div id="siteInventoryReorderListCount" style="font-size:1.15rem;font-weight:800">—</div></div>
+          <div class="card inventory-summary-card"><div class="small">Active</div><div id="siteInventoryActiveItems" style="font-size:1.15rem;font-weight:800">—</div></div>
+          <div class="card inventory-summary-card"><div class="small">Low Stock</div><div id="siteInventoryLowStock" style="font-size:1.15rem;font-weight:800">—</div></div>
+          <div class="card inventory-summary-card"><div class="small">Reserved</div><div id="siteInventoryReserved" style="font-size:1.15rem;font-weight:800">—</div></div>
+          <div class="card inventory-summary-card"><div class="small">Incoming</div><div id="siteInventoryIncoming" style="font-size:1.15rem;font-weight:800">—</div></div>
+          <div class="card inventory-summary-card"><div class="small">Reorder List</div><div id="siteInventoryReorderListCount" style="font-size:1.15rem;font-weight:800">—</div></div>
         </div>
 
-        <form id="siteInventoryForm" class="grid" style="gap:12px">
+        <form id="siteInventoryForm" class="grid inventory-form-grid" style="gap:12px">
           <div id="siteInventoryEditState" class="site-inventory-edit-state small" hidden aria-live="polite"></div>
           <div class="grid cols-5" style="gap:12px">
             <div><label class="small" for="siteInventorySourceType">Source Type</label><select id="siteInventorySourceType"><option value="tool">Tool</option><option value="supply">Supply</option><option value="product">Product</option><option value="other">Other</option></select></div>
@@ -529,11 +530,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="site-inventory-form-actions"><button class="btn primary" type="submit" id="siteInventorySaveButton">Add Inventory Item</button><button class="btn" type="button" id="siteInventoryResetButton">Reset Form</button></div>
         </form>
 
-        <div id="siteInventorySyncResult" class="small card" style="display:none;margin-top:12px"></div>
-        <div class="grid cols-4" style="gap:12px;align-items:end;margin-top:16px">
+        <div id="siteInventorySyncResult" class="small card inventory-feedback-panel" style="display:none;margin-top:12px"></div>
+        <div class="grid cols-4 site-inventory-toolbar" style="gap:12px;align-items:end;margin-top:16px">
           <div><label class="small" for="siteInventorySearch">Search</label><input id="siteInventorySearch" type="text" placeholder="name, category, supplier" /></div>
           <div><label class="small" for="siteInventoryStockView">Stock view</label><select id="siteInventoryStockView"><option value="">All items</option><option value="low">Low stock</option><option value="reorder">Reorder list</option><option value="no_reuse">Do not reuse</option><option value="inactive">Inactive</option></select></div>
-          <div style="align-self:end;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh</button><button class="btn" type="button" id="siteInventorySyncToolsButton">Sync tools</button><button class="btn" type="button" id="siteInventorySyncSuppliesButton">Sync supplies</button><button class="btn primary" type="button" id="siteInventorySyncAllButton">Sync all tools + supplies</button></div>
+          <div class="site-inventory-toolbar-actions"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh</button><button class="btn" type="button" id="siteInventorySyncToolsButton">Sync tools</button><button class="btn" type="button" id="siteInventorySyncSuppliesButton">Sync supplies</button><button class="btn primary" type="button" id="siteInventorySyncAllButton">Sync all tools + supplies</button></div>
         </div>
 
         <div class="card" style="margin-top:16px">
@@ -600,8 +601,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div id="siteInventoryBulkCostPreview" class="small" style="display:none;margin-top:12px"></div>
         </div>
 
-        <div class="admin-table-wrap" style="margin-top:12px"><table class="site-inventory-admin-table"><thead><tr><th>Item image &amp; name</th><th>Stock</th><th>Rules</th><th>Supplier</th><th>Linked Products</th><th>Cost</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
-        <div class="card" style="margin-top:16px"><h4 style="margin-top:0">Recent Inventory Movements</h4><div class="admin-table-wrap"><table><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Loading movement history...</td></tr></tbody></table></div></div>
+        <div class="admin-table-wrap site-inventory-table-wrap" style="margin-top:12px"><table class="site-inventory-admin-table"><thead><tr><th>Item image &amp; name</th><th>Stock</th><th>Rules</th><th>Supplier</th><th>Linked Products</th><th>Cost</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
+        <div class="card site-inventory-movements-card" style="margin-top:16px"><h4 style="margin-top:0">Recent Inventory Movements</h4><div class="admin-table-wrap site-inventory-movements-wrap"><table class="site-inventory-movements-table"><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Loading movement history...</td></tr></tbody></table></div></div>
       </div>`;
 
     document.getElementById('siteInventoryForm')?.addEventListener('submit', saveItem);
@@ -667,10 +668,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const body = document.getElementById('siteInventoryMovementList');
     if (!body) return;
     if (!Array.isArray(movements) || !movements.length) {
-      body.innerHTML = '<tr><td colspan="5" style="padding:8px">No inventory movements recorded yet.</td></tr>';
+      body.innerHTML = '<tr><td colspan="5" class="site-inventory-empty-row">No inventory movements recorded yet.</td></tr>';
       return;
     }
-    body.innerHTML = movements.map((row) => `<tr><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.created_at || '—')}</td><td style="padding:8px;border-bottom:1px solid #ddd"><strong>${escapeHtml(row.item_name || 'Item')}</strong><div class="small">${escapeHtml(row.source_type || '—')} • ${escapeHtml(row.external_key || '—')}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.movement_type || 'adjustment')}<div class="small">Δ ${row.quantity_delta || 0}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${row.previous_on_hand_quantity || 0} → ${row.new_on_hand_quantity || 0}<div class="small">Res ${row.previous_reserved_quantity || 0} → ${row.new_reserved_quantity || 0} • In ${row.previous_incoming_quantity || 0} → ${row.new_incoming_quantity || 0}</div></td><td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.note || '—')}</td></tr>`).join('');
+    body.innerHTML = movements.map((row) => `<tr>
+      <td data-label="When">${escapeHtml(row.created_at || '—')}</td>
+      <td data-label="Item"><strong>${escapeHtml(row.item_name || 'Item')}</strong><div class="small">${escapeHtml(row.source_type || '—')} • ${escapeHtml(row.external_key || '—')}</div></td>
+      <td data-label="Type">${escapeHtml(row.movement_type || 'adjustment')}<div class="small">Δ ${row.quantity_delta || 0}</div></td>
+      <td data-label="On hand">${row.previous_on_hand_quantity || 0} → ${row.new_on_hand_quantity || 0}<div class="small">Reserved ${row.previous_reserved_quantity || 0} → ${row.new_reserved_quantity || 0} • Incoming ${row.previous_incoming_quantity || 0} → ${row.new_incoming_quantity || 0}</div></td>
+      <td data-label="Note">${escapeHtml(row.note || '—')}</td>
+    </tr>`).join('');
   }
 
   async function syncCatalog(sourceTypes) {
@@ -775,11 +782,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!body) return;
 
       if (!items.length) {
-        body.innerHTML = '<tr><td colspan="7" style="padding:8px">No site inventory items matched the current view.</td></tr>';
+        body.innerHTML = '<tr><td colspan="7" class="site-inventory-empty-row">No site inventory items matched the current view.</td></tr>';
       } else {
         body.innerHTML = items.map((x) => `
           <tr>
-            <td style="padding:8px;border-bottom:1px solid #ddd">
+            <td data-label="Item">
               <div class="site-inventory-list-identity">
                 <div class="site-inventory-media-stack">
                   ${x.image_url ? `<a class="site-inventory-list-thumb" href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" loading="lazy"/></a>` : '<div class="site-inventory-list-thumb is-empty small">No image</div>'}
@@ -793,12 +800,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
               </div>
             </td>
-            <td style="padding:8px;border-bottom:1px solid #ddd">On hand ${x.on_hand_quantity} ${escapeHtml(x.stock_unit_label || 'unit')}<div class="small">Reserved ${x.reserved_quantity} • Incoming ${x.incoming_quantity} • Reorder ${x.reorder_level}</div><div class="small">1 ${escapeHtml(x.stock_unit_label || 'unit')} = ${Number(x.usage_units_per_stock_unit || 1)} ${escapeHtml(x.usage_unit_label || 'unit')}</div><div class="small">Preferred reorder ${x.preferred_reorder_quantity || 0}</div></td>
-            <td style="padding:8px;border-bottom:1px solid #ddd"><div class="small">${x.is_on_reorder_list ? 'On reorder list' : 'Not queued'}</div><div class="small">${x.do_not_reorder ? 'Do not reorder' : 'Can reorder'}</div><div class="small">${x.do_not_reuse ? 'Do not reuse' : (x.reuse_status || 'Reusable/normal')}</div></td>
-            <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(x.supplier_name || '—')}<div class="small">${escapeHtml(x.supplier_sku || '')}</div><div class="small">${escapeHtml(x.supplier_contact || '')}</div></td>
-            <td style="padding:8px;border-bottom:1px solid #ddd">${Number(x.linked_product_count || 0)}<div class="small">${escapeHtml(x.linked_product_names || '')}</div></td>
-            <td style="padding:8px;border-bottom:1px solid #ddd">${fmtMoney(x.unit_cost_cents || 0)}<div class="small">per ${escapeHtml(x.stock_unit_label || 'unit')}</div><div class="small">≈ ${fmtMoney(Math.round((Number(x.unit_cost_cents || 0)) / Math.max(1, Number(x.usage_units_per_stock_unit || 1))))} per ${escapeHtml(x.usage_unit_label || 'unit')}</div></td>
-            <td class="site-inventory-row-actions" style="padding:8px;border-bottom:1px solid #ddd"><button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Edit full record</button> <button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick stock / cost</button> <button class="btn" type="button" data-adjust-action="reserve" data-id="${x.site_item_inventory_id}">Reserve</button> <button class="btn" type="button" data-adjust-action="release" data-id="${x.site_item_inventory_id}">Release</button> <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button> <button class="btn" type="button" data-adjust-action="consume" data-id="${x.site_item_inventory_id}">Consume</button> <button class="btn" type="button" data-adjust-action="reorder_request" data-id="${x.site_item_inventory_id}">Reorder</button> <button class="btn" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button></td>
+            <td data-label="Stock">On hand ${x.on_hand_quantity} ${escapeHtml(x.stock_unit_label || 'unit')}<div class="small">Reserved ${x.reserved_quantity} • Incoming ${x.incoming_quantity} • Reorder ${x.reorder_level}</div><div class="small">1 ${escapeHtml(x.stock_unit_label || 'unit')} = ${Number(x.usage_units_per_stock_unit || 1)} ${escapeHtml(x.usage_unit_label || 'unit')}</div><div class="small">Preferred reorder ${x.preferred_reorder_quantity || 0}</div></td>
+            <td data-label="Rules"><div class="small">${x.is_on_reorder_list ? 'On reorder list' : 'Not queued'}</div><div class="small">${x.do_not_reorder ? 'Do not reorder' : 'Can reorder'}</div><div class="small">${x.do_not_reuse ? 'Do not reuse' : (x.reuse_status || 'Reusable/normal')}</div></td>
+            <td data-label="Supplier">${escapeHtml(x.supplier_name || '—')}<div class="small">${escapeHtml(x.supplier_sku || '')}</div><div class="small">${escapeHtml(x.supplier_contact || '')}</div></td>
+            <td data-label="Linked products">${Number(x.linked_product_count || 0)}<div class="small">${escapeHtml(x.linked_product_names || '')}</div></td>
+            <td data-label="Cost">${fmtMoney(x.unit_cost_cents || 0)}<div class="small">per ${escapeHtml(x.stock_unit_label || 'unit')}</div><div class="small">≈ ${fmtMoney(Math.round((Number(x.unit_cost_cents || 0)) / Math.max(1, Number(x.usage_units_per_stock_unit || 1))))} per ${escapeHtml(x.usage_unit_label || 'unit')}</div></td>
+            <td class="site-inventory-row-actions" data-label="Actions">
+              <div class="site-inventory-action-buttons">
+                <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Edit full record</button>
+                <button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick stock / cost</button>
+                <button class="btn" type="button" data-adjust-action="reserve" data-id="${x.site_item_inventory_id}">Reserve</button>
+                <button class="btn" type="button" data-adjust-action="release" data-id="${x.site_item_inventory_id}">Release</button>
+                <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button>
+                <button class="btn" type="button" data-adjust-action="consume" data-id="${x.site_item_inventory_id}">Consume</button>
+                <button class="btn" type="button" data-adjust-action="reorder_request" data-id="${x.site_item_inventory_id}">Reorder</button>
+                <button class="btn danger" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button>
+              </div>
+            </td>
           </tr>
         `).join('');
       }
