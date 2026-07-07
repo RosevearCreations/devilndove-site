@@ -1540,3 +1540,484 @@ body.nav-mobile-open{overflow:hidden}
 .release-preflight-stage-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:18px 0}.release-preflight-stage{border:1px solid rgba(95,112,122,.30);border-radius:16px;padding:16px;background:rgba(255,255,255,.035);min-width:0}.release-preflight-stage.is-ready{border-color:rgba(54,130,99,.48)}.release-preflight-stage.is-blocked{border-color:rgba(215,126,87,.52)}.release-preflight-stage-head{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}.release-preflight-stage-head h3{margin:2px 0 5px}.release-preflight-stage-head p{margin:0;font-size:.87rem;line-height:1.42;color:var(--muted)}.release-preflight-badge{flex:0 0 auto;border-radius:999px;padding:5px 8px;font-size:.74rem;font-weight:700;border:1px solid rgba(95,112,122,.38);background:rgba(255,255,255,.08)}.release-preflight-badge.is-ready{border-color:rgba(54,130,99,.64);color:#27775c}.release-preflight-badge.is-blocked{border-color:rgba(215,126,87,.7);color:#b95126}.release-preflight-counts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;font-size:.78rem}.release-preflight-counts span{padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.08)}.release-preflight-check-list{margin:0;padding:0;list-style:none;display:grid;gap:9px}.release-preflight-check{display:grid;grid-template-columns:22px minmax(0,1fr);gap:9px;padding:9px;border-radius:10px;background:rgba(255,255,255,.04)}.release-preflight-check-mark{display:grid;place-items:center;width:21px;height:21px;border-radius:50%;font-weight:800;font-size:.82rem;background:rgba(255,255,255,.1)}.release-preflight-check.pass .release-preflight-check-mark{background:rgba(54,130,99,.2);color:#2f9d72}.release-preflight-check.block .release-preflight-check-mark{background:rgba(215,126,87,.22);color:#bc522a}.release-preflight-check.warn .release-preflight-check-mark{background:rgba(243,213,142,.20);color:#a56f00}.release-preflight-check strong{font-size:.9rem}.release-preflight-check p{margin:3px 0 7px;font-size:.82rem;line-height:1.38;color:var(--muted)}.release-preflight-check .btn{font-size:.75rem;padding:5px 8px}.release-preflight-boundary{margin:18px 0}.release-preflight-boundary h2{margin-top:0;font-size:1.1rem}.release-preflight-boundary p{margin-bottom:0;line-height:1.52}.release-preflight-empty{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;align-items:center;margin:18px 0}.release-preflight-empty img{width:180px;border-radius:14px;border:1px solid var(--border)}.release-preflight-empty h2{margin:0 0 6px}.release-preflight-empty p{margin:0;line-height:1.48}
 @media(max-width:980px){.release-preflight-toolbar{grid-template-columns:1fr 1fr}.release-preflight-toolbar .btn{grid-column:1/-1}.release-preflight-product-summary{grid-template-columns:132px minmax(0,1fr)}.release-preflight-mini-stats{grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr))}.release-preflight-decision{grid-template-columns:minmax(0,1fr) 110px}.release-preflight-next{grid-column:1/-1}}
 @media(max-width:640px){.release-preflight-toolbar,.release-preflight-stage-grid,.release-preflight-product-summary,.release-preflight-decision,.release-preflight-empty{grid-template-columns:1fr}.release-preflight-toolbar .btn{grid-column:auto;width:100%}.release-preflight-product-art,.release-preflight-empty img{width:100%;max-width:220px}.release-preflight-mini-stats{grid-column:auto;grid-template-columns:1fr}.release-preflight-decision{padding:14px}.release-preflight-score{width:104px}.release-preflight-next{grid-column:auto}.release-preflight-product-links{display:grid;grid-template-columns:1fr}.release-preflight-product-links .btn{width:100%;justify-content:center}.release-preflight-stage{padding:13px}.release-preflight-stage-head{display:grid}.release-preflight-badge{justify-self:start}.release-preflight-result{width:100%}}
+
+
+/* Build 209 — Inventory Operations contrast, action-column, and mobile layout repair.
+   Scope is intentionally limited to /admin/inventory-operations/ so public pages,
+   catalog media, and release workflow styling are unchanged. */
+.inventory-operations-page {
+  background:
+    radial-gradient(circle at 88% 0%, rgba(46,168,255,.08), transparent 32rem),
+    radial-gradient(circle at 0% 38%, rgba(255,122,24,.055), transparent 28rem),
+    var(--bg);
+}
+.inventory-operations-page .inventory-operations-hero {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(190px,260px);
+  gap:18px;
+  align-items:center;
+  padding:18px 0 10px;
+}
+.inventory-operations-eyebrow {
+  margin:0 0 6px;
+  color:var(--ice);
+  font-size:.76rem;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.inventory-operations-page .inventory-operations-hero h1 { margin:.1rem 0 .6rem; }
+.inventory-operations-hero-note { max-width:76ch; margin:10px 0 0; }
+.inventory-operations-hero-art {
+  min-width:0;
+  max-width:260px;
+  justify-self:end;
+  padding:8px;
+  border:1px solid rgba(191,232,255,.18);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(46,168,255,.08),rgba(255,122,24,.055));
+}
+.inventory-operations-hero-art img {
+  display:block;
+  width:100%;
+  border-radius:13px;
+}
+.inventory-operations-page .inventory-operations-links {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  overflow:visible;
+}
+.inventory-operations-page .inventory-operations-links .btn {
+  min-width:0;
+  min-height:48px;
+}
+.inventory-operations-page .inventory-operations-links .btn.active {
+  background:rgba(46,168,255,.19);
+  border-color:rgba(191,232,255,.62);
+  box-shadow:inset 0 0 0 1px rgba(191,232,255,.15);
+}
+.inventory-operations-workspace {
+  display:grid;
+  gap:18px;
+  overflow:visible !important;
+}
+.inventory-operations-workspace-heading,
+.inventory-panel-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.inventory-operations-workspace-heading h2 { margin:0 0 8px; }
+.inventory-operations-workspace-heading .btn,
+.inventory-panel-shortcut { flex:0 0 auto; }
+.inventory-operations-page #productResourcesAdminMount,
+.inventory-operations-page #siteInventoryAdminMount,
+.inventory-operations-page #productStockReportMount,
+.inventory-operations-page #catalogSyncAdminMount,
+.inventory-operations-page #catalogOptionManagerMount,
+.inventory-operations-page #notificationAdminMount,
+.inventory-operations-page #appSettingsAdminMount {
+  min-width:0;
+}
+.inventory-operations-page #siteInventoryAdminMount > .card,
+.inventory-operations-page #productStockReportMount > .card,
+.inventory-operations-page #catalogSyncAdminMount > .card,
+.inventory-operations-page #catalogOptionManagerMount > .card,
+.inventory-operations-page #notificationAdminMount > .card,
+.inventory-operations-page #appSettingsAdminMount > .card {
+  background:linear-gradient(180deg,rgba(31,38,54,.98),rgba(18,23,34,.98));
+  border-color:rgba(191,232,255,.13);
+}
+.inventory-operations-page #siteInventoryAdminMount .card,
+.inventory-operations-page #productStockReportMount .card,
+.inventory-operations-page #catalogSyncAdminMount .card,
+.inventory-operations-page #catalogOptionManagerMount .card,
+.inventory-operations-page #notificationAdminMount .card,
+.inventory-operations-page #appSettingsAdminMount .card {
+  color:var(--text);
+  background:linear-gradient(180deg,rgba(27,34,49,.98),rgba(19,25,37,.98)) !important;
+  border-color:rgba(191,232,255,.13) !important;
+}
+.inventory-operations-page #siteInventoryAdminMount .small,
+.inventory-operations-page #productStockReportMount .small,
+.inventory-operations-page #catalogSyncAdminMount .small,
+.inventory-operations-page #catalogOptionManagerMount .small,
+.inventory-operations-page #notificationAdminMount .small,
+.inventory-operations-page #appSettingsAdminMount .small {
+  color:#c8d2e4;
+}
+.inventory-operations-page #siteInventoryAdminMount input,
+.inventory-operations-page #siteInventoryAdminMount select,
+.inventory-operations-page #siteInventoryAdminMount textarea,
+.inventory-operations-page #productStockReportMount input,
+.inventory-operations-page #productStockReportMount select,
+.inventory-operations-page #catalogSyncAdminMount input,
+.inventory-operations-page #catalogOptionManagerMount input,
+.inventory-operations-page #catalogOptionManagerMount select,
+.inventory-operations-page #catalogOptionManagerMount textarea,
+.inventory-operations-page #appSettingsAdminMount input,
+.inventory-operations-page #appSettingsAdminMount select {
+  background:#0e141f;
+  color:var(--text);
+  border-color:rgba(191,232,255,.2);
+}
+.inventory-operations-page #siteInventoryAdminMount input::placeholder,
+.inventory-operations-page #siteInventoryAdminMount textarea::placeholder,
+.inventory-operations-page #productStockReportMount input::placeholder,
+.inventory-operations-page #catalogOptionManagerMount input::placeholder,
+.inventory-operations-page #catalogOptionManagerMount textarea::placeholder {
+  color:#93a4bf;
+  opacity:1;
+}
+.inventory-operations-page #siteInventoryAdminMount input:focus,
+.inventory-operations-page #siteInventoryAdminMount select:focus,
+.inventory-operations-page #siteInventoryAdminMount textarea:focus,
+.inventory-operations-page #productStockReportMount input:focus,
+.inventory-operations-page #productStockReportMount select:focus,
+.inventory-operations-page #catalogOptionManagerMount input:focus,
+.inventory-operations-page #catalogOptionManagerMount select:focus,
+.inventory-operations-page #catalogOptionManagerMount textarea:focus,
+.inventory-operations-page #appSettingsAdminMount input:focus,
+.inventory-operations-page #appSettingsAdminMount select:focus {
+  outline:3px solid rgba(46,168,255,.22);
+  outline-offset:1px;
+  border-color:rgba(191,232,255,.58);
+}
+.inventory-operations-page input[type="checkbox"] {
+  accent-color:var(--blue);
+}
+.inventory-operations-page .inventory-summary-grid {
+  grid-template-columns:repeat(6,minmax(0,1fr));
+}
+.inventory-operations-page .inventory-summary-card {
+  min-width:0;
+  min-height:92px;
+  padding:13px;
+  display:grid;
+  align-content:space-between;
+  background:linear-gradient(160deg,rgba(46,168,255,.13),rgba(18,24,38,.94)) !important;
+  border-color:rgba(46,168,255,.22) !important;
+}
+.inventory-operations-page .inventory-summary-card:nth-child(3n+2) {
+  background:linear-gradient(160deg,rgba(255,176,32,.12),rgba(27,25,34,.94)) !important;
+  border-color:rgba(255,176,32,.20) !important;
+}
+.inventory-operations-page .inventory-summary-card:nth-child(3n+3) {
+  background:linear-gradient(160deg,rgba(164,132,255,.12),rgba(26,21,38,.94)) !important;
+  border-color:rgba(164,132,255,.2) !important;
+}
+.inventory-operations-page .inventory-summary-card > div:last-child {
+  font-size:1.42rem !important;
+  line-height:1.15;
+  color:var(--text);
+}
+.inventory-operations-page .site-inventory-edit-state,
+.inventory-operations-page #siteInventorySyncResult,
+.inventory-operations-page #siteInventoryBulkCostPreview,
+.inventory-operations-page #siteInventoryMessage,
+.inventory-operations-page #productStockReportMessage,
+.inventory-operations-page #catalogOptionManagerMessage,
+.inventory-operations-page #catalogSyncMessage,
+.inventory-operations-page #notificationAdminMessage,
+.inventory-operations-page #adminAppSettingsMessage {
+  border:1px solid rgba(191,232,255,.18);
+  border-radius:12px;
+  padding:10px 12px;
+  background:rgba(46,168,255,.075);
+  color:#d7ecff !important;
+}
+.inventory-operations-page .is-success {
+  border-color:rgba(140,240,179,.34) !important;
+  background:rgba(10,122,47,.16) !important;
+  color:#baf6cc !important;
+}
+.inventory-operations-page .is-error {
+  border-color:rgba(255,156,156,.42) !important;
+  background:rgba(176,0,32,.18) !important;
+  color:#ffd0d5 !important;
+}
+.inventory-operations-page .site-inventory-toolbar {
+  grid-template-columns:minmax(0,1.15fr) minmax(180px,.72fr) minmax(260px,1.35fr);
+}
+.inventory-operations-page .site-inventory-toolbar-actions,
+.inventory-operations-page .site-inventory-bulk-actions,
+.inventory-operations-page .inventory-panel-actions,
+.inventory-operations-page .inventory-inline-actions {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.inventory-operations-page .site-inventory-toolbar-actions {
+  align-self:end;
+}
+.inventory-operations-page .site-inventory-toolbar-actions .btn,
+.inventory-operations-page .site-inventory-bulk-actions .btn {
+  flex:1 1 150px;
+  justify-content:center;
+}
+.inventory-operations-page .site-inventory-table-wrap,
+.inventory-operations-page .site-inventory-movements-wrap,
+.inventory-operations-page .product-stock-table-wrap {
+  background:rgba(4,8,15,.52);
+  border-color:rgba(191,232,255,.16);
+  overflow:auto;
+  overscroll-behavior-x:contain;
+}
+.inventory-operations-page .site-inventory-admin-table {
+  min-width:1180px;
+  table-layout:auto !important;
+}
+.inventory-operations-page .site-inventory-movements-table {
+  min-width:780px;
+  table-layout:auto !important;
+}
+.inventory-operations-page .product-stock-table {
+  min-width:980px;
+  table-layout:auto !important;
+}
+.inventory-operations-page .site-inventory-admin-table th,
+.inventory-operations-page .site-inventory-admin-table td,
+.inventory-operations-page .site-inventory-movements-table th,
+.inventory-operations-page .site-inventory-movements-table td,
+.inventory-operations-page .product-stock-table th,
+.inventory-operations-page .product-stock-table td,
+.inventory-operations-page #catalogOptionManagerMount table th,
+.inventory-operations-page #catalogOptionManagerMount table td {
+  color:var(--text);
+  border-bottom-color:rgba(191,232,255,.13) !important;
+  background:transparent;
+  overflow-wrap:anywhere;
+}
+.inventory-operations-page .site-inventory-admin-table th,
+.inventory-operations-page .site-inventory-movements-table th,
+.inventory-operations-page .product-stock-table th,
+.inventory-operations-page #catalogOptionManagerMount thead th {
+  background:#101a28 !important;
+  color:#dff3ff;
+  border-bottom-color:rgba(191,232,255,.26) !important;
+}
+.inventory-operations-page .site-inventory-admin-table tbody tr:nth-child(even) td,
+.inventory-operations-page .site-inventory-movements-table tbody tr:nth-child(even) td,
+.inventory-operations-page .product-stock-table tbody tr:nth-child(even) td {
+  background:rgba(191,232,255,.025);
+}
+.inventory-operations-page .site-inventory-row-actions,
+.inventory-operations-page .product-stock-actions {
+  min-width:268px;
+  background:linear-gradient(180deg,rgba(40,53,76,.75),rgba(19,28,42,.84)) !important;
+  box-shadow:inset 1px 0 0 rgba(191,232,255,.13);
+}
+.inventory-operations-page .site-inventory-action-buttons {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.inventory-operations-page .site-inventory-action-buttons .btn,
+.inventory-operations-page .product-stock-actions .btn,
+.inventory-operations-page .inventory-inline-actions .btn {
+  width:100%;
+  min-width:0;
+  justify-content:center;
+  font-size:.86rem;
+}
+.inventory-operations-page .btn.danger {
+  border-color:rgba(255,156,156,.56);
+  background:rgba(176,0,32,.18);
+  color:#ffd4d8;
+}
+.inventory-operations-page .btn.danger:hover {
+  background:rgba(176,0,32,.30);
+}
+.inventory-operations-page .site-inventory-empty-row {
+  padding:18px !important;
+  color:#c8d2e4;
+  text-align:center;
+}
+.inventory-operations-page .product-stock-thumb {
+  width:56px;
+  height:56px;
+  object-fit:cover;
+  border-radius:12px;
+  display:block;
+  margin-bottom:8px;
+  border:1px solid rgba(191,232,255,.18);
+  background:#0b111b;
+}
+.inventory-operations-page .resource-tile,
+.inventory-operations-page .resource-linked-card {
+  color:#f8f5ff !important;
+  background:#221a31 !important;
+  border-color:rgba(164,132,255,.24) !important;
+}
+.inventory-operations-page .resource-tile .small,
+.inventory-operations-page .resource-linked-card .small {
+  color:#d7caef !important;
+}
+.inventory-operations-page .resource-tile-placeholder {
+  background:#130f1d !important;
+  color:#d7caef !important;
+}
+.inventory-operations-page .site-inventory-image-preview,
+.inventory-operations-page .site-inventory-image-preview-card,
+.inventory-operations-page .site-inventory-list-thumb.is-empty {
+  background:#0e141f;
+  border-color:rgba(191,232,255,.18);
+  color:#c8d2e4;
+}
+.inventory-operations-page .site-inventory-list-identity {
+  min-width:0;
+}
+.inventory-operations-page .site-inventory-list-copy,
+.inventory-operations-page .site-inventory-media-stack {
+  min-width:0;
+}
+.inventory-operations-page .site-inventory-url-line {
+  overflow-wrap:anywhere;
+}
+.inventory-operations-page .inventory-stock-summary-grid .admin-stat {
+  background:linear-gradient(160deg,rgba(46,168,255,.12),rgba(18,24,38,.92));
+  border-color:rgba(46,168,255,.2);
+}
+.inventory-operations-page .inventory-stock-filter-grid {
+  grid-template-columns:minmax(0,1fr) minmax(180px,.45fr) auto;
+}
+.inventory-operations-page #catalogOptionManagerMount .grid.cols-3 > .card {
+  min-width:0;
+}
+.inventory-operations-page #catalogOptionManagerMount .btn,
+.inventory-operations-page #catalogSyncAdminMount .btn,
+.inventory-operations-page #notificationAdminMount .btn,
+.inventory-operations-page #appSettingsAdminMount .btn {
+  justify-content:center;
+}
+.inventory-operations-page #notificationAdminList {
+  display:grid;
+  gap:8px;
+}
+.inventory-operations-page #notificationAdminList .btn {
+  margin-left:8px;
+}
+@media (max-width:1080px) {
+  .inventory-operations-page .inventory-operations-links { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .inventory-operations-page .inventory-summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .inventory-operations-page .site-inventory-toolbar { grid-template-columns:1fr 1fr; }
+  .inventory-operations-page .site-inventory-toolbar-actions { grid-column:1/-1; }
+}
+@media (max-width:820px) {
+  .inventory-operations-page .inventory-operations-hero { grid-template-columns:1fr; }
+  .inventory-operations-page .inventory-operations-hero-art { max-width:230px; justify-self:start; }
+  .inventory-operations-page .inventory-stock-filter-grid { grid-template-columns:1fr 1fr; }
+  .inventory-operations-page .inventory-stock-filter-grid > :last-child { grid-column:1/-1; }
+  .inventory-operations-page .inventory-stock-filter-grid > :last-child .btn { flex:1 1 140px; }
+  .inventory-operations-page .inventory-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:680px) {
+  .inventory-operations-page .container { padding:14px; }
+  .inventory-operations-page .inventory-operations-links { grid-template-columns:1fr; }
+  .inventory-operations-page .inventory-operations-workspace-heading,
+  .inventory-operations-page .inventory-panel-heading { align-items:stretch; }
+  .inventory-operations-page .inventory-operations-workspace-heading .btn,
+  .inventory-operations-page .inventory-panel-shortcut { width:100%; justify-content:center; }
+  .inventory-operations-page .site-inventory-toolbar,
+  .inventory-operations-page .inventory-stock-filter-grid,
+  .inventory-operations-page .inventory-summary-grid { grid-template-columns:1fr; }
+  .inventory-operations-page .site-inventory-toolbar-actions,
+  .inventory-operations-page .inventory-stock-filter-grid > :last-child { grid-column:auto; }
+  .inventory-operations-page .site-inventory-toolbar-actions,
+  .inventory-operations-page .site-inventory-bulk-actions { align-items:stretch; }
+  .inventory-operations-page .site-inventory-toolbar-actions .btn,
+  .inventory-operations-page .site-inventory-bulk-actions .btn { width:100%; flex-basis:100%; }
+  .inventory-operations-page .site-inventory-table-wrap,
+  .inventory-operations-page .site-inventory-movements-wrap,
+  .inventory-operations-page .product-stock-table-wrap { overflow:visible; border:0; background:transparent; }
+  .inventory-operations-page .site-inventory-admin-table,
+  .inventory-operations-page .site-inventory-admin-table tbody,
+  .inventory-operations-page .site-inventory-admin-table tr,
+  .inventory-operations-page .site-inventory-admin-table td,
+  .inventory-operations-page .site-inventory-movements-table,
+  .inventory-operations-page .site-inventory-movements-table tbody,
+  .inventory-operations-page .site-inventory-movements-table tr,
+  .inventory-operations-page .site-inventory-movements-table td,
+  .inventory-operations-page .product-stock-table,
+  .inventory-operations-page .product-stock-table tbody,
+  .inventory-operations-page .product-stock-table tr,
+  .inventory-operations-page .product-stock-table td { display:block; width:100%; min-width:0; }
+  .inventory-operations-page .site-inventory-admin-table thead,
+  .inventory-operations-page .site-inventory-movements-table thead,
+  .inventory-operations-page .product-stock-table thead { display:none; }
+  .inventory-operations-page .site-inventory-admin-table tr,
+  .inventory-operations-page .site-inventory-movements-table tr,
+  .inventory-operations-page .product-stock-table tr {
+    margin:0 0 12px;
+    padding:4px 12px;
+    border:1px solid rgba(191,232,255,.17);
+    border-radius:16px;
+    background:linear-gradient(180deg,rgba(24,32,47,.98),rgba(16,22,34,.98));
+  }
+  .inventory-operations-page .site-inventory-admin-table td,
+  .inventory-operations-page .site-inventory-movements-table td,
+  .inventory-operations-page .product-stock-table td {
+    display:grid;
+    grid-template-columns:minmax(96px,.4fr) minmax(0,1fr);
+    gap:8px;
+    padding:12px 0 !important;
+    border-bottom:1px solid rgba(191,232,255,.12) !important;
+    background:transparent !important;
+  }
+  .inventory-operations-page .site-inventory-admin-table td:last-child,
+  .inventory-operations-page .site-inventory-movements-table td:last-child,
+  .inventory-operations-page .product-stock-table td:last-child { border-bottom:0 !important; }
+  .inventory-operations-page .site-inventory-admin-table td::before,
+  .inventory-operations-page .site-inventory-movements-table td::before,
+  .inventory-operations-page .product-stock-table td::before {
+    content:attr(data-label);
+    color:#bfe8ff;
+    font-size:.76rem;
+    font-weight:800;
+    letter-spacing:.035em;
+    text-transform:uppercase;
+  }
+  .inventory-operations-page .site-inventory-row-actions,
+  .inventory-operations-page .product-stock-actions {
+    min-width:0;
+    box-shadow:none;
+    background:transparent !important;
+  }
+  .inventory-operations-page .site-inventory-action-buttons {
+    grid-template-columns:1fr;
+  }
+  .inventory-operations-page .inventory-inline-actions {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .inventory-operations-page .site-inventory-empty-row {
+    display:block !important;
+    text-align:left;
+  }
+  .inventory-operations-page .site-inventory-empty-row::before { display:none !important; }
+  .inventory-operations-page #notificationAdminList .btn { width:100%; margin:8px 0 0; }
+}
+@media (max-width:430px) {
+  .inventory-operations-page .site-inventory-admin-table td,
+  .inventory-operations-page .site-inventory-movements-table td,
+  .inventory-operations-page .product-stock-table td { grid-template-columns:1fr; }
+  .inventory-operations-page .site-inventory-admin-table td::before,
+  .inventory-operations-page .site-inventory-movements-table td::before,
+  .inventory-operations-page .product-stock-table td::before { margin-bottom:-3px; }
+  .inventory-operations-page .inventory-inline-actions { grid-template-columns:1fr; }
+}
+
+
+/* Build 209 — non-blocking inventory context in Product Release Preflight. */
+.release-preflight-stage.is-info {
+  border-color:rgba(191,232,255,.30);
+  background:linear-gradient(180deg,rgba(46,168,255,.08),rgba(255,255,255,.02));
+}
+.release-preflight-badge.is-info {
+  color:#d9f0ff;
+  border-color:rgba(191,232,255,.42);
+  background:rgba(46,168,255,.14);
+}
