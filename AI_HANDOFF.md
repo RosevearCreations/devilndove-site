@@ -1,3 +1,31 @@
+# Devil n Dove AI Handoff — Build 211
+
+## Read this first
+
+This is the technical/deployment source of truth. Pair it with `PROJECT_STATUS_AND_ROADMAP.md`. Build 211 continues application work while social API approvals are pending.
+
+## Build 211 changes
+
+- Added a browser-only Platform Preview & Media Preflight to `/admin/social-publishing/`. It checks caption length, HTTPS destination/image URLs, image type, browser accessibility, dimensions, aspect ratio, and a visual preview without saving or publishing.
+- Added `public/js/admin-social-platform-preflight.js` and `assets/social-platform-preflight-placeholder.svg`.
+- Hardened the shared mobile menu as a true dropdown/accordion: only one navigation group remains open at a time, the panel stays scroll-contained, and desktop links remain hidden at mobile widths.
+- Social account API credentials remain optional for this preflight. Meta, Pinterest, X, TikTok, and YouTube publishing behavior is unchanged.
+- `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the two canonical project documents.
+
+## Safety boundary
+
+The Build 211 preflight is advisory and browser-only. It does not upload media, write D1 data, create or approve a social queue item, modify products, grant media consent, change CAIP evidence, call a provider API, or publish content.
+
+## Deployment test
+
+1. Deploy the flattened ZIP.
+2. Open `/admin/social-publishing/`.
+3. Test one public JPEG product image and real Devil n Dove product URL in Platform Preview & Media Preflight.
+4. Confirm no queue item or product record changes.
+5. At a phone width, open Menu and confirm opening one group closes the previously open group.
+
+---
+
 # Devil n Dove AI Handoff — Build 210
 
 ## Read this first
@@ -110,3 +138,18 @@ functions/
 ```
 
 Cloudflare Pages must bind the existing D1 database as `DB`. Do not create `DB` as a text secret.
+
+
+# Build 212 — Social platform policy and callback prerequisites
+
+The following production prerequisites now exist directly in the application:
+
+- `https://devilndove.com/privacy/` and `/privacy.html`
+- `https://devilndove.com/terms/` and `/terms.html`
+- `https://devilndove.com/data-deletion/` and `/data-deletion.html`
+- `https://devilndove.com/social-connections/` and `/social-connections.html`
+- Exact OAuth callback routes for Meta/Facebook/Instagram, Pinterest, X, TikTok, and YouTube
+- `https://devilndove.com/api/social/meta/data-deletion`
+- `https://devilndove.com/api/social/integration-readiness`
+
+The Pinterest verification meta tag is present in every HTML head. Callback routes are currently safe readiness endpoints: they do not exchange codes or store tokens until one-time state storage, encrypted token persistence, refresh, and disconnect controls are implemented.

@@ -22,3 +22,11 @@
 
 /functions/api/*
   Cache-Control: no-store, no-cache, must-revalidate
+
+/api/social/oauth/*
+  Cache-Control: no-store, no-cache, must-revalidate
+  Referrer-Policy: no-referrer
+
+/api/social/meta/data-deletion
+  Cache-Control: no-store, no-cache, must-revalidate
+  Referrer-Policy: no-referrer
