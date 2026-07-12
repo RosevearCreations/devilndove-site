@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
   <meta charset="utf-8">
   <meta content="width=device-width,initial-scale=1" name="viewport">
   <meta name="robots" content="noindex,nofollow">
@@ -35,6 +36,53 @@
       <a class="btn" href="/admin/release-preflight/">Release Preflight</a>
       <a class="btn" href="/admin/operations/">Operations</a>
     </nav>
+
+    <section class="card social-preflight-panel" id="social-platform-preflight">
+      <div class="social-automation-heading">
+        <div>
+          <p class="eyebrow">No credentials required</p>
+          <h2>Platform Preview & Media Preflight</h2>
+          <p>Check a proposed caption, destination link, and image before social API credentials are approved. This tool runs in the browser and does not publish, save, upload, or change product records.</p>
+        </div>
+        <img class="social-preflight-icon" src="/assets/social-platform-preflight-placeholder.svg" alt="Admin-only illustration of a social post being checked before publishing.">
+      </div>
+      <div class="social-preflight-grid">
+        <div class="social-preflight-fields">
+          <label>Platform
+            <select id="socialPreflightPlatform">
+              <option value="instagram">Instagram image post</option>
+              <option value="facebook">Facebook Page post</option>
+              <option value="pinterest">Pinterest Pin</option>
+              <option value="x">X post</option>
+            </select>
+          </label>
+          <label>Caption<textarea id="socialPreflightCaption" rows="7" placeholder="Paste the reviewed caption here..."></textarea></label>
+          <label>Public product or article URL<input id="socialPreflightLink" type="url" placeholder="https://devilndove.com/shop/product/?slug=..."></label>
+          <label>Public image URL<input id="socialPreflightImage" type="url" placeholder="https://.../real-product-image.jpg"></label>
+          <div class="social-preflight-actions"><button class="btn primary" id="socialPreflightRun" type="button">Run preflight</button><button class="btn" id="socialPreflightClear" type="button">Clear</button></div>
+        </div>
+        <div>
+          <div id="socialPreflightResults" class="social-preflight-results" aria-live="polite"><p class="small">Enter the proposed content, then run the preflight. Results are advisory and do not replace platform review, media consent, or the Social Media Privacy Guard.</p></div>
+          <article class="social-post-preview" id="socialPreflightPreview" hidden>
+            <div class="social-post-preview-head"><strong id="socialPreviewAccount">Devil n Dove</strong><span id="socialPreviewPlatform"></span></div>
+            <img id="socialPreviewImage" alt="Proposed social media image preview">
+            <div class="social-post-preview-copy" id="socialPreviewCaption"></div>
+            <a id="socialPreviewLink" target="_blank" rel="noopener">Open destination link</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="social-provider-readiness">
+      <p class="eyebrow">Build 212 platform prerequisites</p>
+      <h2>Public policy pages and exact callback URLs</h2>
+      <p>These public pages and direct HTTPS callback routes now exist. Provider callbacks are readiness endpoints only until secure OAuth start, state validation, encrypted token storage, refresh, and disconnect controls are enabled.</p>
+      <div class="social-setup-grid">
+        <article><h3>Public documents</h3><ul class="clean small"><li><a href="/privacy/" target="_blank" rel="noopener">Privacy Policy</a></li><li><a href="/terms/" target="_blank" rel="noopener">Terms of Use and Sale</a></li><li><a href="/data-deletion/" target="_blank" rel="noopener">Data Deletion Instructions</a></li><li><a href="/social-connections/" target="_blank" rel="noopener">Social Connection Disclosure</a></li></ul></article>
+        <article><h3>OAuth callback checks</h3><ul class="clean small"><li><a href="/api/social/oauth/meta/callback" target="_blank" rel="noopener">Meta callback</a></li><li><a href="/api/social/oauth/pinterest/callback" target="_blank" rel="noopener">Pinterest callback</a></li><li><a href="/api/social/oauth/x/callback" target="_blank" rel="noopener">X callback</a></li><li><a href="/api/social/oauth/tiktok/callback" target="_blank" rel="noopener">TikTok callback</a></li><li><a href="/api/social/oauth/youtube/callback" target="_blank" rel="noopener">YouTube callback</a></li></ul></article>
+      </div>
+      <p class="small"><strong>Pinterest verification:</strong> <code>p:domain_verify</code> is included in the head of every HTML page, including the home page.</p>
+    </section>
 
     <div id="socialProductAutomationMount"></div>
     <div id="socialPostQueueAdminMount"></div>
@@ -125,6 +173,7 @@
   <script src="/public/js/admin-route-usage.js"></script>
   <script src="/public/js/site-auth-ui.js"></script>
   <script src="/public/js/admin-self-protect.js"></script>
+  <script src="/public/js/admin-social-platform-preflight.js"></script>
   <script src="/public/js/admin-social-product-automation.js"></script>
   <script src="/public/js/admin-social-post-queue.js"></script>
   <script src="/public/js/admin-social-media-privacy-guard.js"></script>
