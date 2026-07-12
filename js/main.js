@@ -266,6 +266,15 @@
     });
     closeBtn?.addEventListener('click', () => close({ restoreFocus: true }));
     panel.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => close()));
+    // Keep mobile navigation as a compact dropdown/accordion, never a fully expanded link list.
+    panel.querySelectorAll('details.nav-mobile-group').forEach((group) => {
+      group.addEventListener('toggle', () => {
+        if (!group.open) return;
+        panel.querySelectorAll('details.nav-mobile-group[open]').forEach((other) => {
+          if (other !== group) other.open = false;
+        });
+      });
+    });
     // Keep this a compact popup rather than a long scrolling page of links.
     panel.querySelectorAll('details.nav-mobile-group').forEach((group) => {
       group.addEventListener('toggle', () => {
@@ -523,4 +532,21 @@
     ensureGlobalScript('/public/js/site-auth-ui.js');
     ensureGlobalScript('/public/js/site-analytics.js');
   });
+})();
+
+
+// Build 212 policy-link footer enhancement
+(() => {
+  const addPolicyLinks = () => {
+    const hrefs = new Set(Array.from(document.querySelectorAll('a[href]')).map((a) => a.getAttribute('href')));
+    const footer = document.querySelector('.footer') || document.querySelector('footer');
+    if (!footer || hrefs.has('/privacy/')) return;
+    const nav = document.createElement('nav');
+    nav.className = 'dd-policy-footer-links';
+    nav.setAttribute('aria-label', 'Legal and social connection policies');
+    nav.innerHTML = '<a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/data-deletion/">Data deletion</a><a href="/social-connections/">Social connections</a>';
+    footer.appendChild(nav);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addPolicyLinks, { once: true });
+  else addPolicyLinks();
 })();
