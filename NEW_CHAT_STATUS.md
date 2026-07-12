@@ -18,3 +18,18 @@ Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
 ## Immediate validation
 
 Deploy Build 210. Follow `BUILD210_VALIDATION.md`, then test a non-sensitive Active + Approved product with a real product image. Confirm one draft appears but no social post is published until human privacy/approval steps are completed.
+
+
+# Build 212 — Social platform policy and callback prerequisites
+
+The following production prerequisites now exist directly in the application:
+
+- `https://devilndove.com/privacy/` and `/privacy.html`
+- `https://devilndove.com/terms/` and `/terms.html`
+- `https://devilndove.com/data-deletion/` and `/data-deletion.html`
+- `https://devilndove.com/social-connections/` and `/social-connections.html`
+- Exact OAuth callback routes for Meta/Facebook/Instagram, Pinterest, X, TikTok, and YouTube
+- `https://devilndove.com/api/social/meta/data-deletion`
+- `https://devilndove.com/api/social/integration-readiness`
+
+The Pinterest verification meta tag is present in every HTML head. Callback routes are currently safe readiness endpoints: they do not exchange codes or store tokens until one-time state storage, encrypted token persistence, refresh, and disconnect controls are implemented.

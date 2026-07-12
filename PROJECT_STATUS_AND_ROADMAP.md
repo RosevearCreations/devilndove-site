@@ -1,3 +1,24 @@
+# Devil n Dove Project Status and Roadmap — Build 211
+
+## Current business outcome
+
+Build 211 lets the team continue preparing social content while platform applications, API permissions, and credentials are being validated. The new social preflight catches preventable caption, link, and image problems before a queue item reaches Dry Run or Publish. It does not weaken the existing review-first policy.
+
+## Highest-value next work
+
+1. Use the new platform preflight with several real product images and correct any inaccessible or poorly sized media.
+2. Complete Meta app validation, then test one Facebook Page post and one Instagram image post through Dry Run first.
+3. Add encrypted OAuth callback/token-refresh storage only after the first provider connection is proven.
+4. Add a queue-level scheduler only after connection health, platform previews, and failure recovery are proven.
+5. Continue evidence-first diagnosis of the login POST 500.
+6. Continue real-device testing of catalog, inventory operations, release preflight, Content Studio, and CAIP.
+
+## SEO and public-content rule
+
+Social captions, product pages, visible availability, images, and Product structured data must remain consistent. The preflight can identify format and access risks, but it cannot prove product facts, ownership, consent, or availability.
+
+---
+
 # Devil n Dove Project Status and Roadmap — Build 210
 
 ## Purpose
@@ -103,3 +124,18 @@ All other Markdown files are specialist references or retained history. They do 
 - There is no OAuth callback/refresh-token vault yet; encrypted Cloudflare secrets are the only supported active credential configuration.
 - Social platform account setup/app approval cannot be performed by the application or inferred from a browser pixel.
 - Stripe/email/webhooks, R2/D1 live behavior, Search Console/Google Business Profile evidence, marketplace sync, and full real-device reliability still need deployed proof.
+
+
+# Build 212 — Social platform policy and callback prerequisites
+
+The following production prerequisites now exist directly in the application:
+
+- `https://devilndove.com/privacy/` and `/privacy.html`
+- `https://devilndove.com/terms/` and `/terms.html`
+- `https://devilndove.com/data-deletion/` and `/data-deletion.html`
+- `https://devilndove.com/social-connections/` and `/social-connections.html`
+- Exact OAuth callback routes for Meta/Facebook/Instagram, Pinterest, X, TikTok, and YouTube
+- `https://devilndove.com/api/social/meta/data-deletion`
+- `https://devilndove.com/api/social/integration-readiness`
+
+The Pinterest verification meta tag is present in every HTML head. Callback routes are currently safe readiness endpoints: they do not exchange codes or store tokens until one-time state storage, encrypted token persistence, refresh, and disconnect controls are implemented.

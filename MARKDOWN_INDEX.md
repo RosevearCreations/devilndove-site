@@ -1,3 +1,21 @@
+# Markdown Index — Build 211
+
+## Canonical documents
+
+1. `AI_HANDOFF.md` — technical, deployment, incidents, safety boundaries.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — business, SEO, workflow, and priorities.
+
+## Current specialist documents
+
+- `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md` — provider account and credential setup.
+- `BUILD211_VALIDATION.md` — Build 211 deployment and regression checks.
+- `CONTENT_AUTOMATION_STUDIO.md` — Content Studio and CAIP specialist workflow.
+- `DATABASE_SCHEMA_REFERENCE.md` — schema reference only; verify live D1 before migrations.
+
+All other root Markdown files are retained specialist/history references and do not override the canonical pair.
+
+---
+
 # Devil n Dove Markdown Index — Build 210
 
 ## Read only these two first
@@ -26,3 +44,5 @@ These are the canonical pair. Every other root Markdown file is a specialist ref
 - Canonical active planning: **2 documents**.
 - Active specialist operating files: open only for the task at hand.
 - Historical Markdown: retained rather than deleted, with this index preventing accidental use as current instructions.
+
+- `BUILD212_VALIDATION.md` — specialist deployment checklist for public policies, Pinterest verification, and exact OAuth callbacks.

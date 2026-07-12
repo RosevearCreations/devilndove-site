@@ -1348,3 +1348,25 @@ Build 210 begins the product-to-social draft workflow, but a complete integratio
 20. A complete social analytics dashboard using stored post IDs and UTM results.
 
 Until those OAuth features are built, manually entered access tokens should be treated as controlled testing credentials—not the final permanent social connection.
+
+
+---
+
+## Build 211: work while credentials are pending
+
+Use `/admin/social-publishing/#social-platform-preflight` before API credentials are approved. It validates proposed captions, public links, and product image accessibility without calling a social network or saving data. It is not a substitute for account authorization, app review, privacy review, or media consent.
+
+
+# Build 212 — Social platform policy and callback prerequisites
+
+The following production prerequisites now exist directly in the application:
+
+- `https://devilndove.com/privacy/` and `/privacy.html`
+- `https://devilndove.com/terms/` and `/terms.html`
+- `https://devilndove.com/data-deletion/` and `/data-deletion.html`
+- `https://devilndove.com/social-connections/` and `/social-connections.html`
+- Exact OAuth callback routes for Meta/Facebook/Instagram, Pinterest, X, TikTok, and YouTube
+- `https://devilndove.com/api/social/meta/data-deletion`
+- `https://devilndove.com/api/social/integration-readiness`
+
+The Pinterest verification meta tag is present in every HTML head. Callback routes are currently safe readiness endpoints: they do not exchange codes or store tokens until one-time state storage, encrypted token persistence, refresh, and disconnect controls are implemented.
