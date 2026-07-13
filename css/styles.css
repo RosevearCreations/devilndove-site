@@ -2323,3 +2323,14 @@ body.nav-mobile-open{overflow:hidden}
 #mobileCreativeProjectId+small{display:block;margin-top:5px;color:var(--muted);line-height:1.35}
 @media(max-width:900px){.creative-link-product-form{grid-template-columns:repeat(2,minmax(0,1fr))}.creative-link-product-form .btn{width:100%}}
 @media(max-width:680px){.creative-link-product-form{grid-template-columns:1fr}.creative-linked-product{display:grid}.creative-linked-product .creative-process-links{display:grid;grid-template-columns:1fr}.creative-linked-product .btn{width:100%}}
+/* Build 215 — Creative Intelligence Integration */
+.creative-integration-panel{margin-top:18px;overflow:hidden}
+.creative-material-review-list{display:grid;gap:10px}
+.creative-material-review{display:grid;grid-template-columns:minmax(190px,1.5fr) repeat(4,minmax(100px,.65fr)) auto;gap:8px;align-items:end;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(4,9,17,.68)}
+.creative-material-review small{display:block;color:var(--muted)}
+.creative-profit-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px}
+.creative-profit-summary{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;padding:12px;border-radius:12px;background:rgba(0,0,0,.26)}
+.creative-profit-summary span,.creative-profit-summary strong{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08)}
+.creative-handoff-list{margin-top:10px}
+@media(max-width:980px){.creative-material-review{grid-template-columns:repeat(2,minmax(0,1fr))}.creative-profit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.creative-material-review,.creative-profit-grid{grid-template-columns:1fr}.creative-material-review .btn,.creative-integration-panel .btn{width:100%}.creative-profit-summary{display:grid}.creative-process-links{display:grid;grid-template-columns:1fr}.creative-process-links .btn{width:100%}}
