@@ -164,3 +164,6 @@ The following production prerequisites now exist directly in the application:
 - `https://devilndove.com/api/social/integration-readiness`
 
 The Pinterest verification meta tag is present in every HTML head. Callback routes are currently safe readiness endpoints: they do not exchange codes or store tokens until one-time state storage, encrypted token persistence, refresh, and disconnect controls are implemented.
+
+## Build 214 — flexible Creator entry paths
+Creative Projects are the preferred origin for documented maker work, but they are not mandatory. Phone capture and direct catalog product entry must continue to create valid independent products. Build 214 adds the optional `creative_project_product_links` relationship so one project can produce several products and an existing independent product can be linked later. Never migrate or reject an unrelated product solely because it has no Creative Project.
