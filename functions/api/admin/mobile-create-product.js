@@ -594,6 +594,7 @@ export async function onRequestPost(context) {
     const resourceLinksRaw = normalizeText(form.get("resource_links_json"));
     const captureEntryModeRaw = normalizeText(form.get("capture_entry_mode")).toLowerCase();
     const captureEntryMode = ["full", "wizard"].includes(captureEntryModeRaw) ? captureEntryModeRaw : "full";
+    const creativeProjectId = Math.max(0, Number(form.get("creative_project_id") || 0) || 0);
 
     if (!Number.isInteger(priceCents) || priceCents < 0) {
       return json({ ok: false, error: "price_cents must be a valid whole number." }, 400);
@@ -860,6 +861,29 @@ export async function onRequestPost(context) {
 
     await saveResourceLinks({ db, productId: resolvedProductId, resourceLinksRaw, supportsConsumptionMode, supportsLotSizeUnits });
 
+    // Build 214: project association is optional. A product created by phone capture may remain independent.
+    if (creativeProjectId > 0) {
+      await db.prepare(`CREATE TABLE IF NOT EXISTS creative_project_product_links (
+        creative_project_product_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        creative_work_project_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        relationship_type TEXT NOT NULL DEFAULT 'phone_capture',
+        is_primary INTEGER NOT NULL DEFAULT 0,
+        notes TEXT,
+        created_by INTEGER,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(creative_work_project_id, product_id)
+      )`).run();
+      const projectExists = await db.prepare("SELECT creative_work_project_id FROM creative_work_projects WHERE creative_work_project_id = ? LIMIT 1").bind(creativeProjectId).first().catch(() => null);
+      if (projectExists) {
+        const hasPrimary = await db.prepare("SELECT 1 AS found FROM creative_project_product_links WHERE creative_work_project_id = ? AND is_primary = 1 LIMIT 1").bind(creativeProjectId).first().catch(() => null);
+        await db.prepare(`INSERT INTO creative_project_product_links (creative_work_project_id, product_id, relationship_type, is_primary, created_by)
+          VALUES (?, ?, 'phone_capture', ?, ?)
+          ON CONFLICT(creative_work_project_id, product_id) DO UPDATE SET relationship_type = excluded.relationship_type`)
+          .bind(creativeProjectId, resolvedProductId, hasPrimary ? 0 : 1, Number(adminUser.user_id || 0) || null).run();
+      }
+    }
+
     const createdProduct = await db
       .prepare("SELECT * FROM products WHERE product_id = ? LIMIT 1")
       .bind(resolvedProductId)
@@ -883,7 +907,9 @@ export async function onRequestPost(context) {
         product_number_label: formatProductNumberLabel(normalizedProduct?.product_number || productNumber),
         uploaded_images: uploaded,
         next_product_number: nextProductNumber,
-        next_product_number_label: formatProductNumberLabel(nextProductNumber)
+        next_product_number_label: formatProductNumberLabel(nextProductNumber),
+        creative_project_id: creativeProjectId || null,
+        project_linked: creativeProjectId > 0
       },
       requestedProductId > 0 ? 200 : 201
     );
