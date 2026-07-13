@@ -190,3 +190,17 @@ The following production prerequisites now exist directly in the application:
 - `https://devilndove.com/api/social/integration-readiness`
 
 The Pinterest verification meta tag is present in every HTML head. Callback routes are currently safe readiness endpoints: they do not exchange codes or store tokens until one-time state storage, encrypted token persistence, refresh, and disconnect controls are implemented.
+
+
+## Build 215 completed
+- Reviewed Creative Project evidence packages can be passed to Content Studio when a primary product exists.
+- Material usage has an explicit approval layer and does not consume inventory automatically.
+- Project profitability includes materials, labour, packaging, overhead, channel fees, shipping, revenue and estimated content value.
+- Lessons, mistakes, repairs and results can be selected as reusable CAIP/Content Studio evidence.
+- Full Catalog keeps Creative Project linking optional.
+
+### Next strongest work
+1. Add a reviewed inventory-consumption transaction after approved material usage.
+2. Mirror selected lessons and recommendations into CAIP evidence records.
+3. Add project-level packaging and fee templates.
+4. Complete provider OAuth only after credentials and platform approvals are available.

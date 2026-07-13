@@ -64,3 +64,5 @@ These are the canonical pair. Every other root Markdown file is a specialist ref
 
 ### Build 214 specialist validation
 - `BUILD214_VALIDATION.md` — optional project/product links, phone capture independence, and mobile checks.
+
+- `BUILD215_VALIDATION.md` — specialist deployment and workflow validation for Creative Intelligence Integration.

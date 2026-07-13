@@ -41,3 +41,7 @@ The Pinterest verification meta tag is present in every HTML head. Callback rout
 - Preserved independent phone capture and direct catalog product creation.
 - Added project-aware phone capture preselection, link/unlink, and primary-product controls.
 - Added responsive flexible-entry workflow visual and Build 214 validation guide.
+
+
+## Build 215 — Creative Intelligence Integration
+Added reviewed project evidence handoffs, material-usage approval, profitability, optional Catalog project convenience controls, responsive integration panels, and an internal workflow visual.
