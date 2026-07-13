@@ -167,3 +167,7 @@ The Pinterest verification meta tag is present in every HTML head. Callback rout
 
 ## Build 214 — flexible Creator entry paths
 Creative Projects are the preferred origin for documented maker work, but they are not mandatory. Phone capture and direct catalog product entry must continue to create valid independent products. Build 214 adds the optional `creative_project_product_links` relationship so one project can produce several products and an existing independent product can be linked later. Never migrate or reject an unrelated product solely because it has no Creative Project.
+
+
+## Build 215 — Creative Intelligence Integration
+Creative Projects now support reviewed timeline-evidence selection, Content Studio handoff packages, explicit material-usage review before any future inventory consumption, and project profitability. Products remain optional and may be created directly or by phone without a project. No social provider publishing or inventory deduction occurs automatically.
