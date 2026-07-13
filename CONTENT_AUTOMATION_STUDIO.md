@@ -1,3 +1,7 @@
+# Build 213 project-first integration note
+
+Creative Projects are now the preferred process/evidence origin. Content Studio remains the owner of deliverable drafts and source-linked packages. Build 213 does not yet automatically import project timeline entries into Content Studio; that reviewed bridge is the next integration step.
+
 # Retained reference — current pointer refreshed in Build 209
 
 For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 209 inventory context, release-preflight, catalog-media, public-media consent, CAIP, deployment, or auth rules.

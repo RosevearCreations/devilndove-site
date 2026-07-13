@@ -1,3 +1,25 @@
+# Devil n Dove Project Status and Roadmap — Build 213
+
+## Current business outcome
+Devil n Dove now has the foundation for a project-first operating model. A creative project can document the complete process and carry a standard output blueprint for YouTube, Shorts, Reels, TikTok, Facebook, Pinterest, Etsy, the website, articles, galleries, archive, material use, cost analysis, lessons and future recommendations.
+
+## What is complete
+- Additive Creative Project, timeline-event and output-plan records.
+- Admin workspace for project overview, process entries, materials, time, cost and output status.
+- Mobile/desktop layout and an internal visual workflow placeholder.
+- Links into the existing Product, Content Studio and CAIP owner screens.
+
+## Highest-value next work
+1. Link selected project events/media into Content Studio without copying originals.
+2. Add inventory-resource selection so material usage can be posted through an explicit reviewed transaction.
+3. Add time/cost rollups and project profitability comparison.
+4. Create reviewed conversion actions: Creative Project → product draft, Etsy draft and Content Studio package.
+5. Add lessons/future-recommendation extraction from approved timeline evidence.
+6. Complete social OAuth/token lifecycle after platform credentials are approved.
+
+## SEO rule
+Generated listing, article and social copy must remain tied to verified project evidence and visible page facts. No output blueprint is permission to invent materials, origin, pricing, availability, claims or rights.
+
 # Devil n Dove Project Status and Roadmap — Build 211
 
 ## Current business outcome

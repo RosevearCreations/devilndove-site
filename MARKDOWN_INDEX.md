@@ -1,3 +1,18 @@
+# Markdown Index — Build 213
+
+## Canonical documents
+1. `AI_HANDOFF.md` — technical state, deployment and safety boundaries.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — business direction, priorities and next work.
+
+## Current specialist documents
+- `BUILD213_VALIDATION.md` — Creative Process Engine deployment and tests.
+- `CONTENT_AUTOMATION_STUDIO.md` — content-package ownership and review rules.
+- `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md` — provider setup and OAuth prerequisites.
+- `DATABASE_SCHEMA_REFERENCE.md` — schema reference.
+- `LOCAL_SEO_PLAYBOOK.md` — public search guidance.
+
+All older build reports are retained history and must not override the two canonical documents.
+
 # Markdown Index — Build 211
 
 ## Canonical documents
