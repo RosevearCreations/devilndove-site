@@ -265,6 +265,12 @@
           <p class="small" style="margin:0 0 10px 0">Create one product at a time from a phone and send the draft into review.</p>
           <a class="btn primary" href="/admin/mobile-product/">Open phone workflow</a>
         </div>
+
+        <div class="admin-quick-link-card" id="catalogCreativeProjectCard">
+          <h3 style="margin:0 0 8px 0">Creative Project relationship</h3>
+          <p class="small" id="catalogCreativeProjectText" style="margin:0 0 10px 0">Products may remain independent or be linked to a Creative Project later.</p>
+          <a class="btn" id="catalogCreativeProjectLink" href="/admin/creative-process/">Open Creative Projects</a>
+        </div>
         <div class="admin-quick-link-card">
           <h3 style="margin:0 0 8px 0">Phone inventory intake</h3>
           <p class="small" style="margin:0 0 10px 0">Capture supplies and tools without returning to the full admin desktop shell.</p>
@@ -292,5 +298,6 @@
   <script src="/public/js/admin-product-bulk-tools.js"></script>
   <script src="/public/js/admin-import-products.js"></script>
   <script src="/public/js/admin-product-price-suggestions.js"></script>
+<script>document.addEventListener('DOMContentLoaded',()=>{const productId=new URLSearchParams(location.search).get('product_id');const link=document.getElementById('catalogCreativeProjectLink');const text=document.getElementById('catalogCreativeProjectText');if(productId&&link){link.href=`/admin/creative-process/?product_id=${encodeURIComponent(productId)}`;text.textContent=`View or link Product ${productId} to an optional Creative Project. The product may also remain independent.`;}});</script>
 </body>
 </html>
