@@ -1,3 +1,14 @@
+# Devil n Dove AI Handoff — Build 213
+
+## Read this first
+The two canonical project documents are `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. Build 213 introduces the project-first Creative Process Engine at `/admin/creative-process/`. Products, Content Studio packages and CAIP records remain valid systems, but a Creative Project is now the preferred origin for documenting an idea, process evidence, materials, time, cost, mistakes, repairs, lessons and intended outputs.
+
+## Build 213 safety boundary
+The new engine is additive and review-first. It does not publish, consume inventory, alter source media, create marketplace listings or create products automatically. The 17-output blueprint is a planning/status record only.
+
+## Immediate test
+Run `database_build213_creative_process_engine.sql` or allow the admin API to create the additive tables, then create one project at `/admin/creative-process/`, add a process event and confirm all output plans persist after reload.
+
 # Devil n Dove AI Handoff — Build 211
 
 ## Read this first
