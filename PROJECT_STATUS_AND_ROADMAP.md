@@ -1,3 +1,32 @@
+# Devil n Dove Project Status and Roadmap — Build 214
+
+## Current business outcome
+The Creator path is now project-first without becoming project-mandatory. A documented Creative Project may link several product outputs, while phone capture and direct catalog entry continue to support valid products with no project.
+
+## What is complete
+- Optional many-to-many Creative Project ↔ product links.
+- Link, unlink and primary-product controls in the Creative Process workspace.
+- Phone capture project selector with an explicit `No project — independent product` default.
+- Project-aware phone-capture links that preselect, but do not force, the relationship.
+- Existing direct catalog creation remains unchanged.
+- Mobile-safe linked-product cards and controls.
+
+## Highest-value next work
+1. Add reviewed Creative Project → Content Studio package creation using selected timeline evidence without copying source media.
+2. Add explicit material-usage review and transactional inventory posting.
+3. Add project profitability rollups using material, labour, packaging and selling-channel costs.
+4. Add a project evidence selector for lessons learned and future recommendations.
+5. Add optional project association to the full catalog editor as a convenience, while preserving unlinked products.
+6. Complete social OAuth/token lifecycle after provider approvals.
+
+## Permanent architecture rule
+A Creative Project is preferred when we are documenting a process. It is never required for vintage items, sourced items, quick captures, legacy products, incomplete records, or products whose making process was not documented.
+
+## SEO rule
+Project evidence may support future copy, but no link itself proves materials, origin, rights, price, availability or claims. Public pages and structured data must stay aligned with reviewed catalog facts.
+
+---
+
 # Devil n Dove Project Status and Roadmap — Build 213
 
 ## Current business outcome

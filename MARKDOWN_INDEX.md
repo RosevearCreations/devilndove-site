@@ -61,3 +61,6 @@ These are the canonical pair. Every other root Markdown file is a specialist ref
 - Historical Markdown: retained rather than deleted, with this index preventing accidental use as current instructions.
 
 - `BUILD212_VALIDATION.md` — specialist deployment checklist for public policies, Pinterest verification, and exact OAuth callbacks.
+
+### Build 214 specialist validation
+- `BUILD214_VALIDATION.md` — optional project/product links, phone capture independence, and mobile checks.

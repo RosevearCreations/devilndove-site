@@ -83,3 +83,6 @@ Build 208 adds **no mandatory D1 migration**. `/api/admin/product-release-prefli
 - New rows must start as `approval_status='needs_review'`, `post_status='draft'`, `privacy_status='needs_review'`, and `approved_for_public_post=0`.
 
 Platform tokens, client secrets, OAuth codes, Page tokens, and refresh tokens remain Cloudflare encrypted Secrets, not D1 schema data.
+
+## Build 214 optional project/product relationship
+`creative_project_product_links` connects a Creative Project to zero, one, or many products. The relationship is optional in both directions and does not replace `products` or require legacy/direct products to be migrated.
