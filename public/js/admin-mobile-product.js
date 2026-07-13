@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const draftSummary = document.getElementById('mobileDraftSummary');
   const draftReadiness = document.getElementById('mobileDraftReadiness');
   const refreshDraftsButton = document.getElementById('mobileRefreshDraftsButton');
+  const creativeProjectSelect = document.getElementById('mobileCreativeProjectId');
 
   let bootstrap = null;
   let drafts = [];
@@ -72,6 +73,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function normalizeText(value) {
     return String(value ?? '').trim();
+  }
+  async function loadCreativeProjects(productId = null) {
+    if (!creativeProjectSelect || !window.DDAuth?.isLoggedIn()) return;
+    const query = productId ? `?product_id=${encodeURIComponent(productId)}` : '';
+    try {
+      const response = await window.DDAuth.apiFetch(`/api/admin/creative-process${query}`);
+      const data = await parseApiResponse(response, 'Failed to load Creative Projects.');
+      const projects = Array.isArray(data.projects) ? data.projects : [];
+      creativeProjectSelect.innerHTML = '<option value="">No project — independent product</option>' + projects.map((row) => `<option value="${row.creative_work_project_id}">${escapeHtml(row.project_key || `Project ${row.creative_work_project_id}`)} · ${escapeHtml(row.project_title || 'Untitled project')} · ${escapeHtml(row.project_status || 'idea')}</option>`).join('');
+      const linkedIds = Array.isArray(data.product_project_ids) ? data.product_project_ids.map(String) : [];
+      const requested = new URLSearchParams(window.location.search).get('creative_project_id') || '';
+      const preferred = linkedIds[0] || requested;
+      if (preferred && projects.some((row) => String(row.creative_work_project_id) === String(preferred))) creativeProjectSelect.value = String(preferred);
+    } catch (error) {
+      creativeProjectSelect.innerHTML = '<option value="">No project — independent product</option>';
+      creativeProjectSelect.title = error.message || 'Creative Projects could not be loaded.';
+    }
   }
   function buildLiveDraft(baseDraft = null) {
     const source = baseDraft || loadedDraft || {};
@@ -345,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function resetFormState(message = 'Ready for the next product.') {
     if (form) form.reset();
     if (draftProductIdInput) draftProductIdInput.value = '';
+    if (creativeProjectSelect) creativeProjectSelect.value = new URLSearchParams(window.location.search).get('creative_project_id') || '';
     loadedDraft = null;
     selectedMap = new Map();
     renderImages();
@@ -408,6 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSelectedResources();
     renderResourceGrid();
     renderDraftReadiness(draft);
+    loadCreativeProjects(draft.product_id).catch(() => null);
     if (draftSummary) draftSummary.textContent = `Editing draft ${formatProductNumber(draft.product_number)} · ${draft.name || draft.capture_reference || 'Unnamed draft'} · ${draft.image_count || 0} images · ${draft.linked_resource_count || 0} linked resources.`;
     setMessage(`Loaded draft ${formatProductNumber(draft.product_number || draft.product_id)}. Continue working without leaving this screen.`);
   }
@@ -461,6 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderSelectedResources();
       renderResourceGrid();
       await loadDrafts(selectedDraftId);
+      await loadCreativeProjects(selectedDraftId);
     } catch (error) {
       bootstrap = getBootstrapFallback();
       nextNumberEl.textContent = String(bootstrap.next_product_number_label || formatProductNumber(bootstrap.next_product_number));
