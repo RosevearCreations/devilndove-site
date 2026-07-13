@@ -1,7 +1,7 @@
 // Build 213 — project-first Creative Process Engine foundation.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '213';
+const BUILD = '214';
 const OUTPUTS = [
   ['youtube_video','YouTube video','video'], ['youtube_shorts','YouTube Shorts','video'],
   ['instagram_reels','Instagram Reels','social'], ['tiktok_videos','TikToks','social'],
@@ -55,7 +55,19 @@ async function ensureSchema(db){
     )`,
     `CREATE INDEX IF NOT EXISTS idx_creative_work_projects_status ON creative_work_projects(project_status)`,
     `CREATE INDEX IF NOT EXISTS idx_creative_work_events_project ON creative_work_events(creative_work_project_id, occurred_at)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_work_outputs_project ON creative_work_outputs(creative_work_project_id, output_status)`
+    `CREATE INDEX IF NOT EXISTS idx_creative_work_outputs_project ON creative_work_outputs(creative_work_project_id, output_status)`,
+    `CREATE TABLE IF NOT EXISTS creative_project_product_links (
+      creative_project_product_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      creative_work_project_id INTEGER NOT NULL, product_id INTEGER NOT NULL,
+      relationship_type TEXT NOT NULL DEFAULT 'project_output',
+      is_primary INTEGER NOT NULL DEFAULT 0, notes TEXT,
+      created_by INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(creative_work_project_id, product_id),
+      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
+      FOREIGN KEY(product_id) REFERENCES products(product_id) ON DELETE CASCADE
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_creative_project_product_links_project ON creative_project_product_links(creative_work_project_id, is_primary)`,
+    `CREATE INDEX IF NOT EXISTS idx_creative_project_product_links_product ON creative_project_product_links(product_id)`
   ];
   for (const sql of statements) await db.prepare(sql).run();
 }
@@ -81,7 +93,8 @@ async function detail(db,id){
   const events=await db.prepare(`SELECT * FROM creative_work_events WHERE creative_work_project_id=?1 ORDER BY occurred_at DESC, creative_work_event_id DESC`).bind(id).all();
   const outputs=await db.prepare(`SELECT * FROM creative_work_outputs WHERE creative_work_project_id=?1 ORDER BY output_group, creative_work_output_id`).bind(id).all();
   const totals=await db.prepare(`SELECT COALESCE(SUM(duration_minutes),0) tracked_minutes, COALESCE(SUM(material_cost_cents),0) tracked_material_cost_cents FROM creative_work_events WHERE creative_work_project_id=?1`).bind(id).first();
-  return {project,events:events.results||[],outputs:outputs.results||[],totals:totals||{}};
+  const linked=await db.prepare(`SELECT l.creative_project_product_link_id,l.product_id,l.relationship_type,l.is_primary,l.notes,p.product_number,p.name,p.slug,p.sku,p.status,p.review_status,p.featured_image_url FROM creative_project_product_links l JOIN products p ON p.product_id=l.product_id WHERE l.creative_work_project_id=?1 ORDER BY l.is_primary DESC,p.updated_at DESC,p.product_id DESC`).bind(id).all();
+  return {project,events:events.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[]};
 }
 async function seedOutputs(db,id){
   for(const [key,label,group] of OUTPUTS){
@@ -92,8 +105,15 @@ export async function onRequestGet(context){
   const access=await requireAdmin(context); if(access.error) return access.error;
   try{
     await ensureSchema(access.db);
-    const id=num(new URL(context.request.url).searchParams.get('project_id'));
-    return json({ok:true,build:BUILD,projects:await listProjects(access.db),detail:id?await detail(access.db,id):null,output_blueprint:OUTPUTS.map(([key,label,group])=>({key,label,group})),mode:'project_first_review_first'});
+    const url=new URL(context.request.url);
+    const id=num(url.searchParams.get('project_id'));
+    const productId=num(url.searchParams.get('product_id'));
+    let productProjectIds=[];
+    if(productId){
+      const linked=await access.db.prepare(`SELECT creative_work_project_id FROM creative_project_product_links WHERE product_id=?1 ORDER BY is_primary DESC,creative_work_project_id DESC`).bind(productId).all();
+      productProjectIds=(linked.results||[]).map(row=>Number(row.creative_work_project_id||0)).filter(Boolean);
+    }
+    return json({ok:true,build:BUILD,projects:await listProjects(access.db),detail:id?await detail(access.db,id):null,product_project_ids:productProjectIds,output_blueprint:OUTPUTS.map(([key,label,group])=>({key,label,group})),mode:'project_first_optional_product_links'});
   }catch(error){
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'creative_process_engine',incident_code:'creative_process_get_failed',severity:'error',message:error?.message||'Creative Process Engine failed to load.',related_user_id:access.adminUser.user_id,details:{error:String(error?.stack||error)}});
     return json({ok:false,error:'Creative Process Engine could not load.'},500);
@@ -110,10 +130,15 @@ export async function onRequestPost(context){
       const title=text(body.project_title,180); if(!title) throw new Error('Project title is required.');
       const key=`CP-${Date.now().toString(36).toUpperCase()}`;
       const result=await access.db.prepare(`INSERT INTO creative_work_projects (project_key,project_title,project_type,project_status,summary,objective,story_angle,product_id,privacy_status,rights_status,created_by,updated_by) VALUES (?1,?2,?3,'idea',?4,?5,?6,?7,'internal','needs_review',?8,?8)`).bind(key,title,text(body.project_type,60)||'maker_project',text(body.summary),text(body.objective),text(body.story_angle),num(body.product_id)||null,access.adminUser.user_id).run();
-      projectId=num(result.meta?.last_row_id); await seedOutputs(access.db,projectId); message='Creative Project created with the complete output blueprint.';
+      projectId=num(result.meta?.last_row_id); await seedOutputs(access.db,projectId);
+      const initialProductId=num(body.product_id);
+      if(initialProductId) await access.db.prepare(`INSERT OR IGNORE INTO creative_project_product_links (creative_work_project_id,product_id,relationship_type,is_primary,created_by) VALUES (?1,?2,'project_output',1,?3)`).bind(projectId,initialProductId,access.adminUser.user_id).run();
+      message='Creative Project created with the complete output blueprint.';
     }else if(action==='update_project'){
       if(!projectId) throw new Error('Project is required.');
       await access.db.prepare(`UPDATE creative_work_projects SET project_title=?2,project_type=?3,project_status=?4,summary=?5,objective=?6,story_angle=?7,product_id=?8,started_at=?9,completed_at=?10,total_minutes=?11,estimated_cost_cents=?12,actual_cost_cents=?13,privacy_status=?14,rights_status=?15,updated_by=?16,updated_at=CURRENT_TIMESTAMP WHERE creative_work_project_id=?1`).bind(projectId,text(body.project_title,180),text(body.project_type,60)||'maker_project',text(body.project_status,40)||'idea',text(body.summary),text(body.objective),text(body.story_angle),num(body.product_id)||null,text(body.started_at,40)||null,text(body.completed_at,40)||null,Math.max(0,Number(body.total_minutes||0)),Math.max(0,Number(body.estimated_cost_cents||0)),Math.max(0,Number(body.actual_cost_cents||0)),text(body.privacy_status,40)||'internal',text(body.rights_status,40)||'needs_review',access.adminUser.user_id).run();
+      const legacyProductId=num(body.product_id);
+      if(legacyProductId) await access.db.prepare(`INSERT OR IGNORE INTO creative_project_product_links (creative_work_project_id,product_id,relationship_type,is_primary,created_by) VALUES (?1,?2,'project_output',CASE WHEN EXISTS(SELECT 1 FROM creative_project_product_links WHERE creative_work_project_id=?1) THEN 0 ELSE 1 END,?3)`).bind(projectId,legacyProductId,access.adminUser.user_id).run();
       message='Project overview saved.';
     }else if(action==='add_event'){
       if(!projectId) throw new Error('Project is required.');
@@ -126,6 +151,21 @@ export async function onRequestPost(context){
       message='Output status saved.';
     }else if(action==='seed_outputs'){
       if(!projectId) throw new Error('Project is required.'); await seedOutputs(access.db,projectId); message='Missing output plans restored.';
+    }else if(action==='link_product'){
+      const productId=num(body.product_id); if(!projectId||!productId) throw new Error('Project and product are required.');
+      const product=await access.db.prepare(`SELECT product_id FROM products WHERE product_id=?1`).bind(productId).first(); if(!product) throw new Error('Product was not found.');
+      const hasPrimary=await access.db.prepare(`SELECT 1 found FROM creative_project_product_links WHERE creative_work_project_id=?1 AND is_primary=1 LIMIT 1`).bind(projectId).first();
+      await access.db.prepare(`INSERT INTO creative_project_product_links (creative_work_project_id,product_id,relationship_type,is_primary,notes,created_by) VALUES (?1,?2,?3,?4,?5,?6) ON CONFLICT(creative_work_project_id,product_id) DO UPDATE SET relationship_type=excluded.relationship_type,notes=excluded.notes`).bind(projectId,productId,text(body.relationship_type,50)||'project_output',hasPrimary?0:1,text(body.notes,500)||null,access.adminUser.user_id).run();
+      message='Product linked to the Creative Project. Products may also remain unlinked.';
+    }else if(action==='unlink_product'){
+      const productId=num(body.product_id); if(!projectId||!productId) throw new Error('Project and product are required.');
+      await access.db.prepare(`DELETE FROM creative_project_product_links WHERE creative_work_project_id=?1 AND product_id=?2`).bind(projectId,productId).run();
+      message='Product link removed. The product itself was not changed.';
+    }else if(action==='set_primary_product'){
+      const productId=num(body.product_id); if(!projectId||!productId) throw new Error('Project and product are required.');
+      await access.db.prepare(`UPDATE creative_project_product_links SET is_primary=CASE WHEN product_id=?2 THEN 1 ELSE 0 END WHERE creative_work_project_id=?1`).bind(projectId,productId).run();
+      await access.db.prepare(`UPDATE creative_work_projects SET product_id=?2,updated_at=CURRENT_TIMESTAMP WHERE creative_work_project_id=?1`).bind(projectId,productId).run();
+      message='Primary product updated.';
     }else throw new Error('Unsupported Creative Process action.');
     const current=await detail(access.db,projectId);
     await auditAdminAction(context.env,context.request,access.adminUser,{action_type:`creative_process_${action}`,target_type:'creative_work_project',target_id:projectId,target_key:current?.project?.project_key||null,details:{review_first:true,automatic_publish:false}});
