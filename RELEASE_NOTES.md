@@ -1,3 +1,7 @@
+# Build 216 — Reviewed Inventory and CAIP Evidence
+
+Adds explicit approved material-to-inventory posting, duplicate prevention, audited stock movements, internal review-required CAIP evidence mirroring, reusable cost templates, mobile-safe controls and updated canonical handoff documents.
+
 # Build 210 — Social Publishing Workspace & Product Draft Automation
 
 - Added `/admin/social-publishing/` with a focused product-social automation configuration, platform status cards, full queue, Social Media Privacy Guard, and practical in-app connection guide.

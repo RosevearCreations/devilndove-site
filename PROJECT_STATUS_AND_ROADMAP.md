@@ -1,3 +1,28 @@
+# Devil n Dove Project Status and Roadmap — Build 216
+
+## Current business outcome
+Reviewed project materials can now be posted to real inventory through an explicit, idempotent transaction, and selected project lessons/process evidence can be mirrored into CAIP as internal review-required evidence. Products may still be created directly or by phone without a project.
+
+## Completed in Build 216
+- Approved material review → explicit inventory consumption with before/after quantities and movement audit.
+- Duplicate material posting prevention.
+- Selected project evidence → CAIP evidence mirror with `needs_review` status.
+- Reusable project cost-template records for labour, packaging, overhead, channel assumptions and shipping.
+- Responsive Creator controls and unchanged dropdown mobile navigation.
+
+## Highest-value next work
+1. Add inventory-post reversal with reason, authorization and compensating movement.
+2. Add template-apply controls and percentage-based channel fee calculation.
+3. Generate reviewed lessons/future-recommendation summaries from CAIP evidence without inventing claims.
+4. Add project-level product profitability allocation when one project creates several products.
+5. Complete social OAuth only after provider approval and credentials are available.
+6. Continue deployed evidence for login, R2, Stripe, email/webhooks, Search Console and Google Business Profile.
+
+## SEO rule
+Project evidence may improve product pages, articles and listings only after factual review. Visible copy, Product structured data, price, availability, materials and images must remain consistent.
+
+---
+
 # Devil n Dove Project Status and Roadmap — Build 214
 
 ## Current business outcome

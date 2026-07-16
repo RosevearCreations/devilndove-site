@@ -1,3 +1,8 @@
+# Build 216 additions
+- `creative_project_inventory_posts`: one idempotent inventory posting per approved material review.
+- `creative_project_caip_mirrors`: tracks Creative Project evidence mirrored into CAIP.
+- `creative_project_cost_templates`: reusable labour, packaging, overhead, fee and shipping assumptions.
+
 # Build 208 schema note
 
 Build 208 does not require a D1 migration. `/api/admin/product-release-preflight` is read-only and detects absent optional Content Studio, CAIP, and Content Release Board tables rather than creating them. `/api/admin/product-featured-image-sync` updates only `products.featured_image_url` after an explicit administrator request and an existing retained `product_images`/`media_assets` candidate match. It does not change source-media rows, annotations, consent, Content Studio, CAIP, or publication state.

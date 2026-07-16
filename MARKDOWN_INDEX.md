@@ -1,3 +1,19 @@
+# Markdown Index — Build 216
+
+## Canonical documents
+1. `AI_HANDOFF.md` — technical, deployment and safety truth.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — business, SEO and priority truth.
+
+## Current specialist validation
+- `BUILD216_VALIDATION.md`
+- `DATABASE_SCHEMA_REFERENCE.md`
+- `CONTENT_AUTOMATION_STUDIO.md`
+- `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md`
+
+Older Build files are retained history and do not override the canonical pair.
+
+---
+
 # Markdown Index — Build 213
 
 ## Canonical documents
