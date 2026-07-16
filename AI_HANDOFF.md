@@ -1,3 +1,16 @@
+# Devil n Dove AI Handoff — Build 216
+
+## Read this first
+Build 216 is the current Creator-path integration release. It adds explicit reviewed inventory posting, CAIP evidence mirroring and reusable cost-template storage. `PROJECT_STATUS_AND_ROADMAP.md` is the business/SEO companion.
+
+## Safety boundary
+Never deduct inventory from timeline capture or material review alone. Only `post_material_inventory` may consume stock, and it must remain approval-gated and idempotent. Mirrored CAIP evidence remains internal and `needs_review`; it is not publication permission.
+
+## Deployment
+Run `database_build216_reviewed_inventory_caip_evidence.sql` or allow the admin route to create the additive tables. Cloudflare Pages still requires the D1 binding named `DB`.
+
+---
+
 # Devil n Dove AI Handoff — Build 213
 
 ## Read this first
