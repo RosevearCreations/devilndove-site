@@ -2334,3 +2334,10 @@ body.nav-mobile-open{overflow:hidden}
 .creative-handoff-list{margin-top:10px}
 @media(max-width:980px){.creative-material-review{grid-template-columns:repeat(2,minmax(0,1fr))}.creative-profit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.creative-material-review,.creative-profit-grid{grid-template-columns:1fr}.creative-material-review .btn,.creative-integration-panel .btn{width:100%}.creative-profit-summary{display:grid}.creative-process-links{display:grid;grid-template-columns:1fr}.creative-process-links .btn{width:100%}}
+
+/* Build 216 — explicit project inventory posting, CAIP evidence mirror, reusable cost templates */
+.creative-material-review{grid-template-columns:repeat(auto-fit,minmax(135px,1fr));align-items:end}
+.creative-material-review>div:first-child{min-width:190px}
+.creative-material-review select,.creative-material-review input,.creative-material-review button{min-width:0;width:100%}
+.creative-integration-panel .pill{display:inline-block;margin-top:6px}
+@media(max-width:680px){.creative-material-review{grid-template-columns:1fr}.creative-material-review>div:first-child{min-width:0}}
