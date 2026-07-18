@@ -184,3 +184,11 @@ Creative Projects are the preferred origin for documented maker work, but they a
 
 ## Build 215 — Creative Intelligence Integration
 Creative Projects now support reviewed timeline-evidence selection, Content Studio handoff packages, explicit material-usage review before any future inventory consumption, and project profitability. Products remain optional and may be created directly or by phone without a project. No social provider publishing or inventory deduction occurs automatically.
+
+## Build 217 — reviewed reversals, allocations and CAIP knowledge
+- Creative Project inventory usage can be reversed only through an authorized compensating movement with a required reason. Never delete the original movement.
+- Cost templates can be applied; channel fees support revenue percentage plus a fixed amount.
+- Shared project costs can be allocated among linked products, but allocations do not change product prices or public facts.
+- Knowledge summaries are derived from mirrored CAIP internal source evidence and remain review-required.
+- `/admin/creative-assets/` uses scoped dark contrast rules. Preserve these when changing global card styles.
+- Social OAuth remains staged until real provider credentials and approvals exist.

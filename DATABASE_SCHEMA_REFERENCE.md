@@ -91,3 +91,9 @@ Platform tokens, client secrets, OAuth codes, Page tokens, and refresh tokens re
 
 ## Build 214 optional project/product relationship
 `creative_project_product_links` connects a Creative Project to zero, one, or many products. The relationship is optional in both directions and does not replace `products` or require legacy/direct products to be migrated.
+
+## Build 217 additive tables
+- `creative_project_inventory_reversals`: immutable reasoned compensating restorations for project inventory postings.
+- `creative_project_profitability_extensions`: fee percentage and fixed-fee assumptions.
+- `creative_project_cost_allocations`: reviewed project-cost shares assigned to linked products.
+- `creative_project_knowledge_summaries`: review-controlled lessons and recommendations derived from CAIP evidence.

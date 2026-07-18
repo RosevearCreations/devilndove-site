@@ -14,3 +14,7 @@ This retained context file is not a third roadmap. Start with:
 - No D1 migration is included.
 - CAIP remains reference-only, source-preserving, and human-reviewed.
 - The outstanding login `500` remains evidence-first; do not run any legacy database migration based only on the browser error.
+
+
+## Build 217 current release
+See `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `BUILD217_VALIDATION.md`. Build 217 adds reasoned inventory reversals, applied cost templates, percentage fees, linked-product cost allocations, CAIP-derived reviewed summaries, and Creative Assets contrast fixes.
