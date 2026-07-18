@@ -2341,3 +2341,35 @@ body.nav-mobile-open{overflow:hidden}
 .creative-material-review select,.creative-material-review input,.creative-material-review button{min-width:0;width:100%}
 .creative-integration-panel .pill{display:inline-block;margin-top:6px}
 @media(max-width:680px){.creative-material-review{grid-template-columns:1fr}.creative-material-review>div:first-child{min-width:0}}
+
+/* Build 217 — Creative Assets contrast and Creative Process review controls */
+body[data-admin-page="creative-assets"]{background:#0b1020;color:#eef2ff}
+body[data-admin-page="creative-assets"] .admin-shell{color:#eef2ff}
+body[data-admin-page="creative-assets"] .card,
+body[data-admin-page="creative-assets"] .caip-sidebar,
+body[data-admin-page="creative-assets"] .caip-main,
+body[data-admin-page="creative-assets"] .caip-policy-card,
+body[data-admin-page="creative-assets"] .caip-operations-card,
+body[data-admin-page="creative-assets"] .caip-assets-section{background:#151b2f;color:#eef2ff;border-color:#34405f}
+body[data-admin-page="creative-assets"] .caip-project-row,
+body[data-admin-page="creative-assets"] .caip-metric-grid article,
+body[data-admin-page="creative-assets"] .caip-ops-grid article,
+body[data-admin-page="creative-assets"] .caip-asset-card,
+body[data-admin-page="creative-assets"] .caip-evidence-row,
+body[data-admin-page="creative-assets"] .caip-segment-row,
+body[data-admin-page="creative-assets"] .caip-recommendation-grid article,
+body[data-admin-page="creative-assets"] .caip-policy{background:#1c2540;color:#f8fafc;border-color:#455273}
+body[data-admin-page="creative-assets"] input,
+body[data-admin-page="creative-assets"] select,
+body[data-admin-page="creative-assets"] textarea{background:#0f172a!important;color:#f8fafc!important;border-color:#52617f!important}
+body[data-admin-page="creative-assets"] option{background:#0f172a;color:#f8fafc}
+body[data-admin-page="creative-assets"] a{color:#f9d27d}
+body[data-admin-page="creative-assets"] .small,
+body[data-admin-page="creative-assets"] small{color:#cbd5e1;opacity:1}
+body[data-admin-page="creative-assets"] .caip-score-strip span{background:#263354;color:#f8fafc}
+body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
+.creative-reversal-box{display:grid;gap:8px;padding:10px;border:1px solid rgba(239,68,68,.45);border-radius:12px;background:rgba(127,29,29,.16)}
+.creative-allocation-grid,.creative-knowledge-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.creative-allocation-grid label,.creative-knowledge-card{display:grid;gap:7px;padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.035)}
+.creative-knowledge-card textarea{min-height:150px}
+@media(max-width:720px){.creative-allocation-grid,.creative-knowledge-grid{grid-template-columns:1fr}.creative-process-links{display:grid;grid-template-columns:1fr}.creative-process-links .btn,.creative-process-links .input{width:100%}}
