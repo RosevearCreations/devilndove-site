@@ -192,3 +192,10 @@ Creative Projects now support reviewed timeline-evidence selection, Content Stud
 - Knowledge summaries are derived from mirrored CAIP internal source evidence and remain review-required.
 - `/admin/creative-assets/` uses scoped dark contrast rules. Preserve these when changing global card styles.
 - Social OAuth remains staged until real provider credentials and approvals exist.
+
+## Build 218 handoff
+- New authenticated endpoint: `/api/admin/amazon-link-preview`.
+- New Inventory Operations UI: Amazon URL + Tool/Consumable choice creates a review draft only.
+- Do not convert this into automatic inventory creation. Purchase price, quantity, classification and metadata must remain human-reviewed.
+- Amazon page metadata can be incomplete or blocked; preserve the manual form and Amazon CSV review workflow as fallbacks.
+- Validate with `BUILD218_VALIDATION.md` after deployment.
