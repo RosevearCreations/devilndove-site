@@ -149,7 +149,7 @@ async function ensureSchema(db){
       created_by INTEGER,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    ),
+      )`,
     `CREATE TABLE IF NOT EXISTS creative_project_inventory_reversals (
       creative_project_inventory_reversal_id INTEGER PRIMARY KEY AUTOINCREMENT,
       creative_project_inventory_post_id INTEGER NOT NULL UNIQUE,
