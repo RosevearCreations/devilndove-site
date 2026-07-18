@@ -19,3 +19,7 @@ Read `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` first. This file is a s
 ## Required proof
 
 Run `BUILD209_VALIDATION.md` after deployment, then `POST_DEPLOY_SMOKE_TEST.md`.
+
+
+## Build 217 current release
+See `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `BUILD217_VALIDATION.md`. Build 217 adds reasoned inventory reversals, applied cost templates, percentage fees, linked-product cost allocations, CAIP-derived reviewed summaries, and Creative Assets contrast fixes.

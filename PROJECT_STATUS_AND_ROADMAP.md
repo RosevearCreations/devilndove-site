@@ -229,3 +229,13 @@ The Pinterest verification meta tag is present in every HTML head. Callback rout
 2. Mirror selected lessons and recommendations into CAIP evidence records.
 3. Add project-level packaging and fee templates.
 4. Complete provider OAuth only after credentials and platform approvals are available.
+
+## Build 217 status
+Completed: compensating inventory reversal, applied cost templates, percentage marketplace fees, multi-product shared-cost allocation, CAIP-based lessons/recommendation drafts, and Creative Assets contrast repair.
+
+Next strongest work:
+1. Add per-product revenue and realized-margin comparison against allocated project cost.
+2. Add reversal authorization roles and accountant/export references.
+3. Promote approved knowledge summaries into selectable Content Studio evidence, never directly to public copy.
+4. Add cost-template edit/deactivate controls and channel presets.
+5. Complete social OAuth only when provider credentials and app approvals are available.

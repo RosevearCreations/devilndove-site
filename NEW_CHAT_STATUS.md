@@ -33,3 +33,7 @@ The following production prerequisites now exist directly in the application:
 - `https://devilndove.com/api/social/integration-readiness`
 
 The Pinterest verification meta tag is present in every HTML head. Callback routes are currently safe readiness endpoints: they do not exchange codes or store tokens until one-time state storage, encrypted token persistence, refresh, and disconnect controls are implemented.
+
+
+## Build 217 current release
+See `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `BUILD217_VALIDATION.md`. Build 217 adds reasoned inventory reversals, applied cost templates, percentage fees, linked-product cost allocations, CAIP-derived reviewed summaries, and Creative Assets contrast fixes.

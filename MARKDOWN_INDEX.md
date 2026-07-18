@@ -82,3 +82,6 @@ These are the canonical pair. Every other root Markdown file is a specialist ref
 - `BUILD214_VALIDATION.md` — optional project/product links, phone capture independence, and mobile checks.
 
 - `BUILD215_VALIDATION.md` — specialist deployment and workflow validation for Creative Intelligence Integration.
+
+### Build 217 specialist validation
+- `BUILD217_VALIDATION.md` — deployment and safety checks for inventory reversal, profitability, allocations, CAIP summaries and Creative Assets contrast.

@@ -49,3 +49,6 @@ The Pinterest verification meta tag is present in every HTML head. Callback rout
 
 ## Build 215 — Creative Intelligence Integration
 Added reviewed project evidence handoffs, material-usage approval, profitability, optional Catalog project convenience controls, responsive integration panels, and an internal workflow visual.
+
+## Build 217
+Added authorized inventory reversals, cost-template application, revenue-percentage channel fees, shared linked-product cost allocation, CAIP-derived reviewed knowledge summaries, and a scoped dark contrast repair for Creative Asset Intelligence.
