@@ -3,7 +3,7 @@ import { createOrRefreshContentProjectForProduct, ensureContentAutomationSchema 
 import { ensureCreativeAssetIntelligenceSchema, syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '216';
+const BUILD = '217';
 const OUTPUTS = [
   ['youtube_video','YouTube video','video'], ['youtube_shorts','YouTube Shorts','video'],
   ['instagram_reels','Instagram Reels','social'], ['tiktok_videos','TikToks','social'],
@@ -149,6 +149,52 @@ async function ensureSchema(db){
       created_by INTEGER,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ),
+    `CREATE TABLE IF NOT EXISTS creative_project_inventory_reversals (
+      creative_project_inventory_reversal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      creative_project_inventory_post_id INTEGER NOT NULL UNIQUE,
+      creative_work_project_id INTEGER NOT NULL,
+      site_item_inventory_id INTEGER NOT NULL,
+      stock_quantity_restored INTEGER NOT NULL,
+      previous_on_hand_quantity INTEGER NOT NULL,
+      new_on_hand_quantity INTEGER NOT NULL,
+      reason TEXT NOT NULL,
+      authorized_by INTEGER NOT NULL,
+      authorized_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(creative_project_inventory_post_id) REFERENCES creative_project_inventory_posts(creative_project_inventory_post_id) ON DELETE RESTRICT
+    )`,
+    `CREATE TABLE IF NOT EXISTS creative_project_profitability_extensions (
+      creative_work_project_id INTEGER PRIMARY KEY,
+      channel_fee_percent REAL NOT NULL DEFAULT 0,
+      fixed_channel_fee_cents INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS creative_project_cost_allocations (
+      creative_project_cost_allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      creative_work_project_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      allocation_percent REAL NOT NULL DEFAULT 0,
+      allocated_cost_cents INTEGER NOT NULL DEFAULT 0,
+      notes TEXT,
+      updated_by INTEGER,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(creative_work_project_id, product_id),
+      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
+      FOREIGN KEY(product_id) REFERENCES products(product_id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS creative_project_knowledge_summaries (
+      creative_project_knowledge_summary_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      creative_work_project_id INTEGER NOT NULL,
+      summary_type TEXT NOT NULL,
+      summary_text TEXT NOT NULL,
+      source_evidence_count INTEGER NOT NULL DEFAULT 0,
+      review_status TEXT NOT NULL DEFAULT 'needs_review',
+      reviewed_by INTEGER,
+      reviewed_at TEXT,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(creative_work_project_id, summary_type),
+      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
     )`
   ];
   for (const sql of statements) await db.prepare(sql).run();
@@ -177,13 +223,16 @@ async function detail(db,id){
   const totals=await db.prepare(`SELECT COALESCE(SUM(duration_minutes),0) tracked_minutes, COALESCE(SUM(material_cost_cents),0) tracked_material_cost_cents FROM creative_work_events WHERE creative_work_project_id=?1`).bind(id).first();
   const linked=await db.prepare(`SELECT l.creative_project_product_link_id,l.product_id,l.relationship_type,l.is_primary,l.notes,p.product_number,p.name,p.slug,p.sku,p.status,p.review_status,p.featured_image_url FROM creative_project_product_links l JOIN products p ON p.product_id=l.product_id WHERE l.creative_work_project_id=?1 ORDER BY l.is_primary DESC,p.updated_at DESC,p.product_id DESC`).bind(id).all();
   const evidence=await db.prepare(`SELECT s.*,e.event_type,e.event_title,e.event_notes,e.media_url,e.material_name,e.material_quantity,e.material_unit,e.material_cost_cents FROM creative_project_evidence_selections s JOIN creative_work_events e ON e.creative_work_event_id=s.creative_work_event_id WHERE s.creative_work_project_id=?1 AND s.selected=1 ORDER BY e.occurred_at,e.creative_work_event_id`).bind(id).all();
-  const materials=await db.prepare(`SELECT e.creative_work_event_id,e.event_title,e.material_name,e.material_quantity,e.material_unit,e.material_cost_cents,r.creative_project_material_review_id,r.review_status,r.actual_quantity,r.waste_quantity,r.reusable_quantity,r.approved_cost_cents,r.review_notes,r.inventory_consumed,ip.site_item_inventory_id,ip.stock_quantity_consumed,ip.previous_on_hand_quantity,ip.new_on_hand_quantity,ip.posted_at FROM creative_work_events e LEFT JOIN creative_project_material_reviews r ON r.creative_work_event_id=e.creative_work_event_id AND r.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_inventory_posts ip ON ip.creative_project_material_review_id=r.creative_project_material_review_id WHERE e.creative_work_project_id=?1 AND TRIM(COALESCE(e.material_name,''))<>'' ORDER BY e.occurred_at,e.creative_work_event_id`).bind(id).all();
-  const profitability=await db.prepare(`SELECT * FROM creative_project_profitability WHERE creative_work_project_id=?1`).bind(id).first();
+  const materials=await db.prepare(`SELECT e.creative_work_event_id,e.event_title,e.material_name,e.material_quantity,e.material_unit,e.material_cost_cents,r.creative_project_material_review_id,r.review_status,r.actual_quantity,r.waste_quantity,r.reusable_quantity,r.approved_cost_cents,r.review_notes,r.inventory_consumed,ip.creative_project_inventory_post_id,ip.site_item_inventory_id,ip.stock_quantity_consumed,ip.previous_on_hand_quantity,ip.new_on_hand_quantity,ip.posting_status,ip.posted_at FROM creative_work_events e LEFT JOIN creative_project_material_reviews r ON r.creative_work_event_id=e.creative_work_event_id AND r.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_inventory_posts ip ON ip.creative_project_material_review_id=r.creative_project_material_review_id WHERE e.creative_work_project_id=?1 AND TRIM(COALESCE(e.material_name,''))<>'' ORDER BY e.occurred_at,e.creative_work_event_id`).bind(id).all();
+  const profitability=await db.prepare(`SELECT p.*,COALESCE(x.channel_fee_percent,0) channel_fee_percent,COALESCE(x.fixed_channel_fee_cents,p.channel_fee_cents,0) fixed_channel_fee_cents FROM creative_project_profitability p LEFT JOIN creative_project_profitability_extensions x ON x.creative_work_project_id=p.creative_work_project_id WHERE p.creative_work_project_id=?1`).bind(id).first();
   const handoffs=await db.prepare(`SELECT creative_project_content_handoff_id,content_project_id,handoff_status,evidence_count,created_at FROM creative_project_content_handoffs WHERE creative_work_project_id=?1 ORDER BY creative_project_content_handoff_id DESC`).bind(id).all();
   const inventoryItems=await db.prepare(`SELECT site_item_inventory_id,item_name,on_hand_quantity,reserved_quantity,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,unit_cost_cents,do_not_reuse,is_active FROM site_item_inventory WHERE is_active=1 ORDER BY LOWER(item_name),site_item_inventory_id`).all().catch(()=>({results:[]}));
   const caipMirrors=await db.prepare(`SELECT * FROM creative_project_caip_mirrors WHERE creative_work_project_id=?1 ORDER BY mirrored_at DESC`).bind(id).all();
   const costTemplates=await db.prepare(`SELECT * FROM creative_project_cost_templates WHERE is_active=1 ORDER BY LOWER(template_name)`).all();
-  return {project,events:events.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[]};
+  const allocations=await db.prepare(`SELECT a.*,p.name product_name,p.product_number FROM creative_project_cost_allocations a JOIN products p ON p.product_id=a.product_id WHERE a.creative_work_project_id=?1 ORDER BY LOWER(p.name)`).bind(id).all();
+  const reversals=await db.prepare(`SELECT * FROM creative_project_inventory_reversals WHERE creative_work_project_id=?1 ORDER BY authorized_at DESC`).bind(id).all();
+  const summaries=await db.prepare(`SELECT * FROM creative_project_knowledge_summaries WHERE creative_work_project_id=?1 ORDER BY summary_type`).bind(id).all();
+  return {project,events:events.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[]};
 }
 async function seedOutputs(db,id){
   for(const [key,label,group] of OUTPUTS){
@@ -248,8 +297,15 @@ export async function onRequestPost(context){
       message='Material usage review saved. Inventory has not been consumed.';
     }else if(action==='save_profitability'){
       if(!projectId) throw new Error('Project is required.');
-      await access.db.prepare(`INSERT INTO creative_project_profitability (creative_work_project_id,labour_rate_cents,packaging_cost_cents,overhead_cost_cents,channel_fee_cents,shipping_cost_cents,revenue_cents,estimated_content_value_cents,notes,updated_by,updated_at) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,CURRENT_TIMESTAMP) ON CONFLICT(creative_work_project_id) DO UPDATE SET labour_rate_cents=excluded.labour_rate_cents,packaging_cost_cents=excluded.packaging_cost_cents,overhead_cost_cents=excluded.overhead_cost_cents,channel_fee_cents=excluded.channel_fee_cents,shipping_cost_cents=excluded.shipping_cost_cents,revenue_cents=excluded.revenue_cents,estimated_content_value_cents=excluded.estimated_content_value_cents,notes=excluded.notes,updated_by=excluded.updated_by,updated_at=CURRENT_TIMESTAMP`).bind(projectId,Math.max(0,Number(body.labour_rate_cents||0)),Math.max(0,Number(body.packaging_cost_cents||0)),Math.max(0,Number(body.overhead_cost_cents||0)),Math.max(0,Number(body.channel_fee_cents||0)),Math.max(0,Number(body.shipping_cost_cents||0)),Math.max(0,Number(body.revenue_cents||0)),Math.max(0,Number(body.estimated_content_value_cents||0)),text(body.notes,1000)||null,access.adminUser.user_id).run();
-      message='Project profitability assumptions saved.';
+      const revenueCents=Math.max(0,Number(body.revenue_cents||0));
+      const feePercent=Math.max(0,Math.min(100,Number(body.channel_fee_percent||0)));
+      const fixedFee=Math.max(0,Number(body.channel_fee_cents||0));
+      const calculatedFee=Math.round(revenueCents*feePercent/100);
+      await access.db.batch([
+        access.db.prepare(`INSERT INTO creative_project_profitability (creative_work_project_id,labour_rate_cents,packaging_cost_cents,overhead_cost_cents,channel_fee_cents,shipping_cost_cents,revenue_cents,estimated_content_value_cents,notes,updated_by,updated_at) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,CURRENT_TIMESTAMP) ON CONFLICT(creative_work_project_id) DO UPDATE SET labour_rate_cents=excluded.labour_rate_cents,packaging_cost_cents=excluded.packaging_cost_cents,overhead_cost_cents=excluded.overhead_cost_cents,channel_fee_cents=excluded.channel_fee_cents,shipping_cost_cents=excluded.shipping_cost_cents,revenue_cents=excluded.revenue_cents,estimated_content_value_cents=excluded.estimated_content_value_cents,notes=excluded.notes,updated_by=excluded.updated_by,updated_at=CURRENT_TIMESTAMP`).bind(projectId,Math.max(0,Number(body.labour_rate_cents||0)),Math.max(0,Number(body.packaging_cost_cents||0)),Math.max(0,Number(body.overhead_cost_cents||0)),fixedFee+calculatedFee,Math.max(0,Number(body.shipping_cost_cents||0)),revenueCents,Math.max(0,Number(body.estimated_content_value_cents||0)),text(body.notes,1000)||null,access.adminUser.user_id),
+        access.db.prepare(`INSERT INTO creative_project_profitability_extensions (creative_work_project_id,channel_fee_percent,fixed_channel_fee_cents,updated_at) VALUES (?1,?2,?3,CURRENT_TIMESTAMP) ON CONFLICT(creative_work_project_id) DO UPDATE SET channel_fee_percent=excluded.channel_fee_percent,fixed_channel_fee_cents=excluded.fixed_channel_fee_cents,updated_at=CURRENT_TIMESTAMP`).bind(projectId,feePercent,fixedFee)
+      ]);
+      message=`Project profitability saved. Marketplace fees include ${feePercent}% of revenue plus any fixed fee.`;
     }else if(action==='create_content_handoff'){
       if(!projectId) throw new Error('Project is required.');
       const current=await detail(access.db,projectId); if(!current) throw new Error('Project was not found.');
@@ -282,6 +338,73 @@ export async function onRequestPost(context){
         access.db.prepare(`UPDATE creative_project_material_reviews SET inventory_consumed=1 WHERE creative_project_material_review_id=?1`).bind(review.creative_project_material_review_id)
       ]);
       message=`Inventory posted: ${stockQuantity} ${item.stock_unit_label||'unit'} consumed from ${item.item_name}.`;
+    }else if(action==='reverse_material_inventory'){
+      const postId=num(body.creative_project_inventory_post_id);
+      const reason=text(body.reason,500);
+      if(!projectId||!postId||reason.length<8) throw new Error('A posted inventory record and a clear reversal reason are required.');
+      const post=await access.db.prepare(`SELECT ip.*,i.* FROM creative_project_inventory_posts ip JOIN site_item_inventory i ON i.site_item_inventory_id=ip.site_item_inventory_id WHERE ip.creative_project_inventory_post_id=?1 AND ip.creative_work_project_id=?2`).bind(postId,projectId).first();
+      if(!post) throw new Error('The inventory posting was not found.');
+      if(post.posting_status==='reversed') throw new Error('This inventory posting has already been reversed.');
+      const prior=await access.db.prepare(`SELECT creative_project_inventory_reversal_id FROM creative_project_inventory_reversals WHERE creative_project_inventory_post_id=?1`).bind(postId).first();
+      if(prior) throw new Error('This inventory posting already has a reversal.');
+      const previous=Math.max(0,Number(post.on_hand_quantity||0));
+      const restored=Math.max(1,Number(post.stock_quantity_consumed||0));
+      const next=previous+restored;
+      await access.db.batch([
+        access.db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?2,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=?1 AND on_hand_quantity=?3`).bind(post.site_item_inventory_id,next,previous),
+        access.db.prepare(`INSERT INTO site_inventory_movements (site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?1,?2,?3,?4,'adjustment',?5,?6,?7,?8,?8,?9,?9,?10,?11,CURRENT_TIMESTAMP)`).bind(post.site_item_inventory_id,post.source_type||null,post.external_key||null,post.item_name,restored,previous,next,Number(post.reserved_quantity||0),Number(post.incoming_quantity||0),`Creative Project ${projectId} inventory reversal. Reason: ${reason}`,access.adminUser.user_id),
+        access.db.prepare(`INSERT INTO creative_project_inventory_reversals (creative_project_inventory_post_id,creative_work_project_id,site_item_inventory_id,stock_quantity_restored,previous_on_hand_quantity,new_on_hand_quantity,reason,authorized_by) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)`).bind(postId,projectId,post.site_item_inventory_id,restored,previous,next,reason,access.adminUser.user_id),
+        access.db.prepare(`UPDATE creative_project_inventory_posts SET posting_status='reversed',notes=TRIM(COALESCE(notes,'') || ?2) WHERE creative_project_inventory_post_id=?1`).bind(postId,` | Reversed: ${reason}`),
+        access.db.prepare(`UPDATE creative_project_material_reviews SET inventory_consumed=0 WHERE creative_project_material_review_id=?1`).bind(post.creative_project_material_review_id)
+      ]);
+      message=`Inventory reversal posted: ${restored} ${post.stock_unit_label||'unit'} restored to ${post.item_name}.`;
+    }else if(action==='apply_cost_template'){
+      const templateId=num(body.creative_project_cost_template_id);
+      if(!projectId||!templateId) throw new Error('Project and cost template are required.');
+      const t=await access.db.prepare(`SELECT * FROM creative_project_cost_templates WHERE creative_project_cost_template_id=?1 AND is_active=1`).bind(templateId).first();
+      if(!t) throw new Error('Cost template was not found.');
+      const current=await access.db.prepare(`SELECT revenue_cents,estimated_content_value_cents,notes FROM creative_project_profitability WHERE creative_work_project_id=?1`).bind(projectId).first()||{};
+      const fee=Math.round(Math.max(0,Number(current.revenue_cents||0))*Math.max(0,Number(t.channel_fee_percent||0))/100);
+      await access.db.batch([
+        access.db.prepare(`INSERT INTO creative_project_profitability (creative_work_project_id,labour_rate_cents,packaging_cost_cents,overhead_cost_cents,channel_fee_cents,shipping_cost_cents,revenue_cents,estimated_content_value_cents,notes,updated_by,updated_at) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,CURRENT_TIMESTAMP) ON CONFLICT(creative_work_project_id) DO UPDATE SET labour_rate_cents=excluded.labour_rate_cents,packaging_cost_cents=excluded.packaging_cost_cents,overhead_cost_cents=excluded.overhead_cost_cents,channel_fee_cents=excluded.channel_fee_cents,shipping_cost_cents=excluded.shipping_cost_cents,updated_by=excluded.updated_by,updated_at=CURRENT_TIMESTAMP`).bind(projectId,t.labour_rate_cents,t.packaging_cost_cents,t.overhead_cost_cents,fee,t.shipping_cost_cents,Number(current.revenue_cents||0),Number(current.estimated_content_value_cents||0),current.notes||null,access.adminUser.user_id),
+        access.db.prepare(`INSERT INTO creative_project_profitability_extensions (creative_work_project_id,channel_fee_percent,fixed_channel_fee_cents,updated_at) VALUES (?1,?2,0,CURRENT_TIMESTAMP) ON CONFLICT(creative_work_project_id) DO UPDATE SET channel_fee_percent=excluded.channel_fee_percent,fixed_channel_fee_cents=0,updated_at=CURRENT_TIMESTAMP`).bind(projectId,Number(t.channel_fee_percent||0))
+      ]);
+      message=`Cost template “${t.template_name}” applied.`;
+    }else if(action==='save_cost_allocations'){
+      if(!projectId) throw new Error('Project is required.');
+      const allocations=Array.isArray(body.allocations)?body.allocations:[];
+      const totalPercent=allocations.reduce((sum,row)=>sum+Math.max(0,Number(row.allocation_percent||0)),0);
+      if(Math.abs(totalPercent-100)>0.01) throw new Error('Linked-product allocation percentages must total 100%.');
+      const current=await detail(access.db,projectId);
+      const p=current.profitability||{};
+      const materialCost=(current.material_reviews||[]).reduce((sum,row)=>sum+Number(row.approved_cost_cents||row.material_cost_cents||0),0);
+      const minutes=Number(current.totals?.tracked_minutes||0)+Number(current.project?.total_minutes||0);
+      const labour=Math.round(minutes/60*Number(p.labour_rate_cents||0));
+      const totalCost=materialCost+labour+Number(p.packaging_cost_cents||0)+Number(p.overhead_cost_cents||0)+Number(p.channel_fee_cents||0)+Number(p.shipping_cost_cents||0);
+      for(const row of allocations){
+        const productId=num(row.product_id); if(!productId) continue;
+        const percent=Math.max(0,Number(row.allocation_percent||0));
+        await access.db.prepare(`INSERT INTO creative_project_cost_allocations (creative_work_project_id,product_id,allocation_percent,allocated_cost_cents,notes,updated_by,updated_at) VALUES (?1,?2,?3,?4,?5,?6,CURRENT_TIMESTAMP) ON CONFLICT(creative_work_project_id,product_id) DO UPDATE SET allocation_percent=excluded.allocation_percent,allocated_cost_cents=excluded.allocated_cost_cents,notes=excluded.notes,updated_by=excluded.updated_by,updated_at=CURRENT_TIMESTAMP`).bind(projectId,productId,percent,Math.round(totalCost*percent/100),text(row.notes,300)||null,access.adminUser.user_id).run();
+      }
+      message='Shared project costs allocated across linked products.';
+    }else if(action==='generate_knowledge_summary'){
+      if(!projectId) throw new Error('Project is required.');
+      const summaryType=['lessons_learned','future_recommendations'].includes(text(body.summary_type,50))?text(body.summary_type,50):'lessons_learned';
+      const mirror=await access.db.prepare(`SELECT creative_project_id FROM creative_project_caip_mirrors WHERE creative_work_project_id=?1 ORDER BY mirrored_at DESC LIMIT 1`).bind(projectId).first();
+      if(!mirror?.creative_project_id) throw new Error('Mirror selected evidence into CAIP before generating a reviewed knowledge summary.');
+      const evidence=await access.db.prepare(`SELECT evidence_type,claim_text,review_status FROM creative_story_evidence WHERE creative_project_id=?1 AND visibility='internal' AND verification_status='source_record' ORDER BY updated_at,creative_story_evidence_id`).bind(mirror.creative_project_id).all();
+      const allowed=summaryType==='lessons_learned'?['lesson','mistake','repair','result']:['lesson','result','research','planning','milestone','process'];
+      const rows=(evidence.results||[]).filter(row=>allowed.includes(String(row.evidence_type||'')) && text(row.claim_text,500));
+      if(!rows.length) throw new Error('CAIP does not yet contain relevant source evidence for this summary.');
+      const heading=summaryType==='lessons_learned'?'Reviewed lessons learned':'Reviewed future-project recommendations';
+      const summary=`${heading}:\n${rows.map((row,index)=>`${index+1}. ${text(row.claim_text,500)}`).join('\n')}`;
+      await access.db.prepare(`INSERT INTO creative_project_knowledge_summaries (creative_work_project_id,summary_type,summary_text,source_evidence_count,review_status,updated_at) VALUES (?1,?2,?3,?4,'needs_review',CURRENT_TIMESTAMP) ON CONFLICT(creative_work_project_id,summary_type) DO UPDATE SET summary_text=excluded.summary_text,source_evidence_count=excluded.source_evidence_count,review_status='needs_review',reviewed_by=NULL,reviewed_at=NULL,updated_at=CURRENT_TIMESTAMP`).bind(projectId,summaryType,summary,rows.length).run();
+      message='Knowledge summary generated as an internal draft requiring review.';
+    }else if(action==='review_knowledge_summary'){
+      const summaryType=text(body.summary_type,50); const reviewStatus=['needs_review','approved','rejected'].includes(text(body.review_status,30))?text(body.review_status,30):'needs_review';
+      if(!projectId||!summaryType) throw new Error('Project and summary type are required.');
+      await access.db.prepare(`UPDATE creative_project_knowledge_summaries SET summary_text=?3,review_status=?4,reviewed_by=?5,reviewed_at=CASE WHEN ?4='approved' THEN CURRENT_TIMESTAMP ELSE NULL END,updated_at=CURRENT_TIMESTAMP WHERE creative_work_project_id=?1 AND summary_type=?2`).bind(projectId,summaryType,text(body.summary_text,5000),reviewStatus,access.adminUser.user_id).run();
+      message='Knowledge summary review saved.';
     }else if(action==='mirror_caip_evidence'){
       if(!projectId) throw new Error('Project is required.');
       const current=await detail(access.db,projectId);
