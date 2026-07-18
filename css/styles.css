@@ -2373,3 +2373,24 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
 .creative-allocation-grid label,.creative-knowledge-card{display:grid;gap:7px;padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.035)}
 .creative-knowledge-card textarea{min-height:150px}
 @media(max-width:720px){.creative-allocation-grid,.creative-knowledge-grid{grid-template-columns:1fr}.creative-process-links{display:grid;grid-template-columns:1fr}.creative-process-links .btn,.creative-process-links .input{width:100%}}
+
+/* Build 218 — review-first Amazon link inventory import */
+.site-inventory-amazon-import {
+  margin: 0 0 16px;
+  display: grid;
+  gap: 12px;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  overflow: hidden;
+}
+.site-inventory-amazon-import h4 { margin: 0 0 6px; }
+.site-inventory-amazon-import .inventory-operations-eyebrow { margin: 0 0 4px; }
+.site-inventory-amazon-import-controls { align-items: end; }
+.site-inventory-amazon-import-action { display: flex; align-items: end; }
+.site-inventory-amazon-import-action .btn { width: 100%; min-height: 44px; }
+#siteInventoryAmazonPreviewStatus { margin-top: 2px; }
+#siteInventoryAmazonPreviewStatus.is-error { border-color: rgba(170, 50, 50, .45); }
+#siteInventoryAmazonPreviewStatus.is-success { border-color: rgba(45, 130, 80, .45); }
+@media (max-width: 760px) {
+  .site-inventory-amazon-import-controls { grid-template-columns: 1fr !important; }
+  .site-inventory-amazon-import-action .btn { width: 100%; }
+}
