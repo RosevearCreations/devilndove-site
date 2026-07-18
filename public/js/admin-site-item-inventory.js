@@ -67,6 +67,68 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
+  function setAmazonLinkPreviewStatus(message = '', isError = false) {
+    const el = document.getElementById('siteInventoryAmazonPreviewStatus');
+    if (!el) return;
+    el.textContent = message;
+    el.hidden = !message;
+    el.classList.toggle('is-error', Boolean(message && isError));
+    el.classList.toggle('is-success', Boolean(message && !isError));
+  }
+
+  function applyAmazonDraft(draft = {}, warnings = []) {
+    if (!draft || typeof draft !== 'object') return;
+    resetInventoryForm();
+    setInputValue('siteInventorySourceType', draft.source_type || 'supply');
+    setInputValue('siteInventoryExternalKey', draft.external_key || '');
+    setInputValue('siteInventoryItemName', draft.item_name || '');
+    setInputValue('siteInventoryItemDescription', draft.item_description || '');
+    setInputValue('siteInventoryCategory', draft.category || '');
+    syncCategoryPresetSelection(draft.category || '');
+    setInputValue('siteInventorySourceUrl', draft.source_url || draft.amazon_url || '');
+    setInputValue('siteInventoryAmazonUrl', draft.amazon_url || draft.source_url || '');
+    setInputValue('siteInventoryImageUrl', draft.image_url || '');
+    setInputValue('siteInventoryOnHand', Math.max(1, Number(draft.on_hand_quantity || 1)));
+    setInputValue('siteInventorySupplierName', draft.supplier_name || 'Amazon.ca');
+    setInputValue('siteInventorySupplierSku', draft.supplier_sku || '');
+    setInputValue('siteInventorySupplierContact', draft.supplier_contact || 'Amazon.ca');
+    setInputValue('siteInventoryStockUnitLabel', draft.stock_unit_label || 'package');
+    setInputValue('siteInventoryUsageUnitLabel', draft.usage_unit_label || 'unit');
+    setInputValue('siteInventoryUsageUnitsPerStock', Math.max(1, Number(draft.usage_units_per_stock_unit || 1)));
+    setInputValue('siteInventoryNotes', draft.reorder_notes || '');
+    setInputValue('siteInventoryMovementNote', 'Created from reviewed Amazon link metadata.');
+    updateSiteInventoryImagePreview();
+    const warningText = Array.isArray(warnings) && warnings.length ? ` ${warnings.join(' ')}` : '';
+    setAmazonLinkPreviewStatus(`Amazon draft loaded. Review every field, enter the actual purchase cost, then save.${warningText}`);
+    document.getElementById('siteInventoryForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function previewAmazonLink() {
+    const amazonUrl = String(document.getElementById('siteInventoryAmazonImportUrl')?.value || '').trim();
+    const sourceType = String(document.getElementById('siteInventoryAmazonImportType')?.value || 'supply').trim();
+    if (!amazonUrl) {
+      setAmazonLinkPreviewStatus('Paste the Amazon product link first.', true);
+      return;
+    }
+    const button = document.getElementById('siteInventoryAmazonPreviewButton');
+    if (button) button.disabled = true;
+    setAmazonLinkPreviewStatus('Reading available Amazon product metadata…');
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/amazon-link-preview', {
+        method: 'POST',
+        body: JSON.stringify({ amazon_url: amazonUrl, source_type: sourceType })
+      });
+      const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+      const data = contentType.includes('application/json') ? await response.json() : null;
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Amazon metadata could not be loaded.');
+      applyAmazonDraft(data.draft || {}, data.warnings || []);
+    } catch (error) {
+      setAmazonLinkPreviewStatus(`${error.message || 'Amazon metadata could not be loaded.'} You may still paste the link into the manual form.`, true);
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
   function updateSiteInventoryImagePreview() {
     const imageUrl = String(document.getElementById('siteInventoryImageUrl')?.value || '').trim();
     const preview = document.getElementById('siteInventoryImagePreview');
@@ -464,6 +526,19 @@ document.addEventListener('DOMContentLoaded', () => {
         <h3 style="margin-top:0">Tools &amp; Supplies Inventory Operations</h3>
         <p class="small" style="margin-top:0">Track quantities, reorder lists, do-not-reuse flags, supplier details, item images, movement history, and bulk unit-cost changes for tariffs, shipping, or packaging increases.</p>
         <div id="siteInventoryMessage" class="small" style="display:none;margin-bottom:12px"></div>
+        <section class="card site-inventory-amazon-import" aria-labelledby="siteInventoryAmazonImportHeading">
+          <div>
+            <p class="inventory-operations-eyebrow">New review-first shortcut</p>
+            <h4 id="siteInventoryAmazonImportHeading">Add an item from an Amazon link</h4>
+            <p class="small">Paste the purchased product link. The system will try to fill the title, image, description, ASIN, supplier, and a suggested category. Nothing is added until you review the draft and press <strong>Add Inventory Item</strong>.</p>
+          </div>
+          <div class="grid cols-3 site-inventory-amazon-import-controls">
+            <div><label class="small" for="siteInventoryAmazonImportUrl">Amazon product URL</label><input id="siteInventoryAmazonImportUrl" type="url" inputmode="url" placeholder="https://www.amazon.ca/dp/..." /></div>
+            <div><label class="small" for="siteInventoryAmazonImportType">Inventory type</label><select id="siteInventoryAmazonImportType"><option value="supply">Consumable / supply</option><option value="tool">Tool / equipment</option></select></div>
+            <div class="site-inventory-amazon-import-action"><button class="btn primary" type="button" id="siteInventoryAmazonPreviewButton">Build Review Draft</button></div>
+          </div>
+          <div id="siteInventoryAmazonPreviewStatus" class="small inventory-feedback-panel" hidden aria-live="polite"></div>
+        </section>
         <div class="grid cols-6" style="gap:12px;margin-bottom:12px">
           <div class="card"><div class="small">Items</div><div id="siteInventoryTotalItems" style="font-size:1.15rem;font-weight:800">—</div></div>
           <div class="card inventory-summary-card"><div class="small">Active</div><div id="siteInventoryActiveItems" style="font-size:1.15rem;font-weight:800">—</div></div>
@@ -605,6 +680,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="card site-inventory-movements-card" style="margin-top:16px"><h4 style="margin-top:0">Recent Inventory Movements</h4><div class="admin-table-wrap site-inventory-movements-wrap"><table class="site-inventory-movements-table"><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Loading movement history...</td></tr></tbody></table></div></div>
       </div>`;
 
+    document.getElementById('siteInventoryAmazonPreviewButton')?.addEventListener('click', previewAmazonLink);
+    document.getElementById('siteInventoryAmazonImportUrl')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') { event.preventDefault(); previewAmazonLink(); }
+    });
     document.getElementById('siteInventoryForm')?.addEventListener('submit', saveItem);
     document.getElementById('siteInventoryImageUrl')?.addEventListener('input', updateSiteInventoryImagePreview);
     updateSiteInventoryImagePreview();
