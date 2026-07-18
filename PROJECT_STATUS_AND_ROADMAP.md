@@ -239,3 +239,20 @@ Next strongest work:
 3. Promote approved knowledge summaries into selectable Content Studio evidence, never directly to public copy.
 4. Add cost-template edit/deactivate controls and channel presets.
 5. Complete social OAuth only when provider credentials and app approvals are available.
+
+## Build 218 status — Amazon link inventory intake
+
+Completed:
+- Inventory Operations now accepts an Amazon product URL and builds a review-only tool or consumable draft.
+- The preview attempts to capture available title, description, image, ASIN/SKU, supplier, canonical link and category suggestion.
+- The workflow deliberately does not create inventory, set price, or move stock until the administrator reviews and saves the normal inventory form.
+- Mobile controls stack cleanly and a manual-entry fallback remains visible when Amazon withholds metadata.
+- `AI_HANDOFF.md` and this document remain the canonical pair; historical Build files are retained only as evidence.
+
+Strongest next work:
+1. Compare per-product sales and realized margins against allocated project costs.
+2. Add role-specific authorization for inventory reversals and accounting exports.
+3. Allow approved CAIP summaries to be deliberately selected for Content Studio packages.
+4. Add edit, deactivate, clone and channel-preset controls for cost templates.
+5. Add profitability trends across repeated techniques and product families.
+6. Complete social OAuth only after provider credentials and platform approvals are available.

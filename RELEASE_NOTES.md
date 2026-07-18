@@ -52,3 +52,9 @@ Added reviewed project evidence handoffs, material-usage approval, profitability
 
 ## Build 217
 Added authorized inventory reversals, cost-template application, revenue-percentage channel fees, shared linked-product cost allocation, CAIP-derived reviewed knowledge summaries, and a scoped dark contrast repair for Creative Asset Intelligence.
+
+## Build 218
+- Added a review-first Amazon link importer to Tools & Supplies Inventory Operations.
+- Added authenticated Amazon metadata preview with ASIN/canonical-link extraction and safe fallbacks.
+- Added mobile-responsive import controls and explicit no-auto-create safeguards.
+- Consolidated Markdown authority around `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
