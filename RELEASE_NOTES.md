@@ -1,3 +1,11 @@
+# Build 219
+
+- Added fast table-row editing to Tools & Supplies Inventory Operations.
+- Added row-level authenticated saves while preserving audit and inventory movement history.
+- Improved mobile responsiveness for inventory operations.
+- Refreshed the authoritative roadmap with the next 20 launch-readiness steps.
+- Documented the seven-image product-gallery operating rule and launch validation requirements.
+
 # Build 216 — Reviewed Inventory and CAIP Evidence
 
 Adds explicit approved material-to-inventory posting, duplicate prevention, audited stock movements, internal review-required CAIP evidence mirroring, reusable cost templates, mobile-safe controls and updated canonical handoff documents.

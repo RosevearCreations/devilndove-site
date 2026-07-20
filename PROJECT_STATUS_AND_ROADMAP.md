@@ -1,3 +1,42 @@
+# Devil n Dove Project Status and Roadmap — Build 219
+
+## Current business outcome
+Tools and supplies can now be maintained through a fast row-based table editor while retaining the full editor for advanced fields. The next development phase remains launch confidence: product completeness, deployed payment/order evidence, media reliability, policies, tax/shipping, accessibility, and recovery procedures.
+
+## Completed in Build 219
+- Inline row editing for inventory name, category, supplier, quantity, reorder point, cost and active status.
+- Independent authenticated row save with existing audit, movement and cost-history behavior.
+- Mobile-safe table controls and CSS polish.
+- Seven-image product-gallery operating rule documented: one featured plus six supporting images, managed through Catalog Media.
+- Build 219 validation and launch checklist refreshed.
+
+## Next 20 steps
+1. Prove login, logout, password reset and session expiry on production.
+2. Run Stripe test and one low-value live payment, webhook, order and receipt path.
+3. Test cancellation, partial refund, full refund and inventory restoration.
+4. Verify Ontario/Canada tax treatment against accountant-approved rules.
+5. Verify pickup, Canadian shipping, US shipping and unavailable-region behavior.
+6. Confirm order, payment, shipping, refund and review-request emails.
+7. Prove R2 upload, public delivery, thumbnails and failed-image fallback.
+8. Complete seven-image galleries for launch products with alt text and rights review.
+9. Run product-release preflight on every launch product.
+10. Confirm price, stock, availability and Product schema match visibly.
+11. Test cart/checkout/order confirmation on iPhone, Android, tablet and desktop.
+12. Run keyboard, focus, contrast, form-label and screen-reader checks.
+13. Run broken-link, canonical, sitemap, robots and one-H1 checks.
+14. Verify analytics consent, GA/Search Console events and no secret leakage.
+15. Perform database backup and a documented restore rehearsal.
+16. Confirm admin-role boundaries for inventory reversals and accounting exports.
+17. Compare realized product margins against allocated Creative Project costs.
+18. Allow approved CAIP summaries to be selected deliberately for Content Studio packages.
+19. Add cost-template edit, clone, deactivate and channel-preset controls.
+20. Complete social OAuth only after provider credentials, permissions and safe dry-run proof.
+
+## Go-live guidance
+The store can open with a controlled launch subset once every published product passes release preflight and the complete payment → order → email → fulfillment → refund chain is proven in production. Unfinished advanced automation may continue in the background; payment, legal/policy, inventory accuracy, media access, customer communication and recovery cannot be deferred.
+
+---
+
 # Devil n Dove Project Status and Roadmap — Build 216
 
 ## Current business outcome
