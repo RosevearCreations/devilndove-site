@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let categorySeedOptions = [];
   let seedSearchText = '';
   let editingSiteInventoryId = 0;
+  let inventoryTableEditMode = true;
 
 
   function setMessage(message, isError = false) {
@@ -676,7 +677,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <div id="siteInventoryBulkCostPreview" class="small" style="display:none;margin-top:12px"></div>
         </div>
 
-        <div class="admin-table-wrap site-inventory-table-wrap" style="margin-top:12px"><table class="site-inventory-admin-table"><thead><tr><th>Item image &amp; name</th><th>Stock</th><th>Rules</th><th>Supplier</th><th>Linked Products</th><th>Cost</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
+        <div class="site-inventory-view-toolbar" style="margin-top:12px">
+          <div><strong>Inventory table editor</strong><div class="small">Change common values directly in a row, then choose Save row. Full edit remains available for descriptions, links, unit conversions and advanced rules.</div></div>
+          <button class="btn" type="button" id="siteInventoryTableModeButton" aria-pressed="true">Table editing: On</button>
+        </div>
+        <div class="admin-table-wrap site-inventory-table-wrap"><table class="site-inventory-admin-table"><thead><tr><th>Image / item</th><th>Category / supplier</th><th>On hand</th><th>Reorder at</th><th>Unit cost</th><th>Status</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
         <div class="card site-inventory-movements-card" style="margin-top:16px"><h4 style="margin-top:0">Recent Inventory Movements</h4><div class="admin-table-wrap site-inventory-movements-wrap"><table class="site-inventory-movements-table"><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Loading movement history...</td></tr></tbody></table></div></div>
       </div>`;
 
@@ -705,6 +710,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryBulkPreviewButton')?.addEventListener('click', onBulkCostPreview);
     document.getElementById('siteInventoryBulkScope')?.addEventListener('change', updateBulkCostScopeHelpers);
     document.getElementById('siteInventoryBulkCostAction')?.addEventListener('change', updateBulkCostPlaceholder);
+    document.getElementById('siteInventoryTableModeButton')?.addEventListener('click', () => {
+      inventoryTableEditMode = !inventoryTableEditMode;
+      const button = document.getElementById('siteInventoryTableModeButton');
+      if (button) { button.textContent = `Table editing: ${inventoryTableEditMode ? 'On' : 'Off'}`; button.setAttribute('aria-pressed', inventoryTableEditMode ? 'true' : 'false'); }
+      loadList();
+    });
     updateBulkCostScopeHelpers();
     updateBulkCostPlaceholder();
     mountEl.addEventListener('click', onTableClick);
@@ -863,41 +874,32 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!items.length) {
         body.innerHTML = '<tr><td colspan="7" class="site-inventory-empty-row">No site inventory items matched the current view.</td></tr>';
       } else {
-        body.innerHTML = items.map((x) => `
-          <tr>
-            <td data-label="Item">
-              <div class="site-inventory-list-identity">
-                <div class="site-inventory-media-stack">
-                  ${x.image_url ? `<a class="site-inventory-list-thumb" href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" loading="lazy"/></a>` : '<div class="site-inventory-list-thumb is-empty small">No image</div>'}
-                  <strong class="site-inventory-media-name">${x.needs_reorder ? '⚠️ ' : ''}${escapeHtml(x.item_name)}</strong>
-                </div>
-                <div class="site-inventory-list-copy">
-                  <div class="small">#${x.site_item_inventory_id} · ${escapeHtml(x.source_type)} • ${escapeHtml(x.category || '—')}</div>
-                  ${x.image_url ? `<div class="small site-inventory-url-line">Image: <a href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer">open image</a></div>` : '<div class="small">Image: not set</div>'}
-                  ${(x.source_url || x.amazon_url) ? `<div class="small site-inventory-url-line">Source: <a href="${escapeHtml(x.source_url || x.amazon_url)}" target="_blank" rel="noopener noreferrer">open source</a></div>` : ''}
-                  <button class="btn small site-inventory-full-edit" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Edit full record</button>
-                </div>
+        body.innerHTML = items.map((x) => {
+          const edit = inventoryTableEditMode;
+          return `
+          <tr data-inventory-row="${x.site_item_inventory_id}">
+            <td data-label="Image / item">
+              <div class="site-inventory-grid-identity">
+                ${x.image_url ? `<a class="site-inventory-list-thumb" href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" loading="lazy"/></a>` : '<div class="site-inventory-list-thumb is-empty small">No image</div>'}
+                <div>${edit ? `<input class="site-inventory-row-input" data-field="item_name" value="${escapeHtml(x.item_name)}" aria-label="Item name"/>` : `<strong>${escapeHtml(x.item_name)}</strong>`}<div class="small">#${x.site_item_inventory_id} · ${escapeHtml(x.source_type)} · ${escapeHtml(x.external_key)}</div></div>
               </div>
             </td>
-            <td data-label="Stock">On hand ${x.on_hand_quantity} ${escapeHtml(x.stock_unit_label || 'unit')}<div class="small">Reserved ${x.reserved_quantity} • Incoming ${x.incoming_quantity} • Reorder ${x.reorder_level}</div><div class="small">1 ${escapeHtml(x.stock_unit_label || 'unit')} = ${Number(x.usage_units_per_stock_unit || 1)} ${escapeHtml(x.usage_unit_label || 'unit')}</div><div class="small">Preferred reorder ${x.preferred_reorder_quantity || 0}</div></td>
-            <td data-label="Rules"><div class="small">${x.is_on_reorder_list ? 'On reorder list' : 'Not queued'}</div><div class="small">${x.do_not_reorder ? 'Do not reorder' : 'Can reorder'}</div><div class="small">${x.do_not_reuse ? 'Do not reuse' : (x.reuse_status || 'Reusable/normal')}</div></td>
-            <td data-label="Supplier">${escapeHtml(x.supplier_name || '—')}<div class="small">${escapeHtml(x.supplier_sku || '')}</div><div class="small">${escapeHtml(x.supplier_contact || '')}</div></td>
-            <td data-label="Linked products">${Number(x.linked_product_count || 0)}<div class="small">${escapeHtml(x.linked_product_names || '')}</div></td>
-            <td data-label="Cost">${fmtMoney(x.unit_cost_cents || 0)}<div class="small">per ${escapeHtml(x.stock_unit_label || 'unit')}</div><div class="small">≈ ${fmtMoney(Math.round((Number(x.unit_cost_cents || 0)) / Math.max(1, Number(x.usage_units_per_stock_unit || 1))))} per ${escapeHtml(x.usage_unit_label || 'unit')}</div></td>
-            <td class="site-inventory-row-actions" data-label="Actions">
-              <div class="site-inventory-action-buttons">
-                <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Edit full record</button>
-                <button class="btn" type="button" data-edit-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Quick stock / cost</button>
-                <button class="btn" type="button" data-adjust-action="reserve" data-id="${x.site_item_inventory_id}">Reserve</button>
-                <button class="btn" type="button" data-adjust-action="release" data-id="${x.site_item_inventory_id}">Release</button>
-                <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button>
-                <button class="btn" type="button" data-adjust-action="consume" data-id="${x.site_item_inventory_id}">Consume</button>
-                <button class="btn" type="button" data-adjust-action="reorder_request" data-id="${x.site_item_inventory_id}">Reorder</button>
-                <button class="btn danger" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button>
-              </div>
+            <td data-label="Category / supplier">
+              ${edit ? `<input class="site-inventory-row-input" data-field="category" value="${escapeHtml(x.category || '')}" aria-label="Category"/><input class="site-inventory-row-input" data-field="supplier_name" value="${escapeHtml(x.supplier_name || '')}" aria-label="Supplier" placeholder="Supplier"/>` : `${escapeHtml(x.category || '—')}<div class="small">${escapeHtml(x.supplier_name || '—')}</div>`}
             </td>
-          </tr>
-        `).join('');
+            <td data-label="On hand">${edit ? `<input class="site-inventory-row-number" data-field="on_hand_quantity" type="number" min="0" step="1" value="${Number(x.on_hand_quantity || 0)}"/>` : Number(x.on_hand_quantity || 0)}<div class="small">${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
+            <td data-label="Reorder at">${edit ? `<input class="site-inventory-row-number" data-field="reorder_level" type="number" min="0" step="1" value="${Number(x.reorder_level || 0)}"/>` : Number(x.reorder_level || 0)}<div class="small">${x.needs_reorder ? 'Needs reorder' : 'Stock okay'}</div></td>
+            <td data-label="Unit cost">${edit ? `<input class="site-inventory-row-money" data-field="unit_cost_dollars" type="number" min="0" step="0.01" value="${escapeHtml(centsToDollarInput(x.unit_cost_cents || 0))}"/>` : fmtMoney(x.unit_cost_cents || 0)}<div class="small">CAD / ${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
+            <td data-label="Status">${edit ? `<select class="site-inventory-row-input" data-field="is_active"><option value="1" ${Number(x.is_active)!==0?'selected':''}>Active</option><option value="0" ${Number(x.is_active)===0?'selected':''}>Inactive</option></select>` : (Number(x.is_active)===0?'Inactive':'Active')}<div class="small">${Number(x.linked_product_count || 0)} linked product(s)</div></td>
+            <td class="site-inventory-row-actions" data-label="Actions"><div class="site-inventory-action-buttons">
+              ${edit ? `<button class="btn primary" type="button" data-save-row-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Save row</button>` : ''}
+              <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Full edit</button>
+              <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button>
+              <button class="btn" type="button" data-adjust-action="consume" data-id="${x.site_item_inventory_id}">Consume</button>
+              <button class="btn danger" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button>
+            </div></td>
+          </tr>`;
+        }).join('');
       }
 
       renderMovements(data.movements || []);
@@ -908,6 +910,39 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function onTableClick(event) {
+    const saveRowBtn = event.target.closest('[data-save-row-id]');
+    if (saveRowBtn) {
+      const id = Number(saveRowBtn.getAttribute('data-save-row-id') || 0);
+      const row = saveRowBtn.closest('[data-inventory-row]');
+      let original = {};
+      try { original = JSON.parse(saveRowBtn.getAttribute('data-item') || '{}'); } catch {}
+      if (!id || !row) return;
+      const value = (field) => row.querySelector(`[data-field="${field}"]`)?.value;
+      const payload = {
+        ...original,
+        site_item_inventory_id: id,
+        item_name: value('item_name') || original.item_name,
+        category: value('category') || '',
+        supplier_name: value('supplier_name') || '',
+        on_hand_quantity: Math.max(0, Number(value('on_hand_quantity') || 0)),
+        reorder_level: Math.max(0, Number(value('reorder_level') || 0)),
+        unit_cost_cents: Math.max(0, Math.round(Number(value('unit_cost_dollars') || 0) * 100)),
+        is_active: Number(value('is_active')) === 0 ? 0 : 1,
+        movement_note: 'Saved from inventory table editor.'
+      };
+      try {
+        saveRowBtn.disabled = true; saveRowBtn.textContent = 'Saving…';
+        const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'PATCH', body: JSON.stringify(payload) });
+        const data = await response.json();
+        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Row update failed.');
+        setMessage(`${payload.item_name} updated.`);
+        await loadList();
+      } catch (error) {
+        setMessage(error.message || 'Row update failed.', true);
+        saveRowBtn.disabled = false; saveRowBtn.textContent = 'Save row';
+      }
+      return;
+    }
     const editBtn = event.target.closest('[data-edit-id]');
     const deleteBtn = event.target.closest('[data-delete-id]');
     const loadFormBtn = event.target.closest('[data-load-form-id]');
