@@ -1,3 +1,9 @@
+# Build 219 handoff
+
+Inventory Operations now includes row-level table editing through the existing `PATCH /api/admin/site-item-inventory` path. Do not replace Catalog Media with inventory images. Product publication should support one featured plus up to six supporting images, all reviewed for role, order, alt text and rights. Current priority is deployed launch proof, not uncontrolled feature expansion. See `PROJECT_STATUS_AND_ROADMAP.md` and `BUILD219_VALIDATION.md`.
+
+---
+
 # Devil n Dove AI Handoff — Build 216
 
 ## Read this first
