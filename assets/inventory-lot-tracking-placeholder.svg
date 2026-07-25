@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" role="img" aria-labelledby="t d">
+<title id="t">Inventory purchase lot tracking</title><desc id="d">Three separate purchase lots with dates, order references, costs and remaining quantities feeding one inventory item.</desc>
+<rect width="1200" height="640" rx="32" fill="#f4efe7"/>
+<g fill="none" stroke="#2f2b28" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<rect x="70" y="95" width="275" height="135" rx="22"/><rect x="70" y="255" width="275" height="135" rx="22"/><rect x="70" y="415" width="275" height="135" rx="22"/>
+<path d="M145 135h125M145 175h75M145 295h125M145 335h75M145 455h125M145 495h75"/>
+<path d="M370 162h210M370 322h210M370 482h210M580 162v320M580 322h120"/><path d="m670 292 35 30-35 30"/>
+<rect x="715" y="175" width="400" height="290" rx="30"/><path d="M790 250h250M790 310h250M790 370h175"/>
+</g>
+<g font-family="Arial,sans-serif" fill="#2f2b28" text-anchor="middle"><text x="208" y="595" font-size="30" font-weight="700">Separate purchases</text><text x="915" y="520" font-size="30" font-weight="700">One traceable inventory item</text></g>
+</svg>
