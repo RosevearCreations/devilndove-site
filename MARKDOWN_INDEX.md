@@ -1,23 +1,30 @@
-# Markdown Index — Build 218
+# Devil n Dove Markdown Index — Build 220
 
-## Canonical documents — read these first
-1. `AI_HANDOFF.md` — technical state, deployment boundaries, safety rules and current endpoints.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — business direction, SEO guardrails, completed work and priority backlog.
+## Authoritative documents — always read first
+1. `AI_HANDOFF.md` — current technical state, workflows, safety boundaries, deployment and endpoints.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — launch status, SEO direction, current risks and next 20 steps.
 
-These two files are the authoritative handoff for a new AI or new chat.
+These are the only active planning/handoff documents.
+
+## Current validation and deployment references
+- `BUILD220_VALIDATION.md` — Build 220 test plan.
+- `BUILD220_CHANGED_FILES.md` — Build 220 file manifest.
+- `database_build220_quantity_sets_lots_content_only.sql` — Build 220 D1 migration.
+- `POST_DEPLOY_SMOKE_TEST.md` — general deployed checks.
+- `CLOUDFLARE_ENVIRONMENT_CHECKLIST.md` — bindings and environment review.
+- `DATABASE_SCHEMA_REFERENCE.md` — schema lookup; verify live D1 before destructive changes.
 
 ## Current specialist references
-- `BUILD218_VALIDATION.md` — Amazon-link inventory preview deployment and regression checks.
-- `DATABASE_SCHEMA_REFERENCE.md` — schema lookup; verify live D1 before migrations.
-- `CONTENT_AUTOMATION_STUDIO.md` — Content Studio and CAIP workflow rules.
-- `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md` — provider setup and OAuth prerequisites.
+- `CONTENT_AUTOMATION_STUDIO.md` — Content Studio and CAIP operating rules.
+- `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md` — provider prerequisites and OAuth guidance.
 - `LOCAL_SEO_PLAYBOOK.md` — public SEO implementation guidance.
-- `POST_DEPLOY_SMOKE_TEST.md` — general deployment checks.
+- `IMAGES_REQUIRED.md` — missing-image and sizing guidance.
 
-## Retired from active planning
-All `BUILD194_...` through `BUILD217_...` validation files, `AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AND_RISKS.md`, `COMPETITIVE.md` and other root Markdown remain retained evidence or specialist history. They must not override the canonical pair.
+## Compatibility pointers
+- `NEW_CHAT_STATUS.md`
+- `KNOWN_GAPS_AND_RISKS.md`
 
-## Consolidation result
-- Active planning and handoff: **2 documents**.
-- Specialist documents: open only when the task requires them.
-- Historical documents: retained to preserve evidence, not treated as current instructions.
+These point to the canonical pair and must not be treated as separate roadmaps.
+
+## Historical evidence
+All earlier `BUILD*_VALIDATION.md`, build-specific SQL migrations, `DEVELOPMENT_ROADMAP.md`, `AI_CONTEXT.md`, `COMPETITIVE.md` and older planning notes are retained for traceability. They are not active instructions and must not override Build 220.

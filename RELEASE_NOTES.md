@@ -1,3 +1,13 @@
+# Build 220
+
+- Added protected permanent cleanup for unused duplicate draft products.
+- Added server-validated quantity price breaks.
+- Added limited product sets with finished-component reservations and component availability protection.
+- Added purchase-lot tracking for repeated supplier/Amazon purchases.
+- Added explicit content-only Creative Projects that can create Content Studio plans without products.
+- Added offer/set checks to Product Release Preflight.
+- Added responsive visual placeholders and consolidated the canonical Markdown pair.
+
 # Build 219
 
 - Added fast table-row editing to Tools & Supplies Inventory Operations.

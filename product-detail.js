@@ -54,6 +54,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productCandleSoapDetailsEl = document.getElementById('productCandleSoapDetails');
   const productRelatedProofListEl = document.getElementById("productRelatedProofList");
   let currentProduct = null;
+  let currentQuantityPriceTiers = [];
+  let currentBundle = null;
   let currentTrustSummary = null;
 
   function show(el) { if (el) el.style.display = ""; }
@@ -341,7 +343,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     show(productCandleSoapSafetyCardEl);
   }
 
-  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec) {
+
+  function priceForQuantity(quantity) {
+    const qty = Math.max(1, Number(quantity || 1));
+    const eligible = currentQuantityPriceTiers.filter((row) => Number(row.min_quantity || 0) <= qty);
+    return eligible.length ? Number(eligible[eligible.length - 1].unit_price_cents || currentProduct?.price_cents || 0) : Number(currentProduct?.price_cents || 0);
+  }
+
+  function renderOfferSummary(product, tiers = [], bundle = null) {
+    currentQuantityPriceTiers = Array.isArray(tiers) ? tiers.slice().sort((a,b)=>Number(a.min_quantity||0)-Number(b.min_quantity||0)) : [];
+    currentBundle = bundle || null;
+    let node = document.getElementById('productOfferSummary');
+    if (!node && productPriceEl?.parentNode) {
+      node = document.createElement('div');
+      node.id = 'productOfferSummary';
+      node.className = 'product-offer-summary';
+      productPriceEl.parentNode.insertBefore(node, productPriceEl.nextSibling);
+    }
+    if (!node) return;
+    const tierMarkup = currentQuantityPriceTiers.length
+      ? `<div class="product-volume-pricing"><strong>Quantity savings</strong><ul>${currentQuantityPriceTiers.map((row)=>`<li>Buy ${Number(row.min_quantity||0)}+: ${escapeHtml(formatMoney(row.unit_price_cents, product.currency))} each${row.label?` — ${escapeHtml(row.label)}`:''}</li>`).join('')}</ul></div>`
+      : '';
+    const bundleMarkup = Number(bundle?.is_bundle || 0) === 1
+      ? `<div class="product-bundle-summary"><strong>Limited set</strong><p>${Number(bundle.available_quantity||0)} complete set${Number(bundle.available_quantity||0)===1?'':'s'} available. Components are reserved together and the set becomes unavailable when a complete set cannot be fulfilled.</p><ul>${(bundle.components||[]).map((row)=>`<li>${Number(row.quantity_per_bundle||1)} × ${escapeHtml(row.component_name||`Product ${row.component_product_id}`)}</li>`).join('')}</ul></div>`
+      : '';
+    node.innerHTML = tierMarkup + bundleMarkup;
+    node.hidden = !node.innerHTML;
+    updateDisplayedQuantityPrice();
+  }
+
+  function updateDisplayedQuantityPrice() {
+    if (!currentProduct || !productPriceEl) return;
+    const qty = Math.max(1, Number(productQuantityEl?.value || 1));
+    const unit = priceForQuantity(qty);
+    productPriceEl.textContent = unit === Number(currentProduct.price_cents || 0)
+      ? formatMoney(unit, currentProduct.currency)
+      : `${formatMoney(unit, currentProduct.currency)} each for ${qty}`;
+  }
+
+  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec, quantityPriceTiers, bundle) {
     currentProduct = product || null;
     try { window.DDAnalytics?.trackFunnel?.('product_view', { source: 'product_detail', product_id: currentProduct?.product_id || null, slug: currentProduct?.slug || '' }); } catch {}
     if (productTypeEl) {
@@ -379,6 +419,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderProcessLinks(product, resourceLinks);
     renderRelatedProducts(relatedProducts);
     renderCandleSoapSpec(candleSoapSpec);
+    renderOfferSummary(product, quantityPriceTiers, bundle);
     if (addToCartButton) {
       const externalOnly = String(product.sale_channel || 'onsite').toLowerCase() === 'external_only';
       addToCartButton.style.display = externalOnly ? 'none' : '';
@@ -438,7 +479,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       if (!response.ok && !data.ok) throw new Error(data.error || "Failed to load product.");
       if (!data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null);
+      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null, data.quantity_price_tiers || [], data.bundle || null);
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;
@@ -505,6 +546,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  productQuantityEl?.addEventListener('input', updateDisplayedQuantityPrice);
+
   if (addToCartButton) {
     addToCartButton.addEventListener("click", () => {
       clearCartMessage();
@@ -515,8 +558,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       const quantity = Number(productQuantityEl?.value || 1);
       if (!Number.isInteger(quantity) || quantity <= 0) return setCartMessage("Please enter a valid quantity.", true);
+      const available = Math.max(0, Number(currentProduct.inventory_quantity || 0));
+      if (Number(currentProduct.inventory_tracking || 0) === 1 && quantity > available) return setCartMessage(`Only ${available} available.`, true);
       try {
-        window.DDCart.addToCart(currentProduct, quantity);
+        window.DDCart.addToCart({ ...currentProduct, quantity_price_tiers: currentQuantityPriceTiers, bundle: currentBundle }, quantity);
         try { window.DDAnalytics?.trackCart?.('add_to_cart', { meta: { source: 'product_detail', product_id: currentProduct.product_id, quantity } }); } catch {}
         setCartMessage("Added to cart successfully.");
         if (productQuantityEl) productQuantityEl.value = "1";
