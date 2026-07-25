@@ -1,207 +1,52 @@
-# Build 219 handoff
+# Devil n Dove AI Handoff — Build 220
 
-Inventory Operations now includes row-level table editing through the existing `PATCH /api/admin/site-item-inventory` path. Do not replace Catalog Media with inventory images. Product publication should support one featured plus up to six supporting images, all reviewed for role, order, alt text and rights. Current priority is deployed launch proof, not uncontrolled feature expansion. See `PROJECT_STATUS_AND_ROADMAP.md` and `BUILD219_VALIDATION.md`.
+## Read these two files first
+1. `AI_HANDOFF.md` — current architecture, safety boundaries, deployment requirements and active workflows.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — business status, launch gates, SEO guardrails, next 20 steps and current risks.
 
----
+All other root Markdown files are specialist references or retained build history. They must not override this canonical pair.
 
-# Devil n Dove AI Handoff — Build 216
+## Build 220 outcome
+Build 220 adds four connected operating workflows:
 
-## Read this first
-Build 216 is the current Creator-path integration release. It adds explicit reviewed inventory posting, CAIP evidence mirroring and reusable cost-template storage. `PROJECT_STATUS_AND_ROADMAP.md` is the business/SEO companion.
+1. **Duplicate-draft cleanup** — draft product rows now show **Remove duplicate draft**. The action performs a server preflight, refuses any ordered/referenced/reserved product, requires the exact phrase `DELETE PRODUCT`, and requires current-admin password confirmation. Products with business history must be archived instead.
+2. **Quantity specials** — a saved product can have minimum-quantity price breaks such as one soap at the regular price and three or more at a lower price per bar. Browser displays are advisory; `checkout-create-order` resolves the valid unit price again from D1.
+3. **Limited product sets** — a product may reserve finished component products. Only complete sets are exposed as available. Component products have set reservations subtracted from their own storefront availability, preventing the same units from being offered both individually and in a set.
+4. **Inventory purchase lots** — Tools & Supplies rows now open a Lots editor for separate purchase date, received date, order number, supplier/SKU/ASIN, source URL, quantity, remaining quantity, cost, shipping, tax, expiry, storage, status and notes.
 
-## Safety boundary
-Never deduct inventory from timeline capture or material review alone. Only `post_material_inventory` may consume stock, and it must remain approval-gated and idempotent. Mirrored CAIP evidence remains internal and `needs_review`; it is not publication permission.
+Build 220 also makes **content-only Creative Projects** explicit. A project such as Laurie’s hair-colouring video can create its own Content Studio package and CAIP review path without creating or linking a storefront product.
 
 ## Deployment
-Run `database_build216_reviewed_inventory_caip_evidence.sql` or allow the admin route to create the additive tables. Cloudflare Pages still requires the D1 binding named `DB`.
+Apply:
 
----
+`database_build220_quantity_sets_lots_content_only.sql`
 
-# Devil n Dove AI Handoff — Build 213
+The code also uses additive `CREATE TABLE IF NOT EXISTS` guards, but the migration should be applied deliberately before production testing. Cloudflare Pages still requires the D1 binding named `DB` (or the existing supported fallback binding where already configured).
 
-## Read this first
-The two canonical project documents are `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. Build 213 introduces the project-first Creative Process Engine at `/admin/creative-process/`. Products, Content Studio packages and CAIP records remain valid systems, but a Creative Project is now the preferred origin for documenting an idea, process evidence, materials, time, cost, mistakes, repairs, lessons and intended outputs.
+## New or changed endpoints
+- `GET/POST /api/admin/product-offers`
+- `GET/POST/DELETE /api/admin/inventory-lots`
+- Existing `GET/POST /api/admin/delete-product` now has a clearer draft-cleanup route in the UI.
+- `GET /api/product-detail` returns `quantity_price_tiers`, bundle details and effective available quantity.
+- `GET /api/products` subtracts component reservations from component-product availability.
+- `POST /api/checkout-create-order` revalidates quantity-tier pricing and effective set/component availability.
+- `GET /api/admin/product-release-preflight` includes quantity-special and set checks.
+- `POST /api/admin/creative-process` can create a product-backed or content-only Content Studio handoff.
 
-## Build 213 safety boundary
-The new engine is additive and review-first. It does not publish, consume inventory, alter source media, create marketplace listings or create products automatically. The 17-output blueprint is a planning/status record only.
+## Safety boundaries
+- Never delete an ordered, published, reserved or otherwise referenced product. Archive it.
+- Quantity prices must be resolved server-side; never trust a browser-submitted price.
+- A set reservation is not a physical inventory count. It allocates finished-product availability so components cannot be double-sold.
+- Do not silently alter the main Tools & Supplies on-hand quantity when a purchase lot is recorded. Lots are traceability evidence until a reviewed reconciliation/posting workflow is completed.
+- Content-only projects never create products automatically.
+- Content Studio and CAIP remain review-first. Generated plans, summaries and media selections are not publication permission.
+- Social OAuth and publishing remain staged until provider credentials, approvals, token storage, refresh and disconnect controls are proven.
 
-## Immediate test
-Run `database_build213_creative_process_engine.sql` or allow the admin API to create the additive tables, then create one project at `/admin/creative-process/`, add a process event and confirm all output plans persist after reload.
+## Known launch-critical limitation
+The storefront now validates quantity pricing and set/component availability when an order is created, but a complete paid-order inventory settlement and cancelled/refunded-order restoration workflow still requires production proof and further hardening. Treat this as a launch gate for limited sets and scarce one-of-a-kind stock. See `PROJECT_STATUS_AND_ROADMAP.md`.
 
-# Devil n Dove AI Handoff — Build 211
+## Product media rule
+The product model supports up to seven operating images: one featured image plus up to six supporting gallery images. Catalog Media remains authoritative for image order, role, alt text, rights/consent and public approval. Inventory reference images do not replace storefront product media.
 
-## Read this first
-
-This is the technical/deployment source of truth. Pair it with `PROJECT_STATUS_AND_ROADMAP.md`. Build 211 continues application work while social API approvals are pending.
-
-## Build 211 changes
-
-- Added a browser-only Platform Preview & Media Preflight to `/admin/social-publishing/`. It checks caption length, HTTPS destination/image URLs, image type, browser accessibility, dimensions, aspect ratio, and a visual preview without saving or publishing.
-- Added `public/js/admin-social-platform-preflight.js` and `assets/social-platform-preflight-placeholder.svg`.
-- Hardened the shared mobile menu as a true dropdown/accordion: only one navigation group remains open at a time, the panel stays scroll-contained, and desktop links remain hidden at mobile widths.
-- Social account API credentials remain optional for this preflight. Meta, Pinterest, X, TikTok, and YouTube publishing behavior is unchanged.
-- `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the two canonical project documents.
-
-## Safety boundary
-
-The Build 211 preflight is advisory and browser-only. It does not upload media, write D1 data, create or approve a social queue item, modify products, grant media consent, change CAIP evidence, call a provider API, or publish content.
-
-## Deployment test
-
-1. Deploy the flattened ZIP.
-2. Open `/admin/social-publishing/`.
-3. Test one public JPEG product image and real Devil n Dove product URL in Platform Preview & Media Preflight.
-4. Confirm no queue item or product record changes.
-5. At a phone width, open Menu and confirm opening one group closes the previously open group.
-
----
-
-# Devil n Dove AI Handoff — Build 210
-
-## Read this first
-
-This is the technical/deployment source of truth. Pair it with `PROJECT_STATUS_AND_ROADMAP.md` for business, workflow, SEO, and release direction. Use `MARKDOWN_INDEX.md` to open only task-specific references.
-
-## Current build
-
-**Build 210** adds a dedicated Social Publishing workspace and a safe product-to-social automation handoff.
-
-### What changed
-
-- Added `/admin/social-publishing/` with:
-  - Product-to-social draft settings.
-  - Live, secret-safe connection status for Facebook, Instagram, Pinterest, X, TikTok, and YouTube.
-  - The existing social queue and Social Media Privacy Guard in one focused workspace.
-  - Detailed in-app setup guidance that distinguishes tracking pixels from account publishing authorization.
-- Added `functions/api/admin/social-product-automation.js`.
-- Added `functions/api/_lib/productSocialAutomation.js`.
-- Added `database_build210_social_publishing_product_automation.sql`.
-- Approved/Published Active products can now automatically create **one linked review-first social queue draft** when the administrator explicitly enables the setting.
-- Added a public product link with UTM parameters to the generated draft.
-- Changed the Meta Graph API default in the existing social queue from `v20.0` to `v25.0`; use the `META_GRAPH_API_VERSION` Cloudflare secret only when an intentional supported override is needed.
-- Added `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md`.
-
-## Critical safety boundary
-
-Build 210 **does not auto-publish** a product to any network.
-
-The optional product trigger creates a queue item only. Generated items start:
-
-```text
-approval_status = needs_review
-post_status = draft
-privacy_status = needs_review
-approved_for_public_post = 0
-api_publish_mode = review_first
-```
-
-The trigger does not bypass Social Media Privacy Guard, modify original media, make a product claim, change CAIP evidence/governance, add a Release Board approval, call a platform API, or place credentials in D1/browser code.
-
-## Platform status
-
-| Platform | Queue draft | Current direct API path | Required next safe action |
-|---|---:|---:|---|
-| Facebook Page | Yes | Existing review-first Page feed/photo path | Add Page ID/token, dry run, privacy-review, test post |
-| Instagram Professional | Yes | Existing review-first single-image path | Add IG account ID/token, dry run, privacy-review, test post |
-| Pinterest | Yes | Existing review-first image-Pin path | Add access token/board ID, dry run, test Pin |
-| X | Yes | Existing review-first text/link path | Add write-capable user token, dry run, test post |
-| TikTok | Yes | Manual only | Build approved OAuth, creator-info, and upload/Direct Post flow |
-| YouTube | Yes | Manual only | Build Google OAuth + resumable `videos.insert` upload flow |
-
-Do not call a platform “connected” merely because a pixel is installed. A pixel measures site events; organic posting requires platform app permissions and server-side credentials.
-
-## Cloudflare secrets
-
-Use **Pages → Settings → Variables and Secrets** and add secrets only as encrypted values:
-
-```text
-FACEBOOK_PAGE_ID
-FACEBOOK_PAGE_ACCESS_TOKEN
-INSTAGRAM_USER_ID
-INSTAGRAM_ACCESS_TOKEN
-META_GRAPH_API_VERSION             # optional; Build 210 defaults to v25.0
-X_USER_ACCESS_TOKEN
-PINTEREST_ACCESS_TOKEN
-PINTEREST_BOARD_ID
-TIKTOK_ACCESS_TOKEN                # future dedicated direct-post integration only
-YOUTUBE_ACCESS_TOKEN               # future dedicated upload integration only
-```
-
-`DB` remains a D1 binding, not a secret variable.
-
-Never store social access tokens, OAuth codes, client secrets, refresh tokens, or Page tokens in public code, D1, R2 metadata, Git, Markdown, screenshots, browser storage, or product fields.
-
-## Immediate deployment and validation
-
-1. Deploy the flattened Build 210 archive.
-2. If not using the runtime auto-create fallback, apply `database_build210_social_publishing_product_automation.sql` to the existing D1 database. It is additive and leaves automation disabled.
-3. Sign in as admin and open `/admin/social-publishing/`.
-4. Confirm platform cards show only secret names, never secret values.
-5. Keep product draft automation disabled until a low-risk test product exists.
-6. Enable draft automation, create or approve one Active product with a usable image, and confirm exactly one linked queue item appears.
-7. Confirm that the queue item remains Draft/Needs review and that no network API call or public post occurs.
-8. Complete privacy review, Dry run the payload, and test a single configured platform only.
-9. Confirm the public product page, product facts, media, CAIP, Release Preflight, and Release Board were not modified by draft creation.
-
-## Main unresolved incident
-
-The login `POST /api/auth/login` `500` is still not claimed fixed. The database has current `users` and `sessions` tables. Obtain the sanitized response body or matching Cloudflare Function log before changing login logic or schema.
-
-## Best next engineering work
-
-1. Deploy and prove the Build 210 Facebook/Instagram/Pinterest/X test paths with one safe draft each.
-2. Add secure OAuth callback/token-refresh storage only for platforms we actually connect, using encrypted environment secrets and a documented rotation plan.
-3. Implement a dedicated TikTok upload/Direct Post flow only after required app approval, scopes, creator-info, media transfer, and UX rules are documented.
-4. Implement YouTube OAuth + resumable upload only after a deliberate channel/video release workflow exists.
-5. Add a pre-publish visual preview and per-platform media sizing/format validator before expanding direct publishing.
-6. Continue resolving the login 500 evidence-first.
-
-## Deployment shape
-
-The deployment archive must have these at its root:
-
-```text
-index.html
-_routes.json
-wrangler.toml
-functions/
-```
-
-Cloudflare Pages must bind the existing D1 database as `DB`. Do not create `DB` as a text secret.
-
-
-# Build 212 — Social platform policy and callback prerequisites
-
-The following production prerequisites now exist directly in the application:
-
-- `https://devilndove.com/privacy/` and `/privacy.html`
-- `https://devilndove.com/terms/` and `/terms.html`
-- `https://devilndove.com/data-deletion/` and `/data-deletion.html`
-- `https://devilndove.com/social-connections/` and `/social-connections.html`
-- Exact OAuth callback routes for Meta/Facebook/Instagram, Pinterest, X, TikTok, and YouTube
-- `https://devilndove.com/api/social/meta/data-deletion`
-- `https://devilndove.com/api/social/integration-readiness`
-
-The Pinterest verification meta tag is present in every HTML head. Callback routes are currently safe readiness endpoints: they do not exchange codes or store tokens until one-time state storage, encrypted token persistence, refresh, and disconnect controls are implemented.
-
-## Build 214 — flexible Creator entry paths
-Creative Projects are the preferred origin for documented maker work, but they are not mandatory. Phone capture and direct catalog product entry must continue to create valid independent products. Build 214 adds the optional `creative_project_product_links` relationship so one project can produce several products and an existing independent product can be linked later. Never migrate or reject an unrelated product solely because it has no Creative Project.
-
-
-## Build 215 — Creative Intelligence Integration
-Creative Projects now support reviewed timeline-evidence selection, Content Studio handoff packages, explicit material-usage review before any future inventory consumption, and project profitability. Products remain optional and may be created directly or by phone without a project. No social provider publishing or inventory deduction occurs automatically.
-
-## Build 217 — reviewed reversals, allocations and CAIP knowledge
-- Creative Project inventory usage can be reversed only through an authorized compensating movement with a required reason. Never delete the original movement.
-- Cost templates can be applied; channel fees support revenue percentage plus a fixed amount.
-- Shared project costs can be allocated among linked products, but allocations do not change product prices or public facts.
-- Knowledge summaries are derived from mirrored CAIP internal source evidence and remain review-required.
-- `/admin/creative-assets/` uses scoped dark contrast rules. Preserve these when changing global card styles.
-- Social OAuth remains staged until real provider credentials and approvals exist.
-
-## Build 218 handoff
-- New authenticated endpoint: `/api/admin/amazon-link-preview`.
-- New Inventory Operations UI: Amazon URL + Tool/Consumable choice creates a review draft only.
-- Do not convert this into automatic inventory creation. Purchase price, quantity, classification and metadata must remain human-reviewed.
-- Amazon page metadata can be incomplete or blocked; preserve the manual form and Amazon CSV review workflow as fallbacks.
-- Validate with `BUILD218_VALIDATION.md` after deployment.
+## Validation
+Follow `BUILD220_VALIDATION.md` after deploying the migration and Functions. Do not publish a limited set until the component-reservation, checkout conflict and cancellation/restoration tests are completed.

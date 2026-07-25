@@ -69,6 +69,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function checkoutEffectivePrice(item, quantity) {
+    const qty=Math.max(1,Number(quantity||1));
+    const tiers=Array.isArray(item?.quantity_price_tiers)?item.quantity_price_tiers.slice().sort((a,b)=>Number(a.min_quantity||0)-Number(b.min_quantity||0)):[];
+    const eligible=tiers.filter((row)=>Number(row.min_quantity||0)<=qty);
+    return eligible.length?Number(eligible[eligible.length-1].unit_price_cents||item.base_price_cents||item.price_cents||0):Number(item.base_price_cents||item.price_cents||0);
+  }
+
   function getCartItems() {
     try {
       const raw = localStorage.getItem(CART_KEY);
@@ -182,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const safeItems = Array.isArray(cartItems) ? cartItems : [];
     const giftCardPurchase = getGiftCardPurchase();
     const giftCardPurchaseCents = Number(giftCardPurchase?.amount_cents || 0);
-    const subtotal_cents = safeItems.reduce((sum, item) => sum + (Number(item.price_cents || 0) * Number(item.quantity || 0)), 0) + giftCardPurchaseCents;
+    const subtotal_cents = safeItems.reduce((sum, item) => sum + (checkoutEffectivePrice(item, item.quantity) * Number(item.quantity || 0)), 0) + giftCardPurchaseCents;
     const requiresShipping = safeItems.some((item) => Number(item.requires_shipping || 0) === 1);
     const shipping_cents = requiresShipping ? 1500 : 0;
     const gift_card_discount_cents = Math.min(Number(appliedGiftCard?.applicable_discount_cents || 0), subtotal_cents + shipping_cents);
@@ -219,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (cartItems.length) {
         rows.push(...cartItems.map((item) => {
           const qty = Number(item.quantity || 0);
-          const unit = Number(item.price_cents || 0);
+          const unit = checkoutEffectivePrice(item, qty);
           const line = qty * unit;
           return `
             <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px">
