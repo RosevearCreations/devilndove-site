@@ -894,6 +894,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td class="site-inventory-row-actions" data-label="Actions"><div class="site-inventory-action-buttons">
               ${edit ? `<button class="btn primary" type="button" data-save-row-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Save row</button>` : ''}
               <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Full edit</button>
+              <button class="btn" type="button" data-open-inventory-lots="${x.site_item_inventory_id}">Lots</button>
               <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button>
               <button class="btn" type="button" data-adjust-action="consume" data-id="${x.site_item_inventory_id}">Consume</button>
               <button class="btn danger" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button>
