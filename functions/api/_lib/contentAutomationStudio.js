@@ -624,6 +624,62 @@ export async function createOrRefreshContentProjectForProduct(db, productId, act
   return { project, facts, archived_count: archivedCount, deliverables_created: deliverablesCreated };
 }
 
+
+export async function createOrRefreshContentProjectForCreativeProject(db, creativeProject, evidenceRows = [], actorUserId, options = {}) {
+  await ensureContentAutomationSchema(db);
+  const sourceId = String(creativeProject?.creative_work_project_id || creativeProject?.project_id || '');
+  if (!sourceId) throw new Error('Creative Project is required for Content Automation Studio.');
+  const name = text(creativeProject?.project_title) || `Creative Project ${sourceId}`;
+  const category = text(creativeProject?.project_type).replace(/_/g, ' ') || 'content project';
+  const summary = text(creativeProject?.summary || creativeProject?.objective || creativeProject?.story_angle) || `${name} is a content-only creative project documented in the Creative Process Engine.`;
+  const key = `creative-project-${sourceId}-${slug(name)}`;
+  const policy = {
+    review_first: true,
+    no_auto_publish: true,
+    source_media_is_reference_only: true,
+    factual_copy_only: true,
+    content_only_project: true,
+    require_public_media_review_before_publish: true,
+    build: CONTENT_STUDIO_BUILD
+  };
+  await db.prepare(`
+    INSERT INTO content_projects (
+      content_project_key, source_type, source_id, product_id, project_title, project_status, review_status,
+      public_release_status, story_angle, factual_summary, source_snapshot_json, content_policy_json, created_by_user_id,
+      created_at, updated_at
+    ) VALUES (?, 'creative_project', ?, NULL, ?, 'draft', 'needs_review', 'private', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(source_type, source_id) DO UPDATE SET
+      project_title=excluded.project_title, story_angle=excluded.story_angle, factual_summary=excluded.factual_summary,
+      source_snapshot_json=excluded.source_snapshot_json, content_policy_json=excluded.content_policy_json,
+      updated_at=CURRENT_TIMESTAMP
+  `).bind(
+    key, sourceId, `${name} content package`, text(creativeProject?.story_angle) || `${category} story`, summary,
+    JSON.stringify({ creative_project: creativeProject, evidence_count: Array.isArray(evidenceRows) ? evidenceRows.length : 0, archived_at: new Date().toISOString(), build: CONTENT_STUDIO_BUILD }),
+    JSON.stringify(policy), actorUserId || null
+  ).run();
+  const project = await db.prepare(`SELECT * FROM content_projects WHERE source_type='creative_project' AND source_id=? LIMIT 1`).bind(sourceId).first();
+  const mediaRows = (Array.isArray(evidenceRows) ? evidenceRows : []).filter((row) => text(row?.media_url)).map((row, index) => ({
+    source_url: text(row.media_url),
+    original_filename: filenameFromUrl(row.media_url, `creative-evidence-${index + 1}`),
+    mime_type: null,
+    image_role: text(row.evidence_role || row.event_type || 'process'),
+    public_use_status: Number(row.is_public_candidate || 0) === 1 ? 'internal_review' : 'internal_review',
+    consent_status: 'needs_review',
+    sort_order: index,
+    merchandising_score: 55
+  }));
+  const archivedCount = await archiveSourceMedia(db, project, mediaRows, actorUserId);
+  const assets = await getProjectMedia(db, project.content_project_id);
+  const facts = {
+    name, category, shortDescription: clip(summary, 420), description: summary, materials: '',
+    origin: 'creative project', storySummary: text(creativeProject?.story_angle || creativeProject?.objective || summary),
+    location: 'Southern Ontario', factualSummary: clip(summary, 1200)
+  };
+  const deliverablesCreated = await writeDeliverables(db, project, facts, assets, actorUserId, Boolean(options.refresh_copy));
+  await writeProjectEvent(db, project.content_project_id, 'creative_project_linked', actorUserId, { creative_work_project_id: Number(sourceId), content_only_project: true });
+  return { project, facts, archived_count: archivedCount, deliverables_created: deliverablesCreated };
+}
+
 export async function getContentProjectDetail(db, projectId) {
   await ensureContentAutomationSchema(db);
   const project = await db.prepare(`SELECT * FROM content_projects WHERE content_project_id = ? LIMIT 1`).bind(Number(projectId)).first();

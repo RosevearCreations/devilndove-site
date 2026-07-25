@@ -202,6 +202,34 @@ function shapeProducts(rows) {
   return rows.map((row) => normalizeProductRow(row));
 }
 
+async function enrichProductsWithOfferAvailability(db, products) {
+  const list = Array.isArray(products) ? products : [];
+  if (!db || !list.length) return list;
+  try {
+    const reservedRows = normalizeResults(await db.prepare(`
+      SELECT component_product_id, COALESCE(SUM(reserved_component_quantity),0) reserved_quantity
+      FROM product_bundle_components GROUP BY component_product_id
+    `).all());
+    const bundleRows = normalizeResults(await db.prepare(`
+      SELECT bs.bundle_product_id, bs.reserved_bundle_quantity,
+             COALESCE(MIN(CAST(bc.reserved_component_quantity / NULLIF(bc.quantity_per_bundle,0) AS INTEGER)),0) supported_quantity
+      FROM product_bundle_settings bs
+      LEFT JOIN product_bundle_components bc ON bc.bundle_product_id=bs.bundle_product_id
+      GROUP BY bs.bundle_product_id, bs.reserved_bundle_quantity
+    `).all());
+    const reservedByProduct = new Map(reservedRows.map((row)=>[Number(row.component_product_id||0),Math.max(0,Number(row.reserved_quantity||0))]));
+    const bundleByProduct = new Map(bundleRows.map((row)=>[Number(row.bundle_product_id||0),Math.max(0,Math.min(Number(row.reserved_bundle_quantity||0),Number(row.supported_quantity||0))) ]));
+    return list.map((product)=>{
+      const id=Number(product.product_id||0);
+      if(bundleByProduct.has(id)) return {...product,is_bundle:1,inventory_tracking:1,inventory_quantity:bundleByProduct.get(id)};
+      const reserved=reservedByProduct.get(id)||0;
+      return {...product,is_bundle:0,reserved_for_sets:reserved,inventory_quantity:Number(product.inventory_tracking||0)===1?Math.max(0,Number(product.inventory_quantity||0)-reserved):Number(product.inventory_quantity||0)};
+    });
+  } catch {
+    return list;
+  }
+}
+
 async function enrichProductsWithStoryNotes(db, products) {
   const rows = Array.isArray(products) ? products : [];
   if (!db || !rows.length) return rows;
@@ -995,7 +1023,7 @@ export async function onRequestGet(context) {
       warnings.push("schema_columns_unavailable_ultra_fallback_used");
       return json({
         ok: true,
-        products,
+        products: await enrichProductsWithOfferAvailability(db, products),
         warning: "Schema inspection was unavailable, so a safe product-only fallback was used.",
         summary: { total_products: products.length, authority: "d1_select_star_fallback" },
         filter_groups: buildFilterGroups(products),
@@ -1051,7 +1079,7 @@ export async function onRequestGet(context) {
     const products = (await enrichProductsWithTrustBadges(db, await enrichProductsWithProofSignals(db, await enrichProductsWithImages(db, storyProducts)))).filter((product) => productMatchesFilters(product, filters));
     return json({
       ok: true,
-      products,
+      products: await enrichProductsWithOfferAvailability(db, products),
       summary: { total_products: products.length, authority: "d1_adaptive_query" },
       filter_groups: buildFilterGroups(products),
       diagnostics: { warnings, ...filters }
@@ -1079,7 +1107,7 @@ export async function onRequestGet(context) {
       warnings.push("fallback_query_used");
       return json({
         ok: true,
-        products,
+        products: await enrichProductsWithOfferAvailability(db, products),
         warning: "Fallback product query used while the richer storefront query recovers.",
         summary: { total_products: products.length, authority: "d1_product_only_fallback_query" },
         filter_groups: buildFilterGroups(products),
@@ -1093,7 +1121,7 @@ export async function onRequestGet(context) {
         warnings.push("select_star_fallback_used");
         return json({
           ok: true,
-          products,
+          products: await enrichProductsWithOfferAvailability(db, products),
           warning: "Safe product-only fallback used because richer product queries are still recovering.",
           summary: { total_products: products.length, authority: "d1_select_star_fallback" },
           filter_groups: buildFilterGroups(products),

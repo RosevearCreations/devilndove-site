@@ -1,3 +1,4 @@
+import { ensureProductOffersSchema, getBundleDetails, resolveUnitPrice } from './_lib/productOffers.js';
 // File: /functions/api/checkout-create-order.js
 // Brief description: Creates a checkout order from the browser cart and customer form data.
 // It now also supports storefront gift-card purchases where the purchaser and recipient
@@ -237,7 +238,8 @@ export async function onRequestPost(context) {
   if (productIds.length) {
     const placeholders = productIds.map(() => "?").join(", ");
     const productsResult = await db.prepare(`
-      SELECT product_id, sku, name, product_type, status, price_cents, currency, taxable, tax_class_code, requires_shipping, digital_file_url
+      SELECT product_id, sku, name, product_type, status, price_cents, currency, taxable, tax_class_code, requires_shipping, digital_file_url,
+             COALESCE(inventory_tracking,0) AS inventory_tracking, COALESCE(inventory_quantity,0) AS inventory_quantity
       FROM products
       WHERE product_id IN (${placeholders})
     `).bind(...productIds).all();
@@ -257,7 +259,17 @@ export async function onRequestPost(context) {
     if (!product) return json({ ok: false, error: `Product ${product_id} was not found.` }, 404);
     if (String(product.status || "").toLowerCase() !== "active") return json({ ok: false, error: `Product ${product.name || product_id} is not available.` }, 400);
 
-    const unit_price_cents = Number(product.price_cents || 0);
+    await ensureProductOffersSchema(db);
+    const bundle = await getBundleDetails(db, product_id);
+    const componentReservation = Number(bundle?.is_bundle || 0) === 1 ? 0 : Number((await db.prepare(`SELECT COALESCE(SUM(reserved_component_quantity),0) reserved_quantity FROM product_bundle_components WHERE component_product_id=?`).bind(product_id).first().catch(()=>({reserved_quantity:0})))?.reserved_quantity || 0);
+    const availableQuantity = Number(bundle?.is_bundle || 0) === 1
+      ? Math.max(0, Number(bundle.available_quantity || 0))
+      : Math.max(0, Number(product.inventory_quantity || 0) - componentReservation);
+    if (Number(product.inventory_tracking || 0) === 1 && quantity > availableQuantity) {
+      return json({ ok: false, error: `Only ${availableQuantity} of ${product.name || `product ${product_id}`} are currently available.` }, 409);
+    }
+    const pricing = await resolveUnitPrice(db, product_id, quantity, Number(product.price_cents || 0));
+    const unit_price_cents = Number(pricing.unit_price_cents || 0);
     const line_subtotal_cents = unit_price_cents * quantity;
     subtotal_cents += line_subtotal_cents;
 

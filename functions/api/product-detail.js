@@ -1,3 +1,4 @@
+import { ensureProductOffersSchema, getBundleDetails, getQuantityPriceTiers } from './_lib/productOffers.js';
 // File: /functions/api/product-detail.js
 // Brief description: Returns one active storefront product with images, SEO fields,
 // linked making-story resources, and stock/trust summaries for the product detail page.
@@ -282,6 +283,20 @@ async function handleProductDetailRequest(context) {
   product.proof_process = filterText(product.proof_processes);
   product.proof_localities = splitFilterValues(product.locality_label, product.local_pickup_note, product.sourcing_notes);
   product.proof_locality = filterText(product.proof_localities);
+
+  await ensureProductOffersSchema(db);
+  const quantity_price_tiers = await getQuantityPriceTiers(db, product.product_id);
+  const bundle = await getBundleDetails(db, product.product_id);
+  if (Number(bundle?.is_bundle || 0) === 1) {
+    product.inventory_tracking = 1;
+    product.inventory_quantity = Math.max(0, Number(bundle.available_quantity || 0));
+    product.is_bundle = 1;
+  } else {
+    product.is_bundle = 0;
+    const reserved = await db.prepare(`SELECT COALESCE(SUM(reserved_component_quantity),0) reserved_quantity FROM product_bundle_components WHERE component_product_id=?`).bind(product.product_id).first().catch(()=>({reserved_quantity:0}));
+    product.reserved_for_sets = Math.max(0, Number(reserved?.reserved_quantity || 0));
+    if (Number(product.inventory_tracking || 0) === 1) product.inventory_quantity = Math.max(0, Number(product.inventory_quantity || 0) - product.reserved_for_sets);
+  }
 
   const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
   const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
@@ -613,7 +628,7 @@ async function handleProductDetailRequest(context) {
   } catch {}
 
   const related_products = await relatedProductsByProof();
-  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, listing_profile, candle_soap_spec, reviews, review_summary, related_products });
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, listing_profile, candle_soap_spec, reviews, review_summary, related_products, quantity_price_tiers, bundle });
 }
 
 
