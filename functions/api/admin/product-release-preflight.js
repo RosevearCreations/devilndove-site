@@ -492,6 +492,37 @@ function buildInventoryContextStage(product, inventory) {
   ], 'Internal stock and maker-input context only. It never changes inventory, builds, reservations, costs, rights, public copy, or release readiness.', { informational: true });
 }
 
+async function loadOfferContext(db, productId, support) {
+  const tierReady = Boolean(support.tables.product_quantity_price_tiers);
+  const bundleReady = Boolean(support.tables.product_bundle_settings && support.tables.product_bundle_components);
+  const tiers = tierReady ? rows(await db.prepare(`SELECT min_quantity,unit_price_cents,label,is_active FROM product_quantity_price_tiers WHERE product_id=? AND is_active=1 ORDER BY min_quantity`).bind(productId).all().catch(() => ({results:[]}))) : [];
+  const settings = bundleReady ? await db.prepare(`SELECT * FROM product_bundle_settings WHERE bundle_product_id=? LIMIT 1`).bind(productId).first().catch(() => null) : null;
+  const components = settings && bundleReady ? rows(await db.prepare(`SELECT bc.*,p.name component_name,COALESCE(p.inventory_quantity,0) component_inventory_quantity FROM product_bundle_components bc LEFT JOIN products p ON p.product_id=bc.component_product_id WHERE bc.bundle_product_id=? ORDER BY bc.sort_order,bc.product_bundle_component_id`).bind(productId).all().catch(() => ({results:[]}))) : [];
+  return { schema_ready: tierReady && bundleReady, tiers, settings, components };
+}
+
+function buildOfferStage(product, offer) {
+  const tiers = offer?.tiers || [];
+  let prior = Number(product.price_cents || 0);
+  const tierIntegrity = tiers.every((row) => {
+    const current = Number(row.unit_price_cents || 0);
+    const valid = Number(row.min_quantity || 0) >= 2 && current > 0 && current <= prior;
+    prior = current;
+    return valid;
+  });
+  const settings = offer?.settings || null;
+  const components = offer?.components || [];
+  const bundleConfigured = Boolean(settings);
+  const reserved = Number(settings?.reserved_bundle_quantity || 0);
+  const requested = Number(settings?.requested_bundle_quantity || 0);
+  return stage('offers', 'Quantity specials & limited sets', [
+    check('offer_schema', 'Offer controls available', Boolean(offer?.schema_ready), offer?.schema_ready ? 'Build 220 offer and set tables are available.' : 'Apply the Build 220 database migration before using quantity specials or limited sets.', { required: false, href: `/admin/catalog/?product_id=${product.product_id}` }),
+    check('tier_integrity', 'Quantity-price progression', tierIntegrity, tiers.length ? (tierIntegrity ? `${tiers.length} quantity price break${tiers.length===1?'':'s'} decreases or holds the per-item price correctly.` : 'One or more quantity breaks increases the per-item price or has an invalid quantity.') : 'No quantity specials are configured.', { required: tiers.length > 0, href: `/admin/catalog/?product_id=${product.product_id}` }),
+    check('bundle_components', 'Set component definition', !bundleConfigured || components.length > 0, !bundleConfigured ? 'This is not configured as a product set.' : (components.length ? `${components.length} finished-product component${components.length===1?'':'s'} are assigned.` : 'The set has no components.'), { required: bundleConfigured, href: `/admin/catalog/?product_id=${product.product_id}` }),
+    check('bundle_reservation', 'Complete-set availability', !bundleConfigured || requested === 0 || reserved > 0, !bundleConfigured ? 'No set reservation applies.' : (reserved > 0 ? `${reserved} of ${requested} requested complete set${requested===1?'':'s'} are reserved.` : 'No complete set can currently be formed; storefront availability will be zero.'), { required: false, href: `/admin/catalog/?product_id=${product.product_id}` })
+  ], 'Prices are re-resolved by checkout. Set availability is based on complete finished-product component reservations.', { informational: true });
+}
+
 function buildCatalogStage(product) {
   return stage('catalog', 'Catalog facts', [
     check('product_exists', 'Product record', Boolean(product), product ? 'The selected product exists.' : 'Choose a valid product record.', { href: '/admin/catalog/' }),
@@ -581,7 +612,8 @@ async function supportState(db) {
     'products', 'product_seo', 'product_images', 'product_image_annotations', 'media_assets', 'media_consent_records',
     'content_projects', 'content_project_media', 'content_project_deliverables',
     'creative_projects', 'creative_assets', 'creative_story_evidence', 'creative_story_segments',
-    'content_publications', 'product_resource_links', 'site_item_inventory'
+    'content_publications', 'product_resource_links', 'site_item_inventory',
+    'product_quantity_price_tiers', 'product_bundle_settings', 'product_bundle_components'
   ];
   const entries = await Promise.all(required.map(async (name) => [name, await tableExists(db, name)]));
   const tables = Object.fromEntries(entries);
@@ -610,10 +642,11 @@ export async function onRequestGet(context) {
     const product = await loadProduct(db, productId, support);
     if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
 
-    const [media, content, inventory] = await Promise.all([
+    const [media, content, inventory, offer] = await Promise.all([
       loadProductMedia(db, product, support),
       loadContent(db, productId, support),
-      loadInventoryContext(db, product, support)
+      loadInventoryContext(db, product, support),
+      loadOfferContext(db, productId, support)
     ]);
     const [caip, publications] = await Promise.all([
       loadCaip(db, productId, number(content.project?.content_project_id), support),
@@ -623,9 +656,10 @@ export async function onRequestGet(context) {
     const catalog = buildCatalogStage(product);
     const mediaStage = buildMediaStage(product, media);
     const inventoryStage = buildInventoryContextStage(product, inventory);
+    const offerStage = buildOfferStage(product, offer);
     const contentStage = buildContentStage(product, content, destination);
     const caipStage = buildCaipStage(product, caip);
-    const handoffStages = { catalog, media: mediaStage, content_studio: contentStage, caip: caipStage };
+    const handoffStages = { catalog, media: mediaStage, offers: offerStage, content_studio: contentStage, caip: caipStage };
     const handoff = summaryFromStages(handoffStages);
     const releaseBoard = buildReleaseStage(product, publications, destination);
     const publish = summaryFromStages({ ...handoffStages, release_board: releaseBoard });
@@ -633,7 +667,7 @@ export async function onRequestGet(context) {
 
     return json({
       ok: true,
-      build: 'Build 209',
+      build: 'Build 220',
       mode: { destination, read_only: true },
       product,
       media: {
@@ -645,6 +679,7 @@ export async function onRequestGet(context) {
       },
       content,
       inventory,
+      offer,
       caip,
       publications,
       handoff: {
@@ -657,7 +692,7 @@ export async function onRequestGet(context) {
         label: destination === 'both' ? 'Ready to publish both destinations' : `Ready to publish ${destination === 'website_gallery' ? 'Website gallery' : 'Workshop Journal'}`,
         first_next_action: publish.blockers[0] ? { label: publish.blockers[0].label, detail: publish.blockers[0].detail, href: publish.blockers[0].href } : null
       },
-      stages: { catalog, media: mediaStage, inventory_context: inventoryStage, content_studio: contentStage, caip: caipStage, release_board: releaseBoard },
+      stages: { catalog, media: mediaStage, inventory_context: inventoryStage, offers: offerStage, content_studio: contentStage, caip: caipStage, release_board: releaseBoard },
       generated_at: new Date().toISOString(),
       requested_by: { user_id: number(adminUser.user_id), email: text(adminUser.email, 180) }
     });
