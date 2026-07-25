@@ -154,12 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function detailView(detail) {
-    if (!detail?.project) return `<section class="card content-studio-welcome"><div>${visualPlaceholder('Content package visual placeholder')}</div><div><h2>One completed project, a calm content system</h2><p>Choose an approved product above. The studio links all retained source media into a structured archive, scores it from available metadata, and prepares the full output plan for review.</p><ul><li>1 YouTube long-form video plan</li><li>3 Facebook video plans</li><li>5 Instagram Reels and 5 TikToks</li><li>Gallery, Google Business Profile, SEO, blog, thumbnail, and captions</li></ul></div></section>`;
+    if (!detail?.project) return `<section class="card content-studio-welcome"><div>${visualPlaceholder('Content package visual placeholder')}</div><div><h2>One completed project, a calm content system</h2><p>Choose an approved product above, or create a content-only handoff from Creative Process. The studio links retained source references into a structured archive and prepares the full output plan for review.</p><ul><li>1 YouTube long-form video plan</li><li>3 Facebook video plans</li><li>5 Instagram Reels and 5 TikToks</li><li>Gallery, Google Business Profile, SEO, blog, thumbnail, and captions</li></ul></div></section>`;
     const project = detail.project;
     return `<section class="content-studio-detail">
       <div class="content-studio-detail-header card">
-        <div><p class="eyebrow">${esc(project.content_project_key || '')}</p><h2>${esc(project.project_title || 'Content package')}</h2><p class="small">Source references are archived without moving or deleting the original R2/product files. Every public asset remains review-first.</p></div>
-        <div class="content-studio-toolbar"><a class="btn secondary" href="/admin/creative-assets/?content_project_id=${esc(project.content_project_id)}">Open CAIP</a><button class="btn" type="button" id="refreshContentArchive">Refresh archive and preserve edits</button><button class="btn" type="button" id="refreshContentCopy">Refresh only unlocked factual copy</button><button class="btn secondary" type="button" id="downloadContentManifest">Download project manifest</button></div>
+        <div><p class="eyebrow">${esc(project.content_project_key || '')}</p><h2>${esc(project.project_title || 'Content package')}</h2><p class="small">${project.source_type==='creative_project'?'Content-only Creative Project: no storefront product is required. ':''}Source references are archived without moving or deleting original files. Every public asset remains review-first.</p></div>
+        <div class="content-studio-toolbar"><a class="btn secondary" href="/admin/creative-assets/?content_project_id=${esc(project.content_project_id)}">Open CAIP</a>${project.product_id?'<button class="btn" type="button" id="refreshContentArchive">Refresh archive and preserve edits</button><button class="btn" type="button" id="refreshContentCopy">Refresh only unlocked factual copy</button>':'<a class="btn" href="/admin/creative-process/">Refresh from Creative Process</a>'}<button class="btn secondary" type="button" id="downloadContentManifest">Download project manifest</button></div>
       </div>
       <div class="content-metric-grid">${deliverableSummary(detail)}</div>
       <section class="card content-project-settings">
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <section class="content-studio-layout">
         <aside class="card content-studio-sidebar">
           <h2>Create or open a content package</h2>
-          <p class="small">The studio creates one source-linked package per product. Existing product approval also creates the package automatically.</p>
+          <p class="small">The studio creates one source-linked package per approved product. Content-only packages are created from Creative Process and remain separate from store inventory.</p>
           <label><span class="small">Approved finished product</span><select class="input" id="contentStudioProductSelect">${productOptions()}</select></label>
           <button class="btn primary" type="button" id="createContentProject">Create / refresh content package</button>
           <hr/>

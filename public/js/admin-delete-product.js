@@ -56,37 +56,42 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!button) return;
 
     const productId = getRowProductId(button);
-    if (!productId) {
-      alert("Invalid product.");
-      return;
-    }
-
+    if (!productId) return alert("Invalid product.");
     const label = productLabel(button);
-    const confirmed = window.confirm(
-      `Delete ${label} permanently?\n\nOnly use this for an unused incorrect/test product. Products with orders or saved history cannot be deleted and should be archived instead.`
-    );
-    if (!confirmed) return;
+    const draftCleanup = button.getAttribute('data-draft-cleanup') === '1';
 
-    const confirmationPhrase = window.prompt(
-      `Final safety check for ${label}.\n\nType DELETE PRODUCT exactly to permanently remove this unused product.`
-    );
-    if (confirmationPhrase === null) return;
-
-    const deletionReason = window.prompt(
-      "Why is this product being removed? This is saved in the deletion audit.",
-      "Incorrect or duplicate entry"
-    );
-    if (deletionReason === null) return;
-
-    const confirmPassword = window.prompt(
-      "Enter your current admin password to confirm this permanent deletion."
-    );
-    if (confirmPassword === null) return;
-
-    await deleteProduct(productId, button, {
-      confirmation_phrase: confirmationPhrase,
-      deletion_reason: deletionReason,
-      confirm_password: confirmPassword
-    });
+    try {
+      button.disabled = true;
+      button.textContent = 'Checking…';
+      const previewResponse = await window.DDAuth.apiFetch(`/api/admin/delete-product?product_id=${encodeURIComponent(productId)}`);
+      const preview = await previewResponse.json().catch(() => null);
+      if (!previewResponse.ok || !preview?.ok) throw new Error(preview?.error || 'Could not check this product.');
+      if (String(preview.product?.status || '').toLowerCase() !== 'draft' && draftCleanup) {
+        throw new Error('Only draft products use the duplicate-draft cleanup action. Archive or use the full correction workflow for other products.');
+      }
+      if (Number(preview.deletion_allowed || 0) !== 1) {
+        const refs = (preview.blocking_references || []).map((row) => `${row.count} ${row.table_name}`).join(', ');
+        throw new Error(`This product has saved history${refs ? ` (${refs})` : ''} and cannot be permanently removed. Archive it instead.`);
+      }
+      const materialWarning = (preview.materials || []).length
+        ? '\n\nThis draft has linked raw inventory. Use Correct / remove instead so reservation releases or physical returns can be reviewed.'
+        : '';
+      if (materialWarning) throw new Error(materialWarning.trim());
+      if (!window.confirm(`${draftCleanup ? 'Remove duplicate draft' : 'Delete unused product'}: ${label}?\n\nThis permanently removes only this unused record. Product numbers are not reused.`)) return;
+      const confirmationPhrase = window.prompt(`Type DELETE PRODUCT exactly to remove ${label}.`);
+      if (confirmationPhrase === null) return;
+      const confirmPassword = window.prompt('Enter your current admin password to authorize this permanent cleanup.');
+      if (confirmPassword === null) return;
+      await deleteProduct(productId, button, {
+        confirmation_phrase: confirmationPhrase,
+        deletion_reason: draftCleanup ? 'Duplicate draft created during data entry.' : 'Incorrect or unused product entry.',
+        confirm_password: confirmPassword
+      });
+    } catch (error) {
+      alert(error.message || 'Delete check failed.');
+    } finally {
+      button.disabled = false;
+      button.textContent = draftCleanup ? 'Remove duplicate draft' : 'Delete unused';
+    }
   });
 });

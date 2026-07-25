@@ -395,7 +395,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <button class="btn" type="button" data-resource-action="reserve" data-product-id="${productId}">Reserve Resources</button>
               <button class="btn" type="button" data-resource-action="release" data-product-id="${productId}">Release Resources</button>
               <button class="btn" type="button" data-archive-product-id="${productId}" ${isArchived ? "disabled" : ""}>Archive</button>
-              <button class="btn danger" type="button" data-delete-product-id="${productId}" data-product-name="${name}" data-product-number="${escapeHtml(String(product.product_number || ''))}" data-product-sku="${sku}" title="Permanently delete only an unused incorrect/test product. Ordered or referenced products must be archived.">Delete unused</button>
+              ${String(product.status || "").toLowerCase() === "draft" ? `<button class="btn danger" type="button" data-delete-product-id="${productId}" data-draft-cleanup="1" data-product-name="${name}" data-product-number="${escapeHtml(String(product.product_number || ''))}" data-product-sku="${sku}" title="Remove an unused duplicate draft after safety checks.">Remove duplicate draft</button>` : `<button class="btn danger" type="button" data-delete-product-id="${productId}" data-product-name="${name}" data-product-number="${escapeHtml(String(product.product_number || ''))}" data-product-sku="${sku}" title="Permanently delete only an unused incorrect/test product. Ordered or referenced products must be archived.">Delete unused</button>`}
             </div>
           </td>
         </tr>
