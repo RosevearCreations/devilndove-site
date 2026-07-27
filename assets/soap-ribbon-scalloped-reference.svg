@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 200" role="img" aria-labelledby="title desc">
+  <title id="title">Scalloped soap ribbon reference</title>
+  <desc id="desc">A cream soap ribbon with a narrow band, scalloped front badge, curved Coconut milk and Sweet Vanilla text, bilingual Luxury Soap title, botanical side ornaments, ingredient panels and rear medallion.</desc>
+  <defs>
+    <path id="topArc" d="M68 103 A77 77 0 0 1 222 103"/>
+    <path id="bottomArc" d="M62 116 A84 84 0 0 0 228 116"/>
+  </defs>
+  <rect width="1100" height="200" fill="#ffffff"/>
+  <rect y="62" width="1100" height="76" fill="#f2ead8"/>
+  <rect x="2" y="64" width="1096" height="72" fill="none" stroke="#b69a61" stroke-width="3"/>
+  <g opacity=".4" stroke="#2f2721"><line x1="278" y1="62" x2="278" y2="138"/><line x1="490" y1="62" x2="490" y2="138"/><line x1="702" y1="62" x2="702" y2="138"/><line x1="910" y1="62" x2="910" y2="138"/></g>
+  <path d="M145,12 L151.3,18.3 L160.7,13.6 L165.4,22.9 L175.8,20.6 L178.2,31 L188.8,31.2 L188.6,41.8 L199,44.2 L196.6,54.6 L205.9,59.3 L201.2,68.7 L207.5,75 L201.2,81.3 L205.9,90.7 L196.6,95.4 L199,105.8 L188.6,108.2 L188.8,118.8 L178.2,119 L175.8,129.4 L165.4,127.1 L160.7,136.4 L151.3,131.7 L145,138 L138.7,131.7 L129.3,136.4 L124.6,127.1 L114.2,129.4 L111.8,119 L101.2,118.8 L101.4,108.2 L91,105.8 L93.4,95.4 L84.1,90.7 L88.8,81.3 L82.5,75 L88.8,68.7 L84.1,59.3 L93.4,54.6 L91,44.2 L101.4,41.8 L101.2,31.2 L111.8,31 L114.2,20.6 L124.6,22.9 L129.3,13.6 L138.7,18.3 Z" transform="translate(0 25)" fill="#f2ead8" stroke="#b69a61" stroke-width="3"/>
+  <circle cx="145" cy="100" r="73" fill="none" stroke="#2f2721" stroke-width="1.6"/><circle cx="145" cy="100" r="68" fill="none" stroke="#b69a61"/>
+  <g fill="none" stroke="#9b8068" stroke-width="2" stroke-linecap="round">
+    <path d="M70 98 C85 91 100 91 118 98 C100 105 85 105 70 98Z"/><path d="M82 98 C90 82 100 78 104 73 C106 85 100 94 82 98Z"/><path d="M215 98 C200 91 185 91 167 98 C185 105 200 105 215 98Z"/><path d="M203 98 C195 82 185 78 181 73 C179 85 185 94 203 98Z"/>
+  </g>
+  <g font-family="Arial,sans-serif" fill="#2f2721" text-anchor="middle"><text font-size="14" font-weight="700" letter-spacing="1.4"><textPath href="#topArc" startOffset="50%">COCONUT MILK</textPath></text><text font-family="Georgia,serif" x="145" y="93" font-size="18" font-weight="700">Luxury Soap</text><text font-family="Georgia,serif" x="145" y="113" font-size="12">Savon de luxe</text><text x="145" y="131" font-size="11">◇</text><text font-size="13" font-weight="700" letter-spacing="1.4"><textPath href="#bottomArc" startOffset="50%">SWEET VANILLA</textPath></text>
+  <text x="384" y="76" font-size="8" font-weight="700">INGREDIENTS</text><text x="384" y="92" font-size="6">Structured English copy</text><text x="384" y="103" font-size="6">and INCI ingredients</text><text x="596" y="76" font-size="8" font-weight="700">INGRÉDIENTS</text><text x="596" y="92" font-size="6">Texte français structuré</text><text x="596" y="103" font-size="6">et ingrédients INCI</text>
+  <circle cx="806" cy="100" r="36" fill="#f2ead8" stroke="#b69a61" stroke-width="2"/><circle cx="806" cy="100" r="31" fill="none" stroke="#2f2721"/><text x="806" y="94" font-family="Georgia,serif" font-size="9" font-weight="700">Devil n Dove</text><text x="806" y="108" font-size="6">devilndove.com</text><text x="1003" y="76" font-size="8" font-weight="700">CLAIMS / DETAILS</text><text x="1003" y="94" font-size="6">100 g · Made in Canada</text><text x="1003" y="106" font-size="6">Review before printing</text></g>
+</svg>

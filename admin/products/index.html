@@ -48,11 +48,34 @@
           <span class="small">Use <b>Archive</b>. It removes the item from active storefront use while preserving order, accounting, and customer history.</span>
         </div>
         <div class="lifecycle-rule">
+          <strong>Packaging after product facts</strong>
+          <span class="small">Use <a href="/admin/packaging-studio/">Packaging Studio</a> to create bilingual SVG labels and review versions from structured product data.</span>
+        </div>
+        <div class="lifecycle-rule">
           <strong>Automatic numbers</strong>
           <span class="small">Product numbers move forward permanently. Leave SKU blank to receive a unique automatic SKU such as <code>DND-01000</code>; custom SKUs are allowed but must also be unique.</span>
         </div>
       </div>
     </details>
+
+
+    <section class="card product-cleanup-center" id="productCleanupCenter" style="margin-bottom:18px">
+      <div class="section-heading-row">
+        <div>
+          <p class="eyebrow">Draft &amp; archive cleanup</p>
+          <h2 style="margin:0">Remove unused duplicate records</h2>
+          <p class="small">Drafts and archives stay visible here even when the main table is long. The preflight distinguishes removable working rows from real order, accounting, reservation, content, or customer history. Unused recipe/material links can be discarded with a duplicate without changing stock; only rows that may involve reserved stock require the full inventory review.</p>
+        </div>
+        <img src="/assets/product-cleanup-placeholder.svg" alt="Draft and archived product records moving through a safety preflight before permanent removal"/>
+      </div>
+      <div class="product-cleanup-controls">
+        <label><span class="small">Search draft or archived products</span><input class="input" id="productCleanupSearch" type="search" placeholder="Name, SKU, product number or row ID"/></label>
+        <label><span class="small">Status</span><select class="input" id="productCleanupStatus"><option value="draft">Drafts</option><option value="archived">Archived</option><option value="all">Drafts and archived</option></select></label>
+        <button class="btn" id="refreshProductCleanup" type="button">Refresh cleanup list</button>
+      </div>
+      <div id="productCleanupMessage" class="small" hidden></div>
+      <div id="productCleanupList" class="product-cleanup-list" aria-live="polite"><p class="small">Loading cleanup candidates…</p></div>
+    </section>
 
 
     <div class="card" style="margin-bottom:18px">
@@ -223,6 +246,7 @@
   <script src="/public/js/admin-create-product.js"></script><script src="/public/js/admin-product-draft-checklist.js"></script>
   <script src="/public/js/admin-edit-product.js"></script>
   <script src="/public/js/admin-delete-product.js"></script>
+  <script src="/public/js/admin-product-cleanup.js"></script>
   <script src="/public/js/admin-product-offers.js"></script>
   <script src="/public/js/admin-product-correction.js"></script>
   <script src="/public/js/admin-archive-product.js"></script>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Packaging Studio — Devil n Dove Admin</title>
+  <meta name="description" content="Create structured bilingual packaging drafts, reusable SVG labels, review versions, and print-ready exports for Devil n Dove products."/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+</head>
+<body data-admin-page="packaging-studio">
+  <div class="container admin-shell packaging-studio-page">
+    <div class="nav">
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800;line-height:1.1">Devil n Dove</div><div class="small">Admin / Packaging Studio</div></div></div>
+      <div class="links"><a href="/admin/">Dashboard</a><a href="/admin/products/">Products</a><a href="/admin/creative-process/">Creative Process</a><a href="/admin/creative-assets/">CAIP</a></div>
+    </div>
+
+    <section class="hero packaging-studio-hero">
+      <div>
+        <p class="eyebrow">Build 221 • Structured packaging assets</p>
+        <h1>Packaging Studio</h1>
+        <p>Create reusable SVG-based packaging from product data. Text, bilingual ingredients, claims, colours, artwork choices, versions, and export history stay in structured database records instead of being permanently baked into artwork.</p>
+        <div class="packaging-hero-actions"><button class="btn primary" id="newPackagingProject" type="button">Create packaging project</button><button class="btn" id="restorePackagingDraft" type="button">Restore browser draft</button></div>
+      </div>
+      <div class="visual-placeholder-card"><img src="/assets/packaging-studio-placeholder.svg" alt="Scalloped soap ribbon packaging with curved bilingual badge text, ingredient panels, rear medallion, claims and net weight sections"/><small>Packaging Studio visual placeholder • replace with approved print samples later</small></div>
+    </section>
+
+    <div class="card packaging-compliance-note">
+      <strong>Review-first compliance boundary</strong>
+      <p class="small">The Studio checks for common Canadian cosmetic-label fields, but it does not provide legal approval. Before printing or selling, review product identity, metric net quantity, INCI ingredients, dealer/contact details, bilingual warnings where applicable, and any product-specific regulatory requirements.</p>
+    </div>
+
+    <div id="packagingStudioMessage" class="card small" hidden></div>
+    <div class="packaging-studio-layout">
+      <aside class="card packaging-project-sidebar">
+        <div class="section-heading-row"><div><h2 style="margin:0">Packaging projects</h2><p class="small">Draft, review, approve, duplicate, or archive.</p></div><button class="btn" id="refreshPackagingStudio" type="button">Refresh</button></div>
+        <label><span class="small">Find a project</span><input class="input" id="packagingProjectSearch" type="search" placeholder="Product, collection, key or status"/></label>
+        <div id="packagingProjectList" class="packaging-project-list"><p class="small">Loading projects…</p></div>
+      </aside>
+
+      <main id="packagingStudioMain" class="packaging-studio-main">
+        <section class="card packaging-studio-welcome">
+          <h2>Choose or create a packaging project</h2>
+          <p>Start with the supplied scalloped soap-ribbon reference or the standard ribbon master template, link a product if one exists, and keep all editable content in structured fields. The same foundation can later support candle labels, wax melts, jewelry cards, hang tags, inserts, QR cards, gift sets, and shipping labels.</p>
+        </section>
+      </main>
+    </div>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script src="/public/js/auth.js"></script><script src="/public/js/admin-route-usage.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script><script src="/public/js/site-analytics.js"></script>
+  <script src="/public/js/admin-self-protect.js"></script><script src="/public/js/admin.js"></script>
+  <script src="/public/js/admin-packaging-studio.js"></script>
+</body>
+</html>
