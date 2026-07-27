@@ -1,52 +1,69 @@
-# Devil n Dove AI Handoff — Build 220
+# Devil n Dove AI Handoff — Build 221
 
 ## Read these two files first
 1. `AI_HANDOFF.md` — current architecture, safety boundaries, deployment requirements and active workflows.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — business status, launch gates, SEO guardrails, next 20 steps and current risks.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — launch status, completed Build 221 actions, current risks and the next 20 steps.
 
-All other root Markdown files are specialist references or retained build history. They must not override this canonical pair.
+Specialist reference: `PACKAGING_STUDIO.md`. Historical build notes must not override this canonical pair.
 
-## Build 220 outcome
-Build 220 adds four connected operating workflows:
+## Build 221 outcome
+Build 221 concentrates on operational cleanup, packaging and lot traceability:
 
-1. **Duplicate-draft cleanup** — draft product rows now show **Remove duplicate draft**. The action performs a server preflight, refuses any ordered/referenced/reserved product, requires the exact phrase `DELETE PRODUCT`, and requires current-admin password confirmation. Products with business history must be archived instead.
-2. **Quantity specials** — a saved product can have minimum-quantity price breaks such as one soap at the regular price and three or more at a lower price per bar. Browser displays are advisory; `checkout-create-order` resolves the valid unit price again from D1.
-3. **Limited product sets** — a product may reserve finished component products. Only complete sets are exposed as available. Component products have set reservations subtracted from their own storefront availability, preventing the same units from being offered both individually and in a set.
-4. **Inventory purchase lots** — Tools & Supplies rows now open a Lots editor for separate purchase date, received date, order number, supplier/SKU/ASIN, source URL, quantity, remaining quantity, cost, shipping, tax, expiry, storage, status and notes.
-
-Build 220 also makes **content-only Creative Projects** explicit. A project such as Laurie’s hair-colouring video can create its own Content Studio package and CAIP review path without creating or linking a storefront product.
+1. **Draft & Archive Cleanup Centre** — `/admin/products/` now has a visible, searchable cleanup panel for both draft and archived products. A preflight separates disposable product-owned working rows from protected order, payment, reservation, content, accounting and customer history.
+2. **Corrected deletion classification** — product-owned draft records such as images, SEO, tags, resource links, offer rows, QA rows and story working rows no longer block the cleanup routine merely because their foreign key is not cascading. Unused recipe/material links can be discarded without changing stock; rows that may involve reserved stock still require the full review. Older non-FK product references are now discovered explicitly, and protected order, accounting, project, packaging, customer-story, recall and public-proof history still blocks deletion.
+3. **Packaging Studio** — `/admin/packaging-studio/` stores structured bilingual packaging projects, reusable SVG templates, review versions and export history in D1.
+4. **Supplied soap-ribbon template** — the first preferred template recreates the photographed structure with a narrow 19 mm band, extended scalloped badge, curved collection/scent text, bilingual centre title and botanical side ornaments. The full 50 mm canvas prevents badge clipping.
+5. **Lot reconciliation controls** — purchase-lot totals can be compared with main on-hand stock, reviewed without changing stock, or deliberately applied using typed confirmation and an audited inventory movement. FIFO/FEFO are stored as preferences only; automatic depletion is not enabled.
 
 ## Deployment
-Apply:
+Apply either the dedicated migration or the reset current-pass file (not both):
 
-`database_build220_quantity_sets_lots_content_only.sql`
+`database_build221_packaging_studio_cleanup_lot_controls.sql`
 
-The code also uses additive `CREATE TABLE IF NOT EXISTS` guards, but the migration should be applied deliberately before production testing. Cloudflare Pages still requires the D1 binding named `DB` (or the existing supported fallback binding where already configured).
+or `database_upgrade_current_pass.sql`, which contains the same Build 221 upgrade only.
+
+Then deploy the complete ZIP. It is additive and must follow Build 220. Runtime guards create the same minimum tables, but production D1 should still receive the migration deliberately.
 
 ## New or changed endpoints
-- `GET/POST /api/admin/product-offers`
-- `GET/POST/DELETE /api/admin/inventory-lots`
-- Existing `GET/POST /api/admin/delete-product` now has a clearer draft-cleanup route in the UI.
-- `GET /api/product-detail` returns `quantity_price_tiers`, bundle details and effective available quantity.
-- `GET /api/products` subtracts component reservations from component-product availability.
-- `POST /api/checkout-create-order` revalidates quantity-tier pricing and effective set/component availability.
-- `GET /api/admin/product-release-preflight` includes quantity-special and set checks.
-- `POST /api/admin/creative-process` can create a product-backed or content-only Content Studio handoff.
+- `GET/POST /api/admin/packaging-studio`
+- `GET/POST/DELETE /api/admin/inventory-lots` now includes lot policy and reconciliation actions.
+- `GET/POST /api/admin/delete-product` now classifies product-owned working records separately from protected business history.
+- `POST /api/admin/archive-product` now uses the shared DB resolver, audit trail and incident fallback, then directs the product into the Archived cleanup filter.
 
-## Safety boundaries
-- Never delete an ordered, published, reserved or otherwise referenced product. Archive it.
-- Quantity prices must be resolved server-side; never trust a browser-submitted price.
-- A set reservation is not a physical inventory count. It allocates finished-product availability so components cannot be double-sold.
-- Do not silently alter the main Tools & Supplies on-hand quantity when a purchase lot is recorded. Lots are traceability evidence until a reviewed reconciliation/posting workflow is completed.
-- Content-only projects never create products automatically.
-- Content Studio and CAIP remain review-first. Generated plans, summaries and media selections are not publication permission.
-- Social OAuth and publishing remain staged until provider credentials, approvals, token storage, refresh and disconnect controls are proven.
+## New admin surfaces
+- `/admin/packaging-studio/`
+- Draft & Archive Cleanup Centre inside `/admin/products/`
+- Lot reconciliation panel inside Tools & Supplies purchase lots.
 
-## Known launch-critical limitation
-The storefront now validates quantity pricing and set/component availability when an order is created, but a complete paid-order inventory settlement and cancelled/refunded-order restoration workflow still requires production proof and further hardening. Treat this as a launch gate for limited sets and scarce one-of-a-kind stock. See `PROJECT_STATUS_AND_ROADMAP.md`.
+## Packaging safety boundaries
+- Packaging content is a draft until formula, INCI, bilingual identity, metric quantity, dealer/contact details, warnings, claims and physical print have been reviewed.
+- Browser export is not regulatory approval.
+- A saved Packaging Studio version does not update the product page or publish media.
+- The supplied photo is a layout reference; editable text and colours are recreated as SVG rather than embedding the photograph.
+- The dealer principal address is intentionally required by the Packaging Studio common-field preflight.
 
-## Product media rule
-The product model supports up to seven operating images: one featured image plus up to six supporting gallery images. Catalog Media remains authoritative for image order, role, alt text, rights/consent and public approval. Inventory reference images do not replace storefront product media.
+## Product deletion safety boundaries
+- Permanent deletion is only for unused incorrect drafts or unused archives.
+- Product numbers and SKUs remain retired after deletion.
+- Any true historical reference blocks deletion and requires Archive.
+- Product-owned working rows are removed in the same reviewed operation.
+- Linked material rows require the existing Correct / remove workflow when reservation release or physical stock return needs review.
+- R2 objects are not automatically deleted because media may be reused elsewhere.
+
+## Lot reconciliation safety boundaries
+- Adding or editing a lot marks reconciliation `needs_review`.
+- **Record review only** creates evidence without changing main stock.
+- **Apply lot total to main on-hand** requires `APPLY LOT TOTAL`, records before/after quantities and creates a movement where the movement table exists.
+- FIFO/FEFO are policy preferences only. Automatic lot selection and lot-level consumption remain future work.
+
+## SEO and UI rules
+- Every public and admin HTML file currently has exactly one H1.
+- Admin Packaging Studio is `noindex,nofollow`.
+- Continue descriptive titles, one clear main heading, crawlable descriptive links, visible buyer wording and truthful local Southern Ontario relevance.
+- Do not create public thin pages for each package template or scent unless they provide unique buyer value.
+
+## Current launch-critical limitations
+Payment/inventory settlement, refund restoration, concurrency/oversell proof, production email delivery, shipping/tax verification, backup restore rehearsal and social OAuth remain launch gates. Packaging Studio and cleanup do not remove those requirements.
 
 ## Validation
-Follow `BUILD220_VALIDATION.md` after deploying the migration and Functions. Do not publish a limited set until the component-reservation, checkout conflict and cancellation/restoration tests are completed.
+Follow `BUILD221_VALIDATION.md`. The migration, delete preflight, photo-reference SVG, version/export workflow and lot reconciliation must be tested against a staging D1 backup before production use.
