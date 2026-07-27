@@ -73,11 +73,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const refs = (preview.blocking_references || []).map((row) => `${row.count} ${row.table_name}`).join(', ');
         throw new Error(`This product has saved history${refs ? ` (${refs})` : ''} and cannot be permanently removed. Archive it instead.`);
       }
-      const materialWarning = (preview.materials || []).length
-        ? '\n\nThis draft has linked raw inventory. Use Correct / remove instead so reservation releases or physical returns can be reviewed.'
+      const linkedMaterials = Array.isArray(preview.materials) ? preview.materials : [];
+      const materialReviewRows = Array.isArray(preview.materials_requiring_review) ? preview.materials_requiring_review : [];
+      if (materialReviewRows.length) {
+        throw new Error('This draft has linked material rows that may involve reserved stock. Use Correct / remove so reservation releases or physical returns can be reviewed.');
+      }
+      const recipeNote = linkedMaterials.length
+        ? `\n\n${linkedMaterials.length} linked recipe/material row(s) will be removed with the duplicate. Main inventory quantities will not be changed.`
         : '';
-      if (materialWarning) throw new Error(materialWarning.trim());
-      if (!window.confirm(`${draftCleanup ? 'Remove duplicate draft' : 'Delete unused product'}: ${label}?\n\nThis permanently removes only this unused record. Product numbers are not reused.`)) return;
+      if (!window.confirm(`${draftCleanup ? 'Remove duplicate draft' : 'Delete unused product'}: ${label}?\n\nThis permanently removes only this unused record. Product numbers are not reused.${recipeNote}`)) return;
       const confirmationPhrase = window.prompt(`Type DELETE PRODUCT exactly to remove ${label}.`);
       if (confirmationPhrase === null) return;
       const confirmPassword = window.prompt('Enter your current admin password to authorize this permanent cleanup.');

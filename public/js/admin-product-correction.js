@@ -217,6 +217,7 @@
             confirmation_phrase: phrase,
             deletion_reason: reason,
             confirm_password: password,
+            material_review_confirmed: 1,
             material_actions: actions
           })
         });
