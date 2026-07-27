@@ -70,3 +70,11 @@ Local tests cannot prove Cloudflare D1/R2 bindings, remote public media resoluti
 9. Revoke the grant and confirm the link fails immediately. Create a new grant with a short expiry and confirm expiry denial after the time passes.
 10. Confirm `GET /api/admin/creative-assets` never returns a raw token/token hash, and the downloaded manifest contains only sanitized grant metadata.
 11. Recheck `/admin/content-studio/`, `/admin/content-publications/`, `/gallery/`, and `/workshop-journal/`; confirm no source media disappeared and existing releases stay unchanged.
+
+## Build 221 smoke tests
+- Open `/admin/products/`, confirm the Draft & Archive Cleanup Centre loads both draft and archived candidates, and run preflight on a disposable test row.
+- Confirm a product with protected history is Archive-only and an unused row can reach typed/password confirmation.
+- Open `/admin/packaging-studio/`, create a scalloped soap-ribbon project, apply the reference example, save, save a review version, and test SVG/PNG/JPG/Print-PDF preparation.
+- Confirm the preview reports a 279.4 mm × 50 mm canvas and the medallion is not clipped.
+- Open Tools & Supplies → Lots, save a lot, record reconciliation without changing on-hand, then use a disposable item to test the typed `APPLY LOT TOTAL` path.
+

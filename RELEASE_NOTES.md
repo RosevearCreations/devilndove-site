@@ -1,3 +1,17 @@
+# Build 221
+
+- Added a visible Draft & Archive Cleanup Centre and corrected product-owned reference classification so unused archived or draft duplicates can be removed after live preflight.
+- Streamlined duplicate cleanup so unused recipe/material links no longer force the full correction panel unless reserved stock may be involved; hardened Archive with DB/DD_DB compatibility, audit logging and safe runtime fallback.
+- Expanded deletion discovery to include older product-reference tables without declared foreign keys while explicitly protecting order, accounting, project, packaging, customer-story, recall and public-proof history.
+- Added the missing canonical and Open Graph metadata to the public custom-request page during the SEO pass.
+- Added Packaging Studio with structured D1 projects, templates, review versions and export history.
+- Added the supplied scalloped soap-ribbon reference with extended medallion canvas, curved upper/lower text, bilingual centre identity and botanical ornaments.
+- Added SVG, PNG, JPG and Print/Save PDF preparation plus browser-local draft fallback.
+- Added common Canadian cosmetic-label field preflight while preserving explicit legal/formula/print review boundaries.
+- Added purchase-lot reconciliation evidence, discrepancy display, deliberate audited application to main on-hand and manual/FIFO/FEFO policy preferences.
+- Repaired the fresh aggregate schemas by restoring missing Build 213–215 Creative Process parent tables, and reset `database_upgrade_current_pass.sql` to the Build 221 additive migration only.
+- Updated core/full/store/current schema guidance, canonical handoff documents, specialist Packaging Studio guide, validation and changed-file manifest.
+
 # Build 220
 
 - Added protected permanent cleanup for unused duplicate draft products.

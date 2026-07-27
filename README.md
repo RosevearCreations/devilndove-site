@@ -9,3 +9,12 @@ No D1 migration is required for this build. The remaining login 500 is separate 
 
 ## Build 217 current release
 See `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `BUILD217_VALIDATION.md`. Build 217 adds reasoned inventory reversals, applied cost templates, percentage fees, linked-product cost allocations, CAIP-derived reviewed summaries, and Creative Assets contrast fixes.
+## Build 221 operating additions
+
+- Packaging Studio: `/admin/packaging-studio/`
+- Draft & Archive Cleanup Centre: `/admin/products/`
+- Purchase-lot reconciliation: Tools & Supplies → Lots
+- Migration: `database_build221_packaging_studio_cleanup_lot_controls.sql`
+
+Read `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `PACKAGING_STUDIO.md` before extending these workflows.
+

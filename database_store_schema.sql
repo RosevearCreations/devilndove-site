@@ -7313,3 +7313,260 @@ CREATE INDEX IF NOT EXISTS idx_inventory_purchase_lots_expiry
 -- Content-only Creative Projects use the existing content_projects.source_type /
 -- source_id columns with source_type='creative_project'. No new table is required.
 
+-- Build 221 — Packaging Studio foundation, streamlined product cleanup,
+-- purchase-lot reconciliation controls, and review-first packaging exports.
+-- Apply after database_build220_quantity_sets_lots_content_only.sql.
+
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS packaging_templates (
+  packaging_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  template_key TEXT NOT NULL UNIQUE,
+  template_name TEXT NOT NULL,
+  package_type TEXT NOT NULL DEFAULT 'soap_ribbon',
+  description TEXT,
+  page_width_mm REAL NOT NULL DEFAULT 279.4,
+  page_height_mm REAL NOT NULL DEFAULT 19,
+  front_width_mm REAL NOT NULL DEFAULT 50.8,
+  front_height_mm REAL NOT NULL DEFAULT 38.1,
+  rear_width_mm REAL NOT NULL DEFAULT 50,
+  rear_height_mm REAL NOT NULL DEFAULT 50,
+  layout_json TEXT NOT NULL DEFAULT '{}',
+  theme_json TEXT NOT NULL DEFAULT '{}',
+  is_system INTEGER NOT NULL DEFAULT 0,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS packaging_projects (
+  packaging_project_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_key TEXT NOT NULL UNIQUE,
+  product_id INTEGER,
+  packaging_template_id INTEGER NOT NULL,
+  project_name TEXT NOT NULL,
+  package_type TEXT NOT NULL DEFAULT 'soap_ribbon',
+  project_status TEXT NOT NULL DEFAULT 'draft',
+  collection_name TEXT,
+  product_name TEXT NOT NULL,
+  product_subtitle TEXT,
+  product_identity_en TEXT,
+  product_identity_fr TEXT,
+  ingredients_inci TEXT,
+  ingredients_en TEXT,
+  ingredients_fr TEXT,
+  net_quantity_text TEXT,
+  website_text TEXT,
+  dealer_name TEXT,
+  dealer_address TEXT,
+  contact_text TEXT,
+  made_in_canada_text TEXT,
+  claims_json TEXT NOT NULL DEFAULT '[]',
+  warnings_en TEXT,
+  warnings_fr TEXT,
+  icons_json TEXT NOT NULL DEFAULT '[]',
+  theme_json TEXT NOT NULL DEFAULT '{}',
+  artwork_json TEXT NOT NULL DEFAULT '{}',
+  print_notes TEXT,
+  compliance_status TEXT NOT NULL DEFAULT 'needs_review',
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(product_id) REFERENCES products(product_id) ON DELETE SET NULL,
+  FOREIGN KEY(packaging_template_id) REFERENCES packaging_templates(packaging_template_id) ON DELETE RESTRICT
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_projects_product ON packaging_projects(product_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_packaging_projects_status ON packaging_projects(project_status, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS packaging_project_versions (
+  packaging_project_version_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_project_id INTEGER NOT NULL,
+  version_number INTEGER NOT NULL,
+  version_label TEXT,
+  snapshot_json TEXT NOT NULL,
+  svg_markup TEXT,
+  review_status TEXT NOT NULL DEFAULT 'needs_review',
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(packaging_project_id, version_number),
+  FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_project_versions_project ON packaging_project_versions(packaging_project_id, version_number DESC);
+
+CREATE TABLE IF NOT EXISTS packaging_export_history (
+  packaging_export_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_project_id INTEGER NOT NULL,
+  packaging_project_version_id INTEGER,
+  export_format TEXT NOT NULL,
+  file_name TEXT,
+  export_status TEXT NOT NULL DEFAULT 'prepared',
+  source_snapshot_json TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE,
+  FOREIGN KEY(packaging_project_version_id) REFERENCES packaging_project_versions(packaging_project_version_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_export_history_project ON packaging_export_history(packaging_project_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS inventory_lot_policies (
+  site_item_inventory_id INTEGER PRIMARY KEY,
+  depletion_method TEXT NOT NULL DEFAULT 'manual',
+  reconcile_status TEXT NOT NULL DEFAULT 'needs_review',
+  last_reconciled_quantity REAL,
+  last_reconciled_at TEXT,
+  updated_by_user_id INTEGER,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS inventory_lot_reconciliations (
+  inventory_lot_reconciliation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_item_inventory_id INTEGER NOT NULL,
+  main_on_hand_quantity REAL NOT NULL DEFAULT 0,
+  lot_remaining_quantity REAL NOT NULL DEFAULT 0,
+  discrepancy_quantity REAL NOT NULL DEFAULT 0,
+  applied_to_main_inventory INTEGER NOT NULL DEFAULT 0,
+  previous_on_hand_quantity REAL,
+  new_on_hand_quantity REAL,
+  depletion_method TEXT NOT NULL DEFAULT 'manual',
+  review_note TEXT NOT NULL,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_lot_reconciliations_item ON inventory_lot_reconciliations(site_item_inventory_id, reviewed_at DESC);
+
+INSERT OR IGNORE INTO packaging_templates (
+  template_key, template_name, package_type, description,
+  page_width_mm, page_height_mm, front_width_mm, front_height_mm,
+  rear_width_mm, rear_height_mm, layout_json, theme_json, is_system, is_active
+) VALUES (
+  'soap-ribbon-scalloped-reference-v1',
+  'Soap ribbon — scalloped medallion reference',
+  'soap_ribbon',
+  'Recreates the supplied ribbon structure: narrow 19 mm band, scalloped front medallion, curved collection and scent text, bilingual centre title, side botanical ornaments, ingredients, rear medallion, claims and net quantity.',
+  279.4, 50, 50.8, 38.1, 50, 50,
+  '{"sections":["front_scalloped_badge","ingredients_en","ingredients_fr","rear_medallion","claims"],"band_height_mm":19,"front_style":"scalloped_curved_text"}',
+  '{"rose_colour":"#9b8068","theme_colour":"#f2ead8","border_colour":"#2f2721","accent_gold":"#b69a61"}',
+  1, 1
+);
+
+INSERT OR IGNORE INTO packaging_templates (
+  template_key, template_name, package_type, description,
+  page_width_mm, page_height_mm, front_width_mm, front_height_mm,
+  rear_width_mm, rear_height_mm, layout_json, theme_json, is_system, is_active
+) VALUES (
+  'soap-ribbon-11x0.75-v1',
+  'Soap ribbon — standard 11 × 0.75 inch',
+  'soap_ribbon',
+  'Standard narrow ribbon with front oval, English ingredients, French ingredients, rear medallion, claims and net weight.',
+  279.4, 19, 50.8, 19, 50, 19,
+  '{"sections":["front","ingredients_en","ingredients_fr","rear","claims"],"band_height_mm":19}',
+  '{"rose_colour":"#b74b63","theme_colour":"#f4eadb","border_colour":"#3b2c2f","accent_gold":"#b38a3b"}',
+  1, 1
+);
+
+-- =========================================================
+-- BUILD 221 AGGREGATE SCHEMA REPAIR
+-- Restores the Build 213-215 Creative Process parent tables that later
+-- Build 216-217 foreign keys depend on in fresh/aggregate installations.
+-- =========================================================
+-- Build 213 — Creative Process Engine foundation. Safe additive migration.
+CREATE TABLE IF NOT EXISTS creative_work_projects (
+ creative_work_project_id INTEGER PRIMARY KEY AUTOINCREMENT, project_key TEXT NOT NULL UNIQUE,
+ project_title TEXT NOT NULL, project_type TEXT NOT NULL DEFAULT 'maker_project', project_status TEXT NOT NULL DEFAULT 'idea',
+ summary TEXT, objective TEXT, story_angle TEXT, product_id INTEGER, started_at TEXT, completed_at TEXT,
+ total_minutes INTEGER NOT NULL DEFAULT 0, estimated_cost_cents INTEGER NOT NULL DEFAULT 0, actual_cost_cents INTEGER NOT NULL DEFAULT 0,
+ privacy_status TEXT NOT NULL DEFAULT 'internal', rights_status TEXT NOT NULL DEFAULT 'needs_review', created_by INTEGER, updated_by INTEGER,
+ created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS creative_work_events (
+ creative_work_event_id INTEGER PRIMARY KEY AUTOINCREMENT, creative_work_project_id INTEGER NOT NULL,
+ event_type TEXT NOT NULL DEFAULT 'note', event_title TEXT NOT NULL, event_notes TEXT, occurred_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ duration_minutes INTEGER NOT NULL DEFAULT 0, material_name TEXT, material_quantity REAL, material_unit TEXT,
+ material_cost_cents INTEGER NOT NULL DEFAULT 0, media_url TEXT, is_public_candidate INTEGER NOT NULL DEFAULT 0,
+ created_by INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS creative_work_outputs (
+ creative_work_output_id INTEGER PRIMARY KEY AUTOINCREMENT, creative_work_project_id INTEGER NOT NULL,
+ output_key TEXT NOT NULL, output_label TEXT NOT NULL, output_group TEXT NOT NULL, output_status TEXT NOT NULL DEFAULT 'planned',
+ approval_status TEXT NOT NULL DEFAULT 'needs_review', linked_record_type TEXT, linked_record_id INTEGER, output_url TEXT, notes TEXT,
+ created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ UNIQUE(creative_work_project_id,output_key), FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_creative_work_projects_status ON creative_work_projects(project_status);
+CREATE INDEX IF NOT EXISTS idx_creative_work_events_project ON creative_work_events(creative_work_project_id,occurred_at);
+CREATE INDEX IF NOT EXISTS idx_creative_work_outputs_project ON creative_work_outputs(creative_work_project_id,output_status);
+
+-- Devil n Dove Build 214
+-- Additive optional relationship between Creative Projects and products.
+-- Products are NOT required to have a project; existing direct and phone-capture workflows remain valid.
+CREATE TABLE IF NOT EXISTS creative_project_product_links (
+  creative_project_product_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  creative_work_project_id INTEGER NOT NULL,
+  product_id INTEGER NOT NULL,
+  relationship_type TEXT NOT NULL DEFAULT 'project_output',
+  is_primary INTEGER NOT NULL DEFAULT 0,
+  notes TEXT,
+  created_by INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(creative_work_project_id, product_id),
+  FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
+  FOREIGN KEY(product_id) REFERENCES products(product_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_creative_project_product_links_project ON creative_project_product_links(creative_work_project_id, is_primary);
+CREATE INDEX IF NOT EXISTS idx_creative_project_product_links_product ON creative_project_product_links(product_id);
+
+-- Build 215 — additive Creative Intelligence Integration.
+-- Review-first only. This migration does not consume inventory or publish content.
+CREATE TABLE IF NOT EXISTS creative_project_evidence_selections (
+  creative_project_evidence_selection_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  creative_work_project_id INTEGER NOT NULL,
+  creative_work_event_id INTEGER NOT NULL,
+  evidence_role TEXT NOT NULL DEFAULT 'process_evidence',
+  selected INTEGER NOT NULL DEFAULT 1,
+  review_notes TEXT, reviewed_by INTEGER, reviewed_at TEXT,
+  UNIQUE(creative_work_project_id, creative_work_event_id),
+  FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
+  FOREIGN KEY(creative_work_event_id) REFERENCES creative_work_events(creative_work_event_id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS creative_project_material_reviews (
+  creative_project_material_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  creative_work_project_id INTEGER NOT NULL,
+  creative_work_event_id INTEGER NOT NULL,
+  review_status TEXT NOT NULL DEFAULT 'pending',
+  actual_quantity REAL, waste_quantity REAL, reusable_quantity REAL,
+  approved_cost_cents INTEGER NOT NULL DEFAULT 0,
+  review_notes TEXT, inventory_consumed INTEGER NOT NULL DEFAULT 0,
+  reviewed_by INTEGER, reviewed_at TEXT,
+  UNIQUE(creative_work_project_id, creative_work_event_id),
+  FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
+  FOREIGN KEY(creative_work_event_id) REFERENCES creative_work_events(creative_work_event_id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS creative_project_profitability (
+  creative_work_project_id INTEGER PRIMARY KEY,
+  labour_rate_cents INTEGER NOT NULL DEFAULT 0,
+  packaging_cost_cents INTEGER NOT NULL DEFAULT 0,
+  overhead_cost_cents INTEGER NOT NULL DEFAULT 0,
+  channel_fee_cents INTEGER NOT NULL DEFAULT 0,
+  shipping_cost_cents INTEGER NOT NULL DEFAULT 0,
+  revenue_cents INTEGER NOT NULL DEFAULT 0,
+  estimated_content_value_cents INTEGER NOT NULL DEFAULT 0,
+  notes TEXT, updated_by INTEGER, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS creative_project_content_handoffs (
+  creative_project_content_handoff_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  creative_work_project_id INTEGER NOT NULL,
+  content_project_id INTEGER,
+  handoff_status TEXT NOT NULL DEFAULT 'draft',
+  evidence_count INTEGER NOT NULL DEFAULT 0,
+  package_json TEXT NOT NULL,
+  created_by INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
+);

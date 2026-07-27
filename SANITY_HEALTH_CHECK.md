@@ -23,3 +23,7 @@ Run `BUILD209_VALIDATION.md` after deployment, then `POST_DEPLOY_SMOKE_TEST.md`.
 
 ## Build 217 current release
 See `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `BUILD217_VALIDATION.md`. Build 217 adds reasoned inventory reversals, applied cost templates, percentage fees, linked-product cost allocations, CAIP-derived reviewed summaries, and Creative Assets contrast fixes.
+
+## Build 221 sanity additions
+Packaging Studio, draft/archive cleanup, and lot reconciliation are review-first. A successful UI render is not proof that packaging is legally compliant, a product is safe to delete, or lot totals match physical stock. Validate against staging D1, a database backup, physical counts and a printed label proof.
+

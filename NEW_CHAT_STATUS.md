@@ -1,9 +1,3 @@
-# New Chat Status — Build 220
+# New Chat Status — Build 221 pointer
 
-Start with:
-1. `AI_HANDOFF.md`
-2. `PROJECT_STATUS_AND_ROADMAP.md`
-
-Build 220 adds safe duplicate-draft cleanup, server-validated quantity specials, component-reserved limited sets, inventory purchase lots and product-free Creative Project → Content Studio packages. Apply `database_build220_quantity_sets_lots_content_only.sql` and follow `BUILD220_VALIDATION.md`.
-
-This file is a compatibility pointer only and is not a third authoritative roadmap.
+Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. For Packaging Studio or the supplied scalloped soap ribbon, also read `PACKAGING_STUDIO.md`. Apply `database_build221_packaging_studio_cleanup_lot_controls.sql` after Build 220 before testing the new workflows.

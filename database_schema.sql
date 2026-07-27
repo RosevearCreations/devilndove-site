@@ -1,3 +1,5 @@
+-- IMPORTANT BUILD 221: database_schema.sql is a legacy/core-plus-historical overlay and is not the supported fresh-install file. Use database_full_schema.sql for a new D1 database, or apply numbered migrations to an existing database.
+-- Build 221 schema note: Packaging Studio and lot-reconciliation tables are defined in database_build221_packaging_studio_cleanup_lot_controls.sql and the aggregate full/store/current-pass schemas. Apply that additive migration after the core and store schemas.
 -- Current cleanup sync 2026-05-10: active schema retained; database_upgrade_current_pass.sql was archived and reset for the next migration batch.
 -- Current pass note: accounting now adds statement-import tables, reconciliation exceptions, fixed-asset groundwork, attachment-required month-close checks, export bundle v2 groundwork, and public colour-filter/catalog-preference support.
 -- Current pass note: product records now support multi-colour storage using color_names_json while keeping color_name as the primary/filter field.

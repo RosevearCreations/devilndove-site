@@ -46,3 +46,7 @@ Search Console, Merchant Center, GBP photo/uploads, sitemap submission, social p
 ## Build 201 CAIP content-source guardrail
 
 CAIP recommendations, metadata scores, and future provider outputs are internal review aids only. Before any public use, Content Release Board must still verify that the visible page has useful unique copy, selected public-cleared source media, truthful title/meta/structured data, and descriptive real-image text. Do not publish a CAIP placeholder, score, inferred caption, or derived asset as a factual search claim without source and human review evidence.
+
+## Build 221 packaging boundary
+Packaging Studio is an authenticated admin tool and must remain `noindex,nofollow`. Do not create crawlable public pages for templates, label drafts or quantity tiers. Public product pages should use the final buyer-facing product identity, truthful visible price/availability, descriptive images and canonical URLs. Packaging claims must not be copied into public SEO text until they are reviewed and substantiated.
+

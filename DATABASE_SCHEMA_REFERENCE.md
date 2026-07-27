@@ -97,3 +97,21 @@ Platform tokens, client secrets, OAuth codes, Page tokens, and refresh tokens re
 - `creative_project_profitability_extensions`: fee percentage and fixed-fee assumptions.
 - `creative_project_cost_allocations`: reviewed project-cost shares assigned to linked products.
 - `creative_project_knowledge_summaries`: review-controlled lessons and recommendations derived from CAIP evidence.
+
+## Build 221 — Packaging Studio and lot reconciliation
+
+- `packaging_templates` — reusable physical dimensions, layout JSON, theme defaults, template type and active/system controls. The preferred first template is `soap-ribbon-scalloped-reference-v1`; its 19 mm band sits within a 50 mm full canvas so the supplied scalloped medallion is not clipped.
+- `packaging_projects` — structured bilingual packaging content, optional product link, theme/artwork settings, compliance state and review-first project status.
+- `packaging_project_versions` — version-numbered structured snapshot and SVG evidence with review state.
+- `packaging_export_history` — prepared export format, filename, source snapshot and actor/time evidence.
+- `inventory_lot_policies` — manual/FIFO/FEFO preference, reconciliation state and last reviewed lot quantity. A policy is not automatic depletion permission.
+- `inventory_lot_reconciliations` — immutable-style main-versus-lot count evidence, discrepancy, whether the lot total was applied, before/after quantity, note and reviewer.
+
+Build 221 also changes product deletion logic rather than adding a deletion table: product-owned working rows can be removed with an unused product, while true business/history references continue to block deletion. `product_deletion_audit` and `product_material_return_audit` remain the evidence boundary.
+
+
+### Build 221 aggregate-schema repair
+The fresh/aggregate schema files now also include the Build 213–215 Creative Process parent tables (`creative_work_projects`, events, outputs, optional product links, evidence selections, material reviews, profitability and Content Studio handoffs). Later Build 216–217 tables already referenced these parents, so omitting them could make a fresh SQLite/D1 schema appear to create successfully but fail when a product deletion activated a foreign-key path. The dedicated numbered migrations remain the source of truth for existing databases; the aggregate repair makes fresh installs structurally complete.
+
+### `database_upgrade_current_pass.sql`
+This file is reset for Build 221 and now contains only the additive Build 221 migration. It no longer replays the accumulated Build 184–220 historical upgrade chain. Existing databases should use the numbered migrations as evidence and apply the current-pass file only after confirming Build 220 is present.
