@@ -2,10 +2,83 @@
 // Permanent deletion is intentionally limited to unused products. Ordered or referenced
 // products stay in history and must be archived instead.
 
-import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
+import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 import { requireAdminStepUp } from "../_lib/adminStepUp.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
+
+const PRODUCT_OWNED_CLEANUP_RELATIONS = new Set([
+  'product_images.product_id',
+  'product_image_annotations.product_id',
+  'product_image_derivatives.product_id',
+  'product_tags.product_id',
+  'product_seo.product_id',
+  'product_resource_links.product_id',
+  'product_listing_profiles.product_id',
+  'product_media_role_assignments.product_id',
+  'product_media_score_history.product_id',
+  'product_publish_qa_results.product_id',
+  'product_qa_panel_states.product_id',
+  'product_qa_bulk_fix_preview_items.product_id',
+  'product_detail_visual_polish_checks.product_id',
+  'product_story_public_notes.product_id',
+  'product_quantity_price_tiers.product_id',
+  'product_bundle_settings.bundle_product_id',
+  'product_bundle_components.bundle_product_id',
+  'product_cost_profiles.product_id',
+  'product_cost_margin_review_rows.product_id',
+  'product_margin_warning_rows.product_id',
+  'product_story_notes.product_id',
+  'custom_candle_soap_product_specs.product_id',
+  'marketplace_export_image_selections.product_id',
+  'marketplace_export_row_validation_results.product_id'
+]);
+
+// These records are useful independently of a disposable product row. Preserve them and
+// remove only the product association when permanent cleanup is allowed.
+const PRODUCT_DETACH_RELATIONS = new Set([
+  'media_assets.product_id',
+  'mobile_resumable_upload_runtime_rows.attached_product_id',
+  'mobile_resumable_upload_sessions.product_id'
+]);
+
+// A permissive FK action such as SET NULL or CASCADE must not make customer, accounting,
+// publishing or project history disposable. These relations always block permanent removal.
+const PROTECTED_PRODUCT_REFERENCES = new Set([
+  'order_items.product_id',
+  'creative_projects.product_id',
+  'content_projects.product_id',
+  'creative_project_cost_allocations.product_id',
+  'accounting_overhead_product_allocations.product_id',
+  'packaging_projects.product_id',
+  'product_bundle_components.component_product_id',
+  'marketplace_margin_override_history.product_id',
+  'product_media_change_audit.product_id',
+  'approved_before_after_gallery_items.product_id',
+  'customer_story_approval_batches.product_id',
+  'customer_story_output_drafts.product_id',
+  'public_proof_candidates.product_id',
+  'recall_customer_match_previews.product_id',
+  'trust_block_items.related_product_id'
+]);
+
+const EXPLICIT_PRODUCT_RELATIONS = new Set([
+  ...PRODUCT_OWNED_CLEANUP_RELATIONS,
+  ...PRODUCT_DETACH_RELATIONS,
+  ...PROTECTED_PRODUCT_REFERENCES
+]);
+
+function relationKey(row = {}) {
+  return `${String(row.table_name || '')}.${String(row.column_name || '')}`;
+}
+
+function isAutomaticallySafeReference(row = {}) {
+  const key = relationKey(row);
+  if (PROTECTED_PRODUCT_REFERENCES.has(key)) return false;
+  if (PRODUCT_OWNED_CLEANUP_RELATIONS.has(key) || PRODUCT_DETACH_RELATIONS.has(key)) return true;
+  const onDelete = String(row.on_delete || 'NO ACTION').toUpperCase();
+  return ['CASCADE', 'SET NULL', 'SET DEFAULT'].includes(onDelete);
+}
 
 async function requireAdmin(request, env) {
   const sessionUser = await getAdminUserFromRequest(request, env);
@@ -47,8 +120,44 @@ async function discoverProductReferences(db, productId) {
     FROM sqlite_master
     WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
   `).all().catch(() => ({ results: [] }));
-  const tables = Array.isArray(tablesResult?.results) ? tablesResult.results.map((row) => String(row?.name || "")).filter(Boolean) : [];
+  const tables = Array.isArray(tablesResult?.results)
+    ? tablesResult.results.map((row) => String(row?.name || '')).filter(Boolean)
+    : [];
+  const tableSet = new Set(tables);
   const references = [];
+  const seen = new Set();
+
+  async function addReference(tableName, columnName, onDelete = 'NO FOREIGN KEY') {
+    const key = `${tableName}.${columnName}`;
+    if (seen.has(key) || tableName === 'products' || tableName === 'product_deletion_audit') return;
+    if (!tableSet.has(tableName)) return;
+    const columns = await getTableColumnSet(db, tableName);
+    if (!columns.has(columnName)) return;
+    let count = 0;
+    try {
+      const row = await db.prepare(`
+        SELECT COUNT(*) AS count
+        FROM ${quoteIdentifier(tableName)}
+        WHERE ${quoteIdentifier(columnName)} = ?
+      `).bind(productId).first();
+      count = Number(row?.count || 0);
+    } catch {
+      count = 0;
+    }
+    seen.add(key);
+    if (count < 1) return;
+    const reference = {
+      table_name: tableName,
+      column_name: columnName,
+      count,
+      on_delete: String(onDelete || 'NO FOREIGN KEY').toUpperCase()
+    };
+    reference.cleanup_owned = PRODUCT_OWNED_CLEANUP_RELATIONS.has(key) ? 1 : 0;
+    reference.detach_preserved = PRODUCT_DETACH_RELATIONS.has(key) ? 1 : 0;
+    reference.protected_history = PROTECTED_PRODUCT_REFERENCES.has(key) ? 1 : 0;
+    reference.automatically_safe = isAutomaticallySafeReference(reference) ? 1 : 0;
+    references.push(reference);
+  }
 
   for (const tableName of tables) {
     if (tableName === 'products' || tableName === 'product_deletion_audit') continue;
@@ -64,29 +173,24 @@ async function discoverProductReferences(db, productId) {
       if (String(foreignKey?.table || '').toLowerCase() !== 'products') continue;
       const childColumn = String(foreignKey?.from || '').trim();
       if (!childColumn) continue;
-      let count = 0;
-      try {
-        const row = await db.prepare(`
-          SELECT COUNT(*) AS count
-          FROM ${quoteIdentifier(tableName)}
-          WHERE ${quoteIdentifier(childColumn)} = ?
-        `).bind(productId).first();
-        count = Number(row?.count || 0);
-      } catch {
-        count = 0;
-      }
-      if (count > 0) {
-        references.push({
-          table_name: tableName,
-          column_name: childColumn,
-          count,
-          on_delete: String(foreignKey?.on_delete || 'NO ACTION').toUpperCase()
-        });
-      }
+      await addReference(tableName, childColumn, foreignKey?.on_delete || 'NO ACTION');
     }
   }
 
-  return references.sort((a, b) => a.table_name.localeCompare(b.table_name));
+  // Older migrations contain a few product references without declared foreign keys.
+  // Scan the explicit allow/block lists as well so they cannot become invisible or orphaned.
+  for (const key of EXPLICIT_PRODUCT_RELATIONS) {
+    const separator = key.lastIndexOf('.');
+    if (separator < 1) continue;
+    await addReference(key.slice(0, separator), key.slice(separator + 1), 'NO FOREIGN KEY');
+  }
+
+  return references.sort((a, b) => {
+    if (Number(b.protected_history || 0) !== Number(a.protected_history || 0)) {
+      return Number(b.protected_history || 0) - Number(a.protected_history || 0);
+    }
+    return `${a.table_name}.${a.column_name}`.localeCompare(`${b.table_name}.${b.column_name}`);
+  });
 }
 
 async function safeProductImages(db, productId) {
@@ -178,6 +282,15 @@ async function loadProductMaterialPreview(db, productId) {
       can_return_on_hand: canReturn ? 1 : 0,
       suggested_release_quantity: canRelease ? Math.max(0, Math.min(Number(row?.quantity_used || 0), Number(row?.reserved_quantity || 0))) : 0
     };
+  });
+}
+
+function materialRowsRequiringReview(materials = []) {
+  return materials.filter((row) => {
+    const suggestedRelease = Number(row?.suggested_release_quantity || 0);
+    const reserved = Number(row?.reserved_quantity || 0);
+    const linkedQuantity = Number(row?.quantity_used || 0);
+    return suggestedRelease > 0 || (reserved > 0 && linkedQuantity > 0 && Number(row?.can_release_reservation || 0) !== 1);
   });
 }
 
@@ -298,41 +411,54 @@ async function applyReviewedMaterialActions(db, { productId, actions = [], delet
 }
 
 async function runCleanup(db, productId) {
-  // These are product-owned working records; removing an unused incorrect draft should
-  // remove their D1 rows too. Other non-cascading business references block deletion.
-  const cleanupTables = [
-    'product_images',
-    'product_tags',
-    'product_seo',
-    'product_resource_links',
-    'product_listing_profiles',
-    'product_media_role_assignments',
-    'product_image_annotations',
-    'product_media_score_history',
-    'product_image_derivatives',
-    'product_publish_qa_results',
-    'product_qa_panel_states',
-    'product_story_public_notes'
-  ];
-
+  // Delete only product-owned working rows. Preserve independent uploads/media by
+  // detaching them, and never reach this function while protected history exists.
   const statements = [];
-  for (const tableName of cleanupTables) {
+
+  for (const key of PRODUCT_OWNED_CLEANUP_RELATIONS) {
+    const separator = key.lastIndexOf('.');
+    const tableName = key.slice(0, separator);
+    const columnName = key.slice(separator + 1);
     if (!(await tableExists(db, tableName))) continue;
     const columns = await getTableColumnSet(db, tableName);
-    if (!columns.has('product_id')) continue;
-    statements.push(db.prepare(`DELETE FROM ${quoteIdentifier(tableName)} WHERE product_id = ?`).bind(productId));
+    if (!columns.has(columnName)) continue;
+    statements.push(db.prepare(
+      `DELETE FROM ${quoteIdentifier(tableName)} WHERE ${quoteIdentifier(columnName)} = ?`
+    ).bind(productId));
   }
+
+  for (const key of PRODUCT_DETACH_RELATIONS) {
+    const separator = key.lastIndexOf('.');
+    const tableName = key.slice(0, separator);
+    const columnName = key.slice(separator + 1);
+    if (!(await tableExists(db, tableName))) continue;
+    const columns = await getTableColumnSet(db, tableName);
+    if (!columns.has(columnName)) continue;
+    statements.push(db.prepare(
+      `UPDATE ${quoteIdentifier(tableName)} SET ${quoteIdentifier(columnName)} = NULL WHERE ${quoteIdentifier(columnName)} = ?`
+    ).bind(productId));
+  }
+
   statements.push(db.prepare(`DELETE FROM products WHERE product_id = ?`).bind(productId));
 
   if (typeof db.batch === 'function') {
-    await db.batch(statements);
+    const results = await db.batch(statements);
+    const productDeleteResult = Array.isArray(results) ? results[results.length - 1] : null;
+    if (productDeleteResult && Number(productDeleteResult?.meta?.changes || 0) < 1) {
+      throw new Error('The product was not removed. Refresh the cleanup preflight and try again.');
+    }
   } else {
-    for (const statement of statements) await statement.run();
+    for (let index = 0; index < statements.length; index += 1) {
+      const result = await statements[index].run();
+      if (index === statements.length - 1 && Number(result?.meta?.changes || 0) < 1) {
+        throw new Error('The product was not removed. Refresh the cleanup preflight and try again.');
+      }
+    }
   }
 }
 
 
-export async function onRequestGet(context) {
+async function handleGet(context) {
   const { request, env } = context;
   const db = getDb(env);
   const authCheck = await requireAdmin(request, env);
@@ -343,14 +469,19 @@ export async function onRequestGet(context) {
   const product = await db.prepare(`SELECT product_id, product_number, sku, name, slug, status FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
   const references = await discoverProductReferences(db, productId);
-  const blockingReferences = references.filter((row) => row.on_delete !== 'CASCADE');
+  const blockingReferences = references.filter((row) => !isAutomaticallySafeReference(row));
   const materials = await loadProductMaterialPreview(db, productId);
+  const materialsRequiringReview = materialRowsRequiringReview(materials);
   return json({
     ok: true,
     product,
     materials,
+    materials_requiring_review: materialsRequiringReview,
+    material_review_required: materialsRequiringReview.length ? 1 : 0,
     deletion_allowed: blockingReferences.length ? 0 : 1,
+    references,
     blocking_references: blockingReferences,
+    automatically_safe_references: references.filter((row) => isAutomaticallySafeReference(row)),
     instructions: {
       release_reservation: 'Use only for raw stock already reserved for this unfinished product. It makes stock available again without changing on-hand quantity.',
       return_on_hand: 'Use only for unused physical raw supplies that had been removed from on-hand stock and are truly available again. Enter whole stock units.'
@@ -358,7 +489,7 @@ export async function onRequestGet(context) {
   });
 }
 
-export async function onRequestPost(context) {
+async function handlePost(context) {
   const { request, env } = context;
   const db = getDb(env);
 
@@ -401,7 +532,7 @@ export async function onRequestPost(context) {
   }
 
   const references = await discoverProductReferences(db, productId);
-  const blockingReferences = references.filter((row) => row.on_delete !== 'CASCADE');
+  const blockingReferences = references.filter((row) => !isAutomaticallySafeReference(row));
   if (blockingReferences.length) {
     const summary = blockingReferences.map((row) => `${row.count} ${row.table_name}`).join(', ');
     return json({
@@ -409,6 +540,17 @@ export async function onRequestPost(context) {
       error: `This product has saved business/history references (${summary}) and cannot be permanently deleted. Archive it instead.`,
       requires_archive: true,
       references: blockingReferences
+    }, 409);
+  }
+
+  const materialPreview = await loadProductMaterialPreview(db, productId);
+  const materialReviewRows = materialRowsRequiringReview(materialPreview);
+  if (materialReviewRows.length && Number(body.material_review_confirmed || 0) !== 1) {
+    return json({
+      ok: false,
+      error: 'Linked material rows may involve reserved stock. Open Correct / remove, review the quantities, and confirm the material review before deletion.',
+      requires_material_review: true,
+      materials_requiring_review: materialReviewRows
     }, 409);
   }
 
@@ -476,4 +618,38 @@ export async function onRequestPost(context) {
     material_summary: materialSummary,
     r2_cleanup_note: snapshot.r2_cleanup_note
   });
+}
+
+export async function onRequestGet(context) {
+  try {
+    return await handleGet(context);
+  } catch (error) {
+    const adminUser = await getAdminUserFromRequest(context.request, context.env).catch(() => null);
+    await captureRuntimeIncident(context.env, context.request, {
+      incident_scope: 'product_cleanup',
+      incident_code: 'product_delete_preflight_failed',
+      severity: 'error',
+      message: error?.message || 'Product deletion preflight failed.',
+      related_user_id: adminUser?.user_id || null,
+      details: { error: String(error?.stack || error) }
+    }).catch(() => null);
+    return json({ ok: false, error: 'Product removal preflight could not complete. No product was changed.' }, 500);
+  }
+}
+
+export async function onRequestPost(context) {
+  try {
+    return await handlePost(context);
+  } catch (error) {
+    const adminUser = await getAdminUserFromRequest(context.request, context.env).catch(() => null);
+    await captureRuntimeIncident(context.env, context.request, {
+      incident_scope: 'product_cleanup',
+      incident_code: 'product_delete_failed',
+      severity: 'error',
+      message: error?.message || 'Product deletion failed.',
+      related_user_id: adminUser?.user_id || null,
+      details: { error: String(error?.stack || error) }
+    }).catch(() => null);
+    return json({ ok: false, error: 'Product removal failed safely. The product may still exist; refresh the cleanup list before trying again.' }, 500);
+  }
 }
