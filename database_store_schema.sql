@@ -16,6 +16,19 @@
 -- Current pass note: phone product capture now resolves the shared D1 binding through DB or DD_DB and returns structured JSON failures instead of HTML parser breaks.
 PRAGMA foreign_keys = ON;
 
+-- Build 222 aggregate compatibility: the store schema can be validated by itself while remaining compatible with the main auth schema.
+CREATE TABLE IF NOT EXISTS users (
+  user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  display_name TEXT,
+  role TEXT NOT NULL DEFAULT 'member',
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_login_at TEXT
+);
+
 -- ---------------------------------------------------------
 -- TAX CLASSES
 -- ---------------------------------------------------------
@@ -879,9 +892,9 @@ CREATE TABLE IF NOT EXISTS accounting_attachments (
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_expense ON accounting_attachments(expense_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_vendor ON accounting_attachments(vendor_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_period ON accounting_attachments(period_month, tax_year, reconciliation_type, attachment_kind);
-ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded';
-ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT;
+-- Build 222 aggregate repair: accounting_attachments.attachment_status is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.document_date is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.scope_key is already declared in its CREATE TABLE definition; historical ALTER omitted.
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_scope ON accounting_attachments(reconciliation_type, period_month, scope_key, attachment_kind);
 
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN statement_reference TEXT;
@@ -896,17 +909,17 @@ ALTER TABLE accounting_reconciliation_reviews ADD COLUMN observed_rate_basis_poi
 ALTER TABLE accounting_reconciliation_reviews ADD COLUMN unresolved_item_count INTEGER NOT NULL DEFAULT 0;
 
 -- Current pass additions for statement-backed accounting attachments
-ALTER TABLE accounting_attachments ADD COLUMN attachment_scope TEXT NOT NULL DEFAULT 'other';
-ALTER TABLE accounting_attachments ADD COLUMN provider_scope TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN statement_gross_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_fee_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_net_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_tax_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_shipping_cents INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_txn_count INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE accounting_attachments ADD COLUMN statement_period_start TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN statement_period_end TEXT;
-ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT;
+-- Build 222 aggregate repair: accounting_attachments.attachment_scope is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.provider_scope is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.statement_gross_cents is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.statement_fee_cents is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.statement_net_cents is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.statement_tax_cents is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.statement_shipping_cents is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.statement_txn_count is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.statement_period_start is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.statement_period_end is already declared in its CREATE TABLE definition; historical ALTER omitted.
+-- Build 222 aggregate repair: accounting_attachments.statement_detail_json is already declared in its CREATE TABLE definition; historical ALTER omitted.
 
 
 -- Current pass update: customer engagement automation timing rules
@@ -1141,6 +1154,69 @@ CREATE TABLE IF NOT EXISTS site_item_inventory_cost_history (
 );
 CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_item ON site_item_inventory_cost_history(site_item_inventory_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_source ON site_item_inventory_cost_history(source_kind, source_id);
+
+
+
+-- Build 222 aggregate repair: current staging and custom-request parents required by historical ALTER overlays.
+CREATE TABLE IF NOT EXISTS amazon_purchase_import_staging (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  import_batch_id TEXT NOT NULL,
+  source_file TEXT NOT NULL,
+  match_status TEXT NOT NULL DEFAULT 'unmatched',
+  match_score REAL NOT NULL DEFAULT 0,
+  token_coverage REAL NOT NULL DEFAULT 0,
+  matched_token_count INTEGER NOT NULL DEFAULT 0,
+  matched_tokens TEXT,
+  safe_to_stage_after_review TEXT NOT NULL DEFAULT 'review',
+  review_decision TEXT NOT NULL DEFAULT 'pending',
+  review_notes TEXT,
+  inventory_type TEXT CHECK (inventory_type IN ('tool', 'supply') OR inventory_type IS NULL),
+  inventory_key TEXT,
+  inventory_key_loose TEXT,
+  inventory_name TEXT,
+  inventory_brand_guess TEXT,
+  inventory_category_or_type TEXT,
+  inventory_r2_object_key TEXT,
+  order_date TEXT,
+  payment_date TEXT,
+  amazon_order_id TEXT,
+  asin TEXT,
+  amazon_title TEXT,
+  amazon_brand TEXT,
+  manufacturer TEXT,
+  amazon_product_category TEXT,
+  item_model_number TEXT,
+  part_number TEXT,
+  seller_name TEXT,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  item_quantity REAL,
+  item_subtotal_cents INTEGER NOT NULL DEFAULT 0,
+  item_shipping_cents INTEGER NOT NULL DEFAULT 0,
+  item_tax_cents INTEGER NOT NULL DEFAULT 0,
+  item_net_total_cents INTEGER NOT NULL DEFAULT 0,
+  unit_net_cost_cents INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS custom_requests (
+  custom_request_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  request_key TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  request_type TEXT NOT NULL,
+  product_interest TEXT,
+  deadline_date TEXT,
+  budget_cents INTEGER,
+  message TEXT NOT NULL,
+  attachment_urls_json TEXT DEFAULT '[]',
+  consent_to_contact INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'new',
+  admin_notes TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
 
 ALTER TABLE amazon_purchase_import_staging ADD COLUMN applied_inventory_id INTEGER;
 ALTER TABLE amazon_purchase_import_staging ADD COLUMN applied_cost_history_id INTEGER;
@@ -7570,3 +7646,194 @@ CREATE TABLE IF NOT EXISTS creative_project_content_handoffs (
   created_by INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
 );
+
+
+-- Build 222 aggregate compatibility: normalized soap labels and print proof.
+-- Build 222 — Soap Label Automation normalization, print proof evidence, exact template profiles, and startup-readiness documentation support.
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS soap_label_templates (
+  template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_template_id INTEGER NOT NULL UNIQUE,
+  template_name TEXT NOT NULL,
+  version TEXT NOT NULL DEFAULT '1.0',
+  artboard_width_in REAL NOT NULL DEFAULT 11.0,
+  artboard_height_in REAL NOT NULL DEFAULT 1.5,
+  band_height_in REAL NOT NULL DEFAULT 0.75,
+  front_oval_width_in REAL NOT NULL DEFAULT 2.0,
+  front_oval_height_in REAL NOT NULL DEFAULT 1.5,
+  rear_circle_mm REAL NOT NULL DEFAULT 38.1,
+  bleed_in REAL NOT NULL DEFAULT 0.125,
+  safe_margin_in REAL NOT NULL DEFAULT 0.0625,
+  dimension_profile TEXT NOT NULL DEFAULT 'photo_fit',
+  background_style TEXT NOT NULL DEFAULT 'cream_damask',
+  default_font_set TEXT NOT NULL DEFAULT 'devil_dove_vintage',
+  default_gold_colour TEXT NOT NULL DEFAULT '#B88A2F',
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(packaging_template_id) REFERENCES packaging_templates(packaging_template_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS soap_products (
+  soap_product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_project_id INTEGER NOT NULL UNIQUE,
+  product_id INTEGER,
+  product_name TEXT NOT NULL,
+  product_family TEXT,
+  soap_type TEXT,
+  description_en TEXT,
+  description_fr TEXT,
+  net_weight_oz REAL,
+  net_weight_g REAL,
+  accent_colour TEXT,
+  secondary_colour TEXT,
+  rose_colour TEXT,
+  rose_asset_id TEXT NOT NULL DEFAULT 'rose-purple-v1',
+  website TEXT NOT NULL DEFAULT 'devilndove.com',
+  made_in_text_en TEXT NOT NULL DEFAULT 'Made in Canada',
+  made_in_text_fr TEXT NOT NULL DEFAULT 'Fabriqué au Canada',
+  print_status TEXT NOT NULL DEFAULT 'draft',
+  compliance_status TEXT NOT NULL DEFAULT 'needs_review',
+  active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE,
+  FOREIGN KEY(product_id) REFERENCES products(product_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_soap_products_product ON soap_products(product_id, active);
+
+CREATE TABLE IF NOT EXISTS soap_ingredients (
+  ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  soap_product_id INTEGER NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  inci_name TEXT,
+  display_name_en TEXT,
+  display_name_fr TEXT,
+  organic_flag INTEGER NOT NULL DEFAULT 0,
+  allergen_note TEXT,
+  required_on_label INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(soap_product_id) REFERENCES soap_products(soap_product_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_soap_ingredients_product ON soap_ingredients(soap_product_id, sort_order, ingredient_id);
+
+CREATE TABLE IF NOT EXISTS soap_label_claims (
+  claim_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  soap_product_id INTEGER NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  claim_en TEXT NOT NULL,
+  claim_fr TEXT NOT NULL,
+  icon_name TEXT,
+  is_approved INTEGER NOT NULL DEFAULT 0,
+  compliance_note TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(soap_product_id) REFERENCES soap_products(soap_product_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_soap_label_claims_product ON soap_label_claims(soap_product_id, sort_order, claim_id);
+
+CREATE TABLE IF NOT EXISTS soap_label_exports (
+  export_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  soap_product_id INTEGER NOT NULL,
+  template_id INTEGER NOT NULL,
+  packaging_project_version_id INTEGER,
+  version TEXT,
+  export_format TEXT NOT NULL,
+  file_name TEXT NOT NULL,
+  svg_url TEXT,
+  pdf_url TEXT,
+  png_url TEXT,
+  webp_url TEXT,
+  checksum TEXT,
+  generated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  generated_by INTEGER,
+  approval_status TEXT NOT NULL DEFAULT 'prepared',
+  print_test_status TEXT NOT NULL DEFAULT 'not_tested',
+  notes TEXT,
+  FOREIGN KEY(soap_product_id) REFERENCES soap_products(soap_product_id) ON DELETE CASCADE,
+  FOREIGN KEY(template_id) REFERENCES soap_label_templates(template_id) ON DELETE RESTRICT,
+  FOREIGN KEY(packaging_project_version_id) REFERENCES packaging_project_versions(packaging_project_version_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_soap_label_exports_product ON soap_label_exports(soap_product_id, generated_at DESC);
+
+CREATE TABLE IF NOT EXISTS soap_label_print_tests (
+  print_test_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_project_id INTEGER NOT NULL,
+  packaging_project_version_id INTEGER,
+  test_status TEXT NOT NULL DEFAULT 'needs_test',
+  printed_at TEXT,
+  printer_name TEXT,
+  paper_stock TEXT,
+  scale_percent REAL NOT NULL DEFAULT 100,
+  measured_strip_width_in REAL,
+  measured_band_height_in REAL,
+  measured_front_width_in REAL,
+  measured_front_height_in REAL,
+  measured_rear_circle_mm REAL,
+  wrap_fit_status TEXT NOT NULL DEFAULT 'not_checked',
+  legibility_status TEXT NOT NULL DEFAULT 'not_checked',
+  overlap_status TEXT NOT NULL DEFAULT 'not_checked',
+  proof_image_url TEXT,
+  notes TEXT,
+  reviewed_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE,
+  FOREIGN KEY(packaging_project_version_id) REFERENCES packaging_project_versions(packaging_project_version_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_soap_label_print_tests_project ON soap_label_print_tests(packaging_project_id, created_at DESC);
+
+-- Exact photo-match profile: the overall artboard and front oval follow the approved image/spec.
+-- The rear seal is 38.1 mm so it fits the 38.1 mm artboard. A separate 50 mm profile is seeded below because the supplied specification contains a physical conflict between a 38.1 mm artboard and a 50 mm rear circle.
+INSERT OR IGNORE INTO packaging_templates (
+  template_key,template_name,package_type,description,page_width_mm,page_height_mm,front_width_mm,front_height_mm,rear_width_mm,rear_height_mm,layout_json,theme_json,is_system,is_active
+) VALUES (
+  'soap-ribbon-glacial-approved-v1',
+  'Soap ribbon — Glacial Purple approved photo layout',
+  'soap_ribbon',
+  'Photo-matched continuous ribbon: English ingredients, 2 × 1.5 inch front oval with rose, French ingredients, rear seal, bilingual claims and net weight. The 0.75 inch band is centred in the 1.5 inch artboard.',
+  279.4,38.1,50.8,38.1,38.1,38.1,
+  '{"sections":["ingredients_en","front_oval","ingredients_fr","rear_seal","claims_weight","overlap"],"band_height_mm":19.05,"artboard_height_mm":38.1,"front_style":"glacial_photo_oval","rear_circle_spec_mm":50,"rear_circle_render_mm":38.1,"dimension_profile":"photo_fit","bleed_in":0.125,"safe_margin_in":0.0625}',
+  '{"rose_colour":"#7B4DA6","theme_colour":"#FBF5E8","border_colour":"#32105E","accent_gold":"#B88A2F","secondary_colour":"#5A2A86"}',
+  1,1
+);
+
+INSERT OR IGNORE INTO packaging_templates (
+  template_key,template_name,package_type,description,page_width_mm,page_height_mm,front_width_mm,front_height_mm,rear_width_mm,rear_height_mm,layout_json,theme_json,is_system,is_active
+) VALUES (
+  'soap-ribbon-spec-50mm-seal-v1',
+  'Soap ribbon — 50 mm rear-seal specification profile',
+  'soap_ribbon',
+  'Uses a 50 mm-high artboard so the specified 50 mm rear circle is not clipped. Requires physical review because the supplied specification also states a 1.5 inch overall artboard.',
+  279.4,50,50.8,38.1,50,50,
+  '{"sections":["ingredients_en","front_oval","ingredients_fr","rear_seal","claims_weight","overlap"],"band_height_mm":19.05,"artboard_height_mm":50,"front_style":"glacial_photo_oval","rear_circle_spec_mm":50,"rear_circle_render_mm":50,"dimension_profile":"50mm_seal","bleed_in":0.125,"safe_margin_in":0.0625}',
+  '{"rose_colour":"#7B4DA6","theme_colour":"#FBF5E8","border_colour":"#32105E","accent_gold":"#B88A2F","secondary_colour":"#5A2A86"}',
+  1,1
+);
+
+INSERT OR IGNORE INTO soap_label_templates (
+  packaging_template_id,template_name,version,artboard_width_in,artboard_height_in,band_height_in,front_oval_width_in,front_oval_height_in,rear_circle_mm,bleed_in,safe_margin_in,dimension_profile,background_style,default_font_set,default_gold_colour,is_active
+)
+SELECT packaging_template_id,template_name,'1.1',11.0,1.5,0.75,2.0,1.5,38.1,0.125,0.0625,'photo_fit','cream_damask','devil_dove_vintage','#B88A2F',1
+FROM packaging_templates WHERE template_key='soap-ribbon-glacial-approved-v1';
+
+INSERT OR IGNORE INTO soap_label_templates (
+  packaging_template_id,template_name,version,artboard_width_in,artboard_height_in,band_height_in,front_oval_width_in,front_oval_height_in,rear_circle_mm,bleed_in,safe_margin_in,dimension_profile,background_style,default_font_set,default_gold_colour,is_active
+)
+SELECT packaging_template_id,template_name,'1.1',11.0,1.96850394,0.75,2.0,1.5,50.0,0.125,0.0625,'50mm_seal','cream_damask','devil_dove_vintage','#B88A2F',1
+FROM packaging_templates WHERE template_key='soap-ribbon-spec-50mm-seal-v1';
+
+UPDATE packaging_templates
+SET page_width_mm=279.4,
+    page_height_mm=38.1,
+    front_width_mm=50.8,
+    front_height_mm=38.1,
+    rear_width_mm=38.1,
+    rear_height_mm=38.1,
+    layout_json='{"sections":["ingredients_en","front_oval","ingredients_fr","rear_seal","claims_weight","overlap"],"band_height_mm":19.05,"artboard_height_mm":38.1,"front_style":"glacial_photo_oval","rear_circle_spec_mm":50,"rear_circle_render_mm":38.1,"dimension_profile":"photo_fit","bleed_in":0.125,"safe_margin_in":0.0625}',
+    description='Build 222 exact photo-layout profile. The 0.75 inch band and 2 × 1.5 inch front oval are centred in the 11 × 1.5 inch artboard. Rear seal is rendered at 38.1 mm to fit; use the separate 50 mm profile when the larger seal is required.',
+    updated_at=CURRENT_TIMESTAMP
+WHERE template_key='soap-ribbon-scalloped-reference-v1';
+

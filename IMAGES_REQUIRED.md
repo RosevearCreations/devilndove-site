@@ -1099,3 +1099,20 @@ Use browser developer tools to confirm:
 - `assets/packaging-studio-placeholder.svg` — admin hero explanation; implemented as a safe vector placeholder.
 - `assets/soap-ribbon-scalloped-reference.svg` — editable-layout reference derived from the supplied soap ribbon; implemented as SVG, not a photograph.
 - Future approved photo: a straight, well-lit scan or overhead photograph of the printed ribbon beside a ruler. Recommended capture at 300 ppi or higher with the full cut edge visible. Keep it internal until packaging text, formula, rights and regulatory review are complete.
+
+## Build 222 — Soap Label Studio visual evidence
+
+### Included reusable assets
+- `assets/packaging/soap/reference/glacial-purple-aloe-soap-approved-reference.png` — approved structure/reference only; never use it as the final product-specific legal label.
+- `assets/packaging/soap/roses/purple-rose.svg`
+- `assets/packaging/soap/roses/green-rose.svg`
+- `assets/packaging/soap/roses/oatmeal-rose.svg`
+
+### Still required for each launch soap
+1. **Physical print-proof photograph** — full ribbon printed at 100% beside a ruler; clear enough to confirm total width, band height and front oval.
+2. **Wrapped front photograph** — label fitted to the actual soap with the front oval centred.
+3. **Wrapped back photograph** — rear seal, ingredients/claims and overlap visible.
+4. **Ingredient close-up** — legibility proof at normal viewing distance.
+5. **Final product gallery** — featured image plus supporting views; packaging proof does not replace public product photography.
+
+Recommended proof image: at least 1600 px on the long edge, sRGB JPG/WebP for review, with the original retained. Add the proof URL to the Soap Label Studio Print Test tab. Do not publish proof images automatically.

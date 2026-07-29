@@ -115,3 +115,34 @@ The fresh/aggregate schema files now also include the Build 213–215 Creative P
 
 ### `database_upgrade_current_pass.sql`
 This file is reset for Build 221 and now contains only the additive Build 221 migration. It no longer replays the accumulated Build 184–220 historical upgrade chain. Existing databases should use the numbered migrations as evidence and apply the current-pass file only after confirming Build 220 is present.
+
+## Build 222 — normalized soap-label data and physical print evidence
+
+Build 222 extends the Build 221 Packaging Studio rather than creating a disconnected label database:
+
+- `soap_label_templates` — soap-specific physical profile linked one-to-one to a broad `packaging_templates` row. Stores artboard, band, oval, rear-seal, bleed, safe-margin and profile values.
+- `soap_products` — normalized label identity linked one-to-one to a `packaging_projects` row and optionally to a commerce `products` row.
+- `soap_ingredients` — ordered INCI/English/French ingredient rows with organic, allergen-note and required-on-label fields.
+- `soap_label_claims` — ordered bilingual claim/icon rows with approval and compliance notes.
+- `soap_label_exports` — versioned prepared-export evidence including format, filename, URLs, checksum, approval and print-test state.
+- `soap_label_print_tests` — physical 100%-scale measurements, printer/paper, wrap fit, legibility, overlap, proof-image URL and reviewer evidence.
+
+### Data ownership
+- Commerce price, stock and public product identity remain in `products`.
+- Broad package project/version state remains in `packaging_projects` and `packaging_project_versions`.
+- Normalized soap content belongs in the Build 222 tables above.
+- `claims_json`, `ingredients_en` and `ingredients_fr` remain compatibility/current-draft fields in `packaging_projects`, but the Build 222 API synchronizes authoritative editable rows to the normalized tables. New code should not create another independent copy.
+- Visual theme/artwork JSON remains acceptable for bounded, versioned presentation settings; ingredients, claims, tests and exports must remain row-based.
+
+### Dimension profiles
+`soap-ribbon-glacial-approved-v1` uses an 11 × 1.5-inch artboard and renders the rear seal at 38.1 mm so it fits. `soap-ribbon-spec-50mm-seal-v1` uses a 50 mm-high artboard and a true 50 mm rear seal. This intentionally exposes the physical conflict in the source specification rather than clipping or mislabelling a file.
+
+### Current migration
+For an existing Build 221 database apply one of:
+
+```text
+database_build222_soap_label_startup_readiness.sql
+database_upgrade_current_pass.sql
+```
+
+They contain the same additive Build 222 upgrade. Do not apply both. The aggregate schema files include the same definitions for fresh installations.

@@ -1,9 +1,10 @@
-# Development Roadmap compatibility pointer — Build 221
+# Development Roadmap compatibility pointer — Build 222
 
-The active roadmap is the **Next 20 steps** section of `PROJECT_STATUS_AND_ROADMAP.md`. Build 221 completed the 20 implementation actions listed in **Completed implementation actions in Build 221**.
+The active roadmap is the **Next 20 steps — Build 223 direction** section of `PROJECT_STATUS_AND_ROADMAP.md`. Build 222 completed the 20 actions listed in **Completed implementation actions in Build 222**.
 
-The authoritative handoff pair is:
+Read in this order:
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
+3. `STARTUP_GO_LIVE_GUIDE.md`
 
-Packaging-specific architecture and the supplied soap-ribbon mapping are in `PACKAGING_STUDIO.md`. Older roadmap text is retained only in historical build files and must not override Build 221 safety, SEO, schema, packaging, deletion or inventory rules.
+Packaging work must also follow `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` and `PACKAGING_STUDIO.md`. Older roadmap files remain historical evidence and do not override Build 222 schema, launch, SEO, packaging, approval or data-integrity rules.
