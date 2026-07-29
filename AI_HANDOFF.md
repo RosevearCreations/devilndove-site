@@ -1,8 +1,28 @@
-# Devil n Dove AI Handoff — Build 222
+# Devil n Dove AI Handoff — Build 223
+
+## Build 223 outcome — product detail recovery
+Build 223 is a code-only production hotfix applied on top of Build 222.
+
+1. The exact runtime defect was in `/functions/api/product-detail.js`: the code called `.catch()` on the array returned by `normalizeResults(...)` rather than on the D1 promise. When `product_image_annotations` existed, every product-detail request could throw `normalizeResults(...).catch is not a function`.
+2. The image-annotation query now catches the D1 promise before normalization.
+3. Optional offer, set, gallery and resource-story sections degrade independently and return warnings instead of failing the entire product page.
+4. The storefront product-detail browser code now activates its catalog fallback for any failed detail response, including valid JSON 503 responses.
+5. Public product search now includes `slug`, and the browser retries the full active catalog when an older search endpoint cannot match the slug.
+6. Unhandled detail failures are recorded in `runtime_incidents` when D1 is available.
+7. No Build 223 schema migration is required. Build 222 remains the current database schema.
+
+## Build 223 deployment order
+1. Confirm Build 222 schema migration has already been applied.
+2. Do **not** run a new D1 migration for this hotfix.
+3. Deploy the complete Build 223 ZIP.
+4. Purge or bypass the Cloudflare cache for `/public/js/product-detail.js` if the old browser script remains cached.
+5. Open `/shop/`, select at least three active product cards, and use **View**.
+6. Confirm `/api/product-detail?slug=<slug>` returns HTTP 200 JSON with `ok:true`.
+7. Follow `BUILD223_VALIDATION.md` and record the live result in Post-Deploy Smoke Tests.
 
 ## Read these documents first
 1. `AI_HANDOFF.md` — current architecture, safety boundaries, deployment order and active workflows.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 222 work, launch position, known risks and the next 20 actions.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 223 hotfix, launch position, known risks and the next 20 actions.
 3. `STARTUP_GO_LIVE_GUIDE.md` — ordered, detailed instructions for every launch gate.
 
 Specialist references:
@@ -27,7 +47,7 @@ Build 222 advances launch readiness and converts the soap-label specification in
 9. **Dashboard discoverability** — Startup Readiness and Soap Label Studio are available directly from `/admin/`.
 10. **Documentation/schema synchronization** — the authoritative roadmap, gaps pointer, schema reference, packaging guide, specification, release notes, current migration and aggregate schemas describe Build 222 consistently.
 
-## Deployment order
+## Build 222 base deployment order
 1. Back up production D1 and record the backup name and time.
 2. Confirm Build 221 is already present.
 3. Apply **one** of:
