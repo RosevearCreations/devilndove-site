@@ -1,4 +1,14 @@
-# Release Notes — Build 222
+# Release Notes — Build 223
+
+## Product detail runtime hotfix — Build 223
+- Corrected the public product-detail API failure `normalizeResults(...).catch is not a function` that occurred whenever the image-annotation table was available.
+- Moved the database promise fallback inside `normalizeResults(...)` so image annotations resolve to an empty result safely instead of taking the entire page offline.
+- Isolated optional quantity-pricing, set-reservation, gallery-media and resource-story queries so an out-of-sync optional table no longer prevents basic product details from loading.
+- Preserved the product featured image when optional gallery tables cannot be read.
+- Corrected the browser fallback so valid JSON errors such as HTTP 503 now trigger the public catalog fallback; previously only malformed/non-JSON responses did.
+- Added slug to public catalog search and added a complete-catalog retry for older deployed endpoints.
+- Added runtime incident capture for any future unhandled public product-detail failure.
+- No D1 schema migration is required for Build 223. Deploy the complete package after Build 222 and run `BUILD223_VALIDATION.md`.
 
 ## Soap Label Studio and startup readiness
 - Added `/admin/packaging/soap-labels/` with a nine-tab exact-size bilingual soap-label editor.
@@ -13,7 +23,7 @@
 - Added direct Admin Dashboard cards for Startup Readiness and Soap Label Studio.
 - Updated the soap-label specification, Packaging Studio guide, canonical roadmap/handoff, schema reference, aggregate schemas, current migration and validation documents.
 
-## Deployment
+## Build 222 deployment
 Apply `database_build222_soap_label_startup_readiness.sql` after Build 221, or the identical `database_upgrade_current_pass.sql`, but not both. Then deploy the complete package and follow `BUILD222_VALIDATION.md`.
 
 ---

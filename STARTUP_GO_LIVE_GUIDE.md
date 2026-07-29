@@ -1,4 +1,4 @@
-# Devil n Dove Startup and Go-Live Guide — Build 222
+# Devil n Dove Startup and Go-Live Guide — Build 223
 
 **Updated:** 2026-07-29  
 **Purpose:** One ordered document showing every known item that can prevent or materially weaken a confident Devil n Dove public launch. Complete the items in sequence because later tests depend on earlier database, authentication, payment and inventory controls.
@@ -26,7 +26,7 @@
 2. Export or otherwise create a recoverable D1 backup before changing the schema.
 3. Apply **either** `database_build222_soap_label_startup_readiness.sql` **or** `database_upgrade_current_pass.sql`; do not apply both because the current-pass file contains the same Build 222 migration.
 4. Confirm the new tables exist: `soap_label_templates`, `soap_products`, `soap_ingredients`, `soap_label_claims`, `soap_label_exports`, and `soap_label_print_tests`.
-5. Deploy the full Build 222 package.
+5. Deploy the full Build 223 package after confirming the Build 222 schema is present. Build 223 itself has no D1 migration.
 6. Open `/admin/deployment-preflight/` and run every check.
 7. Save/export the preflight result and keep it with the release evidence.
 
@@ -416,6 +416,31 @@ The team can complete the entire customer journey without editing the database m
 
 ### Pass condition
 The public store is open only with products and workflows that have passed this guide, while unfinished development continues safely in the background.
+
+---
+
+## Product-card View and Product Details verification — **Launch blocker**
+
+### Where to go
+- Public shop: `/shop/`
+- Product route: `/shop/product/?slug=<product-slug>`
+- API route: `/api/product-detail?slug=<product-slug>`
+- Admin evidence: `/admin/post-deploy-smoke-tests/`
+
+### What to do
+1. Open the public shop in a private/incognito browser window so an administrator session does not hide public-only failures.
+2. Choose three different active products, including one with multiple images and one with only a featured image.
+3. Select **View** on each card.
+4. Confirm the product name, price, description, image and inventory state appear and the red “Product detail is temporarily unavailable” message does not appear.
+5. Open browser Developer Tools → **Network**, reload the product page, and select the request named `product-detail?slug=...`.
+6. Confirm the response status is **200**, the response content type is JSON, and the response begins with `{"ok":true`.
+7. When the API contains a `warnings` array, confirm the page still loads. Record the warning and review the corresponding optional table, but do not treat a missing optional story/gallery section as a complete storefront outage.
+8. Test one deliberately invalid slug and confirm it produces a clear not-found response without exposing stack traces or private data.
+9. Save the three successful URLs and results in Post-Deploy Smoke Tests.
+10. When the old JavaScript appears to remain in use after deployment, purge the Cloudflare cache or use a cache-busting reload, then repeat the test.
+
+### Pass condition
+Every active product card opens a usable detail page, the detail API returns HTTP 200 JSON for valid slugs, optional-section warnings do not hide the core product, and invalid slugs fail safely.
 
 ---
 

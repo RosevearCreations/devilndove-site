@@ -1,3 +1,9 @@
+# Build 223 schema note
+
+Build 223 is a code-only product-detail reliability hotfix. It introduces no tables, columns, indexes, triggers or data migration. Build 222 remains the current schema authority.
+
+Do not run a new D1 migration specifically for Build 223. The endpoint now tolerates optional-table/schema drift more safely, but this does not replace applying the Build 222 migration or maintaining the aggregate schemas.
+
 # Build 216 additions
 - `creative_project_inventory_posts`: one idempotent inventory posting per approved material review.
 - `creative_project_caip_mirrors`: tracks Creative Project evidence mirrored into CAIP.

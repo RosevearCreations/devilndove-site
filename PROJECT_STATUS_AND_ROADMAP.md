@@ -1,4 +1,24 @@
-# Devil n Dove Project Status and Roadmap — Build 222
+# Devil n Dove Project Status and Roadmap — Build 223
+
+## Build 223 completed hotfix
+1. Reproduced the product-detail failure against the current aggregate schema.
+2. Identified the exact error: `.catch()` was attached after `normalizeResults(...)`, which returns an array.
+3. Corrected the image-annotation D1 promise handling.
+4. Added independent failure boundaries around optional offers, set reservations, galleries and resource-story data.
+5. Preserved a featured-image fallback when gallery tables are unavailable.
+6. Corrected browser fallback activation for HTTP 503 JSON responses.
+7. Added slug-aware catalog fallback search.
+8. Added a full active-catalog retry for older deployed APIs.
+9. Added runtime incident capture for future public detail failures.
+10. Added a live product-detail go-live gate to the startup guide.
+11. Confirmed the fix against a fresh full aggregate schema.
+12. Confirmed the endpoint still returns a usable product against a deliberately minimal products-only schema.
+13. Synchronized root and public copies of the product-detail browser script.
+14. Updated authoritative handoff, roadmap, risks, release, schema reference and startup documentation.
+15. Added Build 223 validation and changed-file manifests.
+
+## Current launch impact
+The product-card **View** path is a launch blocker because buyers must be able to inspect product facts before adding to cart. Build 223 removes the known runtime defect and adds a second browser-side recovery path. Production verification is still required after deployment because cache state, D1 schema drift and live data cannot be proven from the package alone.
 
 ## Current position
 Devil n Dove is in launch-readiness and operational-polish, not early feature discovery. Catalog, media, inventory, projects, Content Studio, CAIP, packaging, social review, checkout, order and accounting foundations exist. The remaining work is primarily production proof, data completion, workflow hardening and controlled opening.
@@ -75,7 +95,7 @@ Detailed instructions are in `STARTUP_GO_LIVE_GUIDE.md` and the browser guide at
 - Social OAuth remains dependent on provider credentials, review and approval.
 - First-page local search placement cannot be guaranteed; local SEO must be maintained through relevance, accurate business information, useful content, prominence and customer trust.
 
-## Next 20 steps — Build 223 direction
+## Next 20 steps — Build 224 direction
 1. Implement true server-side print-PDF generation with exact media/bleed boxes and embedded or outlined fonts.
 2. Add printer calibration rulers, crop marks and a saved calibration profile per printer/paper combination.
 3. Add deterministic SVG text-overflow measurement and approval blockers for each label region.

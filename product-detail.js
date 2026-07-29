@@ -18,6 +18,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productTaxClassEl = document.getElementById("productTaxClass");
   const productInventoryEl = document.getElementById("productInventory");
   const productDescriptionEl = document.getElementById("productDescription");
+  const productQuickFactsCardEl = document.getElementById("productQuickFactsCard");
+  const productQuickFactsEl = document.getElementById("productQuickFacts");
+  const productVideoCardEl = document.getElementById("productVideoCard");
+  const productVideoMountEl = document.getElementById("productVideoMount");
   const productStoryCardEl = document.getElementById("productStoryCard");
   const productPublicStoryCardEl = document.getElementById("productPublicStoryCard");
   const productPublicStoryKickerEl = document.getElementById("productPublicStoryKicker");
@@ -54,8 +58,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const productCandleSoapDetailsEl = document.getElementById('productCandleSoapDetails');
   const productRelatedProofListEl = document.getElementById("productRelatedProofList");
   let currentProduct = null;
-  let currentQuantityPriceTiers = [];
-  let currentBundle = null;
   let currentTrustSummary = null;
 
   function show(el) { if (el) el.style.display = ""; }
@@ -223,6 +225,61 @@ document.addEventListener("DOMContentLoaded", async () => {
     productPolicyListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
   }
 
+  function safeHttpsUrl(value) {
+    try { const url = new URL(String(value || '').trim()); return url.protocol === 'https:' ? url.toString() : ''; } catch { return ''; }
+  }
+
+  function renderQuickFacts(product, storyNotes, listingProfile) {
+    if (!productQuickFactsCardEl || !productQuickFactsEl) return;
+    const profile = listingProfile && typeof listingProfile === 'object' ? listingProfile : {};
+    const story = storyNotes && typeof storyNotes === 'object' ? storyNotes : {};
+    const materials = String(profile.materials_text || product?.proof_material || product?.material_tags || product?.primary_material || product?.material || '').trim();
+    const process = String(product?.proof_process || story.process_notes || '').trim();
+    const rows = [
+      ['Best for', profile.best_for_text],
+      ['Materials', materials],
+      ['Finish / condition', profile.finish_text || product?.condition_summary],
+      ['Size / dimensions', profile.dimensions_text || (Number(product?.weight_grams || 0) > 0 ? `${Number(product.weight_grams)} g` : '')],
+      ['Care', profile.care_summary || story.care_notes],
+      ['Availability', profile.availability_note || (Number(product?.inventory_tracking || 0) === 1 ? (Number(product?.inventory_quantity || 0) > 0 ? 'Current stock shown above.' : 'Follow this item for restock or availability.') : '')],
+      ['Shipping / pickup', profile.shipping_pickup_note || story.local_pickup_note],
+      ['Handmade note', profile.handmade_variation_note || (String(product?.merchandise_origin || '').toLowerCase() === 'handmade' ? 'Each handmade piece may have small, honest variations in pattern, placement, or finish.' : '')]
+    ].filter(([, value]) => String(value || '').trim());
+    if (!rows.length) { hide(productQuickFactsCardEl); productQuickFactsEl.innerHTML = ''; return; }
+    productQuickFactsEl.innerHTML = rows.map(([label, value]) => `<div class="product-quick-fact"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`).join('');
+    show(productQuickFactsCardEl);
+    const videoUrl = safeHttpsUrl(profile.product_video_url);
+    if (!productVideoCardEl || !productVideoMountEl) return;
+    if (!videoUrl) { hide(productVideoCardEl); productVideoMountEl.innerHTML = ''; return; }
+    const file = videoUrl.toLowerCase();
+    productVideoMountEl.innerHTML = /\.(mp4|webm|ogg)(?:\?|$)/.test(file)
+      ? `<video controls preload="metadata" playsinline src="${escapeHtml(videoUrl)}">Your browser cannot play this video. <a href="${escapeHtml(videoUrl)}" target="_blank" rel="noopener">Open the video</a>.</video>`
+      : `<a class="btn" href="${escapeHtml(videoUrl)}" target="_blank" rel="noopener">Open approved product video</a>`;
+    show(productVideoCardEl);
+  }
+
+  function renderVisualProofModules(images) {
+    const root = document.getElementById('productVisualProofModules');
+    if (!root) return;
+    const safeImages = Array.isArray(images) ? images : [];
+    const slots = [
+      ['process', ['process_story','process'], 'Process'],
+      ['scale', ['scale_context','scale'], 'Scale'],
+      ['materials', ['material_tool_proof','detail_texture','close_up'], 'Materials'],
+      ['care', ['packaging_pickup','packaging','back_side','back_or_side'], 'Care']
+    ];
+    slots.forEach(([slot, roles, label]) => {
+      const figure = root.querySelector(`[data-product-proof-slot="${slot}"]`);
+      const match = safeImages.find((image) => roles.includes(String(image?.image_role || '').toLowerCase()));
+      if (!figure || !match?.image_url) return;
+      const image = figure.querySelector('img');
+      const note = figure.querySelector('figcaption span');
+      if (image) { image.src = match.image_url; image.alt = match.alt_text || `${label} view for ${currentProduct?.name || 'product'}`; image.classList.add('is-approved-product-proof'); }
+      if (note) note.textContent = match.caption || `${label} view from this listing.`;
+      figure.classList.add('has-approved-product-proof');
+    });
+  }
+
   function renderProcessLinks(product, resourceLinks) {
     if (!productProcessSummaryEl || !productProcessLinksEl) return;
     const hasStory = (resourceLinks?.length || 0) > 0;
@@ -231,6 +288,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       : 'Not every listing has full process links yet, so these shortcuts help buyers see the broader workshop story, gallery, and maker pages.';
     const links = [
       { href: '/gallery/', label: 'Gallery & media' },
+      { href: '/workshop-journal/', label: 'Workshop Journal' },
       { href: '/about/', label: 'About the workshop' },
       { href: '/creations/', label: 'Creations overview' },
       { href: '/events/', label: 'Events & markets' },
@@ -343,45 +401,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     show(productCandleSoapSafetyCardEl);
   }
 
-
-  function priceForQuantity(quantity) {
-    const qty = Math.max(1, Number(quantity || 1));
-    const eligible = currentQuantityPriceTiers.filter((row) => Number(row.min_quantity || 0) <= qty);
-    return eligible.length ? Number(eligible[eligible.length - 1].unit_price_cents || currentProduct?.price_cents || 0) : Number(currentProduct?.price_cents || 0);
-  }
-
-  function renderOfferSummary(product, tiers = [], bundle = null) {
-    currentQuantityPriceTiers = Array.isArray(tiers) ? tiers.slice().sort((a,b)=>Number(a.min_quantity||0)-Number(b.min_quantity||0)) : [];
-    currentBundle = bundle || null;
-    let node = document.getElementById('productOfferSummary');
-    if (!node && productPriceEl?.parentNode) {
-      node = document.createElement('div');
-      node.id = 'productOfferSummary';
-      node.className = 'product-offer-summary';
-      productPriceEl.parentNode.insertBefore(node, productPriceEl.nextSibling);
-    }
-    if (!node) return;
-    const tierMarkup = currentQuantityPriceTiers.length
-      ? `<div class="product-volume-pricing"><strong>Quantity savings</strong><ul>${currentQuantityPriceTiers.map((row)=>`<li>Buy ${Number(row.min_quantity||0)}+: ${escapeHtml(formatMoney(row.unit_price_cents, product.currency))} each${row.label?` — ${escapeHtml(row.label)}`:''}</li>`).join('')}</ul></div>`
-      : '';
-    const bundleMarkup = Number(bundle?.is_bundle || 0) === 1
-      ? `<div class="product-bundle-summary"><strong>Limited set</strong><p>${Number(bundle.available_quantity||0)} complete set${Number(bundle.available_quantity||0)===1?'':'s'} available. Components are reserved together and the set becomes unavailable when a complete set cannot be fulfilled.</p><ul>${(bundle.components||[]).map((row)=>`<li>${Number(row.quantity_per_bundle||1)} × ${escapeHtml(row.component_name||`Product ${row.component_product_id}`)}</li>`).join('')}</ul></div>`
-      : '';
-    node.innerHTML = tierMarkup + bundleMarkup;
-    node.hidden = !node.innerHTML;
-    updateDisplayedQuantityPrice();
-  }
-
-  function updateDisplayedQuantityPrice() {
-    if (!currentProduct || !productPriceEl) return;
-    const qty = Math.max(1, Number(productQuantityEl?.value || 1));
-    const unit = priceForQuantity(qty);
-    productPriceEl.textContent = unit === Number(currentProduct.price_cents || 0)
-      ? formatMoney(unit, currentProduct.currency)
-      : `${formatMoney(unit, currentProduct.currency)} each for ${qty}`;
-  }
-
-  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec, quantityPriceTiers, bundle) {
+  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec, listingProfile) {
     currentProduct = product || null;
     try { window.DDAnalytics?.trackFunnel?.('product_view', { source: 'product_detail', product_id: currentProduct?.product_id || null, slug: currentProduct?.slug || '' }); } catch {}
     if (productTypeEl) {
@@ -411,6 +431,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     renderMainImage(product, images);
     renderGallery(images, product.name || "Product");
+    renderQuickFacts(product, storyNotes, listingProfile);
+    renderVisualProofModules(images);
+    try { window.DDRecentlyViewed?.add?.(product); } catch {}
     renderResourceStory(resourceLinks, resourceSummary);
     renderReviews(reviews, reviewSummary);
     renderTrustSummary(product, trustSummary, images, resourceLinks);
@@ -419,7 +442,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderProcessLinks(product, resourceLinks);
     renderRelatedProducts(relatedProducts);
     renderCandleSoapSpec(candleSoapSpec);
-    renderOfferSummary(product, quantityPriceTiers, bundle);
     if (addToCartButton) {
       const externalOnly = String(product.sale_channel || 'onsite').toLowerCase() === 'external_only';
       addToCartButton.style.display = externalOnly ? 'none' : '';
@@ -441,11 +463,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function loadProductFallbackFromProducts(slug) {
-    const response = await fetch(`/api/products?q=${encodeURIComponent(slug)}`, { method: 'GET', headers: { Accept: 'application/json' } });
-    const data = await readJsonResponse(response, 'Fallback shop lookup failed.');
-    if (!response.ok || !data.ok) throw new Error(data.error || 'Fallback shop lookup failed.');
-    const rows = Array.isArray(data.products) ? data.products : [];
-    return rows.find((row) => String(row.slug || '').toLowerCase() === String(slug || '').toLowerCase()) || null;
+    const cleanSlug = String(slug || '').trim().toLowerCase();
+    // Build 223: the first lookup uses the slug-aware catalog search. If an older
+    // deployed products endpoint does not search slugs, retry the complete active
+    // catalog before declaring the product unavailable.
+    const paths = [
+      `/api/products?q=${encodeURIComponent(cleanSlug)}`,
+      '/api/products'
+    ];
+    let lastError = null;
+    for (const path of paths) {
+      try {
+        const response = await fetch(path, { method: 'GET', headers: { Accept: 'application/json' } });
+        const data = await readJsonResponse(response, 'Fallback shop lookup failed.');
+        if (!response.ok || !data.ok) throw new Error(data.error || 'Fallback shop lookup failed.');
+        const rows = Array.isArray(data.products) ? data.products : [];
+        const match = rows.find((row) => String(row.slug || '').trim().toLowerCase() === cleanSlug) || null;
+        if (match) return match;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    if (lastError) console.warn('Product detail fallback warning:', lastError);
+    return null;
   }
 
   async function loadProduct() {
@@ -458,15 +498,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!slug) throw new Error("No product slug was provided.");
       const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET", headers: { Accept: "application/json" } });
       let data = null;
+      let detailError = null;
       try {
         data = await readJsonResponse(response, "Failed to load product detail.");
-      } catch (detailError) {
+        if (!response.ok || !data?.ok) {
+          detailError = new Error(data?.error || `Failed to load product detail (HTTP ${response.status}).`);
+        }
+      } catch (error) {
+        detailError = error;
+      }
+
+      // Build 223: a valid JSON 503 previously bypassed the fallback because only JSON
+      // parse failures entered the fallback branch. Any failed detail response now tries
+      // the public catalog before showing an error page.
+      if (detailError) {
         const fallbackProduct = await loadProductFallbackFromProducts(slug);
         if (!fallbackProduct) throw detailError;
+        console.warn('Extended product detail was unavailable; rendering the catalog fallback.', detailError);
         data = {
           ok: true,
           product: fallbackProduct,
           images: Array.isArray(fallbackProduct.images) ? fallbackProduct.images : (Array.isArray(fallbackProduct.image_urls) ? fallbackProduct.image_urls.map((image_url) => ({ image_url, alt_text: fallbackProduct.name || 'Product image' })) : []),
+          storefront_images: Array.isArray(fallbackProduct.images) ? fallbackProduct.images : [],
           resource_links: [],
           resource_summary: {},
           trust_summary: { image_count: Number(fallbackProduct.image_count || 0), in_stock: Number(fallbackProduct.inventory_quantity || 0) > 0 },
@@ -474,12 +527,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           review_summary: {},
           story_notes: {},
           related_products: [],
-          warning: detailError.message
+          quantity_price_tiers: [],
+          bundle: null,
+          warning: detailError.message,
+          fallback_mode: 'public_catalog'
         };
       }
-      if (!response.ok && !data.ok) throw new Error(data.error || "Failed to load product.");
-      if (!data.ok) throw new Error(data.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null, data.quantity_price_tiers || [], data.bundle || null);
+      if (!data?.ok) throw new Error(data?.error || "Failed to load product.");
+      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null, data.listing_profile || null);
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
       const resolvedCanonical = data.product?.canonical_url || window.location.href;
@@ -546,8 +601,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  productQuantityEl?.addEventListener('input', updateDisplayedQuantityPrice);
-
   if (addToCartButton) {
     addToCartButton.addEventListener("click", () => {
       clearCartMessage();
@@ -558,10 +611,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       const quantity = Number(productQuantityEl?.value || 1);
       if (!Number.isInteger(quantity) || quantity <= 0) return setCartMessage("Please enter a valid quantity.", true);
-      const available = Math.max(0, Number(currentProduct.inventory_quantity || 0));
-      if (Number(currentProduct.inventory_tracking || 0) === 1 && quantity > available) return setCartMessage(`Only ${available} available.`, true);
       try {
-        window.DDCart.addToCart({ ...currentProduct, quantity_price_tiers: currentQuantityPriceTiers, bundle: currentBundle }, quantity);
+        window.DDCart.addToCart(currentProduct, quantity);
         try { window.DDAnalytics?.trackCart?.('add_to_cart', { meta: { source: 'product_detail', product_id: currentProduct.product_id, quantity } }); } catch {}
         setCartMessage("Added to cart successfully.");
         if (productQuantityEl) productQuantityEl.value = "1";
