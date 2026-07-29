@@ -1,4 +1,5 @@
 import { ensureProductOffersSchema, getBundleDetails, getQuantityPriceTiers } from './_lib/productOffers.js';
+import { captureRuntimeIncident } from './_lib/adminAudit.js';
 // File: /functions/api/product-detail.js
 // Brief description: Returns one active storefront product with images, SEO fields,
 // linked making-story resources, and stock/trust summaries for the product detail page.
@@ -284,16 +285,31 @@ async function handleProductDetailRequest(context) {
   product.proof_localities = splitFilterValues(product.locality_label, product.local_pickup_note, product.sourcing_notes);
   product.proof_locality = filterText(product.proof_localities);
 
-  await ensureProductOffersSchema(db);
-  const quantity_price_tiers = await getQuantityPriceTiers(db, product.product_id);
-  const bundle = await getBundleDetails(db, product.product_id);
+  // Build 223: product detail must remain usable when optional offer tables are not yet
+  // present in production. Optional sections now degrade independently instead of taking
+  // the entire product page offline.
+  const section_warnings = [];
+  let quantity_price_tiers = [];
+  let bundle = { is_bundle: 0, settings: null, components: [], available_quantity: null };
+  try {
+    await ensureProductOffersSchema(db);
+    quantity_price_tiers = await getQuantityPriceTiers(db, product.product_id);
+    bundle = await getBundleDetails(db, product.product_id);
+  } catch (error) {
+    section_warnings.push(`offers_unavailable: ${String(error?.message || error || 'unknown error')}`);
+  }
+
   if (Number(bundle?.is_bundle || 0) === 1) {
     product.inventory_tracking = 1;
     product.inventory_quantity = Math.max(0, Number(bundle.available_quantity || 0));
     product.is_bundle = 1;
   } else {
     product.is_bundle = 0;
-    const reserved = await db.prepare(`SELECT COALESCE(SUM(reserved_component_quantity),0) reserved_quantity FROM product_bundle_components WHERE component_product_id=?`).bind(product.product_id).first().catch(()=>({reserved_quantity:0}));
+    const reserved = await db.prepare(`SELECT COALESCE(SUM(reserved_component_quantity),0) reserved_quantity FROM product_bundle_components WHERE component_product_id=?`)
+      .bind(product.product_id).first().catch((error)=>{
+        section_warnings.push(`set_reservations_unavailable: ${String(error?.message || error || 'unknown error')}`);
+        return {reserved_quantity:0};
+      });
     product.reserved_for_sets = Math.max(0, Number(reserved?.reserved_quantity || 0));
     if (Number(product.inventory_tracking || 0) === 1) product.inventory_quantity = Math.max(0, Number(product.inventory_quantity || 0) - product.reserved_for_sets);
   }
@@ -313,32 +329,62 @@ async function handleProductDetailRequest(context) {
   const stockUnitLabelExpr = inventoryColumns.has('stock_unit_label') ? `COALESCE(NULLIF(sii.stock_unit_label,''),'unit')` : `'unit'`;
   const unitCostExpr = inventoryColumns.has('unit_cost_cents') ? `COALESCE(sii.unit_cost_cents,0)` : (inventoryColumns.has('cost_cents') ? `COALESCE(sii.cost_cents,0)` : `0`);
 
-  const images = normalizeResults(await db.prepare(`
-    SELECT pi.product_image_id, pi.product_id, pi.image_url,
-           ${hasImageAnnotationJoin && imageAnnotationColumns.has('alt_text') ? `COALESCE(pia.alt_text, pi.alt_text, p.name)` : `COALESCE(pi.alt_text, p.name)`} AS alt_text,
-           pi.sort_order, pi.created_at,
-           ${piaColumn('product_image_annotation_id', 'NULL')},
-           ${piaColumn('image_title', `''`)},
-           ${piaColumn('caption', `''`)},
-           ${piaColumn('focal_point_x', 'NULL')},
-           ${piaColumn('focal_point_y', 'NULL')},
-           ${piaColumn('annotation_notes', `''`)},
-           ${piaColumn('image_role', `''`)},
-           ${piaColumn('public_use_status', `'internal_review'`)},
-           ${piaColumn('consent_record_id', 'NULL')},
-           ${mcrColumn('consent_status', `''`)},
-           ${mcrColumn('consent_scope', `''`)},
-           ${mcrColumn('public_use_allowed', '0', 'consent_public_use_allowed')},
-           ma.variant_role
-    FROM product_images pi
-    ${hasImageAnnotationJoin ? `LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id` : ``}
-    LEFT JOIN products p ON p.product_id = pi.product_id
-    LEFT JOIN media_assets ma ON ma.product_id = pi.product_id AND ma.public_url = pi.image_url AND ma.deleted_at IS NULL
-    ${hasConsentJoin ? `LEFT JOIN media_consent_records mcr ON mcr.consent_record_id = pia.consent_record_id` : ``}
-    WHERE pi.product_id = ?
-    ORDER BY pi.sort_order ASC, pi.product_image_id ASC
-    LIMIT 20
-  `).bind(product.product_id).all());
+  let images = [];
+  try {
+    images = normalizeResults(await db.prepare(`
+      SELECT pi.product_image_id, pi.product_id, pi.image_url,
+             ${hasImageAnnotationJoin && imageAnnotationColumns.has('alt_text') ? `COALESCE(pia.alt_text, pi.alt_text, p.name)` : `COALESCE(pi.alt_text, p.name)`} AS alt_text,
+             pi.sort_order, pi.created_at,
+             ${piaColumn('product_image_annotation_id', 'NULL')},
+             ${piaColumn('image_title', `''`)},
+             ${piaColumn('caption', `''`)},
+             ${piaColumn('focal_point_x', 'NULL')},
+             ${piaColumn('focal_point_y', 'NULL')},
+             ${piaColumn('annotation_notes', `''`)},
+             ${piaColumn('image_role', `''`)},
+             ${piaColumn('public_use_status', `'internal_review'`)},
+             ${piaColumn('consent_record_id', 'NULL')},
+             ${mcrColumn('consent_status', `''`)},
+             ${mcrColumn('consent_scope', `''`)},
+             ${mcrColumn('public_use_allowed', '0', 'consent_public_use_allowed')},
+             ma.variant_role
+      FROM product_images pi
+      ${hasImageAnnotationJoin ? `LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id` : ``}
+      LEFT JOIN products p ON p.product_id = pi.product_id
+      LEFT JOIN media_assets ma ON ma.product_id = pi.product_id AND ma.public_url = pi.image_url AND ma.deleted_at IS NULL
+      ${hasConsentJoin ? `LEFT JOIN media_consent_records mcr ON mcr.consent_record_id = pia.consent_record_id` : ``}
+      WHERE pi.product_id = ?
+      ORDER BY pi.sort_order ASC, pi.product_image_id ASC
+      LIMIT 20
+    `).bind(product.product_id).all());
+  } catch (error) {
+    section_warnings.push(`product_images_unavailable: ${String(error?.message || error || 'unknown error')}`);
+    // Keep the featured image stored on the product row so a schema mismatch in the
+    // optional gallery tables does not remove all visual context from the page.
+    if (String(product.featured_image_url || '').trim()) {
+      images = [{
+        product_image_id: 0,
+        product_id: Number(product.product_id || 0),
+        image_url: String(product.featured_image_url || '').trim(),
+        alt_text: product.name || 'Product image',
+        sort_order: 0,
+        created_at: product.updated_at || product.created_at || '',
+        product_image_annotation_id: null,
+        image_title: '',
+        caption: '',
+        focal_point_x: null,
+        focal_point_y: null,
+        annotation_notes: '',
+        image_role: 'hero_front',
+        public_use_status: 'product_page_ok',
+        consent_record_id: null,
+        consent_status: '',
+        consent_scope: '',
+        consent_public_use_allowed: 0,
+        variant_role: 'featured'
+      }];
+    }
+  }
 
   let image_annotations = [];
   if (hasImageAnnotationJoin) {
@@ -360,10 +406,12 @@ async function handleProductDetailRequest(context) {
       FROM product_image_annotations
       WHERE product_id = ?
       ORDER BY product_image_annotation_id ASC
-    `).bind(product.product_id).all()).catch(() => []);
+    `).bind(product.product_id).all().catch(() => ({ results: [] })));
   }
 
-  const resource_links = normalizeResults(await db.prepare(`
+  let resource_links = [];
+  try {
+    resource_links = normalizeResults(await db.prepare(`
     SELECT prl.product_resource_link_id, prl.product_id, prl.resource_kind, prl.source_key, prl.quantity_used,
            prl.usage_notes, prl.sort_order,
            ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} AS consumption_mode,
@@ -381,7 +429,7 @@ async function handleProductDetailRequest(context) {
     LEFT JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
     WHERE prl.product_id = ?
     ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
-  `).bind(product.product_id).all()).map((row) => {
+    `).bind(product.product_id).all()).map((row) => {
     const usageUnitsPerStockUnit = Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1);
     const onHand = Number(row.on_hand_quantity || 0);
     const reserved = Number(row.reserved_quantity || 0);
@@ -434,7 +482,11 @@ async function handleProductDetailRequest(context) {
         buildable_products: buildableProducts
       } : null
     };
-  });
+    });
+  } catch (error) {
+    section_warnings.push(`product_resources_unavailable: ${String(error?.message || error || 'unknown error')}`);
+    resource_links = [];
+  }
 
   const resource_summary = {
     total_linked_items: resource_links.length,
@@ -628,7 +680,7 @@ async function handleProductDetailRequest(context) {
   } catch {}
 
   const related_products = await relatedProductsByProof();
-  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, listing_profile, candle_soap_spec, reviews, review_summary, related_products, quantity_price_tiers, bundle });
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, listing_profile, candle_soap_spec, reviews, review_summary, related_products, quantity_price_tiers, bundle, warnings: section_warnings });
 }
 
 
@@ -636,6 +688,13 @@ export async function onRequestGet(context) {
   try {
     return await handleProductDetailRequest(context);
   } catch (error) {
+    await captureRuntimeIncident(context.env, context.request, {
+      incident_scope: 'public_product_detail',
+      incident_code: 'product_detail_unhandled_failure',
+      severity: 'error',
+      message: 'Public product detail failed and required the catalog fallback.',
+      details: { error: String(error?.stack || error?.message || error || 'Unknown product detail error') }
+    }).catch(() => false);
     return json({
       ok: false,
       error: 'Product detail is temporarily unavailable, but the page can try the shop fallback.',

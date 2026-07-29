@@ -663,6 +663,7 @@ function buildWhere({ productColumns, seoColumns, hasSeoJoin, filters, includeSe
     const like = `%${filters.q}%`;
     const searchParts = [];
     [
+      "slug",
       "name",
       "short_description",
       "description",
