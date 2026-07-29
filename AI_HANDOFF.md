@@ -1,69 +1,97 @@
-# Devil n Dove AI Handoff — Build 221
+# Devil n Dove AI Handoff — Build 222
 
-## Read these two files first
-1. `AI_HANDOFF.md` — current architecture, safety boundaries, deployment requirements and active workflows.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — launch status, completed Build 221 actions, current risks and the next 20 steps.
+## Read these documents first
+1. `AI_HANDOFF.md` — current architecture, safety boundaries, deployment order and active workflows.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 222 work, launch position, known risks and the next 20 actions.
+3. `STARTUP_GO_LIVE_GUIDE.md` — ordered, detailed instructions for every launch gate.
 
-Specialist reference: `PACKAGING_STUDIO.md`. Historical build notes must not override this canonical pair.
+Specialist references:
+- `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md`
+- `PACKAGING_STUDIO.md`
+- `CONTENT_AUTOMATION_STUDIO.md`
+- `DATABASE_SCHEMA_REFERENCE.md`
 
-## Build 221 outcome
-Build 221 concentrates on operational cleanup, packaging and lot traceability:
+Historical build notes remain evidence only and must not override this canonical set.
 
-1. **Draft & Archive Cleanup Centre** — `/admin/products/` now has a visible, searchable cleanup panel for both draft and archived products. A preflight separates disposable product-owned working rows from protected order, payment, reservation, content, accounting and customer history.
-2. **Corrected deletion classification** — product-owned draft records such as images, SEO, tags, resource links, offer rows, QA rows and story working rows no longer block the cleanup routine merely because their foreign key is not cascading. Unused recipe/material links can be discarded without changing stock; rows that may involve reserved stock still require the full review. Older non-FK product references are now discovered explicitly, and protected order, accounting, project, packaging, customer-story, recall and public-proof history still blocks deletion.
-3. **Packaging Studio** — `/admin/packaging-studio/` stores structured bilingual packaging projects, reusable SVG templates, review versions and export history in D1.
-4. **Supplied soap-ribbon template** — the first preferred template recreates the photographed structure with a narrow 19 mm band, extended scalloped badge, curved collection/scent text, bilingual centre title and botanical side ornaments. The full 50 mm canvas prevents badge clipping.
-5. **Lot reconciliation controls** — purchase-lot totals can be compared with main on-hand stock, reviewed without changing stock, or deliberately applied using typed confirmation and an audited inventory movement. FIFO/FEFO are stored as preferences only; automatic depletion is not enabled.
+## Build 222 outcome
+Build 222 advances launch readiness and converts the soap-label specification into an operating CAIP packaging workflow:
 
-## Deployment
-Apply either the dedicated migration or the reset current-pass file (not both):
+1. **Soap Label Studio** — `/admin/packaging/soap-labels/` provides a focused nine-tab label editor while `/admin/packaging-studio/` remains the broader packaging entry point.
+2. **Photo-matched ribbon structure** — the live SVG follows the approved Glacial Purple reference: English ingredient panel, rose-led front oval, French ingredient panel, rear brand seal, bilingual claim rows and net weight.
+3. **Exact physical profiles** — the preferred photo-fit profile is 11 × 1.5 inches with a centred 0.75-inch band and 2 × 1.5-inch front oval. A separate 50 mm rear-seal profile is retained because a 50 mm circle cannot fit inside a 38.1 mm-high artboard without clipping.
+4. **Normalized D1 soap-label records** — templates, soap products, ingredient rows, bilingual claim rows, export evidence and physical print-test evidence are no longer dependent on one large JSON document.
+5. **Rose asset library** — purple, green and oatmeal rose vectors are stored as reusable assets; a rose remains mandatory for the soap-label visual language.
+6. **Approval gate** — a label version cannot be approved until a 100%-scale print test has been recorded as passed.
+7. **Export evidence** — SVG, PNG, WebP, JPG and browser print preparation record filenames, versions and SHA-256 checksums. Browser printing is not represented as a true CMYK prepress PDF.
+8. **Startup Readiness Guide** — `/admin/startup-readiness/` and `STARTUP_GO_LIVE_GUIDE.md` provide 20 ordered launch gates with direct paths, detailed test steps, evidence and pass conditions.
+9. **Dashboard discoverability** — Startup Readiness and Soap Label Studio are available directly from `/admin/`.
+10. **Documentation/schema synchronization** — the authoritative roadmap, gaps pointer, schema reference, packaging guide, specification, release notes, current migration and aggregate schemas describe Build 222 consistently.
 
-`database_build221_packaging_studio_cleanup_lot_controls.sql`
+## Deployment order
+1. Back up production D1 and record the backup name and time.
+2. Confirm Build 221 is already present.
+3. Apply **one** of:
+   - `database_build222_soap_label_startup_readiness.sql`, or
+   - `database_upgrade_current_pass.sql`.
+4. Do not apply both; the current-pass file contains the same Build 222 migration.
+5. Deploy the complete Build 222 ZIP.
+6. Follow `BUILD222_VALIDATION.md`.
+7. Work through `STARTUP_GO_LIVE_GUIDE.md` in order.
 
-or `database_upgrade_current_pass.sql`, which contains the same Build 221 upgrade only.
+Runtime schema guards can create minimum packaging records, but production D1 must still receive the reviewed migration deliberately.
 
-Then deploy the complete ZIP. It is additive and must follow Build 220. Runtime guards create the same minimum tables, but production D1 should still receive the migration deliberately.
+## New or changed routes
+- `/admin/packaging/soap-labels/` — focused Soap Label Studio.
+- `/admin/packaging-studio/` — broader packaging project interface, updated to the approved soap-ribbon reference.
+- `/admin/startup-readiness/` — browser-friendly go-live gate guide.
+- `/api/admin/packaging-studio` — Build 222 normalized soap data, version, export and print-test actions.
 
-## New or changed endpoints
-- `GET/POST /api/admin/packaging-studio`
-- `GET/POST/DELETE /api/admin/inventory-lots` now includes lot policy and reconciliation actions.
-- `GET/POST /api/admin/delete-product` now classifies product-owned working records separately from protected business history.
-- `POST /api/admin/archive-product` now uses the shared DB resolver, audit trail and incident fallback, then directs the product into the Archived cleanup filter.
-
-## New admin surfaces
-- `/admin/packaging-studio/`
-- Draft & Archive Cleanup Centre inside `/admin/products/`
-- Lot reconciliation panel inside Tools & Supplies purchase lots.
+## Soap-label data authority
+- Product sale facts remain in `products`.
+- Packaging project identity and current draft remain in `packaging_projects`.
+- Soap-specific normalized content is stored in `soap_products`, `soap_ingredients` and `soap_label_claims`.
+- Review snapshots remain in `packaging_project_versions`.
+- Physical print evidence is stored in `soap_label_print_tests`.
+- Prepared-export evidence is stored in `soap_label_exports` and the broader `packaging_export_history`.
+- Small bounded visual settings may remain JSON; ingredients, claims, tests, products and exports use relational rows because they require ordering, review and independent updates.
 
 ## Packaging safety boundaries
-- Packaging content is a draft until formula, INCI, bilingual identity, metric quantity, dealer/contact details, warnings, claims and physical print have been reviewed.
-- Browser export is not regulatory approval.
-- A saved Packaging Studio version does not update the product page or publish media.
-- The supplied photo is a layout reference; editable text and colours are recreated as SVG rather than embedding the photograph.
-- The dealer principal address is intentionally required by the Packaging Studio common-field preflight.
+- The approved image is a structural and visual reference, not a source of verified formula or legal copy.
+- Never infer INCI names, allergens, warnings, product claims, net quantity or bilingual wording from a picture.
+- SVG is the authoritative editable layout. PNG, WebP and JPG are previews.
+- Browser Print/Save PDF is not a true CMYK prepress export.
+- Approval requires a saved version and a passed physical print test at 100% scale.
+- A label approval does not publish the product, alter inventory or submit regulatory forms.
+- The 50 mm rear-circle requirement conflicts physically with a 1.5-inch (38.1 mm) artboard. Build 222 exposes two explicit profiles rather than silently clipping or changing dimensions.
 
-## Product deletion safety boundaries
-- Permanent deletion is only for unused incorrect drafts or unused archives.
-- Product numbers and SKUs remain retired after deletion.
-- Any true historical reference blocks deletion and requires Archive.
-- Product-owned working rows are removed in the same reviewed operation.
-- Linked material rows require the existing Correct / remove workflow when reservation release or physical stock return needs review.
-- R2 objects are not automatically deleted because media may be reused elsewhere.
+## Launch-critical limitations
+The site should not be considered fully ready merely because the pages load. Production proof is still required for:
+- login, reset and role enforcement;
+- live payment/webhook idempotency;
+- exact-once inventory consumption and refund restoration;
+- final-unit and component-set concurrency;
+- taxes, shipping/pickup and transactional email;
+- complete launch-product facts and real media rights;
+- physical soap-label proof and regulatory review;
+- analytics/Search Console/Business Profile verification;
+- D1/R2 restore rehearsal and rollback;
+- a complete paid-order-to-fulfilment rehearsal.
 
-## Lot reconciliation safety boundaries
-- Adding or editing a lot marks reconciliation `needs_review`.
-- **Record review only** creates evidence without changing main stock.
-- **Apply lot total to main on-hand** requires `APPLY LOT TOTAL`, records before/after quantities and creates a movement where the movement table exists.
-- FIFO/FEFO are policy preferences only. Automatic lot selection and lot-level consumption remain future work.
+The exact sequence and instructions are in `STARTUP_GO_LIVE_GUIDE.md`.
 
 ## SEO and UI rules
-- Every public and admin HTML file currently has exactly one H1.
-- Admin Packaging Studio is `noindex,nofollow`.
-- Continue descriptive titles, one clear main heading, crawlable descriptive links, visible buyer wording and truthful local Southern Ontario relevance.
-- Do not create public thin pages for each package template or scent unless they provide unique buyer value.
+- Exactly one H1 per exposed HTML page.
+- Each public indexable page needs a distinctive title, useful meta description, canonical URL, descriptive internal links and truthful visible buyer wording.
+- Admin and private operational pages remain `noindex,nofollow` where appropriate.
+- Local language must remain relevant to actual Southern Ontario service or pickup reach; no build can guarantee first-page placement.
+- Product and merchant structured data must match visible price, availability and product facts.
+- Continue mobile touch targets, sticky action placement, overflow checks, keyboard operation and low-bandwidth fallbacks.
 
-## Current launch-critical limitations
-Payment/inventory settlement, refund restoration, concurrency/oversell proof, production email delivery, shipping/tax verification, backup restore rehearsal and social OAuth remain launch gates. Packaging Studio and cleanup do not remove those requirements.
+## Error and fallback rules
+- Admin APIs return structured JSON errors and record runtime incidents when D1, authentication or validation fails.
+- The Packaging Studio preserves a browser-local recovery draft when a save cannot reach D1.
+- Fallback content must never imply that a save, export, payment, inventory movement or approval succeeded when it did not.
+- Destructive and financial actions remain explicit, authenticated, audited and idempotent where possible.
 
 ## Validation
-Follow `BUILD221_VALIDATION.md`. The migration, delete preflight, photo-reference SVG, version/export workflow and lot reconciliation must be tested against a staging D1 backup before production use.
+Use `BUILD222_VALIDATION.md`. At minimum test both dimension profiles, structured ingredient and claim rows, SVG generation, checksum recording, local-draft recovery, physical print-test gating, one-H1 coverage, public SEO metadata, local references, CSS balance, JavaScript syntax and migration idempotency.

@@ -139,6 +139,16 @@ REQUIRED_FILES = [
     'public/js/admin-delete-product.js',
     'public/js/admin-site-item-inventory.js',
     'BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md',
+    'database_build221_packaging_studio_cleanup_lot_controls.sql',
+    'database_build222_soap_label_startup_readiness.sql',
+    'database_upgrade_current_pass.sql',
+    'admin/packaging-studio/index.html',
+    'admin/packaging/soap-labels/index.html',
+    'admin/startup-readiness/index.html',
+    'functions/api/admin/packaging-studio.js',
+    'public/js/admin-packaging-studio.js',
+    'DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md',
+    'STARTUP_GO_LIVE_GUIDE.md',
 ]
 
 def read(path: Path) -> str:
@@ -279,12 +289,24 @@ def check_schema_files(checks: list[dict]) -> None:
         'build_195_product_lifecycle_sku_inventory_cards',
         'product_material_return_audit',
         'build_196_product_correction_material_returns',
+        'packaging_templates',
+        'packaging_projects',
+        'packaging_project_versions',
+        'packaging_export_history',
+        'inventory_lot_policies',
+        'inventory_lot_reconciliations',
+        'soap_label_templates',
+        'soap_products',
+        'soap_ingredients',
+        'soap_label_claims',
+        'soap_label_exports',
+        'soap_label_print_tests',
     ]
     required = {
         'database_schema.sql': schema_needles,
         'database_full_schema.sql': schema_needles,
         'database_store_schema.sql': schema_needles,
-        'database_upgrade_current_pass.sql': ['application_sanity_snapshots', 'value_added_modification_candidates', 'build_184_sanity_check_and_value_roadmap', 'catalog_product_number_sequence', 'product_deletion_audit', 'site_inventory_item_descriptions', 'build_195_product_lifecycle_sku_inventory_cards', 'product_material_return_audit', 'build_196_product_correction_material_returns'],
+        'database_upgrade_current_pass.sql': ['soap_label_templates', 'soap_products', 'soap_ingredients', 'soap_label_claims', 'soap_label_exports', 'soap_label_print_tests'],
         'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
         'database_build182_mobile_visual_polish.sql': ['desktop_mobile_parity_checks', 'visual_enrichment_candidates', 'build_182_mobile_visual_polish'],
         'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
@@ -306,6 +328,8 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build194_storefront_discovery_product_facts_media_roles.sql': ['product_listing_profiles', 'product_media_role_assignments', 'storefront_discovery_audit_rows', 'build_194_storefront_discovery_product_facts_media_roles'],
         'database_build195_product_lifecycle_sku_inventory_cards.sql': ['catalog_product_number_sequence', 'product_deletion_audit', 'site_inventory_item_descriptions', 'build_195_product_lifecycle_sku_inventory_cards'],
         'database_build196_product_correction_material_returns.sql': ['product_material_return_audit', 'build_196_product_correction_material_returns'],
+        'database_build221_packaging_studio_cleanup_lot_controls.sql': ['packaging_templates', 'packaging_projects', 'packaging_project_versions', 'packaging_export_history', 'inventory_lot_policies', 'inventory_lot_reconciliations'],
+        'database_build222_soap_label_startup_readiness.sql': ['soap_label_templates', 'soap_products', 'soap_ingredients', 'soap_label_claims', 'soap_label_exports', 'soap_label_print_tests'],
     }
     missing=[]
     detail=[]
@@ -315,7 +339,7 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 195 schema tables and ledger markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 222 schema tables and current migration markers found in the correct schema files.', 'missing':missing})
 
 def main() -> int:
     checks=[]
@@ -326,7 +350,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 195','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 222','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
