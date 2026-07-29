@@ -1,111 +1,101 @@
-# Devil n Dove Project Status and Roadmap — Build 221
+# Devil n Dove Project Status and Roadmap — Build 222
 
 ## Current position
-Devil n Dove remains in launch-readiness and operational-polish. Catalog, media, inventory, projects, Content Studio, CAIP, social review, order/payment and accounting foundations exist. Build 221 improves three daily operating gaps: removing unused duplicate records, tracing repeated material purchases, and creating packaging from structured data.
+Devil n Dove is in launch-readiness and operational-polish, not early feature discovery. Catalog, media, inventory, projects, Content Studio, CAIP, packaging, social review, checkout, order and accounting foundations exist. The remaining work is primarily production proof, data completion, workflow hardening and controlled opening.
 
-## Completed implementation actions in Build 221
-1. Added a dedicated Draft & Archive Cleanup Centre above the product editor.
-2. Added search and Draft/Archived/All filters independent of the long product table.
-3. Added row-level removal preflight with protected-history explanation.
-4. Corrected safe classification for product-owned working records, including older product-reference tables without declared foreign keys.
-5. Allowed unused linked recipe/material rows to be discarded with a duplicate while requiring the full review only when reserved stock may be involved.
-6. Hardened Archive with DB/DD_DB compatibility, audit logging, incident fallback, typed deletion confirmation and protected-history controls.
-7. Added the Packaging Studio admin route and dashboard navigation.
-8. Added structured D1 packaging templates and packaging projects.
-9. Added immutable packaging review versions and review states.
-10. Added packaging export-history evidence.
-11. Added the supplied scalloped soap-ribbon reference template.
-12. Corrected the print canvas so the medallion can extend beyond the 19 mm band without clipping.
-13. Added curved upper/lower text, bilingual centre title, side ornaments, badge shapes and colour controls.
-14. Added a one-click reference example using Coconut milk / Luxury Soap / Savon de luxe / Sweet Vanilla.
-15. Added SVG, PNG, JPG and Print/Save PDF preparation.
-16. Added browser-local packaging draft fallback when the network or D1 is unavailable.
-17. Added common Canadian cosmetic-label field preflight and explicit legal-review boundaries.
-18. Added lot-to-main on-hand comparison, discrepancy display and reconciliation history.
-19. Added deliberate audited application of lot totals to main inventory plus manual/FIFO/FEFO preferences.
-20. Updated the canonical Markdown pair, Packaging Studio specialist guide, schema reference, current/full/store/core schema guidance, release notes, custom-request canonical/Open Graph metadata, validation guide and changed-file manifest.
+Build 222 implements the soap-label automation specification as a structured CAIP packaging workflow and makes the launch blockers easier to find and complete.
 
-## How the workflows now operate
-
-### Remove the triplicate drafts or archives
-Open Products and use **Draft & Archive Cleanup**. Select Drafts or Archived, search the product, and choose **Check removal**. **Permanent remove** becomes available only when the live preflight finds no protected history and no material action requiring the full correction panel. Archiving is not a prerequisite for an unused draft; an unused archived duplicate can also be checked and removed.
-
-### Recreate the supplied soap ribbon
-Open Packaging Studio, create a project and choose **Soap ribbon — scalloped medallion reference**. The photographed layout maps:
-- Collection to the upper curved text.
-- English and French product identity to the centre.
-- Product or scent name to the lower curved text.
-- Ingredients, dealer/contact, claims and net quantity to the band panels.
-
-The built-in example reproduces the visible wording as a starting demonstration. Replace every field with the real product facts before saving a review version or printing.
-
-### Reconcile repeated purchases
-Open Tools & Supplies, choose **Lots**, and enter each purchase separately. The reconciliation panel compares remaining lot quantities with the main on-hand count. Record a review without changing inventory, or apply the lot total deliberately with typed confirmation. Choose Manual, FIFO or FEFO as a future-depletion preference.
+## Completed implementation actions in Build 222
+1. Added a dedicated `/admin/packaging/soap-labels/` route with exactly one H1 and noindex protection.
+2. Added direct Soap Label Studio and Startup Readiness cards to the Admin Dashboard.
+3. Reworked the soap ribbon renderer to follow the approved Glacial Purple layout order and visual hierarchy.
+4. Added the approved reference image as an internal design reference rather than embedding it as production artwork.
+5. Added reusable purple, green and oatmeal rose SVG assets.
+6. Added a nine-tab editor: Product, Ingredients, French, Rose & Colours, Claims, Layout, Preview, Print Test and Versions.
+7. Added structured bilingual ingredient rows with order, INCI, organic and allergen-review fields.
+8. Added structured bilingual claim rows with icon, approval and compliance-note fields.
+9. Added exact-dimension summaries and guide controls for bleed, safe areas, folds and overlap/glue zones.
+10. Added a photo-fit 11 × 1.5-inch profile with a centred 0.75-inch band and 2 × 1.5-inch front oval.
+11. Added a separate 50 mm rear-seal profile so the specification conflict is visible and testable rather than clipped.
+12. Added normalized D1 tables for soap templates, products, ingredients, claims, exports and print tests.
+13. Added synchronization between the Packaging Studio project and normalized soap-label rows.
+14. Added SVG, PNG, WebP, JPG and browser-print preparation with predictable filenames.
+15. Added SHA-256 export checksum recording and version/export evidence.
+16. Added physical 100%-scale print-test records with measured dimensions, wrap fit, legibility, overlap and proof-image fields.
+17. Blocked label approval until a passed physical print test exists.
+18. Added browser-local recovery when D1 or the network is unavailable, without presenting the fallback as a successful server save.
+19. Added `STARTUP_GO_LIVE_GUIDE.md` and `/admin/startup-readiness/` with 20 ordered launch gates, detailed paths, instructions and pass conditions.
+20. Updated the authoritative Markdown set, Packaging Studio specification/guide, schema reference, aggregate/current migration files, release notes and validation documents for Build 222.
 
 ## Launch sanity check
 
-### Green — structurally ready
-- Public catalog and product detail foundations.
-- One featured plus six supporting product images.
-- One-H1, title/meta/canonical and structured-data guardrails.
-- Review-first product, media, content and packaging workflows.
-- Draft/archive cleanup with historical-record protection.
-- Tools & Supplies table editing, lots and reconciliation evidence.
-- Quantity specials and limited-set availability calculations.
-- Product-backed and content-only Creative Projects.
+### Structurally ready
+- Public catalog, product detail, cart and checkout foundations.
+- Product media roles, alt text, rights review and up-to-seven-image direction.
+- Draft/archive cleanup with protected-history preflight.
+- Tools and Supplies row editing, Amazon review draft and purchase-lot evidence.
+- Quantity specials and component-set availability calculations.
+- Creative Projects that may be product-backed or content-only.
+- Content Studio, CAIP evidence and review-first publication foundations.
+- Structured Packaging Studio and Soap Label Studio.
+- One-H1 and public title/meta/canonical guardrails.
 
-### Yellow — deployed proof or operating completion required
-- Production authentication and password-reset proof.
-- Stripe/PayPal payment and webhook idempotency.
-- Paid-order inventory consumption and cancellation/refund restoration.
-- Limited-set component settlement after payment.
-- Tax, pickup, Canada/US shipping and refund calculations.
-- Transactional email delivery.
-- Seven real images, alt text and rights review for launch products.
-- Physical packaging print proof, formula/INCI review and Canadian label review.
-- Accessibility/device testing and backup/restore rehearsal.
+### Must be proven before unrestricted opening
+1. Production login, password reset, session expiry and lower-role denial.
+2. Live Stripe capture and signed webhook idempotency.
+3. PayPal either fully proven or hidden.
+4. Exact-once inventory consumption after payment.
+5. Exact-once release/restoration after failure, cancellation and refund.
+6. Concurrent final-unit and final-set checkout behaviour.
+7. Launch-stock physical counts and lot reconciliation.
+8. Quantity-special, coupon, tax and refund calculations.
+9. Shipping and pickup destinations, rates and instructions.
+10. Registration, reset, order, refund and fulfilment email delivery.
+11. A small, fully green opening-day product list.
+12. Real product images, rights, alt text, derivatives and fallback delivery.
+13. Verified soap formula/INCI/bilingual label content and physical print proof.
+14. Cosmetic notification/change-control process for applicable products.
+15. Public policy accuracy and checkout/footer discoverability.
+16. Analytics, Search Console, sitemap and Business Profile verification.
+17. Mobile, accessibility, structured-data and launch-path performance checks.
+18. D1/R2 restore and rollback rehearsal.
+19. A complete real paid-order, fulfilment and separate refund rehearsal.
+20. A controlled opening with conservative stock and active monitoring.
 
-### Red — do not assume complete
-- Proven concurrent oversell protection for the final unit/set.
-- Automatic FIFO/FEFO lot depletion tied to approved material consumption.
-- Provider-approved production social OAuth and token lifecycle.
-- Fully automated TikTok/YouTube publishing.
-- Accountant-approved month-end and export package.
+Detailed instructions are in `STARTUP_GO_LIVE_GUIDE.md` and the browser guide at `/admin/startup-readiness/`.
 
-## Next 20 steps
-1. Apply and verify `database_build221_packaging_studio_cleanup_lot_controls.sql` on staging, then production D1 after backup.
-2. Use the Cleanup Centre to remove two disposable duplicate rows and confirm the surviving product and retired numbers remain correct.
-3. Test an archived disposable duplicate separately to confirm Archive is not a permanent-deletion blocker by itself.
-4. Create the first real soap-ribbon project from the supplied reference and measure the physical printed badge, band and wrap length.
-5. Confirm the actual soap-bar dimensions and adjust template dimensions only from measured print evidence.
-6. Complete formula-specific INCI, bilingual product identity, dealer address, contact, metric quantity, warnings and claims review for the first soap.
-7. Save and approve a Packaging Studio version only after a physical print proof has been checked for legibility and alignment.
-8. Add template-level safe-area, bleed, cut/fold guides and printer calibration marks.
-9. Add approved font-family controls with embedded/outlined print fallback rules.
-10. Add QR-code generation linked to the canonical product or care page without making the label depend on the QR code.
-11. Reconcile all repeated goat-milk base, oils, mica and coloured-base purchases against physical stock.
-12. Add explicit lot selection when approved Creative Project material usage posts to inventory.
-13. Implement automatic FIFO/FEFO suggestions, while keeping the final lot choice reviewable.
-14. Complete transactional paid-order inventory settlement for regular products and sets.
-15. Add failed/expired payment, cancellation, refund and partial-refund inventory restoration.
-16. Add idempotency and concurrency tests so payment/webhook retries cannot consume stock twice.
-17. Run Product Release Preflight on every intended launch product and close required blockers.
-18. Prove authentication, checkout, payment, tax, shipping, email, mobile and accessibility paths on deployed production-like infrastructure.
-19. Complete realized-margin reporting, role authorization for reversals/accounting exports, CAIP-summary selection and cost-template management.
-20. Complete social OAuth only after provider approval, encrypted token storage, refresh and disconnect behaviour are proven.
+## Known issues and risks
+- The specification states both a 1.5-inch artboard and a 50 mm rear circle. Since 50 mm is taller than 38.1 mm, both cannot be true without clipping or a taller canvas. Build 222 provides two explicit profiles; a physical test must choose the production profile.
+- Browser Print/Save PDF is not yet a true server-generated CMYK prepress PDF with embedded/outlined fonts, crop marks and verified bleed boxes.
+- Ingredient-panel overflow now uses a conservative eight-line approval blocker, but exact glyph-width measurement is still outstanding; visual and physical review remain mandatory, especially for long French or INCI copy.
+- Rose vectors are initial reusable assets; final colour, contrast and print reproduction need proofing.
+- Product formula and supplier descriptions must not be copied directly into a cosmetic ingredient declaration without review.
+- Payment and inventory settlement still need deployed exact-once evidence before scarce products or sets are opened broadly.
+- Automatic FIFO/FEFO lot consumption remains disabled; policies are preferences and evidence only.
+- Social OAuth remains dependent on provider credentials, review and approval.
+- First-page local search placement cannot be guaranteed; local SEO must be maintained through relevance, accurate business information, useful content, prominence and customer trust.
 
-## SEO and local-search guardrails
-Google continues to recommend helpful people-first content, using the words buyers use in prominent places such as titles and main headings, and descriptive alt/link text. Titles should remain descriptive and concise. Local results remain primarily influenced by relevance, distance and prominence; no implementation can guarantee first-page placement.
+## Next 20 steps — Build 223 direction
+1. Implement true server-side print-PDF generation with exact media/bleed boxes and embedded or outlined fonts.
+2. Add printer calibration rulers, crop marks and a saved calibration profile per printer/paper combination.
+3. Add deterministic SVG text-overflow measurement and approval blockers for each label region.
+4. Add wrapped-soap front/back/side mockups generated from the same source SVG.
+5. Add uploaded print-proof photo storage in R2 with checksum and version linkage.
+6. Add barcode, SKU, batch/lot and optional QR zones for market/retail label variants.
+7. Link a finished soap product and its verified recipe/formula to a label draft without duplicating source facts.
+8. Add reviewed ingredient-translation/version control rather than free-text overwrite.
+9. Add allergen and warning review queues with effective-date evidence.
+10. Add approved-label lock, supersession and controlled reprint workflow.
+11. Complete live Stripe/webhook exact-once settlement integration tests and saved evidence.
+12. Complete failed/abandoned/cancelled/refunded inventory release and restoration tests.
+13. Add a concurrency-safe stock reservation transaction for the final unit and component set.
+14. Add role-specific authorization for permanent delete, inventory reversal, label approval and accounting export.
+15. Add an actionable Startup Readiness database cockpit with owner, status, evidence URL, due date and blocker severity.
+16. Add automated transactional-email test records and resend/failure diagnostics.
+17. Add shipping/tax scenario fixtures for Ontario, other supported provinces, pickup and any enabled US destinations.
+18. Add product-family realized margin trends using sales, allocated project cost, packaging, channel fees and refunds.
+19. Allow deliberately approved CAIP summaries to be selected for Content Studio packages.
+20. Complete social OAuth only after provider credentials, callbacks, scopes and platform approvals are available.
 
-Continue:
-- exactly one clear H1 per exposed page;
-- unique descriptive titles and meta descriptions;
-- buyer-language category/product copy rather than internal system terminology;
-- truthful Southern Ontario and Tillsonburg relevance where the business actually serves or sells;
-- crawlable descriptive internal links;
-- consistent mobile/desktop visible content and alt text;
-- Product structured data matching visible price and availability;
-- no thin public pages for admin packaging templates or quantity tiers.
-
-## Documentation authority
-The authoritative pair remains `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. `PACKAGING_STUDIO.md` is the current specialist guide. `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AND_RISKS.md` and `NEW_CHAT_STATUS.md` are compatibility pointers. Build validation files remain retained evidence.
+## Operating direction after launch
+Open with a small, complete product list. Continue adding products, content, packaging variants and automation in the background only when the existing order, inventory, email, refund and fulfilment workflows remain observable and reversible.

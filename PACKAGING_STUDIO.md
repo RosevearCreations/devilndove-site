@@ -1,76 +1,121 @@
-# Devil n Dove Packaging Studio — Build 221
+# Devil n Dove Packaging Studio — Build 222
 
 ## Purpose
-Packaging Studio creates reusable print packaging from structured product data rather than artwork with permanent text. The first operating template recreates the supplied soap ribbon: a narrow 19 mm wrap band, a scalloped front medallion extending beyond the band, curved collection and scent text, bilingual centre identity, botanical side ornaments, ingredient panels, rear medallion, claims and metric net quantity.
+Packaging Studio creates reusable packaging from structured product data rather than flattening permanent text into a picture. Build 222 adds a focused Soap Label Studio that follows the approved Glacial Purple Aloe Soap continuous ribbon and the authoritative `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md`.
 
-## Supplied soap-ribbon mapping
-The photographed reference is represented without embedding the photograph itself:
+## Admin routes
+- `/admin/packaging-studio/` — all structured packaging projects and templates.
+- `/admin/packaging/soap-labels/` — focused soap-label project list and nine-tab editor.
+- `/admin/startup-readiness/` — ordered launch gates, including physical label proof and regulatory workflow.
 
-- Upper curved text: `collection_name` or an optional upper-arc override.
-- Centre English title: `product_identity_en`, for example `Luxury Soap`.
-- Centre French title: `product_identity_fr`, for example `Savon de luxe`.
-- Lower curved text: `product_name` or an optional lower-arc override.
-- Side artwork: structured botanical, minimal or none.
-- Narrow wrap band: 19 mm high.
-- Full export canvas: 279.4 mm × 50 mm so the medallion is not clipped.
+## Approved soap-ribbon structure
+The live SVG uses one continuous ribbon in this order:
 
-The built-in **Apply reference example** control loads `Coconut milk`, `Luxury Soap`, `Savon de luxe`, and `Sweet Vanilla` as a demonstration. Those values must be reviewed and replaced for each real product.
+```text
+English ingredients | front oval | French ingredients | rear seal | bilingual claims + net weight | overlap/glue
+```
 
-## Initial operating scope
-- Scalloped soap-ribbon template based on the supplied reference.
-- Standard 11 × 0.75 inch soap-ribbon template.
-- Editable colours, botanical style, badge shape and centre mark.
-- English/French product identity and supporting copy.
-- INCI ingredient field.
-- Metric net quantity, dealer identity/address, contact, claims and bilingual warnings.
-- Live SVG preview with automatic font scaling.
-- Structured D1 projects, templates, versions and export history.
-- SVG, PNG, JPG and browser Print/Save PDF preparation.
-- Browser-local draft fallback when D1 or the network is unavailable.
+The front oval recreates the approved hierarchy without embedding the reference picture:
+- `Rosevear Creations`
+- `- Devil n Dove -`
+- a product-coloured rose as the primary botanical
+- product family/variant and soap type
+- `Handcrafted with Care`
+- `Made in Canada`
+- website/brand seal as configured
+
+The rear seal contains the brand, small-batch line, website and Canadian origin. The right panel supports editable bilingual claim/icon rows and net quantity.
+
+## Exact physical profiles
+### Photo-fit profile — preferred starting point
+- artboard: 11.00 × 1.50 inches;
+- band: 11.00 × 0.75 inches, centred vertically;
+- front oval: 2.00 × 1.50 inches, centred on the same line;
+- rear seal rendered at 38.1 mm so it fits the 38.1 mm artboard;
+- bleed: 0.125 inch;
+- safe margin: 0.0625 inch default.
+
+### 50 mm rear-seal profile
+- artboard width: 11.00 inches;
+- artboard height: 50 mm (about 1.9685 inches);
+- band: 0.75 inch;
+- front oval: 2.00 × 1.50 inches;
+- rear seal: 50 mm.
+
+The source specification requires both a 1.5-inch artboard and 50 mm rear circle. Since 50 mm exceeds 38.1 mm, Build 222 does not silently clip the seal or misstate the dimensions. Both profiles remain explicit until physical testing chooses the production geometry.
+
+## Editor tabs
+1. **Product** — product link, family, variant/type, brand, website, Canadian origin and net quantity.
+2. **Ingredients** — ordered INCI/English rows, organic flag, allergen note and required-on-label state.
+3. **French** — matched French display rows and completeness warnings.
+4. **Rose & Colours** — rose asset, rose colour, product accent, gold and background palette.
+5. **Claims** — ordered bilingual claim/icon rows, approval and compliance notes.
+6. **Layout** — dimension profile, safe/bleed values, guide toggles and section controls.
+7. **Preview** — exact-source SVG, region checks and downloadable previews.
+8. **Print Test** — 100%-scale measurements, printer/paper, fit, legibility, overlap, proof URL and reviewer notes.
+9. **Versions** — review snapshots, approval state and export/checksum history.
+
+## Data authority
+- `products` remains the public commerce product authority.
+- `packaging_templates` and `packaging_projects` remain the broad packaging engine.
+- `soap_label_templates` stores soap-specific physical profiles.
+- `soap_products` stores soap-label product identity and visual selection linked to the packaging project.
+- `soap_ingredients` stores ordered ingredient/translation rows.
+- `soap_label_claims` stores ordered bilingual claim rows and approval evidence.
+- `packaging_project_versions` stores review snapshots and source SVG.
+- `soap_label_print_tests` stores physical evidence and measured dimensions.
+- `soap_label_exports` stores format, filename, checksum, version and print-test status.
+
+Structured rows replace duplicated JSON for ingredients, claims, print tests and exports. Small bounded visual options may remain JSON because they are versioned with the project and do not require independent inventory-style editing.
+
+## Export rules
+- SVG is the editable master.
+- PNG, WebP and JPG are previews.
+- Browser Print/Save PDF prepares a measured print but is not a true CMYK prepress PDF.
+- Predictable names use the product slug and version.
+- Each prepared export records a SHA-256 checksum where browser support is available.
+- Approval is blocked until a saved version has a passed 100%-scale print test.
 
 ## Review and compliance boundary
-Packaging Studio is an authoring and preflight aid, not legal approval. Before printing or selling a cosmetic, verify the visible label against current Canadian requirements and the actual formula. Common fields checked by the application include:
-
-- product identity in English and French;
+The system helps find missing fields; it does not approve a formula or legal label. Before sale, verify:
+- actual formula and INCI order;
+- English/French product identity and warnings;
 - metric net quantity;
-- INCI ingredient list;
-- dealer identity and principal place of business;
+- dealer/business identity and principal address;
 - consumer contact information;
-- bilingual warnings or cautions when applicable.
+- claim substantiation;
+- fragrance/allergen obligations that apply at the sale date;
+- physical fit, legibility, scale, overlap and colour.
 
-Approval must remain deliberate. An SVG export or saved version does not prove regulatory compliance, print quality, colour accuracy, ingredient accuracy or claim substantiation.
+Never use supplier marketing bullets as an ingredient declaration without review. Never infer a cosmetic claim or warning from the reference artwork.
 
-## Data model
-- `packaging_templates` — reusable dimensions, layout and theme defaults.
-- `packaging_projects` — current structured label content linked optionally to a product.
-- `packaging_project_versions` — immutable review snapshots and SVG evidence.
-- `packaging_export_history` — prepared export format, filename and source snapshot.
+## Error and fallback behaviour
+- D1/auth/validation failures return structured errors and create runtime incidents.
+- The browser stores a local recovery draft when a server save cannot complete.
+- The recovery draft is clearly marked local and is not considered a version, approval or server export.
+- Failed exports and failed print tests cannot advance approval.
 
-Editable content remains in database columns and JSON subdocuments for small bounded theme/artwork settings. Product facts remain in the product system; Packaging Studio does not replace the catalog.
+## Current completion
+Implemented:
+- exact SVG canvas profiles;
+- photo-matched section order;
+- structured product, ingredient and claim editing;
+- reusable rose assets;
+- guide overlays;
+- versions, checksums and export evidence;
+- local recovery;
+- physical print-test recording and approval gate;
+- mobile-responsive editor and sticky actions.
 
-## Future packaging types
-The engine should expand by template, not by separate disconnected tools:
-
-- candle and wax-melt labels;
-- lotion bars, lip balms, bottles and essential oils;
-- jewelry display cards and hang tags;
-- care, thank-you and QR information cards;
-- craft-fair price labels and retail shelf labels;
-- shipping labels, box wraps and gift-set packaging.
-
-## CAIP and Content Studio relationship
-Packaging assets can later become CAIP-controlled derivatives linked to their source product/project, rights state, approved claims and version. Packaging Studio must not auto-publish, overwrite source media or silently promote draft claims into public copy.
+Still required for production-grade prepress:
+- server-generated print PDF with exact media/bleed boxes;
+- embedded or outlined fonts;
+- explicit RGB/CMYK conversion/profile workflow;
+- crop/calibration marks;
+- automated region text measurement;
+- R2 proof-image upload;
+- locked approved-version/supersession workflow;
+- barcode/batch/QR retail variants.
 
 ## Deployment
-Apply `database_build221_packaging_studio_cleanup_lot_controls.sql`, deploy the complete build, open `/admin/packaging-studio/`, create a test project, save a review version and verify all four export paths before using a real production label.
-
-## Current competitive print baseline
-Current mainstream label/design tools emphasize editable templates and resizing, while production-oriented print export commonly includes bleed, crop marks and CMYK PDF output. Build 221 reaches the structured-template, resizing, auto-font-scaling and multi-format draft-export stage, but its browser Print/Save PDF must **not** be described as a true CMYK prepress file.
-
-Next print-engine priorities are therefore:
-- configurable safe areas and bleed;
-- visible cut, fold and wrap guides;
-- printer calibration marks and measured scaling proof;
-- true print-PDF generation with embedded or outlined fonts;
-- explicit RGB/CMYK handling and printer-profile guidance;
-- QR generation that supplements rather than replaces mandatory label information.
+Apply `database_build222_soap_label_startup_readiness.sql` after Build 221, or the identical `database_upgrade_current_pass.sql`, but not both. Deploy the complete build and follow `BUILD222_VALIDATION.md`, then complete Gate 13 in `STARTUP_GO_LIVE_GUIDE.md` for each launch soap.

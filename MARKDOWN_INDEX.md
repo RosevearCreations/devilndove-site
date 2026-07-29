@@ -1,32 +1,33 @@
-# Devil n Dove Markdown Index — Build 221
+# Devil n Dove Markdown Index — Build 222
 
 ## Authoritative documents — always read first
-1. `AI_HANDOFF.md` — current architecture, workflows, safety boundaries, deployment and endpoints.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — launch status, completed Build 221 actions, current risks and next 20 steps.
-
-These are the active planning and handoff documents.
+1. `AI_HANDOFF.md` — current architecture, routes, deployment, safety and data authority.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — current status, completed Build 222 work, risks and next 20 steps.
+3. `STARTUP_GO_LIVE_GUIDE.md` — detailed ordered launch blockers, paths, instructions and pass conditions.
 
 ## Current specialist references
-- `PACKAGING_STUDIO.md` — supplied soap-ribbon mapping, structured packaging architecture, compliance boundary and future templates.
+- `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` — authoritative soap-label physical, visual, data, workflow and approval specification.
+- `PACKAGING_STUDIO.md` — implemented Packaging/Soap Label Studio mapping and remaining print-engine boundaries.
 - `CONTENT_AUTOMATION_STUDIO.md` — Content Studio and CAIP operating rules.
-- `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md` — provider prerequisites and OAuth guidance.
-- `LOCAL_SEO_PLAYBOOK.md` — public SEO implementation guidance.
-- `IMAGES_REQUIRED.md` — missing-image and sizing guidance.
+- `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md` — provider prerequisites and OAuth setup.
+- `LOCAL_SEO_PLAYBOOK.md` — public SEO and truthful local-search guidance.
+- `IMAGES_REQUIRED.md` — product, content and packaging image requirements.
+- `DATABASE_SCHEMA_REFERENCE.md` — current schema additions and data ownership.
 
 ## Current validation and deployment references
-- `BUILD221_VALIDATION.md` — Build 221 test plan.
-- `BUILD221_CHANGED_FILES.md` — Build 221 file manifest.
-- `database_build221_packaging_studio_cleanup_lot_controls.sql` — additive D1 migration.
-- `POST_DEPLOY_SMOKE_TEST.md` — general deployed checks.
-- `CLOUDFLARE_ENVIRONMENT_CHECKLIST.md` — bindings and environment review.
-- `DATABASE_SCHEMA_REFERENCE.md` — schema lookup; verify live D1 before destructive changes.
+- `BUILD222_VALIDATION.md`
+- `BUILD222_CHANGED_FILES.md`
+- `database_build222_soap_label_startup_readiness.sql`
+- `database_upgrade_current_pass.sql`
+- `POST_DEPLOY_SMOKE_TEST.md`
+- `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md`
 
 ## Compatibility pointers
 - `DEVELOPMENT_ROADMAP.md`
 - `KNOWN_GAPS_AND_RISKS.md`
 - `NEW_CHAT_STATUS.md`
 
-These point to the canonical pair and must not be treated as separate roadmaps.
+These point to the canonical documents and are not separate roadmaps.
 
 ## Historical evidence
-Earlier `BUILD*_VALIDATION.md`, numbered historical migrations, `AI_CONTEXT.md`, `COMPETITIVE.md` and older planning notes remain for traceability. They do not override Build 221.
+Earlier `BUILD*_VALIDATION.md`, numbered migrations and older planning documents remain for traceability. They must not be rewritten as current state and do not override Build 222.

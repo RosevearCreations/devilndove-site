@@ -1,29 +1,20 @@
-# Devil n Dove Sanity Health Check — Build 209
+# Devil n Dove Sanity and Health Check — Build 222
 
-## Canonical truth
+## Current architecture health
+- Supported fresh schema: `database_full_schema.sql`.
+- Store aggregate: `database_store_schema.sql`, repaired in Build 222 so it can validate independently while remaining compatible with the main users table.
+- Core-plus-history aggregate: `database_schema.sql`, repaired with required commerce parents; production upgrades still use numbered migrations.
+- Current additive migration: `database_build222_soap_label_startup_readiness.sql` or identical `database_upgrade_current_pass.sql`.
+- Canonical handoff: `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `STARTUP_GO_LIVE_GUIDE.md`.
 
-Read `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` first. This file is a short quality checkpoint.
+## Build 222 health result
+- Soap-label source data is normalized into relational rows for product, ingredients, claims, exports and print tests.
+- Packaging current-draft compatibility fields remain synchronized rather than becoming another independent data authority.
+- The approved ribbon reference is reproduced by deterministic SVG structure, not flattened into a non-editable image.
+- Label approval requires a saved version and physical proof.
+- New admin routes remain private/noindex and have one H1.
+- Public SEO metadata and local references remain complete in static validation.
+- CSS and JavaScript syntax checks pass.
 
-## Build 209 checkpoint
-
-- `/admin/inventory-operations/` has scoped contrast and responsive fixes only; public storefront styling is not changed.
-- All inventory controls, cards, inputs, tables, messages, and action columns use a readable dark theme.
-- Desktop tables stay inside their own scroll container when wide. At phone widths, inventory, movement, and stock report tables become labelled cards.
-- Inventory page accepts `?product_id=<id>` and routes that context into the Product Tools & Supplies selector.
-- Product Release Preflight adds read-only, non-blocking inventory/maker-input context.
-- Inventory context never affects release handoff/publish scores and never writes stock, reservations, costs, supplier data, product-resource links, CAIP evidence, rights, consent, media, or publication status.
-- No D1 migration is required.
-- Admin visual placeholder remains internal-only.
-- Outstanding separate incident: `POST /api/auth/login` `500` still needs a safe response/log detail; current `users`/`sessions` D1 schema is already confirmed.
-
-## Required proof
-
-Run `BUILD209_VALIDATION.md` after deployment, then `POST_DEPLOY_SMOKE_TEST.md`.
-
-
-## Build 217 current release
-See `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `BUILD217_VALIDATION.md`. Build 217 adds reasoned inventory reversals, applied cost templates, percentage fees, linked-product cost allocations, CAIP-derived reviewed summaries, and Creative Assets contrast fixes.
-
-## Build 221 sanity additions
-Packaging Studio, draft/archive cleanup, and lot reconciliation are review-first. A successful UI render is not proof that packaging is legally compliant, a product is safe to delete, or lot totals match physical stock. Validate against staging D1, a database backup, physical counts and a printed label proof.
-
+## Launch health
+The application is structurally mature but unrestricted opening remains dependent on the 20 gates in `STARTUP_GO_LIVE_GUIDE.md`. The highest-risk unresolved areas are payment/webhook idempotency, exact-once inventory restoration, final-unit concurrency, transactional email, tax/shipping verification, physical label/regulatory review, restore rehearsal and full fulfilment proof.

@@ -78,3 +78,18 @@ Local tests cannot prove Cloudflare D1/R2 bindings, remote public media resoluti
 - Confirm the preview reports a 279.4 mm × 50 mm canvas and the medallion is not clipped.
 - Open Tools & Supplies → Lots, save a lot, record reconciliation without changing on-hand, then use a disposable item to test the typed `APPLY LOT TOTAL` path.
 
+
+## Build 222 smoke test — Soap Label Studio and Startup Readiness
+
+1. Open `/admin/` and confirm **Startup Readiness Guide** and **Soap Label Studio** cards are visible.
+2. Open `/admin/startup-readiness/`; confirm all 20 gates render and direct links work.
+3. Open `/admin/packaging/soap-labels/`; confirm the approved Glacial Purple reference loads without a broken image.
+4. Create a disposable soap-label project using the photo-fit profile.
+5. Add, reorder and remove English/French ingredient and claim rows; save and reload from D1.
+6. Confirm the preview shows the continuous English → front oval → French → rear seal → claims/weight order.
+7. Switch between the photo-fit and 50 mm profiles and confirm the dimension warning changes.
+8. Save a review version and prepare SVG and WebP exports; confirm export/checksum history appears.
+9. Attempt approval without a passed print test; approval must be refused.
+10. Record a failed test, then a passed 100%-scale test with all physical checks passed; approve the version.
+11. Temporarily interrupt the API and confirm a browser-local recovery draft is offered without claiming a D1 save succeeded.
+12. Review runtime incidents and admin audit evidence for deliberate failures and successful approval.

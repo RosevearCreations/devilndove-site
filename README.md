@@ -1,20 +1,16 @@
-# Devil n Dove — Build 208 entry point
+# Devil n Dove — Build 222 entry point
 
-For current work, read `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` first. `MARKDOWN_INDEX.md` identifies specialist reference files.
+Read these first:
+1. `AI_HANDOFF.md`
+2. `PROJECT_STATUS_AND_ROADMAP.md`
+3. `STARTUP_GO_LIVE_GUIDE.md`
+4. `MARKDOWN_INDEX.md`
 
-Build 208 adds a protected, read-only Product Release Preflight that joins catalog facts, media status, Content Studio, CAIP, and Release Board checks without creating or publishing anything. It also adds a confirmation-gated sync for a known existing resolved featured image URL.
-
-No D1 migration is required for this build. The remaining login 500 is separate and must be fixed from actual safe route evidence.
-
-
-## Build 217 current release
-See `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `BUILD217_VALIDATION.md`. Build 217 adds reasoned inventory reversals, applied cost templates, percentage fees, linked-product cost allocations, CAIP-derived reviewed summaries, and Creative Assets contrast fixes.
-## Build 221 operating additions
-
+## Build 222 operating additions
+- Soap Label Studio: `/admin/packaging/soap-labels/`
 - Packaging Studio: `/admin/packaging-studio/`
-- Draft & Archive Cleanup Centre: `/admin/products/`
-- Purchase-lot reconciliation: Tools & Supplies → Lots
-- Migration: `database_build221_packaging_studio_cleanup_lot_controls.sql`
+- Startup Readiness Guide: `/admin/startup-readiness/`
+- Approved soap-ribbon reference: `/assets/packaging/soap/reference/glacial-purple-aloe-soap-approved-reference.png`
+- Migration: `database_build222_soap_label_startup_readiness.sql`
 
-Read `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `PACKAGING_STUDIO.md` before extending these workflows.
-
+Build 222 normalizes soap products, ingredient rows, claim rows, export evidence and physical print tests in D1; follows the approved Glacial Purple ribbon structure; preserves explicit photo-fit and 50 mm seal dimension profiles; and blocks label approval until a 100%-scale physical print test passes.

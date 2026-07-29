@@ -50,3 +50,9 @@ CAIP recommendations, metadata scores, and future provider outputs are internal 
 ## Build 221 packaging boundary
 Packaging Studio is an authenticated admin tool and must remain `noindex,nofollow`. Do not create crawlable public pages for templates, label drafts or quantity tiers. Public product pages should use the final buyer-facing product identity, truthful visible price/availability, descriptive images and canonical URLs. Packaging claims must not be copied into public SEO text until they are reviewed and substantiated.
 
+
+## Build 222 SEO pass
+
+Build 222 adds admin-only Packaging and Startup routes, so they remain `noindex,nofollow` and are not added to the public sitemap. The public HTML audit continues to require one H1, a distinctive title, useful description and canonical URL on every indexable page. Packaging templates, scents and internal projects must not become thin public pages merely to create more location or product keywords. Public product structured data must use the same visible price, availability, product identity and images shown to buyers.
+
+First-page local placement cannot be guaranteed. Continue improving actual relevance, complete and consistent business information, useful local/product content, customer reviews, links and prominence while avoiding unsupported town/service claims.

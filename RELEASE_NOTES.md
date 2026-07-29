@@ -1,3 +1,23 @@
+# Release Notes — Build 222
+
+## Soap Label Studio and startup readiness
+- Added `/admin/packaging/soap-labels/` with a nine-tab exact-size bilingual soap-label editor.
+- Rebuilt the ribbon preview to follow the approved Glacial Purple structure.
+- Added photo-fit and true-50-mm-seal dimension profiles instead of silently clipping the conflicting specification.
+- Added normalized D1 soap templates, products, ingredient rows, claim rows, export evidence and physical print-test records.
+- Added purple, green and oatmeal reusable rose SVG assets.
+- Added SVG, PNG, WebP, JPG and browser-print preparation with predictable filenames and SHA-256 evidence.
+- Added a passed 100%-scale physical print-test requirement before label approval.
+- Added browser-local draft recovery for Packaging Studio save failures.
+- Added `/admin/startup-readiness/` and `STARTUP_GO_LIVE_GUIDE.md` with 20 ordered launch gates and detailed pass conditions.
+- Added direct Admin Dashboard cards for Startup Readiness and Soap Label Studio.
+- Updated the soap-label specification, Packaging Studio guide, canonical roadmap/handoff, schema reference, aggregate schemas, current migration and validation documents.
+
+## Deployment
+Apply `database_build222_soap_label_startup_readiness.sql` after Build 221, or the identical `database_upgrade_current_pass.sql`, but not both. Then deploy the complete package and follow `BUILD222_VALIDATION.md`.
+
+---
+
 # Build 221
 
 - Added a visible Draft & Archive Cleanup Centre and corrected product-owned reference classification so unused archived or draft duplicates can be removed after live preflight.
