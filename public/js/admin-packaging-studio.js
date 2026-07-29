@@ -1,14 +1,12 @@
-// Build 221 — Packaging Studio client with live SVG, local fallback, reference ribbon preset and export tracking.
+// Build 222 — Soap Label Automation editor with exact SVG layout, normalized rows, print proof and resilient local fallback.
 (() => {
-  const STORAGE_KEY = 'dd_packaging_studio_local_draft_v2';
-  const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[char]));
-  const xml = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({
-    '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;'
-  }[char]));
+  const STORAGE_KEY = 'dd_packaging_studio_local_draft_v3';
+  const state = { projects: [], templates: [], products: [], detail: null, loading: false, activeTab: 'product' };
   const id = (name) => document.getElementById(name);
-  const state = { projects: [], templates: [], products: [], detail: null, loading: false };
+  const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  const xml = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[char]));
+  const num = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+  const bool = (value) => value === true || value === 'true' || Number(value) === 1;
 
   function message(text = '', kind = '') {
     const node = id('packagingStudioMessage');
@@ -26,6 +24,18 @@
     return data;
   }
 
+  function options(rows, value, label) {
+    return rows.map((row) => {
+      const optionId = Number(row.packaging_template_id || row.product_id || 0);
+      return `<option value="${optionId}" ${Number(value) === optionId ? 'selected' : ''}>${esc(label(row))}</option>`;
+    }).join('');
+  }
+
+  function currentTemplate() {
+    const selectedId = Number(id('packagingTemplateId')?.value || state.detail?.project?.packaging_template_id || 0);
+    return state.templates.find((row) => Number(row.packaging_template_id) === selectedId) || state.detail?.template || state.templates[0] || {};
+  }
+
   function projectMatches(row) {
     const query = String(id('packagingProjectSearch')?.value || '').trim().toLowerCase();
     if (!query) return true;
@@ -39,659 +49,398 @@
     const rows = state.projects.filter(projectMatches);
     mount.innerHTML = rows.length ? rows.map((row) => `
       <button class="packaging-project-row ${Number(state.detail?.project?.packaging_project_id || 0) === Number(row.packaging_project_id) ? 'is-active' : ''}" type="button" data-open-packaging="${Number(row.packaging_project_id || 0)}">
-        <span>
-          <strong>${esc(row.project_name || row.product_name || 'Untitled packaging')}</strong>
-          <small>${esc(row.project_key || '')} · ${esc(row.project_status || 'draft')} · ${esc(row.compliance_status || 'needs_review')}</small>
-        </span>
-        <span class="status-pill">${esc(row.package_type || 'packaging')}</span>
+        <span><strong>${esc(row.project_name || row.product_name || 'Untitled packaging')}</strong><small>${esc(row.project_key || '')} · ${esc(row.project_status || 'draft')} · ${esc(row.compliance_status || 'needs_review')}</small></span>
+        <span class="status-pill">${esc(row.soap_print_status || row.package_type || 'packaging')}</span>
       </button>`).join('') : '<p class="small">No matching packaging projects.</p>';
   }
 
-  function options(rows, value, label) {
-    return rows.map((row) => {
-      const optionId = Number(row.packaging_template_id || row.product_id || 0);
-      return `<option value="${optionId}" ${Number(value) === optionId ? 'selected' : ''}>${esc(label(row))}</option>`;
-    }).join('');
+  function ingredientRowsFromDom() {
+    return [...document.querySelectorAll('[data-soap-ingredient-row]')].map((row, index) => ({
+      sort_order: index + 1,
+      inci_name: row.querySelector('[data-field="inci_name"]')?.value || '',
+      display_name_en: row.querySelector('[data-field="display_name_en"]')?.value || '',
+      display_name_fr: row.querySelector('[data-field="display_name_fr"]')?.value || '',
+      organic_flag: row.querySelector('[data-field="organic_flag"]')?.checked ? 1 : 0,
+      allergen_note: row.querySelector('[data-field="allergen_note"]')?.value || '',
+      required_on_label: row.querySelector('[data-field="required_on_label"]')?.checked ? 1 : 0
+    })).filter((row) => row.inci_name || row.display_name_en || row.display_name_fr);
   }
 
-  function checkedList(name) {
-    const value = state.detail?.project?.[name];
-    return Array.isArray(value) ? value : [];
-  }
-
-  function currentTemplate() {
-    const selectedId = Number(id('packagingTemplateId')?.value || state.detail?.project?.packaging_template_id || 0);
-    return state.templates.find((row) => Number(row.packaging_template_id) === selectedId)
-      || state.detail?.template
-      || state.templates[0]
-      || {};
-  }
-
-  function compliance(project) {
-    const checks = [
-      ['identity_en', 'English product identity', project.product_identity_en],
-      ['identity_fr', 'French product identity', project.product_identity_fr],
-      ['net', 'Metric net quantity', project.net_quantity_text],
-      ['inci', 'INCI ingredient list', project.ingredients_inci],
-      ['dealer', 'Dealer / business identity', project.dealer_name],
-      ['address', 'Dealer principal place of business', project.dealer_address],
-      ['contact', 'Consumer contact information', project.contact_text]
-    ];
-    const warningsNeeded = Boolean(String(project.warnings_en || project.warnings_fr || '').trim());
-    if (warningsNeeded) {
-      checks.push(['warning_en', 'English warning', project.warnings_en]);
-      checks.push(['warning_fr', 'French warning', project.warnings_fr]);
-    }
-    const missing = checks.filter(([, , value]) => !String(value || '').trim());
-    return { checks, missing, ready: missing.length === 0 };
-  }
-
-  function fontSize(textValue, maxLength, base, min) {
-    const length = String(textValue || '').length;
-    if (length <= maxLength) return base;
-    return Math.max(min, Math.round((base * maxLength / length) * 10) / 10);
-  }
-
-  function lines(value, maxChars = 42, maxLines = 5) {
-    const words = String(value || '').trim().split(/\s+/).filter(Boolean);
-    const output = [];
-    let current = '';
-    for (const word of words) {
-      const next = current ? `${current} ${word}` : word;
-      if (next.length > maxChars && current) {
-        output.push(current);
-        current = word;
-      } else current = next;
-      if (output.length >= maxLines) break;
-    }
-    if (output.length < maxLines && current) output.push(current);
-    return output.slice(0, maxLines);
-  }
-
-  function textBlock(value, x, y, lineHeight, maxChars, maxLines, size, anchor = 'middle') {
-    return lines(value, maxChars, maxLines)
-      .map((line, index) => `<text x="${x}" y="${y + index * lineHeight}" text-anchor="${anchor}" font-size="${size}" class="pkg-copy">${xml(line)}</text>`)
-      .join('');
+  function claimRowsFromDom() {
+    return [...document.querySelectorAll('[data-soap-claim-row]')].map((row, index) => ({
+      sort_order: index + 1,
+      claim_en: row.querySelector('[data-field="claim_en"]')?.value || '',
+      claim_fr: row.querySelector('[data-field="claim_fr"]')?.value || '',
+      icon_name: row.querySelector('[data-field="icon_name"]')?.value || '',
+      is_approved: row.querySelector('[data-field="is_approved"]')?.checked ? 1 : 0,
+      compliance_note: row.querySelector('[data-field="compliance_note"]')?.value || ''
+    })).filter((row) => row.claim_en || row.claim_fr);
   }
 
   function snapshot() {
-    const names = [
-      'packagingProjectId', 'packagingTemplateId', 'packagingProductId', 'packagingProjectName',
-      'packagingType', 'packagingStatus', 'packagingCollection', 'packagingProductName',
-      'packagingSubtitle', 'packagingIdentityEn', 'packagingIdentityFr', 'packagingInci',
-      'packagingIngredientsEn', 'packagingIngredientsFr', 'packagingNetQuantity',
-      'packagingWebsite', 'packagingDealerName', 'packagingDealerAddress', 'packagingContact',
-      'packagingMadeInCanada', 'packagingWarningsEn', 'packagingWarningsFr',
-      'packagingPrintNotes', 'packagingCompliance'
-    ];
-    const output = {};
-    names.forEach((name) => {
-      const node = id(name);
-      if (node) output[name] = node.value;
-    });
-    output.claims = String(id('packagingClaims')?.value || '').split(/[,\n]/).map((value) => value.trim()).filter(Boolean);
-    output.icons = String(id('packagingIcons')?.value || '').split(/[,\n]/).map((value) => value.trim()).filter(Boolean);
-    output.theme = {
-      rose_colour: id('packagingRoseColour')?.value || '#9b8068',
-      theme_colour: id('packagingThemeColour')?.value || '#f2ead8',
-      border_colour: id('packagingBorderColour')?.value || '#2f2721',
-      accent_gold: id('packagingAccentGold')?.value || '#b69a61'
+    const value = (name) => id(name)?.value ?? '';
+    const theme = {
+      rose_colour: value('packagingRoseColour') || '#7B4DA6',
+      theme_colour: value('packagingThemeColour') || '#FBF5E8',
+      border_colour: value('packagingBorderColour') || '#32105E',
+      accent_gold: value('packagingAccentGold') || '#B88A2F',
+      secondary_colour: value('packagingSecondaryColour') || '#5A2A86'
     };
-    output.artwork = {
-      rose_style: id('packagingRoseStyle')?.value || 'botanical_sprigs',
-      badge_shape: id('packagingBadgeShape')?.value || 'scalloped',
-      top_arc_text: id('packagingTopArcText')?.value || '',
-      bottom_arc_text: id('packagingBottomArcText')?.value || '',
-      centre_mark: id('packagingCentreMark')?.value || '◇'
+    const artwork = {
+      rose_asset_id: value('packagingRoseAsset') || 'rose-purple-v1',
+      rose_style: value('packagingRoseStyle') || 'full_rose',
+      badge_shape: value('packagingBadgeShape') || 'oval',
+      top_arc_text: value('packagingTopArcText'),
+      bottom_arc_text: value('packagingBottomArcText'),
+      centre_mark: value('packagingCentreMark') || '♥',
+      show_guides: id('packagingShowGuides')?.checked ? 1 : 0,
+      show_bleed: id('packagingShowBleed')?.checked ? 1 : 0,
+      show_safe_area: id('packagingShowSafeArea')?.checked ? 1 : 0,
+      show_fold_guides: id('packagingShowFoldGuides')?.checked ? 1 : 0,
+      show_glue_zone: id('packagingShowGlueZone')?.checked ? 1 : 0
     };
-    output.saved_at = new Date().toISOString();
-    return output;
+    return {
+      packagingProjectId: value('packagingProjectId'), packagingTemplateId: value('packagingTemplateId'), packagingProductId: value('packagingProductId'),
+      packagingProjectName: value('packagingProjectName'), packagingType: value('packagingType'), packagingStatus: value('packagingStatus'), packagingCompliance: value('packagingCompliance'),
+      packagingCollection: value('packagingCollection'), packagingProductName: value('packagingProductName'), packagingSubtitle: value('packagingSubtitle'),
+      packagingIdentityEn: value('packagingIdentityEn'), packagingIdentityFr: value('packagingIdentityFr'), packagingInci: value('packagingInci'),
+      packagingIngredientsEn: value('packagingIngredientsEn'), packagingIngredientsFr: value('packagingIngredientsFr'), packagingNetQuantity: value('packagingNetQuantity'),
+      packagingNetWeightOz: value('packagingNetWeightOz'), packagingNetWeightG: value('packagingNetWeightG'), packagingWebsite: value('packagingWebsite'),
+      packagingDealerName: value('packagingDealerName'), packagingDealerAddress: value('packagingDealerAddress'), packagingContact: value('packagingContact'),
+      packagingMadeInCanada: value('packagingMadeInCanada'), packagingWarningsEn: value('packagingWarningsEn'), packagingWarningsFr: value('packagingWarningsFr'),
+      packagingPrintNotes: value('packagingPrintNotes'), claims: claimRowsFromDom().map((row) => row.claim_en), icons: claimRowsFromDom().map((row) => row.icon_name).filter(Boolean),
+      structured_ingredients: ingredientRowsFromDom(), structured_claims: claimRowsFromDom(), theme, artwork, saved_at: new Date().toISOString()
+    };
   }
 
   function projectPayload() {
     const data = snapshot();
     return {
-      action: 'save_project',
-      packaging_project_id: Number(data.packagingProjectId || 0),
-      packaging_template_id: Number(data.packagingTemplateId || 0),
-      product_id: Number(data.packagingProductId || 0) || null,
-      project_name: data.packagingProjectName,
-      package_type: data.packagingType,
-      project_status: data.packagingStatus,
-      collection_name: data.packagingCollection,
-      product_name: data.packagingProductName,
-      product_subtitle: data.packagingSubtitle,
-      product_identity_en: data.packagingIdentityEn,
-      product_identity_fr: data.packagingIdentityFr,
-      ingredients_inci: data.packagingInci,
-      ingredients_en: data.packagingIngredientsEn,
-      ingredients_fr: data.packagingIngredientsFr,
-      net_quantity_text: data.packagingNetQuantity,
-      website_text: data.packagingWebsite,
-      dealer_name: data.packagingDealerName,
-      dealer_address: data.packagingDealerAddress,
-      contact_text: data.packagingContact,
-      made_in_canada_text: data.packagingMadeInCanada,
-      claims: data.claims,
-      warnings_en: data.packagingWarningsEn,
-      warnings_fr: data.packagingWarningsFr,
-      icons: data.icons,
-      theme: data.theme,
-      artwork: data.artwork,
-      print_notes: data.packagingPrintNotes,
-      compliance_status: data.packagingCompliance
+      action: 'save_project', packaging_project_id: Number(data.packagingProjectId || 0), packaging_template_id: Number(data.packagingTemplateId || 0),
+      product_id: Number(data.packagingProductId || 0) || null, project_name: data.packagingProjectName, package_type: data.packagingType,
+      project_status: data.packagingStatus, compliance_status: data.packagingCompliance, collection_name: data.packagingCollection, product_name: data.packagingProductName,
+      product_subtitle: data.packagingSubtitle, product_identity_en: data.packagingIdentityEn, product_identity_fr: data.packagingIdentityFr,
+      ingredients_inci: data.packagingInci, ingredients_en: data.packagingIngredientsEn, ingredients_fr: data.packagingIngredientsFr,
+      net_quantity_text: data.packagingNetQuantity, net_weight_oz: Number(data.packagingNetWeightOz || 0) || null, net_weight_g: Number(data.packagingNetWeightG || 0) || null,
+      website_text: data.packagingWebsite, dealer_name: data.packagingDealerName, dealer_address: data.packagingDealerAddress, contact_text: data.packagingContact,
+      made_in_canada_text: data.packagingMadeInCanada, claims: data.claims, warnings_en: data.packagingWarningsEn, warnings_fr: data.packagingWarningsFr,
+      icons: data.icons, theme: data.theme, artwork: data.artwork, rose_asset_id: data.artwork.rose_asset_id, print_notes: data.packagingPrintNotes,
+      structured_ingredients: data.structured_ingredients, structured_claims: data.structured_claims
     };
   }
 
-  function scallopedPath(cx, cy, innerRadius, outerRadius, teeth = 30) {
-    const points = [];
-    const steps = teeth * 2;
-    for (let index = 0; index < steps; index += 1) {
-      const angle = -Math.PI / 2 + (Math.PI * 2 * index / steps);
-      const radius = index % 2 === 0 ? outerRadius : innerRadius;
-      points.push(`${cx + Math.cos(angle) * radius},${cy + Math.sin(angle) * radius}`);
-    }
-    return `M${points.join(' L')} Z`;
+  function fontSize(textValue, maxLength, base, min) {
+    const length = String(textValue || '').length;
+    return length <= maxLength ? base : Math.max(min, Math.round((base * maxLength / length) * 10) / 10);
   }
 
-  function ornamentSvg(x, y, scale, colour, mirror = false, style = 'botanical_sprigs') {
-    if (style === 'none') return '';
-    const transform = `translate(${x} ${y}) scale(${mirror ? -scale : scale} ${scale})`;
-    if (style === 'minimal') {
-      return `<g transform="${transform}" fill="none" stroke="${colour}" stroke-width="2"><path d="M0 0 C20 -15 38 -12 54 0 C38 12 20 15 0 0Z"/><path d="M10 0H47"/></g>`;
+  function wrapLines(value, maxChars = 32, maxLines = 6) {
+    const segments = String(value || '').split(/(?:\r?\n|•)+/).map((part) => part.trim()).filter(Boolean);
+    const output = [];
+    for (const segment of segments) {
+      const words = segment.split(/\s+/).filter(Boolean); let current = ''; let first = true;
+      for (const word of words) {
+        const prefix = first ? '• ' : '  ';
+        const next = current ? `${current} ${word}` : `${prefix}${word}`;
+        if (next.length > maxChars && current) { output.push(current); current = `  ${word}`; first = false; }
+        else current = next;
+        if (output.length >= maxLines) break;
+      }
+      if (output.length < maxLines && current) output.push(current);
+      if (output.length >= maxLines) break;
     }
-    return `<g transform="${transform}" fill="none" stroke="${colour}" stroke-width="2" stroke-linecap="round">
-      <path d="M0 0 C15 -7 30 -7 48 0 C30 7 15 7 0 0Z"/>
-      <path d="M12 0 C20 -16 30 -20 34 -25 C36 -13 30 -4 12 0Z"/>
-      <path d="M23 1 C32 14 42 16 48 20 C47 9 39 3 23 1Z"/>
-      <path d="M8 -1 C12 -11 18 -15 23 -18"/>
-      <circle cx="27" cy="0" r="2.5" fill="${colour}"/>
+    if (segments.length && output.length >= maxLines) {
+      const last = output[maxLines - 1] || '';
+      output[maxLines - 1] = `${last.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`;
+    }
+    return output.slice(0, maxLines);
+  }
+
+  function textBlock(value, x, y, lineHeight, maxChars, maxLines, size, anchor = 'start', className = 'pkg-copy') {
+    return wrapLines(value, maxChars, maxLines).map((line, index) => `<text x="${x}" y="${y + index * lineHeight}" text-anchor="${anchor}" font-size="${size}" class="${className}">${xml(line)}</text>`).join('');
+  }
+
+  function ingredientDisplay(language) {
+    const rows = ingredientRowsFromDom();
+    if (rows.length) return rows.filter((row) => row.required_on_label !== 0).map((row) => language === 'fr' ? row.display_name_fr : row.display_name_en).filter(Boolean).map((row) => `• ${row}`).join('\n');
+    return language === 'fr' ? (id('packagingIngredientsFr')?.value || id('packagingInci')?.value || '') : (id('packagingIngredientsEn')?.value || id('packagingInci')?.value || '');
+  }
+
+  function mixHex(base, target = '#FFFFFF', amount = .5) {
+    const parse = (value) => { const clean = String(value || '').replace('#',''); const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean.padEnd(6,'0').slice(0,6); return [0,2,4].map((offset) => parseInt(full.slice(offset,offset + 2),16) || 0); };
+    const a = parse(base), b = parse(target), ratio = Math.max(0,Math.min(1,Number(amount) || 0));
+    return `#${a.map((value,index) => Math.round(value + (b[index] - value) * ratio).toString(16).padStart(2,'0')).join('')}`;
+  }
+
+  function scallopedOvalPath(cx, cy, rx, ry, points = 44) {
+    const coords = [];
+    for (let index = 0; index < points * 2; index += 1) {
+      const angle = Math.PI * 2 * index / (points * 2); const wave = index % 2 === 0 ? 1 : .965;
+      coords.push(`${index ? 'L' : 'M'}${(cx + Math.cos(angle) * rx * wave).toFixed(2)} ${(cy + Math.sin(angle) * ry * wave).toFixed(2)}`);
+    }
+    return `${coords.join(' ')} Z`;
+  }
+
+  function roseVector(cx, cy, scale, colour) {
+    const dark = id('packagingBorderColour')?.value || '#32105E'; const mid = mixHex(colour,'#FFFFFF',.34); const light = mixHex(colour,'#FFFFFF',.58);
+    return `<g transform="translate(${cx} ${cy}) scale(${scale})" stroke="${dark}" stroke-width="2.2" stroke-linejoin="round">
+      <path fill="#536B35" d="M-14 35C-50 36-66 64-60 88c29 2 53-10 70-37z"/><path fill="#657C3C" d="M66 37c35 4 53 27 49 50-29 3-53-8-72-34z"/>
+      <path fill="${colour}" d="M26-79C1-66-17-46-18-21c-1 31 17 65 44 86 27-21 45-55 44-86-1-25-19-45-44-58z" opacity=".86"/>
+      <path fill="${colour}" d="M-26-35c-14 26-12 55 6 77 17 20 43 29 46 28-6-19-14-39-22-58-8-18-18-34-30-47z" opacity=".72"/>
+      <path fill="${colour}" d="M78-35c14 26 12 55-6 77-17 20-43 29-46 28 6-19 14-39 22-58 8-18 18-34 30-47z" opacity=".72"/>
+      <path fill="${mid}" d="M-3-45c-9 31 1 61 29 87 28-26 38-56 29-87-11 5-21 15-29 28-8-13-18-23-29-28z"/><path fill="${light}" d="M12-31c-7 23-2 43 14 60 16-17 21-37 14-60-5 4-10 10-14 18-4-8-9-14-14-18z"/>
     </g>`;
   }
 
-  function scallopedRibbonSvg(data, template) {
-    const theme = data.theme || {};
-    const artwork = data.artwork || {};
-    const background = theme.theme_colour || '#f2ead8';
-    const border = theme.border_colour || '#2f2721';
-    const gold = theme.accent_gold || '#b69a61';
-    const botanical = theme.rose_colour || '#9b8068';
-    const collection = artwork.top_arc_text || data.packagingCollection || 'Coconut milk';
-    const bottomArc = artwork.bottom_arc_text || data.packagingProductName || 'Sweet Vanilla';
-    const identityEn = data.packagingIdentityEn || 'Luxury Soap';
-    const identityFr = data.packagingIdentityFr || 'Savon de luxe';
-    const inci = data.packagingInci || 'INCI ingredients';
-    const ingredientsEn = data.packagingIngredientsEn || inci;
-    const ingredientsFr = data.packagingIngredientsFr || inci;
-    const net = data.packagingNetQuantity || '100 g';
-    const website = data.packagingWebsite || 'devilndove.com';
-    const dealer = data.packagingDealerName || 'Devil n Dove';
-    const made = data.packagingMadeInCanada || 'Made in Canada / Fabriqué au Canada';
-    const claims = data.claims || [];
-    const badgePath = artwork.badge_shape === 'oval'
-      ? '<ellipse cx="145" cy="100" rx="90" ry="74"/>'
-      : `<path d="${scallopedPath(145, 100, 82, 88, 34)}"/>`;
-    const pageWidth = Number(template.page_width_mm || 279.4);
-    const pageHeight = Number(template.page_height_mm || 50);
-    const topArcSize = fontSize(collection, 24, 14, 8);
-    const bottomArcSize = fontSize(bottomArc, 24, 13, 8);
-    const titleSize = fontSize(identityEn, 22, 18, 11);
-    const subtitleSize = fontSize(identityFr, 24, 12, 8);
-    const mark = artwork.centre_mark || '◇';
-    const uid = `pkg-${Number(data.packagingProjectId || 0)}-${Date.now().toString(36)}`;
+  function iconSvg(icon, x, y, colour) {
+    const key = String(icon || 'leaf').toLowerCase();
+    if (key.includes('recycle')) return `<g transform="translate(${x} ${y}) scale(.42)" fill="none" stroke="${colour}" stroke-width="2.4"><circle r="13"/><path d="M-7 4l5-9 4 7M7-4l-5 9-4-7"/></g>`;
+    if (key.includes('hand') || key.includes('care')) return `<g transform="translate(${x} ${y}) scale(.42)" fill="none" stroke="${colour}" stroke-width="2.4"><circle r="13"/><path d="M-7 2c5-8 8-8 12 0M-8 4c4 7 12 7 16 0M0-5v11"/></g>`;
+    return `<g transform="translate(${x} ${y}) scale(.42)" fill="none" stroke="${colour}" stroke-width="2.4"><circle r="13"/><path d="M-6 6C-8-3-1-9 7-9 8-1 3 7-6 6ZM-5 5 5-6"/></g>`;
+  }
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${pageWidth}mm" height="${pageHeight}mm" viewBox="0 0 1100 200" role="img" aria-label="${xml(bottomArc)} scalloped soap ribbon packaging">
-      <defs>
-        <path id="${uid}-top" d="M68 103 A77 77 0 0 1 222 103"/>
-        <path id="${uid}-bottom" d="M62 116 A84 84 0 0 0 228 116"/>
-      </defs>
-      <style>
-        .pkg-copy{font-family:Arial,sans-serif;fill:${border}}
-        .pkg-serif{font-family:Georgia,serif;fill:${border}}
-        .pkg-arc{font-family:Arial,sans-serif;fill:${border};font-weight:700;letter-spacing:1.4px;text-transform:uppercase}
-      </style>
-      <rect width="1100" height="200" fill="#fff"/>
-      <rect x="0" y="62" width="1100" height="76" fill="${background}"/>
-      <rect x="2" y="64" width="1096" height="72" fill="none" stroke="${gold}" stroke-width="3"/>
-      <g opacity=".45" stroke="${border}" stroke-width="1">
-        <line x1="278" y1="62" x2="278" y2="138"/>
-        <line x1="490" y1="62" x2="490" y2="138"/>
-        <line x1="702" y1="62" x2="702" y2="138"/>
-        <line x1="910" y1="62" x2="910" y2="138"/>
+  function guideSvg(height, artwork = {}) {
+    let output = '';
+    if (artwork.show_bleed) output += `<rect x="12.5" y="12.5" width="1075" height="${height - 25}" fill="none" stroke="#d12424" stroke-width="1" stroke-dasharray="5 4"/>`;
+    if (artwork.show_safe_area) output += `<rect x="6.25" y="${height / 2 - 31.25}" width="1087.5" height="62.5" fill="none" stroke="#14843a" stroke-width="1" stroke-dasharray="4 4"/>`;
+    if (artwork.show_fold_guides || artwork.show_guides) output += `<g stroke="#2680c2" stroke-width="1" stroke-dasharray="3 3"><line x1="210" y1="0" x2="210" y2="${height}"/><line x1="490" y1="0" x2="490" y2="${height}"/><line x1="720" y1="0" x2="720" y2="${height}"/><line x1="900" y1="0" x2="900" y2="${height}"/></g>`;
+    if (artwork.show_glue_zone || artwork.show_guides) output += `<rect x="1050" y="${height / 2 - 37.5}" width="50" height="75" fill="rgba(239,185,43,.18)" stroke="#b58000" stroke-width="1"/><text x="1075" y="${height / 2}" text-anchor="middle" font-size="7" transform="rotate(-90 1075 ${height / 2})" class="pkg-copy">OVERLAP / GLUE</text>`;
+    return output;
+  }
+
+  function glacialRibbonSvg(data, template) {
+    const theme = data.theme || {}; const artwork = data.artwork || {}; const layout = template.layout || {};
+    const widthMm = num(template.page_width_mm, 279.4); const heightMm = num(template.page_height_mm, 38.1); const height = Math.round(heightMm / 25.4 * 100);
+    const bandY = (height - 75) / 2; const centreY = height / 2; const rose = theme.rose_colour || '#7B4DA6'; const border = theme.border_colour || '#32105E';
+    const gold = theme.accent_gold || '#B88A2F'; const background = theme.theme_colour || '#FBF5E8'; const secondary = theme.secondary_colour || '#5A2A86';
+    const family = data.packagingCollection || 'Glacial Purple'; const typeEn = data.packagingIdentityEn || 'Aloe Soap'; const typeFr = data.packagingIdentityFr || 'Savon à l’aloès';
+    const structuredIngredients = Array.isArray(data.structured_ingredients) ? data.structured_ingredients : [];
+    const enFromRows = structuredIngredients.filter((row) => Number(row.required_on_label) !== 0).map((row) => row.display_name_en).filter(Boolean).map((row) => `• ${row}`).join('\n');
+    const frFromRows = structuredIngredients.filter((row) => Number(row.required_on_label) !== 0).map((row) => row.display_name_fr).filter(Boolean).map((row) => `• ${row}`).join('\n');
+    const en = enFromRows || ingredientDisplay('en') || '• Aloe Soap Base – SLS/SLES free\n• No Palm Oil\n• Organic Soap Base'; const fr = frFromRows || ingredientDisplay('fr') || '• Base de savon à l’aloès – sans SLS/SLES\n• Sans huile de palme\n• Base de savon biologique';
+    const claims = Array.isArray(data.structured_claims) && data.structured_claims.length ? data.structured_claims : claimRowsFromDom().length ? claimRowsFromDom() : [
+      { claim_en: 'Natural Ingredients', claim_fr: 'Ingrédients naturels', icon_name: 'leaf' },
+      { claim_en: 'Handmade with Care', claim_fr: 'Fait à la main avec soin', icon_name: 'hands' },
+      { claim_en: 'Gentle & Moisturizing', claim_fr: 'Doux et hydratant', icon_name: 'leaf' },
+      { claim_en: 'Please Recycle', claim_fr: 'Veuillez recycler', icon_name: 'recycle' }
+    ];
+    const rearDiameter = Math.min(height - 12, Math.round(num(template.rear_width_mm, 38.1) / 25.4 * 100)); const rearR = rearDiameter / 2; const rearCx = 765;
+    const roseScale = artwork.rose_style === 'minimal' ? .32 : .48; const topLabel = artwork.top_arc_text || 'Rosevear Creations'; const bottomLabel = artwork.bottom_arc_text || 'MADE IN CANADA'; const centreMark = artwork.centre_mark || '♥';
+    const frontOuter = artwork.badge_shape === 'scalloped' ? `<path d="${scallopedOvalPath(350,centreY,100,75)}" fill="${background}" stroke="${gold}" stroke-width="5"/>` : `<ellipse cx="350" cy="${centreY}" rx="100" ry="75" fill="${background}" stroke="${gold}" stroke-width="5"/>`;
+    const damaskId = `damask-${Date.now().toString(36)}`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${widthMm}mm" height="${heightMm}mm" viewBox="0 0 1100 ${height}" role="img" aria-label="${xml(family)} ${xml(typeEn)} continuous soap ribbon label">
+      <defs><pattern id="${damaskId}" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M18 2C12 9 12 15 18 18C24 15 24 9 18 2ZM18 34C12 27 12 21 18 18C24 21 24 27 18 34ZM2 18C9 12 15 12 18 18C15 24 9 24 2 18ZM34 18C27 12 21 12 18 18C21 24 27 24 34 18Z" fill="none" stroke="${gold}" stroke-width=".7" opacity=".14"/></pattern></defs>
+      <style>.pkg-copy{font-family:Arial,Helvetica,sans-serif;fill:${border}}.pkg-serif{font-family:Georgia,'Times New Roman',serif;fill:${border}}.pkg-script{font-family:'Brush Script MT','Segoe Script',cursive;fill:${secondary}}</style>
+      <rect width="1100" height="${height}" fill="#fff"/><rect x="0" y="${bandY}" width="1100" height="75" rx="5" fill="${background}"/><rect x="0" y="${bandY}" width="1100" height="75" fill="url(#${damaskId})"/>
+      <rect x="2" y="${bandY + 2}" width="1096" height="71" rx="4" fill="none" stroke="${border}" stroke-width="4"/><line x1="2" y1="${bandY + 9}" x2="1098" y2="${bandY + 9}" stroke="${gold}" stroke-width="2"/><line x1="2" y1="${bandY + 66}" x2="1098" y2="${bandY + 66}" stroke="${gold}" stroke-width="2"/>
+      <text x="18" y="${bandY + 17}" font-size="7.6" font-weight="700" class="pkg-copy">INGREDIENTS:</text>${textBlock(en,18,bandY + 27,6.2,55,8,4.7,'start')}
+      <g>${frontOuter}<ellipse cx="350" cy="${centreY}" rx="94" ry="69" fill="none" stroke="${border}" stroke-width="2"/><ellipse cx="350" cy="${centreY}" rx="90" ry="65" fill="none" stroke="${gold}" stroke-width="1" stroke-dasharray="2 3"/>
+        ${roseVector(285, centreY + 8, roseScale, rose)}
+        <text x="382" y="${centreY - 49}" text-anchor="middle" font-size="11.5" class="pkg-script">${xml(topLabel)}</text><text x="382" y="${centreY - 35}" text-anchor="middle" font-size="8" class="pkg-script">- Devil n Dove -</text>
+        <text x="392" y="${centreY - 3}" text-anchor="middle" font-size="${fontSize(family,22,15,9)}" class="pkg-script">${xml(family)}</text><text x="392" y="${centreY + 18}" text-anchor="middle" font-size="12.5" class="pkg-serif">${xml(typeEn)}</text>
+        <text x="392" y="${centreY + 39}" text-anchor="middle" font-size="8.5" class="pkg-script">${xml(data.packagingSubtitle || 'Handcrafted with Care')}</text><text x="392" y="${centreY + 56}" text-anchor="middle" font-size="7" font-weight="700" class="pkg-copy">${xml(centreMark)} ${xml(bottomLabel)} ${xml(centreMark)}</text>
       </g>
-      <g fill="${background}" stroke="${gold}" stroke-width="3">${badgePath}</g>
-      <circle cx="145" cy="100" r="73" fill="none" stroke="${border}" stroke-width="1.6"/>
-      <circle cx="145" cy="100" r="68" fill="none" stroke="${gold}" stroke-width="1" opacity=".75"/>
-      ${ornamentSvg(73, 98, .72, botanical, false, artwork.rose_style)}
-      ${ornamentSvg(217, 98, .72, botanical, true, artwork.rose_style)}
-      <text class="pkg-arc" font-size="${topArcSize}"><textPath href="#${uid}-top" startOffset="50%" text-anchor="middle">${xml(collection)}</textPath></text>
-      <text x="145" y="93" text-anchor="middle" font-size="${titleSize}" font-weight="700" class="pkg-serif">${xml(identityEn)}</text>
-      <text x="145" y="113" text-anchor="middle" font-size="${subtitleSize}" class="pkg-serif">${xml(identityFr)}</text>
-      <text x="145" y="131" text-anchor="middle" font-size="11" class="pkg-serif">${xml(mark)}</text>
-      <text class="pkg-arc" font-size="${bottomArcSize}"><textPath href="#${uid}-bottom" startOffset="50%" text-anchor="middle">${xml(bottomArc)}</textPath></text>
-      <text x="384" y="76" text-anchor="middle" font-size="8" font-weight="700" class="pkg-copy">INGREDIENTS</text>
-      ${textBlock(ingredientsEn, 384, 89, 9, 38, 5, 6.2)}
-      <text x="596" y="76" text-anchor="middle" font-size="8" font-weight="700" class="pkg-copy">INGRÉDIENTS</text>
-      ${textBlock(ingredientsFr, 596, 89, 9, 38, 5, 6.2)}
-      <circle cx="806" cy="100" r="36" fill="${background}" stroke="${gold}" stroke-width="2"/>
-      <circle cx="806" cy="100" r="31" fill="none" stroke="${border}" stroke-width="1"/>
-      <text x="806" y="92" text-anchor="middle" font-size="9" font-weight="700" class="pkg-serif">${xml(dealer)}</text>
-      <text x="806" y="106" text-anchor="middle" font-size="5.8" class="pkg-copy">${xml(website)}</text>
-      <text x="806" y="118" text-anchor="middle" font-size="5.2" class="pkg-copy">${xml(made)}</text>
-      <text x="1003" y="76" text-anchor="middle" font-size="8" font-weight="700" class="pkg-copy">CLAIMS / DETAILS</text>
-      ${textBlock(claims.join(' • ') || made, 1003, 90, 9, 30, 4, 5.8)}
-      <text x="1003" y="128" text-anchor="middle" font-size="6.2" class="pkg-copy">${xml(net)} • ${xml(website)}</text>
+      <text x="490" y="${bandY + 17}" font-size="7.6" font-weight="700" class="pkg-copy">INGRÉDIENTS :</text>${textBlock(fr,490,bandY + 27,6.2,55,8,4.7,'start')}
+      <g><circle cx="${rearCx}" cy="${centreY}" r="${rearR}" fill="${background}" stroke="${secondary}" stroke-width="4"/><circle cx="${rearCx}" cy="${centreY}" r="${rearR - 6}" fill="none" stroke="${gold}" stroke-width="2"/><text x="${rearCx}" y="${centreY - 28}" text-anchor="middle" font-size="10" class="pkg-script">Rosevear Creations</text><text x="${rearCx}" y="${centreY - 14}" text-anchor="middle" font-size="8" class="pkg-script">- Devil n Dove -</text><text x="${rearCx}" y="${centreY + 5}" text-anchor="middle" font-size="7" class="pkg-copy">Handmade in Small Batches</text><text x="${rearCx}" y="${centreY + 25}" text-anchor="middle" font-size="10" font-weight="700" fill="${secondary}" class="pkg-copy">${xml(data.packagingWebsite || 'devilndove.com')}</text><text x="${rearCx}" y="${centreY + 40}" text-anchor="middle" font-size="7" font-weight="700" class="pkg-copy">MADE IN CANADA</text></g>
+      <g>${claims.slice(0,4).map((claim,index) => { const y = bandY + 12 + index * 12.5; return `${iconSvg(claim.icon_name, 858, y, secondary)}<text x="870" y="${y - 2.5}" font-size="6.1" font-weight="700" class="pkg-copy">${xml(claim.claim_en || '')}</text><text x="870" y="${y + 4}" font-size="5.25" class="pkg-copy">${xml(claim.claim_fr || '')}</text>`; }).join('')}</g>
+      <line x1="850" y1="${bandY + 56}" x2="1084" y2="${bandY + 56}" stroke="${gold}" stroke-width="1"/><text x="854" y="${bandY + 64}" font-size="5.5" font-weight="700" class="pkg-copy">${xml(data.packagingNetQuantity || 'NET WT. APPROX. 4.5 OZ / 127 G')}</text>
+      ${guideSvg(height, artwork)}
     </svg>`;
   }
 
-  function standardRibbonSvg(data, template) {
-    const theme = data.theme || {};
-    const claims = data.claims || [];
-    const title = data.packagingProductName || 'Product name';
-    const subtitle = data.packagingSubtitle || data.packagingCollection || '';
-    const identity = `${data.packagingIdentityEn || 'Soap'} / ${data.packagingIdentityFr || 'Savon'}`;
-    const inci = data.packagingInci || 'INCI ingredients';
-    const en = data.packagingIngredientsEn || inci;
-    const fr = data.packagingIngredientsFr || inci;
-    const website = data.packagingWebsite || 'devilndove.com';
-    const dealer = data.packagingDealerName || 'Devil n Dove';
-    const net = data.packagingNetQuantity || 'Net 100 g';
-    const made = data.packagingMadeInCanada || 'Made in Canada / Fabriqué au Canada';
-    const titleSize = fontSize(title, 22, 15, 8);
-    const subtitleSize = fontSize(subtitle, 32, 7, 4.5);
-    const pageWidth = Number(template.page_width_mm || 279.4);
-    const pageHeight = Number(template.page_height_mm || 19);
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${pageWidth}mm" height="${pageHeight}mm" viewBox="0 0 1100 75" role="img" aria-label="${xml(title)} soap ribbon packaging">
-      <style>.pkg-copy{font-family:Arial,sans-serif;fill:${theme.border_colour || '#3b2c2f'}}.pkg-serif{font-family:Georgia,serif;fill:${theme.border_colour || '#3b2c2f'}}</style>
-      <rect width="1100" height="75" fill="${theme.theme_colour || '#f4eadb'}"/>
-      <rect x="1.5" y="1.5" width="1097" height="72" rx="4" fill="none" stroke="${theme.accent_gold || '#b38a3b'}" stroke-width="3"/>
-      <g stroke="${theme.border_colour || '#3b2c2f'}" stroke-width="1" opacity=".45"><line x1="245" y1="0" x2="245" y2="75"/><line x1="465" y1="0" x2="465" y2="75"/><line x1="685" y1="0" x2="685" y2="75"/><line x1="905" y1="0" x2="905" y2="75"/></g>
-      <ellipse cx="122" cy="37.5" rx="103" ry="30" fill="rgba(255,255,255,.5)" stroke="${theme.rose_colour || '#b74b63'}" stroke-width="2"/>
-      <text x="135" y="25" text-anchor="middle" font-size="${titleSize}" font-weight="700" class="pkg-serif">${xml(title)}</text>
-      <text x="135" y="38" text-anchor="middle" font-size="${subtitleSize}" class="pkg-copy">${xml(subtitle)}</text>
-      <text x="135" y="51" text-anchor="middle" font-size="6" class="pkg-copy">${xml(identity)}</text>
-      <text x="135" y="62" text-anchor="middle" font-size="6" class="pkg-copy">${xml(net)}</text>
-      <text x="355" y="11" text-anchor="middle" font-size="7" font-weight="700" class="pkg-copy">INGREDIENTS</text>${textBlock(en, 355, 22, 8, 42, 6, 5.4)}
-      <text x="575" y="11" text-anchor="middle" font-size="7" font-weight="700" class="pkg-copy">INGRÉDIENTS</text>${textBlock(fr, 575, 22, 8, 42, 6, 5.4)}
-      <circle cx="795" cy="37" r="30" fill="rgba(255,255,255,.45)" stroke="${theme.rose_colour || '#b74b63'}" stroke-width="2"/>
-      <text x="795" y="29" text-anchor="middle" font-size="8" font-weight="700" class="pkg-serif">${xml(dealer)}</text>
-      <text x="795" y="40" text-anchor="middle" font-size="5.5" class="pkg-copy">${xml(website)}</text>
-      <text x="795" y="51" text-anchor="middle" font-size="4.8" class="pkg-copy">${xml(made)}</text>
-      <text x="1002" y="12" text-anchor="middle" font-size="7" font-weight="700" class="pkg-copy">CLAIMS / DETAILS</text>${textBlock(claims.join(' • ') || made, 1002, 24, 8, 32, 5, 5.2)}
-      <text x="1002" y="65" text-anchor="middle" font-size="5.5" class="pkg-copy">${xml(net)} • ${xml(website)}</text>
-    </svg>`;
-  }
+  function svgMarkup() { return glacialRibbonSvg(snapshot(), currentTemplate()); }
 
-  function svgMarkup() {
-    const data = snapshot();
-    const template = currentTemplate();
-    const key = String(template.template_key || '').toLowerCase();
-    return key.includes('scalloped')
-      ? scallopedRibbonSvg(data, template)
-      : standardRibbonSvg(data, template);
+  function compliance(payload) {
+    const ingredients = payload.structured_ingredients || []; const claims = payload.structured_claims || []; const template = currentTemplate(); const layout = template.layout || {};
+    const checks = [
+      ['English identity', payload.product_identity_en], ['French identity', payload.product_identity_fr], ['Metric net quantity', payload.net_quantity_text],
+      ['INCI list', payload.ingredients_inci], ['Dealer / business', payload.dealer_name], ['Principal address', payload.dealer_address], ['Consumer contact', payload.contact_text],
+      ['Website', payload.website_text], ['Made in Canada', payload.made_in_canada_text], ['Rose asset', payload.rose_asset_id], ['Structured ingredients', ingredients.length],
+      ['Bilingual ingredient rows', ingredients.length && ingredients.every((row) => row.inci_name && row.display_name_en && row.display_name_fr)],
+      ['Bilingual claims', claims.every((row) => row.claim_en && row.claim_fr)]
+    ];
+    const missing = checks.filter(([, value]) => !value); const warnings = [];
+    if (Math.abs(num(template.page_width_mm) - 279.4) > .2) missing.push(['11-inch artboard', false]);
+    if (Math.abs(num(layout.band_height_mm) - 19.05) > .1) missing.push(['0.75-inch band', false]);
+    if (Math.abs(num(template.front_width_mm) - 50.8) > .1 || Math.abs(num(template.front_height_mm) - 38.1) > .1) missing.push(['2 × 1.5-inch front oval', false]);
+    if (Math.abs(num(template.page_height_mm) - 38.1) > .1) warnings.push('This 50 mm rear-seal profile expands the artboard beyond 1.50 inches.');
+    if (Math.abs(num(template.rear_width_mm) - 50) > .1) warnings.push('Photo-fit profile uses a 38.1 mm rear seal because 50 mm cannot fit inside a 38.1 mm-high artboard.');
+    if (ingredients.some((row) => row.allergen_note)) warnings.push('At least one ingredient includes an allergen note; verify current Health Canada fragrance-allergen requirements.');
+    if (claims.some((row) => !row.is_approved)) warnings.push('One or more claims are not marked approved.');
+    if (wrapLines(ingredients.map((row) => `• ${row.display_name_en || ''}`).join('\n'),55,99).length > 8 || wrapLines(ingredients.map((row) => `• ${row.display_name_fr || ''}`).join('\n'),55,99).length > 8) warnings.push('Ingredient copy exceeds the eight-line narrow-band preview; shorten display wording or use a physically tested larger label profile without reducing below the chosen minimum print size.');
+    if (claims.length > 4) warnings.push('Only the first four claim rows fit the standard claims panel; remove, combine or move additional claims after review.');
+    return { checks, missing, warnings, ready: missing.length === 0 };
   }
 
   function renderPreview() {
-    const mount = id('packagingSvgPreview');
-    if (mount) mount.innerHTML = svgMarkup();
-    const result = compliance(projectPayload());
-    const target = id('packagingComplianceResults');
-    if (target) {
-      target.innerHTML = `<div class="packaging-compliance-grid">${result.checks.map(([, label, value]) => `
-        <span class="${String(value || '').trim() ? 'ok' : 'missing'}">${String(value || '').trim() ? '✓' : '!'} ${esc(label)}</span>`).join('')}</div>
-        <p class="small">${result.ready ? 'Common required fields are present. Final regulatory and print review is still required.' : `${result.missing.length} common field(s) remain incomplete.`}</p>`;
-    }
-    const template = currentTemplate();
-    const size = id('packagingPreviewSize');
-    if (size) size.textContent = `Physical canvas: ${Number(template.page_width_mm || 279.4)} mm × ${Number(template.page_height_mm || 19)} mm. The narrow band remains 19 mm high; extended badges use the larger canvas.`;
+    const mount = id('packagingSvgPreview'); if (mount) mount.innerHTML = svgMarkup();
+    const payload = projectPayload(); const result = compliance(payload); const target = id('packagingComplianceResults');
+    if (target) target.innerHTML = `<div class="packaging-compliance-grid">${result.checks.map(([label, value]) => `<span class="${value ? 'ok' : 'missing'}">${value ? '✓' : '!'} ${esc(label)}</span>`).join('')}</div>
+      ${result.warnings.length ? `<div class="packaging-warning-list"><strong>Physical/design decisions:</strong><ul>${result.warnings.map((warning) => `<li>${esc(warning)}</li>`).join('')}</ul></div>` : ''}
+      <p class="small">${result.ready ? 'Data and primary dimensions are ready for a review version. Final formula, bilingual, claim and physical print review still apply.' : `${result.missing.length} required check(s) remain incomplete.`}</p>`;
+    const template = currentTemplate(); const size = id('packagingPreviewSize');
+    if (size) size.textContent = `Canvas ${num(template.page_width_mm,279.4)} × ${num(template.page_height_mm,38.1)} mm • band ${num(template.layout?.band_height_mm,19.05)} mm • front ${num(template.front_width_mm,50.8)} × ${num(template.front_height_mm,38.1)} mm • rear ${num(template.rear_width_mm,38.1)} mm.`;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot())); } catch {}
   }
 
+  function ingredientRow(row = {}, index = 0) {
+    return `<tr data-soap-ingredient-row><td class="row-order">${index + 1}</td><td><input class="input" data-field="inci_name" value="${esc(row.inci_name || '')}" placeholder="INCI name"/></td><td><input class="input" data-field="display_name_en" value="${esc(row.display_name_en || '')}" placeholder="English"/></td><td><input class="input" data-field="display_name_fr" value="${esc(row.display_name_fr || '')}" placeholder="Français"/></td><td><label class="compact-check"><input type="checkbox" data-field="organic_flag" ${Number(row.organic_flag) === 1 ? 'checked' : ''}/> Organic</label></td><td><input class="input" data-field="allergen_note" value="${esc(row.allergen_note || '')}" placeholder="Allergen / review note"/></td><td><label class="compact-check"><input type="checkbox" data-field="required_on_label" ${Number(row.required_on_label) !== 0 ? 'checked' : ''}/> Required</label></td><td><button class="btn danger" type="button" data-remove-ingredient>Remove</button></td></tr>`;
+  }
+
+  function claimRow(row = {}, index = 0) {
+    return `<tr data-soap-claim-row><td class="row-order">${index + 1}</td><td><input class="input" data-field="claim_en" value="${esc(row.claim_en || '')}" placeholder="English claim"/></td><td><input class="input" data-field="claim_fr" value="${esc(row.claim_fr || '')}" placeholder="French claim"/></td><td><select class="input" data-field="icon_name">${['leaf','hands','recycle','heart','none'].map((name) => `<option ${String(row.icon_name || 'leaf') === name ? 'selected' : ''}>${name}</option>`).join('')}</select></td><td><label class="compact-check"><input type="checkbox" data-field="is_approved" ${Number(row.is_approved) === 1 ? 'checked' : ''}/> Approved</label></td><td><input class="input" data-field="compliance_note" value="${esc(row.compliance_note || '')}" placeholder="Review note"/></td><td><button class="btn danger" type="button" data-remove-claim>Remove</button></td></tr>`;
+  }
+
+  function tabButton(key, label) { return `<button class="packaging-tab ${state.activeTab === key ? 'is-active' : ''}" type="button" data-packaging-tab="${key}">${label}</button>`; }
+  function tabPanel(key, content) { return `<section class="packaging-tab-panel ${state.activeTab === key ? 'is-active' : ''}" data-packaging-panel="${key}">${content}</section>`; }
+
   function detailMarkup() {
-    const project = state.detail?.project || {};
-    const template = state.detail?.template || {};
-    const theme = project.theme || template.theme || {};
-    const artwork = project.artwork || {};
-    const claims = checkedList('claims').join(', ');
-    const icons = checkedList('icons').join(', ');
-    const versions = state.detail?.versions || [];
-    const exports = state.detail?.exports || [];
-    return `<section class="card packaging-editor-card">
-      <div class="section-heading-row">
-        <div><p class="eyebrow">${esc(project.project_key || 'New packaging')}</p><h2 style="margin:0">${esc(project.project_name || project.product_name || 'Packaging project')}</h2></div>
-        <div class="packaging-project-actions"><button class="btn" id="duplicatePackagingProject" type="button">Duplicate</button><button class="btn" id="archivePackagingProject" type="button">Archive</button></div>
-      </div>
+    const project = state.detail?.project || {}; const template = state.detail?.template || {}; const theme = project.theme || template.theme || {};
+    const artwork = project.artwork || {}; const ingredients = state.detail?.ingredients || []; const claims = state.detail?.structured_claims || [];
+    const versions = state.detail?.versions || []; const exports = state.detail?.soap_exports?.length ? state.detail.soap_exports : (state.detail?.exports || []); const printTests = state.detail?.print_tests || [];
+    const newestVersion = versions[0]?.packaging_project_version_id || '';
+    return `<section class="card packaging-editor-card"><div class="section-heading-row"><div><p class="eyebrow">${esc(project.project_key || 'New soap label')}</p><h2 style="margin:0">${esc(project.project_name || project.product_name || 'Soap label project')}</h2></div><div class="packaging-project-actions"><button class="btn" id="duplicatePackagingProject" type="button">Duplicate</button><button class="btn" id="archivePackagingProject" type="button">Archive</button></div></div>
       <input type="hidden" id="packagingProjectId" value="${Number(project.packaging_project_id || 0)}"/>
-      <div class="grid cols-3">
-        <label><span class="small">Project name</span><input class="input" id="packagingProjectName" value="${esc(project.project_name || '')}"/></label>
-        <label><span class="small">Template</span><select class="input" id="packagingTemplateId">${options(state.templates, project.packaging_template_id, (row) => row.template_name)}</select></label>
-        <label><span class="small">Linked product</span><select class="input" id="packagingProductId"><option value="">No product link</option>${options(state.products, project.product_id, (row) => `${row.name} · ${row.sku || `#${row.product_id}`}`)}</select></label>
-      </div>
-      <div class="grid cols-3">
-        <label><span class="small">Package type</span><select class="input" id="packagingType"><option value="soap_ribbon" ${project.package_type === 'soap_ribbon' ? 'selected' : ''}>Soap ribbon</option><option value="candle_label" ${project.package_type === 'candle_label' ? 'selected' : ''}>Candle label</option><option value="jewelry_card" ${project.package_type === 'jewelry_card' ? 'selected' : ''}>Jewelry display card</option><option value="hang_tag" ${project.package_type === 'hang_tag' ? 'selected' : ''}>Hang tag</option><option value="insert_card" ${project.package_type === 'insert_card' ? 'selected' : ''}>Insert / care card</option></select></label>
-        <label><span class="small">Project status</span><select class="input" id="packagingStatus">${['draft', 'review', 'approved', 'archived'].map((value) => `<option ${project.project_status === value ? 'selected' : ''}>${value}</option>`).join('')}</select></label>
-        <label><span class="small">Compliance review</span><select class="input" id="packagingCompliance">${['needs_review', 'ready_for_review', 'approved', 'blocked'].map((value) => `<option ${project.compliance_status === value ? 'selected' : ''}>${value}</option>`).join('')}</select></label>
-      </div>
-      <div class="packaging-reference-note">
-        <img src="/assets/soap-ribbon-scalloped-reference.svg" alt="Scalloped soap ribbon reference with curved collection and scent text, bilingual centre title, side botanical ornaments and a narrow wrap band"/>
-        <div><strong>Photo-reference ribbon preset</strong><p class="small">The supplied ribbon maps collection text to the upper curve, English and French product identity to the centre, and the scent or product name to the lower curve. The scalloped badge extends beyond the 19 mm wrap band.</p><button class="btn" id="applySoapRibbonReference" type="button">Apply reference example</button></div>
-      </div>
-      <details open><summary>Product and bilingual label content</summary>
-        <div class="grid cols-3">
-          <label><span class="small">Collection / upper curved text</span><input class="input" id="packagingCollection" value="${esc(project.collection_name || '')}" placeholder="Coconut milk"/></label>
-          <label><span class="small">Product / scent / lower curved text</span><input class="input" id="packagingProductName" value="${esc(project.product_name || '')}" placeholder="Sweet Vanilla"/></label>
-          <label><span class="small">Subtitle</span><input class="input" id="packagingSubtitle" value="${esc(project.product_subtitle || '')}"/></label>
-        </div>
-        <div class="grid cols-2">
-          <label><span class="small">Product identity — English</span><input class="input" id="packagingIdentityEn" value="${esc(project.product_identity_en || 'Luxury Soap')}"/></label>
-          <label><span class="small">Product identity — French</span><input class="input" id="packagingIdentityFr" value="${esc(project.product_identity_fr || 'Savon de luxe')}"/></label>
-        </div>
-        <label><span class="small">INCI ingredient list</span><textarea class="input" id="packagingInci" rows="4">${esc(project.ingredients_inci || '')}</textarea></label>
-        <div class="grid cols-2">
-          <label><span class="small">English ingredient/supporting copy</span><textarea class="input" id="packagingIngredientsEn" rows="4">${esc(project.ingredients_en || '')}</textarea></label>
-          <label><span class="small">French ingredient/supporting copy</span><textarea class="input" id="packagingIngredientsFr" rows="4">${esc(project.ingredients_fr || '')}</textarea></label>
-        </div>
-        <div class="grid cols-3">
-          <label><span class="small">Net quantity</span><input class="input" id="packagingNetQuantity" value="${esc(project.net_quantity_text || '')}" placeholder="100 g"/></label>
-          <label><span class="small">Website</span><input class="input" id="packagingWebsite" value="${esc(project.website_text || 'devilndove.com')}"/></label>
-          <label><span class="small">Made in Canada text</span><input class="input" id="packagingMadeInCanada" value="${esc(project.made_in_canada_text || 'Made in Canada / Fabriqué au Canada')}"/></label>
-        </div>
-      </details>
-      <details><summary>Dealer, contact, claims and warnings</summary>
-        <div class="grid cols-3">
-          <label><span class="small">Dealer / business</span><input class="input" id="packagingDealerName" value="${esc(project.dealer_name || 'Devil n Dove')}"/></label>
-          <label><span class="small">Dealer principal address</span><input class="input" id="packagingDealerAddress" value="${esc(project.dealer_address || '')}"/></label>
-          <label><span class="small">Consumer contact</span><input class="input" id="packagingContact" value="${esc(project.contact_text || 'devilndove.com/contact')}"/></label>
-        </div>
-        <div class="grid cols-2">
-          <label><span class="small">Claims, comma separated</span><textarea class="input" id="packagingClaims" rows="3">${esc(claims)}</textarea></label>
-          <label><span class="small">Icons, comma separated</span><textarea class="input" id="packagingIcons" rows="3">${esc(icons)}</textarea></label>
-        </div>
-        <div class="grid cols-2">
-          <label><span class="small">Warnings — English</span><textarea class="input" id="packagingWarningsEn" rows="3">${esc(project.warnings_en || '')}</textarea></label>
-          <label><span class="small">Warnings — French</span><textarea class="input" id="packagingWarningsFr" rows="3">${esc(project.warnings_fr || '')}</textarea></label>
-        </div>
-      </details>
-      <details open><summary>Badge and theme engine</summary>
-        <div class="grid cols-4">
-          <label><span class="small">Botanical colour</span><input class="input" id="packagingRoseColour" type="color" value="${esc(theme.rose_colour || '#9b8068')}"/></label>
-          <label><span class="small">Paper / ribbon colour</span><input class="input" id="packagingThemeColour" type="color" value="${esc(theme.theme_colour || '#f2ead8')}"/></label>
-          <label><span class="small">Text / border colour</span><input class="input" id="packagingBorderColour" type="color" value="${esc(theme.border_colour || '#2f2721')}"/></label>
-          <label><span class="small">Accent gold</span><input class="input" id="packagingAccentGold" type="color" value="${esc(theme.accent_gold || '#b69a61')}"/></label>
-        </div>
-        <div class="grid cols-3">
-          <label><span class="small">Badge shape</span><select class="input" id="packagingBadgeShape"><option value="scalloped" ${artwork.badge_shape !== 'oval' ? 'selected' : ''}>Scalloped medallion</option><option value="oval" ${artwork.badge_shape === 'oval' ? 'selected' : ''}>Oval medallion</option></select></label>
-          <label><span class="small">Side ornament</span><select class="input" id="packagingRoseStyle"><option value="botanical_sprigs" ${!artwork.rose_style || artwork.rose_style === 'botanical_sprigs' ? 'selected' : ''}>Botanical sprigs</option><option value="minimal" ${artwork.rose_style === 'minimal' ? 'selected' : ''}>Minimal line ornaments</option><option value="none" ${artwork.rose_style === 'none' ? 'selected' : ''}>No ornaments</option></select></label>
-          <label><span class="small">Centre mark</span><input class="input" id="packagingCentreMark" value="${esc(artwork.centre_mark || '◇')}" maxlength="8"/></label>
-        </div>
-        <div class="grid cols-2">
-          <label><span class="small">Upper arc override (optional)</span><input class="input" id="packagingTopArcText" value="${esc(artwork.top_arc_text || '')}" placeholder="Uses Collection when blank"/></label>
-          <label><span class="small">Lower arc override (optional)</span><input class="input" id="packagingBottomArcText" value="${esc(artwork.bottom_arc_text || '')}" placeholder="Uses Product name when blank"/></label>
-        </div>
-      </details>
-      <label><span class="small">Print and finishing notes</span><textarea class="input" id="packagingPrintNotes" rows="3">${esc(project.print_notes || '')}</textarea></label>
-      <div class="packaging-save-actions"><button class="btn primary" id="savePackagingProject" type="button">Save packaging project</button><button class="btn" id="savePackagingVersion" type="button">Save review version</button></div>
-    </section>
-    <section class="card packaging-preview-card">
-      <div class="section-heading-row"><div><h2 style="margin:0">Live soap ribbon preview</h2><p class="small" id="packagingPreviewSize">Physical dimensions load from the selected template.</p></div><span class="status-pill">Auto font scaling</span></div>
-      <div id="packagingSvgPreview" class="packaging-svg-preview"></div>
-      <div id="packagingComplianceResults"></div>
-      <div class="packaging-export-actions"><button class="btn primary" data-packaging-export="svg">Export SVG</button><button class="btn" data-packaging-export="png">Export PNG</button><button class="btn" data-packaging-export="jpg">Export JPG</button><button class="btn" data-packaging-export="pdf_print">Print / Save PDF</button></div>
-    </section>
-    <section class="card">
-      <h2>Version history</h2>
-      <div class="admin-table-wrap"><table><thead><tr><th>Version</th><th>Label</th><th>Review</th><th>Created</th><th>Action</th></tr></thead><tbody>${versions.length ? versions.map((version) => `<tr><td>${Number(version.version_number || 0)}</td><td>${esc(version.version_label || '')}</td><td><select class="input" data-version-status="${Number(version.packaging_project_version_id || 0)}">${['needs_review', 'approved', 'changes_requested', 'blocked'].map((status) => `<option ${version.review_status === status ? 'selected' : ''}>${status}</option>`).join('')}</select></td><td>${esc(version.created_at || '')}</td><td><button class="btn" data-review-version="${Number(version.packaging_project_version_id || 0)}">Save review</button></td></tr>`).join('') : '<tr><td colspan="5">No saved versions yet.</td></tr>'}</tbody></table></div>
-      <h3>Export history</h3><div class="packaging-export-history">${exports.length ? exports.map((entry) => `<span>${esc(entry.export_format)} · ${esc(entry.file_name || 'prepared file')} · ${esc(entry.created_at || '')}</span>`).join('') : '<span class="small">No exports recorded yet.</span>'}</div>
-    </section>`;
+      <div class="packaging-tab-list" role="tablist" aria-label="Soap label editor sections">${tabButton('product','1. Product')}${tabButton('ingredients','2. Ingredients')}${tabButton('french','3. French')}${tabButton('rose','4. Rose & Colours')}${tabButton('claims','5. Claims')}${tabButton('layout','6. Layout')}${tabButton('preview','7. Preview')}${tabButton('print','8. Print Test')}${tabButton('versions','9. Versions')}</div>
+      ${tabPanel('product',`<h3>Product and project</h3><div class="grid cols-3"><label><span class="small">Project name</span><input class="input" id="packagingProjectName" value="${esc(project.project_name || '')}"/></label><label><span class="small">Template</span><select class="input" id="packagingTemplateId">${options(state.templates,project.packaging_template_id,(row)=>row.template_name)}</select></label><label><span class="small">Linked store product</span><select class="input" id="packagingProductId"><option value="">No product link</option>${options(state.products,project.product_id,(row)=>`${row.name} · ${row.sku || `#${row.product_id}`}`)}</select></label></div>
+        <div class="grid cols-3"><label><span class="small">Package type</span><select class="input" id="packagingType"><option value="soap_ribbon" selected>Soap ribbon</option><option value="candle_label">Candle label</option><option value="jewelry_card">Jewelry card</option></select></label><label><span class="small">Project status</span><select class="input" id="packagingStatus">${['draft','review','approved','archived'].map((value)=>`<option ${project.project_status===value?'selected':''}>${value}</option>`).join('')}</select></label><label><span class="small">Compliance status</span><select class="input" id="packagingCompliance">${['needs_review','ready_for_review','approved','blocked'].map((value)=>`<option ${project.compliance_status===value?'selected':''}>${value}</option>`).join('')}</select></label></div>
+        <div class="grid cols-3"><label><span class="small">Product family / main name</span><input class="input" id="packagingCollection" value="${esc(project.collection_name || '')}" placeholder="Glacial Purple"/></label><label><span class="small">Soap type / variant</span><input class="input" id="packagingProductName" value="${esc(project.product_name || '')}" placeholder="Aloe Soap"/></label><label><span class="small">Front tagline</span><input class="input" id="packagingSubtitle" value="${esc(project.product_subtitle || 'Handcrafted with Care')}"/></label></div>
+        <div class="grid cols-2"><label><span class="small">Product identity — English</span><input class="input" id="packagingIdentityEn" value="${esc(project.product_identity_en || 'Aloe Soap')}"/></label><label><span class="small">Product identity — French</span><input class="input" id="packagingIdentityFr" value="${esc(project.product_identity_fr || 'Savon à l’aloès')}"/></label></div>
+        <label><span class="small">Master INCI list</span><textarea class="input" id="packagingInci" rows="4">${esc(project.ingredients_inci || '')}</textarea></label>
+        <div class="grid cols-4"><label><span class="small">Net weight wording</span><input class="input" id="packagingNetQuantity" value="${esc(project.net_quantity_text || '')}" placeholder="NET WT. APPROX. 4.5 OZ / 127 G"/></label><label><span class="small">Ounces</span><input class="input" id="packagingNetWeightOz" type="number" step="0.01" value="${esc(project.net_weight_oz || '')}"/></label><label><span class="small">Grams</span><input class="input" id="packagingNetWeightG" type="number" step="0.1" value="${esc(project.net_weight_g || project.weight_grams || '')}"/></label><label><span class="small">Website</span><input class="input" id="packagingWebsite" value="${esc(project.website_text || 'devilndove.com')}"/></label></div>
+        <div class="grid cols-3"><label><span class="small">Dealer / business</span><input class="input" id="packagingDealerName" value="${esc(project.dealer_name || 'Rosevear Creations - Devil n Dove')}"/></label><label><span class="small">Principal business address</span><input class="input" id="packagingDealerAddress" value="${esc(project.dealer_address || '')}"/></label><label><span class="small">Consumer contact</span><input class="input" id="packagingContact" value="${esc(project.contact_text || 'devilndove.com/contact')}"/></label></div><label><span class="small">Made in Canada wording</span><input class="input" id="packagingMadeInCanada" value="${esc(project.made_in_canada_text || 'Made in Canada / Fabriqué au Canada')}"/></label>`)}
+      ${tabPanel('ingredients',`<div class="section-heading-row"><div><h3>Structured ingredient rows</h3><p class="small">One D1 row per ingredient preserves order, INCI, bilingual display wording, organic status and allergen review evidence.</p></div><button class="btn" id="addSoapIngredient" type="button">Add ingredient</button></div><div class="admin-table-wrap packaging-row-editor"><table><thead><tr><th>#</th><th>INCI</th><th>English</th><th>French</th><th>Organic</th><th>Allergen note</th><th>Label</th><th></th></tr></thead><tbody id="soapIngredientRows">${(ingredients.length?ingredients:[{}]).map(ingredientRow).join('')}</tbody></table></div><label><span class="small">English panel fallback / supporting copy</span><textarea class="input" id="packagingIngredientsEn" rows="5">${esc(project.ingredients_en || '')}</textarea></label>`)}
+      ${tabPanel('french',`<h3>French content review</h3><p class="small">French is equal label content, not an optional translation. Keep the structured ingredient rows aligned and review product identity, warnings and claims independently.</p><label><span class="small">French panel fallback / supporting copy</span><textarea class="input" id="packagingIngredientsFr" rows="6">${esc(project.ingredients_fr || '')}</textarea></label><div class="grid cols-2"><label><span class="small">Warnings — English</span><textarea class="input" id="packagingWarningsEn" rows="4">${esc(project.warnings_en || '')}</textarea></label><label><span class="small">Warnings — French</span><textarea class="input" id="packagingWarningsFr" rows="4">${esc(project.warnings_fr || '')}</textarea></label></div>`)}
+      ${tabPanel('rose',`<h3>Rose and colour direction</h3><div class="packaging-reference-note"><img src="/assets/packaging/soap/reference/glacial-purple-aloe-soap-approved-reference.png" alt="Approved Glacial Purple Aloe Soap continuous ribbon reference"/><div><strong>Approved visual reference</strong><p class="small">The renderer recreates this structure using editable SVG data rather than embedding text in an image.</p><button class="btn" id="applyGlacialPurpleReference" type="button">Apply Glacial Purple example</button></div></div><div class="grid cols-3"><label><span class="small">Rose asset</span><select class="input" id="packagingRoseAsset"><option value="rose-purple-v1" ${(project.rose_asset_id||artwork.rose_asset_id||'rose-purple-v1')==='rose-purple-v1'?'selected':''}>Purple rose</option><option value="rose-green-v1" ${(project.rose_asset_id||artwork.rose_asset_id)==='rose-green-v1'?'selected':''}>Green rose</option><option value="rose-oatmeal-v1" ${(project.rose_asset_id||artwork.rose_asset_id)==='rose-oatmeal-v1'?'selected':''}>Oatmeal / cream rose</option></select></label><label><span class="small">Rose style</span><select class="input" id="packagingRoseStyle"><option value="full_rose" selected>Full rose illustration</option><option value="minimal">Minimal rose mark</option></select></label><label><span class="small">Badge shape</span><select class="input" id="packagingBadgeShape"><option value="oval" selected>Front oval</option><option value="scalloped">Scalloped edge</option></select></label></div><div class="grid cols-5"><label><span class="small">Rose colour</span><input class="input" id="packagingRoseColour" type="color" value="${esc(theme.rose_colour||'#7B4DA6')}"/></label><label><span class="small">Cream background</span><input class="input" id="packagingThemeColour" type="color" value="${esc(theme.theme_colour||'#FBF5E8')}"/></label><label><span class="small">Dark border</span><input class="input" id="packagingBorderColour" type="color" value="${esc(theme.border_colour||'#32105E')}"/></label><label><span class="small">Gold trim</span><input class="input" id="packagingAccentGold" type="color" value="${esc(theme.accent_gold||'#B88A2F')}"/></label><label><span class="small">Accent purple</span><input class="input" id="packagingSecondaryColour" type="color" value="${esc(theme.secondary_colour||'#5A2A86')}"/></label></div><div class="grid cols-3"><label><span class="small">Upper arc override</span><input class="input" id="packagingTopArcText" value="${esc(artwork.top_arc_text||'')}"/></label><label><span class="small">Lower arc override</span><input class="input" id="packagingBottomArcText" value="${esc(artwork.bottom_arc_text||'')}"/></label><label><span class="small">Centre mark</span><input class="input" id="packagingCentreMark" value="${esc(artwork.centre_mark||'♥')}" maxlength="8"/></label></div>`)}
+      ${tabPanel('claims',`<div class="section-heading-row"><div><h3>Bilingual claims</h3><p class="small">Claims remain review-first. Marking a row approved records internal review only and is not legal approval.</p></div><button class="btn" id="addSoapClaim" type="button">Add claim</button></div><div class="admin-table-wrap packaging-row-editor"><table><thead><tr><th>#</th><th>English</th><th>French</th><th>Icon</th><th>Approved</th><th>Review note</th><th></th></tr></thead><tbody id="soapClaimRows">${(claims.length?claims:[{claim_en:'Natural Ingredients',claim_fr:'Ingrédients naturels',icon_name:'leaf'},{claim_en:'Handmade with Care',claim_fr:'Fait à la main avec soin',icon_name:'hands'},{claim_en:'Gentle & Moisturizing',claim_fr:'Doux et hydratant',icon_name:'leaf'},{claim_en:'Please Recycle',claim_fr:'Veuillez recycler',icon_name:'recycle'}]).map(claimRow).join('')}</tbody></table></div>`)}
+      ${tabPanel('layout',`<h3>Physical layout and guides</h3><div class="packaging-dimension-summary"><strong>${esc(template.template_name||'Template')}</strong><p class="small">${esc(template.description||'')}</p><dl><div><dt>Canvas</dt><dd>${num(template.page_width_mm,279.4)} × ${num(template.page_height_mm,38.1)} mm</dd></div><div><dt>Band</dt><dd>${num(template.layout?.band_height_mm,19.05)} mm</dd></div><div><dt>Front</dt><dd>${num(template.front_width_mm,50.8)} × ${num(template.front_height_mm,38.1)} mm</dd></div><div><dt>Rear</dt><dd>${num(template.rear_width_mm,38.1)} mm</dd></div></dl></div><div class="grid cols-5 packaging-guide-controls"><label><input type="checkbox" id="packagingShowGuides" ${Number(artwork.show_guides)===1?'checked':''}/> All guides</label><label><input type="checkbox" id="packagingShowBleed" ${Number(artwork.show_bleed)===1?'checked':''}/> Bleed</label><label><input type="checkbox" id="packagingShowSafeArea" ${Number(artwork.show_safe_area)===1?'checked':''}/> Safe area</label><label><input type="checkbox" id="packagingShowFoldGuides" ${Number(artwork.show_fold_guides)===1?'checked':''}/> Folds</label><label><input type="checkbox" id="packagingShowGlueZone" ${Number(artwork.show_glue_zone)===1?'checked':''}/> Glue zone</label></div><div class="packaging-warning-list"><strong>Dimensional conflict preserved for review</strong><p class="small">The supplied specification requires a 38.1 mm-high artboard and a 50 mm rear circle. Those cannot physically fit together. Use the photo-fit profile for a 38.1 mm rear seal, or the 50 mm profile with a taller artboard. The app does not hide this decision.</p></div><label><span class="small">Print and finishing notes</span><textarea class="input" id="packagingPrintNotes" rows="4">${esc(project.print_notes||'')}</textarea></label>`)}
+      ${tabPanel('preview',`<div class="section-heading-row"><div><h3>Live exact-size SVG preview</h3><p class="small" id="packagingPreviewSize">Loading dimensions…</p></div><span class="status-pill">SVG master</span></div><div id="packagingSvgPreview" class="packaging-svg-preview"></div><div id="packagingComplianceResults"></div><div class="packaging-export-actions"><button class="btn primary" data-packaging-export="svg">Export SVG</button><button class="btn" data-packaging-export="png">Export PNG</button><button class="btn" data-packaging-export="webp">Export WebP</button><button class="btn" data-packaging-export="jpg">Export JPG</button><button class="btn" data-packaging-export="pdf_print">Print / Save PDF</button></div>`)}
+      ${tabPanel('print',`<h3>100% physical print test</h3><p class="small">Print at actual size with browser scaling set to 100% or Actual Size. Measure the physical label and record the evidence below.</p><div class="grid cols-3"><label><span class="small">Version tested</span><select class="input" id="printTestVersion"><option value="">Project draft</option>${versions.map((version)=>`<option value="${version.packaging_project_version_id}" ${Number(newestVersion)===Number(version.packaging_project_version_id)?'selected':''}>Version ${version.version_number} — ${esc(version.version_label||'')}</option>`).join('')}</select></label><label><span class="small">Result</span><select class="input" id="printTestStatus"><option value="needs_test">Needs test</option><option value="passed">Passed</option><option value="failed">Failed</option></select></label><label><span class="small">Printed date/time</span><input class="input" id="printTestDate" type="datetime-local"/></label></div><div class="grid cols-3"><label><span class="small">Printer</span><input class="input" id="printTestPrinter"/></label><label><span class="small">Paper / stock</span><input class="input" id="printTestPaper"/></label><label><span class="small">Scale %</span><input class="input" id="printTestScale" type="number" value="100" step="0.1"/></label></div><div class="grid cols-5"><label><span class="small">Strip width in</span><input class="input" id="printTestStripWidth" type="number" step="0.001" value="11"/></label><label><span class="small">Band height in</span><input class="input" id="printTestBandHeight" type="number" step="0.001" value="0.75"/></label><label><span class="small">Front width in</span><input class="input" id="printTestFrontWidth" type="number" step="0.001" value="2"/></label><label><span class="small">Front height in</span><input class="input" id="printTestFrontHeight" type="number" step="0.001" value="1.5"/></label><label><span class="small">Rear circle mm</span><input class="input" id="printTestRearCircle" type="number" step="0.1" value="${num(template.rear_width_mm,38.1)}"/></label></div><div class="grid cols-3"><label><span class="small">Wrap fit</span><select class="input" id="printTestWrap"><option>not_checked</option><option>passed</option><option>failed</option></select></label><label><span class="small">Legibility</span><select class="input" id="printTestLegibility"><option>not_checked</option><option>passed</option><option>failed</option></select></label><label><span class="small">Overlap / folds</span><select class="input" id="printTestOverlap"><option>not_checked</option><option>passed</option><option>failed</option></select></label></div><label><span class="small">Proof image URL</span><input class="input" id="printTestProofUrl" type="url" placeholder="R2 or approved media URL"/></label><label><span class="small">Print-test notes</span><textarea class="input" id="printTestNotes" rows="4"></textarea></label><button class="btn primary" id="savePrintTest" type="button">Save print-test evidence</button><h4>Print-test history</h4><div class="admin-table-wrap"><table><thead><tr><th>Status</th><th>Version</th><th>Scale</th><th>Measurements</th><th>Physical checks</th><th>Date</th></tr></thead><tbody>${printTests.length?printTests.map((test)=>`<tr><td>${esc(test.test_status)}</td><td>${esc(test.packaging_project_version_id||'draft')}</td><td>${esc(test.scale_percent)}%</td><td>${esc(test.measured_strip_width_in||'—')} in × ${esc(test.measured_band_height_in||'—')} in; front ${esc(test.measured_front_width_in||'—')} × ${esc(test.measured_front_height_in||'—')}</td><td>${esc(test.wrap_fit_status)} / ${esc(test.legibility_status)} / ${esc(test.overlap_status)}</td><td>${esc(test.created_at||'')}</td></tr>`).join(''):'<tr><td colspan="6">No physical print tests recorded.</td></tr>'}</tbody></table></div>`)}
+      ${tabPanel('versions',`<h3>Review versions and exports</h3><div class="admin-table-wrap"><table><thead><tr><th>Version</th><th>Label</th><th>Review</th><th>Created</th><th>Action</th></tr></thead><tbody>${versions.length?versions.map((version)=>`<tr><td>${version.version_number}</td><td>${esc(version.version_label||'')}</td><td><select class="input" data-version-status="${version.packaging_project_version_id}">${['needs_review','approved','changes_requested','blocked'].map((status)=>`<option ${version.review_status===status?'selected':''}>${status}</option>`).join('')}</select></td><td>${esc(version.created_at||'')}</td><td><button class="btn" data-review-version="${version.packaging_project_version_id}">Save review</button></td></tr>`).join(''):'<tr><td colspan="5">No review versions saved.</td></tr>'}</tbody></table></div><h4>Export history</h4><div class="packaging-export-history">${exports.length?exports.map((entry)=>`<span>${esc(entry.export_format)} · ${esc(entry.file_name||'prepared file')} · ${esc(entry.checksum?String(entry.checksum).slice(0,12):'no checksum')} · ${esc(entry.generated_at||entry.created_at||'')}</span>`).join(''):'<span class="small">No exports recorded.</span>'}</div>`)}
+      <div class="packaging-save-actions packaging-sticky-actions"><button class="btn primary" id="savePackagingProject" type="button">Save project</button><button class="btn" id="savePackagingVersion" type="button">Save review version</button></div></section>`;
   }
 
-  function applyReferenceExample() {
-    if (!confirm('Apply the photographed soap-ribbon example to the current draft? Existing label text and colours in these fields will be replaced.')) return;
-    const fields = {
-      packagingCollection: 'Coconut milk',
-      packagingProductName: 'Sweet Vanilla',
-      packagingIdentityEn: 'Luxury Soap',
-      packagingIdentityFr: 'Savon de luxe',
-      packagingTopArcText: '',
-      packagingBottomArcText: '',
-      packagingCentreMark: '◇',
-      packagingRoseColour: '#9b8068',
-      packagingThemeColour: '#f2ead8',
-      packagingBorderColour: '#2f2721',
-      packagingAccentGold: '#b69a61',
-      packagingBadgeShape: 'scalloped',
-      packagingRoseStyle: 'botanical_sprigs'
-    };
-    Object.entries(fields).forEach(([fieldId, value]) => { const node = id(fieldId); if (node) node.value = value; });
-    renderPreview();
-    message('Photo-reference soap ribbon styling applied. Review every field before saving or printing.', 'success');
+  function activateTab(key) {
+    state.activeTab = key;
+    document.querySelectorAll('[data-packaging-tab]').forEach((node) => node.classList.toggle('is-active', node.dataset.packagingTab === key));
+    document.querySelectorAll('[data-packaging-panel]').forEach((node) => node.classList.toggle('is-active', node.dataset.packagingPanel === key));
+    if (key === 'preview') renderPreview();
   }
 
-  function bindDetail() {
-    document.querySelectorAll('.packaging-editor-card input,.packaging-editor-card textarea,.packaging-editor-card select').forEach((node) => {
-      node.addEventListener(node.type === 'color' ? 'input' : 'change', renderPreview);
-      if (['text', 'search', 'number', 'url'].includes(node.type) || node.tagName === 'TEXTAREA') node.addEventListener('input', renderPreview);
-    });
-    id('savePackagingProject')?.addEventListener('click', saveProject);
-    id('savePackagingVersion')?.addEventListener('click', saveVersion);
-    id('duplicatePackagingProject')?.addEventListener('click', duplicateProject);
-    id('archivePackagingProject')?.addEventListener('click', archiveProject);
-    id('applySoapRibbonReference')?.addEventListener('click', applyReferenceExample);
-    document.querySelectorAll('[data-packaging-export]').forEach((button) => button.addEventListener('click', () => exportFile(button.dataset.packagingExport)));
-    document.querySelectorAll('[data-review-version]').forEach((button) => button.addEventListener('click', () => reviewVersion(Number(button.dataset.reviewVersion || 0))));
-    renderPreview();
+  function updateRowNumbers(selector) { document.querySelectorAll(selector).forEach((row, index) => { const cell = row.querySelector('.row-order'); if (cell) cell.textContent = String(index + 1); }); }
+  function addIngredient(row = {}) { id('soapIngredientRows')?.insertAdjacentHTML('beforeend', ingredientRow(row, document.querySelectorAll('[data-soap-ingredient-row]').length)); bindDynamicRows(); renderPreview(); }
+  function addClaim(row = {}) { id('soapClaimRows')?.insertAdjacentHTML('beforeend', claimRow(row, document.querySelectorAll('[data-soap-claim-row]').length)); bindDynamicRows(); renderPreview(); }
+
+  function bindDynamicRows() {
+    document.querySelectorAll('[data-remove-ingredient]').forEach((button) => { button.onclick = () => { button.closest('[data-soap-ingredient-row]')?.remove(); updateRowNumbers('[data-soap-ingredient-row]'); renderPreview(); }; });
+    document.querySelectorAll('[data-remove-claim]').forEach((button) => { button.onclick = () => { button.closest('[data-soap-claim-row]')?.remove(); updateRowNumbers('[data-soap-claim-row]'); renderPreview(); }; });
+    document.querySelectorAll('[data-soap-ingredient-row] input,[data-soap-claim-row] input,[data-soap-claim-row] select').forEach((node) => { node.oninput = renderPreview; node.onchange = renderPreview; });
   }
 
   function renderMain() {
-    const main = id('packagingStudioMain');
-    if (!main) return;
-    if (!state.detail?.project) {
-      main.innerHTML = '<section class="card packaging-studio-welcome"><h2>Choose or create a packaging project</h2><p>Start with the supplied scalloped soap-ribbon reference or the standard ribbon template, link a product if one exists, and keep all editable content in structured fields.</p></section>';
-      return;
-    }
-    main.innerHTML = detailMarkup();
-    bindDetail();
+    const main = id('packagingStudioMain'); if (!main) return;
+    if (!state.detail?.project) { main.innerHTML = '<section class="card packaging-studio-welcome"><h2>Choose or create a soap-label project</h2><p>Start with the Glacial Purple approved photo layout. The label remains structured, bilingual, exact-size and review-first.</p></section>'; return; }
+    main.innerHTML = detailMarkup(); bindDetail();
   }
 
   async function load(projectId = 0) {
-    try {
-      state.loading = true;
-      message('Loading Packaging Studio…');
-      const data = await api(null, projectId);
-      state.projects = data.projects || [];
-      state.templates = data.templates || [];
-      state.products = data.products || [];
-      state.detail = data.detail || null;
-      renderProjects();
-      renderMain();
-      message('Packaging Studio loaded.', 'success');
-    } catch (error) {
-      message(error.message, 'error');
-      restoreLocal(false);
-    } finally { state.loading = false; }
+    try { state.loading = true; message('Loading Packaging Studio…'); const data = await api(null, projectId); state.projects = data.projects || []; state.templates = data.templates || []; state.products = data.products || []; state.detail = data.detail || null; renderProjects(); renderMain(); message('Packaging Studio loaded.', 'success'); }
+    catch (error) { message(error.message, 'error'); restoreLocal(false); }
+    finally { state.loading = false; }
   }
 
   async function createProject() {
-    const productOptions = state.products.slice(0, 150).map((product) => `${product.product_id}: ${product.name}`).join('\n');
-    const productId = Number(prompt(`Optional product row ID. Leave blank for packaging not yet linked to a product.\n\nAvailable examples:\n${productOptions.slice(0, 1200)}`) || 0) || null;
-    const product = state.products.find((row) => Number(row.product_id) === productId);
-    const productName = product?.name || prompt('Packaging product or scent name:');
-    if (!productName) return;
-    try {
-      const preferred = state.templates.find((row) => String(row.template_key || '').includes('scalloped')) || state.templates[0];
-      const data = await api({ action: 'create_project', product_id: productId, packaging_template_id: Number(preferred?.packaging_template_id || 0), project_name: `${productName} packaging`, product_name: productName });
-      state.projects = data.projects || [];
-      state.detail = data.detail;
-      renderProjects();
-      renderMain();
-      message(data.message, 'success');
-    } catch (error) { message(error.message, 'error'); }
+    const productOptions = state.products.slice(0, 100).map((product) => `${product.product_id}: ${product.name}`).join('\n');
+    const productId = Number(prompt(`Optional store-product row ID. Leave blank for packaging not yet linked to a product.\n\nExamples:\n${productOptions.slice(0,1000)}`) || 0) || null;
+    const product = state.products.find((row) => Number(row.product_id) === productId); const productName = product?.name || prompt('Soap product or collection name:'); if (!productName) return;
+    try { const preferred = state.templates.find((row) => row.template_key === 'soap-ribbon-glacial-approved-v1') || state.templates[0]; const data = await api({ action: 'create_project', product_id: productId, packaging_template_id: Number(preferred?.packaging_template_id || 0), project_name: `${productName} soap label`, product_name: productName, collection_name: productName }); state.projects = data.projects || []; state.detail = data.detail; state.activeTab = 'product'; renderProjects(); renderMain(); message(data.message, 'success'); }
+    catch (error) { message(error.message, 'error'); }
   }
 
   async function saveProject() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot()));
-      message('Saving packaging project…');
-      const data = await api(projectPayload());
-      state.projects = data.projects || [];
-      state.detail = data.detail;
-      renderProjects();
-      renderMain();
-      message(data.message, 'success');
-    } catch (error) { message(`${error.message} Browser draft retained locally.`, 'error'); }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot())); message('Saving structured soap-label data…'); const data = await api(projectPayload()); state.projects = data.projects || []; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); return true; }
+    catch (error) { message(`${error.message} Browser draft retained locally.`, 'error'); return false; }
+  }
+
+  async function sha256(value) {
+    if (!crypto?.subtle) return '';
+    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+    return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
   }
 
   async function saveVersion() {
-    try {
-      await saveProject();
-      const data = await api({
-        action: 'save_version',
-        packaging_project_id: Number(id('packagingProjectId')?.value || 0),
-        version_label: prompt('Version label:', `Review ${new Date().toLocaleDateString()}`) || '',
-        snapshot: projectPayload(),
-        svg_markup: svgMarkup()
-      });
-      state.projects = data.projects || [];
-      state.detail = data.detail;
-      renderProjects();
-      renderMain();
-      message(data.message, 'success');
-    } catch (error) { message(error.message, 'error'); }
+    try { if (!(await saveProject())) return; const svg = svgMarkup(); const checksum = await sha256(svg); const data = await api({ action: 'save_version', packaging_project_id: Number(id('packagingProjectId')?.value || 0), version_label: prompt('Version label:', `Review ${new Date().toLocaleDateString('en-CA')}`) || '', snapshot: projectPayload(), svg_markup: svg, checksum }); state.projects = data.projects || []; state.detail = data.detail; state.activeTab = 'versions'; renderProjects(); renderMain(); message(data.message, 'success'); }
+    catch (error) { message(error.message, 'error'); }
   }
 
-  async function duplicateProject() {
-    if (!confirm('Duplicate this packaging project as a new draft?')) return;
-    try {
-      const data = await api({ action: 'duplicate_project', packaging_project_id: Number(id('packagingProjectId')?.value || 0) });
-      state.projects = data.projects || [];
-      state.detail = data.detail;
-      renderProjects();
-      renderMain();
-      message(data.message, 'success');
-    } catch (error) { message(error.message, 'error'); }
-  }
-
-  async function archiveProject() {
-    if (!confirm('Archive this packaging project? Versions and export history will remain.')) return;
-    try {
-      const data = await api({ action: 'archive_project', packaging_project_id: Number(id('packagingProjectId')?.value || 0) });
-      state.projects = data.projects || [];
-      state.detail = data.detail;
-      renderProjects();
-      renderMain();
-      message(data.message, 'success');
-    } catch (error) { message(error.message, 'error'); }
-  }
+  async function duplicateProject() { if (!confirm('Duplicate this packaging project as a new draft?')) return; try { const data = await api({ action: 'duplicate_project', packaging_project_id: Number(id('packagingProjectId')?.value || 0) }); state.projects = data.projects || []; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); } catch (error) { message(error.message, 'error'); } }
+  async function archiveProject() { if (!confirm('Archive this packaging project? Versions, exports and print evidence will remain.')) return; try { const data = await api({ action: 'archive_project', packaging_project_id: Number(id('packagingProjectId')?.value || 0) }); state.projects = data.projects || []; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); } catch (error) { message(error.message, 'error'); } }
 
   async function reviewVersion(versionId) {
+    try { const status = document.querySelector(`[data-version-status="${versionId}"]`)?.value || 'needs_review'; const data = await api({ action: 'review_version', packaging_project_id: Number(id('packagingProjectId')?.value || 0), packaging_project_version_id: versionId, review_status: status }); state.projects = data.projects || []; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); }
+    catch (error) { message(error.message, 'error'); }
+  }
+
+  async function savePrintTest() {
     try {
-      const status = document.querySelector(`[data-version-status="${versionId}"]`)?.value || 'needs_review';
-      const data = await api({ action: 'review_version', packaging_project_id: Number(id('packagingProjectId')?.value || 0), packaging_project_version_id: versionId, review_status: status });
-      state.projects = data.projects || [];
-      state.detail = data.detail;
-      renderProjects();
-      renderMain();
-      message(data.message, 'success');
+      const data = await api({ action: 'save_print_test', packaging_project_id: Number(id('packagingProjectId')?.value || 0), packaging_project_version_id: Number(id('printTestVersion')?.value || 0) || null, test_status: id('printTestStatus')?.value, printed_at: id('printTestDate')?.value, printer_name: id('printTestPrinter')?.value, paper_stock: id('printTestPaper')?.value, scale_percent: Number(id('printTestScale')?.value || 100), measured_strip_width_in: Number(id('printTestStripWidth')?.value || 0), measured_band_height_in: Number(id('printTestBandHeight')?.value || 0), measured_front_width_in: Number(id('printTestFrontWidth')?.value || 0), measured_front_height_in: Number(id('printTestFrontHeight')?.value || 0), measured_rear_circle_mm: Number(id('printTestRearCircle')?.value || 0), wrap_fit_status: id('printTestWrap')?.value, legibility_status: id('printTestLegibility')?.value, overlap_status: id('printTestOverlap')?.value, proof_image_url: id('printTestProofUrl')?.value, notes: id('printTestNotes')?.value });
+      state.projects = data.projects || []; state.detail = data.detail; state.activeTab = 'print'; renderProjects(); renderMain(); message(data.message, 'success');
     } catch (error) { message(error.message, 'error'); }
   }
 
   function fileBase() {
-    return String(id('packagingProjectName')?.value || 'devil-n-dove-packaging').toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80) || 'packaging';
+    const family = String(id('packagingCollection')?.value || id('packagingProjectName')?.value || 'soap-label').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0,80) || 'soap-label';
+    const version = (state.detail?.versions?.[0]?.version_number || 1).toString(); return `soap-label-${family}-v${version}.0`;
   }
-
-  function download(blob, name) {
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = name;
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1000);
-  }
-
-  async function recordExport(format, name) {
-    try {
-      await api({ action: 'record_export', packaging_project_id: Number(id('packagingProjectId')?.value || 0), export_format: format, file_name: name, snapshot: projectPayload() });
-    } catch (error) { message(`File prepared, but export history could not be recorded: ${error.message}`, 'error'); }
-  }
+  function download(blob, name) { const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = name; document.body.appendChild(link); link.click(); setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1200); }
+  async function recordExport(format, name, checksum) { try { await api({ action: 'record_export', packaging_project_id: Number(id('packagingProjectId')?.value || 0), packaging_project_version_id: Number(state.detail?.versions?.[0]?.packaging_project_version_id || 0) || null, export_format: format, file_name: name, version: String(state.detail?.versions?.[0]?.version_number || 1), checksum, snapshot: projectPayload() }); } catch (error) { message(`File prepared, but export history could not be recorded: ${error.message}`, 'error'); } }
 
   async function exportFile(format) {
-    const svg = svgMarkup();
-    const base = fileBase();
-    const template = currentTemplate();
-    const widthMm = Number(template.page_width_mm || 279.4);
-    const heightMm = Number(template.page_height_mm || 19);
-    if (format === 'svg') {
-      const name = `${base}.svg`;
-      download(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), name);
-      await recordExport(format, name);
-      return;
+    const svg = svgMarkup(); const base = fileBase(); const template = currentTemplate(); const widthMm = num(template.page_width_mm,279.4); const heightMm = num(template.page_height_mm,38.1); const checksum = await sha256(svg);
+    if (format === 'svg') { const name = `${base}.svg`; download(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), name); await recordExport(format,name,checksum); return; }
+    if (format === 'pdf_print') { const win = open('', '_blank', 'noopener,noreferrer'); if (!win) { message('Pop-up blocked. Allow pop-ups for Print / Save PDF.', 'error'); return; } win.document.write(`<!doctype html><html><head><title>${esc(base)}</title><style>@page{size:${widthMm}mm ${heightMm}mm;margin:0}html,body{margin:0;padding:0;width:${widthMm}mm;height:${heightMm}mm}svg{display:block;width:${widthMm}mm;height:${heightMm}mm}</style></head><body>${svg}<script>onload=()=>setTimeout(()=>print(),350)<\/script></body></html>`); win.document.close(); await recordExport(format,`${base}-print.pdf`,checksum); return; }
+    const source = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })); const image = new Image();
+    image.onload = () => { const canvas = document.createElement('canvas'); canvas.width = Math.round(widthMm / 25.4 * 300); canvas.height = Math.round(heightMm / 25.4 * 300); const context = canvas.getContext('2d'); if (!context) { message('Canvas rendering is unavailable. Use SVG.', 'error'); return; } if (format === 'jpg') { context.fillStyle = '#fff'; context.fillRect(0,0,canvas.width,canvas.height); } context.drawImage(image,0,0,canvas.width,canvas.height); URL.revokeObjectURL(source); const mime = format === 'jpg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png'; canvas.toBlob(async (blob) => { if (!blob) { message('Raster export failed. Use SVG.', 'error'); return; } const name = `${base}-preview.${format === 'jpg' ? 'jpg' : format}`; download(blob,name); await recordExport(format,name,checksum); }, mime, .95); };
+    image.onerror = () => { URL.revokeObjectURL(source); message('Raster preview could not be rendered. Use SVG.', 'error'); }; image.src = source;
+  }
+
+  function applyGlacialPurpleReference() {
+    if (!confirm('Apply the Glacial Purple photo-reference wording and colours to this draft? Existing fields will be replaced.')) return;
+    const values = { packagingCollection:'Glacial Purple', packagingProductName:'Aloe Soap', packagingSubtitle:'Handcrafted with Care', packagingIdentityEn:'Aloe Soap', packagingIdentityFr:'Savon à l’aloès', packagingNetQuantity:'NET WT. APPROX. 4.5 OZ / 127 G', packagingNetWeightOz:'4.5', packagingNetWeightG:'127', packagingRoseColour:'#7B4DA6', packagingThemeColour:'#FBF5E8', packagingBorderColour:'#32105E', packagingAccentGold:'#B88A2F', packagingSecondaryColour:'#5A2A86', packagingRoseAsset:'rose-purple-v1' };
+    Object.entries(values).forEach(([key,value]) => { const node = id(key); if (node) node.value = value; });
+    if (!ingredientRowsFromDom().length || confirm('Replace the current ingredient rows with the six visible reference rows?')) {
+      id('soapIngredientRows').innerHTML = [
+        ['Aloe Soap Base','Aloe Soap Base – SLS/SLES free','Base de savon à l’aloès – sans SLS/SLES'],['','No Palm Oil','Sans huile de palme'],['','Organic Soap Base','Base de savon biologique'],['','Bulk Aloe Melt and Pour Soap Base','Base de savon à fondre et à verser à l’aloès en vrac'],['','Natural Soap Base for Soap Making Organic','Base de savon naturelle pour fabrication de savon biologique'],['','Soap Making Supplies','Fournitures pour fabrication de savon']
+      ].map((row,index)=>ingredientRow({inci_name:row[0],display_name_en:row[1],display_name_fr:row[2],required_on_label:1},index)).join(''); bindDynamicRows();
     }
-    if (format === 'pdf_print') {
-      const win = open('', '_blank', 'noopener,noreferrer');
-      if (!win) { message('Pop-up blocked. Allow pop-ups to use Print / Save PDF.', 'error'); return; }
-      win.document.write(`<!doctype html><html><head><title>${esc(base)}</title><style>@page{size:${widthMm}mm ${heightMm}mm;margin:0}html,body{margin:0;padding:0;width:${widthMm}mm;height:${heightMm}mm}svg{display:block;width:${widthMm}mm;height:${heightMm}mm}</style></head><body>${svg}<script>onload=()=>setTimeout(()=>print(),250)<\/script></body></html>`);
-      win.document.close();
-      await recordExport(format, `${base}.pdf`);
-      return;
-    }
-    const source = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
-    const image = new Image();
-    image.onload = async () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1200, Math.round(widthMm / 25.4 * 300));
-      canvas.height = Math.max(225, Math.round(heightMm / 25.4 * 300));
-      const context = canvas.getContext('2d');
-      if (format === 'jpg') { context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height); }
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(source);
-      canvas.toBlob(async (blob) => {
-        if (!blob) { message('Raster export failed. Use SVG export instead.', 'error'); return; }
-        const extension = format === 'jpg' ? 'jpg' : 'png';
-        const name = `${base}.${extension}`;
-        download(blob, name);
-        await recordExport(format, name);
-      }, format === 'jpg' ? 'image/jpeg' : 'image/png', 0.95);
-    };
-    image.onerror = () => { URL.revokeObjectURL(source); message('Raster preview could not be rendered. Use SVG export instead.', 'error'); };
-    image.src = source;
+    renderPreview(); message('Glacial Purple photo-reference layout applied. Replace reference wording with the verified formula and INCI facts before approval.', 'success');
+  }
+
+  function bindDetail() {
+    document.querySelectorAll('[data-packaging-tab]').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.packagingTab)));
+    document.querySelectorAll('.packaging-editor-card input,.packaging-editor-card textarea,.packaging-editor-card select').forEach((node) => { const eventName = node.type === 'color' || node.type === 'checkbox' ? 'input' : 'change'; node.addEventListener(eventName, renderPreview); if (node.tagName === 'TEXTAREA' || ['text','number','url','search'].includes(node.type)) node.addEventListener('input', renderPreview); });
+    id('addSoapIngredient')?.addEventListener('click', () => addIngredient({required_on_label:1})); id('addSoapClaim')?.addEventListener('click', () => addClaim({icon_name:'leaf'})); bindDynamicRows();
+    id('packagingRoseAsset')?.addEventListener('change', (event) => { const presets = { 'rose-purple-v1':['#7B4DA6','#5A2A86'], 'rose-green-v1':['#66804A','#365737'], 'rose-oatmeal-v1':['#D7C3A3','#785B45'] }; const preset = presets[event.target.value]; if (preset) { if (id('packagingRoseColour')) id('packagingRoseColour').value = preset[0]; if (id('packagingSecondaryColour')) id('packagingSecondaryColour').value = preset[1]; renderPreview(); } });
+    id('savePackagingProject')?.addEventListener('click', saveProject); id('savePackagingVersion')?.addEventListener('click', saveVersion); id('duplicatePackagingProject')?.addEventListener('click', duplicateProject); id('archivePackagingProject')?.addEventListener('click', archiveProject); id('savePrintTest')?.addEventListener('click', savePrintTest); id('applyGlacialPurpleReference')?.addEventListener('click', applyGlacialPurpleReference);
+    document.querySelectorAll('[data-packaging-export]').forEach((button) => button.addEventListener('click', () => exportFile(button.dataset.packagingExport))); document.querySelectorAll('[data-review-version]').forEach((button) => button.addEventListener('click', () => reviewVersion(Number(button.dataset.reviewVersion || 0))));
+    renderPreview();
   }
 
   function restoreLocal(showMessage = true) {
-    try {
-      const draft = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-      if (!draft) { if (showMessage) message('No browser packaging draft was found.', 'error'); return; }
-      if (!state.detail?.project) { if (showMessage) message('Open or create a packaging project before restoring the browser draft.', 'error'); return; }
-      Object.entries(draft).forEach(([name, value]) => { const node = id(name); if (node && typeof value !== 'object') node.value = value ?? ''; });
-      if (draft.claims && id('packagingClaims')) id('packagingClaims').value = draft.claims.join(', ');
-      if (draft.icons && id('packagingIcons')) id('packagingIcons').value = draft.icons.join(', ');
-      if (draft.theme) {
-        if (id('packagingRoseColour')) id('packagingRoseColour').value = draft.theme.rose_colour || '#9b8068';
-        if (id('packagingThemeColour')) id('packagingThemeColour').value = draft.theme.theme_colour || '#f2ead8';
-        if (id('packagingBorderColour')) id('packagingBorderColour').value = draft.theme.border_colour || '#2f2721';
-        if (id('packagingAccentGold')) id('packagingAccentGold').value = draft.theme.accent_gold || '#b69a61';
-      }
-      if (draft.artwork) {
-        if (id('packagingRoseStyle')) id('packagingRoseStyle').value = draft.artwork.rose_style || 'botanical_sprigs';
-        if (id('packagingBadgeShape')) id('packagingBadgeShape').value = draft.artwork.badge_shape || 'scalloped';
-        if (id('packagingTopArcText')) id('packagingTopArcText').value = draft.artwork.top_arc_text || '';
-        if (id('packagingBottomArcText')) id('packagingBottomArcText').value = draft.artwork.bottom_arc_text || '';
-        if (id('packagingCentreMark')) id('packagingCentreMark').value = draft.artwork.centre_mark || '◇';
-      }
-      renderPreview();
-      if (showMessage) message(`Browser draft restored from ${draft.saved_at || 'an earlier session'}. Review and save it to D1.`, 'success');
+    try { const draft = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); if (!draft) { if (showMessage) message('No browser packaging draft was found.', 'error'); return; } if (!state.detail?.project) { if (showMessage) message('Open or create a project before restoring the browser draft.', 'error'); return; }
+      const simple = { packagingProjectName:'packagingProjectName', packagingCollection:'packagingCollection', packagingProductName:'packagingProductName', packagingSubtitle:'packagingSubtitle', packagingIdentityEn:'packagingIdentityEn', packagingIdentityFr:'packagingIdentityFr', packagingInci:'packagingInci', packagingIngredientsEn:'packagingIngredientsEn', packagingIngredientsFr:'packagingIngredientsFr', packagingNetQuantity:'packagingNetQuantity', packagingNetWeightOz:'packagingNetWeightOz', packagingNetWeightG:'packagingNetWeightG', packagingWebsite:'packagingWebsite', packagingDealerName:'packagingDealerName', packagingDealerAddress:'packagingDealerAddress', packagingContact:'packagingContact', packagingMadeInCanada:'packagingMadeInCanada', packagingWarningsEn:'packagingWarningsEn', packagingWarningsFr:'packagingWarningsFr', packagingPrintNotes:'packagingPrintNotes' };
+      Object.entries(simple).forEach(([key,field]) => { if (id(field) && draft[key] !== undefined) id(field).value = draft[key] ?? ''; });
+      if (draft.theme) Object.entries({rose_colour:'packagingRoseColour',theme_colour:'packagingThemeColour',border_colour:'packagingBorderColour',accent_gold:'packagingAccentGold',secondary_colour:'packagingSecondaryColour'}).forEach(([key,field]) => { if (id(field) && draft.theme[key]) id(field).value = draft.theme[key]; });
+      if (draft.artwork?.rose_asset_id && id('packagingRoseAsset')) id('packagingRoseAsset').value = draft.artwork.rose_asset_id;
+      if (Array.isArray(draft.structured_ingredients)) { id('soapIngredientRows').innerHTML = draft.structured_ingredients.map(ingredientRow).join(''); }
+      if (Array.isArray(draft.structured_claims)) { id('soapClaimRows').innerHTML = draft.structured_claims.map(claimRow).join(''); }
+      bindDynamicRows(); renderPreview(); if (showMessage) message(`Browser draft restored from ${draft.saved_at || 'an earlier session'}. Review and save it to D1.`, 'success');
     } catch { if (showMessage) message('The browser draft could not be restored.', 'error'); }
   }
 
   function bind() {
-    id('newPackagingProject')?.addEventListener('click', createProject);
-    id('refreshPackagingStudio')?.addEventListener('click', () => load(Number(state.detail?.project?.packaging_project_id || 0)));
-    id('restorePackagingDraft')?.addEventListener('click', () => restoreLocal(true));
-    id('packagingProjectSearch')?.addEventListener('input', renderProjects);
-    id('packagingProjectList')?.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-open-packaging]');
-      if (button) load(Number(button.dataset.openPackaging || 0));
-    });
+    id('newPackagingProject')?.addEventListener('click', createProject); id('refreshPackagingStudio')?.addEventListener('click', () => load(Number(state.detail?.project?.packaging_project_id || 0))); id('restorePackagingDraft')?.addEventListener('click', () => restoreLocal(true)); id('packagingProjectSearch')?.addEventListener('input', renderProjects);
+    id('packagingProjectList')?.addEventListener('click', (event) => { const button = event.target.closest('[data-open-packaging]'); if (button) load(Number(button.dataset.openPackaging || 0)); });
   }
 
   document.addEventListener('DOMContentLoaded', () => { bind(); load(); });
