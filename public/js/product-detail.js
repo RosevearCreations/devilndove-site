@@ -463,11 +463,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function loadProductFallbackFromProducts(slug) {
-    const response = await fetch(`/api/products?q=${encodeURIComponent(slug)}`, { method: 'GET', headers: { Accept: 'application/json' } });
-    const data = await readJsonResponse(response, 'Fallback shop lookup failed.');
-    if (!response.ok || !data.ok) throw new Error(data.error || 'Fallback shop lookup failed.');
-    const rows = Array.isArray(data.products) ? data.products : [];
-    return rows.find((row) => String(row.slug || '').toLowerCase() === String(slug || '').toLowerCase()) || null;
+    const cleanSlug = String(slug || '').trim().toLowerCase();
+    // Build 223: the first lookup uses the slug-aware catalog search. If an older
+    // deployed products endpoint does not search slugs, retry the complete active
+    // catalog before declaring the product unavailable.
+    const paths = [
+      `/api/products?q=${encodeURIComponent(cleanSlug)}`,
+      '/api/products'
+    ];
+    let lastError = null;
+    for (const path of paths) {
+      try {
+        const response = await fetch(path, { method: 'GET', headers: { Accept: 'application/json' } });
+        const data = await readJsonResponse(response, 'Fallback shop lookup failed.');
+        if (!response.ok || !data.ok) throw new Error(data.error || 'Fallback shop lookup failed.');
+        const rows = Array.isArray(data.products) ? data.products : [];
+        const match = rows.find((row) => String(row.slug || '').trim().toLowerCase() === cleanSlug) || null;
+        if (match) return match;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    if (lastError) console.warn('Product detail fallback warning:', lastError);
+    return null;
   }
 
   async function loadProduct() {
@@ -480,15 +498,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!slug) throw new Error("No product slug was provided.");
       const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET", headers: { Accept: "application/json" } });
       let data = null;
+      let detailError = null;
       try {
         data = await readJsonResponse(response, "Failed to load product detail.");
-      } catch (detailError) {
+        if (!response.ok || !data?.ok) {
+          detailError = new Error(data?.error || `Failed to load product detail (HTTP ${response.status}).`);
+        }
+      } catch (error) {
+        detailError = error;
+      }
+
+      // Build 223: a valid JSON 503 previously bypassed the fallback because only JSON
+      // parse failures entered the fallback branch. Any failed detail response now tries
+      // the public catalog before showing an error page.
+      if (detailError) {
         const fallbackProduct = await loadProductFallbackFromProducts(slug);
         if (!fallbackProduct) throw detailError;
+        console.warn('Extended product detail was unavailable; rendering the catalog fallback.', detailError);
         data = {
           ok: true,
           product: fallbackProduct,
           images: Array.isArray(fallbackProduct.images) ? fallbackProduct.images : (Array.isArray(fallbackProduct.image_urls) ? fallbackProduct.image_urls.map((image_url) => ({ image_url, alt_text: fallbackProduct.name || 'Product image' })) : []),
+          storefront_images: Array.isArray(fallbackProduct.images) ? fallbackProduct.images : [],
           resource_links: [],
           resource_summary: {},
           trust_summary: { image_count: Number(fallbackProduct.image_count || 0), in_stock: Number(fallbackProduct.inventory_quantity || 0) > 0 },
@@ -496,11 +527,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           review_summary: {},
           story_notes: {},
           related_products: [],
-          warning: detailError.message
+          quantity_price_tiers: [],
+          bundle: null,
+          warning: detailError.message,
+          fallback_mode: 'public_catalog'
         };
       }
-      if (!response.ok && !data.ok) throw new Error(data.error || "Failed to load product.");
-      if (!data.ok) throw new Error(data.error || "Failed to load product.");
+      if (!data?.ok) throw new Error(data?.error || "Failed to load product.");
       renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null, data.listing_profile || null);
       document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
       const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
