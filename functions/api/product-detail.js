@@ -7,7 +7,7 @@ import { captureRuntimeIncident } from './_lib/adminAudit.js';
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
   });
 }
 
@@ -316,8 +316,10 @@ async function handleProductDetailRequest(context) {
 
   const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
   const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
+  const productImageColumns = await getTableColumnSet(db, 'product_images');
   const imageAnnotationColumns = await getTableColumnSet(db, 'product_image_annotations');
   const mediaConsentColumns = await getTableColumnSet(db, 'media_consent_records');
+  const mediaAssetColumns = await getTableColumnSet(db, 'media_assets');
   const hasImageAnnotationJoin = imageAnnotationColumns.has('product_image_id');
   const hasConsentJoin = hasImageAnnotationJoin && imageAnnotationColumns.has('consent_record_id') && mediaConsentColumns.has('consent_record_id');
   const piaColumn = (columnName, fallbackSql = 'NULL') => hasImageAnnotationJoin && imageAnnotationColumns.has(columnName) ? `pia.${columnName} AS ${columnName}` : `${fallbackSql} AS ${columnName}`;
@@ -330,61 +332,89 @@ async function handleProductDetailRequest(context) {
   const unitCostExpr = inventoryColumns.has('unit_cost_cents') ? `COALESCE(sii.unit_cost_cents,0)` : (inventoryColumns.has('cost_cents') ? `COALESCE(sii.cost_cents,0)` : `0`);
 
   let images = [];
-  try {
-    images = normalizeResults(await db.prepare(`
-      SELECT pi.product_image_id, pi.product_id, pi.image_url,
-             ${hasImageAnnotationJoin && imageAnnotationColumns.has('alt_text') ? `COALESCE(pia.alt_text, pi.alt_text, p.name)` : `COALESCE(pi.alt_text, p.name)`} AS alt_text,
-             pi.sort_order, pi.created_at,
-             ${piaColumn('product_image_annotation_id', 'NULL')},
-             ${piaColumn('image_title', `''`)},
-             ${piaColumn('caption', `''`)},
-             ${piaColumn('focal_point_x', 'NULL')},
-             ${piaColumn('focal_point_y', 'NULL')},
-             ${piaColumn('annotation_notes', `''`)},
-             ${piaColumn('image_role', `''`)},
-             ${piaColumn('public_use_status', `'internal_review'`)},
-             ${piaColumn('consent_record_id', 'NULL')},
-             ${mcrColumn('consent_status', `''`)},
-             ${mcrColumn('consent_scope', `''`)},
-             ${mcrColumn('public_use_allowed', '0', 'consent_public_use_allowed')},
-             ma.variant_role
-      FROM product_images pi
-      ${hasImageAnnotationJoin ? `LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id` : ``}
-      LEFT JOIN products p ON p.product_id = pi.product_id
-      LEFT JOIN media_assets ma ON ma.product_id = pi.product_id AND ma.public_url = pi.image_url AND ma.deleted_at IS NULL
-      ${hasConsentJoin ? `LEFT JOIN media_consent_records mcr ON mcr.consent_record_id = pia.consent_record_id` : ``}
-      WHERE pi.product_id = ?
-      ORDER BY pi.sort_order ASC, pi.product_image_id ASC
-      LIMIT 20
-    `).bind(product.product_id).all());
-  } catch (error) {
-    section_warnings.push(`product_images_unavailable: ${String(error?.message || error || 'unknown error')}`);
-    // Keep the featured image stored on the product row so a schema mismatch in the
-    // optional gallery tables does not remove all visual context from the page.
-    if (String(product.featured_image_url || '').trim()) {
-      images = [{
-        product_image_id: 0,
-        product_id: Number(product.product_id || 0),
-        image_url: String(product.featured_image_url || '').trim(),
-        alt_text: product.name || 'Product image',
-        sort_order: 0,
-        created_at: product.updated_at || product.created_at || '',
-        product_image_annotation_id: null,
-        image_title: '',
-        caption: '',
-        focal_point_x: null,
-        focal_point_y: null,
-        annotation_notes: '',
-        image_role: 'hero_front',
-        public_use_status: 'product_page_ok',
-        consent_record_id: null,
-        consent_status: '',
-        consent_scope: '',
-        consent_public_use_allowed: 0,
-        variant_role: 'featured'
-      }];
+  const imageSourceCounts = { product_images: 0, media_assets_enriched: 0, featured_fallback: 0 };
+  const hasProductImageSource = productImageColumns.has('product_id') && productImageColumns.has('image_url');
+
+  if (hasProductImageSource) {
+    try {
+      const imageOrderParts = [];
+      if (productImageColumns.has('sort_order')) imageOrderParts.push('COALESCE(pi.sort_order, 0) ASC');
+      if (productImageColumns.has('product_image_id')) imageOrderParts.push('pi.product_image_id ASC');
+      if (!imageOrderParts.length) imageOrderParts.push('pi.image_url ASC');
+      const baseAltExpression = productImageColumns.has('alt_text') ? 'NULLIF(pi.alt_text, \'\')' : 'NULL';
+      const annotatedAltExpression = hasImageAnnotationJoin && imageAnnotationColumns.has('alt_text') ? 'NULLIF(pia.alt_text, \'\')' : 'NULL';
+
+      images = normalizeResults(await db.prepare(`
+        SELECT ${selectColumn(productImageColumns, 'pi', 'product_image_id', 'NULL')},
+               ${selectColumn(productImageColumns, 'pi', 'product_id', String(Number(product.product_id || 0)))},
+               ${selectColumn(productImageColumns, 'pi', 'image_url', `''`)},
+               COALESCE(${annotatedAltExpression}, ${baseAltExpression}, ${sqlString(product.name || 'Product image')}) AS alt_text,
+               ${selectColumn(productImageColumns, 'pi', 'sort_order', '0')},
+               ${selectColumn(productImageColumns, 'pi', 'created_at', `''`)},
+               ${piaColumn('product_image_annotation_id', 'NULL')},
+               ${piaColumn('image_title', `''`)},
+               ${piaColumn('caption', `''`)},
+               ${piaColumn('focal_point_x', 'NULL')},
+               ${piaColumn('focal_point_y', 'NULL')},
+               ${piaColumn('annotation_notes', `''`)},
+               ${piaColumn('image_role', `''`)},
+               ${piaColumn('public_use_status', `'internal_review'`)},
+               ${piaColumn('consent_record_id', 'NULL')},
+               ${mcrColumn('consent_status', `''`)},
+               ${mcrColumn('consent_scope', `''`)},
+               ${mcrColumn('public_use_allowed', '0', 'consent_public_use_allowed')},
+               '' AS variant_role
+        FROM product_images pi
+        ${hasImageAnnotationJoin ? `LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id` : ``}
+        ${hasConsentJoin ? `LEFT JOIN media_consent_records mcr ON mcr.consent_record_id = pia.consent_record_id` : ``}
+        WHERE pi.product_id = ?
+          AND TRIM(COALESCE(pi.image_url, '')) <> ''
+        ORDER BY ${imageOrderParts.join(', ')}
+        LIMIT 20
+      `).bind(product.product_id).all());
+      imageSourceCounts.product_images = images.length;
+    } catch (error) {
+      section_warnings.push(`product_images_unavailable: ${String(error?.message || error || 'unknown error')}`);
+      images = [];
+    }
+  } else {
+    section_warnings.push('product_images_unavailable: product_images table or required columns are missing');
+  }
+
+  // Media assets are an optional enrichment source. Query them separately so a missing
+  // legacy column (for example deleted_at or variant_role) can never collapse the whole
+  // product gallery to the featured-image fallback.
+  if (images.length && mediaAssetColumns.has('product_id') && mediaAssetColumns.has('public_url')) {
+    try {
+      const assetOrderParts = [];
+      if (mediaAssetColumns.has('sort_order')) assetOrderParts.push('COALESCE(sort_order, 0) ASC');
+      if (mediaAssetColumns.has('media_asset_id')) assetOrderParts.push('media_asset_id ASC');
+      if (!assetOrderParts.length) assetOrderParts.push('public_url ASC');
+      const deletedWhere = mediaAssetColumns.has('deleted_at') ? 'AND deleted_at IS NULL' : '';
+      const assetRows = normalizeResults(await db.prepare(`
+        SELECT ${selectColumn(mediaAssetColumns, 'media_assets', 'media_asset_id', 'NULL')},
+               ${selectColumn(mediaAssetColumns, 'media_assets', 'public_url', `''`)},
+               ${selectColumn(mediaAssetColumns, 'media_assets', 'variant_role', `''`)},
+               ${selectColumn(mediaAssetColumns, 'media_assets', 'sort_order', '0')}
+        FROM media_assets
+        WHERE product_id = ?
+          AND TRIM(COALESCE(public_url, '')) <> ''
+          ${deletedWhere}
+        ORDER BY ${assetOrderParts.join(', ')}
+        LIMIT 50
+      `).bind(product.product_id).all());
+      const assetByUrl = new Map(assetRows.map((row) => [String(row.public_url || '').trim().toLowerCase(), row]));
+      images = images.map((row) => {
+        const match = assetByUrl.get(String(row.image_url || '').trim().toLowerCase());
+        if (!match) return row;
+        imageSourceCounts.media_assets_enriched += 1;
+        return { ...row, variant_role: row.variant_role || match.variant_role || '' };
+      });
+    } catch (error) {
+      section_warnings.push(`media_asset_enrichment_unavailable: ${String(error?.message || error || 'unknown error')}`);
     }
   }
+
 
   let image_annotations = [];
   if (hasImageAnnotationJoin) {
@@ -408,6 +438,87 @@ async function handleProductDetailRequest(context) {
       ORDER BY product_image_annotation_id ASC
     `).bind(product.product_id).all().catch(() => ({ results: [] })));
   }
+
+
+  // Reconcile annotation-only rows, preserve the featured image, and de-duplicate by URL.
+  // This is intentionally separate from the SQL query so legacy schema differences do not
+  // prevent the seven-image storefront gallery from rendering.
+  const annotationById = new Map();
+  const annotationByUrl = new Map();
+  image_annotations.forEach((row) => {
+    const id = Number(row.product_image_id || 0);
+    const urlKey = String(row.image_url || '').trim().toLowerCase();
+    if (id) annotationById.set(id, row);
+    if (urlKey) annotationByUrl.set(urlKey, row);
+  });
+
+  const mergedImageRows = [];
+  const imageIndexByUrl = new Map();
+  const mergeImage = (candidate = {}, preferFirst = false) => {
+    const imageUrl = String(candidate.image_url || '').trim();
+    if (!imageUrl) return;
+    const key = imageUrl.toLowerCase();
+    const existingIndex = imageIndexByUrl.get(key);
+    if (existingIndex != null) {
+      const existing = mergedImageRows[existingIndex];
+      mergedImageRows[existingIndex] = {
+        ...candidate,
+        ...existing,
+        image_url: imageUrl,
+        alt_text: existing.alt_text || candidate.alt_text || product.name || 'Product image',
+        image_title: existing.image_title || candidate.image_title || '',
+        caption: existing.caption || candidate.caption || '',
+        image_role: existing.image_role || candidate.image_role || '',
+        public_use_status: existing.public_use_status || candidate.public_use_status || 'internal_review',
+        variant_role: existing.variant_role || candidate.variant_role || ''
+      };
+      return;
+    }
+    const next = {
+      ...candidate,
+      image_url: imageUrl,
+      alt_text: candidate.alt_text || product.name || 'Product image',
+      sort_order: Number(candidate.sort_order || 0)
+    };
+    if (preferFirst) {
+      mergedImageRows.unshift(next);
+      imageIndexByUrl.clear();
+      mergedImageRows.forEach((row, index) => imageIndexByUrl.set(String(row.image_url || '').trim().toLowerCase(), index));
+    } else {
+      imageIndexByUrl.set(key, mergedImageRows.length);
+      mergedImageRows.push(next);
+    }
+  };
+
+  images.forEach((row) => {
+    const annotation = annotationById.get(Number(row.product_image_id || 0)) || annotationByUrl.get(String(row.image_url || '').trim().toLowerCase()) || {};
+    mergeImage({ ...row, ...annotation, image_url: row.image_url || annotation.image_url || '' });
+  });
+  image_annotations.forEach((row) => mergeImage(row));
+
+  const featuredUrl = String(product.featured_image_url || '').trim();
+  if (featuredUrl) {
+    const featuredKey = featuredUrl.toLowerCase();
+    const existingFeatured = mergedImageRows.find((row) => String(row.image_url || '').trim().toLowerCase() === featuredKey) || {};
+    if (imageIndexByUrl.has(featuredKey)) {
+      const existingIndex = imageIndexByUrl.get(featuredKey);
+      mergedImageRows.splice(existingIndex, 1);
+      imageIndexByUrl.clear();
+      mergedImageRows.forEach((row, index) => imageIndexByUrl.set(String(row.image_url || '').trim().toLowerCase(), index));
+    } else {
+      imageSourceCounts.featured_fallback = 1;
+    }
+    mergeImage({
+      ...existingFeatured,
+      image_url: featuredUrl,
+      alt_text: existingFeatured.alt_text || product.name || 'Product image',
+      image_role: existingFeatured.image_role || 'hero_front',
+      public_use_status: existingFeatured.public_use_status || 'product_page_ok',
+      variant_role: existingFeatured.variant_role || 'featured',
+      sort_order: -1
+    }, true);
+  }
+  images = mergedImageRows.slice(0, 20);
 
   let resource_links = [];
   try {
@@ -544,9 +655,20 @@ async function handleProductDetailRequest(context) {
     const publicRole = { main:'hero_front', close_up:'detail_texture', scale:'scale_context', back_or_side:'back_side', process:'process_story', packaging:'packaging_pickup', social_share:'social_share' };
     storefront_images.forEach((image) => {
       const role = roleMap.get(`id:${Number(image.product_image_id || 0)}`) || roleMap.get(`url:${String(image.image_url || '').trim()}`) || '';
-      if (role && publicRole[role]) image.image_role = publicRole[role];
+      if (role && publicRole[role]) {
+        image.image_role = publicRole[role];
+        image.image_group = imageRoleGroup(image.image_role, image.variant_role || '');
+      }
     });
   } catch {}
+
+  const image_summary = {
+    raw_count: images.length,
+    storefront_count: storefront_images.length,
+    has_multiple_images: storefront_images.length > 1,
+    source_counts: imageSourceCounts,
+    warnings: section_warnings.filter((warning) => String(warning || '').includes('image') || String(warning || '').includes('media_asset'))
+  };
 
   const image_groups = {
     featured: storefront_images.find((row) => row.image_url === product.featured_image_url) || storefront_images.find((row) => row.image_group === 'featured') || storefront_images[0] || null,
@@ -680,7 +802,7 @@ async function handleProductDetailRequest(context) {
   } catch {}
 
   const related_products = await relatedProductsByProof();
-  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, resource_links, resource_summary, build_summary, trust_summary, story_notes, listing_profile, candle_soap_spec, reviews, review_summary, related_products, quantity_price_tiers, bundle, warnings: section_warnings });
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, image_summary, resource_links, resource_summary, build_summary, trust_summary, story_notes, listing_profile, candle_soap_spec, reviews, review_summary, related_products, quantity_price_tiers, bundle, warnings: section_warnings });
 }
 
 
