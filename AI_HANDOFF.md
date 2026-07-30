@@ -1,90 +1,27 @@
-# Devil n Dove AI Handoff — Build 223
+# Devil n Dove AI Handoff — Build 224
 
-## Build 223 outcome — product detail recovery
-Build 223 is a code-only production hotfix applied on top of Build 222.
+## Build 224 outcome — complete product gallery recovery
+Build 224 is a code-only storefront-media hotfix applied on top of Build 222/223.
 
-1. The exact runtime defect was in `/functions/api/product-detail.js`: the code called `.catch()` on the array returned by `normalizeResults(...)` rather than on the D1 promise. When `product_image_annotations` existed, every product-detail request could throw `normalizeResults(...).catch is not a function`.
-2. The image-annotation query now catches the D1 promise before normalization.
-3. Optional offer, set, gallery and resource-story sections degrade independently and return warnings instead of failing the entire product page.
-4. The storefront product-detail browser code now activates its catalog fallback for any failed detail response, including valid JSON 503 responses.
-5. Public product search now includes `slug`, and the browser retries the full active catalog when an older search endpoint cannot match the slug.
-6. Unhandled detail failures are recorded in `runtime_incidents` when D1 is available.
-7. No Build 223 schema migration is required. Build 222 remains the current database schema.
+1. Product details already loaded after Build 223, but production could still return only the featured image when the gallery query referenced an optional `media_assets` column that was absent in an older D1 schema.
+2. `/functions/api/product-detail.js` now discovers the actual `product_images`, `product_image_annotations`, `media_consent_records`, and `media_assets` columns before composing gallery queries.
+3. Product images are loaded independently from optional media-asset enrichment. A missing `deleted_at`, `variant_role`, or other optional media column can no longer collapse the gallery to one fallback image.
+4. Featured, product-image, annotation, and media-role data are reconciled and de-duplicated by URL while preserving the intended featured image first.
+5. The public product page renders every available storefront image, including the intended seven-image product set, and displays an `Image X of Y` indicator.
+6. Selecting a thumbnail now updates the main image source, alternative text, caption, active state, and image counter.
+7. The product-detail response includes `image_summary` diagnostics and is explicitly `Cache-Control: no-store`.
+8. The product-detail script uses a Build 224 cache-busting URL.
+9. No Build 224 schema migration is required; Build 222 remains the current database schema authority.
 
-## Build 223 deployment order
-1. Confirm Build 222 schema migration has already been applied.
-2. Do **not** run a new D1 migration for this hotfix.
-3. Deploy the complete Build 223 ZIP.
-4. Purge or bypass the Cloudflare cache for `/public/js/product-detail.js` if the old browser script remains cached.
-5. Open `/shop/`, select at least three active product cards, and use **View**.
-6. Confirm `/api/product-detail?slug=<slug>` returns HTTP 200 JSON with `ok:true`.
-7. Follow `BUILD223_VALIDATION.md` and record the live result in Post-Deploy Smoke Tests.
+## Build 224 deployment order
+1. Confirm the Build 222 migration has already been applied.
+2. Do **not** run a new D1 migration for this gallery hotfix.
+3. Deploy the complete Build 224 ZIP.
+4. Open `/shop/` in a private window and select a product known to have seven Catalog Media images.
+5. Confirm seven thumbnails appear and each thumbnail changes the main image.
+6. Inspect `/api/product-detail?slug=<slug>` and confirm `storefront_images` contains the expected records and `image_summary.storefront_count` is `7`.
+7. If fewer than seven are returned, review Catalog Media for missing image URLs, blocked/consent-needed status, or images saved against a different product record.
 
-## Read these documents first
-1. `AI_HANDOFF.md` — current architecture, safety boundaries, deployment order and active workflows.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 223 hotfix, launch position, known risks and the next 20 actions.
-3. `STARTUP_GO_LIVE_GUIDE.md` — ordered, detailed instructions for every launch gate.
-
-Specialist references:
-- `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md`
-- `PACKAGING_STUDIO.md`
-- `CONTENT_AUTOMATION_STUDIO.md`
-- `DATABASE_SCHEMA_REFERENCE.md`
-
-Historical build notes remain evidence only and must not override this canonical set.
-
-## Build 222 outcome
-Build 222 advances launch readiness and converts the soap-label specification into an operating CAIP packaging workflow:
-
-1. **Soap Label Studio** — `/admin/packaging/soap-labels/` provides a focused nine-tab label editor while `/admin/packaging-studio/` remains the broader packaging entry point.
-2. **Photo-matched ribbon structure** — the live SVG follows the approved Glacial Purple reference: English ingredient panel, rose-led front oval, French ingredient panel, rear brand seal, bilingual claim rows and net weight.
-3. **Exact physical profiles** — the preferred photo-fit profile is 11 × 1.5 inches with a centred 0.75-inch band and 2 × 1.5-inch front oval. A separate 50 mm rear-seal profile is retained because a 50 mm circle cannot fit inside a 38.1 mm-high artboard without clipping.
-4. **Normalized D1 soap-label records** — templates, soap products, ingredient rows, bilingual claim rows, export evidence and physical print-test evidence are no longer dependent on one large JSON document.
-5. **Rose asset library** — purple, green and oatmeal rose vectors are stored as reusable assets; a rose remains mandatory for the soap-label visual language.
-6. **Approval gate** — a label version cannot be approved until a 100%-scale print test has been recorded as passed.
-7. **Export evidence** — SVG, PNG, WebP, JPG and browser print preparation record filenames, versions and SHA-256 checksums. Browser printing is not represented as a true CMYK prepress PDF.
-8. **Startup Readiness Guide** — `/admin/startup-readiness/` and `STARTUP_GO_LIVE_GUIDE.md` provide 20 ordered launch gates with direct paths, detailed test steps, evidence and pass conditions.
-9. **Dashboard discoverability** — Startup Readiness and Soap Label Studio are available directly from `/admin/`.
-10. **Documentation/schema synchronization** — the authoritative roadmap, gaps pointer, schema reference, packaging guide, specification, release notes, current migration and aggregate schemas describe Build 222 consistently.
-
-## Build 222 base deployment order
-1. Back up production D1 and record the backup name and time.
-2. Confirm Build 221 is already present.
-3. Apply **one** of:
-   - `database_build222_soap_label_startup_readiness.sql`, or
-   - `database_upgrade_current_pass.sql`.
-4. Do not apply both; the current-pass file contains the same Build 222 migration.
-5. Deploy the complete Build 222 ZIP.
-6. Follow `BUILD222_VALIDATION.md`.
-7. Work through `STARTUP_GO_LIVE_GUIDE.md` in order.
-
-Runtime schema guards can create minimum packaging records, but production D1 must still receive the reviewed migration deliberately.
-
-## New or changed routes
-- `/admin/packaging/soap-labels/` — focused Soap Label Studio.
-- `/admin/packaging-studio/` — broader packaging project interface, updated to the approved soap-ribbon reference.
-- `/admin/startup-readiness/` — browser-friendly go-live gate guide.
-- `/api/admin/packaging-studio` — Build 222 normalized soap data, version, export and print-test actions.
-
-## Soap-label data authority
-- Product sale facts remain in `products`.
-- Packaging project identity and current draft remain in `packaging_projects`.
-- Soap-specific normalized content is stored in `soap_products`, `soap_ingredients` and `soap_label_claims`.
-- Review snapshots remain in `packaging_project_versions`.
-- Physical print evidence is stored in `soap_label_print_tests`.
-- Prepared-export evidence is stored in `soap_label_exports` and the broader `packaging_export_history`.
-- Small bounded visual settings may remain JSON; ingredients, claims, tests, products and exports use relational rows because they require ordering, review and independent updates.
-
-## Packaging safety boundaries
-- The approved image is a structural and visual reference, not a source of verified formula or legal copy.
-- Never infer INCI names, allergens, warnings, product claims, net quantity or bilingual wording from a picture.
-- SVG is the authoritative editable layout. PNG, WebP and JPG are previews.
-- Browser Print/Save PDF is not a true CMYK prepress export.
-- Approval requires a saved version and a passed physical print test at 100% scale.
-- A label approval does not publish the product, alter inventory or submit regulatory forms.
-- The 50 mm rear-circle requirement conflicts physically with a 1.5-inch (38.1 mm) artboard. Build 222 exposes two explicit profiles rather than silently clipping or changing dimensions.
-
-## Launch-critical limitations
 The site should not be considered fully ready merely because the pages load. Production proof is still required for:
 - login, reset and role enforcement;
 - live payment/webhook idempotency;
@@ -114,4 +51,4 @@ The exact sequence and instructions are in `STARTUP_GO_LIVE_GUIDE.md`.
 - Destructive and financial actions remain explicit, authenticated, audited and idempotent where possible.
 
 ## Validation
-Use `BUILD222_VALIDATION.md`. At minimum test both dimension profiles, structured ingredient and claim rows, SVG generation, checksum recording, local-draft recovery, physical print-test gating, one-H1 coverage, public SEO metadata, local references, CSS balance, JavaScript syntax and migration idempotency.
+Use `BUILD224_VALIDATION.md` for this gallery hotfix and retain `BUILD222_VALIDATION.md` for the underlying schema and Packaging Studio features. At minimum verify a known seven-image product, thumbnail switching, image counters, API `image_summary`, one-H1 coverage, public SEO metadata, local references, CSS balance, JavaScript syntax, and ZIP integrity.
