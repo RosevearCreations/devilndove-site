@@ -107,7 +107,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     productMainImageWrapEl.innerHTML = `
       <div class="product-detail-main-image">
         <img src="${escapeHtml(mainImageUrl)}" alt="${escapeHtml(mainRow?.alt_text || product.name || 'Product image')}" data-product-detail-main-image />
-        <div class="small" data-product-detail-caption ${caption ? '' : 'hidden'}>${escapeHtml(caption)}</div>
+        <div class="product-detail-image-meta">
+          <span class="small" data-product-detail-image-count>${safeImages.length > 1 ? `Image 1 of ${safeImages.length}` : 'Featured image'}</span>
+          <span class="small" data-product-detail-caption ${caption ? '' : 'hidden'}>${escapeHtml(caption)}</span>
+        </div>
       </div>`;
   }
 
@@ -116,7 +119,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const safeImages = normalizeProductImages(currentProduct || {}, images);
     if (!safeImages.length) { productGalleryEl.innerHTML = ""; return; }
     productGalleryEl.innerHTML = `<div class="product-detail-thumbs">${safeImages.map((image, index) => `
-      <button class="product-detail-thumb ${index === 0 ? 'is-active' : ''}" type="button" data-product-detail-thumb="${escapeHtml(image.image_url || '')}" data-caption="${escapeHtml(image.caption || '')}" aria-label="Show ${escapeHtml(productName)} image ${index + 1}">
+      <button class="product-detail-thumb ${index === 0 ? 'is-active' : ''}" type="button" data-product-detail-thumb="${escapeHtml(image.image_url || '')}" data-caption="${escapeHtml(image.caption || '')}" data-alt="${escapeHtml(image.alt_text || `${productName} image ${index + 1}`)}" data-image-index="${index + 1}" aria-label="Show ${escapeHtml(productName)} image ${index + 1} of ${safeImages.length}">
         <img src="${escapeHtml(image.image_url || "")}" alt="${escapeHtml(image.alt_text || `${productName} image ${index + 1}`)}" title="${escapeHtml(image.image_title || image.caption || '')}" loading="lazy" />
       </button>`).join("")}</div>`;
     productGalleryEl.querySelectorAll('[data-product-detail-thumb]').forEach((button) => {
@@ -124,12 +127,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         const main = document.querySelector('[data-product-detail-main-image]');
         const captionEl = document.querySelector('[data-product-detail-caption]');
         const imageUrl = String(button.getAttribute('data-product-detail-thumb') || '').trim();
-        if (main && imageUrl) main.src = imageUrl;
+        if (main && imageUrl) {
+          main.src = imageUrl;
+          main.alt = String(button.getAttribute('data-alt') || `${productName} product image`).trim();
+        }
         const caption = String(button.getAttribute('data-caption') || '').trim();
         if (captionEl) {
           captionEl.textContent = caption;
           captionEl.hidden = !caption;
         }
+        const countEl = document.querySelector('[data-product-detail-image-count]');
+        const imageIndex = Number(button.getAttribute('data-image-index') || 1);
+        if (countEl) countEl.textContent = safeImages.length > 1 ? `Image ${imageIndex} of ${safeImages.length}` : 'Featured image';
         productGalleryEl.querySelectorAll('.product-detail-thumb').forEach((thumb) => thumb.classList.remove('is-active'));
         button.classList.add('is-active');
       });
