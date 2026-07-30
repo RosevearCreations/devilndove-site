@@ -1,21 +1,26 @@
-# Devil n Dove Project Status and Roadmap — Build 223
+# Devil n Dove Project Status and Roadmap — Build 224
 
-## Build 223 completed hotfix
-1. Reproduced the product-detail failure against the current aggregate schema.
-2. Identified the exact error: `.catch()` was attached after `normalizeResults(...)`, which returns an array.
-3. Corrected the image-annotation D1 promise handling.
-4. Added independent failure boundaries around optional offers, set reservations, galleries and resource-story data.
-5. Preserved a featured-image fallback when gallery tables are unavailable.
-6. Corrected browser fallback activation for HTTP 503 JSON responses.
-7. Added slug-aware catalog fallback search.
-8. Added a full active-catalog retry for older deployed APIs.
-9. Added runtime incident capture for future public detail failures.
-10. Added a live product-detail go-live gate to the startup guide.
-11. Confirmed the fix against a fresh full aggregate schema.
-12. Confirmed the endpoint still returns a usable product against a deliberately minimal products-only schema.
-13. Synchronized root and public copies of the product-detail browser script.
-14. Updated authoritative handoff, roadmap, risks, release, schema reference and startup documentation.
-15. Added Build 223 validation and changed-file manifests.
+## Build 224 completed gallery hotfix
+1. Reproduced the one-image product-detail outcome against a legacy media-assets schema.
+2. Identified the remaining fragility: the gallery SQL directly referenced optional media-asset columns.
+3. Added schema-aware `product_images` selection.
+4. Removed the optional `media_assets` join from the core gallery query.
+5. Added independent media-asset role enrichment.
+6. Preserved gallery loading when `media_assets.deleted_at` is absent.
+7. Preserved gallery loading when `media_assets.variant_role` is absent.
+8. Reconciled annotation-only and product-image rows.
+9. De-duplicated images by normalized URL.
+10. Forced the product featured image to remain first without discarding supporting images.
+11. Recalculated image groups after explicit media-role assignments.
+12. Added `image_summary` diagnostics to the public API.
+13. Added `Cache-Control: no-store` to product-detail responses.
+14. Added a Build 224 browser-script cache buster.
+15. Added an `Image X of Y` indicator.
+16. Updated thumbnail selection to change main-image alt text and caption.
+17. Confirmed a synthetic legacy-schema product returns all seven storefront images.
+18. Synchronized root and public browser-script copies.
+19. Updated launch verification and authoritative Markdown.
+20. Added Build 224 validation and changed-file manifests.
 
 ## Current launch impact
 The product-card **View** path is a launch blocker because buyers must be able to inspect product facts before adding to cart. Build 223 removes the known runtime defect and adds a second browser-side recovery path. Production verification is still required after deployment because cache state, D1 schema drift and live data cannot be proven from the package alone.

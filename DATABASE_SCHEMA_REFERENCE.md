@@ -1,3 +1,9 @@
+# Build 224 schema note
+
+Build 224 is a code-only product-gallery compatibility hotfix. It adds no D1 tables, columns, indexes, triggers, or migration. Build 222 remains the current schema authority.
+
+The public product-detail API now introspects actual `product_images`, `product_image_annotations`, `media_consent_records`, and `media_assets` columns before composing media queries. This tolerance is a runtime compatibility boundary, not a replacement for keeping aggregate schemas and production D1 synchronized.
+
 # Build 223 schema note
 
 Build 223 is a code-only product-detail reliability hotfix. It introduces no tables, columns, indexes, triggers or data migration. Build 222 remains the current schema authority.

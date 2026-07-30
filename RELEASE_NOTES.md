@@ -1,4 +1,14 @@
-# Release Notes — Build 223
+# Release Notes — Build 224
+
+## Complete storefront gallery hotfix — Build 224
+- Corrected the production condition that could leave a product detail page with only its featured image even though up to seven product images existed.
+- Replaced the fragile core gallery join with schema-aware product-image loading plus independent optional media-asset enrichment.
+- Added compatibility for legacy `media_assets` tables without `deleted_at`, `variant_role`, or ordering columns.
+- Reconciled product-image and annotation records, de-duplicated URLs, and preserved the featured image first.
+- Recalculated role groups after explicit media-role assignments.
+- Added an `Image X of Y` storefront indicator and complete thumbnail main-image/alt/caption switching.
+- Added `image_summary` API diagnostics, `Cache-Control: no-store`, and a Build 224 script cache buster.
+- No D1 schema migration is required.
 
 ## Product detail runtime hotfix — Build 223
 - Corrected the public product-detail API failure `normalizeResults(...).catch is not a function` that occurred whenever the image-annotation table was available.

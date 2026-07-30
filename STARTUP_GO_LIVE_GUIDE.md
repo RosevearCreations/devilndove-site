@@ -429,18 +429,19 @@ The public store is open only with products and workflows that have passed this 
 
 ### What to do
 1. Open the public shop in a private/incognito browser window so an administrator session does not hide public-only failures.
-2. Choose three different active products, including one with multiple images and one with only a featured image.
+2. Choose three different active products, including one that is known to have all seven Catalog Media images and one with only a featured image.
 3. Select **View** on each card.
-4. Confirm the product name, price, description, image and inventory state appear and the red “Product detail is temporarily unavailable” message does not appear.
+4. Confirm the product name, price, description, inventory state, featured image, and all supporting thumbnails appear. For the seven-image product, confirm the page says `Image 1 of 7`.
 5. Open browser Developer Tools → **Network**, reload the product page, and select the request named `product-detail?slug=...`.
-6. Confirm the response status is **200**, the response content type is JSON, and the response begins with `{"ok":true`.
+6. Confirm the response status is **200**, the response content type is JSON, and the response begins with `{"ok":true`. For the seven-image product, confirm `image_summary.storefront_count` is `7` and `storefront_images` contains seven unique URLs.
 7. When the API contains a `warnings` array, confirm the page still loads. Record the warning and review the corresponding optional table, but do not treat a missing optional story/gallery section as a complete storefront outage.
 8. Test one deliberately invalid slug and confirm it produces a clear not-found response without exposing stack traces or private data.
 9. Save the three successful URLs and results in Post-Deploy Smoke Tests.
-10. When the old JavaScript appears to remain in use after deployment, purge the Cloudflare cache or use a cache-busting reload, then repeat the test.
+10. Select every thumbnail. Confirm each one changes the main image, updates the `Image X of 7` counter, preserves useful alt text, and displays its caption when one exists.
+11. When old JavaScript appears to remain in use after deployment, purge the Cloudflare cache or use a cache-busting reload, then repeat the test.
 
 ### Pass condition
-Every active product card opens a usable detail page, the detail API returns HTTP 200 JSON for valid slugs, optional-section warnings do not hide the core product, and invalid slugs fail safely.
+Every active product card opens a usable detail page, the detail API returns HTTP 200 JSON for valid slugs, a known seven-image product displays all seven unique images, optional-section warnings do not hide the core product, and invalid slugs fail safely.
 
 ---
 
