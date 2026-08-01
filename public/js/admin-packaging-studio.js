@@ -1,4 +1,4 @@
-// Build 222 — Soap Label Automation editor with exact SVG layout, normalized rows, print proof and resilient local fallback.
+// Build 225 — Soap Label Automation editor with exact SVG layout, normalized rows, print proof and resilient local fallback.
 (() => {
   const STORAGE_KEY = 'dd_packaging_studio_local_draft_v3';
   const state = { projects: [], templates: [], products: [], detail: null, loading: false, activeTab: 'product' };
