@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 227",
+    "date": "2026-08-01",
+    "title": "Unified labeling, packaging, client documents, Meta tests, and detailed launch corrections",
+    "summary": "Combined soap labels and all-business packaging into one system with packaging BOM/cost controls; added immutable sequential invoices, receipts, packing slips, credit notes and refund confirmations; added safe read-only Facebook/Instagram credential tests; and expanded all 37 launch gates with preparation, failure correction, evidence and retest guidance. Build 227 adds an additive D1 migration."
+  },
+  {
     "build": "Build 226",
     "date": "2026-08-01",
     "title": "Startup Readiness loading and deployment-validation repair",
