@@ -1,4 +1,7 @@
-# Devil n Dove AI Handoff — Build 225
+# Devil n Dove AI Handoff — Build 226
+
+## Build 226 outcome
+Build 226 repairs Startup Readiness loading. The Build 225 API contained a malformed newline string, while the browser accepted non-JSON HTTP 200 responses as valid empty data. The Function now parses, the client requires a non-empty readiness payload, and all 37 built-in gates remain visible in honest degraded mode when D1/API access is unavailable. No D1 schema change is required.
 
 ## Build 225 outcome
 Build 225 converts launch readiness from a static twenty-card guide into a database-backed operating cockpit and consolidates packaging into one authoritative specification.
@@ -20,10 +23,10 @@ Build 225 converts launch readiness from a static twenty-card guide into a datab
 
 ### Deployment
 1. Back up production D1.
-2. Apply `database_build225_startup_readiness_packaging_authority.sql` or the identical `database_upgrade_current_pass.sql`, not both.
-3. Deploy the complete Build 225 package.
+2. If the Build 225 readiness migration was never applied, apply `database_build225_startup_readiness_packaging_authority.sql` or the identical `database_upgrade_current_pass.sql`, not both. If it was applied, do not rerun it for Build 226.
+3. Deploy the complete Build 226 package.
 4. Open `/admin/startup-readiness/`, refresh/seed the list, and verify existing status changes persist after reload.
-5. Follow `BUILD225_VALIDATION.md`.
+5. Follow `BUILD226_VALIDATION.md`.
 
 ### Unchanged launch boundaries
 Product-detail and seven-image gallery fixes from Builds 223–224 remain active. Production proof is still required for live payment/webhook idempotency, exact-once inventory settlement/restoration, taxes, shipping, email, physical labels, regulatory workflow, restore rehearsal, and paid-order/refund rehearsals.

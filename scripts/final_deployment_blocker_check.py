@@ -112,7 +112,14 @@ def js_syntax():
     paths = list((ROOT/'functions').rglob('*.js')) + list((ROOT/'public/js').rglob('*.js')) + list((ROOT/'js').rglob('*.js'))
     def check(path: Path):
         try:
-            result = subprocess.run(['node','--check',str(path)], cwd=ROOT, capture_output=True, text=True, timeout=12)
+            if 'functions' in path.relative_to(ROOT).parts:
+                result = subprocess.run(
+                    ['node','--input-type=module','--check'], cwd=ROOT,
+                    input=path.read_text(encoding='utf-8', errors='replace'),
+                    capture_output=True, text=True, timeout=12
+                )
+            else:
+                result = subprocess.run(['node','--check',str(path)], cwd=ROOT, capture_output=True, text=True, timeout=12)
         except subprocess.TimeoutExpired:
             return f'JS syntax timeout: {path.relative_to(ROOT)}'
         if result.returncode:
