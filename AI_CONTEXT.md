@@ -1,11 +1,20 @@
-# Devil n Dove AI Context — Build 225 Compatibility Pointer
+# Devil n Dove AI Context — Build 209
 
-This retained filename is not a competing roadmap. Start every new build or chat with:
+This retained context file is not a third roadmap. Start with:
 
-1. `AI_HANDOFF.md` — current architecture, routes, deployment, data authority, safety, and fallback rules.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — Build 225 completion, current launch position, risks, and next 20 steps.
-3. `STARTUP_GO_LIVE_GUIDE.md` — all 37 go-live gates with detailed locations, instructions, evidence, and pass conditions.
-4. `PACKAGING_STUDIO.md` — the single packaging and soap-label source of truth.
-5. `MARKDOWN_INDEX.md` — current specialist, deployment, validation, and historical references.
+1. `AI_HANDOFF.md` for technical/deployment facts and safety boundaries.
+2. `PROJECT_STATUS_AND_ROADMAP.md` for business, SEO, operations, and release priorities.
+3. `MARKDOWN_INDEX.md` for specialist references.
 
-Current live launch status belongs in `/admin/startup-readiness/` and its D1 tables. Historical Build files remain evidence only and do not override Build 225.
+## Build 209 snapshot
+
+- Inventory Operations received scoped contrast, action-column, and responsive mobile/tablet/desktop repairs.
+- `/admin/inventory-operations/?product_id=<id>` opens that product in the product-resource workflow.
+- Product Release Preflight now includes a non-blocking inventory/maker-input context stage.
+- No D1 migration is included.
+- CAIP remains reference-only, source-preserving, and human-reviewed.
+- The outstanding login `500` remains evidence-first; do not run any legacy database migration based only on the browser error.
+
+
+## Build 217 current release
+See `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, and `BUILD217_VALIDATION.md`. Build 217 adds reasoned inventory reversals, applied cost templates, percentage fees, linked-product cost allocations, CAIP-derived reviewed summaries, and Creative Assets contrast fixes.
