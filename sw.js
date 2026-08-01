@@ -1,4 +1,5 @@
-const CACHE_NAME = 'devilndove-shell-v7';
+// Build 227: force the public shell to refresh after the responsive/SEO release.
+const CACHE_NAME = 'devilndove-shell-v8';
 const CORE_ASSETS = [
   '/',
   '/offline.html',
