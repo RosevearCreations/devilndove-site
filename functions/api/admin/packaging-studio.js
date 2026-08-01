@@ -1,7 +1,7 @@
-// Build 222 — Packaging Studio + normalized Soap Label Automation workflow.
+// Build 225 — Packaging Studio + normalized Soap Label Automation workflow.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '222';
+const BUILD = '225';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
