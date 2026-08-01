@@ -1,4 +1,4 @@
-# Devil n Dove Sanity and Health Check — Build 225
+# Devil n Dove Sanity and Health Check — Build 226
 
 ## Current architecture health
 - Supported fresh schema: `database_full_schema.sql`.
@@ -7,7 +7,10 @@
 - Current additive migration: `database_build225_startup_readiness_packaging_authority.sql` or identical `database_upgrade_current_pass.sql`.
 - Canonical handoff: `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `STARTUP_GO_LIVE_GUIDE.md`, and `PACKAGING_STUDIO.md`.
 
-## Build 225 health result
+## Build 226 health result
+- The Startup Readiness Function parses as an ES module after correcting the malformed Markdown newline string.
+- The browser rejects malformed, HTML, empty, and incomplete success responses and shows all 37 instructions in honest degraded mode.
+- Legitimate no-match filter states provide a direct Reset filters or Show all statuses action.
 - Startup readiness is now a D1-backed operating workflow rather than a static duplicate checklist.
 - The cockpit records status, owner, due date, evidence, blocked reason, completion, history, and a calculated launch state.
 - Browser-only recovery is visibly marked Unsynced and does not pretend a D1 save succeeded.

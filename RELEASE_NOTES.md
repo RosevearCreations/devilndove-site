@@ -1,3 +1,16 @@
+# Release Notes — Build 226
+
+## Startup Readiness loading repair
+- Corrected a malformed newline string that prevented the Build 225 Startup Readiness Pages Function from parsing as an ES module.
+- Stopped the browser from accepting empty, malformed, or HTML HTTP 200 responses as a successfully loaded readiness list.
+- Preserved all 37 built-in gates in visibly degraded mode whenever the API is unavailable.
+- Added honest reset/show-all guidance when active filters have no matches or all gates are closed.
+- Added response diagnostics (`expected_total`) and status normalization without overwriting stored evidence.
+- Strengthened the final deployment blocker so Pages Functions are parsed as ES modules.
+- No D1 schema migration is required; the Build 225 readiness tables and 37 seeded gates remain authoritative.
+
+Deploy the complete Build 226 package and follow `BUILD226_VALIDATION.md`.
+
 # Release Notes — Build 225
 
 ## Startup Readiness Cockpit and Packaging Authority
@@ -144,3 +157,4 @@ Added authorized inventory reversals, cost-template application, revenue-percent
 - Added authenticated Amazon metadata preview with ASIN/canonical-link extraction and safe fallbacks.
 - Added mobile-responsive import controls and explicit no-auto-create safeguards.
 - Consolidated Markdown authority around `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
+

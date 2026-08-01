@@ -1,4 +1,14 @@
-# Devil n Dove Project Status and Roadmap — Build 225
+# Devil n Dove Project Status and Roadmap — Build 226
+
+## Build 226 completed actions
+1. Corrected the Startup Readiness Pages Function newline syntax failure.
+2. Required valid JSON with a non-empty readiness item array before the browser reports a successful load.
+3. Kept all 37 instructions visible in clearly labelled degraded mode when the API cannot load.
+4. Added a Reset filters/Show all statuses recovery action for legitimate empty filter results.
+5. Normalized unexpected stored status text on read without overwriting owner or evidence fields.
+6. Added `expected_total: 37` to readiness responses for production diagnostics.
+7. Changed deployment validation to parse Pages Functions as ES modules.
+8. Confirmed Build 226 is code-only and retains the Build 225 D1 authority.
 
 ## Build 225 completed actions
 1. Replaced the static Startup Readiness page with a D1-backed status cockpit.
