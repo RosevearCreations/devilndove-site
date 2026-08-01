@@ -1,6 +1,6 @@
 # Creative Asset Intelligence Platform (CAIP) — Authoritative Design Specification
 
-**Current implementation:** Build 208 governed media-operations, secure review, and read-only product release-preflight foundation  
+**Current implementation:** Build 228 specialist asset/rights/evidence stage within Creative Automation Studio; Build 208 CAIP controls retained  
 **Design status:** authoritative subsystem specification  
 **Primary business roadmap:** `../../PROJECT_STATUS_AND_ROADMAP.md`  
 **Technical deployment handoff:** `../../AI_HANDOFF.md`
@@ -16,6 +16,10 @@ CAIP is Devil n Dove’s governed creative-asset layer. It turns a completed Con
 - how a project can become a reusable set of gallery, article, thumbnail, video, and educational candidates without re-uploading or mutating original files.
 
 CAIP is **not** a second media library, a public publisher, a content-claim generator, an AI provider, a video renderer, or a permission engine that can invent consent.
+
+## Build 228 master-process placement
+
+CAIP is stage 3 of `/admin/creative-automation/`. The master workflow may record the owner, stage status and a safe evidence reference, but CAIP remains the sole asset/rights/evidence authority and every existing CAIP feature remains available at `/admin/creative-assets/`. A master Complete review cannot elevate restricted media or replace CAIP evidence; source readiness must also pass. See `../../CREATIVE_AUTOMATION_STUDIO.md`.
 
 ## Governing principles
 
@@ -53,7 +57,7 @@ Not implemented and deliberately not claimed:
 ```text
 Product / source records
         ↓  (existing source ownership)
-Content Automation Studio
+Creative Automation Studio stage 4 / Content Studio
         ↓  (source-linked package + deliverable plans)
 CAIP
   ├─ Creative project identity
@@ -65,7 +69,7 @@ CAIP
   ├─ Policy/readiness signals + audit trail
   └─ Exportable CAIP manifest
         ↓  (human chooses approved candidates)
-Content Release Board / Social Queue / future renderer adapters
+Creative Automation stages 4–7 / Content Release Board / Social Queue / future adapters
 ```
 
 ## Required reading order
@@ -73,7 +77,8 @@ Content Release Board / Social Queue / future renderer adapters
 1. This README for CAIP boundaries and current implementation.
 2. `00_Project_Charter.md` through `12_Testing_and_Acceptance.md` for the detailed design.
 3. `../../AI_HANDOFF.md` for deployment/migration order.
-4. `../../PROJECT_STATUS_AND_ROADMAP.md` for current business priority and the active 20-step plan.
+4. `../../CREATIVE_AUTOMATION_STUDIO.md` for the master stage contract.
+5. `../../PROJECT_STATUS_AND_ROADMAP.md` for current business priority and ordered next steps.
 
 ## Official external design references
 
