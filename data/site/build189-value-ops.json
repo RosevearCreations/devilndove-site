@@ -1,8 +1,0 @@
-{
-  "build_label": "Build 189",
-  "focus": "Live command-center counts, conversion funnel events, mobile autosave recovery, placeholder replacement plan, local SEO observation rows, product costing/margin review, and Markdown sanity direction.",
-  "admin_pages": ["/admin/command-center/", "/admin/markdown-sanity/", "/admin/deployment-preflight/"],
-  "new_api_routes": ["/api/admin/command-center"],
-  "new_public_support": ["explicit product_view/add_to_cart/checkout_started/order_created funnel events", "visual placeholder bands on key public pages", "mobile product browser recovery script"],
-  "next_highest_value": ["replace placeholders with approved real photos", "import Search Console rows", "enter GBP observation notes", "connect product material/labour costing to real SKUs", "review mobile autosave on an actual phone"]
-}
