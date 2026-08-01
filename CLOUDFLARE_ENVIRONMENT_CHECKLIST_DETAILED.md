@@ -1,12 +1,47 @@
-# Retired reference — Build 200
+# Cloudflare Environment Checklist — Devil n Dove (Build 227)
 
-This file is preserved as historical implementation evidence only. It does not define current work or release order. Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; use `MARKDOWN_INDEX.md` to decide whether this historical note is relevant.
-
-## Cloudflare Environment Checklist — Devil n Dove
-
-_Last updated: Build 188/189 environment clarification after login route fix_
+_Last updated: Build 227 unified packaging, client documents and read-only Meta credential tests._
 
 This checklist explains **exactly where to add each setting in Cloudflare** and **where to find or create each value**.
+
+## Build 227 additions — business documents and Meta tests
+
+### Client-document business identity
+
+Add these to the Production environment. Encrypt them if Cloudflare only offers encrypted values:
+
+| Variable | Required | Source / test |
+|---|---|---|
+| `BUSINESS_LEGAL_NAME` | Yes | Owner-confirmed legal/operating supplier name. Issue a test invoice and confirm the heading. |
+| `BUSINESS_ADDRESS_LINE1` | Yes | Principal business address approved for customer documents. Confirm with owner/accountant. |
+| `BUSINESS_ADDRESS_LINE2` | Optional | Suite/unit where applicable. |
+| `BUSINESS_CITY`, `BUSINESS_PROVINCE`, `BUSINESS_POSTAL_CODE`, `BUSINESS_COUNTRY` | Yes | Owner-confirmed mailing/business facts. Print and review an invoice/credit note. |
+| `BUSINESS_EMAIL`, `BUSINESS_PHONE`, `BUSINESS_WEBSITE` | Recommended | Customer-service contact details. Test that the public email/site destinations work. |
+| `BUSINESS_GST_HST_NUMBER` | Conditional/important | Use only the owner/accountant-confirmed registration number. Never invent one. Required before treating a GST/HST credit note as complete. |
+
+After saving, deploy, open `/admin/customer-documents/`, issue an owner-controlled invoice and packing slip, then select a recorded test refund and issue a credit note/refund confirmation. Confirm business name, registration number, recipient, date, reason, amounts and tax adjustment. Formally void only a disposable test document and confirm its immutable snapshot remains previewable.
+
+### Meta Facebook Page + Instagram professional account
+
+| Variable | Required | Source / safe test |
+|---|---|---|
+| `FACEBOOK_PAGE_ID` or `META_PAGE_ID` | Facebook | Meta Page identity. The app checks returned ID matches. |
+| `FACEBOOK_PAGE_ACCESS_TOKEN` or `META_PAGE_ACCESS_TOKEN` | Facebook | Page access token stored as an encrypted Production secret. |
+| `INSTAGRAM_USER_ID`, `IG_USER_ID`, or `INSTAGRAM_BUSINESS_ACCOUNT_ID` | Instagram | Connected professional-account ID. It may also be derived from the Page response. |
+| `INSTAGRAM_ACCESS_TOKEN` | Optional | Use when the Instagram workflow requires a distinct token; otherwise the configured Page token is tested. |
+| `META_APP_ID`, `META_APP_SECRET` | Optional diagnostic | Enables server-side Page-token debug: validity, app-ID match, expiry/data-access-expiry and scopes. Store the secret encrypted. |
+| `META_GRAPH_API_VERSION` | Optional | Set only after reviewing/testing the chosen Meta version. Build 227 falls back to `v26.0`. |
+
+Safe test procedure:
+
+1. Deploy after saving the variables; do not paste values into evidence.
+2. Open `/admin/social-publishing/` and select **Test Facebook + Instagram**.
+3. Confirm Facebook and Instagram return HTTP 200 and their IDs match the configured/derived account IDs.
+4. If optional app credentials are configured, confirm `is_valid`, app-ID match, acceptable expiry/data-access-expiry and the expected returned scopes.
+5. Save only the test time, API version, masked IDs/names, HTTP result, scope names and expiry timestamps.
+6. Generate/dry-run a product draft. Keep automatic publishing disabled.
+7. Only after roles/scopes/app review are approved, publish one reviewed non-sensitive product-only test and save the provider post ID/URL.
+8. Retest after token rotation, app-role change, account reconnection or Graph API version change.
 
 You confirmed:
 

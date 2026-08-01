@@ -142,6 +142,7 @@ REQUIRED_FILES = [
     'database_build221_packaging_studio_cleanup_lot_controls.sql',
     'database_build222_soap_label_startup_readiness.sql',
     'database_build225_startup_readiness_packaging_authority.sql',
+    'database_build227_unified_business_operations.sql',
     'database_upgrade_current_pass.sql',
     'admin/packaging-studio/index.html',
     'admin/packaging/soap-labels/index.html',
@@ -150,6 +151,9 @@ REQUIRED_FILES = [
     'functions/api/admin/startup-readiness.js',
     'public/js/admin-packaging-studio.js',
     'public/js/admin-startup-readiness.js',
+    'admin/customer-documents/index.html',
+    'functions/api/admin/customer-documents.js',
+    'public/js/admin-customer-documents.js',
     'DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md',
     'STARTUP_GO_LIVE_GUIDE.md',
 ]
@@ -304,12 +308,15 @@ def check_schema_files(checks: list[dict]) -> None:
         'soap_label_claims',
         'soap_label_exports',
         'soap_label_print_tests',
+        'packaging_components',
+        'customer_document_sequences',
+        'customer_documents',
     ]
     required = {
         'database_schema.sql': schema_needles,
         'database_full_schema.sql': schema_needles,
         'database_store_schema.sql': schema_needles,
-        'database_upgrade_current_pass.sql': ['startup_readiness_items', 'startup_readiness_history'],
+        'database_upgrade_current_pass.sql': ['packaging_components', 'customer_document_sequences', 'customer_documents', 'build227_unified_business_operations'],
         'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
         'database_build182_mobile_visual_polish.sql': ['desktop_mobile_parity_checks', 'visual_enrichment_candidates', 'build_182_mobile_visual_polish'],
         'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
@@ -334,6 +341,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build221_packaging_studio_cleanup_lot_controls.sql': ['packaging_templates', 'packaging_projects', 'packaging_project_versions', 'packaging_export_history', 'inventory_lot_policies', 'inventory_lot_reconciliations'],
         'database_build222_soap_label_startup_readiness.sql': ['soap_label_templates', 'soap_products', 'soap_ingredients', 'soap_label_claims', 'soap_label_exports', 'soap_label_print_tests'],
         'database_build225_startup_readiness_packaging_authority.sql': ['startup_readiness_items', 'startup_readiness_history'],
+        'database_build227_unified_business_operations.sql': ['packaging_components', 'customer_document_sequences', 'customer_documents', 'build227_unified_business_operations'],
     }
     missing=[]
     detail=[]
@@ -343,7 +351,7 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 225 schema tables and current migration markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 227 schema tables and current migration markers found in the correct schema files.', 'missing':missing})
 
 def main() -> int:
     checks=[]
@@ -354,7 +362,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 225','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 227','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
