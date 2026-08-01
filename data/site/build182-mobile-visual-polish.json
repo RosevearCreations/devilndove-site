@@ -1,0 +1,31 @@
+{
+  "build_label": "Build 182",
+  "focus": [
+    "desktop website version",
+    "mobile phone version",
+    "visual polish",
+    "reduced-motion-safe effects",
+    "SEO local phrase enrichment",
+    "schema/fallback safety"
+  ],
+  "public_pages_checked": [
+    "/",
+    "/shop/",
+    "/collections/",
+    "/custom-gifts-southern-ontario/",
+    "/handmade-jewelry-ontario/",
+    "/laser-engraving-ontario/",
+    "/custom-candle-making-ontario/",
+    "/custom-soap-making-ontario/",
+    "/vintage-finds-ontario/",
+    "/workshop-made-gifts-ontario/"
+  ],
+  "admin_pages_added": [
+    "/admin/visual-polish/"
+  ],
+  "api_routes_added": [
+    "/api/admin/visual-polish"
+  ],
+  "migration": "database_build182_mobile_visual_polish.sql",
+  "notes": "Generated as a static handoff artifact for the Build 182 visual/mobile polish pass."
+}

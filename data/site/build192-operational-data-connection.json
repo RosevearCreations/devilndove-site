@@ -1,0 +1,28 @@
+{
+  "build_label": "Build 192",
+  "generated_at": "2026-06-19T01:17:09.329421+00:00",
+  "focus": [
+    "actual marketplace/payment fees",
+    "actual material/labour/packaging/overhead costs",
+    "R2 derivative worker readiness",
+    "resumable mobile image upload sessions",
+    "approved real-media replacement planning",
+    "scheduled Search Console imports",
+    "monthly GBP evidence",
+    "customer duplicate/merge review",
+    "Stripe/email/R2 live test records",
+    "PageSpeed/Lighthouse imports",
+    "legacy admin consolidation telemetry"
+  ],
+  "canonical_markdown": [
+    "PROJECT_STATUS_AND_ROADMAP.md",
+    "AI_HANDOFF.md"
+  ],
+  "new_files": [
+    "database_build192_operational_data_connection.sql",
+    "functions/api/admin/value-ops-next.js",
+    "public/js/admin-value-ops-next.js",
+    "data/site/build192-operational-data-connection.json"
+  ],
+  "notes": "Build 192 connects the strongest next-value work into the existing Command Center instead of creating another disconnected admin page."
+}

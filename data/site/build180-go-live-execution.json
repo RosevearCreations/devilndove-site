@@ -1,0 +1,18 @@
+{
+  "build": "Build 180",
+  "focus": "Go-live execution controls, direct endpoint gates, Local SEO visuals, and post-promotion watcher scheduling.",
+  "admin_pages": [
+    "/admin/go-live-execution/",
+    "/admin/promotion-control/",
+    "/admin/deploy-readiness/"
+  ],
+  "api_routes": [
+    "/api/admin/go-live-execution"
+  ],
+  "migration": "database_build180_go_live_execution.sql",
+  "seo_principles": [
+    "one clear H1 per exposed page",
+    "prominent local wording in title/main heading/body",
+    "structured data previews before promotion"
+  ]
+}

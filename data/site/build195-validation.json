@@ -1,0 +1,29 @@
+{
+  "build_label": "Build 195",
+  "status": "passed_local_validation",
+  "javascript_syntax_files": 402,
+  "python_scripts_compiled": 12,
+  "json_files_parsed": 48,
+  "html_pages_scanned": 86,
+  "multiple_h1_issue_count": 0,
+  "css_open_braces": 1259,
+  "css_close_braces": 1259,
+  "fresh_schema_tables": 347,
+  "build194_to_build195_migration": "passed twice",
+  "sequence_test": {
+    "legacy_max_product_number": 1444,
+    "next_number_before_delete": 1445,
+    "next_number_after_delete": 1445,
+    "reused": false
+  },
+  "inventory_description_sidecar_test": "passed",
+  "deployment_preflight": {
+    "status": "ready",
+    "blocker_count": 0,
+    "warning_count": 0
+  },
+  "final_blocker_check": "passed",
+  "notes": [
+    "Full schema and migration run used SQLite-compatible D1 SQL. Live Cloudflare/R2/provider verification remains separately required."
+  ]
+}

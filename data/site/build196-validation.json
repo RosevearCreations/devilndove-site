@@ -1,0 +1,20 @@
+{
+  "build": "Build 196",
+  "validation": {
+    "javascript_syntax": "403 files passed",
+    "python_compile": "scripts passed",
+    "json_parse": "51 files passed",
+    "html_scan": "86 pages passed; 0 pages with multiple H1 elements; title/meta present",
+    "css_balance": "1263 / 1263 braces",
+    "full_schema": "348 tables created",
+    "build195_to_196_migration": "passed twice",
+    "static_deployment_preflight": "ready; 0 blockers; 0 warnings",
+    "final_blocker_check": "PASS"
+  },
+  "manual_tests_required": [
+    "Apply database_build196_product_correction_material_returns.sql after Build 195.",
+    "Load an unused test product and confirm the visible correction button opens linked raw inventory.",
+    "Test reservation release separately from physical raw-supply return using factual quantities.",
+    "Verify item name displays directly below raw inventory/tool images on desktop and phone."
+  ]
+}
