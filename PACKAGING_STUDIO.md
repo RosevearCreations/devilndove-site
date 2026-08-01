@@ -1,7 +1,9 @@
-# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 227)
+# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 228)
 
 ## Authority rule
 This file is the **single authoritative packaging specification and implementation map** for Devil n Dove. Packaging code, schema, templates, launch checks, and future work must be reconciled here during every build.
+
+Build 228 does not change packaging tables or split this authority. Packaging remains a specialist business system linked from Product Release Preflight and Startup Readiness; Creative Automation may reference packaging evidence but must not duplicate labels, BOM costs, print tests or approval state.
 
 The former root and documentation-tree files named `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` are compatibility pointers only. They must not contain a second editable copy of the specification.
 
@@ -924,7 +926,7 @@ Before selling printed products, have the final labels checked against the requi
 
 ---
 
-## Build 227 maintenance directive
+## Build 228 maintenance directive
 During every future packaging change:
 1. Update this file first or in the same commit as code/schema changes.
 2. Keep the compatibility pointer files short; never recreate a second full copy.

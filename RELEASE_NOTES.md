@@ -1,3 +1,18 @@
+# Release Notes — Build 228
+
+## Master creative workflow and separate prelaunch stages
+
+- Added a seven-stage Creative Automation Studio while preserving Creative Process, CAIP, Content Studio, Social Publishing and Content Release Board specialist features/authorities.
+- Added D1 master workflow, stage-review and append-only event tables; mutable status/evidence stays in D1 rather than duplicated JSON.
+- Added a Prelaunch Operations Map and detailed separate Product Preflight, Deployment Preflight, Safe Deploy, Smoke, Deploy Readiness, Go-Live and Live Ops playbooks.
+- Preserved 37 Startup gates and added five standalone process gates for exactly 42; regenerated detailed correction/evidence/retest instructions.
+- Added regression coverage for HTML/incomplete readiness responses and the full 42-gate honest fallback.
+- Added responsive master/prelaunch layouts, direct specialist fallbacks, runtime incident handling and two internal planning SVG placeholders.
+- Added D1 migration compatibility checks that reject explicit SQL transactions and require numbered/current migrations to match.
+- Refreshed the two canonical handoff files, schema reference, SEO direction, smoke guide, image inventory and ordered next steps.
+
+Back up D1 and confirm Build 227. Apply `database_build228_creative_automation_prelaunch_stages.sql` or identical `database_upgrade_current_pass.sql`, not both. Do not add `BEGIN TRANSACTION`/`SAVEPOINT`. Deploy the complete package and follow `BUILD228_VALIDATION.md` plus `PRELAUNCH_PROCESS_PLAYBOOKS.md`.
+
 # Release Notes — Build 227
 
 ## Unified business operations

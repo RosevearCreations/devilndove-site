@@ -1,3 +1,9 @@
+# Post-Deploy Smoke Test — Build 228 current entry
+
+Use the complete stage 4 procedure in `PRELAUNCH_PROCESS_PLAYBOOKS.md`. On the production deployment, confirm the domain/HTTPS/canonical routes; exactly one H1 and no mobile/desktop overlap; public catalog/product/gallery; login/logout/recovery; structured API errors and runtime incident capture; Creative Automation specialist fallback; read-only Meta identity/token tests; and all 42 Startup gates with All statuses. Force an HTML or incomplete Startup API response in a safe preview/test path and confirm all 42 built-in gates appear—never “No readiness items match these filters.” Record deployment ID, route, device/browser, expected/actual result and non-secret evidence. A failed check pauses promotion and requires the full suite to be repeated after correction or rollback.
+
+---
+
 # Build 206 — Catalog/Media/CAIP smoke test
 
 1. Sign in as admin. On `/admin/catalog/`, search a known Product ID and test Draft, Revision / needs changes, Approved, and Archived filters plus each sort option.
@@ -93,7 +99,7 @@ Local tests cannot prove Cloudflare D1/R2 bindings, remote public media resoluti
 10. Record a failed test, then a passed 100%-scale test with all physical checks passed; approve the version.
 11. Temporarily interrupt the API and confirm a browser-local recovery draft is offered without claiming a D1 save succeeded.
 12. Review runtime incidents and admin audit evidence for deliberate failures and successful approval.
-# Build 227 focused smoke tests
+# Build 227 focused smoke tests — historical
 
 1. Open `/admin/startup-readiness/`; confirm All statuses is selected, all 37 gates render, and each gate expands to Before you begin, Test steps, Correction, Evidence, Retest and Pass condition.
 2. Set a temporary search/filter that returns no rows, select Show all gates, and confirm the complete list returns.

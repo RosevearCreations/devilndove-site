@@ -1,4 +1,4 @@
-# Devil n Dove Soap Label Automation Specification — Compatibility Pointer
+# Devil n Dove Soap Label Automation Specification — Build 228 Compatibility Pointer
 
 The single authoritative packaging and soap-label specification is now:
 

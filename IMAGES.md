@@ -1,3 +1,9 @@
+# Build 228 current media authority note
+
+Creative Automation references existing media/evidence and never copies, moves, deletes or elevates its public rights. Its new process-map SVG is admin-only. Real public product/story media still requires owned/consented source, accurate role/alt text, reliable URL and specialist approval. Detailed capture/replacement work lives in `IMAGES_REQUIRED.md`.
+
+---
+
 # Build 206 media resolution note
 
 For Product Editor display, a featured image is resolved from the product record, ordered gallery, then a linked non-deleted media-library asset. The visual source label prevents operators from mistaking a valid media asset for a missing product image. The admin placeholder is never a public/catalog image and must not be placed into product schema or public Open Graph fields.

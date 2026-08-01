@@ -1,17 +1,53 @@
-# Devil n Dove Startup and Go-Live Guide — Build 227
+# Devil n Dove Startup and Go-Live Guide — Build 228
 
-This is the human-readable operating copy of the 37 database-backed gates in `/admin/startup-readiness/`. The D1 cockpit remains the status authority. Each gate now states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
+This is the human-readable operating copy of all 42 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
 
 ## Operating rules
 
-1. Apply `database_build227_unified_business_operations.sql` or the identical `database_upgrade_current_pass.sql`, not both. Back up D1 first.
+1. Apply `database_build228_creative_automation_prelaunch_stages.sql` or the identical `database_upgrade_current_pass.sql`, not both. Back up D1 first and confirm Build 227 is already present.
 2. Use owner-controlled test records and real Production bindings only where the gate explicitly requires a production test.
 3. Never paste secrets, passwords, access tokens, full payment data, or private customer information into gate evidence.
 4. A failed numbered step keeps the gate Failed or Blocked until the correction procedure and full retest succeed.
 5. Complete and Not Applicable decisions require factual evidence. Reopen a completed gate after a related deployment, credential rotation, schema/provider version, policy, or material data change.
-6. The guide does not replace legal, accounting, tax, product-safety, platform, printer, or regulatory review.
+6. Use `PRELAUNCH_PROCESS_PLAYBOOKS.md` for the standalone process order; never use a green specialist page to erase another Startup blocker.
+7. The guide does not replace legal, accounting, tax, product-safety, platform, printer, or regulatory review.
 
 ## Foundation and deployment
+
+### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
+
+**Inside the application:** `/admin/deployment-preflight/`  
+**External location:** Build 228 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**Production test:** No live binding is required, but deployed verification may still be appropriate.
+
+#### Before you begin
+
+Assign one owner and open /admin/deployment-preflight/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+
+#### Test steps
+
+1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, aggregate-schema, repeated-current-migration, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
+4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface.
+5. Confirm database_upgrade_current_pass.sql is identical to database_build228_creative_automation_prelaunch_stages.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, or RELEASE statement.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files, validation and process playbooks all identify Build 228 consistently.
+7. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
+8. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.
+
+#### If any step fails: correction procedure
+
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then stop before deployment, correct the owning code/schema/HTML/CSS/Markdown file, regenerate derived artifacts from their source, then rerun every preflight check against the exact rebuilt archive. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+
+#### Evidence to save
+
+Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+
+#### Retest and reopening rule
+
+Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+
+**Pass condition:** The exact Build 228 archive passes every static, schema, syntax, CSS, one-H1, metadata, fallback, documentation and Pages Functions bundle check with zero unresolved blocker.
 
 ### 10. Back up D1, apply the current migration, and deploy the complete build — **Critical**
 
@@ -25,15 +61,15 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 
 #### Test steps
 
-1. Open Cloudflare D1 and create a production backup or export before changing the schema.
-2. Record the backup date, database name, and safe storage location in the evidence notes.
-3. Confirm the Build 225 readiness/packaging migration is already present, then apply database_build227_unified_business_operations.sql or the identical database_upgrade_current_pass.sql, but not both.
-4. Confirm the migration ledger records build227_unified_business_operations and the new packaging_components, customer_document_sequences, and customer_documents tables exist.
+1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.
+2. Record the date, database name and safe recovery reference in the evidence notes.
+3. Confirm the Build 227 migration is already present, then apply database_build228_creative_automation_prelaunch_stages.sql or the identical database_upgrade_current_pass.sql, but not both.
+4. Confirm the migration ledger records build228_creative_automation_prelaunch_stages and the creative_automation_workflows, creative_automation_stage_reviews, and creative_automation_events tables exist.
 5. Deploy the complete ZIP rather than selected files.
-6. Open Deployment Preflight and run every available check.
-7. Open Startup Readiness with All statuses and confirm all 37 gates load with correction/evidence guidance.
-8. Save the deployment URL, commit or deployment identifier, schema result, and preflight result.
-9. Stop and restore the previous deployment or D1 backup if any critical migration, Function, route, or data-integrity error appears.
+6. Record the Pages deployment URL and deployment/commit identifier.
+7. Open Startup Readiness with All statuses and confirm all 42 gates load without removing prior owner, evidence or history records.
+8. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.
+9. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.
 
 #### If any step fails: correction procedure
 
@@ -47,7 +83,43 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** A recoverable D1 backup exists, the Build 227 migration is applied once after the Build 225 baseline, the complete deployment is live, all 37 gates load, and Deployment Preflight has no unresolved critical result.
+**Pass condition:** A recoverable D1 point exists, the Build 228 migration is applied once after Build 227, the complete deployment is live, all 42 gates load, and no migration, Function, route or data-integrity error remains.
+
+### 15. Complete Post-Deploy Smoke Tests as a standalone live-verification process — **Critical**
+
+**Inside the application:** `/admin/post-deploy-smoke-tests/`  
+**External location:** Production domain, browser developer tools, Cloudflare Pages Functions logs, and POST_DEPLOY_SMOKE_TEST.md  
+**Production test:** Yes — use owner-controlled records and save non-secret identifiers.
+
+#### Before you begin
+
+Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+
+#### Test steps
+
+1. Confirm the deployment ID and Build 228 migration evidence match the package that passed Deployment Preflight.
+2. Open the production home, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.
+3. Sign in with an owner-controlled administrator and test Startup Readiness, Creative Automation Studio, Packaging, Client Documents, Orders and the Prelaunch Operations Map.
+4. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.
+5. At phone, tablet, laptop and wide-desktop widths, check navigation, tables, forms, dialogs, focus, touch targets, text contrast and horizontal overflow on every changed route.
+6. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.
+7. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner.
+8. After any correction/redeploy, repeat all smoke checks—not only the originally failed URL.
+9. Continue to Deploy Readiness only when every critical smoke result passes.
+
+#### If any step fails: correction procedure
+
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then stop promotion, record the exact live route and result, correct or roll back the deployment, then repeat the full smoke suite across public, auth, admin, API, fallback and device checks. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+
+#### Evidence to save
+
+Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+
+#### Retest and reopening rule
+
+Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+
+**Pass condition:** The exact production deployment passes all critical public, authentication, admin, API, fallback, mobile/desktop and SEO smoke checks with current evidence and no unresolved critical result.
 
 ### 20. Verify production bindings, secrets, domains, and environment separation — **Critical**
 
@@ -1231,6 +1303,41 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 **Pass condition:** A separate refund/cancellation can be completed safely, communicated clearly, reconciled, and repeated webhook delivery cannot duplicate its effects.
 
+### 355. Complete Deploy Readiness as a standalone promotion decision — **Critical**
+
+**Inside the application:** `/admin/deploy-readiness/`  
+**External location:** Startup Readiness, Deployment Preflight result, Post-Deploy Smoke Tests, rollback evidence, and release manifest  
+**Production test:** Yes — use owner-controlled records and save non-secret identifiers.
+
+#### Before you begin
+
+Assign one owner and open /admin/deploy-readiness/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+
+#### Test steps
+
+1. Open Deploy Readiness only after the exact package passed Deployment Preflight, was deployed, and passed the complete Post-Deploy Smoke process.
+2. Confirm every Critical Startup gate is Complete or has an owner-approved, factually justified Not Applicable result; do not rely only on a score.
+3. Review blocker drilldowns, manifest paths, migration ledger, rollback/recovery reference, smoke evidence, product scope, marketplace/recall locks and provider checks.
+4. Confirm the opening owner, monitoring hours, stop conditions, rollback steps and customer recovery contacts are written and reachable from a phone.
+5. Record the exact deployment, database bookmark/recovery point, approved product count, outstanding High items and the person making the decision.
+6. Select Blocked when any required evidence is absent or contradictory and link back to the exact Startup gate.
+7. Select approval only when the evidence—not the existence of the feature—supports proceeding to controlled Go-Live Execution.
+8. Reopen this decision after a new deployment, migration, critical configuration change, failed smoke test or material Startup-gate change.
+
+#### If any step fails: correction procedure
+
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then set the promotion decision to Blocked, link it to the exact open Startup or smoke result, correct and retest that source gate, then rebuild the final evidence-backed decision. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+
+#### Evidence to save
+
+Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+
+#### Retest and reopening rule
+
+Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+
+**Pass condition:** A named owner has recorded an evidence-backed promotion decision for the exact live build, no Critical Startup gate or smoke result remains open, and rollback/stop conditions are ready.
+
 ### 360. Assign launch-day ownership, monitoring, support, and stop conditions — **Critical**
 
 **Inside the application:** `/admin/startup-readiness/`  
@@ -1263,6 +1370,42 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
 **Pass condition:** Each launch responsibility has an owner and the team has clear monitoring, escalation, rollback, and temporary-stop instructions.
+
+### 365. Run Go-Live Execution as a standalone controlled-opening process — **Critical**
+
+**Inside the application:** `/admin/go-live-execution/`  
+**External location:** Production storefront, Deploy Readiness approval, Promotion Control, launch owner and immediate monitoring dashboards  
+**Production test:** Yes — use owner-controlled records and save non-secret identifiers.
+
+#### Before you begin
+
+Assign one owner and open /admin/go-live-execution/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+
+#### Test steps
+
+1. Confirm the Deploy Readiness decision names the exact live build and still has no Critical blocker.
+2. Confirm the deliberately small opening product list, conservative sellable quantities, real product media, packaging status, accepted destinations and customer policies.
+3. Record the opening date/time, owner on duty, monitoring window and first scheduled review before changing public availability.
+4. Enable only the approved products/channels; keep unfinished automation and unapproved providers disabled.
+5. Open the production store in a private session and complete the agreed visibility/cart/checkout check without changing unrelated products.
+6. Queue immediate incident/order/payment/inventory/email monitoring and keep rollback, checkout pause and product-archive controls open.
+7. If any stop condition occurs, pause the affected public action immediately, preserve evidence, communicate with affected customers and roll back or correct safely.
+8. Record the exact actions, operator, timestamps and resulting public URLs; never mark this gate complete from a successful button click alone.
+9. Continue to Live Ops Follow-through and monitor the first operational window.
+
+#### If any step fails: correction procedure
+
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then pause the affected public action, preserve timestamps and evidence, use the approved rollback/product-hide/checkout-stop control, correct the source gate, then obtain a new Deploy Readiness decision before retrying. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+
+#### Evidence to save
+
+Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+
+#### Retest and reopening rule
+
+Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+
+**Pass condition:** The approved limited storefront is opened by a named operator, the exact actions and public results are recorded, immediate monitoring is active, and the opening remains reversible.
 
 ### 370. Open with controlled stock, limited products, and a reversible rollout — **Critical**
 
@@ -1298,7 +1441,43 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 **Pass condition:** The store opens through a monitored, reversible, low-risk release with no unresolved critical blocker and a clear pause/rollback path.
 
+### 380. Run Live Ops Follow-through as a standalone first-window monitoring process — **Critical**
+
+**Inside the application:** `/admin/live-ops-followthrough/`  
+**External location:** Production orders, payments, inventory, email provider, customer support, incidents, analytics and public channels  
+**Production test:** Yes — use owner-controlled records and save non-secret identifiers.
+
+#### Before you begin
+
+Assign one owner and open /admin/live-ops-followthrough/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+
+#### Test steps
+
+1. Begin monitoring at the Go-Live timestamp and keep the named owner available for the agreed first operating window.
+2. For every first-window order, compare payment, order, item, inventory movement, tax, delivery/pickup, email, client document and accounting records.
+3. Review runtime incidents, webhook retries, failed messages, stock warnings, customer questions, public-content/provider results and analytics duplication.
+4. Confirm completed fulfilment and any separate refund rehearsal remain reconciled and idempotent.
+5. Record expected versus actual results, safe IDs, customer recovery actions, owner and resolution for every anomaly.
+6. Activate the stop condition immediately for payment mismatch, oversell, repeated 500 errors, unsafe product/label, lost transactional email, wrong tax or unrecoverable fulfilment failure.
+7. Reopen every affected Startup gate after a failure, credential/configuration change or corrective deployment; never hide the incident by editing only the status.
+8. Complete a written end-of-window review covering orders, refunds, incidents, inventory, support and the next monitoring period.
+9. Expand products, stock or automation only after stable evidence supports the change.
+
+#### If any step fails: correction procedure
+
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then activate the stop condition, protect affected customers, reconcile each money/stock/message record, reopen related Startup gates, and resume only after corrected live evidence is stable. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+
+#### Evidence to save
+
+Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+
+#### Retest and reopening rule
+
+Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+
+**Pass condition:** The first live operating window is reconciled across customer, money, stock, communication, fulfilment, accounting and incident records, with every anomaly owned and no active stop condition.
+
 ## Gate count and authority
 
-This guide contains 37 gates. If it differs from the D1 cockpit after deployment, use the Build 227 API seed, confirm all 37 items return, and keep the gate Failed until the status authority and guide agree.
+This guide contains 42 gates. If it differs from the D1 cockpit after deployment, use the Build 228 API seed, confirm all 42 items return, and keep the gate Failed until the status authority and guide agree.
 

@@ -1,8 +1,10 @@
 # Devil n Dove — Images Required
 
-**Audited build:** Build 216 — Reviewed Inventory and CAIP Evidence  
+**Audited build:** Build 228 — Creative Automation and Prelaunch Operations  
 **Purpose:** Replace public-facing placeholder graphics with truthful, approved Devil n Dove photography while keeping internal workflow diagrams where they are useful.  
 **Priority rule:** Replace public storefront/service placeholders first. Admin-only diagrams are not missing product photography and do not need replacement unless we want a different branded illustration.
+
+**Build 228 internal placeholders:** `assets/creative-automation-master-process.svg` and `assets/prelaunch-operations-map.svg` are descriptive admin-only planning graphics. Keep them out of Product/Offer structured data, Open Graph images and launch-product galleries. Replace public launch placeholders only with owned/approved representative photography.
 
 ---
 

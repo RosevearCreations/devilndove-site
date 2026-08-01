@@ -1,25 +1,17 @@
-# Devil n Dove Sanity and Health Check — Build 226
+# Devil n Dove Sanity and Health Check — Build 228
 
-## Current architecture health
-- Supported fresh schema: `database_full_schema.sql`.
-- Store aggregate: `database_store_schema.sql`.
-- Core-plus-history aggregate: `database_schema.sql`.
-- Current additive migration: `database_build225_startup_readiness_packaging_authority.sql` or identical `database_upgrade_current_pass.sql`.
-- Canonical handoff: `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `STARTUP_GO_LIVE_GUIDE.md`, and `PACKAGING_STUDIO.md`.
+## Structural result
 
-## Build 226 health result
-- The Startup Readiness Function parses as an ES module after correcting the malformed Markdown newline string.
-- The browser rejects malformed, HTML, empty, and incomplete success responses and shows all 37 instructions in honest degraded mode.
-- Legitimate no-match filter states provide a direct Reset filters or Show all statuses action.
-- Startup readiness is now a D1-backed operating workflow rather than a static duplicate checklist.
-- The cockpit records status, owner, due date, evidence, blocked reason, completion, history, and a calculated launch state.
-- Browser-only recovery is visibly marked Unsynced and does not pretend a D1 save succeeded.
-- Packaging documentation has one authority: `PACKAGING_STUDIO.md`.
-- Legacy soap-label specification files are compatibility pointers.
-- Product-detail and seven-image gallery hotfixes remain present.
-- Admin routes remain noindex and exposed HTML pages retain one H1.
-- Public static SEO title, description, canonical, local wording, JSON, CSS, and JavaScript checks pass.
-- Fresh aggregate schemas and repeated Build 225 migration execution pass.
+- Two current Markdown authorities: `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; scoped playbooks are indexed and historical Build files are retired from current authority.
+- Three aggregate schema files include Build 228; current-pass SQL is identical to the numbered migration and has no explicit transaction statements.
+- Startup authority contains 42 unique gates; all 37 prior keys remain and five separate prelaunch-stage keys were added.
+- Startup browser fallback handles HTML/malformed/empty/incomplete API responses without an empty filtered result or false server-save claim.
+- Creative Automation stores orchestration only; specialist business facts remain in existing D1 authorities.
+- Labeling & Packaging remains one whole-business system; the old soap route remains a compatibility pointer.
+- New admin pages are noindex, have one H1 and responsive phone/desktop layouts.
+- Public SEO policy continues one H1, title/description/canonical/structured-visible fact agreement, approved media and truthful local wording.
 
 ## Launch health
-The application is structurally mature, but unrestricted opening depends on closing the tracked gates in `/admin/startup-readiness/`. The highest-risk areas remain live payment/webhook idempotency, exact-once inventory settlement/restoration, final-unit concurrency, tax/shipping, transactional email, physical soap-label/regulatory proof, restore rehearsal, paid fulfilment, and a separate refund rehearsal.
+
+The application is structurally mature but remains in production-evidence preparation. Live payments/webhooks, exact-once inventory, concurrency, tax/shipping, email, physical packaging/regulatory proof, provider permissions, restore, paid fulfilment and separate refund evidence remain authoritative Startup gates. Use `PRELAUNCH_PROCESS_PLAYBOOKS.md` in order and never infer Pass from unavailable data.
+
