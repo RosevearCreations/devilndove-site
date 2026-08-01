@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 228",
+    "date": "2026-08-01",
+    "title": "Master Creative Automation and separate evidence-backed prelaunch stages",
+    "summary": "Added a seven-stage Creative Automation master workflow while preserving all specialist authorities/features; separated Deployment Preflight, Post-Deploy Smoke, Deploy Readiness, Go-Live and Live Ops; expanded Startup Readiness from 37 preserved gates to 42; added full degraded fallback tests; synchronized D1-safe schemas; and refreshed responsive, SEO, error-handling and canonical operating documentation. Build 228 adds an additive D1 orchestration migration with no explicit SQL transaction statements."
+  },
+  {
     "build": "Build 227",
     "date": "2026-08-01",
     "title": "Unified labeling, packaging, client documents, Meta tests, and detailed launch corrections",

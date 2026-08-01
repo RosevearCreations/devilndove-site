@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 227",
+  "build_label": "Build 228",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,14 +7,25 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "98 required files are present.",
+      "detail": "110 required files are present.",
+      "missing": []
+    },
+    {
+      "code": "static_markdown_authority",
+      "status": "pass",
+      "detail": "Two Build 228 canonical authorities, scoped specialist playbooks, historical retirement policy, and 42 generated Startup sections agree.",
       "missing": []
     },
     {
       "code": "static_schema_current",
       "status": "pass",
-      "detail": "Build 174 through Build 227 schema tables and current migration markers found in the correct schema files.",
+      "detail": "Build 174 through Build 228 schema tables and current migration markers found in the correct schema files.",
       "missing": []
+    },
+    {
+      "code": "static_d1_migration_compatibility",
+      "status": "pass",
+      "detail": "Current and numbered Build 228 migrations are identical and contain no explicit SQL transaction statements."
     },
     {
       "code": "static_public_pages",
@@ -234,7 +245,7 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 2331/2331"
+      "detail": "CSS braces 2385/2385"
     },
     {
       "code": "static_json_parse",
