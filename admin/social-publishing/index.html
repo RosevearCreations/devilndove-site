@@ -74,7 +74,7 @@
     </section>
 
     <section class="card" id="social-provider-readiness">
-      <p class="eyebrow">Build 212 platform prerequisites</p>
+          <p class="eyebrow">Build 227 platform prerequisites</p>
       <h2>Public policy pages and exact callback URLs</h2>
       <p>These public pages and direct HTTPS callback routes now exist. Provider callbacks are readiness endpoints only until secure OAuth start, state validation, encrypted token storage, refresh, and disconnect controls are enabled.</p>
       <div class="social-setup-grid">
@@ -101,8 +101,10 @@
             <li>Ensure the Facebook Page is managed by the Meta account and that Instagram is a Professional account connected to that Page.</li>
             <li>Request only the permissions the app needs. Page publishing normally needs Page management/posting access; Instagram publishing needs the publishing permission for the connected business/creator account.</li>
             <li>Use Graph API Explorer or your app’s token flow to obtain a Page access token, then identify the Page ID and Instagram professional account ID.</li>
-            <li>In Cloudflare Pages → Settings → Variables and Secrets, add encrypted secrets: <code>FACEBOOK_PAGE_ID</code>, <code>FACEBOOK_PAGE_ACCESS_TOKEN</code>, <code>INSTAGRAM_USER_ID</code>, and optionally <code>INSTAGRAM_ACCESS_TOKEN</code>. You may also add <code>META_GRAPH_API_VERSION</code> if you need a later approved version.</li>
-            <li>Return here, confirm both cards say configured, dry-run a product draft, then publish one non-sensitive test post.</li>
+            <li>In Cloudflare Pages → Settings → Variables and Secrets, add encrypted secrets: <code>FACEBOOK_PAGE_ID</code> (or <code>META_PAGE_ID</code>), <code>FACEBOOK_PAGE_ACCESS_TOKEN</code> (or <code>META_PAGE_ACCESS_TOKEN</code>), <code>INSTAGRAM_USER_ID</code>/<code>INSTAGRAM_BUSINESS_ACCOUNT_ID</code>, and optionally <code>INSTAGRAM_ACCESS_TOKEN</code>. Set <code>META_GRAPH_API_VERSION</code> only after reviewing that version.</li>
+            <li>Optionally add <code>META_APP_ID</code> and <code>META_APP_SECRET</code> to let the server test Page-token validity, app ID, expiry, data-access expiry, and returned scopes. Secret values are never returned to the browser.</li>
+            <li>Return here and select <strong>Test Facebook + Instagram</strong>. Confirm HTTP 200, Page/account identity and configured ID match. This read-only test does not publish.</li>
+            <li>After the credential tests pass, dry-run a product draft, complete privacy/media/caption review, then publish one non-sensitive product-only test post and save its provider ID/URL.</li>
           </ol>
           <p class="small">The current app supports Facebook Page image/link posts and Instagram single-image feed posts through its review-first queue. Reels, carousels, and video uploads need their own tested media path before being automated.</p>
         </article>
