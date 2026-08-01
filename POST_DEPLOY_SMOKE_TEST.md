@@ -93,3 +93,15 @@ Local tests cannot prove Cloudflare D1/R2 bindings, remote public media resoluti
 10. Record a failed test, then a passed 100%-scale test with all physical checks passed; approve the version.
 11. Temporarily interrupt the API and confirm a browser-local recovery draft is offered without claiming a D1 save succeeded.
 12. Review runtime incidents and admin audit evidence for deliberate failures and successful approval.
+# Build 227 focused smoke tests
+
+1. Open `/admin/startup-readiness/`; confirm All statuses is selected, all 37 gates render, and each gate expands to Before you begin, Test steps, Correction, Evidence, Retest and Pass condition.
+2. Set a temporary search/filter that returns no rows, select Show all gates, and confirm the complete list returns.
+3. Open `/admin/packaging-studio/`; create an owner-controlled non-soap project, select a general template, save, reload, and confirm the generic SVG preview remains.
+4. Open Components & Cost; link an inventory item, confirm name/SKU/cost/supplier suggestions, save, reload, and verify component count and estimated per-unit cost.
+5. Open `/admin/packaging/soap-labels/` and confirm it clearly points to the unified system without loading a second editor.
+6. Open `/admin/customer-documents/`; select an owner-controlled order and issue/preview an invoice and packing slip.
+7. Select an existing recorded test refund before issuing a credit note/refund confirmation. Confirm sequential number, business/recipient identity, original order date, reason, refund amount and tax adjustment.
+8. Formally void a disposable test document with a reason. Confirm Preview / print shows VOID and the original source snapshot remains.
+9. Open `/admin/social-publishing/`; select Test Facebook + Instagram. Confirm no secret is displayed and no post is created. Record Page/account ID-match and optional token validity/scope/expiry evidence.
+10. Open Operations > Release Sanity and confirm Build 227 packaging BOM, client-document and Meta credential-presence checks render.

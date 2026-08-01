@@ -1,4 +1,4 @@
-# Devil n Dove Social Publishing Connection Guide
+# Devil n Dove Social Publishing Connection Guide — Build 227
 
 **Current version:** Build 210
 **Purpose:** Connect Devil n Dove to Facebook, Instagram, Pinterest, and X for controlled social publishing, while preparing for future TikTok and YouTube integration.

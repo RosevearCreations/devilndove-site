@@ -1,13 +1,25 @@
-# Devil n Dove Database Schema Reference — Build 226
+# Devil n Dove Database Schema Reference — Build 227
 
-## Build 226 database boundary
+## Build 227 database boundary
+
+Apply `database_build227_unified_business_operations.sql` or the identical `database_upgrade_current_pass.sql`, not both, after backing up D1 and confirming the Build 225 readiness/packaging baseline. Build 227 adds:
+
+- `packaging_components` — packaging BOM, inventory link, per-finished-unit quantity, waste, unit cost, lot-tracking flag, supplier and notes.
+- `customer_document_sequences` — separate yearly sequential number authority for invoice, receipt, packing slip, credit note and refund-confirmation types.
+- `customer_documents` — immutable issued/void document metadata and `source_snapshot_json`, linked to the source order and optional recorded refund.
+- general product-label, candle-label, jewelry-card and A6 package-insert templates.
+- migration ledger key `build227_unified_business_operations`.
+
+Issued client documents are snapshots; do not update them to follow later order edits. A wrong document is voided with a reason and replaced by a new numbered document. Packaging BOM save does not consume inventory.
+
+## Historical Build 226 boundary
 
 Build 226 is a code-only Startup Readiness loading repair. It adds no tables, columns, indexes, or seed rows. The Build 225 readiness schema and exactly 37 seeded item keys remain current. Do not rerun the Build 225 migration merely because Build 226 is deployed.
 
 ## Current schema authority
 
 - Fresh database: `database_full_schema.sql` or the intentionally scoped aggregate schema appropriate to the deployment.
-- Existing production database: apply `database_build225_startup_readiness_packaging_authority.sql` **or** the identical `database_upgrade_current_pass.sql`, never both.
+- Existing production database: confirm Build 225 is already installed, then apply the Build 227 migration named above.
 - The Build 225 current-pass migration creates and seeds `startup_readiness_items` and `startup_readiness_history`. It does not replay the historical Packaging Studio/Soap Label migrations.
 - Production must already include the Build 221 Packaging Studio and Build 222 normalized soap-label tables before applying Build 225.
 - Builds 223 and 224 were code-only product-detail/gallery compatibility repairs and required no schema migration.
@@ -28,7 +40,7 @@ Append-only-style evidence for each status update, including prior/next status, 
 
 ## Current migration boundary
 
-`database_upgrade_current_pass.sql` is reset to the additive Build 225 migration only. Do not use it as an accumulated history replay. Use numbered historical migrations to understand/repair an older database, and back up D1 before applying any production change.
+`database_upgrade_current_pass.sql` is reset to the additive Build 227 migration only. It assumes the Build 225 baseline. Do not use it as an accumulated history replay. Use numbered historical migrations to understand/repair an older database, and back up D1 before applying any production change.
 
 ---
 
@@ -176,10 +188,10 @@ Build 222 extends the Build 221 Packaging Studio rather than creating a disconne
 `soap-ribbon-glacial-approved-v1` uses an 11 × 1.5-inch artboard and renders the rear seal at 38.1 mm so it fits. `soap-ribbon-spec-50mm-seal-v1` uses a 50 mm-high artboard and a true 50 mm rear seal. This intentionally exposes the physical conflict in the source specification rather than clipping or mislabelling a file.
 
 ### Historical Build 222 migration boundary
-Build 222 introduced the normalized soap-label tables. Existing databases should already contain them before Build 225. The current-pass file no longer replays Build 222; it contains only the Build 225 readiness migration.
+Build 222 introduced the normalized soap-label tables. Existing databases should already contain them before Build 225. The Build 227 current-pass file does not replay Build 222 or Build 225; it contains only the Build 227 packaging-component and client-document additions.
 ## Build 225 — Startup Readiness status authority
 
-Current additive migration: `database_build225_startup_readiness_packaging_authority.sql` (identical to `database_upgrade_current_pass.sql`; apply one, not both).
+Historical additive migration: `database_build225_startup_readiness_packaging_authority.sql`. It must already be applied before the Build 227 current-pass migration.
 
 New tables:
 - `startup_readiness_items` — the authoritative go-live item definition and current status, owner, due date, evidence, blocked reason, completion, severity, route, and pass condition.

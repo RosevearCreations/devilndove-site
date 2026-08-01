@@ -1116,3 +1116,14 @@ Use browser developer tools to confirm:
 5. **Final product gallery** — featured image plus supporting views; packaging proof does not replace public product photography.
 
 Recommended proof image: at least 1600 px on the long edge, sRGB JPG/WebP for review, with the original retained. Add the proof URL to the Soap Label Studio Print Test tab. Do not publish proof images automatically.
+
+## Build 227 — unified packaging and client-document planning assets
+
+The following new SVGs are admin-only planning placeholders with descriptive alternative text. They are not real products and must not be used in public product galleries, Open Graph images, merchant structured data, social posts, or packaging approval evidence:
+
+- `assets/packaging/placeholders/candle-label-package.svg`
+- `assets/packaging/placeholders/jewelry-card-package.svg`
+- `assets/packaging/placeholders/package-insert-system.svg`
+- `assets/client-document-workflow-placeholder.svg`
+
+Replace each packaging placeholder with a privacy-safe photo only after the actual container/card/insert is physically produced and approved. Capture straight-on front, back/required information, scale/dimensions, closure/finish, barcode/QR destination and the complete packed-product context. Keep a neutral placeholder when no real item exists; do not imply that a concept is inventory.

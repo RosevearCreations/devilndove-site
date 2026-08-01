@@ -1,4 +1,4 @@
-# Devil n Dove Packaging Studio — Single Source of Truth (Build 225)
+# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 227)
 
 ## Authority rule
 This file is the **single authoritative packaging specification and implementation map** for Devil n Dove. Packaging code, schema, templates, launch checks, and future work must be reconciled here during every build.
@@ -6,19 +6,23 @@ This file is the **single authoritative packaging specification and implementati
 The former root and documentation-tree files named `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` are compatibility pointers only. They must not contain a second editable copy of the specification.
 
 ## Current implemented routes
-- `/admin/packaging-studio/` — all structured packaging projects and templates.
-- `/admin/packaging/soap-labels/` — focused nine-tab soap-label editor.
+- `/admin/packaging-studio/` — the single editor for soap ribbons, general product labels, candle labels, jewelry cards, package inserts, packaging components/cost, versions, exports and print tests.
+- `/admin/packaging/soap-labels/` — compatibility pointer to the unified route; it no longer hosts a second editor.
 - `/admin/startup-readiness/` — launch status, evidence, and physical/regulatory gates.
 
 ## Current data authority
 - `products` is the public commerce product authority.
 - `packaging_templates`, `packaging_projects`, `packaging_project_versions`, and `packaging_export_history` are the broad packaging engine.
+- `packaging_components` is the per-project bill of materials: inventory link, component type/name, SKU/reference, quantity per finished unit, waste, cost, lot traceability, supplier and notes.
 - `soap_label_templates`, `soap_products`, `soap_ingredients`, `soap_label_claims`, `soap_label_exports`, and `soap_label_print_tests` are the normalized soap-label authority.
 - SVG is the editable master. PNG/WebP/JPG are previews. Browser Print/Save PDF remains preparation until a printer-specific prepress workflow is proven.
 - Approved labels require a saved version and passed physical 100%-scale print evidence.
 
 ## Current implementation reconciliation
 Implemented now:
+- one application authority across soap ribbons, general labels, candle labels, jewelry cards and package inserts;
+- generic editable SVG preview for non-soap formats plus the established exact soap-ribbon renderer;
+- inventory-linked packaging BOM, per-finished-unit quantity, waste and estimated packaging unit cost;
 - exact 11-inch continuous SVG ribbon and centred 0.75-inch band;
 - Glacial Purple reference hierarchy and reusable rose assets;
 - English/French/INCI rows and bilingual claims as editable database rows;
@@ -32,7 +36,7 @@ Still gated or incomplete:
 - printer calibration profiles and crop/calibration marks;
 - deterministic glyph-level overflow measurement for every SVG region;
 - R2 proof-photo upload and immutable approved-label supersession;
-- barcode, batch/lot, QR, gift, and market/retail variants;
+- production barcode, verified QR destination, transactional batch/lot consumption, gift, shipping and market/retail variants;
 - direct reviewed recipe/formula-to-label synchronization without duplicating source facts;
 - final bilingual, formula, claim, cosmetic, packaging, and net-quantity review for each product.
 
@@ -920,7 +924,7 @@ Before selling printed products, have the final labels checked against the requi
 
 ---
 
-## Build 225 maintenance directive
+## Build 227 maintenance directive
 During every future packaging change:
 1. Update this file first or in the same commit as code/schema changes.
 2. Keep the compatibility pointer files short; never recreate a second full copy.

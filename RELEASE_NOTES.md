@@ -1,3 +1,17 @@
+# Release Notes — Build 227
+
+## Unified business operations
+
+- Unified Soap Label Studio and Packaging Studio into one Labeling & Packaging System.
+- Added general label/card/insert templates, generic SVG preview and inventory-linked packaging BOM/cost controls.
+- Added sequential immutable invoices, receipts, packing slips, credit notes and refund confirmations with formal void history.
+- Added read-only Facebook Page and Instagram professional-account credential tests plus optional Meta token validity/scope/expiry evidence.
+- Added preparation, gate-specific correction, evidence and retest guidance to all 37 Startup Readiness gates; All statuses is now the safe initial view.
+- Consolidated current project memory into `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
+- Added Build 227 schema, responsive UI rules, planning SVG placeholders, Release Sanity checks and validation.
+
+Back up D1. Apply `database_build227_unified_business_operations.sql` or the identical `database_upgrade_current_pass.sql`, not both, after confirming the Build 225 baseline. Deploy the complete package and follow `BUILD227_VALIDATION.md`.
+
 # Release Notes — Build 226
 
 ## Startup Readiness loading repair
@@ -157,4 +171,3 @@ Added authorized inventory reversals, cost-template application, revenue-percent
 - Added authenticated Amazon metadata preview with ASIN/canonical-link extraction and safe fallbacks.
 - Added mobile-responsive import controls and explicit no-auto-create safeguards.
 - Consolidated Markdown authority around `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
-
