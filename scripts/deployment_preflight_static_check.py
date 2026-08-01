@@ -143,6 +143,7 @@ REQUIRED_FILES = [
     'database_build222_soap_label_startup_readiness.sql',
     'database_build225_startup_readiness_packaging_authority.sql',
     'database_build227_unified_business_operations.sql',
+    'database_build228_creative_automation_prelaunch_stages.sql',
     'database_upgrade_current_pass.sql',
     'admin/packaging-studio/index.html',
     'admin/packaging/soap-labels/index.html',
@@ -151,11 +152,22 @@ REQUIRED_FILES = [
     'functions/api/admin/startup-readiness.js',
     'public/js/admin-packaging-studio.js',
     'public/js/admin-startup-readiness.js',
+    'admin/prelaunch/index.html',
+    'public/js/admin-prelaunch-hub.js',
+    'assets/prelaunch-operations-map.svg',
+    'admin/creative-automation/index.html',
+    'functions/api/admin/creative-automation.js',
+    'public/js/admin-creative-automation.js',
+    'assets/creative-automation-master-process.svg',
     'admin/customer-documents/index.html',
     'functions/api/admin/customer-documents.js',
     'public/js/admin-customer-documents.js',
     'DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md',
     'STARTUP_GO_LIVE_GUIDE.md',
+    'PRELAUNCH_PROCESS_PLAYBOOKS.md',
+    'CREATIVE_AUTOMATION_STUDIO.md',
+    'scripts/build228_startup_readiness_test.mjs',
+    'scripts/sync-build228-aggregate-schema.mjs',
 ]
 
 def read(path: Path) -> str:
@@ -250,6 +262,26 @@ def check_required_files(checks: list[dict]) -> None:
     missing=[rel for rel in REQUIRED_FILES if not (ROOT/rel).exists()]
     checks.append({'code':'static_required_files','status':'fail' if missing else 'pass','detail':'Missing: '+', '.join(missing) if missing else f'{len(REQUIRED_FILES)} required files are present.', 'missing':missing})
 
+def check_markdown_authority(checks: list[dict]) -> None:
+    required_markers = {
+        'AI_HANDOFF.md': ['Build 228', 'PROJECT_STATUS_AND_ROADMAP.md', '42 gates'],
+        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 228', 'P0 — before production promotion', 'SEO/local-search direction each pass'],
+        'MARKDOWN_INDEX.md': ['Build 228', 'Two current authorities', 'Historical evidence'],
+        'README.md': ['Build 228', 'database_build228_creative_automation_prelaunch_stages.sql'],
+        'STARTUP_GO_LIVE_GUIDE.md': ['Build 228', 'This guide contains 42 gates'],
+        'PRELAUNCH_PROCESS_PLAYBOOKS.md': ['Deployment Preflight', 'Deploy Readiness', 'Go-Live Execution'],
+        'CREATIVE_AUTOMATION_STUDIO.md': ['seven stages', 'creative_automation_workflows'],
+    }
+    missing=[]
+    for rel, markers in required_markers.items():
+        text=read(ROOT/rel)
+        absent=[marker for marker in markers if marker not in text]
+        if absent: missing.append(f'{rel}: {", ".join(absent)}')
+    guide=read(ROOT/'STARTUP_GO_LIVE_GUIDE.md')
+    if guide.count('#### Before you begin') != 42:
+        missing.append(f'STARTUP_GO_LIVE_GUIDE.md: expected 42 gate sections, found {guide.count("#### Before you begin")}')
+    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 228 canonical authorities, scoped specialist playbooks, historical retirement policy, and 42 generated Startup sections agree.', 'missing':missing})
+
 def check_schema_files(checks: list[dict]) -> None:
     schema_needles = [
         'deployment_post_deploy_confirmations',
@@ -311,12 +343,16 @@ def check_schema_files(checks: list[dict]) -> None:
         'packaging_components',
         'customer_document_sequences',
         'customer_documents',
+        'creative_automation_workflows',
+        'creative_automation_stage_reviews',
+        'creative_automation_events',
+        'build228_creative_automation_prelaunch_stages',
     ]
     required = {
         'database_schema.sql': schema_needles,
         'database_full_schema.sql': schema_needles,
         'database_store_schema.sql': schema_needles,
-        'database_upgrade_current_pass.sql': ['packaging_components', 'customer_document_sequences', 'customer_documents', 'build227_unified_business_operations'],
+        'database_upgrade_current_pass.sql': ['creative_automation_workflows', 'creative_automation_stage_reviews', 'creative_automation_events', 'build228_creative_automation_prelaunch_stages'],
         'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
         'database_build182_mobile_visual_polish.sql': ['desktop_mobile_parity_checks', 'visual_enrichment_candidates', 'build_182_mobile_visual_polish'],
         'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
@@ -342,6 +378,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build222_soap_label_startup_readiness.sql': ['soap_label_templates', 'soap_products', 'soap_ingredients', 'soap_label_claims', 'soap_label_exports', 'soap_label_print_tests'],
         'database_build225_startup_readiness_packaging_authority.sql': ['startup_readiness_items', 'startup_readiness_history'],
         'database_build227_unified_business_operations.sql': ['packaging_components', 'customer_document_sequences', 'customer_documents', 'build227_unified_business_operations'],
+        'database_build228_creative_automation_prelaunch_stages.sql': ['creative_automation_workflows', 'creative_automation_stage_reviews', 'creative_automation_events', 'build228_creative_automation_prelaunch_stages'],
     }
     missing=[]
     detail=[]
@@ -351,18 +388,28 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 227 schema tables and current migration markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 228 schema tables and current migration markers found in the correct schema files.', 'missing':missing})
+
+    current=read(ROOT/'database_upgrade_current_pass.sql')
+    numbered=read(ROOT/'database_build228_creative_automation_prelaunch_stages.sql')
+    explicit=re.findall(r'(?im)^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b', current)
+    checks.append({
+        'code':'static_d1_migration_compatibility',
+        'status':'fail' if explicit or current != numbered else 'pass',
+        'detail':('Current migration contains unsupported explicit transaction statements: '+', '.join(explicit)) if explicit else ('Current migration differs from the numbered Build 228 migration.' if current != numbered else 'Current and numbered Build 228 migrations are identical and contain no explicit SQL transaction statements.'),
+    })
 
 def main() -> int:
     checks=[]
     check_required_files(checks)
+    check_markdown_authority(checks)
     check_schema_files(checks)
     check_pages(checks)
     check_css(checks)
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 227','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 228','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
