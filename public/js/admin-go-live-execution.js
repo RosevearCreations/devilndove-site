@@ -39,5 +39,17 @@ document.addEventListener('DOMContentLoaded', () => {
     mount.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', async () => { try { await post(button.getAttribute('data-action')); } catch (error) { alert(error.message || 'Action failed.'); } }));
     mount.querySelector('#safeApplyForm')?.addEventListener('submit', async (event) => { event.preventDefault(); const form = event.currentTarget; try { await post('apply_safe_catalog_fixes', { product_qa_bulk_fix_queue_id: Number(form.queue_id.value || 0), run_mode: form.run_mode.value }); } catch (error) { alert(error.message || 'Safe apply failed.'); } });
   }
-  window.DDAuth.apiFetch('/api/admin/go-live-execution').then((r) => r.json()).then((data) => { if (!data?.ok) throw new Error(data?.error || 'Load failed.'); render(data); }).catch((error) => { mount.textContent = error.message || 'Go-live execution failed.'; });
+  async function load() {
+    try {
+      const response = await window.DDAuth.apiFetch('/api/admin/go-live-execution');
+      const raw = await response.text();
+      let data = null; try { data = raw ? JSON.parse(raw) : null; } catch { throw new Error('Go-Live Execution returned an invalid response.'); }
+      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Go-Live Execution could not load.');
+      render(data);
+    } catch (error) {
+      mount.innerHTML = `<section class="card startup-degraded"><h2>Go-Live controls are unavailable</h2><p>${esc(error.message || 'Go-Live Execution failed.')}</p><p>No gate is being treated as passed. Return to the blocker register or another standalone stage while the API is corrected.</p><div class="admin-actions"><button class="btn" id="goLiveRetry" type="button">Retry</button> <a class="btn" href="/admin/startup-readiness/">Startup blockers</a> <a class="btn" href="/admin/prelaunch/">Process map</a></div></section>`;
+      document.getElementById('goLiveRetry')?.addEventListener('click', load);
+    }
+  }
+  load();
 });

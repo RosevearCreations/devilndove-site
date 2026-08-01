@@ -70,5 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
     mount.querySelectorAll('[data-confirm-qa]').forEach((button) => button.addEventListener('click', () => { if (confirm('Confirm this Product QA apply group as safe to run?')) post('confirm_qa_apply', { product_qa_bulk_fix_queue_id: Number(button.getAttribute('data-confirm-qa') || 0) }); }));
     mount.querySelectorAll('[data-copy-path]').forEach((button) => button.addEventListener('click', async () => { await navigator.clipboard?.writeText(button.getAttribute('data-copy-path') || ''); button.textContent = 'Copied'; }));
   }
-  window.DDAuth.apiFetch('/api/admin/deploy-readiness').then(read).then(render).catch((error) => { mount.textContent = error.message || 'Deploy-readiness failed.'; });
+  async function load() {
+    try { render(await read(await window.DDAuth.apiFetch('/api/admin/deploy-readiness'))); }
+    catch (error) {
+      mount.innerHTML = `<section class="card startup-degraded"><h2>Deploy Readiness is unavailable</h2><p>${esc(error.message || 'Deploy Readiness failed.')}</p><p>No promotion approval is being inferred. Correct the API or D1 dependency and rerun this complete decision stage.</p><div class="admin-actions"><button class="btn" id="deployReadinessRetry" type="button">Retry</button> <a class="btn" href="/admin/startup-readiness/">Startup blockers</a> <a class="btn" href="/admin/prelaunch/">Process map</a></div></section>`;
+      document.getElementById('deployReadinessRetry')?.addEventListener('click', load);
+    }
+  }
+  load();
 });
