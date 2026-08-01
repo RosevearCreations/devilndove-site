@@ -1,8 +1,8 @@
-# Devil n Dove Markdown Index — Build 225
+# Devil n Dove Markdown Index — Build 226
 
 ## Authoritative documents — always read first
 1. `AI_HANDOFF.md` — current architecture, routes, deployment, safety, fallback, and data authority.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — current position, Build 225 completed work, launch risks, and next 20 steps.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — current position, Build 226 completed work, launch risks, and next 20 steps.
 3. `STARTUP_GO_LIVE_GUIDE.md` — every go-live gate with exact locations, steps, and pass conditions.
 4. `PACKAGING_STUDIO.md` — the single authoritative packaging and soap-label specification plus implementation map.
 
@@ -15,6 +15,8 @@
 - `DATABASE_SCHEMA_REFERENCE.md` — current schema additions and data ownership.
 
 ## Current deployment and validation
+- `BUILD226_VALIDATION.md`
+- `BUILD226_CHANGED_FILES.md`
 - `BUILD225_VALIDATION.md`
 - `BUILD225_CHANGED_FILES.md`
 - `database_build225_startup_readiness_packaging_authority.sql`
@@ -33,4 +35,4 @@
 These point to the canonical documents and must not become competing roadmaps.
 
 ## Historical evidence
-Earlier `BUILD*_VALIDATION.md`, numbered migrations, and older planning documents remain for traceability. They do not override Build 225.
+Earlier `BUILD*_VALIDATION.md`, numbered migrations, and older planning documents remain for traceability. They do not override Build 226.

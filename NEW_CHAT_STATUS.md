@@ -1,4 +1,4 @@
-# New Chat Status — Build 225
+# New Chat Status — Build 226
 
 Start with:
 1. `AI_HANDOFF.md`
@@ -6,6 +6,6 @@ Start with:
 3. `STARTUP_GO_LIVE_GUIDE.md`
 4. `PACKAGING_STUDIO.md`
 
-Build 225 adds a D1-backed Startup Readiness Cockpit with editable status, owner, due date, evidence, blocked reason, completion, filters, progress, history, and browser-only unsynced recovery. It also consolidates the complete soap-label specification and implementation mapping into `PACKAGING_STUDIO.md` as the single packaging source of truth.
+Build 226 repairs the D1-backed Startup Readiness loading path and prevents a malformed/HTML API response from appearing as an empty successful list. The 37-gate Build 225 data model, status evidence, history, and packaging authority remain unchanged.
 
-Deployment requires the Build 225 migration. Builds 223–224 product-detail and seven-image gallery hotfixes remain included.
+No new migration is required. Apply the Build 225 readiness migration only if it was never applied. Builds 223–225 remain included.

@@ -82,7 +82,7 @@ Local tests cannot prove Cloudflare D1/R2 bindings, remote public media resoluti
 ## Build 222 smoke test — Soap Label Studio and Startup Readiness
 
 1. Open `/admin/` and confirm **Startup Readiness Guide** and **Soap Label Studio** cards are visible.
-2. Open `/admin/startup-readiness/`; confirm all 20 gates render and direct links work.
+2. Open `/admin/startup-readiness/`; confirm all 37 gates render and direct links work.
 3. Open `/admin/packaging/soap-labels/`; confirm the approved Glacial Purple reference loads without a broken image.
 4. Create a disposable soap-label project using the photo-fit profile.
 5. Add, reorder and remove English/French ingredient and claim rows; save and reload from D1.

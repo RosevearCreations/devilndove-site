@@ -1,4 +1,8 @@
-# Devil n Dove Database Schema Reference — Build 225
+# Devil n Dove Database Schema Reference — Build 226
+
+## Build 226 database boundary
+
+Build 226 is a code-only Startup Readiness loading repair. It adds no tables, columns, indexes, or seed rows. The Build 225 readiness schema and exactly 37 seeded item keys remain current. Do not rerun the Build 225 migration merely because Build 226 is deployed.
 
 ## Current schema authority
 
@@ -182,4 +186,3 @@ New tables:
 - `startup_readiness_history` — append-only status/evidence transition history for the launch cockpit.
 
 Packaging documentation authority is `PACKAGING_STUDIO.md`. The legacy `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` files are compatibility pointers and contain no second schema/specification copy.
-
