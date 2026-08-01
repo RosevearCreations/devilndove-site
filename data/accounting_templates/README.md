@@ -1,3 +1,9 @@
+# Build 225 current accounting note
+
+Launch accounting status is tracked in `/admin/startup-readiness/`. Before controlled opening, prove payment application, HST/GST review, refund/tax reversal, reconciliation, role-restricted accountant export, and the temporary month-end procedure. Current schema and roadmap authority are `DATABASE_SCHEMA_REFERENCE.md` and `PROJECT_STATUS_AND_ROADMAP.md`; older notes below remain historical implementation evidence.
+
+---
+
 # Build 156 accounting/template note
 
 Build 156 did not change close CSV math, but custom request payments now create provider checkout preparation records. Future accountant exports should include `custom_request_payment_checkout_records`, `custom_request_payment_links`, and related `payments` rows when custom work is paid through Stripe, PayPal, Square, or manual fallback.
