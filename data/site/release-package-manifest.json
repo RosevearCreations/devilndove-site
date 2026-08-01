@@ -1,18 +1,18 @@
 {
-  "build_label": "Build 225",
+  "build_label": "Build 226",
   "generated_by": "scripts/generate_release_manifest.py",
-  "file_count": 734,
-  "total_size_bytes": 34322843,
+  "file_count": 737,
+  "total_size_bytes": 34332912,
   "files": [
     {
       "path": "AI_CONTEXT.md",
-      "size_bytes": 838,
-      "sha256": "84f921dc080253abb2b3b2f0e15f558e1f3f8df57b5c5e78ca1d25b27de5af23"
+      "size_bytes": 922,
+      "sha256": "4806ea6fc500794b9ee08e4b52940ba2ef377a8300bebab8cfd945b27adca3b8"
     },
     {
       "path": "AI_HANDOFF.md",
-      "size_bytes": 2789,
-      "sha256": "4154e51ab855b3bae6cae1a6f4dec2b086ca8be02ed31d43d8ca3c2aa0a70416"
+      "size_bytes": 3303,
+      "sha256": "25ecfca57ccc7d1bfd6346b9e470729b8df2a36c022309d44411e8a5729815d5"
     },
     {
       "path": "AMAZON_MATCHING_NOTES.md",
@@ -180,6 +180,16 @@
       "sha256": "8383aa3917ae7f462815a5e715ac90f652dbf8df0e99fe702b206f386cf97fa1"
     },
     {
+      "path": "BUILD226_CHANGED_FILES.md",
+      "size_bytes": 896,
+      "sha256": "abbcc07180b2de8bcdc9447ca5bd09b019d5daaba4842594b1cb225b3769b245"
+    },
+    {
+      "path": "BUILD226_VALIDATION.md",
+      "size_bytes": 3746,
+      "sha256": "d7649f6712cb52ac84f86fc5bcefa8cf3a559364831d8f35741ba66e7f8d7588"
+    },
+    {
       "path": "CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md",
       "size_bytes": 20989,
       "sha256": "f9f33cc90c70b3460049d834b618114b6a9e6808d1a4e97ded78d3c8b23a018a"
@@ -196,8 +206,8 @@
     },
     {
       "path": "DATABASE_SCHEMA_REFERENCE.md",
-      "size_bytes": 16670,
-      "sha256": "d05d32cf2b13e57675824f3b28b611a566ffa9b738d89ad4eb72732e09a85744"
+      "size_bytes": 16966,
+      "sha256": "3b88aad2c29d42ac29542b7886d1349dd721fbf1bc003e1d51f85fb52045b5cf"
     },
     {
       "path": "DEVELOPMENT_ROADMAP.md",
@@ -236,13 +246,13 @@
     },
     {
       "path": "MARKDOWN_INDEX.md",
-      "size_bytes": 2073,
-      "sha256": "b243fa1ba63112189426ccf76f408e3be009d676442fde9f888af242901d8014"
+      "size_bytes": 2130,
+      "sha256": "13e29fe42d5d6c8b8eaa55448a303a7656166912e0850d80be6d81fcc201a928"
     },
     {
       "path": "NEW_CHAT_STATUS.md",
-      "size_bytes": 631,
-      "sha256": "732905b89d1384271a7896023aa5507929e52b96244e4957227648bfe98049fd"
+      "size_bytes": 542,
+      "sha256": "da1cd5f056ed8f5d02e62a56bb8aa74153880127247577426bb8bdaf133a318b"
     },
     {
       "path": "PACKAGING_STUDIO.md",
@@ -252,12 +262,12 @@
     {
       "path": "POST_DEPLOY_SMOKE_TEST.md",
       "size_bytes": 9501,
-      "sha256": "fc3ee8bc6eaad42380ece26e3f47758de750afccd3aab92bbeff7dc0b28d01be"
+      "sha256": "cd9c81c900e88ac60e2f9bdae162f165a05841548e50d90ed2717e08071c41dc"
     },
     {
       "path": "PROJECT_STATUS_AND_ROADMAP.md",
-      "size_bytes": 5285,
-      "sha256": "138f9164ad5f5ebc3d185fa48d57b368b0174d04b82f79579b77e7ad1ce5c891"
+      "size_bytes": 6018,
+      "sha256": "bf4d4f26a221880c02aab846e3b5554b7f5a411789b6b4950b020d9873115dcd"
     },
     {
       "path": "README.md",
@@ -266,8 +276,8 @@
     },
     {
       "path": "RELEASE_NOTES.md",
-      "size_bytes": 11412,
-      "sha256": "665bc6ab0c1ef854ac13f522e91a30ffad5456dab5c683bb9f482516eef58700"
+      "size_bytes": 12313,
+      "sha256": "2ba8892d724edac0d7171b4529092334dd56f8418c4eb36b9e76e8f61c402492"
     },
     {
       "path": "REPO_BASE_GUIDE.md",
@@ -281,8 +291,8 @@
     },
     {
       "path": "SANITY_HEALTH_CHECK.md",
-      "size_bytes": 1732,
-      "sha256": "942e1953dfcfc313690b529faf1f671b426648f22ff385955d25724c49055adf"
+      "size_bytes": 2074,
+      "sha256": "6937abd9b262f153761f87512e2212cea3b31731841f8062906d6eb4b542d971"
     },
     {
       "path": "SOCIAL_PUBLISHING_CONNECTION_GUIDE.md",
@@ -512,7 +522,7 @@
     {
       "path": "admin/startup-readiness/index.html",
       "size_bytes": 3278,
-      "sha256": "c8d8ea89571c753a29dc3cb85b861e540e0f776e1f76e5d85a2d3e9c24b3e6ea"
+      "sha256": "97933a2960523a45fbcb2b141cc3de5ede115bedf8ba90a79499c8c8e3d71472"
     },
     {
       "path": "admin/trust-blocks/index.html",
@@ -1021,8 +1031,8 @@
     },
     {
       "path": "data/site/release-notes.json",
-      "size_bytes": 5085,
-      "sha256": "25beeffc0eb5c34e3cab6895d72eb1ed1d43e5ae7ab02b5ac1ea19d295ca023d"
+      "size_bytes": 5531,
+      "sha256": "b00a3ac5eed6724978c2083ebc38bbbfad9e5abb7d6b1c7c675727044f04e554"
     },
     {
       "path": "data/site/seo-page-overrides.json",
@@ -1266,8 +1276,8 @@
     },
     {
       "path": "database_full_schema.sql",
-      "size_bytes": 490892,
-      "sha256": "b8d50b3f559e1dd017552f1c3c35f32e9ba5dd56a6b563f276c29ffcfb20ef0d"
+      "size_bytes": 491008,
+      "sha256": "5f0ece9bfa637255a06322adf85726e2263a8a190eaa1a6b0d0bde97af059df9"
     },
     {
       "path": "database_growth_analytics_seo_extension.sql",
@@ -1291,13 +1301,13 @@
     },
     {
       "path": "database_schema.sql",
-      "size_bytes": 438658,
-      "sha256": "e3429fbee2bad4a2cdcd753417cc4344377ce87618f2ac847ff9238ac3449824"
+      "size_bytes": 438774,
+      "sha256": "c97dbc1efb9af1cc51b6e351a3ddb61e794608df1a9e7147d53a29e10173d524"
     },
     {
       "path": "database_store_schema.sql",
-      "size_bytes": 454563,
-      "sha256": "44f3328ad6bd47a958915a0eeb4f07d047782cd2df80a8646a482d060fa8f94f"
+      "size_bytes": 454679,
+      "sha256": "8881b8c2a45b643957d9270888c3258be3bb28947a38966868ebdf8169c73977"
     },
     {
       "path": "database_upgrade_current_pass.sql",
@@ -2296,8 +2306,8 @@
     },
     {
       "path": "functions/api/admin/startup-readiness.js",
-      "size_bytes": 60984,
-      "sha256": "afef5ba1b1b1da00e91c9cc8f4e60489f33b55d4bab22d2d03f1bcba9713f201"
+      "size_bytes": 61120,
+      "sha256": "7da07c172deb4cee6aba644c3b6809ebcf51324a3cd92798dd603b68c931b235"
     },
     {
       "path": "functions/api/admin/storefront-schema-repair.js",
@@ -2651,8 +2661,8 @@
     },
     {
       "path": "functions/api/readme.md",
-      "size_bytes": 36536,
-      "sha256": "e4764f62c21ea07691d8fd8bf2a270b81c154b1eb6fb29c25400c0899a444548"
+      "size_bytes": 36610,
+      "sha256": "8eb195ea328b0f08f2b8882809e6abe079aabfbc83cc066f6ef027401bb9c0b3"
     },
     {
       "path": "functions/api/seo-page-overrides.js",
@@ -3356,8 +3366,8 @@
     },
     {
       "path": "public/js/admin-startup-readiness.js",
-      "size_bytes": 61319,
-      "sha256": "e96f3db6ec241f5dfc6154f471de91e07da8c5626c5af1cb6d4feaf09a951a8d"
+      "size_bytes": 62903,
+      "sha256": "4c6246fe7135e0984aaca3814de04466f3db7ab13910b3c3cc21cf01d0683904"
     },
     {
       "path": "public/js/admin-storefront-schema-repair.js",
@@ -3528,6 +3538,11 @@
       "path": "public/js/home-featured-products.js",
       "size_bytes": 3267,
       "sha256": "32e54f330ba97be91cb72d8dfe0557652d2b831c28e3c95b65103b2c7026f48c"
+    },
+    {
+      "path": "public/js/java.md",
+      "size_bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
     },
     {
       "path": "public/js/local-trust-block.js",

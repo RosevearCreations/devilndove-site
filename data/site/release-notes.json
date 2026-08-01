@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 226",
+    "date": "2026-08-01",
+    "title": "Startup Readiness loading and deployment-validation repair",
+    "summary": "Corrected the malformed Build 225 Startup Readiness Pages Function newline, rejected malformed/HTML/empty success responses in the browser, preserved all 37 gates in honest degraded mode, added filter recovery, and strengthened ES-module syntax validation. No D1 schema migration is required."
+  },
+  {
     "build": "Build 225",
     "date": "2026-07-30",
     "title": "Actionable Startup Readiness Cockpit and one packaging source of truth",
