@@ -1,13 +1,13 @@
-# Development Roadmap compatibility pointer — Build 224
+# Devil n Dove Development Roadmap — Build 225 Compatibility Guide
 
-The active roadmap is the **Next 20 steps — Build 224 direction** section of `PROJECT_STATUS_AND_ROADMAP.md`.
+The active roadmap is `PROJECT_STATUS_AND_ROADMAP.md`. The live launch-status authority is `/admin/startup-readiness/` backed by `startup_readiness_items` and `startup_readiness_history`.
 
-Build 224 is a code-only storefront gallery repair. It ensures the product-detail page displays the complete product image set rather than dropping to the featured image when optional media schema differs in production.
+Packaging work must follow only `PACKAGING_STUDIO.md`. The legacy soap-label specification files are compatibility pointers and do not override it.
 
-Read in this order:
-1. `AI_HANDOFF.md`
-2. `PROJECT_STATUS_AND_ROADMAP.md`
-3. `STARTUP_GO_LIVE_GUIDE.md`
-4. `BUILD224_VALIDATION.md`
-
-Packaging work must continue to follow `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` and `PACKAGING_STUDIO.md`. Older roadmaps remain historical evidence and do not override Build 224 gallery, fallback, launch, SEO, or data-integrity rules.
+Build order:
+1. Close production Critical launch gates.
+2. Complete exact-once payment/inventory/refund proof.
+3. Complete launch products, media, lots, shipping, tax, email, policy, accessibility, SEO, packaging, and regulatory evidence.
+4. Rehearse restore, paid fulfilment, and a separate refund.
+5. Open through a small monitored release.
+6. Then continue the next 20 items in `PROJECT_STATUS_AND_ROADMAP.md`.

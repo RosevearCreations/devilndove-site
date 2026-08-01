@@ -1,3 +1,17 @@
+# Release Notes — Build 225
+
+## Startup Readiness Cockpit and Packaging Authority
+- Replaced the static launch guide interface with a D1-backed status cockpit.
+- Added owner, due date, status, severity, evidence, blocked reason, completion, filters, progress, history, local unsynced recovery, and Markdown status export.
+- Expanded the launch guide to 37 detailed gates covering every current opening dependency.
+- Made `PACKAGING_STUDIO.md` the single packaging source of truth and converted duplicate specification files into compatibility pointers.
+- Added direct Packaging Studio interface links to the authoritative specification and packaging launch gates.
+- Added `startup_readiness_items` and `startup_readiness_history` to the current and aggregate schemas.
+- Build 223–224 product-detail and seven-image gallery fixes remain included.
+
+## Deployment
+Back up D1. Apply `database_build225_startup_readiness_packaging_authority.sql` or the identical `database_upgrade_current_pass.sql`, but not both. Deploy the full ZIP and follow `BUILD225_VALIDATION.md`.
+
 # Release Notes — Build 224
 
 ## Complete storefront gallery hotfix — Build 224
