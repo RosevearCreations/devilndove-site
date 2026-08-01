@@ -1,13 +1,21 @@
-# Known Gaps and Risks compatibility pointer — Build 224
+# Devil n Dove Known Gaps and Risks — Build 225
 
-Current gaps and risks are maintained in:
-1. `PROJECT_STATUS_AND_ROADMAP.md` — launch position, known risks, and next actions.
-2. `STARTUP_GO_LIVE_GUIDE.md` — ordered launch blockers and exact verification instructions.
-3. `AI_HANDOFF.md` — current architecture, deployment, and fallback boundaries.
+## Status authority
+Open, blocked, complete, and not-applicable launch decisions are maintained in `/admin/startup-readiness/`. Detailed instructions are in `STARTUP_GO_LIVE_GUIDE.md`. Current architecture and deployment boundaries are in `AI_HANDOFF.md`.
 
-## Product-detail and gallery status
-The Build 223 product-detail outage is corrected. Build 224 also corrects the production-schema condition that could reduce a seven-image gallery to the single featured image. Production remains unverified until a known seven-image product returns seven `storefront_images` records and all seven thumbnails work publicly.
+## Primary open risks
+- Production payment/webhook idempotency and exact-once stock settlement/restoration remain unproven until saved evidence closes those gates.
+- Final-unit and component-set concurrency may oversell until the production concurrency gate passes.
+- Tax, shipping/pickup, email delivery/failure, policy, analytics, accessibility/mobile, restore, paid-order, and refund rehearsals must be completed.
+- Launch products require accurate facts, approved media rights, working detail/gallery pages, physical stock, traceable lots, and final Product Release Preflight.
+- Soap requires verified formula/INCI/bilingual facts, physical label proof, printer-fit export, and applicable Health Canada notification/change control.
+- Browser Print/Save PDF is not a complete prepress/CMYK workflow.
+- Automatic FIFO/FEFO lot consumption remains disabled until explicitly proven.
+- Social OAuth remains dependent on provider credentials, scopes, review, and approval and is not a selling prerequisite when hidden/manual.
+- First-page local search placement cannot be guaranteed.
 
-Images explicitly marked `blocked` or `consent_needed`, or linked to consent that does not allow public use, are intentionally excluded. Missing URLs, duplicate URLs, or images attached to a different product record also reduce the public count and should be corrected in Catalog Media rather than bypassed.
+## Packaging authority
+`PACKAGING_STUDIO.md` is the one packaging source of truth. `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` is a compatibility pointer only.
 
-Packaging work must also read `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` and `PACKAGING_STUDIO.md`.
+## Product detail/gallery status
+Builds 223–224 corrected the product-detail runtime error and legacy media-schema gallery collapse. Production verification remains required for every launch product, especially the intended seven-image gallery.
