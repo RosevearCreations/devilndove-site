@@ -1,8 +1,12 @@
-# Cloudflare Environment Checklist — Devil n Dove (Build 227)
+# Cloudflare Environment Checklist — Devil n Dove (Build 228)
 
-_Last updated: Build 227 unified packaging, client documents and read-only Meta credential tests._
+_Last updated: Build 228 master creative workflow, separate prelaunch stages and retained read-only Meta credential tests._
 
 This checklist explains **exactly where to add each setting in Cloudflare** and **where to find or create each value**.
+
+## Build 228 environment note
+
+Build 228 introduces no new secret or external-provider variable. It requires the existing production D1 binding. Back up D1, apply one Build 228 migration without explicit SQL transaction statements, then test `/api/admin/creative-automation` and `/api/admin/startup-readiness`. Do not store creative evidence, Startup evidence or Meta token values in environment-variable documentation.
 
 ## Build 227 additions — business documents and Meta tests
 

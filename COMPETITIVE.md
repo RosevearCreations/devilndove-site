@@ -1,3 +1,20 @@
+# Build 228 competitive direction — review-led creative operations and local clarity
+
+Build 228 adopts a common competitive pattern from current social-management products without copying their unattended-risk model: one shared workflow, role/stage visibility, changes-requested/approval decisions and channel-specific handoff. Hootsuite and Later both document content approval workflows; Devil n Dove adds stronger source-rights/evidence, inventory/cost, public-release and honest provider-result boundaries suited to a handmade business.
+
+Current sources:
+
+- `https://help.hootsuite.com/s/article/set-up-approvals`
+- `https://help.later.com/hc/en-us/articles/40954654500375-Team-Collaboration-and-Content-Approvals`
+- `https://developers.google.com/search/docs/appearance/title-link`
+- `https://support.google.com/business/answer/7091?hl=en`
+- `https://developers.google.com/search/docs/appearance/structured-data/local-business`
+- `https://developers.google.com/search/docs/appearance/structured-data/product`
+
+The competitive advantage is not bulk auto-posting. It is a mobile-friendly, evidence-linked path from process and material facts through rights-cleared media, accurate content, explicit channel approval, observable release and measured reuse. For local search, keep one unambiguous page title/H1, truthful buyer wording and a complete accurate Business Profile; monitor relevance, distance and prominence rather than promising first-page placement.
+
+---
+
 # Retained reference — current pointer refreshed in Build 208
 
 For all current planning, start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. This file is retained for historical/specialist evidence and must not override the Build 208 release-preflight, catalog-media, public-media consent, CAIP, deployment, or auth rules.
