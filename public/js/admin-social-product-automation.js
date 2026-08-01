@@ -1,5 +1,5 @@
 // File: /public/js/admin-social-product-automation.js
-// Build 210 — dedicated connection + automatic product-draft configuration.
+// Build 227 — connection, safe Meta tests and automatic product-draft configuration.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('socialProductAutomationMount');
@@ -45,6 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <p class="small"><strong>Mode:</strong> ${esc(String(data.mode || 'manual_ready').replace(/_/g, ' '))}</p>
     </article>`;
   }
+  function metaTestMarkup(test) {
+    if (!test) return '<p class="small">No read-only Meta credential test has been run in this browser session.</p>';
+    const card = (label, row = {}) => `<article class="social-connection-card ${row.ok ? 'is-connected' : 'is-unconfigured'}"><div class="social-connection-card-head"><h3>${esc(label)}</h3><span class="admin-status-pill ${row.ok ? 'success' : 'muted'}">${row.ok ? 'Passed' : row.configured ? 'Needs attention' : 'Not configured'}</span></div><p class="small"><strong>HTTP:</strong> ${esc(row.http_status ?? 'not attempted')} · <strong>ID match:</strong> ${row.id_match === true ? 'yes' : row.id_match === false ? 'no' : 'not tested'}</p>${row.page_name ? `<p class="small"><strong>Page:</strong> ${esc(row.page_name)}</p>` : ''}${row.username ? `<p class="small"><strong>Instagram:</strong> @${esc(row.username)} · ${esc(row.account_type || '')}</p>` : ''}${row.error_message ? `<p class="small social-test-error"><strong>Provider response:</strong> ${esc(row.error_message)}</p>` : ''}${Array.isArray(row.missing_variables) ? `<p class="small"><strong>Missing:</strong> ${row.missing_variables.map(esc).join(', ')}</p>` : ''}</article>`;
+    return `<div class="social-test-summary ${test.overall_ok ? 'is-ok' : 'is-warning'}"><strong>${test.overall_ok ? 'Meta read-only connection test passed' : 'Meta connection test needs review'}</strong><span>${esc(test.graph_api_version)} · ${esc(test.tested_at)} · no post created · no secret displayed</span></div><div class="social-connection-grid">${card('Facebook Page', test.facebook)}${card('Instagram Professional', test.instagram)}${test.token_debug?.configured ? card('Page token validity', {...test.token_debug,id_match:test.token_debug.app_id_match}) : ''}</div>${test.token_debug?.scopes?.length ? `<details><summary>Returned token scopes</summary><p class="small">${test.token_debug.scopes.map(esc).join(', ')}</p></details>` : '<p class="small">Token debug was not run. Add META_APP_ID and META_APP_SECRET only if you want server-side validity/expiry/scope evidence.</p>'}`;
+  }
   function render(data) {
     const settings = data?.settings || {};
     const platforms = Array.isArray(settings.default_platforms) ? settings.default_platforms : ['facebook','instagram','pinterest'];
@@ -77,8 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <p id="socialProductAutomationMessage" class="social-automation-message" hidden></p>
       </section>
       <section class="card social-connections-panel">
-        <div class="social-automation-heading"><div><p class="eyebrow">Connection status</p><h2>Social account connections</h2><p>Credentials are shown only as their variable names; the app never displays secret values.</p></div><a class="btn" href="/admin/social-publishing/#setup-guide">Open setup guide</a></div>
+        <div class="social-automation-heading"><div><p class="eyebrow">Connection status</p><h2>Social account connections</h2><p>Credentials are shown only as their variable names; the app never displays secret values.</p></div><div class="social-automation-actions"><button class="btn primary" id="testMetaConnections" type="button">Test Facebook + Instagram</button><a class="btn" href="/admin/social-publishing/#setup-guide">Open setup guide</a></div></div>
         <div class="social-connection-grid">${Object.entries(status).map(([platform, item]) => platformCard(platform, item)).join('')}</div>
+        <section class="social-meta-test-results"><h3>Read-only Meta test evidence</h3><p class="small">This requests Page/account identity fields and, when app credentials are configured, token validity/scopes. It does not create, schedule or publish content.</p><div id="socialMetaTestResults">${metaTestMarkup(data?.meta_test)}</div></section>
       </section>`;
   }
   async function load() {
@@ -92,6 +98,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   mount.addEventListener('click', async (event) => {
+    if (event.target?.id === 'testMetaConnections') {
+      try {
+        setMessage('Testing Facebook Page and Instagram credentials with read-only Meta requests…');
+        const data = await readJson(await window.DDAuth.apiFetch('/api/admin/social-product-automation', { method: 'POST', body: JSON.stringify({ action: 'test_meta_connections' }) }));
+        const target = document.getElementById('socialMetaTestResults'); if (target) target.innerHTML = metaTestMarkup(data.meta_test);
+        setMessage(data.message || 'Meta connection test completed.', !data.meta_test?.overall_ok);
+      } catch (error) { setMessage(error.message || 'Meta connection test could not complete.', true); }
+      return;
+    }
     if (event.target?.id !== 'socialProductAutomationSave') return;
     try {
       setMessage('Saving social automation settings...');
