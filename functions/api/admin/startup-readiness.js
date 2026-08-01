@@ -1,9 +1,9 @@
 // File: /functions/api/admin/startup-readiness.js
-// Build 226 — startup launch cockpit loading repair, response diagnostics, and honest degraded fallback.
+// Build 227 — startup launch cockpit with per-gate test, correction, evidence and retest guidance.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '226';
+const BUILD = '227';
 const STARTUP_ITEMS = [
   {
     "key": "backup_migrate_deploy",
@@ -15,8 +15,8 @@ const STARTUP_ITEMS = [
     "live": 1,
     "route": "/admin/deployment-preflight/",
     "external": "Cloudflare Dashboard → Workers & Pages → D1 and Pages deployments",
-    "instructions": "1. Open Cloudflare D1 and create a production backup or export before changing the schema.\n2. Record the backup date, database name, and safe storage location in the evidence notes.\n3. Apply database_build225_startup_readiness_packaging_authority.sql or database_upgrade_current_pass.sql, but not both.\n4. Deploy the complete ZIP rather than selected files.\n5. Open Deployment Preflight and run every available check.\n6. Save the deployment URL, commit or deployment identifier, and the preflight result.\n7. Stop and restore the previous deployment if any critical migration or routing error appears.",
-    "pass": "A recoverable D1 backup exists, the Build 225 migration is applied once, the complete deployment is live, and Deployment Preflight has no unresolved critical result."
+    "instructions": "1. Open Cloudflare D1 and create a production backup or export before changing the schema.\n2. Record the backup date, database name, and safe storage location in the evidence notes.\n3. Confirm the Build 225 readiness/packaging migration is already present, then apply database_build227_unified_business_operations.sql or the identical database_upgrade_current_pass.sql, but not both.\n4. Confirm the migration ledger records build227_unified_business_operations and the new packaging_components, customer_document_sequences, and customer_documents tables exist.\n5. Deploy the complete ZIP rather than selected files.\n6. Open Deployment Preflight and run every available check.\n7. Open Startup Readiness with All statuses and confirm all 37 gates load with correction/evidence guidance.\n8. Save the deployment URL, commit or deployment identifier, schema result, and preflight result.\n9. Stop and restore the previous deployment or D1 backup if any critical migration, Function, route, or data-integrity error appears.",
+    "pass": "A recoverable D1 backup exists, the Build 227 migration is applied once after the Build 225 baseline, the complete deployment is live, all 37 gates load, and Deployment Preflight has no unresolved critical result."
   },
   {
     "key": "production_bindings_secrets",
@@ -236,7 +236,7 @@ const STARTUP_ITEMS = [
     "live": 1,
     "route": "/checkout/",
     "external": "PayPal developer/live account and production callback settings",
-    "instructions": "1. Inspect checkout, footer, payment options, and documentation for PayPal references.\n2. If live credentials, callbacks, capture, cancellation, webhook, and refund paths are not proven, remove or hide PayPal from all public surfaces.\n3. If PayPal will launch, use a low-value owner-controlled transaction to test approval, capture, cancellation, webhook retry, and refund.\n4. Confirm order and inventory effects match the Stripe workflow and remain idempotent.\n5. Record the explicit business decision and date.",
+    "instructions": "1. Inspect checkout, footer, payment options, public policies, email templates, admin screens, and documentation for PayPal references.\n2. In Cloudflare Production secrets, confirm the intended PayPal environment, client ID, secret, webhook identity, callback/return URLs, and currency without recording secret values.\n3. If live credentials, callbacks, capture, cancellation, signed webhook, idempotency, and refund paths are not proven, remove or hide PayPal from all public surfaces.\n4. If PayPal will launch, use a low-value owner-controlled transaction to test approval, capture, cancellation, duplicate webhook delivery, and full refund.\n5. Compare the PayPal transaction, stored payment/order, tax, inventory, customer notice and accounting records.\n6. Confirm the displayed provider status never claims connected based only on a client ID or browser-side setting.\n7. Keep manual payment records clearly separate from provider-confirmed payments and record the provider transaction/event IDs as evidence.\n8. Record the explicit launch/hide decision, owner, date, and next review date.",
     "pass": "Customers either receive a completely working PayPal option or see no PayPal option or promise anywhere on the live site."
   },
   {
@@ -416,9 +416,9 @@ const STARTUP_ITEMS = [
     "order": 320,
     "severity": "medium",
     "live": 1,
-    "route": "/admin/social-hub/",
+    "route": "/admin/social-publishing/",
     "external": "Meta, Pinterest, YouTube, TikTok, and other configured provider developer consoles",
-    "instructions": "1. List each social provider shown in the admin or public interface.\n2. Confirm callback URLs, privacy/data-deletion pages, scopes, app review, tokens, and page/account identifiers are approved and current.\n3. Keep automatic publishing disabled for providers that are not completely connected.\n4. Test draft generation, deliberate approval, one safe publish, provider response, and analytics link tracking separately.\n5. Confirm failure or token expiry leaves content in review rather than falsely marked published.\n6. Hide unfinished public promises or buttons; social OAuth is not a blocker to selling when publishing remains manual.",
+    "instructions": "1. Open Social Publishing and list each provider shown in the connection cards, queue, and public footer.\n2. For Meta, confirm FACEBOOK_PAGE_ID (or META_PAGE_ID), FACEBOOK_PAGE_ACCESS_TOKEN (or META_PAGE_ACCESS_TOKEN), INSTAGRAM_USER_ID/INSTAGRAM_BUSINESS_ACCOUNT_ID, and the optional INSTAGRAM_ACCESS_TOKEN exist as encrypted Production secrets; never record their values.\n3. Select Test Facebook + Instagram. Confirm the Page identity and Instagram professional-account identity return HTTP 200 and the configured IDs match.\n4. If META_APP_ID and META_APP_SECRET are present, confirm token debug reports is_valid, the app ID matches, expiry/data-access-expiry are acceptable, and the returned scopes cover the approved workflow.\n5. Confirm exact callback URLs, privacy/data-deletion pages, app-review state, Page/account roles, and provider scopes in the Meta developer/business consoles.\n6. Keep automatic publishing disabled. Generate one product draft, review media/privacy/caption/UTM, approve deliberately, and publish only one safe product-only test post.\n7. Confirm the provider post ID/URL and queue status are recorded, then verify the tracked public destination works.\n8. Expire/revoke a test token or use a safe invalid preview credential and confirm the item remains in review/failed state rather than falsely marked published.\n9. Repeat the credential identity test after token rotation, app-role changes, Graph API version changes, or account reconnection.\n10. Keep providers manual and remove unfinished public promises when OAuth, review, or posting permissions are incomplete.",
     "pass": "Unapproved providers remain disabled and honestly labelled; any enabled provider publishes only after deliberate review with observable success/failure evidence."
   },
   {
@@ -488,6 +488,59 @@ const STARTUP_ITEMS = [
   }
 ];
 
+const GATE_FIX_FOCUS = {
+  backup_migrate_deploy:'restore the pre-change D1 backup or previous Pages deployment, correct the failed migration/build file, then redeploy the complete package',
+  production_bindings_secrets:'correct the binding or encrypted Production variable in Cloudflare, verify Preview and Production are not crossed, then repeat one safe read and write',
+  login_logout_recovery:'repair the server session/reset-token path and email delivery rather than only changing the browser message; invalidate test sessions before retesting',
+  role_authorization:'enforce the missing role check inside the server endpoint, add an audited denial/success test, and do not rely on hidden buttons',
+  runtime_incident_fallback:'return structured sanitized JSON, record the runtime incident, and make the UI label any local/fallback result as unsynced or incomplete',
+  launch_product_list:'remove incomplete products from the launch group, restore them to Draft/Archived, and re-freeze the finite product/SKU list with an owner',
+  product_detail_gallery:'repair the product slug/facts/media authority, clear stale fallback assumptions, and retest direct, refreshed, copied and mobile URLs',
+  product_facts_preflight:'correct required product facts in their owning product/inventory/media/packaging records and rerun the full product preflight',
+  catalog_media_rights:'replace or block unapproved/broken media, correct role/order/alt text, regenerate required derivatives, and confirm public R2 delivery',
+  pricing_quantity_sets:'correct the server-side pricing or component-set rule, remove unsafe promotions, and repeat boundary values plus a tampered-browser request',
+  inventory_regular_exact_once:'repair the idempotency key, settlement transaction or compensating movement workflow; reconcile the test SKU to its counted quantity before repeating',
+  inventory_sets_concurrency:'correct reservation/transaction boundaries and component availability, reconcile every affected component, then rerun simultaneous final-unit attempts',
+  purchase_lots_costs:'correct separate lot quantities, dates, allocation and cost evidence, quarantine uncertain stock, and apply the reviewed physical total through the inventory workflow',
+  tax_scenarios:'stop checkout for the affected destination/product rule, have the owner/accountant correct the tax mapping, and rerun saved expected-versus-actual scenarios including refunds',
+  shipping_pickup:'hide unsupported destinations or pickup promises, correct rate/weight/dimension/policy data, and repeat a physical pack plus checkout test',
+  stripe_live_webhook:'correct the live endpoint, signing secret, subscribed events or idempotency handling; reconcile the rehearsal order before resending only the safe test event',
+  refund_restore:'correct provider/order/inventory/tax/accounting/email steps as separate observable records, reverse duplicates with audited compensating entries, then replay the webhook safely',
+  paypal_visibility:'remove PayPal from every public surface until live capture, cancellation, webhook and refund evidence exists, or correct and retest the entire provider flow',
+  accounting_tax_reporting:'correct account mappings with the owner/accountant, post balanced correcting entries instead of rewriting closed history, and rerun reconciliation/export checks',
+  transactional_email:'correct the provider secret, sender/domain, template data or retry state; resend only to owner-controlled addresses and confirm the outbox/provider IDs',
+  customer_support_contact:'correct every public contact channel and owner schedule, answer the rehearsal request, and document escalation plus expected response time',
+  policies_legal:'remove contradictory promises, correct policy and checkout/product wording together, obtain owner/legal review where needed, and repeat every footer/checkout link test',
+  soap_formula_ingredients:'block the label/product, correct the authoritative formula and INCI/bilingual facts, supersede stale drafts, and repeat ingredient/claim review',
+  soap_print_proof:'keep the version unapproved, correct layout/overflow/scale/material issues, save a new version, and repeat a measured 100%-scale wrap test with proof',
+  health_canada_notification:'stop sale when required, correct the notification/change record using the authoritative formula/label facts, and save the submitted acknowledgement/reference',
+  packaging_prepress_boundary:'reject the file as a production master, correct dieline/bleed/font/colour/output settings with the printer, and repeat preflight plus physical proof',
+  analytics_consent:'disable the affected tag/event, correct consent gating and deduplication without sending personal/sensitive data, then retest debug and production streams',
+  search_console_indexing:'correct robots/canonical/sitemap/status/redirect/template data, request validation where appropriate, and recheck the live URL after deployment',
+  google_business_profile:'correct the owner-approved business facts/photos/categories/hours in the profile and website, then verify the public listing while signed out',
+  seo_page_quality:'rewrite thin/duplicate or misleading visible copy and metadata, keep structured data aligned, repair internal links/images, and revalidate the deployed page',
+  mobile_accessibility_performance:'fix the source CSS/HTML/JavaScript issue at the failing viewport or input method, then rerun the entire customer journey on a real device and keyboard',
+  social_oauth_visibility:'keep publishing manual/disabled, correct Meta/provider IDs, roles, scopes, token validity or callback settings, then rerun read-only identity tests before one reviewed post',
+  backup_restore_rehearsal:'discard the unsafe test restore, correct the backup/media/config/runbook gap, create a fresh isolated target, and repeat while measuring recovery time',
+  paid_order_fulfilment_rehearsal:'pause launch, reconcile the rehearsal order across payment/stock/tax/email/accounting/packaging, correct the failing source workflow, then use a new order',
+  separate_refund_rehearsal:'reconcile provider refund, credit note, customer notice, stock disposition, tax and accounting records; correct duplicate/missing effects before a new rehearsal',
+  launch_monitoring_ownership:'assign the missing owner/coverage, document phone-accessible stop and rollback steps, and rehearse the handoff or escalation',
+  controlled_opening:'pause or roll back sales, close the failed critical/high gate with evidence, reduce opening scope if needed, and restart only through the recorded owner decision'
+};
+
+function enrichRow(row) {
+  const item = STARTUP_ITEMS.find((entry) => entry.key === row.item_key) || {};
+  const focus = GATE_FIX_FOCUS[row.item_key] || 'correct the authoritative source record or configuration, then repeat the failed step and the full gate';
+  const route = row.target_route || item.route || 'the named internal workflow';
+  return {
+    ...row,
+    preparation_guidance: `Assign one owner and open ${route}. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.`,
+    correction_guidance: `If any step fails, do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then ${focus}. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.`,
+    evidence_guidance: `Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.`,
+    retest_guidance: `Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.`
+  };
+}
+
 function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control': 'no-store' }); }
 function text(value, max = 5000) { return normalizeText(value).slice(0, max); }
 function records(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -503,7 +556,7 @@ function safeUrl(value) {
   return '';
 }
 function fallbackRows() {
-  return STARTUP_ITEMS.map((item) => ({
+  return STARTUP_ITEMS.map((item) => enrichRow({
     item_key: item.key, phase_key: item.phase, phase_label: item.phase_label, item_title: item.title,
     sort_order: item.order, blocker_severity: item.severity, is_launch_blocker: 1, requires_live_binding: item.live,
     target_route: item.route, external_location: item.external, instructions_markdown: item.instructions,
@@ -612,13 +665,13 @@ function markdown(rows, stats) {
     lines.push(`- **Evidence:** ${row.evidence_url || 'Not recorded'}`);
     if (row.blocked_reason) lines.push(`- **Blocked reason:** ${row.blocked_reason}`);
     if (row.evidence_notes) lines.push(`- **Evidence notes:** ${row.evidence_notes}`);
-    lines.push('', '#### Steps', '', row.instructions_markdown || '', '', `**Pass condition:** ${row.pass_condition}`, '');
+    lines.push('', '#### Before you begin', '', row.preparation_guidance || '', '', '#### Test steps', '', row.instructions_markdown || '', '', '#### If a step fails: correction procedure', '', row.correction_guidance || '', '', '#### Evidence to save', '', row.evidence_guidance || '', '', '#### Retest and reopening rule', '', row.retest_guidance || '', '', `**Pass condition:** ${row.pass_condition}`, '');
   }
   return lines.join('\n');
 }
 async function readData(db) {
   const rows = records(await db.prepare(`SELECT * FROM startup_readiness_items WHERE is_active=1 ORDER BY sort_order,item_key`).all())
-    .map((row) => ({ ...row, item_status: normalizeStatus(row.item_status) }));
+    .map((row) => enrichRow({ ...row, item_status: normalizeStatus(row.item_status) }));
   const history = records(await db.prepare(`SELECT h.*,i.item_title FROM startup_readiness_history h JOIN startup_readiness_items i ON i.startup_readiness_item_id=h.startup_readiness_item_id ORDER BY h.changed_at DESC,h.startup_readiness_history_id DESC LIMIT 60`).all());
   const stats = statsFor(rows);
   return { ok:true, build:BUILD, degraded:false, expected_total:STARTUP_ITEMS.length, items:rows, recent_history:history, stats, markdown:markdown(rows,stats) };

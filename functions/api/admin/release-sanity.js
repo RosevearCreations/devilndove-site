@@ -503,6 +503,41 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+  const metaFacebookConfigured = Boolean(envText(context.env, 'FACEBOOK_PAGE_ID', 'META_PAGE_ID') && envText(context.env, 'FACEBOOK_PAGE_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN'));
+  const metaInstagramConfigured = Boolean(envText(context.env, 'INSTAGRAM_USER_ID', 'IG_USER_ID', 'INSTAGRAM_BUSINESS_ACCOUNT_ID') && envText(context.env, 'INSTAGRAM_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN', 'FACEBOOK_PAGE_ACCESS_TOKEN'));
+  addCheck(
+    checks,
+    metaFacebookConfigured && metaInstagramConfigured ? 'pass' : 'warn',
+    'Meta Facebook + Instagram credential presence',
+    `Facebook Page variables: ${metaFacebookConfigured ? 'present' : 'incomplete'}; Instagram professional-account variables: ${metaInstagramConfigured ? 'present' : 'incomplete'}. Presence is not proof of validity.`,
+    'Open Social Publishing and select Test Facebook + Instagram. Save the read-only Page/account ID-match result and token validity/scope evidence; do not record secret values.',
+    'warning'
+  );
+
+  const packagingComponentsInstalled = await tableExists(db, 'packaging_components');
+  const packagingComponentRows = packagingComponentsInstalled ? await safeFirst(db, `SELECT COUNT(*) AS total, SUM(CASE WHEN site_item_inventory_id IS NOT NULL THEN 1 ELSE 0 END) AS inventory_linked, SUM(CASE WHEN COALESCE(unit_cost_cents,0)>0 THEN 1 ELSE 0 END) AS costed FROM packaging_components WHERE COALESCE(is_active,1)=1`) : { total:0, inventory_linked:0, costed:0 };
+  addCheck(
+    checks,
+    packagingComponentsInstalled ? (Number(packagingComponentRows.total || 0) ? 'pass' : 'warn') : 'warn',
+    'Unified packaging component BOM',
+    packagingComponentsInstalled ? `${Number(packagingComponentRows.total || 0)} active packaging component(s); ${Number(packagingComponentRows.inventory_linked || 0)} linked to inventory; ${Number(packagingComponentRows.costed || 0)} with a unit cost.` : 'packaging_components is not installed.',
+    'Apply Build 227, then use Labeling & Packaging > Components & Cost to record labels, containers, inserts, seals and shipping materials per launch product.',
+    'warning'
+  );
+
+  const customerDocumentsInstalled = await tableExists(db, 'customer_documents');
+  const customerDocumentRows = customerDocumentsInstalled ? await safeFirst(db, `SELECT COUNT(*) AS total, SUM(CASE WHEN document_status='void' THEN 1 ELSE 0 END) AS void_count, SUM(CASE WHEN document_type='credit_note' THEN 1 ELSE 0 END) AS credit_note_count FROM customer_documents`) : { total:0, void_count:0, credit_note_count:0 };
+  const businessIdentityConfigured = Boolean(envText(context.env, 'BUSINESS_LEGAL_NAME', 'BUSINESS_NAME') && envText(context.env, 'BUSINESS_ADDRESS_LINE1', 'BUSINESS_ADDRESS'));
+  const taxNumberConfigured = Boolean(envText(context.env, 'BUSINESS_GST_HST_NUMBER', 'GST_HST_NUMBER', 'BUSINESS_REGISTRATION_NUMBER'));
+  addCheck(
+    checks,
+    customerDocumentsInstalled && businessIdentityConfigured ? (taxNumberConfigured ? 'pass' : 'warn') : 'warn',
+    'Client document and credit-note controls',
+    customerDocumentsInstalled ? `${Number(customerDocumentRows.total || 0)} issued document record(s), ${Number(customerDocumentRows.credit_note_count || 0)} credit note(s), ${Number(customerDocumentRows.void_count || 0)} void; business identity ${businessIdentityConfigured ? 'configured' : 'incomplete'}; GST/HST/registration number ${taxNumberConfigured ? 'configured' : 'not configured'}.` : 'customer_documents is not installed.',
+    'Apply Build 227, configure business identity variables, have the owner/accountant verify the registration number, then issue and print an owner-controlled invoice, packing slip, refund confirmation and tax credit note.',
+    'warning'
+  );
+
   const storefrontValueDefaults = productColumns.size ? await safeAll(db, `
     SELECT 'status' AS field, COUNT(*) AS missing_count FROM products WHERE ${productColumns.has('status') ? "COALESCE(status,'') = ''" : '0'}
     UNION ALL SELECT 'product_type', COUNT(*) FROM products WHERE ${productColumns.has('product_type') ? "COALESCE(product_type,'') = ''" : '0'}

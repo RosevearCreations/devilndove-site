@@ -1,7 +1,7 @@
-// Build 225 — Packaging Studio + normalized Soap Label Automation workflow.
+// Build 227 — unified Labeling & Packaging System with packaging BOM/cost controls.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '225';
+const BUILD = '227';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
@@ -47,8 +47,15 @@ async function ensureSchema(db){
     `CREATE INDEX IF NOT EXISTS idx_soap_label_exports_product ON soap_label_exports(soap_product_id,generated_at DESC)`,
     `CREATE TABLE IF NOT EXISTS soap_label_print_tests (print_test_id INTEGER PRIMARY KEY AUTOINCREMENT,packaging_project_id INTEGER NOT NULL,packaging_project_version_id INTEGER,test_status TEXT NOT NULL DEFAULT 'needs_test',printed_at TEXT,printer_name TEXT,paper_stock TEXT,scale_percent REAL NOT NULL DEFAULT 100,measured_strip_width_in REAL,measured_band_height_in REAL,measured_front_width_in REAL,measured_front_height_in REAL,measured_rear_circle_mm REAL,wrap_fit_status TEXT NOT NULL DEFAULT 'not_checked',legibility_status TEXT NOT NULL DEFAULT 'not_checked',overlap_status TEXT NOT NULL DEFAULT 'not_checked',proof_image_url TEXT,notes TEXT,reviewed_by_user_id INTEGER,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE,FOREIGN KEY(packaging_project_version_id) REFERENCES packaging_project_versions(packaging_project_version_id) ON DELETE SET NULL)`,
     `CREATE INDEX IF NOT EXISTS idx_soap_label_print_tests_project ON soap_label_print_tests(packaging_project_id,created_at DESC)`,
+    `CREATE TABLE IF NOT EXISTS packaging_components (packaging_component_id INTEGER PRIMARY KEY AUTOINCREMENT,packaging_project_id INTEGER NOT NULL,site_item_inventory_id INTEGER,component_type TEXT NOT NULL DEFAULT 'label',component_name TEXT NOT NULL,sku_reference TEXT,quantity_per_finished_unit REAL NOT NULL DEFAULT 1,wastage_percent REAL NOT NULL DEFAULT 0,unit_cost_cents INTEGER NOT NULL DEFAULT 0,lot_tracking_required INTEGER NOT NULL DEFAULT 0,supplier_name TEXT,notes TEXT,is_active INTEGER NOT NULL DEFAULT 1,created_by_user_id INTEGER,updated_by_user_id INTEGER,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE,FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE SET NULL)`,
+    `CREATE INDEX IF NOT EXISTS idx_packaging_components_project ON packaging_components(packaging_project_id,is_active,packaging_component_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_packaging_components_inventory ON packaging_components(site_item_inventory_id,is_active)`,
     `INSERT OR IGNORE INTO packaging_templates (template_key,template_name,package_type,description,page_width_mm,page_height_mm,front_width_mm,front_height_mm,rear_width_mm,rear_height_mm,layout_json,theme_json,is_system,is_active) VALUES ('soap-ribbon-glacial-approved-v1','Soap ribbon — Glacial Purple approved photo layout','soap_ribbon','Photo-matched continuous ribbon with English ingredients, 2 × 1.5 inch front oval and rose, French ingredients, rear seal, bilingual claims and net weight.',279.4,38.1,50.8,38.1,38.1,38.1,'{"sections":["ingredients_en","front_oval","ingredients_fr","rear_seal","claims_weight","overlap"],"band_height_mm":19.05,"artboard_height_mm":38.1,"front_style":"glacial_photo_oval","rear_circle_spec_mm":50,"rear_circle_render_mm":38.1,"dimension_profile":"photo_fit","bleed_in":0.125,"safe_margin_in":0.0625}','{"rose_colour":"#7B4DA6","theme_colour":"#FBF5E8","border_colour":"#32105E","accent_gold":"#B88A2F","secondary_colour":"#5A2A86"}',1,1)`,
     `INSERT OR IGNORE INTO packaging_templates (template_key,template_name,package_type,description,page_width_mm,page_height_mm,front_width_mm,front_height_mm,rear_width_mm,rear_height_mm,layout_json,theme_json,is_system,is_active) VALUES ('soap-ribbon-spec-50mm-seal-v1','Soap ribbon — 50 mm rear-seal specification profile','soap_ribbon','Uses a 50 mm-high artboard so the specified 50 mm rear circle is not clipped. Physical review is required because the supplied specification also states a 1.5 inch artboard.',279.4,50,50.8,38.1,50,50,'{"sections":["ingredients_en","front_oval","ingredients_fr","rear_seal","claims_weight","overlap"],"band_height_mm":19.05,"artboard_height_mm":50,"front_style":"glacial_photo_oval","rear_circle_spec_mm":50,"rear_circle_render_mm":50,"dimension_profile":"50mm_seal","bleed_in":0.125,"safe_margin_in":0.0625}','{"rose_colour":"#7B4DA6","theme_colour":"#FBF5E8","border_colour":"#32105E","accent_gold":"#B88A2F","secondary_colour":"#5A2A86"}',1,1)`,
+    `INSERT OR IGNORE INTO packaging_templates (template_key,template_name,package_type,description,page_width_mm,page_height_mm,front_width_mm,front_height_mm,rear_width_mm,rear_height_mm,layout_json,theme_json,is_system,is_active) VALUES ('product-label-rectangle-v1','General product label — rectangle','product_label','Structured bilingual general-purpose label for non-soap products. Confirm the physical dieline and category-specific legal fields before approval.',88.9,50.8,88.9,50.8,0,0,'{"sections":["identity","description","net_quantity","dealer_contact","batch_barcode"],"dimension_profile":"general_rectangle","bleed_mm":3,"safe_margin_mm":3}','{"rose_colour":"#7B4DA6","theme_colour":"#FBF5E8","border_colour":"#32105E","accent_gold":"#B88A2F","secondary_colour":"#5A2A86"}',1,1)`,
+    `INSERT OR IGNORE INTO packaging_templates (template_key,template_name,package_type,description,page_width_mm,page_height_mm,front_width_mm,front_height_mm,rear_width_mm,rear_height_mm,layout_json,theme_json,is_system,is_active) VALUES ('candle-label-v1','Candle label — bilingual rectangle','candle_label','General candle-label working profile with review-first warnings and net quantity. Confirm vessel fit and current hazard requirements.',76.2,50.8,76.2,50.8,0,0,'{"sections":["identity","scent","net_quantity","warnings","dealer_contact","batch"],"dimension_profile":"candle_rectangle","bleed_mm":3,"safe_margin_mm":3}','{"rose_colour":"#7B4DA6","theme_colour":"#FBF5E8","border_colour":"#32105E","accent_gold":"#B88A2F","secondary_colour":"#5A2A86"}',1,1)`,
+    `INSERT OR IGNORE INTO packaging_templates (template_key,template_name,package_type,description,page_width_mm,page_height_mm,front_width_mm,front_height_mm,rear_width_mm,rear_height_mm,layout_json,theme_json,is_system,is_active) VALUES ('jewelry-card-v1','Jewelry display card','jewelry_card','Display-card working profile with product identity, maker/contact, care and inventory references.',63.5,88.9,63.5,88.9,0,0,'{"sections":["brand","identity","care","maker_contact","sku_barcode"],"dimension_profile":"jewelry_card","bleed_mm":3,"safe_margin_mm":3}','{"rose_colour":"#7B4DA6","theme_colour":"#FBF5E8","border_colour":"#32105E","accent_gold":"#B88A2F","secondary_colour":"#5A2A86"}',1,1)`,
+    `INSERT OR IGNORE INTO packaging_templates (template_key,template_name,package_type,description,page_width_mm,page_height_mm,front_width_mm,front_height_mm,rear_width_mm,rear_height_mm,layout_json,theme_json,is_system,is_active) VALUES ('package-insert-a6-v1','Package insert / care card — A6','package_insert','Customer-facing insert for care, thank-you, support, QR and reorder information.',105,148,105,148,0,0,'{"sections":["brand","message","care","support","qr"],"dimension_profile":"a6_insert","bleed_mm":3,"safe_margin_mm":5}','{"rose_colour":"#7B4DA6","theme_colour":"#FBF5E8","border_colour":"#32105E","accent_gold":"#B88A2F","secondary_colour":"#5A2A86"}',1,1)`,
     `INSERT OR IGNORE INTO soap_label_templates (packaging_template_id,template_name,version,artboard_width_in,artboard_height_in,band_height_in,front_oval_width_in,front_oval_height_in,rear_circle_mm,bleed_in,safe_margin_in,dimension_profile,background_style,default_font_set,default_gold_colour,is_active) SELECT packaging_template_id,template_name,'1.1',11,1.5,.75,2,1.5,38.1,.125,.0625,'photo_fit','cream_damask','devil_dove_vintage','#B88A2F',1 FROM packaging_templates WHERE template_key='soap-ribbon-glacial-approved-v1'`,
     `INSERT OR IGNORE INTO soap_label_templates (packaging_template_id,template_name,version,artboard_width_in,artboard_height_in,band_height_in,front_oval_width_in,front_oval_height_in,rear_circle_mm,bleed_in,safe_margin_in,dimension_profile,background_style,default_font_set,default_gold_colour,is_active) SELECT packaging_template_id,template_name,'1.1',11,1.96850394,.75,2,1.5,50,.125,.0625,'50mm_seal','cream_damask','devil_dove_vintage','#B88A2F',1 FROM packaging_templates WHERE template_key='soap-ribbon-spec-50mm-seal-v1'`
   ];
@@ -109,16 +116,17 @@ function estimatedIngredientLines(values=[],maxChars=55){
   return lines;
 }
 function packagingRequiredFields(project={},ingredients=[],claims=[],template={}){
+  const isSoap=String(project.package_type||template.package_type||'')==='soap_ribbon';
   const checks=[
     ['English product identity',project.product_identity_en],['French product identity',project.product_identity_fr],
-    ['metric net quantity',project.net_quantity_text],['INCI ingredient list',project.ingredients_inci],
+    ['metric net quantity',project.net_quantity_text],
     ['dealer / business identity',project.dealer_name],['dealer principal address',project.dealer_address],
-    ['consumer contact information',project.contact_text],['website',project.website_text],['Made in Canada wording',project.made_in_canada_text],
-    ['rose asset',project.artwork?.rose_asset_id||project.rose_asset_id]
+    ['consumer contact information',project.contact_text],['website',project.website_text]
   ];
+  if(isSoap)checks.push(['INCI ingredient list',project.ingredients_inci],['Made in Canada wording',project.made_in_canada_text],['rose asset',project.artwork?.rose_asset_id||project.rose_asset_id]);
   if(String(project.warnings_en||project.warnings_fr||'').trim())checks.push(['English warning',project.warnings_en],['French warning',project.warnings_fr]);
   const missing=checks.filter(([,value])=>!String(value||'').trim()).map(([label])=>label);
-  if(!ingredients.length)missing.push('structured bilingual ingredient rows');
+  if(isSoap&&!ingredients.length)missing.push('structured bilingual ingredient rows');
   if(ingredients.some((row)=>Number(row.required_on_label)!==0&&(!String(row.inci_name||'').trim()||!String(row.display_name_en||'').trim()||!String(row.display_name_fr||'').trim())))missing.push('complete INCI/English/French text for each required ingredient row');
   if(claims.some((row)=>!String(row.claim_en||'').trim()||!String(row.claim_fr||'').trim()))missing.push('English and French text for each claim');
   const requiredIngredients=ingredients.filter((row)=>Number(row.required_on_label)!==0);
@@ -126,7 +134,7 @@ function packagingRequiredFields(project={},ingredients=[],claims=[],template={}
   const frLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_fr),55);
   if(enLines>8)missing.push(`English ingredient panel exceeds the tested eight-line narrow-band capacity (${enLines} estimated lines)`);
   if(frLines>8)missing.push(`French ingredient panel exceeds the tested eight-line narrow-band capacity (${frLines} estimated lines)`);
-  const dimensions=dimensionReview(template);
+  const dimensions=isSoap?dimensionReview(template):{blockers:[],warnings:['Confirm the selected template against the physical container/card dieline before approval.'],profile:template.layout?.dimension_profile||'general'};
   return{missing:[...new Set(missing)],dimension_blockers:dimensions.blockers,dimension_warnings:dimensions.warnings,dimension_profile:dimensions.profile};
 }
 
@@ -134,7 +142,8 @@ async function listData(db){
   const templates=rows(await db.prepare(`SELECT * FROM packaging_templates WHERE is_active=1 ORDER BY CASE WHEN template_key='soap-ribbon-glacial-approved-v1' THEN 0 WHEN template_key='soap-ribbon-spec-50mm-seal-v1' THEN 1 ELSE 2 END,is_system DESC,LOWER(template_name)`).all()).map(mapTemplate);
   const projects=rows(await db.prepare(`SELECT pp.*,p.sku,p.slug,p.status AS product_status,p.featured_image_url,sp.print_status AS soap_print_status FROM packaging_projects pp LEFT JOIN products p ON p.product_id=pp.product_id LEFT JOIN soap_products sp ON sp.packaging_project_id=pp.packaging_project_id ORDER BY pp.updated_at DESC,pp.packaging_project_id DESC`).all()).map(mapProject);
   const products=rows(await db.prepare(`SELECT product_id,product_number,sku,name,slug,status,product_category,short_description,description,weight_grams,featured_image_url FROM products WHERE COALESCE(status,'draft')<>'archived' ORDER BY LOWER(name),product_id DESC LIMIT 500`).all().catch(()=>({results:[]})));
-  return{templates,projects,products};
+  const inventory=rows(await db.prepare(`SELECT site_item_inventory_id,source_type,external_key,item_name,category,on_hand_quantity,reserved_quantity,unit_cost_cents,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,supplier_name,supplier_sku FROM site_item_inventory WHERE COALESCE(is_active,1)=1 ORDER BY LOWER(item_name) LIMIT 1000`).all().catch(()=>({results:[]})));
+  return{templates,projects,products,inventory};
 }
 
 async function loadDetail(db,projectId){
@@ -147,10 +156,12 @@ async function loadDetail(db,projectId){
   const exports=rows(await db.prepare(`SELECT * FROM packaging_export_history WHERE packaging_project_id=? ORDER BY created_at DESC,packaging_export_history_id DESC LIMIT 100`).bind(projectId).all());
   const printTests=rows(await db.prepare(`SELECT * FROM soap_label_print_tests WHERE packaging_project_id=? ORDER BY created_at DESC,print_test_id DESC LIMIT 50`).bind(projectId).all());
   const soapExports=soapProduct?rows(await db.prepare(`SELECT * FROM soap_label_exports WHERE soap_product_id=? ORDER BY generated_at DESC,export_id DESC LIMIT 100`).bind(soapProduct.soap_product_id).all()):[];
+  const components=rows(await db.prepare(`SELECT pc.*,sii.item_name AS inventory_item_name,sii.on_hand_quantity,sii.reserved_quantity,sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit FROM packaging_components pc LEFT JOIN site_item_inventory sii ON sii.site_item_inventory_id=pc.site_item_inventory_id WHERE pc.packaging_project_id=? AND pc.is_active=1 ORDER BY pc.packaging_component_id`).bind(projectId).all());
   const template=mapTemplate({...row,packaging_template_id:row.packaging_template_id,layout_json:row.template_layout_json,theme_json:row.template_theme_json});
   const project=mapProject(row);
   if(soapProduct){project.rose_asset_id=soapProduct.rose_asset_id;project.net_weight_oz=soapProduct.net_weight_oz;project.net_weight_g=soapProduct.net_weight_g;}
-  return{project,template,soap_product:soapProduct||null,ingredients,structured_claims:claims,versions,exports,soap_exports:soapExports,print_tests:printTests,preflight:packagingRequiredFields(project,ingredients,claims,template)};
+  const componentCostCents=components.reduce((sum,row)=>sum+Math.round(number(row.unit_cost_cents)*number(row.quantity_per_finished_unit,1)*(1+number(row.wastage_percent)/100)),0);
+  return{project,template,soap_product:soapProduct||null,ingredients,structured_claims:claims,components,component_summary:{active_count:components.length,estimated_unit_cost_cents:componentCostCents,lot_tracked_count:components.filter((row)=>Number(row.lot_tracking_required)===1).length},versions,exports,soap_exports:soapExports,print_tests:printTests,preflight:packagingRequiredFields(project,ingredients,claims,template)};
 }
 
 function snapshotFromBody(body,existing={}){
@@ -222,7 +233,7 @@ export async function onRequestPost(context){
       projectId=id(result.meta?.last_row_id);
       const created=mapProject(await a.db.prepare(`SELECT * FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId).first());
       await syncSoapRecords(a.db,projectId,{...created,net_weight_g:number(product?.weight_grams)||null,structured_ingredients:[],structured_claims:[]});
-      message='Soap-label project created from the approved photo-layout profile.';
+      message=template.package_type==='soap_ribbon'?'Soap-label project created from the approved photo-layout profile.':'Labeling and packaging project created from the selected business-wide template.';
     }else if(action==='save_project'){
       if(!projectId)throw new Error('Packaging project is required.');
       const existing=await a.db.prepare(`SELECT * FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId).first();if(!existing)throw new Error('Packaging project was not found.');
@@ -232,7 +243,21 @@ export async function onRequestPost(context){
       if((data.project_status==='approved'||data.compliance_status==='approved')&&(preflight.missing.length||preflight.dimension_blockers.length))throw new Error(`Packaging cannot be approved while blockers remain: ${[...preflight.missing,...preflight.dimension_blockers].join(', ')}.`);
       await a.db.prepare(`UPDATE packaging_projects SET product_id=?,packaging_template_id=?,project_name=?,package_type=?,project_status=?,collection_name=?,product_name=?,product_subtitle=?,product_identity_en=?,product_identity_fr=?,ingredients_inci=?,ingredients_en=?,ingredients_fr=?,net_quantity_text=?,website_text=?,dealer_name=?,dealer_address=?,contact_text=?,made_in_canada_text=?,claims_json=?,warnings_en=?,warnings_fr=?,icons_json=?,theme_json=?,artwork_json=?,print_notes=?,compliance_status=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_project_id=?`).bind(data.product_id,data.packaging_template_id,data.project_name,data.package_type,data.project_status,data.collection_name,data.product_name,data.product_subtitle,data.product_identity_en,data.product_identity_fr,data.ingredients_inci,data.ingredients_en,data.ingredients_fr,data.net_quantity_text,data.website_text,data.dealer_name,data.dealer_address,data.contact_text,data.made_in_canada_text,jsonText(data.claims,[]),data.warnings_en,data.warnings_fr,jsonText(data.icons,[]),jsonText(data.theme,{}),jsonText(data.artwork,{}),data.print_notes,data.compliance_status,a.adminUser.user_id,projectId).run();
       await syncSoapRecords(a.db,projectId,data);
-      message='Packaging project, bilingual ingredients, claims and rose selection saved to D1.';
+      message='Labeling and packaging project, structured content, claims and artwork selection saved to D1.';
+    }else if(action==='save_components'){
+      if(!projectId)throw new Error('Packaging project is required.');
+      const project=await a.db.prepare(`SELECT packaging_project_id FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId).first();if(!project)throw new Error('Packaging project was not found.');
+      const components=Array.isArray(body.components)?body.components.slice(0,100):[];
+      await a.db.prepare(`UPDATE packaging_components SET is_active=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_project_id=?`).bind(a.adminUser.user_id,projectId).run();
+      for(const row of components){
+        const componentName=text(row?.component_name,180);if(!componentName)continue;
+        const componentType=text(row?.component_type,60)||'label';
+        const quantity=Math.max(.0001,number(row?.quantity_per_finished_unit,1));
+        const wastage=Math.min(1000,Math.max(0,number(row?.wastage_percent,0)));
+        const cost=Math.max(0,Math.round(number(row?.unit_cost_cents,0)));
+        await a.db.prepare(`INSERT INTO packaging_components (packaging_project_id,site_item_inventory_id,component_type,component_name,sku_reference,quantity_per_finished_unit,wastage_percent,unit_cost_cents,lot_tracking_required,supplier_name,notes,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,id(row?.site_item_inventory_id)||null,componentType,componentName,text(row?.sku_reference,160)||null,quantity,wastage,cost,bool(row?.lot_tracking_required)?1:0,text(row?.supplier_name,180)||null,text(row?.notes,1000)||null,a.adminUser.user_id,a.adminUser.user_id).run();
+      }
+      message='Packaging component bill of materials and per-unit cost controls saved.';
     }else if(action==='duplicate_project'){
       if(!projectId)throw new Error('Packaging project is required.');
       const source=await a.db.prepare(`SELECT * FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId).first();if(!source)throw new Error('Packaging project was not found.');
@@ -244,6 +269,7 @@ export async function onRequestPost(context){
       projectId=id(result.meta?.last_row_id);
       const copied=snapshotFromBody({...mapProject(source),structured_ingredients:sourceDetail?.ingredients||[],structured_claims:sourceDetail?.structured_claims||[],rose_asset_id:sourceDetail?.soap_product?.rose_asset_id},mapProject(source));
       await syncSoapRecords(a.db,projectId,copied);
+      for(const row of sourceDetail?.components||[])await a.db.prepare(`INSERT INTO packaging_components (packaging_project_id,site_item_inventory_id,component_type,component_name,sku_reference,quantity_per_finished_unit,wastage_percent,unit_cost_cents,lot_tracking_required,supplier_name,notes,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,id(row.site_item_inventory_id)||null,text(row.component_type,60)||'label',text(row.component_name,180),text(row.sku_reference,160)||null,number(row.quantity_per_finished_unit,1),number(row.wastage_percent,0),Math.max(0,Math.round(number(row.unit_cost_cents,0))),Number(row.lot_tracking_required)===1?1:0,text(row.supplier_name,180)||null,text(row.notes,1000)||null,a.adminUser.user_id,a.adminUser.user_id).run();
       message='Packaging project duplicated as a new review-first draft.';
     }else if(action==='save_version'){
       if(!projectId)throw new Error('Packaging project is required.');
@@ -296,7 +322,7 @@ export async function onRequestPost(context){
       ]);message='Packaging project archived; versions, exports and print evidence remain.';
     }else throw new Error('Unsupported Packaging Studio action.');
     const detail=projectId?await loadDetail(a.db,projectId):null;
-    await auditAdminAction(context.env,context.request,a.adminUser,{action_type:`packaging_studio_${action}`,target_type:'packaging_project',target_id:projectId,target_key:detail?.project?.project_key||String(projectId||''),details:{review_first:true,automatic_publish:false,soap_label_automation:true}});
+    await auditAdminAction(context.env,context.request,a.adminUser,{action_type:`packaging_studio_${action}`,target_type:'packaging_project',target_id:projectId,target_key:detail?.project?.project_key||String(projectId||''),details:{review_first:true,automatic_publish:false,unified_labeling_packaging:true,component_count:detail?.component_summary?.active_count||0}});
     return json({ok:true,message,build:BUILD,...await listData(a.db),detail});
   }catch(error){
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'packaging_studio',incident_code:'packaging_studio_post_failed',severity:'warning',message:error?.message||'Packaging Studio save failed.',related_user_id:a.adminUser.user_id,details:{action,error:String(error?.stack||error)}}).catch(()=>null);
