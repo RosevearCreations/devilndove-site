@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Creative Automation Studio master workflow</title>
+  <desc id="desc">Seven connected review stages: process, materials, assets, content package, channel approval, public release, and learning.</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#241531"/><stop offset="1" stop-color="#0d3540"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-opacity=".28"/></filter></defs>
+  <rect width="1200" height="720" rx="34" fill="url(#bg)"/>
+  <g fill="none" stroke="#d9b66f" stroke-width="6" opacity=".8"><path d="M260 175H465"/><path d="M735 175H940"/><path d="M1030 245V360"/><path d="M940 450H735"/><path d="M465 450H260"/><path d="M170 520V610"/></g>
+  <g font-family="Arial,sans-serif" text-anchor="middle" filter="url(#shadow)">
+    <g><rect x="70" y="105" width="190" height="140" rx="24" fill="#573a6b"/><text x="165" y="158" fill="#fff" font-size="25" font-weight="700">1 Process</text><text x="165" y="192" fill="#efe7f3" font-size="17">idea • timeline</text><text x="165" y="218" fill="#efe7f3" font-size="17">mistakes • lessons</text></g>
+    <g><rect x="465" y="105" width="270" height="140" rx="24" fill="#6b4935"/><text x="600" y="158" fill="#fff" font-size="25" font-weight="700">2 Materials &amp; Cost</text><text x="600" y="192" fill="#fff5df" font-size="17">inventory • time • margin</text><text x="600" y="218" fill="#fff5df" font-size="17">review • reversal</text></g>
+    <g><rect x="940" y="105" width="190" height="140" rx="24" fill="#24556a"/><text x="1035" y="158" fill="#fff" font-size="25" font-weight="700">3 Assets</text><text x="1035" y="192" fill="#e5f6fa" font-size="17">rights • privacy</text><text x="1035" y="218" fill="#e5f6fa" font-size="17">evidence • source</text></g>
+    <g><rect x="940" y="360" width="190" height="160" rx="24" fill="#2f684f"/><text x="1035" y="415" fill="#fff" font-size="25" font-weight="700">4 Package</text><text x="1035" y="450" fill="#e7f8ee" font-size="17">video • SEO • blog</text><text x="1035" y="478" fill="#e7f8ee" font-size="17">social • gallery</text></g>
+    <g><rect x="465" y="360" width="270" height="160" rx="24" fill="#645f29"/><text x="600" y="415" fill="#fff" font-size="25" font-weight="700">5 Channel Review</text><text x="600" y="450" fill="#fffbe2" font-size="17">format • caption • UTM</text><text x="600" y="478" fill="#fffbe2" font-size="17">human approval</text></g>
+    <g><rect x="70" y="360" width="190" height="160" rx="24" fill="#704147"/><text x="165" y="415" fill="#fff" font-size="25" font-weight="700">6 Release</text><text x="165" y="450" fill="#ffecef" font-size="17">publish • verify</text><text x="165" y="478" fill="#ffecef" font-size="17">unpublish • history</text></g>
+    <g><rect x="70" y="610" width="420" height="70" rx="24" fill="#3a4b76"/><text x="280" y="653" fill="#fff" font-size="25" font-weight="700">7 Measure • Learn • Repurpose</text></g>
+  </g>
+  <text x="1110" y="682" fill="#ddd" font-family="Arial,sans-serif" font-size="15" text-anchor="end">Planning placeholder • Build 228</text>
+</svg>
