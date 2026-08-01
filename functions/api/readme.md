@@ -1,3 +1,13 @@
+# Build 225 current API note
+
+The active readiness API is `/api/admin/startup-readiness`. It requires administrator authentication, stores current status in `startup_readiness_items`, appends changes to `startup_readiness_history`, audits sensitive updates, records runtime incidents, and returns an honest degraded instruction set if D1 is temporarily unavailable. Browser-only recovery remains visibly unsynced until a later successful D1 save.
+
+The Packaging Studio API remains review-first and uses the normalized Build 221–222 packaging/soap tables. `PACKAGING_STUDIO.md` is the single current packaging specification. Product-detail/gallery compatibility repairs from Builds 223–224 remain part of the release.
+
+For current deployment and roadmap authority, use `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `STARTUP_GO_LIVE_GUIDE.md`, and `DATABASE_SCHEMA_REFERENCE.md`. The older notes below are historical API evidence.
+
+---
+
 # Build 156 API note
 
 New or expanded API surface:
