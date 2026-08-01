@@ -1,62 +1,126 @@
-# Devil n Dove Project Status and Roadmap — Build 225
+# Devil n Dove Project Status and Roadmap — Build 224
 
-## Build 225 completed actions
-1. Replaced the static Startup Readiness page with a D1-backed status cockpit.
-2. Added 37 detailed launch gates covering deployment, access, catalog, commerce, payments, communication, packaging, discovery, recovery, fulfilment, and controlled opening.
-3. Added item status, owner, due date, evidence URL, evidence notes, blocked reason, completion timestamps, and severity.
-4. Added status-history records and admin audit evidence.
-5. Added filters for open/completed status, severity, phase, owner/instruction search.
-6. Added progress, critical-open, high-open, blocked, in-progress, complete, and launch-state summaries.
-7. Added quick Complete and Reopen controls with evidence requirements.
-8. Added browser-only unsynced recovery and deliberate synchronization after D1/network failure.
-9. Expanded STARTUP_GO_LIVE_GUIDE.md to mirror every database gate with exact locations, steps, and pass conditions.
-10. Made PACKAGING_STUDIO.md the single packaging source of truth.
-11. Merged the complete user-provided soap-label specification into PACKAGING_STUDIO.md.
-12. Converted legacy soap-label specification files into compatibility pointers.
-13. Added Packaging Studio interface links to the authoritative specification and startup gates.
-14. Updated current/additive and aggregate schema files for the new readiness tables.
-15. Updated database schema reference and deployment instructions.
-16. Preserved Build 223–224 product-detail and seven-image gallery fixes.
-17. Re-ran public one-H1 and metadata checks.
-18. Re-ran JavaScript and CSS integrity checks.
-19. Re-ran fresh-schema and repeated migration checks.
-20. Added Build 225 validation and changed-file manifests.
+## Build 224 completed gallery hotfix
+1. Reproduced the one-image product-detail outcome against a legacy media-assets schema.
+2. Identified the remaining fragility: the gallery SQL directly referenced optional media-asset columns.
+3. Added schema-aware `product_images` selection.
+4. Removed the optional `media_assets` join from the core gallery query.
+5. Added independent media-asset role enrichment.
+6. Preserved gallery loading when `media_assets.deleted_at` is absent.
+7. Preserved gallery loading when `media_assets.variant_role` is absent.
+8. Reconciled annotation-only and product-image rows.
+9. De-duplicated images by normalized URL.
+10. Forced the product featured image to remain first without discarding supporting images.
+11. Recalculated image groups after explicit media-role assignments.
+12. Added `image_summary` diagnostics to the public API.
+13. Added `Cache-Control: no-store` to product-detail responses.
+14. Added a Build 224 browser-script cache buster.
+15. Added an `Image X of Y` indicator.
+16. Updated thumbnail selection to change main-image alt text and caption.
+17. Confirmed a synthetic legacy-schema product returns all seven storefront images.
+18. Synchronized root and public browser-script copies.
+19. Updated launch verification and authoritative Markdown.
+20. Added Build 224 validation and changed-file manifests.
 
-## Current launch position
-Devil n Dove is in launch proof and controlled-opening preparation. The application has broad commerce, inventory, project, content, CAIP, packaging, accounting, media, and SEO foundations. The remaining work is not another undirected feature list: it is production evidence, final data completion, regulatory/physical proof, recovery rehearsal, and stable daily operation.
+## Current launch impact
+The product-card **View** path is a launch blocker because buyers must be able to inspect product facts before adding to cart. Build 223 removes the known runtime defect and adds a second browser-side recovery path. Production verification is still required after deployment because cache state, D1 schema drift and live data cannot be proven from the package alone.
 
-Use `/admin/startup-readiness/` as the current status authority. A page existing or a local test passing does not close a gate; record deployed evidence and the stated pass condition.
+## Current position
+Devil n Dove is in launch-readiness and operational-polish, not early feature discovery. Catalog, media, inventory, projects, Content Studio, CAIP, packaging, social review, checkout, order and accounting foundations exist. The remaining work is primarily production proof, data completion, workflow hardening and controlled opening.
 
-## Known launch risks
-- Live payment/webhook idempotency and exact-once inventory settlement/restoration still require production evidence.
-- Final-unit and component-set concurrency must be proven before scarce stock is promoted broadly.
-- Taxes, shipping/pickup, transactional email, policies, analytics, restore, and full order/refund rehearsals remain explicit gates.
-- Every launch soap requires verified formula/INCI/bilingual content, physical print proof, packaging export fit, and applicable cosmetic notification/change control.
-- Browser Print/Save PDF is not yet a proven CMYK prepress file.
-- Social OAuth remains optional for selling and must stay review-first until provider approval.
-- First-page local ranking cannot be guaranteed; relevance, distance, prominence, accurate business information, useful content, reviews, photos, and links must be maintained.
+Build 222 implements the soap-label automation specification as a structured CAIP packaging workflow and makes the launch blockers easier to find and complete.
 
-## Next 20 steps
-1. Complete production evidence for every Critical Startup Readiness item.
-2. Add automated import of Deployment Preflight results into matching readiness gates.
-3. Add automatic Product Release Preflight rollups by launch-product group.
-4. Add automatic product-detail/gallery checks for every selected launch product.
-5. Implement concurrency-safe stock reservations for final units and component sets.
-6. Complete Stripe live webhook idempotency and exact-once settlement evidence.
-7. Complete failed, abandoned, cancelled, and refunded inventory restoration evidence.
-8. Add saved tax/shipping scenario fixtures with expected and actual totals.
-9. Add transactional-email test records, provider IDs, retry, and failure diagnostics.
-10. Add R2 upload for packaging print-proof photos with checksum/version linkage.
-11. Implement true server-generated print PDF with exact media/bleed boxes and embedded or outlined fonts.
-12. Add deterministic SVG text measurement and per-region overflow blockers.
-13. Add printer/paper calibration profiles, rulers, crop marks, and saved no-scaling settings.
-14. Link verified soap recipe/formula source rows to labels without duplicating ingredient facts.
-15. Add approved-label lock, supersession, reprint, batch/lot, barcode, and QR workflows.
-16. Add role-specific authorization tests for delete, reversal, label approval, and accounting export.
-17. Add realized margin trends across products, product families, and repeated techniques.
-18. Allow approved CAIP summaries to be deliberately selected for Content Studio packages.
-19. Complete social OAuth only after provider credentials, scopes, callbacks, and approvals are proven.
-20. Run a controlled public opening and convert the first-week evidence into permanent operating checks.
+## Completed implementation actions in Build 222
+1. Added a dedicated `/admin/packaging/soap-labels/` route with exactly one H1 and noindex protection.
+2. Added direct Soap Label Studio and Startup Readiness cards to the Admin Dashboard.
+3. Reworked the soap ribbon renderer to follow the approved Glacial Purple layout order and visual hierarchy.
+4. Added the approved reference image as an internal design reference rather than embedding it as production artwork.
+5. Added reusable purple, green and oatmeal rose SVG assets.
+6. Added a nine-tab editor: Product, Ingredients, French, Rose & Colours, Claims, Layout, Preview, Print Test and Versions.
+7. Added structured bilingual ingredient rows with order, INCI, organic and allergen-review fields.
+8. Added structured bilingual claim rows with icon, approval and compliance-note fields.
+9. Added exact-dimension summaries and guide controls for bleed, safe areas, folds and overlap/glue zones.
+10. Added a photo-fit 11 × 1.5-inch profile with a centred 0.75-inch band and 2 × 1.5-inch front oval.
+11. Added a separate 50 mm rear-seal profile so the specification conflict is visible and testable rather than clipped.
+12. Added normalized D1 tables for soap templates, products, ingredients, claims, exports and print tests.
+13. Added synchronization between the Packaging Studio project and normalized soap-label rows.
+14. Added SVG, PNG, WebP, JPG and browser-print preparation with predictable filenames.
+15. Added SHA-256 export checksum recording and version/export evidence.
+16. Added physical 100%-scale print-test records with measured dimensions, wrap fit, legibility, overlap and proof-image fields.
+17. Blocked label approval until a passed physical print test exists.
+18. Added browser-local recovery when D1 or the network is unavailable, without presenting the fallback as a successful server save.
+19. Added `STARTUP_GO_LIVE_GUIDE.md` and `/admin/startup-readiness/` with 20 ordered launch gates, detailed paths, instructions and pass conditions.
+20. Updated the authoritative Markdown set, Packaging Studio specification/guide, schema reference, aggregate/current migration files, release notes and validation documents for Build 222.
 
-## Operating direction
-Open with a small complete product list and conservative stock. Continue background improvements only while order, payment, inventory, email, refund, support, packaging, and fulfilment workflows remain observable and reversible.
+## Launch sanity check
+
+### Structurally ready
+- Public catalog, product detail, cart and checkout foundations.
+- Product media roles, alt text, rights review and up-to-seven-image direction.
+- Draft/archive cleanup with protected-history preflight.
+- Tools and Supplies row editing, Amazon review draft and purchase-lot evidence.
+- Quantity specials and component-set availability calculations.
+- Creative Projects that may be product-backed or content-only.
+- Content Studio, CAIP evidence and review-first publication foundations.
+- Structured Packaging Studio and Soap Label Studio.
+- One-H1 and public title/meta/canonical guardrails.
+
+### Must be proven before unrestricted opening
+1. Production login, password reset, session expiry and lower-role denial.
+2. Live Stripe capture and signed webhook idempotency.
+3. PayPal either fully proven or hidden.
+4. Exact-once inventory consumption after payment.
+5. Exact-once release/restoration after failure, cancellation and refund.
+6. Concurrent final-unit and final-set checkout behaviour.
+7. Launch-stock physical counts and lot reconciliation.
+8. Quantity-special, coupon, tax and refund calculations.
+9. Shipping and pickup destinations, rates and instructions.
+10. Registration, reset, order, refund and fulfilment email delivery.
+11. A small, fully green opening-day product list.
+12. Real product images, rights, alt text, derivatives and fallback delivery.
+13. Verified soap formula/INCI/bilingual label content and physical print proof.
+14. Cosmetic notification/change-control process for applicable products.
+15. Public policy accuracy and checkout/footer discoverability.
+16. Analytics, Search Console, sitemap and Business Profile verification.
+17. Mobile, accessibility, structured-data and launch-path performance checks.
+18. D1/R2 restore and rollback rehearsal.
+19. A complete real paid-order, fulfilment and separate refund rehearsal.
+20. A controlled opening with conservative stock and active monitoring.
+
+Detailed instructions are in `STARTUP_GO_LIVE_GUIDE.md` and the browser guide at `/admin/startup-readiness/`.
+
+## Known issues and risks
+- The specification states both a 1.5-inch artboard and a 50 mm rear circle. Since 50 mm is taller than 38.1 mm, both cannot be true without clipping or a taller canvas. Build 222 provides two explicit profiles; a physical test must choose the production profile.
+- Browser Print/Save PDF is not yet a true server-generated CMYK prepress PDF with embedded/outlined fonts, crop marks and verified bleed boxes.
+- Ingredient-panel overflow now uses a conservative eight-line approval blocker, but exact glyph-width measurement is still outstanding; visual and physical review remain mandatory, especially for long French or INCI copy.
+- Rose vectors are initial reusable assets; final colour, contrast and print reproduction need proofing.
+- Product formula and supplier descriptions must not be copied directly into a cosmetic ingredient declaration without review.
+- Payment and inventory settlement still need deployed exact-once evidence before scarce products or sets are opened broadly.
+- Automatic FIFO/FEFO lot consumption remains disabled; policies are preferences and evidence only.
+- Social OAuth remains dependent on provider credentials, review and approval.
+- First-page local search placement cannot be guaranteed; local SEO must be maintained through relevance, accurate business information, useful content, prominence and customer trust.
+
+## Next 20 steps — Build 224 direction
+1. Implement true server-side print-PDF generation with exact media/bleed boxes and embedded or outlined fonts.
+2. Add printer calibration rulers, crop marks and a saved calibration profile per printer/paper combination.
+3. Add deterministic SVG text-overflow measurement and approval blockers for each label region.
+4. Add wrapped-soap front/back/side mockups generated from the same source SVG.
+5. Add uploaded print-proof photo storage in R2 with checksum and version linkage.
+6. Add barcode, SKU, batch/lot and optional QR zones for market/retail label variants.
+7. Link a finished soap product and its verified recipe/formula to a label draft without duplicating source facts.
+8. Add reviewed ingredient-translation/version control rather than free-text overwrite.
+9. Add allergen and warning review queues with effective-date evidence.
+10. Add approved-label lock, supersession and controlled reprint workflow.
+11. Complete live Stripe/webhook exact-once settlement integration tests and saved evidence.
+12. Complete failed/abandoned/cancelled/refunded inventory release and restoration tests.
+13. Add a concurrency-safe stock reservation transaction for the final unit and component set.
+14. Add role-specific authorization for permanent delete, inventory reversal, label approval and accounting export.
+15. Add an actionable Startup Readiness database cockpit with owner, status, evidence URL, due date and blocker severity.
+16. Add automated transactional-email test records and resend/failure diagnostics.
+17. Add shipping/tax scenario fixtures for Ontario, other supported provinces, pickup and any enabled US destinations.
+18. Add product-family realized margin trends using sales, allocated project cost, packaging, channel fees and refunds.
+19. Allow deliberately approved CAIP summaries to be selected for Content Studio packages.
+20. Complete social OAuth only after provider credentials, callbacks, scopes and platform approvals are available.
+
+## Operating direction after launch
+Open with a small, complete product list. Continue adding products, content, packaging variants and automation in the background only when the existing order, inventory, email, refund and fulfilment workflows remain observable and reversible.

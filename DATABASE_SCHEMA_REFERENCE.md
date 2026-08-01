@@ -1,36 +1,14 @@
-# Devil n Dove Database Schema Reference — Build 225
+# Build 224 schema note
 
-## Current schema authority
+Build 224 is a code-only product-gallery compatibility hotfix. It adds no D1 tables, columns, indexes, triggers, or migration. Build 222 remains the current schema authority.
 
-- Fresh database: `database_full_schema.sql` or the intentionally scoped aggregate schema appropriate to the deployment.
-- Existing production database: apply `database_build225_startup_readiness_packaging_authority.sql` **or** the identical `database_upgrade_current_pass.sql`, never both.
-- The Build 225 current-pass migration creates and seeds `startup_readiness_items` and `startup_readiness_history`. It does not replay the historical Packaging Studio/Soap Label migrations.
-- Production must already include the Build 221 Packaging Studio and Build 222 normalized soap-label tables before applying Build 225.
-- Builds 223 and 224 were code-only product-detail/gallery compatibility repairs and required no schema migration.
+The public product-detail API now introspects actual `product_images`, `product_image_annotations`, `media_consent_records`, and `media_assets` columns before composing media queries. This tolerance is a runtime compatibility boundary, not a replacement for keeping aggregate schemas and production D1 synchronized.
 
-## Build 225 tables and ownership
+# Build 223 schema note
 
-### `startup_readiness_items`
-Stores one current row per launch gate, including phase, severity, blocker flag, live-binding requirement, internal route, external location, detailed instructions, pass condition, status, owner, due date, evidence URL/notes, blocked reason, completion actor/time, last updater, and active state. Seed refreshes update instructions and metadata without overwriting the operator's status/evidence.
+Build 223 is a code-only product-detail reliability hotfix. It introduces no tables, columns, indexes, triggers or data migration. Build 222 remains the current schema authority.
 
-### `startup_readiness_history`
-Append-only-style evidence for each status update, including prior/next status, owner, due date, evidence, blocked reason, actor, and change time. The main item row remains the current-state authority; history remains the audit trail.
-
-### Packaging data authority
-- Broad project/template/version/export state: `packaging_templates`, `packaging_projects`, `packaging_project_versions`, `packaging_export_history`.
-- Normalized soap content and proof: `soap_label_templates`, `soap_products`, `soap_ingredients`, `soap_label_claims`, `soap_label_exports`, `soap_label_print_tests`.
-- Commerce price, public product identity, and sellable inventory remain in `products` and established inventory tables.
-- `PACKAGING_STUDIO.md` is the single human-readable packaging specification; the root and docs-tree soap-label files are compatibility pointers.
-
-## Current migration boundary
-
-`database_upgrade_current_pass.sql` is reset to the additive Build 225 migration only. Do not use it as an accumulated history replay. Use numbered historical migrations to understand/repair an older database, and back up D1 before applying any production change.
-
----
-
-# Historical schema notes
-
-Builds 223–224 were code-only product-detail/gallery compatibility fixes. Their runtime schema introspection does not replace keeping D1 and aggregate schemas synchronized. Build 222 introduced the normalized soap-label schema; Build 221 introduced Packaging Studio and lot-reconciliation structures.
+Do not run a new D1 migration specifically for Build 223. The endpoint now tolerates optional-table/schema drift more safely, but this does not replace applying the Build 222 migration or maintaining the aggregate schemas.
 
 # Build 216 additions
 - `creative_project_inventory_posts`: one idempotent inventory posting per approved material review.
@@ -171,15 +149,12 @@ Build 222 extends the Build 221 Packaging Studio rather than creating a disconne
 ### Dimension profiles
 `soap-ribbon-glacial-approved-v1` uses an 11 × 1.5-inch artboard and renders the rear seal at 38.1 mm so it fits. `soap-ribbon-spec-50mm-seal-v1` uses a 50 mm-high artboard and a true 50 mm rear seal. This intentionally exposes the physical conflict in the source specification rather than clipping or mislabelling a file.
 
-### Historical Build 222 migration boundary
-Build 222 introduced the normalized soap-label tables. Existing databases should already contain them before Build 225. The current-pass file no longer replays Build 222; it contains only the Build 225 readiness migration.
-## Build 225 — Startup Readiness status authority
+### Current migration
+For an existing Build 221 database apply one of:
 
-Current additive migration: `database_build225_startup_readiness_packaging_authority.sql` (identical to `database_upgrade_current_pass.sql`; apply one, not both).
+```text
+database_build222_soap_label_startup_readiness.sql
+database_upgrade_current_pass.sql
+```
 
-New tables:
-- `startup_readiness_items` — the authoritative go-live item definition and current status, owner, due date, evidence, blocked reason, completion, severity, route, and pass condition.
-- `startup_readiness_history` — append-only status/evidence transition history for the launch cockpit.
-
-Packaging documentation authority is `PACKAGING_STUDIO.md`. The legacy `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` files are compatibility pointers and contain no second schema/specification copy.
-
+They contain the same additive Build 222 upgrade. Do not apply both. The aggregate schema files include the same definitions for fresh installations.

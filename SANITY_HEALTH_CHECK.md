@@ -1,22 +1,20 @@
-# Devil n Dove Sanity and Health Check — Build 225
+# Devil n Dove Sanity and Health Check — Build 222
 
 ## Current architecture health
 - Supported fresh schema: `database_full_schema.sql`.
-- Store aggregate: `database_store_schema.sql`.
-- Core-plus-history aggregate: `database_schema.sql`.
-- Current additive migration: `database_build225_startup_readiness_packaging_authority.sql` or identical `database_upgrade_current_pass.sql`.
-- Canonical handoff: `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `STARTUP_GO_LIVE_GUIDE.md`, and `PACKAGING_STUDIO.md`.
+- Store aggregate: `database_store_schema.sql`, repaired in Build 222 so it can validate independently while remaining compatible with the main users table.
+- Core-plus-history aggregate: `database_schema.sql`, repaired with required commerce parents; production upgrades still use numbered migrations.
+- Current additive migration: `database_build222_soap_label_startup_readiness.sql` or identical `database_upgrade_current_pass.sql`.
+- Canonical handoff: `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `STARTUP_GO_LIVE_GUIDE.md`.
 
-## Build 225 health result
-- Startup readiness is now a D1-backed operating workflow rather than a static duplicate checklist.
-- The cockpit records status, owner, due date, evidence, blocked reason, completion, history, and a calculated launch state.
-- Browser-only recovery is visibly marked Unsynced and does not pretend a D1 save succeeded.
-- Packaging documentation has one authority: `PACKAGING_STUDIO.md`.
-- Legacy soap-label specification files are compatibility pointers.
-- Product-detail and seven-image gallery hotfixes remain present.
-- Admin routes remain noindex and exposed HTML pages retain one H1.
-- Public static SEO title, description, canonical, local wording, JSON, CSS, and JavaScript checks pass.
-- Fresh aggregate schemas and repeated Build 225 migration execution pass.
+## Build 222 health result
+- Soap-label source data is normalized into relational rows for product, ingredients, claims, exports and print tests.
+- Packaging current-draft compatibility fields remain synchronized rather than becoming another independent data authority.
+- The approved ribbon reference is reproduced by deterministic SVG structure, not flattened into a non-editable image.
+- Label approval requires a saved version and physical proof.
+- New admin routes remain private/noindex and have one H1.
+- Public SEO metadata and local references remain complete in static validation.
+- CSS and JavaScript syntax checks pass.
 
 ## Launch health
-The application is structurally mature, but unrestricted opening depends on closing the tracked gates in `/admin/startup-readiness/`. The highest-risk areas remain live payment/webhook idempotency, exact-once inventory settlement/restoration, final-unit concurrency, tax/shipping, transactional email, physical soap-label/regulatory proof, restore rehearsal, paid fulfilment, and a separate refund rehearsal.
+The application is structurally mature but unrestricted opening remains dependent on the 20 gates in `STARTUP_GO_LIVE_GUIDE.md`. The highest-risk unresolved areas are payment/webhook idempotency, exact-once inventory restoration, final-unit concurrency, transactional email, tax/shipping verification, physical label/regulatory review, restore rehearsal and full fulfilment proof.
