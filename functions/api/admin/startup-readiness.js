@@ -1,10 +1,23 @@
 // File: /functions/api/admin/startup-readiness.js
-// Build 227 — startup launch cockpit with per-gate test, correction, evidence and retest guidance.
+// Build 228 — complete blocker register with standalone prelaunch process gates.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '227';
+const BUILD = '228';
 const STARTUP_ITEMS = [
+  {
+    "key": "deployment_preflight_standalone",
+    "phase": "foundation",
+    "phase_label": "Foundation and deployment",
+    "title": "Complete Deployment Preflight as a standalone pre-deploy process",
+    "order": 5,
+    "severity": "critical",
+    "live": 0,
+    "route": "/admin/deployment-preflight/",
+    "external": "Build 228 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md",
+    "instructions": "1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.\n2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, aggregate-schema, repeated-current-migration, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.\n3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.\n4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface.\n5. Confirm database_upgrade_current_pass.sql is identical to database_build228_creative_automation_prelaunch_stages.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, or RELEASE statement.\n6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files, validation and process playbooks all identify Build 228 consistently.\n7. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.\n8. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.",
+    "pass": "The exact Build 228 archive passes every static, schema, syntax, CSS, one-H1, metadata, fallback, documentation and Pages Functions bundle check with zero unresolved blocker."
+  },
   {
     "key": "backup_migrate_deploy",
     "phase": "foundation",
@@ -15,8 +28,21 @@ const STARTUP_ITEMS = [
     "live": 1,
     "route": "/admin/deployment-preflight/",
     "external": "Cloudflare Dashboard → Workers & Pages → D1 and Pages deployments",
-    "instructions": "1. Open Cloudflare D1 and create a production backup or export before changing the schema.\n2. Record the backup date, database name, and safe storage location in the evidence notes.\n3. Confirm the Build 225 readiness/packaging migration is already present, then apply database_build227_unified_business_operations.sql or the identical database_upgrade_current_pass.sql, but not both.\n4. Confirm the migration ledger records build227_unified_business_operations and the new packaging_components, customer_document_sequences, and customer_documents tables exist.\n5. Deploy the complete ZIP rather than selected files.\n6. Open Deployment Preflight and run every available check.\n7. Open Startup Readiness with All statuses and confirm all 37 gates load with correction/evidence guidance.\n8. Save the deployment URL, commit or deployment identifier, schema result, and preflight result.\n9. Stop and restore the previous deployment or D1 backup if any critical migration, Function, route, or data-integrity error appears.",
-    "pass": "A recoverable D1 backup exists, the Build 227 migration is applied once after the Build 225 baseline, the complete deployment is live, all 37 gates load, and Deployment Preflight has no unresolved critical result."
+    "instructions": "1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.\n2. Record the date, database name and safe recovery reference in the evidence notes.\n3. Confirm the Build 227 migration is already present, then apply database_build228_creative_automation_prelaunch_stages.sql or the identical database_upgrade_current_pass.sql, but not both.\n4. Confirm the migration ledger records build228_creative_automation_prelaunch_stages and the creative_automation_workflows, creative_automation_stage_reviews, and creative_automation_events tables exist.\n5. Deploy the complete ZIP rather than selected files.\n6. Record the Pages deployment URL and deployment/commit identifier.\n7. Open Startup Readiness with All statuses and confirm all 42 gates load without removing prior owner, evidence or history records.\n8. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.\n9. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.",
+    "pass": "A recoverable D1 point exists, the Build 228 migration is applied once after Build 227, the complete deployment is live, all 42 gates load, and no migration, Function, route or data-integrity error remains."
+  },
+  {
+    "key": "post_deploy_smoke_standalone",
+    "phase": "foundation",
+    "phase_label": "Foundation and deployment",
+    "title": "Complete Post-Deploy Smoke Tests as a standalone live-verification process",
+    "order": 15,
+    "severity": "critical",
+    "live": 1,
+    "route": "/admin/post-deploy-smoke-tests/",
+    "external": "Production domain, browser developer tools, Cloudflare Pages Functions logs, and POST_DEPLOY_SMOKE_TEST.md",
+    "instructions": "1. Confirm the deployment ID and Build 228 migration evidence match the package that passed Deployment Preflight.\n2. Open the production home, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.\n3. Sign in with an owner-controlled administrator and test Startup Readiness, Creative Automation Studio, Packaging, Client Documents, Orders and the Prelaunch Operations Map.\n4. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.\n5. At phone, tablet, laptop and wide-desktop widths, check navigation, tables, forms, dialogs, focus, touch targets, text contrast and horizontal overflow on every changed route.\n6. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.\n7. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner.\n8. After any correction/redeploy, repeat all smoke checks—not only the originally failed URL.\n9. Continue to Deploy Readiness only when every critical smoke result passes.",
+    "pass": "The exact production deployment passes all critical public, authentication, admin, API, fallback, mobile/desktop and SEO smoke checks with current evidence and no unresolved critical result."
   },
   {
     "key": "production_bindings_secrets",
@@ -461,6 +487,19 @@ const STARTUP_ITEMS = [
     "pass": "A separate refund/cancellation can be completed safely, communicated clearly, reconciled, and repeated webhook delivery cannot duplicate its effects."
   },
   {
+    "key": "deploy_readiness_standalone",
+    "phase": "operations",
+    "phase_label": "Recovery, fulfilment, and controlled opening",
+    "title": "Complete Deploy Readiness as a standalone promotion decision",
+    "order": 355,
+    "severity": "critical",
+    "live": 1,
+    "route": "/admin/deploy-readiness/",
+    "external": "Startup Readiness, Deployment Preflight result, Post-Deploy Smoke Tests, rollback evidence, and release manifest",
+    "instructions": "1. Open Deploy Readiness only after the exact package passed Deployment Preflight, was deployed, and passed the complete Post-Deploy Smoke process.\n2. Confirm every Critical Startup gate is Complete or has an owner-approved, factually justified Not Applicable result; do not rely only on a score.\n3. Review blocker drilldowns, manifest paths, migration ledger, rollback/recovery reference, smoke evidence, product scope, marketplace/recall locks and provider checks.\n4. Confirm the opening owner, monitoring hours, stop conditions, rollback steps and customer recovery contacts are written and reachable from a phone.\n5. Record the exact deployment, database bookmark/recovery point, approved product count, outstanding High items and the person making the decision.\n6. Select Blocked when any required evidence is absent or contradictory and link back to the exact Startup gate.\n7. Select approval only when the evidence—not the existence of the feature—supports proceeding to controlled Go-Live Execution.\n8. Reopen this decision after a new deployment, migration, critical configuration change, failed smoke test or material Startup-gate change.",
+    "pass": "A named owner has recorded an evidence-backed promotion decision for the exact live build, no Critical Startup gate or smoke result remains open, and rollback/stop conditions are ready."
+  },
+  {
     "key": "launch_monitoring_ownership",
     "phase": "operations",
     "phase_label": "Recovery, fulfilment, and controlled opening",
@@ -474,6 +513,19 @@ const STARTUP_ITEMS = [
     "pass": "Each launch responsibility has an owner and the team has clear monitoring, escalation, rollback, and temporary-stop instructions."
   },
   {
+    "key": "go_live_execution_standalone",
+    "phase": "operations",
+    "phase_label": "Recovery, fulfilment, and controlled opening",
+    "title": "Run Go-Live Execution as a standalone controlled-opening process",
+    "order": 365,
+    "severity": "critical",
+    "live": 1,
+    "route": "/admin/go-live-execution/",
+    "external": "Production storefront, Deploy Readiness approval, Promotion Control, launch owner and immediate monitoring dashboards",
+    "instructions": "1. Confirm the Deploy Readiness decision names the exact live build and still has no Critical blocker.\n2. Confirm the deliberately small opening product list, conservative sellable quantities, real product media, packaging status, accepted destinations and customer policies.\n3. Record the opening date/time, owner on duty, monitoring window and first scheduled review before changing public availability.\n4. Enable only the approved products/channels; keep unfinished automation and unapproved providers disabled.\n5. Open the production store in a private session and complete the agreed visibility/cart/checkout check without changing unrelated products.\n6. Queue immediate incident/order/payment/inventory/email monitoring and keep rollback, checkout pause and product-archive controls open.\n7. If any stop condition occurs, pause the affected public action immediately, preserve evidence, communicate with affected customers and roll back or correct safely.\n8. Record the exact actions, operator, timestamps and resulting public URLs; never mark this gate complete from a successful button click alone.\n9. Continue to Live Ops Follow-through and monitor the first operational window.",
+    "pass": "The approved limited storefront is opened by a named operator, the exact actions and public results are recorded, immediate monitoring is active, and the opening remains reversible."
+  },
+  {
     "key": "controlled_opening",
     "phase": "operations",
     "phase_label": "Recovery, fulfilment, and controlled opening",
@@ -485,11 +537,26 @@ const STARTUP_ITEMS = [
     "external": "Production store and launch operating decision",
     "instructions": "1. Confirm every critical readiness item is Complete or has a formally justified Not Applicable decision.\n2. Keep the opening-day product list small and inventory conservative.\n3. Open to a limited audience or quiet public release before paid promotion.\n4. Monitor the first orders in real time and compare every system record.\n5. Pause sales immediately if a stop condition is reached.\n6. Add products and automation gradually only after the core order, inventory, email, refund, and fulfilment paths remain stable.\n7. Record the opening time, product count, owner on duty, and first review time.",
     "pass": "The store opens through a monitored, reversible, low-risk release with no unresolved critical blocker and a clear pause/rollback path."
+  },
+  {
+    "key": "live_ops_followthrough_standalone",
+    "phase": "operations",
+    "phase_label": "Recovery, fulfilment, and controlled opening",
+    "title": "Run Live Ops Follow-through as a standalone first-window monitoring process",
+    "order": 380,
+    "severity": "critical",
+    "live": 1,
+    "route": "/admin/live-ops-followthrough/",
+    "external": "Production orders, payments, inventory, email provider, customer support, incidents, analytics and public channels",
+    "instructions": "1. Begin monitoring at the Go-Live timestamp and keep the named owner available for the agreed first operating window.\n2. For every first-window order, compare payment, order, item, inventory movement, tax, delivery/pickup, email, client document and accounting records.\n3. Review runtime incidents, webhook retries, failed messages, stock warnings, customer questions, public-content/provider results and analytics duplication.\n4. Confirm completed fulfilment and any separate refund rehearsal remain reconciled and idempotent.\n5. Record expected versus actual results, safe IDs, customer recovery actions, owner and resolution for every anomaly.\n6. Activate the stop condition immediately for payment mismatch, oversell, repeated 500 errors, unsafe product/label, lost transactional email, wrong tax or unrecoverable fulfilment failure.\n7. Reopen every affected Startup gate after a failure, credential/configuration change or corrective deployment; never hide the incident by editing only the status.\n8. Complete a written end-of-window review covering orders, refunds, incidents, inventory, support and the next monitoring period.\n9. Expand products, stock or automation only after stable evidence supports the change.",
+    "pass": "The first live operating window is reconciled across customer, money, stock, communication, fulfilment, accounting and incident records, with every anomaly owned and no active stop condition."
   }
 ];
 
 const GATE_FIX_FOCUS = {
+  deployment_preflight_standalone:'stop before deployment, correct the owning code/schema/HTML/CSS/Markdown file, regenerate derived artifacts from their source, then rerun every preflight check against the exact rebuilt archive',
   backup_migrate_deploy:'restore the pre-change D1 backup or previous Pages deployment, correct the failed migration/build file, then redeploy the complete package',
+  post_deploy_smoke_standalone:'stop promotion, record the exact live route and result, correct or roll back the deployment, then repeat the full smoke suite across public, auth, admin, API, fallback and device checks',
   production_bindings_secrets:'correct the binding or encrypted Production variable in Cloudflare, verify Preview and Production are not crossed, then repeat one safe read and write',
   login_logout_recovery:'repair the server session/reset-token path and email delivery rather than only changing the browser message; invalidate test sessions before retesting',
   role_authorization:'enforce the missing role check inside the server endpoint, add an audited denial/success test, and do not rely on hidden buttons',
@@ -524,8 +591,11 @@ const GATE_FIX_FOCUS = {
   backup_restore_rehearsal:'discard the unsafe test restore, correct the backup/media/config/runbook gap, create a fresh isolated target, and repeat while measuring recovery time',
   paid_order_fulfilment_rehearsal:'pause launch, reconcile the rehearsal order across payment/stock/tax/email/accounting/packaging, correct the failing source workflow, then use a new order',
   separate_refund_rehearsal:'reconcile provider refund, credit note, customer notice, stock disposition, tax and accounting records; correct duplicate/missing effects before a new rehearsal',
+  deploy_readiness_standalone:'set the promotion decision to Blocked, link it to the exact open Startup or smoke result, correct and retest that source gate, then rebuild the final evidence-backed decision',
   launch_monitoring_ownership:'assign the missing owner/coverage, document phone-accessible stop and rollback steps, and rehearse the handoff or escalation',
-  controlled_opening:'pause or roll back sales, close the failed critical/high gate with evidence, reduce opening scope if needed, and restart only through the recorded owner decision'
+  go_live_execution_standalone:'pause the affected public action, preserve timestamps and evidence, use the approved rollback/product-hide/checkout-stop control, correct the source gate, then obtain a new Deploy Readiness decision before retrying',
+  controlled_opening:'pause or roll back sales, close the failed critical/high gate with evidence, reduce opening scope if needed, and restart only through the recorded owner decision',
+  live_ops_followthrough_standalone:'activate the stop condition, protect affected customers, reconcile each money/stock/message record, reopen related Startup gates, and resume only after corrected live evidence is stable'
 };
 
 function enrichRow(row) {

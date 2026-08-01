@@ -538,6 +538,41 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+  const creativeAutomationInstalled = await tableExists(db, 'creative_automation_workflows')
+    && await tableExists(db, 'creative_automation_stage_reviews')
+    && await tableExists(db, 'creative_automation_events');
+  const creativeAutomationRows = creativeAutomationInstalled ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+      SUM(CASE WHEN workflow_status='blocked' THEN 1 ELSE 0 END) AS blocked,
+      SUM(CASE WHEN workflow_status IN ('ready_for_release','released') THEN 1 ELSE 0 END) AS release_ready
+    FROM creative_automation_workflows
+  `, [], { total:0, blocked:0, release_ready:0 }) : { total:0, blocked:0, release_ready:0 };
+  addCheck(
+    checks,
+    creativeAutomationInstalled ? (Number(creativeAutomationRows.blocked || 0) ? 'warn' : 'pass') : 'warn',
+    'Creative Automation master workflow',
+    creativeAutomationInstalled
+      ? `${Number(creativeAutomationRows.total || 0)} tracked workflow(s), ${Number(creativeAutomationRows.blocked || 0)} blocked, ${Number(creativeAutomationRows.release_ready || 0)} ready/released. Specialist records remain their source authorities.`
+      : 'Build 228 Creative Automation orchestration tables are not installed.',
+    'Apply Build 228 once, open Creative Automation Studio, link each active Creative Process project, and record evidence for every completed stage.',
+    'warning'
+  );
+
+  const readinessInstalled = await tableExists(db, 'startup_readiness_items');
+  const readinessRows = readinessInstalled ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+      SUM(CASE WHEN item_status IN ('not_started','in_progress','failed','blocked') THEN 1 ELSE 0 END) AS open_count
+    FROM startup_readiness_items
+  `, [], { total:0, open_count:0 }) : { total:0, open_count:0 };
+  addCheck(
+    checks,
+    readinessInstalled && Number(readinessRows.total || 0) === 42 ? 'pass' : 'fail',
+    'Build 228 Startup Readiness authority',
+    readinessInstalled ? `${Number(readinessRows.total || 0)} readiness gate(s) found; ${Number(readinessRows.open_count || 0)} open.` : 'startup_readiness_items is not installed.',
+    'Open Startup Readiness with All statuses. Confirm all 42 gates load, including the five standalone prelaunch stages, without deleting or replacing prior evidence.',
+    'error'
+  );
+
   const storefrontValueDefaults = productColumns.size ? await safeAll(db, `
     SELECT 'status' AS field, COUNT(*) AS missing_count FROM products WHERE ${productColumns.has('status') ? "COALESCE(status,'') = ''" : '0'}
     UNION ALL SELECT 'product_type', COUNT(*) FROM products WHERE ${productColumns.has('product_type') ? "COALESCE(product_type,'') = ''" : '0'}

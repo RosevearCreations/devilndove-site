@@ -2,44 +2,43 @@
 import { getAdminUserFromRequest, jsonResponse } from '../_lib/adminAudit.js';
 
 const notes = {
-  build_label: 'Build 199 — Content Automation Studio',
-  generated_at: '2026-06-30T00:00:00-04:00',
+  build_label: 'Build 228 — Creative Automation and Prelaunch Operations',
+  generated_at: '2026-08-01T16:30:00-04:00',
   source: '/data/site/release-notes.json',
   summary: [
-    'Added a review-first Content Automation Studio for approved finished products.',
-    'Approved product workflows now prepare a structured source-media archive and exactly 1 YouTube, 3 Facebook, 5 Instagram Reel, and 5 TikTok production plans, plus website gallery, Google Business Profile photo, SEO, blog, thumbnail, and caption deliverables.',
-    'Source media is reference-linked only: no product image, media asset, R2 object, or original video is moved, overwritten, or deleted by content-package preparation.',
-    'Added a responsive admin workspace with media selection/safety review, editable content plans, protected copy refresh, JSON manifest export, and a gated handoff to the existing social review queue.',
-    'Added direct-create and editor-transition triggers so an approved product gets the same content-package handoff regardless of where approval occurred.',
-    'Preserved Build 197/198 media-integrity, featured-image, inventory-editing, storefront-card, mobile-navigation, and canonical Markdown protections.'
+    'Added one seven-stage Creative Automation master workflow while preserving Creative Process, CAIP, Content Studio, Social Publishing and Release Board specialist authorities.',
+    'Added separate Prelaunch, Deployment Preflight, Post-Deploy Smoke, Deploy Readiness, Go-Live and Live Ops operator surfaces and playbooks.',
+    'Preserved all 37 prior Startup gates, added five standalone process gates and strengthened the complete 42-gate fallback.',
+    'Added D1-safe schema checks that reject explicit SQL transaction statements and require current/numbered Build 228 migrations to match.',
+    'Added responsive master/prelaunch layouts, honest fallback paths, runtime incident handling and refreshed SEO/one-H1 checks.',
+    'Consolidated current project memory into two canonical Markdown authorities with scoped specialist playbooks and historical evidence retirement.'
   ],
   changed_files: [
-    'admin/content-studio/index.html',
-    'public/js/admin-content-studio.js',
+    'admin/creative-automation/index.html',
+    'admin/prelaunch/index.html',
+    'functions/api/admin/creative-automation.js',
+    'public/js/admin-creative-automation.js',
+    'public/js/admin-prelaunch-hub.js',
     'css/styles.css',
-    'functions/api/_lib/contentAutomationStudio.js',
-    'functions/api/admin/content-studio.js',
-    'functions/api/admin/create-product.js',
-    'functions/api/admin/update-product.js',
-    'functions/api/admin/product-review-actions.js',
-    'database_build199_content_automation_studio.sql',
+    'functions/api/admin/startup-readiness.js',
+    'public/js/admin-startup-readiness.js',
+    'database_build228_creative_automation_prelaunch_stages.sql',
     'database_full_schema.sql',
     'database_schema.sql',
     'database_store_schema.sql',
     'database_upgrade_current_pass.sql',
-    'CONTENT_AUTOMATION_STUDIO.md',
+    'CREATIVE_AUTOMATION_STUDIO.md',
+    'PRELAUNCH_PROCESS_PLAYBOOKS.md',
     'AI_HANDOFF.md',
     'PROJECT_STATUS_AND_ROADMAP.md',
-    'POST_DEPLOY_SMOKE_TEST.md',
+    'STARTUP_GO_LIVE_GUIDE.md',
     'data/site/release-notes.json'
   ],
   d1_migrations: [
-    'content_projects',
-    'content_project_media',
-    'content_project_deliverables',
-    'content_render_jobs',
-    'content_project_events',
-    'Build 199 migration ledger entry'
+    'creative_automation_workflows',
+    'creative_automation_stage_reviews',
+    'creative_automation_events',
+    'Build 228 migration ledger entry'
   ]
 };
 
