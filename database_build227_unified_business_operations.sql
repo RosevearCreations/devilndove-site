@@ -1,8 +1,8 @@
 -- Devil n Dove Build 227 — unified labeling/packaging and client-document controls.
 -- Apply once after the Build 225 readiness/packaging migration. Back up D1 first.
 -- This file is identical to database_upgrade_current_pass.sql; apply one, not both.
-
-BEGIN TRANSACTION;
+-- Cloudflare D1 executes imported statements for us. Do not add SQL BEGIN,
+-- COMMIT, SAVEPOINT, or Durable Object state.storage transaction calls here.
 
 CREATE TABLE IF NOT EXISTS packaging_components (
   packaging_component_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,5 +81,3 @@ CREATE TABLE IF NOT EXISTS schema_migration_ledger (
 INSERT INTO schema_migration_ledger (migration_key,file_name,applied_at,notes)
 VALUES ('build227_unified_business_operations','database_build227_unified_business_operations.sql',CURRENT_TIMESTAMP,'Adds a business-wide packaging component BOM/cost layer and immutable sequential invoices, receipts, packing slips, credit notes, and refund-confirmation snapshots.')
 ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,notes=excluded.notes;
-
-COMMIT;
