@@ -1,9 +1,9 @@
 // File: /functions/api/admin/startup-readiness.js
-// Build 225 — DB-backed startup launch cockpit with evidence, ownership, due dates, history, and honest degraded fallback.
+// Build 226 — startup launch cockpit loading repair, response diagnostics, and honest degraded fallback.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '225';
+const BUILD = '226';
 const STARTUP_ITEMS = [
   {
     "key": "backup_migrate_deploy",
@@ -614,19 +614,19 @@ function markdown(rows, stats) {
     if (row.evidence_notes) lines.push(`- **Evidence notes:** ${row.evidence_notes}`);
     lines.push('', '#### Steps', '', row.instructions_markdown || '', '', `**Pass condition:** ${row.pass_condition}`, '');
   }
-  return lines.join('
-');
+  return lines.join('\n');
 }
 async function readData(db) {
-  const rows = records(await db.prepare(`SELECT * FROM startup_readiness_items WHERE is_active=1 ORDER BY sort_order,item_key`).all());
+  const rows = records(await db.prepare(`SELECT * FROM startup_readiness_items WHERE is_active=1 ORDER BY sort_order,item_key`).all())
+    .map((row) => ({ ...row, item_status: normalizeStatus(row.item_status) }));
   const history = records(await db.prepare(`SELECT h.*,i.item_title FROM startup_readiness_history h JOIN startup_readiness_items i ON i.startup_readiness_item_id=h.startup_readiness_item_id ORDER BY h.changed_at DESC,h.startup_readiness_history_id DESC LIMIT 60`).all());
   const stats = statsFor(rows);
-  return { ok:true, build:BUILD, degraded:false, items:rows, recent_history:history, stats, markdown:markdown(rows,stats) };
+  return { ok:true, build:BUILD, degraded:false, expected_total:STARTUP_ITEMS.length, items:rows, recent_history:history, stats, markdown:markdown(rows,stats) };
 }
 function degradedData(message) {
   const rows = fallbackRows();
   const stats = statsFor(rows);
-  return { ok:true, build:BUILD, degraded:true, backend_warning:message || 'D1 readiness status is temporarily unavailable. Instructions remain visible, and browser-only changes will be clearly marked unsynced.', items:rows, recent_history:[], stats, markdown:markdown(rows,stats) };
+  return { ok:true, build:BUILD, degraded:true, expected_total:STARTUP_ITEMS.length, backend_warning:message || 'D1 readiness status is temporarily unavailable. Instructions remain visible, and browser-only changes will be clearly marked unsynced.', items:rows, recent_history:[], stats, markdown:markdown(rows,stats) };
 }
 async function requireAdmin(context) {
   try {
