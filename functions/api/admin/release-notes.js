@@ -2,32 +2,33 @@
 import { getAdminUserFromRequest, jsonResponse } from '../_lib/adminAudit.js';
 
 const notes = {
-  build_label: 'Build 228 — Creative Automation and Prelaunch Operations',
-  generated_at: '2026-08-01T16:30:00-04:00',
+  build_label: 'Build 229 — Packaging References and Missing-Image Launch Gate',
+  generated_at: '2026-08-01T18:45:00-04:00',
   source: '/data/site/release-notes.json',
   summary: [
-    'Added one seven-stage Creative Automation master workflow while preserving Creative Process, CAIP, Content Studio, Social Publishing and Release Board specialist authorities.',
-    'Added separate Prelaunch, Deployment Preflight, Post-Deploy Smoke, Deploy Readiness, Go-Live and Live Ops operator surfaces and playbooks.',
-    'Preserved all 37 prior Startup gates, added five standalone process gates and strengthened the complete 42-gate fallback.',
-    'Added D1-safe schema checks that reject explicit SQL transaction statements and require current/numbered Build 228 migrations to match.',
-    'Added responsive master/prelaunch layouts, honest fallback paths, runtime incident handling and refreshed SEO/one-H1 checks.',
-    'Consolidated current project memory into two canonical Markdown authorities with scoped specialist playbooks and historical evidence retirement.'
+    'Adopted the supplied soap-label specification, guide PDF and master SVG as a three-source packaging baseline with repository paths and SHA-256 values.',
+    'Exposed the three source references in Labeling & Packaging and registered their provenance/dimensional scope in D1.',
+    'Preserved all 42 prior Startup gates, added the distinct Critical missing_launch_images blocker and strengthened the complete 43-gate fallback.',
+    'Documented the 25 mm supplied SVG seal, 38.1 mm artboard and 50 mm specification target as a physical-proof decision rather than silently changing the source.',
+    'Added D1-safe schema checks that reject explicit SQL transaction statements and require current/numbered Build 229 migrations to match.',
+    'Refreshed responsive Packaging/Startup layouts, image manifest, SEO/one-H1 checks and canonical handoff/playbook documentation.'
   ],
   changed_files: [
-    'admin/creative-automation/index.html',
+    'admin/packaging-studio/index.html',
     'admin/prelaunch/index.html',
-    'functions/api/admin/creative-automation.js',
-    'public/js/admin-creative-automation.js',
+    'functions/api/admin/packaging-studio.js',
+    'public/js/admin-packaging-studio.js',
     'public/js/admin-prelaunch-hub.js',
     'css/styles.css',
     'functions/api/admin/startup-readiness.js',
     'public/js/admin-startup-readiness.js',
-    'database_build228_creative_automation_prelaunch_stages.sql',
+    'database_build229_packaging_reference_authority.sql',
     'database_full_schema.sql',
     'database_schema.sql',
     'database_store_schema.sql',
     'database_upgrade_current_pass.sql',
-    'CREATIVE_AUTOMATION_STUDIO.md',
+    'PACKAGING_REFERENCE_BASELINE.md',
+    'PACKAGING_STUDIO.md',
     'PRELAUNCH_PROCESS_PLAYBOOKS.md',
     'AI_HANDOFF.md',
     'PROJECT_STATUS_AND_ROADMAP.md',
@@ -35,10 +36,9 @@ const notes = {
     'data/site/release-notes.json'
   ],
   d1_migrations: [
-    'creative_automation_workflows',
-    'creative_automation_stage_reviews',
-    'creative_automation_events',
-    'Build 228 migration ledger entry'
+    'packaging_reference_sources',
+    'Three adopted source-reference rows',
+    'Build 229 migration ledger entry'
   ]
 };
 

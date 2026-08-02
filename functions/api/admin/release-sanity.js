@@ -525,6 +525,28 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+  const packagingReferencesInstalled = await tableExists(db, 'packaging_reference_sources');
+  const packagingReferenceRows = packagingReferencesInstalled ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+      SUM(CASE WHEN review_status='adopted' AND is_active=1 THEN 1 ELSE 0 END) AS adopted,
+      SUM(CASE WHEN COALESCE(sha256,'')='' THEN 1 ELSE 0 END) AS missing_checksum
+    FROM packaging_reference_sources
+  `, [], { total:0, adopted:0, missing_checksum:0 }) : { total:0, adopted:0, missing_checksum:0 };
+  const packagingReferencePass = packagingReferencesInstalled
+    && Number(packagingReferenceRows.total || 0) === 3
+    && Number(packagingReferenceRows.adopted || 0) === 3
+    && Number(packagingReferenceRows.missing_checksum || 0) === 0;
+  addCheck(
+    checks,
+    packagingReferencePass ? 'pass' : 'fail',
+    'Build 229 packaging reference authority',
+    packagingReferencesInstalled
+      ? `${Number(packagingReferenceRows.adopted || 0)} of ${Number(packagingReferenceRows.total || 0)} packaging reference source(s) are active/adopted; ${Number(packagingReferenceRows.missing_checksum || 0)} missing checksum.`
+      : 'packaging_reference_sources is not installed.',
+    'Apply Build 229 once, open Labeling & Packaging, confirm the supplied specification, guide PDF and master SVG cards all appear, compare their checksums with PACKAGING_REFERENCE_BASELINE.md, and retain the documented rear-seal discrepancy until a physical proof determines the approved renderer profile.',
+    'error'
+  );
+
   const customerDocumentsInstalled = await tableExists(db, 'customer_documents');
   const customerDocumentRows = customerDocumentsInstalled ? await safeFirst(db, `SELECT COUNT(*) AS total, SUM(CASE WHEN document_status='void' THEN 1 ELSE 0 END) AS void_count, SUM(CASE WHEN document_type='credit_note' THEN 1 ELSE 0 END) AS credit_note_count FROM customer_documents`) : { total:0, void_count:0, credit_note_count:0 };
   const businessIdentityConfigured = Boolean(envText(context.env, 'BUSINESS_LEGAL_NAME', 'BUSINESS_NAME') && envText(context.env, 'BUSINESS_ADDRESS_LINE1', 'BUSINESS_ADDRESS'));
@@ -566,10 +588,10 @@ export async function onRequestGet(context) {
   `, [], { total:0, open_count:0 }) : { total:0, open_count:0 };
   addCheck(
     checks,
-    readinessInstalled && Number(readinessRows.total || 0) === 42 ? 'pass' : 'fail',
-    'Build 228 Startup Readiness authority',
+    readinessInstalled && Number(readinessRows.total || 0) === 43 ? 'pass' : 'fail',
+    'Build 229 Startup Readiness authority',
     readinessInstalled ? `${Number(readinessRows.total || 0)} readiness gate(s) found; ${Number(readinessRows.open_count || 0)} open.` : 'startup_readiness_items is not installed.',
-    'Open Startup Readiness with All statuses. Confirm all 42 gates load, including the five standalone prelaunch stages, without deleting or replacing prior evidence.',
+    'Open Startup Readiness with All statuses. Confirm all 43 gates load, including the five standalone prelaunch stages and the distinct missing_launch_images Critical gate, without deleting or replacing prior evidence.',
     'error'
   );
 
