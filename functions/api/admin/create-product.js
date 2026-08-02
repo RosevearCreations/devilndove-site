@@ -289,6 +289,11 @@ export async function onRequestPost(context) {
   const db = getDb(env);
   if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
 
+  const contentLength = Number(request.headers.get("Content-Length") || 0);
+  if (contentLength > 96 * 1024) {
+    return json({ ok: false, code: "product_payload_too_large", error: "This product draft is too large to save safely. Shorten embedded text or remove data URLs, then retry." }, 413);
+  }
+
   try {
     let body;
     try {
@@ -318,11 +323,13 @@ export async function onRequestPost(context) {
     );
     const color_names_json = JSON.stringify(color_names);
     const shipping_code = cleanText(body.shipping_code, 80);
-    const review_status = String(body.review_status || "pending_review").trim().toLowerCase();
+    let review_status = String(body.review_status || "pending_review").trim().toLowerCase();
     const short_description = cleanText(body.short_description, 1200);
     const description = cleanText(body.description, 6000);
     const product_type = String(body.product_type || "physical").trim().toLowerCase();
     const status = String(body.status || "draft").trim().toLowerCase();
+    const isAutosave = String(body.save_intent || "").trim().toLowerCase() === "autosave" && status === "draft";
+    if (isAutosave) review_status = "pending_review";
     const price_cents = parseInteger(body.price_cents, 0);
     const compare_at_price_cents = parseOptionalInteger(body.compare_at_price_cents);
     const currency = String(body.currency || "CAD").trim().toUpperCase() || "CAD";
@@ -514,7 +521,7 @@ export async function onRequestPost(context) {
     // Supports the direct “create and approve” workflow without making the
     // operator revisit the product solely to start the content package.
     let contentProject = null;
-    if (['approved', 'published'].includes(review_status)) {
+    if (!isAutosave && ['approved', 'published'].includes(review_status)) {
       try {
         contentProject = await createOrRefreshContentProjectForProduct(db, newProductId, Number(authCheck.sessionUser?.user_id || 0));
         try {
@@ -543,23 +550,25 @@ export async function onRequestPost(context) {
 
     // Build 210 — optional review-first social draft. This intentionally never publishes;
     // it only creates one queue item when the admin has enabled the automation.
-    let socialDraft = null;
-    try {
-      socialDraft = await maybeQueueApprovedProductSocialPost(
-        db,
-        createdProduct || { product_id: newProductId, name, slug, status, review_status, featured_image_url, short_description, description },
-        Number(authCheck.sessionUser?.user_id || 0),
-        env
-      );
-    } catch (socialError) {
-      await captureRuntimeIncident(env, request, {
-        incident_scope: "social_product_automation",
-        incident_code: "product_create_social_draft_failed",
-        severity: "warning",
-        message: "Product was created, but its optional social draft could not be prepared.",
-        related_user_id: Number(authCheck.sessionUser?.user_id || 0),
-        details: { product_id: newProductId, error: String(socialError?.message || socialError || "Unknown social draft error") }
-      }).catch(() => null);
+    let socialDraft = isAutosave ? { queued: false, code: 'AUTOSAVE_SKIPPED' } : null;
+    if (!isAutosave) {
+      try {
+        socialDraft = await maybeQueueApprovedProductSocialPost(
+          db,
+          createdProduct || { product_id: newProductId, name, slug, status, review_status, featured_image_url, short_description, description },
+          Number(authCheck.sessionUser?.user_id || 0),
+          env
+        );
+      } catch (socialError) {
+        await captureRuntimeIncident(env, request, {
+          incident_scope: "social_product_automation",
+          incident_code: "product_create_social_draft_failed",
+          severity: "warning",
+          message: "Product was created, but its optional social draft could not be prepared.",
+          related_user_id: Number(authCheck.sessionUser?.user_id || 0),
+          details: { product_id: newProductId, error: String(socialError?.message || socialError || "Unknown social draft error") }
+        }).catch(() => null);
+      }
     }
 
     await auditAdminAction(env, request, authCheck.sessionUser, {
@@ -603,7 +612,8 @@ export async function onRequestPost(context) {
           code: socialDraft.code,
           queued: Boolean(socialDraft.queued),
           social_post_queue_id: socialDraft.social_post_queue_id || null
-        } : null
+        } : null,
+        save_intent: isAutosave ? "autosave" : "manual"
       },
       201
     );
