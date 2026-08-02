@@ -88,13 +88,15 @@ async function syncProductImages(db, productId, name, featuredImageUrl, imageUrl
     if (existingId && imageColumns.has("product_image_id")) {
       const assignments = [];
       const binds = [];
-      assignments.push("image_url = ?"); binds.push(imageUrl);
-      if (imageColumns.has("sort_order")) { assignments.push("sort_order = ?"); binds.push(index); }
-      else if (imageColumns.has("display_order")) { assignments.push("display_order = ?"); binds.push(index); }
-      if (imageColumns.has("alt_text")) { assignments.push("alt_text = COALESCE(NULLIF(alt_text, ''), ?)"); binds.push(fallbackAlt); }
-      if (imageColumns.has("updated_at")) assignments.push("updated_at = CURRENT_TIMESTAMP");
-      binds.push(existingId);
-      await db.prepare(`UPDATE product_images SET ${assignments.join(", ")} WHERE product_image_id = ?`).bind(...binds).run().catch(() => null);
+      if (String(existing?.image_url || "") !== imageUrl) { assignments.push("image_url = ?"); binds.push(imageUrl); }
+      if (imageColumns.has("sort_order") && Number(existing?.sort_order ?? -1) !== index) { assignments.push("sort_order = ?"); binds.push(index); }
+      else if (imageColumns.has("display_order") && Number(existing?.display_order ?? -1) !== index) { assignments.push("display_order = ?"); binds.push(index); }
+      if (imageColumns.has("alt_text") && !String(existing?.alt_text || "").trim()) { assignments.push("alt_text = ?"); binds.push(fallbackAlt); }
+      if (assignments.length) {
+        if (imageColumns.has("updated_at")) assignments.push("updated_at = CURRENT_TIMESTAMP");
+        binds.push(existingId);
+        await db.prepare(`UPDATE product_images SET ${assignments.join(", ")} WHERE product_image_id = ?`).bind(...binds).run().catch(() => null);
+      }
       keptIds.push(existingId);
     } else {
       const columns = ["product_id", "image_url"];
@@ -120,6 +122,7 @@ async function syncProductImages(db, productId, name, featuredImageUrl, imageUrl
       const key = normalizeImageKey(row?.image_url);
       if (!rowId || explicitKeys.has(key)) continue;
       const orderColumn = imageColumns.has("sort_order") ? "sort_order" : "display_order";
+      if (Number(row?.[orderColumn] ?? -1) === retainedOrder) { retainedOrder += 1; continue; }
       const orderAssignments = [`${orderColumn} = ?`];
       if (imageColumns.has("updated_at")) orderAssignments.push("updated_at = CURRENT_TIMESTAMP");
       await db.prepare(`UPDATE product_images SET ${orderAssignments.join(", ")} WHERE product_image_id = ?`)
@@ -243,6 +246,11 @@ export async function onRequestPost(context) {
   const db = getDb(env);
   if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
 
+  const contentLength = Number(request.headers.get("Content-Length") || 0);
+  if (contentLength > 96 * 1024) {
+    return json({ ok: false, code: "product_payload_too_large", error: "This product draft is too large to save safely. Shorten embedded text or remove data URLs, then retry." }, 413);
+  }
+
   try {
     let body;
     try {
@@ -267,11 +275,12 @@ export async function onRequestPost(context) {
     );
     const color_names_json = JSON.stringify(color_names);
     const shipping_code = String(body.shipping_code || "").trim() || null;
-    const review_status = String(body.review_status || "pending_review").trim().toLowerCase();
+    let review_status = String(body.review_status || "pending_review").trim().toLowerCase();
     const short_description = String(body.short_description || "").trim() || null;
     const description = String(body.description || "").trim() || null;
     const product_type = String(body.product_type || "").trim().toLowerCase();
     const status = String(body.status || "draft").trim().toLowerCase();
+    const isAutosave = String(body.save_intent || "").trim().toLowerCase() === "autosave" && status === "draft";
     const price_cents = Number(body.price_cents);
     const compare_at_price_cents =
       body.compare_at_price_cents == null || body.compare_at_price_cents === ""
@@ -362,6 +371,9 @@ export async function onRequestPost(context) {
       .bind(product_id)
       .first();
     if (!existingProduct) return json({ ok: false, error: "Product not found." }, 404);
+    // Autosave persists working fields but never changes review approval. A deliberate
+    // Update Product action remains the only editor path that can start approval automation.
+    if (isAutosave) review_status = String(existingProduct.review_status || "pending_review").trim().toLowerCase();
 
     const existingImagesResult = await db
       .prepare(`SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, product_image_id ASC`)
@@ -523,7 +535,7 @@ export async function onRequestPost(context) {
     const previousReviewStatus = String(existingProduct?.review_status || '').trim().toLowerCase();
     const isApprovedNow = ['approved', 'published'].includes(review_status);
     const wasApproved = ['approved', 'published'].includes(previousReviewStatus);
-    if (isApprovedNow && !wasApproved) {
+    if (!isAutosave && isApprovedNow && !wasApproved) {
       try {
         contentProject = await createOrRefreshContentProjectForProduct(db, product_id, Number(authCheck.sessionUser?.user_id || 0));
         try {
@@ -552,28 +564,30 @@ export async function onRequestPost(context) {
 
     // Build 210 — optional review-first social draft after the product update.
     // The helper is idempotent and will not publish or create a duplicate queue item.
-    let socialDraft = null;
-    try {
-      socialDraft = await maybeQueueApprovedProductSocialPost(
-        db,
-        updatedProduct || { product_id, name, slug, status, review_status, featured_image_url, short_description, description },
-        Number(authCheck.sessionUser?.user_id || 0),
-        env
-      );
-    } catch (socialError) {
-      await captureRuntimeIncident(env, request, {
-        incident_scope: "social_product_automation",
-        incident_code: "product_update_social_draft_failed",
-        severity: "warning",
-        message: "Product update succeeded, but its optional social draft could not be prepared.",
-        related_user_id: Number(authCheck.sessionUser?.user_id || 0),
-        details: { product_id, error: String(socialError?.message || socialError || "Unknown social draft error") }
-      }).catch(() => null);
+    let socialDraft = isAutosave ? { queued: false, code: 'AUTOSAVE_SKIPPED' } : null;
+    if (!isAutosave) {
+      try {
+        socialDraft = await maybeQueueApprovedProductSocialPost(
+          db,
+          updatedProduct || { product_id, name, slug, status, review_status, featured_image_url, short_description, description },
+          Number(authCheck.sessionUser?.user_id || 0),
+          env
+        );
+      } catch (socialError) {
+        await captureRuntimeIncident(env, request, {
+          incident_scope: "social_product_automation",
+          incident_code: "product_update_social_draft_failed",
+          severity: "warning",
+          message: "Product update succeeded, but its optional social draft could not be prepared.",
+          related_user_id: Number(authCheck.sessionUser?.user_id || 0),
+          details: { product_id, error: String(socialError?.message || socialError || "Unknown social draft error") }
+        }).catch(() => null);
+      }
     }
 
     const updatedImagesResult = { results: syncedImages };
 
-    await db.prepare(`
+    if (!isAutosave) await db.prepare(`
       INSERT INTO product_media_change_audit (
         product_id, action_key, media_kind, media_url, details_json, created_by_user_id, created_at
       ) VALUES (?, ?, 'image', ?, ?, ?, CURRENT_TIMESTAMP)
@@ -585,7 +599,7 @@ export async function onRequestPost(context) {
       Number(authCheck.sessionUser?.user_id || 0) || null
     ).run().catch(() => null);
 
-    await auditAdminAction(env, request, authCheck.sessionUser, {
+    if (!isAutosave) await auditAdminAction(env, request, authCheck.sessionUser, {
       action_type: "product_update",
       target_type: "product",
       target_id: Number(updatedProduct?.product_id || product_id),
@@ -625,7 +639,8 @@ export async function onRequestPost(context) {
         code: socialDraft.code,
         queued: Boolean(socialDraft.queued),
         social_post_queue_id: socialDraft.social_post_queue_id || null
-      } : null
+      } : null,
+      save_intent: isAutosave ? "autosave" : "manual"
     });
   } catch (error) {
     await captureRuntimeIncident(env, request, {
