@@ -1,1 +1,1 @@
-throw new Error('Build 228 synchronization is retired. Run node scripts/sync-build229-aggregate-schema.mjs so the Build 229 packaging-reference authority cannot be removed accidentally.');
+throw new Error('Build 228 synchronization is retired. Run node scripts/sync-build230-aggregate-schema.mjs so the current visual image manifest cannot be removed accidentally.');
