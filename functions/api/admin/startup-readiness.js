@@ -1,9 +1,9 @@
 // File: /functions/api/admin/startup-readiness.js
-// Build 233 — complete blocker register plus bounded login/session-retention proof.
+// Build 234 — complete blocker register plus bounded login/session-retention proof.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '233';
+const BUILD = '234';
 const STARTUP_ITEMS = [
   {
     "key": "deployment_preflight_standalone",
@@ -14,9 +14,9 @@ const STARTUP_ITEMS = [
     "severity": "critical",
     "live": 0,
     "route": "/admin/deployment-preflight/",
-    "external": "Build 233 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md",
-    "instructions": "1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.\n2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, aggregate-schema, repeated-current-migration, Startup 43-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.\n3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.\n4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest and three public image bands.\n5. Confirm Build 233 adds no D1 migration: database_upgrade_current_pass.sql remains identical to database_build230_visual_image_manifest.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.\n6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 233 consistently while naming Build 230 as the current D1 migration.\n7. Confirm the three adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.\n8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.\n9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.\n10. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.",
-    "pass": "The exact Build 233 archive passes every static, bounded-login/session-retention, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker."
+    "external": "Build 234 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md",
+    "instructions": "1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.\n2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, aggregate-schema, repeated-current-migration, Startup 44-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.\n3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.\n4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest, Labeling & Packaging, Creative Automation and three public image bands.\n5. Confirm database_upgrade_current_pass.sql remains identical to database_build234_packaging_templates_creative_cleanup.sql and the Build 234 migration contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.\n6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 234 consistently while naming Build 234 as the current D1 migration.\n7. Confirm the five adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.\n8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.\n9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.\n10. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.",
+    "pass": "The exact Build 234 archive passes every static, bounded-login/session-retention, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker."
   },
   {
     "key": "backup_migrate_deploy",
@@ -28,8 +28,8 @@ const STARTUP_ITEMS = [
     "live": 1,
     "route": "/admin/deployment-preflight/",
     "external": "Cloudflare Dashboard → Workers & Pages → D1 and Pages deployments",
-    "instructions": "1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.\n2. Record the date, database name and safe recovery reference in the evidence notes.\n3. Confirm the Build 229 migration is already present, then apply database_build230_visual_image_manifest.sql or the identical database_upgrade_current_pass.sql, but not both.\n4. Confirm the migration ledger records build230_visual_image_manifest, image_manifest_items and image_manifest_history exist, and 20 active manifest seed rows load without overwriting mutable review evidence.\n5. Deploy the complete ZIP rather than selected files.\n6. Record the Pages deployment URL and deployment/commit identifier.\n7. Open Startup Readiness with All statuses and confirm all 43 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images and open its Visual Image Manifest route.\n8. Confirm the manifest loads from D1 rather than Unsynced fallback and preserves the three generated-editorial provenance rows.\n9. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.\n10. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.",
-    "pass": "A recoverable D1 point exists, the Build 230 migration is applied once after Build 229, the complete deployment is live, all 43 gates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains."
+    "instructions": "1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.\n2. Record the date, database name and safe recovery reference in the evidence notes.\n3. Confirm ledger keys build229_packaging_reference_authority and build230_visual_image_manifest already exist, then apply database_build234_packaging_templates_creative_cleanup.sql or the identical database_upgrade_current_pass.sql, but not both.\n4. Confirm the ledger also records build234_packaging_templates_creative_cleanup; verify the five packaging references, five new reusable system templates, 20 active image-manifest rows and unchanged mutable review evidence.\n5. Deploy the complete ZIP rather than selected files.\n6. Record the Pages deployment URL and deployment/commit identifier.\n7. Open Startup Readiness with All statuses and confirm all 44 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images and open its Visual Image Manifest route.\n8. Confirm the manifest loads from D1 rather than Unsynced fallback and preserves the three generated-editorial provenance rows.\n9. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.\n10. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.",
+    "pass": "A recoverable D1 point exists, the Build 234 migration is applied once after Builds 229 and 230, the complete deployment is live, all 44 gates, five packaging references, five new reusable templates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains."
   },
   {
     "key": "post_deploy_smoke_standalone",
@@ -41,7 +41,7 @@ const STARTUP_ITEMS = [
     "live": 1,
     "route": "/admin/post-deploy-smoke-tests/",
     "external": "Production domain, browser developer tools, Cloudflare Pages Functions logs, and POST_DEPLOY_SMOKE_TEST.md",
-    "instructions": "1. Confirm the deployment ID and Build 230 migration evidence match the package that passed Deployment Preflight.\n2. Open the production home, handmade-jewelry, gift-card, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.\n3. Confirm the three generated WebP illustrations load at phone and desktop sizes, disclose editorial use, preserve one H1, and are absent from Product/Offer structured data and real-product galleries.\n4. Sign in with an owner-controlled administrator and test Startup Readiness, Visual Image Manifest, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map.\n5. In the manifest, filter open blockers, open a route, make one reversible review update, reload, and confirm database history. Test the API failure path and confirm the full 20-row Unsynced fallback remains visible with saving disabled.\n6. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.\n7. At phone, tablet, laptop and wide-desktop widths, check navigation, image crops, cards, forms, tables, focus, touch targets, contrast and horizontal overflow on every changed route.\n8. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.\n9. Open Startup Readiness with All statuses, confirm 43 unique gates and locate the missing-launch-images Critical blocker.\n10. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner. After any correction/redeploy, repeat all smoke checks.\n11. Continue to Deploy Readiness only when every critical smoke result passes.",
+    "instructions": "1. Confirm the deployment ID and Build 234 migration evidence match the package that passed Deployment Preflight.\n2. Open the production home, handmade-jewelry, gift-card, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.\n3. Confirm the three generated WebP illustrations load at phone and desktop sizes, disclose editorial use, preserve one H1, and are absent from Product/Offer structured data and real-product galleries.\n4. Sign in with an owner-controlled administrator and test Startup Readiness, Visual Image Manifest, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map.\n5. In the manifest, filter open blockers, open a route, make one reversible review update, reload, and confirm database history. Test the API failure path and confirm the full 20-row Unsynced fallback remains visible with saving disabled.\n6. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.\n7. At phone, tablet, laptop and wide-desktop widths, check navigation, image crops, cards, forms, tables, focus, touch targets, contrast and horizontal overflow on every changed route.\n8. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.\n9. Open Startup Readiness with All statuses, confirm 44 unique gates and locate the missing-launch-images Critical blocker.\n10. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner. After any correction/redeploy, repeat all smoke checks.\n11. Continue to Deploy Readiness only when every critical smoke result passes.",
     "pass": "The exact production deployment passes all critical public, authentication, admin, API, fallback, mobile/desktop and SEO smoke checks with current evidence and no unresolved critical result."
   },
   {
@@ -67,7 +67,7 @@ const STARTUP_ITEMS = [
     "live": 1,
     "route": "/login/",
     "external": "Production website and the configured transactional email provider",
-    "instructions": "1. Deploy the complete Build 233 package, hard refresh to service-worker shell v14, and record the Pages deployment ID before testing.\n2. Open a private browser window, open Developer Tools → Network, enable Preserve log, and load /login/ without storing the password in evidence.\n3. Open /api/auth/login in a separate tab and confirm HTTP 200 JSON reports response_profile auth_login_bounded_v1 and diagnostic_mode binding_only; a normal GET must not run full schema discovery.\n4. Submit an owner-controlled administrator login and confirm POST /api/auth/login returns HTTP 200 JSON, X-DD-Auth-Profile auth_login_bounded_v1, a session cookie, the correct role and the expected redirect. Never copy the token into evidence.\n5. In Cloudflare Workers & Pages → the production project → Functions/Workers Logs and Metrics, filter the login timestamp and confirm the invocation was successful with no exceededCpu, exceededMemory or 1102 outcome.\n6. Confirm the redirected page calls /api/auth/me once, returns HTTP 200 JSON with response_profile auth_session_bounded_v1, and remains signed in after one normal refresh.\n7. Test one deliberately wrong password and confirm HTTP 401 structured JSON AUTH_INVALID_CREDENTIALS, no redirect and no new authenticated session.\n8. While a valid session exists, use browser request blocking for /api/auth/me, reload /login/, and confirm the account widget says the session was retained/verification is temporarily unavailable; local storage and cookie must not be erased by a network/503 failure. Remove the block and confirm the next verification succeeds.\n9. Log out normally and verify the auth token/cookie is cleared and protected pages/APIs return a real 401 rather than continuing access.\n10. Request a password reset from the public recovery page; confirm delivery, one-time use, rejection of an expired/reused link, and successful login with the new password.\n11. Test Logout All Sessions in two browsers and confirm the older session receives 401 and is cleared, while a temporary 503 still does not masquerade as an invalid session.\n12. Confirm a deliberately expired owner-controlled session receives 401 and a clear login path; do not wait on a real production account or alter customer sessions.\n13. Record deployment ID, UTC/local timestamp, route, HTTP status, response code/profile, browser/device, Cloudflare invocation outcome and pass/fail result without passwords, cookies or tokens.\n14. If any step returns 503/1102, keep this gate Failed or Blocked, capture the Cloudflare invocation outcome, redeploy/roll back as appropriate and repeat all fourteen steps from a clean private session.",
+    "instructions": "1. Deploy the complete Build 234 package, hard refresh to service-worker shell v15, and record the Pages deployment ID before testing.\n2. Open a private browser window, open Developer Tools → Network, enable Preserve log, and load /login/ without storing the password in evidence.\n3. Open /api/auth/login in a separate tab and confirm HTTP 200 JSON reports response_profile auth_login_bounded_v1 and diagnostic_mode binding_only; a normal GET must not run full schema discovery.\n4. Submit an owner-controlled administrator login and confirm POST /api/auth/login returns HTTP 200 JSON, X-DD-Auth-Profile auth_login_bounded_v1, a session cookie, the correct role and the expected redirect. Never copy the token into evidence.\n5. In Cloudflare Workers & Pages → the production project → Functions/Workers Logs and Metrics, filter the login timestamp and confirm the invocation was successful with no exceededCpu, exceededMemory or 1102 outcome.\n6. Confirm the redirected page calls /api/auth/me once, returns HTTP 200 JSON with response_profile auth_session_bounded_v1, and remains signed in after one normal refresh.\n7. Test one deliberately wrong password and confirm HTTP 401 structured JSON AUTH_INVALID_CREDENTIALS, no redirect and no new authenticated session.\n8. While a valid session exists, use browser request blocking for /api/auth/me, reload /login/, and confirm the account widget says the session was retained/verification is temporarily unavailable; local storage and cookie must not be erased by a network/503 failure. Remove the block and confirm the next verification succeeds.\n9. Log out normally and verify the auth token/cookie is cleared and protected pages/APIs return a real 401 rather than continuing access.\n10. Request a password reset from the public recovery page; confirm delivery, one-time use, rejection of an expired/reused link, and successful login with the new password.\n11. Test Logout All Sessions in two browsers and confirm the older session receives 401 and is cleared, while a temporary 503 still does not masquerade as an invalid session.\n12. Confirm a deliberately expired owner-controlled session receives 401 and a clear login path; do not wait on a real production account or alter customer sessions.\n13. Record deployment ID, UTC/local timestamp, route, HTTP status, response code/profile, browser/device, Cloudflare invocation outcome and pass/fail result without passwords, cookies or tokens.\n14. If any step returns 503/1102, keep this gate Failed or Blocked, capture the Cloudflare invocation outcome, redeploy/roll back as appropriate and repeat all fourteen steps from a clean private session.",
     "pass": "Bounded login, session verification, temporary-503 retention, logout, reset, one-time token use, deliberate expiry, and logout-all work in production with no exceeded-resource outcome and no continued access after an explicit invalidation."
   },
   {
@@ -357,6 +357,19 @@ const STARTUP_ITEMS = [
     "pass": "Each launch soap has a saved, physically measured, wrapped, passed, approved, and archived label version linked to its exact structured source data."
   },
   {
+    "key": "candle_top_template_proof",
+    "phase": "packaging",
+    "phase_label": "Soap, packaging, and regulatory readiness",
+    "title": "Measure, save, laser-test, approve, and archive each candle-top template",
+    "order": 245,
+    "severity": "critical",
+    "live": 0,
+    "route": "/admin/packaging-studio/",
+    "external": "Physical candle lid or blank, laser/printer settings, owner-supplied wedding sample, and PACKAGING_STUDIO.md",
+    "instructions": "1. Open Labeling & Packaging, create or open the intended candle-top project, and select the closest round system template; never reuse a soap or generic rectangle template.\n2. Measure the actual lid or laser blank in millimetres with an appropriate ruler or caliper. Record the usable diameter separately from any lip, bevel, fixture or no-burn area.\n3. In Layout, enter the measured canvas diameter, safe margin and bleed/trim allowance. Select round plus the wedding, centred-candle or maker-mark design profile that matches the job.\n4. In Artwork & Colours, replace the sample names, original date, occasion, celebration date, upper website arc and lower origin arc. Keep all customer wording editable; do not bake names or dates into the illustration.\n5. Confirm the preview uses centred text anchors and curved text paths, both rings are concentric, permanent website/origin wording is present, and no line crosses the safe area.\n6. Enter a specific reusable template name that includes nominal size and use, such as 3.75-inch wedding candle top, add material/fixture notes, and select Save these dimensions and features as a reusable template. Reload the project and confirm the custom template remains selected.\n7. Save the project and a review version, export SVG, and archive its filename and checksum. Do not treat browser PNG/JPG or the AI-created line-art raster as a vector engraving master unless the chosen laser workflow has accepted and traced it.\n8. Run one owner-controlled material test using the exact blank, laser/printer, power/speed/DPI, focus, masking and fixture settings intended for production. Keep flammable candle material out of an unsafe test setup and follow the equipment/material manufacturer instructions.\n9. Measure the finished result and inspect centring, legibility, line weight, arc direction, spelling, dates, scorching/colour, edge clearance and fixture rotation. Photograph the proof without exposing private customer information beyond approved wording.\n10. In Print Test, record 100% scale, round diameter, material/stock, equipment, physical checks, proof URL and factual notes. A failed size, spelling, material or centring result requires a new version and full retest.\n11. Approve only the exact version that passed and keep the source sample, generated text-free artwork, exported file, settings and proof evidence together for the repeat job. Never overwrite an approved customer version silently.\n12. Repeat this gate for every new physical size, blank/material, artwork profile, laser/printer setting or meaningful wording-layout change.",
+    "pass": "Every launch candle top or engraved round uses a saved exact-size reusable template with editable wording, centred static brand elements, an archived export/checksum, and a passed physical proof on the intended blank and production method."
+  },
+  {
     "key": "health_canada_notification",
     "phase": "packaging",
     "phase_label": "Soap, packaging, and regulatory readiness",
@@ -594,6 +607,7 @@ const GATE_FIX_FOCUS = {
   policies_legal:'remove contradictory promises, correct policy and checkout/product wording together, obtain owner/legal review where needed, and repeat every footer/checkout link test',
   soap_formula_ingredients:'block the label/product, correct the authoritative formula and INCI/bilingual facts, supersede stale drafts, and repeat ingredient/claim review',
   soap_print_proof:'keep the version unapproved, correct layout/overflow/scale/material issues, save a new version, and repeat a measured 100%-scale wrap test with proof',
+  candle_top_template_proof:'keep the candle-top version unapproved, remeasure the physical blank, correct template size/safe area/centred wording or material settings, save a new version, and repeat the physical laser or print proof',
   health_canada_notification:'stop sale when required, correct the notification/change record using the authoritative formula/label facts, and save the submitted acknowledgement/reference',
   packaging_prepress_boundary:'reject the file as a production master, correct dieline/bleed/font/colour/output settings with the printer, and repeat preflight plus physical proof',
   analytics_consent:'disable the affected tag/event, correct consent gating and deduplication without sending personal/sensitive data, then retest debug and production streams',
@@ -647,69 +661,6 @@ function fallbackRows() {
     pass_condition: item.pass, item_status: 'not_started', owner_name: '', due_date: '', evidence_url: '',
     evidence_notes: '', blocked_reason: '', completed_at: null, updated_at: null
   }));
-}
-async function ensureSchema(db) {
-  const statements = [
-    `CREATE TABLE IF NOT EXISTS startup_readiness_items (
-      startup_readiness_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      item_key TEXT NOT NULL UNIQUE,
-      phase_key TEXT NOT NULL,
-      phase_label TEXT NOT NULL,
-      item_title TEXT NOT NULL,
-      sort_order INTEGER NOT NULL DEFAULT 100,
-      blocker_severity TEXT NOT NULL DEFAULT 'high',
-      is_launch_blocker INTEGER NOT NULL DEFAULT 1,
-      requires_live_binding INTEGER NOT NULL DEFAULT 0,
-      target_route TEXT,
-      external_location TEXT,
-      instructions_markdown TEXT NOT NULL,
-      pass_condition TEXT NOT NULL,
-      item_status TEXT NOT NULL DEFAULT 'not_started',
-      owner_name TEXT,
-      due_date TEXT,
-      evidence_url TEXT,
-      evidence_notes TEXT,
-      blocked_reason TEXT,
-      completed_at TEXT,
-      completed_by_user_id INTEGER,
-      last_updated_by_user_id INTEGER,
-      is_active INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_startup_readiness_items_phase_status ON startup_readiness_items(is_active, phase_key, item_status, sort_order)`,
-    `CREATE INDEX IF NOT EXISTS idx_startup_readiness_items_severity ON startup_readiness_items(is_active, blocker_severity, item_status)`,
-    `CREATE TABLE IF NOT EXISTS startup_readiness_history (
-      startup_readiness_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      startup_readiness_item_id INTEGER NOT NULL,
-      item_key TEXT NOT NULL,
-      previous_status TEXT,
-      next_status TEXT NOT NULL,
-      owner_name TEXT,
-      due_date TEXT,
-      evidence_url TEXT,
-      evidence_notes TEXT,
-      blocked_reason TEXT,
-      changed_by_user_id INTEGER,
-      changed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(startup_readiness_item_id) REFERENCES startup_readiness_items(startup_readiness_item_id) ON DELETE CASCADE
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_startup_readiness_history_item ON startup_readiness_history(startup_readiness_item_id, changed_at DESC)`
-  ];
-  for (const statement of statements) await db.prepare(statement).run();
-}
-async function seedItems(db) {
-  for (const item of STARTUP_ITEMS) {
-    await db.prepare(`INSERT INTO startup_readiness_items
-      (item_key,phase_key,phase_label,item_title,sort_order,blocker_severity,is_launch_blocker,requires_live_binding,target_route,external_location,instructions_markdown,pass_condition,is_active)
-      VALUES (?1,?2,?3,?4,?5,?6,1,?7,?8,?9,?10,?11,1)
-      ON CONFLICT(item_key) DO UPDATE SET
-        phase_key=excluded.phase_key,phase_label=excluded.phase_label,item_title=excluded.item_title,sort_order=excluded.sort_order,
-        blocker_severity=excluded.blocker_severity,is_launch_blocker=1,requires_live_binding=excluded.requires_live_binding,
-        target_route=excluded.target_route,external_location=excluded.external_location,instructions_markdown=excluded.instructions_markdown,
-        pass_condition=excluded.pass_condition,is_active=1,updated_at=CURRENT_TIMESTAMP`)
-      .bind(item.key,item.phase,item.phase_label,item.title,item.order,item.severity,item.live,item.route,item.external,item.instructions,item.pass).run();
-  }
 }
 function statsFor(rows) {
   const isClosed = (row) => ['passed','not_applicable'].includes(String(row.item_status || ''));
@@ -781,8 +732,6 @@ async function requireAdmin(context) {
 export async function onRequestGet(context) {
   const access = await requireAdmin(context); if (access.error) return access.error;
   try {
-    await ensureSchema(access.db);
-    await seedItems(access.db);
     return json(await readData(access.db));
   } catch (error) {
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'startup_readiness',incident_code:'startup_readiness_get_degraded',severity:'warning',message:error?.message||'Startup readiness could not load from D1.',related_user_id:access.adminUser.user_id,details:{error:String(error?.stack||error)}}).catch(()=>null);
@@ -795,9 +744,7 @@ export async function onRequestPost(context) {
   let body = {}; try { body = await context.request.json(); } catch { return json({ok:false,error:'Expected a JSON request body.'},400); }
   const action = text(body.action,80).toLowerCase();
   try {
-    await ensureSchema(access.db);
-    await seedItems(access.db);
-    if (action === 'seed_items' || action === 'export_markdown') return json({...(await readData(access.db)),message:'Startup readiness list refreshed.'});
+    if (action === 'seed_items' || action === 'export_markdown') return json({...(await readData(access.db)),message:'Startup readiness list reloaded. Canonical gate definitions are installed by the current migration, not rewritten during this request.'});
     if (!['save_item','mark_complete','reopen_item'].includes(action)) return json({ok:false,error:'Unsupported startup readiness action.'},400);
     const itemKey = text(body.item_key,120);
     const current = await access.db.prepare(`SELECT * FROM startup_readiness_items WHERE item_key=?1 AND is_active=1`).bind(itemKey).first();
