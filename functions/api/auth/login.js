@@ -1,11 +1,10 @@
 // File: /functions/api/auth/login.js
 // Devil n Dove Cloudflare Pages + D1 login endpoint.
 //
-// Build 204 auth compatibility safeguard:
-// - Auth uses the Pages D1 binding named DB.
-// - A legacy bootstrap used members + a different sessions table; this endpoint
-//   detects that schema before authenticating and returns a precise safe code.
-// - The paired SQL repair preserves member rows and archives legacy sessions.
+// Build 233 authentication resource-limit hotfix:
+// - POST validates the request before touching D1 and avoids per-login schema inspection.
+// - A successful login uses one bounded user read and one atomic D1 batch.
+// - Full legacy-schema diagnostics remain available only through an explicit GET.
 
 const AUTH_ROUTE_HEADERS = {
   "Content-Type": "application/json",
@@ -160,56 +159,67 @@ function loginUnavailable(authDatabase) {
 
 async function handleLoginPost(context) {
   const { request, env } = context;
-  const authDatabase = await inspectAuthDatabase(env);
-  if (!authDatabase.ready) return loginUnavailable(authDatabase);
-
   let body;
   try { body = await request.json(); } catch { return json({ ok: false, error: "Invalid JSON body.", code: "AUTH_INVALID_JSON" }, 400); }
   const email = normalizeEmail(body.email);
   const password = String(body.password || "");
   if (!email) return json({ ok: false, error: "Email is required.", code: "AUTH_EMAIL_REQUIRED" }, 400);
   if (!password) return json({ ok: false, error: "Password is required.", code: "AUTH_PASSWORD_REQUIRED" }, 400);
+  if (!env?.DB || typeof env.DB.prepare !== "function" || typeof env.DB.batch !== "function") {
+    return loginUnavailable({
+      code: "AUTH_DB_BINDING_MISSING",
+      hint: "Connect the Production Cloudflare D1 binding named DB to this Pages project."
+    });
+  }
 
-  const user = await env.DB.prepare("SELECT user_id, email, password_hash, display_name, role, is_active, created_at, updated_at FROM users WHERE LOWER(email)=LOWER(?) LIMIT 1").bind(email).first();
+  let user;
+  try {
+    // Registered and administrator emails are stored normalized. The exact lookup uses
+    // idx_users_email and keeps the production login hot path bounded.
+    user = await env.DB.prepare("SELECT user_id, email, password_hash, display_name, role, is_active, created_at, updated_at FROM users WHERE email = ? LIMIT 1").bind(email).first();
+  } catch (error) {
+    return json({
+      ok: false,
+      error: "Login is temporarily unavailable.",
+      code: "AUTH_USER_LOOKUP_FAILED",
+      hint: "Check the Production D1 binding and current users table, then run the explicit login diagnostic.",
+      detail: compactError(error)
+    }, 503, { "X-DD-Auth-Code": "AUTH_USER_LOOKUP_FAILED" });
+  }
   if (!user) return json({ ok: false, error: "Invalid email or password.", code: "AUTH_INVALID_CREDENTIALS" }, 401);
   if (Number(user.is_active || 0) !== 1) return json({ ok: false, error: "This account is inactive.", code: "AUTH_ACCOUNT_INACTIVE" }, 403);
   if (!(await verifyStoredPasswordHash(password, user.password_hash))) return json({ ok: false, error: "Invalid email or password.", code: "AUTH_INVALID_CREDENTIALS" }, 401);
 
   const sessionToken = makeSessionToken();
+  const createdAt = new Date();
+  const expiresAt = new Date(createdAt.getTime() + (60 * 60 * 24 * 30 * 1000));
+  const databaseTimestamp = (date) => date.toISOString().slice(0, 19).replace("T", " ");
   try {
-    await env.DB.prepare("INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) VALUES (?, ?, ?, datetime('now', '+30 days'), CURRENT_TIMESTAMP)").bind(Number(user.user_id || 0), sessionToken, sessionToken).run();
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) VALUES (?, ?, ?, ?, ?)")
+        .bind(Number(user.user_id || 0), sessionToken, sessionToken, databaseTimestamp(expiresAt), databaseTimestamp(createdAt)),
+      env.DB.prepare("UPDATE users SET last_login_at = ?, updated_at = ? WHERE user_id = ?")
+        .bind(databaseTimestamp(createdAt), databaseTimestamp(createdAt), Number(user.user_id || 0))
+    ]);
   } catch (error) {
     return json({
       ok: false,
       error: "Login is temporarily unavailable.",
       code: "AUTH_SESSION_CREATE_FAILED",
-      hint: "The account was verified, but D1 could not create its login session. Check the sessions table columns and the response detail.",
+      hint: "The account was verified, but D1 could not create its login session. The atomic batch was rolled back; check the sessions table and explicit login diagnostic.",
       detail: compactError(error)
     }, 503, { "X-DD-Auth-Code": "AUTH_SESSION_CREATE_FAILED" });
   }
 
-  let session;
-  try {
-    session = await env.DB.prepare("SELECT session_id, user_id, session_token, token, expires_at, created_at FROM sessions WHERE user_id = ? ORDER BY session_id DESC LIMIT 1").bind(Number(user.user_id || 0)).first();
-  } catch (error) {
-    return json({
-      ok: false,
-      error: "Login is temporarily unavailable.",
-      code: "AUTH_SESSION_READ_FAILED",
-      hint: "D1 created a session but could not read it back. Check the sessions table columns and the response detail.",
-      detail: compactError(error)
-    }, 503, { "X-DD-Auth-Code": "AUTH_SESSION_READ_FAILED" });
-  }
-  await env.DB.prepare("UPDATE users SET last_login_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE user_id=?").bind(Number(user.user_id || 0)).run().catch(() => null);
-
   return json({
     ok: true,
     message: "Login successful.",
-    session_token: session?.session_token || sessionToken,
-    token: session?.token || sessionToken,
-    session: { session_id: Number(session?.session_id || 0), session_token: session?.session_token || sessionToken, token: session?.token || sessionToken, expires_at: session?.expires_at || null, created_at: session?.created_at || null },
+    response_profile: "auth_login_bounded_v1",
+    session_token: sessionToken,
+    token: sessionToken,
+    session: { session_id: 0, session_token: sessionToken, token: sessionToken, expires_at: databaseTimestamp(expiresAt), created_at: databaseTimestamp(createdAt) },
     user: { user_id: Number(user.user_id || 0), email: user.email || email, display_name: user.display_name || "", role: user.role || "member", is_active: Number(user.is_active || 0), created_at: user.created_at || null, updated_at: user.updated_at || null }
-  }, 200, { "Set-Cookie": buildSessionCookie(request, session?.session_token || sessionToken) });
+  }, 200, { "Set-Cookie": buildSessionCookie(request, sessionToken), "X-DD-Auth-Profile": "auth_login_bounded_v1" });
 }
 
 export async function onRequest(context) {
@@ -217,7 +227,20 @@ export async function onRequest(context) {
   if (method === "OPTIONS") return empty(204);
 
   if (method === "GET" || method === "HEAD") {
-    const authDatabase = await inspectAuthDatabase(context?.env);
+    const requestUrl = new URL(context.request.url);
+    const runFullDiagnostic = requestUrl.searchParams.get("diagnostic") === "full";
+    const hasDbBinding = !!context?.env?.DB && typeof context.env.DB.prepare === "function";
+    const authDatabase = runFullDiagnostic
+      ? await inspectAuthDatabase(context?.env)
+      : {
+          binding_available: hasDbBinding,
+          ping: "not_run",
+          ready: hasDbBinding,
+          code: hasDbBinding ? "AUTH_BINDING_PRESENT" : "AUTH_DB_BINDING_MISSING",
+          hint: hasDbBinding
+            ? "Use ?diagnostic=full for an owner-requested schema diagnostic; POST does not run schema discovery."
+            : "Connect the Production Cloudflare D1 binding named DB to this Pages project."
+        };
     return json({
       ok: true,
       route: "/api/auth/login",
@@ -226,7 +249,9 @@ export async function onRequest(context) {
       functions_active: true,
       has_db_binding: authDatabase.binding_available,
       auth_database: authDatabase,
-      note: "Submit login credentials with POST JSON: { email, password }."
+      response_profile: "auth_login_bounded_v1",
+      diagnostic_mode: runFullDiagnostic ? "full" : "binding_only",
+      note: "Submit login credentials with POST JSON: { email, password }. Full schema diagnostics require ?diagnostic=full."
     }, 200);
   }
 
