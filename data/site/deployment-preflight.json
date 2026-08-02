@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 229",
+  "build_label": "Build 230",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,7 +7,7 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "119 required files are present.",
+      "detail": "132 required files are present.",
       "missing": []
     },
     {
@@ -38,19 +38,19 @@
     {
       "code": "static_markdown_authority",
       "status": "pass",
-      "detail": "Two Build 229 canonical authorities, scoped specialist playbooks, adopted packaging sources, historical retirement policy, and 43 generated Startup sections agree.",
+      "detail": "Two Build 230 canonical authorities, scoped specialist playbooks, visual provenance, historical retirement policy, and 43 generated Startup sections agree.",
       "missing": []
     },
     {
       "code": "static_schema_current",
       "status": "pass",
-      "detail": "Build 174 through Build 229 schema tables and current migration markers found in the correct schema files.",
+      "detail": "Build 174 through Build 230 schema tables and current migration markers found in the correct schema files.",
       "missing": []
     },
     {
       "code": "static_d1_migration_compatibility",
       "status": "pass",
-      "detail": "Current and numbered Build 229 migrations are identical and contain no explicit SQL transaction statements."
+      "detail": "Current and numbered Build 230 migrations are identical and contain no explicit SQL transaction statements."
     },
     {
       "code": "static_public_pages",
@@ -270,7 +270,7 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 2397/2397"
+      "detail": "CSS braces 2456/2456"
     },
     {
       "code": "static_json_parse",
