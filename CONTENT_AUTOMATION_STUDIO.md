@@ -1,4 +1,4 @@
-# Content Automation Studio — Build 228 specialist-stage pointer
+# Content Automation Studio — Build 229 specialist-stage pointer
 
 Content Automation Studio is preserved in full as stages 4–5 of the master process at `/admin/creative-automation/`. It remains the authority for source-linked packages and deliverable drafts; the master stores only owner/stage/evidence orchestration. Creative Process remains the process/material authority, CAIP remains the asset/rights/evidence authority, Content Release Board remains the public-release authority, and Social Publishing remains the reviewed provider handoff. See `CREATIVE_AUTOMATION_STUDIO.md` for the current end-to-end workflow. Everything below is retained specialist/historical detail and cannot override the two canonical handoff files.
 

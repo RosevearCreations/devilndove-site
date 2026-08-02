@@ -1,10 +1,16 @@
 # Devil n Dove — Images Required
 
-**Audited build:** Build 228 — Creative Automation and Prelaunch Operations  
+**Audited build:** Build 229 — Packaging reference authority and explicit missing-image launch gate  
 **Purpose:** Replace public-facing placeholder graphics with truthful, approved Devil n Dove photography while keeping internal workflow diagrams where they are useful.  
 **Priority rule:** Replace public storefront/service placeholders first. Admin-only diagrams are not missing product photography and do not need replacement unless we want a different branded illustration.
 
-**Build 228 internal placeholders:** `assets/creative-automation-master-process.svg` and `assets/prelaunch-operations-map.svg` are descriptive admin-only planning graphics. Keep them out of Product/Offer structured data, Open Graph images and launch-product galleries. Replace public launch placeholders only with owned/approved representative photography.
+**Build 229 Startup authority:** `missing_launch_images` is a separate **Critical** gate in `/admin/startup-readiness/`. This file is its required manifest. The gate remains Failed or Blocked until every launch-route/product requirement below has an approved final URL, rights record and phone/desktop proof. Missing, broken, generic fallback, planning-placeholder and duplicated-as-substitute images all count as unresolved.
+
+**Internal placeholders:** `assets/creative-automation-master-process.svg` and `assets/prelaunch-operations-map.svg` are descriptive admin-only planning graphics. Keep them out of Product/Offer structured data, Open Graph images and launch-product galleries. Replace public launch placeholders only with owned/approved representative photography.
+
+## Startup evidence fields
+
+For every required public image, record: route or product ID; image role; current missing/placeholder/broken status; owner; rights/consent state; source/original; final public URL; descriptive alt text; phone result; desktop result; reviewer; review date. Do not mark the Critical gate Complete from a total count or folder upload alone.
 
 ---
 

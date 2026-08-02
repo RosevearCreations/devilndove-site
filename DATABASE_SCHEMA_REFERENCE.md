@@ -1,17 +1,20 @@
-# Devil n Dove Database Schema Reference — Build 228
+# Devil n Dove Database Schema Reference — Build 229
 
-## Build 228 database boundary
+## Build 229 database boundary
 
-Back up D1 and confirm Build 227 is installed. Apply `database_build228_creative_automation_prelaunch_stages.sql` or the identical `database_upgrade_current_pass.sql`, not both. Build 228 adds:
+Back up D1 and confirm Build 228 is installed. Apply `database_build229_packaging_reference_authority.sql` or the identical `database_upgrade_current_pass.sql`, not both. Build 229 adds:
 
-- `creative_automation_workflows` — one master orchestration row per Creative Process project.
-- `creative_automation_stage_reviews` — one status/evidence review per workflow stage.
-- `creative_automation_events` — append-only master workflow/stage transition evidence.
-- migration ledger key `build228_creative_automation_prelaunch_stages`.
+- `packaging_reference_sources` — one registered row per adopted packaging-direction file with source key/name/type, repository path, SHA-256, authority scope, structured dimensions, notes and active/adopted review state.
+- three idempotent source rows for the supplied Markdown specification, PDF guide and SVG master.
+- migration ledger key `build229_packaging_reference_authority`.
 
-These tables do not duplicate specialist facts. Creative Process, CAIP, Content Studio, Release Board, social/provider, product, inventory and analytics records remain authoritative. The master stores only cross-stage ownership/status/evidence.
+This table does not duplicate editable packaging projects or label content. It registers provenance/direction; packaging projects, normalized soap rows, versions, exports and physical print tests remain their specialist authorities. `PACKAGING_REFERENCE_BASELINE.md` documents the dimensional discrepancy and approval rule.
 
 The migration contains no `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK`. Do not add them for D1/Durable Object execution; use the JavaScript storage transaction APIs when a JavaScript transaction is required.
+
+## Build 228 retained boundary
+
+Build 228 added `creative_automation_workflows`, `creative_automation_stage_reviews`, `creative_automation_events` and ledger key `build228_creative_automation_prelaunch_stages`. Those orchestration tables remain additive and do not duplicate specialist Creative Process, CAIP, Content Studio, publication, social or analytics facts.
 
 ## Build 227 retained boundary
 
@@ -19,12 +22,12 @@ Build 227 added `packaging_components`, `customer_document_sequences`, immutable
 
 ## Historical Build 226 boundary
 
-Build 226 was a code-only Startup Readiness loading repair. Build 225 created the readiness tables and 37 original item keys. Build 228 preserves those keys and seeds five additional process keys through the runtime authority, for 42 expected active rows without overwriting existing operator status/evidence.
+Build 226 was a code-only Startup Readiness loading repair. Build 225 created the readiness tables and 37 original item keys. Build 228 preserved those keys and seeded five additional process keys. Build 229 preserves all 42 and seeds `missing_launch_images`, for 43 expected active rows without overwriting existing operator status/evidence.
 
 ## Current schema authority
 
 - Fresh database: `database_full_schema.sql` or the intentionally scoped aggregate schema appropriate to the deployment.
-- Existing production database: confirm Build 227 is installed, then apply one Build 228 migration named above.
+- Existing production database: confirm Build 228 is installed, then apply one Build 229 migration named above.
 - The Build 225 current-pass migration creates and seeds `startup_readiness_items` and `startup_readiness_history`. It does not replay the historical Packaging Studio/Soap Label migrations.
 - Production must already include the Build 221 Packaging Studio and Build 222 normalized soap-label tables before applying Build 225.
 - Builds 223 and 224 were code-only product-detail/gallery compatibility repairs and required no schema migration.
@@ -41,11 +44,11 @@ Append-only-style evidence for each status update, including prior/next status, 
 - Broad project/template/version/export state: `packaging_templates`, `packaging_projects`, `packaging_project_versions`, `packaging_export_history`.
 - Normalized soap content and proof: `soap_label_templates`, `soap_products`, `soap_ingredients`, `soap_label_claims`, `soap_label_exports`, `soap_label_print_tests`.
 - Commerce price, public product identity, and sellable inventory remain in `products` and established inventory tables.
-- `PACKAGING_STUDIO.md` is the single human-readable packaging specification; the root and docs-tree soap-label files are compatibility pointers.
+- `PACKAGING_STUDIO.md` is the current human-readable implementation map. `PACKAGING_REFERENCE_BASELINE.md` and the three adopted source files govern packaging direction; the root soap-label file is a compatibility pointer.
 
 ## Current migration boundary
 
-`database_upgrade_current_pass.sql` is the additive Build 228 migration only and is byte-identical to its numbered file. It assumes Build 227. Do not use it as an accumulated history replay. Use numbered historical migrations to understand/repair an older database, and back up D1 before applying any production change.
+`database_upgrade_current_pass.sql` is the additive Build 229 migration only and is byte-identical to its numbered file. It assumes Build 228. Do not use it as an accumulated history replay. Use numbered historical migrations to understand/repair an older database, and back up D1 before applying any production change.
 
 ---
 
@@ -193,10 +196,10 @@ Build 222 extends the Build 221 Packaging Studio rather than creating a disconne
 `soap-ribbon-glacial-approved-v1` uses an 11 × 1.5-inch artboard and renders the rear seal at 38.1 mm so it fits. `soap-ribbon-spec-50mm-seal-v1` uses a 50 mm-high artboard and a true 50 mm rear seal. This intentionally exposes the physical conflict in the source specification rather than clipping or mislabelling a file.
 
 ### Historical Build 222 migration boundary
-Build 222 introduced the normalized soap-label tables. Existing databases should already contain them before Build 225. The historical numbered Build 227 migration does not replay Build 222 or Build 225; it contains only the Build 227 packaging-component and client-document additions. The current-pass file is now Build 228 only.
+Build 222 introduced the normalized soap-label tables. Existing databases should already contain them before Build 225. The historical numbered Build 227 migration does not replay Build 222 or Build 225; it contains only the Build 227 packaging-component and client-document additions. The current-pass file is now Build 229 only.
 ## Build 225 — Startup Readiness status authority
 
-Historical additive migration: `database_build225_startup_readiness_packaging_authority.sql`. It must already be applied before the numbered Build 227 migration, and Build 227 must precede the current Build 228 migration.
+Historical additive migration: `database_build225_startup_readiness_packaging_authority.sql`. It must already be applied before Build 227; Build 227 and Build 228 must precede the current Build 229 migration.
 
 New tables:
 - `startup_readiness_items` — the authoritative go-live item definition and current status, owner, due date, evidence, blocked reason, completion, severity, route, and pass condition.

@@ -1,6 +1,6 @@
-# Build 228 competitive direction — review-led creative operations and local clarity
+# Build 229 competitive direction — review-led creative operations and local clarity
 
-Build 228 adopts a common competitive pattern from current social-management products without copying their unattended-risk model: one shared workflow, role/stage visibility, changes-requested/approval decisions and channel-specific handoff. Hootsuite and Later both document content approval workflows; Devil n Dove adds stronger source-rights/evidence, inventory/cost, public-release and honest provider-result boundaries suited to a handmade business.
+Build 229 retains the competitive pattern reviewed in Build 228: one shared workflow, role/stage visibility, changes-requested/approval decisions and channel-specific handoff. It strengthens the handmade-business differentiator with checksum-traceable packaging sources, physical-proof geometry decisions and an explicit no-placeholder launch gate.
 
 Current sources:
 

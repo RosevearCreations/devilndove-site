@@ -1,9 +1,9 @@
-# Devil n Dove Soap Label Automation Specification — Build 228 Compatibility Pointer
+# Devil n Dove Soap Label Automation Specification — Build 229 Compatibility Pointer
 
-The single authoritative packaging and soap-label specification is now:
+The exact user-supplied specification is preserved at:
 
 ```text
-PACKAGING_STUDIO.md
+docs/packaging/source-references/DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md
 ```
 
-This compatibility file remains so older chats, links, and documentation references do not break. Do **not** maintain a second copy here. All physical dimensions, visual rules, data models, workflow, implementation status, launch gates, and future packaging changes must be updated in `PACKAGING_STUDIO.md`.
+Use `PACKAGING_REFERENCE_BASELINE.md` for the three-file checksum/dimension baseline and `PACKAGING_STUDIO.md` for current implementation reconciliation. This compatibility file remains so older chats and links do not break. Do **not** maintain a second editable copy here.

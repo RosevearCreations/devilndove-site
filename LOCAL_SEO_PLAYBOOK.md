@@ -1,8 +1,8 @@
-# Local SEO and Public Content Playbook — Build 228
+# Local SEO and Public Content Playbook — Build 229
 
 This is a specialist implementation guide, not a second roadmap. Current priorities are in `PROJECT_STATUS_AND_ROADMAP.md`.
 
-## Build 228 recurring local-search pass
+## Build 229 recurring local-search pass
 
 1. Run the public HTML scan and require exactly one H1, a distinctive title, useful description, canonical and visible introductory copy on every indexable page.
 2. Put words real buyers use in the title, main heading, opening copy, product facts and descriptive internal links only where they accurately describe the page.
@@ -11,6 +11,7 @@ This is a specialist implementation guide, not a second roadmap. Current priorit
 5. Compare the website with Google Business Profile name, categories, phone, site, hours, service/pickup area, products/services and real current photos.
 6. Review Search Console queries/pages/indexing and Business Profile actions monthly. Make changes from observed gaps; do not guarantee first-page position because distance and prominence remain outside direct control.
 7. Recheck phone layout, tap targets, text wrapping, image fallback and page speed after every CSS/media change.
+8. Keep every missing/fallback/placeholder public asset in the `missing_launch_images` Critical gate; only final approved representative media may enter structured data, social previews or Business Profile workflows.
 
 ## Non-negotiable public SEO rules
 
