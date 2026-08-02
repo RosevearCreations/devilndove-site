@@ -1,4 +1,8 @@
-# Devil n Dove Database Schema Reference — Build 231
+# Devil n Dove Database Schema Reference — Build 232
+
+## Build 232 database boundary
+
+Build 232 is code-only. It adds no table, column, seed or migration-ledger row. The current production schema boundary remains Build 230, and `database_upgrade_current_pass.sql` remains byte-identical to `database_build230_visual_image_manifest.sql`. Product-removal safety is implemented through a bounded code registry whose aggregate-schema coverage is validated by `scripts/build232_product_removal_test.mjs`; no migration should be applied merely because the application package is Build 232.
 
 ## Build 231 database boundary
 

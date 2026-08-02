@@ -1,12 +1,22 @@
-# Cloudflare Environment Checklist — Devil n Dove (Build 231)
+# Cloudflare Environment Checklist — Devil n Dove (Build 232)
 
-_Last updated: Build 231 product autosave/reload resource-limit hotfix, Build 230 visual manifest, 43-gate Startup system and retained read-only Meta credential tests._
+_Last updated: Build 232 archived-product removal hotfix, retained Build 231 autosave/reload recovery, Build 230 visual manifest, 43-gate Startup system and retained read-only Meta credential tests._
 
 This checklist explains **exactly where to add each setting in Cloudflare** and **where to find or create each value**.
 
 ## Build 230 environment note
 
 Build 230 introduces no new secret or external-provider variable. It requires the existing production D1 binding. Back up D1, confirm Build 229, apply one Build 230 migration without explicit SQL transaction statements, then test `/api/admin/image-manifest`, `/api/admin/packaging-studio`, `/api/admin/creative-automation` and `/api/admin/startup-readiness`. Confirm 20 visual rows, three generated provenance rows, three adopted packaging references and 43 readiness gates. Do not store creative/visual/Startup evidence or Meta token values in environment-variable documentation.
+
+## Build 232 archived-product removal check
+
+Build 232 adds no variable and no D1 migration. After deployment and a hard refresh to `devilndove-shell-v13`:
+
+1. Open `/admin/products/` → **Draft & Archive Cleanup** → **Archived** and use an owner-controlled unused archived product.
+2. Select **Check removal** and confirm `/api/admin/delete-product?product_id=<ID>` returns HTTP 200 JSON with `cleanup_profile: bounded_registry_v1`.
+3. Confirm a normal archive/media-change audit does not block that disposable product, while an order-, packaging-, creative-project-, recall- or customer-history product remains **Archive only**.
+4. Complete the reviewed deletion only for the disposable record; confirm inventory and deletion audit effects occur exactly once.
+5. In Functions Metrics/Logs, filter `/api/admin/delete-product` and confirm the GET and POST produced no `exceededCpu`, `exceededMemory`, raw Cloudflare HTML or JSON parsing error.
 
 ## Build 231 Worker resource-limit check
 
@@ -17,7 +27,7 @@ Cloudflare currently documents a 10 ms CPU budget for Workers Free and explains 
 1. Open Cloudflare Dashboard → Workers & Pages → the Devil n Dove project → Metrics → Errors → Invocation Statuses.
 2. Check whether the matching timestamp is **Exceeded CPU Time Limits** or **Exceeded Memory**.
 3. Open Workers Logs and filter for `/api/admin/product-detail`, `/api/admin/create-product` and `/api/admin/update-product`. Record timestamp, route, invocation outcome, CPU time, wall time and a non-secret product ID only.
-4. Confirm the browser is running Build 231 (`devilndove-shell-v12` after refresh). Load Draft product 45 and confirm the Product Detail request returns HTTP 200 JSON with `response_profile: editor_compact_v1`; then autosave twice, edit while the first save is throttled, reload and run the browser-recovery test in `BUILD231_VALIDATION.md`.
+4. Confirm the browser is running Build 232 (`devilndove-shell-v13` after refresh), which retains the Build 231 repair. Load Draft product 45 and confirm the Product Detail request returns HTTP 200 JSON with `response_profile: editor_compact_v1`; then autosave twice, edit while the first save is throttled, reload and run the browser-recovery test in `BUILD231_VALIDATION.md`.
 5. Keep the Startup `runtime_incident_fallback` gate Failed or Blocked if an `exceededCpu`/`exceededMemory` result recurs. A Worker terminated by Cloudflare may not reach application catch/incident code, so the platform log is required evidence.
 6. Optimize/reduce the failing request before considering a paid-plan CPU-limit increase. Do not treat a higher limit as proof that an unbounded loop, large payload or memory problem is fixed.
 
