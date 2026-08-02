@@ -144,6 +144,7 @@
     error.code = normalizeText(data?.code || (resourceLimit ? 'cloudflare_worker_resource_limit' : 'invalid_api_response'));
     error.hint = normalizeText(data?.hint);
     error.detail = normalizeText(data?.detail);
+    error.payload = data;
     error.cloudflareErrorType = cloudflareErrorType;
     error.isCloudflareResourceLimit = resourceLimit;
     error.isRetryable = status === 0 || status === 408 || status === 429 || status >= 500;
