@@ -1,9 +1,9 @@
-// Build 213 — project-first Creative Process Engine foundation.
+// Build 234 — project-first Creative Process Engine without request-time schema DDL.
 import { createOrRefreshContentProjectForCreativeProject, createOrRefreshContentProjectForProduct, ensureContentAutomationSchema } from '../_lib/contentAutomationStudio.js';
 import { ensureCreativeAssetIntelligenceSchema, syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '220';
+const BUILD = '234';
 const OUTPUTS = [
   ['youtube_video','YouTube video','video'], ['youtube_shorts','YouTube Shorts','video'],
   ['instagram_reels','Instagram Reels','social'], ['tiktok_videos','TikToks','social'],
@@ -19,186 +19,6 @@ function json(data,status=200){ return jsonResponse(data,status,{'Cache-Control'
 function num(value){ const n=Number(value||0); return Number.isInteger(n)&&n>0?n:0; }
 function text(value,max=4000){ return normalizeText(value).slice(0,max); }
 
-async function ensureSchema(db){
-  const statements = [
-    `CREATE TABLE IF NOT EXISTS creative_work_projects (
-      creative_work_project_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      project_key TEXT NOT NULL UNIQUE,
-      project_title TEXT NOT NULL,
-      project_type TEXT NOT NULL DEFAULT 'maker_project',
-      project_status TEXT NOT NULL DEFAULT 'idea',
-      summary TEXT, objective TEXT, story_angle TEXT, product_id INTEGER,
-      started_at TEXT, completed_at TEXT, total_minutes INTEGER NOT NULL DEFAULT 0,
-      estimated_cost_cents INTEGER NOT NULL DEFAULT 0, actual_cost_cents INTEGER NOT NULL DEFAULT 0,
-      privacy_status TEXT NOT NULL DEFAULT 'internal', rights_status TEXT NOT NULL DEFAULT 'needs_review',
-      created_by INTEGER, updated_by INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_work_events (
-      creative_work_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL,
-      event_type TEXT NOT NULL DEFAULT 'note', event_title TEXT NOT NULL,
-      event_notes TEXT, occurred_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      duration_minutes INTEGER NOT NULL DEFAULT 0,
-      material_name TEXT, material_quantity REAL, material_unit TEXT, material_cost_cents INTEGER NOT NULL DEFAULT 0,
-      media_url TEXT, is_public_candidate INTEGER NOT NULL DEFAULT 0,
-      created_by INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_work_outputs (
-      creative_work_output_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL,
-      output_key TEXT NOT NULL, output_label TEXT NOT NULL, output_group TEXT NOT NULL,
-      output_status TEXT NOT NULL DEFAULT 'planned', approval_status TEXT NOT NULL DEFAULT 'needs_review',
-      linked_record_type TEXT, linked_record_id INTEGER, output_url TEXT, notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(creative_work_project_id, output_key),
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_work_projects_status ON creative_work_projects(project_status)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_work_events_project ON creative_work_events(creative_work_project_id, occurred_at)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_work_outputs_project ON creative_work_outputs(creative_work_project_id, output_status)`,
-    `CREATE TABLE IF NOT EXISTS creative_project_product_links (
-      creative_project_product_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL, product_id INTEGER NOT NULL,
-      relationship_type TEXT NOT NULL DEFAULT 'project_output',
-      is_primary INTEGER NOT NULL DEFAULT 0, notes TEXT,
-      created_by INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(creative_work_project_id, product_id),
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
-      FOREIGN KEY(product_id) REFERENCES products(product_id) ON DELETE CASCADE
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_project_product_links_project ON creative_project_product_links(creative_work_project_id, is_primary)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_project_product_links_product ON creative_project_product_links(product_id)`,
-    `CREATE TABLE IF NOT EXISTS creative_project_evidence_selections (
-      creative_project_evidence_selection_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL, creative_work_event_id INTEGER NOT NULL,
-      evidence_role TEXT NOT NULL DEFAULT 'process_evidence', selected INTEGER NOT NULL DEFAULT 1,
-      review_notes TEXT, reviewed_by INTEGER, reviewed_at TEXT,
-      UNIQUE(creative_work_project_id, creative_work_event_id),
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
-      FOREIGN KEY(creative_work_event_id) REFERENCES creative_work_events(creative_work_event_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_project_material_reviews (
-      creative_project_material_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL, creative_work_event_id INTEGER NOT NULL,
-      review_status TEXT NOT NULL DEFAULT 'pending', actual_quantity REAL, waste_quantity REAL,
-      reusable_quantity REAL, approved_cost_cents INTEGER NOT NULL DEFAULT 0, review_notes TEXT,
-      inventory_consumed INTEGER NOT NULL DEFAULT 0, reviewed_by INTEGER, reviewed_at TEXT,
-      UNIQUE(creative_work_project_id, creative_work_event_id),
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
-      FOREIGN KEY(creative_work_event_id) REFERENCES creative_work_events(creative_work_event_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_project_profitability (
-      creative_work_project_id INTEGER PRIMARY KEY, labour_rate_cents INTEGER NOT NULL DEFAULT 0,
-      packaging_cost_cents INTEGER NOT NULL DEFAULT 0, overhead_cost_cents INTEGER NOT NULL DEFAULT 0,
-      channel_fee_cents INTEGER NOT NULL DEFAULT 0, shipping_cost_cents INTEGER NOT NULL DEFAULT 0,
-      revenue_cents INTEGER NOT NULL DEFAULT 0, estimated_content_value_cents INTEGER NOT NULL DEFAULT 0,
-      notes TEXT, updated_by INTEGER, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_project_content_handoffs (
-      creative_project_content_handoff_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL, content_project_id INTEGER,
-      handoff_status TEXT NOT NULL DEFAULT 'draft', evidence_count INTEGER NOT NULL DEFAULT 0,
-      package_json TEXT NOT NULL, created_by INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_project_inventory_posts (
-      creative_project_inventory_post_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL,
-      creative_work_event_id INTEGER NOT NULL,
-      creative_project_material_review_id INTEGER NOT NULL,
-      site_item_inventory_id INTEGER NOT NULL,
-      stock_quantity_consumed INTEGER NOT NULL,
-      previous_on_hand_quantity INTEGER NOT NULL,
-      new_on_hand_quantity INTEGER NOT NULL,
-      posting_status TEXT NOT NULL DEFAULT 'posted',
-      reversal_post_id INTEGER,
-      posted_by INTEGER,
-      posted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      notes TEXT,
-      UNIQUE(creative_project_material_review_id),
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
-      FOREIGN KEY(creative_work_event_id) REFERENCES creative_work_events(creative_work_event_id) ON DELETE CASCADE,
-      FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE RESTRICT
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_project_inventory_posts_project ON creative_project_inventory_posts(creative_work_project_id, posted_at DESC)`,
-    `CREATE TABLE IF NOT EXISTS creative_project_caip_mirrors (
-      creative_project_caip_mirror_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL,
-      creative_project_id INTEGER NOT NULL,
-      source_handoff_id INTEGER,
-      evidence_count INTEGER NOT NULL DEFAULT 0,
-      mirror_status TEXT NOT NULL DEFAULT 'needs_review',
-      mirrored_by INTEGER,
-      mirrored_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      notes TEXT,
-      UNIQUE(creative_work_project_id, creative_project_id),
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_project_cost_templates (
-      creative_project_cost_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      template_name TEXT NOT NULL UNIQUE,
-      labour_rate_cents INTEGER NOT NULL DEFAULT 0,
-      packaging_cost_cents INTEGER NOT NULL DEFAULT 0,
-      overhead_cost_cents INTEGER NOT NULL DEFAULT 0,
-      channel_fee_percent REAL NOT NULL DEFAULT 0,
-      shipping_cost_cents INTEGER NOT NULL DEFAULT 0,
-      is_active INTEGER NOT NULL DEFAULT 1,
-      created_by INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )`,
-    `CREATE TABLE IF NOT EXISTS creative_project_inventory_reversals (
-      creative_project_inventory_reversal_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_project_inventory_post_id INTEGER NOT NULL UNIQUE,
-      creative_work_project_id INTEGER NOT NULL,
-      site_item_inventory_id INTEGER NOT NULL,
-      stock_quantity_restored INTEGER NOT NULL,
-      previous_on_hand_quantity INTEGER NOT NULL,
-      new_on_hand_quantity INTEGER NOT NULL,
-      reason TEXT NOT NULL,
-      authorized_by INTEGER NOT NULL,
-      authorized_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(creative_project_inventory_post_id) REFERENCES creative_project_inventory_posts(creative_project_inventory_post_id) ON DELETE RESTRICT
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_project_profitability_extensions (
-      creative_work_project_id INTEGER PRIMARY KEY,
-      channel_fee_percent REAL NOT NULL DEFAULT 0,
-      fixed_channel_fee_cents INTEGER NOT NULL DEFAULT 0,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_project_cost_allocations (
-      creative_project_cost_allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL,
-      product_id INTEGER NOT NULL,
-      allocation_percent REAL NOT NULL DEFAULT 0,
-      allocated_cost_cents INTEGER NOT NULL DEFAULT 0,
-      notes TEXT,
-      updated_by INTEGER,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(creative_work_project_id, product_id),
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE,
-      FOREIGN KEY(product_id) REFERENCES products(product_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_project_knowledge_summaries (
-      creative_project_knowledge_summary_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_work_project_id INTEGER NOT NULL,
-      summary_type TEXT NOT NULL,
-      summary_text TEXT NOT NULL,
-      source_evidence_count INTEGER NOT NULL DEFAULT 0,
-      review_status TEXT NOT NULL DEFAULT 'needs_review',
-      reviewed_by INTEGER,
-      reviewed_at TEXT,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(creative_work_project_id, summary_type),
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
-    )`
-  ];
-  for (const sql of statements) await db.prepare(sql).run();
-}
 async function requireAdmin(context){
   const adminUser=await getAdminUserFromRequest(context.request,context.env);
   if(!adminUser) return {error:json({ok:false,error:'Admin access required.'},401)};
@@ -245,7 +65,6 @@ async function seedOutputs(db,id,projectType='maker_project'){
 export async function onRequestGet(context){
   const access=await requireAdmin(context); if(access.error) return access.error;
   try{
-    await ensureSchema(access.db);
     const url=new URL(context.request.url);
     const id=num(url.searchParams.get('project_id'));
     const productId=num(url.searchParams.get('product_id'));
@@ -265,7 +84,6 @@ export async function onRequestPost(context){
   let body={}; try{body=await context.request.json();}catch{}
   const action=text(body.action,80).toLowerCase();
   try{
-    await ensureSchema(access.db);
     let projectId=num(body.creative_work_project_id||body.project_id); let message='Saved.';
     if(action==='create_project'){
       const title=text(body.project_title,180); if(!title) throw new Error('Project title is required.');

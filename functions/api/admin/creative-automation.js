@@ -1,4 +1,4 @@
-// Build 228 — master Creative Automation Studio orchestration layer.
+// Build 234 — master Creative Automation Studio with guarded duplicate cleanup.
 // Existing project, CAIP, Content Studio, publication and social records remain
 // authoritative; this endpoint stores only cross-stage ownership/review state.
 import {
@@ -10,7 +10,7 @@ import {
   normalizeText
 } from '../_lib/adminAudit.js';
 
-const BUILD='228';
+const BUILD='234';
 const STAGES=[
   {key:'process',order:10,label:'1. Creative process',route:'/admin/creative-process/',authority:'Creative Process Engine',description:'Idea, scope, timeline, tools, experiments, mistakes, repairs, lessons and intended outputs.',pass:'The project summary and at least one factual timeline entry are saved.',correction:'Open Creative Process, add the missing project facts or timeline evidence, save, and reload this master workflow.'},
   {key:'materials_cost',order:20,label:'2. Materials, inventory and cost',route:'/admin/creative-process/',authority:'Creative Process Engine',description:'Material review, explicit inventory posting/reversal, time, packaging, channel fees, shared cost and profitability.',pass:'Every recorded material is reviewed or the stage is deliberately marked not applicable, and cost assumptions are documented.',correction:'Review each material row, correct quantities/costs, use only audited inventory posting or reversal, then recalculate profitability.'},
@@ -27,44 +27,6 @@ const REVIEW_STATUSES=new Set(['not_started','in_progress','blocked','needs_revi
 function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store'});}
 function id(value){const n=Number(value||0);return Number.isInteger(n)&&n>0?n:0;}
 function text(value,max=5000){return normalizeText(value).slice(0,max);}
-
-async function ensureSchema(db){
-  const statements=[
-    `CREATE TABLE IF NOT EXISTS creative_automation_workflows (
-      creative_automation_workflow_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      workflow_key TEXT NOT NULL UNIQUE,
-      creative_work_project_id INTEGER NOT NULL UNIQUE,
-      workflow_status TEXT NOT NULL DEFAULT 'planning',
-      current_stage_key TEXT NOT NULL DEFAULT 'process',
-      owner_user_id INTEGER, due_date TEXT, blocked_reason TEXT, operator_notes TEXT,
-      created_by_user_id INTEGER, updated_by_user_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_automation_stage_reviews (
-      creative_automation_stage_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_automation_workflow_id INTEGER NOT NULL,
-      stage_key TEXT NOT NULL,
-      review_status TEXT NOT NULL DEFAULT 'not_started',
-      evidence_reference TEXT, review_notes TEXT, reviewed_by_user_id INTEGER, reviewed_at TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(creative_automation_workflow_id,stage_key),
-      FOREIGN KEY(creative_automation_workflow_id) REFERENCES creative_automation_workflows(creative_automation_workflow_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_automation_events (
-      creative_automation_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_automation_workflow_id INTEGER NOT NULL,
-      event_type TEXT NOT NULL, stage_key TEXT, previous_status TEXT, next_status TEXT,
-      details_json TEXT, created_by_user_id INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(creative_automation_workflow_id) REFERENCES creative_automation_workflows(creative_automation_workflow_id) ON DELETE CASCADE
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_automation_workflows_status ON creative_automation_workflows(workflow_status,current_stage_key,updated_at DESC)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_automation_stage_reviews_workflow ON creative_automation_stage_reviews(creative_automation_workflow_id,stage_key,review_status)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_automation_events_workflow ON creative_automation_events(creative_automation_workflow_id,created_at DESC)`
-  ];
-  for(const statement of statements) await db.prepare(statement).run();
-}
 
 async function safeFirst(db,sql,bindings=[]){
   try{return await db.prepare(sql).bind(...bindings).first();}
@@ -91,6 +53,59 @@ async function ensureWorkflow(db,projectId,userId){
     workflow_key,creative_work_project_id,created_by_user_id,updated_by_user_id,created_at,updated_at
   ) VALUES (?1,?2,?3,?3,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(`creative-${projectId}`,projectId,userId||null).run();
   return db.prepare('SELECT * FROM creative_automation_workflows WHERE creative_work_project_id=?1').bind(projectId).first();
+}
+
+async function projectDeletionPreview(db,projectId){
+  const row=await db.prepare(`SELECT
+    p.creative_work_project_id,p.project_key,p.project_title,p.project_status,p.product_id,
+    COALESCE(w.creative_automation_workflow_id,0) workflow_id,
+    COALESCE(w.workflow_status,'') workflow_status,COALESCE(w.current_stage_key,'') current_stage_key,
+    COALESCE(w.due_date,'') due_date,COALESCE(w.blocked_reason,'') blocked_reason,COALESCE(w.operator_notes,'') operator_notes,
+    (SELECT COUNT(*) FROM creative_work_events e WHERE e.creative_work_project_id=p.creative_work_project_id) event_count,
+    (SELECT COUNT(*) FROM creative_work_outputs o WHERE o.creative_work_project_id=p.creative_work_project_id) output_count,
+    (SELECT COUNT(*) FROM creative_work_outputs o WHERE o.creative_work_project_id=p.creative_work_project_id AND (COALESCE(o.output_status,'planned')<>'planned' OR COALESCE(o.approval_status,'needs_review')<>'needs_review' OR o.linked_record_id IS NOT NULL OR TRIM(COALESCE(o.output_url,''))<>'' OR TRIM(COALESCE(o.notes,''))<>'')) modified_output_count,
+    (SELECT COUNT(*) FROM creative_project_product_links x WHERE x.creative_work_project_id=p.creative_work_project_id) product_link_count,
+    (SELECT COUNT(*) FROM creative_project_product_links x WHERE x.creative_work_project_id=p.creative_work_project_id AND (COALESCE(x.relationship_type,'project_output')<>'project_output' OR COALESCE(x.is_primary,0)<>1 OR TRIM(COALESCE(x.notes,''))<>'')) modified_product_link_count,
+    (SELECT COUNT(*) FROM creative_project_evidence_selections x WHERE x.creative_work_project_id=p.creative_work_project_id) evidence_count,
+    (SELECT COUNT(*) FROM creative_project_material_reviews x WHERE x.creative_work_project_id=p.creative_work_project_id) material_review_count,
+    (SELECT COUNT(*) FROM creative_project_inventory_posts x WHERE x.creative_work_project_id=p.creative_work_project_id) inventory_post_count,
+    (SELECT COUNT(*) FROM creative_project_inventory_reversals x WHERE x.creative_work_project_id=p.creative_work_project_id) inventory_reversal_count,
+    (SELECT COUNT(*) FROM creative_project_content_handoffs x WHERE x.creative_work_project_id=p.creative_work_project_id) content_handoff_count,
+    (SELECT COUNT(*) FROM creative_project_caip_mirrors x WHERE x.creative_work_project_id=p.creative_work_project_id) caip_mirror_count,
+    (SELECT COUNT(*) FROM creative_project_profitability x WHERE x.creative_work_project_id=p.creative_work_project_id) profitability_count,
+    (SELECT COUNT(*) FROM creative_project_profitability_extensions x WHERE x.creative_work_project_id=p.creative_work_project_id) profitability_extension_count,
+    (SELECT COUNT(*) FROM creative_project_cost_allocations x WHERE x.creative_work_project_id=p.creative_work_project_id) allocation_count,
+    (SELECT COUNT(*) FROM creative_project_knowledge_summaries x WHERE x.creative_work_project_id=p.creative_work_project_id) knowledge_count,
+    (SELECT COUNT(*) FROM creative_automation_stage_reviews r WHERE r.creative_automation_workflow_id=w.creative_automation_workflow_id) stage_review_count,
+    (SELECT COUNT(*) FROM creative_automation_events e WHERE e.creative_automation_workflow_id=w.creative_automation_workflow_id AND e.event_type<>'workflow_linked') meaningful_workflow_event_count,
+    (SELECT COUNT(*) FROM creative_automation_events e WHERE e.creative_automation_workflow_id=w.creative_automation_workflow_id) workflow_event_count
+    FROM creative_work_projects p
+    LEFT JOIN creative_automation_workflows w ON w.creative_work_project_id=p.creative_work_project_id
+    WHERE p.creative_work_project_id=?1`).bind(projectId).first();
+  if(!row) throw Object.assign(new Error('Creative project was not found.'),{code:'NOT_FOUND'});
+
+  const blockers=[];
+  if(!['idea','planning'].includes(String(row.project_status||'idea'))) blockers.push(`Project status is ${row.project_status}; archive completed or active work instead.`);
+  if(Number(row.event_count)>0) blockers.push(`${row.event_count} timeline event(s) contain project evidence.`);
+  if(Number(row.product_link_count)>1||Number(row.modified_product_link_count)>0) blockers.push(`${row.product_link_count} product link row(s) include deliberate relationship, primary or note changes.`);
+  if(Number(row.modified_output_count)>0) blockers.push(`${row.modified_output_count} output plan row(s) contain status, approval, link, URL or notes changes.`);
+  if(Number(row.evidence_count)>0) blockers.push(`${row.evidence_count} selected evidence row(s) exist.`);
+  if(Number(row.material_review_count)>0) blockers.push(`${row.material_review_count} material review row(s) exist.`);
+  if(Number(row.inventory_post_count)>0||Number(row.inventory_reversal_count)>0) blockers.push('Inventory posting or reversal history exists and cannot be removed here.');
+  if(Number(row.content_handoff_count)>0) blockers.push(`${row.content_handoff_count} Content Studio handoff(s) exist.`);
+  if(Number(row.caip_mirror_count)>0) blockers.push(`${row.caip_mirror_count} CAIP mirror link(s) exist.`);
+  if(Number(row.profitability_count)>0||Number(row.profitability_extension_count)>0) blockers.push('Profitability work exists.');
+  if(Number(row.allocation_count)>0) blockers.push(`${row.allocation_count} product cost allocation(s) exist.`);
+  if(Number(row.knowledge_count)>0) blockers.push(`${row.knowledge_count} reviewed knowledge summary row(s) exist.`);
+  if(Number(row.stage_review_count)>0||Number(row.meaningful_workflow_event_count)>0) blockers.push('Master workflow review/history exists beyond the initial tracking link.');
+  if(row.workflow_id&&(row.workflow_status!=='planning'||(row.current_stage_key&&row.current_stage_key!=='process')||row.due_date||row.blocked_reason||row.operator_notes)) blockers.push('The master workflow contains deliberate status, stage, due-date, blocker or operator-note changes.');
+
+  const cleanup=[];
+  if(id(row.product_id)||Number(row.product_link_count)>0) cleanup.push('the project-only pointer to the existing product (the product itself is preserved)');
+  if(Number(row.output_count)>0&&!Number(row.modified_output_count)) cleanup.push(`${row.output_count} untouched generated output-plan row(s)`);
+  if(Number(row.workflow_id)>0&&!Number(row.stage_review_count)&&!Number(row.meaningful_workflow_event_count)) cleanup.push(`empty planning workflow and ${Number(row.workflow_event_count||0)} initial link event(s)`);
+  cleanup.push('the duplicate Creative Project row');
+  return {allowed:blockers.length===0,project_id:projectId,project_key:row.project_key,project_title:row.project_title,blockers,cleanup,confirmation:`DELETE ${row.project_key}`};
 }
 
 async function projectDetail(db,project){
@@ -155,7 +170,6 @@ async function access(context){
 export async function onRequestGet(context){
   const granted=await access(context);if(granted.error)return granted.error;
   try{
-    await ensureSchema(granted.db);
     const selected=id(new URL(context.request.url).searchParams.get('project_id'));
     return json(await payload(granted.db,selected));
   }catch(error){
@@ -168,11 +182,27 @@ export async function onRequestPost(context){
   const granted=await access(context);if(granted.error)return granted.error;
   let body={};try{body=await context.request.json();}catch{return json({ok:false,error:'Expected a JSON request body.'},400);}
   try{
-    await ensureSchema(granted.db);
     const projectId=id(body.project_id);
     if(!projectId) return json({ok:false,error:'Choose a Creative Project first.'},400);
-    const workflow=await ensureWorkflow(granted.db,projectId,granted.adminUser.user_id);
     const action=text(body.action,80);
+    if(action==='delete_project_preview'){
+      const deletion=await projectDeletionPreview(granted.db,projectId);
+      return json({...await payload(granted.db,projectId),deletion,message:deletion.allowed?'This appears to be an unused duplicate and is eligible for guarded deletion.':'This project contains work that must be preserved or corrected before deletion.'});
+    }
+    if(action==='delete_project'){
+      const deletion=await projectDeletionPreview(granted.db,projectId);
+      if(!deletion.allowed)return json({ok:false,error:'This project contains protected work and cannot be permanently deleted from Creative Automation.',deletion},409);
+      if(text(body.confirmation,180)!==deletion.confirmation)return json({ok:false,error:`Type ${deletion.confirmation} exactly to confirm this duplicate-project deletion.`,deletion},400);
+      await granted.db.batch([
+        granted.db.prepare('DELETE FROM creative_automation_workflows WHERE creative_work_project_id=?1').bind(projectId),
+        granted.db.prepare("DELETE FROM creative_work_outputs WHERE creative_work_project_id=?1 AND COALESCE(output_status,'planned')='planned' AND COALESCE(approval_status,'needs_review')='needs_review' AND linked_record_id IS NULL AND TRIM(COALESCE(output_url,''))='' AND TRIM(COALESCE(notes,''))='' ").bind(projectId),
+        granted.db.prepare("DELETE FROM creative_project_product_links WHERE creative_work_project_id=?1 AND COALESCE(relationship_type,'project_output')='project_output' AND COALESCE(is_primary,0)=1 AND TRIM(COALESCE(notes,''))='' ").bind(projectId),
+        granted.db.prepare('DELETE FROM creative_work_projects WHERE creative_work_project_id=?1').bind(projectId)
+      ]);
+      await auditAdminAction(context.env,context.request,granted.adminUser,{action_type:'creative_automation_delete_unused_project',target_type:'creative_work_project',target_id:projectId,target_key:deletion.project_key,details:{project_title:deletion.project_title,guarded_empty_project:true,cleanup:deletion.cleanup}});
+      return json({...await payload(granted.db,0),message:`Unused duplicate project “${deletion.project_title}” was permanently deleted.`});
+    }
+    const workflow=await ensureWorkflow(granted.db,projectId,granted.adminUser.user_id);
     if(action==='ensure_workflow'){
       await granted.db.prepare(`INSERT INTO creative_automation_events (creative_automation_workflow_id,event_type,stage_key,next_status,details_json,created_by_user_id) VALUES (?1,'workflow_linked','process','planning',?2,?3)`).bind(workflow.creative_automation_workflow_id,JSON.stringify({project_id:projectId}),granted.adminUser.user_id).run();
     }else if(action==='save_workflow'){
