@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="11in" height="1.5in" viewBox="0 0 279.4 38.1">
+<rect x="0" y="9.525" width="279.4" height="19.05" fill="#f9f3e8" stroke="#6b3fa0" stroke-width="0.6"/>
+<ellipse cx="95" cy="19.05" rx="25.4" ry="19.05" fill="#fffaf2" stroke="#b88a2f" stroke-width="0.8"/>
+<text x="95" y="9" text-anchor="middle" font-size="4">Rosevear Creations</text>
+<text x="95" y="14" text-anchor="middle" font-size="3">Devil n Dove</text>
+<text x="95" y="20" text-anchor="middle" font-size="5">SOAP NAME</text>
+<text x="95" y="25" text-anchor="middle" font-size="3">Soap Type</text>
+<circle cx="205" cy="19.05" r="12.5" fill="#fffaf2" stroke="#6b3fa0" stroke-width="0.6"/>
+<text x="205" y="19" text-anchor="middle" font-size="3">devilndove.com</text>
+</svg>
