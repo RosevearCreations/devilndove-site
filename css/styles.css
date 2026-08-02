@@ -2561,3 +2561,7 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
 @media(max-width:1050px){.image-manifest-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.image-manifest-toolbar{grid-template-columns:1fr 1fr}.image-manifest-grid{grid-template-columns:1fr}}
 @media(max-width:680px){.section-heading-row>picture{width:100%;flex-basis:100%;order:-1}.image-manifest-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.image-manifest-toolbar,.image-manifest-field-grid{grid-template-columns:1fr}.image-manifest-toolbar .manifest-checkbox{min-height:46px}.image-manifest-card-heading{display:grid}.image-manifest-card-heading .btn,.image-manifest-save-row .btn{width:100%;min-height:46px}.image-manifest-preview{aspect-ratio:4/3}}
 @media(max-width:420px){.image-manifest-summary{grid-template-columns:1fr}.image-manifest-summary article{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}.image-manifest-summary span{margin-top:0;text-align:right}}
+
+/* Build 231 - product draft autosave recovery and narrow-screen error containment. */
+.dd-product-autosave-panel #productAutosaveStatus{flex:1 1 320px;min-width:0;overflow-wrap:anywhere}
+@media(max-width:640px){.dd-product-autosave-panel{align-items:stretch}.dd-product-autosave-panel>strong,.dd-product-autosave-panel #productAutosaveStatus{flex-basis:100%}.dd-product-autosave-panel .btn{width:100%;min-height:46px}}

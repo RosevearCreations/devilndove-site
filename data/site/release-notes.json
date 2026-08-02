@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 231",
+    "date": "2026-08-02",
+    "title": "Product draft autosave and reload resource-limit recovery",
+    "summary": "Reduced the Product Editor load/autosave hot paths by replacing Product Detail schema introspection with five bounded calls, skipping draft approval/social and repetitive audit work, avoiding unchanged image writes, and rejecting oversized requests; queued newer edits behind one in-flight save; added browser recovery; replaced raw Cloudflare HTML and JSON.parse failures with one safe parser; expanded Startup runtime proof; and preserved Build 230 as the current D1 migration boundary."
+  },
+  {
     "build": "Build 230",
     "date": "2026-08-01",
     "title": "Visual Image Manifest and honest editorial enrichment",

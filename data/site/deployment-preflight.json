@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 230",
+  "build_label": "Build 231",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,7 +7,7 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "132 required files are present.",
+      "detail": "135 required files are present.",
       "missing": []
     },
     {
@@ -38,7 +38,7 @@
     {
       "code": "static_markdown_authority",
       "status": "pass",
-      "detail": "Two Build 230 canonical authorities, scoped specialist playbooks, visual provenance, historical retirement policy, and 43 generated Startup sections agree.",
+      "detail": "Two Build 231 canonical authorities, scoped specialist playbooks, code-only schema boundary, visual provenance, historical retirement policy, and 43 generated Startup sections agree.",
       "missing": []
     },
     {
@@ -270,7 +270,7 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 2456/2456"
+      "detail": "CSS braces 2461/2461"
     },
     {
       "code": "static_json_parse",
