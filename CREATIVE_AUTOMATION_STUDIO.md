@@ -1,6 +1,6 @@
-# Devil n Dove Creative Automation Studio — Build 229
+# Devil n Dove Creative Automation Studio — Build 230
 
-Build 229 does not change this orchestration boundary. It adds packaging-source provenance and a distinct missing-image Startup blocker; Creative Automation may link that evidence but cannot approve packaging geometry or make placeholder media launch-ready.
+Build 230 does not change this orchestration boundary. It adds a D1 Visual Image Manifest and generated-editorial provenance; Creative Automation may link that evidence but cannot approve packaging geometry, turn an illustration into product proof or make placeholder media launch-ready.
 
 Creative Automation Studio is the master operating process for product stories, media, channel content and public release. It combines navigation, ownership, seven stages and evidence without deleting or duplicating specialist features.
 

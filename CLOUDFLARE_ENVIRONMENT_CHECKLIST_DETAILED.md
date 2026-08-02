@@ -1,12 +1,12 @@
-# Cloudflare Environment Checklist — Devil n Dove (Build 229)
+# Cloudflare Environment Checklist — Devil n Dove (Build 230)
 
-_Last updated: Build 229 packaging reference authority, 43-gate Startup system and retained read-only Meta credential tests._
+_Last updated: Build 230 visual manifest, 43-gate Startup system and retained read-only Meta credential tests._
 
 This checklist explains **exactly where to add each setting in Cloudflare** and **where to find or create each value**.
 
-## Build 229 environment note
+## Build 230 environment note
 
-Build 229 introduces no new secret or external-provider variable. It requires the existing production D1 binding. Back up D1, confirm Build 228, apply one Build 229 migration without explicit SQL transaction statements, then test `/api/admin/packaging-studio`, `/api/admin/creative-automation` and `/api/admin/startup-readiness`. Confirm three adopted packaging references and 43 readiness gates. Do not store creative evidence, Startup evidence or Meta token values in environment-variable documentation.
+Build 230 introduces no new secret or external-provider variable. It requires the existing production D1 binding. Back up D1, confirm Build 229, apply one Build 230 migration without explicit SQL transaction statements, then test `/api/admin/image-manifest`, `/api/admin/packaging-studio`, `/api/admin/creative-automation` and `/api/admin/startup-readiness`. Confirm 20 visual rows, three generated provenance rows, three adopted packaging references and 43 readiness gates. Do not store creative/visual/Startup evidence or Meta token values in environment-variable documentation.
 
 ## Build 227 additions — business documents and Meta tests
 

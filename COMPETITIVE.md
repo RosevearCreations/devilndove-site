@@ -1,3 +1,16 @@
+# Build 230 competitive direction — visible image operations and local clarity
+
+Build 230 turns the missing-image list into a visual, mobile-friendly operating board while retaining specialist media tools. The competitive direction follows current search and commerce guidance: place useful high-quality images near relevant copy, use accurate descriptive alternative text, preserve mobile/desktop parity, and show multiple real product views/details that reduce buyer uncertainty. Generated illustrations may enrich brand/category storytelling but do not replace actual listing photos, process/condition proof or Business Profile media.
+
+Current additional sources:
+
+- `https://developers.google.com/search/docs/appearance/google-images`
+- `https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing`
+- `https://help.shopify.com/en/manual/products/product-media`
+- `https://www.etsy.com/seller-handbook/article/1289139008351`
+
+---
+
 # Build 229 competitive direction — review-led creative operations and local clarity
 
 Build 229 retains the competitive pattern reviewed in Build 228: one shared workflow, role/stage visibility, changes-requested/approval decisions and channel-specific handoff. It strengthens the handmade-business differentiator with checksum-traceable packaging sources, physical-proof geometry decisions and an explicit no-placeholder launch gate.
