@@ -1,19 +1,23 @@
-# Cloudflare Environment Checklist — Devil n Dove (Build 233)
+# Cloudflare Environment Checklist — Devil n Dove (Build 234)
 
-_Last updated: Build 233 bounded-login/session-retention hotfix, retained Build 232 archived-product removal, Build 231 autosave/reload recovery, Build 230 visual manifest, 43-gate Startup system and retained read-only Meta credential tests._
+_Last updated: Build 234 bounded hot routes, template-driven soap/candle packaging, guarded Creative duplicate cleanup, retained login/product repairs, Build 230 visual manifest, 44-gate Startup system and retained read-only Meta credential tests._
+
+## Build 234 packaging/Startup migration and route check
+
+Back up D1 and confirm ledger keys `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply `database_build234_packaging_templates_creative_cleanup.sql` or the identical `database_upgrade_current_pass.sql`, not both. Confirm ledger key `build234_packaging_templates_creative_cleanup`, five active packaging reference rows, the five new system template keys and 44 active Startup rows. Packaging Studio, Startup Readiness, Creative Automation and Creative Process must not execute request-time `CREATE TABLE` or bulk Startup seeding. Deploy the whole package, activate `devilndove-shell-v15`, then run `BUILD234_VALIDATION.md` and the production evidence gates. Do not store customer names/designs, token values or physical-proof evidence in variable documentation.
 
 This checklist explains **exactly where to add each setting in Cloudflare** and **where to find or create each value**.
 
-## Build 230 environment note
+## Retained Build 230 environment note
 
-Build 230 introduces no new secret or external-provider variable. It requires the existing production D1 binding. Back up D1, confirm Build 229, apply one Build 230 migration without explicit SQL transaction statements, then test `/api/admin/image-manifest`, `/api/admin/packaging-studio`, `/api/admin/creative-automation` and `/api/admin/startup-readiness`. Confirm 20 visual rows, three generated provenance rows, three adopted packaging references and 43 readiness gates. Do not store creative/visual/Startup evidence or Meta token values in environment-variable documentation.
+Build 230 introduced no new secret or external-provider variable. Its original 20 visual rows, three generated provenance rows, three packaging reference rows and 43 readiness gates remain historical baseline facts. For a Build 234 deployment, follow the Build 234 migration section above; do not treat this retained paragraph as the current migration procedure.
 
 ## Build 233 login 503 and unexpected-logout check
 
 Build 233 adds no variable and no D1 migration. It requires the existing Production D1 binding named exactly `DB`. The code removes full schema inspection from every login POST, uses one indexed user read plus one atomic D1 batch, stops temporary session-verification outages from erasing a valid browser token, and keeps the 897-row Amazon reference compressed until an authenticated inventory route requests it.
 
-1. Deploy the complete Build 233 ZIP. Record **Workers & Pages → your Pages project → Deployments → deployment ID/time**.
-2. Hard refresh `/login/`. In Developer Tools → Application → Service Workers, confirm the current shell is `devilndove-shell-v14`; unregister an older shell only if the hard refresh did not activate v14.
+1. Deploy the complete Build 234 ZIP. Record **Workers & Pages → your Pages project → Deployments → deployment ID/time**.
+2. Hard refresh `/login/`. In Developer Tools → Application → Service Workers, confirm the current shell is `devilndove-shell-v15`; unregister an older shell only if the hard refresh did not activate v15.
 3. Open Developer Tools → Network, enable **Preserve log**, select **Fetch/XHR**, and keep the panel open.
 4. Open `https://devilndove.com/api/auth/login`. Expect HTTP 200 JSON with `response_profile: auth_login_bounded_v1` and `diagnostic_mode: binding_only`. This default check confirms only that `DB` is present and does not query D1.
 5. Return to `/login/` and submit an owner-controlled administrator login. Select the `POST /api/auth/login` row. Under **Headers**, expect Status 200 and `x-dd-auth-profile: auth_login_bounded_v1`; under **Response**, expect `ok: true`, the same profile and the correct user role. Never copy the returned token or cookie into notes/screenshots.
@@ -848,7 +852,7 @@ https://devilndove-site.pages.dev/admin/command-center/
 
 If login breaks again:
 
-1. Confirm the deployed build is Build 233 or later and service-worker shell v14 is active.
+1. Confirm the deployed build is Build 234 or later and service-worker shell v15 is active.
 2. Confirm `_routes.json` exists at the deployed root.
 3. Confirm Functions are active in the deployment details.
 4. Confirm D1 binding name is `DB`.

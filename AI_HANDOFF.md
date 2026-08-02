@@ -1,8 +1,26 @@
-# Devil n Dove AI Handoff — Build 233
+# Devil n Dove AI Handoff — Build 234
 
 This is the first of two canonical current-status files. Read it first for architecture, authority, safety and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for completed work, risks and ordered next steps. Historical Build Markdown remains evidence only.
 
-## Build 233 outcome
+## Build 234 outcome
+
+1. Labeling & Packaging is the only active packaging editor. The selected `packaging_templates` row now determines renderer and saved `package_type`; stale project data can no longer turn a soap template into a generic rectangle.
+2. The Glacial Purple soap renderer follows the owner-supplied visual: permanent Rosevear/Devil n Dove, website, Canadian-origin, small-batch, claim and weight elements; a botanical purple rose; centred product hierarchy; English/French panels; rear seal; and editable SVG text.
+3. Five packaging directions are checksum-registered: soap specification, PDF guide, master SVG, approved soap visual and wedding candle-top sample. `PACKAGING_REFERENCE_BASELINE.md` defines their scopes.
+4. Five system templates were added: 4-inch and 3.5-inch wedding candle tops, 3-inch general candle top, 4-inch round maker/coaster mark and 2×1.5-inch oval product label.
+5. Candle-top names/main wording, two dates, occasion, top/bottom arcs and artwork remain editable and centred. Users can change millimetre dimensions, shape, renderer profile, bleed/safe margin and save a D1 custom template for repeat work.
+6. SVG export embeds artwork data so a downloaded repeat-job master does not depend on a website-relative image path. PNG/WebP/JPG remain preview formats; printer/laser acceptance and physical proof remain required.
+7. Creative Automation exposes guarded permanent deletion for unused accidental project shells. It permits the automatic output blueprint and ordinary initial product link, preserves the real product, blocks meaningful timeline/inventory/evidence/content/cost/review work and requires `DELETE <project_key>`.
+8. Packaging Studio, Creative Automation, Creative Process and Startup Readiness execute no request-time `CREATE TABLE` or schema initializer. Schema/seed installation belongs to migrations, reducing Pages Worker CPU/memory pressure.
+9. Startup Readiness now has exactly 44 gates. `candle_top_template_proof` provides twelve detailed measurement, custom-template, export, laser/material proof, correction and archive steps.
+10. Build 234 adds migration `database_build234_packaging_templates_creative_cleanup.sql`, identical current-pass SQL and ledger key `build234_packaging_templates_creative_cleanup`. It upserts system templates, five reference records and all 44 canonical gate definitions without overwriting operator status/evidence.
+11. Generated text-free packaging art and prompts/checksums are documented in `GENERATED_VISUAL_ASSET_REGISTER.md`. It cannot supply formula, bilingual, legal, customer or product-proof facts.
+12. Admin navigation now presents one Labeling & Packaging entry; the old Soap Label route remains a compatibility pointer.
+13. Responsive preview CSS distinguishes wide soap wraps from round candle tops, pairs source references safely and stacks destructive controls on phones.
+14. Build 234 retains the Build 231 autosave, Build 232 archived-product removal and Build 233 bounded-login/session-retention repairs.
+15. Public SEO direction is unchanged: one H1 per exposed page, clear title/main-heading hierarchy, truthful local language, accurate structured data and rights-cleared media. Admin routes remain `noindex,nofollow`.
+
+## Retained Build 233 outcome
 
 1. Startup Readiness preserves all 42 Build 228 gates and adds `missing_launch_images` as a distinct Critical blocker. Exactly 43 gates are expected.
 2. The Startup browser rejects HTML, empty, malformed or incomplete API success responses and renders the full built-in 43-gate guide. It never turns a service failure into “No readiness items match these filters.” Browser-only changes are visibly Unsynced.
@@ -28,7 +46,7 @@ This is the first of two canonical current-status files. Read it first for archi
 22. Archive status alone does not block an unused product from permanent removal. Ordinary `product_media_change_audit` and product review rows are product-owned cleanup data; orders, customer, accounting, packaging, creative-project, recall and other retained history still block deletion.
 23. Reviewed inventory releases/physical returns, product-owned cleanup, preserved-media/soap-record detachment and final product deletion run in one D1 batch so a failure rolls the operation back together.
 24. Correction, table-row deletion and the Draft & Archive Cleanup centre all use the shared safe API parser; Cloudflare HTML and malformed responses cannot collapse into the unhelpful “Could not load product correction details” message.
-25. Build 232 is code-only. The current D1 migration remains Build 230 and must not be reapplied merely because the application build number changed.
+25. Build 232 was code-only. At that historical release, Build 230 was the current D1 boundary; Build 234 now supersedes the current-pass file.
 26. `/api/auth/login` validates its request before D1, uses the indexed normalized email lookup, omits request-time schema discovery and returns `auth_login_bounded_v1` after one user read plus one atomic session/last-login batch.
 27. Login no longer rereads the session it just created. The new token and timestamps are already authoritative inputs to the successful response.
 28. Normal GET `/api/auth/login` is binding-only and performs no D1 query; the older table/column diagnostic remains available only through the deliberate `?diagnostic=full` owner procedure.
@@ -39,7 +57,7 @@ This is the first of two canonical current-status files. Read it first for archi
 ## Data authority
 
 - Startup status/history: D1 `startup_readiness_items` and `startup_readiness_history` at `/admin/startup-readiness/`.
-- Startup instruction seed: `STARTUP_ITEMS` in `functions/api/admin/startup-readiness.js`; generate `STARTUP_GO_LIVE_GUIDE.md` with `node scripts/generate-startup-guide.mjs`.
+- Startup instruction source: `STARTUP_ITEMS` in `functions/api/admin/startup-readiness.js`; generate `STARTUP_GO_LIVE_GUIDE.md`, sync the browser fallback, then sync the 44 definitions into the Build 234 migration. Runtime requests do not seed or create tables.
 - Creative project/process/material/output facts: existing Creative Process tables.
 - Media rights/evidence/intelligence: CAIP records and referenced source media; CAIP never invents consent.
 - Content packages/channel deliverables: Content Studio records.
@@ -54,26 +72,32 @@ This is the first of two canonical current-status files. Read it first for archi
 
 ## Current operating routes
 
-- `/admin/startup-readiness/` — 43 launch gates and D1 evidence, including the distinct missing-image blocker.
+- `/admin/startup-readiness/` — 44 launch gates and D1 evidence, including distinct missing-image and candle-top-proof blockers.
 - `/admin/image-manifest/` — 20 seeded static/dynamic image requirements, rights/public/device approvals, evidence and history.
 - `/admin/prelaunch/` — separate process map.
 - `/admin/deployment-preflight/`, `/admin/post-deploy-smoke-tests/`, `/admin/deploy-readiness/`, `/admin/go-live-execution/`, `/admin/live-ops-followthrough/` — standalone release stages.
 - `/admin/creative-automation/` — master creative workflow.
 - `/admin/creative-process/`, `/admin/creative-assets/`, `/admin/content-studio/`, `/admin/content-publications/`, `/admin/social-publishing/` — specialist creative authorities retained.
-- `/admin/packaging-studio/` — whole-business labels, packaging BOM/cost, previews, versions, exports and print tests.
+- `/admin/packaging-studio/` — whole-business soap/candle/round/general labels, reusable custom templates, packaging BOM/cost, previews, versions, embedded-artwork exports and print tests.
 - `/admin/customer-documents/` — invoices, receipts, packing slips, credit notes and refund confirmations.
 - `/admin/orders/`, `/admin/accounting/`, `/admin/inventory-operations/` — operational transaction authorities.
 
-## Build 233 database boundary
+## Build 234 database boundary
 
-Build 233 adds no D1 table, column, seed or ledger row. `database_upgrade_current_pass.sql` remains byte-identical to the Build 230 migration. Login uses existing indexed `users.email`, `sessions`, `users.last_login_at` and D1 `batch()` behaviour. Back up D1, confirm Build 229, and apply exactly one of these only when `build230_visual_image_manifest` is not already recorded:
+Back up D1 and confirm `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply exactly one:
 
-- `database_build230_visual_image_manifest.sql`
+- `database_build234_packaging_templates_creative_cleanup.sql`
 - `database_upgrade_current_pass.sql` (byte-identical copy)
+
+The migration upserts five packaging templates, five adopted reference rows and 44 Startup definitions while preserving mutable readiness status/evidence. It adds ledger key `build234_packaging_templates_creative_cleanup` and contains no explicit `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK`. Aggregate schemas contain the same block. Run `node scripts/sync-build234-startup-seed.mjs` after changing the API gate definition, then `node scripts/sync-build234-aggregate-schema.mjs`.
+
+## Retained Build 233 database boundary
+
+Build 233 added no D1 table, column, seed or ledger row. At that historical release, its current-pass file was byte-identical to the numbered Build 230 migration. Build 234 has now replaced `database_upgrade_current_pass.sql`; use `database_build230_visual_image_manifest.sql` by its numbered name only when repairing an environment whose `build230_visual_image_manifest` ledger key is absent.
 
 That Build 230 migration adds `image_manifest_items`, `image_manifest_history`, 20 active requirements, three generated-asset provenance rows and ledger key `build230_visual_image_manifest`. It preserves operator-editable evidence on repeat execution and contains no explicit SQL transaction statements. Do not add `BEGIN TRANSACTION` or `SAVEPOINT`; D1/Durable Object code must use `state.storage.transaction()` or `transactionSync()` when a JavaScript transaction is required.
 
-Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `database_store_schema.sql` include Builds 229 and 230. Run `node scripts/sync-build230-aggregate-schema.mjs` after changing the numbered migration. Older synchronizers intentionally stop so they cannot erase the current block.
+Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `database_store_schema.sql` retain Builds 229 and 230 and now end with Build 234. Older synchronizers intentionally stop so they cannot erase the current block.
 
 ## Error/fallback rules
 
@@ -99,12 +123,12 @@ Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `da
 ## Deploy sequence
 
 1. Run the complete Deployment Preflight against the exact folder/archive.
-2. Record D1 recovery point; apply one Build 230 migration; verify ledger, both manifest tables, 20 active rows and three generated provenance rows.
-3. Deploy the complete Build 233 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v14 is active.
+2. Record a D1 recovery point; confirm the Build 229 and Build 230 ledger keys; apply exactly one Build 234 migration; verify its ledger key, five active packaging references, five new system-template keys and 44 active Startup definitions.
+3. Deploy the complete Build 234 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v15 is active.
 4. Run Post-Deploy Smoke Tests on production.
-5. Confirm all 43 Startup gates load with All statuses, locate `missing_launch_images`, open the D1 manifest and confirm 20 rows rather than Unsynced fallback.
+5. Confirm all 44 Startup gates load with All statuses, locate both `missing_launch_images` and `candle_top_template_proof`, open the D1 manifest and confirm 20 rows rather than Unsynced fallback.
 6. Link one owner-controlled Creative Project in the master studio; save one stage review with evidence and reload.
-7. Run Release Sanity, Product Release Preflight, the Build 233 bounded-login/session-retention proof, retained Build 231 product load/autosave/browser recovery, Build 232 unused-archived-product/protected-history removal, visual-manifest phone/desktop review and read-only Meta identity/token checks.
+7. Run Build 234 validation, Release Sanity, Product Release Preflight, bounded-login/session-retention proof, product load/autosave/browser recovery, unused-archived-product/protected-history removal, guarded Creative duplicate cleanup, soap/candle physical proofs, visual-manifest phone/desktop review and read-only Meta identity/token checks.
 8. Make a separate Deploy Readiness decision; execute Go-Live only after Ready; continue Live Ops reconciliation.
 
 ## Not claimed complete
