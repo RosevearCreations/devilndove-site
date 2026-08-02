@@ -134,9 +134,9 @@ async function fetchJsonFromSite(request, paths) {
   return { items: [], source_path: "", tried_paths, warnings };
 }
 
-function mapToolRow(row, index, sourcePath) {
+async function mapToolRow(row, index, sourcePath) {
   const name = normalizeText(row.item_name_suggested || row.name || row.example_image_file) || `Tool ${index + 1}`;
-  const amazonMatch = getAmazonInventoryMatch('toolshed', index, name);
+  const amazonMatch = await getAmazonInventoryMatch('toolshed', index, name);
   const amazonFields = extractAmazonInventoryFields(amazonMatch || row, 'tool');
   const enrichedRow = amazonMatch
     ? {
@@ -192,9 +192,9 @@ function mapToolRow(row, index, sourcePath) {
   };
 }
 
-function mapSupplyRow(row, index, sourcePath) {
+async function mapSupplyRow(row, index, sourcePath) {
   const name = normalizeText(row.item_name_suggested || row.example_image_file) || `Supply ${index + 1}`;
-  const amazonMatch = getAmazonInventoryMatch('supplies', index, name);
+  const amazonMatch = await getAmazonInventoryMatch('supplies', index, name);
   const amazonFields = extractAmazonInventoryFields(amazonMatch || row, 'supply');
   const enrichedRow = amazonMatch
     ? {
@@ -543,7 +543,7 @@ export async function onRequestPost(context) {
       if (!definition) continue;
 
       const fetched = await fetchJsonFromSite(request, definition.fetch_paths);
-      const rows = fetched.items.map((row, index) => definition.mapper(row, index, fetched.source_path || definition.fetch_paths[0]));
+      const rows = await Promise.all(fetched.items.map((row, index) => definition.mapper(row, index, fetched.source_path || definition.fetch_paths[0])));
       const upserted = rows.length ? await definition.upsert(db, rows) : 0;
       totalUpserted += upserted;
 
