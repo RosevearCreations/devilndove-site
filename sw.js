@@ -1,5 +1,5 @@
-// Build 231: refresh cached browser helpers after product autosave/reload recovery hardening.
-const CACHE_NAME = 'devilndove-shell-v12';
+// Build 232: refresh cached browser helpers after archived-product removal recovery hardening.
+const CACHE_NAME = 'devilndove-shell-v13';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

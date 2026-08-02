@@ -1,8 +1,8 @@
-# Devil n Dove Project Status and Roadmap — Build 231
+# Devil n Dove Project Status and Roadmap — Build 232
 
-This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 231 work, launch position, gaps and ordered next actions.
+This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 232 work, launch position, gaps and ordered next actions.
 
-## Current integrated baseline through Build 231
+## Current integrated baseline through Build 232
 
 1. Preserved every prior Startup gate and expanded the authority from 42 to 43 unique gates with a distinct Critical missing-image blocker.
 2. Added standalone gates and detailed operating pages for Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution and Live Ops Follow-through.
@@ -44,10 +44,15 @@ This is the second canonical current-status file. `AI_HANDOFF.md` owns architect
 38. Expanded the Startup runtime gate and Cloudflare checklist with exact autosave, reload, recovery, `exceededCpu` and `exceededMemory` verification.
 39. Replaced repeated Product Detail schema introspection with five bounded database calls including authentication, capped the editor response at seven images and added a mocked product-45 JSON/query-budget regression.
 40. Kept Build 231 code-only; aggregate/current schema remains the validated Build 230 boundary.
+41. Replaced archived-product correction preflight’s all-table/all-foreign-key discovery with a bounded protected-history registry and a 17-call mocked query budget.
+42. Corrected the archive/deletion conflict: ordinary product media-change and review audit rows are cleaned with an unused product rather than automatically forcing Archive-only status.
+43. Kept orders, customer/accounting, packaging, creative projects, recalls, trust/public-proof and other business history as permanent-removal blockers.
+44. Combined reviewed inventory actions, cleanup/detachment and final product deletion into one D1 batch and added full mocked removal proof plus aggregate-schema registry coverage.
+45. Extended shared safe JSON/Cloudflare parsing across all three product-removal browser paths and expanded Startup’s destructive-action test to twelve exact steps.
 
 ## Current position
 
-The application has broad, integrated foundations for catalog/media, inventory lots/movements, orders/payments/refunds, accounting review, customer documents, whole-business packaging, creative/content governance, SEO operations and launch control. Build 231 hardens product draft editing after a live Cloudflare resource-limit report; local checks cannot prove the production error is resolved until the controlled log-backed autosave/reload test passes. Generated art and untested production/physical/provider work remain outside launch evidence.
+The application has broad, integrated foundations for catalog/media, inventory lots/movements, orders/payments/refunds, accounting review, customer documents, whole-business packaging, creative/content governance, SEO operations and launch control. Build 232 repairs archived unused-product removal without weakening retained-history safeguards. Local checks cannot prove the production correction and autosave symptoms are resolved until their controlled log-backed production tests pass. Generated art and untested production/physical/provider work remain outside launch evidence.
 
 Status remains **production-evidence and controlled-opening preparation**.
 
@@ -64,16 +69,17 @@ Status remains **production-evidence and controlled-opening preparation**.
 - The six generated WebP files require owner/device review and stay only in their documented editorial roles; 17 seeded manifest requirements remain real-photo or dynamic-catalog work.
 - Google local first-page placement cannot be guaranteed; relevance, distance and prominence must be improved and monitored over time.
 - Product autosave/reload needs a Build 231 production run correlated with Cloudflare invocation outcomes; any new `exceededCpu` or `exceededMemory` result keeps the runtime Startup gate open.
+- Archived-product correction/removal needs a Build 232 production run proving an unused archived record can be removed while a history-backed record remains blocked and inventory/audits change exactly once.
 
 ## Ordered next steps
 
 ### P0 — before production promotion
 
-1. Run Build 231 validation, resolve every blocker and generate/checksum the exact ZIP.
-2. Back up D1 and verify the Build 230 ledger/schema boundary. Apply the Build 230 migration only if absent; Build 231 adds no migration.
-3. Deploy, hard refresh to service-worker shell v12, run the full live smoke suite and confirm 43 Startup gates plus the D1-backed manifest with honest degraded-mode behaviour.
+1. Run Build 232 validation, resolve every blocker and generate/checksum the exact ZIP.
+2. Back up D1 and verify the Build 230 ledger/schema boundary. Apply the Build 230 migration only if absent; Build 232 adds no migration.
+3. Deploy, hard refresh to service-worker shell v13, run the full live smoke suite and confirm 43 Startup gates plus the D1-backed manifest with honest degraded-mode behaviour.
 4. Run the controlled Product Editor load/autosave/queued-edit/reload/browser-recovery test and correlate it with Cloudflare `exceededCpu`/`exceededMemory` metrics before closing the runtime gate.
-5. Complete role authorization tests for deletion, reversal, refund/document void, packaging approval, publication and accounting export.
+5. Complete the twelve-step Startup role/destructive-action test: remove one disposable archived product through `bounded_registry_v1`, verify one reviewed inventory/audit effect, and prove a separate order/packaging/project-history product remains Archive-only; then test reversal, refund/document void, packaging approval, publication and accounting export authorization.
 6. Prove Stripe signed webhook and duplicate delivery; reconcile payment/order/inventory exactly once.
 7. Prove final-unit and component-set concurrency with two simultaneous owner-controlled sessions.
 8. Complete separate failed/abandoned/cancelled and partial/full refund tests with stock, credit note, refund confirmation, tax and fee reconciliation.

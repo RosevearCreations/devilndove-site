@@ -1,4 +1,4 @@
-# Devil n Dove Sanity and Health Check — Build 230
+# Devil n Dove Sanity and Health Check — Build 232
 
 ## Structural result
 
@@ -13,6 +13,8 @@
 - Public SEO policy continues one H1, title/description/canonical/structured-visible fact agreement, approved media and truthful local wording.
 - The Visual Image Manifest has 20 D1 requirements, approval validation, audit/history and a complete read-only fallback; generated art is explicitly separated from real-photo proof.
 - Three public editorial illustrations have responsive derivatives, intrinsic dimensions and truthful disclosure. They remain outside Product/Offer schema and launch-product galleries.
+- Build 231 product-detail/autosave routes retain their bounded reads, safe response parser, queued save and browser recovery proof.
+- Build 232 product-removal preflight uses a bounded protected-history registry; unused archive/media audit rows can be cleaned, retained business history still blocks, and reviewed inventory plus deletion share one D1 batch.
 
 ## Launch health
 

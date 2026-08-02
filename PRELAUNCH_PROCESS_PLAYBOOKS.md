@@ -1,4 +1,4 @@
-# Devil n Dove Prelaunch Process Playbooks — Build 230
+# Devil n Dove Prelaunch Process Playbooks — Build 232
 
 This document separates the release journey into distinct processes. A pass in one process never erases a blocker in another. `/admin/startup-readiness/` remains the 43-gate status authority; this playbook explains where to click, what to prove, what to save, and what to do when a stage fails.
 
@@ -35,16 +35,18 @@ This document separates the release journey into distinct processes. A pass in o
 1. Run `python3 scripts/predeploy_sanity_check.py` from the extracted release folder.
 2. Run `python3 scripts/deployment_preflight_static_check.py` and open `data/site/deployment-preflight.json`.
 3. Run `node scripts/build230_visual_manifest_test.mjs`; it must report 43 unique Startup gates, 20 unique manifest rows, a working read-only fallback and generated-asset checksum integrity.
-4. Run syntax checks for changed Functions and browser JavaScript.
-5. Confirm every public HTML page has a viewport, distinctive title, useful description, exactly one H1, canonical where applicable and descriptive image alternatives.
-6. Confirm `css/styles.css` has balanced braces and inspect the changed pages at phone, tablet, laptop and wide-desktop widths.
-7. Compare `database_upgrade_current_pass.sql` with `database_build230_visual_image_manifest.sql`; they must be identical.
-8. Search the current migration for explicit SQL transaction statements. Any `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK` is a blocker for D1/Durable Objects execution.
-9. Apply aggregate schemas in disposable SQLite databases and apply the current migration twice to prove rerun safety.
-10. Compile Pages Functions with the Wrangler version used by Cloudflare.
-11. Compare the three adopted packaging source checksums with `PACKAGING_REFERENCE_BASELINE.md`; retain the 25/38.1/50 mm discrepancy until physical proof.
-12. Compare all six editorial WebP hashes with `GENERATED_VISUAL_ASSET_REGISTER.md`; verify intrinsic dimensions and confirm no generated path appears in Product/Offer data.
-13. Generate the release manifest and record the ZIP SHA-256. Deploy only that exact archive.
+4. Run `node scripts/build231_product_autosave_test.mjs`; it must prove bounded Product Detail JSON, safe Cloudflare parsing, queued autosave and browser recovery.
+5. Run `node scripts/build232_product_removal_test.mjs`; it must prove bounded archived-product preflight, full product-reference registry coverage and one reviewed removal batch.
+6. Run syntax checks for all Functions, browser JavaScript, scripts and the service worker.
+7. Confirm every public HTML page has a viewport, distinctive title, useful description, exactly one H1, canonical where applicable and descriptive image alternatives.
+8. Confirm `css/styles.css` has balanced braces and inspect the changed pages at phone, tablet, laptop and wide-desktop widths.
+9. Compare `database_upgrade_current_pass.sql` with `database_build230_visual_image_manifest.sql`; they must be identical.
+10. Search the current migration for explicit SQL transaction statements. Any `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK` is a blocker for D1/Durable Objects execution.
+11. Apply aggregate schemas in disposable SQLite databases and apply the current migration twice to prove rerun safety.
+12. Compile Pages Functions with the Wrangler version used by Cloudflare.
+13. Compare the three adopted packaging source checksums with `PACKAGING_REFERENCE_BASELINE.md`; retain the 25/38.1/50 mm discrepancy until physical proof.
+14. Compare all six editorial WebP hashes with `GENERATED_VISUAL_ASSET_REGISTER.md`; verify intrinsic dimensions and confirm no generated path appears in Product/Offer data.
+15. Generate the release manifest and record the ZIP SHA-256. Deploy only that exact archive.
 
 **Failure:** correct the owning source file, regenerate derived files, rebuild the archive and restart the entire preflight.  
 **Pass:** all local/static/schema/syntax/bundle checks pass and the archive is identified by name and checksum.

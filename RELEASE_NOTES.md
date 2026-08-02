@@ -1,3 +1,18 @@
+# Release Notes — Build 232
+
+## Archived unused-product correction and removal recovery
+
+- Replaced request-time enumeration of every D1 table and foreign key in `/api/admin/delete-product` with a bounded protected-history registry and `bounded_registry_v1` response profile.
+- Corrected the archive/removal conflict: ordinary media-change and product review audit rows are product-owned cleanup data, so archiving an otherwise unused product no longer makes it permanently undeletable.
+- Preserved permanent-removal blockers for orders, customer/accounting, packaging, creative projects, recalls, trust/public-proof and other retained business history.
+- Combined reviewed reservation release/physical return, product-owned cleanup, preserved record/media detachment and final product deletion in one D1 batch.
+- Added aggregate-schema registry coverage plus mocked archived-product GET/POST, inventory, cleanup, detachment, rollback-boundary and query-budget regression tests.
+- Extended the shared safe API response parser to the correction panel, table-row delete action and Draft & Archive Cleanup centre.
+- Expanded Startup’s destructive-action gate to a twelve-step unused-archived versus protected-history production proof.
+- Preserved Build 230 as the current D1 migration boundary; Build 232 adds no schema change.
+
+Deploy the complete package, hard refresh to service-worker shell v13, and follow `BUILD232_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 232.
+
 # Release Notes — Build 231
 
 ## Product draft autosave and reload resource-limit recovery

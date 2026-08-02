@@ -1,4 +1,4 @@
-# Devil n Dove Startup and Go-Live Guide — Build 231
+# Devil n Dove Startup and Go-Live Guide — Build 232
 
 This is the human-readable operating copy of all 43 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
 
@@ -18,7 +18,7 @@ This is the human-readable operating copy of all 43 database-backed gates in `/a
 ### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
 
 **Inside the application:** `/admin/deployment-preflight/`  
-**External location:** Build 231 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**External location:** Build 232 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
 **Production test:** No live binding is required, but deployed verification may still be appropriate.
 
 #### Before you begin
@@ -28,11 +28,11 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 #### Test steps
 
 1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, aggregate-schema, repeated-current-migration, Startup 43-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, aggregate-schema, repeated-current-migration, Startup 43-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
 3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
-4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially the Product Editor, Visual Image Manifest and three public image bands.
-5. Confirm Build 231 adds no D1 migration: database_upgrade_current_pass.sql remains identical to database_build230_visual_image_manifest.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
-6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 231 consistently while naming Build 230 as the current D1 migration.
+4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially the Product Editor, Product Cleanup, Visual Image Manifest and three public image bands.
+5. Confirm Build 232 adds no D1 migration: database_upgrade_current_pass.sql remains identical to database_build230_visual_image_manifest.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 232 consistently while naming Build 230 as the current D1 migration.
 7. Confirm the three adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
 8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
 9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
@@ -50,7 +50,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** The exact Build 231 archive passes every static, autosave/reload, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
+**Pass condition:** The exact Build 232 archive passes every static, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
 
 ### 10. Back up D1, apply the current migration, and deploy the complete build — **Critical**
 
@@ -211,16 +211,21 @@ Assign one owner and open /admin/members/. Record the starting IDs, counts, tota
 #### Test steps
 
 1. Prepare an administrator account and at least one lower-privilege test account.
-2. Test permanent product deletion, inventory reversal, label approval, accounting export, member administration, and publication approval.
-3. Confirm the administrator can perform only the actions intended for that role.
-4. Call the same APIs while signed in as the lower role and confirm 401 or 403 responses.
-5. Confirm hiding a button is not the only protection; direct API calls must also be denied.
-6. Confirm every successful sensitive action creates an audit record with actor, target, time, and reason.
-7. Remove or disable temporary test accounts after the review.
+2. Test inventory reversal, label approval, accounting export, member administration, publication approval and permanent product deletion with the lower role; confirm every direct API call returns 401 or 403 even if a button is hidden.
+3. As an administrator, create an owner-controlled disposable Draft product with no order, payment, customer, packaging or creative-project history; record its ID and System #.
+4. Archive that disposable product, open /admin/products/ → Draft & Archive Cleanup → Archived, select Check removal, and confirm /api/admin/delete-product?product_id=<ID> returns HTTP 200 JSON with cleanup_profile bounded_registry_v1.
+5. Confirm archive status and its ordinary editor/media audit alone do not block removal; the preflight must say Removal allowed unless a genuine protected reference exists.
+6. For a second owner-controlled product that has an order, packaging project, creative project or other protected history, repeat Check removal and confirm Archive only lists the blocking table/count and Permanent remove stays disabled. Never delete that history-backed product.
+7. On the disposable product, link one safe test supply and reserve one unit. Open Correct / return raw inventory, confirm the suggested release never exceeds Reserved, leave physical return at zero unless stock was truly put back, and enter a factual reason.
+8. Select Delete unused product and apply reviewed inventory actions, type DELETE PRODUCT exactly, confirm the current admin password and verify one success response.
+9. Confirm the product row is gone, its System # was not reused, Reserved changed exactly once, On hand did not change for reservation release, and product deletion/material-return/admin audit evidence identifies the actor, product, reason and time.
+10. Repeat the protected-history check after the deletion test and confirm it remains archived and unchanged.
+11. In Cloudflare Functions metrics/logs, confirm product-removal GET/POST returned valid JSON and produced no exceededCpu, exceededMemory, raw HTML or JSON.parse error.
+12. Retest the other sensitive administrator actions, remove or disable temporary accounts, and reconcile or remove only the owner-controlled disposable records.
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then enforce the missing role check inside the server endpoint, add an audited denial/success test, and do not rely on hidden buttons. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then enforce the missing role check inside the server endpoint, keep product-removal reference checks bounded and registry-backed, treat editor/media audit rows as product-owned cleanup rather than protected business history, keep order/accounting/customer/packaging/project history blocking, reconcile any test inventory through audited movements, and do not rely on hidden buttons. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
@@ -230,7 +235,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** Every sensitive action is enforced on the server, lower roles receive 401/403, and successful actions are attributable in the audit history.
+**Pass condition:** Every sensitive action is enforced on the server; lower roles receive 401/403; an unused archived product passes the bounded preflight and is removed with its reviewed inventory action exactly once; protected-history products remain archived; and successful actions are attributable in audit history without a Worker resource-limit event.
 
 ### 50. Prove runtime incident capture and honest fallback behaviour — **High**
 
@@ -1529,5 +1534,5 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 ## Gate count and authority
 
-This guide contains 43 gates. If it differs from the D1 cockpit after deployment, use the Build 231 API seed, confirm all 43 items return, and keep the gate Failed until the status authority and guide agree.
+This guide contains 43 gates. If it differs from the D1 cockpit after deployment, use the Build 232 API seed, confirm all 43 items return, and keep the gate Failed until the status authority and guide agree.
 
