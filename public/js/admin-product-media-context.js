@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function api(url) {
     const response = await window.DDAuth.apiFetch(url, { method: 'GET' });
+    if (window.DDAuth?.readApiJson) return window.DDAuth.readApiJson(response, { fallbackMessage: 'Product workspace request failed.' });
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) throw new Error(data?.error || 'Product workspace request failed.');
     return data;

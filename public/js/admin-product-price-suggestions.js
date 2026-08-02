@@ -52,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   async function loadCurrentProduct(productId) {
     const response = await window.DDAuth.apiFetch(`/api/admin/product-detail?product_id=${encodeURIComponent(productId)}`);
-    const data = await response.json();
+    if (window.DDAuth?.readApiJson) return window.DDAuth.readApiJson(response, { fallbackMessage: 'Failed to load product details.' });
+    const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load product details.');
     return data;
   }

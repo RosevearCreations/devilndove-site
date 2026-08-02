@@ -1,5 +1,5 @@
 // File: /public/js/admin-create-product.js
-// Build 145: Draft-first product creation with autosave and multi-image upload (max 7 images).
+// Build 231: resource-aware draft autosave, browser recovery, and safe non-JSON errors.
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("createProductForm");
@@ -8,11 +8,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const MAX_PRODUCT_IMAGES = 7;
   const MAX_UPLOAD_SELECTION = 6;
   const MAX_GALLERY_IMAGE_FIELDS = MAX_PRODUCT_IMAGES - 1;
-  const AUTOSAVE_DELAY_MS = 1400;
+  const AUTOSAVE_DELAY_MS = 2200;
+  const AUTOSAVE_RECOVERY_KEY = "dd_admin_product_autosave_recovery_v1";
   let autosaveTimer = null;
   let autosaveInFlight = false;
+  let autosaveQueuedAfterFlight = false;
   let lastAutosaveFingerprint = "";
   let autosaveStatusEl = null;
+  let autosaveRecoverButton = null;
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -67,17 +70,80 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function readApiJson(response, fallbackMessage = "Request failed.") {
-    const contentType = String(response?.headers?.get("Content-Type") || "").toLowerCase();
-    if (contentType.includes("application/json")) {
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) {
-        throw new Error(data?.error_detail || data?.error || fallbackMessage);
-      }
-      return data;
+    if (window.DDAuth?.readApiJson) {
+      return window.DDAuth.readApiJson(response, { fallbackMessage });
     }
-    const text = await response.text().catch(() => "");
-    const details = text ? text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 240) : "";
-    throw new Error(`${fallbackMessage} Server returned ${response.status || "an error"}${details ? `: ${details}` : ""}`);
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error_detail || data?.error || fallbackMessage);
+    return data;
+  }
+
+  function readBrowserRecovery() {
+    try {
+      const value = JSON.parse(localStorage.getItem(AUTOSAVE_RECOVERY_KEY) || "null");
+      return value?.payload && typeof value.payload === "object" ? value : null;
+    } catch { return null; }
+  }
+
+  function refreshRecoveryButton() {
+    if (!autosaveRecoverButton) return;
+    const recovery = readBrowserRecovery();
+    autosaveRecoverButton.hidden = !recovery;
+    if (recovery) {
+      const when = recovery.saved_at ? new Date(recovery.saved_at).toLocaleString() : "an earlier edit";
+      autosaveRecoverButton.title = `Recover ${recovery.payload?.name || "product draft"} saved in this browser at ${when}.`;
+    }
+  }
+
+  function persistBrowserRecovery(payload) {
+    try {
+      localStorage.setItem(AUTOSAVE_RECOVERY_KEY, JSON.stringify({
+        version: 1,
+        saved_at: new Date().toISOString(),
+        page_path: window.location.pathname,
+        payload
+      }));
+      refreshRecoveryButton();
+      return true;
+    } catch { return false; }
+  }
+
+  function clearBrowserRecovery() {
+    try { localStorage.removeItem(AUTOSAVE_RECOVERY_KEY); } catch {}
+    refreshRecoveryButton();
+  }
+
+  function restoreBrowserRecovery() {
+    const recovery = readBrowserRecovery();
+    const payload = recovery?.payload;
+    if (!payload || !form) return setAutosaveStatus("No browser recovery copy is available.", "muted");
+    const previousPause = form.dataset.autosavePaused;
+    form.dataset.autosavePaused = "1";
+    try {
+      Object.entries(payload).forEach(([name, value]) => {
+        if (["product_id", "price_cents", "compare_at_price_cents", "image_urls", "save_intent"].includes(name)) return;
+        const field = form.elements.namedItem(name);
+        if (field && !Array.isArray(value)) field.value = value == null ? "" : String(value);
+      });
+      const priceField = form.elements.namedItem("price");
+      if (priceField) priceField.value = (Number(payload.price_cents || 0) / 100).toFixed(2);
+      const compareField = form.elements.namedItem("compare_at_price");
+      if (compareField) compareField.value = payload.compare_at_price_cents == null ? "" : (Number(payload.compare_at_price_cents || 0) / 100).toFixed(2);
+      imageUrlFields().forEach((field, index) => { field.value = payload.image_urls?.[index] || ""; });
+      const productId = Number(payload.product_id || 0);
+      if (productId) {
+        form.dataset.productId = String(productId);
+        window.DDCurrentProductEditorId = productId;
+      }
+    } finally {
+      if (previousPause) form.dataset.autosavePaused = previousPause;
+      else delete form.dataset.autosavePaused;
+    }
+    syncRequiredFieldOutlines();
+    updateImageRoleChecklist();
+    renderDraftImageManager();
+    lastAutosaveFingerprint = "";
+    setAutosaveStatus("Recovered the browser copy. Review it, then use Autosave now or Save/Update Product.", "pending");
   }
 
   function isDraftMode() {
@@ -795,9 +861,10 @@ document.addEventListener("DOMContentLoaded", () => {
   async function saveProductPayload(payload, { autosave = false } = {}) {
     const isExisting = Number(payload.product_id || 0) > 0;
     const endpoint = isExisting ? "/api/admin/update-product" : "/api/admin/create-product";
+    const requestPayload = { ...payload, save_intent: autosave ? "autosave" : "manual" };
     const response = await window.DDAuth.apiFetch(endpoint, {
       method: "POST",
-      body: JSON.stringify(payload)
+      body: JSON.stringify(requestPayload)
     });
     const data = await readApiJson(response, autosave ? "Autosave failed." : "Failed to save product.");
     if (!isExisting && Number(data?.product?.product_id || 0)) {
@@ -833,7 +900,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function runAutosave(reason = "change") {
-    if (autosaveInFlight || !canAutosaveDraft()) return;
+    if (autosaveInFlight) {
+      autosaveQueuedAfterFlight = true;
+      setAutosaveStatus("Autosaving; newer changes are queued…", "pending");
+      return;
+    }
+    if (!canAutosaveDraft()) return;
     const payload = collectProductPayload({ forceDraft: true });
     const validationError = validatePayload(payload, { allowDraft: true });
     if (validationError) {
@@ -845,18 +917,34 @@ document.addEventListener("DOMContentLoaded", () => {
       setAutosaveStatus("Autosaved — no changes.", "saved");
       return;
     }
+    const browserCopySaved = persistBrowserRecovery(payload);
+    autosaveQueuedAfterFlight = false;
     autosaveInFlight = true;
     setAutosaveStatus("Autosaving draft…", "pending");
     try {
       const data = await saveProductPayload(payload, { autosave: true });
-      lastAutosaveFingerprint = JSON.stringify(collectProductPayload({ forceDraft: true }));
+      lastAutosaveFingerprint = fingerprint;
+      const latestFingerprint = JSON.stringify(collectProductPayload({ forceDraft: true }));
       const productId = Number(data?.product?.product_id || payload.product_id || 0);
-      setAutosaveStatus(`Autosaved draft${productId ? ` #${productId}` : ""} at ${new Date().toLocaleTimeString()}.`, "saved");
+      if (latestFingerprint === fingerprint) {
+        clearBrowserRecovery();
+        setAutosaveStatus(`Autosaved draft${productId ? ` #${productId}` : ""} at ${new Date().toLocaleTimeString()}.`, "saved");
+      } else {
+        autosaveQueuedAfterFlight = true;
+        persistBrowserRecovery(collectProductPayload({ forceDraft: true }));
+        setAutosaveStatus("First save finished; saving newer changes next…", "pending");
+      }
       document.dispatchEvent(new CustomEvent("dd:product-autosaved", { detail: { product: data.product || null, reason } }));
     } catch (error) {
-      setAutosaveStatus(`Autosave failed: ${error.message || "unknown error"}`, "error");
+      const recoveryNote = browserCopySaved ? " Your unsaved draft is kept in this browser; use Recover browser copy if you reload." : " Keep this page open and copy your text before reloading.";
+      setAutosaveStatus(`Autosave failed: ${error.message || "unknown error"}${recoveryNote}`, "error");
     } finally {
       autosaveInFlight = false;
+      if (autosaveQueuedAfterFlight) {
+        autosaveQueuedAfterFlight = false;
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(() => runAutosave("queued-change"), 300);
+      }
     }
   }
 
@@ -869,10 +957,14 @@ document.addEventListener("DOMContentLoaded", () => {
       <strong>Draft autosave:</strong>
       <span id="productAutosaveStatus" data-tone="muted">Autosave starts after product name and type are filled.</span>
       <button class="btn" type="button" id="productAutosaveNowButton">Autosave now</button>
+      <button class="btn" type="button" id="productAutosaveRecoverButton" hidden>Recover browser copy</button>
     `;
     form.insertBefore(panel, form.firstElementChild || null);
     autosaveStatusEl = panel.querySelector("#productAutosaveStatus");
+    autosaveRecoverButton = panel.querySelector("#productAutosaveRecoverButton");
     panel.querySelector("#productAutosaveNowButton")?.addEventListener("click", () => runAutosave("manual"));
+    autosaveRecoverButton?.addEventListener("click", restoreBrowserRecovery);
+    refreshRecoveryButton();
   }
 
   if (!form) {
@@ -891,6 +983,7 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("input", () => { syncRequiredFieldOutlines(); updateImageRoleChecklist(); renderDraftImageManager(); scheduleAutosave("input"); });
   form.addEventListener("change", () => { syncRequiredFieldOutlines(); updateImageRoleChecklist(); renderDraftImageManager(); scheduleAutosave("change"); });
   document.addEventListener("dd:product-image-fields-updated", renderDraftImageManager);
+  document.addEventListener("dd:product-updated", clearBrowserRecovery);
   window.DDProductDraftMedia = { render: renderDraftImageManager, writeSlots: writeImageSlots };
 
   form.addEventListener("submit", async (event) => {
@@ -933,6 +1026,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const identityLabel = [savedNumber ? `DD${savedNumber}` : "", savedSku].filter(Boolean).join(" · ");
       setMessage(`${data.message || "Product draft saved successfully."}${identityLabel ? ` Saved as ${identityLabel}.` : ""}`);
       lastAutosaveFingerprint = JSON.stringify(collectProductPayload({ forceDraft: true }));
+      clearBrowserRecovery();
       setAutosaveStatus("Saved. You can continue editing this draft or clear the editor.", "saved");
       document.dispatchEvent(new CustomEvent("dd:product-created", { detail: { product: data.product || null } }));
       document.dispatchEvent(new CustomEvent("dd:product-editor-target", {

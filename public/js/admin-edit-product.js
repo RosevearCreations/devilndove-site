@@ -49,6 +49,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function parseSafeJson(value, fallback = null) { try { return JSON.parse(value); } catch { return fallback; } }
+  async function readApiJson(response, fallbackMessage) {
+    if (window.DDAuth?.readApiJson) return window.DDAuth.readApiJson(response, { fallbackMessage });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || fallbackMessage);
+    return data;
+  }
   function loadLocalPendingActions() { const rows = parseSafeJson(localStorage.getItem(LOCAL_PENDING_KEY) || '[]', []); return Array.isArray(rows) ? rows : []; }
   function saveLocalPendingActions(rows) { try { localStorage.setItem(LOCAL_PENDING_KEY, JSON.stringify(Array.isArray(rows) ? rows : [])); } catch {} }
   function upsertLocalPendingAction(action) {
@@ -511,6 +517,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function fillForm(product, images) {
+    const previousAutosavePause = form.dataset.autosavePaused;
+    form.dataset.autosavePaused = "1";
+    try {
     form.dataset.productId = String(product.product_id || editingProductId || "");
     window.DDCurrentProductEditorId = Number(product.product_id || editingProductId || 0);
     setField("name", product.name || "");
@@ -570,13 +579,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.DDProductEditorRequiredState?.sync) window.DDProductEditorRequiredState.sync();
     window.DDProductDraftMedia?.render?.();
     document.dispatchEvent(new CustomEvent('dd:product-image-fields-updated', { detail: { product_id: Number(product.product_id || editingProductId || 0) } }));
+    } finally {
+      if (previousAutosavePause) form.dataset.autosavePaused = previousAutosavePause;
+      else delete form.dataset.autosavePaused;
+    }
   }
 
   async function loadProduct(productId) {
     const response = await window.DDAuth.apiFetch(`/api/admin/product-detail?product_id=${encodeURIComponent(productId)}`, { method: "GET" });
-    const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error(data.error || "Failed to load product.");
-    return data;
+    return readApiJson(response, "Failed to load product.");
   }
 
   async function liveUpdateProduct(payload) {
@@ -589,16 +600,7 @@ document.addEventListener("DOMContentLoaded", () => {
       error.isRetryable = true;
       throw error;
     }
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) {
-      const error = new Error(data?.error || "Failed to update product.");
-      error.httpStatus = Number(response.status || 0);
-      error.code = String(data?.code || "").trim();
-      // Validation, duplicate and authorization failures need human correction, not background retries.
-      error.isRetryable = response.status === 0 || response.status === 408 || response.status === 429 || response.status >= 500;
-      throw error;
-    }
-    return data;
+    return readApiJson(response, "Failed to update product.");
   }
 
   function isRetryableUpdateError(error) {
