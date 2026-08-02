@@ -18,7 +18,7 @@
 
     <section class="hero packaging-studio-hero">
       <div>
-        <p class="eyebrow">Build 227 • One business-wide authority</p>
+        <p class="eyebrow">Build 229 • Three adopted soap-label references</p>
         <h1>Labeling &amp; Packaging System</h1>
         <p>Create reusable SVG-based labels and packaging from product data. One project now holds the label design, bilingual content, packaging bill of materials, inventory links, per-unit cost, print tests, approvals, versions and export evidence. Soap ribbons keep their detailed INCI and Canadian cosmetic-label workflow inside this same system.</p>
         <div class="packaging-hero-actions"><button class="btn primary" id="newPackagingProject" type="button">Create labeling / packaging project</button><button class="btn" id="restorePackagingDraft" type="button">Restore browser draft</button></div>
@@ -26,7 +26,12 @@
       <div class="visual-placeholder-card"><img src="/assets/packaging/soap/reference/glacial-purple-aloe-soap-approved-reference.png" alt="Scalloped soap ribbon packaging with curved bilingual badge text, ingredient panels, rear medallion, claims and net weight sections"/><small>Approved Glacial Purple soap-ribbon structural reference</small></div>
     </section>
 
-    <section class="card packaging-authority-card"><div><p class="eyebrow">Authoritative specification</p><h2>One packaging source of truth</h2><p><code>PACKAGING_STUDIO.md</code> now contains the complete user-provided soap-label specification, current implementation mapping, exact dimension profiles, approval boundaries, and remaining work. Older soap-label specification files are compatibility pointers only.</p></div><div class="packaging-hero-actions"><a class="btn primary" href="/PACKAGING_STUDIO.md">Open Packaging Studio specification</a><a class="btn" href="/admin/startup-readiness/">Open packaging launch gates</a></div></section>
+    <section class="card packaging-authority-card"><div><p class="eyebrow">Adopted design authority</p><h2>The supplied specification, PDF guide and SVG direct this system</h2><p><code>PACKAGING_STUDIO.md</code> reconciles the complete supplied specification with the current implementation. The original Markdown, compact PDF guide and editable SVG are retained with checksums so later changes cannot quietly replace their dimensions, rose identity, bilingual/INCI workflow, print tests or approval boundaries.</p></div><div class="packaging-hero-actions"><a class="btn primary" href="/PACKAGING_STUDIO.md">Open implementation specification</a><a class="btn" href="/PACKAGING_REFERENCE_BASELINE.md">Open adopted reference baseline</a><a class="btn" href="/admin/startup-readiness/">Open packaging launch gates</a></div></section>
+    <section class="packaging-reference-source-grid" aria-label="Adopted soap-label source files">
+      <article class="card"><h2>Automation specification</h2><p>The primary brand, structured-data, bilingual content, renderer, export, testing and definition-of-done direction.</p><a class="btn" href="/docs/packaging/source-references/DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md">Open supplied Markdown</a></article>
+      <article class="card"><h2>Template guide</h2><p>The supplied 11 × 1.5-inch canvas, centred 0.75-inch band, 2 × 1.5-inch oval, 50 mm seal, 300-DPI, bleed and colour direction sheet.</p><a class="btn" href="/docs/packaging/source-references/Soap_Label_Template_Guide.pdf">Open supplied PDF</a></article>
+      <article class="card packaging-master-template-card"><h2>Master SVG</h2><img src="/assets/packaging/soap/reference/Soap_Label_Master_Template.svg" alt="Supplied 11 by 1.5 inch soap-label SVG master with centred band, front product oval and rear website seal"/><p>The supplied editable baseline is preserved exactly. Its 25 mm rendered rear seal differs from the 50 mm written specification and remains a physical-review blocker.</p><a class="btn" href="/assets/packaging/soap/reference/Soap_Label_Master_Template.svg">Open supplied SVG</a></article>
+    </section>
     <div class="card packaging-compliance-note">
       <strong>Review-first compliance boundary</strong>
       <p class="small">The Studio checks for common Canadian cosmetic-label fields, but it does not provide legal approval. Before printing or selling, review product identity, metric net quantity, INCI ingredients, dealer/contact details, bilingual warnings where applicable, and any product-specific regulatory requirements.</p>
@@ -55,6 +60,6 @@
   <script src="/public/js/auth.js"></script><script src="/public/js/admin-route-usage.js"></script>
   <script src="/public/js/site-auth-ui.js"></script><script src="/public/js/site-analytics.js"></script>
   <script src="/public/js/admin-self-protect.js"></script><script src="/public/js/admin.js"></script>
-  <script src="/public/js/admin-packaging-studio.js?v=227"></script>
+  <script src="/public/js/admin-packaging-studio.js?v=229"></script>
 </body>
 </html>
