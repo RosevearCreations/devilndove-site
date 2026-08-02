@@ -216,10 +216,16 @@ export async function maybeQueueApprovedProductSocialPost(db, product, actorUser
   const productId = Number(product?.product_id || 0);
   if (!productId) return { queued: false, code: 'PRODUCT_ID_MISSING' };
 
+  // Draft typing must not create/inspect/alter the social schema on every autosave.
+  // A product that has not reached review approval cannot be eligible under any setting.
+  const reviewStatus = clean(product?.review_status).toLowerCase();
+  if (!['approved', 'published'].includes(reviewStatus)) {
+    return { queued: false, code: 'PRODUCT_NOT_APPROVED' };
+  }
+
   const settings = await getProductSocialAutomationSettings(db);
   if (!settings.auto_queue_enabled) return { queued: false, code: 'AUTOMATION_DISABLED', settings };
 
-  const reviewStatus = clean(product?.review_status).toLowerCase();
   const status = clean(product?.status).toLowerCase();
   const acceptedStatus = settings.auto_queue_on_review_status === 'published'
     ? reviewStatus === 'published'
