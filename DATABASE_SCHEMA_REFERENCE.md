@@ -1,16 +1,32 @@
-# Devil n Dove Database Schema Reference — Build 233
+# Devil n Dove Database Schema Reference — Build 234
 
-## Build 233 database boundary
+## Build 234 database boundary
+
+Back up D1 and confirm ledger keys `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply `database_build234_packaging_templates_creative_cleanup.sql` or the identical `database_upgrade_current_pass.sql`, not both.
+
+Build 234 adds no new table or column. It idempotently:
+
+- updates the two system soap-ribbon template layouts to `soap_reference_v2` and the botanical rose asset;
+- upserts five system formats: 4-inch/3.5-inch wedding candle tops, 3-inch general candle top, 4-inch round maker/coaster mark and 2×1.5-inch oval label;
+- registers the owner-supplied approved soap visual and wedding candle-top sample, bringing `packaging_reference_sources` to five active adopted rows;
+- upserts all 44 `startup_readiness_items` definitions, including `candle_top_template_proof`, without updating mutable status, owner, due date, evidence, blocker or completion fields;
+- records ledger key `build234_packaging_templates_creative_cleanup`.
+
+Custom repeat-job templates use existing `packaging_templates` rows with `is_system=0`; the project points to the new row. Creative duplicate deletion is guarded code over existing Creative tables and adds no table. Packaging Studio, Creative Automation, Creative Process and Startup Readiness no longer create schema or seed rows during a request.
+
+The migration contains no explicit SQL transaction statement. D1/Durable Object JavaScript uses platform transaction APIs when a JavaScript transaction is required. Run `node scripts/sync-build234-startup-seed.mjs`, then `node scripts/sync-build234-aggregate-schema.mjs` after changing canonical Startup/template migration content.
+
+## Retained Build 233 database boundary
 
 Build 233 is code-only. It adds no table, column, index, seed or migration-ledger row. The bounded login uses the existing `idx_users_email`, `sessions` indexes and `users.last_login_at`; one D1 `batch()` creates the session and updates the login timestamp atomically. The 897-row Amazon reference remains a private compressed code payload and is demand-loaded only by authenticated inventory routes; moving its purchase identifiers to a public JSON file is prohibited. `scripts/build233_login_resource_test.mjs` proves exactly two executed D1 operations, the match round trip, no POST schema introspection and no current-migration change. Do not apply a migration merely because the application package is Build 233.
 
 ## Build 232 database boundary
 
-Build 232 is code-only. It adds no table, column, seed or migration-ledger row. The current production schema boundary remains Build 230, and `database_upgrade_current_pass.sql` remains byte-identical to `database_build230_visual_image_manifest.sql`. Product-removal safety is implemented through a bounded code registry whose aggregate-schema coverage is validated by `scripts/build232_product_removal_test.mjs`; no migration should be applied merely because the application package is Build 232.
+Build 232 was code-only. At that release the current schema boundary was Build 230. Product-removal safety is implemented through a bounded code registry whose aggregate-schema coverage is validated by `scripts/build232_product_removal_test.mjs`; no migration was required merely because the application package was Build 232.
 
 ## Build 231 database boundary
 
-Build 231 is code-only. It adds no table, column, seed or migration-ledger row. The current production schema boundary remains Build 230, and `database_upgrade_current_pass.sql` remains byte-identical to `database_build230_visual_image_manifest.sql`. Do not reapply that migration merely because the application package is Build 231.
+Build 231 was code-only. At that release the current schema boundary was Build 230. Do not reapply its historical migration merely because the application package was Build 231.
 
 ## Build 230 database boundary
 
@@ -52,9 +68,9 @@ Build 226 was a code-only Startup Readiness loading repair. Build 225 created th
 ## Current schema authority
 
 - Fresh database: `database_full_schema.sql` or the intentionally scoped aggregate schema appropriate to the deployment.
-- Existing production database: confirm Build 229 is installed, then apply one Build 230 migration named above.
+- Existing production database: confirm Build 229 and Build 230 ledger keys are installed, then apply one Build 234 migration named above.
 - The Build 225 current-pass migration creates and seeds `startup_readiness_items` and `startup_readiness_history`. It does not replay the historical Packaging Studio/Soap Label migrations.
-- Production must already include the Build 221 Packaging Studio and Build 222 normalized soap-label tables before applying Build 225.
+- Production must already include the Build 221 Packaging Studio, Build 222 normalized soap-label tables and Build 225 Startup tables before applying Build 234.
 - Builds 223 and 224 were code-only product-detail/gallery compatibility repairs and required no schema migration.
 
 ## Build 225 tables and ownership
@@ -69,11 +85,11 @@ Append-only-style evidence for each status update, including prior/next status, 
 - Broad project/template/version/export state: `packaging_templates`, `packaging_projects`, `packaging_project_versions`, `packaging_export_history`.
 - Normalized soap content and proof: `soap_label_templates`, `soap_products`, `soap_ingredients`, `soap_label_claims`, `soap_label_exports`, `soap_label_print_tests`.
 - Commerce price, public product identity, and sellable inventory remain in `products` and established inventory tables.
-- `PACKAGING_STUDIO.md` is the current human-readable implementation map. `PACKAGING_REFERENCE_BASELINE.md` and the three adopted source files govern packaging direction; the root soap-label file is a compatibility pointer.
+- `PACKAGING_STUDIO.md` is the current human-readable implementation map. `PACKAGING_REFERENCE_BASELINE.md` and the five adopted source files govern packaging direction; the root soap-label file is a compatibility pointer.
 
 ## Current migration boundary
 
-`database_upgrade_current_pass.sql` is the additive Build 230 migration only and is byte-identical to its numbered file. It assumes Build 229. Do not use it as an accumulated history replay. Use numbered historical migrations to understand/repair an older database, and back up D1 before applying any production change.
+`database_upgrade_current_pass.sql` is the additive Build 234 migration only and is byte-identical to `database_build234_packaging_templates_creative_cleanup.sql`. It assumes Builds 229 and 230 are already installed. Do not use it as an accumulated history replay. Use numbered historical migrations to understand/repair an older database, and back up D1 before applying any production change.
 
 ---
 

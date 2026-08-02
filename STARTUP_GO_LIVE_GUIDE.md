@@ -1,24 +1,24 @@
-# Devil n Dove Startup and Go-Live Guide — Build 233
+# Devil n Dove Startup and Go-Live Guide — Build 234
 
-This is the human-readable operating copy of all 43 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
+This is the human-readable operating copy of all 44 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
 
 ## Operating rules
 
-1. Apply `database_build230_visual_image_manifest.sql` or the identical `database_upgrade_current_pass.sql`, not both. Back up D1 first and confirm Build 229 is already present.
+1. Back up D1 and confirm ledger keys `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply `database_build234_packaging_templates_creative_cleanup.sql` or the identical `database_upgrade_current_pass.sql`, not both.
 2. Use owner-controlled test records and real Production bindings only where the gate explicitly requires a production test.
 3. Never paste secrets, passwords, access tokens, full payment data, or private customer information into gate evidence.
 4. A failed numbered step keeps the gate Failed or Blocked until the correction procedure and full retest succeed.
 5. Complete and Not Applicable decisions require factual evidence. Reopen a completed gate after a related deployment, credential rotation, schema/provider version, policy, or material data change.
 6. Use `PRELAUNCH_PROCESS_PLAYBOOKS.md` for the standalone process order; never use a green specialist page to erase another Startup blocker.
 7. The `missing_launch_images` Critical gate, D1 Visual Image Manifest, item-specific Catalog Media evidence, and `IMAGES_REQUIRED.md` capture standard must be complete before go-live; generated editorial art cannot satisfy a real-photo requirement.
-8. The guide does not replace legal, accounting, tax, product-safety, platform, printer, or regulatory review.
+8. The guide does not replace legal, accounting, tax, product-safety, laser/material, platform, printer, or regulatory review.
 
 ## Foundation and deployment
 
 ### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
 
 **Inside the application:** `/admin/deployment-preflight/`  
-**External location:** Build 233 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**External location:** Build 234 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
 **Production test:** No live binding is required, but deployed verification may still be appropriate.
 
 #### Before you begin
@@ -28,12 +28,12 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 #### Test steps
 
 1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, aggregate-schema, repeated-current-migration, Startup 43-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, aggregate-schema, repeated-current-migration, Startup 44-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
 3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
-4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest and three public image bands.
-5. Confirm Build 233 adds no D1 migration: database_upgrade_current_pass.sql remains identical to database_build230_visual_image_manifest.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
-6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 233 consistently while naming Build 230 as the current D1 migration.
-7. Confirm the three adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
+4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest, Labeling & Packaging, Creative Automation and three public image bands.
+5. Confirm database_upgrade_current_pass.sql remains identical to database_build234_packaging_templates_creative_cleanup.sql and the Build 234 migration contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 234 consistently while naming Build 234 as the current D1 migration.
+7. Confirm the five adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
 8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
 9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
 10. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.
@@ -50,7 +50,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** The exact Build 233 archive passes every static, bounded-login/session-retention, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
+**Pass condition:** The exact Build 234 archive passes every static, bounded-login/session-retention, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
 
 ### 10. Back up D1, apply the current migration, and deploy the complete build — **Critical**
 
@@ -66,11 +66,11 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 
 1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.
 2. Record the date, database name and safe recovery reference in the evidence notes.
-3. Confirm the Build 229 migration is already present, then apply database_build230_visual_image_manifest.sql or the identical database_upgrade_current_pass.sql, but not both.
-4. Confirm the migration ledger records build230_visual_image_manifest, image_manifest_items and image_manifest_history exist, and 20 active manifest seed rows load without overwriting mutable review evidence.
+3. Confirm ledger keys build229_packaging_reference_authority and build230_visual_image_manifest already exist, then apply database_build234_packaging_templates_creative_cleanup.sql or the identical database_upgrade_current_pass.sql, but not both.
+4. Confirm the ledger also records build234_packaging_templates_creative_cleanup; verify the five packaging references, five new reusable system templates, 20 active image-manifest rows and unchanged mutable review evidence.
 5. Deploy the complete ZIP rather than selected files.
 6. Record the Pages deployment URL and deployment/commit identifier.
-7. Open Startup Readiness with All statuses and confirm all 43 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images and open its Visual Image Manifest route.
+7. Open Startup Readiness with All statuses and confirm all 44 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images and open its Visual Image Manifest route.
 8. Confirm the manifest loads from D1 rather than Unsynced fallback and preserves the three generated-editorial provenance rows.
 9. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.
 10. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.
@@ -87,7 +87,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** A recoverable D1 point exists, the Build 230 migration is applied once after Build 229, the complete deployment is live, all 43 gates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains.
+**Pass condition:** A recoverable D1 point exists, the Build 234 migration is applied once after Builds 229 and 230, the complete deployment is live, all 44 gates, five packaging references, five new reusable templates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains.
 
 ### 15. Complete Post-Deploy Smoke Tests as a standalone live-verification process — **Critical**
 
@@ -101,7 +101,7 @@ Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting I
 
 #### Test steps
 
-1. Confirm the deployment ID and Build 230 migration evidence match the package that passed Deployment Preflight.
+1. Confirm the deployment ID and Build 234 migration evidence match the package that passed Deployment Preflight.
 2. Open the production home, handmade-jewelry, gift-card, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.
 3. Confirm the three generated WebP illustrations load at phone and desktop sizes, disclose editorial use, preserve one H1, and are absent from Product/Offer structured data and real-product galleries.
 4. Sign in with an owner-controlled administrator and test Startup Readiness, Visual Image Manifest, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map.
@@ -109,7 +109,7 @@ Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting I
 6. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.
 7. At phone, tablet, laptop and wide-desktop widths, check navigation, image crops, cards, forms, tables, focus, touch targets, contrast and horizontal overflow on every changed route.
 8. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.
-9. Open Startup Readiness with All statuses, confirm 43 unique gates and locate the missing-launch-images Critical blocker.
+9. Open Startup Readiness with All statuses, confirm 44 unique gates and locate the missing-launch-images Critical blocker.
 10. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner. After any correction/redeploy, repeat all smoke checks.
 11. Continue to Deploy Readiness only when every critical smoke result passes.
 
@@ -175,7 +175,7 @@ Assign one owner and open /login/. Record the starting IDs, counts, totals, time
 
 #### Test steps
 
-1. Deploy the complete Build 233 package, hard refresh to service-worker shell v14, and record the Pages deployment ID before testing.
+1. Deploy the complete Build 234 package, hard refresh to service-worker shell v15, and record the Pages deployment ID before testing.
 2. Open a private browser window, open Developer Tools → Network, enable Preserve log, and load /login/ without storing the password in evidence.
 3. Open /api/auth/login in a separate tab and confirm HTTP 200 JSON reports response_profile auth_login_bounded_v1 and diagnostic_mode binding_only; a normal GET must not run full schema discovery.
 4. Submit an owner-controlled administrator login and confirm POST /api/auth/login returns HTTP 200 JSON, X-DD-Auth-Profile auth_login_bounded_v1, a session cookie, the correct role and the expected redirect. Never copy the token into evidence.
@@ -982,6 +982,45 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 **Pass condition:** Each launch soap has a saved, physically measured, wrapped, passed, approved, and archived label version linked to its exact structured source data.
 
+### 245. Measure, save, laser-test, approve, and archive each candle-top template — **Critical**
+
+**Inside the application:** `/admin/packaging-studio/`  
+**External location:** Physical candle lid or blank, laser/printer settings, owner-supplied wedding sample, and PACKAGING_STUDIO.md  
+**Production test:** No live binding is required, but deployed verification may still be appropriate.
+
+#### Before you begin
+
+Assign one owner and open /admin/packaging-studio/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+
+#### Test steps
+
+1. Open Labeling & Packaging, create or open the intended candle-top project, and select the closest round system template; never reuse a soap or generic rectangle template.
+2. Measure the actual lid or laser blank in millimetres with an appropriate ruler or caliper. Record the usable diameter separately from any lip, bevel, fixture or no-burn area.
+3. In Layout, enter the measured canvas diameter, safe margin and bleed/trim allowance. Select round plus the wedding, centred-candle or maker-mark design profile that matches the job.
+4. In Artwork & Colours, replace the sample names, original date, occasion, celebration date, upper website arc and lower origin arc. Keep all customer wording editable; do not bake names or dates into the illustration.
+5. Confirm the preview uses centred text anchors and curved text paths, both rings are concentric, permanent website/origin wording is present, and no line crosses the safe area.
+6. Enter a specific reusable template name that includes nominal size and use, such as 3.75-inch wedding candle top, add material/fixture notes, and select Save these dimensions and features as a reusable template. Reload the project and confirm the custom template remains selected.
+7. Save the project and a review version, export SVG, and archive its filename and checksum. Do not treat browser PNG/JPG or the AI-created line-art raster as a vector engraving master unless the chosen laser workflow has accepted and traced it.
+8. Run one owner-controlled material test using the exact blank, laser/printer, power/speed/DPI, focus, masking and fixture settings intended for production. Keep flammable candle material out of an unsafe test setup and follow the equipment/material manufacturer instructions.
+9. Measure the finished result and inspect centring, legibility, line weight, arc direction, spelling, dates, scorching/colour, edge clearance and fixture rotation. Photograph the proof without exposing private customer information beyond approved wording.
+10. In Print Test, record 100% scale, round diameter, material/stock, equipment, physical checks, proof URL and factual notes. A failed size, spelling, material or centring result requires a new version and full retest.
+11. Approve only the exact version that passed and keep the source sample, generated text-free artwork, exported file, settings and proof evidence together for the repeat job. Never overwrite an approved customer version silently.
+12. Repeat this gate for every new physical size, blank/material, artwork profile, laser/printer setting or meaningful wording-layout change.
+
+#### If any step fails: correction procedure
+
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then keep the candle-top version unapproved, remeasure the physical blank, correct template size/safe area/centred wording or material settings, save a new version, and repeat the physical laser or print proof. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+
+#### Evidence to save
+
+Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+
+#### Retest and reopening rule
+
+Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+
+**Pass condition:** Every launch candle top or engraved round uses a saved exact-size reusable template with editable wording, centred static brand elements, an archived export/checksum, and a passed physical proof on the intended blank and production method.
+
 ### 250. Prepare Health Canada cosmetic notification and change control — **Critical**
 
 **Inside the application:** `/admin/startup-readiness/`  
@@ -1540,5 +1579,5 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 ## Gate count and authority
 
-This guide contains 43 gates. If it differs from the D1 cockpit after deployment, use the Build 233 API seed, confirm all 43 items return, and keep the gate Failed until the status authority and guide agree.
+This guide contains 44 gates. If it differs from the D1 cockpit after deployment, use the Build 234 API seed, confirm all 44 items return, and keep the gate Failed until the status authority and guide agree.
 

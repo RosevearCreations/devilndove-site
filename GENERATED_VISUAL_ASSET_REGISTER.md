@@ -1,6 +1,6 @@
-# Devil n Dove Generated Visual Asset Register — Build 230
+# Devil n Dove Generated Visual Asset Register — Build 234
 
-This register documents generated editorial imagery in the application. D1 `/admin/image-manifest/` is the mutable review authority; this file preserves immutable source intent, prompt summary, generated-use boundaries and file checksums for future maintainers.
+This register documents generated editorial imagery and generated text-free packaging artwork in the application. D1 `/admin/image-manifest/` is the mutable public-image review authority; Labeling & Packaging versions/print tests are the production-art review authority. This file preserves immutable source intent, prompt summary, generated-use boundaries and file checksums for future maintainers.
 
 ## Non-negotiable use boundary
 
@@ -9,6 +9,7 @@ This register documents generated editorial imagery in the application. D1 `/adm
 - Keep nearby text truthful. Use “illustration” in alternative text or visible disclosure when a buyer could otherwise mistake the asset for a real product/process photograph.
 - A `real_photo_required` manifest item remains open until accurate, rights-cleared real media and phone/desktop evidence are saved.
 - Retain the checksums and update this register if any generated source or derivative changes.
+- Packaging artwork may decorate an editable label or engraving layout only after owner, rights, legibility, material and physical-production review. It never supplies formula, bilingual, legal, net-quantity, customer-name/date or safety facts.
 
 ## Asset 1 — Workshop discovery illustration
 
@@ -39,6 +40,26 @@ This register documents generated editorial imagery in the application. D1 `/adm
 - **Phone/tablet:** `/assets/generated/editorial/gift-card-brand-illustration-768.webp` — 768×512, 68,376 bytes, SHA-256 `3b13f341f9a960b63b93402c781c0f9b7e11d5317c02a7fe94666f1354fa8d58`
 - **Current disclosure:** The page identifies it as decorative brand illustration and keeps value/balance/status in the live form.
 - **Approval remaining:** owner, public-use, phone and desktop review in `/admin/image-manifest/`.
+
+## Asset 4 — Soap botanical purple rose
+
+- **Admin route:** `/admin/packaging-studio/`
+- **Role:** Text-free botanical rose artwork for the approved Glacial Purple soap-ribbon structure. All brand, product, ingredient, claim and weight text remains live SVG text.
+- **Generation mode:** Built-in image generation using the owner-supplied soap-label image as structural colour/style direction, followed by chroma-background removal and WebP conversion.
+- **Prompt summary:** Vintage botanical purple rose cluster with one large open lavender-purple rose, several buds and green leaves; detailed engraved/package-illustration finish; isolated on a solid chroma red background; no words, letters, logos, labels, borders, shadows, mockup or extra objects.
+- **Production/SVG-default PNG:** `/assets/packaging/artwork/soap-botanical-purple-rose-v1.png` — 1024×1536, SHA-256 `06b6de844dd889fb6d22b7e0f3de81d5f3fa17f636fcb8eac2eb3c63b2c5a635`
+- **Optional browser WebP:** `/assets/packaging/artwork/soap-botanical-purple-rose-v1.webp` — SHA-256 `4cb107e2642dae0b5a94673d5809998f6fc11a7aef9d416ddf7754a91fae0d0a`
+- **Boundary:** Colour/style artwork only. It is not the actual formula, product photograph, printer proof or legal-label approval.
+
+## Asset 5 — Wedding candle-top line artwork
+
+- **Admin route:** `/admin/packaging-studio/`
+- **Role:** Text-free monochrome illustration for reusable round wedding/anniversary candle-top templates. Names, dates, event text, web address and origin wording remain editable SVG text.
+- **Generation mode:** Built-in image generation using the owner-supplied candle-top sample as composition direction, followed by chroma-background removal and WebP conversion.
+- **Prompt summary:** Black laser-engraving line art of three lit pillar candles with an ornamental heart on the centre candle, symmetrical roses and leafy foliage, a ribbon bow and small heart charm; high-contrast fine engraving lines; isolated on solid chroma red; no words, letters, numbers, dates, logos, borders, frames, circles or mockups.
+- **Production/SVG-default PNG:** `/assets/packaging/artwork/candle-top-wedding-line-art-v1.png` — 1536×1024, SHA-256 `bdf34b23411858ed51e4b4d937663832cd916b3d9e94d51e28283dc3812dbb8d`
+- **Optional browser WebP:** `/assets/packaging/artwork/candle-top-wedding-line-art-v1.webp` — SHA-256 `7ffac7cfea0326c96bc90bbdd1a963d419d0eb9f50945ed5cd60c10b8027cdcf`
+- **Boundary:** This raster artwork may require an approved trace/vectorization step for a particular laser workflow. The Build 234 Startup gate requires a material proof before production.
 
 ## Replacement and retirement rule
 

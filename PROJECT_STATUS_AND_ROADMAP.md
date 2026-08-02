@@ -1,8 +1,27 @@
-# Devil n Dove Project Status and Roadmap — Build 233
+# Devil n Dove Project Status and Roadmap — Build 234
 
-This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 233 work, launch position, gaps and ordered next actions.
+This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 234 work, launch position, gaps and ordered next actions.
 
-## Current integrated baseline through Build 233
+## Build 234 completed work
+
+1. Made the selected packaging template authoritative in both browser and server; old project `package_type` drift can no longer select the wrong renderer.
+2. Rebuilt the soap preview around the exact owner-approved structure with permanent brand/static content, botanical rose artwork, centred editable hierarchy, bilingual panels, rear seal, claims and weight area.
+3. Registered both supplied visual samples in D1 with checksums, bringing packaging reference authority to five sources.
+4. Added generated text-free soap rose and wedding candle artwork as PNG/WebP production/browser pairs with prompt, checksum and usage boundaries.
+5. Added editable 4-inch and 3.5-inch wedding candle tops, a 3-inch general candle top, 4-inch round maker/coaster mark and 2×1.5-inch oval product label.
+6. Added editable candle names/main wording, two dates, occasion, curved brand/origin text and concentric round preview guides.
+7. Added custom millimetre dimensions, shape, renderer profile, bleed/safe margin and Save as reusable template; custom templates live in D1 and reattach to the project.
+8. Made SVG exports self-contained by embedding referenced artwork; retained preview and physical proof boundaries.
+9. Added guarded Creative Automation deletion for accidental unused duplicates while protecting meaningful work and preserving the linked product.
+10. Removed request-time schema DDL from Packaging Studio, Creative Automation, Creative Process and Startup Readiness.
+11. Moved all 44 Startup definitions to the one-time Build 234 migration without overwriting owner/status/evidence, eliminating 44 request-time upserts.
+12. Added `candle_top_template_proof` as the 44th Critical Startup gate with twelve detailed measurement, safe-area, reusable-template, export, material-test, correction and archive steps.
+13. Consolidated the admin dashboard to one Labeling & Packaging entry while retaining the old soap path as a compatibility page.
+14. Added shape-aware responsive preview CSS and mobile stacking for paired references and destructive Creative controls.
+15. Added Build 234 schema/render/deletion/resource regression coverage and repeat-applied the migration after each aggregate schema.
+16. Updated the two canonical handoff files, specialist packaging/visual guides, Startup guide/fallback, schema reference, release/validation evidence and Markdown index.
+
+## Retained integrated baseline through Build 233
 
 1. Preserved every prior Startup gate and expanded the authority from 42 to 43 unique gates with a distinct Critical missing-image blocker.
 2. Added standalone gates and detailed operating pages for Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution and Live Ops Follow-through.
@@ -58,7 +77,7 @@ This is the second canonical current-status file. `AI_HANDOFF.md` owns architect
 
 ## Current position
 
-The application has broad, integrated foundations for catalog/media, inventory lots/movements, orders/payments/refunds, accounting review, customer documents, whole-business packaging, creative/content governance, SEO operations and launch control. Build 233 repairs the bounded login path, prevents temporary verification outages from impersonating logout and removes the largest known eager cross-route reference allocation while retaining explicit invalid-session security. Local checks cannot prove the live login, product correction or autosave symptoms are resolved until their controlled log-backed production tests pass. Generated art and untested production/physical/provider work remain outside launch evidence.
+The application has broad, integrated foundations for catalog/media, inventory lots/movements, orders/payments/refunds, accounting review, customer documents, whole-business packaging, creative/content governance, SEO operations and launch control. Build 234 makes the label/candle template system usable for repeat work, enables safe cleanup of accidental Creative shells and removes four request-time schema/seed hot paths. Local checks cannot prove the live Worker, login, product correction, autosave, packaging or laser/print results until controlled log-backed production tests pass. Generated art and untested production/physical/provider work remain outside launch evidence.
 
 Status remains **production-evidence and controlled-opening preparation**.
 
@@ -68,6 +87,9 @@ Status remains **production-evidence and controlled-opening preparation**.
 - Final-unit and component-set concurrency need simultaneous-session proof.
 - Packaging component BOM currently estimates quantity/cost; fulfilment consumption/reservation needs an approved idempotent movement design.
 - Launch soaps require verified formula/INCI/bilingual facts, measured 100% print/wrap proof and applicable notification/change control.
+- Every candle-top size/material requires a measured blank, saved reusable template, reviewed names/dates, self-contained export and passed physical laser/print proof; the supplied sample is not a dieline.
+- Embedded candle artwork is raster and may require reviewed trace/vectorization for the chosen laser workflow.
+- Accidental Creative deletion must be tested on one empty duplicate and one meaningful-work project; the latter must remain blocked.
 - Customer documents require owner/accountant review of legal identity, registration number, tax adjustment and retention.
 - Transactional email delivery/retry, tax/shipping fixtures, D1/R2 restore and separate paid-order/refund rehearsals remain open.
 - Meta credential presence/read-only identity success does not prove app review, scope approval or publishing. Automation stays review-first.
@@ -83,9 +105,9 @@ Status remains **production-evidence and controlled-opening preparation**.
 
 ### P0 — before production promotion
 
-1. Run Build 233 validation, resolve every blocker and generate/checksum the exact ZIP.
-2. Back up D1 and verify the Build 230 ledger/schema boundary. Apply the Build 230 migration only if absent; Build 233 adds no migration.
-3. Deploy, hard refresh to service-worker shell v14, run the full live smoke suite and confirm 43 Startup gates plus the D1-backed manifest with honest degraded-mode behaviour.
+1. Run Build 234 validation, resolve every blocker and generate/checksum the exact ZIP.
+2. Back up D1; verify Build 229 and 230 ledger keys; apply `database_build234_packaging_templates_creative_cleanup.sql` or identical current-pass SQL exactly once.
+3. Deploy, hard refresh to service-worker shell v15, run the full live smoke suite and confirm 44 Startup gates, five packaging references, five new system templates and the D1-backed image manifest with honest degraded-mode behaviour.
 4. Complete the fourteen-step Startup login proof: bounded profile/header, successful redirect, Cloudflare outcome, valid refresh, invalid password, blocked `/api/auth/me` retention, recovery, logout, reset, logout-all and deliberate expiry.
 5. Run the controlled Product Editor load/autosave/queued-edit/reload/browser-recovery test and correlate it with Cloudflare `exceededCpu`/`exceededMemory` metrics before closing the runtime gate.
 6. Complete the twelve-step Startup role/destructive-action test: remove one disposable archived product through `bounded_registry_v1`, verify one reviewed inventory/audit effect, and prove a separate order/packaging/project-history product remains Archive-only; then test reversal, refund/document void, packaging approval, publication and accounting export authorization.
@@ -95,11 +117,12 @@ Status remains **production-evidence and controlled-opening preparation**.
 10. Save expected/actual Canadian tax and shipping/pickup fixtures for every launch scenario.
 11. Test transactional order/receipt/refund/fulfilment messages, provider IDs, retry and failure diagnostics.
 12. Complete D1, R2, deployment and required-configuration restore rehearsal.
-13. Complete physical counts, packaging BOM, approved label version and measured print/wrap proof for each launch product.
+13. Complete physical counts, packaging BOM, approved label version and measured print/wrap proof for each launch product. For every candle-top/round job, measure the blank, save the exact reusable template and complete the new twelve-step physical material gate.
 14. Complete `missing_launch_images` in `/admin/image-manifest/`; use `IMAGES_REQUIRED.md` for capture standards, create item-specific Catalog Media rows, replace real-photo blockers, approve the three editorials deliberately, then validate Product/Offer, Open Graph, canonical, alt text, galleries and Search Console on phone and desktop.
 15. Complete Business Profile details/photos/hours/services and record a recurring local accuracy review.
 16. Complete one real paid fulfilment and a different refund recovery; retain all non-secret evidence.
-17. Assign launch owner, monitoring hours, support access, stop conditions and phone-ready rollback instructions.
+17. Test Creative duplicate cleanup: delete one untouched accidental shell using its exact key, then prove a project with timeline/output/inventory/evidence/content/cost/review work is blocked and unchanged.
+18. Assign launch owner, monitoring hours, support access, stop conditions and phone-ready rollback instructions.
 
 ### P1 — controlled-opening stabilization
 

@@ -1,3 +1,19 @@
+# Release Notes — Build 234
+
+## Reference-faithful packaging templates and safe Creative cleanup
+
+- Made the selected Packaging Studio template authoritative in the browser and server so an older project type cannot silently choose the wrong renderer.
+- Rebuilt the soap ribbon with permanent Rosevear/Devil n Dove, website, Canadian-origin, small-batch, claims and weight elements; centred live SVG wording; bilingual panels; rear seal; botanical rose and embedded-artwork export.
+- Registered the approved soap visual and wedding candle-top sample with exact checksums, bringing adopted packaging references to five.
+- Added editable 4-inch/3.5-inch wedding candle tops, 3-inch general candle top, 4-inch round maker/coaster mark and 2×1.5-inch oval label, plus exact custom dimensions and reusable D1 templates.
+- Added generated text-free soap and candle art with PNG/WebP variants, hashes, prompts and strict production-use boundaries.
+- Added guarded Creative Automation deletion for untouched accidental shells with exact project-key confirmation; real products and meaningful outputs, events, reviews, evidence, inventory, cost and linked work remain protected.
+- Removed request-time schema creation/bulk seeding from Packaging Studio, Creative Process, Creative Automation and Startup Readiness.
+- Added the detailed Critical `candle_top_template_proof` gate for exactly 44 Startup gates and moved all canonical Startup definitions to the idempotent migration without overwriting mutable evidence/status.
+- Updated responsive soap/round previews, source-reference layout, phone destructive controls, one-H1/SEO rules, schema aggregates, current handoff and validation tooling.
+
+Back up D1 and confirm Build 229 and Build 230 ledger keys. Apply `database_build234_packaging_templates_creative_cleanup.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the whole package, hard refresh to service-worker shell v15 and follow `BUILD234_VALIDATION.md`. Soap and candle-top production remain blocked until measured physical proofs and applicable label/material reviews pass.
+
 # Release Notes — Build 233
 
 ## Bounded login and temporary-session retention

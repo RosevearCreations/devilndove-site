@@ -1,5 +1,5 @@
-// Build 233: refresh authentication helpers after resource-limit/session-retention hardening.
-const CACHE_NAME = 'devilndove-shell-v14';
+// Build 234: refresh packaging templates, candle-top artwork and guarded project cleanup.
+const CACHE_NAME = 'devilndove-shell-v15';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

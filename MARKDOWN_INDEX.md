@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 233
+# Devil n Dove Markdown Index — Build 234
 
 ## Two current authorities
 
@@ -9,11 +9,11 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 
 ## Active specialist playbooks
 
-- `STARTUP_GO_LIVE_GUIDE.md` — generated operating copy of all 43 D1-backed gates; status remains in D1.
+- `STARTUP_GO_LIVE_GUIDE.md` — generated operating copy of all 44 D1-backed gates; status remains in D1.
 - `PRELAUNCH_PROCESS_PLAYBOOKS.md` — separate Product Preflight, Deployment Preflight, Safe Deploy, Smoke, Deploy Readiness, Go-Live and Live Ops procedures.
 - `CREATIVE_AUTOMATION_STUDIO.md` — master creative process and specialist authority map.
 - `PACKAGING_STUDIO.md` — whole-business labeling/packaging specification.
-- `PACKAGING_REFERENCE_BASELINE.md` — adopted user-supplied specification/PDF/SVG paths, checksums, dimensional reconciliation and approval rule.
+- `PACKAGING_REFERENCE_BASELINE.md` — five adopted specification/PDF/SVG/visual reference paths, checksums, dimensional reconciliation and soap/candle approval rules.
 - `DATABASE_SCHEMA_REFERENCE.md` — current and historical schema ownership.
 - `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — production variables/bindings and safe checks.
 - `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md` — review-first provider setup/tests.
@@ -24,10 +24,10 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 
 ## Current release files
 
-- `database_build230_visual_image_manifest.sql`
+- `database_build234_packaging_templates_creative_cleanup.sql`
 - `database_upgrade_current_pass.sql` — identical; apply one, not both.
-- `BUILD233_VALIDATION.md`
-- `BUILD233_CHANGED_FILES.md`
+- `BUILD234_VALIDATION.md`
+- `BUILD234_CHANGED_FILES.md`
 - `RELEASE_NOTES.md`
 
 ## Retired pointers
@@ -36,4 +36,4 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 
 ## Historical evidence
 
-Earlier `BUILD*_VALIDATION.md`, `BUILD*_CHANGED_FILES.md`, numbered migrations, research notes and former roadmaps—including Build 232—remain immutable traceability evidence. They intentionally keep their original Build labels and must not be edited to appear current. This retirement policy is the Markdown sanity check: current direction lives in two files; specialist procedures stay scoped; historical evidence cannot compete with current instructions.
+Earlier `BUILD*_VALIDATION.md`, `BUILD*_CHANGED_FILES.md`, numbered migrations, research notes and former roadmaps—including Build 233—remain traceability evidence. They intentionally keep their original release labels. Historical regression scripts may be adjusted only so their test scope remains valid after a newer current-pass migration replaces the old one. This retirement policy is the Markdown sanity check: current direction lives in two files; specialist procedures stay scoped; historical evidence cannot compete with current instructions.

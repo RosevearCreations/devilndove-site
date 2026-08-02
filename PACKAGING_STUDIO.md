@@ -1,20 +1,20 @@
-# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 230)
+# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 234)
 
 ## Authority rule
-This file is the **single current implementation map** for Devil n Dove packaging. Its design direction is governed collectively by the three adopted user-supplied sources in `PACKAGING_REFERENCE_BASELINE.md`: the full automation specification, template-guide PDF and master SVG. Packaging code, schema, templates, launch checks and future work must be reconciled against all four records during every build.
+This file is the **single current implementation map** for Devil n Dove packaging. Soap design direction is governed collectively by the supplied automation specification, template-guide PDF, master SVG and approved Glacial Purple image. Round candle-top direction is governed by the owner-supplied wedding/anniversary sample. `PACKAGING_REFERENCE_BASELINE.md` preserves the four registered source-file checksums and their scopes. Packaging code, schema, templates, launch checks and future work must be reconciled during every build.
 
-Build 230 retains the three adopted sources, immutable checksums and dimensional scopes in D1. Packaging remains a specialist business system linked from Product Release Preflight and Startup Readiness; Creative Automation and the Visual Image Manifest may reference packaging evidence but must not duplicate labels, BOM costs, print tests or approval state. Generated editorial imagery is never physical label, wrap, component or shipped-package proof.
+Build 234 retains five adopted sources, immutable checksums and dimensional scopes in D1. Packaging remains a specialist business system linked from Product Release Preflight and Startup Readiness; Creative Automation and the Visual Image Manifest may reference packaging evidence but must not duplicate labels, BOM costs, print tests or approval state. Generated editorial imagery is never physical label, wrap, component or shipped-package proof. Text-free generated packaging artwork remains review-required and never supplies customer, formula, bilingual, legal or net-quantity facts.
 
 The root `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` is a compatibility pointer. The exact supplied specification is retained at `docs/packaging/source-references/DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md`; it and the PDF/SVG sources must not be silently edited into competing versions.
 
 ## Current implemented routes
-- `/admin/packaging-studio/` — the single editor for soap ribbons, general product labels, candle labels, jewelry cards, package inserts, packaging components/cost, versions, exports and print tests.
+- `/admin/packaging-studio/` — the single editor for soap ribbons, candle tops, engraved rounds/coasters, custom exact-size templates, general product labels, candle labels, jewelry cards, package inserts, packaging components/cost, versions, exports and print tests.
 - `/admin/packaging/soap-labels/` — compatibility pointer to the unified route; it no longer hosts a second editor.
 - `/admin/startup-readiness/` — launch status, evidence, and physical/regulatory gates.
 
 ## Current data authority
 - `products` is the public commerce product authority.
-- `packaging_reference_sources` registers the three adopted directions, repository paths, SHA-256 values, dimensional summaries and review status.
+- `packaging_reference_sources` registers the five adopted directions, repository paths, SHA-256 values, dimensional summaries and review status.
 - `packaging_templates`, `packaging_projects`, `packaging_project_versions`, and `packaging_export_history` are the broad packaging engine.
 - `packaging_components` is the per-project bill of materials: inventory link, component type/name, SKU/reference, quantity per finished unit, waste, cost, lot traceability, supplier and notes.
 - `soap_label_templates`, `soap_products`, `soap_ingredients`, `soap_label_claims`, `soap_label_exports`, and `soap_label_print_tests` are the normalized soap-label authority.
@@ -23,9 +23,14 @@ The root `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` is a compatibility poin
 
 ## Current implementation reconciliation
 Implemented now:
-- three adopted reference-source cards and D1 records for the supplied specification, guide PDF and master SVG;
-- one application authority across soap ribbons, general labels, candle labels, jewelry cards and package inserts;
-- generic editable SVG preview for non-soap formats plus the established exact soap-ribbon renderer;
+- five adopted reference-source cards/D1 records for the supplied soap specification, guide PDF, master SVG, approved soap visual and round candle-top sample;
+- one application authority across soap ribbons, candle tops, engraved rounds/coasters, custom sizes, general labels, candle labels, jewelry cards and package inserts;
+- template-authoritative rendering so stale project `package_type` data cannot send a selected soap template through the generic rectangle renderer;
+- a rebuilt soap SVG with static Rosevear/Devil n Dove marks, botanical purple rose, centred product hierarchy, bilingual ingredient panels, rear seal, four claims and net-weight area;
+- 4-inch and 3.5-inch wedding candle tops, a 3-inch general candle top, 4-inch round maker/coaster mark and 2×1.5-inch oval product label;
+- editable candle names/main wording, two dates, occasion, upper/lower arcs, exact dimensions, safe margin and artwork path;
+- reusable owner-created D1 templates storing dimensions, shape, renderer profile, artwork/text defaults and colours for repeat jobs;
+- self-contained SVG exports that embed referenced artwork instead of leaving a broken root-relative image link;
 - inventory-linked packaging BOM, per-finished-unit quantity, waste and estimated packaging unit cost;
 - exact 11-inch continuous SVG ribbon and centred 0.75-inch band;
 - Glacial Purple reference hierarchy and reusable rose assets;
@@ -43,6 +48,8 @@ Still gated or incomplete:
 - production barcode, verified QR destination, transactional batch/lot consumption, gift, shipping and market/retail variants;
 - direct reviewed recipe/formula-to-label synchronization without duplicating source facts;
 - final bilingual, formula, claim, cosmetic, packaging, and net-quantity review for each product.
+- physical measurement and material/laser proof for each candle lid/blank and custom size; the owner-supplied candle image is not a measured dieline;
+- reviewed trace/vectorization of raster candle artwork when a specific laser workflow requires vector paths rather than embedded raster art.
 
 ## Physical dimension conflict
 The supplied specification and PDF state both a 1.50-inch (38.1 mm) artboard and a 50 mm rear circle. These cannot occupy the same height without clipping. The supplied master SVG introduces a second discrepancy: its `<circle r="12.5">` renders a 25 mm diameter. The application keeps the original sources unchanged and two explicit renderer profiles until a physical proof selects the production geometry:
