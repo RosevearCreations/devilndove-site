@@ -1,4 +1,4 @@
-# Devil n Dove Prelaunch Process Playbooks — Build 229
+# Devil n Dove Prelaunch Process Playbooks — Build 230
 
 This document separates the release journey into distinct processes. A pass in one process never erases a blocker in another. `/admin/startup-readiness/` remains the 43-gate status authority; this playbook explains where to click, what to prove, what to save, and what to do when a stage fails.
 
@@ -19,7 +19,7 @@ This document separates the release journey into distinct processes. A pass in o
 1. In Products, create a deliberately small launch list and record each product ID, slug and SKU.
 2. In Product Release Preflight, filter to that list. Do not use an average score to excuse a blocking row.
 3. Open each product and verify name, product type, origin, price, currency, tax treatment, inventory authority, sale channel, dimensions, weight, care, shipping/pickup and customer-facing facts.
-4. Open Catalog Media and `IMAGES_REQUIRED.md`. Prove one featured image, promised supporting roles, public-use clearance, useful alt text and reliable delivery. The distinct `missing_launch_images` Critical gate stays open for any missing, broken, fallback, placeholder or rights-unclear launch asset.
+4. Open Catalog Media and `/admin/image-manifest/`; use `IMAGES_REQUIRED.md` for capture standards. Prove one featured image, promised supporting roles, public-use clearance, useful alt text and reliable delivery. The Critical gate stays open for any missing, broken, placeholder or rights-unclear launch asset; generated art cannot satisfy real-product proof.
 5. Open the public View link in a private window, refresh it, copy the URL, and test the gallery on a phone and desktop.
 6. Open Labeling & Packaging and prove the approved label, package components, costs, lot/batch fields and physical print/wrap test required for that product.
 7. Resolve every red item in the owning record. Retest the public view after important corrections.
@@ -34,16 +34,17 @@ This document separates the release journey into distinct processes. A pass in o
 
 1. Run `python3 scripts/predeploy_sanity_check.py` from the extracted release folder.
 2. Run `python3 scripts/deployment_preflight_static_check.py` and open `data/site/deployment-preflight.json`.
-3. Run `node scripts/build229_startup_readiness_test.mjs`; it must report 43 unique gates, the missing-image blocker and a working degraded fallback.
+3. Run `node scripts/build230_visual_manifest_test.mjs`; it must report 43 unique Startup gates, 20 unique manifest rows, a working read-only fallback and generated-asset checksum integrity.
 4. Run syntax checks for changed Functions and browser JavaScript.
 5. Confirm every public HTML page has a viewport, distinctive title, useful description, exactly one H1, canonical where applicable and descriptive image alternatives.
 6. Confirm `css/styles.css` has balanced braces and inspect the changed pages at phone, tablet, laptop and wide-desktop widths.
-7. Compare `database_upgrade_current_pass.sql` with `database_build229_packaging_reference_authority.sql`; they must be identical.
+7. Compare `database_upgrade_current_pass.sql` with `database_build230_visual_image_manifest.sql`; they must be identical.
 8. Search the current migration for explicit SQL transaction statements. Any `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK` is a blocker for D1/Durable Objects execution.
 9. Apply aggregate schemas in disposable SQLite databases and apply the current migration twice to prove rerun safety.
 10. Compile Pages Functions with the Wrangler version used by Cloudflare.
-11. Compare the three adopted packaging source checksums with `PACKAGING_REFERENCE_BASELINE.md`; render/inspect the SVG and retain the 25/38.1/50 mm discrepancy as a blocker until physical proof.
-12. Generate the release manifest and record the ZIP SHA-256. Deploy only that exact archive.
+11. Compare the three adopted packaging source checksums with `PACKAGING_REFERENCE_BASELINE.md`; retain the 25/38.1/50 mm discrepancy until physical proof.
+12. Compare all six editorial WebP hashes with `GENERATED_VISUAL_ASSET_REGISTER.md`; verify intrinsic dimensions and confirm no generated path appears in Product/Offer data.
+13. Generate the release manifest and record the ZIP SHA-256. Deploy only that exact archive.
 
 **Failure:** correct the owning source file, regenerate derived files, rebuild the archive and restart the entire preflight.  
 **Pass:** all local/static/schema/syntax/bundle checks pass and the archive is identified by name and checksum.
@@ -53,10 +54,10 @@ This document separates the release journey into distinct processes. A pass in o
 **Open:** Cloudflare Dashboard → Workers & Pages, D1 and the production Pages project.
 
 1. Record the production D1 database name and create an approved Time Travel/recovery reference before writing.
-2. Confirm the Build 228 ledger entry exists.
-3. Apply either `database_build229_packaging_reference_authority.sql` or the identical `database_upgrade_current_pass.sql` once—not both.
+2. Confirm the Build 229 ledger entry exists.
+3. Apply either `database_build230_visual_image_manifest.sql` or the identical `database_upgrade_current_pass.sql` once—not both.
 4. Do not wrap the SQL in `BEGIN TRANSACTION` or `SAVEPOINT`. If migration is executed inside Durable Object code, use `state.storage.transaction()` or `transactionSync()` around the JavaScript operations.
-5. Confirm ledger key `build229_packaging_reference_authority`, the `packaging_reference_sources` table and exactly three active/adopted checksum-bearing source rows. Build 228 creative tables must already exist.
+5. Confirm ledger key `build230_visual_image_manifest`, both manifest tables, 20 active rows and three generated-provenance rows. Build 229 packaging references must already exist.
 6. Upload the complete preflighted package and record deployment ID, URL, time and operator.
 7. Keep the previous production deployment and D1 recovery point available.
 8. Do not promote because upload succeeded; continue immediately to live smoke tests.
@@ -73,11 +74,13 @@ This document separates the release journey into distinct processes. A pass in o
 3. Confirm exactly one visible H1 and no CSS overlap or horizontal page overflow at phone and desktop widths.
 4. Test login, logout, protected route denial and password recovery with owner-controlled accounts.
 5. Open Startup Readiness with All statuses and confirm all 43 gates appear, including `missing_launch_images`. Force or simulate an API error and confirm the full built-in guide appears instead of an empty result.
-6. Open Labeling & Packaging and confirm the supplied Markdown, PDF and SVG reference cards are visible; verify the SVG preview contains within its card on phone and desktop.
-7. Test a safe product view/cart/checkout path without completing payment unless the Startup gate calls for a paid rehearsal.
-8. Test image fallback, slow network behaviour, structured error messages and runtime incident capture.
-9. Open Creative Automation Studio and confirm its specialist links remain usable if the master API is unavailable.
-10. Run the read-only Facebook + Instagram identity/token test; save IDs and scope/expiry results, never secrets.
+6. Open Visual Image Manifest and confirm 20 D1 rows. Save/reload one reversible review, confirm history, then test the API failure path: all 20 rows must remain visible as Unsynced and saving must be disabled.
+7. Open Home, Handmade Jewelry and Gift Cards on phone/desktop. Confirm responsive WebPs, editorial disclosure, one H1 and no Product/Offer use. Keep real-photo rows open.
+8. Open Labeling & Packaging and confirm the supplied Markdown, PDF and SVG reference cards are visible; verify the SVG preview contains within its card on phone and desktop.
+9. Test a safe product view/cart/checkout path without completing payment unless the Startup gate calls for a paid rehearsal.
+10. Test image fallback, slow network behaviour, structured error messages and runtime incident capture.
+11. Open Creative Automation Studio and confirm its specialist links remain usable if the master API is unavailable.
+12. Run the read-only Facebook + Instagram identity/token test; save IDs and scope/expiry results, never secrets.
 11. Record route, time, browser/device, expected/actual result and safe evidence for every check.
 
 **Failure:** pause promotion, correct or roll back, and repeat the full live suite—not only the failed route.  

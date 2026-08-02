@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 229
+# Devil n Dove Markdown Index — Build 230
 
 ## Two current authorities
 
@@ -20,18 +20,19 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 - `POST_DEPLOY_SMOKE_TEST.md` — production smoke evidence procedure.
 - `LOCAL_SEO_PLAYBOOK.md` — current SEO/local operating practice.
 - `IMAGES_REQUIRED.md` — real-media capture/replacement requirements.
+- `GENERATED_VISUAL_ASSET_REGISTER.md` — immutable prompt/use/checksum provenance for generated editorial assets; mutable review status remains in D1.
 
 ## Current release files
 
-- `database_build229_packaging_reference_authority.sql`
+- `database_build230_visual_image_manifest.sql`
 - `database_upgrade_current_pass.sql` — identical; apply one, not both.
-- `BUILD229_VALIDATION.md`
-- `BUILD229_CHANGED_FILES.md`
+- `BUILD230_VALIDATION.md`
+- `BUILD230_CHANGED_FILES.md`
 - `RELEASE_NOTES.md`
 
 ## Retired pointers
 
-`AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` point to the two current authorities. `CONTENT_AUTOMATION_STUDIO.md` and the CAIP documentation are specialist/historical references under the master Creative Automation process. The root `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` is a compatibility pointer; the exact supplied source is preserved under `docs/packaging/source-references/` and reconciled through `PACKAGING_REFERENCE_BASELINE.md` and `PACKAGING_STUDIO.md`.
+`AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` point to the two current authorities. `CONTENT_AUTOMATION_STUDIO.md` and CAIP documentation are specialist/historical references under Creative Automation. `IMAGES_REQUIRED.md` and `GENERATED_VISUAL_ASSET_REGISTER.md` are specialist visual references; mutable owner/status/evidence belongs in D1 `/admin/image-manifest/`. The root soap-label specification is a compatibility pointer to the exact adopted source under `docs/packaging/source-references/`.
 
 ## Historical evidence
 

@@ -1,4 +1,4 @@
-# Devil n Dove Packaging Reference Baseline - Build 229
+# Devil n Dove Packaging Reference Baseline - Build 230 current pointer
 
 The following three user-supplied files are adopted together as direction for the soap-label system. `PACKAGING_STUDIO.md` remains the current implementation map and contains the full specification. Code, schema, templates, Startup gates and future changes must be reconciled against all three files.
 

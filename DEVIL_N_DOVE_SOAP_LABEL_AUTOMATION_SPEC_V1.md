@@ -1,4 +1,4 @@
-# Devil n Dove Soap Label Automation Specification — Build 229 Compatibility Pointer
+# Devil n Dove Soap Label Automation Specification — Build 230 Compatibility Pointer
 
 The exact user-supplied specification is preserved at:
 

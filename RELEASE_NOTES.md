@@ -1,3 +1,17 @@
+# Release Notes — Build 230
+
+## Visual Image Manifest and honest editorial enrichment
+
+- Added `/admin/image-manifest/` with 20 D1-backed image requirements, visual filters/previews, owner, rights, public-use, final URL, alternative text, phone/desktop review and append-only history.
+- Added approval validation, admin audit/runtime incidents and a complete read-only Unsynced browser fallback so service failure cannot appear empty or approved.
+- Generated three intentional editorial illustrations and responsive derivatives for homepage discovery, general jewelry techniques and gift-card decoration; all six WebPs include intrinsic dimensions and remain below 270 KB.
+- Preserved generated prompts, dimensions, hashes, intended use and prohibitions in `GENERATED_VISUAL_ASSET_REGISTER.md` and D1. Generated art never satisfies real-product/process/condition proof.
+- Updated the Critical Startup image gate with 12 step-by-step test/correction instructions and regenerated all 43 gates without removing prior keys.
+- Synchronized the D1-safe Build 230 migration to all aggregate schemas/current-pass SQL and retired the older synchronizer.
+- Refreshed one-H1, mobile/desktop CSS, image SEO, Markdown consolidation, current handoff, schema, smoke, sanity and next-step guidance.
+
+Back up D1 and confirm Build 229. Apply `database_build230_visual_image_manifest.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the complete package and follow `BUILD230_VALIDATION.md`.
+
 # Release Notes — Build 229
 
 ## Adopted packaging sources and explicit missing-image blocker

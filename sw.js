@@ -1,5 +1,5 @@
-// Build 229: refresh the shell after packaging-reference, image-gate, responsive and SEO verification.
-const CACHE_NAME = 'devilndove-shell-v10';
+// Build 230: refresh the shell after visual-manifest, editorial-image, responsive and SEO verification.
+const CACHE_NAME = 'devilndove-shell-v11';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

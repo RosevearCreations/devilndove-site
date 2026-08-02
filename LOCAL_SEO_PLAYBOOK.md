@@ -1,8 +1,8 @@
-# Local SEO and Public Content Playbook — Build 229
+# Local SEO and Public Content Playbook — Build 230
 
 This is a specialist implementation guide, not a second roadmap. Current priorities are in `PROJECT_STATUS_AND_ROADMAP.md`.
 
-## Build 229 recurring local-search pass
+## Build 230 recurring local-search and image pass
 
 1. Run the public HTML scan and require exactly one H1, a distinctive title, useful description, canonical and visible introductory copy on every indexable page.
 2. Put words real buyers use in the title, main heading, opening copy, product facts and descriptive internal links only where they accurately describe the page.
@@ -11,7 +11,9 @@ This is a specialist implementation guide, not a second roadmap. Current priorit
 5. Compare the website with Google Business Profile name, categories, phone, site, hours, service/pickup area, products/services and real current photos.
 6. Review Search Console queries/pages/indexing and Business Profile actions monthly. Make changes from observed gaps; do not guarantee first-page position because distance and prominence remain outside direct control.
 7. Recheck phone layout, tap targets, text wrapping, image fallback and page speed after every CSS/media change.
-8. Keep every missing/fallback/placeholder public asset in the `missing_launch_images` Critical gate; only final approved representative media may enter structured data, social previews or Business Profile workflows.
+8. Keep every missing/fallback/placeholder public asset in the D1 Visual Image Manifest and `missing_launch_images` Critical gate; only final approved representative real media may enter product structured data, real-product social previews or Business Profile workflows.
+9. Keep equivalent primary content, image meaning and alternative text available on mobile and desktop. Use crawlable representative images near relevant copy and multiple accurate real-product angles where useful.
+10. Treat generated editorial art as design, not local or product proof. Preserve its disclosure/provenance and never use it to imply products, premises, events, condition or customer results.
 
 ## Non-negotiable public SEO rules
 

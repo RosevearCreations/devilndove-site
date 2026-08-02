@@ -1,16 +1,16 @@
-# Devil n Dove Startup and Go-Live Guide — Build 229
+# Devil n Dove Startup and Go-Live Guide — Build 230
 
 This is the human-readable operating copy of all 43 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
 
 ## Operating rules
 
-1. Apply `database_build229_packaging_reference_authority.sql` or the identical `database_upgrade_current_pass.sql`, not both. Back up D1 first and confirm Build 228 is already present.
+1. Apply `database_build230_visual_image_manifest.sql` or the identical `database_upgrade_current_pass.sql`, not both. Back up D1 first and confirm Build 229 is already present.
 2. Use owner-controlled test records and real Production bindings only where the gate explicitly requires a production test.
 3. Never paste secrets, passwords, access tokens, full payment data, or private customer information into gate evidence.
 4. A failed numbered step keeps the gate Failed or Blocked until the correction procedure and full retest succeed.
 5. Complete and Not Applicable decisions require factual evidence. Reopen a completed gate after a related deployment, credential rotation, schema/provider version, policy, or material data change.
 6. Use `PRELAUNCH_PROCESS_PLAYBOOKS.md` for the standalone process order; never use a green specialist page to erase another Startup blocker.
-7. The `missing_launch_images` Critical gate and `IMAGES_REQUIRED.md` manifest must both be complete before go-live; a placeholder is planning evidence, not launch media.
+7. The `missing_launch_images` Critical gate, D1 Visual Image Manifest, item-specific Catalog Media evidence, and `IMAGES_REQUIRED.md` capture standard must be complete before go-live; generated editorial art cannot satisfy a real-photo requirement.
 8. The guide does not replace legal, accounting, tax, product-safety, platform, printer, or regulatory review.
 
 ## Foundation and deployment
@@ -18,7 +18,7 @@ This is the human-readable operating copy of all 43 database-backed gates in `/a
 ### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
 
 **Inside the application:** `/admin/deployment-preflight/`  
-**External location:** Build 229 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**External location:** Build 230 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
 **Production test:** No live binding is required, but deployed verification may still be appropriate.
 
 #### Before you begin
@@ -28,14 +28,15 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 #### Test steps
 
 1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, aggregate-schema, repeated-current-migration, Startup 43-gate, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, aggregate-schema, repeated-current-migration, Startup 43-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
 3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
-4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface.
-5. Confirm database_upgrade_current_pass.sql is identical to database_build229_packaging_reference_authority.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, or RELEASE statement.
-6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files, validation and process playbooks all identify Build 229 consistently.
-7. Confirm the three adopted packaging source files match the SHA-256 values in PACKAGING_REFERENCE_BASELINE.md and the supplied SVG discrepancy remains documented rather than silently normalized.
-8. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
-9. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.
+4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially the Visual Image Manifest and three changed public image bands.
+5. Confirm database_upgrade_current_pass.sql is identical to database_build230_visual_image_manifest.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 230 consistently.
+7. Confirm the three adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
+8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
+9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
+10. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.
 
 #### If any step fails: correction procedure
 
@@ -49,7 +50,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** The exact Build 229 archive passes every static, schema, syntax, CSS, one-H1, metadata, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
+**Pass condition:** The exact Build 230 archive passes every static, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
 
 ### 10. Back up D1, apply the current migration, and deploy the complete build — **Critical**
 
@@ -65,13 +66,14 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 
 1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.
 2. Record the date, database name and safe recovery reference in the evidence notes.
-3. Confirm the Build 228 migration is already present, then apply database_build229_packaging_reference_authority.sql or the identical database_upgrade_current_pass.sql, but not both.
-4. Confirm the migration ledger records build229_packaging_reference_authority, the packaging_reference_sources table exists, and it contains the three active adopted source records with the documented SHA-256 values.
+3. Confirm the Build 229 migration is already present, then apply database_build230_visual_image_manifest.sql or the identical database_upgrade_current_pass.sql, but not both.
+4. Confirm the migration ledger records build230_visual_image_manifest, image_manifest_items and image_manifest_history exist, and 20 active manifest seed rows load without overwriting mutable review evidence.
 5. Deploy the complete ZIP rather than selected files.
 6. Record the Pages deployment URL and deployment/commit identifier.
-7. Open Startup Readiness with All statuses and confirm all 43 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images.
-8. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.
-9. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.
+7. Open Startup Readiness with All statuses and confirm all 43 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images and open its Visual Image Manifest route.
+8. Confirm the manifest loads from D1 rather than Unsynced fallback and preserves the three generated-editorial provenance rows.
+9. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.
+10. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.
 
 #### If any step fails: correction procedure
 
@@ -85,7 +87,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** A recoverable D1 point exists, the Build 229 migration is applied once after Build 228, the complete deployment is live, all 43 gates load, all three packaging source records exist, and no migration, Function, route or data-integrity error remains.
+**Pass condition:** A recoverable D1 point exists, the Build 230 migration is applied once after Build 229, the complete deployment is live, all 43 gates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains.
 
 ### 15. Complete Post-Deploy Smoke Tests as a standalone live-verification process — **Critical**
 
@@ -99,16 +101,17 @@ Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting I
 
 #### Test steps
 
-1. Confirm the deployment ID and Build 229 migration evidence match the package that passed Deployment Preflight.
-2. Open the production home, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.
-3. Sign in with an owner-controlled administrator and test Startup Readiness, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map. Confirm Packaging lists the three adopted reference sources.
-4. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.
-5. At phone, tablet, laptop and wide-desktop widths, check navigation, tables, forms, dialogs, focus, touch targets, text contrast and horizontal overflow on every changed route.
-6. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.
-7. Open Startup Readiness with All statuses, confirm 43 unique gates and locate the separate missing-launch-images Critical blocker.
-8. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner.
-9. After any correction/redeploy, repeat all smoke checks—not only the originally failed URL.
-10. Continue to Deploy Readiness only when every critical smoke result passes.
+1. Confirm the deployment ID and Build 230 migration evidence match the package that passed Deployment Preflight.
+2. Open the production home, handmade-jewelry, gift-card, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.
+3. Confirm the three generated WebP illustrations load at phone and desktop sizes, disclose editorial use, preserve one H1, and are absent from Product/Offer structured data and real-product galleries.
+4. Sign in with an owner-controlled administrator and test Startup Readiness, Visual Image Manifest, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map.
+5. In the manifest, filter open blockers, open a route, make one reversible review update, reload, and confirm database history. Test the API failure path and confirm the full 20-row Unsynced fallback remains visible with saving disabled.
+6. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.
+7. At phone, tablet, laptop and wide-desktop widths, check navigation, image crops, cards, forms, tables, focus, touch targets, contrast and horizontal overflow on every changed route.
+8. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.
+9. Open Startup Readiness with All statuses, confirm 43 unique gates and locate the missing-launch-images Critical blocker.
+10. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner. After any correction/redeploy, repeat all smoke checks.
+11. Continue to Deploy Readiness only when every critical smoke result passes.
 
 #### If any step fails: correction procedure
 
@@ -402,30 +405,32 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 ### 95. Replace every missing, broken, fallback, or placeholder launch image — **Critical**
 
-**Inside the application:** `/admin/visual-enrichment-studio/`  
-**External location:** IMAGES_REQUIRED.md, Catalog Media, R2, and every public launch product, service, local, category, and social-preview route  
+**Inside the application:** `/admin/image-manifest/`  
+**External location:** Database Visual Image Manifest, IMAGES_REQUIRED.md capture guide, Catalog Media, R2, and every public launch product, service, local, category, and social-preview route  
 **Production test:** Yes — use owner-controlled records and save non-secret identifiers.
 
 #### Before you begin
 
-Assign one owner and open /admin/visual-enrichment-studio/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/image-manifest/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
 
 #### Test steps
 
-1. Open IMAGES_REQUIRED.md and use it as the launch-image manifest; do not rely on memory or a visual spot-check.
-2. Freeze the opening-day product list and list every indexable launch route, including home, shop, product, service, story, contact, local-relevance, category and policy pages that display meaningful imagery.
-3. At phone and desktop widths, audit each route for an empty source, HTTP error, broken thumbnail, generic fallback, planning placeholder, repeated image, unsuitable crop, missing intrinsic dimensions or misleading alternative text.
-4. For every launch product, require one approved featured image and all supporting image roles promised by the public gallery; record intentionally unavailable supporting roles instead of inventing or duplicating media.
-5. Confirm ownership, model/property consent, product accuracy and privacy for every public asset. Keep rights-unclear media blocked.
-6. Upload approved originals through the managed R2/Catalog Media workflow, assign role, order, descriptive alt text, caption when useful, public-use status, and responsive derivatives.
-7. Verify every final public image URL returns HTTP 200 and renders without overlap, distortion or layout shift on a narrow phone, tablet and desktop, including a throttled connection and the offline/low-bandwidth fallback.
-8. Remove placeholders from Product/Organization structured data, Open Graph/social previews, local-business surfaces, feeds and scheduled posts; only approved final images may represent a launch item publicly.
-9. Save before-and-after evidence in the manifest for every required item: route or product, image role, owner, rights status, final URL, desktop/phone result and reviewer.
-10. Keep this gate Failed or Blocked while any required launch image is missing, broken, placeholder-based, misleading, rights-unclear or absent from the evidence manifest. Reopen it after any launch-product, route, image, crop or rights change.
+1. Open Visual Image Manifest and confirm the green Database status authority banner, 20 active seed rows, three generated-editorial provenance rows, and visible open-launch-blocker count. If Unsynced fallback appears, apply Build 230 and repair the API before continuing.
+2. Open IMAGES_REQUIRED.md from the manifest for capture standards, then freeze the opening-day product list and create item-specific Catalog Media records for every launch product.
+3. Filter Open launch blockers only. Assign each item an owner and open its page; do not approve from the thumbnail alone.
+4. At narrow-phone, tablet, desktop and wide-desktop widths, check source HTTP status, crop, distortion, overlap, layout shift, repeated-image substitution, intrinsic dimensions, slow/offline fallback and whether the alternative text describes the actual image.
+5. For real_photo_required rows, photograph the actual current product, process, condition, location or packaging. Generated or stock-looking artwork cannot pass these rows.
+6. For editorial_illustration_allowed rows, confirm the page discloses illustration where necessary, does not imply actual inventory, and excludes the asset from Product/Offer schema and real-product galleries.
+7. Confirm ownership, model/property consent, product accuracy, privacy and public-use permission. Keep needs-review or blocked media out of public release surfaces.
+8. Upload approved originals through R2/Catalog Media where applicable; create responsive derivatives; save the final root-relative or HTTPS URL and useful alt text.
+9. Save rights, public-use, phone and desktop results plus evidence URL and a plain-language change note. Approval is rejected until all required fields pass. Reload and confirm the change appears in manifest history.
+10. Inspect Open Graph, Organization/LocalBusiness/Product structured data, feeds, social queues and scheduled content so no planning placeholder or generated product proof represents a launch item.
+11. Repeat the open-blocker filter. Keep this Startup gate Failed or Blocked while any required row or item-specific launch-product role is missing, misleading, rights-unclear, placeholder-based, device-failed or absent from saved evidence.
+12. Reopen this gate after any launch-product, route, crop, asset, rights, schema, social-preview or public-use change.
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then complete the IMAGES_REQUIRED manifest, replace every missing/broken/fallback/planning asset with rights-cleared final media, and retest all launch routes on phone and desktop. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then use the D1 Visual Image Manifest and IMAGES_REQUIRED capture guide, replace every real-photo requirement with accurate rights-cleared media, keep generated art limited to disclosed editorial slots, save phone/desktop evidence, and retest every launch route. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
@@ -435,7 +440,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** Every launch product and indexable launch route uses approved, accurate, rights-cleared, responsive final imagery; no missing, broken, fallback, duplicated-as-substitute, or planning-placeholder image is exposed; and the completed IMAGES_REQUIRED.md manifest records final URLs and phone/desktop evidence.
+**Pass condition:** The D1 Visual Image Manifest and item-specific Catalog Media evidence show approved, accurate, rights-cleared responsive final imagery for every launch product and indexable launch route; no required real-photo row is passed with generated art; no missing, broken, fallback, duplicate substitute or planning placeholder remains; and phone/desktop review history is complete.
 
 ## Pricing, inventory, and checkout
 
@@ -1519,5 +1524,5 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 ## Gate count and authority
 
-This guide contains 43 gates. If it differs from the D1 cockpit after deployment, use the Build 229 API seed, confirm all 43 items return, and keep the gate Failed until the status authority and guide agree.
+This guide contains 43 gates. If it differs from the D1 cockpit after deployment, use the Build 230 API seed, confirm all 43 items return, and keep the gate Failed until the status authority and guide agree.
 

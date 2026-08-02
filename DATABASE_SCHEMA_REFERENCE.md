@@ -1,4 +1,17 @@
-# Devil n Dove Database Schema Reference — Build 229
+# Devil n Dove Database Schema Reference — Build 230
+
+## Build 230 database boundary
+
+Back up D1 and confirm Build 229 is installed. Apply `database_build230_visual_image_manifest.sql` or the identical `database_upgrade_current_pass.sql`, not both. Build 230 adds:
+
+- `image_manifest_items` — one current row per static or dynamic visual need, including required asset kind, current/final URL, status, rights, public-use, alt text, owner, evidence, device results, generated provenance and blocker state.
+- `image_manifest_history` — append-only review changes with previous/next status and assets, rights/public/device state, evidence, note, actor and time.
+- 20 idempotent manifest rows, including three generated-editorial provenance rows; repeated migration execution refreshes seed metadata without overwriting operator status/evidence.
+- migration ledger key `build230_visual_image_manifest`.
+
+`IMAGES_REQUIRED.md` remains the human capture/crop standard and `GENERATED_VISUAL_ASSET_REGISTER.md` preserves generated-file hashes/prompts. Mutable owner/status/evidence stays in D1. A generated asset never satisfies a real-photo requirement.
+
+The migration contains no explicit SQL transaction statements. D1/Durable Object JavaScript uses `state.storage.transaction()` or `transactionSync()` when a transaction is required.
 
 ## Build 229 database boundary
 
@@ -27,7 +40,7 @@ Build 226 was a code-only Startup Readiness loading repair. Build 225 created th
 ## Current schema authority
 
 - Fresh database: `database_full_schema.sql` or the intentionally scoped aggregate schema appropriate to the deployment.
-- Existing production database: confirm Build 228 is installed, then apply one Build 229 migration named above.
+- Existing production database: confirm Build 229 is installed, then apply one Build 230 migration named above.
 - The Build 225 current-pass migration creates and seeds `startup_readiness_items` and `startup_readiness_history`. It does not replay the historical Packaging Studio/Soap Label migrations.
 - Production must already include the Build 221 Packaging Studio and Build 222 normalized soap-label tables before applying Build 225.
 - Builds 223 and 224 were code-only product-detail/gallery compatibility repairs and required no schema migration.
@@ -48,7 +61,7 @@ Append-only-style evidence for each status update, including prior/next status, 
 
 ## Current migration boundary
 
-`database_upgrade_current_pass.sql` is the additive Build 229 migration only and is byte-identical to its numbered file. It assumes Build 228. Do not use it as an accumulated history replay. Use numbered historical migrations to understand/repair an older database, and back up D1 before applying any production change.
+`database_upgrade_current_pass.sql` is the additive Build 230 migration only and is byte-identical to its numbered file. It assumes Build 229. Do not use it as an accumulated history replay. Use numbered historical migrations to understand/repair an older database, and back up D1 before applying any production change.
 
 ---
 

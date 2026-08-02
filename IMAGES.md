@@ -1,4 +1,4 @@
-# Build 229 current media authority note
+# Build 230 current media authority note
 
 Creative Automation references existing media/evidence and never copies, moves, deletes or elevates its public rights. Its process-map SVG is admin-only. Real public product/story media still requires owned/consented source, accurate role/alt text, reliable URL and specialist approval. Detailed capture/replacement work lives in `IMAGES_REQUIRED.md`, which is now the required manifest for the distinct Critical `missing_launch_images` Startup gate.
 

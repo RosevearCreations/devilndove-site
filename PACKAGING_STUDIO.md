@@ -1,9 +1,9 @@
-# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 229)
+# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 230)
 
 ## Authority rule
 This file is the **single current implementation map** for Devil n Dove packaging. Its design direction is governed collectively by the three adopted user-supplied sources in `PACKAGING_REFERENCE_BASELINE.md`: the full automation specification, template-guide PDF and master SVG. Packaging code, schema, templates, launch checks and future work must be reconciled against all four records during every build.
 
-Build 229 registers the three adopted sources, their immutable checksums and dimensional scopes in D1. Packaging remains a specialist business system linked from Product Release Preflight and Startup Readiness; Creative Automation may reference packaging evidence but must not duplicate labels, BOM costs, print tests or approval state.
+Build 230 retains the three adopted sources, immutable checksums and dimensional scopes in D1. Packaging remains a specialist business system linked from Product Release Preflight and Startup Readiness; Creative Automation and the Visual Image Manifest may reference packaging evidence but must not duplicate labels, BOM costs, print tests or approval state. Generated editorial imagery is never physical label, wrap, component or shipped-package proof.
 
 The root `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` is a compatibility pointer. The exact supplied specification is retained at `docs/packaging/source-references/DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md`; it and the PDF/SVG sources must not be silently edited into competing versions.
 

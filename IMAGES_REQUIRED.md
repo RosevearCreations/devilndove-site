@@ -1,10 +1,12 @@
 # Devil n Dove — Images Required
 
-**Audited build:** Build 229 — Packaging reference authority and explicit missing-image launch gate  
-**Purpose:** Replace public-facing placeholder graphics with truthful, approved Devil n Dove photography while keeping internal workflow diagrams where they are useful.  
+**Audited build:** Build 230 — Visual Image Manifest and first generated editorial replacements  
+**Purpose:** Provide the human capture/crop standard for replacing public-facing placeholder graphics with truthful, approved Devil n Dove photography while keeping internal workflow diagrams and clearly disclosed editorial illustrations where useful.  
 **Priority rule:** Replace public storefront/service placeholders first. Admin-only diagrams are not missing product photography and do not need replacement unless we want a different branded illustration.
 
-**Build 229 Startup authority:** `missing_launch_images` is a separate **Critical** gate in `/admin/startup-readiness/`. This file is its required manifest. The gate remains Failed or Blocked until every launch-route/product requirement below has an approved final URL, rights record and phone/desktop proof. Missing, broken, generic fallback, planning-placeholder and duplicated-as-substitute images all count as unresolved.
+**Build 230 status authority:** `missing_launch_images` is a separate **Critical** gate in `/admin/startup-readiness/`. Mutable owner, status, rights, final URL, alternative text, evidence and device-review facts now belong in D1 and are edited at `/admin/image-manifest/`. This file is the human capture standard and detailed inventory, not a second mutable status ledger. The gate remains Failed or Blocked until every required launch-route/product row has approved evidence. Missing, broken, generic fallback, planning-placeholder and duplicated-as-substitute images all count as unresolved.
+
+**Generated editorial boundary:** Build 230 adds three responsive WebP illustrations and records their hashes/prompts in `GENERATED_VISUAL_ASSET_REGISTER.md`. They may enrich a category or decorative brand section only when the page does not imply a photographed product. They never satisfy a `real_photo_required` row and must not be used as Product/Offer images, real process proof, condition proof, Business Profile photography, or item-specific launch-gallery media.
 
 **Internal placeholders:** `assets/creative-automation-master-process.svg` and `assets/prelaunch-operations-map.svg` are descriptive admin-only planning graphics. Keep them out of Product/Offer structured data, Open Graph images and launch-product galleries. Replace public launch placeholders only with owned/approved representative photography.
 
@@ -131,16 +133,18 @@ Update each `alt` attribute to match what is visible on that page. The homepage,
 
 ## B. Homepage workshop/category discovery image
 
-**Current placeholder**
+**Build 230 editorial asset now used on the homepage**
 
 ```text
-/assets/visual-placeholders/workshop-discovery.svg
+/assets/generated/editorial/workshop-discovery-illustration.webp
+/assets/generated/editorial/workshop-discovery-illustration-768.webp
 ```
 
-**Used on**
+The homepage now labels this as an illustrated workshop overview. It is a category signpost, not proof of actual inventory. The Workshop Journal still uses its planning placeholder and still needs a truthful story photograph.
+
+**Original placeholder remains on**
 
 ```text
-/index.html
 /workshop-journal/index.html
 ```
 
@@ -173,7 +177,7 @@ Search for:
 /assets/visual-placeholders/workshop-discovery.svg
 ```
 
-Replace the `src` or CSS image URL with the new WebP. Keep the homepage version decorative with `alt=""` when nearby text already explains the categories. On the Workshop Journal page, use descriptive alt text only when the image contributes information.
+Replace the Workshop Journal placeholder with the approved real WebP. Keep the Build 230 homepage illustration’s disclosure and descriptive alternative text unless a real, rights-cleared workshop-discovery photograph replaces it. Record either decision in `/admin/image-manifest/` and preserve the generated provenance record.
 
 ---
 
@@ -300,16 +304,18 @@ For the Gallery page, the preferred long-term solution is to approve a Before/Af
 
 ## E. Handmade jewelry macro photograph
 
-**Current placeholder**
+**Build 230 editorial asset used on the general jewelry page**
 
 ```text
-/assets/visual-placeholders/jewelry-macro.svg
+/assets/generated/editorial/handmade-jewelry-techniques-illustration.webp
+/assets/generated/editorial/handmade-jewelry-techniques-illustration-768.webp
 ```
 
-**Used on**
+It is disclosed as a techniques illustration and is not real-item proof. The polymer-clay page still uses the planning placeholder.
+
+**Real photograph remains required on**
 
 ```text
-/handmade-jewelry-ontario/index.html
 /polymer-clay-earrings-ontario/index.html
 ```
 
@@ -345,7 +351,7 @@ or
 
 **How to update**
 
-Replace the placeholder reference separately on both pages and change the placeholder heading/copy to a real descriptive heading such as “Close-up details” or “Colour and finish up close.”
+Replace the polymer-clay placeholder with an accurate product photograph and item-specific alt text. On the general jewelry page, the editorial illustration may remain as a methods signpost after owner/device approval, but every launch jewelry item still needs accurate Catalog Media close-ups.
 
 ---
 
@@ -690,10 +696,11 @@ Replace the gift-card packaging section directly. Product care images should eve
 
 ## N. Main gift-card artwork
 
-**Current placeholder**
+**Build 230 decorative artwork now used**
 
 ```text
-/assets/gift-card-placeholder.svg
+/assets/generated/editorial/gift-card-brand-illustration.webp
+/assets/generated/editorial/gift-card-brand-illustration-768.webp
 ```
 
 **Used on**
@@ -702,8 +709,8 @@ Replace the gift-card packaging section directly. Product care images should eve
 /gift-cards/index.html
 ```
 
-**Image needed**  
-A branded Devil n Dove gift-card presentation. This may be a photograph of a printed card and envelope or a polished graphic mock-up using our own logo and branding. Clearly indicate whether the card is digital, printed, or both.
+**Owner/device approval needed**  
+The responsive artwork is a decorative brand illustration and contains no amount, balance, QR code or claim that a printed card exists. It may be approved as the final decorative page image after rights, public-use, phone and desktop review. A real photograph remains useful if a physical card/envelope becomes part of the offer; clearly indicate whether the card is digital, printed, or both.
 
 **Required size already stated by the page**
 
@@ -725,13 +732,7 @@ WebP, ideally under 220 KB
 
 **How to update**
 
-In `/gift-cards/index.html`, replace:
-
-```html
-/assets/gift-card-placeholder.svg
-```
-
-with the real WebP and remove the sentence that says it is a placeholder.
+Review `/gift-cards/index.html` on phone and desktop, confirm the illustration does not contradict the checkout/status facts, then save owner approval and evidence in `/admin/image-manifest/`. Replace it later only if approved physical-card photography becomes accurate and more useful.
 
 ---
 
