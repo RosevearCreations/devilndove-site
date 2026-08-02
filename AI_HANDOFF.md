@@ -1,8 +1,8 @@
-# Devil n Dove AI Handoff — Build 230
+# Devil n Dove AI Handoff — Build 231
 
 This is the first of two canonical current-status files. Read it first for architecture, authority, safety and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for completed work, risks and ordered next steps. Historical Build Markdown remains evidence only.
 
-## Build 230 outcome
+## Build 231 outcome
 
 1. Startup Readiness preserves all 42 Build 228 gates and adds `missing_launch_images` as a distinct Critical blocker. Exactly 43 gates are expected.
 2. The Startup browser rejects HTML, empty, malformed or incomplete API success responses and renders the full built-in 43-gate guide. It never turns a service failure into “No readiness items match these filters.” Browser-only changes are visibly Unsynced.
@@ -18,6 +18,12 @@ This is the first of two canonical current-status files. Read it first for archi
 12. Three responsive editorial illustrations now enrich the homepage, general handmade-jewelry guide and gift-card page. Prompts, intended roles, dimensions and hashes are preserved in `GENERATED_VISUAL_ASSET_REGISTER.md`.
 13. Generated art never satisfies a real-product, process, condition, packaging or local-business photo requirement and must not enter Product/Offer structured data or launch-product galleries.
 14. Changed public pages keep one H1, truthful editorial disclosure, intrinsic image dimensions and responsive phone/desktop sources; the manifest stacks safely with touch-sized actions.
+15. Product Draft autosave now carries an explicit autosave intent so create/update routes omit approval/content/social preparation and repetitive update/media audits while retaining deliberate Save/Update audits and automation.
+16. Unapproved products exit social automation before schema/settings inspection, and unchanged image rows are not rewritten on text-only autosaves.
+17. Autosave allows one request in flight, queues the newest edit, stores a browser recovery copy before the request and clears it only after the matching server save succeeds.
+18. Product reload, autosave and update use one safe response parser. A Cloudflare HTML/1102 page becomes a short retryable message; raw HTML/CSS and `JSON.parse` exceptions are never shown to the operator.
+19. `/api/admin/product-detail` now uses one core product read plus three bounded optional editor reads, performs no request-time schema introspection, returns at most seven images and identifies its JSON as `editor_compact_v1`.
+20. Build 231 is code-only. The current D1 migration remains Build 230 and must not be reapplied merely because the application build number changed.
 
 ## Data authority
 
@@ -47,14 +53,14 @@ This is the first of two canonical current-status files. Read it first for archi
 - `/admin/customer-documents/` — invoices, receipts, packing slips, credit notes and refund confirmations.
 - `/admin/orders/`, `/admin/accounting/`, `/admin/inventory-operations/` — operational transaction authorities.
 
-## Build 230 database change
+## Build 231 database boundary
 
-Back up D1 and confirm Build 229 exists. Apply exactly one:
+Build 231 adds no D1 table, column, seed or ledger row. `database_upgrade_current_pass.sql` remains byte-identical to the Build 230 migration. Back up D1, confirm Build 229, and apply exactly one of these only when `build230_visual_image_manifest` is not already recorded:
 
 - `database_build230_visual_image_manifest.sql`
 - `database_upgrade_current_pass.sql` (byte-identical copy)
 
-The migration adds `image_manifest_items`, `image_manifest_history`, 20 active requirements, three generated-asset provenance rows and ledger key `build230_visual_image_manifest`. It preserves operator-editable evidence on repeat execution and contains no explicit SQL transaction statements. Do not add `BEGIN TRANSACTION` or `SAVEPOINT`; D1/Durable Object code must use `state.storage.transaction()` or `transactionSync()` when a JavaScript transaction is required.
+That Build 230 migration adds `image_manifest_items`, `image_manifest_history`, 20 active requirements, three generated-asset provenance rows and ledger key `build230_visual_image_manifest`. It preserves operator-editable evidence on repeat execution and contains no explicit SQL transaction statements. Do not add `BEGIN TRANSACTION` or `SAVEPOINT`; D1/Durable Object code must use `state.storage.transaction()` or `transactionSync()` when a JavaScript transaction is required.
 
 Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `database_store_schema.sql` include Builds 229 and 230. Run `node scripts/sync-build230-aggregate-schema.mjs` after changing the numbered migration. Older synchronizers intentionally stop so they cannot erase the current block.
 
@@ -81,11 +87,11 @@ Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `da
 
 1. Run the complete Deployment Preflight against the exact folder/archive.
 2. Record D1 recovery point; apply one Build 230 migration; verify ledger, both manifest tables, 20 active rows and three generated provenance rows.
-3. Deploy the complete archive and retain previous deployment/rollback details.
+3. Deploy the complete Build 231 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v12 is active.
 4. Run Post-Deploy Smoke Tests on production.
 5. Confirm all 43 Startup gates load with All statuses, locate `missing_launch_images`, open the D1 manifest and confirm 20 rows rather than Unsynced fallback.
 6. Link one owner-controlled Creative Project in the master studio; save one stage review with evidence and reload.
-7. Run Release Sanity, Product Release Preflight, visual-manifest phone/desktop review and read-only Meta identity/token checks.
+7. Run Release Sanity, Product Release Preflight, Build 231 product load/autosave/browser-recovery proof, visual-manifest phone/desktop review and read-only Meta identity/token checks.
 8. Make a separate Deploy Readiness decision; execute Go-Live only after Ready; continue Live Ops reconciliation.
 
 ## Not claimed complete

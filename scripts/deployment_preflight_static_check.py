@@ -188,10 +188,13 @@ REQUIRED_FILES = [
     'scripts/build229_startup_readiness_test.mjs',
     'scripts/sync-build229-aggregate-schema.mjs',
     'scripts/build230_visual_manifest_test.mjs',
+    'scripts/build231_product_autosave_test.mjs',
     'scripts/sync-build230-aggregate-schema.mjs',
     'GENERATED_VISUAL_ASSET_REGISTER.md',
     'BUILD230_VALIDATION.md',
     'BUILD230_CHANGED_FILES.md',
+    'BUILD231_VALIDATION.md',
+    'BUILD231_CHANGED_FILES.md',
 ]
 
 def read(path: Path) -> str:
@@ -309,11 +312,11 @@ def check_packaging_references(checks: list[dict]) -> None:
 
 def check_markdown_authority(checks: list[dict]) -> None:
     required_markers = {
-        'AI_HANDOFF.md': ['Build 230', 'PROJECT_STATUS_AND_ROADMAP.md', '43 gates', 'image_manifest_items'],
-        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 230', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/'],
-        'MARKDOWN_INDEX.md': ['Build 230', 'Two current authorities', 'Historical evidence'],
-        'README.md': ['Build 230', 'database_build230_visual_image_manifest.sql'],
-        'STARTUP_GO_LIVE_GUIDE.md': ['Build 230', 'This guide contains 43 gates', 'missing_launch_images', '/admin/image-manifest/'],
+        'AI_HANDOFF.md': ['Build 231', 'PROJECT_STATUS_AND_ROADMAP.md', '43 gates', 'image_manifest_items', 'browser recovery'],
+        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 231', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/', 'exceededCpu'],
+        'MARKDOWN_INDEX.md': ['Build 231', 'Two current authorities', 'Historical evidence'],
+        'README.md': ['Build 231', 'database_build230_visual_image_manifest.sql'],
+        'STARTUP_GO_LIVE_GUIDE.md': ['Build 231', 'This guide contains 43 gates', 'missing_launch_images', '/admin/image-manifest/', 'Recover browser copy'],
         'PACKAGING_REFERENCE_BASELINE.md': ['Build 230', 'three user-supplied files', 'Dimensional discrepancy'],
         'PRELAUNCH_PROCESS_PLAYBOOKS.md': ['Deployment Preflight', 'Deploy Readiness', 'Go-Live Execution'],
         'CREATIVE_AUTOMATION_STUDIO.md': ['seven stages', 'creative_automation_workflows'],
@@ -327,7 +330,7 @@ def check_markdown_authority(checks: list[dict]) -> None:
     guide=read(ROOT/'STARTUP_GO_LIVE_GUIDE.md')
     if guide.count('#### Before you begin') != 43:
         missing.append(f'STARTUP_GO_LIVE_GUIDE.md: expected 43 gate sections, found {guide.count("#### Before you begin")}')
-    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 230 canonical authorities, scoped specialist playbooks, visual provenance, historical retirement policy, and 43 generated Startup sections agree.', 'missing':missing})
+    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 231 canonical authorities, scoped specialist playbooks, code-only schema boundary, visual provenance, historical retirement policy, and 43 generated Startup sections agree.', 'missing':missing})
 
 def check_schema_files(checks: list[dict]) -> None:
     schema_needles = [
@@ -464,7 +467,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 230','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 231','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
