@@ -635,7 +635,7 @@ async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
     if (!sourceType || !externalKey || !itemName) continue;
 
     const amazonArea = sourceType === 'tool' ? 'toolshed' : 'supplies';
-    const amazonMatch = getAmazonInventoryMatch(amazonArea, -1, itemName);
+    const amazonMatch = await getAmazonInventoryMatch(amazonArea, -1, itemName);
     const amazon = extractAmazonInventoryFields(amazonMatch || row.source_record_json || {}, sourceType);
     const amazonUrl = normalizeText(row.amazon_url || amazon.amazon_url);
     const supplierName = normalizeText(amazon.seller_name || (amazonUrl ? 'Amazon.ca' : ''));

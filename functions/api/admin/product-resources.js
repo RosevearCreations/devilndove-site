@@ -254,7 +254,7 @@ export async function onRequestGet(context) {
       status: row.status || ""
     }));
 
-    const catalogResources = normalizeResults(
+    const catalogResourceRows = normalizeResults(
       await db.prepare(`
         SELECT
           ci.item_kind,
@@ -288,9 +288,10 @@ export async function onRequestGet(context) {
         ORDER BY ci.item_kind ASC, LOWER(COALESCE(ci.name, '')) ASC
         LIMIT 1200
       `).bind(query, like, like, like, like, like).all()
-    ).map((row) => {
+    );
+    const catalogResources = await Promise.all(catalogResourceRows.map(async (row) => {
       const amazonArea = row.item_kind === "tool" ? "toolshed" : "supplies";
-      const amazonMatch = getAmazonInventoryMatch(amazonArea, -1, row.name || "");
+      const amazonMatch = await getAmazonInventoryMatch(amazonArea, -1, row.name || "");
       const amazon = extractAmazonInventoryFields(amazonMatch || row.source_record_json || {}, row.item_kind || "");
       const inventoryCostCents = parseMoneyCents(row.unit_cost_cents);
       const inventoryUsageUnits = Math.max(1, parseNumber(row.usage_units_per_stock_unit, 1));
@@ -317,7 +318,7 @@ export async function onRequestGet(context) {
         stock_unit_label: (row.stock_unit_label && row.stock_unit_label !== "stock unit") ? row.stock_unit_label : (amazon.stock_unit_label || row.stock_unit_label || "stock unit"),
         usage_units_per_stock_unit: inventoryUsageUnits > 1 ? inventoryUsageUnits : Math.max(1, parseNumber(amazon.usage_units_per_stock_unit, 1))
       };
-    });
+    }));
 
     const canReadInventoryOnly =
       inventoryColumns.size > 0 &&
