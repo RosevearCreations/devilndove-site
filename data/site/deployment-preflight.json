@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 228",
+  "build_label": "Build 229",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,25 +7,50 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "110 required files are present.",
+      "detail": "119 required files are present.",
       "missing": []
+    },
+    {
+      "code": "static_packaging_reference_integrity",
+      "status": "pass",
+      "detail": "All three adopted packaging sources match their registered SHA-256 values and the SVG parses as XML.",
+      "rows": [
+        {
+          "path": "docs/packaging/source-references/DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md",
+          "expected_sha256": "26fe76cff4943547739bbe68b328509ba916ed6c608b57e86a048ceb4f1611b7",
+          "actual_sha256": "26fe76cff4943547739bbe68b328509ba916ed6c608b57e86a048ceb4f1611b7",
+          "ok": true
+        },
+        {
+          "path": "docs/packaging/source-references/Soap_Label_Template_Guide.pdf",
+          "expected_sha256": "cc4940bcb31a244ee7bd9248f4830be986c5cb669d21273a23b373aa3b5bfe0e",
+          "actual_sha256": "cc4940bcb31a244ee7bd9248f4830be986c5cb669d21273a23b373aa3b5bfe0e",
+          "ok": true
+        },
+        {
+          "path": "assets/packaging/soap/reference/Soap_Label_Master_Template.svg",
+          "expected_sha256": "6e0a1653cdb85861544f06f5d1aa1897e1878cfcb5e62ebe86c6cfe003aacb5e",
+          "actual_sha256": "6e0a1653cdb85861544f06f5d1aa1897e1878cfcb5e62ebe86c6cfe003aacb5e",
+          "ok": true
+        }
+      ]
     },
     {
       "code": "static_markdown_authority",
       "status": "pass",
-      "detail": "Two Build 228 canonical authorities, scoped specialist playbooks, historical retirement policy, and 42 generated Startup sections agree.",
+      "detail": "Two Build 229 canonical authorities, scoped specialist playbooks, adopted packaging sources, historical retirement policy, and 43 generated Startup sections agree.",
       "missing": []
     },
     {
       "code": "static_schema_current",
       "status": "pass",
-      "detail": "Build 174 through Build 228 schema tables and current migration markers found in the correct schema files.",
+      "detail": "Build 174 through Build 229 schema tables and current migration markers found in the correct schema files.",
       "missing": []
     },
     {
       "code": "static_d1_migration_compatibility",
       "status": "pass",
-      "detail": "Current and numbered Build 228 migrations are identical and contain no explicit SQL transaction statements."
+      "detail": "Current and numbered Build 229 migrations are identical and contain no explicit SQL transaction statements."
     },
     {
       "code": "static_public_pages",
@@ -245,7 +270,7 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 2385/2385"
+      "detail": "CSS braces 2397/2397"
     },
     {
       "code": "static_json_parse",

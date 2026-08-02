@@ -2539,3 +2539,13 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
 .social-meta-test-results{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}.social-test-summary{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0;padding:10px 12px;border-radius:10px}.social-test-summary.is-ok{background:rgba(75,166,106,.12);border:1px solid rgba(75,166,106,.4)}.social-test-summary.is-warning{background:rgba(217,164,65,.1);border:1px solid rgba(217,164,65,.42)}.social-test-error{overflow-wrap:anywhere;color:#e8b1b1}
 @media(max-width:800px){.customer-documents-hero .visual-placeholder-card{display:block}.customer-documents-hero .visual-placeholder-card img{max-height:190px}.document-order-summary{align-items:flex-start;flex-direction:column}.document-order-summary>div:last-child{text-align:left}.social-test-summary{display:grid}.packaging-cost-summary{align-items:flex-start;flex-direction:column}.packaging-system-placeholder-grid{grid-template-columns:1fr 1fr}.packaging-studio-page .grid.cols-3,.customer-documents-page .grid.cols-3,.customer-documents-page .grid.cols-2{grid-template-columns:1fr}}
 @media(max-width:520px){.customer-documents-page .btn,.packaging-studio-page .packaging-save-actions .btn{min-height:46px;width:100%}.customer-documents-hero .visual-placeholder-card img{max-height:150px}.startup-guidance-block{padding:10px}.social-automation-actions{width:100%}.social-automation-actions .btn{flex:1 1 180px}.packaging-system-placeholder-grid{grid-template-columns:1fr}.packaging-system-placeholder-grid img{height:150px}}
+
+/* Build 229 - adopted soap-label reference-source cards. */
+.packaging-reference-source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:16px 0}
+.packaging-reference-source-grid>article{display:flex;flex-direction:column;min-width:0}
+.packaging-reference-source-grid h2{font-size:1.05rem;margin-top:0}
+.packaging-reference-source-grid p{flex:1;overflow-wrap:anywhere}
+.packaging-reference-source-grid .btn{align-self:flex-start}
+.packaging-master-template-card img{display:block;width:100%;height:150px;object-fit:contain;margin:4px 0 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+@media(max-width:900px){.packaging-reference-source-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.packaging-reference-source-grid{grid-template-columns:1fr}.packaging-reference-source-grid .btn{width:100%;min-height:46px}.packaging-master-template-card img{height:120px}}

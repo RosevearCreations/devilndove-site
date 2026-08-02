@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 229",
+    "date": "2026-08-01",
+    "title": "Adopted packaging reference authority and missing-image launch blocker",
+    "summary": "Registered the supplied soap-label specification, guide PDF and master SVG with checksums and dimensional scope; exposed all three in the unified Packaging Studio; preserved the 25/38.1/50 mm geometry discrepancy for physical proof; expanded Startup Readiness from 42 preserved gates to 43 with a distinct Critical missing-image manifest; and refreshed D1-safe schemas, fallback tests, responsive CSS, SEO/H1 checks and canonical documentation."
+  },
+  {
     "build": "Build 228",
     "date": "2026-08-01",
     "title": "Master Creative Automation and separate evidence-backed prelaunch stages",
