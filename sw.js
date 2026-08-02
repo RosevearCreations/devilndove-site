@@ -1,5 +1,5 @@
-// Build 232: refresh cached browser helpers after archived-product removal recovery hardening.
-const CACHE_NAME = 'devilndove-shell-v13';
+// Build 233: refresh authentication helpers after resource-limit/session-retention hardening.
+const CACHE_NAME = 'devilndove-shell-v14';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

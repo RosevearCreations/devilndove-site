@@ -1,4 +1,4 @@
-# Devil n Dove Startup and Go-Live Guide — Build 232
+# Devil n Dove Startup and Go-Live Guide — Build 233
 
 This is the human-readable operating copy of all 43 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
 
@@ -18,7 +18,7 @@ This is the human-readable operating copy of all 43 database-backed gates in `/a
 ### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
 
 **Inside the application:** `/admin/deployment-preflight/`  
-**External location:** Build 232 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**External location:** Build 233 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
 **Production test:** No live binding is required, but deployed verification may still be appropriate.
 
 #### Before you begin
@@ -28,11 +28,11 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 #### Test steps
 
 1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, aggregate-schema, repeated-current-migration, Startup 43-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, aggregate-schema, repeated-current-migration, Startup 43-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
 3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
-4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially the Product Editor, Product Cleanup, Visual Image Manifest and three public image bands.
-5. Confirm Build 232 adds no D1 migration: database_upgrade_current_pass.sql remains identical to database_build230_visual_image_manifest.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
-6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 232 consistently while naming Build 230 as the current D1 migration.
+4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest and three public image bands.
+5. Confirm Build 233 adds no D1 migration: database_upgrade_current_pass.sql remains identical to database_build230_visual_image_manifest.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 233 consistently while naming Build 230 as the current D1 migration.
 7. Confirm the three adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
 8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
 9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
@@ -50,7 +50,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** The exact Build 232 archive passes every static, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
+**Pass condition:** The exact Build 233 archive passes every static, bounded-login/session-retention, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
 
 ### 10. Back up D1, apply the current migration, and deploy the complete build — **Critical**
 
@@ -175,18 +175,24 @@ Assign one owner and open /login/. Record the starting IDs, counts, totals, time
 
 #### Test steps
 
-1. Open a private browser window and log in with a test administrator account.
-2. Confirm successful login redirects correctly and does not return a 500 error.
-3. Log out and verify protected pages and APIs are no longer accessible.
-4. Request a password reset from the public recovery page.
-5. Confirm the reset message arrives, the link can be used once, and an expired or reused link is rejected.
-6. Test Logout All Sessions and confirm an older browser session is invalidated.
-7. Leave a test session idle long enough to confirm expiry behaviour and a clear sign-in recovery path.
-8. Record browser, time, account role, and result without storing passwords or tokens.
+1. Deploy the complete Build 233 package, hard refresh to service-worker shell v14, and record the Pages deployment ID before testing.
+2. Open a private browser window, open Developer Tools → Network, enable Preserve log, and load /login/ without storing the password in evidence.
+3. Open /api/auth/login in a separate tab and confirm HTTP 200 JSON reports response_profile auth_login_bounded_v1 and diagnostic_mode binding_only; a normal GET must not run full schema discovery.
+4. Submit an owner-controlled administrator login and confirm POST /api/auth/login returns HTTP 200 JSON, X-DD-Auth-Profile auth_login_bounded_v1, a session cookie, the correct role and the expected redirect. Never copy the token into evidence.
+5. In Cloudflare Workers & Pages → the production project → Functions/Workers Logs and Metrics, filter the login timestamp and confirm the invocation was successful with no exceededCpu, exceededMemory or 1102 outcome.
+6. Confirm the redirected page calls /api/auth/me once, returns HTTP 200 JSON with response_profile auth_session_bounded_v1, and remains signed in after one normal refresh.
+7. Test one deliberately wrong password and confirm HTTP 401 structured JSON AUTH_INVALID_CREDENTIALS, no redirect and no new authenticated session.
+8. While a valid session exists, use browser request blocking for /api/auth/me, reload /login/, and confirm the account widget says the session was retained/verification is temporarily unavailable; local storage and cookie must not be erased by a network/503 failure. Remove the block and confirm the next verification succeeds.
+9. Log out normally and verify the auth token/cookie is cleared and protected pages/APIs return a real 401 rather than continuing access.
+10. Request a password reset from the public recovery page; confirm delivery, one-time use, rejection of an expired/reused link, and successful login with the new password.
+11. Test Logout All Sessions in two browsers and confirm the older session receives 401 and is cleared, while a temporary 503 still does not masquerade as an invalid session.
+12. Confirm a deliberately expired owner-controlled session receives 401 and a clear login path; do not wait on a real production account or alter customer sessions.
+13. Record deployment ID, UTC/local timestamp, route, HTTP status, response code/profile, browser/device, Cloudflare invocation outcome and pass/fail result without passwords, cookies or tokens.
+14. If any step returns 503/1102, keep this gate Failed or Blocked, capture the Cloudflare invocation outcome, redeploy/roll back as appropriate and repeat all fourteen steps from a clean private session.
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then repair the server session/reset-token path and email delivery rather than only changing the browser message; invalidate test sessions before retesting. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then inspect the exact /api/auth/login or /api/auth/me Cloudflare invocation outcome, keep login POST on the bounded two-operation D1 path, preserve browser credentials for temporary 5xx/network failures, clear them only after a real 401/403 decision, repair reset-token/email delivery separately, and invalidate only owner-controlled test sessions before retesting. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
@@ -196,7 +202,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** Login, logout, reset, one-time token use, session expiry, and logout-all work in production without 500 errors or continued access after invalidation.
+**Pass condition:** Bounded login, session verification, temporary-503 retention, logout, reset, one-time token use, deliberate expiry, and logout-all work in production with no exceeded-resource outcome and no continued access after an explicit invalidation.
 
 ### 40. Verify server-side authorization for destructive, financial, and approval actions — **Critical**
 
@@ -1534,5 +1540,5 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 ## Gate count and authority
 
-This guide contains 43 gates. If it differs from the D1 cockpit after deployment, use the Build 232 API seed, confirm all 43 items return, and keep the gate Failed until the status authority and guide agree.
+This guide contains 43 gates. If it differs from the D1 cockpit after deployment, use the Build 233 API seed, confirm all 43 items return, and keep the gate Failed until the status authority and guide agree.
 

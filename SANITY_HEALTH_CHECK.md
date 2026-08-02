@@ -1,4 +1,4 @@
-# Devil n Dove Sanity and Health Check — Build 232
+# Devil n Dove Sanity and Health Check — Build 233
 
 ## Structural result
 
@@ -15,7 +15,10 @@
 - Three public editorial illustrations have responsive derivatives, intrinsic dimensions and truthful disclosure. They remain outside Product/Offer schema and launch-product galleries.
 - Build 231 product-detail/autosave routes retain their bounded reads, safe response parser, queued save and browser recovery proof.
 - Build 232 product-removal preflight uses a bounded protected-history registry; unused archive/media audit rows can be cleaned, retained business history still blocks, and reviewed inventory plus deletion share one D1 batch.
+- Build 233 login validates before D1, runs no POST schema discovery, executes one indexed user read plus one atomic D1 batch, and returns the `auth_login_bounded_v1` profile without rereading the new session.
+- Temporary `/api/auth/me` 5xx, Worker 1102, offline or malformed responses retain the existing browser session and show degraded verification; only a real 401/403 or deliberate logout clears credentials.
+- All 897 private Amazon inventory matches remain available, but their 1.1 MB eager source/object indexes were replaced with a 211,860-byte compressed, area-demand-loaded helper so unrelated Pages Function routes do not allocate the registry at startup.
 
 ## Launch health
 
-The application is structurally mature but remains in production-evidence preparation. Live payments/webhooks, exact-once inventory, concurrency, tax/shipping, email, physical packaging/regulatory proof, provider permissions, restore, paid fulfilment and separate refund evidence remain authoritative Startup gates. Use `PRELAUNCH_PROCESS_PLAYBOOKS.md` in order and never infer Pass from unavailable data.
+The application is structurally mature but remains in production-evidence preparation. The Build 233 bounded-login and session-retention path still needs the fourteen-step production/Cloudflare proof. Live payments/webhooks, exact-once inventory, concurrency, tax/shipping, email, physical packaging/regulatory proof, provider permissions, restore, paid fulfilment and separate refund evidence remain authoritative Startup gates. Use `PRELAUNCH_PROCESS_PLAYBOOKS.md` in order and never infer Pass from unavailable data.

@@ -1,3 +1,19 @@
+# Release Notes — Build 233
+
+## Bounded login and temporary-session retention
+
+- Removed D1 ping/table enumeration/three `PRAGMA table_info` calls from every login POST; full schema diagnostics now require explicit `?diagnostic=full`.
+- Validated login JSON and required fields before D1, and changed successful authentication to one indexed user read plus one D1 batch for session creation and last-login time.
+- Removed the unnecessary new-session reread and added `auth_login_bounded_v1` response/header evidence.
+- Reduced `/api/auth/me` to one indexed `session_token` query and a compact `auth_session_bounded_v1` response.
+- Corrected unexpected logout: temporary 5xx, Cloudflare 1102, offline and malformed session-verification responses retain the existing browser token/cached identity and show degraded verification; real 401/403 decisions still clear access.
+- Added concise login resource-limit guidance, service-worker shell v14, two-operation mocked regression and explicit invalid-input/binding-only/503-retention/401-clearing checks.
+- Compressed the 897-row private Amazon inventory reference from a 1.1 MB eager object payload to a 211,860-byte demand-loaded helper. The catalog, inventory and product-resource routes retain every match, while login, session, autosave, detail and deletion routes no longer allocate its rows or indexes at Worker startup.
+- Expanded the Critical Startup login gate to fourteen detailed deployment, Network, Cloudflare log, invalid-password, request-blocking, reset, logout-all and expiry steps.
+- Preserved Build 230 as the current D1 migration boundary; Build 233 adds no schema change.
+
+Deploy the complete package, hard refresh to service-worker shell v14, and follow `BUILD233_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 233.
+
 # Release Notes — Build 232
 
 ## Archived unused-product correction and removal recovery
