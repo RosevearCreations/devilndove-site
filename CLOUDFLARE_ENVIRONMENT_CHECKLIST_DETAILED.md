@@ -1,12 +1,33 @@
-# Cloudflare Environment Checklist — Devil n Dove (Build 232)
+# Cloudflare Environment Checklist — Devil n Dove (Build 233)
 
-_Last updated: Build 232 archived-product removal hotfix, retained Build 231 autosave/reload recovery, Build 230 visual manifest, 43-gate Startup system and retained read-only Meta credential tests._
+_Last updated: Build 233 bounded-login/session-retention hotfix, retained Build 232 archived-product removal, Build 231 autosave/reload recovery, Build 230 visual manifest, 43-gate Startup system and retained read-only Meta credential tests._
 
 This checklist explains **exactly where to add each setting in Cloudflare** and **where to find or create each value**.
 
 ## Build 230 environment note
 
 Build 230 introduces no new secret or external-provider variable. It requires the existing production D1 binding. Back up D1, confirm Build 229, apply one Build 230 migration without explicit SQL transaction statements, then test `/api/admin/image-manifest`, `/api/admin/packaging-studio`, `/api/admin/creative-automation` and `/api/admin/startup-readiness`. Confirm 20 visual rows, three generated provenance rows, three adopted packaging references and 43 readiness gates. Do not store creative/visual/Startup evidence or Meta token values in environment-variable documentation.
+
+## Build 233 login 503 and unexpected-logout check
+
+Build 233 adds no variable and no D1 migration. It requires the existing Production D1 binding named exactly `DB`. The code removes full schema inspection from every login POST, uses one indexed user read plus one atomic D1 batch, stops temporary session-verification outages from erasing a valid browser token, and keeps the 897-row Amazon reference compressed until an authenticated inventory route requests it.
+
+1. Deploy the complete Build 233 ZIP. Record **Workers & Pages → your Pages project → Deployments → deployment ID/time**.
+2. Hard refresh `/login/`. In Developer Tools → Application → Service Workers, confirm the current shell is `devilndove-shell-v14`; unregister an older shell only if the hard refresh did not activate v14.
+3. Open Developer Tools → Network, enable **Preserve log**, select **Fetch/XHR**, and keep the panel open.
+4. Open `https://devilndove.com/api/auth/login`. Expect HTTP 200 JSON with `response_profile: auth_login_bounded_v1` and `diagnostic_mode: binding_only`. This default check confirms only that `DB` is present and does not query D1.
+5. Return to `/login/` and submit an owner-controlled administrator login. Select the `POST /api/auth/login` row. Under **Headers**, expect Status 200 and `x-dd-auth-profile: auth_login_bounded_v1`; under **Response**, expect `ok: true`, the same profile and the correct user role. Never copy the returned token or cookie into notes/screenshots.
+6. Confirm redirect to Admin, then refresh once. Select `GET /api/auth/me` and confirm HTTP 200 JSON with `response_profile: auth_session_bounded_v1`. This proves the new session can be read through the one-query indexed verification path.
+7. In Cloudflare Dashboard open **Workers & Pages → the production project → Metrics → Errors / Invocation statuses**. Match the UTC timestamp. Then open **Logs** and filter `/api/auth/login` and `/api/auth/me`. Record successful/failed invocation status, CPU time, wall time and whether the outcome is `exceededCpu`, `exceededMemory` or error 1102. These auth routes must not trigger Amazon reference expansion. Do not infer CPU from the browser’s 34 ms duration because waiting and platform time differ from Worker CPU.
+8. Submit one deliberately wrong password. Expect HTTP 401 JSON with `code: AUTH_INVALID_CREDENTIALS`. It must not redirect or create an authenticated session.
+9. Sign in correctly again. In Developer Tools → Network request blocking, block only `*/api/auth/me*`, reload `/login/`, and confirm the account widget reports **Session retained • verification temporarily unavailable**. Confirm the existing token/cookie was not cleared. Remove the block, reload, and confirm `/api/auth/me` returns 200. Never block customer/payment endpoints for this test.
+10. Log out deliberately and confirm the token/cookie is cleared. A protected API must now return 401. This distinguishes a true authentication rejection from a temporary platform failure.
+11. Run password reset, two-browser Logout All Sessions and a deliberately expired test-session check exactly as listed under `login_logout_recovery` in `/admin/startup-readiness/`.
+12. If login returns the Cloudflare HTML 503/1102 page, keep the Startup gate Failed/Blocked. Save the deployment ID, route, UTC timestamp and invocation outcome; do not paste the HTML, password, cookie or token. Roll back if the new deployment introduced the failure.
+13. Only when a structured application response reports `AUTH_USER_LOOKUP_FAILED`, `AUTH_SESSION_CREATE_FAILED`, `AUTH_SCHEMA_INCOMPLETE` or a binding problem, open `/api/auth/login?diagnostic=full`. Record table/column names and safe error code only. Do not run the full diagnostic during every login attempt.
+14. Rerun `node scripts/build233_login_resource_test.mjs` locally and repeat all production steps after any correction. A plan/CPU-limit increase is not a substitute for proving the bounded path.
+
+Cloudflare’s [Error 1102 guidance](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1102/) identifies CPU or memory exhaustion; [Pages Functions metrics](https://developers.cloudflare.com/pages/functions/metrics/) and [Workers limits](https://developers.cloudflare.com/workers/platform/limits/) are the platform authorities for the actual invocation and plan limits.
 
 ## Build 232 archived-product removal check
 
@@ -827,11 +848,12 @@ https://devilndove-site.pages.dev/admin/command-center/
 
 If login breaks again:
 
-1. Confirm the deployed build includes Build 188 or later.
+1. Confirm the deployed build is Build 233 or later and service-worker shell v14 is active.
 2. Confirm `_routes.json` exists at the deployed root.
 3. Confirm Functions are active in the deployment details.
 4. Confirm D1 binding name is `DB`.
 5. Check Cloudflare Pages deployment logs.
+6. Follow the Build 233 fourteen-step login 503 and unexpected-logout check at the top of this file.
 
 ---
 

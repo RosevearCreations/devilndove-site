@@ -1,8 +1,8 @@
-# Devil n Dove AI Handoff — Build 232
+# Devil n Dove AI Handoff — Build 233
 
 This is the first of two canonical current-status files. Read it first for architecture, authority, safety and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for completed work, risks and ordered next steps. Historical Build Markdown remains evidence only.
 
-## Build 232 outcome
+## Build 233 outcome
 
 1. Startup Readiness preserves all 42 Build 228 gates and adds `missing_launch_images` as a distinct Critical blocker. Exactly 43 gates are expected.
 2. The Startup browser rejects HTML, empty, malformed or incomplete API success responses and renders the full built-in 43-gate guide. It never turns a service failure into “No readiness items match these filters.” Browser-only changes are visibly Unsynced.
@@ -29,6 +29,12 @@ This is the first of two canonical current-status files. Read it first for archi
 23. Reviewed inventory releases/physical returns, product-owned cleanup, preserved-media/soap-record detachment and final product deletion run in one D1 batch so a failure rolls the operation back together.
 24. Correction, table-row deletion and the Draft & Archive Cleanup centre all use the shared safe API parser; Cloudflare HTML and malformed responses cannot collapse into the unhelpful “Could not load product correction details” message.
 25. Build 232 is code-only. The current D1 migration remains Build 230 and must not be reapplied merely because the application build number changed.
+26. `/api/auth/login` validates its request before D1, uses the indexed normalized email lookup, omits request-time schema discovery and returns `auth_login_bounded_v1` after one user read plus one atomic session/last-login batch.
+27. Login no longer rereads the session it just created. The new token and timestamps are already authoritative inputs to the successful response.
+28. Normal GET `/api/auth/login` is binding-only and performs no D1 query; the older table/column diagnostic remains available only through the deliberate `?diagnostic=full` owner procedure.
+29. `/api/auth/me` now performs one indexed `session_token` lookup, returns only the fields the UI consumes and identifies the result as `auth_session_bounded_v1`. A temporary 5xx, Cloudflare 1102, offline or malformed response no longer clears browser credentials; only a real 401/403 authentication decision clears them, and degraded verification is visibly labelled.
+30. Build 233 remains code-only and adds a mocked two-operation login/query-budget, temporary-503 retention, real-401 clearing and safe-response regression.
+31. Pages Functions compile into one Worker, so the former 1.1 MB/897-row Amazon reference array and its top-level Maps affected unrelated routes. Build 233 keeps that private payload compressed by area and expands it only after an authenticated inventory request; login, session, product detail, autosave and product removal no longer allocate it during Worker startup.
 
 ## Data authority
 
@@ -58,9 +64,9 @@ This is the first of two canonical current-status files. Read it first for archi
 - `/admin/customer-documents/` — invoices, receipts, packing slips, credit notes and refund confirmations.
 - `/admin/orders/`, `/admin/accounting/`, `/admin/inventory-operations/` — operational transaction authorities.
 
-## Build 232 database boundary
+## Build 233 database boundary
 
-Build 232 adds no D1 table, column, seed or ledger row. `database_upgrade_current_pass.sql` remains byte-identical to the Build 230 migration. Back up D1, confirm Build 229, and apply exactly one of these only when `build230_visual_image_manifest` is not already recorded:
+Build 233 adds no D1 table, column, seed or ledger row. `database_upgrade_current_pass.sql` remains byte-identical to the Build 230 migration. Login uses existing indexed `users.email`, `sessions`, `users.last_login_at` and D1 `batch()` behaviour. Back up D1, confirm Build 229, and apply exactly one of these only when `build230_visual_image_manifest` is not already recorded:
 
 - `database_build230_visual_image_manifest.sql`
 - `database_upgrade_current_pass.sql` (byte-identical copy)
@@ -78,6 +84,8 @@ Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `da
 - Master creative failure must leave specialist workspaces reachable.
 - Startup failure must show all built-in gates and a retry path.
 - Image-manifest failure must show 20 read-only fallback requirements, an Unsynced warning and retry; saving is disabled and no fallback status is presented as approved.
+- Authentication credentials are cleared only after an explicit 401/403 decision or deliberate logout. A 5xx, Worker 1102, network/offline or malformed upstream response retains the existing session and reports degraded verification without claiming the server validated it.
+- Large optional reference datasets must not be allocated at module top level in Pages Functions. Keep the Amazon rows private, compressed and demand-loaded; do not move purchase/order identifiers into a publicly served JSON file.
 
 ## SEO/local/mobile rules
 
@@ -92,11 +100,11 @@ Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `da
 
 1. Run the complete Deployment Preflight against the exact folder/archive.
 2. Record D1 recovery point; apply one Build 230 migration; verify ledger, both manifest tables, 20 active rows and three generated provenance rows.
-3. Deploy the complete Build 232 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v13 is active.
+3. Deploy the complete Build 233 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v14 is active.
 4. Run Post-Deploy Smoke Tests on production.
 5. Confirm all 43 Startup gates load with All statuses, locate `missing_launch_images`, open the D1 manifest and confirm 20 rows rather than Unsynced fallback.
 6. Link one owner-controlled Creative Project in the master studio; save one stage review with evidence and reload.
-7. Run Release Sanity, Product Release Preflight, the retained Build 231 product load/autosave/browser-recovery proof, the Build 232 unused-archived-product/protected-history removal proof, visual-manifest phone/desktop review and read-only Meta identity/token checks.
+7. Run Release Sanity, Product Release Preflight, the Build 233 bounded-login/session-retention proof, retained Build 231 product load/autosave/browser recovery, Build 232 unused-archived-product/protected-history removal, visual-manifest phone/desktop review and read-only Meta identity/token checks.
 8. Make a separate Deploy Readiness decision; execute Go-Live only after Ready; continue Live Ops reconciliation.
 
 ## Not claimed complete
