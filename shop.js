@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const mainImage = images[0]?.image_url || '';
       const imageMarkup = mainImage
         ? `<div class="shop-card-gallery" data-shop-card-gallery="${productId}"><button class="shop-card-main-image" type="button" data-main-image-button><img src="${escapeHtml(mainImage)}" alt="${imageAlt}" data-main-image /></button>${images.length > 1 ? `<div class="shop-card-thumbs">${images.map((image, index) => `<button class="shop-card-thumb ${index === 0 ? 'is-active' : ''}" type="button" data-shop-thumb="${escapeHtml(image.image_url)}" aria-label="Show image ${index + 1} for ${name}"><img src="${escapeHtml(image.image_url)}" alt="${escapeHtml(image.alt_text || product.name || 'Product image')}" loading="lazy" /></button>`).join('')}</div>` : ''}</div>`
-        : `<div class="shop-card-no-image small"><img src="/assets/visual-placeholders/product-photo-coming-soon.svg" alt="" aria-hidden="true" loading="lazy"/><span>Workshop photo coming soon</span></div>`;
+        : `<div class="shop-card-no-image small">No Image</div>`;
       const originLink = `/shop/?merchandise_origin=${encodeURIComponent(product.merchandise_origin || '')}`;
       const ctaMarkup = externalUrl
         ? `<a class="btn" href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">${externalLabel}</a>${product.sale_channel === 'hybrid' ? `<button class="btn" type="button" data-add-shop-cart-id="${productId}">Add to Cart</button>` : ''}`
@@ -308,6 +308,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } finally { hide(loadingEl); }
   }
+  document.querySelectorAll('[data-shop-quick]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const key = String(button.getAttribute('data-shop-quick') || '');
+      const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value; };
+      if (key === 'handmade') { set('shopOriginFilter','handmade'); set('shopSearchInput',''); }
+      if (key === 'vintage') { set('shopOriginFilter','vintage'); set('shopSearchInput',''); }
+      if (key === 'under25') { set('shopMinPrice',''); set('shopMaxPrice','2500'); }
+      if (key === 'gifts') { set('shopSearchInput','gift'); }
+      loadProducts();
+    });
+  });
+  try { window.DDRecentlyViewed?.render?.(document.getElementById('shopRecentlyViewedMount'), { limit: 4 }); } catch {}
   document.getElementById('shopSearchButton')?.addEventListener('click', loadProducts);
   document.getElementById('shopResetButton')?.addEventListener('click', () => {
     ['shopSearchInput','shopTypeFilter','shopOriginFilter','shopChannelFilter','shopColorFilter','shopMinPrice','shopMaxPrice'].forEach((id) => { const el=document.getElementById(id); if (el) el.value=''; });

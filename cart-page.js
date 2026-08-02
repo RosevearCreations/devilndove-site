@@ -40,13 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  function effectivePrice(item, quantity) {
-    const qty = Math.max(1, Number(quantity || 1));
-    const tiers = Array.isArray(item?.quantity_price_tiers) ? item.quantity_price_tiers.slice().sort((a,b)=>Number(a.min_quantity||0)-Number(b.min_quantity||0)) : [];
-    const eligible = tiers.filter((row)=>Number(row.min_quantity||0)<=qty);
-    return eligible.length ? Number(eligible[eligible.length-1].unit_price_cents||item.base_price_cents||item.price_cents||0) : Number(item.base_price_cents||item.price_cents||0);
-  }
-
   function renderCartTrust() {
     if (!cartPolicyTrustMount) return;
     cartPolicyTrustMount.innerHTML = `
@@ -87,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     show(cartContentEl);
 
     const subtotalCents = items.reduce((sum, item) => {
-      return sum + (effectivePrice(item, item.quantity) * Number(item.quantity || 0));
+      return sum + (Number(item.price_cents || 0) * Number(item.quantity || 0));
     }, 0);
 
     const totalItems = items.reduce((sum, item) => {
@@ -110,8 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const name = escapeHtml(item.name || "");
       const slug = encodeURIComponent(item.slug || "");
       const imageUrl = String(item.featured_image_url || "").trim();
-      const unitPrice = effectivePrice(item, item.quantity);
-      const price = formatMoney(unitPrice, item.currency);
+      const price = formatMoney(item.price_cents, item.currency);
       const quantity = Number(item.quantity || 0);
 
       const imageMarkup = imageUrl
@@ -141,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ${escapeHtml(item.product_type || "")}
               </div>
 
-              <div style="font-weight:700;margin-bottom:10px">${escapeHtml(price)} each${Number(item.base_price_cents||item.price_cents||0)!==unitPrice?` <span class="small">quantity special applied</span>`:''}</div>
+              <div style="font-weight:700;margin-bottom:10px">${escapeHtml(price)}</div>
 
               <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
                 <label class="small" for="cart_qty_${productId}">Quantity</label>
@@ -150,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
                   type="number"
                   min="1"
                   value="${quantity}"
-                  max="${Number(item.inventory_tracking||0)===1?Math.max(0,Number(item.inventory_quantity||0)):''}"
                   data-cart-qty-id="${productId}"
                   style="max-width:90px"
                 />
