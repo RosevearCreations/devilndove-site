@@ -190,6 +190,9 @@ REQUIRED_FILES = [
     'scripts/build230_visual_manifest_test.mjs',
     'scripts/build231_product_autosave_test.mjs',
     'scripts/build232_product_removal_test.mjs',
+    'scripts/build233_login_resource_test.mjs',
+    'scripts/lazify-amazon-inventory-matches.mjs',
+    'functions/api/admin/_amazonInventoryMatches.js',
     'scripts/sync-build230-aggregate-schema.mjs',
     'GENERATED_VISUAL_ASSET_REGISTER.md',
     'BUILD230_VALIDATION.md',
@@ -198,6 +201,8 @@ REQUIRED_FILES = [
     'BUILD231_CHANGED_FILES.md',
     'BUILD232_VALIDATION.md',
     'BUILD232_CHANGED_FILES.md',
+    'BUILD233_VALIDATION.md',
+    'BUILD233_CHANGED_FILES.md',
 ]
 
 def read(path: Path) -> str:
@@ -315,11 +320,11 @@ def check_packaging_references(checks: list[dict]) -> None:
 
 def check_markdown_authority(checks: list[dict]) -> None:
     required_markers = {
-        'AI_HANDOFF.md': ['Build 232', 'PROJECT_STATUS_AND_ROADMAP.md', '43 gates', 'bounded_registry_v1', 'browser recovery'],
-        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 232', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/', 'Archived-product'],
-        'MARKDOWN_INDEX.md': ['Build 232', 'Two current authorities', 'Historical evidence'],
-        'README.md': ['Build 232', 'database_build230_visual_image_manifest.sql'],
-        'STARTUP_GO_LIVE_GUIDE.md': ['Build 232', 'This guide contains 43 gates', 'missing_launch_images', '/admin/image-manifest/', 'bounded_registry_v1'],
+        'AI_HANDOFF.md': ['Build 233', 'PROJECT_STATUS_AND_ROADMAP.md', '43 gates', 'auth_login_bounded_v1', 'bounded_registry_v1', 'browser recovery', 'compressed by area'],
+        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 233', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/', 'temporary 5xx', '211,860-byte'],
+        'MARKDOWN_INDEX.md': ['Build 233', 'Two current authorities', 'Historical evidence'],
+        'README.md': ['Build 233', 'database_build230_visual_image_manifest.sql'],
+        'STARTUP_GO_LIVE_GUIDE.md': ['Build 233', 'This guide contains 43 gates', 'missing_launch_images', '/admin/image-manifest/', 'auth_login_bounded_v1'],
         'PACKAGING_REFERENCE_BASELINE.md': ['Build 230', 'three user-supplied files', 'Dimensional discrepancy'],
         'PRELAUNCH_PROCESS_PLAYBOOKS.md': ['Deployment Preflight', 'Deploy Readiness', 'Go-Live Execution'],
         'CREATIVE_AUTOMATION_STUDIO.md': ['seven stages', 'creative_automation_workflows'],
@@ -333,7 +338,7 @@ def check_markdown_authority(checks: list[dict]) -> None:
     guide=read(ROOT/'STARTUP_GO_LIVE_GUIDE.md')
     if guide.count('#### Before you begin') != 43:
         missing.append(f'STARTUP_GO_LIVE_GUIDE.md: expected 43 gate sections, found {guide.count("#### Before you begin")}')
-    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 232 canonical authorities, scoped specialist playbooks, code-only schema boundary, product-removal safety registry, visual provenance, historical retirement policy, and 43 generated Startup sections agree.', 'missing':missing})
+    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 233 canonical authorities, scoped specialist playbooks, code-only schema boundary, bounded login/session retention, demand-loaded private reference data, product-removal safety registry, visual provenance, historical retirement policy, and 43 generated Startup sections agree.', 'missing':missing})
 
 def check_schema_files(checks: list[dict]) -> None:
     schema_needles = [
@@ -470,7 +475,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 232','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 233','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
