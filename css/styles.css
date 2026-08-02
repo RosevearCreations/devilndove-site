@@ -2569,3 +2569,16 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
 /* Build 231 - product draft autosave recovery and narrow-screen error containment. */
 .dd-product-autosave-panel #productAutosaveStatus{flex:1 1 320px;min-width:0;overflow-wrap:anywhere}
 @media(max-width:640px){.dd-product-autosave-panel{align-items:stretch}.dd-product-autosave-panel>strong,.dd-product-autosave-panel #productAutosaveStatus{flex-basis:100%}.dd-product-autosave-panel .btn{width:100%;min-height:46px}}
+
+/* Build 234 - responsive packaging previews, paired references and guarded duplicate cleanup. */
+.packaging-svg-preview svg{width:min(100%,1000px);max-width:1000px;margin-inline:auto}
+.packaging-svg-preview[data-preview-shape="soap_wrap"] svg{width:max(100%,1100px);max-width:none;margin-inline:0}
+.packaging-svg-preview[data-preview-shape="round"]{display:grid;place-items:center}
+.packaging-svg-preview[data-preview-shape="round"] svg{width:min(100%,760px);border-radius:50%}
+.packaging-reference-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.packaging-reference-pair .packaging-reference-note{grid-template-columns:1fr;margin:0;align-content:start}
+.packaging-reference-pair .packaging-reference-note img{height:200px;max-height:200px;object-fit:contain}
+.creative-automation-delete-box{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;padding:13px;border:1px solid rgba(244,63,94,.42);border-radius:12px;background:rgba(244,63,94,.07)}
+.creative-automation-delete-box>div{min-width:0}.creative-automation-delete-box strong,.creative-automation-delete-box small{display:block}.creative-automation-delete-box small{margin-top:5px;overflow-wrap:anywhere}
+@media(max-width:820px){.packaging-reference-pair{grid-template-columns:1fr}.creative-automation-delete-box{align-items:stretch;flex-direction:column}.creative-automation-delete-box .btn{width:100%;min-height:46px}}
+@media(max-width:620px){.packaging-svg-preview[data-preview-shape="round"] svg{width:100%}.packaging-reference-pair .packaging-reference-note img{height:150px}}
