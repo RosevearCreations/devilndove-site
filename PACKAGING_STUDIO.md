@@ -1,11 +1,11 @@
-# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 228)
+# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 229)
 
 ## Authority rule
-This file is the **single authoritative packaging specification and implementation map** for Devil n Dove. Packaging code, schema, templates, launch checks, and future work must be reconciled here during every build.
+This file is the **single current implementation map** for Devil n Dove packaging. Its design direction is governed collectively by the three adopted user-supplied sources in `PACKAGING_REFERENCE_BASELINE.md`: the full automation specification, template-guide PDF and master SVG. Packaging code, schema, templates, launch checks and future work must be reconciled against all four records during every build.
 
-Build 228 does not change packaging tables or split this authority. Packaging remains a specialist business system linked from Product Release Preflight and Startup Readiness; Creative Automation may reference packaging evidence but must not duplicate labels, BOM costs, print tests or approval state.
+Build 229 registers the three adopted sources, their immutable checksums and dimensional scopes in D1. Packaging remains a specialist business system linked from Product Release Preflight and Startup Readiness; Creative Automation may reference packaging evidence but must not duplicate labels, BOM costs, print tests or approval state.
 
-The former root and documentation-tree files named `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` are compatibility pointers only. They must not contain a second editable copy of the specification.
+The root `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` is a compatibility pointer. The exact supplied specification is retained at `docs/packaging/source-references/DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md`; it and the PDF/SVG sources must not be silently edited into competing versions.
 
 ## Current implemented routes
 - `/admin/packaging-studio/` — the single editor for soap ribbons, general product labels, candle labels, jewelry cards, package inserts, packaging components/cost, versions, exports and print tests.
@@ -14,6 +14,7 @@ The former root and documentation-tree files named `DEVIL_N_DOVE_SOAP_LABEL_AUTO
 
 ## Current data authority
 - `products` is the public commerce product authority.
+- `packaging_reference_sources` registers the three adopted directions, repository paths, SHA-256 values, dimensional summaries and review status.
 - `packaging_templates`, `packaging_projects`, `packaging_project_versions`, and `packaging_export_history` are the broad packaging engine.
 - `packaging_components` is the per-project bill of materials: inventory link, component type/name, SKU/reference, quantity per finished unit, waste, cost, lot traceability, supplier and notes.
 - `soap_label_templates`, `soap_products`, `soap_ingredients`, `soap_label_claims`, `soap_label_exports`, and `soap_label_print_tests` are the normalized soap-label authority.
@@ -22,6 +23,7 @@ The former root and documentation-tree files named `DEVIL_N_DOVE_SOAP_LABEL_AUTO
 
 ## Current implementation reconciliation
 Implemented now:
+- three adopted reference-source cards and D1 records for the supplied specification, guide PDF and master SVG;
 - one application authority across soap ribbons, general labels, candle labels, jewelry cards and package inserts;
 - generic editable SVG preview for non-soap formats plus the established exact soap-ribbon renderer;
 - inventory-linked packaging BOM, per-finished-unit quantity, waste and estimated packaging unit cost;
@@ -43,7 +45,7 @@ Still gated or incomplete:
 - final bilingual, formula, claim, cosmetic, packaging, and net-quantity review for each product.
 
 ## Physical dimension conflict
-The supplied specification states both a 1.50-inch (38.1 mm) artboard and a 50 mm rear circle. These cannot occupy the same height without clipping. The application keeps two explicit profiles until a physical proof selects the production geometry:
+The supplied specification and PDF state both a 1.50-inch (38.1 mm) artboard and a 50 mm rear circle. These cannot occupy the same height without clipping. The supplied master SVG introduces a second discrepancy: its `<circle r="12.5">` renders a 25 mm diameter. The application keeps the original sources unchanged and two explicit renderer profiles until a physical proof selects the production geometry:
 1. **Photo-fit:** 11 × 1.5 inches with a 38.1 mm rear seal.
 2. **True 50 mm:** 11 inches wide × 50 mm high with a 50 mm rear seal.
 
@@ -926,10 +928,10 @@ Before selling printed products, have the final labels checked against the requi
 
 ---
 
-## Build 228 maintenance directive
+## Build 229 maintenance directive
 During every future packaging change:
 1. Update this file first or in the same commit as code/schema changes.
-2. Keep the compatibility pointer files short; never recreate a second full copy.
+2. Reconcile all three immutable adopted source files through `PACKAGING_REFERENCE_BASELINE.md`; keep compatibility pointers short and never silently edit a source checksum or dimensional conflict.
 3. Update `DATABASE_SCHEMA_REFERENCE.md`, aggregate schemas, current migration, `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AND_RISKS.md`, and the build validation record.
 4. Re-run exact-dimension, one-H1, CSS, JavaScript, local-reference, schema, XML/SVG, and ZIP-integrity checks.
 5. Never describe an untested browser PDF, label, formula, claim, or notification as production/legal approval.

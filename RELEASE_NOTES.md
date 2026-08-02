@@ -1,3 +1,18 @@
+# Release Notes — Build 229
+
+## Adopted packaging sources and explicit missing-image blocker
+
+- Preserved and registered the supplied soap-label automation specification, guide PDF and master SVG with repository paths, SHA-256 values, dimensional summaries and active/adopted state.
+- Added Packaging Studio source cards and `PACKAGING_REFERENCE_BASELINE.md` so future work must reconcile all three directions rather than relying on an unlabeled copy.
+- Kept the source SVG unchanged and documented that it renders a 25 mm rear seal while the specification/PDF request 50 mm on a 38.1 mm-high artboard; a 100%-scale physical proof must select an approved profile.
+- Preserved all 42 Startup gates and added `missing_launch_images` as a distinct Critical gate, for exactly 43.
+- Made `IMAGES_REQUIRED.md` the detailed missing/broken/fallback/placeholder/right-clearance evidence manifest and added phone/desktop, structured-data and social-preview checks.
+- Regenerated the complete Startup guide and degraded browser fallback; HTML, empty or incomplete API responses still show all gates rather than an empty-filter message.
+- Synchronized the D1-safe Build 229 migration to all aggregate schemas/current-pass SQL and added Release Sanity plus deployment-preflight checks for the three-source authority and exact gate count.
+- Refreshed canonical handoff, status, schema, release, image, mobile/CSS, SEO/H1 and prelaunch documentation.
+
+Back up D1 and confirm Build 228. Apply `database_build229_packaging_reference_authority.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the complete package and follow `BUILD229_VALIDATION.md`.
+
 # Release Notes — Build 228
 
 ## Master creative workflow and separate prelaunch stages

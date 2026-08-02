@@ -1,9 +1,9 @@
-# Devil n Dove Social Publishing Connection Guide — Build 228
+# Devil n Dove Social Publishing Connection Guide — Build 229
 
-**Current version:** Build 228 (Build 210 provider queue and Build 227 read-only Meta tests retained)  
+**Current version:** Build 229 (Build 210 provider queue and Build 227 read-only Meta tests retained)  
 **Purpose:** Connect Devil n Dove to Facebook, Instagram, Pinterest, and X for controlled social publishing, while preparing for future TikTok and YouTube integration.
 
-Social Publishing is stage 5/7 of the master process in `CREATIVE_AUTOMATION_STUDIO.md`. The master may store a safe review evidence reference, but this guide/provider queue remains the publishing setup and result authority. A master stage, credential-presence check or queued draft is never proof of publication.
+Social Publishing is stage 5/7 of the master process in `CREATIVE_AUTOMATION_STUDIO.md`. The master may store a safe review evidence reference, but this guide/provider queue remains the publishing setup and result authority. A master stage, credential-presence check or queued draft is never proof of publication. Any missing, fallback or placeholder post image keeps the `missing_launch_images` Startup gate open and must not be scheduled.
 
 ---
 

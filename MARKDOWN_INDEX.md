@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 228
+# Devil n Dove Markdown Index — Build 229
 
 ## Two current authorities
 
@@ -9,10 +9,11 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 
 ## Active specialist playbooks
 
-- `STARTUP_GO_LIVE_GUIDE.md` — generated operating copy of all 42 D1-backed gates; status remains in D1.
+- `STARTUP_GO_LIVE_GUIDE.md` — generated operating copy of all 43 D1-backed gates; status remains in D1.
 - `PRELAUNCH_PROCESS_PLAYBOOKS.md` — separate Product Preflight, Deployment Preflight, Safe Deploy, Smoke, Deploy Readiness, Go-Live and Live Ops procedures.
 - `CREATIVE_AUTOMATION_STUDIO.md` — master creative process and specialist authority map.
 - `PACKAGING_STUDIO.md` — whole-business labeling/packaging specification.
+- `PACKAGING_REFERENCE_BASELINE.md` — adopted user-supplied specification/PDF/SVG paths, checksums, dimensional reconciliation and approval rule.
 - `DATABASE_SCHEMA_REFERENCE.md` — current and historical schema ownership.
 - `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md` — production variables/bindings and safe checks.
 - `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md` — review-first provider setup/tests.
@@ -22,17 +23,16 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 
 ## Current release files
 
-- `database_build228_creative_automation_prelaunch_stages.sql`
+- `database_build229_packaging_reference_authority.sql`
 - `database_upgrade_current_pass.sql` — identical; apply one, not both.
-- `BUILD228_VALIDATION.md`
-- `BUILD228_CHANGED_FILES.md`
+- `BUILD229_VALIDATION.md`
+- `BUILD229_CHANGED_FILES.md`
 - `RELEASE_NOTES.md`
 
 ## Retired pointers
 
-`AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` point to the two current authorities. `CONTENT_AUTOMATION_STUDIO.md` and the CAIP documentation are specialist/historical references under the master Creative Automation process. `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` is retained only as a compatibility pointer to `PACKAGING_STUDIO.md`.
+`AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` point to the two current authorities. `CONTENT_AUTOMATION_STUDIO.md` and the CAIP documentation are specialist/historical references under the master Creative Automation process. The root `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md` is a compatibility pointer; the exact supplied source is preserved under `docs/packaging/source-references/` and reconciled through `PACKAGING_REFERENCE_BASELINE.md` and `PACKAGING_STUDIO.md`.
 
 ## Historical evidence
 
 Earlier `BUILD*_VALIDATION.md`, `BUILD*_CHANGED_FILES.md`, numbered migrations, research notes and former roadmaps remain immutable traceability evidence. They intentionally keep their original Build labels and must not be edited to appear current. This retirement policy is the Markdown sanity check: current direction lives in two files; specialist procedures stay scoped; historical evidence cannot compete with current instructions.
-
