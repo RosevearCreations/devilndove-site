@@ -1,4 +1,5 @@
 // File: /public/js/admin-product-correction.js
+// Build 232: resource-aware correction preflight and safe Cloudflare/non-JSON errors.
 // Visible correction workflow for a loaded product. It shows linked raw inventory,
 // lets an admin explicitly release reservations and/or return physically unused raw
 // materials before permanently deleting an unused incorrect product.
@@ -22,6 +23,13 @@
   function toSafeInteger(value, fallback = 0) {
     const number = Number(value);
     return Number.isInteger(number) && number >= 0 ? number : fallback;
+  }
+
+  async function readApiJson(response, fallbackMessage) {
+    if (window.DDAuth?.readApiJson) return window.DDAuth.readApiJson(response, { fallbackMessage });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || fallbackMessage);
+    return data;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -167,9 +175,8 @@
       target.innerHTML = `<h3 style="margin-top:0">Correct or remove product</h3><p class="small">Loading linked raw inventory…</p>`;
       try {
         const response = await window.DDAuth.apiFetch(`/api/admin/delete-product?product_id=${encodeURIComponent(productId)}`, { method: 'GET' });
-        const data = await response.json().catch(() => null);
+        const data = await readApiJson(response, 'Could not load product correction details.');
         if (requestNumber !== previewRequestNumber || productId !== selectedProductId()) return;
-        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load product correction details.');
         preview = data;
         renderPreview();
         if (force) setMessage('Linked raw inventory refreshed.');
@@ -221,8 +228,7 @@
             material_actions: actions
           })
         });
-        const data = await response.json().catch(() => null);
-        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Product correction/delete failed.');
+        const data = await readApiJson(response, 'Product correction/delete failed.');
         const materialSummary = data?.material_summary?.affected_items
           ? ` Raw inventory updated for ${data.material_summary.affected_items} item(s).`
           : '';

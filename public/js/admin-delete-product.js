@@ -1,10 +1,18 @@
 // File: /public/js/admin-delete-product.js
+// Build 232: safe removal-preflight parsing for JSON and Cloudflare platform errors.
 // Permanent deletion is for unused incorrect/test products only. Ordered or referenced
 // products must remain in business history and are archived instead.
 
 document.addEventListener("DOMContentLoaded", () => {
   const tableBody = document.getElementById("productsTableBody");
   if (!tableBody) return;
+
+  async function readApiJson(response, fallbackMessage) {
+    if (window.DDAuth?.readApiJson) return window.DDAuth.readApiJson(response, { fallbackMessage });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || fallbackMessage);
+    return data;
+  }
 
   function getRowProductId(button) {
     return Number(button.getAttribute("data-delete-product-id"));
@@ -28,14 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ product_id: productId, ...payload })
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) {
-        const error = data?.error || "Delete failed.";
-        if (data?.requires_archive) {
-          throw new Error(`${error}\n\nUse Archive instead. Archive keeps the order/history record but removes the item from active storefront use.`);
-        }
-        throw new Error(error);
-      }
+      const data = await readApiJson(response, 'Delete failed.');
 
       const cleanupNote = data?.r2_cleanup_note ? `\n\n${data.r2_cleanup_note}` : "";
       alert(`${data.message || "Product deleted successfully."}${cleanupNote}`);
@@ -64,8 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
       button.disabled = true;
       button.textContent = 'Checking…';
       const previewResponse = await window.DDAuth.apiFetch(`/api/admin/delete-product?product_id=${encodeURIComponent(productId)}`);
-      const preview = await previewResponse.json().catch(() => null);
-      if (!previewResponse.ok || !preview?.ok) throw new Error(preview?.error || 'Could not check this product.');
+      const preview = await readApiJson(previewResponse, 'Could not check this product.');
       if (String(preview.product?.status || '').toLowerCase() !== 'draft' && draftCleanup) {
         throw new Error('Only draft products use the duplicate-draft cleanup action. Archive or use the full correction workflow for other products.');
       }

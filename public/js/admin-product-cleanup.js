@@ -1,9 +1,15 @@
-// Build 221 — visible draft/archive cleanup centre.
+// Build 232 — bounded draft/archive cleanup preflight with safe API response parsing.
 (() => {
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[char]));
   let products = [];
 
   function node(id) { return document.getElementById(id); }
+  async function readApiJson(response, fallbackMessage) {
+    if (window.DDAuth?.readApiJson) return window.DDAuth.readApiJson(response, { fallbackMessage });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error(data?.error || fallbackMessage);
+    return data;
+  }
   function message(text = '', kind = '') {
     const target = node('productCleanupMessage');
     if (!target) return;
@@ -56,8 +62,7 @@
     try {
       message('Loading draft and archive cleanup candidates…');
       const response = await window.DDAuth.apiFetch('/api/admin/products');
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Products could not load.');
+      const data = await readApiJson(response, 'Products could not load.');
       products = Array.isArray(data.products) ? data.products : [];
       render();
       message(`${candidateRows().length} cleanup candidate${candidateRows().length === 1 ? '' : 's'} shown.`, 'success');
@@ -80,10 +85,8 @@
     if (deleteButton) deleteButton.disabled = true;
     if (result) result.innerHTML = '<span class="small">Checking references…</span>';
     const response = await window.DDAuth.apiFetch(`/api/admin/delete-product?product_id=${encodeURIComponent(productId)}`);
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Removal preflight failed.');
+    const data = await readApiJson(response, 'Removal preflight failed.');
     const blockers = Array.isArray(data.blocking_references) ? data.blocking_references : [];
-    const safeRows = Array.isArray(data.references) ? data.references.filter((row) => Number(row.automatically_safe || 0) === 1) : [];
     const materials = Array.isArray(data.materials) ? data.materials : [];
     const materialReviewRows = Array.isArray(data.materials_requiring_review) ? data.materials_requiring_review : [];
     const historyAllowsRemoval = Number(data.deletion_allowed || 0) === 1;
@@ -97,7 +100,7 @@
         const recipeNote = materials.length
           ? ` ${materials.length} linked recipe/material row(s) will be discarded with the duplicate; main inventory quantities will not change.`
           : '';
-        result.innerHTML = `<span class="status-pill is-success">Removal allowed</span><p class="small">${safeRows.length} product-owned, detachable or automatic reference group(s) can be cleaned safely.${recipeNote}</p>`;
+        result.innerHTML = `<span class="status-pill is-success">Removal allowed</span><p class="small">Product-owned editor rows will be removed and reusable media will be detached in the same reviewed operation.${recipeNote}</p>`;
       }
     }
     if (deleteButton) deleteButton.disabled = !allowed;
@@ -123,8 +126,7 @@
           : 'Duplicate draft removed from cleanup centre.'
       })
     });
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Product could not be removed.');
+    const data = await readApiJson(response, 'Product could not be removed.');
     message(data.message || 'Product removed.', 'success');
     document.dispatchEvent(new CustomEvent('dd:product-deleted', { detail: { product_id: Number(productId), product: data.product || null } }));
     await load();
@@ -132,8 +134,7 @@
   async function archive(productId) {
     if (!confirm('Archive this draft? It will remain available in the Archived cleanup list.')) return;
     const response = await window.DDAuth.apiFetch('/api/admin/archive-product', { method: 'POST', body: JSON.stringify({ product_id: Number(productId) }) });
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Product could not be archived.');
+    const data = await readApiJson(response, 'Product could not be archived.');
     message(data.message || 'Product archived.', 'success');
     document.dispatchEvent(new CustomEvent('dd:product-archived', { detail: { product_id: Number(productId), product: data.product || null } }));
     await load();
