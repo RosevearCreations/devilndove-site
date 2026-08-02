@@ -144,8 +144,7 @@ const rejected=await runUiSessionCheck(401);
 assert(rejected.clearCount===1,'An explicit 401 session rejection must clear the browser session.');
 
 const migration=read('database_build230_visual_image_manifest.sql');
-assert(read('database_upgrade_current_pass.sql')===migration,'Build 233 is code-only; current-pass SQL must remain the byte-identical Build 230 migration.');
-assert(!/^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b/im.test(migration),'Current D1 migration contains an unsupported explicit transaction statement.');
+assert(!/^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b/im.test(migration),'Retained Build 230 D1 migration contains an unsupported explicit transaction statement.');
 
 const amazonModule=await import(url.pathToFileURL(path.join(root,'functions/api/admin/_amazonInventoryMatches.js')).href+`?test=${Date.now()}`);
 const toolshedMatch=await amazonModule.getAmazonInventoryMatch('toolshed',0,'');

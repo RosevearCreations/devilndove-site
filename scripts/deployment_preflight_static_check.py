@@ -203,6 +203,18 @@ REQUIRED_FILES = [
     'BUILD232_CHANGED_FILES.md',
     'BUILD233_VALIDATION.md',
     'BUILD233_CHANGED_FILES.md',
+    'database_build234_packaging_templates_creative_cleanup.sql',
+    'scripts/build234_packaging_creative_test.mjs',
+    'scripts/sync-build234-startup-seed.mjs',
+    'scripts/sync-build234-aggregate-schema.mjs',
+    'assets/packaging/soap/reference/glacial-purple-aloe-soap-approved-reference.png',
+    'assets/packaging/reference/wedding-candle-top-john-laurie-approved-reference.png',
+    'assets/packaging/artwork/soap-botanical-purple-rose-v1.png',
+    'assets/packaging/artwork/soap-botanical-purple-rose-v1.webp',
+    'assets/packaging/artwork/candle-top-wedding-line-art-v1.png',
+    'assets/packaging/artwork/candle-top-wedding-line-art-v1.webp',
+    'BUILD234_VALIDATION.md',
+    'BUILD234_CHANGED_FILES.md',
 ]
 
 def read(path: Path) -> str:
@@ -302,6 +314,8 @@ def check_packaging_references(checks: list[dict]) -> None:
         'docs/packaging/source-references/DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md': '26fe76cff4943547739bbe68b328509ba916ed6c608b57e86a048ceb4f1611b7',
         'docs/packaging/source-references/Soap_Label_Template_Guide.pdf': 'cc4940bcb31a244ee7bd9248f4830be986c5cb669d21273a23b373aa3b5bfe0e',
         'assets/packaging/soap/reference/Soap_Label_Master_Template.svg': '6e0a1653cdb85861544f06f5d1aa1897e1878cfcb5e62ebe86c6cfe003aacb5e',
+        'assets/packaging/soap/reference/glacial-purple-aloe-soap-approved-reference.png': '297d8a7e737447c307523ea50b04d4967892e86c948f19745e35c114dd0a382c',
+        'assets/packaging/reference/wedding-candle-top-john-laurie-approved-reference.png': '8abe415ff7fb472fd28697a18638a9b30a7e8f53cce737eb5bc87f13c8cfa056',
     }
     failures=[]
     rows=[]
@@ -316,19 +330,19 @@ def check_packaging_references(checks: list[dict]) -> None:
         ET.parse(svg)
     except Exception as exc:
         failures.append(f'{svg.relative_to(ROOT)} XML: {exc}')
-    checks.append({'code':'static_packaging_reference_integrity','status':'fail' if failures else 'pass','detail':'; '.join(failures) if failures else 'All three adopted packaging sources match their registered SHA-256 values and the SVG parses as XML.', 'rows':rows})
+    checks.append({'code':'static_packaging_reference_integrity','status':'fail' if failures else 'pass','detail':'; '.join(failures) if failures else 'All five adopted packaging sources match their registered SHA-256 values and the SVG parses as XML.', 'rows':rows})
 
 def check_markdown_authority(checks: list[dict]) -> None:
     required_markers = {
-        'AI_HANDOFF.md': ['Build 233', 'PROJECT_STATUS_AND_ROADMAP.md', '43 gates', 'auth_login_bounded_v1', 'bounded_registry_v1', 'browser recovery', 'compressed by area'],
-        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 233', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/', 'temporary 5xx', '211,860-byte'],
-        'MARKDOWN_INDEX.md': ['Build 233', 'Two current authorities', 'Historical evidence'],
-        'README.md': ['Build 233', 'database_build230_visual_image_manifest.sql'],
-        'STARTUP_GO_LIVE_GUIDE.md': ['Build 233', 'This guide contains 43 gates', 'missing_launch_images', '/admin/image-manifest/', 'auth_login_bounded_v1'],
-        'PACKAGING_REFERENCE_BASELINE.md': ['Build 230', 'three user-supplied files', 'Dimensional discrepancy'],
+        'AI_HANDOFF.md': ['Build 234', 'PROJECT_STATUS_AND_ROADMAP.md', '44 gates', 'auth_login_bounded_v1', 'bounded_registry_v1', 'browser recovery', 'compressed by area'],
+        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 234', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/', 'temporary 5xx', '211,860-byte'],
+        'MARKDOWN_INDEX.md': ['Build 234', 'Two current authorities', 'Historical evidence'],
+        'README.md': ['Build 234', 'database_build234_packaging_templates_creative_cleanup.sql'],
+        'STARTUP_GO_LIVE_GUIDE.md': ['Build 234', 'This guide contains 44 gates', 'missing_launch_images', 'Measure, save, laser-test, approve, and archive each candle-top template', '/admin/image-manifest/', 'auth_login_bounded_v1'],
+        'PACKAGING_REFERENCE_BASELINE.md': ['Build 234', 'Five owner-supplied files', 'Dimensional discrepancy', 'Candle-top direction'],
         'PRELAUNCH_PROCESS_PLAYBOOKS.md': ['Deployment Preflight', 'Deploy Readiness', 'Go-Live Execution'],
         'CREATIVE_AUTOMATION_STUDIO.md': ['seven stages', 'creative_automation_workflows'],
-        'GENERATED_VISUAL_ASSET_REGISTER.md': ['Build 230', 'Product/Offer structured data', 'SHA-256'],
+        'GENERATED_VISUAL_ASSET_REGISTER.md': ['Build 234', 'Product/Offer structured data', 'Soap botanical purple rose', 'Wedding candle-top line artwork', 'SHA-256'],
     }
     missing=[]
     for rel, markers in required_markers.items():
@@ -336,9 +350,9 @@ def check_markdown_authority(checks: list[dict]) -> None:
         absent=[marker for marker in markers if marker not in text]
         if absent: missing.append(f'{rel}: {", ".join(absent)}')
     guide=read(ROOT/'STARTUP_GO_LIVE_GUIDE.md')
-    if guide.count('#### Before you begin') != 43:
-        missing.append(f'STARTUP_GO_LIVE_GUIDE.md: expected 43 gate sections, found {guide.count("#### Before you begin")}')
-    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 233 canonical authorities, scoped specialist playbooks, code-only schema boundary, bounded login/session retention, demand-loaded private reference data, product-removal safety registry, visual provenance, historical retirement policy, and 43 generated Startup sections agree.', 'missing':missing})
+    if guide.count('#### Before you begin') != 44:
+        missing.append(f'STARTUP_GO_LIVE_GUIDE.md: expected 44 gate sections, found {guide.count("#### Before you begin")}')
+    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 234 canonical authorities, scoped playbooks, bounded hot routes, five packaging references, guarded duplicate cleanup, visual provenance, historical retirement policy, and 44 generated Startup sections agree.', 'missing':missing})
 
 def check_schema_files(checks: list[dict]) -> None:
     schema_needles = [
@@ -410,12 +424,16 @@ def check_schema_files(checks: list[dict]) -> None:
         'image_manifest_items',
         'image_manifest_history',
         'build230_visual_image_manifest',
+        'build234_packaging_templates_creative_cleanup',
+        'candle-top-wedding-4in-v1',
+        'candle-top-round-3in-v1',
+        'candle_top_template_proof',
     ]
     required = {
         'database_schema.sql': schema_needles,
         'database_full_schema.sql': schema_needles,
         'database_store_schema.sql': schema_needles,
-        'database_upgrade_current_pass.sql': ['image_manifest_items', 'image_manifest_history', 'build230_visual_image_manifest'],
+        'database_upgrade_current_pass.sql': ['candle-top-wedding-4in-v1', 'candle-top-round-3in-v1', 'candle_top_template_proof', 'build234_packaging_templates_creative_cleanup'],
         'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
         'database_build182_mobile_visual_polish.sql': ['desktop_mobile_parity_checks', 'visual_enrichment_candidates', 'build_182_mobile_visual_polish'],
         'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
@@ -444,6 +462,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build228_creative_automation_prelaunch_stages.sql': ['creative_automation_workflows', 'creative_automation_stage_reviews', 'creative_automation_events', 'build228_creative_automation_prelaunch_stages'],
         'database_build229_packaging_reference_authority.sql': ['packaging_reference_sources', 'build229_packaging_reference_authority', 'soap-label-automation-spec-v1', 'soap-label-template-guide-v1', 'soap-label-master-template-v1'],
         'database_build230_visual_image_manifest.sql': ['image_manifest_items', 'image_manifest_history', 'build230_visual_image_manifest', 'home_workshop_discovery', 'gift_card_artwork'],
+        'database_build234_packaging_templates_creative_cleanup.sql': ['candle-top-wedding-4in-v1', 'candle-top-round-3in-v1', 'soap-approved-visual-v1', 'wedding-candle-top-john-laurie-v1', 'candle_top_template_proof', 'build234_packaging_templates_creative_cleanup'],
     }
     missing=[]
     detail=[]
@@ -453,15 +472,15 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 230 schema tables and current migration markers found in the correct schema files.', 'missing':missing})
+    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 234 schema and current migration markers were found in the correct files.', 'missing':missing})
 
     current=read(ROOT/'database_upgrade_current_pass.sql')
-    numbered=read(ROOT/'database_build230_visual_image_manifest.sql')
+    numbered=read(ROOT/'database_build234_packaging_templates_creative_cleanup.sql')
     explicit=re.findall(r'(?im)^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b', current)
     checks.append({
         'code':'static_d1_migration_compatibility',
         'status':'fail' if explicit or current != numbered else 'pass',
-        'detail':('Current migration contains unsupported explicit transaction statements: '+', '.join(explicit)) if explicit else ('Current migration differs from the numbered Build 230 migration.' if current != numbered else 'Current and numbered Build 230 migrations are identical and contain no explicit SQL transaction statements.'),
+        'detail':('Current migration contains unsupported explicit transaction statements: '+', '.join(explicit)) if explicit else ('Current migration differs from the numbered Build 234 migration.' if current != numbered else 'Current and numbered Build 234 migrations are identical and contain no explicit SQL transaction statements.'),
     })
 
 def main() -> int:
@@ -475,7 +494,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 233','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 234','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')

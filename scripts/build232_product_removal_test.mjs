@@ -140,6 +140,6 @@ assert(deleteBatch.at(-1)?.sql.includes('DELETE FROM products'),'Product deletio
 assert(deletePayload.material_summary?.release_quantity===1,'Reviewed reservation release summary is incorrect.');
 
 const migration=read('database_build230_visual_image_manifest.sql');
-assert(read('database_upgrade_current_pass.sql')===migration,'Build 232 is code-only; the current-pass SQL must remain the byte-identical Build 230 migration.');
+assert(migration.includes('build230_visual_image_manifest'),'Retained Build 230 migration ledger marker is missing.');
 
 console.log(`Build 232 archived-product removal, bounded preflight, registry coverage, safe parser and code-only schema checks: PASS (${calls.length} mock DB calls)`);

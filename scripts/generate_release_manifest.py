@@ -44,7 +44,7 @@ def main() -> int:
             'sha256': sha256(path),
         })
     payload={
-        'build_label': 'Build 233',
+        'build_label': 'Build 234',
         'generated_by': 'scripts/generate_release_manifest.py',
         'file_count': len(files),
         'total_size_bytes': sum(item['size_bytes'] for item in files),

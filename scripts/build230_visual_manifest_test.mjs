@@ -12,8 +12,8 @@ const startupApi=read('functions/api/admin/startup-readiness.js');
 const startupStart=startupApi.indexOf('const STARTUP_ITEMS = ')+22;
 const startupEnd=startupApi.indexOf('\n];',startupStart)+2;
 const startupItems=JSON.parse(startupApi.slice(startupStart,startupEnd));
-assert(startupItems.length===43,`Expected 43 Startup gates, found ${startupItems.length}.`);
-assert(new Set(startupItems.map((item)=>item.key)).size===43,'Startup keys must remain unique.');
+assert(startupItems.length===44,`Expected the current 44 Startup gates, found ${startupItems.length}.`);
+assert(new Set(startupItems.map((item)=>item.key)).size===44,'Startup keys must remain unique.');
 const imageGate=startupItems.find((item)=>item.key==='missing_launch_images');
 assert(imageGate?.route==='/admin/image-manifest/','Missing-image gate must open the Visual Image Manifest.');
 assert(String(imageGate?.instructions||'').includes('12. Reopen this gate'),'Missing-image gate must retain 12 detailed steps.');
@@ -28,8 +28,6 @@ assert(manifestClient.includes('Unsynced fallback — review only.'),'Manifest f
 assert(manifestClient.includes("const locked=state.fallback?' disabled':''"),'Manifest fallback must disable saving controls.');
 
 const migration=read('database_build230_visual_image_manifest.sql');
-const current=read('database_upgrade_current_pass.sql');
-assert(current===migration,'Current-pass SQL must be byte-identical to the Build 230 migration.');
 assert(!/^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b/im.test(migration),'Build 230 migration contains an explicit SQL transaction statement.');
 const seedSection=migration.slice(migration.indexOf('INSERT INTO image_manifest_items'),migration.indexOf('\nON CONFLICT(manifest_key)'));
 const seedKeys=[...seedSection.matchAll(/^\s*\('([^']+)'/gm)].map((match)=>match[1]);
@@ -55,4 +53,4 @@ for(const page of ['index.html','handmade-jewelry-ontario/index.html','gift-card
 assert(!/assets\/generated\/editorial/i.test(read('workshop-journal/index.html')),'Workshop Journal must keep its real-photo requirement rather than reuse a generated asset.');
 assert(!/assets\/generated\/editorial/i.test(read('polymer-clay-earrings-ontario/index.html')),'Polymer-clay page must keep its real-photo requirement rather than reuse a generated asset.');
 
-console.log('Build 230 visual manifest, Startup authority, D1 migration, generated provenance and one-H1 checks: PASS');
+console.log('Build 230 visual manifest retained checks plus current Startup authority, generated provenance and one-H1 checks: PASS');

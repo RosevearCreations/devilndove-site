@@ -87,8 +87,7 @@ assert(!detailCalls.some((call)=>/PRAGMA\s+table_info|sqlite_master/i.test(call.
 assert(!detailCalls.some((call)=>/tc\.rate_percent/i.test(call.sql)),'Product detail must remain compatible with the older tax_classes shape that has tax_rate but no rate_percent.');
 
 const migration=read('database_build230_visual_image_manifest.sql');
-assert(read('database_upgrade_current_pass.sql')===migration,'Build 231 is code-only; current-pass SQL must remain the byte-identical Build 230 migration.');
-assert(!/^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b/im.test(migration),'Current D1 migration contains an unsupported explicit transaction statement.');
+assert(!/^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b/im.test(migration),'Build 230 D1 migration contains an unsupported explicit transaction statement.');
 
 for(const page of ['admin/catalog/index.html','admin/products/index.html']){
   const html=read(page);
