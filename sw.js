@@ -1,5 +1,5 @@
-// Build 230: refresh the shell after visual-manifest, editorial-image, responsive and SEO verification.
-const CACHE_NAME = 'devilndove-shell-v11';
+// Build 231: refresh cached browser helpers after product autosave/reload recovery hardening.
+const CACHE_NAME = 'devilndove-shell-v12';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

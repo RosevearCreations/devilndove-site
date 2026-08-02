@@ -1,3 +1,18 @@
+# Release Notes — Build 231
+
+## Product draft autosave and reload resource-limit recovery
+
+- Added one shared API response parser that accepts valid JSON and turns Cloudflare HTML/1102 pages into a short retryable message without exposing raw markup or a `JSON.parse` exception.
+- Changed Draft autosave to one request in flight with a queued-newer-edit pass, a 2.2-second debounce and a visible browser recovery copy that is cleared only after the matching server save.
+- Added explicit `save_intent=autosave`; create/update routes skip approval/content/social preparation and repetitive update/media audit work for that intent while deliberate saves keep their normal automation/audit path.
+- Moved unapproved products out of social automation before schema/settings inspection and stopped text-only autosaves from rewriting unchanged image rows.
+- Replaced request-time schema introspection in `/api/admin/product-detail` with five bounded database calls including authentication, independent optional reads and a seven-image compact JSON response.
+- Added a structured 96 KiB product payload guard, paused autosave while a stored product is programmatically loaded and refreshed narrow-screen error/recovery layout.
+- Expanded the Startup runtime gate and Cloudflare checklist with exact product load, queued autosave, reload, offline recovery, `exceededCpu` and `exceededMemory` tests.
+- Preserved Build 230 as the current D1 migration boundary; Build 231 adds no schema change.
+
+Deploy the complete package, hard refresh to service-worker shell v12, and follow `BUILD231_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 231.
+
 # Release Notes — Build 230
 
 ## Visual Image Manifest and honest editorial enrichment

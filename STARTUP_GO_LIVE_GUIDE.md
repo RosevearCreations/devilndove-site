@@ -1,4 +1,4 @@
-# Devil n Dove Startup and Go-Live Guide — Build 230
+# Devil n Dove Startup and Go-Live Guide — Build 231
 
 This is the human-readable operating copy of all 43 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
 
@@ -18,7 +18,7 @@ This is the human-readable operating copy of all 43 database-backed gates in `/a
 ### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
 
 **Inside the application:** `/admin/deployment-preflight/`  
-**External location:** Build 230 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**External location:** Build 231 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
 **Production test:** No live binding is required, but deployed verification may still be appropriate.
 
 #### Before you begin
@@ -28,11 +28,11 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 #### Test steps
 
 1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, aggregate-schema, repeated-current-migration, Startup 43-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, aggregate-schema, repeated-current-migration, Startup 43-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
 3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
-4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially the Visual Image Manifest and three changed public image bands.
-5. Confirm database_upgrade_current_pass.sql is identical to database_build230_visual_image_manifest.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
-6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 230 consistently.
+4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially the Product Editor, Visual Image Manifest and three public image bands.
+5. Confirm Build 231 adds no D1 migration: database_upgrade_current_pass.sql remains identical to database_build230_visual_image_manifest.sql and contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 231 consistently while naming Build 230 as the current D1 migration.
 7. Confirm the three adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
 8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
 9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
@@ -50,7 +50,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** The exact Build 230 archive passes every static, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
+**Pass condition:** The exact Build 231 archive passes every static, autosave/reload, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
 
 ### 10. Back up D1, apply the current migration, and deploy the complete build — **Critical**
 
@@ -246,14 +246,19 @@ Assign one owner and open /admin/runtime-incidents/. Record the starting IDs, co
 
 1. Use a safe test condition that causes a non-destructive optional API failure, such as an unavailable optional table in a preview environment.
 2. Confirm the API returns structured JSON with a useful status code and plain-language error.
-3. Confirm the browser shows a usable fallback or retry path without claiming a save, payment, export, or approval succeeded.
-4. Confirm the runtime incident includes scope, code, severity, user or request context, and a sanitized stack or detail.
-5. Restore the optional dependency and verify the normal path recovers.
-6. Review offline.html and low-bandwidth media fallbacks on a throttled connection.
+3. In /admin/catalog/, load an owner-controlled Draft product, change its short description, wait at least three seconds and confirm Draft autosave reports a saved product ID/time.
+4. Reload the same product and confirm it loads without a JSON.parse error and contains the saved value.
+5. Throttle the browser network, edit the draft during an in-flight autosave and confirm the newer edit is queued, saved next and remains after reload.
+6. Block the update request or go temporarily offline, edit again and confirm the browser offers Recover browser copy without showing raw Cloudflare HTML/CSS or claiming D1 saved it.
+7. Restore connectivity, recover the copy, select Autosave now, reload and confirm the recovered value is authoritative in D1.
+8. In Cloudflare Workers & Pages metrics/logs, check the matching product-detail/create/update invocations for exceededCpu, exceededMemory and cf-error-type 1102. Record only timestamp, route, outcome, CPU/wall time and non-secret IDs. A platform-terminated Worker may be unable to write its own runtime incident, so Cloudflare logs are required evidence.
+9. Confirm an ordinary application exception still records scope, code, severity, user/request context and sanitized detail in /admin/runtime-incidents/.
+10. Restore the optional dependency and verify the normal path recovers; also review offline.html and low-bandwidth media fallback.
+11. After any code, deployment, plan/limit or schema change, repeat steps 3–10 before marking this gate Complete.
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then return structured sanitized JSON, record the runtime incident, and make the UI label any local/fallback result as unsynced or incomplete. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then identify the exact Cloudflare invocation outcome and failing route, reduce CPU/memory and unnecessary D1/automation work, return structured sanitized JSON where the Worker can respond, suppress raw HTML in the browser, preserve a clearly labelled local recovery copy, redeploy, then repeat load/autosave/queued-edit/reload/recovery tests while checking exceededCpu and exceededMemory logs. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
@@ -263,7 +268,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** Expected failures are visible, sanitized, recoverable, and recorded; fallback states never present an uncompleted business action as successful.
+**Pass condition:** Expected failures are visible, sanitized and recoverable; product reload/autosave preserves the newest edit without raw HTML or JSON.parse text; the controlled run adds no exceeded-resource event; and fallback states never present a browser copy as an authoritative save.
 
 ## Catalog, product facts, and media
 
@@ -1524,5 +1529,5 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 ## Gate count and authority
 
-This guide contains 43 gates. If it differs from the D1 cockpit after deployment, use the Build 230 API seed, confirm all 43 items return, and keep the gate Failed until the status authority and guide agree.
+This guide contains 43 gates. If it differs from the D1 cockpit after deployment, use the Build 231 API seed, confirm all 43 items return, and keep the gate Failed until the status authority and guide agree.
 

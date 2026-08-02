@@ -1,4 +1,8 @@
-# Devil n Dove Database Schema Reference — Build 230
+# Devil n Dove Database Schema Reference — Build 231
+
+## Build 231 database boundary
+
+Build 231 is code-only. It adds no table, column, seed or migration-ledger row. The current production schema boundary remains Build 230, and `database_upgrade_current_pass.sql` remains byte-identical to `database_build230_visual_image_manifest.sql`. Do not reapply that migration merely because the application package is Build 231.
 
 ## Build 230 database boundary
 

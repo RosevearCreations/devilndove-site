@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 230
+# Devil n Dove Markdown Index — Build 231
 
 ## Two current authorities
 
@@ -26,8 +26,8 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 
 - `database_build230_visual_image_manifest.sql`
 - `database_upgrade_current_pass.sql` — identical; apply one, not both.
-- `BUILD230_VALIDATION.md`
-- `BUILD230_CHANGED_FILES.md`
+- `BUILD231_VALIDATION.md`
+- `BUILD231_CHANGED_FILES.md`
 - `RELEASE_NOTES.md`
 
 ## Retired pointers
