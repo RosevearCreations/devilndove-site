@@ -1,4 +1,8 @@
-# Devil n Dove Database Schema Reference — Build 232
+# Devil n Dove Database Schema Reference — Build 233
+
+## Build 233 database boundary
+
+Build 233 is code-only. It adds no table, column, index, seed or migration-ledger row. The bounded login uses the existing `idx_users_email`, `sessions` indexes and `users.last_login_at`; one D1 `batch()` creates the session and updates the login timestamp atomically. The 897-row Amazon reference remains a private compressed code payload and is demand-loaded only by authenticated inventory routes; moving its purchase identifiers to a public JSON file is prohibited. `scripts/build233_login_resource_test.mjs` proves exactly two executed D1 operations, the match round trip, no POST schema introspection and no current-migration change. Do not apply a migration merely because the application package is Build 233.
 
 ## Build 232 database boundary
 

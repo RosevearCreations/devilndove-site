@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 232
+# Devil n Dove Markdown Index — Build 233
 
 ## Two current authorities
 
@@ -26,8 +26,8 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 
 - `database_build230_visual_image_manifest.sql`
 - `database_upgrade_current_pass.sql` — identical; apply one, not both.
-- `BUILD232_VALIDATION.md`
-- `BUILD232_CHANGED_FILES.md`
+- `BUILD233_VALIDATION.md`
+- `BUILD233_CHANGED_FILES.md`
 - `RELEASE_NOTES.md`
 
 ## Retired pointers
@@ -36,4 +36,4 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 
 ## Historical evidence
 
-Earlier `BUILD*_VALIDATION.md`, `BUILD*_CHANGED_FILES.md`, numbered migrations, research notes and former roadmaps—including Build 231—remain immutable traceability evidence. They intentionally keep their original Build labels and must not be edited to appear current. This retirement policy is the Markdown sanity check: current direction lives in two files; specialist procedures stay scoped; historical evidence cannot compete with current instructions.
+Earlier `BUILD*_VALIDATION.md`, `BUILD*_CHANGED_FILES.md`, numbered migrations, research notes and former roadmaps—including Build 232—remain immutable traceability evidence. They intentionally keep their original Build labels and must not be edited to appear current. This retirement policy is the Markdown sanity check: current direction lives in two files; specialist procedures stay scoped; historical evidence cannot compete with current instructions.

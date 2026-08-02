@@ -1,4 +1,4 @@
-# Devil n Dove Prelaunch Process Playbooks — Build 232
+# Devil n Dove Prelaunch Process Playbooks — Build 233
 
 This document separates the release journey into distinct processes. A pass in one process never erases a blocker in another. `/admin/startup-readiness/` remains the 43-gate status authority; this playbook explains where to click, what to prove, what to save, and what to do when a stage fails.
 
@@ -37,16 +37,17 @@ This document separates the release journey into distinct processes. A pass in o
 3. Run `node scripts/build230_visual_manifest_test.mjs`; it must report 43 unique Startup gates, 20 unique manifest rows, a working read-only fallback and generated-asset checksum integrity.
 4. Run `node scripts/build231_product_autosave_test.mjs`; it must prove bounded Product Detail JSON, safe Cloudflare parsing, queued autosave and browser recovery.
 5. Run `node scripts/build232_product_removal_test.mjs`; it must prove bounded archived-product preflight, full product-reference registry coverage and one reviewed removal batch.
-6. Run syntax checks for all Functions, browser JavaScript, scripts and the service worker.
-7. Confirm every public HTML page has a viewport, distinctive title, useful description, exactly one H1, canonical where applicable and descriptive image alternatives.
-8. Confirm `css/styles.css` has balanced braces and inspect the changed pages at phone, tablet, laptop and wide-desktop widths.
-9. Compare `database_upgrade_current_pass.sql` with `database_build230_visual_image_manifest.sql`; they must be identical.
-10. Search the current migration for explicit SQL transaction statements. Any `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK` is a blocker for D1/Durable Objects execution.
-11. Apply aggregate schemas in disposable SQLite databases and apply the current migration twice to prove rerun safety.
-12. Compile Pages Functions with the Wrangler version used by Cloudflare.
-13. Compare the three adopted packaging source checksums with `PACKAGING_REFERENCE_BASELINE.md`; retain the 25/38.1/50 mm discrepancy until physical proof.
-14. Compare all six editorial WebP hashes with `GENERATED_VISUAL_ASSET_REGISTER.md`; verify intrinsic dimensions and confirm no generated path appears in Product/Offer data.
-15. Generate the release manifest and record the ZIP SHA-256. Deploy only that exact archive.
+6. Run `node scripts/build233_login_resource_test.mjs`; it must prove two executed D1 operations for successful login, no POST schema discovery/session reread, binding-only normal diagnostics, temporary-503 session retention, real-401 clearing and all 897 compressed Amazon matches available only through demand loading.
+7. Run syntax checks for all Functions, browser JavaScript, scripts and the service worker.
+8. Confirm every public HTML page has a viewport, distinctive title, useful description, exactly one H1, canonical where applicable and descriptive image alternatives.
+9. Confirm `css/styles.css` has balanced braces and inspect the changed pages at phone, tablet, laptop and wide-desktop widths.
+10. Compare `database_upgrade_current_pass.sql` with `database_build230_visual_image_manifest.sql`; they must be identical.
+11. Search the current migration for explicit SQL transaction statements. Any `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK` is a blocker for D1/Durable Objects execution.
+12. Apply aggregate schemas in disposable SQLite databases and apply the current migration twice to prove rerun safety.
+13. Compile Pages Functions with the Wrangler version used by Cloudflare.
+14. Compare the three adopted packaging source checksums with `PACKAGING_REFERENCE_BASELINE.md`; retain the 25/38.1/50 mm discrepancy until physical proof.
+15. Compare all six editorial WebP hashes with `GENERATED_VISUAL_ASSET_REGISTER.md`; verify intrinsic dimensions and confirm no generated path appears in Product/Offer data.
+16. Generate the release manifest and record the ZIP SHA-256. Deploy only that exact archive.
 
 **Failure:** correct the owning source file, regenerate derived files, rebuild the archive and restart the entire preflight.  
 **Pass:** all local/static/schema/syntax/bundle checks pass and the archive is identified by name and checksum.
@@ -74,7 +75,7 @@ This document separates the release journey into distinct processes. A pass in o
 1. Test the production domain, HTTPS and the canonical `www`/non-`www` redirect.
 2. In a private window, open Home, Shop, one local landing page, one product detail, Contact, policies, sitemap and robots.
 3. Confirm exactly one visible H1 and no CSS overlap or horizontal page overflow at phone and desktop widths.
-4. Test login, logout, protected route denial and password recovery with owner-controlled accounts.
+4. Test the complete fourteen-step Build 233 login gate: `auth_login_bounded_v1`, successful redirect and refresh, Cloudflare invocation result, wrong-password 401, blocked `/api/auth/me` session retention/recovery, deliberate logout, reset, logout-all and expiry using owner-controlled accounts.
 5. Open Startup Readiness with All statuses and confirm all 43 gates appear, including `missing_launch_images`. Force or simulate an API error and confirm the full built-in guide appears instead of an empty result.
 6. Open Visual Image Manifest and confirm 20 D1 rows. Save/reload one reversible review, confirm history, then test the API failure path: all 20 rows must remain visible as Unsynced and saving must be disabled.
 7. Open Home, Handmade Jewelry and Gift Cards on phone/desktop. Confirm responsive WebPs, editorial disclosure, one H1 and no Product/Offer use. Keep real-photo rows open.

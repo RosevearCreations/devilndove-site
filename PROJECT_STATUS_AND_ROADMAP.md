@@ -1,8 +1,8 @@
-# Devil n Dove Project Status and Roadmap — Build 232
+# Devil n Dove Project Status and Roadmap — Build 233
 
-This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 232 work, launch position, gaps and ordered next actions.
+This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 233 work, launch position, gaps and ordered next actions.
 
-## Current integrated baseline through Build 232
+## Current integrated baseline through Build 233
 
 1. Preserved every prior Startup gate and expanded the authority from 42 to 43 unique gates with a distinct Critical missing-image blocker.
 2. Added standalone gates and detailed operating pages for Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution and Live Ops Follow-through.
@@ -49,10 +49,16 @@ This is the second canonical current-status file. `AI_HANDOFF.md` owns architect
 43. Kept orders, customer/accounting, packaging, creative projects, recalls, trust/public-proof and other business history as permanent-removal blockers.
 44. Combined reviewed inventory actions, cleanup/detachment and final product deletion into one D1 batch and added full mocked removal proof plus aggregate-schema registry coverage.
 45. Extended shared safe JSON/Cloudflare parsing across all three product-removal browser paths and expanded Startup’s destructive-action test to twelve exact steps.
+46. Removed per-login schema/table/column discovery, session reread and nonessential executed calls from `/api/auth/login`; successful login now executes one user read and one D1 batch.
+47. Kept detailed auth schema inspection behind explicit `GET /api/auth/login?diagnostic=full`; the normal GET checks only that the Production `DB` binding is present and performs no query.
+48. Corrected unexpected logout behaviour: temporary 5xx, Worker 1102, network/offline and malformed verification responses retain the existing token and cached identity, while real 401/403 decisions still clear access.
+49. Added concise login resource-limit recovery copy, service-worker shell v14 and a regression proving two D1 operations, no hot-path introspection, invalid-input early exit, temporary-session retention and real-401 clearing.
+50. Expanded the Critical Startup login gate from eight broad prompts to fourteen exact deployment, browser, Network, response-profile, Cloudflare log, invalid-password, request-blocking, logout, reset, logout-all and expiry steps.
+51. Removed a cross-route Worker-startup hazard: the 897-row Amazon inventory reference no longer creates a 1.1 MB object array plus indexes when the Pages Worker starts. Its 211,860-byte compressed source expands by area only for authenticated catalog/inventory/resource work, preserving all matches while reducing unrelated route startup pressure.
 
 ## Current position
 
-The application has broad, integrated foundations for catalog/media, inventory lots/movements, orders/payments/refunds, accounting review, customer documents, whole-business packaging, creative/content governance, SEO operations and launch control. Build 232 repairs archived unused-product removal without weakening retained-history safeguards. Local checks cannot prove the production correction and autosave symptoms are resolved until their controlled log-backed production tests pass. Generated art and untested production/physical/provider work remain outside launch evidence.
+The application has broad, integrated foundations for catalog/media, inventory lots/movements, orders/payments/refunds, accounting review, customer documents, whole-business packaging, creative/content governance, SEO operations and launch control. Build 233 repairs the bounded login path, prevents temporary verification outages from impersonating logout and removes the largest known eager cross-route reference allocation while retaining explicit invalid-session security. Local checks cannot prove the live login, product correction or autosave symptoms are resolved until their controlled log-backed production tests pass. Generated art and untested production/physical/provider work remain outside launch evidence.
 
 Status remains **production-evidence and controlled-opening preparation**.
 
@@ -70,51 +76,54 @@ Status remains **production-evidence and controlled-opening preparation**.
 - Google local first-page placement cannot be guaranteed; relevance, distance and prominence must be improved and monitored over time.
 - Product autosave/reload needs a Build 231 production run correlated with Cloudflare invocation outcomes; any new `exceededCpu` or `exceededMemory` result keeps the runtime Startup gate open.
 - Archived-product correction/removal needs a Build 232 production run proving an unused archived record can be removed while a history-backed record remains blocked and inventory/audits change exactly once.
+- Login/session verification needs the Build 233 fourteen-step production run. Any `/api/auth/login` or `/api/auth/me` `exceededCpu`, `exceededMemory` or 1102 result keeps the Critical login gate open; a temporary verification error must retain credentials but is not proof the session was server-validated.
+- The demand-loaded Amazon registry still performs deliberate decompression on catalog/inventory/resource routes. Measure those routes separately; never move its private purchase/order reference payload into public static assets merely to reduce bundle work.
 
 ## Ordered next steps
 
 ### P0 — before production promotion
 
-1. Run Build 232 validation, resolve every blocker and generate/checksum the exact ZIP.
-2. Back up D1 and verify the Build 230 ledger/schema boundary. Apply the Build 230 migration only if absent; Build 232 adds no migration.
-3. Deploy, hard refresh to service-worker shell v13, run the full live smoke suite and confirm 43 Startup gates plus the D1-backed manifest with honest degraded-mode behaviour.
-4. Run the controlled Product Editor load/autosave/queued-edit/reload/browser-recovery test and correlate it with Cloudflare `exceededCpu`/`exceededMemory` metrics before closing the runtime gate.
-5. Complete the twelve-step Startup role/destructive-action test: remove one disposable archived product through `bounded_registry_v1`, verify one reviewed inventory/audit effect, and prove a separate order/packaging/project-history product remains Archive-only; then test reversal, refund/document void, packaging approval, publication and accounting export authorization.
-6. Prove Stripe signed webhook and duplicate delivery; reconcile payment/order/inventory exactly once.
-7. Prove final-unit and component-set concurrency with two simultaneous owner-controlled sessions.
-8. Complete separate failed/abandoned/cancelled and partial/full refund tests with stock, credit note, refund confirmation, tax and fee reconciliation.
-9. Save expected/actual Canadian tax and shipping/pickup fixtures for every launch scenario.
-10. Test transactional order/receipt/refund/fulfilment messages, provider IDs, retry and failure diagnostics.
-11. Complete D1, R2, deployment and required-configuration restore rehearsal.
-12. Complete physical counts, packaging BOM, approved label version and measured print/wrap proof for each launch product.
-13. Complete `missing_launch_images` in `/admin/image-manifest/`; use `IMAGES_REQUIRED.md` for capture standards, create item-specific Catalog Media rows, replace real-photo blockers, approve the three editorials deliberately, then validate Product/Offer, Open Graph, canonical, alt text, galleries and Search Console on phone and desktop.
-14. Complete Business Profile details/photos/hours/services and record a recurring local accuracy review.
-15. Complete one real paid fulfilment and a different refund recovery; retain all non-secret evidence.
-16. Assign launch owner, monitoring hours, support access, stop conditions and phone-ready rollback instructions.
+1. Run Build 233 validation, resolve every blocker and generate/checksum the exact ZIP.
+2. Back up D1 and verify the Build 230 ledger/schema boundary. Apply the Build 230 migration only if absent; Build 233 adds no migration.
+3. Deploy, hard refresh to service-worker shell v14, run the full live smoke suite and confirm 43 Startup gates plus the D1-backed manifest with honest degraded-mode behaviour.
+4. Complete the fourteen-step Startup login proof: bounded profile/header, successful redirect, Cloudflare outcome, valid refresh, invalid password, blocked `/api/auth/me` retention, recovery, logout, reset, logout-all and deliberate expiry.
+5. Run the controlled Product Editor load/autosave/queued-edit/reload/browser-recovery test and correlate it with Cloudflare `exceededCpu`/`exceededMemory` metrics before closing the runtime gate.
+6. Complete the twelve-step Startup role/destructive-action test: remove one disposable archived product through `bounded_registry_v1`, verify one reviewed inventory/audit effect, and prove a separate order/packaging/project-history product remains Archive-only; then test reversal, refund/document void, packaging approval, publication and accounting export authorization.
+7. Prove Stripe signed webhook and duplicate delivery; reconcile payment/order/inventory exactly once.
+8. Prove final-unit and component-set concurrency with two simultaneous owner-controlled sessions.
+9. Complete separate failed/abandoned/cancelled and partial/full refund tests with stock, credit note, refund confirmation, tax and fee reconciliation.
+10. Save expected/actual Canadian tax and shipping/pickup fixtures for every launch scenario.
+11. Test transactional order/receipt/refund/fulfilment messages, provider IDs, retry and failure diagnostics.
+12. Complete D1, R2, deployment and required-configuration restore rehearsal.
+13. Complete physical counts, packaging BOM, approved label version and measured print/wrap proof for each launch product.
+14. Complete `missing_launch_images` in `/admin/image-manifest/`; use `IMAGES_REQUIRED.md` for capture standards, create item-specific Catalog Media rows, replace real-photo blockers, approve the three editorials deliberately, then validate Product/Offer, Open Graph, canonical, alt text, galleries and Search Console on phone and desktop.
+15. Complete Business Profile details/photos/hours/services and record a recurring local accuracy review.
+16. Complete one real paid fulfilment and a different refund recovery; retain all non-secret evidence.
+17. Assign launch owner, monitoring hours, support access, stop conditions and phone-ready rollback instructions.
 
 ### P1 — controlled-opening stabilization
 
-17. Add transactional packaging-component reservation/consumption/reversal with idempotency keys and lot references.
-18. Link verified formula/source rows to packaging without duplicating ingredient facts.
-19. Add server-generated prepress PDF with exact media/bleed boxes and embedded/outlined fonts.
-20. Add deterministic text-fit, barcode/QR destination and region-overflow blockers.
-21. Add approved packaging lock/supersession/reprint workflow with checksum and physical-proof links.
-22. Run one deliberately reviewed Meta product-only publish test only after provider roles/scopes/app review pass.
-23. Reconcile provider post ID/URL and analytics without treating queue status as publication.
-24. Add server-computed Creative Automation stage rule registry and overdue/blocker assignments.
-25. Add camera-first mobile evidence upload with R2 rights/derivative checks and explicit unsynced recovery.
-26. Add accessible project evidence packet export and provider/result reconciliation.
-27. Add camera-first manifest upload from a phone with EXIF/privacy warning, R2 derivative creation and offline draft recovery.
-28. Add automated deployed-URL checks for manifest assets, intrinsic dimensions, duplicate hashes, structured-data leakage and slow-network budgets.
-29. Generate product-specific manifest rows from the frozen launch-product list so featured/detail/scale/packaging roles remain visible without copying product facts.
+18. Add transactional packaging-component reservation/consumption/reversal with idempotency keys and lot references.
+19. Link verified formula/source rows to packaging without duplicating ingredient facts.
+20. Add server-generated prepress PDF with exact media/bleed boxes and embedded/outlined fonts.
+21. Add deterministic text-fit, barcode/QR destination and region-overflow blockers.
+22. Add approved packaging lock/supersession/reprint workflow with checksum and physical-proof links.
+23. Run one deliberately reviewed Meta product-only publish test only after provider roles/scopes/app review pass.
+24. Reconcile provider post ID/URL and analytics without treating queue status as publication.
+25. Add server-computed Creative Automation stage rule registry and overdue/blocker assignments.
+26. Add camera-first mobile evidence upload with R2 rights/derivative checks and explicit unsynced recovery.
+27. Add accessible project evidence packet export and provider/result reconciliation.
+28. Add camera-first manifest upload from a phone with EXIF/privacy warning, R2 derivative creation and offline draft recovery.
+29. Add automated deployed-URL checks for manifest assets, intrinsic dimensions, duplicate hashes, structured-data leakage and slow-network budgets.
+30. Generate product-specific manifest rows from the frozen launch-product list so featured/detail/scale/packaging roles remain visible without copying product facts.
 
 ### P2 — after stable operations
 
-30. Add notification queues for customer service, inventory exceptions, failed email and creative/visual approvals.
-31. Add controlled batch approval only for low-risk items, retaining per-item evidence/rollback.
-32. Add accounting close/reconciliation checklist and accountant export validation fixtures.
-33. Add repeat-customer support history and consent-safe follow-up workflows.
-34. Expand launch products/channels only when order, stock, email, refunds, packaging, media and support remain reconciled and reversible.
+31. Add notification queues for customer service, inventory exceptions, failed email and creative/visual approvals.
+32. Add controlled batch approval only for low-risk items, retaining per-item evidence/rollback.
+33. Add accounting close/reconciliation checklist and accountant export validation fixtures.
+34. Add repeat-customer support history and consent-safe follow-up workflows.
+35. Expand launch products/channels only when order, stock, email, refunds, packaging, media and support remain reconciled and reversible.
 
 ## SEO/local-search direction each pass
 

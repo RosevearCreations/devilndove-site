@@ -1,3 +1,4 @@
+-- Build 233 sync: code-only bounded-login/session-retention repair; current D1 migration remains Build 230.
 -- Build 226 sync: code-only Startup Readiness loading repair; Build 225 tables and 37 seeded gates remain current.
 -- IMPORTANT BUILD 221: database_schema.sql is a legacy/core-plus-historical overlay and is not the supported fresh-install file. Use database_full_schema.sql for a new D1 database, or apply numbered migrations to an existing database.
 -- Build 221 schema note: Packaging Studio and lot-reconciliation tables are defined in database_build221_packaging_studio_cleanup_lot_controls.sql and the aggregate full/store/current-pass schemas. Apply that additive migration after the core and store schemas.
