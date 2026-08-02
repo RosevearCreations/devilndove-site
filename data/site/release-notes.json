@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 233",
+    "date": "2026-08-02",
+    "title": "Bounded login, lean Worker startup and temporary-session retention",
+    "summary": "Removed per-login D1 schema discovery and the new-session reread; reduced successful login to one indexed user read plus one atomic D1 batch; reduced session verification to one indexed query; added auth_login_bounded_v1 and auth_session_bounded_v1 proof profiles; preserved valid browser credentials on temporary 5xx, Cloudflare 1102, offline and malformed session checks while still clearing on explicit 401/403; replaced the eager 1.1 MB/897-row Amazon inventory registry with a 211,860-byte private demand-loaded payload; expanded the Critical Startup login procedure; and preserved Build 230 as the current schema boundary."
+  },
+  {
     "build": "Build 232",
     "date": "2026-08-02",
     "title": "Archived unused-product correction and removal recovery",

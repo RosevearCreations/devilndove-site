@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 232",
+  "build_label": "Build 233",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,7 +7,7 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "138 required files are present.",
+      "detail": "143 required files are present.",
       "missing": []
     },
     {
@@ -38,7 +38,7 @@
     {
       "code": "static_markdown_authority",
       "status": "pass",
-      "detail": "Two Build 232 canonical authorities, scoped specialist playbooks, code-only schema boundary, product-removal safety registry, visual provenance, historical retirement policy, and 43 generated Startup sections agree.",
+      "detail": "Two Build 233 canonical authorities, scoped specialist playbooks, code-only schema boundary, bounded login/session retention, demand-loaded private reference data, product-removal safety registry, visual provenance, historical retirement policy, and 43 generated Startup sections agree.",
       "missing": []
     },
     {
