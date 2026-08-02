@@ -1,6 +1,6 @@
 # Creative Asset Intelligence Platform (CAIP) — Authoritative Design Specification
 
-**Current implementation:** Build 228 specialist asset/rights/evidence stage within Creative Automation Studio; Build 208 CAIP controls retained  
+**Current implementation:** Build 229 specialist asset/rights/evidence stage within Creative Automation Studio; Build 208 CAIP controls retained  
 **Design status:** authoritative subsystem specification  
 **Primary business roadmap:** `../../PROJECT_STATUS_AND_ROADMAP.md`  
 **Technical deployment handoff:** `../../AI_HANDOFF.md`
