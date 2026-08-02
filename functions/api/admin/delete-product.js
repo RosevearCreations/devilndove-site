@@ -1,4 +1,5 @@
 // File: /functions/api/admin/delete-product.js
+// Build 232: resource-bounded correction preflight and atomic reviewed removal.
 // Permanent deletion is intentionally limited to unused products. Ordered or referenced
 // products stay in history and must be archived instead.
 
@@ -11,6 +12,7 @@ const PRODUCT_OWNED_CLEANUP_RELATIONS = new Set([
   'product_images.product_id',
   'product_image_annotations.product_id',
   'product_image_derivatives.product_id',
+  'product_review_actions.product_id',
   'product_tags.product_id',
   'product_seo.product_id',
   'product_resource_links.product_id',
@@ -31,7 +33,9 @@ const PRODUCT_OWNED_CLEANUP_RELATIONS = new Set([
   'product_story_notes.product_id',
   'custom_candle_soap_product_specs.product_id',
   'marketplace_export_image_selections.product_id',
-  'marketplace_export_row_validation_results.product_id'
+  'marketplace_export_row_validation_results.product_id',
+  'creative_project_product_links.product_id',
+  'product_media_change_audit.product_id'
 ]);
 
 // These records are useful independently of a disposable product row. Preserve them and
@@ -39,7 +43,8 @@ const PRODUCT_OWNED_CLEANUP_RELATIONS = new Set([
 const PRODUCT_DETACH_RELATIONS = new Set([
   'media_assets.product_id',
   'mobile_resumable_upload_runtime_rows.attached_product_id',
-  'mobile_resumable_upload_sessions.product_id'
+  'mobile_resumable_upload_sessions.product_id',
+  'soap_products.product_id'
 ]);
 
 // A permissive FK action such as SET NULL or CASCADE must not make customer, accounting,
@@ -53,7 +58,6 @@ const PROTECTED_PRODUCT_REFERENCES = new Set([
   'packaging_projects.product_id',
   'product_bundle_components.component_product_id',
   'marketplace_margin_override_history.product_id',
-  'product_media_change_audit.product_id',
   'approved_before_after_gallery_items.product_id',
   'customer_story_approval_batches.product_id',
   'customer_story_output_drafts.product_id',
@@ -61,24 +65,6 @@ const PROTECTED_PRODUCT_REFERENCES = new Set([
   'recall_customer_match_previews.product_id',
   'trust_block_items.related_product_id'
 ]);
-
-const EXPLICIT_PRODUCT_RELATIONS = new Set([
-  ...PRODUCT_OWNED_CLEANUP_RELATIONS,
-  ...PRODUCT_DETACH_RELATIONS,
-  ...PROTECTED_PRODUCT_REFERENCES
-]);
-
-function relationKey(row = {}) {
-  return `${String(row.table_name || '')}.${String(row.column_name || '')}`;
-}
-
-function isAutomaticallySafeReference(row = {}) {
-  const key = relationKey(row);
-  if (PROTECTED_PRODUCT_REFERENCES.has(key)) return false;
-  if (PRODUCT_OWNED_CLEANUP_RELATIONS.has(key) || PRODUCT_DETACH_RELATIONS.has(key)) return true;
-  const onDelete = String(row.on_delete || 'NO ACTION').toUpperCase();
-  return ['CASCADE', 'SET NULL', 'SET DEFAULT'].includes(onDelete);
-}
 
 async function requireAdmin(request, env) {
   const sessionUser = await getAdminUserFromRequest(request, env);
@@ -115,94 +101,48 @@ async function tableExists(db, tableName) {
 }
 
 async function discoverProductReferences(db, productId) {
-  const tablesResult = await db.prepare(`
-    SELECT name
-    FROM sqlite_master
-    WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
-  `).all().catch(() => ({ results: [] }));
-  const tables = Array.isArray(tablesResult?.results)
-    ? tablesResult.results.map((row) => String(row?.name || '')).filter(Boolean)
-    : [];
-  const tableSet = new Set(tables);
-  const references = [];
-  const seen = new Set();
-
-  async function addReference(tableName, columnName, onDelete = 'NO FOREIGN KEY') {
-    const key = `${tableName}.${columnName}`;
-    if (seen.has(key) || tableName === 'products' || tableName === 'product_deletion_audit') return;
-    if (!tableSet.has(tableName)) return;
-    const columns = await getTableColumnSet(db, tableName);
-    if (!columns.has(columnName)) return;
-    let count = 0;
+  // Only retained business/history relations can block deletion. Product-owned editor
+  // rows and detachable media are cleaned in the final atomic batch, so enumerating
+  // every D1 table and foreign key here added hundreds of calls without improving safety.
+  const references = await Promise.all([...PROTECTED_PRODUCT_REFERENCES].map(async (key) => {
+    const separator = key.lastIndexOf('.');
+    const tableName = key.slice(0, separator);
+    const columnName = key.slice(separator + 1);
     try {
       const row = await db.prepare(`
         SELECT COUNT(*) AS count
         FROM ${quoteIdentifier(tableName)}
         WHERE ${quoteIdentifier(columnName)} = ?
       `).bind(productId).first();
-      count = Number(row?.count || 0);
+      const count = Number(row?.count || 0);
+      if (count < 1) return null;
+      return {
+        table_name: tableName,
+        column_name: columnName,
+        count,
+        on_delete: 'PROTECTED',
+        cleanup_owned: 0,
+        detach_preserved: 0,
+        protected_history: 1,
+        automatically_safe: 0
+      };
     } catch {
-      count = 0;
+      // An older schema may not have this optional history table. The offline Build 232
+      // registry test ensures every product FK in current aggregate schemas is classified.
+      return null;
     }
-    seen.add(key);
-    if (count < 1) return;
-    const reference = {
-      table_name: tableName,
-      column_name: columnName,
-      count,
-      on_delete: String(onDelete || 'NO FOREIGN KEY').toUpperCase()
-    };
-    reference.cleanup_owned = PRODUCT_OWNED_CLEANUP_RELATIONS.has(key) ? 1 : 0;
-    reference.detach_preserved = PRODUCT_DETACH_RELATIONS.has(key) ? 1 : 0;
-    reference.protected_history = PROTECTED_PRODUCT_REFERENCES.has(key) ? 1 : 0;
-    reference.automatically_safe = isAutomaticallySafeReference(reference) ? 1 : 0;
-    references.push(reference);
-  }
-
-  for (const tableName of tables) {
-    if (tableName === 'products' || tableName === 'product_deletion_audit') continue;
-    let foreignKeys = [];
-    try {
-      const result = await db.prepare(`PRAGMA foreign_key_list(${quoteIdentifier(tableName)})`).all();
-      foreignKeys = Array.isArray(result?.results) ? result.results : [];
-    } catch {
-      foreignKeys = [];
-    }
-
-    for (const foreignKey of foreignKeys) {
-      if (String(foreignKey?.table || '').toLowerCase() !== 'products') continue;
-      const childColumn = String(foreignKey?.from || '').trim();
-      if (!childColumn) continue;
-      await addReference(tableName, childColumn, foreignKey?.on_delete || 'NO ACTION');
-    }
-  }
-
-  // Older migrations contain a few product references without declared foreign keys.
-  // Scan the explicit allow/block lists as well so they cannot become invisible or orphaned.
-  for (const key of EXPLICIT_PRODUCT_RELATIONS) {
-    const separator = key.lastIndexOf('.');
-    if (separator < 1) continue;
-    await addReference(key.slice(0, separator), key.slice(separator + 1), 'NO FOREIGN KEY');
-  }
-
-  return references.sort((a, b) => {
-    if (Number(b.protected_history || 0) !== Number(a.protected_history || 0)) {
-      return Number(b.protected_history || 0) - Number(a.protected_history || 0);
-    }
-    return `${a.table_name}.${a.column_name}`.localeCompare(`${b.table_name}.${b.column_name}`);
-  });
+  }));
+  return references.filter(Boolean).sort((a, b) => `${a.table_name}.${a.column_name}`.localeCompare(`${b.table_name}.${b.column_name}`));
 }
 
 async function safeProductImages(db, productId) {
-  if (!(await tableExists(db, 'product_images'))) return [];
   try {
-    const result = await db.prepare(`
-      SELECT product_image_id, image_url, alt_text, caption, display_order
-      FROM product_images
-      WHERE product_id = ?
-      ORDER BY display_order ASC, product_image_id ASC
-    `).bind(productId).all();
-    return Array.isArray(result?.results) ? result.results : [];
+    const result = await db.prepare(`SELECT * FROM product_images WHERE product_id = ? LIMIT 20`).bind(productId).all();
+    return (Array.isArray(result?.results) ? result.results : []).sort((a, b) => {
+      const orderA = Number(a?.display_order ?? a?.sort_order ?? a?.product_image_id ?? 0);
+      const orderB = Number(b?.display_order ?? b?.sort_order ?? b?.product_image_id ?? 0);
+      return orderA - orderB;
+    });
   } catch {
     return [];
   }
@@ -232,38 +172,44 @@ async function ensureMaterialReturnAuditTable(db) {
   `).run().catch(() => null);
 }
 
+async function loadTableSqlMap(db, tableNames = []) {
+  const names = [...new Set(tableNames.map((value) => String(value || '').trim()).filter(Boolean))];
+  if (!names.length) return new Map();
+  const placeholders = names.map(() => '?').join(',');
+  const result = await db.prepare(`
+    SELECT name, sql
+    FROM sqlite_master
+    WHERE type = 'table' AND name IN (${placeholders})
+  `).bind(...names).all().catch(() => ({ results: [] }));
+  return new Map((Array.isArray(result?.results) ? result.results : []).map((row) => [String(row?.name || ''), String(row?.sql || '')]));
+}
+
+function tableSqlHasColumn(createSql, columnName) {
+  const escaped = String(columnName || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?:^|[,\\(]\\s*)[\"\`\\[]?${escaped}[\"\`\\]]?(?:\\s|,|\\))`, 'im').test(String(createSql || ''));
+}
+
 async function loadProductMaterialPreview(db, productId) {
-  if (!(await tableExists(db, 'product_resource_links')) || !(await tableExists(db, 'site_item_inventory'))) return [];
-  const linkColumns = await getTableColumnSet(db, 'product_resource_links');
-  const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
-  const supportsConsumptionMode = linkColumns.has('consumption_mode');
-  const supportsLotSize = linkColumns.has('lot_size_units');
-  const supportsUsageUnits = inventoryColumns.has('usage_units_per_stock_unit');
-  const supportsStockLabel = inventoryColumns.has('stock_unit_label');
-  const supportsUsageLabel = inventoryColumns.has('usage_unit_label');
   const result = await db.prepare(`
     SELECT
+      prl.*,
+      sii.*,
       prl.product_resource_link_id,
       prl.resource_kind,
       prl.source_key,
       COALESCE(prl.quantity_used, 0) AS quantity_used,
-      ${supportsConsumptionMode ? `COALESCE(prl.consumption_mode, 'per_unit')` : `'per_unit'`} AS consumption_mode,
-      ${supportsLotSize ? `COALESCE(prl.lot_size_units, 1)` : `1`} AS lot_size_units,
       sii.site_item_inventory_id,
       sii.item_name,
       COALESCE(sii.on_hand_quantity, 0) AS on_hand_quantity,
       COALESCE(sii.reserved_quantity, 0) AS reserved_quantity,
       COALESCE(sii.incoming_quantity, 0) AS incoming_quantity,
-      COALESCE(sii.unit_cost_cents, 0) AS unit_cost_cents,
-      ${supportsUsageUnits ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit, 0), 1)` : `1`} AS usage_units_per_stock_unit,
-      ${supportsStockLabel ? `COALESCE(NULLIF(sii.stock_unit_label, ''), 'unit')` : `'unit'`} AS stock_unit_label,
-      ${supportsUsageLabel ? `COALESCE(NULLIF(sii.usage_unit_label, ''), 'unit')` : `'unit'`} AS usage_unit_label
+      COALESCE(sii.unit_cost_cents, 0) AS unit_cost_cents
     FROM product_resource_links prl
     LEFT JOIN site_item_inventory sii
       ON sii.source_type = prl.resource_kind
      AND sii.external_key = prl.source_key
     WHERE prl.product_id = ?
-    ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
+    ORDER BY prl.product_resource_link_id ASC
   `).bind(productId).all().catch(() => ({ results: [] }));
   const rows = Array.isArray(result?.results) ? result.results : [];
   return rows.map((row) => {
@@ -299,13 +245,16 @@ function wholeNonNegative(value) {
   return Number.isInteger(number) && number >= 0 ? number : null;
 }
 
-async function applyReviewedMaterialActions(db, { productId, actions = [], deletionReason = '', actorUserId = null }) {
-  if (!Array.isArray(actions) || !actions.length) return { affected_items: 0, release_quantity: 0, returned_on_hand_quantity: 0, rows: [] };
+async function prepareReviewedMaterialActions(db, { productId, actions = [], deletionReason = '', actorUserId = null }) {
+  if (!Array.isArray(actions) || !actions.length) {
+    return { summary: { affected_items: 0, release_quantity: 0, returned_on_hand_quantity: 0, rows: [] }, statements: [] };
+  }
   const previewRows = await loadProductMaterialPreview(db, productId);
   const rowByLink = new Map(previewRows.map((row) => [Number(row.product_resource_link_id || 0), row]));
-  const inventoryMovementExists = await tableExists(db, 'site_inventory_movements');
   await ensureMaterialReturnAuditTable(db);
-  const auditExists = await tableExists(db, 'product_material_return_audit');
+  const actionTables = await loadTableSqlMap(db, ['site_inventory_movements', 'product_material_return_audit']);
+  const inventoryMovementExists = actionTables.has('site_inventory_movements');
+  const auditExists = actionTables.has('product_material_return_audit');
   const statements = [];
   const outputRows = [];
   let totalRelease = 0;
@@ -402,26 +351,25 @@ async function applyReviewedMaterialActions(db, { productId, actions = [], delet
     });
   }
 
-  if (statements.length) {
-    if (typeof db.batch === 'function') await db.batch(statements);
-    else for (const statement of statements) await statement.run();
-  }
-
-  return { affected_items: outputRows.length, release_quantity: totalRelease, returned_on_hand_quantity: totalReturn, rows: outputRows };
+  return {
+    summary: { affected_items: outputRows.length, release_quantity: totalRelease, returned_on_hand_quantity: totalReturn, rows: outputRows },
+    statements
+  };
 }
 
-async function runCleanup(db, productId) {
+async function runCleanup(db, productId, prefixStatements = []) {
   // Delete only product-owned working rows. Preserve independent uploads/media by
   // detaching them, and never reach this function while protected history exists.
-  const statements = [];
+  const statements = [...prefixStatements];
+  const relationKeys = [...PRODUCT_OWNED_CLEANUP_RELATIONS, ...PRODUCT_DETACH_RELATIONS];
+  const relationTables = relationKeys.map((key) => key.slice(0, key.lastIndexOf('.')));
+  const tableSql = await loadTableSqlMap(db, relationTables);
 
   for (const key of PRODUCT_OWNED_CLEANUP_RELATIONS) {
     const separator = key.lastIndexOf('.');
     const tableName = key.slice(0, separator);
     const columnName = key.slice(separator + 1);
-    if (!(await tableExists(db, tableName))) continue;
-    const columns = await getTableColumnSet(db, tableName);
-    if (!columns.has(columnName)) continue;
+    if (!tableSqlHasColumn(tableSql.get(tableName), columnName)) continue;
     statements.push(db.prepare(
       `DELETE FROM ${quoteIdentifier(tableName)} WHERE ${quoteIdentifier(columnName)} = ?`
     ).bind(productId));
@@ -431,9 +379,7 @@ async function runCleanup(db, productId) {
     const separator = key.lastIndexOf('.');
     const tableName = key.slice(0, separator);
     const columnName = key.slice(separator + 1);
-    if (!(await tableExists(db, tableName))) continue;
-    const columns = await getTableColumnSet(db, tableName);
-    if (!columns.has(columnName)) continue;
+    if (!tableSqlHasColumn(tableSql.get(tableName), columnName)) continue;
     statements.push(db.prepare(
       `UPDATE ${quoteIdentifier(tableName)} SET ${quoteIdentifier(columnName)} = NULL WHERE ${quoteIdentifier(columnName)} = ?`
     ).bind(productId));
@@ -468,9 +414,11 @@ async function handleGet(context) {
   if (!Number.isInteger(productId) || productId <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
   const product = await db.prepare(`SELECT product_id, product_number, sku, name, slug, status FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
-  const references = await discoverProductReferences(db, productId);
-  const blockingReferences = references.filter((row) => !isAutomaticallySafeReference(row));
-  const materials = await loadProductMaterialPreview(db, productId);
+  const [references, materials] = await Promise.all([
+    discoverProductReferences(db, productId),
+    loadProductMaterialPreview(db, productId)
+  ]);
+  const blockingReferences = references;
   const materialsRequiringReview = materialRowsRequiringReview(materials);
   return json({
     ok: true,
@@ -481,7 +429,8 @@ async function handleGet(context) {
     deletion_allowed: blockingReferences.length ? 0 : 1,
     references,
     blocking_references: blockingReferences,
-    automatically_safe_references: references.filter((row) => isAutomaticallySafeReference(row)),
+    automatically_safe_references: [],
+    cleanup_profile: 'bounded_registry_v1',
     instructions: {
       release_reservation: 'Use only for raw stock already reserved for this unfinished product. It makes stock available again without changing on-hand quantity.',
       return_on_hand: 'Use only for unused physical raw supplies that had been removed from on-hand stock and are truly available again. Enter whole stock units.'
@@ -532,7 +481,7 @@ async function handlePost(context) {
   }
 
   const references = await discoverProductReferences(db, productId);
-  const blockingReferences = references.filter((row) => !isAutomaticallySafeReference(row));
+  const blockingReferences = references;
   if (blockingReferences.length) {
     const summary = blockingReferences.map((row) => `${row.count} ${row.table_name}`).join(', ');
     return json({
@@ -556,12 +505,13 @@ async function handlePost(context) {
 
   const images = await safeProductImages(db, productId);
   const deletionReason = String(body.deletion_reason || '').trim().slice(0, 500) || 'Incorrect or unused product entry.';
-  const materialSummary = await applyReviewedMaterialActions(db, {
+  const materialPlan = await prepareReviewedMaterialActions(db, {
     productId,
     actions: Array.isArray(body.material_actions) ? body.material_actions : [],
     deletionReason,
     actorUserId: Number(authCheck.sessionUser?.user_id || 0) || null
   });
+  const materialSummary = materialPlan.summary;
   const snapshot = {
     product: existingProduct,
     images,
@@ -572,7 +522,7 @@ async function handlePost(context) {
       : 'No product image rows were attached.'
   };
 
-  await runCleanup(db, productId);
+  await runCleanup(db, productId, materialPlan.statements);
 
   if (await tableExists(db, 'product_deletion_audit')) {
     await db.prepare(`
