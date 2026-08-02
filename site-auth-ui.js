@@ -1,6 +1,6 @@
 // File: /public/js/site-auth-ui.js
-// Brief description: Shared site-wide auth UI helper. It updates nav visibility,
-// renders a floating account widget on every page, and emits page-level auth events.
+// Build 233: temporary Worker/network failures no longer erase a valid browser session.
+// Only an explicit 401/403 authentication response clears credentials.
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!window.DDAuth) return;
@@ -128,10 +128,32 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await window.DDAuth.me();
       applyUi(data?.user || null);
       emitAuthEvents(data?.user || null, data?.session || null);
-    } catch {
-      window.DDAuth.clearAuth();
-      applyUi(null);
-      emitAuthEvents(null, null);
+    } catch (error) {
+      const status = Number(error?.httpStatus || 0);
+      const authenticationRejected = status === 401 || status === 403;
+      if (authenticationRejected || !window.DDAuth.isLoggedIn()) {
+        window.DDAuth.clearAuth();
+        applyUi(null);
+        emitAuthEvents(null, null);
+        return;
+      }
+
+      // A 5xx, Cloudflare 1102, timeout, offline response, or malformed upstream
+      // response is not proof that the session is invalid. Preserve the token and
+      // cached identity so the owner can retry after the service recovers.
+      const retainedUser = window.DDAuth.getStoredUser();
+      applyUi(retainedUser);
+      emitAuthEvents(retainedUser, null);
+      document.dispatchEvent(new CustomEvent('dd:auth-degraded', {
+        detail: {
+          ok: false,
+          session_retained: true,
+          http_status: status,
+          code: String(error?.code || 'session_verification_unavailable')
+        }
+      }));
+      const widgetState = document.getElementById('ddAuthWidgetState');
+      if (widgetState) widgetState.textContent = 'Session retained • verification temporarily unavailable';
     }
   }
 

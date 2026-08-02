@@ -116,24 +116,43 @@
     return response;
   }
 
-  async function parseJson(response) {
-    const raw = await response.text().catch(() => '');
+  async function readApiJson(response, options = {}) {
+    const fallbackMessage = normalizeText(options.fallbackMessage) || 'Request failed.';
+    const status = Number(response?.status || 0);
+    const contentType = normalizeText(response?.headers?.get('Content-Type')).toLowerCase();
+    const cloudflareErrorType = normalizeText(response?.headers?.get('cf-error-type'));
+    const raw = await response?.text().catch(() => '') || '';
     let data = null;
-    try { data = raw ? JSON.parse(raw) : null; } catch {}
-    if (!response.ok || !data?.ok) {
-      const parts = [
-        data?.error || `Request failed (${response.status}).`,
-        data?.code ? `[${data.code}]` : '',
-        data?.hint || '',
-        data?.detail ? `Detail: ${data.detail}` : ''
-      ].filter(Boolean);
-      const error = new Error(parts.join(' '));
-      error.code = data?.code || '';
-      error.hint = data?.hint || '';
-      error.detail = data?.detail || '';
-      throw error;
+
+    if (raw && (contentType.includes('json') || /^[\s\r\n]*[\[{]/.test(raw))) {
+      try { data = JSON.parse(raw); } catch {}
     }
-    return data;
+
+    if (response?.ok && data?.ok) return data;
+
+    const resourceLimit = cloudflareErrorType === '1102' || /worker exceeded resource limits/i.test(raw);
+    const malformedSuccess = Boolean(response?.ok && !data);
+    const message = resourceLimit
+      ? 'Cloudflare stopped this request because the Worker reached a CPU or memory limit. Wait a moment and retry; the page will keep any browser recovery copy.'
+      : data
+        ? (data.error_detail || data.error || fallbackMessage)
+        : malformedSuccess
+          ? `${fallbackMessage} The server returned an invalid response instead of application data.`
+          : `${fallbackMessage} The server returned ${status || 'an error'} without valid application data.`;
+    const error = new Error(message);
+    error.httpStatus = status;
+    error.code = normalizeText(data?.code || (resourceLimit ? 'cloudflare_worker_resource_limit' : 'invalid_api_response'));
+    error.hint = normalizeText(data?.hint);
+    error.detail = normalizeText(data?.detail);
+    error.payload = data;
+    error.cloudflareErrorType = cloudflareErrorType;
+    error.isCloudflareResourceLimit = resourceLimit;
+    error.isRetryable = status === 0 || status === 408 || status === 429 || status >= 500;
+    throw error;
+  }
+
+  async function parseJson(response) {
+    return readApiJson(response, { fallbackMessage: `Request failed (${response?.status || 'unknown status'}).` });
   }
 
   async function handleAuthResponse(response, successFallback) {
@@ -250,6 +269,7 @@
     clearAuth,
     isLoggedIn,
     apiFetch,
+    readApiJson,
     login,
     register,
     logout,
