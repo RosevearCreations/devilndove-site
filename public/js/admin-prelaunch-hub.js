@@ -1,4 +1,4 @@
-// Build 228 — read-only Startup blocker summary for the standalone process map.
+// Build 229 — read-only 43-gate Startup blocker summary for the standalone process map.
 (() => {
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   async function load(){

@@ -1,7 +1,7 @@
-// Build 227 — unified Labeling & Packaging System with exact SVG, BOM costing and print proof.
+// Build 229 - unified Labeling & Packaging System with three adopted source references.
 (() => {
   const STORAGE_KEY = 'dd_packaging_studio_local_draft_v3';
-  const state = { projects: [], templates: [], products: [], inventory: [], detail: null, loading: false, activeTab: 'product' };
+  const state = { projects: [], templates: [], products: [], inventory: [], referenceSources: [], detail: null, loading: false, activeTab: 'product' };
   const id = (name) => document.getElementById(name);
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const xml = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[char]));
@@ -388,7 +388,7 @@
   }
 
   async function load(projectId = 0) {
-    try { state.loading = true; message('Loading Labeling & Packaging System…'); const data = await api(null, projectId); state.projects = data.projects || []; state.templates = data.templates || []; state.products = data.products || []; state.inventory = data.inventory || []; state.detail = data.detail || null; renderProjects(); renderMain(); message('Labeling & Packaging System loaded.', 'success'); }
+    try { state.loading = true; message('Loading Labeling & Packaging System…'); const data = await api(null, projectId); state.projects = data.projects || []; state.templates = data.templates || []; state.products = data.products || []; state.inventory = data.inventory || []; state.referenceSources = data.reference_sources || []; state.detail = data.detail || null; renderProjects(); renderMain(); message(`Labeling & Packaging System loaded with ${state.referenceSources.length} adopted source reference${state.referenceSources.length===1?'':'s'}.`, 'success'); }
     catch (error) { message(error.message, 'error'); restoreLocal(false); }
     finally { state.loading = false; }
   }
