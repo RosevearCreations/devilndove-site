@@ -1,7 +1,6 @@
 // File: /public/js/login.js
-// Brief description: Handles the login page flow. It validates the login form,
-// submits credentials through the shared auth helper, stores the returned session,
-// and redirects the user into the correct protected area after sign-in.
+// Build 233: resource-limit failures remain concise and retryable; the password
+// stays in the form and the submit control is safely restored for a later retry.
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
@@ -86,7 +85,10 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage("Login successful.");
       window.location.href = getRedirectTarget(user);
     } catch (error) {
-      setMessage(error.message || "Login failed.", true);
+      const retryHint = error?.isCloudflareResourceLimit
+        ? " No login or password change was completed. Wait a moment, then try again after the new deployment is active."
+        : "";
+      setMessage(`${error.message || "Login failed."}${retryHint}`, true);
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
