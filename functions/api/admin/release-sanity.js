@@ -580,6 +580,31 @@ export async function onRequestGet(context) {
     'warning'
   );
 
+  const imageManifestInstalled = await tableExists(db, 'image_manifest_items') && await tableExists(db, 'image_manifest_history');
+  const imageManifestRows = imageManifestInstalled ? await safeFirst(db, `
+    SELECT COUNT(*) AS total,
+      SUM(CASE WHEN generated_asset=1 THEN 1 ELSE 0 END) AS generated_count,
+      SUM(CASE WHEN generated_asset=1 AND required_asset_kind='real_photo_required' THEN 1 ELSE 0 END) AS generated_real_photo_conflicts,
+      SUM(CASE WHEN is_launch_blocker=1 AND replacement_status<>'approved' THEN 1 ELSE 0 END) AS open_launch_blockers,
+      SUM(CASE WHEN replacement_status='approved' AND (COALESCE(final_asset_url,'')='' OR COALESCE(alt_text,'')='' OR rights_status<>'approved' OR public_use_status<>'approved' OR phone_review_status<>'passed' OR desktop_review_status<>'passed') THEN 1 ELSE 0 END) AS invalid_approvals
+    FROM image_manifest_items WHERE is_active=1
+  `, [], { total:0, generated_count:0, generated_real_photo_conflicts:0, open_launch_blockers:0, invalid_approvals:0 }) : { total:0, generated_count:0, generated_real_photo_conflicts:0, open_launch_blockers:0, invalid_approvals:0 };
+  const imageManifestValid = imageManifestInstalled
+    && Number(imageManifestRows.total || 0) === 20
+    && Number(imageManifestRows.generated_count || 0) === 3
+    && Number(imageManifestRows.generated_real_photo_conflicts || 0) === 0
+    && Number(imageManifestRows.invalid_approvals || 0) === 0;
+  addCheck(
+    checks,
+    imageManifestValid ? (Number(imageManifestRows.open_launch_blockers || 0) ? 'warn' : 'pass') : 'fail',
+    'Build 230 Visual Image Manifest authority',
+    imageManifestInstalled
+      ? `${Number(imageManifestRows.total || 0)} active requirement(s), ${Number(imageManifestRows.generated_count || 0)} generated editorial row(s), ${Number(imageManifestRows.open_launch_blockers || 0)} open launch blocker(s), ${Number(imageManifestRows.invalid_approvals || 0)} invalid approval(s).`
+      : 'Build 230 image manifest tables are not installed.',
+    'Apply Build 230 once, open Visual Image Manifest, confirm all 20 rows and three provenance records, then resolve real-photo blockers with rights-cleared media and separate phone/desktop evidence. Generated art cannot pass a real-photo requirement.',
+    'error'
+  );
+
   const readinessInstalled = await tableExists(db, 'startup_readiness_items');
   const readinessRows = readinessInstalled ? await safeFirst(db, `
     SELECT COUNT(*) AS total,
@@ -589,7 +614,7 @@ export async function onRequestGet(context) {
   addCheck(
     checks,
     readinessInstalled && Number(readinessRows.total || 0) === 43 ? 'pass' : 'fail',
-    'Build 229 Startup Readiness authority',
+    'Build 230 Startup Readiness authority',
     readinessInstalled ? `${Number(readinessRows.total || 0)} readiness gate(s) found; ${Number(readinessRows.open_count || 0)} open.` : 'startup_readiness_items is not installed.',
     'Open Startup Readiness with All statuses. Confirm all 43 gates load, including the five standalone prelaunch stages and the distinct missing_launch_images Critical gate, without deleting or replacing prior evidence.',
     'error'
