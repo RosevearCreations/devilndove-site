@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 232",
+    "date": "2026-08-02",
+    "title": "Archived unused-product correction and removal recovery",
+    "summary": "Replaced all-table/all-foreign-key removal preflight with a bounded protected-history registry; stopped ordinary archive/media audit rows from making an unused product undeletable; kept genuine order, customer, accounting, packaging, project and recall history blocking; made reviewed inventory actions and product deletion one D1 batch; extended safe response parsing across all removal interfaces; and preserved Build 230 as the current D1 migration boundary."
+  },
+  {
     "build": "Build 231",
     "date": "2026-08-02",
     "title": "Product draft autosave and reload resource-limit recovery",
