@@ -1,8 +1,8 @@
-# Devil n Dove AI Handoff — Build 231
+# Devil n Dove AI Handoff — Build 232
 
 This is the first of two canonical current-status files. Read it first for architecture, authority, safety and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for completed work, risks and ordered next steps. Historical Build Markdown remains evidence only.
 
-## Build 231 outcome
+## Build 232 outcome
 
 1. Startup Readiness preserves all 42 Build 228 gates and adds `missing_launch_images` as a distinct Critical blocker. Exactly 43 gates are expected.
 2. The Startup browser rejects HTML, empty, malformed or incomplete API success responses and renders the full built-in 43-gate guide. It never turns a service failure into “No readiness items match these filters.” Browser-only changes are visibly Unsynced.
@@ -23,7 +23,12 @@ This is the first of two canonical current-status files. Read it first for archi
 17. Autosave allows one request in flight, queues the newest edit, stores a browser recovery copy before the request and clears it only after the matching server save succeeds.
 18. Product reload, autosave and update use one safe response parser. A Cloudflare HTML/1102 page becomes a short retryable message; raw HTML/CSS and `JSON.parse` exceptions are never shown to the operator.
 19. `/api/admin/product-detail` now uses one core product read plus three bounded optional editor reads, performs no request-time schema introspection, returns at most seven images and identifies its JSON as `editor_compact_v1`.
-20. Build 231 is code-only. The current D1 migration remains Build 230 and must not be reapplied merely because the application build number changed.
+20. Build 231 remained code-only and established the current product load/autosave recovery baseline.
+21. `/api/admin/delete-product` no longer enumerates every D1 table and foreign key during each correction preflight; it checks a bounded registry of protected business/history relationships and returns `bounded_registry_v1`.
+22. Archive status alone does not block an unused product from permanent removal. Ordinary `product_media_change_audit` and product review rows are product-owned cleanup data; orders, customer, accounting, packaging, creative-project, recall and other retained history still block deletion.
+23. Reviewed inventory releases/physical returns, product-owned cleanup, preserved-media/soap-record detachment and final product deletion run in one D1 batch so a failure rolls the operation back together.
+24. Correction, table-row deletion and the Draft & Archive Cleanup centre all use the shared safe API parser; Cloudflare HTML and malformed responses cannot collapse into the unhelpful “Could not load product correction details” message.
+25. Build 232 is code-only. The current D1 migration remains Build 230 and must not be reapplied merely because the application build number changed.
 
 ## Data authority
 
@@ -53,9 +58,9 @@ This is the first of two canonical current-status files. Read it first for archi
 - `/admin/customer-documents/` — invoices, receipts, packing slips, credit notes and refund confirmations.
 - `/admin/orders/`, `/admin/accounting/`, `/admin/inventory-operations/` — operational transaction authorities.
 
-## Build 231 database boundary
+## Build 232 database boundary
 
-Build 231 adds no D1 table, column, seed or ledger row. `database_upgrade_current_pass.sql` remains byte-identical to the Build 230 migration. Back up D1, confirm Build 229, and apply exactly one of these only when `build230_visual_image_manifest` is not already recorded:
+Build 232 adds no D1 table, column, seed or ledger row. `database_upgrade_current_pass.sql` remains byte-identical to the Build 230 migration. Back up D1, confirm Build 229, and apply exactly one of these only when `build230_visual_image_manifest` is not already recorded:
 
 - `database_build230_visual_image_manifest.sql`
 - `database_upgrade_current_pass.sql` (byte-identical copy)
@@ -87,11 +92,11 @@ Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `da
 
 1. Run the complete Deployment Preflight against the exact folder/archive.
 2. Record D1 recovery point; apply one Build 230 migration; verify ledger, both manifest tables, 20 active rows and three generated provenance rows.
-3. Deploy the complete Build 231 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v12 is active.
+3. Deploy the complete Build 232 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v13 is active.
 4. Run Post-Deploy Smoke Tests on production.
 5. Confirm all 43 Startup gates load with All statuses, locate `missing_launch_images`, open the D1 manifest and confirm 20 rows rather than Unsynced fallback.
 6. Link one owner-controlled Creative Project in the master studio; save one stage review with evidence and reload.
-7. Run Release Sanity, Product Release Preflight, Build 231 product load/autosave/browser-recovery proof, visual-manifest phone/desktop review and read-only Meta identity/token checks.
+7. Run Release Sanity, Product Release Preflight, the retained Build 231 product load/autosave/browser-recovery proof, the Build 232 unused-archived-product/protected-history removal proof, visual-manifest phone/desktop review and read-only Meta identity/token checks.
 8. Make a separate Deploy Readiness decision; execute Go-Live only after Ready; continue Live Ops reconciliation.
 
 ## Not claimed complete
