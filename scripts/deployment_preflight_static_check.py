@@ -124,7 +124,7 @@ REQUIRED_FILES = [
     'functions/api/admin/mobile-resumable-upload.js',
     'public/js/admin-mobile-resumable-upload.js',
     'LIVE_TESTING_GUIDE.md',
-    'BUILD194_TESTING_GUIDE.md',
+    'docs/archive/build-history/BUILD194_TESTING_GUIDE.md',
     'database_build194_storefront_discovery_product_facts_media_roles.sql',
     'functions/api/featured-products.js',
     'functions/api/admin/product-listing-profiles.js',
@@ -140,7 +140,7 @@ REQUIRED_FILES = [
     'functions/api/admin/site-item-inventory.js',
     'public/js/admin-delete-product.js',
     'public/js/admin-site-item-inventory.js',
-    'BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md',
+    'docs/archive/build-history/BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md',
     'database_build221_packaging_studio_cleanup_lot_controls.sql',
     'database_build222_soap_label_startup_readiness.sql',
     'database_build225_startup_readiness_packaging_authority.sql',
@@ -195,14 +195,14 @@ REQUIRED_FILES = [
     'functions/api/admin/_amazonInventoryMatches.js',
     'scripts/sync-build230-aggregate-schema.mjs',
     'GENERATED_VISUAL_ASSET_REGISTER.md',
-    'BUILD230_VALIDATION.md',
-    'BUILD230_CHANGED_FILES.md',
-    'BUILD231_VALIDATION.md',
-    'BUILD231_CHANGED_FILES.md',
-    'BUILD232_VALIDATION.md',
-    'BUILD232_CHANGED_FILES.md',
-    'BUILD233_VALIDATION.md',
-    'BUILD233_CHANGED_FILES.md',
+    'docs/archive/build-history/BUILD230_VALIDATION.md',
+    'docs/archive/build-history/BUILD230_CHANGED_FILES.md',
+    'docs/archive/build-history/BUILD231_VALIDATION.md',
+    'docs/archive/build-history/BUILD231_CHANGED_FILES.md',
+    'docs/archive/build-history/BUILD232_VALIDATION.md',
+    'docs/archive/build-history/BUILD232_CHANGED_FILES.md',
+    'docs/archive/build-history/BUILD233_VALIDATION.md',
+    'docs/archive/build-history/BUILD233_CHANGED_FILES.md',
     'database_build234_packaging_templates_creative_cleanup.sql',
     'scripts/build234_packaging_creative_test.mjs',
     'scripts/sync-build234-startup-seed.mjs',
@@ -215,6 +215,9 @@ REQUIRED_FILES = [
     'assets/packaging/artwork/candle-top-wedding-line-art-v1.webp',
     'BUILD234_VALIDATION.md',
     'BUILD234_CHANGED_FILES.md',
+    'BUILD235_VALIDATION.md',
+    'BUILD235_CHANGED_FILES.md',
+    'scripts/build235_creative_readiness_test.mjs',
 ]
 
 def read(path: Path) -> str:
@@ -334,14 +337,14 @@ def check_packaging_references(checks: list[dict]) -> None:
 
 def check_markdown_authority(checks: list[dict]) -> None:
     required_markers = {
-        'AI_HANDOFF.md': ['Build 234', 'PROJECT_STATUS_AND_ROADMAP.md', '44 gates', 'auth_login_bounded_v1', 'bounded_registry_v1', 'browser recovery', 'compressed by area'],
-        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 234', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/', 'temporary 5xx', '211,860-byte'],
-        'MARKDOWN_INDEX.md': ['Build 234', 'Two current authorities', 'Historical evidence'],
-        'README.md': ['Build 234', 'database_build234_packaging_templates_creative_cleanup.sql'],
+        'AI_HANDOFF.md': ['Build 235', 'PROJECT_STATUS_AND_ROADMAP.md', '44 gates', 'auth_login_bounded_v1', 'bounded_registry_v1', 'browser recovery', 'compressed by area'],
+        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 235', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/', 'temporary 5xx', '211,860-byte'],
+        'MARKDOWN_INDEX.md': ['Build 235', 'Two current authorities', 'Historical evidence'],
+        'README.md': ['Build 235', 'database_build234_packaging_templates_creative_cleanup.sql'],
         'STARTUP_GO_LIVE_GUIDE.md': ['Build 234', 'This guide contains 44 gates', 'missing_launch_images', 'Measure, save, laser-test, approve, and archive each candle-top template', '/admin/image-manifest/', 'auth_login_bounded_v1'],
         'PACKAGING_REFERENCE_BASELINE.md': ['Build 234', 'Five owner-supplied files', 'Dimensional discrepancy', 'Candle-top direction'],
         'PRELAUNCH_PROCESS_PLAYBOOKS.md': ['Deployment Preflight', 'Deploy Readiness', 'Go-Live Execution'],
-        'CREATIVE_AUTOMATION_STUDIO.md': ['seven stages', 'creative_automation_workflows'],
+        'CREATIVE_AUTOMATION_STUDIO.md': ['seven human-reviewed stages', 'creative_automation_workflows', 'authenticated admin request'],
         'GENERATED_VISUAL_ASSET_REGISTER.md': ['Build 234', 'Product/Offer structured data', 'Soap botanical purple rose', 'Wedding candle-top line artwork', 'SHA-256'],
     }
     missing=[]
@@ -352,7 +355,7 @@ def check_markdown_authority(checks: list[dict]) -> None:
     guide=read(ROOT/'STARTUP_GO_LIVE_GUIDE.md')
     if guide.count('#### Before you begin') != 44:
         missing.append(f'STARTUP_GO_LIVE_GUIDE.md: expected 44 gate sections, found {guide.count("#### Before you begin")}')
-    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 234 canonical authorities, scoped playbooks, bounded hot routes, five packaging references, guarded duplicate cleanup, visual provenance, historical retirement policy, and 44 generated Startup sections agree.', 'missing':missing})
+    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 235 canonical authorities, scoped playbooks, computed Creative readiness, evidence export, five packaging references, guarded duplicate cleanup, visual provenance, historical archive policy, and 44 generated Startup sections agree.', 'missing':missing})
 
 def check_schema_files(checks: list[dict]) -> None:
     schema_needles = [
@@ -494,7 +497,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 234','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 235','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')

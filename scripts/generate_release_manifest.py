@@ -12,10 +12,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INCLUDE_PREFIXES = (
-    'functions/', 'admin/', 'public/js/', 'js/', 'css/', 'assets/', 'data/site/'
+    'functions/', 'admin/', 'public/js/', 'js/', 'css/', 'assets/', 'data/site/', 'scripts/'
 )
 INCLUDE_SUFFIXES = ('.sql', '.md')
-SKIP_PARTS = {'.git', 'node_modules', 'archive', '__pycache__'}
+SKIP_PARTS = {'.git', 'node_modules', '__pycache__'}
 
 def include(path: Path) -> bool:
     rel = path.relative_to(ROOT).as_posix()
@@ -44,7 +44,7 @@ def main() -> int:
             'sha256': sha256(path),
         })
     payload={
-        'build_label': 'Build 234',
+        'build_label': 'Build 235',
         'generated_by': 'scripts/generate_release_manifest.py',
         'file_count': len(files),
         'total_size_bytes': sum(item['size_bytes'] for item in files),
