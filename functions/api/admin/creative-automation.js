@@ -1,4 +1,4 @@
-// Build 234 — master Creative Automation Studio with guarded duplicate cleanup.
+// Build 235 — server-computed stage readiness, overdue/blocker queue, evidence exports, and guarded duplicate cleanup.
 // Existing project, CAIP, Content Studio, publication and social records remain
 // authoritative; this endpoint stores only cross-stage ownership/review state.
 import {
@@ -10,7 +10,7 @@ import {
   normalizeText
 } from '../_lib/adminAudit.js';
 
-const BUILD='234';
+const BUILD='235';
 const STAGES=[
   {key:'process',order:10,label:'1. Creative process',route:'/admin/creative-process/',authority:'Creative Process Engine',description:'Idea, scope, timeline, tools, experiments, mistakes, repairs, lessons and intended outputs.',pass:'The project summary and at least one factual timeline entry are saved.',correction:'Open Creative Process, add the missing project facts or timeline evidence, save, and reload this master workflow.'},
   {key:'materials_cost',order:20,label:'2. Materials, inventory and cost',route:'/admin/creative-process/',authority:'Creative Process Engine',description:'Material review, explicit inventory posting/reversal, time, packaging, channel fees, shared cost and profitability.',pass:'Every recorded material is reviewed or the stage is deliberately marked not applicable, and cost assumptions are documented.',correction:'Review each material row, correct quantities/costs, use only audited inventory posting or reversal, then recalculate profitability.'},
@@ -27,6 +27,16 @@ const REVIEW_STATUSES=new Set(['not_started','in_progress','blocked','needs_revi
 function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store'});}
 function id(value){const n=Number(value||0);return Number.isInteger(n)&&n>0?n:0;}
 function text(value,max=5000){return normalizeText(value).slice(0,max);}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function fileSafe(value){return String(value||'creative-project').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)||'creative-project';}
+function response(body,status=200,headers={}){return new Response(body,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});}
+function check(key,label,passed,actual,expected,correction,{eligibleNotApplicable=false}={}){
+  return {key,label,passed:passed?1:0,actual,expected,correction,eligible_not_applicable:eligibleNotApplicable?1:0};
+}
+function stageReadiness(key,checks,{eligibleNotApplicable=false}={}){
+  const blockers=checks.filter((item)=>!item.passed&&!item.eligible_not_applicable);
+  return {stage_key:key,ready:blockers.length===0&&checks.some((item)=>item.passed)?1:0,eligible_not_applicable:eligibleNotApplicable?1:0,blocking_count:blockers.length,checks};
+}
 
 async function safeFirst(db,sql,bindings=[]){
   try{return await db.prepare(sql).bind(...bindings).first();}
@@ -39,6 +49,7 @@ async function safeAll(db,sql,bindings=[]){
 async function safeCount(db,table,column,value,extra=''){
   const allowed=new Set([
     'creative_work_events','creative_work_outputs','creative_project_material_reviews','creative_project_evidence_selections',
+    'creative_project_profitability','creative_project_knowledge_summaries','creative_project_content_handoffs','creative_project_caip_mirrors',
     'content_project_media','content_project_deliverables','content_publications','content_publication_events'
   ]);
   if(!allowed.has(table)) return 0;
@@ -115,35 +126,135 @@ async function projectDetail(db,project){
   const mirror=await safeFirst(db,'SELECT creative_project_id,mirror_status,evidence_count FROM creative_project_caip_mirrors WHERE creative_work_project_id=?1 ORDER BY creative_project_caip_mirror_id DESC LIMIT 1',[projectId]);
   const contentId=id(handoff?.content_project_id);
   const caipId=id(mirror?.creative_project_id);
-  const eventCount=await safeCount(db,'creative_work_events','creative_work_project_id',projectId);
-  const materialCount=await safeCount(db,'creative_work_events','creative_work_project_id',projectId,"AND TRIM(COALESCE(material_name,''))<>''");
-  const reviewedMaterials=await safeCount(db,'creative_project_material_reviews','creative_work_project_id',projectId,"AND review_status='approved'");
-  const evidenceCount=await safeCount(db,'creative_project_evidence_selections','creative_work_project_id',projectId,'AND selected=1');
-  const outputCount=await safeCount(db,'creative_work_outputs','creative_work_project_id',projectId);
-  const completedOutputs=await safeCount(db,'creative_work_outputs','creative_work_project_id',projectId,"AND output_status='complete'");
-  const mediaCount=contentId?await safeCount(db,'content_project_media','content_project_id',contentId):0;
-  const deliverableCount=contentId?await safeCount(db,'content_project_deliverables','content_project_id',contentId):0;
-  const approvedDeliverables=contentId?await safeCount(db,'content_project_deliverables','content_project_id',contentId,"AND approval_status='approved'"):0;
-  const publicationCount=contentId?await safeCount(db,'content_publications','content_project_id',contentId):0;
-  const releasedCount=contentId?await safeCount(db,'content_publications','content_project_id',contentId,"AND publication_status IN ('published','approved')"):0;
+  const summary=await safeFirst(db,`SELECT
+    (SELECT COUNT(*) FROM creative_work_events WHERE creative_work_project_id=?1) event_count,
+    (SELECT COUNT(*) FROM creative_work_events WHERE creative_work_project_id=?1 AND TRIM(COALESCE(material_name,''))<>'') material_count,
+    (SELECT COUNT(*) FROM creative_project_material_reviews WHERE creative_work_project_id=?1 AND review_status='approved') reviewed_material_count,
+    (SELECT COUNT(*) FROM creative_project_evidence_selections WHERE creative_work_project_id=?1 AND selected=1) evidence_count,
+    (SELECT COUNT(*) FROM creative_work_outputs WHERE creative_work_project_id=?1) output_count,
+    (SELECT COUNT(*) FROM creative_work_outputs WHERE creative_work_project_id=?1 AND output_status='complete') completed_output_count,
+    (SELECT COUNT(*) FROM creative_work_outputs WHERE creative_work_project_id=?1 AND output_status='complete' AND (TRIM(COALESCE(output_url,''))<>'' OR TRIM(COALESCE(notes,''))<>'')) result_output_count,
+    (SELECT COUNT(*) FROM creative_project_profitability WHERE creative_work_project_id=?1) profitability_count,
+    (SELECT COUNT(*) FROM creative_project_knowledge_summaries WHERE creative_work_project_id=?1 AND review_status='approved') approved_knowledge_count,
+    (SELECT COUNT(*) FROM content_project_media WHERE content_project_id=?2) content_media_count,
+    (SELECT COUNT(*) FROM content_project_deliverables WHERE content_project_id=?2) deliverable_count,
+    (SELECT COUNT(*) FROM content_project_deliverables WHERE content_project_id=?2 AND approval_status='approved') approved_deliverable_count,
+    (SELECT COUNT(*) FROM content_publications WHERE content_project_id=?2) publication_count,
+    (SELECT COUNT(*) FROM content_publications WHERE content_project_id=?2 AND content_status IN ('published','approved')) released_publication_count`,[projectId,contentId])||{};
+  const eventCount=Number(summary.event_count||0);
+  const materialCount=Number(summary.material_count||0);
+  const reviewedMaterials=Number(summary.reviewed_material_count||0);
+  const evidenceCount=Number(summary.evidence_count||0);
+  const outputCount=Number(summary.output_count||0);
+  const completedOutputs=Number(summary.completed_output_count||0);
+  const resultOutputs=Number(summary.result_output_count||0);
+  const profitabilityCount=Number(summary.profitability_count||0);
+  const approvedKnowledge=Number(summary.approved_knowledge_count||0);
+  const mediaCount=Number(summary.content_media_count||0);
+  const deliverableCount=Number(summary.deliverable_count||0);
+  const approvedDeliverables=Number(summary.approved_deliverable_count||0);
+  const publicationCount=Number(summary.publication_count||0);
+  const releasedCount=Number(summary.released_publication_count||0);
   const reviews=workflow?await safeAll(db,'SELECT * FROM creative_automation_stage_reviews WHERE creative_automation_workflow_id=?1',[workflow.creative_automation_workflow_id]):[];
   const reviewMap=Object.fromEntries(reviews.map((row)=>[row.stage_key,row]));
-  const facts={event_count:eventCount,material_count:materialCount,reviewed_material_count:reviewedMaterials,evidence_count:evidenceCount,output_count:outputCount,completed_output_count:completedOutputs,content_project_id:contentId,content_media_count:mediaCount,deliverable_count:deliverableCount,approved_deliverable_count:approvedDeliverables,caip_project_id:caipId,caip_mirror_status:mirror?.mirror_status||'',publication_count:publicationCount,released_publication_count:releasedCount};
-  const sourceReady={
-    process:!!text(project.summary,10)&&eventCount>0,
-    materials_cost:materialCount===0||reviewedMaterials>=materialCount,
-    assets_evidence:evidenceCount>0&&project.rights_status==='cleared',
-    content_package:contentId>0&&deliverableCount>0,
-    channel_review:deliverableCount>0&&approvedDeliverables>=deliverableCount,
-    public_release:publicationCount>0&&releasedCount>0,
-    measure_repurpose:completedOutputs>0&&releasedCount>0
+  const facts={event_count:eventCount,material_count:materialCount,reviewed_material_count:reviewedMaterials,evidence_count:evidenceCount,output_count:outputCount,completed_output_count:completedOutputs,result_output_count:resultOutputs,profitability_count:profitabilityCount,approved_knowledge_count:approvedKnowledge,content_project_id:contentId,content_media_count:mediaCount,deliverable_count:deliverableCount,approved_deliverable_count:approvedDeliverables,caip_project_id:caipId,caip_mirror_status:mirror?.mirror_status||'',publication_count:publicationCount,released_publication_count:releasedCount};
+  const readiness={
+    process:stageReadiness('process',[
+      check('summary','Project summary',text(project.summary,10).length>=10,text(project.summary,10).length>=10?'Saved':'Missing or too short','A factual summary of at least 10 characters','Add the factual project summary in Creative Process.'),
+      check('timeline','Timeline evidence',eventCount>0,`${eventCount} timeline entr${eventCount===1?'y':'ies'}`,'At least one factual timeline entry','Add a dated process, experiment, repair, lesson, or result entry.')
+    ]),
+    materials_cost:stageReadiness('materials_cost',[
+      check('material_review','Material review',materialCount>0&&reviewedMaterials>=materialCount,materialCount?`${reviewedMaterials} of ${materialCount} approved`:'No material rows',materialCount?'Every material row approved':'Mark the stage not applicable only after deliberate review','Review quantities, cost, waste/reuse, and inventory action for every material row.',{eligibleNotApplicable:materialCount===0}),
+      check('profitability','Cost assumptions',profitabilityCount>0,profitabilityCount?'Profitability record saved':'No profitability record','Saved labour, packaging, overhead, channel, shipping, and revenue assumptions','Save the project profitability record or document why this stage is not applicable.',{eligibleNotApplicable:materialCount===0})
+    ],{eligibleNotApplicable:materialCount===0}),
+    assets_evidence:stageReadiness('assets_evidence',[
+      check('evidence','Selected evidence',evidenceCount>0,`${evidenceCount} selected record${evidenceCount===1?'':'s'}`,'At least one selected source record','Select factual timeline evidence for the intended story.'),
+      check('rights','Project rights',project.rights_status==='cleared',project.rights_status||'needs_review','Rights status cleared','Review ownership, consent, privacy, and intended public/internal use before completion.'),
+      check('caip','CAIP handoff',caipId>0&&Number(mirror?.evidence_count||0)>0,caipId?`CAIP ${caipId}, ${Number(mirror?.evidence_count||0)} evidence`:'Not linked','A CAIP mirror containing reviewed source references','Mirror the selected evidence into CAIP and complete its rights/privacy review.')
+    ]),
+    content_package:stageReadiness('content_package',[
+      check('handoff','Content handoff',contentId>0,contentId?`Content project ${contentId}`:'Not linked','A source-linked Content Studio project','Create or refresh the reviewed Creative Process → Content Studio handoff.'),
+      check('deliverables','Deliverable plan',deliverableCount>0,`${deliverableCount} deliverable${deliverableCount===1?'':'s'}`,'At least one planned deliverable','Restore or create the required video, social, gallery, GBP, SEO, blog, thumbnail, and caption plan.')
+    ]),
+    channel_review:stageReadiness('channel_review',[
+      check('channel_approvals','Channel approvals',deliverableCount>0&&approvedDeliverables>=deliverableCount,`${approvedDeliverables} of ${deliverableCount} approved`,'Every intended deliverable approved or removed as not applicable','Review channel facts, privacy, format, media, caption, and tracking one deliverable at a time.')
+    ]),
+    public_release:stageReadiness('public_release',[
+      check('release_record','Release result',publicationCount>0&&releasedCount>0,`${releasedCount} of ${publicationCount} approved/published`,'At least one observable approved or published release record','Keep the draft private or correct the failed release requirement before deliberate approval/publish.')
+    ]),
+    measure_repurpose:stageReadiness('measure_repurpose',[
+      check('result_evidence','Factual result evidence',resultOutputs>0,`${resultOutputs} completed output${resultOutputs===1?'':'s'} with URL/notes`,'At least one completed output with an observable result reference','Record the actual provider URL/ID or factual result notes; do not infer performance.'),
+      check('reviewed_learning','Reviewed learning',approvedKnowledge>0,`${approvedKnowledge} approved knowledge summar${approvedKnowledge===1?'y':'ies'}`,'At least one approved lesson or future recommendation','Review and approve the lesson learned or future-project recommendation against source evidence.')
+    ])
   };
   const stages=STAGES.map((stage)=>{
     const review=reviewMap[stage.key]||{review_status:'not_started',evidence_reference:'',review_notes:''};
-    const complete=review.review_status==='complete'&&sourceReady[stage.key];
-    return {...stage,...review,source_ready:sourceReady[stage.key]?1:0,effective_status:complete?'complete':review.review_status==='complete'?'needs_source_evidence':review.review_status};
+    const source=readiness[stage.key];
+    let effective=review.review_status;
+    if(review.review_status==='not_applicable'&&source.eligible_not_applicable) effective='not_applicable';
+    else if(review.review_status==='complete'&&source.ready) effective='complete';
+    else if(review.review_status==='complete'&&!source.ready) effective='needs_source_evidence';
+    else if(review.review_status==='not_applicable'&&!source.eligible_not_applicable) effective='needs_source_evidence';
+    return {...stage,...review,readiness:source,source_ready:source.ready,effective_status:effective};
   });
   return {project,workflow:workflow?.creative_automation_workflow_id?workflow:null,handoff,mirror,facts,stages};
+}
+
+function buildWorkQueue(projects){
+  const today=new Date().toISOString().slice(0,10);
+  const soon=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+  return projects.filter((row)=>row.creative_automation_workflow_id&&!['released','archived'].includes(row.workflow_status)).map((row)=>{
+    const due=text(row.due_date,30);
+    const blocked=row.workflow_status==='blocked'||!!text(row.blocked_reason,2000);
+    const overdue=!!due&&due<today;
+    const dueSoon=!!due&&due>=today&&due<=soon;
+    const unowned=!id(row.owner_user_id);
+    let priority='active';let priority_order=50;let reason=`Continue ${String(row.current_stage_key||'process').replaceAll('_',' ')}.`;
+    if(blocked){priority='blocked';priority_order=10;reason=text(row.blocked_reason,300)||'Workflow is blocked and requires a documented correction.';}
+    else if(overdue){priority='overdue';priority_order=20;reason=`Due ${due}; review the current stage and assign the next action.`;}
+    else if(dueSoon){priority='due_soon';priority_order=30;reason=`Due ${due}; confirm evidence and the next owner action.`;}
+    else if(unowned){priority='unassigned';priority_order=40;reason='Assign an owner before the workflow becomes time-sensitive.';}
+    return {creative_work_project_id:id(row.creative_work_project_id),project_key:row.project_key,project_title:row.project_title,workflow_status:row.workflow_status,current_stage_key:row.current_stage_key,due_date:due,owner_user_id:id(row.owner_user_id)||null,blocked_reason:row.blocked_reason||'',priority,priority_order,reason};
+  }).sort((a,b)=>a.priority_order-b.priority_order||String(a.due_date||'9999').localeCompare(String(b.due_date||'9999'))||a.project_title.localeCompare(b.project_title)).slice(0,50);
+}
+
+async function evidencePacket(db,projectId){
+  const project=await safeFirst(db,`SELECT p.*,w.creative_automation_workflow_id,w.workflow_key,w.workflow_status,w.current_stage_key,w.owner_user_id,w.due_date,w.blocked_reason,w.operator_notes,w.updated_at workflow_updated_at
+    FROM creative_work_projects p LEFT JOIN creative_automation_workflows w ON w.creative_work_project_id=p.creative_work_project_id
+    WHERE p.creative_work_project_id=?1`,[projectId]);
+  if(!project) throw Object.assign(new Error('Creative project was not found.'),{code:'NOT_FOUND'});
+  const detail=await projectDetail(db,project);
+  const contentId=id(detail.handoff?.content_project_id);
+  const workflowId=id(detail.workflow?.creative_automation_workflow_id);
+  const records={
+    timeline:await safeAll(db,`SELECT e.creative_work_event_id,e.event_type,e.event_title,e.event_notes,e.occurred_at,e.duration_minutes,e.material_name,e.material_quantity,e.material_unit,e.material_cost_cents,e.media_url,e.is_public_candidate,
+      COALESCE(s.selected,0) evidence_selected,COALESCE(s.evidence_role,'') evidence_role,COALESCE(r.review_status,'') material_review_status,COALESCE(r.actual_quantity,0) actual_quantity,COALESCE(r.waste_quantity,0) waste_quantity,COALESCE(r.reusable_quantity,0) reusable_quantity,COALESCE(r.approved_cost_cents,0) approved_cost_cents
+      FROM creative_work_events e LEFT JOIN creative_project_evidence_selections s ON s.creative_work_event_id=e.creative_work_event_id AND s.creative_work_project_id=e.creative_work_project_id
+      LEFT JOIN creative_project_material_reviews r ON r.creative_work_event_id=e.creative_work_event_id AND r.creative_work_project_id=e.creative_work_project_id
+      WHERE e.creative_work_project_id=?1 ORDER BY e.occurred_at,e.creative_work_event_id`,[projectId]),
+    outputs:await safeAll(db,'SELECT output_key,output_label,output_group,output_status,approval_status,linked_record_type,linked_record_id,output_url,notes,updated_at FROM creative_work_outputs WHERE creative_work_project_id=?1 ORDER BY output_group,output_label',[projectId]),
+    inventory_posts:await safeAll(db,`SELECT p.creative_project_inventory_post_id,p.creative_work_event_id,p.site_item_inventory_id,p.stock_quantity_consumed,p.previous_on_hand_quantity,p.new_on_hand_quantity,p.posting_status,p.posted_at,p.notes,
+      r.creative_project_inventory_reversal_id,r.stock_quantity_restored,r.reason reversal_reason,r.authorized_at reversal_authorized_at
+      FROM creative_project_inventory_posts p LEFT JOIN creative_project_inventory_reversals r ON r.creative_project_inventory_post_id=p.creative_project_inventory_post_id
+      WHERE p.creative_work_project_id=?1 ORDER BY p.posted_at`,[projectId]),
+    content_handoffs:await safeAll(db,'SELECT creative_project_content_handoff_id,content_project_id,handoff_status,evidence_count,created_at FROM creative_project_content_handoffs WHERE creative_work_project_id=?1 ORDER BY created_at',[projectId]),
+    caip_mirrors:await safeAll(db,'SELECT creative_project_id,source_handoff_id,evidence_count,mirror_status,mirrored_at,notes FROM creative_project_caip_mirrors WHERE creative_work_project_id=?1 ORDER BY mirrored_at',[projectId]),
+    profitability:await safeAll(db,`SELECT p.*,COALESCE(x.channel_fee_percent,0) channel_fee_percent,COALESCE(x.fixed_channel_fee_cents,p.channel_fee_cents,0) fixed_channel_fee_cents FROM creative_project_profitability p LEFT JOIN creative_project_profitability_extensions x ON x.creative_work_project_id=p.creative_work_project_id WHERE p.creative_work_project_id=?1`,[projectId]),
+    allocations:await safeAll(db,'SELECT product_id,allocation_percent,allocated_cost_cents,notes,updated_at FROM creative_project_cost_allocations WHERE creative_work_project_id=?1 ORDER BY product_id',[projectId]),
+    knowledge:await safeAll(db,'SELECT summary_type,summary_text,source_evidence_count,review_status,reviewed_at,updated_at FROM creative_project_knowledge_summaries WHERE creative_work_project_id=?1 ORDER BY summary_type',[projectId]),
+    stage_reviews:workflowId?await safeAll(db,'SELECT stage_key,review_status,evidence_reference,review_notes,reviewed_at,updated_at FROM creative_automation_stage_reviews WHERE creative_automation_workflow_id=?1 ORDER BY creative_automation_stage_review_id',[workflowId]):[],
+    workflow_events:workflowId?await safeAll(db,'SELECT event_type,stage_key,previous_status,next_status,details_json,created_at FROM creative_automation_events WHERE creative_automation_workflow_id=?1 ORDER BY created_at,creative_automation_event_id',[workflowId]):[],
+    deliverables:contentId?await safeAll(db,'SELECT deliverable_key,channel_key,deliverable_type,title,deliverable_status,approval_status,output_url,thumbnail_url,review_notes,approved_at,published_at,updated_at FROM content_project_deliverables WHERE content_project_id=?1 ORDER BY channel_key,deliverable_key',[contentId]):[],
+    publications:contentId?await safeAll(db,'SELECT destination,publication_slug,title,canonical_path,content_status,hero_media_url,hero_alt_text,review_notes,approved_at,published_at,unpublished_at,updated_at FROM content_publications WHERE content_project_id=?1 ORDER BY destination,publication_slug',[contentId]):[]
+  };
+  return {schema:'devilndove.creative_evidence_packet.v1',build:BUILD,generated_at:new Date().toISOString(),statement:'Internal review export. It records saved facts and review states; it does not prove provider publication, rights clearance, physical production, or performance beyond the referenced evidence.',project:detail.project,workflow:detail.workflow,stage_readiness:detail.stages.map(({key,label,authority,review_status,effective_status,evidence_reference,review_notes,readiness})=>({key,label,authority,review_status,effective_status,evidence_reference,review_notes,readiness})),facts:detail.facts,records};
+}
+
+function tableHtml(rows,columns,empty='No saved records.'){if(!rows.length)return `<p class="muted">${escapeHtml(empty)}</p>`;return `<div class="table-wrap"><table><thead><tr>${columns.map(([key,label])=>`<th>${escapeHtml(label)}</th>`).join('')}</tr></thead><tbody>${rows.map((row)=>`<tr>${columns.map(([key])=>`<td>${escapeHtml(row?.[key]??'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;}
+function evidencePacketHtml(packet){
+  const p=packet.project||{};const w=packet.workflow||{};
+  const readiness=(packet.stage_readiness||[]).map((stage)=>({stage:stage.label,review:stage.review_status,effective:stage.effective_status,source_ready:stage.readiness?.ready?'Yes':'No',blockers:stage.readiness?.blocking_count||0,evidence:stage.evidence_reference||''}));
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(p.project_title||'Creative project')} — Evidence Packet</title><style>:root{font-family:Arial,sans-serif;color:#171717;background:#fff}body{max-width:1100px;margin:0 auto;padding:28px;line-height:1.45}h1,h2{line-height:1.2}h2{border-bottom:2px solid #444;padding-bottom:5px;margin-top:28px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.meta div{border:1px solid #bbb;border-radius:8px;padding:10px}.notice{padding:12px;border:2px solid #765c18;background:#fff8dc}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #bbb;padding:7px;text-align:left;vertical-align:top}th{background:#eee}.muted{color:#555}.no-print{margin:0 0 18px}.no-print button{padding:10px 16px}@media print{body{max-width:none;padding:0}.no-print{display:none}h2{break-after:avoid}table{break-inside:auto}tr{break-inside:avoid}}</style></head><body><div class="no-print"><button type="button" onclick="window.print()">Print or save as PDF</button></div><p class="notice"><strong>Internal evidence packet.</strong> ${escapeHtml(packet.statement)}</p><h1>${escapeHtml(p.project_title||'Creative project')}</h1><div class="meta"><div><strong>Project key</strong><br>${escapeHtml(p.project_key||'')}</div><div><strong>Project status</strong><br>${escapeHtml(p.project_status||'')}</div><div><strong>Workflow status</strong><br>${escapeHtml(w.workflow_status||'Not tracked')}</div><div><strong>Current stage</strong><br>${escapeHtml(w.current_stage_key||'')}</div><div><strong>Due date</strong><br>${escapeHtml(w.due_date||'Not set')}</div><div><strong>Generated</strong><br>${escapeHtml(packet.generated_at)}</div></div><h2>Project summary</h2><p>${escapeHtml(p.summary||'No summary saved.')}</p><p><strong>Objective:</strong> ${escapeHtml(p.objective||'Not saved.')}</p><p><strong>Story angle:</strong> ${escapeHtml(p.story_angle||'Not saved.')}</p><h2>Stage readiness</h2>${tableHtml(readiness,[['stage','Stage'],['review','Human review'],['effective','Effective status'],['source_ready','Source ready'],['blockers','Blocking checks'],['evidence','Evidence reference']])}<h2>Timeline and material evidence</h2>${tableHtml(packet.records.timeline,[['occurred_at','When'],['event_type','Type'],['event_title','Title'],['event_notes','Notes'],['material_name','Material'],['material_quantity','Planned quantity'],['material_review_status','Material review'],['approved_cost_cents','Approved cost (cents)'],['media_url','Media reference'],['evidence_selected','Selected evidence']])}<h2>Outputs</h2>${tableHtml(packet.records.outputs,[['output_group','Group'],['output_label','Output'],['output_status','Status'],['approval_status','Approval'],['output_url','Result URL'],['notes','Notes']])}<h2>Inventory postings and reversals</h2>${tableHtml(packet.records.inventory_posts,[['posted_at','Posted'],['site_item_inventory_id','Inventory item'],['stock_quantity_consumed','Consumed'],['posting_status','Status'],['new_on_hand_quantity','New on hand'],['reversal_reason','Reversal reason'],['reversal_authorized_at','Reversed']])}<h2>Content deliverables</h2>${tableHtml(packet.records.deliverables,[['channel_key','Channel'],['title','Deliverable'],['deliverable_status','Status'],['approval_status','Approval'],['output_url','Output URL'],['review_notes','Review notes']])}<h2>Publications</h2>${tableHtml(packet.records.publications,[['destination','Destination'],['title','Title'],['content_status','Status'],['canonical_path','Canonical path'],['published_at','Published'],['review_notes','Review notes']])}<h2>Reviewed lessons and recommendations</h2>${tableHtml(packet.records.knowledge,[['summary_type','Type'],['review_status','Review'],['source_evidence_count','Source count'],['summary_text','Summary'],['reviewed_at','Reviewed']])}<h2>Master workflow history</h2>${tableHtml(packet.records.workflow_events,[['created_at','When'],['stage_key','Stage'],['event_type','Event'],['previous_status','Previous'],['next_status','Next'],['details_json','Details']])}</body></html>`;
 }
 
 async function payload(db,selectedId=0){
@@ -156,7 +267,8 @@ async function payload(db,selectedId=0){
   const detail=chosen?await projectDetail(db,chosen):null;
   const events=detail?.workflow?await safeAll(db,'SELECT * FROM creative_automation_events WHERE creative_automation_workflow_id=?1 ORDER BY created_at DESC,creative_automation_event_id DESC LIMIT 30',[detail.workflow.creative_automation_workflow_id]):[];
   const tracked=projects.filter((row)=>row.creative_automation_workflow_id).length;
-  return {ok:true,build:BUILD,mode:'one_master_process_specialist_authorities_preserved',stage_definitions:STAGES,projects,detail,recent_events:events,stats:{projects:projects.length,tracked,untracked:projects.length-tracked,blocked:projects.filter((row)=>row.workflow_status==='blocked').length,ready:projects.filter((row)=>row.workflow_status==='ready_for_release').length,released:projects.filter((row)=>row.workflow_status==='released').length}};
+  const workQueue=buildWorkQueue(projects);
+  return {ok:true,build:BUILD,mode:'server_readiness_queue_export_specialist_authorities_preserved',stage_definitions:STAGES,projects,detail,recent_events:events,work_queue:workQueue,stats:{projects:projects.length,tracked,untracked:projects.length-tracked,blocked:projects.filter((row)=>row.workflow_status==='blocked').length,overdue:workQueue.filter((row)=>row.priority==='overdue').length,unassigned:workQueue.filter((row)=>row.priority==='unassigned').length,ready:projects.filter((row)=>row.workflow_status==='ready_for_release').length,released:projects.filter((row)=>row.workflow_status==='released').length}};
 }
 
 async function access(context){
@@ -170,7 +282,17 @@ async function access(context){
 export async function onRequestGet(context){
   const granted=await access(context);if(granted.error)return granted.error;
   try{
-    const selected=id(new URL(context.request.url).searchParams.get('project_id'));
+    const url=new URL(context.request.url);
+    const selected=id(url.searchParams.get('project_id'));
+    const exportFormat=text(url.searchParams.get('export'),30);
+    if(exportFormat){
+      if(!selected)return json({ok:false,error:'Choose a Creative Project before exporting evidence.'},400);
+      if(!['html','json'].includes(exportFormat))return json({ok:false,error:'Choose html or json evidence export format.'},400);
+      const packet=await evidencePacket(granted.db,selected);
+      const filename=`${fileSafe(packet.project?.project_key||packet.project?.project_title)}-evidence-packet`;
+      if(exportFormat==='json')return response(JSON.stringify(packet,null,2),200,{'Content-Type':'application/json; charset=utf-8','Content-Disposition':`attachment; filename="${filename}.json"`});
+      return response(evidencePacketHtml(packet),200,{'Content-Type':'text/html; charset=utf-8','Content-Disposition':`inline; filename="${filename}.html"`});
+    }
     return json(await payload(granted.db,selected));
   }catch(error){
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'creative_automation',incident_code:'creative_automation_load_failed',severity:'error',message:error?.message||'Creative Automation Studio failed to load.',related_user_id:granted.adminUser.user_id,details:{build:BUILD}});
