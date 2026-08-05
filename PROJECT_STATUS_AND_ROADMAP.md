@@ -1,8 +1,21 @@
-# Devil n Dove Project Status and Roadmap — Build 234
+# Devil n Dove Project Status and Roadmap — Build 235
 
-This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 234 work, launch position, gaps and ordered next actions.
+This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 235 work, launch position, gaps and ordered next actions.
 
-## Build 234 completed work
+## Build 235 completed work
+
+1. Added server-computed readiness rules for all seven Creative Automation stages using bounded aggregate reads from the existing specialist authorities.
+2. Added explicit pass/fail/not-applicable checks, expected/actual evidence and correction guidance without duplicating authoritative business facts.
+3. Added a prioritized operational queue for blocked, overdue, due-soon, unassigned and active Creative workflows.
+4. Added authenticated JSON and accessible print-ready HTML project evidence packets covering timeline, materials, inventory, CAIP, content, reviews, publications, results and profitability.
+5. Corrected publication readiness to use authoritative `content_status` values.
+6. Rebuilt the master UI with eight metrics, source-readiness checklists, export controls, safe response handling and contained phone/desktop layouts.
+7. Added Build 235 regression coverage for readiness, queue order, publication counting, evidence exports, one-H1/noindex markup, responsive CSS and shell v16.
+8. Retired 47 historical Build Markdown files from the root into `docs/archive/build-history/` and updated release checks/references so two current authority files remain unambiguous.
+9. Rechecked current Google search/local guidance and representative Ontario/custom-maker sites; retained truthful local intent, clear custom-order process, real workshop identity, useful product imagery and no ranking guarantees as the competitive direction.
+10. Kept the schema boundary at Build 234; Build 235 adds no migration or runtime schema initialization.
+
+## Retained Build 234 completed work
 
 1. Made the selected packaging template authoritative in both browser and server; old project `package_type` drift can no longer select the wrong renderer.
 2. Rebuilt the soap preview around the exact owner-approved structure with permanent brand/static content, botanical rose artwork, centred editable hierarchy, bilingual panels, rear seal, claims and weight area.
@@ -77,7 +90,7 @@ This is the second canonical current-status file. `AI_HANDOFF.md` owns architect
 
 ## Current position
 
-The application has broad, integrated foundations for catalog/media, inventory lots/movements, orders/payments/refunds, accounting review, customer documents, whole-business packaging, creative/content governance, SEO operations and launch control. Build 234 makes the label/candle template system usable for repeat work, enables safe cleanup of accidental Creative shells and removes four request-time schema/seed hot paths. Local checks cannot prove the live Worker, login, product correction, autosave, packaging or laser/print results until controlled log-backed production tests pass. Generated art and untested production/physical/provider work remain outside launch evidence.
+The application has broad, integrated foundations for catalog/media, inventory lots/movements, orders/payments/refunds, accounting review, customer documents, whole-business packaging, creative/content governance, SEO operations and launch control. Build 235 adds computed Creative readiness, a focused exception queue and portable project evidence while retaining Build 234 packaging templates, guarded duplicate cleanup and request-time DDL removal. Local checks cannot prove the live Worker, login, product correction, autosave, packaging or laser/print results until controlled log-backed production tests pass. Generated art and untested production/physical/provider work remain outside launch evidence.
 
 Status remains **production-evidence and controlled-opening preparation**.
 
@@ -105,9 +118,9 @@ Status remains **production-evidence and controlled-opening preparation**.
 
 ### P0 — before production promotion
 
-1. Run Build 234 validation, resolve every blocker and generate/checksum the exact ZIP.
+1. Run Build 235 validation, resolve every blocker and generate/checksum the exact ZIP.
 2. Back up D1; verify Build 229 and 230 ledger keys; apply `database_build234_packaging_templates_creative_cleanup.sql` or identical current-pass SQL exactly once.
-3. Deploy, hard refresh to service-worker shell v15, run the full live smoke suite and confirm 44 Startup gates, five packaging references, five new system templates and the D1-backed image manifest with honest degraded-mode behaviour.
+3. Deploy, hard refresh to service-worker shell v16, run the full live smoke suite and confirm 44 Startup gates, five packaging references, five new system templates and the D1-backed image manifest with honest degraded-mode behaviour.
 4. Complete the fourteen-step Startup login proof: bounded profile/header, successful redirect, Cloudflare outcome, valid refresh, invalid password, blocked `/api/auth/me` retention, recovery, logout, reset, logout-all and deliberate expiry.
 5. Run the controlled Product Editor load/autosave/queued-edit/reload/browser-recovery test and correlate it with Cloudflare `exceededCpu`/`exceededMemory` metrics before closing the runtime gate.
 6. Complete the twelve-step Startup role/destructive-action test: remove one disposable archived product through `bounded_registry_v1`, verify one reviewed inventory/audit effect, and prove a separate order/packaging/project-history product remains Archive-only; then test reversal, refund/document void, packaging approval, publication and accounting export authorization.
@@ -121,7 +134,7 @@ Status remains **production-evidence and controlled-opening preparation**.
 14. Complete `missing_launch_images` in `/admin/image-manifest/`; use `IMAGES_REQUIRED.md` for capture standards, create item-specific Catalog Media rows, replace real-photo blockers, approve the three editorials deliberately, then validate Product/Offer, Open Graph, canonical, alt text, galleries and Search Console on phone and desktop.
 15. Complete Business Profile details/photos/hours/services and record a recurring local accuracy review.
 16. Complete one real paid fulfilment and a different refund recovery; retain all non-secret evidence.
-17. Test Creative duplicate cleanup: delete one untouched accidental shell using its exact key, then prove a project with timeline/output/inventory/evidence/content/cost/review work is blocked and unchanged.
+17. Test Creative Automation end to end: prove blocked/overdue/unassigned queue order, compare all seven computed stages with specialist records, export JSON/HTML evidence, delete one untouched accidental shell using its exact key, and prove a meaningful-work project remains protected.
 18. Assign launch owner, monitoring hours, support access, stop conditions and phone-ready rollback instructions.
 
 ### P1 — controlled-opening stabilization
@@ -133,9 +146,9 @@ Status remains **production-evidence and controlled-opening preparation**.
 22. Add approved packaging lock/supersession/reprint workflow with checksum and physical-proof links.
 23. Run one deliberately reviewed Meta product-only publish test only after provider roles/scopes/app review pass.
 24. Reconcile provider post ID/URL and analytics without treating queue status as publication.
-25. Add server-computed Creative Automation stage rule registry and overdue/blocker assignments.
+25. **Completed in Build 235:** server-computed Creative Automation stage rules and blocked/overdue/due-soon/unassigned work queue. Next, add external notification delivery only after delivery/retry evidence is designed.
 26. Add camera-first mobile evidence upload with R2 rights/derivative checks and explicit unsynced recovery.
-27. Add accessible project evidence packet export and provider/result reconciliation.
+27. **Partly completed in Build 235:** accessible JSON/print-ready project evidence packet export. Provider/result reconciliation remains open and must use observable provider IDs/URLs rather than queue status.
 28. Add camera-first manifest upload from a phone with EXIF/privacy warning, R2 derivative creation and offline draft recovery.
 29. Add automated deployed-URL checks for manifest assets, intrinsic dimensions, duplicate hashes, structured-data leakage and slow-network budgets.
 30. Generate product-specific manifest rows from the frozen launch-product list so featured/detail/scale/packaging roles remain visible without copying product facts.

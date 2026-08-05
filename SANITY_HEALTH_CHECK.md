@@ -1,6 +1,13 @@
-# Devil n Dove Sanity and Health Check — Build 234
+# Devil n Dove Sanity and Health Check — Build 235
 
 ## Structural result
+
+- Build 235 Creative readiness is server-computed from specialist authorities, returned as explicit checks and never persisted as a second source of truth.
+- The priority queue surfaces blocked, overdue, due-soon and unassigned workflows before ordinary active work.
+- Authenticated JSON and accessible print-ready HTML evidence packets collect existing project evidence without creating a public export route.
+- Publication readiness uses authoritative `content_status`; the former nonexistent-column count path is removed.
+- Forty-seven historical Build Markdown files are under `docs/archive/build-history/`; the root now has two current authorities plus scoped specialist/current-release documents.
+- Build 235 is code-only. Aggregate/current-pass SQL still ends at Build 234.
 
 - Two current Markdown authorities: `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`; scoped playbooks are indexed and historical Build files are retired from current authority.
 - Three aggregate schema files include Builds 229, 230 and 234; current-pass SQL is identical to the Build 234 numbered migration and has no explicit transaction statements.
@@ -24,4 +31,15 @@
 
 ## Launch health
 
-The application is structurally mature but remains in production-evidence preparation. Build 234 local regressions can prove layout/data/error boundaries but cannot supply physical print/laser acceptance or live provider evidence. The bounded-login path still needs the fourteen-step production/Cloudflare proof. Live payments/webhooks, exact-once inventory, concurrency, tax/shipping, email, soap/candle physical packaging and regulatory proof, provider permissions, restore, paid fulfilment and separate refund evidence remain authoritative Startup gates. Use `PRELAUNCH_PROCESS_PLAYBOOKS.md` in order and never infer Pass from unavailable data.
+The application is structurally mature but remains in production-evidence preparation. Build 235 local regressions can prove Creative readiness/queue/export plus retained layout/data/error boundaries but cannot supply physical print/laser acceptance or live provider evidence. The bounded-login path still needs the fourteen-step production/Cloudflare proof. Live payments/webhooks, exact-once inventory, concurrency, tax/shipping, email, soap/candle physical packaging and regulatory proof, provider permissions, restore, paid fulfilment and separate refund evidence remain authoritative Startup gates. Use `PRELAUNCH_PROCESS_PLAYBOOKS.md` in order and never infer Pass from unavailable data.
+
+## Build 235 final local result
+
+- Deployment Preflight: Ready, 0 blockers, 0 warnings.
+- Predeploy sanity: Pass, 108 HTML pages checked, 0 issues.
+- Final deployment-blocker check: Pass.
+- Build 230–235 targeted regressions: Pass.
+- Current/numbered Build 234 migration SHA-256: identical.
+- Root Markdown: 36 files, of which only two are current cross-project authorities; 47 superseded Build records plus the archive README are under `docs/archive/build-history/`.
+- Release manifest: Build 235 and 832 tracked release files after final regeneration.
+- Wrangler compilation was not available in this sandbox because the configured package registry returned 404; Cloudflare/developer-environment bundle compilation remains a required deployment check.

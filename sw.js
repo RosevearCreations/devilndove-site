@@ -1,5 +1,5 @@
-// Build 234: refresh packaging templates, candle-top artwork and guarded project cleanup.
-const CACHE_NAME = 'devilndove-shell-v15';
+// Build 235: refresh Creative Automation readiness, work queue and evidence packet controls.
+const CACHE_NAME = 'devilndove-shell-v16';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

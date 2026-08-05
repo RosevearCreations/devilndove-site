@@ -1,3 +1,22 @@
+# Build 235 — Creative readiness, exception queue and evidence packets
+
+Date: 2026-08-05
+
+## Summary
+
+- Compute all seven Creative Automation stage-readiness results from existing specialist authorities with explicit expected/actual checks and correction guidance.
+- Surface blocked, overdue, due-soon and unassigned work in one responsive queue.
+- Export an authenticated project as machine-readable JSON or accessible print-ready HTML evidence.
+- Correct public-release counting to use `content_status`.
+- Preserve human review, guarded duplicate cleanup, specialist data authority and Build 234 as the current schema boundary.
+- Move 47 superseded Build Markdown files to `docs/archive/build-history/` and update automated release references.
+
+## Deployment
+
+No D1 migration or new secret is required. Deploy the complete Build 235 package, hard refresh to service-worker shell v16, and follow `BUILD235_VALIDATION.md`. Apply the Build 234/current-pass migration only when its ledger key is genuinely absent.
+
+---
+
 # Release Notes — Build 234
 
 ## Reference-faithful packaging templates and safe Creative cleanup
@@ -28,7 +47,7 @@ Back up D1 and confirm Build 229 and Build 230 ledger keys. Apply `database_buil
 - Expanded the Critical Startup login gate to fourteen detailed deployment, Network, Cloudflare log, invalid-password, request-blocking, reset, logout-all and expiry steps.
 - Preserved Build 230 as the current D1 migration boundary; Build 233 adds no schema change.
 
-Deploy the complete package, hard refresh to service-worker shell v14, and follow `BUILD233_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 233.
+Deploy the complete package, hard refresh to service-worker shell v14, and follow `docs/archive/build-history/BUILD233_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 233.
 
 # Release Notes — Build 232
 
@@ -43,7 +62,7 @@ Deploy the complete package, hard refresh to service-worker shell v14, and follo
 - Expanded Startup’s destructive-action gate to a twelve-step unused-archived versus protected-history production proof.
 - Preserved Build 230 as the current D1 migration boundary; Build 232 adds no schema change.
 
-Deploy the complete package, hard refresh to service-worker shell v13, and follow `BUILD232_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 232.
+Deploy the complete package, hard refresh to service-worker shell v13, and follow `docs/archive/build-history/BUILD232_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 232.
 
 # Release Notes — Build 231
 
@@ -58,7 +77,7 @@ Deploy the complete package, hard refresh to service-worker shell v13, and follo
 - Expanded the Startup runtime gate and Cloudflare checklist with exact product load, queued autosave, reload, offline recovery, `exceededCpu` and `exceededMemory` tests.
 - Preserved Build 230 as the current D1 migration boundary; Build 231 adds no schema change.
 
-Deploy the complete package, hard refresh to service-worker shell v12, and follow `BUILD231_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 231.
+Deploy the complete package, hard refresh to service-worker shell v12, and follow `docs/archive/build-history/BUILD231_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 231.
 
 # Release Notes — Build 230
 
@@ -72,7 +91,7 @@ Deploy the complete package, hard refresh to service-worker shell v12, and follo
 - Synchronized the D1-safe Build 230 migration to all aggregate schemas/current-pass SQL and retired the older synchronizer.
 - Refreshed one-H1, mobile/desktop CSS, image SEO, Markdown consolidation, current handoff, schema, smoke, sanity and next-step guidance.
 
-Back up D1 and confirm Build 229. Apply `database_build230_visual_image_manifest.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the complete package and follow `BUILD230_VALIDATION.md`.
+Back up D1 and confirm Build 229. Apply `database_build230_visual_image_manifest.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the complete package and follow `docs/archive/build-history/BUILD230_VALIDATION.md`.
 
 # Release Notes — Build 229
 
@@ -87,7 +106,7 @@ Back up D1 and confirm Build 229. Apply `database_build230_visual_image_manifest
 - Synchronized the D1-safe Build 229 migration to all aggregate schemas/current-pass SQL and added Release Sanity plus deployment-preflight checks for the three-source authority and exact gate count.
 - Refreshed canonical handoff, status, schema, release, image, mobile/CSS, SEO/H1 and prelaunch documentation.
 
-Back up D1 and confirm Build 228. Apply `database_build229_packaging_reference_authority.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the complete package and follow `BUILD229_VALIDATION.md`.
+Back up D1 and confirm Build 228. Apply `database_build229_packaging_reference_authority.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the complete package and follow `docs/archive/build-history/BUILD229_VALIDATION.md`.
 
 # Release Notes — Build 228
 
@@ -102,7 +121,7 @@ Back up D1 and confirm Build 228. Apply `database_build229_packaging_reference_a
 - Added D1 migration compatibility checks that reject explicit SQL transactions and require numbered/current migrations to match.
 - Refreshed the two canonical handoff files, schema reference, SEO direction, smoke guide, image inventory and ordered next steps.
 
-Back up D1 and confirm Build 227. Apply `database_build228_creative_automation_prelaunch_stages.sql` or identical `database_upgrade_current_pass.sql`, not both. Do not add `BEGIN TRANSACTION`/`SAVEPOINT`. Deploy the complete package and follow `BUILD228_VALIDATION.md` plus `PRELAUNCH_PROCESS_PLAYBOOKS.md`.
+Back up D1 and confirm Build 227. Apply `database_build228_creative_automation_prelaunch_stages.sql` or identical `database_upgrade_current_pass.sql`, not both. Do not add `BEGIN TRANSACTION`/`SAVEPOINT`. Deploy the complete package and follow `docs/archive/build-history/BUILD228_VALIDATION.md` plus `PRELAUNCH_PROCESS_PLAYBOOKS.md`.
 
 # Release Notes — Build 227
 
@@ -116,7 +135,7 @@ Back up D1 and confirm Build 227. Apply `database_build228_creative_automation_p
 - Consolidated current project memory into `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
 - Added Build 227 schema, responsive UI rules, planning SVG placeholders, Release Sanity checks and validation.
 
-Back up D1. Apply `database_build227_unified_business_operations.sql` or the identical `database_upgrade_current_pass.sql`, not both, after confirming the Build 225 baseline. Deploy the complete package and follow `BUILD227_VALIDATION.md`.
+Back up D1. Apply `database_build227_unified_business_operations.sql` or the identical `database_upgrade_current_pass.sql`, not both, after confirming the Build 225 baseline. Deploy the complete package and follow `docs/archive/build-history/BUILD227_VALIDATION.md`.
 
 # Release Notes — Build 226
 
@@ -129,7 +148,7 @@ Back up D1. Apply `database_build227_unified_business_operations.sql` or the ide
 - Strengthened the final deployment blocker so Pages Functions are parsed as ES modules.
 - No D1 schema migration is required; the Build 225 readiness tables and 37 seeded gates remain authoritative.
 
-Deploy the complete Build 226 package and follow `BUILD226_VALIDATION.md`.
+Deploy the complete Build 226 package and follow `docs/archive/build-history/BUILD226_VALIDATION.md`.
 
 # Release Notes — Build 225
 
@@ -143,7 +162,7 @@ Deploy the complete Build 226 package and follow `BUILD226_VALIDATION.md`.
 - Build 223–224 product-detail and seven-image gallery fixes remain included.
 
 ## Deployment
-Back up D1. Apply `database_build225_startup_readiness_packaging_authority.sql` or the identical `database_upgrade_current_pass.sql`, but not both. Deploy the full ZIP and follow `BUILD225_VALIDATION.md`.
+Back up D1. Apply `database_build225_startup_readiness_packaging_authority.sql` or the identical `database_upgrade_current_pass.sql`, but not both. Deploy the full ZIP and follow `docs/archive/build-history/BUILD225_VALIDATION.md`.
 
 # Release Notes — Build 224
 
@@ -165,7 +184,7 @@ Back up D1. Apply `database_build225_startup_readiness_packaging_authority.sql` 
 - Corrected the browser fallback so valid JSON errors such as HTTP 503 now trigger the public catalog fallback; previously only malformed/non-JSON responses did.
 - Added slug to public catalog search and added a complete-catalog retry for older deployed endpoints.
 - Added runtime incident capture for any future unhandled public product-detail failure.
-- No D1 schema migration is required for Build 223. Deploy the complete package after Build 222 and run `BUILD223_VALIDATION.md`.
+- No D1 schema migration is required for Build 223. Deploy the complete package after Build 222 and run `docs/archive/build-history/BUILD223_VALIDATION.md`.
 
 ## Soap Label Studio and startup readiness
 - Added `/admin/packaging/soap-labels/` with a nine-tab exact-size bilingual soap-label editor.
@@ -181,7 +200,7 @@ Back up D1. Apply `database_build225_startup_readiness_packaging_authority.sql` 
 - Updated the soap-label specification, Packaging Studio guide, canonical roadmap/handoff, schema reference, aggregate schemas, current migration and validation documents.
 
 ## Build 222 deployment
-Apply `database_build222_soap_label_startup_readiness.sql` after Build 221, or the identical `database_upgrade_current_pass.sql`, but not both. Then deploy the complete package and follow `BUILD222_VALIDATION.md`.
+Apply `database_build222_soap_label_startup_readiness.sql` after Build 221, or the identical `database_upgrade_current_pass.sql`, but not both. Then deploy the complete package and follow `docs/archive/build-history/BUILD222_VALIDATION.md`.
 
 ---
 

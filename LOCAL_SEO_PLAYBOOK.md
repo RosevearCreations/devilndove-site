@@ -1,5 +1,12 @@
 # Local SEO and Public Content Playbook — Build 230
 
+## Guidance verification — 2026-08-05
+
+Google's current Business Profile guidance continues to describe local results mainly through relevance, distance and prominence. Search documentation continues to favour descriptive, people-first titles/headings, crawlable internal links, consistent visible/structured product facts and useful images. The operating rule remains: improve accurate local relevance and real prominence over time; never guarantee first-page placement.
+
+Primary references: https://support.google.com/business/answer/7091 ; https://developers.google.com/search/docs/fundamentals/seo-starter-guide ; https://developers.google.com/search/docs/specialty/ecommerce ; https://developers.google.com/search/docs/appearance/structured-data/product
+
+
 This is a specialist implementation guide, not a second roadmap. Current priorities are in `PROJECT_STATUS_AND_ROADMAP.md`.
 
 ## Build 230 recurring local-search and image pass

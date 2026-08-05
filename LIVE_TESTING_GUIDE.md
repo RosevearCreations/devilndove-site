@@ -248,4 +248,4 @@ This is a supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `
 
 ## Build 194 testing reference
 
-Use `BUILD194_TESTING_GUIDE.md` after deployment for the homepage, shop quick filters, product listing facts, media-role scoring, workshop journal, visual placeholders, and SEO/H1 verification.
+Use `docs/archive/build-history/BUILD194_TESTING_GUIDE.md` after deployment for the homepage, shop quick filters, product listing facts, media-role scoring, workshop journal, visual placeholders, and SEO/H1 verification.

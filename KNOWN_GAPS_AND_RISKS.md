@@ -1,3 +1,3 @@
-# Retired Gaps and Risks Pointer
+# Known Gaps and Risks — Current Pointer
 
-Current Build 234 risks and production-only evidence gaps are maintained only in `PROJECT_STATUS_AND_ROADMAP.md`. Gate-level evidence belongs in `/admin/startup-readiness/` and the generated 44-gate `STARTUP_GO_LIVE_GUIDE.md`; mutable missing-image evidence belongs in D1 `/admin/image-manifest/`, with `IMAGES_REQUIRED.md` as its capture standard. Soap/ribbon and candle-top physical production proof remains open until the detailed Startup gates pass.
+The authoritative risk register and P0/P1/P2 order are in `PROJECT_STATUS_AND_ROADMAP.md`. Safety, fallback and deployment boundaries are in `AI_HANDOFF.md`. This file intentionally contains no duplicate issue list.
