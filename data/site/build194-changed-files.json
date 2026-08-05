@@ -5,7 +5,7 @@
   "changed_count": 40,
   "removed_count": 0,
   "added_files": [
-    "BUILD194_TESTING_GUIDE.md",
+    "docs/archive/build-history/BUILD194_TESTING_GUIDE.md",
     "assets/visual-placeholders/product-media-roles.svg",
     "assets/visual-placeholders/workshop-discovery.svg",
     "assets/visual-placeholders/workshop-journal.svg",

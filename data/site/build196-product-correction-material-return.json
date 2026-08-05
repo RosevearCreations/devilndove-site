@@ -9,5 +9,5 @@
     "Inventory cards show item name directly below image and no short description block."
   ],
   "required_migration": "database_build196_product_correction_material_returns.sql",
-  "owner_guide": "BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md"
+  "owner_guide": "docs/archive/build-history/BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md"
 }

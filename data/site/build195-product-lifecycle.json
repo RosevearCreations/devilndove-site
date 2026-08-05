@@ -13,7 +13,7 @@
     "product_deletion_audit",
     "site_inventory_item_descriptions"
   ],
-  "owner_guide": "BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md",
+  "owner_guide": "docs/archive/build-history/BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md",
   "notes": [
     "Do not delete products with order/history references; archive them.",
     "Default SKUs are DND-xxxxx only when SKU is blank.",

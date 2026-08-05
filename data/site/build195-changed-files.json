@@ -5,7 +5,7 @@
   "changed_count": 37,
   "removed_count": 0,
   "added_files": [
-    "BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md",
+    "docs/archive/build-history/BUILD195_PRODUCT_LIFECYCLE_INVENTORY_GUIDE.md",
     "data/site/build195-changed-files.json",
     "data/site/build195-product-lifecycle.json",
     "data/site/build195-validation.json",

@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 234",
+  "build_label": "Build 235",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,7 +7,7 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "155 required files are present.",
+      "detail": "158 required files are present.",
       "missing": []
     },
     {
@@ -50,7 +50,7 @@
     {
       "code": "static_markdown_authority",
       "status": "pass",
-      "detail": "Two Build 234 canonical authorities, scoped playbooks, bounded hot routes, five packaging references, guarded duplicate cleanup, visual provenance, historical retirement policy, and 44 generated Startup sections agree.",
+      "detail": "Two Build 235 canonical authorities, scoped playbooks, computed Creative readiness, evidence export, five packaging references, guarded duplicate cleanup, visual provenance, historical archive policy, and 44 generated Startup sections agree.",
       "missing": []
     },
     {
@@ -282,7 +282,7 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 2494/2494"
+      "detail": "CSS braces 2534/2534"
     },
     {
       "code": "static_json_parse",

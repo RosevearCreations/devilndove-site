@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 235",
+    "date": "2026-08-05",
+    "title": "Creative readiness, exception queue and evidence packets",
+    "summary": "Computed seven Creative Automation stage-readiness results from existing specialist records; added blocked/overdue/due-soon/unassigned work queues; added authenticated JSON and accessible print-ready evidence exports; corrected release counting to authoritative content_status; consolidated historical Build Markdown under docs/archive/build-history; retained human review and Build 234 as the current schema boundary."
+  },
+  {
     "build": "Build 233",
     "date": "2026-08-02",
     "title": "Bounded login, lean Worker startup and temporary-session retention",
