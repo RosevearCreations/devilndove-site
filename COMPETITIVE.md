@@ -1,5 +1,23 @@
 # Build 230 competitive direction — visible image operations and local clarity
 
+## Build 235 current competitive check — 2026-08-05
+
+Current direction was checked against Google guidance and active custom-maker examples.
+
+- Google says local visibility is mainly driven by relevance, distance and prominence. Devil n Dove should therefore keep accurate Business Profile facts, strong category/service alignment, real reviews and locally useful pages rather than promise first-page placement: https://support.google.com/business/answer/7091
+- Google ecommerce guidance supports descriptive product/category URLs, crawlable internal links, visible product facts, structured data that agrees with the page, and useful high-quality images near relevant text: https://developers.google.com/search/docs/specialty/ecommerce and https://developers.google.com/search/docs/appearance/structured-data/product
+- Devious Designs demonstrates a clear Ontario/in-house custom-manufacturing identity; Fernwood Hills exposes a simple custom-order/proof process; White's Woodworking uses a credible workshop-made story; Infinite Idea Makers explains a short request-to-proof workflow. These are useful patterns, not facts to copy: https://deviousdesigns.ca/ ; https://fernwoodhills.com/pages/custom-orders ; https://whiteswoodworking.ca/ ; https://infiniteideamakers.com/pages/custom-orders
+
+Competitive actions retained for Devil n Dove:
+
+1. Show a simple custom request → reviewed proof → make → pickup/ship process on relevant pages.
+2. Put authentic workshop/process identity and limitations near the offer; avoid pretending generated art is finished-product evidence.
+3. Use real item dimensions, material, care, availability, turnaround and personalization limits in visible product facts and matching structured data.
+4. Keep one clear H1, descriptive titles/internal links and useful Ontario/Southern Ontario wording without location stuffing.
+5. Build trust with approved process/product photos, policies, contact details, honest reviews and observable completed work.
+6. Keep Creative Automation review-first so a content queue never becomes an unsupported public or provider-success claim.
+
+
 Build 230 turns the missing-image list into a visual, mobile-friendly operating board while retaining specialist media tools. The competitive direction follows current search and commerce guidance: place useful high-quality images near relevant copy, use accurate descriptive alternative text, preserve mobile/desktop parity, and show multiple real product views/details that reduce buyer uncertainty. Generated illustrations may enrich brand/category storytelling but do not replace actual listing photos, process/condition proof or Business Profile media.
 
 Current additional sources:

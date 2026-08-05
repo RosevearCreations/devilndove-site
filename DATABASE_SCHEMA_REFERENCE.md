@@ -1,4 +1,9 @@
-# Devil n Dove Database Schema Reference — Build 234
+# Devil n Dove Database Schema Reference — Build 235
+
+## Build 235 code-only boundary
+
+Build 235 adds no D1 table, column, index, seed or ledger row. The Creative Automation readiness registry is computed at request time from existing specialist tables and is not stored as duplicate status. `database_build234_packaging_templates_creative_cleanup.sql` and byte-identical `database_upgrade_current_pass.sql` remain the current migration boundary.
+
 
 ## Build 234 database boundary
 

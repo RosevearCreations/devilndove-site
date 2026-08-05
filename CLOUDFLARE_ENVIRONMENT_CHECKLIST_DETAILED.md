@@ -1,4 +1,18 @@
-# Cloudflare Environment Checklist — Devil n Dove (Build 234)
+# Cloudflare Environment Checklist — Devil n Dove (Build 235)
+
+## Build 235 Creative readiness, queue and export check
+
+Build 235 adds no environment variable and no D1 migration. Deploy the complete archive, hard refresh to `devilndove-shell-v16`, then:
+
+1. Open `/admin/creative-automation/` while signed in and confirm HTTP 200 JSON from `/api/admin/creative-automation` with `mode: server_readiness_queue_export_specialist_authorities_preserved`.
+2. Use owner-controlled fixtures for one Blocked, one overdue and one unassigned workflow. Confirm priority order and compare owner/due date/blocker with D1.
+3. Open one fully evidenced project and compare every seven-stage check with the linked specialist record. A human Complete review with missing source evidence must remain visibly disagreed, not silently ready.
+4. Confirm an approved/published Content Release record is counted through `content_status`.
+5. Select JSON packet and print-ready packet. Confirm both requests are authenticated, contain only the selected project, use safe filenames and expose no credential/full-payment data.
+6. Print/preview the HTML packet on phone and desktop; check headings, landmarks, table containment and page breaks.
+7. Sign out and request the export URL again. It must return 401 rather than a packet.
+8. In Functions Metrics/Logs, filter `/api/admin/creative-automation`; record invocation status/CPU/wall time for load and both exports. Any repeated 1102, exceeded CPU/memory, malformed/HTML success or cross-project leakage keeps the relevant Startup gate open.
+
 
 _Last updated: Build 234 bounded hot routes, template-driven soap/candle packaging, guarded Creative duplicate cleanup, retained login/product repairs, Build 230 visual manifest, 44-gate Startup system and retained read-only Meta credential tests._
 
@@ -16,7 +30,7 @@ Build 230 introduced no new secret or external-provider variable. Its original 2
 
 Build 233 adds no variable and no D1 migration. It requires the existing Production D1 binding named exactly `DB`. The code removes full schema inspection from every login POST, uses one indexed user read plus one atomic D1 batch, stops temporary session-verification outages from erasing a valid browser token, and keeps the 897-row Amazon reference compressed until an authenticated inventory route requests it.
 
-1. Deploy the complete Build 234 ZIP. Record **Workers & Pages → your Pages project → Deployments → deployment ID/time**.
+1. Deploy the complete Build 235 ZIP. Record **Workers & Pages → your Pages project → Deployments → deployment ID/time**.
 2. Hard refresh `/login/`. In Developer Tools → Application → Service Workers, confirm the current shell is `devilndove-shell-v15`; unregister an older shell only if the hard refresh did not activate v15.
 3. Open Developer Tools → Network, enable **Preserve log**, select **Fetch/XHR**, and keep the panel open.
 4. Open `https://devilndove.com/api/auth/login`. Expect HTTP 200 JSON with `response_profile: auth_login_bounded_v1` and `diagnostic_mode: binding_only`. This default check confirms only that `DB` is present and does not query D1.
@@ -52,7 +66,7 @@ Cloudflare currently documents a 10 ms CPU budget for Workers Free and explains 
 1. Open Cloudflare Dashboard → Workers & Pages → the Devil n Dove project → Metrics → Errors → Invocation Statuses.
 2. Check whether the matching timestamp is **Exceeded CPU Time Limits** or **Exceeded Memory**.
 3. Open Workers Logs and filter for `/api/admin/product-detail`, `/api/admin/create-product` and `/api/admin/update-product`. Record timestamp, route, invocation outcome, CPU time, wall time and a non-secret product ID only.
-4. Confirm the browser is running Build 232 (`devilndove-shell-v13` after refresh), which retains the Build 231 repair. Load Draft product 45 and confirm the Product Detail request returns HTTP 200 JSON with `response_profile: editor_compact_v1`; then autosave twice, edit while the first save is throttled, reload and run the browser-recovery test in `BUILD231_VALIDATION.md`.
+4. Confirm the browser is running Build 232 (`devilndove-shell-v13` after refresh), which retains the Build 231 repair. Load Draft product 45 and confirm the Product Detail request returns HTTP 200 JSON with `response_profile: editor_compact_v1`; then autosave twice, edit while the first save is throttled, reload and run the browser-recovery test in `docs/archive/build-history/BUILD231_VALIDATION.md`.
 5. Keep the Startup `runtime_incident_fallback` gate Failed or Blocked if an `exceededCpu`/`exceededMemory` result recurs. A Worker terminated by Cloudflare may not reach application catch/incident code, so the platform log is required evidence.
 6. Optimize/reduce the failing request before considering a paid-plan CPU-limit increase. Do not treat a higher limit as proof that an unbounded loop, large payload or memory problem is fixed.
 
@@ -852,7 +866,7 @@ https://devilndove-site.pages.dev/admin/command-center/
 
 If login breaks again:
 
-1. Confirm the deployed build is Build 234 or later and service-worker shell v15 is active.
+1. Confirm the deployed build is Build 235 or later and service-worker shell v16 is active.
 2. Confirm `_routes.json` exists at the deployed root.
 3. Confirm Functions are active in the deployment details.
 4. Confirm D1 binding name is `DB`.

@@ -1,5 +1,10 @@
 # Devil n Dove — Images Required
 
+## Build 235 visual-placeholder result
+
+Creative Automation now has a semantic empty/quiet work-queue illustration built in CSS, plus responsive status cards and readiness graphics. It is an admin operating aid only. It does not satisfy any real-product, process, packaging, condition, local-business or customer-evidence image requirement. Existing D1 Image Manifest blockers and this capture/crop specification remain authoritative.
+
+
 **Audited build:** Build 230 — Visual Image Manifest and first generated editorial replacements  
 **Purpose:** Provide the human capture/crop standard for replacing public-facing placeholder graphics with truthful, approved Devil n Dove photography while keeping internal workflow diagrams and clearly disclosed editorial illustrations where useful.  
 **Priority rule:** Replace public storefront/service placeholders first. Admin-only diagrams are not missing product photography and do not need replacement unless we want a different branded illustration.

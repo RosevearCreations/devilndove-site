@@ -1,8 +1,21 @@
-# Devil n Dove AI Handoff — Build 234
+# Devil n Dove AI Handoff — Build 235
 
 This is the first of two canonical current-status files. Read it first for architecture, authority, safety and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for completed work, risks and ordered next steps. Historical Build Markdown remains evidence only.
 
-## Build 234 outcome
+## Build 235 outcome
+
+1. Creative Automation now calculates seven stage-readiness results on the server from the existing specialist authorities. Each stage returns explicit checks, expected facts, actual counts, correction guidance and whether an intentional Not applicable review is allowed.
+2. A human master review remains mandatory. Computed readiness can expose disagreement as `needs_source_evidence`; it cannot silently approve rights, costs, facts, publication or provider results.
+3. The master page now provides one responsive work queue prioritizing blocked, overdue, due-soon and unassigned workflows before ordinary active work.
+4. Each linked project can export an authenticated JSON evidence packet or an accessible print-ready HTML packet containing project/timeline/material, inventory, CAIP, content, review, publication, result and profitability evidence already stored in specialist tables.
+5. Publication readiness now reads the authoritative `content_status` field rather than the nonexistent `publication_status` field, preventing a real approved/published record from being counted as absent.
+6. The browser adds readiness checklists, eight operational metrics, safe authenticated Blob exports, retry/fallback copy and phone/desktop layouts. The admin route remains `noindex,nofollow` and has one H1.
+7. Build 235 is code-only. It adds no D1 table, column, seed or ledger row; the Build 234 numbered/current-pass migration remains the current schema boundary.
+8. Forty-seven superseded Build guides/validation files were moved from the repository root to `docs/archive/build-history/`. `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the only current cross-project authorities; specialist playbooks retain narrow authority.
+9. Release checks now understand the historical archive, and `scripts/build235_creative_readiness_test.mjs` proves source-readiness, queue ordering, publication counting, evidence export, responsive UI and the retained Build 234 schema boundary.
+10. Build 235 does not claim production/provider/physical success. Live Cloudflare, payment, concurrency, email, media-rights, printing/laser and paid/refund evidence remain Startup gates.
+
+## Retained Build 234 outcome
 
 1. Labeling & Packaging is the only active packaging editor. The selected `packaging_templates` row now determines renderer and saved `package_type`; stale project data can no longer turn a soap template into a generic rectangle.
 2. The Glacial Purple soap renderer follows the owner-supplied visual: permanent Rosevear/Devil n Dove, website, Canadian-origin, small-batch, claim and weight elements; a botanical purple rose; centred product hierarchy; English/French panels; rear seal; and editable SVG text.
@@ -62,7 +75,7 @@ This is the first of two canonical current-status files. Read it first for archi
 - Media rights/evidence/intelligence: CAIP records and referenced source media; CAIP never invents consent.
 - Content packages/channel deliverables: Content Studio records.
 - Public release state/history: Content Release Board records.
-- Master creative ownership/stage reviews: three `creative_automation_*` tables only.
+- Master creative ownership/stage reviews: three `creative_automation_*` tables only. Build 235 computes readiness from bounded reads of specialist authorities and writes no duplicate readiness facts.
 - Product/order/payment/refund/inventory/accounting facts: their existing D1 transaction/ledger records.
 - Packaging: `packaging_projects`, normalized soap rows, `packaging_components`, versions, exports and print tests; `PACKAGING_STUDIO.md` is the human specification.
 - Packaging sources: `packaging_reference_sources` and `PACKAGING_REFERENCE_BASELINE.md`; the adopted files remain unchanged at their registered repository paths.
@@ -76,13 +89,13 @@ This is the first of two canonical current-status files. Read it first for archi
 - `/admin/image-manifest/` — 20 seeded static/dynamic image requirements, rights/public/device approvals, evidence and history.
 - `/admin/prelaunch/` — separate process map.
 - `/admin/deployment-preflight/`, `/admin/post-deploy-smoke-tests/`, `/admin/deploy-readiness/`, `/admin/go-live-execution/`, `/admin/live-ops-followthrough/` — standalone release stages.
-- `/admin/creative-automation/` — master creative workflow.
+- `/admin/creative-automation/` — master creative workflow, computed readiness, priority work queue and authenticated project evidence exports.
 - `/admin/creative-process/`, `/admin/creative-assets/`, `/admin/content-studio/`, `/admin/content-publications/`, `/admin/social-publishing/` — specialist creative authorities retained.
 - `/admin/packaging-studio/` — whole-business soap/candle/round/general labels, reusable custom templates, packaging BOM/cost, previews, versions, embedded-artwork exports and print tests.
 - `/admin/customer-documents/` — invoices, receipts, packing slips, credit notes and refund confirmations.
 - `/admin/orders/`, `/admin/accounting/`, `/admin/inventory-operations/` — operational transaction authorities.
 
-## Build 234 database boundary
+## Current database boundary — Build 234 schema, Build 235 code-only
 
 Back up D1 and confirm `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply exactly one:
 
@@ -122,14 +135,16 @@ Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `da
 
 ## Deploy sequence
 
-1. Run the complete Deployment Preflight against the exact folder/archive.
-2. Record a D1 recovery point; confirm the Build 229 and Build 230 ledger keys; apply exactly one Build 234 migration; verify its ledger key, five active packaging references, five new system-template keys and 44 active Startup definitions.
-3. Deploy the complete Build 234 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v15 is active.
+1. Run the complete Build 235 Deployment Preflight and regression suite against the exact folder/archive.
+2. Record a D1 recovery point. If the `build234_packaging_templates_creative_cleanup` ledger key is absent, apply exactly one Build 234 numbered/current-pass migration; otherwise do not reapply it merely for Build 235.
+3. Deploy the complete Build 235 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v16 is active.
 4. Run Post-Deploy Smoke Tests on production.
-5. Confirm all 44 Startup gates load with All statuses, locate both `missing_launch_images` and `candle_top_template_proof`, open the D1 manifest and confirm 20 rows rather than Unsynced fallback.
-6. Link one owner-controlled Creative Project in the master studio; save one stage review with evidence and reload.
-7. Run Build 234 validation, Release Sanity, Product Release Preflight, bounded-login/session-retention proof, product load/autosave/browser recovery, unused-archived-product/protected-history removal, guarded Creative duplicate cleanup, soap/candle physical proofs, visual-manifest phone/desktop review and read-only Meta identity/token checks.
-8. Make a separate Deploy Readiness decision; execute Go-Live only after Ready; continue Live Ops reconciliation.
+5. Confirm all 44 Startup gates load, the image manifest has 20 D1 rows, and degraded fallbacks remain visibly unsynced/read-only.
+6. In Creative Automation, verify the priority queue order with owner-controlled blocked/overdue/unassigned fixtures; open one project and compare every computed check with its specialist authority.
+7. Export the same project as JSON and print-ready HTML. Confirm authentication, safe filenames, one H1/landmarks, complete factual sections and no credential/private-payment leakage.
+8. Save one human stage review with evidence, reload, and confirm computed disagreement is shown rather than overwritten.
+9. Run Build 235 validation plus the retained bounded-login, product autosave, product removal, guarded duplicate cleanup, packaging physical proof, visual-manifest and provider read-only checks.
+10. Make a separate Deploy Readiness decision; execute Go-Live only after Ready; continue Live Ops reconciliation.
 
 ## Not claimed complete
 

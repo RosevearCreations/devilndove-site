@@ -1,63 +1,60 @@
-# Devil n Dove Creative Automation Studio — Build 230
+# Devil n Dove Creative Automation Studio — Build 235
 
-Build 230 does not change this orchestration boundary. It adds a D1 Visual Image Manifest and generated-editorial provenance; Creative Automation may link that evidence but cannot approve packaging geometry, turn an illustration into product proof or make placeholder media launch-ready.
-
-Creative Automation Studio is the master operating process for product stories, media, channel content and public release. It combines navigation, ownership, seven stages and evidence without deleting or duplicating specialist features.
+Creative Automation is the master operating view for a Creative Process project. It coordinates ownership, deadlines, seven human-reviewed stages and evidence without copying or replacing specialist facts.
 
 ## Authority model
 
-| Stage | Specialist authority | Master responsibility |
+| Stage | Specialist authority | Build 235 computed evidence |
 |---|---|---|
-| 1. Creative process | Creative Process Engine | Owner, status, due date and cross-stage progress |
-| 2. Materials, inventory and cost | Creative Process material reviews and audited inventory actions | Readiness/evidence pointer only |
-| 3. Assets, rights and evidence | Creative Asset Intelligence Platform (CAIP) | Rights/evidence stage decision |
-| 4. Content package | Content Automation Studio records | Handoff and package-stage decision |
-| 5. Channel drafts and approvals | Content Studio deliverables and Social Publishing | Approval-stage decision; never inferred publishing |
-| 6. Public release | Content Release Board/publication history | Release-stage decision and evidence link |
-| 7. Measure, learn and repurpose | Analytics, outputs and reviewed lessons | Final factual result/next-use decision |
+| 1. Creative process | Creative Process Engine | Saved project summary plus factual timeline event |
+| 2. Materials, inventory and cost | Material reviews, inventory posts/reversals, profitability | Reviewed material state and documented cost/profitability evidence; deliberate Not applicable allowed when no material applies |
+| 3. Assets, rights and evidence | CAIP and evidence selections | Selected evidence plus CAIP mirror/rights review |
+| 4. Content package | Content handoff and Content Studio project | Source-linked handoff/project and deliverable plan |
+| 5. Channel drafts and approvals | Content deliverables and Social Publishing | Intended deliverables approved or deliberately excluded; queue status is never publication proof |
+| 6. Public release | Content Release Board/publication history | Approved or published `content_status` plus observable release evidence |
+| 7. Measure, learn and repurpose | Outputs, publications and reviewed knowledge | Finished output/result evidence plus reviewed lesson or recommendation |
 
-The master tables store orchestration only:
+The master tables remain orchestration only:
 
-- `creative_automation_workflows`: one row per Creative Process project, owner/status/current stage/due date/blocker/notes.
-- `creative_automation_stage_reviews`: one reviewed status and evidence reference per stage.
-- `creative_automation_events`: append-only workflow and stage transition history.
+- `creative_automation_workflows` — owner, status, stage, due date, blocker and notes.
+- `creative_automation_stage_reviews` — one human review/evidence pointer per stage.
+- `creative_automation_events` — append-only workflow/review history.
 
-Project facts, media, deliverables, publications, provider results, inventory movements and accounting facts stay in their existing authoritative tables. JSON remains appropriate for static templates and public read-only configuration; changing business status belongs in D1.
+Computed readiness is returned from bounded reads of specialist tables. It is not stored as a competing business fact.
+
+## Work queue
+
+The page prioritizes work in this order: Blocked, Overdue, Due soon, Unassigned, then Active. A queue card shows project, stage, owner, due date and blocker. Dates are operational aids; the saved D1 workflow remains authoritative.
 
 ## Operator procedure
 
-1. Open `/admin/creative-automation/` and choose an existing Creative Process project.
-2. Select **Add to master workflow**. This links the project; it does not copy its specialist records.
-3. Set workflow owner/status/current stage/due date. A Blocked workflow requires the exact blocker.
-4. Open the stage’s specialist workspace and complete its native review/actions.
-5. Return to the master page. Compare the displayed source facts with the specialist result.
-6. Choose the stage review status. Complete requires a safe evidence URL or record reference; Blocked requires correction notes.
-7. Move to the next stage only when the specialist evidence and stated pass condition agree.
-8. If the master API fails, use the displayed specialist links. Do not assume any unsaved master change reached D1.
+1. Open `/admin/creative-automation/` and select an existing Creative Process project.
+2. Select **Add to master workflow** if it is not already linked.
+3. Save owner/status/stage/due date. A Blocked workflow requires the exact blocker and next action.
+4. Review each server-computed check against the linked specialist workspace. Correct the source authority rather than editing a count in the master page.
+5. Save a human stage review. Complete requires a safe evidence reference; Blocked requires correction notes. Use Not applicable only where the rule explicitly permits it.
+6. Reload and confirm the human review and computed source state agree. A disagreement is shown as needing source evidence; it is not silently passed.
+7. Use **JSON packet** for machine-readable evidence or **Print-ready packet** for an accessible review/filing copy. Both require an authenticated admin request.
+8. Record provider/public IDs or URLs only after they are observable. Drafted, queued or approved content is not the same as published content.
 
-## Review rules
+## Evidence packet
 
-- Human approval remains mandatory for facts, rights/privacy, public copy, channel media and publish actions.
-- A completed master review cannot make an unready specialist record ready. The UI reports `needs_source_evidence` when these disagree.
-- Publishing success requires a provider/public ID or observable public result; a queued draft is not published.
-- Inventory posting/reversal, pricing, payment, refunds and customer documents use their own audited systems.
-- Product/customer/private media is not public until its rights/privacy status allows the intended use.
-- Never put credentials, access tokens, private customer data or full payment data in evidence fields.
+The packet includes available project/workflow facts, timeline, materials, inventory posting/reversal, outputs, product links, evidence selections, CAIP mirrors, content handoffs/projects/media/deliverables, stage reviews/events, publication events, profitability/allocation and knowledge summaries. Missing specialist tables or optional records produce empty sections rather than invented facts.
 
-## Mobile operating pattern
+Never include credentials, access tokens, full payment data or unrelated private customer data in notes/evidence fields. Review print output before filing or sharing.
 
-At phone width the project list, workflow form and stage cards stack vertically; buttons become full-width touch targets and tables scroll inside their own container. Operators can resume from the current stage and use direct specialist links. A future enhancement should add camera-first evidence upload and explicit offline-draft synchronization, while preserving the current rule that browser-only changes are visibly unsynced.
+## Mobile, accessibility and fallback
 
-## Failure and fallback
+Metrics and cards use auto-fit layouts; project/stage controls stack at phone width; tables remain contained; actions retain touch-sized targets. The HTML packet uses headings, landmarks, labelled tables and print CSS. When the master endpoint fails, Retry and specialist routes remain available, and no approval/publish claim is fabricated.
 
-When the master endpoint is unavailable, the page shows a failure message, Retry and all specialist routes. It never reports an approval or publish action as successful. Runtime failures are sent to the incident system with sanitized context. Correct the dependency, retry the master load and confirm the saved D1 event before relying on the stage decision.
+## Guarded duplicate cleanup
+
+Permanent deletion remains limited to untouched accidental project shells after exact `DELETE <project_key>` confirmation. Timeline, inventory, evidence, content, cost, review, publication or other meaningful history blocks deletion and must be preserved.
 
 ## Next improvements
 
-1. Add a server-computed readiness rule registry per stage instead of the current conservative source-count checks.
-2. Add camera-first mobile evidence upload with R2 derivative/rights checks.
-3. Add deliberate batch review for low-risk drafts while retaining per-item approval and rollback.
-4. Add provider result reconciliation for Meta and future channels.
-5. Add analytics result snapshots and experiment comparisons without writing inferred performance.
-6. Add notification/assignment queues for overdue and blocked stages.
-7. Add accessible print/export of a complete project evidence packet.
+1. Camera-first mobile evidence upload with R2 rights, derivative and explicit offline recovery.
+2. Observable provider-result reconciliation for Meta and future channels.
+3. Delivery/retry-backed notifications for blocked, overdue and failed approval work.
+4. Reviewed analytics snapshots and experiment comparison without inferred performance.
+5. Deliberate low-risk batch review only after per-item evidence and rollback remain visible.
