@@ -1,10 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" role="img" aria-labelledby="t d">
-<title id="t">Quantity specials and limited product sets</title><desc id="d">A product with volume price breaks and a set assembled from reserved component products.</desc>
-<rect width="1200" height="640" rx="32" fill="#f4efe7"/>
-<g fill="none" stroke="#2f2b28" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-<rect x="80" y="120" width="300" height="390" rx="28"/><path d="M145 220h170M145 275h170M145 330h170"/><path d="m145 405 48 46 105-115"/>
-<rect x="475" y="135" width="260" height="150" rx="24"/><rect x="475" y="355" width="260" height="150" rx="24"/><path d="M760 210h105M760 430h105"/><path d="m835 180 35 30-35 30M835 400l35 30-35 30"/>
-<rect x="885" y="185" width="235" height="270" rx="30"/><path d="M940 260h125M940 320h125M940 380h85"/>
-</g>
-<g font-family="Arial,sans-serif" fill="#2f2b28" text-anchor="middle"><text x="230" y="565" font-size="30" font-weight="700">Quantity pricing</text><text x="605" y="205" font-size="28" font-weight="700">Component A</text><text x="605" y="425" font-size="28" font-weight="700">Component B</text><text x="1002" y="510" font-size="30" font-weight="700">Reserved set</text></g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-labelledby="title desc">
+  <title id="title">Product pricing photo</title>
+  <desc id="desc">Representative product set and pricing photo</desc>
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(23,10,45,0.08)"/><stop offset="1" stop-color="rgba(23,10,45,0.42)"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#f6efe5"/>
+  <image href="/assets/real-media/product-detail-photo.webp" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="100%" height="100%" fill="url(#fade)"/>
+  <rect x="24" y="24" width="1552" height="952" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.68" stroke-width="6"/>
 </svg>

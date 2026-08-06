@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="t d"><title id="t">Product process image placeholder</title><desc id="d">A workshop process placeholder showing a tool, workbench, and finished piece.</desc><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#3a2549"/><stop offset="1" stop-color="#17131f"/></linearGradient></defs><rect width="640" height="420" rx="30" fill="url(#g)"/><rect x="70" y="255" width="500" height="70" rx="18" fill="#f0d49a" opacity=".18"/><circle cx="200" cy="185" r="74" fill="#f0d49a" opacity=".16"/><path d="M165 196l70-70 25 25-70 70z" fill="#f0d49a" opacity=".75"/><path d="M355 142h120v120H355z" fill="none" stroke="#f0d49a" stroke-width="12" opacity=".72"/><text x="320" y="365" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="#f6e9c8">Approved process photo goes here</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-labelledby="title desc">
+  <title id="title">Product process photo</title>
+  <desc id="desc">Representative product making process photo</desc>
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(23,10,45,0.08)"/><stop offset="1" stop-color="rgba(23,10,45,0.42)"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#f6efe5"/>
+  <image href="/assets/real-media/workshop-process-photo.webp" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="100%" height="100%" fill="url(#fade)"/>
+  <rect x="24" y="24" width="1552" height="952" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.68" stroke-width="6"/>
+</svg>

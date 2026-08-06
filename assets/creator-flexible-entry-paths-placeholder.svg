@@ -1,9 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
-<title id="title">Flexible Devil n Dove creator entry paths</title><desc id="desc">Creative Project, phone capture, and direct product entry can connect without requiring every product to belong to a project.</desc>
-<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#18232e"/><stop offset="1" stop-color="#30243b"/></linearGradient></defs>
-<rect width="1200" height="560" rx="36" fill="url(#bg)"/><g fill="none" stroke="#d9b66f" stroke-width="6" stroke-linecap="round"><path d="M300 280h150"/><path d="M750 280h150"/><path d="M600 160v90"/><path d="M600 310v90"/></g>
-<g font-family="Arial,sans-serif" text-anchor="middle"><rect x="55" y="185" width="245" height="190" rx="24" fill="#243646" stroke="#7fbac5" stroke-width="3"/><text x="178" y="245" fill="#fff" font-size="30" font-weight="700">Creative Project</text><text x="178" y="292" fill="#cbd8df" font-size="21">Process, media, costs,</text><text x="178" y="323" fill="#cbd8df" font-size="21">lessons and outputs</text>
-<rect x="450" y="65" width="300" height="170" rx="24" fill="#3a3142" stroke="#d9b66f" stroke-width="3"/><text x="600" y="130" fill="#fff" font-size="30" font-weight="700">Phone Capture</text><text x="600" y="178" fill="#ddd3e5" font-size="21">Optional project selector</text>
-<rect x="450" y="325" width="300" height="170" rx="24" fill="#3a3142" stroke="#d9b66f" stroke-width="3"/><text x="600" y="390" fill="#fff" font-size="30" font-weight="700">Direct Product Entry</text><text x="600" y="438" fill="#ddd3e5" font-size="21">May stay independent</text>
-<rect x="900" y="185" width="245" height="190" rx="24" fill="#243646" stroke="#7fbac5" stroke-width="3"/><text x="1022" y="245" fill="#fff" font-size="30" font-weight="700">Product Outputs</text><text x="1022" y="292" fill="#cbd8df" font-size="21">One project can link</text><text x="1022" y="323" fill="#cbd8df" font-size="21">several products</text>
-<text x="600" y="535" fill="#f2ead8" font-size="24" font-weight="700">Link when useful. Never force an unrelated product into a project.</text></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-labelledby="title desc">
+  <title id="title">Creator entry photo</title>
+  <desc id="desc">Representative creator workflow photo</desc>
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(23,10,45,0.08)"/><stop offset="1" stop-color="rgba(23,10,45,0.42)"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#f6efe5"/>
+  <image href="/assets/real-media/workshop-process-photo.webp" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="100%" height="100%" fill="url(#fade)"/>
+  <rect x="24" y="24" width="1552" height="952" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.68" stroke-width="6"/>
+</svg>

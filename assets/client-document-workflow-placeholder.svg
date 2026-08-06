@@ -1,9 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-labelledby="title desc">
-  <title id="title">Client document workflow placeholder</title><desc id="desc">Stylized invoice, packing slip and credit note cards connected by review and print steps.</desc>
-  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#251733"/><stop offset="1" stop-color="#5a2a86"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-opacity=".3"/></filter></defs>
-  <rect width="960" height="640" rx="36" fill="url(#bg)"/><circle cx="800" cy="110" r="150" fill="#b88a2f" opacity=".16"/><circle cx="150" cy="560" r="180" fill="#f7f0e2" opacity=".08"/>
-  <g filter="url(#shadow)"><rect x="95" y="115" width="270" height="360" rx="18" fill="#fffaf0" transform="rotate(-5 230 295)"/><rect x="345" y="85" width="270" height="390" rx="18" fill="#fff"/><rect x="600" y="125" width="270" height="350" rx="18" fill="#f8f0ff" transform="rotate(5 735 300)"/></g>
-  <g fill="#32105e"><text x="375" y="140" font-family="Georgia,serif" font-size="28" font-weight="700">INVOICE</text><text x="125" y="175" font-family="Georgia,serif" font-size="24" font-weight="700">PACKING SLIP</text><text x="640" y="185" font-family="Georgia,serif" font-size="24" font-weight="700">CREDIT NOTE</text></g>
-  <g stroke="#b88a2f" stroke-width="8" stroke-linecap="round" opacity=".8"><path d="M125 215h190M125 250h150M125 285h185M380 180h200M380 225h165M380 270h200M635 225h185M635 265h145M635 305h175"/><path d="M125 345h190M125 385h130M380 340h200M380 385h200M635 370h185M635 410h120"/></g>
-  <g fill="#fff" font-family="Arial,sans-serif" text-anchor="middle"><rect x="255" y="510" width="150" height="58" rx="29" fill="#7b4da6"/><text x="330" y="547" font-size="18" font-weight="700">REVIEW</text><path d="M410 539h120" stroke="#e8be69" stroke-width="8" stroke-linecap="round"/><path d="m520 522 22 17-22 17" fill="none" stroke="#e8be69" stroke-width="8"/><rect x="555" y="510" width="150" height="58" rx="29" fill="#b88a2f"/><text x="630" y="547" font-size="18" font-weight="700">PRINT / PDF</text></g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-labelledby="title desc">
+  <title id="title">Client documents workflow photo</title>
+  <desc id="desc">Representative business/admin support photo</desc>
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(23,10,45,0.08)"/><stop offset="1" stop-color="rgba(23,10,45,0.42)"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#f6efe5"/>
+  <image href="/assets/real-media/maker-portrait-photo.webp" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="100%" height="100%" fill="url(#fade)"/>
+  <rect x="24" y="24" width="1152" height="1152" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.68" stroke-width="6"/>
 </svg>

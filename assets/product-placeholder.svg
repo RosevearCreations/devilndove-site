@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-labelledby="title desc">
-  <title id="title">Catalog cleanup photo</title>
-  <desc id="desc">Representative catalog and workshop product photo</desc>
+  <title id="title">Product photo</title>
+  <desc id="desc">Representative product photo</desc>
   <defs>
     <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(23,10,45,0.08)"/><stop offset="1" stop-color="rgba(23,10,45,0.42)"/></linearGradient>
   </defs>

@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="t d"><title id="t">Product material image placeholder</title><desc id="d">A material-detail placeholder with close-up texture shapes.</desc><defs><pattern id="p" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M0 16h32M16 0v32" stroke="#f0d49a" stroke-opacity=".13" stroke-width="2"/></pattern></defs><rect width="640" height="420" rx="30" fill="#24182e"/><rect x="70" y="70" width="220" height="220" rx="26" fill="url(#p)" stroke="#f0d49a" stroke-opacity=".5" stroke-width="8"/><circle cx="430" cy="180" r="100" fill="#c28add" opacity=".24" stroke="#f0d49a" stroke-opacity=".5" stroke-width="8"/><text x="320" y="350" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="#f6e9c8">Approved material and texture close-up</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-labelledby="title desc">
+  <title id="title">Product materials photo</title>
+  <desc id="desc">Representative materials and tools photo</desc>
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(23,10,45,0.08)"/><stop offset="1" stop-color="rgba(23,10,45,0.42)"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#f6efe5"/>
+  <image href="/assets/real-media/tools-supplies-photo.webp" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="100%" height="100%" fill="url(#fade)"/>
+  <rect x="24" y="24" width="1552" height="952" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.68" stroke-width="6"/>
+</svg>

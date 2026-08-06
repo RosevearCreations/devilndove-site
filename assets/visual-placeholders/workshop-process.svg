@@ -1,10 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
-<title>Workshop process placeholder</title><desc>Workshop process placeholder for approved future visual enrichment.</desc>
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6d4b7d"/><stop offset="1" stop-color="#15111c"/></linearGradient><radialGradient id="r" cx="70%" cy="20%" r="50%"><stop offset="0" stop-color="#caa45d" stop-opacity=".72"/><stop offset="1" stop-color="#caa45d" stop-opacity="0"/></radialGradient></defs>
-<rect width="1200" height="800" fill="url(#g)"/><rect width="1200" height="800" fill="url(#r)"/>
-<circle cx="220" cy="180" r="96" fill="#caa45d" opacity=".18"/><circle cx="980" cy="620" r="150" fill="#caa45d" opacity=".14"/>
-<path d="M145 560 C 310 430, 430 640, 610 505 S 895 415, 1045 552" fill="none" stroke="#caa45d" stroke-width="18" stroke-linecap="round" opacity=".42"/>
-<rect x="118" y="118" width="964" height="564" rx="44" fill="none" stroke="rgba(255,255,255,.38)" stroke-width="8" stroke-dasharray="22 18"/>
-<text x="600" y="372" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="800" fill="#fff">Process photo slot</text>
-<text x="600" y="430" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="rgba(255,255,255,.78)">Replace with approved Devil n Dove media</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-labelledby="title desc">
+  <title id="title">Workshop process photo</title>
+  <desc id="desc">Real workshop and making process photo</desc>
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(23,10,45,0.08)"/><stop offset="1" stop-color="rgba(23,10,45,0.42)"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#f6efe5"/>
+  <image href="/assets/real-media/workshop-process-photo.webp" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="100%" height="100%" fill="url(#fade)"/>
+  <rect x="24" y="24" width="1552" height="952" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.68" stroke-width="6"/>
 </svg>

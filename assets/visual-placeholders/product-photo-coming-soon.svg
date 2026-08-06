@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" aria-labelledby="title desc"><title id="title">Product photo placeholder</title><desc id="desc">A neutral workshop placeholder showing a camera frame, sparkle and an upcoming product photo note.</desc><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8e9d8"/><stop offset="1" stop-color="#cde7f6"/></linearGradient></defs><rect width="760" height="520" rx="38" fill="url(#g)"/><rect x="133" y="112" width="494" height="296" rx="28" fill="#fff9f1" stroke="#553829" stroke-width="12"/><path d="M220 342l88-95 73 67 63-73 96 101H220z" fill="#e9b365"/><circle cx="485" cy="194" r="39" fill="#78b9d5"/><path d="M290 112l22-42h135l22 42" fill="#fff9f1" stroke="#553829" stroke-linejoin="round" stroke-width="12"/><path d="M582 79l8 21 21 8-21 8-8 21-8-21-21-8 21-8z" fill="#c37b2f"/><text x="380" y="466" text-anchor="middle" font-family="system-ui, sans-serif" font-size="25" font-weight="700" fill="#553829">Workshop photo coming soon</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-labelledby="title desc">
+  <title id="title">Product photo available</title>
+  <desc id="desc">Representative product photo while item-specific media is gathered</desc>
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(23,10,45,0.08)"/><stop offset="1" stop-color="rgba(23,10,45,0.42)"/></linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#f6efe5"/>
+  <image href="/assets/real-media/product-detail-photo.webp" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="100%" height="100%" fill="url(#fade)"/>
+  <rect x="24" y="24" width="1552" height="952" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.68" stroke-width="6"/>
+</svg>
