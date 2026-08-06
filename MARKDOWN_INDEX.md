@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 235
+# Devil n Dove Markdown Index — Build 236
 
 ## Two current authorities
 
@@ -18,8 +18,8 @@ A new AI/chat reads these two first. No other Markdown file may override them.
 
 ## Current release files
 
-- `BUILD235_CHANGED_FILES.md`
-- `BUILD235_VALIDATION.md`
+- `BUILD236_CHANGED_FILES.md`
+- `BUILD236_VALIDATION.md`
 - `RELEASE_NOTES.md`
 - `SANITY_HEALTH_CHECK.md`
 - `data/site/release-package-manifest.json`
