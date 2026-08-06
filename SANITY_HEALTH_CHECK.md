@@ -1,3 +1,5 @@
+Build 236 summary: Packaging keeps one whole-business system, the soap preview is visually closer to the approved polished label, and the most visible placeholder SVGs now render photo-backed wrappers from repository media while preserving stable paths. Build 236 remains code-only; live provider, physical packaging and item-specific product-photo evidence are still required.
+
 # Devil n Dove Sanity and Health Check — Build 235
 
 ## Structural result

@@ -1,3 +1,11 @@
+# Build 236 Release Notes
+
+- Polished the reusable soap-ribbon SVG label preview so it better matches the approved Glacial Purple structure.
+- Replaced common placeholder SVGs with photo-backed wrappers while preserving existing asset paths.
+- Added reusable raster assets under `assets/real-media/` and missing compatibility placeholder routes.
+- Updated the release trail and current-status pointers for Build 236.
+
+
 # Build 235 — Creative readiness, exception queue and evidence packets
 
 Date: 2026-08-05

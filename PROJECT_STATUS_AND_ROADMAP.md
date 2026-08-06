@@ -1,6 +1,15 @@
-# Devil n Dove Project Status and Roadmap — Build 235
+# Devil n Dove Project Status and Roadmap — Build 236
 
-This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 235 work, launch position, gaps and ordered next actions.
+This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 236 work, launch position, gaps and ordered next actions.
+
+## Build 236 completed work
+
+1. Polished the soap-ribbon SVG renderer so the live editable preview more closely follows the owner-approved Glacial Purple label: a wider front oval, more centered wording, cleaner separators and a smaller integrated round seal.
+2. Kept the reusable-template, product-data, bilingual, claims, compliance, versioning and export workflow inside the same Labeling & Packaging System.
+3. Replaced the most common placeholder SVGs with photo-backed SVG wrappers so existing page and database paths now render real raster imagery without route-by-route breakage.
+4. Created a reusable `assets/real-media/` set from existing repository photos and approved packaging references, then reused those assets across public and selected admin views.
+5. Added compatibility placeholder assets for event, pickup, tools and generic product routes that were referenced by schema/manifests but missing from the working tree.
+6. Refreshed the Build trail (`BUILD236_*`, release notes, sanity and new-chat pointers) while keeping `AI_HANDOFF.md` and this file as the only two current authorities.
 
 ## Build 235 completed work
 
