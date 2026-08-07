@@ -43,7 +43,7 @@ for (const response of [
 ]) {
   const nodes = await renderWithResponse(response);
   const cards = nodes.startupReadinessMount.innerHTML.match(/data-key=/g) ?? [];
-  assert.equal(cards.length, 37, 'degraded mode must retain all 37 readiness gates');
+  assert.equal(cards.length, 46, 'degraded mode must retain all current 46 readiness gates');
   assert.match(nodes.startupReadinessMount.innerHTML, /Degraded mode/);
   assert.doesNotMatch(nodes.startupReadinessMount.innerHTML, /No readiness items match these filters/);
   assert.match(nodes.startupReadinessMessage.textContent, /startup service/i);

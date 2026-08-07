@@ -9,16 +9,16 @@ const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
 const read=(name)=>fs.readFileSync(path.join(root,name),'utf8');
 const hash=(name)=>crypto.createHash('sha256').update(fs.readFileSync(path.join(root,name))).digest('hex');
 const retainedMigration=read('database_build234_packaging_templates_creative_cleanup.sql');
-const migration=read('database_build240_operational_evidence_continuity.sql');
-assert.equal(read('database_upgrade_current_pass.sql'),migration,'Current-pass migration must equal the numbered Build 240 migration.');
+const migration=read('database_build241_caip_large_media_intake.sql');
+assert.equal(read('database_upgrade_current_pass.sql'),migration,'Current-pass migration must equal the numbered Build 241 migration.');
 assert(!/^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b/im.test(migration),'Migration contains an explicit transaction statement.');
 for(const key of ['candle-top-wedding-4in-v1','candle-top-wedding-3-5in-v1','candle-top-round-3in-v1','round-maker-mark-4in-v1','product-label-oval-2x1-5in-v1','build234_packaging_templates_creative_cleanup','candle_top_template_proof'])assert(retainedMigration.includes(key),`Retained Build 234 migration is missing ${key}.`);
-for(const key of ['build240_operational_evidence_continuity','operational_workstreams','production_evidence_cases','public_page_audit_results'])assert(migration.includes(key),`Build 240 migration is missing ${key}.`);
+for(const key of ['build241_caip_large_media_intake','caip_media_upload_sessions','caip_media_processing_jobs','caip_private_large_media_intake'])assert(migration.includes(key),`Build 241 migration is missing ${key}.`);
 for(const aggregate of ['database_schema.sql','database_full_schema.sql','database_store_schema.sql']){
   const db=new DatabaseSync(':memory:');db.exec(read(aggregate));db.exec(migration);db.exec(migration);
   assert.equal(db.prepare("SELECT COUNT(*) n FROM packaging_templates WHERE template_key IN ('candle-top-wedding-4in-v1','candle-top-wedding-3-5in-v1','candle-top-round-3in-v1','round-maker-mark-4in-v1','product-label-oval-2x1-5in-v1')").get().n,5,`${aggregate} does not retain five Build 234 templates.`);
   assert.equal(db.prepare('SELECT COUNT(*) n FROM packaging_reference_sources WHERE is_active=1').get().n,5,`${aggregate} does not retain five adopted references.`);
-  assert.equal(db.prepare('SELECT COUNT(*) n FROM startup_readiness_items WHERE is_active=1').get().n,45,`${aggregate} does not retain 45 Startup gates.`);
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM startup_readiness_items WHERE is_active=1').get().n,46,`${aggregate} does not retain 46 Startup gates.`);
   assert.equal(db.prepare("SELECT COUNT(*) n FROM schema_migration_ledger WHERE migration_key='build240_operational_evidence_continuity'").get().n,1,`${aggregate} duplicates the Build 240 ledger row.`);
 }
 
@@ -60,5 +60,5 @@ fs.writeFileSync('/tmp/build234-candle-top-preview.svg',svg.replaceAll('href="/a
 
 for(const page of ['admin/packaging-studio/index.html','admin/creative-automation/index.html'])assert.equal((read(page).match(/<h1\b/gi)||[]).length,1,`${page} must have exactly one H1.`);
 assert(read('css/styles.css').includes('data-preview-shape="round"'),'Round responsive preview CSS is missing.');
-assert(read('STARTUP_GO_LIVE_GUIDE.md').includes('This guide contains 45 gates.'),'Generated Startup guide gate count is stale.');
+assert(read('STARTUP_GO_LIVE_GUIDE.md').includes('This guide contains 46 gates.'),'Generated Startup guide gate count is stale.');
 console.log('Build 234 packaging, candle-top, guarded deletion, bounded D1 and schema checks passed.');

@@ -6,15 +6,15 @@ const api=fs.readFileSync(new URL('../functions/api/admin/startup-readiness.js',
 const itemsStart=api.indexOf('const STARTUP_ITEMS = ')+22;
 const itemsEnd=api.indexOf('\n];',itemsStart)+2;
 const items=JSON.parse(api.slice(itemsStart,itemsEnd));
-assert.equal(items.length,43,'all 42 prior gates plus the distinct missing-image gate are required');
-assert.equal(new Set(items.map((row)=>row.key)).size,43,'gate keys must be unique');
-assert.match(api,/const BUILD = '229'/);
+assert.equal(items.length,46,'current authority must retain the missing-image gate plus current additions');
+assert.equal(new Set(items.map((row)=>row.key)).size,46,'gate keys must be unique');
+assert.match(api,/const BUILD = '241'/);
 for(const key of ['deployment_preflight_standalone','post_deploy_smoke_standalone','deploy_readiness_standalone','go_live_execution_standalone','live_ops_followthrough_standalone','missing_launch_images']) assert.ok(items.some((row)=>row.key===key),`${key} must remain explicit`);
 const imageGate=items.find((row)=>row.key==='missing_launch_images');
 assert.equal(imageGate.severity,'critical');
 assert.match(imageGate.external,/IMAGES_REQUIRED\.md/);
 assert.match(imageGate.instructions,/placeholder/i);
-assert.match(imageGate.pass,/phone\/desktop evidence/i);
+assert.match(imageGate.pass,/phone\/desktop (?:evidence|review history)/i);
 for(const row of items){assert.ok(row.instructions.split('\n').length>=6,`${row.key} needs at least six numbered steps`);assert.ok(row.pass.length>30,`${row.key} needs a substantive pass condition`);assert.ok(api.includes(`${row.key}:'`)||api.includes(`${row.key}:"`),`${row.key} needs gate-specific correction focus`);}
 
 const source=fs.readFileSync(new URL('../public/js/admin-startup-readiness.js',import.meta.url),'utf8');
@@ -24,6 +24,6 @@ async function renderWithResponse(response){
   vm.runInNewContext(source,context,{filename:'admin-startup-readiness.js'});await readyHandler();return nodes;
 }
 for(const response of [new Response('<!doctype html><title>Fallback page</title>',{status:200}),Response.json({ok:true,build:'229',expected_total:43,items:[]})]){
-  const nodes=await renderWithResponse(response);assert.equal((nodes.startupReadinessMount.innerHTML.match(/data-key=/g)||[]).length,43);assert.match(nodes.startupReadinessMount.innerHTML,/Replace every missing, broken, fallback, or placeholder launch image/);assert.match(nodes.startupReadinessMount.innerHTML,/Complete Deployment Preflight as a standalone/);assert.match(nodes.startupReadinessMount.innerHTML,/Run Go-Live Execution as a standalone/);assert.doesNotMatch(nodes.startupReadinessMount.innerHTML,/No readiness items match these filters/);
+  const nodes=await renderWithResponse(response);assert.equal((nodes.startupReadinessMount.innerHTML.match(/data-key=/g)||[]).length,46);assert.match(nodes.startupReadinessMount.innerHTML,/Replace every missing, broken, fallback, or placeholder launch image/);assert.match(nodes.startupReadinessMount.innerHTML,/Complete Deployment Preflight as a standalone/);assert.match(nodes.startupReadinessMount.innerHTML,/Run Go-Live Execution as a standalone/);assert.doesNotMatch(nodes.startupReadinessMount.innerHTML,/No readiness items match these filters/);
 }
 console.log('Build 229 Startup Readiness 43-gate authority, missing-image blocker, and degraded UI: PASS');
