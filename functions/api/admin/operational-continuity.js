@@ -1,5 +1,5 @@
-// Build 240 — production evidence, continuity, packaging safeguards, SEO observation and mobile recovery.
-// This route never creates schema at request time. Apply database_build240_operational_evidence_continuity.sql first.
+// Build 241 — production evidence, continuity, packaging safeguards, SEO observation, mobile recovery and CAIP intake status.
+// This route never creates schema at request time. Apply Build 240 first, then the current Build 241 migration.
 
 import {
   getAdminUserFromRequest,
@@ -10,7 +10,7 @@ import {
   captureRuntimeIncident
 } from '../_lib/adminAudit.js';
 
-const BUILD_LABEL = 'Build 240';
+const BUILD_LABEL = 'Build 241';
 const MAX_TEXT = 3000;
 const MAX_JSON = 24000;
 const WORKSTREAM_STATUSES = new Set(['planned','ready_to_test','in_progress','blocked','complete','not_applicable']);
@@ -68,7 +68,7 @@ async function summary(db) {
     all(db, `SELECT * FROM public_page_audit_results WHERE build_label=? ORDER BY CASE audit_status WHEN 'failed' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END,page_path LIMIT 150`, [BUILD_LABEL]),
     all(db, `SELECT * FROM route_fallback_policies ORDER BY route_kind,route_path LIMIT 80`),
     all(db, `SELECT * FROM mobile_operations_cards WHERE card_status!='hidden' ORDER BY card_group,sort_order LIMIT 50`),
-    first(db, `SELECT migration_key,file_name,applied_at,notes FROM schema_migration_ledger WHERE migration_key='build240_operational_evidence_continuity' LIMIT 1`)
+    first(db, `SELECT migration_key,file_name,applied_at,notes FROM schema_migration_ledger WHERE migration_key='build241_caip_large_media_intake' LIMIT 1`)
   ]);
   const metrics = {
     workstream_total: workstreams.length,
