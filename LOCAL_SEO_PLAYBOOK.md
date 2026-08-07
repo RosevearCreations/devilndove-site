@@ -1,4 +1,21 @@
-# Local SEO and Public Content Playbook — Build 230
+# Local SEO and Public Content Playbook — Build 240
+
+## Build 240 recurring audit
+
+The reproducible audit is `scripts/build240_public_page_audit.py`; its release result is `data/site/build240-public-page-audit.json`, while mutable observations belong in D1 `local_seo_observation_snapshots` and `public_page_audit_results`.
+
+Current pass requirements:
+
+1. Exactly one H1 on each indexable public page.
+2. Distinctive, truthful title, description and canonical URL.
+3. Buyer language in the title, main heading, opening copy and crawlable descriptive links where accurate.
+4. Useful route- or item-relevant images near matching copy, with descriptive alt text and local files present.
+5. Visible facts agree with Organization/LocalBusiness/Product/Offer structured data.
+6. Phone and desktop contain the same primary meaning with no clipping or horizontal page overflow.
+7. Local copy reflects the real Southern Ontario/service-area scope; never create doorway pages or promise first-page placement.
+8. Record Search Console and Business Profile observations over time; local ranking remains influenced by relevance, distance and prominence and cannot be guaranteed.
+
+Build 240 static result: 36 indexable pages passed with zero warnings and zero failures. This is release evidence, not proof of live indexing or ranking.
 
 ## Guidance verification — 2026-08-05
 

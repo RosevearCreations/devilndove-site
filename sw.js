@@ -1,5 +1,5 @@
-// Build 239: refresh public visual assets, route-specific hero media and retained Creative Automation controls.
-const CACHE_NAME = 'devilndove-shell-v17';
+// Build 240: Operational Continuity, current public audit assets, and retained offline/error fallbacks.
+const CACHE_NAME = 'devilndove-shell-v18';
 const CORE_ASSETS = [
   '/',
   '/offline.html',
@@ -12,7 +12,8 @@ const CORE_ASSETS = [
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png',
   '/manifest.webmanifest',
-  '/socials/'
+  '/socials/',
+  '/workshop-journal/'
 ];
 const NO_CACHE_PATH_PREFIXES = ['/admin/', '/members/', '/login/', '/register/', '/account-help/', '/api/'];
 

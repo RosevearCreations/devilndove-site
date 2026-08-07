@@ -1,451 +1,506 @@
--- Devil n Dove Build 234 — faithful soap renderer, reusable format templates,
--- candle-top profiles, and guarded Creative Automation project cleanup.
--- Apply once after Build 230. Back up D1 first.
--- Cloudflare D1 imports statements directly; do not add BEGIN, COMMIT, or SAVEPOINT.
+-- Devil n Dove Build 240 — operational evidence, packaging continuity, SEO observation, mobile recovery and controlled approvals.
+-- Apply once after Build 234. Back up D1 first. This migration contains no explicit transaction statements.
 
-UPDATE packaging_templates
-SET
-  template_name='Soap ribbon — approved Glacial Purple structure',
-  description='Faithful continuous soap ribbon with permanent brand marks, botanical rose, centred product hierarchy, English/French ingredients, rear brand seal, four bilingual claims and bilingual net quantity.',
-  layout_json='{"sections":["ingredients_en","front_oval","ingredients_fr","rear_seal","claims_weight","overlap"],"band_height_mm":19.05,"artboard_height_mm":38.1,"front_style":"glacial_photo_oval","design_profile":"soap_reference_v2","shape":"soap_wrap","artwork_asset":"/assets/packaging/artwork/soap-botanical-purple-rose-v1.png","rear_circle_spec_mm":50,"rear_circle_render_mm":38.1,"dimension_profile":"photo_fit","bleed_in":0.125,"safe_margin_in":0.0625}',
-  updated_at=CURRENT_TIMESTAMP
-WHERE template_key='soap-ribbon-glacial-approved-v1';
+CREATE TABLE IF NOT EXISTS runtime_incidents (
+  runtime_incident_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  incident_scope TEXT,
+  incident_code TEXT,
+  severity TEXT DEFAULT 'warning',
+  endpoint_path TEXT,
+  request_method TEXT,
+  message TEXT,
+  details_json TEXT,
+  related_user_id INTEGER,
+  ip_address TEXT,
+  user_agent TEXT,
+  review_status TEXT DEFAULT 'open',
+  admin_note TEXT,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_runtime_incidents_created_at ON runtime_incidents(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_runtime_incidents_scope ON runtime_incidents(incident_scope,severity,created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_runtime_incidents_code_path ON runtime_incidents(incident_code,endpoint_path,created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_runtime_incidents_review_status_created ON runtime_incidents(review_status,severity,created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_runtime_incidents_grouping ON runtime_incidents(severity,incident_scope,incident_code,endpoint_path,created_at DESC);
 
-UPDATE packaging_templates
-SET
-  layout_json='{"sections":["ingredients_en","front_oval","ingredients_fr","rear_seal","claims_weight","overlap"],"band_height_mm":19.05,"artboard_height_mm":50,"front_style":"glacial_photo_oval","design_profile":"soap_reference_v2","shape":"soap_wrap","artwork_asset":"/assets/packaging/artwork/soap-botanical-purple-rose-v1.png","rear_circle_spec_mm":50,"rear_circle_render_mm":50,"dimension_profile":"50mm_seal","bleed_in":0.125,"safe_margin_in":0.0625}',
-  updated_at=CURRENT_TIMESTAMP
-WHERE template_key='soap-ribbon-spec-50mm-seal-v1';
+CREATE TABLE IF NOT EXISTS operational_workstreams (
+  operational_workstream_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  workstream_key TEXT NOT NULL UNIQUE,
+  workstream_title TEXT NOT NULL,
+  workstream_group TEXT NOT NULL,
+  workstream_status TEXT NOT NULL DEFAULT 'ready_to_test' CHECK (workstream_status IN ('planned','ready_to_test','in_progress','blocked','complete','not_applicable')),
+  priority TEXT NOT NULL DEFAULT 'P1' CHECK (priority IN ('P0','P1','P2')),
+  destination_path TEXT,
+  owner_name TEXT,
+  due_at TEXT,
+  blocker_text TEXT,
+  evidence_summary TEXT,
+  completion_rule TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_operational_workstreams_status ON operational_workstreams(is_active,priority,workstream_status,sort_order);
 
-INSERT INTO packaging_templates (
-  template_key,template_name,package_type,description,
-  page_width_mm,page_height_mm,front_width_mm,front_height_mm,
-  rear_width_mm,rear_height_mm,layout_json,theme_json,is_system,is_active
-) VALUES
-('candle-top-wedding-4in-v1','Candle top — wedding / anniversary 4 inch','candle_top','Editable 4-inch round candle-top engraving with curved website and origin text, text-free wedding candle/rose artwork, names, original date, occasion and celebration date.',101.6,101.6,101.6,101.6,0,0,'{"shape":"round","design_profile":"candle_top_wedding","diameter_mm":101.6,"bleed_mm":2,"safe_margin_mm":5,"artwork_asset":"/assets/packaging/artwork/candle-top-wedding-line-art-v1.png","default_top_arc_text":"devilndove.com","default_bottom_arc_text":"Hand Made in Canada","default_primary_text":"John and Laurie","default_date_line_1":"March 3rd 1990","default_event_line":"35 Year Anniversary","default_date_line_2":"March 3rd 2025"}','{"rose_colour":"#000000","theme_colour":"#FFFFFF","border_colour":"#000000","accent_gold":"#000000","secondary_colour":"#000000"}',1,1),
-('candle-top-wedding-3-5in-v1','Candle top — wedding / anniversary 3.5 inch','candle_top','Editable 3.5-inch round wedding or anniversary candle-top engraving. Reduce copy and complete a physical laser proof before production.',88.9,88.9,88.9,88.9,0,0,'{"shape":"round","design_profile":"candle_top_wedding","diameter_mm":88.9,"bleed_mm":2,"safe_margin_mm":4,"artwork_asset":"/assets/packaging/artwork/candle-top-wedding-line-art-v1.png","default_top_arc_text":"devilndove.com","default_bottom_arc_text":"Hand Made in Canada","default_primary_text":"Names","default_date_line_1":"Original date","default_event_line":"Anniversary","default_date_line_2":"Celebration date"}','{"rose_colour":"#000000","theme_colour":"#FFFFFF","border_colour":"#000000","accent_gold":"#000000","secondary_colour":"#000000"}',1,1),
-('candle-top-round-3in-v1','Candle top — general round 3 inch','candle_top','Editable 3-inch round candle-top or lid design for a short message, product/event name, date and curved brand wording.',76.2,76.2,76.2,76.2,0,0,'{"shape":"round","design_profile":"candle_top_centered","diameter_mm":76.2,"bleed_mm":2,"safe_margin_mm":4,"default_top_arc_text":"devilndove.com","default_bottom_arc_text":"Hand Made in Canada","default_primary_text":"Special Occasion"}','{"rose_colour":"#000000","theme_colour":"#FFFFFF","border_colour":"#000000","accent_gold":"#000000","secondary_colour":"#000000"}',1,1),
-('round-maker-mark-4in-v1','Round maker mark / coaster — 4 inch','engraved_round','Reusable 4-inch round maker, sample, coaster or lid layout with curved upper/lower text and editable centred wording.',101.6,101.6,101.6,101.6,0,0,'{"shape":"round","design_profile":"round_maker_mark","diameter_mm":101.6,"bleed_mm":2,"safe_margin_mm":5,"default_top_arc_text":"DevilnDove.com","default_bottom_arc_text":"Hand Made in Canada","default_primary_text":"Remember When","default_event_line":"sample"}','{"rose_colour":"#000000","theme_colour":"#FFFFFF","border_colour":"#000000","accent_gold":"#000000","secondary_colour":"#000000"}',1,1),
-('product-label-oval-2x1-5in-v1','Product label — oval 2 × 1.5 inch','product_label','Reusable centred oval maker/product label. Confirm category-specific legal copy and physical stock before approval.',50.8,38.1,50.8,38.1,0,0,'{"shape":"oval","design_profile":"general_centered","bleed_mm":2,"safe_margin_mm":3,"default_top_arc_text":"Rosevear Creations - Devil n Dove -","default_bottom_arc_text":"devilndove.com"}','{"rose_colour":"#7B4DA6","theme_colour":"#FBF5E8","border_colour":"#32105E","accent_gold":"#B88A2F","secondary_colour":"#5A2A86"}',1,1)
-ON CONFLICT(template_key) DO UPDATE SET
-  template_name=excluded.template_name,
-  package_type=excluded.package_type,
-  description=excluded.description,
-  page_width_mm=excluded.page_width_mm,
-  page_height_mm=excluded.page_height_mm,
-  front_width_mm=excluded.front_width_mm,
-  front_height_mm=excluded.front_height_mm,
-  rear_width_mm=excluded.rear_width_mm,
-  rear_height_mm=excluded.rear_height_mm,
-  layout_json=excluded.layout_json,
-  theme_json=excluded.theme_json,
-  is_system=1,
+CREATE TABLE IF NOT EXISTS production_evidence_cases (
+  production_evidence_case_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  case_key TEXT NOT NULL UNIQUE,
+  case_type TEXT NOT NULL,
+  case_title TEXT NOT NULL,
+  case_status TEXT NOT NULL DEFAULT 'open' CHECK (case_status IN ('open','running','passed','failed','blocked','cancelled')),
+  environment_name TEXT NOT NULL DEFAULT 'production',
+  expected_result TEXT,
+  actual_result TEXT,
+  safe_reference TEXT,
+  owner_name TEXT,
+  started_at TEXT,
+  completed_at TEXT,
+  related_workstream_key TEXT,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_production_evidence_cases_status ON production_evidence_cases(case_status,case_type,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS production_evidence_events (
+  production_evidence_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  production_evidence_case_id INTEGER NOT NULL,
+  event_type TEXT NOT NULL,
+  event_status TEXT NOT NULL DEFAULT 'recorded',
+  expected_text TEXT,
+  actual_text TEXT,
+  evidence_url TEXT,
+  safe_payload_json TEXT NOT NULL DEFAULT '{}',
+  actor_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(production_evidence_case_id) REFERENCES production_evidence_cases(production_evidence_case_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_production_evidence_events_case ON production_evidence_events(production_evidence_case_id,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS operation_idempotency_claims (
+  operation_idempotency_claim_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  idempotency_key TEXT NOT NULL UNIQUE,
+  operation_kind TEXT NOT NULL,
+  target_type TEXT,
+  target_id INTEGER,
+  request_hash TEXT,
+  claim_status TEXT NOT NULL DEFAULT 'claimed' CHECK (claim_status IN ('claimed','completed','failed','released')),
+  response_reference TEXT,
+  first_claimed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  completed_at TEXT,
+  expires_at TEXT,
+  created_by_user_id INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_operation_idempotency_status ON operation_idempotency_claims(operation_kind,claim_status,first_claimed_at DESC);
+
+CREATE TABLE IF NOT EXISTS packaging_inventory_reservations (
+  packaging_inventory_reservation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  reservation_key TEXT NOT NULL UNIQUE,
+  packaging_project_id INTEGER NOT NULL,
+  packaging_project_version_id INTEGER,
+  reservation_status TEXT NOT NULL DEFAULT 'draft' CHECK (reservation_status IN ('draft','reserved','consumed','released','reversed','blocked')),
+  quantity_finished_units REAL NOT NULL DEFAULT 1,
+  idempotency_key TEXT NOT NULL UNIQUE,
+  reason_text TEXT,
+  reserved_at TEXT,
+  consumed_at TEXT,
+  released_at TEXT,
+  reversed_at TEXT,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_inventory_reservations_project ON packaging_inventory_reservations(packaging_project_id,reservation_status,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS packaging_inventory_reservation_lines (
+  packaging_inventory_reservation_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_inventory_reservation_id INTEGER NOT NULL,
+  packaging_component_id INTEGER,
+  site_item_inventory_id INTEGER,
+  inventory_lot_id INTEGER,
+  quantity_required REAL NOT NULL DEFAULT 0,
+  quantity_reserved REAL NOT NULL DEFAULT 0,
+  quantity_consumed REAL NOT NULL DEFAULT 0,
+  quantity_reversed REAL NOT NULL DEFAULT 0,
+  line_status TEXT NOT NULL DEFAULT 'draft' CHECK (line_status IN ('draft','reserved','consumed','released','reversed','shortage','blocked')),
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(packaging_inventory_reservation_id) REFERENCES packaging_inventory_reservations(packaging_inventory_reservation_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_reservation_lines_reservation ON packaging_inventory_reservation_lines(packaging_inventory_reservation_id,line_status);
+
+CREATE TABLE IF NOT EXISTS packaging_formula_source_links (
+  packaging_formula_source_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_project_id INTEGER NOT NULL,
+  formula_source_type TEXT NOT NULL DEFAULT 'verified_formula',
+  formula_source_key TEXT NOT NULL,
+  formula_version TEXT,
+  source_checksum TEXT,
+  verification_status TEXT NOT NULL DEFAULT 'needs_review' CHECK (verification_status IN ('needs_review','verified','superseded','blocked')),
+  verified_by_user_id INTEGER,
+  verified_at TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(packaging_project_id,formula_source_type,formula_source_key,formula_version)
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_formula_links_project ON packaging_formula_source_links(packaging_project_id,verification_status,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS packaging_release_locks (
+  packaging_release_lock_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_project_id INTEGER NOT NULL,
+  packaging_project_version_id INTEGER NOT NULL,
+  lock_status TEXT NOT NULL DEFAULT 'locked' CHECK (lock_status IN ('locked','superseded','reprint_authorized','voided')),
+  version_checksum TEXT NOT NULL,
+  physical_proof_reference TEXT,
+  lock_reason TEXT,
+  superseded_by_version_id INTEGER,
+  reprint_count INTEGER NOT NULL DEFAULT 0,
+  locked_by_user_id INTEGER,
+  locked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(packaging_project_id,packaging_project_version_id)
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_release_locks_project ON packaging_release_locks(packaging_project_id,lock_status,locked_at DESC);
+
+CREATE TABLE IF NOT EXISTS packaging_prepress_checks (
+  packaging_prepress_check_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_project_id INTEGER NOT NULL,
+  packaging_project_version_id INTEGER,
+  check_status TEXT NOT NULL DEFAULT 'needs_review' CHECK (check_status IN ('needs_review','passed','failed','blocked')),
+  page_width_mm REAL,
+  page_height_mm REAL,
+  bleed_mm REAL,
+  safe_margin_mm REAL,
+  text_fit_status TEXT NOT NULL DEFAULT 'not_checked',
+  region_overflow_status TEXT NOT NULL DEFAULT 'not_checked',
+  barcode_destination_status TEXT NOT NULL DEFAULT 'not_applicable',
+  qr_destination_status TEXT NOT NULL DEFAULT 'not_applicable',
+  font_embedding_status TEXT NOT NULL DEFAULT 'not_checked',
+  blocker_count INTEGER NOT NULL DEFAULT 0,
+  warning_count INTEGER NOT NULL DEFAULT 0,
+  result_json TEXT NOT NULL DEFAULT '{}',
+  checked_by_user_id INTEGER,
+  checked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_prepress_project ON packaging_prepress_checks(packaging_project_id,checked_at DESC);
+
+CREATE TABLE IF NOT EXISTS provider_result_reconciliations (
+  provider_result_reconciliation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  provider_name TEXT NOT NULL,
+  provider_action TEXT NOT NULL,
+  local_reference_type TEXT,
+  local_reference_id INTEGER,
+  provider_reference_id TEXT,
+  provider_result_url TEXT,
+  reconciliation_status TEXT NOT NULL DEFAULT 'needs_review' CHECK (reconciliation_status IN ('needs_review','matched','mismatch','failed','not_found')),
+  expected_json TEXT NOT NULL DEFAULT '{}',
+  actual_json TEXT NOT NULL DEFAULT '{}',
+  checked_by_user_id INTEGER,
+  checked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_provider_reconciliation_status ON provider_result_reconciliations(provider_name,reconciliation_status,checked_at DESC);
+
+CREATE TABLE IF NOT EXISTS notification_delivery_attempts (
+  notification_delivery_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notification_outbox_id INTEGER,
+  provider_name TEXT,
+  attempt_number INTEGER NOT NULL DEFAULT 1,
+  attempt_status TEXT NOT NULL DEFAULT 'queued' CHECK (attempt_status IN ('queued','sent','delivered','deferred','bounced','failed','cancelled')),
+  provider_message_id TEXT,
+  provider_status_code TEXT,
+  retry_after_at TEXT,
+  safe_response_json TEXT NOT NULL DEFAULT '{}',
+  error_text TEXT,
+  attempted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notification_attempts_outbox ON notification_delivery_attempts(notification_outbox_id,attempted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notification_attempts_status ON notification_delivery_attempts(attempt_status,retry_after_at,attempted_at DESC);
+
+CREATE TABLE IF NOT EXISTS mobile_evidence_drafts (
+  mobile_evidence_draft_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  draft_key TEXT NOT NULL UNIQUE,
+  evidence_kind TEXT NOT NULL,
+  related_type TEXT,
+  related_id INTEGER,
+  draft_status TEXT NOT NULL DEFAULT 'local_pending' CHECK (draft_status IN ('local_pending','uploading','synced','failed','discarded')),
+  local_created_at TEXT,
+  exif_review_status TEXT NOT NULL DEFAULT 'not_checked',
+  privacy_review_status TEXT NOT NULL DEFAULT 'needs_review',
+  rights_status TEXT NOT NULL DEFAULT 'needs_review',
+  r2_object_key TEXT,
+  derivative_status TEXT NOT NULL DEFAULT 'not_started',
+  unsynced_reason TEXT,
+  payload_json TEXT NOT NULL DEFAULT '{}',
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_mobile_evidence_drafts_status ON mobile_evidence_drafts(draft_status,privacy_review_status,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS deployed_asset_check_results (
+  deployed_asset_check_result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  asset_url TEXT NOT NULL,
+  page_path TEXT,
+  check_status TEXT NOT NULL DEFAULT 'not_run' CHECK (check_status IN ('not_run','passed','warning','failed')),
+  http_status INTEGER,
+  content_type TEXT,
+  width_px INTEGER,
+  height_px INTEGER,
+  byte_size INTEGER,
+  load_time_ms INTEGER,
+  duplicate_hash TEXT,
+  structured_data_exposure INTEGER NOT NULL DEFAULT 0,
+  checked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT,
+  UNIQUE(asset_url,page_path,checked_at)
+);
+CREATE INDEX IF NOT EXISTS idx_deployed_asset_checks_status ON deployed_asset_check_results(check_status,checked_at DESC);
+
+CREATE TABLE IF NOT EXISTS product_media_role_requirements (
+  product_media_role_requirement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  role_key TEXT NOT NULL,
+  role_label TEXT NOT NULL,
+  requirement_status TEXT NOT NULL DEFAULT 'missing' CHECK (requirement_status IN ('missing','candidate','approved','not_applicable','blocked')),
+  media_asset_id INTEGER,
+  final_url TEXT,
+  alt_text TEXT,
+  rights_status TEXT NOT NULL DEFAULT 'needs_review',
+  phone_review_status TEXT NOT NULL DEFAULT 'unchecked',
+  desktop_review_status TEXT NOT NULL DEFAULT 'unchecked',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(product_id,role_key)
+);
+CREATE INDEX IF NOT EXISTS idx_product_media_roles_status ON product_media_role_requirements(requirement_status,rights_status,product_id);
+
+CREATE TABLE IF NOT EXISTS customer_support_interactions (
+  customer_support_interaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_reference TEXT,
+  interaction_channel TEXT NOT NULL DEFAULT 'email',
+  interaction_type TEXT NOT NULL DEFAULT 'question',
+  interaction_status TEXT NOT NULL DEFAULT 'open' CHECK (interaction_status IN ('open','waiting','resolved','closed','escalated')),
+  related_order_id INTEGER,
+  related_product_id INTEGER,
+  consent_status TEXT NOT NULL DEFAULT 'private',
+  summary_text TEXT NOT NULL,
+  next_action_text TEXT,
+  follow_up_at TEXT,
+  resolved_at TEXT,
+  created_by_user_id INTEGER,
+  assigned_to_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_support_interactions_status ON customer_support_interactions(interaction_status,follow_up_at,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS accounting_close_checklist_items (
+  accounting_close_checklist_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_key TEXT NOT NULL,
+  checklist_key TEXT NOT NULL,
+  checklist_label TEXT NOT NULL,
+  checklist_status TEXT NOT NULL DEFAULT 'needs_review' CHECK (checklist_status IN ('needs_review','in_progress','passed','blocked','not_applicable')),
+  evidence_reference TEXT,
+  blocker_text TEXT,
+  owner_name TEXT,
+  due_at TEXT,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(period_key,checklist_key)
+);
+CREATE INDEX IF NOT EXISTS idx_accounting_close_status ON accounting_close_checklist_items(period_key,checklist_status,due_at);
+
+CREATE TABLE IF NOT EXISTS controlled_batch_approvals (
+  controlled_batch_approval_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  batch_key TEXT NOT NULL UNIQUE,
+  batch_type TEXT NOT NULL,
+  risk_level TEXT NOT NULL DEFAULT 'low' CHECK (risk_level IN ('low','medium','high','critical')),
+  batch_status TEXT NOT NULL DEFAULT 'draft' CHECK (batch_status IN ('draft','review','approved','applied','rolled_back','blocked')),
+  item_count INTEGER NOT NULL DEFAULT 0,
+  criteria_json TEXT NOT NULL DEFAULT '{}',
+  item_ids_json TEXT NOT NULL DEFAULT '[]',
+  rollback_json TEXT NOT NULL DEFAULT '{}',
+  approved_by_user_id INTEGER,
+  approved_at TEXT,
+  applied_at TEXT,
+  notes TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_controlled_batch_approvals_status ON controlled_batch_approvals(batch_type,batch_status,risk_level,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS local_seo_observation_snapshots (
+  local_seo_observation_snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  snapshot_date TEXT NOT NULL,
+  page_path TEXT NOT NULL,
+  target_location TEXT NOT NULL DEFAULT 'Southern Ontario',
+  target_query TEXT,
+  search_console_clicks REAL NOT NULL DEFAULT 0,
+  search_console_impressions REAL NOT NULL DEFAULT 0,
+  average_position REAL,
+  business_profile_actions REAL NOT NULL DEFAULT 0,
+  review_count INTEGER,
+  average_rating REAL,
+  conversion_count REAL NOT NULL DEFAULT 0,
+  notes TEXT,
+  source_status TEXT NOT NULL DEFAULT 'manual',
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(snapshot_date,page_path,target_location,target_query)
+);
+CREATE INDEX IF NOT EXISTS idx_local_seo_observations_page ON local_seo_observation_snapshots(page_path,snapshot_date DESC);
+
+CREATE TABLE IF NOT EXISTS public_page_audit_results (
+  public_page_audit_result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  build_label TEXT NOT NULL,
+  page_path TEXT NOT NULL,
+  audit_status TEXT NOT NULL DEFAULT 'not_run' CHECK (audit_status IN ('not_run','passed','warning','failed')),
+  h1_count INTEGER NOT NULL DEFAULT 0,
+  title_text TEXT,
+  meta_description_text TEXT,
+  canonical_url TEXT,
+  internal_link_count INTEGER NOT NULL DEFAULT 0,
+  image_count INTEGER NOT NULL DEFAULT 0,
+  missing_alt_count INTEGER NOT NULL DEFAULT 0,
+  missing_asset_count INTEGER NOT NULL DEFAULT 0,
+  structured_data_count INTEGER NOT NULL DEFAULT 0,
+  mobile_overflow_status TEXT NOT NULL DEFAULT 'not_checked',
+  notes TEXT,
+  audited_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(build_label,page_path)
+);
+CREATE INDEX IF NOT EXISTS idx_public_page_audit_status ON public_page_audit_results(build_label,audit_status,page_path);
+
+CREATE TABLE IF NOT EXISTS route_fallback_policies (
+  route_fallback_policy_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  route_path TEXT NOT NULL UNIQUE,
+  route_kind TEXT NOT NULL DEFAULT 'admin_api',
+  fallback_status TEXT NOT NULL DEFAULT 'active' CHECK (fallback_status IN ('active','disabled','needs_review')),
+  fallback_title TEXT NOT NULL,
+  fallback_message TEXT NOT NULL,
+  retry_enabled INTEGER NOT NULL DEFAULT 1,
+  safe_navigation_json TEXT NOT NULL DEFAULT '[]',
+  incident_scope TEXT,
+  last_verified_at TEXT,
+  verified_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_route_fallback_status ON route_fallback_policies(fallback_status,route_kind,route_path);
+
+CREATE TABLE IF NOT EXISTS mobile_operations_cards (
+  mobile_operations_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  card_key TEXT NOT NULL UNIQUE,
+  card_title TEXT NOT NULL,
+  card_group TEXT NOT NULL,
+  destination_path TEXT NOT NULL,
+  card_status TEXT NOT NULL DEFAULT 'active' CHECK (card_status IN ('active','hidden','blocked')),
+  badge_query TEXT,
+  icon_name TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  payload_json TEXT NOT NULL DEFAULT '{}',
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_mobile_operations_cards_order ON mobile_operations_cards(card_status,card_group,sort_order);
+
+INSERT INTO operational_workstreams (workstream_key,workstream_title,workstream_group,workstream_status,priority,destination_path,completion_rule,sort_order,is_active)
+VALUES
+('production_evidence_cases','Production evidence cases and append-only events','evidence','ready_to_test','P0','/admin/operational-continuity/','A named case records expected, actual, evidence and final status without storing secrets.',10,1),
+('idempotency_registry','Cross-workflow idempotency claim registry','reliability','ready_to_test','P0','/admin/operational-continuity/','Duplicate operation keys are detected and retain a safe result reference.',20,1),
+('packaging_reservation','Packaging component reservation, consumption and reversal','packaging','ready_to_test','P1','/admin/operational-continuity/','Each packaging movement is idempotent, lot-aware and reversible.',30,1),
+('packaging_formula_link','Verified formula/source linkage without ingredient duplication','packaging','ready_to_test','P1','/admin/operational-continuity/','A packaging project points to one verified formula/version/checksum authority.',40,1),
+('packaging_release_lock','Approved packaging lock, supersession and reprint authorization','packaging','ready_to_test','P1','/admin/operational-continuity/','An approved version is checksum-locked and later changes use supersession or reprint authorization.',50,1),
+('packaging_prepress','Deterministic prepress, text-fit and destination checks','packaging','ready_to_test','P1','/admin/operational-continuity/','Text fit, region overflow, barcode/QR destination, dimensions and fonts have explicit pass/fail evidence.',60,1),
+('provider_reconciliation','Provider post/message/result reconciliation','providers','ready_to_test','P1','/admin/operational-continuity/','Local state is matched to observable provider IDs/URLs and mismatches remain visible.',70,1),
+('notification_attempts','Notification delivery attempts, retries and outcomes','notifications','ready_to_test','P1','/admin/operational-continuity/','Each outbox item has provider attempt history and retry evidence.',80,1),
+('mobile_evidence_recovery','Camera-first mobile evidence draft and unsynced recovery','mobile','ready_to_test','P1','/admin/operational-continuity/','A phone draft survives interruption and requires EXIF/privacy/rights review before public use.',90,1),
+('deployed_asset_checks','Deployed asset URL, dimensions, duplicate and speed checks','visuals','ready_to_test','P1','/admin/operational-continuity/','Every launch asset has a deployed check result with status and measurable facts.',100,1),
+('product_media_roles','Product-specific feature/detail/scale/packaging media roles','visuals','ready_to_test','P1','/admin/operational-continuity/','Each launch product has explicit media-role rows without duplicating product facts.',110,1),
+('support_history','Consent-safe customer support interaction history','support','ready_to_test','P2','/admin/operational-continuity/','Open questions, next action and consent remain visible without exposing unnecessary personal data.',120,1),
+('accounting_close','Accounting close and reconciliation checklist','accounting','ready_to_test','P2','/admin/operational-continuity/','Each close period has evidence-backed pass/block/not-applicable decisions.',130,1),
+('controlled_batch_approval','Low-risk controlled batch approval and rollback','operations','ready_to_test','P2','/admin/operational-continuity/','Only low-risk reviewed items can be approved together and every batch has rollback data.',140,1),
+('local_seo_observations','Local SEO and Business Profile observation snapshots','seo','ready_to_test','P1','/admin/operational-continuity/','Search Console, Business Profile and conversion observations are stored by page/location/date.',150,1),
+('public_page_audit','Automated one-H1, title, meta, canonical, links, images and schema audit','seo','ready_to_test','P0','/admin/operational-continuity/','Every exposed page has exactly one H1 and required search/mobile fields are audited per build.',160,1),
+('route_fallbacks','Route-level safe fallback and recovery policy','reliability','ready_to_test','P0','/admin/operational-continuity/','Critical admin/API routes have a no-false-success fallback, retry and safe navigation.',170,1),
+('mobile_operations_cards','Phone operations dashboard cards','mobile','ready_to_test','P2','/admin/operational-continuity/','Phone users can reach evidence, inventory, support, accounting and release exceptions quickly.',180,1),
+('schema_authority','Build 240 aggregate/current schema synchronization','data','complete','P0','/admin/operational-continuity/','The numbered migration, three aggregate schemas and current-pass SQL are identical at the Build 240 boundary.',190,1),
+('markdown_authority','Two-authority Markdown consolidation and next-20 planning','documentation','complete','P0','/admin/operational-continuity/','AI_HANDOFF and PROJECT_STATUS_AND_ROADMAP remain canonical; specialist docs are scoped and historical build docs are archived.',200,1)
+ON CONFLICT(workstream_key) DO UPDATE SET
+  workstream_title=excluded.workstream_title,
+  workstream_group=excluded.workstream_group,
+  priority=excluded.priority,
+  destination_path=excluded.destination_path,
+  completion_rule=excluded.completion_rule,
+  sort_order=excluded.sort_order,
   is_active=1,
   updated_at=CURRENT_TIMESTAMP;
 
-INSERT INTO packaging_reference_sources (
-  source_key,source_name,source_type,repository_path,sha256,authority_scope,
-  review_status,dimensional_summary_json,notes,is_active,adopted_at,updated_at
-) VALUES
-(
-  'glacial-purple-soap-approved-visual-v1',
-  'Glacial Purple Aloe Soap approved visual sample',
-  'approved_visual_reference',
-  '/assets/packaging/soap/reference/glacial-purple-aloe-soap-approved-reference.png',
-  '297d8a7e737447c307523ea50b04d4967892e86c948f19745e35c114dd0a382c',
-  'Owner-supplied appearance and static-content direction for the continuous Glacial Purple soap ribbon. Structured formula/legal facts remain authoritative outside the image.',
-  'adopted',
-  '{"pixels":[2048,462],"shape":"continuous_soap_ribbon","static_elements":["brand","devil_n_dove","website","made_in_canada","rear_small_batch_seal","claims","net_weight_area"],"measurement_status":"use_written_spec_and_physical_proof"}',
-  'The renderer must resemble this structure while keeping all product, bilingual, INCI, claim and weight wording editable. The image itself is not formula, legal or print-proof evidence.',
-  1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
-),
-(
-  'wedding-candle-top-john-laurie-v1',
-  'Wedding candle top — John and Laurie sample',
-  'approved_visual_reference',
-  '/assets/packaging/reference/wedding-candle-top-john-laurie-approved-reference.png',
-  '8abe415ff7fb472fd28697a18638a9b30a7e8f53cce737eb5bc87f13c8cfa056',
-  'Owner-supplied visual direction for round wedding, anniversary and special-event candle tops. Editable text remains separate from artwork.',
-  'adopted',
-  '{"shape":"round","measurement_status":"must_measure_physical_blank","editable_fields":["top_arc","names","original_date","occasion","celebration_date","bottom_arc"]}',
-  'The image is a visual reference, not a measured dieline. Build 234 supplies 4-inch and 3.5-inch working profiles and requires a 100%-scale or physical laser proof.',
-  1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
-)
-ON CONFLICT(source_key) DO UPDATE SET
-  source_name=excluded.source_name,
-  source_type=excluded.source_type,
-  repository_path=excluded.repository_path,
-  sha256=excluded.sha256,
-  authority_scope=excluded.authority_scope,
-  review_status=excluded.review_status,
-  dimensional_summary_json=excluded.dimensional_summary_json,
-  notes=excluded.notes,
-  is_active=excluded.is_active,
+INSERT INTO route_fallback_policies (route_path,route_kind,fallback_status,fallback_title,fallback_message,retry_enabled,safe_navigation_json,incident_scope,last_verified_at)
+VALUES
+('/api/admin/operational-continuity','admin_api','active','Operational Continuity is unavailable','No readiness item is being inferred complete. Correct authentication, API or D1 and retry.',1,'["/admin/startup-readiness/","/admin/deploy-readiness/","/admin/application-sanity/"]','operational_continuity',NULL),
+('/admin/operational-continuity/','admin_page','active','Operational Continuity could not load','Use the static twenty-workstream fallback below; no live database status is being inferred.',1,'["/admin/","/admin/startup-readiness/","/admin/deploy-readiness/"]','operational_continuity_ui',NULL)
+ON CONFLICT(route_path) DO UPDATE SET
+  route_kind=excluded.route_kind,
+  fallback_status='active',
+  fallback_title=excluded.fallback_title,
+  fallback_message=excluded.fallback_message,
+  retry_enabled=excluded.retry_enabled,
+  safe_navigation_json=excluded.safe_navigation_json,
+  incident_scope=excluded.incident_scope,
   updated_at=CURRENT_TIMESTAMP;
 
--- Build 234 startup gate seed BEGIN
-INSERT INTO startup_readiness_items (
-  item_key,phase_key,phase_label,item_title,sort_order,blocker_severity,is_launch_blocker,requires_live_binding,
-  target_route,external_location,instructions_markdown,pass_condition,is_active
-) VALUES
-('deployment_preflight_standalone','foundation','Foundation and deployment','Complete Deployment Preflight as a standalone pre-deploy process',5,'critical',1,0,'/admin/deployment-preflight/','Build 234 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md','1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, aggregate-schema, repeated-current-migration, Startup 44-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
-3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
-4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest, Labeling & Packaging, Creative Automation and three public image bands.
-5. Confirm database_upgrade_current_pass.sql remains identical to database_build234_packaging_templates_creative_cleanup.sql and the Build 234 migration contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
-6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 234 consistently while naming Build 234 as the current D1 migration.
-7. Confirm the five adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
-8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
-9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
-10. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.','The exact Build 234 archive passes every static, bounded-login/session-retention, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.',1),
-('backup_migrate_deploy','foundation','Foundation and deployment','Back up D1, apply the current migration, and deploy the complete build',10,'critical',1,1,'/admin/deployment-preflight/','Cloudflare Dashboard → Workers & Pages → D1 and Pages deployments','1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.
-2. Record the date, database name and safe recovery reference in the evidence notes.
-3. Confirm ledger keys build229_packaging_reference_authority and build230_visual_image_manifest already exist, then apply database_build234_packaging_templates_creative_cleanup.sql or the identical database_upgrade_current_pass.sql, but not both.
-4. Confirm the ledger also records build234_packaging_templates_creative_cleanup; verify the five packaging references, five new reusable system templates, 20 active image-manifest rows and unchanged mutable review evidence.
-5. Deploy the complete ZIP rather than selected files.
-6. Record the Pages deployment URL and deployment/commit identifier.
-7. Open Startup Readiness with All statuses and confirm all 44 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images and open its Visual Image Manifest route.
-8. Confirm the manifest loads from D1 rather than Unsynced fallback and preserves the three generated-editorial provenance rows.
-9. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.
-10. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.','A recoverable D1 point exists, the Build 234 migration is applied once after Builds 229 and 230, the complete deployment is live, all 44 gates, five packaging references, five new reusable templates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains.',1),
-('post_deploy_smoke_standalone','foundation','Foundation and deployment','Complete Post-Deploy Smoke Tests as a standalone live-verification process',15,'critical',1,1,'/admin/post-deploy-smoke-tests/','Production domain, browser developer tools, Cloudflare Pages Functions logs, and POST_DEPLOY_SMOKE_TEST.md','1. Confirm the deployment ID and Build 234 migration evidence match the package that passed Deployment Preflight.
-2. Open the production home, handmade-jewelry, gift-card, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.
-3. Confirm the three generated WebP illustrations load at phone and desktop sizes, disclose editorial use, preserve one H1, and are absent from Product/Offer structured data and real-product galleries.
-4. Sign in with an owner-controlled administrator and test Startup Readiness, Visual Image Manifest, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map.
-5. In the manifest, filter open blockers, open a route, make one reversible review update, reload, and confirm database history. Test the API failure path and confirm the full 20-row Unsynced fallback remains visible with saving disabled.
-6. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.
-7. At phone, tablet, laptop and wide-desktop widths, check navigation, image crops, cards, forms, tables, focus, touch targets, contrast and horizontal overflow on every changed route.
-8. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.
-9. Open Startup Readiness with All statuses, confirm 44 unique gates and locate the missing-launch-images Critical blocker.
-10. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner. After any correction/redeploy, repeat all smoke checks.
-11. Continue to Deploy Readiness only when every critical smoke result passes.','The exact production deployment passes all critical public, authentication, admin, API, fallback, mobile/desktop and SEO smoke checks with current evidence and no unresolved critical result.',1),
-('production_bindings_secrets','foundation','Foundation and deployment','Verify production bindings, secrets, domains, and environment separation',20,'critical',1,1,'/admin/deployment-preflight/','Cloudflare Pages project → Settings → Variables and Bindings; custom domains; D1/R2 bindings','1. Confirm the production Pages project is connected to the intended D1 database and R2 buckets.
-2. Confirm every required secret exists in Production, not only Preview.
-3. Check payment, email, OAuth, admin-bootstrap, analytics, and storage variables against CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md.
-4. Confirm preview/test credentials are not used in production and production credentials are not committed to the repository.
-5. Confirm devilndove.com and any www redirect resolve to the production deployment with valid HTTPS.
-6. Test one read and one safe write against each required binding.
-7. Record only variable names and test results; never paste secret values into evidence.','The production domain, D1, R2, payment, email, and required application bindings are present in the correct environment and pass safe connectivity checks without exposing secrets.',1),
-('login_logout_recovery','access','Access, security, and recovery','Prove production login, logout, session expiry, and password recovery',30,'critical',1,1,'/login/','Production website and the configured transactional email provider','1. Deploy the complete Build 234 package, hard refresh to service-worker shell v15, and record the Pages deployment ID before testing.
-2. Open a private browser window, open Developer Tools → Network, enable Preserve log, and load /login/ without storing the password in evidence.
-3. Open /api/auth/login in a separate tab and confirm HTTP 200 JSON reports response_profile auth_login_bounded_v1 and diagnostic_mode binding_only; a normal GET must not run full schema discovery.
-4. Submit an owner-controlled administrator login and confirm POST /api/auth/login returns HTTP 200 JSON, X-DD-Auth-Profile auth_login_bounded_v1, a session cookie, the correct role and the expected redirect. Never copy the token into evidence.
-5. In Cloudflare Workers & Pages → the production project → Functions/Workers Logs and Metrics, filter the login timestamp and confirm the invocation was successful with no exceededCpu, exceededMemory or 1102 outcome.
-6. Confirm the redirected page calls /api/auth/me once, returns HTTP 200 JSON with response_profile auth_session_bounded_v1, and remains signed in after one normal refresh.
-7. Test one deliberately wrong password and confirm HTTP 401 structured JSON AUTH_INVALID_CREDENTIALS, no redirect and no new authenticated session.
-8. While a valid session exists, use browser request blocking for /api/auth/me, reload /login/, and confirm the account widget says the session was retained/verification is temporarily unavailable; local storage and cookie must not be erased by a network/503 failure. Remove the block and confirm the next verification succeeds.
-9. Log out normally and verify the auth token/cookie is cleared and protected pages/APIs return a real 401 rather than continuing access.
-10. Request a password reset from the public recovery page; confirm delivery, one-time use, rejection of an expired/reused link, and successful login with the new password.
-11. Test Logout All Sessions in two browsers and confirm the older session receives 401 and is cleared, while a temporary 503 still does not masquerade as an invalid session.
-12. Confirm a deliberately expired owner-controlled session receives 401 and a clear login path; do not wait on a real production account or alter customer sessions.
-13. Record deployment ID, UTC/local timestamp, route, HTTP status, response code/profile, browser/device, Cloudflare invocation outcome and pass/fail result without passwords, cookies or tokens.
-14. If any step returns 503/1102, keep this gate Failed or Blocked, capture the Cloudflare invocation outcome, redeploy/roll back as appropriate and repeat all fourteen steps from a clean private session.','Bounded login, session verification, temporary-503 retention, logout, reset, one-time token use, deliberate expiry, and logout-all work in production with no exceeded-resource outcome and no continued access after an explicit invalidation.',1),
-('role_authorization','access','Access, security, and recovery','Verify server-side authorization for destructive, financial, and approval actions',40,'critical',1,1,'/admin/members/','Production admin APIs and role test accounts','1. Prepare an administrator account and at least one lower-privilege test account.
-2. Test inventory reversal, label approval, accounting export, member administration, publication approval and permanent product deletion with the lower role; confirm every direct API call returns 401 or 403 even if a button is hidden.
-3. As an administrator, create an owner-controlled disposable Draft product with no order, payment, customer, packaging or creative-project history; record its ID and System #.
-4. Archive that disposable product, open /admin/products/ → Draft & Archive Cleanup → Archived, select Check removal, and confirm /api/admin/delete-product?product_id=<ID> returns HTTP 200 JSON with cleanup_profile bounded_registry_v1.
-5. Confirm archive status and its ordinary editor/media audit alone do not block removal; the preflight must say Removal allowed unless a genuine protected reference exists.
-6. For a second owner-controlled product that has an order, packaging project, creative project or other protected history, repeat Check removal and confirm Archive only lists the blocking table/count and Permanent remove stays disabled. Never delete that history-backed product.
-7. On the disposable product, link one safe test supply and reserve one unit. Open Correct / return raw inventory, confirm the suggested release never exceeds Reserved, leave physical return at zero unless stock was truly put back, and enter a factual reason.
-8. Select Delete unused product and apply reviewed inventory actions, type DELETE PRODUCT exactly, confirm the current admin password and verify one success response.
-9. Confirm the product row is gone, its System # was not reused, Reserved changed exactly once, On hand did not change for reservation release, and product deletion/material-return/admin audit evidence identifies the actor, product, reason and time.
-10. Repeat the protected-history check after the deletion test and confirm it remains archived and unchanged.
-11. In Cloudflare Functions metrics/logs, confirm product-removal GET/POST returned valid JSON and produced no exceededCpu, exceededMemory, raw HTML or JSON.parse error.
-12. Retest the other sensitive administrator actions, remove or disable temporary accounts, and reconcile or remove only the owner-controlled disposable records.','Every sensitive action is enforced on the server; lower roles receive 401/403; an unused archived product passes the bounded preflight and is removed with its reviewed inventory action exactly once; protected-history products remain archived; and successful actions are attributable in audit history without a Worker resource-limit event.',1),
-('runtime_incident_fallback','access','Access, security, and recovery','Prove runtime incident capture and honest fallback behaviour',50,'high',1,1,'/admin/runtime-incidents/','Production Pages Functions logs and runtime incident records','1. Use a safe test condition that causes a non-destructive optional API failure, such as an unavailable optional table in a preview environment.
-2. Confirm the API returns structured JSON with a useful status code and plain-language error.
-3. In /admin/catalog/, load an owner-controlled Draft product, change its short description, wait at least three seconds and confirm Draft autosave reports a saved product ID/time.
-4. Reload the same product and confirm it loads without a JSON.parse error and contains the saved value.
-5. Throttle the browser network, edit the draft during an in-flight autosave and confirm the newer edit is queued, saved next and remains after reload.
-6. Block the update request or go temporarily offline, edit again and confirm the browser offers Recover browser copy without showing raw Cloudflare HTML/CSS or claiming D1 saved it.
-7. Restore connectivity, recover the copy, select Autosave now, reload and confirm the recovered value is authoritative in D1.
-8. In Cloudflare Workers & Pages metrics/logs, check the matching product-detail/create/update invocations for exceededCpu, exceededMemory and cf-error-type 1102. Record only timestamp, route, outcome, CPU/wall time and non-secret IDs. A platform-terminated Worker may be unable to write its own runtime incident, so Cloudflare logs are required evidence.
-9. Confirm an ordinary application exception still records scope, code, severity, user/request context and sanitized detail in /admin/runtime-incidents/.
-10. Restore the optional dependency and verify the normal path recovers; also review offline.html and low-bandwidth media fallback.
-11. After any code, deployment, plan/limit or schema change, repeat steps 3–10 before marking this gate Complete.','Expected failures are visible, sanitized and recoverable; product reload/autosave preserves the newest edit without raw HTML or JSON.parse text; the controlled run adds no exceeded-resource event; and fallback states never present a browser copy as an authoritative save.',1),
-('launch_product_list','catalog','Catalog, product facts, and media','Choose a small opening-day product list and freeze its launch scope',60,'critical',1,0,'/admin/products/','Internal operating decision','1. Select a deliberately small group of products that can be physically counted, photographed, packaged, and fulfilled now.
-2. Exclude experimental, incomplete, duplicate, content-only, or uncertain products from the launch group.
-3. Record the product IDs, names, SKUs, and intended sale channels.
-4. Confirm every selected item has an owner responsible for facts, media, inventory, packaging, and final review.
-5. Keep other products in Draft or Archived while the site opens.
-6. Revisit the launch group only through a deliberate review so the finish line does not keep moving.','A finite opening-day product list is recorded, owned, and protected from unrelated draft work.',1),
-('product_detail_gallery','catalog','Catalog, product facts, and media','Verify every launch product View link, detail page, and seven-image gallery',70,'critical',1,1,'/shop/','Public shop and /api/product-detail?slug=<slug>','1. Open the public Shop in a private browser window.
-2. Select View on every launch product card.
-3. Confirm the URL contains the correct slug and the detail endpoint returns HTTP 200 with ok:true.
-4. Confirm name, price, description, SKU, availability, shipping information, and calls to action match the admin record.
-5. For products with seven approved images, confirm seven unique thumbnails appear and each changes the main image, alternative text, caption, and image counter.
-6. Confirm blocked or consent-needed images remain excluded for a documented reason.
-7. Test direct loading, browser refresh, copied link, mobile view, and the public catalog fallback.
-8. Record every product that returns fewer images or stale facts and correct it in Catalog Media or Products.','Every launch product opens from its card, returns current facts, and displays all approved unique storefront images without broken routes or stale fallback content.',1),
-('product_facts_preflight','catalog','Catalog, product facts, and media','Complete Product Release Preflight for every launch product',80,'critical',1,0,'/admin/release-preflight/','Devil n Dove Product Release Preflight','1. Filter Product Release Preflight to the opening-day product list.
-2. Resolve required name, slug, SKU, price, category, description, quantity, dimensions, weight, shipping, tax, care, condition, and sale-channel facts.
-3. Confirm quantity pricing and set components where applicable.
-4. Resolve every blocking media, consent, packaging, content, or inventory warning.
-5. Open the public detail page after each important correction.
-6. Record any warning intentionally accepted, who accepted it, and why.
-7. Do not publish a product merely because a percentage score looks high; manually review the final buyer view.','Every opening-day product is green for required preflight checks and has a final human review of the public page.',1),
-('catalog_media_rights','catalog','Catalog, product facts, and media','Finish product media, rights, roles, alt text, and R2 delivery',90,'critical',1,1,'/admin/catalog-media/','Catalog Media, R2 object delivery, and public product pages','1. Assign one featured image and up to six supporting images to each launch product.
-2. Set image role, display order, concise descriptive alt text, caption where useful, and public-use status.
-3. Confirm ownership or consent and keep blocked/consent-needed media out of public responses.
-4. Verify full, thumbnail, WebP, and AVIF derivatives where configured.
-5. Test image loading on a normal desktop connection and a throttled mobile connection.
-6. Confirm image URLs do not expose private object paths or require an expired signed URL for public catalog media.
-7. Replace every launch-product placeholder or broken image with approved real media.','Every launch product has an approved featured image, supporting media where available, documented rights, useful alt text, and reliable public delivery.',1),
-('missing_launch_images','catalog','Catalog, product facts, and media','Replace every missing, broken, fallback, or placeholder launch image',95,'critical',1,1,'/admin/image-manifest/','Database Visual Image Manifest, IMAGES_REQUIRED.md capture guide, Catalog Media, R2, and every public launch product, service, local, category, and social-preview route','1. Open Visual Image Manifest and confirm the green Database status authority banner, 20 active seed rows, three generated-editorial provenance rows, and visible open-launch-blocker count. If Unsynced fallback appears, apply Build 230 and repair the API before continuing.
-2. Open IMAGES_REQUIRED.md from the manifest for capture standards, then freeze the opening-day product list and create item-specific Catalog Media records for every launch product.
-3. Filter Open launch blockers only. Assign each item an owner and open its page; do not approve from the thumbnail alone.
-4. At narrow-phone, tablet, desktop and wide-desktop widths, check source HTTP status, crop, distortion, overlap, layout shift, repeated-image substitution, intrinsic dimensions, slow/offline fallback and whether the alternative text describes the actual image.
-5. For real_photo_required rows, photograph the actual current product, process, condition, location or packaging. Generated or stock-looking artwork cannot pass these rows.
-6. For editorial_illustration_allowed rows, confirm the page discloses illustration where necessary, does not imply actual inventory, and excludes the asset from Product/Offer schema and real-product galleries.
-7. Confirm ownership, model/property consent, product accuracy, privacy and public-use permission. Keep needs-review or blocked media out of public release surfaces.
-8. Upload approved originals through R2/Catalog Media where applicable; create responsive derivatives; save the final root-relative or HTTPS URL and useful alt text.
-9. Save rights, public-use, phone and desktop results plus evidence URL and a plain-language change note. Approval is rejected until all required fields pass. Reload and confirm the change appears in manifest history.
-10. Inspect Open Graph, Organization/LocalBusiness/Product structured data, feeds, social queues and scheduled content so no planning placeholder or generated product proof represents a launch item.
-11. Repeat the open-blocker filter. Keep this Startup gate Failed or Blocked while any required row or item-specific launch-product role is missing, misleading, rights-unclear, placeholder-based, device-failed or absent from saved evidence.
-12. Reopen this gate after any launch-product, route, crop, asset, rights, schema, social-preview or public-use change.','The D1 Visual Image Manifest and item-specific Catalog Media evidence show approved, accurate, rights-cleared responsive final imagery for every launch product and indexable launch route; no required real-photo row is passed with generated art; no missing, broken, fallback, duplicate substitute or planning placeholder remains; and phone/desktop review history is complete.',1),
-('pricing_quantity_sets','commerce','Pricing, inventory, and checkout','Verify base prices, quantity specials, sets, coupons, and gift-card interactions',100,'critical',1,1,'/admin/products/','Public product detail, cart, checkout, and payment total','1. For each launch product, compare the stored base price with the public detail page, cart, checkout, and payment provider.
-2. Test every quantity breakpoint using the exact threshold, one below, and one above.
-3. Confirm the per-unit price never increases unexpectedly at a higher advertised tier.
-4. For sets, confirm component quantities and requested reserved-set quantity are correct.
-5. Test coupon and gift-card combinations only if those features are publicly displayed.
-6. Confirm discounts cannot reduce a price below an approved floor or create a negative total.
-7. Verify the server recalculates all totals and ignores browser-edited values.
-8. Record screenshots or order IDs for each scenario.','Displayed and server-calculated prices, discounts, quantity tiers, sets, and final payment totals match approved business rules.',1),
-('inventory_regular_exact_once','commerce','Pricing, inventory, and checkout','Prove exact-once inventory settlement for regular products',110,'critical',1,1,'/admin/orders/','Production checkout, Stripe webhook events, orders, and inventory movements','1. Record the starting inventory of a safe test product.
-2. Complete one paid production order for one unit.
-3. Confirm inventory is consumed only after the approved payment event and exactly one movement is recorded.
-4. Replay or resend the same webhook event and confirm no second consumption occurs.
-5. Attempt a failed and an expired checkout and confirm no permanent consumption remains.
-6. Compare order quantity, inventory movement, on-hand quantity, and audit history.
-7. Use a compensating correction only through the reviewed inventory workflow if the test exposes a defect.','A successful payment consumes the correct quantity once, retries are idempotent, and failed or expired payment attempts do not leave stock consumed.',1),
-('inventory_sets_concurrency','commerce','Pricing, inventory, and checkout','Prove component-set reservation, zero availability, and final-unit concurrency',120,'critical',1,1,'/admin/products/','Production set product, component products, simultaneous checkout sessions','1. Create or use a safe set with known component quantities and a small temporary stock level.
-2. Confirm the set availability equals the lowest whole number of complete component sets.
-3. Confirm reserved components reduce the individual component availability shown publicly.
-4. Reduce one component below the required quantity and confirm the set shows zero available.
-5. Restore stock through a reviewed movement, not a direct database edit.
-6. Open two private browser sessions and attempt to buy the final available set or final one-of-a-kind item at nearly the same time.
-7. Confirm only one checkout can settle and the other receives a clear unavailable result.
-8. Confirm cancellation/refund restores both set and component availability exactly once.','Set availability is component-limited, reservations are visible, zero availability is enforced, and simultaneous final-unit attempts cannot oversell.',1),
-('purchase_lots_costs','commerce','Pricing, inventory, and checkout','Reconcile tools, supplies, purchase lots, dates, and actual costs',130,'high',1,0,'/admin/inventory-operations/','Amazon order history, supplier invoices, and physical stock count','1. Open Tools & Supplies and choose Lots for each launch material.
-2. Enter each separate purchase with purchase/received date, supplier, order number, ASIN or supplier SKU, quantity, unit cost, allocated tax/shipping, storage location, and expiry where applicable.
-3. Keep goat milk bases, oils, mica, coloured bases, fragrance, packaging, and other batches separate when traceability matters.
-4. Compare total lot remaining with the main on-hand quantity.
-5. Physically count the material before applying a lot total to main inventory.
-6. Use the review and APPLY LOT TOTAL confirmation rather than editing D1 directly.
-7. Record quarantine, expiry, return, or consumed status accurately.
-8. Verify project and product costing uses reviewed costs rather than a stale default.','Every launch material has traceable purchase evidence, physical quantity, lot status, and a reviewed cost suitable for margin calculation.',1),
-('tax_scenarios','commerce','Pricing, inventory, and checkout','Verify Canadian tax scenarios and refund tax calculations',140,'critical',1,1,'/checkout/','Production checkout, payment provider, and accountant-reviewed tax settings','1. Confirm the business tax-registration status and effective date with the owner/accountant.
-2. Test an Ontario shipping address and every other province or territory the store accepts.
-3. Test local pickup if enabled.
-4. Confirm tax treatment for physical goods, digital items, shipping charges, discounts, gift cards, and refunds.
-5. Compare the public checkout total, payment-provider amount, stored order tax, and accounting journal.
-6. Confirm unsupported destinations are rejected before payment.
-7. Save scenario evidence and the business rule used; do not rely only on a browser display.','Every accepted destination and product type produces the reviewed tax result, and refunds reverse the correct tax amount.',1),
-('shipping_pickup','commerce','Pricing, inventory, and checkout','Verify shipping destinations, rates, pickup, packaging, and fulfilment promises',150,'critical',1,1,'/pickup/','Checkout, carrier or shipping-rate source, packing materials, and public policies','1. List the destinations the business can actually fulfil at launch.
-2. Test Ontario, another supported province, PO box handling, and US/international only when intentionally enabled.
-3. Confirm package weight and dimensions for each launch-product family.
-4. Compare checkout rates with the expected carrier or flat-rate policy.
-5. Test local pickup instructions, pickup timing, contact details, and tax treatment.
-6. Confirm free-shipping thresholds and surcharges cannot be bypassed through quantity or discount combinations.
-7. Perform one physical pack test and verify the product is protected by the materials included in its cost.
-8. Ensure policy text matches actual operating practice.','Every accepted address can be fulfilled at the displayed cost and timeframe, pickup instructions are accurate, and physical packaging protects the product.',1),
-('stripe_live_webhook','payments','Payments, refunds, and financial controls','Complete Stripe live capture, signed webhook, and idempotency proof',160,'critical',1,1,'/admin/webhook-events/','Stripe Dashboard → Developers → Webhooks and production payment settings','1. Confirm live Stripe keys and the production webhook signing secret are stored in Production secrets.
-2. Confirm the public webhook endpoint and subscribed event types match the application.
-3. Place one low-value real order with an owner-controlled payment method.
-4. Confirm the payment amount, currency, order ID, customer details, and settlement status.
-5. Confirm the webhook signature is verified before any state change.
-6. Resend the same event and confirm the event ID is not applied twice.
-7. Test a failed payment, expired checkout, and customer cancellation.
-8. Record Stripe event IDs and order IDs, never secret values or full card data.','A live payment settles once, its signed webhook is verified, duplicate delivery has no duplicate effect, and failed/cancelled sessions remain recoverable.',1),
-('refund_restore','payments','Payments, refunds, and financial controls','Prove cancellation, partial/full refund, and inventory restoration',170,'critical',1,1,'/admin/orders/','Order management, payment provider, inventory movements, and accounting records','1. Use a separate paid rehearsal order after the successful-payment test.
-2. Cancel before fulfilment and confirm the order status, payment state, and inventory restoration.
-3. Test a full refund and, if supported publicly, a partial refund.
-4. Confirm each refund creates one provider action, one order history event, one inventory restoration where appropriate, and balanced accounting entries.
-5. Replay the refund webhook and confirm no second restoration or refund record occurs.
-6. Confirm non-restockable or partially fulfilled items require an explicit reviewed decision.
-7. Check the customer-facing refund communication.','Cancellation and refund actions are idempotent, financially traceable, communicate clearly, and restore only the inventory that should return to sale.',1),
-('paypal_visibility','payments','Payments, refunds, and financial controls','Make PayPal fully operational or completely hide it',180,'critical',1,1,'/checkout/','PayPal developer/live account and production callback settings','1. Inspect checkout, footer, payment options, public policies, email templates, admin screens, and documentation for PayPal references.
-2. In Cloudflare Production secrets, confirm the intended PayPal environment, client ID, secret, webhook identity, callback/return URLs, and currency without recording secret values.
-3. If live credentials, callbacks, capture, cancellation, signed webhook, idempotency, and refund paths are not proven, remove or hide PayPal from all public surfaces.
-4. If PayPal will launch, use a low-value owner-controlled transaction to test approval, capture, cancellation, duplicate webhook delivery, and full refund.
-5. Compare the PayPal transaction, stored payment/order, tax, inventory, customer notice and accounting records.
-6. Confirm the displayed provider status never claims connected based only on a client ID or browser-side setting.
-7. Keep manual payment records clearly separate from provider-confirmed payments and record the provider transaction/event IDs as evidence.
-8. Record the explicit launch/hide decision, owner, date, and next review date.','Customers either receive a completely working PayPal option or see no PayPal option or promise anywhere on the live site.',1),
-('accounting_tax_reporting','payments','Payments, refunds, and financial controls','Verify bookkeeping, payment application, HST/GST review, and export controls',190,'high',1,0,'/admin/accounting/','Accountant-reviewed chart of accounts, tax settings, and export process','1. Confirm sales, tax, shipping, discounts, payment fees, refunds, inventory, cost of goods, and gift-card liabilities map to the intended accounts.
-2. Confirm paid orders can be applied to receivables and provider settlements without duplicate journals.
-3. Review HST/GST reporting fields and opening balances with the accountant.
-4. Test an accountant export with a safe date range and confirm lower roles cannot run it.
-5. Confirm month-end lock/reopen controls or document the temporary manual procedure.
-6. Record unresolved accounting limitations in the operating checklist before launch volume increases.','Opening transactions can be reconciled and exported accurately, sensitive exports are authorized, and any temporary manual accounting controls are documented.',1),
-('transactional_email','communications','Customer communication and policies','Verify every required transactional email and failure path',200,'critical',1,1,'/admin/live-ops-followthrough/','Configured email provider, Gmail, Outlook, and mobile inboxes','1. Test registration or welcome, password reset, order confirmation, payment receipt, cancellation, refund, fulfilment/shipping, pickup, and review request when enabled.
-2. Send only to owner-controlled test addresses.
-3. Check Gmail, Outlook, and a mobile mail application.
-4. Confirm sender name, reply-to, domain authentication, links, order facts, plain-text fallback, and unsubscribe requirements for non-transactional mail.
-5. Trigger a safe provider failure and confirm it is visible in logs or an admin retry queue.
-6. Confirm no secret, internal note, or unrelated customer data appears in the message.
-7. Save provider message IDs or screenshots as evidence.','Essential messages arrive with correct facts and links, failures are observable, and a safe resend or support path exists.',1),
-('customer_support_contact','communications','Customer communication and policies','Verify contact, custom request, order-help, and customer-service response paths',210,'high',1,1,'/contact/','Public contact/custom-request forms and owner-controlled inbox','1. Submit the public contact form and any enabled custom-request form from a private browser.
-2. Confirm required consent, spam protection, validation, acknowledgement, and admin visibility.
-3. Ask a product, shipping, pickup, return, and custom-order question using test data.
-4. Confirm the message reaches the correct owner inbox or admin queue with a useful reference.
-5. Verify a customer can find order-help instructions without entering admin areas.
-6. Confirm response-time promises are realistic and consistent with policy pages.
-7. Delete test personal data after verification where appropriate.','Customers can reach the business, receive acknowledgement, and obtain order/product help through monitored channels with realistic response expectations.',1),
-('policies_legal','communications','Customer communication and policies','Review privacy, terms, shipping, pickup, returns, refunds, and custom-work policies',220,'critical',1,0,'/terms/','Public footer, checkout, product pages, and owner/legal review','1. Open every public policy from the footer and checkout.
-2. Confirm business name, contact method, effective date, jurisdiction, shipping destinations, pickup rules, cancellation, return, refund, damaged-item, custom/personalized, digital, and privacy wording.
-3. Make sure policies describe actual operations and do not promise unsupported delivery times or return rights.
-4. Confirm product pages link to the policy information customers need before payment.
-5. Verify privacy/data-deletion instructions reflect the data actually collected by forms, analytics, accounts, and payment providers.
-6. Review special conditions for one-of-a-kind, vintage, made-to-order, and cosmetic products.
-7. Record who reviewed the final policy set and when.','All customer-facing policies are findable before payment, internally consistent, dated, and aligned with the way the business will actually operate.',1),
-('soap_formula_ingredients','packaging','Soap, packaging, and regulatory readiness','Verify each soap formula, INCI order, bilingual identity, warnings, and claims',230,'critical',1,0,'/admin/packaging/soap-labels/','Verified recipe/formula records, supplier documents, bilingual review, and applicable cosmetic requirements','1. Link the soap label project to the intended finished soap product and verified recipe or formula source.
-2. Enter ingredients in reviewed INCI order rather than copying supplier marketing bullets.
-3. Complete matched English and French product identity, ingredient display rows, warnings, dealer/address, consumer contact, Canadian-origin wording, and metric net quantity.
-4. Review fragrance, colourant, allergen, and claim obligations that apply to the final formula.
-5. Confirm every displayed claim has an internal approval note and factual support.
-6. Compare the structured rows against the batch record and physical product.
-7. Lock the reviewed source facts before creating the final label version.','The label content reflects the actual formula and reviewed bilingual/legal facts; no ingredient or claim is inferred from artwork or supplier advertising.',1),
-('soap_print_proof','packaging','Soap, packaging, and regulatory readiness','Generate, measure, wrap-test, approve, and archive each soap label',240,'critical',1,0,'/admin/packaging/soap-labels/','100% physical printer proof and PACKAGING_STUDIO.md','1. Use PACKAGING_STUDIO.md as the single packaging source of truth.
-2. Generate the continuous ribbon from structured records and save a review version.
-3. Print at 100% with browser/page scaling disabled.
-4. Measure strip width, band height, front oval, rear seal, bleed, and safe-area result.
-5. Test both the photo-fit and true-50-mm profile if the final physical geometry is not yet chosen.
-6. Wrap the actual soap and inspect front centring, folds, overlap/glue, ingredient legibility, French text, claims, net weight, barcode/batch zones, and colour.
-7. Upload or link a proof photo, record printer/paper, and mark fit, legibility, and overlap separately.
-8. Approve and archive only the version that passed; supersede rather than silently overwrite an approved label.','Each launch soap has a saved, physically measured, wrapped, passed, approved, and archived label version linked to its exact structured source data.',1),
-('candle_top_template_proof','packaging','Soap, packaging, and regulatory readiness','Measure, save, laser-test, approve, and archive each candle-top template',245,'critical',1,0,'/admin/packaging-studio/','Physical candle lid or blank, laser/printer settings, owner-supplied wedding sample, and PACKAGING_STUDIO.md','1. Open Labeling & Packaging, create or open the intended candle-top project, and select the closest round system template; never reuse a soap or generic rectangle template.
-2. Measure the actual lid or laser blank in millimetres with an appropriate ruler or caliper. Record the usable diameter separately from any lip, bevel, fixture or no-burn area.
-3. In Layout, enter the measured canvas diameter, safe margin and bleed/trim allowance. Select round plus the wedding, centred-candle or maker-mark design profile that matches the job.
-4. In Artwork & Colours, replace the sample names, original date, occasion, celebration date, upper website arc and lower origin arc. Keep all customer wording editable; do not bake names or dates into the illustration.
-5. Confirm the preview uses centred text anchors and curved text paths, both rings are concentric, permanent website/origin wording is present, and no line crosses the safe area.
-6. Enter a specific reusable template name that includes nominal size and use, such as 3.75-inch wedding candle top, add material/fixture notes, and select Save these dimensions and features as a reusable template. Reload the project and confirm the custom template remains selected.
-7. Save the project and a review version, export SVG, and archive its filename and checksum. Do not treat browser PNG/JPG or the AI-created line-art raster as a vector engraving master unless the chosen laser workflow has accepted and traced it.
-8. Run one owner-controlled material test using the exact blank, laser/printer, power/speed/DPI, focus, masking and fixture settings intended for production. Keep flammable candle material out of an unsafe test setup and follow the equipment/material manufacturer instructions.
-9. Measure the finished result and inspect centring, legibility, line weight, arc direction, spelling, dates, scorching/colour, edge clearance and fixture rotation. Photograph the proof without exposing private customer information beyond approved wording.
-10. In Print Test, record 100% scale, round diameter, material/stock, equipment, physical checks, proof URL and factual notes. A failed size, spelling, material or centring result requires a new version and full retest.
-11. Approve only the exact version that passed and keep the source sample, generated text-free artwork, exported file, settings and proof evidence together for the repeat job. Never overwrite an approved customer version silently.
-12. Repeat this gate for every new physical size, blank/material, artwork profile, laser/printer setting or meaningful wording-layout change.','Every launch candle top or engraved round uses a saved exact-size reusable template with editable wording, centred static brand elements, an archived export/checksum, and a passed physical proof on the intended blank and production method.',1),
-('health_canada_notification','packaging','Soap, packaging, and regulatory readiness','Prepare Health Canada cosmetic notification and change control',250,'critical',1,1,'/admin/startup-readiness/','Health Canada Cosmetic Notification Form and official guidance','1. Determine which launch products are cosmetics and identify the responsible manufacturer or importer.
-2. Prepare product identity, intended use, company/contact, first-sale date, formula ingredients, concentration ranges, and other required notification information.
-3. Submit the Cosmetic Notification Form within the applicable period after first sale; current official guidance states within 10 days after first sale in Canada.
-4. Save the submission confirmation or reference outside the public website and record a safe evidence pointer here.
-5. Create a change-control rule for name, formula, concentration, company, contact, or other reportable changes.
-6. Review the Cosmetic Ingredient Hotlist and other applicable official requirements before release.
-7. Do not treat an app-generated label or notification record as legal approval.','Every applicable cosmetic has an owner, prepared/submitted notification evidence, and a documented process for later formula or business-detail changes.',1),
-('packaging_prepress_boundary','packaging','Soap, packaging, and regulatory readiness','Confirm the packaging export is suitable for the chosen printer and production method',260,'high',1,0,'/admin/packaging-studio/','Chosen printer, paper/stock, cutter, colour profile, and production proof','1. Confirm whether the printer accepts SVG, browser-generated PDF, or requires a prepress PDF with crop/bleed boxes and embedded/outlined fonts.
-2. Verify the exact media size, bleed, safe area, crop marks, colour mode/profile, and no-scaling setting.
-3. Confirm the rose and icon assets remain sharp and licensed/owned for production use.
-4. Print a calibration ruler and compare measured output to the design dimensions.
-5. Record printer, paper, driver, scaling, colour, and cutting settings.
-6. Keep browser Print/Save PDF labelled as preparation until the chosen printer accepts it as final production output.
-7. Archive the source SVG, delivered file, checksum, and proof result.','The chosen printer and material reproduce the approved dimensions, type, colour, bleed, and cut safely using an archived export and documented settings.',1),
-('analytics_consent','discovery','Search, analytics, accessibility, and quality','Verify analytics, consent, privacy boundaries, and commerce event accuracy',270,'high',1,1,'/admin/site-analytics/','GA4 or configured analytics property and browser developer tools','1. Confirm the production analytics identifier is loaded once on public pages and not duplicated by multiple scripts.
-2. Test page_view, view_item, add_to_cart, begin_checkout, purchase, refund, contact, and custom-request events that are actually enabled.
-3. Confirm transaction IDs prevent duplicate purchase events after refresh.
-4. Verify no secret, password, payment detail, private admin note, or unnecessary personal data is sent.
-5. Test consent or privacy controls required by the chosen analytics setup.
-6. Exclude admin and preview traffic where practical.
-7. Compare one test order with analytics and the stored order.','Public and commerce activity is observable once, privacy boundaries are respected, and analytics values can be reconciled to a test transaction.',1),
-('search_console_indexing','discovery','Search, analytics, accessibility, and quality','Verify sitemap, robots, canonical URLs, Search Console, and index coverage',280,'high',1,1,'/sitemap.xml','Google Search Console for devilndove.com','1. Open robots.txt and sitemap.xml on the production domain and confirm both load successfully.
-2. Confirm the sitemap contains only intended canonical public URLs and excludes admin/private pages.
-3. Verify the domain property in Search Console and submit the sitemap.
-4. Inspect the home page, shop, one category/local page, and several product-detail URLs.
-5. Confirm canonical URLs use the production domain and query-based product pages resolve consistently.
-6. Review index coverage, mobile usability, structured-data reports, manual actions, and security issues.
-7. Record important indexing problems as separate work items rather than repeatedly changing titles without evidence.','Search Console owns the production property, the sitemap/canonical system is correct, and representative public pages are crawlable without critical index or security errors.',1),
-('google_business_profile','discovery','Search, analytics, accessibility, and quality','Complete and verify Google Business Profile and local-business consistency',290,'high',1,1,'/contact/','Google Business Profile for Devil n Dove','1. Confirm the profile name, primary/secondary categories, phone, website, service or pickup area, hours, special hours, description, products/services, and photos are accurate.
-2. Keep address visibility consistent with how customers actually visit or receive products.
-3. Compare business name, phone, website, and locality wording with the website and major directory profiles.
-4. Add current real photos and respond to legitimate reviews without incentives that violate platform rules.
-5. Use local wording only where it truthfully reflects pickup, service, market, or delivery reach.
-6. Record monthly evidence and any profile correction task.
-7. Do not promise or report a guaranteed first-page position; monitor relevance, distance, and prominence over time.','The Business Profile is complete, accurate, consistent with the website, actively maintained, and supported by real local proof and customer trust.',1),
-('seo_page_quality','discovery','Search, analytics, accessibility, and quality','Run the public SEO, title, H1, structured-data, image, and internal-link audit',300,'high',1,1,'/admin/local-seo-review/','Production public pages, Google rich-result tools, and Search Console','1. Scan every indexable HTML page for one and only one H1, a distinctive title, useful meta description, canonical URL, robots directive, and meaningful visible introduction.
-2. Make the main title visually unambiguous; avoid multiple headings with equal title prominence.
-3. Use descriptive buyer language in titles, headings, product facts, image alt text, and internal links without stuffing locations or keywords.
-4. Validate Organization/LocalBusiness, Breadcrumb, Product, Offer, image, and other applicable structured data against visible facts.
-5. Confirm Product schema includes the approved gallery images, current price, currency, availability, SKU, and canonical offer URL.
-6. Check crawlable internal links to important shop, category, policy, contact, story, and local relevance pages.
-7. Review duplicate/thin pages and redirect or noindex where appropriate.
-8. Record before/after evidence for changes rather than guessing from rankings.','All indexable pages pass the one-H1 and metadata audit, structured data matches visible facts, and important pages are discoverable through descriptive crawlable links.',1),
-('mobile_accessibility_performance','discovery','Search, analytics, accessibility, and quality','Complete real-device mobile, keyboard, accessibility, and performance testing',310,'critical',1,1,'/admin/post-deploy-smoke-tests/','Real phones/tablet/desktop, Lighthouse/PageSpeed, keyboard, and screen-reader checks','1. Test a narrow phone, large phone, tablet, laptop, and large desktop in portrait and landscape where relevant.
-2. Complete navigation, product view/gallery, cart, checkout, login, password reset, contact, and critical admin workflows.
-3. Confirm touch targets, sticky actions, form labels, validation, focus visibility, keyboard order, dialogs, tables, and horizontal overflow.
-4. Check colour contrast and text readability in dark/light surfaces used by the site.
-5. Test with images disabled or a slow connection and confirm useful fallback content.
-6. Run Lighthouse/PageSpeed on home, shop, product detail, contact, and an important local/content page on mobile and desktop.
-7. Fix critical accessibility errors and layout overlap before launch; document lower-priority performance work.
-8. Re-run after CSS or image changes.','Critical customer journeys work on target devices and keyboard, no blocking accessibility or overlap defect remains, and performance evidence is recorded.',1),
-('social_oauth_visibility','discovery','Search, analytics, accessibility, and quality','Keep social publishing controls review-first until provider OAuth is approved',320,'medium',1,1,'/admin/social-publishing/','Meta, Pinterest, YouTube, TikTok, and other configured provider developer consoles','1. Open Social Publishing and list each provider shown in the connection cards, queue, and public footer.
-2. For Meta, confirm FACEBOOK_PAGE_ID (or META_PAGE_ID), FACEBOOK_PAGE_ACCESS_TOKEN (or META_PAGE_ACCESS_TOKEN), INSTAGRAM_USER_ID/INSTAGRAM_BUSINESS_ACCOUNT_ID, and the optional INSTAGRAM_ACCESS_TOKEN exist as encrypted Production secrets; never record their values.
-3. Select Test Facebook + Instagram. Confirm the Page identity and Instagram professional-account identity return HTTP 200 and the configured IDs match.
-4. If META_APP_ID and META_APP_SECRET are present, confirm token debug reports is_valid, the app ID matches, expiry/data-access-expiry are acceptable, and the returned scopes cover the approved workflow.
-5. Confirm exact callback URLs, privacy/data-deletion pages, app-review state, Page/account roles, and provider scopes in the Meta developer/business consoles.
-6. Keep automatic publishing disabled. Generate one product draft, review media/privacy/caption/UTM, approve deliberately, and publish only one safe product-only test post.
-7. Confirm the provider post ID/URL and queue status are recorded, then verify the tracked public destination works.
-8. Expire/revoke a test token or use a safe invalid preview credential and confirm the item remains in review/failed state rather than falsely marked published.
-9. Repeat the credential identity test after token rotation, app-role changes, Graph API version changes, or account reconnection.
-10. Keep providers manual and remove unfinished public promises when OAuth, review, or posting permissions are incomplete.','Unapproved providers remain disabled and honestly labelled; any enabled provider publishes only after deliberate review with observable success/failure evidence.',1),
-('backup_restore_rehearsal','operations','Recovery, fulfilment, and controlled opening','Rehearse D1, R2, deployment, and configuration recovery',330,'critical',1,1,'/admin/deployment-preflight/','Cloudflare D1 backups/exports, R2, Pages deployments, and secure configuration records','1. Create a test or copied environment that can be restored without risking production customer data.
-2. Restore a recent D1 backup and verify users, products, inventory, orders, packaging, and readiness records.
-3. Verify R2 object inventory and restore or re-link a safe test media object.
-4. Roll back to a previous Pages deployment, run smoke tests, then return to the current deployment.
-5. Confirm required variable and binding names are documented outside the code without storing secret values in the repository.
-6. Measure recovery time and record the operator steps that were confusing or missing.
-7. Update the recovery guide after the rehearsal.','A tested operator can restore database, media, deployment, and required configuration within an acceptable time using documented steps.',1),
-('paid_order_fulfilment_rehearsal','operations','Recovery, fulfilment, and controlled opening','Complete a real paid order from product view through fulfilment',340,'critical',1,1,'/admin/orders/','Public store, payment provider, email, packaging, pickup/shipping, inventory, and accounting','1. Use a launch product and an owner-controlled customer identity/payment method.
-2. Start from the public Shop, inspect the product gallery/facts, add to cart, and complete checkout.
-3. Confirm payment, webhook, order, inventory, tax, shipping/pickup, email, and accounting records.
-4. Pick the physical item, verify lot/batch where relevant, package it with the approved label/materials, and mark fulfilment.
-5. Confirm the customer receives the correct fulfilment or pickup message.
-6. Compare actual labour, packaging, shipping, provider fee, and margin with the stored assumptions.
-7. Save order ID, timestamps, and issues; never store full payment credentials.','One real order completes end to end with correct product, money, stock, communication, packaging, fulfilment, and reconciliable records.',1),
-('separate_refund_rehearsal','operations','Recovery, fulfilment, and controlled opening','Complete a separate cancellation/refund rehearsal and customer recovery',350,'critical',1,1,'/admin/orders/','Production payment, order, inventory, email, and accounting systems','1. Use a different low-value owner-controlled rehearsal order so the paid-order proof remains intact.
-2. Test the actual cancellation/refund workflow an operator will use.
-3. Confirm provider refund, order history, customer email, inventory decision, tax reversal, fee treatment, and accounting entries.
-4. Confirm the item is returned to sellable stock only after physical/operational review where required.
-5. Replay the provider event and confirm the recovery action remains idempotent.
-6. Document the customer-service wording and escalation path for a failed automated step.','A separate refund/cancellation can be completed safely, communicated clearly, reconciled, and repeated webhook delivery cannot duplicate its effects.',1),
-('deploy_readiness_standalone','operations','Recovery, fulfilment, and controlled opening','Complete Deploy Readiness as a standalone promotion decision',355,'critical',1,1,'/admin/deploy-readiness/','Startup Readiness, Deployment Preflight result, Post-Deploy Smoke Tests, rollback evidence, and release manifest','1. Open Deploy Readiness only after the exact package passed Deployment Preflight, was deployed, and passed the complete Post-Deploy Smoke process.
-2. Confirm every Critical Startup gate is Complete or has an owner-approved, factually justified Not Applicable result; do not rely only on a score.
-3. Review blocker drilldowns, manifest paths, migration ledger, rollback/recovery reference, smoke evidence, product scope, marketplace/recall locks and provider checks.
-4. Confirm the opening owner, monitoring hours, stop conditions, rollback steps and customer recovery contacts are written and reachable from a phone.
-5. Record the exact deployment, database bookmark/recovery point, approved product count, outstanding High items and the person making the decision.
-6. Select Blocked when any required evidence is absent or contradictory and link back to the exact Startup gate.
-7. Select approval only when the evidence—not the existence of the feature—supports proceeding to controlled Go-Live Execution.
-8. Reopen this decision after a new deployment, migration, critical configuration change, failed smoke test or material Startup-gate change.','A named owner has recorded an evidence-backed promotion decision for the exact live build, no Critical Startup gate or smoke result remains open, and rollback/stop conditions are ready.',1),
-('launch_monitoring_ownership','operations','Recovery, fulfilment, and controlled opening','Assign launch-day ownership, monitoring, support, and stop conditions',360,'critical',1,0,'/admin/startup-readiness/','Internal launch operating plan','1. Name the person responsible for orders, payments, inventory, email, customer messages, site incidents, and public updates during opening.
-2. Define the hours the store will be actively monitored during the first days.
-3. Write stop conditions for payment mismatch, oversell, repeated 500 errors, lost email, wrong tax, broken fulfilment, or unsafe product/label concern.
-4. Record how to hide checkout, archive a product, roll back a deployment, contact customers, and preserve evidence.
-5. Confirm the owner can access the required dashboards and recovery instructions from a phone.
-6. Prepare a short daily review of orders, incidents, inventory, refunds, and customer questions.','Each launch responsibility has an owner and the team has clear monitoring, escalation, rollback, and temporary-stop instructions.',1),
-('go_live_execution_standalone','operations','Recovery, fulfilment, and controlled opening','Run Go-Live Execution as a standalone controlled-opening process',365,'critical',1,1,'/admin/go-live-execution/','Production storefront, Deploy Readiness approval, Promotion Control, launch owner and immediate monitoring dashboards','1. Confirm the Deploy Readiness decision names the exact live build and still has no Critical blocker.
-2. Confirm the deliberately small opening product list, conservative sellable quantities, real product media, packaging status, accepted destinations and customer policies.
-3. Record the opening date/time, owner on duty, monitoring window and first scheduled review before changing public availability.
-4. Enable only the approved products/channels; keep unfinished automation and unapproved providers disabled.
-5. Open the production store in a private session and complete the agreed visibility/cart/checkout check without changing unrelated products.
-6. Queue immediate incident/order/payment/inventory/email monitoring and keep rollback, checkout pause and product-archive controls open.
-7. If any stop condition occurs, pause the affected public action immediately, preserve evidence, communicate with affected customers and roll back or correct safely.
-8. Record the exact actions, operator, timestamps and resulting public URLs; never mark this gate complete from a successful button click alone.
-9. Continue to Live Ops Follow-through and monitor the first operational window.','The approved limited storefront is opened by a named operator, the exact actions and public results are recorded, immediate monitoring is active, and the opening remains reversible.',1),
-('controlled_opening','operations','Recovery, fulfilment, and controlled opening','Open with controlled stock, limited products, and a reversible rollout',370,'critical',1,1,'/admin/startup-readiness/','Production store and launch operating decision','1. Confirm every critical readiness item is Complete or has a formally justified Not Applicable decision.
-2. Keep the opening-day product list small and inventory conservative.
-3. Open to a limited audience or quiet public release before paid promotion.
-4. Monitor the first orders in real time and compare every system record.
-5. Pause sales immediately if a stop condition is reached.
-6. Add products and automation gradually only after the core order, inventory, email, refund, and fulfilment paths remain stable.
-7. Record the opening time, product count, owner on duty, and first review time.','The store opens through a monitored, reversible, low-risk release with no unresolved critical blocker and a clear pause/rollback path.',1),
-('live_ops_followthrough_standalone','operations','Recovery, fulfilment, and controlled opening','Run Live Ops Follow-through as a standalone first-window monitoring process',380,'critical',1,1,'/admin/live-ops-followthrough/','Production orders, payments, inventory, email provider, customer support, incidents, analytics and public channels','1. Begin monitoring at the Go-Live timestamp and keep the named owner available for the agreed first operating window.
-2. For every first-window order, compare payment, order, item, inventory movement, tax, delivery/pickup, email, client document and accounting records.
-3. Review runtime incidents, webhook retries, failed messages, stock warnings, customer questions, public-content/provider results and analytics duplication.
-4. Confirm completed fulfilment and any separate refund rehearsal remain reconciled and idempotent.
-5. Record expected versus actual results, safe IDs, customer recovery actions, owner and resolution for every anomaly.
-6. Activate the stop condition immediately for payment mismatch, oversell, repeated 500 errors, unsafe product/label, lost transactional email, wrong tax or unrecoverable fulfilment failure.
-7. Reopen every affected Startup gate after a failure, credential/configuration change or corrective deployment; never hide the incident by editing only the status.
-8. Complete a written end-of-window review covering orders, refunds, incidents, inventory, support and the next monitoring period.
-9. Expand products, stock or automation only after stable evidence supports the change.','The first live operating window is reconciled across customer, money, stock, communication, fulfilment, accounting and incident records, with every anomaly owned and no active stop condition.',1)
+INSERT INTO mobile_operations_cards (card_key,card_title,card_group,destination_path,card_status,badge_query,icon_name,sort_order,payload_json)
+VALUES
+('mobile_evidence','Evidence Cases','evidence','/admin/operational-continuity/','active','open_evidence_cases','camera',10,'{}'),
+('mobile_inventory','Packaging Reservations','inventory','/admin/operational-continuity/','active','open_packaging_reservations','boxes',20,'{}'),
+('mobile_notifications','Notification Failures','communications','/admin/operations/','active','failed_notification_attempts','bell',30,'{}'),
+('mobile_support','Customer Follow-up','support','/admin/operational-continuity/','active','open_support_interactions','message',40,'{}'),
+('mobile_close','Accounting Close','accounting','/admin/operational-continuity/','active','blocked_close_items','calculator',50,'{}'),
+('mobile_seo','Local SEO Observations','seo','/admin/operational-continuity/','active','seo_observation_age','search',60,'{}'),
+('mobile_release','Release Blockers','release','/admin/deploy-readiness/','active','release_blockers','shield',70,'{}')
+ON CONFLICT(card_key) DO UPDATE SET
+  card_title=excluded.card_title,
+  card_group=excluded.card_group,
+  destination_path=excluded.destination_path,
+  card_status=excluded.card_status,
+  badge_query=excluded.badge_query,
+  icon_name=excluded.icon_name,
+  sort_order=excluded.sort_order,
+  updated_at=CURRENT_TIMESTAMP;
+
+INSERT INTO startup_readiness_items (item_key,phase_key,phase_label,item_title,sort_order,blocker_severity,is_launch_blocker,requires_live_binding,target_route,external_location,instructions_markdown,pass_condition,is_active)
+VALUES (
+  'operational_continuity_evidence_center',
+  'operations',
+  'Recovery, fulfilment, and controlled opening',
+  'Operate the Build 240 evidence, continuity, fallback and mobile control centre',
+  357,
+  'critical',
+  1,
+  1,
+  '/admin/operational-continuity/',
+  'Production D1, Cloudflare logs, payment/email/social providers, R2 and phone/desktop browsers',
+  '1. Apply Build 240 after backing up D1 and confirm the migration ledger key.\n2. Open Operational Continuity and verify all twenty workstreams load from D1; degraded mode must show the static fallback and no false success.\n3. Create evidence cases for login, autosave, webhook duplicate, concurrency, refund, email, restore, packaging and controlled opening.\n4. Record expected and actual results plus safe IDs/URLs; never store credentials or unnecessary customer data.\n5. Verify idempotency claims reject a duplicate key without repeating the operation.\n6. Test one packaging component reservation, release and reversal with lot-aware quantities.\n7. Link one verified formula/version/checksum to a packaging project and lock one approved version.\n8. Record prepress text-fit, region-overflow, QR/barcode destination and font results.\n9. Reconcile at least one observable provider result and one notification delivery attempt.\n10. Test a phone evidence draft through interruption, privacy review and sync recovery.\n11. Run deployed asset and public-page audits; one H1, titles, descriptions, canonical, links, images and schema must remain visible.\n12. Review support, accounting-close, batch-approval, local-SEO, fallback and mobile-card queues.\n13. Attach non-secret evidence and reopen affected gates after any failure or corrective deployment.',
+  'All twenty workstreams have an owner/status, critical live cases have evidence, duplicate operations are prevented, fallbacks do not imply success, and no active stop condition remains.',
+  1
+)
 ON CONFLICT(item_key) DO UPDATE SET
   phase_key=excluded.phase_key,
   phase_label=excluded.phase_label,
@@ -460,7 +515,132 @@ ON CONFLICT(item_key) DO UPDATE SET
   pass_condition=excluded.pass_condition,
   is_active=1,
   updated_at=CURRENT_TIMESTAMP;
--- Build 234 startup gate seed END
+
+
+-- Build 240 static public-page audit seed generated by scripts/build240_public_page_audit.py.
+INSERT INTO public_page_audit_results (build_label,page_path,audit_status,h1_count,title_text,meta_description_text,canonical_url,internal_link_count,image_count,missing_alt_count,missing_asset_count,structured_data_count,mobile_overflow_status,notes)
+VALUES
+  ('Build 240','/about/','passed',1,'About Devil n Dove | Southern Ontario Artisan Workshop','Learn about Devil n Dove, our Southern Ontario, Canada workshop, our creative process, and the handmade jewelry, art, tools, and maker projects we share.','https://devilndove.com/about/',16,4,0,0,1,'requires_browser_check',''),
+  ('Build 240','/collections/','passed',1,'Devil n Dove Collections | Handmade, Vintage & Collectible Paths','Browse Devil n Dove collection paths for handmade work, vintage finds, collectibles, antiques, oddities, and pre-built stock from our Southern Ontario, Canada workshop and storefront.','https://devilndove.com/collections/',15,1,0,0,1,'requires_browser_check',''),
+  ('Build 240','/contact/','passed',1,'Contact Devil n Dove | Questions, Custom Work & Shop Help','Contact Devil n Dove for shop questions, custom work, product help, workshop inquiries, and general messages from Southern Ontario, Canada.','https://devilndove.com/contact/',10,2,0,0,1,'requires_browser_check',''),
+  ('Build 240','/creations/','passed',1,'Devil n Dove Creations | Browse Handmade Projects & Pieces','Browse Devil n Dove creations including handmade jewelry, resin, mixed media, workshop builds, and featured finished pieces from Southern Ontario, Canada.','https://devilndove.com/creations/',12,2,0,0,1,'requires_browser_check',''),
+  ('Build 240','/custom-candle-making-ontario/','passed',1,'Custom Candle Making in Southern Ontario | Devil n Dove','Request custom candle making from Devil n Dove in Southern Ontario. Small-batch candle gifts, scent ideas, colour themes, labels, and handmade workshop gift planning.','https://devilndove.com/custom-candle-making-ontario/',6,3,0,0,1,'requires_browser_check',''),
+  ('Build 240','/custom-gifts-southern-ontario/','passed',1,'Custom Gifts in Southern Ontario | Devil n Dove','Explore custom gift ideas, handmade items, laser engraved pieces, sublimation experiments, and workshop-made creations from Devil n Dove in Southern Ontario.','https://devilndove.com/custom-gifts-southern-ontario/',14,2,0,0,2,'requires_browser_check',''),
+  ('Build 240','/custom-request/','passed',1,'Custom Gift Request in Southern Ontario — Devil n Dove','Request a custom handmade gift, engraving, jewelry idea, sublimation item, candle, soap, vintage-style find, or workshop-made Devil n Dove creation in Southern Ontario.','https://devilndove.com/custom-request/',6,1,0,0,1,'requires_browser_check',''),
+  ('Build 240','/custom-soap-making-ontario/','passed',1,'Custom Soap Making in Southern Ontario | Devil n Dove','Request custom soap making from Devil n Dove in Southern Ontario. Handmade soap gift ideas, colours, labels, scent notes, and small-batch workshop planning.','https://devilndove.com/custom-soap-making-ontario/',6,3,0,0,1,'requires_browser_check',''),
+  ('Build 240','/data-deletion/','passed',1,'Data Deletion Instructions | Devil n Dove','How to request deletion of eligible Devil n Dove account, media, and connected social-platform information.','https://devilndove.com/data-deletion/',7,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/events/','passed',1,'Devil n Dove Events | Recurring Markets, Pop-Ups & Vendor Dates','See how Devil n Dove handles market days, pop-ups, local events, and in-person selling in Southern Ontario, including what kinds of handmade, vintage, and collectible items may appear at events or pickup-friendly meetups.','https://devilndove.com/events/',9,1,0,0,1,'requires_browser_check',''),
+  ('Build 240','/gallery/','passed',1,'Devil n Dove Gallery | Handmade Art, Jewelry & Experiments','Browse the Devil n Dove gallery of handmade jewelry, mixed media art, workshop experiments, and finished creative pieces from our Southern Ontario, Canada studio.','https://devilndove.com/gallery/',9,2,0,0,1,'requires_browser_check',''),
+  ('Build 240','/gift-cards/','passed',1,'Devil n Dove Gift Cards | Handmade Gift Picks in Ontario','Create a Devil n Dove gift card draft for handmade jewelry, art, custom work, vintage finds, and workshop-made gifts from Southern Ontario.','https://devilndove.com/gift-cards/',7,3,0,0,1,'requires_browser_check',''),
+  ('Build 240','/handmade-jewelry-ontario/','passed',1,'Handmade Jewelry in Southern Ontario | Devil n Dove','Shop and follow handmade jewelry, workshop experiments, polymer clay earrings, resin work, and small-batch artisan creations from Devil n Dove in Southern Ontario.','https://devilndove.com/handmade-jewelry-ontario/',14,2,0,0,2,'requires_browser_check',''),
+  ('Build 240','/','passed',1,'Devil n Dove | Handmade Jewelry & Artisan Gifts Ontario','Devil n Dove is a Southern Ontario, Canada artisan workshop and online store for handmade jewelry, creative projects, tools, supplies, and maker experiments.','https://devilndove.com/',47,4,0,0,3,'requires_browser_check',''),
+  ('Build 240','/laser-engraving-ontario/','passed',1,'Laser Engraving Projects in Ontario | Devil n Dove','See Devil n Dove laser engraving projects, personalized workshop tests, gift ideas, and maker experiments from Southern Ontario.','https://devilndove.com/laser-engraving-ontario/',14,2,0,0,2,'requires_browser_check',''),
+  ('Build 240','/marketplaces/','passed',1,'Devil n Dove Marketplaces | External Listings, Pickup & Sale Channels','Learn how Devil n Dove handles external marketplace listings, hybrid listings, local pickup questions, condition notes, and sale-channel clarity for handmade, vintage, and collectible stock in Southern Ontario, Canada.','https://devilndove.com/marketplaces/',8,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/movies/','passed',1,'Movie Shelf | DVD and Blu-ray Movie Collection at Devil n Dove','Browse the Devil n Dove DVD and Blu-ray movie collection with searchable cover art, UPC lookup, film details, cast, director, runtime, and trailer links.','https://devilndove.com/movies/',9,2,0,0,1,'requires_browser_check',''),
+  ('Build 240','/pickup/','passed',1,'Devil n Dove Local Pickup | Availability, Timing & Support','Learn how Devil n Dove handles local pickup questions, timing, item availability, marketplace-linked listings, and support conversations for handmade, vintage, and collectible stock in Southern Ontario.','https://devilndove.com/pickup/',3,2,0,0,1,'requires_browser_check',''),
+  ('Build 240','/polymer-clay-earrings-ontario/','passed',1,'Polymer Clay Earrings in Ontario | Devil n Dove','Discover polymer clay earrings, lightweight handmade jewelry, and creative workshop pieces from Devil n Dove in Southern Ontario.','https://devilndove.com/polymer-clay-earrings-ontario/',14,2,0,0,2,'requires_browser_check',''),
+  ('Build 240','/privacy/','passed',1,'Privacy Policy | Devil n Dove','How Devil n Dove collects, uses, protects, and handles website, order, media, and social-platform information.','https://devilndove.com/privacy/',8,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/search/','passed',1,'Search Devil n Dove | Find Products, Tools, Supplies & Creations','Search Devil n Dove products, tools, supplies, creations, and key pages from one place across our Southern Ontario workshop and store.','https://devilndove.com/search/',4,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/shop/','passed',1,'Shop Devil n Dove | Handmade, Vintage, Collectibles & Oddities','Shop Devil n Dove handmade pieces, vintage finds, collectibles, oddities, tools, and digital creations from our Southern Ontario, Canada workshop.','https://devilndove.com/shop/',13,3,0,0,1,'requires_browser_check',''),
+  ('Build 240','/shop/product/','passed',1,'Product Details | Devil n Dove Shop','View product details, images, pricing, shipping, and availability for Devil n Dove handmade goods and digital creations.','https://devilndove.com/shop/product/',12,5,0,0,1,'requires_browser_check',''),
+  ('Build 240','/social-connections/','passed',1,'Social Platform Connections | Devil n Dove','How Devil n Dove uses authorized Facebook, Instagram, Pinterest, X, TikTok, and YouTube connections.','https://devilndove.com/social-connections/',7,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/socials/','passed',1,'Social Hub | Devil n Dove','Follow Devil n Dove in one place with profile links and a shared social hub for YouTube, Instagram, TikTok, Facebook, X, and Patreon.','https://devilndove.com/socials/',4,1,0,0,1,'requires_browser_check',''),
+  ('Build 240','/supplies/','passed',1,'Devil n Dove Supplies | Workshop Consumables & Materials','Browse the supplies and consumables we use at Devil n Dove, including workshop materials, refillables, and maker essentials from our Southern Ontario studio.','https://devilndove.com/supplies/',9,2,0,0,1,'requires_browser_check',''),
+  ('Build 240','/terms/','passed',1,'Terms of Use and Sale | Devil n Dove','Terms for using Devil n Dove, ordering handmade or vintage products, custom requests, media, and social publishing.','https://devilndove.com/terms/',7,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/tools/','passed',1,'Devil n Dove Tools | Workshop Tools We Use','Browse the tools Devil n Dove uses in our Southern Ontario workshop for jewelry making, casting, carving, laser work, resin, and maker experiments.','https://devilndove.com/tools/',9,2,0,0,1,'requires_browser_check',''),
+  ('Build 240','/toolshed/','passed',1,'Devil n Dove Toolshed | Workshop Gear, Notes & Learnings','See the Devil n Dove toolshed with workshop gear, duplicate tools, practical notes, and links to what we use in the studio.','https://devilndove.com/toolshed/',9,2,0,0,1,'requires_browser_check',''),
+  ('Build 240','/vintage-finds-ontario/','passed',1,'Vintage Finds and Oddities in Ontario | Devil n Dove','Browse the Devil n Dove mix of handmade creations, vintage finds, collectibles, curiosities, and oddities from Southern Ontario.','https://devilndove.com/vintage-finds-ontario/',14,2,0,0,2,'requires_browser_check',''),
+  ('Build 240','/workshop-journal/coin-and-spoon-ring-care/','passed',1,'Coin & Spoon Ring Care | Devil n Dove Workshop Journal','A Devil n Dove guide to checking fit, cleaning, and caring for coin rings and spoon rings.','https://devilndove.com/workshop-journal/coin-and-spoon-ring-care/',3,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/workshop-journal/handmade-vintage-sourced-guide/','passed',1,'Handmade, Vintage & Sourced Guide | Devil n Dove Workshop Journal','How Devil n Dove describes handmade pieces, vintage finds, collectibles, antiques, oddities, and sourced inventory.','https://devilndove.com/workshop-journal/handmade-vintage-sourced-guide/',3,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/workshop-journal/','passed',1,'Workshop Journal & Handmade Care | Devil n Dove','Workshop notes, handmade care guides, maker experiments, and honest notes on vintage, sourced, and mixed-media pieces from Devil n Dove.','https://devilndove.com/workshop-journal/',8,2,0,0,1,'requires_browser_check',''),
+  ('Build 240','/workshop-journal/polymer-clay-earring-care/','passed',1,'Polymer Clay Earring Care | Devil n Dove Workshop Journal','A simple Devil n Dove guide to storing, cleaning, and wearing polymer clay earrings with care.','https://devilndove.com/workshop-journal/polymer-clay-earring-care/',3,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/workshop-journal/story/','passed',1,'Workshop Journal Story | Devil n Dove','A reviewed Devil n Dove workshop story about a finished handmade, vintage, or mixed-media project.','https://devilndove.com/workshop-journal/story/',4,0,0,0,1,'requires_browser_check',''),
+  ('Build 240','/workshop-made-gifts-ontario/','passed',1,'Workshop-Made Gifts in Ontario | Devil n Dove','Follow Devil n Dove workshop-made gifts, jewelry, CNC experiments, casting projects, engraving, sublimation, and handmade creations in Southern Ontario.','https://devilndove.com/workshop-made-gifts-ontario/',14,1,0,0,2,'requires_browser_check','')
+ON CONFLICT(build_label,page_path) DO UPDATE SET
+  audit_status=excluded.audit_status,
+  h1_count=excluded.h1_count,
+  title_text=excluded.title_text,
+  meta_description_text=excluded.meta_description_text,
+  canonical_url=excluded.canonical_url,
+  internal_link_count=excluded.internal_link_count,
+  image_count=excluded.image_count,
+  missing_alt_count=excluded.missing_alt_count,
+  missing_asset_count=excluded.missing_asset_count,
+  structured_data_count=excluded.structured_data_count,
+  mobile_overflow_status=excluded.mobile_overflow_status,
+  notes=excluded.notes,
+  audited_at=CURRENT_TIMESTAMP;
+
+
+-- Build 240 refreshes current release instructions without changing mutable owner/status/evidence.
+UPDATE startup_readiness_items SET
+  external_location='Build 240 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md',
+  instructions_markdown='1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, aggregate-schema, repeated-current-migration, Startup 45-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
+4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest, Labeling & Packaging, Creative Automation and three public image bands.
+5. Confirm database_upgrade_current_pass.sql remains identical to database_build240_operational_evidence_continuity.sql and the Build 240 migration contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 240 consistently while naming Build 240 as the current D1 migration.
+7. Confirm the five adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
+8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
+9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
+10. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.',
+  pass_condition='The exact Build 240 archive passes every static, bounded-login/session-retention, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.',
+  updated_at=CURRENT_TIMESTAMP
+WHERE item_key='deployment_preflight_standalone';
+
+UPDATE startup_readiness_items SET
+  external_location='Cloudflare Dashboard → Workers & Pages → D1 and Pages deployments',
+  instructions_markdown='1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.
+2. Record the date, database name and safe recovery reference in the evidence notes.
+3. Confirm required prior ledger keys through build234_packaging_templates_creative_cleanup already exist, then apply database_build240_operational_evidence_continuity.sql or the identical database_upgrade_current_pass.sql, but not both.
+4. Confirm the ledger records build240_operational_evidence_continuity; verify twenty workstreams, 45 Startup gates, 36 Build 240 page audits, seven mobile cards, two fallback policies, the retained packaging references/templates and unchanged mutable evidence.
+5. Deploy the complete ZIP rather than selected files.
+6. Record the Pages deployment URL and deployment/commit identifier.
+7. Open Startup Readiness with All statuses and confirm all 45 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images, candle_top_template_proof and operational_continuity_evidence_center and open their operating routes.
+8. Confirm the manifest loads from D1 rather than Unsynced fallback and preserves the three generated-editorial provenance rows.
+9. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.
+10. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.',
+  pass_condition='A recoverable D1 point exists, the Build 240 migration is applied once after the required prior ledger keys, the complete deployment is live, all 45 gates, five packaging references, five new reusable templates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains.',
+  updated_at=CURRENT_TIMESTAMP
+WHERE item_key='backup_migrate_deploy';
+
+UPDATE startup_readiness_items SET
+  external_location='Production domain, browser developer tools, Cloudflare Pages Functions logs, and POST_DEPLOY_SMOKE_TEST.md',
+  instructions_markdown='1. Confirm the deployment ID and Build 240 migration evidence match the package that passed Deployment Preflight.
+2. Open the production home, handmade-jewelry, gift-card, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.
+3. Confirm the three generated WebP illustrations load at phone and desktop sizes, disclose editorial use, preserve one H1, and are absent from Product/Offer structured data and real-product galleries.
+4. Sign in with an owner-controlled administrator and test Startup Readiness, Visual Image Manifest, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map.
+5. In the manifest, filter open blockers, open a route, make one reversible review update, reload, and confirm database history. Test the API failure path and confirm the full 20-row Unsynced fallback remains visible with saving disabled.
+6. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.
+7. At phone, tablet, laptop and wide-desktop widths, check navigation, image crops, cards, forms, tables, focus, touch targets, contrast and horizontal overflow on every changed route.
+8. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.
+9. Open Startup Readiness with All statuses, confirm 45 unique gates and locate the missing-launch-images Critical blocker.
+10. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner. After any correction/redeploy, repeat all smoke checks.
+11. Continue to Deploy Readiness only when every critical smoke result passes.',
+  pass_condition='The exact production deployment passes all critical public, authentication, admin, API, fallback, mobile/desktop and SEO smoke checks with current evidence and no unresolved critical result.',
+  updated_at=CURRENT_TIMESTAMP
+WHERE item_key='post_deploy_smoke_standalone';
+
+UPDATE startup_readiness_items SET
+  external_location='Production website and the configured transactional email provider',
+  instructions_markdown='1. Deploy the complete Build 240 package, hard refresh to service-worker shell v18, and record the Pages deployment ID before testing.
+2. Open a private browser window, open Developer Tools → Network, enable Preserve log, and load /login/ without storing the password in evidence.
+3. Open /api/auth/login in a separate tab and confirm HTTP 200 JSON reports response_profile auth_login_bounded_v1 and diagnostic_mode binding_only; a normal GET must not run full schema discovery.
+4. Submit an owner-controlled administrator login and confirm POST /api/auth/login returns HTTP 200 JSON, X-DD-Auth-Profile auth_login_bounded_v1, a session cookie, the correct role and the expected redirect. Never copy the token into evidence.
+5. In Cloudflare Workers & Pages → the production project → Functions/Workers Logs and Metrics, filter the login timestamp and confirm the invocation was successful with no exceededCpu, exceededMemory or 1102 outcome.
+6. Confirm the redirected page calls /api/auth/me once, returns HTTP 200 JSON with response_profile auth_session_bounded_v1, and remains signed in after one normal refresh.
+7. Test one deliberately wrong password and confirm HTTP 401 structured JSON AUTH_INVALID_CREDENTIALS, no redirect and no new authenticated session.
+8. While a valid session exists, use browser request blocking for /api/auth/me, reload /login/, and confirm the account widget says the session was retained/verification is temporarily unavailable; local storage and cookie must not be erased by a network/503 failure. Remove the block and confirm the next verification succeeds.
+9. Log out normally and verify the auth token/cookie is cleared and protected pages/APIs return a real 401 rather than continuing access.
+10. Request a password reset from the public recovery page; confirm delivery, one-time use, rejection of an expired/reused link, and successful login with the new password.
+11. Test Logout All Sessions in two browsers and confirm the older session receives 401 and is cleared, while a temporary 503 still does not masquerade as an invalid session.
+12. Confirm a deliberately expired owner-controlled session receives 401 and a clear login path; do not wait on a real production account or alter customer sessions.
+13. Record deployment ID, UTC/local timestamp, route, HTTP status, response code/profile, browser/device, Cloudflare invocation outcome and pass/fail result without passwords, cookies or tokens.
+14. If any step returns 503/1102, keep this gate Failed or Blocked, capture the Cloudflare invocation outcome, redeploy/roll back as appropriate and repeat all fourteen steps from a clean private session.',
+  pass_condition='Bounded login, session verification, temporary-503 retention, logout, reset, one-time token use, deliberate expiry, and logout-all work in production with no exceeded-resource outcome and no continued access after an explicit invalidation.',
+  updated_at=CURRENT_TIMESTAMP
+WHERE item_key='login_logout_recovery';
 
 CREATE TABLE IF NOT EXISTS schema_migration_ledger (
   schema_migration_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -472,10 +652,10 @@ CREATE TABLE IF NOT EXISTS schema_migration_ledger (
 
 INSERT INTO schema_migration_ledger (migration_key,file_name,applied_at,notes)
 VALUES (
-  'build234_packaging_templates_creative_cleanup',
-  'database_build234_packaging_templates_creative_cleanup.sql',
+  'build240_operational_evidence_continuity',
+  'database_build240_operational_evidence_continuity.sql',
   CURRENT_TIMESTAMP,
-  'Updates the approved soap template profile; registers the owner-supplied candle-top reference; adds reusable candle/round/oval formats; synchronizes all 44 Startup gate definitions without overwriting operator evidence; and supports guarded Creative duplicate cleanup with bounded request-time database work.'
+  'Adds twenty operational workstreams covering evidence, idempotency, packaging reservations/formula/prepress/locks, provider and notification reconciliation, mobile evidence recovery, deployed assets, product media roles, support, accounting close, controlled batch approvals, local SEO observations, public-page audits, route fallbacks, mobile operations and synchronized schema/Markdown authority.'
 )
 ON CONFLICT(migration_key) DO UPDATE SET
   file_name=excluded.file_name,

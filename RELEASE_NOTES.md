@@ -1,3 +1,13 @@
+# Build 240 Release Notes
+
+- Completed twenty roadmap foundations in a new D1-backed Operational Continuity authority.
+- Added production evidence cases/events, idempotency claims, packaging reservation/formula/lock/prepress records, provider/notification reconciliation, mobile draft recovery, deployed asset/media-role checks, support/accounting/batch approval records, local SEO observations, public page audits, fallback policies and mobile operation cards.
+- Added `/admin/operational-continuity/` with authenticated bounded API, explicit degraded fallback and responsive phone/desktop interface.
+- Added the 45th Startup gate and regenerated the Startup guide/fallback.
+- Synchronized the numbered current migration, current-pass SQL and all three aggregate schema files.
+- Audited 36 indexable public pages: one H1, title, description, canonical, links, image alt/assets and structured data all passed.
+- Moved mutable cross-workflow status from duplicated planning lists into D1 while retaining JSON only as reproducible release evidence.
+
 
 # Build 239 Release Notes
 
@@ -51,7 +61,7 @@ Date: 2026-08-05
 
 ## Deployment
 
-No D1 migration or new secret is required. Deploy the complete Build 235 package, hard refresh to service-worker shell v16, and follow `BUILD235_VALIDATION.md`. Apply the Build 234/current-pass migration only when its ledger key is genuinely absent.
+No D1 migration or new secret is required. Deploy the complete Build 235 package, hard refresh to service-worker shell v16, and follow `docs/archive/build-history/BUILD235_VALIDATION.md`. Apply the Build 234/current-pass migration only when its ledger key is genuinely absent.
 
 ---
 
@@ -69,7 +79,7 @@ No D1 migration or new secret is required. Deploy the complete Build 235 package
 - Added the detailed Critical `candle_top_template_proof` gate for exactly 44 Startup gates and moved all canonical Startup definitions to the idempotent migration without overwriting mutable evidence/status.
 - Updated responsive soap/round previews, source-reference layout, phone destructive controls, one-H1/SEO rules, schema aggregates, current handoff and validation tooling.
 
-Back up D1 and confirm Build 229 and Build 230 ledger keys. Apply `database_build234_packaging_templates_creative_cleanup.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the whole package, hard refresh to service-worker shell v15 and follow `BUILD234_VALIDATION.md`. Soap and candle-top production remain blocked until measured physical proofs and applicable label/material reviews pass.
+Back up D1 and confirm Build 229 and Build 230 ledger keys. Apply `database_build234_packaging_templates_creative_cleanup.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the whole package, hard refresh to service-worker shell v15 and follow `docs/archive/build-history/BUILD234_VALIDATION.md`. Soap and candle-top production remain blocked until measured physical proofs and applicable label/material reviews pass.
 
 # Release Notes — Build 233
 

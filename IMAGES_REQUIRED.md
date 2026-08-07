@@ -1,3 +1,5 @@
+> Build 240 note: `product_media_role_requirements` now provides D1-backed per-product primary/detail/scale/packaging/process role requirements, and `deployed_asset_check_results` stores deployed URL, status, content-type, dimensions, hash and performance checks. The static public audit verifies local asset paths; neither representative fallback nor generated editorial art becomes item-specific product evidence.
+
 > Build 237 note: the mapped placeholder asset paths now resolve to concrete real-image files under `/assets/real-media/`, `/assets/images/site/`, or photo-backed SVG wrappers. These remain representative fallbacks until each route or product is replaced with item-specific approved photography.
 
 # Devil n Dove — Images Required

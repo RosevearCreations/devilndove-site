@@ -1,4 +1,15 @@
-# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 234)
+# Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 240)
+
+## Build 240 continuity additions
+
+Packaging design/content remains authoritative in the existing packaging tables. Build 240 adds linked operational evidence without duplicating product, ingredient or inventory facts:
+
+- `packaging_inventory_reservations` and lines for idempotent reserve/consume/reverse planning;
+- `packaging_formula_source_links` for verified formula/source references;
+- `packaging_release_locks` for approved version checksum/proof locks and supersession control;
+- `packaging_prepress_checks` for deterministic dimensions, bleed/safe area, text fit, font, barcode/QR and overflow results.
+
+These records do not mark physical wrap, print or laser tests Passed. Physical proof, lot reconciliation and owner approval remain required. Use `/admin/operational-continuity/` to record cross-workflow evidence and `/admin/packaging-studio/` for the actual design/project authority.
 
 ## Authority rule
 This file is the **single current implementation map** for Devil n Dove packaging. Soap design direction is governed collectively by the supplied automation specification, template-guide PDF, master SVG and approved Glacial Purple image. Round candle-top direction is governed by the owner-supplied wedding/anniversary sample. `PACKAGING_REFERENCE_BASELINE.md` preserves the four registered source-file checksums and their scopes. Packaging code, schema, templates, launch checks and future work must be reconciled during every build.

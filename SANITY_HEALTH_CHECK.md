@@ -1,3 +1,21 @@
+# Devil n Dove Sanity and Health Check — Build 240
+
+## Structural result
+
+- `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the two canonical entry files.
+- Build 240 is the current D1 boundary; numbered/current-pass SQL are identical and all aggregate schemas include its tables, seeds and ledger row.
+- Startup authority contains 45 unique gates; the new operational-continuity gate cannot pass without live D1 evidence.
+- `/admin/operational-continuity/` uses bounded authenticated reads/writes, no request-time DDL, sanitized runtime incidents and an honest static degraded fallback.
+- Mutable operational status now belongs in D1 rather than duplicated JSON/Markdown lists. Static JSON remains reproducible release evidence only.
+- The current public audit covers 36 indexable pages and reports zero warnings/failures, including one H1 per page and no missing local assets.
+- Service worker shell v18 retains public/offline assets and excludes admin/API routes from static caching.
+
+## Current launch position
+
+Status remains **production-evidence and controlled-opening preparation**. Local checks cannot prove Cloudflare/D1 behavior, provider delivery, payment exact-once behavior, restore, indexing/ranking or physical packaging/laser-print results. Those gates remain open until evidence is captured in the live environment.
+
+---
+
 Build 239 summary: public imagery now uses route-specific crawlable assets, remote item photos have honest local representative fallbacks, the most image-heavy pages have been browser-reviewed at desktop/mobile sizes, and Build 236–238 release records are archived. Build 239 remains code-and-assets only; live Functions/provider and physical production evidence remain open.
 
 Build 237 summary: Packaging keeps one whole-business system, the soap preview is visually closer to the approved polished label, and the most visible placeholder SVGs now render photo-backed wrappers from repository media while preserving stable paths. Build 237 remains code-only; live provider, physical packaging and item-specific product-photo evidence are still required.

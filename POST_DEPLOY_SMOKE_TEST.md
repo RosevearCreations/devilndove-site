@@ -1,8 +1,20 @@
-# Post-Deploy Smoke Test — Build 234 current entry
+# Post-Deploy Smoke Test — Build 240 current entry
 
-Use the complete stage 4 procedure in `PRELAUNCH_PROCESS_PLAYBOOKS.md`. On production, confirm domain/HTTPS/canonical routes; exactly one H1 and no mobile/desktop overlap; public catalog/product/gallery; structured API errors/runtime incidents; read-only Meta tests; and all 44 Startup gates with All statuses. Run the fourteen-step bounded-login proof, retained autosave/reload proof and bounded archived-product proof. Open `missing_launch_images`, prove the D1 manifest and honest fallback, then open `candle_top_template_proof`. In Labeling & Packaging verify the approved soap composition, five new templates, custom-template reload and embedded-artwork SVG; do not mark physical print/laser gates passed without measured evidence. In Creative Automation delete one untouched disposable shell with exact-key confirmation and prove a meaningful-work project is protected. Check phone/desktop layouts and confirm generated art is disclosed and absent from Product/Offer schema. Record deployment ID, route, device/browser, expected/actual result and non-secret evidence. Any failure pauses promotion and requires the full suite after correction or rollback.
+Use the complete stage procedure in `PRELAUNCH_PROCESS_PLAYBOOKS.md`. After deploying the exact package:
+
+1. Confirm domain, HTTPS, canonical routes, service-worker shell v18 and no stale asset failures.
+2. Run public page checks: exactly one H1, unique title/description/canonical, crawlable descriptive links, useful nearby images/alt text and no phone/desktop overflow.
+3. Sign in and verify all **45** Startup gates with All statuses, including `operational_continuity_evidence_center`.
+4. Open `/admin/operational-continuity/`; confirm twenty D1 workstreams, evidence case/event creation, safe error fallback and no request-time schema creation.
+5. Test one idempotency claim twice; the second attempt must not create a duplicate sensitive result.
+6. Test representative packaging reservation, formula link, release lock and prepress result without treating them as physical print proof.
+7. Test provider-result, notification-attempt and mobile-draft records with sanitized evidence only.
+8. Re-run bounded login, product autosave/recovery, archived-product removal protection, payment/refund/exact-once inventory, email and restore procedures.
+9. Confirm `/admin/image-manifest/`, product media roles and deployed asset checks remain honest; representative fallbacks are not item-specific proof.
+10. Record deployment ID, route, device/browser, expected/actual result and non-secret evidence. Any failure pauses promotion and requires correction plus retest or rollback.
 
 ---
+
 
 # Build 206 — Catalog/Media/CAIP smoke test
 

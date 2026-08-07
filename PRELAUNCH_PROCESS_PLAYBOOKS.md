@@ -1,6 +1,18 @@
-# Devil n Dove Prelaunch Process Playbooks — Build 234
+# Devil n Dove Prelaunch Process Playbooks — Build 240
 
-This document separates the release journey into distinct processes. A pass in one process never erases a blocker in another. `/admin/startup-readiness/` remains the 44-gate status authority; this playbook explains where to click, what to prove, what to save, and what to do when a stage fails.
+`/admin/startup-readiness/` is the 45-gate status authority. `/admin/operational-continuity/` is the execution/evidence centre for the twenty cross-workflow foundations. A pass in one process never erases a blocker elsewhere.
+
+## Build 240 release sequence
+
+1. Back up D1 and retain the backup reference.
+2. Apply `database_build240_operational_evidence_continuity.sql` or identical `database_upgrade_current_pass.sql` once.
+3. Deploy the complete package and hard-refresh to `devilndove-shell-v18`.
+4. Confirm all 45 Startup gates, including `operational_continuity_evidence_center`.
+5. Open Operational Continuity and verify the twenty workstreams, thirty-six public audit rows, seven mobile cards and honest degraded fallback.
+6. Run the public-page audit, predeploy sanity, deployment preflight, retained regression tests and live smoke suite.
+7. Record expected/actual evidence in D1; never infer live/provider/physical success from local static checks.
+
+This document separates the release journey into distinct processes. A pass in one process never erases a blocker in another. `/admin/startup-readiness/` remains the 45-gate status authority; this playbook explains where to click, what to prove, what to save, and what to do when a stage fails.
 
 ## Process order
 
@@ -38,7 +50,7 @@ This document separates the release journey into distinct processes. A pass in o
 4. Run `node scripts/build231_product_autosave_test.mjs`; it must prove bounded Product Detail JSON, safe Cloudflare parsing, queued autosave and browser recovery.
 5. Run `node scripts/build232_product_removal_test.mjs`; it must prove bounded archived-product preflight, full product-reference registry coverage and one reviewed removal batch.
 6. Run `node scripts/build233_login_resource_test.mjs`; it must prove two executed D1 operations for successful login, no POST schema discovery/session reread, binding-only normal diagnostics, temporary-503 session retention, real-401 clearing and all 897 compressed Amazon matches available only through demand loading.
-7. Run `node scripts/build234_packaging_creative_test.mjs`; it must prove authoritative template selection, soap/candle render structure, five reference/template keys, 44 gates, guarded duplicate cleanup, bounded hot routes and aggregate-schema repeatability.
+7. Run `node scripts/build234_packaging_creative_test.mjs`; it must prove authoritative template selection, soap/candle render structure, five reference/template keys, 45 current gates, guarded duplicate cleanup, bounded hot routes and aggregate-schema repeatability.
 8. Run syntax checks for all Functions, browser JavaScript, scripts and the service worker.
 9. Confirm every public HTML page has a viewport, distinctive title, useful description, exactly one H1, canonical where applicable and descriptive image alternatives.
 10. Confirm `css/styles.css` has balanced braces and inspect the changed pages at phone, tablet, laptop and wide-desktop widths.
@@ -77,7 +89,7 @@ This document separates the release journey into distinct processes. A pass in o
 2. In a private window, open Home, Shop, one local landing page, one product detail, Contact, policies, sitemap and robots.
 3. Confirm exactly one visible H1 and no CSS overlap or horizontal page overflow at phone and desktop widths.
 4. Test the complete fourteen-step Build 233 login gate: `auth_login_bounded_v1`, successful redirect and refresh, Cloudflare invocation result, wrong-password 401, blocked `/api/auth/me` session retention/recovery, deliberate logout, reset, logout-all and expiry using owner-controlled accounts.
-5. Open Startup Readiness with All statuses and confirm all 44 gates appear, including `missing_launch_images` and `candle_top_template_proof`. Force or simulate an API error and confirm the full built-in guide appears instead of an empty result.
+5. Open Startup Readiness with All statuses and confirm all 45 gates appear, including `missing_launch_images` and `candle_top_template_proof`. Force or simulate an API error and confirm the full built-in guide appears instead of an empty result.
 6. Open Visual Image Manifest and confirm 20 D1 rows. Save/reload one reversible review, confirm history, then test the API failure path: all 20 rows must remain visible as Unsynced and saving must be disabled.
 7. Open Home, Handmade Jewelry and Gift Cards on phone/desktop. Confirm responsive WebPs, editorial disclosure, one H1 and no Product/Offer use. Keep real-photo rows open.
 8. Open Labeling & Packaging and confirm all five reference directions are represented. Verify the approved soap structure, candle-top round renderer, exact dimensions and self-contained SVG exports on phone and desktop; physical proofs remain separate gates.

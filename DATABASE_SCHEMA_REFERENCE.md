@@ -1,8 +1,46 @@
-# Devil n Dove Database Schema Reference — Build 235
+# Devil n Dove Database Schema Reference — Build 240
+
+## Current migration boundary
+
+Back up D1, confirm earlier ledger rows, then apply **one** of:
+
+- `database_build240_operational_evidence_continuity.sql`; or
+- byte-identical `database_upgrade_current_pass.sql`.
+
+Do not apply both. Build 240 contains no explicit transaction statements and creates no schema at request time. All three aggregate schema files are synchronized through Build 240.
+
+## Build 240 operational authority
+
+Build 240 moves mutable cross-workflow progress and evidence out of duplicated JSON/Markdown lists and into D1. It creates or migration-manages these authorities:
+
+- `runtime_incidents` — sanitized runtime/API failure evidence, now installed by migration rather than request-time DDL.
+
+- `operational_workstreams` — the twenty ordered execution areas, owners, priority, state and next action.
+- `production_evidence_cases` and `production_evidence_events` — expected/actual proof and append-only history.
+- `operation_idempotency_claims` — one-key duplicate protection for sensitive operations.
+- `packaging_inventory_reservations` and `packaging_inventory_reservation_lines` — component reservation/consumption/reversal planning tied to inventory lots.
+- `packaging_formula_source_links`, `packaging_release_locks`, `packaging_prepress_checks` — verified source links, approved-version locks and deterministic prepress results.
+- `provider_result_reconciliations` and `notification_delivery_attempts` — observable provider IDs/results and delivery/retry evidence.
+- `mobile_evidence_drafts` — server-side recovery for camera-first/mobile evidence capture.
+- `deployed_asset_check_results` and `product_media_role_requirements` — deployed URL/image integrity and product-specific media roles.
+- `customer_support_interactions` — consent-safe support history.
+- `accounting_close_checklist_items` — close/reconciliation evidence.
+- `controlled_batch_approvals` — reviewed low-risk batch actions with rollback criteria.
+- `local_seo_observation_snapshots` and `public_page_audit_results` — evidence-based local/search observations and page-level audits.
+- `route_fallback_policies` — explicit degraded-mode behavior.
+- `mobile_operations_cards` — compact, ordered phone workflows.
+
+The migration seeds twenty workstreams, thirty-six current public-page audit rows, two fallback policies, seven mobile cards and the 45th Startup gate `operational_continuity_evidence_center`. Mutable status belongs in D1; `data/site/build240-public-page-audit.json` remains reproducible release evidence rather than a competing live status store.
+
+## Retained boundaries
+
+All prior catalog, inventory, orders, payments, accounting, packaging, creative/content, image-manifest and Startup tables remain authoritative in their specialist domains. Build 240 links and records operational evidence; it does not copy core product, ingredient, inventory, payment or publication facts into a second source of truth.
+
+---
 
 ## Build 235 code-only boundary
 
-Build 235 adds no D1 table, column, index, seed or ledger row. The Creative Automation readiness registry is computed at request time from existing specialist tables and is not stored as duplicate status. `database_build234_packaging_templates_creative_cleanup.sql` and byte-identical `database_upgrade_current_pass.sql` remain the current migration boundary.
+Build 235 added no D1 table, column, index, seed or ledger row. The Creative Automation readiness registry is computed from specialist tables and is not stored as duplicate status. At that historical release, Build 234 was the migration boundary; Build 240 now supersedes the current-pass file.
 
 
 ## Build 234 database boundary
