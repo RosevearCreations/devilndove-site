@@ -12,8 +12,9 @@ binding = "PRODUCT_MEDIA_BUCKET"
 bucket_name = "devilndove-toolshed-images"
 preview_bucket_name = "devilndove-toolshed-images"
 
-# Build 241 private CAIP raw-media binding.
-[[r2_buckets]]
-binding = "CAIP_PRIVATE_MEDIA_BUCKET"
-bucket_name = "devilndove-caip-media"
-preview_bucket_name = "devilndove-caip-media"
+# Build 241 optional/private CAIP raw-media binding.
+# Create the private R2 bucket first, keep public access disabled, then uncomment this binding.
+# [[r2_buckets]]
+# binding = "CAIP_PRIVATE_MEDIA_BUCKET"
+# bucket_name = "devilndove-caip-media"
+# preview_bucket_name = "devilndove-caip-media"

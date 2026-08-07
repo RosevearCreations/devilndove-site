@@ -1,3 +1,13 @@
+# Build 241 Release Notes
+
+- Rewrote the supplied Rosie Dazzlers DAIP large-media design into Devil n Dove CAIP architecture, roles, storage prefixes, privacy and content-output boundaries.
+- Added private CAIP raw-media sessions/files/parts, multipart R2 recovery, internal-only immutable raw asset registration, planned processors and review-only public-promotion requests.
+- Added responsive CAIP large-media intake UI, secure private-bucket probe/review resolution, structured errors and sanitized manifest export.
+- Added migration `database_build241_caip_large_media_intake.sql`, byte-identical current-pass SQL, synchronized aggregate schemas, the 21st workstream and 46th Startup gate.
+- Rewrote CAIP storage/ingestion/governance/API/reliability/roadmap/testing docs and consolidated current project authority into `AI_HANDOFF.md` + `PROJECT_STATUS_AND_ROADMAP.md`.
+- Build 241 public SEO audit: 36/36 indexable pages passed; local `/assets/` reference audit: zero missing files.
+- Service-worker shell advanced to v19.
+
 # Build 240 Release Notes
 
 - Completed twenty roadmap foundations in a new D1-backed Operational Continuity authority.

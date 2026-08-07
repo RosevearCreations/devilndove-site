@@ -1,8 +1,8 @@
-# Post-Deploy Smoke Test — Build 240 current entry
+# Post-Deploy Smoke Test — Build 241 current entry
 
 Use the complete stage procedure in `PRELAUNCH_PROCESS_PLAYBOOKS.md`. After deploying the exact package:
 
-1. Confirm domain, HTTPS, canonical routes, service-worker shell v18 and no stale asset failures.
+1. Confirm domain, HTTPS, canonical routes, service-worker shell v19 and no stale asset failures.
 2. Run public page checks: exactly one H1, unique title/description/canonical, crawlable descriptive links, useful nearby images/alt text and no phone/desktop overflow.
 3. Sign in and verify all **45** Startup gates with All statuses, including `operational_continuity_evidence_center`.
 4. Open `/admin/operational-continuity/`; confirm twenty D1 workstreams, evidence case/event creation, safe error fallback and no request-time schema creation.

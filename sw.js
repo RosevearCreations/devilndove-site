@@ -1,5 +1,5 @@
-// Build 240: Operational Continuity, current public audit assets, and retained offline/error fallbacks.
-const CACHE_NAME = 'devilndove-shell-v18';
+// Build 241: CAIP private media intake, Operational Continuity, current public audit assets, and retained offline/error fallbacks.
+const CACHE_NAME = 'devilndove-shell-v19';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

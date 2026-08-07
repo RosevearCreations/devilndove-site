@@ -1,10 +1,10 @@
-# Devil n Dove Startup and Go-Live Guide — Build 240
+# Devil n Dove Startup and Go-Live Guide — Build 241
 
-This is the human-readable operating copy of all 45 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
+This is the human-readable operating copy of all 46 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
 
 ## Operating rules
 
-1. Back up D1 and confirm ledger keys `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply `database_build240_operational_evidence_continuity.sql` or the identical `database_upgrade_current_pass.sql`, not both, after confirming Build 234.
+1. Back up D1 and confirm ledger keys `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply `database_build241_caip_large_media_intake.sql` or the identical `database_upgrade_current_pass.sql`, not both, after confirming ledger key `build240_operational_evidence_continuity`.
 2. Use owner-controlled test records and real Production bindings only where the gate explicitly requires a production test.
 3. Never paste secrets, passwords, access tokens, full payment data, or private customer information into gate evidence.
 4. A failed numbered step keeps the gate Failed or Blocked until the correction procedure and full retest succeed.
@@ -18,7 +18,7 @@ This is the human-readable operating copy of all 45 database-backed gates in `/a
 ### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
 
 **Inside the application:** `/admin/deployment-preflight/`  
-**External location:** Build 240 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**External location:** Build 241 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
 **Production test:** No live binding is required, but deployed verification may still be appropriate.
 
 #### Before you begin
@@ -28,11 +28,11 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 #### Test steps
 
 1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, aggregate-schema, repeated-current-migration, Startup 45-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, Build 241 CAIP large-media regression, aggregate-schema, repeated-current-migration, Startup 46-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
 3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
 4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest, Labeling & Packaging, Creative Automation and three public image bands.
-5. Confirm database_upgrade_current_pass.sql remains identical to database_build240_operational_evidence_continuity.sql and the Build 240 migration contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
-6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 240 consistently while naming Build 240 as the current D1 migration.
+5. Confirm database_upgrade_current_pass.sql remains identical to database_build241_caip_large_media_intake.sql and the Build 241 migration contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 241 consistently while naming Build 241 as the current D1 migration.
 7. Confirm the five adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
 8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
 9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
@@ -50,7 +50,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** The exact Build 240 archive passes every static, bounded-login/session-retention, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
+**Pass condition:** The exact Build 241 archive passes every static, bounded-login/session-retention, autosave/reload, archived-product removal, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
 
 ### 10. Back up D1, apply the current migration, and deploy the complete build — **Critical**
 
@@ -66,11 +66,11 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 
 1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.
 2. Record the date, database name and safe recovery reference in the evidence notes.
-3. Confirm required prior ledger keys through build234_packaging_templates_creative_cleanup already exist, then apply database_build240_operational_evidence_continuity.sql or the identical database_upgrade_current_pass.sql, but not both.
-4. Confirm the ledger records build240_operational_evidence_continuity; verify twenty workstreams, 45 Startup gates, 36 Build 240 page audits, seven mobile cards, two fallback policies, the retained packaging references/templates and unchanged mutable evidence.
+3. Confirm required prior ledger keys through build240_operational_evidence_continuity already exist, including Build 234 packaging and Build 240 continuity, then apply database_build241_caip_large_media_intake.sql or the identical database_upgrade_current_pass.sql, but not both.
+4. Confirm the ledger records build241_caip_large_media_intake; verify twenty-one workstreams, 46 Startup gates, 36 Build 241 page audits, seven mobile cards, two fallback policies, the CAIP private-media workstream, the retained packaging references/templates and unchanged mutable evidence.
 5. Deploy the complete ZIP rather than selected files.
 6. Record the Pages deployment URL and deployment/commit identifier.
-7. Open Startup Readiness with All statuses and confirm all 45 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images, candle_top_template_proof and operational_continuity_evidence_center and open their operating routes.
+7. Open Startup Readiness with All statuses and confirm all 46 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images, candle_top_template_proof and operational_continuity_evidence_center and caip_private_large_media_intake and open their operating routes.
 8. Confirm the manifest loads from D1 rather than Unsynced fallback and preserves the three generated-editorial provenance rows.
 9. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.
 10. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.
@@ -87,7 +87,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** A recoverable D1 point exists, the Build 240 migration is applied once after the required prior ledger keys, the complete deployment is live, all 45 gates, five packaging references, five new reusable templates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains.
+**Pass condition:** A recoverable D1 point exists, the Build 241 migration is applied once after the required prior ledger keys, the complete deployment is live, all 46 gates, five packaging references, five new reusable templates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains.
 
 ### 15. Complete Post-Deploy Smoke Tests as a standalone live-verification process — **Critical**
 
@@ -101,7 +101,7 @@ Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting I
 
 #### Test steps
 
-1. Confirm the deployment ID and Build 240 migration evidence match the package that passed Deployment Preflight.
+1. Confirm the deployment ID and Build 241 migration evidence match the package that passed Deployment Preflight.
 2. Open the production home, handmade-jewelry, gift-card, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.
 3. Confirm the three generated WebP illustrations load at phone and desktop sizes, disclose editorial use, preserve one H1, and are absent from Product/Offer structured data and real-product galleries.
 4. Sign in with an owner-controlled administrator and test Startup Readiness, Visual Image Manifest, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map.
@@ -109,7 +109,7 @@ Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting I
 6. Test safe public/API reads and confirm every failure returns structured JSON or a clearly labelled usable fallback rather than a blank page or false success.
 7. At phone, tablet, laptop and wide-desktop widths, check navigation, image crops, cards, forms, tables, focus, touch targets, contrast and horizontal overflow on every changed route.
 8. Confirm one H1/title/meta/canonical/structured-data behaviour on representative live public pages and verify no admin page is indexable.
-9. Open Startup Readiness with All statuses, confirm 45 unique gates and locate the missing-launch-images Critical blocker.
+9. Open Startup Readiness with All statuses, confirm 46 unique gates and locate the missing-launch-images Critical blocker.
 10. Record every failed route, console error, incident ID, screenshot/evidence reference and correction owner. After any correction/redeploy, repeat all smoke checks.
 11. Continue to Deploy Readiness only when every critical smoke result passes.
 
@@ -175,7 +175,7 @@ Assign one owner and open /login/. Record the starting IDs, counts, totals, time
 
 #### Test steps
 
-1. Deploy the complete Build 240 package, hard refresh to service-worker shell v18, and record the Pages deployment ID before testing.
+1. Deploy the complete Build 241 package, hard refresh to service-worker shell v19, and record the Pages deployment ID before testing.
 2. Open a private browser window, open Developer Tools → Network, enable Preserve log, and load /login/ without storing the password in evidence.
 3. Open /api/auth/login in a separate tab and confirm HTTP 200 JSON reports response_profile auth_login_bounded_v1 and diagnostic_mode binding_only; a normal GET must not run full schema discovery.
 4. Submit an owner-controlled administrator login and confirm POST /api/auth/login returns HTTP 200 JSON, X-DD-Auth-Profile auth_login_bounded_v1, a session cookie, the correct role and the expected redirect. Never copy the token into evidence.
@@ -1159,6 +1159,49 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 **Pass condition:** Search Console owns the production property, the sitemap/canonical system is correct, and representative public pages are crawlable without critical index or security errors.
 
+## Creative media, privacy, and publishing
+
+### 285. Prove private CAIP large-media intake, recovery, immutable originals, and public-promotion boundary — **High**
+
+**Inside the application:** `/admin/creative-assets/`  
+**External location:** Cloudflare R2 private binding CAIP_PRIVATE_MEDIA_BUCKET, D1 Build 241 records, and docs/creative-asset-intelligence-platform/16_Private_Raw_Media_Intake.md  
+**Production test:** Yes — use owner-controlled records and save non-secret identifiers.
+
+#### Before you begin
+
+Assign one owner and open /admin/creative-assets/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+
+#### Test steps
+
+1. Create a dedicated private R2 bucket for Devil n Dove CAIP raw media and bind it as CAIP_PRIVATE_MEDIA_BUCKET; keep r2.dev and public custom-domain access disabled.
+2. Open a reviewed Creative Project in CAIP and create a private media upload session. Confirm D1 stores metadata/state while R2 stores the binary.
+3. Upload at least one image and one video using multipart parts and confirm successful parts record ETags.
+4. Interrupt a multipart upload after several parts, reconnect or refresh, reselect the same local file when browser security requires it, and resume without intentionally re-uploading completed parts.
+5. Confirm object keys use project/file IDs and generated keys rather than personal/customer names.
+6. Confirm successful raw originals are immutable through the intake UI; transformations target proxy/extracted/derived/export namespaces instead.
+7. Confirm completion creates an internal-only CAIP/media record, technical observation, no public URL, and planned—not falsely completed—processing jobs.
+8. Create and test a secure authenticated review grant against the private object.
+9. Update privacy/consent/rights and confirm blocked or revoked media cannot request promotion.
+10. Request public promotion and prove the request remains needs_review and creates no public copy in Build 241.
+11. Test drag/drop, file selection, progress, pause/resume/retry, degraded errors, focus/touch targets and horizontal overflow on phone and desktop.
+12. Record production evidence without secrets or unnecessary personal information before marking this gate complete.
+
+#### If any step fails: correction procedure
+
+Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then keep the raw-media workflow private and unapproved, correct the private R2 binding/upload-session/part/checksum/governance failure, resume or restart only the affected unfinished upload, verify the immutable raw object and D1 metadata chain, then repeat the processing-plan and public-promotion review without exposing the private original. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+
+#### Evidence to save
+
+Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+
+#### Retest and reopening rule
+
+Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+
+**Pass condition:** The dedicated private R2 binding is proven live; multipart interruption/recovery works without restarting completed parts; completed originals remain private and immutable; secure review is authenticated/no-store; planned processors do not claim nonexistent outputs; and public promotion remains rights/consent/privacy/review gated with no automatic public copy.
+
+## Search, analytics, accessibility, and quality
+
 ### 290. Complete and verify Google Business Profile and local-business consistency — **High**
 
 **Inside the application:** `/contact/`  
@@ -1438,7 +1481,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 **Pass condition:** A named owner has recorded an evidence-backed promotion decision for the exact live build, no Critical Startup gate or smoke result remains open, and rollback/stop conditions are ready.
 
-### 357. Operate the Build 240 evidence, continuity, fallback and mobile control centre — **Critical**
+### 357. Operate the Build 241 evidence, continuity, fallback and mobile control centre — **Critical**
 
 **Inside the application:** `/admin/operational-continuity/`  
 **External location:** Production D1, Cloudflare logs, payment/email/social providers, R2 and phone/desktop browsers  
@@ -1450,8 +1493,8 @@ Assign one owner and open /admin/operational-continuity/. Record the starting ID
 
 #### Test steps
 
-1. Apply Build 240 after backing up D1 and confirm the migration ledger key.
-2. Open Operational Continuity and verify all twenty workstreams load from D1; degraded mode must show the static fallback and no false success.
+1. Apply Build 241 after backing up D1 and confirm the migration ledger key.
+2. Open Operational Continuity and verify all twenty-one workstreams load from D1; degraded mode must show the static fallback and no false success.
 3. Create evidence cases for login, autosave, webhook duplicate, concurrency, refund, email, restore, packaging and controlled opening.
 4. Record expected and actual results plus safe IDs/URLs; never store credentials or unnecessary customer data.
 5. Verify idempotency claims reject a duplicate key without repeating the operation.
@@ -1476,7 +1519,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** All twenty workstreams have an owner/status, critical live cases have evidence, duplicate operations are prevented, fallbacks do not imply success, and no active stop condition remains.
+**Pass condition:** All twenty-one workstreams have an owner/status, critical live cases have evidence, duplicate operations are prevented, fallbacks do not imply success, and no active stop condition remains.
 
 ### 360. Assign launch-day ownership, monitoring, support, and stop conditions — **Critical**
 
@@ -1619,5 +1662,5 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 ## Gate count and authority
 
-This guide contains 45 gates. If it differs from the D1 cockpit after deployment, use the Build 240 API definition, confirm all 45 items return, and keep the gate Failed until the status authority and guide agree.
+This guide contains 46 gates. If it differs from the D1 cockpit after deployment, use the Build 241 API definition, confirm all 46 items return, and keep the gate Failed until the status authority and guide agree.
 

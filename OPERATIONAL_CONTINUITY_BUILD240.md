@@ -32,7 +32,7 @@ Build 240 converts twenty roadmap items into database-backed, operator-visible f
 
 ## Safe operating rules
 
-- Apply `database_build240_operational_evidence_continuity.sql` or the byte-identical `database_upgrade_current_pass.sql`, not both.
+- Build 240 remains the prerequisite that created Operational Continuity. On an older database, apply `database_build240_operational_evidence_continuity.sql` first. The **current-pass** file now belongs to Build 241, so do not use it as a substitute for a missing Build 240 ledger row.
 - `runtime_incidents` is migration-managed; shared error capture performs no request-time incident-table creation.
 - Back up D1 first and confirm prior Build 234 ledger state.
 - Never store passwords, tokens, full payment data or unnecessary customer information.

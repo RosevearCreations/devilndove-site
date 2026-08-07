@@ -101,3 +101,17 @@ First-page local placement cannot be guaranteed. Continue improving actual relev
 - Desktop and mobile render the same meaningful images and alternative text; media stacks without document-level horizontal overflow.
 - Remote item images retain honest, visibly labelled local representative fallbacks rather than leaving broken cards.
 - Direction verified against Google Search Central image SEO, mobile-first indexing, title-link and structured-data image guidance during the Build 239 pass.
+
+## Build 241 current-guidance confirmation — August 2026
+
+The SEO guardrails remain unchanged after a fresh official-source check:
+
+- Keep one clear main H1 and a distinctive concise `<title>`; Google may use the title element, main visual title, H1/other headings, prominent text and inbound/link text when forming title links.
+- Keep Devil n Dove business facts accurate and consistent; do not stuff locality or service terms into the real-world business name.
+- Local visibility remains driven mainly by relevance, distance and prominence/popularity. Distance cannot be optimized away, so the controllable work is complete/accurate Business Profile information, useful service/product content, truthful photos/video, reviews/replies and broader web prominence.
+- First-page local placement is a goal and measurement target, never a guarantee.
+
+Current references:
+- https://developers.google.com/search/docs/appearance/title-link
+- https://support.google.com/business/answer/7091?hl=en-CA
+- https://support.google.com/business/answer/3038177
