@@ -11,3 +11,9 @@ database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"
 binding = "PRODUCT_MEDIA_BUCKET"
 bucket_name = "devilndove-toolshed-images"
 preview_bucket_name = "devilndove-toolshed-images"
+
+# Build 241 private CAIP raw-media binding.
+[[r2_buckets]]
+binding = "CAIP_PRIVATE_MEDIA_BUCKET"
+bucket_name = "devilndove-caip-media"
+preview_bucket_name = "devilndove-caip-media"
