@@ -1,4 +1,4 @@
-// Build 202 — Admin API for CAIP intelligence, safe media probes, derivative plans, and secure review grants.
+// Build 241 — CAIP intelligence, private raw-media intake integration, safe probes, derivative plans and secure review grants.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import {
   CAIP_BUILD,
@@ -23,6 +23,7 @@ import {
   probeCreativeAsset,
   revokeSecureReviewGrant
 } from '../_lib/creativeAssetOperations.js';
+import { CAIP_MEDIA_INTAKE_BUILD, listCaipMediaIntake, makeCaipMediaIntakeManifest } from '../_lib/caipMediaIntake.js';
 
 function json(data, status = 200, headers = {}) { return jsonResponse(data, status, { 'Cache-Control': 'no-store', ...headers }); }
 function number(value) { const parsed = Number(value || 0); return Number.isInteger(parsed) && parsed > 0 ? parsed : 0; }
@@ -54,14 +55,14 @@ export async function onRequestGet(context) {
     const resolvedCreativeProjectId = requestedCreativeProjectId || number((Array.isArray(listing.projects) ? listing.projects : []).find((project) => number(project.product_id) === requestedProductId)?.creative_project_id);
     const { detail, operations } = await detailBundle(state.db, resolvedCreativeProjectId);
     if (requestedCreativeProjectId && !detail) return json({ ok: false, error: 'CAIP project not found.' }, 404);
-    return json({ ok: true, build: `${CAIP_BUILD} + ${CAIP_OPERATIONS_BUILD}`, ...listing, detail, operations, requested_product_id: requestedProductId || null, resolved_creative_project_id: resolvedCreativeProjectId || null, mode: 'reference_only_review_first' });
+    return json({ ok: true, build: `${CAIP_BUILD} + ${CAIP_OPERATIONS_BUILD} + ${CAIP_MEDIA_INTAKE_BUILD}`, ...listing, detail, operations, requested_product_id: requestedProductId || null, resolved_creative_project_id: resolvedCreativeProjectId || null, mode: 'hybrid_reference_plus_private_raw_review_first' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'creative_asset_intelligence', incident_code: 'caip_get_failed', severity: 'error',
       message: error?.message || 'CAIP could not load.', related_user_id: state.adminUser.user_id,
       details: { error: String(error?.stack || error?.message || error) }
     });
-    return json({ ok: false, error: 'CAIP could not load. Confirm Builds 199–202 and Cloudflare logs.' }, 500);
+    return json({ ok: false, error: 'CAIP could not load. Confirm the migration chain through Build 241 and Cloudflare logs.' }, 500);
   }
 }
 
@@ -121,6 +122,7 @@ export async function onRequestPost(context) {
       operations = await loadCreativeAssetOperations(state.db, detail.project.creative_project_id);
       const manifest = makeCreativeAssetManifest(detail);
       manifest.media_operations = makeCreativeOperationsManifest(operations);
+      manifest.private_media_intake = makeCaipMediaIntakeManifest(await listCaipMediaIntake(state.db, detail.project.creative_project_id, context.env));
       return new Response(JSON.stringify(manifest, null, 2), {
         status: 200,
         headers: {
@@ -148,7 +150,7 @@ export async function onRequestPost(context) {
       }
     });
     const listing = await listCreativeAssetProjects(state.db);
-    return json({ ok: true, message: 'CAIP saved. Source media remains reference-only and unchanged.', build: `${CAIP_BUILD} + ${CAIP_OPERATIONS_BUILD}`, result, detail, operations, ...listing, mode: 'reference_only_review_first' });
+    return json({ ok: true, message: 'CAIP saved. Referenced source media remains unchanged; private raw originals remain immutable.', build: `${CAIP_BUILD} + ${CAIP_OPERATIONS_BUILD} + ${CAIP_MEDIA_INTAKE_BUILD}`, result, detail, operations, ...listing, mode: 'hybrid_reference_plus_private_raw_review_first' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'creative_asset_intelligence', incident_code: 'caip_post_failed', severity: 'warning',

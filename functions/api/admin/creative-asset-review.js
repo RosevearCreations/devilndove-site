@@ -2,6 +2,7 @@
 // Token is opaque, short lived, bound to the issuing administrator, and never stored raw in D1.
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { authorizeSecureReviewGrant, recordSecureReviewServed } from '../_lib/creativeAssetOperations.js';
+import { resolveCaipBucket } from '../_lib/caipMediaIntake.js';
 
 function json(data, status = 200) {
   return jsonResponse(data, status, { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
@@ -16,8 +17,8 @@ export async function onRequestGet(context) {
   const token = new URL(request.url).searchParams.get('token') || '';
   try {
     const authorized = await authorizeSecureReviewGrant(db, token, adminUser);
-    const bucket = env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
-    if (!bucket || typeof bucket.get !== 'function') throw new Error('R2 review proxy is unavailable because no media bucket binding is configured.');
+    const bucket = resolveCaipBucket(env, authorized.storage_provider, authorized.bucket_name);
+    if (!bucket || typeof bucket.get !== 'function') throw new Error('R2 review proxy is unavailable because the matching public/private media bucket binding is not configured.');
     const object = await bucket.get(authorized.object_key);
     if (!object) throw new Error('The R2 review object was not found. Source media has not been changed.');
     const http = object.httpMetadata || {};
