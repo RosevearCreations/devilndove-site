@@ -1,5 +1,5 @@
-// Build 235: refresh Creative Automation readiness, work queue and evidence packet controls.
-const CACHE_NAME = 'devilndove-shell-v16';
+// Build 239: refresh public visual assets, route-specific hero media and retained Creative Automation controls.
+const CACHE_NAME = 'devilndove-shell-v17';
 const CORE_ASSETS = [
   '/',
   '/offline.html',
@@ -7,6 +7,7 @@ const CORE_ASSETS = [
   '/js/main.js',
   '/assets/logo-clear.png',
   '/assets/mark.png',
+  '/assets/images/site/home-hero-products.webp',
   '/assets/icons/icon-180.png',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png',
