@@ -98,9 +98,15 @@ REQUIRED_FILES = [
     'docs/archive/build-history/BUILD196_PRODUCT_CORRECTION_MATERIAL_RETURN_GUIDE.md',
     'data/site/build196-product-correction-material-return.json',
     'data/site/build196-validation.json',
-    'BUILD235_VALIDATION.md',
-    'BUILD235_CHANGED_FILES.md',
     'scripts/build235_creative_readiness_test.mjs',
+    'database_build240_operational_evidence_continuity.sql',
+    'functions/api/admin/operational-continuity.js',
+    'public/js/admin-operational-continuity.js',
+    'admin/operational-continuity/index.html',
+    'BUILD240_VALIDATION.md',
+    'BUILD240_CHANGED_FILES.md',
+    'OPERATIONAL_CONTINUITY_BUILD240.md',
+    'scripts/build240_operational_continuity_test.mjs',
 ]
 SKIP = {'.git','node_modules','archive','__pycache__'}
 
