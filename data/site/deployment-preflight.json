@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 235",
+  "build_label": "Build 239",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -50,7 +50,7 @@
     {
       "code": "static_markdown_authority",
       "status": "pass",
-      "detail": "Two Build 235 canonical authorities, scoped playbooks, computed Creative readiness, evidence export, five packaging references, guarded duplicate cleanup, visual provenance, historical archive policy, and 44 generated Startup sections agree.",
+      "detail": "Two Build 239 canonical authorities, scoped playbooks, computed Creative readiness, evidence export, five packaging references, guarded duplicate cleanup, visual provenance, historical archive policy, and 44 generated Startup sections agree.",
       "missing": []
     },
     {
@@ -77,7 +77,7 @@
           "meta_description_length": 157,
           "has_canonical": true,
           "schema_blocks": 3,
-          "image_count": 3,
+          "image_count": 4,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -90,7 +90,7 @@
           "meta_description_length": 146,
           "has_canonical": true,
           "schema_blocks": 1,
-          "image_count": 2,
+          "image_count": 3,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -129,7 +129,7 @@
           "meta_description_length": 163,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 1,
+          "image_count": 2,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -142,7 +142,7 @@
           "meta_description_length": 129,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 1,
+          "image_count": 2,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -155,7 +155,7 @@
           "meta_description_length": 157,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 1,
+          "image_count": 2,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -168,7 +168,7 @@
           "meta_description_length": 128,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 1,
+          "image_count": 2,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -181,7 +181,7 @@
           "meta_description_length": 166,
           "has_canonical": true,
           "schema_blocks": 1,
-          "image_count": 2,
+          "image_count": 3,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -194,7 +194,7 @@
           "meta_description_length": 156,
           "has_canonical": true,
           "schema_blocks": 1,
-          "image_count": 2,
+          "image_count": 3,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -207,7 +207,7 @@
           "meta_description_length": 128,
           "has_canonical": true,
           "schema_blocks": 2,
-          "image_count": 1,
+          "image_count": 2,
           "missing_alt_count": 0,
           "missing_terms": [],
           "notes": []
@@ -282,7 +282,7 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 2534/2534"
+      "detail": "CSS braces 2562/2562"
     },
     {
       "code": "static_json_parse",

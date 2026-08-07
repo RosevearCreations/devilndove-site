@@ -1,8 +1,8 @@
 {
-  "build_label": "Build 235",
+  "build_label": "Build 239",
   "generated_by": "scripts/generate_release_manifest.py",
-  "file_count": 832,
-  "total_size_bytes": 40697917,
+  "file_count": 908,
+  "total_size_bytes": 50447209,
   "files": [
     {
       "path": "AI_CONTEXT.md",
@@ -11,8 +11,8 @@
     },
     {
       "path": "AI_HANDOFF.md",
-      "size_bytes": 21542,
-      "sha256": "2c5161d10758fea7cbf6d75e17771dfb8231bf0d89ed3572489e72a0a8876053"
+      "size_bytes": 22864,
+      "sha256": "6863599794f1da3f6d592a5239304dde13332fba23eab90bcce1e53ebad72c20"
     },
     {
       "path": "AMAZON_MATCHING_NOTES.md",
@@ -45,14 +45,24 @@
       "sha256": "379b25defff1d43f34940c70c2080e11626d2259963e437b32bfc3cdc4fed9f8"
     },
     {
+      "path": "BUILD239_CHANGED_FILES.md",
+      "size_bytes": 1385,
+      "sha256": "c2b0f5ea28601d4b888e914b6acbdf3ee40a67a75dc6073a463749eb243c02c9"
+    },
+    {
+      "path": "BUILD239_VALIDATION.md",
+      "size_bytes": 2332,
+      "sha256": "1e07cb8c15a74f513413a76a67402eb263d651846896e423f96cb3a8902bbd48"
+    },
+    {
       "path": "CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md",
       "size_bytes": 34181,
       "sha256": "b5925991344dc1ad32487a586adcc1e37576d02d3f5d8a9026d6f1c480de73f0"
     },
     {
       "path": "COMPETITIVE.md",
-      "size_bytes": 95506,
-      "sha256": "c15c43fe1f932398065fe62d64db919994d39db926ff453141dc3e020a5cce20"
+      "size_bytes": 96076,
+      "sha256": "2c7d301f76a962b3be26660d773d1e35d837521add42f683689c9dc990d8541f"
     },
     {
       "path": "CONTENT_AUTOMATION_STUDIO.md",
@@ -91,8 +101,8 @@
     },
     {
       "path": "IMAGES_REQUIRED.md",
-      "size_bytes": 33098,
-      "sha256": "53ff58864b75e6525a5e55d214d1bfe3086b9d4c83fa2173fdb1c8c63feb6b69"
+      "size_bytes": 33395,
+      "sha256": "a1c1c0ac2284bf1440cd3dac6e717bc942263506f81820725140f2ad4337a86a"
     },
     {
       "path": "KNOWN_GAPS_AND_RISKS.md",
@@ -106,18 +116,18 @@
     },
     {
       "path": "LOCAL_SEO_PLAYBOOK.md",
-      "size_bytes": 8014,
-      "sha256": "b3220757a5033e69b7601c42958c51a6610069141f2fcefa85e6ebab3bcc6650"
+      "size_bytes": 8745,
+      "sha256": "97c6af0f2e4c027eaad206d0b2864cee24930fcef761ce8abb91826229d512cd"
     },
     {
       "path": "MARKDOWN_INDEX.md",
-      "size_bytes": 2364,
-      "sha256": "d9d91b00b9d64175b758bbc5440e7e1af02a71fa1f63d0217ec314199fae9a85"
+      "size_bytes": 1767,
+      "sha256": "0a168a1f3bc7ba4785c5f3882cf13de46c2ffcc2a0b4665ed65a76f6016a34e8"
     },
     {
       "path": "NEW_CHAT_STATUS.md",
-      "size_bytes": 259,
-      "sha256": "8f4fa9a1d844d9f5520548d7dbb88d55fe3866f598be9ae10e1d87fdd1f3311a"
+      "size_bytes": 362,
+      "sha256": "2a0febea03c6b1896d1afaecb90b3f09430d572acabcfeaf2da4583b5f2017df"
     },
     {
       "path": "PACKAGING_REFERENCE_BASELINE.md",
@@ -141,18 +151,23 @@
     },
     {
       "path": "PROJECT_STATUS_AND_ROADMAP.md",
-      "size_bytes": 21576,
-      "sha256": "142b0f4aaf8efc0d00ec182d7fb4f2f11051751bb5a91cd8482849cb8738359f"
+      "size_bytes": 25620,
+      "sha256": "4548de7c5d880ffdcab4340c360502c522d3ad45d6f73bdbe1a1e525a544715e"
+    },
+    {
+      "path": "PUBLIC_VISUAL_AUDIT_BUILD239.md",
+      "size_bytes": 1537,
+      "sha256": "b747d7bf4ff3851fd8f6f5eaea899c7f8bd74b3e78061336d9438a437071aa2b"
     },
     {
       "path": "README.md",
-      "size_bytes": 2165,
-      "sha256": "8b33cd5b58a5d23803dfe44dc0fa64dae85caceaff3bed806ab07d0cc2b48574"
+      "size_bytes": 2186,
+      "sha256": "a92bf1bbd201c8fa7735ce306821c369c0a1f72b109e60cc4dc1338a766e8c66"
     },
     {
       "path": "RELEASE_NOTES.md",
-      "size_bytes": 26656,
-      "sha256": "d5215ce6b222b5812941ce8b4ccc5e43331dcab61b21f534af0e4df25945a4aa"
+      "size_bytes": 28558,
+      "sha256": "e62940ab63bd491bbf817820fc6eb4d43a95e9031576fc3c7586de49c5d16d62"
     },
     {
       "path": "REPO_BASE_GUIDE.md",
@@ -166,8 +181,8 @@
     },
     {
       "path": "SANITY_HEALTH_CHECK.md",
-      "size_bytes": 5600,
-      "sha256": "d62fb4fbf89549121fae37ea8ba806240ab814d895eaee2842b902880e48e6cf"
+      "size_bytes": 6358,
+      "sha256": "f347e526f014a1a703c1e8aab802c738fe3371a15acbadaf931a67c69bbadcfe"
     },
     {
       "path": "SOCIAL_PUBLISHING_CONNECTION_GUIDE.md",
@@ -351,8 +366,8 @@
     },
     {
       "path": "admin/packaging-studio/index.html",
-      "size_bytes": 8608,
-      "sha256": "bc54dac1931117d1ca76f9516f59d0cb1203460d05ccc2e752d9d980a2c62b3b"
+      "size_bytes": 8628,
+      "sha256": "5f1f67028745cbce71436fee9035359d08abee6771e03be0909ba152d053c1c8"
     },
     {
       "path": "admin/post-deploy-smoke-tests/index.html",
@@ -451,23 +466,23 @@
     },
     {
       "path": "assets/caip-package-placeholder.svg",
-      "size_bytes": 2213,
-      "sha256": "04688afb9f015966c6709602ee0f3b1462ebec8775a33c8708dde6f8ee6b45fa"
+      "size_bytes": 827,
+      "sha256": "dadf335a46553bc5a394e73d0ed1827d08886bfb55f5150fe9b37e34f3b5927f"
     },
     {
       "path": "assets/caip-planning-placeholder.svg",
-      "size_bytes": 1398,
-      "sha256": "92a309ff9dd4e505d5e0e08b7f81f6100c76dc9cf913ae2ecf9da1d6fa917af4"
+      "size_bytes": 821,
+      "sha256": "0f0b40720e87f089c37814251093e146f934284821b3186f6a0768afbb198a10"
     },
     {
       "path": "assets/client-document-workflow-placeholder.svg",
-      "size_bytes": 2146,
-      "sha256": "7eebb867745214a46b697c44327311bd5fafab38f851021a2ec858ae7ca369ec"
+      "size_bytes": 837,
+      "sha256": "56b6e594611de9043b903b517cf2f293cbc9c78e5e97901b1f9e5503fb02cf9e"
     },
     {
       "path": "assets/content-only-project-placeholder.svg",
-      "size_bytes": 1615,
-      "sha256": "2e4252936ac0a0001c06cca6426dc9aba2536c3d24ae44a0d580e7b7619d558c"
+      "size_bytes": 836,
+      "sha256": "a0b0ffa442c97c43b99d620d0fa8a43ad0d1c3a772eea575f9a997d61e0d573a"
     },
     {
       "path": "assets/creative-automation-master-process.svg",
@@ -476,18 +491,18 @@
     },
     {
       "path": "assets/creative-intelligence-integration-placeholder.svg",
-      "size_bytes": 2045,
-      "sha256": "0526514bf91baac99923743e6c0d13665f8616750c6bfd55fec984b90a5e874e"
+      "size_bytes": 833,
+      "sha256": "d42feb81d7f439ecf06696ff1cf652191eaf8fe558353a676e99f3b9946d929f"
     },
     {
       "path": "assets/creative-process-engine-placeholder.svg",
-      "size_bytes": 1885,
-      "sha256": "912a1ea331e10a5d6c884d3e5bb3cab942345e1d3293d282920ee5596e1e8d1e"
+      "size_bytes": 823,
+      "sha256": "93f942223a10d4168944f5a80c42a5a4679687d40f065b06f616d3f4dc07466f"
     },
     {
       "path": "assets/creator-flexible-entry-paths-placeholder.svg",
-      "size_bytes": 2168,
-      "sha256": "23d18ba127684c1aa524adfcb8be9a65b5e6bf3c793ae772929c34f847e3c66a"
+      "size_bytes": 820,
+      "sha256": "dc3d1fc145ebc3b16e636e9ce5f930e5ff4a6997fe3e0fde4a6a335e1371c017"
     },
     {
       "path": "assets/free-shipping.png",
@@ -531,8 +546,8 @@
     },
     {
       "path": "assets/gift-card-placeholder.svg",
-      "size_bytes": 1375,
-      "sha256": "b6c78c355caf2c6fd7df56461dc780adbc40f7190e274b88b605974954459b60"
+      "size_bytes": 803,
+      "sha256": "9e0255905853ea08775d07ebac480eabd423d7694a00ec0f53111cddd480226d"
     },
     {
       "path": "assets/hero-workshop.webp",
@@ -555,14 +570,214 @@
       "sha256": "e069c6cd49904a9898a52a6cb5962b5ddfdf7290e2dbd1bf26ac5d6cece40e35"
     },
     {
+      "path": "assets/images/site/about-real-workshop.webp",
+      "size_bytes": 109796,
+      "sha256": "f48de1803b955d2cc255603d5f888fe0bba4e5f42637a13c71a7fa539a431959"
+    },
+    {
+      "path": "assets/images/site/about-workshop-story.webp",
+      "size_bytes": 138958,
+      "sha256": "4e3fb9d6e479302012d2676a86c5f80ac1ac38fe86208511f94602d6eac2e502"
+    },
+    {
+      "path": "assets/images/site/candle-product-mockup.webp",
+      "size_bytes": 157014,
+      "sha256": "0e06815c69361163479c7928b7a96415a5d08212d4ca46d5b5f6924640c4c3bf"
+    },
+    {
+      "path": "assets/images/site/collection-overview.webp",
+      "size_bytes": 136194,
+      "sha256": "7d7b862b4e525bc2f239e3bc18c1989db7687cff9938e23bb230f82c272c1cc0"
+    },
+    {
+      "path": "assets/images/site/creation-in-progress.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
+    },
+    {
+      "path": "assets/images/site/custom-candle-colour-and-detail.webp",
+      "size_bytes": 184244,
+      "sha256": "781da65e90df42c4145c2cad861ea3e2c24994dafb74715c72880a07e1781732"
+    },
+    {
+      "path": "assets/images/site/custom-gift-process-before-after.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/custom-soap-texture-and-process.webp",
+      "size_bytes": 147888,
+      "sha256": "69c8a4e14cab9b40aa0b54c30e5adcd13fc9d220c490afeee858da88bf9c074d"
+    },
+    {
+      "path": "assets/images/site/devil-n-dove-gift-card.webp",
+      "size_bytes": 84528,
+      "sha256": "baa494361be4487c9fe7a71b78bbb2ba47ed2c1457e175d8fe8da790b97ce41f"
+    },
+    {
+      "path": "assets/images/site/devil-n-dove-workshop-process.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
+    },
+    {
+      "path": "assets/images/site/event-display-before-after.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/events-display-collage.webp",
+      "size_bytes": 326028,
+      "sha256": "756c76c69c70fdf770a81473ceb669cc089826d5884a58ac6b147031c1e823eb"
+    },
+    {
+      "path": "assets/images/site/events-market-display.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/gallery-item-specific-collage.webp",
+      "size_bytes": 331886,
+      "sha256": "9adb9d33776e8609edabbe285f633455aace3ad074c0f21a79eb26c8c98d2082"
+    },
+    {
+      "path": "assets/images/site/gallery-proof-collage.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/images/site/gift-card-mockup.webp",
+      "size_bytes": 286846,
+      "sha256": "7b77876c20c8960d075512a1db48b17d177a393d1c72f26f3fd0f0da3e702713"
+    },
+    {
+      "path": "assets/images/site/handmade-jewelry-macro-detail.webp",
+      "size_bytes": 101802,
+      "sha256": "cab60ee66845d02bb269efe967805b27c85897a37e34f2d56b0312768f3ac46c"
+    },
+    {
+      "path": "assets/images/site/handmade-jewelry-product-mockup.webp",
+      "size_bytes": 258910,
+      "sha256": "acb4a13c721014b9b553fa9c2d857b48a62fba0a745884509122d99f2f7d7c30"
+    },
+    {
+      "path": "assets/images/site/handmade-product-collection.webp",
+      "size_bytes": 143316,
+      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
+    },
+    {
+      "path": "assets/images/site/home-hero-products.webp",
+      "size_bytes": 121650,
+      "sha256": "562918c7734ee4d8b677c6d7345ba865387b4ee6dfc7e1675602b5f22a7c2005"
+    },
+    {
+      "path": "assets/images/site/home-workshop-preview.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
+    },
+    {
+      "path": "assets/images/site/laser-engraver-material-test.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/images/site/laser-engraving-finished-example.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/images/site/laser-project-mockup.webp",
+      "size_bytes": 131784,
+      "sha256": "23093cd17c6468b19ba9dba790f20ef72f977ee0e2e2caed0e72d237fec37f98"
+    },
+    {
+      "path": "assets/images/site/pickup-package-mockup.webp",
+      "size_bytes": 154592,
+      "sha256": "e7a4b4b4bcc0a4eab1369d3e9065ffed9e4fb1435938fe625828d223f3fa0ba7"
+    },
+    {
+      "path": "assets/images/site/pickup-ready-order.webp",
+      "size_bytes": 147716,
+      "sha256": "5a178288a328d537c356ca5d6428b4fe50f8bbb59e24e23f2ce87cf6bc32e05d"
+    },
+    {
+      "path": "assets/images/site/polymer-clay-earring-macro.webp",
+      "size_bytes": 101802,
+      "sha256": "cab60ee66845d02bb269efe967805b27c85897a37e34f2d56b0312768f3ac46c"
+    },
+    {
+      "path": "assets/images/site/polymer-clay-product-mockup.webp",
+      "size_bytes": 256322,
+      "sha256": "758e95ba32e365dad482de977eb8e8abdd2c05f31f115e6d77b9cbad3d29138a"
+    },
+    {
+      "path": "assets/images/site/project-before-after.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/shop-featured-collection.webp",
+      "size_bytes": 138046,
+      "sha256": "368e7ad2c1e6d1ecb6c79e6235152573e3b5cf3fd2517371a93219307f863cd7"
+    },
+    {
+      "path": "assets/images/site/shop-item-specific-collage.webp",
+      "size_bytes": 331072,
+      "sha256": "fa393f33dc919361047aa5901defc11dd88b01cc1d27b0cad158c56a042737bb"
+    },
+    {
+      "path": "assets/images/site/soap-product-mockup.webp",
+      "size_bytes": 123476,
+      "sha256": "2882d56d388bc7d4ccad2518fc8e4474563b958cdf0ecb82f5e83f426e19a459"
+    },
+    {
+      "path": "assets/images/site/social-content-workbench.webp",
+      "size_bytes": 223896,
+      "sha256": "d22e3d227e2147051676f451c026b9e625f3465c3883df94c8e8adab0be1fe22"
+    },
+    {
+      "path": "assets/images/site/vintage-collection-preview.webp",
+      "size_bytes": 143316,
+      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
+    },
+    {
+      "path": "assets/images/site/vintage-item-condition-detail.webp",
+      "size_bytes": 143316,
+      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
+    },
+    {
+      "path": "assets/images/site/vintage-tool-condition-detail.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/images/site/vintage-tools-mockup.webp",
+      "size_bytes": 119144,
+      "sha256": "4cf3e7afe11312f8db53bfc852a682e259d6437d669da508b8df46ab9a168a50"
+    },
+    {
+      "path": "assets/images/site/workshop-creative-paths.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/workshop-gift-making-process.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
+    },
+    {
+      "path": "assets/images/site/workshop-journal-storytelling.webp",
+      "size_bytes": 165202,
+      "sha256": "2f956345ad342a962296df34c81d10d576356eda0c66422b280eb2df9239564f"
+    },
+    {
       "path": "assets/inventory-lot-tracking-placeholder.svg",
-      "size_bytes": 1156,
-      "sha256": "1cd939e3a93c6842fc574db7e9e36ee5c610bf3732a04144506387d460da9a60"
+      "size_bytes": 823,
+      "sha256": "9a23e6b4d3c4170aa7eb5e6028294fbe82c024915b227d925d75e72291ff5e27"
     },
     {
       "path": "assets/inventory-operations-placeholder.svg",
-      "size_bytes": 2670,
-      "sha256": "7f1da1a9c67898b4d41d1830b36eacfd56815faef7753fca3e4e4e214cbd69a8"
+      "size_bytes": 840,
+      "sha256": "902ca7c842b0f0823e70c65f888cb9d41397ad150925a8b06e6692e77a741154"
     },
     {
       "path": "assets/logo-clear-nav.webp",
@@ -671,18 +886,18 @@
     },
     {
       "path": "assets/packaging-studio-placeholder.svg",
-      "size_bytes": 2854,
-      "sha256": "ae786097823b1a00d9ee5b8ad33690a3b58945a26a93b6abef7a548c9f73d2e0"
+      "size_bytes": 840,
+      "sha256": "1ffea4125aa30173a788c2ab22ee66e4ef3b37f206e90bab018e51ddcea152ff"
     },
     {
       "path": "assets/prelaunch-operations-map.svg",
-      "size_bytes": 2348,
-      "sha256": "08c3a3d0707dc308c41ff324f1c7e083e54d19ab9e7029356f31e8fef1c351f6"
+      "size_bytes": 830,
+      "sha256": "d25528f6a65f04114953b1324611cd8fe43062ec4c49d671c9db0c1552754d56"
     },
     {
       "path": "assets/product-cleanup-placeholder.svg",
-      "size_bytes": 2771,
-      "sha256": "3a77f29c28294477534bb3de27169f464a688863aa29e3013aff1589b0e5a1eb"
+      "size_bytes": 832,
+      "sha256": "721d272889c4835723db9998fb0657f5404ed70da1f7781f34ab4130cda7facf"
     },
     {
       "path": "assets/product-media-placeholder.svg",
@@ -690,14 +905,104 @@
       "sha256": "732e646b568c50f655b878c4e3978de677017cece72376b87b403800aba960bd"
     },
     {
+      "path": "assets/product-placeholder.svg",
+      "size_bytes": 803,
+      "sha256": "533f2d1ce6c6c0954913da877c8fa92d5f7632ac04a5e999926435e35f3019c6"
+    },
+    {
       "path": "assets/product-set-pricing-placeholder.svg",
-      "size_bytes": 1253,
-      "sha256": "30f172fddd689cda2cf7b451348c1938598891e91c512e6ffeb29ba4bf16097b"
+      "size_bytes": 827,
+      "sha256": "d2dba1bd29537f7dee692cc1f076523000773968a01bd794667b5b3b1866ff6a"
+    },
+    {
+      "path": "assets/products/fallbacks/DD215-216B.webp",
+      "size_bytes": 185974,
+      "sha256": "c93f6276ab6aa2bacd352b2f29f87b4026d82fc1d5ab1d0847d4e8ab3f31cac0"
+    },
+    {
+      "path": "assets/products/fallbacks/DDM04.webp",
+      "size_bytes": 193404,
+      "sha256": "5a3387d4aed4db4da4c8a398e1cb45068edef7b9c64b596b2e077c3043188c33"
+    },
+    {
+      "path": "assets/products/fallbacks/DDM06.webp",
+      "size_bytes": 190492,
+      "sha256": "36d6d80a0ceb0095c88886f388662fca738e6de1e9d488d2dc7fc5324faa5865"
+    },
+    {
+      "path": "assets/products/fallbacks/DDPR02.webp",
+      "size_bytes": 85314,
+      "sha256": "ba992ec00ebdcf6dcf6f03c4402144a309e5d468b1f9c60a96ff46471662cec4"
+    },
+    {
+      "path": "assets/products/fallbacks/DDPR09.webp",
+      "size_bytes": 194564,
+      "sha256": "945dc46497e100d3d80db4687764e46b7d5d899678e69836cf8c41e24b9cb515"
+    },
+    {
+      "path": "assets/products/fallbacks/DDPR14.webp",
+      "size_bytes": 193996,
+      "sha256": "f682686dd792976feb35040d4321e38ad68f36ee292cdb86dd4728e07e94b857"
+    },
+    {
+      "path": "assets/products/fallbacks/LampLight.webp",
+      "size_bytes": 189994,
+      "sha256": "f0320c55f5a49320f5351e8bcbaa3c594cd8033c0e198af99ca2e6f263fb6d40"
+    },
+    {
+      "path": "assets/real-media/candle-top-reference-photo.webp",
+      "size_bytes": 184244,
+      "sha256": "781da65e90df42c4145c2cad861ea3e2c24994dafb74715c72880a07e1781732"
+    },
+    {
+      "path": "assets/real-media/engraving-process-photo.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/real-media/gift-card-photo.webp",
+      "size_bytes": 84528,
+      "sha256": "baa494361be4487c9fe7a71b78bbb2ba47ed2c1457e175d8fe8da790b97ce41f"
+    },
+    {
+      "path": "assets/real-media/jewelry-macro-photo.webp",
+      "size_bytes": 101802,
+      "sha256": "cab60ee66845d02bb269efe967805b27c85897a37e34f2d56b0312768f3ac46c"
+    },
+    {
+      "path": "assets/real-media/maker-portrait-photo.webp",
+      "size_bytes": 165202,
+      "sha256": "2f956345ad342a962296df34c81d10d576356eda0c66422b280eb2df9239564f"
+    },
+    {
+      "path": "assets/real-media/product-detail-photo.webp",
+      "size_bytes": 143316,
+      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
+    },
+    {
+      "path": "assets/real-media/soap-label-reference-photo.webp",
+      "size_bytes": 147888,
+      "sha256": "69c8a4e14cab9b40aa0b54c30e5adcd13fc9d220c490afeee858da88bf9c074d"
+    },
+    {
+      "path": "assets/real-media/tools-supplies-photo.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/real-media/workshop-collage-photo.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/real-media/workshop-process-photo.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
     },
     {
       "path": "assets/release-preflight-placeholder.svg",
-      "size_bytes": 2705,
-      "sha256": "69e31f9b29edb89d0d99d58c69df580453f015285ea5fa6572fd6f42611be954"
+      "size_bytes": 824,
+      "sha256": "160c914798df72e5c6b1f9fe30a92bdf42d85821a4f449edd9ddf9c24f103ec7"
     },
     {
       "path": "assets/soap-ribbon-scalloped-reference.svg",
@@ -706,23 +1011,23 @@
     },
     {
       "path": "assets/social-platform-preflight-placeholder.svg",
-      "size_bytes": 1786,
-      "sha256": "272201777593081949fe9b86a095cd9a6a08440f700316f49ba30c014e544b0f"
+      "size_bytes": 831,
+      "sha256": "be3dac96f8b4c134078c3362339501248989ffa17aecc9c9c48915f26db5a53a"
     },
     {
       "path": "assets/social-publishing-placeholder.svg",
-      "size_bytes": 3089,
-      "sha256": "e9f9691027f7cb28c02ca4821ba0f5e5b89f3c896f91efd4277ef4e41984e64d"
+      "size_bytes": 829,
+      "sha256": "23a3ef3749e76d5d09f1933b9243d7f0ce697b4cc794dbddb60334ca009d8cfa"
     },
     {
       "path": "assets/visual-placeholders/before-after.svg",
-      "size_bytes": 1456,
-      "sha256": "fd624463860552177b3edfa1b06ee09876c5d93f55ad50428ef9a25808b829b6"
+      "size_bytes": 819,
+      "sha256": "966d1b16c07f6cc40d4afcc9de14ed57ad952e1c988ebc4856651969e2b59f73"
     },
     {
       "path": "assets/visual-placeholders/candle-colour.svg",
-      "size_bytes": 1449,
-      "sha256": "a66d01b63c54d6e1b0e6f65147fad0c9e4a64f76d3df7425317bae506e3f65d4"
+      "size_bytes": 843,
+      "sha256": "10de54852573d9d20149c8180e12f97a6066648d97eec7453e8a3714fa39db5d"
     },
     {
       "path": "assets/visual-placeholders/creative-asset-intelligence.svg",
@@ -730,14 +1035,29 @@
       "sha256": "bb0a44e189abc78bdb09ef6b12cb24353ff3777c3a390f31e5dc4f23e7ab8028"
     },
     {
+      "path": "assets/visual-placeholders/engraving-detail.svg",
+      "size_bytes": 651,
+      "sha256": "e86574f4ff69f5f0e5908da47fb678af09246fbb8fb355c48ef4616fab6d7167"
+    },
+    {
       "path": "assets/visual-placeholders/engraving-proof.svg",
-      "size_bytes": 1455,
-      "sha256": "bfda8b38e5ec859a991c7575b8727a4a97ec4cd07150efc4e150f5e5180b7b3b"
+      "size_bytes": 839,
+      "sha256": "a122476516cfc0014fcec899fed7c4783338598cf047bb2d6aace30b9cc39ca3"
+    },
+    {
+      "path": "assets/visual-placeholders/events.svg",
+      "size_bytes": 812,
+      "sha256": "99a5dc4e2885c2dc5b0460289a593e38b60f66a8146a5c05f6447dc7659dff78"
     },
     {
       "path": "assets/visual-placeholders/jewelry-macro.svg",
-      "size_bytes": 1453,
-      "sha256": "4d7a33a5ff189b422c98e20c6f4f3e4167717eec5825403183bd2453c4db3be8"
+      "size_bytes": 820,
+      "sha256": "78793f86c571355871dd480dab305aa95e2d20a3ba8a93ed496c19bb507f0589"
+    },
+    {
+      "path": "assets/visual-placeholders/material-detail.svg",
+      "size_bytes": 648,
+      "sha256": "9863bda6bc89698e4f0148a6104daff626e6d5972987e4be52ac4802fa8e3f8c"
     },
     {
       "path": "assets/visual-placeholders/mobile-upload-safety.svg",
@@ -745,69 +1065,84 @@
       "sha256": "038aa6ee7561f74a19d1bf479bc5c7e46e8ec263db2364514718d9e503e1e7bb"
     },
     {
+      "path": "assets/visual-placeholders/pickup.svg",
+      "size_bytes": 803,
+      "sha256": "d0949fedbb3c806f349083dd0a8dbc26af0fe0194e2fca55b3741be201cb22a8"
+    },
+    {
       "path": "assets/visual-placeholders/product-care.svg",
-      "size_bytes": 759,
-      "sha256": "a1bb33002a92e0c2686963cd89b84dd1ac4f3ee6b4332f0004de9bc62b506484"
+      "size_bytes": 822,
+      "sha256": "bfd2a0eeadcf1f4e3e6aa0e2483fc410af7d95b9e1f19fef888ece7080dc732d"
     },
     {
       "path": "assets/visual-placeholders/product-detail.svg",
-      "size_bytes": 1452,
-      "sha256": "9e9aa11df5f59d462f9a84cfe29d92c419fafd036a0da5bc293c72cf19a43e65"
+      "size_bytes": 823,
+      "sha256": "c0e57ae618f944119b003b8bb7ccb7c44589fa3d82ca77510cf9c1d763c464c7"
+    },
+    {
+      "path": "assets/visual-placeholders/product-grid.svg",
+      "size_bytes": 644,
+      "sha256": "ac605ded7fe8d0176eeb19626cd4802bb306d76bff07049e4efa4d72f3ca480b"
     },
     {
       "path": "assets/visual-placeholders/product-material.svg",
-      "size_bytes": 857,
-      "sha256": "e89881ffba595a5214724aff6712e94afd0aea957e2fb6294d6122855c5563a2"
+      "size_bytes": 825,
+      "sha256": "587dba807e43d098af39edb0fa048101edac7add89373aa814852cbf25c07c12"
     },
     {
       "path": "assets/visual-placeholders/product-media-roles.svg",
-      "size_bytes": 1407,
-      "sha256": "f9e2c7683ba32292300664045adfb4c063519a2205d5c531bc9adccab4b13eac"
+      "size_bytes": 823,
+      "sha256": "e97220ab9dc1f99b1cd0975195042440d81183d28827860b3fd27bb4fab401c7"
     },
     {
       "path": "assets/visual-placeholders/product-photo-coming-soon.svg",
-      "size_bytes": 1043,
-      "sha256": "664fadb5fd9ac599fb1be276f6445d663c20b15efd473cd84dc454a2bb8bdbe6"
+      "size_bytes": 851,
+      "sha256": "a44b885f18acbc8e3999714e21e00a4d4d8785212aff31caf61d4b0d1c322df3"
     },
     {
       "path": "assets/visual-placeholders/product-process.svg",
-      "size_bytes": 894,
-      "sha256": "c4c1b33c0b219ade4b5b150b297d8b74a4789c26ea5ff8bb54e6f748d398a856"
+      "size_bytes": 828,
+      "sha256": "5c830da35de534d22b751ffb2858d738ecd5e734f3ac9b44518bcd38781ca1bf"
     },
     {
       "path": "assets/visual-placeholders/product-scale.svg",
-      "size_bytes": 809,
-      "sha256": "04b8185e9bf88033ae9688e717bef4a1b9652fa20682ea2e57f1a4233cefbdc9"
+      "size_bytes": 825,
+      "sha256": "1205b3b0abddaa793ed99392fb5f897c7c38290cbd37c69285fd716ca4b48946"
     },
     {
       "path": "assets/visual-placeholders/soap-texture.svg",
-      "size_bytes": 1446,
-      "sha256": "2da9fb389a7365b2a44c77f65e14b4701a810eb910fdb704debda0731ccccb44"
+      "size_bytes": 829,
+      "sha256": "7145e6242e1f9ed243db4f8a83c2a29632e120808adcb53951dd7f4585f810b8"
+    },
+    {
+      "path": "assets/visual-placeholders/tools.svg",
+      "size_bytes": 825,
+      "sha256": "aede04c204b3f58a0556b3aa6d9fdfe362904f9277b5f90f71950d131a708085"
     },
     {
       "path": "assets/visual-placeholders/vintage-condition.svg",
-      "size_bytes": 1461,
-      "sha256": "a8687540a94cbd0c7556118350bb70e1c1619035ed1dbffb0b2ebb339abd6c16"
+      "size_bytes": 824,
+      "sha256": "c84ebefa519c80c22c8df3dd2e9c7185b0fc3cbcfe1d12fc328f11439e9dbee7"
     },
     {
       "path": "assets/visual-placeholders/workshop-discovery.svg",
-      "size_bytes": 1451,
-      "sha256": "076c52c3c32146f599981f19e81dfcff18f3eadb1a980a138083ac828abc12f5"
+      "size_bytes": 827,
+      "sha256": "8602bdde07a4daed7f379bc6fea6bf91e17ea57424a5fab14d56586466702f5c"
     },
     {
       "path": "assets/visual-placeholders/workshop-journal.svg",
-      "size_bytes": 1341,
-      "sha256": "09b84d22f2a45730e530aae1871f80cbe209b7da8cc31f275418feadef8ab3ce"
+      "size_bytes": 828,
+      "sha256": "525e49310c88df260a0ed788c36a239e5a9c9f145e66565084b3dfe724f447a0"
     },
     {
       "path": "assets/visual-placeholders/workshop-process.svg",
-      "size_bytes": 1455,
-      "sha256": "a4ce51dfb33b7a044f87e6489547368f4d819fb997d06584e39ea8a71a582034"
+      "size_bytes": 824,
+      "sha256": "650a2c6839da8457a15167c0d2bc1916cc20caa02fbc76e82848f4c3cf985d8e"
     },
     {
       "path": "css/styles.css",
-      "size_bytes": 245418,
-      "sha256": "66ecd1a100e6e68324129745ba758a499054cd2037cc06a94bf18512872077d3"
+      "size_bytes": 248323,
+      "sha256": "78474301078b34041a31947c6411234160595ea84fd350483cac73846d750b79"
     },
     {
       "path": "data/accounting_templates/README.md",
@@ -985,6 +1320,11 @@
       "sha256": "f0b2cb6d4ae06268fa1f3c538db4421ac2307e83f996bc500f1f913beadfff70"
     },
     {
+      "path": "data/site/build239-public-browser-audit.json",
+      "size_bytes": 8357,
+      "sha256": "a8c2bcdc5f55b500e6194e43eee2a7ea22954d17e038f5aa854b9f6f3be41d79"
+    },
+    {
       "path": "data/site/competitive-opportunities.json",
       "size_bytes": 16265,
       "sha256": "19781a9f1012a4ce7c7068f3dc4343f9a862eb12a0acce64d8cb305551c11b48"
@@ -992,12 +1332,12 @@
     {
       "path": "data/site/deployment-preflight.json",
       "size_bytes": 12553,
-      "sha256": "b49a4622092fe066df7bf1a88477e3f5a85df54617ce8fb80b1ae707f7a2991e"
+      "sha256": "315f89dec2f8510e2929497dea6c421c7f652afce93f98a77f19fcbc25607ec6"
     },
     {
       "path": "data/site/featured-items.json",
-      "size_bytes": 2031,
-      "sha256": "be1d4efcbbdb4663ded63421eb0b1102023dfcf0c7a15db69a9f37e377a8a90e"
+      "size_bytes": 3618,
+      "sha256": "f0e9cd986001a822b60972af323e6f1b60b61d1f31a0146dcddf2486543f934f"
     },
     {
       "path": "data/site/local-business-schema.json",
@@ -1578,6 +1918,41 @@
       "path": "docs/archive/build-history/BUILD233_VALIDATION.md",
       "size_bytes": 4504,
       "sha256": "ad35e15f61adf42f604463e75cba1eb8f49847ebbf4fe70acbda5ffcd641e4d5"
+    },
+    {
+      "path": "docs/archive/build-history/BUILD236_CHANGED_FILES.md",
+      "size_bytes": 776,
+      "sha256": "54ac308c9856aa6ccb82ea0c04d78461125951c966beb100835a5cecd8163eb0"
+    },
+    {
+      "path": "docs/archive/build-history/BUILD236_VALIDATION.md",
+      "size_bytes": 1878,
+      "sha256": "e307600d7c009b4418388d84fac625bebeaa70c600a97e6a9247291686553b30"
+    },
+    {
+      "path": "docs/archive/build-history/BUILD237_CHANGED_FILES.md",
+      "size_bytes": 465,
+      "sha256": "bd23ece7e690ec8b4dc13dca1dabccea810bd105839f83143c798e6c81bacaf6"
+    },
+    {
+      "path": "docs/archive/build-history/BUILD237_VALIDATION.md",
+      "size_bytes": 1118,
+      "sha256": "9abcbef289cff64ed511fc8797eeaa8d800379cd599ab4717415a1bcf7bf9cb4"
+    },
+    {
+      "path": "docs/archive/build-history/BUILD238_CHANGED_FILES.md",
+      "size_bytes": 972,
+      "sha256": "163365d6fb0ced96f581b2a3762e2652558b97bcef72935670fb903c2529157e"
+    },
+    {
+      "path": "docs/archive/build-history/BUILD238_VALIDATION.md",
+      "size_bytes": 1242,
+      "sha256": "665ee32cd69725c4dbad7cd99c25035ba218b694a587f5c982437a5f6589053c"
+    },
+    {
+      "path": "docs/archive/build-history/PUBLIC_VISUAL_AUDIT_BUILD238.md",
+      "size_bytes": 2934,
+      "sha256": "bff8f6352ac6f1ceee482c51697c6faaac16907c40f82ca93c918f30b81fd4c8"
     },
     {
       "path": "docs/archive/build-history/README.md",
@@ -3441,8 +3816,8 @@
     },
     {
       "path": "public/js/admin-packaging-studio.js",
-      "size_bytes": 97664,
-      "sha256": "4a9f8a34b7e4a6e2eaea3e6d7bf42695ab53e393414024aac1fb534a3a15d90d"
+      "size_bytes": 97954,
+      "sha256": "7df225d302cca75ced81ff9f72f86c9326f8113ce76d72914ec6751839d8f95a"
     },
     {
       "path": "public/js/admin-panel-routing.js",
@@ -4076,8 +4451,13 @@
     },
     {
       "path": "scripts/build235_creative_readiness_test.mjs",
-      "size_bytes": 11035,
-      "sha256": "9f2f9fa270a6f1522b0913b9e6ca62d2f2453fe551a9549b9e109c47b0640165"
+      "size_bytes": 11058,
+      "sha256": "1f23a8fcb87373556efe6bcc5d5b010898fbce92c6b8fd612d1665b7176124ff"
+    },
+    {
+      "path": "scripts/build239_public_visual_test.py",
+      "size_bytes": 2373,
+      "sha256": "ace72413c465ce5cd7f874e68002397a670e485d25c53a9451261e30b6cec469"
     },
     {
       "path": "scripts/dark_theme_regression_check.py",
@@ -4087,7 +4467,7 @@
     {
       "path": "scripts/deployment_preflight_static_check.py",
       "size_bytes": 30566,
-      "sha256": "5c0b590d71b9e4cb30a0397e18836441cf0e66e967933dfaa3f3c0987279f209"
+      "sha256": "47b8d007e63c4b9eda80ee26f7acb3de3f4da5a496cc7fb0eb4eec4d3a31717a"
     },
     {
       "path": "scripts/final_deployment_blocker_check.py",
@@ -4107,7 +4487,7 @@
     {
       "path": "scripts/generate_release_manifest.py",
       "size_bytes": 2133,
-      "sha256": "45e2c871485d244b2752861b90fa4310d9f42ab95cfd301e393cf053476faab6"
+      "sha256": "dfddfbc81f1ce4de81981d4d481042f5793fe8c76c4c5e1d1dbbca0f5f9419e3"
     },
     {
       "path": "scripts/generate_release_notes.py",
@@ -4121,8 +4501,8 @@
     },
     {
       "path": "scripts/predeploy_sanity_check.py",
-      "size_bytes": 34255,
-      "sha256": "4fcd074f46b4df7dfc0a258018d9642a1bfeaa1a6991fc5074be68a5bf38d365"
+      "size_bytes": 34157,
+      "sha256": "44c738d20b096decf9d5fd82547727ec344b937e8344c7f43a1945f4865cb3e6"
     },
     {
       "path": "scripts/regenerate_sanity_from_preflight.py",

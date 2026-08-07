@@ -1,0 +1,339 @@
+{
+  "build_label": "Build 239",
+  "audit_type": "Chromium public visual audit",
+  "desktop_viewport": "1440x1000",
+  "mobile_viewport": "390x844",
+  "route_count": 18,
+  "result_count": 36,
+  "all_pass": true,
+  "results": [
+    {
+      "route": "/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/about/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/about/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/collections/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/collections/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/contact/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/contact/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/creations/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 7
+    },
+    {
+      "route": "/creations/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 7
+    },
+    {
+      "route": "/custom-candle-making-ontario/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/custom-candle-making-ontario/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/custom-gifts-southern-ontario/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/custom-gifts-southern-ontario/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/custom-soap-making-ontario/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/custom-soap-making-ontario/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/events/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/events/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/gallery/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 7
+    },
+    {
+      "route": "/gallery/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 7
+    },
+    {
+      "route": "/gift-cards/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/gift-cards/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/handmade-jewelry-ontario/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/handmade-jewelry-ontario/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/laser-engraving-ontario/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/laser-engraving-ontario/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/pickup/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/pickup/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/polymer-clay-earrings-ontario/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/polymer-clay-earrings-ontario/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/shop/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/shop/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/socials/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/socials/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/vintage-finds-ontario/",
+      "viewport": "desktop",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    },
+    {
+      "route": "/vintage-finds-ontario/",
+      "viewport": "mobile",
+      "h1_count": 1,
+      "horizontal_overflow": false,
+      "broken_images": 0,
+      "missing_alt": 0,
+      "representative_fallbacks": 0
+    }
+  ],
+  "notes": [
+    "Local static server does not execute Cloudflare Pages Functions.",
+    "Creations and Gallery intentionally demonstrated seven local representative fallbacks when remote R2 item images were unavailable."
+  ]
+}

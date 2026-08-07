@@ -14,91 +14,154 @@
       "title": "Pink Heart Set (Earrings + Pendant)",
       "type": "Jewelry",
       "subcategory": "Set",
-      "materials": ["polymer clay", "metal findings"],
-      "tags": ["pink", "hearts", "handmade", "gift"],
+      "materials": [
+        "polymer clay",
+        "metal findings"
+      ],
+      "tags": [
+        "pink",
+        "hearts",
+        "handmade",
+        "gift"
+      ],
       "image_file": "DD215-216B.jpeg",
       "r2_object_key": "Itemsforsale/DD215-216B.jpeg",
       "alt": "Pink heart jewelry set with matching earrings and pendant.",
       "status": "unknown",
-      "shop_url": ""
+      "shop_url": "",
+      "fallback_image": "/assets/products/fallbacks/DD215-216B.webp",
+      "fallback_alt": "Representative Devil n Dove preview for Pink Heart Set (Earrings + Pendant); the original item photo is temporarily unavailable."
     },
     {
       "id": "DDM04",
       "title": "Black & White Pendant + Earrings (Styled Photo)",
       "type": "Jewelry",
       "subcategory": "Pendant / Earrings",
-      "materials": ["polymer clay", "metal findings"],
-      "tags": ["black", "white", "handmade", "styled"],
+      "materials": [
+        "polymer clay",
+        "metal findings"
+      ],
+      "tags": [
+        "black",
+        "white",
+        "handmade",
+        "styled"
+      ],
       "image_file": "DDM04.jpeg",
       "r2_object_key": "Itemsforsale/DDM04.jpeg",
       "alt": "Styled photo of black and white jewelry pieces on a display surface.",
       "status": "unknown",
-      "shop_url": ""
+      "shop_url": "",
+      "fallback_image": "/assets/products/fallbacks/DDM04.webp",
+      "fallback_alt": "Representative Devil n Dove preview for Black & White Pendant + Earrings (Styled Photo); the original item photo is temporarily unavailable."
     },
     {
       "id": "DDM06",
       "title": "Purple Polymer Set (Bracelet + Ring + Earrings)",
       "type": "Jewelry",
       "subcategory": "Set",
-      "materials": ["polymer clay", "metal findings"],
-      "tags": ["purple", "handmade", "polymer", "set"],
+      "materials": [
+        "polymer clay",
+        "metal findings"
+      ],
+      "tags": [
+        "purple",
+        "handmade",
+        "polymer",
+        "set"
+      ],
       "image_file": "DDM06.jpeg",
       "r2_object_key": "Itemsforsale/DDM06.jpeg",
       "alt": "Purple polymer jewelry set including bracelet, ring, and earrings.",
       "status": "unknown",
-      "shop_url": ""
+      "shop_url": "",
+      "fallback_image": "/assets/products/fallbacks/DDM06.webp",
+      "fallback_alt": "Representative Devil n Dove preview for Purple Polymer Set (Bracelet + Ring + Earrings); the original item photo is temporarily unavailable."
     },
     {
       "id": "DDPR02",
       "title": "Packaged Earrings & Small Pieces (Product Group)",
       "type": "Jewelry",
       "subcategory": "Assorted",
-      "materials": ["mixed"],
-      "tags": ["packaged", "assorted", "display"],
+      "materials": [
+        "mixed"
+      ],
+      "tags": [
+        "packaged",
+        "assorted",
+        "display"
+      ],
       "image_file": "DDPR02.jpeg",
       "r2_object_key": "Itemsforsale/DDPR02.jpeg",
       "alt": "Assorted jewelry pieces packaged and ready for sale.",
       "status": "unknown",
-      "shop_url": ""
+      "shop_url": "",
+      "fallback_image": "/assets/products/fallbacks/DDPR02.webp",
+      "fallback_alt": "Representative Devil n Dove preview for Packaged Earrings & Small Pieces (Product Group); the original item photo is temporarily unavailable."
     },
     {
       "id": "DDPR09",
       "title": "Silverware Spoon Rings (Tray Display)",
       "type": "Jewelry",
       "subcategory": "Rings",
-      "materials": ["metal (silverware)"],
-      "tags": ["spoon ring", "upcycled", "metalwork"],
+      "materials": [
+        "metal (silverware)"
+      ],
+      "tags": [
+        "spoon ring",
+        "upcycled",
+        "metalwork"
+      ],
       "image_file": "DDPR09.jpeg",
       "r2_object_key": "Itemsforsale/DDPR09.jpeg",
       "alt": "Spoon rings displayed on a red velvet tray.",
       "status": "unknown",
-      "shop_url": ""
+      "shop_url": "",
+      "fallback_image": "/assets/products/fallbacks/DDPR09.webp",
+      "fallback_alt": "Representative Devil n Dove preview for Silverware Spoon Rings (Tray Display); the original item photo is temporarily unavailable."
     },
     {
       "id": "DDPR14",
       "title": "Spoon Rings (Pile Photo)",
       "type": "Jewelry",
       "subcategory": "Rings",
-      "materials": ["metal (silverware)"],
-      "tags": ["spoon ring", "upcycled", "metalwork"],
+      "materials": [
+        "metal (silverware)"
+      ],
+      "tags": [
+        "spoon ring",
+        "upcycled",
+        "metalwork"
+      ],
       "image_file": "DDPR14.jpeg",
       "r2_object_key": "Itemsforsale/DDPR14.jpeg",
       "alt": "A pile of handmade spoon rings.",
       "status": "unknown",
-      "shop_url": ""
+      "shop_url": "",
+      "fallback_image": "/assets/products/fallbacks/DDPR14.webp",
+      "fallback_alt": "Representative Devil n Dove preview for Spoon Rings (Pile Photo); the original item photo is temporarily unavailable."
     },
     {
       "id": "LampLight",
       "title": "Colorful Pendant Set (Lamp/Studio Light Shot)",
       "type": "Jewelry",
       "subcategory": "Pendant",
-      "materials": ["polymer clay", "mixed media"],
-      "tags": ["colorful", "handmade", "pendants"],
+      "materials": [
+        "polymer clay",
+        "mixed media"
+      ],
+      "tags": [
+        "colorful",
+        "handmade",
+        "pendants"
+      ],
       "image_file": "LampLight.jpeg",
       "r2_object_key": "Itemsforsale/LampLight.jpeg",
       "alt": "Colorful handmade pendants photographed under studio lighting.",
       "status": "unknown",
-      "shop_url": ""
+      "shop_url": "",
+      "fallback_image": "/assets/products/fallbacks/LampLight.webp",
+      "fallback_alt": "Representative Devil n Dove preview for Colorful Pendant Set (Lamp/Studio Light Shot); the original item photo is temporarily unavailable."
     }
   ]
 }
