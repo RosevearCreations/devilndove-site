@@ -1,58 +1,49 @@
-# 09 — Operations, Reliability, and Observability
+# 09 — CAIP Operations, Reliability, and Observability
 
-## Reliability requirements
+## Reliability goals
 
-- CAIP must be additive: an outage cannot block catalog, product approval, Content Studio, or public storefront operations.
-- Content Studio calls CAIP as best-effort after its own successful source-package operation and captures a warning incident if CAIP sync fails.
-- CAIP UI should provide a clear retry/synchronize action instead of silently showing stale results as current.
-- No scheduled background worker is assumed in Build 201.
+1. No request-time CAIP schema creation.
+2. No false success when D1/R2/provider dependencies are unavailable.
+3. Multipart progress survives network/page interruption through D1 part/ETag state.
+4. Completed raw originals are immutable.
+5. Provider work remains planned/blocked until verified.
+6. Private media never becomes public because of a UI shortcut.
 
-## Observability
+## Error handling
 
-Track, at minimum:
+Build 241 uses the shared `runtime_incidents` authority. CAIP GET/POST and part-upload failures return structured JSON and record sanitized incident details. Binary data, credentials, session cookies, and raw multipart upload IDs must not be placed in incident evidence.
 
-| Signal | Meaning |
-|---|---|
-| synchronization completed/failed | source-to-CAIP ingestion health |
-| source asset count vs CAIP asset count | completeness check |
-| source fingerprint changed | media pointer/material source change detected |
-| blocked/needs-review/public candidates | governance workload |
-| evidence/segment lock count | editorial preservation check |
-| provider/render/publish failure count | future adapter reliability |
-| output URL verification status | future delivery integrity |
-| storage/provider cost per project | future cost guardrail |
+## Upload recovery
 
-## Error policy
+Each file has:
 
-- Show an actionable internal error; do not fall back to a blank gallery or a fabricated generated result.
-- Log an incident with subsystem, project/source IDs, operation, and safe error details.
-- Treat a 4xx validation/rights error as a user-correctable state, not a retry queue candidate.
-- Treat a provider timeout/5xx as retryable only once idempotency and cost controls are implemented.
+- session/file state;
+- R2 upload ID held server-side;
+- expected part ranges;
+- per-part status/ETag/attempt/error;
+- uploaded byte/part totals;
+- session totals.
 
-## Performance and scale strategy
+Failed parts can be retried. Completed parts remain complete. The browser may require file reselection after a full restart.
 
-Build 201 calculates small metadata-only scores synchronously. Future high-volume operations must use queues and bounded batches:
+## Duplicate detection
 
-1. ingest lightweight metadata synchronously;
-2. enqueue technical/semantic work in batches;
-3. use project/asset locks and idempotency keys;
-4. persist progress checkpoints;
-5. expose partial states honestly;
-6. never keep a user waiting on an unbounded full-library scan.
+Metadata fingerprints produce a warning, not destructive deduplication. Future stronger hashing must be memory-bounded and preserve evidence provenance.
 
-## Backup/recovery posture
+## Private bucket health
 
-Database records are recoverable metadata, not the only copy of source media. R2/source backup, database backup, migration ledger, output manifests, audit events, and provider output lineage must all be part of release recovery planning before any destructive lifecycle automation is enabled.
+Startup/production evidence should prove:
 
-## Build 202 observability additions
+- `CAIP_PRIVATE_MEDIA_BUCKET` is bound in production;
+- public access is disabled on the raw bucket;
+- initiate/upload/complete/HEAD works;
+- secure review uses the correct private binding;
+- public promotion does not create a public object in Build 241.
 
-Track at minimum:
+## Processing observability
 
-- probe status by scope (`complete`, `metadata_only`, `partial`, `missing`);
-- R2 binding availability and object-missing counts;
-- derivative plans by `planned`/`approved_plan`/future verified state;
-- secure-review grants created, served, expired, denied, and revoked;
-- attempts to use a grant from the wrong account or after expiry;
-- any future provider being enabled while its budget control remains disabled/zero.
+Planned proxy/frame/audio/transcript jobs record job key, provider key, status, attempts, input object key and output prefix. A provider adapter must add observable provider IDs/results before `complete` can be trusted.
 
-Never log raw secure-review tokens, R2 credentials, cookies, authorization headers, original customer filenames when sensitive, or full source URLs in public telemetry. Runtime incidents record `raw_token_not_logged: true` for proxy errors.
+## Retention
+
+Build 241 intentionally does not auto-delete completed raw originals. A later retention/archive policy must define backup, legal/privacy deletion, supersession and evidence requirements before destructive workers are added.

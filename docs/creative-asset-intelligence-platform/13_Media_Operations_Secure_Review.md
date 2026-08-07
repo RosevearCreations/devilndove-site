@@ -1,5 +1,8 @@
 # 13 — Media Operations, Derivative Plans, and Secure Review
 
+> **Build 241 extension:** This document remains authoritative for technical observations, derivative plans, and authenticated review grants. Build 241 changes the earlier “reference/control plane only” boundary by adding one deliberate source-ingestion path: raw Creative Project media may now be uploaded as an immutable private original to `CAIP_PRIVATE_MEDIA_BUCKET`. Existing catalog/Content Studio media remains reference-first. Private-upload behavior is authoritative in `16_Private_Raw_Media_Intake.md`.
+
+
 **Status:** Authoritative CAIP specification — Build 202 foundation implemented.  
 **Applies to:** Devil n Dove Content Automation Studio → CAIP → Content Release Board.  
 **Does not apply automatically to:** Rosie Dazzlers, customer jobs, external publishing, or any provider account until separate consent, account, and operating controls are implemented.

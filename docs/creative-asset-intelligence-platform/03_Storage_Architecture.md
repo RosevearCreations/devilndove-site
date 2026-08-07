@@ -1,62 +1,74 @@
-# 03 — Storage Architecture
+# 03 — CAIP Storage Architecture
 
-## Current storage model
+## Current Build 241 model
 
-Build 201 is **reference-only**. CAIP stores database metadata about existing source objects. It does not create R2 folders or object copies even though it displays a logical archive path.
+CAIP uses a hybrid storage model:
 
-| Logical class | Current physical home | CAIP behaviour |
+| Media class | Physical home | CAIP behavior |
 |---|---|---|
-| Original source image/video | Existing R2/product/media path | Store pointer/fingerprint only |
-| Product gallery display image | Existing `product_images` URL | Store pointer; never reorder/delete |
-| Content Studio archive reference | `content_project_media` | Ingest as canonical CAIP asset reference |
-| Rendered video/export | Not implemented | Future provider output, must be a separate object and verified URL |
-| Proxy/thumbnail | Not implemented | Future derivative record; never replace original URL silently |
-| Public publication media | Existing verified public URL | Release Board remains authority |
-| Private review media | Future signed/private adapter | Must not be exposed through public URLs |
+| Existing catalog/product source | Existing public/private media path | Reference/fingerprint only; CAIP does not reorder or overwrite |
+| New raw Creative Project media | `CAIP_PRIVATE_MEDIA_BUCKET` | Multipart private upload; canonical immutable original |
+| Product/gallery/public media | `PRODUCT_MEDIA_BUCKET` or verified existing URL | Public only after separate approval/promotion |
+| Proxy/extracted/derived media | Planned namespace in private bucket | Records may be planned; no output exists until provider verification |
+| Secure review | Authenticated no-store CAIP proxy | Does not create public access |
 
-## Future target namespaces
+D1 stores metadata, part/upload state, governance, evidence, processing plans, and promotion requests. R2 stores binary objects.
 
-When object writes are deliberately enabled, use immutable source and derivative namespaces such as:
+## Private raw-media namespace
 
 ```text
-originals/{source-type}/{source-id}/{asset-fingerprint}/{filename}
-proxies/{asset-fingerprint}/{recipe-version}/{filename}
-derivatives/{asset-fingerprint}/{recipe-version}/{format}/{filename}
-exports/{creative-project-key}/{deliverable-key}/{export-version}/{filename}
-review/{creative-project-key}/{request-id}/{filename}
+projects/{creative_project_id}/
+  raw/photos/
+  raw/video/
+  raw/audio/
+  proxy/video/
+  proxy/images/
+  extracted/frames/{file_key}/
+  extracted/audio/
+  extracted/transcripts/
+  derived/photos/
+  derived/thumbnails/
+  derived/video/
+  derived/shorts/
+  derived/reels/
+  derived/social/
+  exports/youtube/
+  exports/facebook/
+  exports/instagram/
+  exports/tiktok/
+  exports/pinterest/
+  exports/website/
+  exports/google-business/
+  manifests/
+  archive/
 ```
 
-Do not store a public URL as the permanent source identity. Store provider, bucket, object key, checksum/fingerprint, and generated access URL separately.
+Only `raw/*` write behavior is implemented in Build 241. Other prefixes are deterministic future-output destinations.
 
-## Future R2 controls
+## Source identity
 
-Before enabling private transfers or upload workflows, require:
+Do not use a public URL as permanent identity. Persist:
 
-- short-lived method-specific presigned URLs;
-- Content-Type and size restrictions;
-- browser CORS configured for the exact production origins;
-- source checksum/fingerprint capture;
-- quarantine/scan state for new uploads;
-- explicit retention class, legal hold, and delete-review state;
-- failure/retry/error audit rows;
-- never expose account credentials to browser JavaScript.
+- storage provider;
+- bucket binding/alias;
+- object key;
+- project/file IDs;
+- fingerprint/checksum state;
+- MIME/size/ETag;
+- original filename as display metadata;
+- governance state.
 
-Cloudflare documents that presigned URLs grant time-limited permission to a specific object/action, and browser use also requires CORS configuration. See the official links in `README.md`.
+## Immutability
 
-## Integrity posture
+Completed `raw/*` objects are never overwritten by CAIP. Abort is allowed only for unfinished multipart sessions. Corrections create a new raw object; transformations create a new proxy/derived/export object.
 
-CAIP detects a changing source fingerprint on refresh but does not overwrite history or “repair” a source object. Any future copy/derivative must carry `derived_from_asset_id`, recipe version, operator/provider, timestamp, and immutable output fingerprint.
+## Public/private boundary
 
-## Build 202 secure review and derivative namespace policy
+`CAIP_PRIVATE_MEDIA_BUCKET` must remain private. `PRODUCT_MEDIA_BUCKET` is the existing public/approved path. A promotion request snapshots privacy/consent/rights but creates no public object in Build 241.
 
-Build 202 does not create derivative objects. It reserves the design for a later provider:
+## Upload transports
 
-```text
-caip/{creative_project_key}/derivatives/{recipe_key}/{derivative_key}/...
-```
+- **Current:** authenticated same-origin Worker-streamed multipart parts, default 32 MiB, two in parallel.
+- **Future preferred:** short-lived direct S3-presigned multipart so large binary data travels browser→R2. This needs a separate signing/CORS/credential implementation and is not active in Build 241.
 
-No later adapter may write into `products/`, `creations/`, `social/`, or existing source paths. Source and output namespaces must remain distinct, with a generated output checksum and a source-fingerprint binding.
-
-Internal review uses a same-origin Pages/Workers proxy against the existing bound bucket. The proxy serves bytes only after an authenticated administrator and hash-verified grant pass. It must not redirect to a public object URL, enable permissive CORS, cache the response, or create a public alias.
-
-This design is deliberately different from an S3-style presigned URL because the current project does not have a configured S3 signing credential service. A future direct-presign adapter must be separately documented, secret-managed, audited, and expiry-tested before replacement.
+See `16_Private_Raw_Media_Intake.md` for full behavior and operator steps.

@@ -1,39 +1,57 @@
-# 05 — Governance, Rights, Privacy, and Claims
+# 05 — CAIP Governance, Rights, Privacy, and Consent
 
-## Rights ladder
+## Default rule
 
-| State | Meaning | CAIP action |
-|---|---|---|
-| `blocked` | Source cannot be used in CAIP/public outputs | Cannot be recommended for public use; retained only as an internal reference if source exists |
-| `internal_only` | Useful for internal planning but not public release | Can support private planning, never public candidates |
-| `needs_review` | Source/rights are incomplete or not yet approved | Visible for review, not a public-use pass |
-| `public_allowed` | Source record says public use is allowed and owner has preserved/confirmed it in CAIP | Still requires destination-specific approval in Content Studio/Release Board |
+New CAIP raw project media is private and needs review unless the operator deliberately supplies stricter/verified states. Uploading a file proves possession of bytes; it does not prove copyright, consent, claim accuracy, or permission to publish.
 
-CAIP cannot move an asset from `needs_review` to `public_allowed` unless source safety is already `public_allowed`. It cannot override source `blocked`.
+## Build 241 states
 
-## Privacy rules
+### Privacy
 
-- Future detailing/client work must have an explicit separate consent source. A product-level internal review flag is not customer/media consent.
-- Never infer public permission from a person appearing in media, a public URL, an email, a prior post, or an uploaded file name.
-- Avoid collecting facial/biometric/personality analysis in CAIP. Future vision providers must be configured to minimize data and have a clear review/retention basis.
-- Do not send private source URLs or client media to an external provider until a specific adapter, access control, privacy review, and contract exist.
+- `private`
+- `internal_review`
+- `public_candidate`
+- `public_approved`
+- `blocked`
 
-## Claims governance
+### Consent
 
-A statement can be used publicly only when it is factual, source-backed, reviewed, visible on the eventual page/output, and consistent with the actual selected media. CAIP does not convert a product description into proof of performance, material purity, medical claim, craftsmanship grade, value, availability, delivery, stock, or warranty.
+- `not_applicable`
+- `unknown`
+- `internal_only`
+- `public_allowed`
+- `revoked`
+- `blocked`
 
-## AI-generated or altered media
+### Rights
 
-Future CAIP provider adapters must mark generated/meaningfully altered visual or audio outputs, preserve original/derivative lineage, and route disclosure obligations through channel-specific policies. YouTube’s current disclosure guidance is listed in `README.md`; CAIP must never hide an altered-media flag in a provider payload.
+- `needs_review`
+- `internal_only`
+- `public_allowed`
+- `blocked`
 
-## Audit and change expectations
+`public_approved` privacy requires `public_allowed` rights and either `public_allowed` or `not_applicable` consent.
 
-Any rights change, evidence approval/rejection, segment approval, policy override, provider run, render request, public release handoff, or deletion/retention action must produce an actor, timestamp, reason/evidence, before/after meaningful state, and correlation/project ID.
+## Storage privacy
 
-## Build 202 operational safeguards
+Raw media in `CAIP_PRIVATE_MEDIA_BUCKET` has no public URL. A secure-review grant is an authenticated, time/view-limited internal access mechanism; it does not change the object's public status.
 
-Technical probe success does not create consent, public rights, or a content claim. A derivative plan may be created internally for a non-blocked source, but a public destination remains forbidden unless upstream source safety and consent allow it.
+## Immutable originals
 
-Secure review grants are classified as internal operational controls. They must be user-bound, time-limited, revocable, no-store, same-origin, and hash-only at rest. Raw tokens, R2 credentials, provider secrets, signed provider manifests, customer data, and privacy-sensitive labels must never be written to public static files, URL logs, or D1 event details.
+A completed raw object cannot be deleted/overwritten through the Build 241 intake control. If a file becomes sensitive, revoked, or blocked, downstream selection/promotion is blocked and references may be archived/superseded according to policy; destructive raw-retention tooling requires a later explicit retention/legal design.
 
-A later visual/AI provider must attach: policy version, prompt/model/provider version, evidence links, cost, retry record, data destination, retention terms, output disclosure, and human review state. It must never elevate an unverified asset into factual or public status.
+## Public promotion
+
+A Build 241 promotion request:
+
+1. requires a completed private CAIP asset;
+2. rejects blocked/revoked media;
+3. snapshots current privacy/consent/rights state;
+4. starts `needs_review`;
+5. creates **no public copy and no public URL**.
+
+A future promotion executor must re-check current governance at execution time, not rely only on the older snapshot.
+
+## Personal information minimization
+
+Generated R2 paths use project/file IDs instead of names. Original filenames remain metadata and may still contain personal information; operators should avoid unnecessary personal data in filenames and evidence. Never place credentials, secret tokens, unnecessary customer details, or private health information into media metadata/evidence.

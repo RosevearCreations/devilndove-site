@@ -1,56 +1,59 @@
-# 04 — Project Ingestion Pipeline
+# 04 — CAIP Project Ingestion Pipeline
 
-## Build 201 live pipeline
+## Two valid ingestion paths
+
+### A. Existing media references
 
 ```text
-Approved/published product
-  → Content Studio source-linked package
-  → CAIP sync (automatic on create/approval/media review; manual from CAIP console)
-  → Creative project upsert
-  → Source reference upsert
-  → Metadata-only deterministic analysis
-  → Reuse candidate preparation
-  → Source-fact evidence and story-spine refresh
-  → Policy/readiness refresh
-  → Run/event history + exportable manifest
+Product / Content Studio media
+  → synchronize source identity/fingerprint
+  → CAIP asset reference
+  → rights/evidence/story review
 ```
 
-## Step-by-step behaviour
+CAIP does not copy/reorder/delete these existing source objects.
 
-1. Product approval triggers or refreshes the existing Content Studio package.
-2. Build 201 calls CAIP sync as a best-effort additive companion. Content Studio success is not undone if CAIP has an error.
-3. CAIP upserts the creative-project record from the Content Studio identity and snapshot.
-4. Each Content Studio source-media row becomes a CAIP canonical asset reference.
-5. Existing CAIP manual restrictions/notes/locks are preserved; blocked source safety is always honoured.
-6. CAIP calculates deterministic scores from recorded order, featured/selected state, media type, dimensions/role/merchandising data when available, and source safety metadata.
-7. CAIP recommends likely roles, but no recommendation is marked accepted automatically.
-8. CAIP inserts/refreshes source-fact evidence from existing product/content fields.
-9. CAIP refreshes an editable story spine. Locked editorial wording remains intact.
-10. CAIP refreshes policy signals and stores a run/event record.
+### B. Build 241 private raw media
 
-## Future pipeline stages
+```text
+Creative Project
+  → select/drop local image/video/audio batch
+  → D1 creates upload session + file + part records
+  → R2 multipart initiate
+  → upload bounded parts + persist ETags
+  → retry/resume incomplete parts
+  → R2 complete + HEAD verification
+  → internal-only media_assets + creative_assets record
+  → technical observation
+  → planned metadata/thumbnail/proxy/frame/audio/transcript jobs
+  → evidence/story selection
+```
 
-| Stage | Target capability | Required before enablement |
-|---|---|---|
-| Technical extraction | EXIF/media probe, duration, resolution, audio presence | Verified worker/provider, private source access, retry/cost guardrails |
-| Semantic analysis | object/scene/transcript suggestions | Provider contract, evidence model, human-review policy, privacy review |
-| Derivative generation | WebP/AVIF/proxies/contact sheets | immutable derivative recipe, rollback, storage budget, source preservation |
-| Story enrichment | draft story variants from confirmed evidence | source citation rendering, locked-copy behavior, no unsupported claims |
-| Render planning | timeline/shot list | approved asset list and output constraints |
-| Render execution | MP4/thumbnail generation | signed inputs, job orchestration, output validation, cost/rate limits |
-| Platform preparation | per-channel metadata packs | policy validator, owner approval, account permissions |
-| Publishing | YouTube/Meta/TikTok/GBP actions | preview, OAuth, final owner confirmation, audit and rollback plan |
+## Intake facts captured before bytes move
 
-## Failure contract
+- Creative Project;
+- original filename and MIME type;
+- file size;
+- last modified/capture date when available;
+- media role;
+- upload device;
+- privacy/consent/rights defaults;
+- file fingerprint;
+- generated object key;
+- part size/count.
 
-An ingestion failure must leave existing source media, product records, Content Studio deliverables, and public releases untouched. CAIP records a failure/run event and offers a retry; it never substitutes a fallback image or makes an output look complete.
+## Recovery
 
-## Build 202 operational branch
+Completed part numbers and ETags are server-side/D1 state. A page refresh or network loss does not intentionally restart successful parts. After the browser fully closes, the owner may need to reselect the same local file because websites cannot silently regain local-file access.
 
-After the reference-only ingestion sync, a reviewer may take one of three non-destructive actions:
+## Duplicate warning
 
-1. **Probe** — record catalog metadata and optional R2 `head()` metadata for the linked object.
-2. **Plan** — create a deterministic immutable derivative recipe/plan for a chosen CAIP asset.
-3. **Review securely** — issue a short-lived, same-administrator proxy grant for a bound R2 object.
+Build 241 warns when an uploaded file already exists with the same metadata fingerprint and byte size. It does not automatically discard the new evidence.
 
-All three actions are independent from Content Studio selection and Release Board publication. A failure in any action must be visible in CAIP history but must not roll back product approval, Content Studio archive records, source-media rows, or existing public releases.
+## Processing honesty
+
+Processing jobs begin `planned` with provider `not_configured`. The presence of a job record means only that CAIP knows what should happen next. It does not mean a proxy, transcript, extracted frame, or derivative exists.
+
+## Public handoff
+
+A completed private asset can enter a reviewed public-promotion request if it is not blocked/revoked. The request itself never creates or publishes public media. Public delivery stays with Release Board/provider workflows.
