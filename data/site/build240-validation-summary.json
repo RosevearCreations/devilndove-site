@@ -1,0 +1,43 @@
+{
+  "build_label": "Build 240",
+  "status": "ready_for_deployed_evidence",
+  "local_checks": {
+    "operational_continuity_regression": "pass",
+    "retained_build_230_235_regressions": "pass",
+    "retained_build_239_public_visual_static_regression": "pass",
+    "public_page_audit": {
+      "status": "pass",
+      "pages": 36,
+      "warnings": 0,
+      "failures": 0
+    },
+    "asset_reference_audit": {
+      "status": "pass",
+      "references": 126,
+      "missing": 0
+    },
+    "predeploy_sanity": {
+      "status": "pass",
+      "pages": 109,
+      "issues": 0
+    },
+    "deployment_preflight": {
+      "status": "ready",
+      "blockers": 0,
+      "warnings": 0
+    },
+    "dark_theme_regression": "pass",
+    "final_blocker_check": "pass",
+    "numbered_current_migration_identical": true,
+    "startup_gate_count": 45,
+    "operational_workstream_count": 20
+  },
+  "not_proven_locally": [
+    "production Cloudflare/D1/R2 behavior",
+    "payment/provider exact-once results",
+    "transactional email delivery",
+    "live indexing or local ranking",
+    "physical packaging, print, wrap or laser acceptance",
+    "new live browser navigation in this restricted container"
+  ]
+}
