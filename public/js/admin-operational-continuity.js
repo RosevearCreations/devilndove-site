@@ -1,4 +1,4 @@
-// Build 240 — mobile-safe Operational Continuity UI with explicit degraded fallback.
+// Build 241 — mobile-safe Operational Continuity UI with CAIP workstream and explicit degraded fallback.
 (() => {
   const mount = document.getElementById('operationalContinuityMount');
   const fallback = document.getElementById('operationalStaticFallback');
@@ -49,7 +49,7 @@
         <button class="btn" type="submit">Save</button>
       </form>
     </article>`).join('');
-    return `<section class="operational-section"><div class="section-heading-row"><div><h2>Twenty operational workstreams</h2><p class="small">Two are code-complete in this build; the others are ready for controlled live or operator evidence.</p></div><span class="status-pill">${rows('workstreams').length} rows</span></div><div class="operational-workstream-grid">${body}</div></section>`;
+    return `<section class="operational-section"><div class="section-heading-row"><div><h2>Twenty-one operational workstreams</h2><p class="small">Build 241 adds CAIP private-media intake to the retained continuity workstreams; live/provider/physical evidence remains explicitly review-driven.</p></div><span class="status-pill">${rows('workstreams').length} rows</span></div><div class="operational-workstream-grid">${body}</div></section>`;
   }
   function evidence() {
     const caseRows = rows('evidence_cases');
@@ -87,7 +87,7 @@
       <details class="card"><summary>Customer support follow-up</summary>${table(['Status','Channel','Summary','Next action','Follow-up'],support,'No support interactions yet.')}</details>
       <details class="card"><summary>Accounting close</summary>${table(['Period','Item','Status','Owner','Blocker'],closeRows,'No close checklist rows yet.')}</details>
       <details class="card"><summary>Local SEO observations</summary>${table(['Date','Page','Location','Query','Impressions','Clicks','Position'],seo,'No SEO observation snapshots yet.')}</details>
-      <details class="card"><summary>Public-page audits</summary>${table(['Page','Status','H1','Missing alt','Missing assets','Mobile overflow'],audits,'Run and import the Build 240 public-page audit.')}</details>
+      <details class="card"><summary>Public-page audits</summary>${table(['Page','Status','H1','Missing alt','Missing assets','Mobile overflow'],audits,'Run and import the Build 241 public-page audit.')}</details>
     </section>`;
   }
   function mobileCards() {
