@@ -1,3 +1,4 @@
+import { resolveCaipBucket } from './caipMediaIntake.js';
 // Build 202 — CAIP media verification, safe derivative planning, and secure review helpers.
 // This module is deliberately provider-neutral. It can inspect catalog/R2 object metadata and
 // plan immutable derivative work, but it never copies, transforms, publishes, or deletes source media.
@@ -159,99 +160,15 @@ function safeHeadSummary(head = {}) {
 }
 
 export async function ensureCreativeAssetOperationsSchema(db) {
-  const statements = [
-    `CREATE TABLE IF NOT EXISTS creative_asset_probe_jobs (
-      creative_asset_probe_job_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_project_id INTEGER NOT NULL, creative_asset_id INTEGER NOT NULL,
-      job_key TEXT NOT NULL UNIQUE, probe_mode TEXT NOT NULL DEFAULT 'metadata_r2_head',
-      job_status TEXT NOT NULL DEFAULT 'queued', source_snapshot_fingerprint TEXT,
-      attempt_count INTEGER NOT NULL DEFAULT 0, max_attempts INTEGER NOT NULL DEFAULT 3,
-      input_summary_json TEXT NOT NULL DEFAULT '{}', output_summary_json TEXT NOT NULL DEFAULT '{}', error_text TEXT,
-      requested_by_user_id INTEGER, started_at TEXT, completed_at TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_asset_technical_observations (
-      creative_asset_technical_observation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_project_id INTEGER NOT NULL, creative_asset_id INTEGER NOT NULL,
-      observation_key TEXT NOT NULL, creative_asset_probe_job_id INTEGER,
-      source_snapshot_fingerprint TEXT, storage_provider TEXT, bucket_name TEXT, object_key TEXT,
-      observed_public_url TEXT, mime_type TEXT, file_size_bytes INTEGER, etag TEXT, uploaded_at TEXT,
-      width_px INTEGER, height_px INTEGER, orientation TEXT, duration_seconds REAL, codec TEXT,
-      probe_status TEXT NOT NULL DEFAULT 'metadata_only', probe_scope TEXT NOT NULL DEFAULT 'catalog_metadata_only',
-      evidence_json TEXT NOT NULL DEFAULT '{}', observed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(creative_asset_id, observation_key)
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_derivative_recipes (
-      creative_derivative_recipe_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_project_id INTEGER NOT NULL, creative_asset_id INTEGER NOT NULL,
-      recipe_key TEXT NOT NULL, recipe_name TEXT NOT NULL, output_role TEXT NOT NULL,
-      output_format TEXT NOT NULL, target_width_px INTEGER, target_height_px INTEGER, aspect_ratio TEXT,
-      transformation_json TEXT NOT NULL DEFAULT '{}', source_policy_json TEXT NOT NULL DEFAULT '{}', recipe_hash TEXT NOT NULL,
-      recipe_status TEXT NOT NULL DEFAULT 'draft', is_immutable INTEGER NOT NULL DEFAULT 1,
-      approved_by_user_id INTEGER, approved_at TEXT, retired_by_user_id INTEGER, retired_at TEXT,
-      created_by_user_id INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(creative_project_id, recipe_key)
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_asset_derivatives (
-      creative_asset_derivative_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_project_id INTEGER NOT NULL, creative_asset_id INTEGER NOT NULL,
-      creative_derivative_recipe_id INTEGER NOT NULL, derivative_key TEXT NOT NULL UNIQUE,
-      derivative_status TEXT NOT NULL DEFAULT 'planned', source_snapshot_fingerprint TEXT,
-      output_storage_provider TEXT, output_bucket_name TEXT, output_object_key TEXT, output_url TEXT,
-      output_mime_type TEXT, output_file_size_bytes INTEGER, checksum_algorithm TEXT, output_checksum TEXT,
-      verification_status TEXT NOT NULL DEFAULT 'not_created', verification_evidence_json TEXT NOT NULL DEFAULT '{}',
-      verified_at TEXT, created_by_user_id INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_asset_access_grants (
-      creative_asset_access_grant_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_project_id INTEGER NOT NULL, creative_asset_id INTEGER NOT NULL,
-      grant_key TEXT NOT NULL UNIQUE, token_hash TEXT NOT NULL UNIQUE, access_scope TEXT NOT NULL DEFAULT 'admin_authenticated_review_proxy',
-      bound_user_id INTEGER, expires_at TEXT NOT NULL, max_access_count INTEGER NOT NULL DEFAULT 25, access_count INTEGER NOT NULL DEFAULT 0,
-      revoked_at TEXT, revoked_by_user_id INTEGER, last_accessed_at TEXT,
-      source_snapshot_fingerprint TEXT, created_by_user_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_asset_access_audit (
-      creative_asset_access_audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_asset_access_grant_id INTEGER, event_type TEXT NOT NULL, actor_user_id INTEGER,
-      outcome TEXT NOT NULL DEFAULT 'recorded', details_json TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_provider_profiles (
-      creative_provider_profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      provider_key TEXT NOT NULL UNIQUE, display_name TEXT NOT NULL, capability_key TEXT NOT NULL,
-      lifecycle_status TEXT NOT NULL DEFAULT 'disabled', endpoint_policy TEXT NOT NULL DEFAULT 'not_configured',
-      config_redacted_json TEXT NOT NULL DEFAULT '{}', consent_required INTEGER NOT NULL DEFAULT 1,
-      default_budget_cap_cents INTEGER NOT NULL DEFAULT 0, enabled_at TEXT, disabled_at TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS creative_execution_budget_controls (
-      creative_execution_budget_control_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      creative_project_id INTEGER, capability_key TEXT NOT NULL, currency_code TEXT NOT NULL DEFAULT 'CAD',
-      per_run_cap_cents INTEGER NOT NULL DEFAULT 0, monthly_cap_cents INTEGER NOT NULL DEFAULT 0,
-      policy_status TEXT NOT NULL DEFAULT 'disabled', notes TEXT,
-      created_by_user_id INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(creative_project_id, capability_key)
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_probe_jobs_asset ON creative_asset_probe_jobs(creative_project_id, creative_asset_id, job_status, created_at DESC)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_observations_asset ON creative_asset_technical_observations(creative_project_id, creative_asset_id, observed_at DESC)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_recipes_asset ON creative_derivative_recipes(creative_project_id, creative_asset_id, recipe_status, created_at DESC)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_derivatives_asset ON creative_asset_derivatives(creative_project_id, creative_asset_id, derivative_status, created_at DESC)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_access_grants_asset ON creative_asset_access_grants(creative_project_id, creative_asset_id, expires_at, revoked_at)`,
-    `CREATE INDEX IF NOT EXISTS idx_creative_access_audit_grant ON creative_asset_access_audit(creative_asset_access_grant_id, created_at DESC)`
-  ];
-  for (const statement of statements) await db.prepare(statement).run();
-  const defaults = [
-    ['r2_metadata_probe', 'Bound R2 metadata probe', 'technical_probe'],
-    ['derivative_renderer', 'Derivative renderer adapter', 'render'],
-    ['thumbnail_builder', 'Thumbnail builder adapter', 'thumbnail'],
-    ['social_export_adapter', 'Social export adapter', 'export']
-  ];
-  for (const [key, label, capability] of defaults) {
-    await db.prepare(`INSERT INTO creative_provider_profiles (
-      provider_key, display_name, capability_key, lifecycle_status, endpoint_policy, config_redacted_json, consent_required, default_budget_cap_cents, created_at, updated_at
-    ) VALUES (?, ?, ?, 'disabled', 'not_configured', '{}', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    ON CONFLICT(provider_key) DO NOTHING`).bind(key, label, capability).run();
+  // Build 241: schema is migration-owned. Runtime requests verify; they never create tables, indexes, or provider rows.
+  try {
+    await db.prepare(`SELECT creative_asset_probe_job_id FROM creative_asset_probe_jobs LIMIT 1`).all();
+    await db.prepare(`SELECT creative_asset_technical_observation_id FROM creative_asset_technical_observations LIMIT 1`).all();
+    await db.prepare(`SELECT creative_derivative_recipe_id FROM creative_derivative_recipes LIMIT 1`).all();
+    await db.prepare(`SELECT creative_asset_access_grant_id FROM creative_asset_access_grants LIMIT 1`).all();
+    await db.prepare(`SELECT creative_provider_profile_id FROM creative_provider_profiles LIMIT 1`).all();
+  } catch {
+    throw new Error('CAIP media-operations schema is not installed. Back up D1 and apply the current migration chain through Build 241 before using probes, derivative plans, or secure review.');
   }
 }
 
@@ -276,7 +193,7 @@ export async function probeCreativeAsset(db, env, creativeProjectId, creativeAss
   let probeStatus = 'metadata_only';
   let probeScope = 'catalog_metadata_only';
   let errorText = null;
-  const bucket = env?.PRODUCT_MEDIA_BUCKET || env?.MEDIA_BUCKET || env?.R2_PRODUCT_MEDIA;
+  const bucket = resolveCaipBucket(env, asset.source_storage_provider, asset.source_bucket_name);
   try {
     if (text(asset.source_object_key) && bucket && typeof bucket.head === 'function') {
       const head = await bucket.head(asset.source_object_key);
