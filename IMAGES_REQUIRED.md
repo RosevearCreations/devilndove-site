@@ -1,3 +1,5 @@
+> Build 237 note: the mapped placeholder asset paths now resolve to concrete real-image files under `/assets/real-media/`, `/assets/images/site/`, or photo-backed SVG wrappers. These remain representative fallbacks until each route or product is replaced with item-specific approved photography.
+
 # Devil n Dove — Images Required
 
 ## Build 235 visual-placeholder result

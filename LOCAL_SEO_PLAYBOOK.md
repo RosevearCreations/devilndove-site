@@ -76,3 +76,11 @@ Packaging Studio is an authenticated admin tool and must remain `noindex,nofollo
 Build 222 adds admin-only Packaging and Startup routes, so they remain `noindex,nofollow` and are not added to the public sitemap. The public HTML audit continues to require one H1, a distinctive title, useful description and canonical URL on every indexable page. Packaging templates, scents and internal projects must not become thin public pages merely to create more location or product keywords. Public product structured data must use the same visible price, availability, product identity and images shown to buyers.
 
 First-page local placement cannot be guaranteed. Continue improving actual relevance, complete and consistent business information, useful local/product content, customer reviews, links and prominence while avoiding unsupported town/service claims.
+
+## Build 239 image and mobile-search pass
+
+- Route-specific images now sit beside relevant page copy on the most important public service and shopping pages.
+- Open Graph, Twitter and parseable page structured-data images use crawlable `/assets/` URLs instead of a generic logo where a relevant page image is available.
+- Desktop and mobile render the same meaningful images and alternative text; media stacks without document-level horizontal overflow.
+- Remote item images retain honest, visibly labelled local representative fallbacks rather than leaving broken cards.
+- Direction verified against Google Search Central image SEO, mobile-first indexing, title-link and structured-data image guidance during the Build 239 pass.

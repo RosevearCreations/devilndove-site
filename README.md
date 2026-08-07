@@ -1,4 +1,4 @@
-# Devil n Dove — Build 235 Entry Point
+# Devil n Dove — Build 239 Entry Point
 
 Devil n Dove is a Cloudflare Pages/D1 application for catalog, inventory, orders, accounting, packaging, creative-process evidence, content preparation, local SEO operations and controlled launch readiness.
 
@@ -16,17 +16,18 @@ Devil n Dove is a Cloudflare Pages/D1 application for catalog, inventory, orders
 - Image Manifest: `/admin/image-manifest/`
 - Product, inventory, order and accounting authorities remain in their existing admin centres.
 
-## Build 235 summary
+## Build 239 summary
 
-Build 235 makes Creative Automation more operational without creating a second source of truth. The server computes readiness for seven stages from existing specialist records, the browser surfaces blocked/overdue/due-soon/unassigned work, and an authenticated project can be exported as JSON or accessible print-ready HTML evidence. Publication counting now uses `content_status`. The layout is responsive, the admin page remains noindex with one H1, and shell v16 refreshes the changed assets.
+Build 239 completes a real desktop/mobile Chromium audit across the 18 most image-heavy public routes, adds route-specific hero and social-preview images, and introduces seven honest local representative fallbacks for R2 item photos. Public placeholder wording was replaced with final customer-facing copy, contact/about content was finished, and image-heavy layouts were rechecked for mobile stacking, one-H1 structure, alt text and document-level overflow.
 
-Build 235 is code-only. `database_build234_packaging_templates_creative_cleanup.sql` and the byte-identical `database_upgrade_current_pass.sql` remain the current D1 boundary. Do not apply both.
+Build 239 is code-and-assets only. `database_build234_packaging_templates_creative_cleanup.sql` and the byte-identical `database_upgrade_current_pass.sql` remain the current D1 boundary. Do not apply both.
 
 Historical Build Markdown is under `docs/archive/build-history/`; it is traceability evidence, not current direction.
 
 ## Local validation
 
 ```bash
+python3 scripts/build239_public_visual_test.py
 node scripts/build235_creative_readiness_test.mjs
 node scripts/build234_packaging_creative_test.mjs
 python3 scripts/deployment_preflight_static_check.py

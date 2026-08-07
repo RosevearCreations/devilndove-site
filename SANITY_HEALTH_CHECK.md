@@ -1,4 +1,6 @@
-Build 236 summary: Packaging keeps one whole-business system, the soap preview is visually closer to the approved polished label, and the most visible placeholder SVGs now render photo-backed wrappers from repository media while preserving stable paths. Build 236 remains code-only; live provider, physical packaging and item-specific product-photo evidence are still required.
+Build 239 summary: public imagery now uses route-specific crawlable assets, remote item photos have honest local representative fallbacks, the most image-heavy pages have been browser-reviewed at desktop/mobile sizes, and Build 236–238 release records are archived. Build 239 remains code-and-assets only; live Functions/provider and physical production evidence remain open.
+
+Build 237 summary: Packaging keeps one whole-business system, the soap preview is visually closer to the approved polished label, and the most visible placeholder SVGs now render photo-backed wrappers from repository media while preserving stable paths. Build 237 remains code-only; live provider, physical packaging and item-specific product-photo evidence are still required.
 
 # Devil n Dove Sanity and Health Check — Build 235
 

@@ -1,6 +1,37 @@
-# Devil n Dove Project Status and Roadmap — Build 236
+# Devil n Dove Project Status and Roadmap — Build 239
 
-This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 236 work, launch position, gaps and ordered next actions.
+This is the second canonical current-status file. `AI_HANDOFF.md` owns architecture/deployment; this file records Build 239 work, launch position, gaps and ordered next actions.
+
+
+
+
+## Build 239 completed work
+
+1. Ran a real headless-Chromium visual review on desktop and mobile for home, about, collections, contact, creations, custom candle, custom gifts, custom soap, events, gallery, gift cards, handmade jewelry, laser engraving, pickup, polymer clay, socials, shop and vintage pages.
+2. Added route-specific hero imagery and more product/category-specific photo composites under `/assets/images/site/`.
+3. Added seven local item-photo fallbacks under `/assets/products/fallbacks/`, with honest representative-preview badges when a remote R2 item photo cannot load.
+4. Replaced visible placeholder language and unfinished contact/about instructions with final customer-facing copy.
+5. Updated relevant Open Graph, Twitter and JSON-LD image references to route-specific crawlable assets.
+6. Completed responsive CSS checks for 1440×1000 and 390×844 viewports; hero and media bands stack without horizontal page overflow.
+7. Rechecked all repository `/assets/...` references and retained one H1 per audited public page.
+8. Archived superseded Build 236–238 release records while retaining the two canonical cross-project documents.
+
+## Build 238 completed work
+
+1. Performed a page-by-page public visual audit across the most image-heavy public routes and replaced representative placeholder usage with route-specific real-image fallbacks.
+2. Added new route-specific representative assets under `/assets/images/site/` so public pages can show more item-specific visuals while keeping the existing SEO-friendly route structure.
+3. Replaced the remaining public editorial/placeholder imagery on gift-card, jewelry and key service pages with concrete images from the project media library.
+4. Completed a targeted mobile/desktop CSS drift pass for image-heavy bands and hero media, standardizing framing and preventing oversized images on small screens.
+5. Re-ran asset-reference checks so every `/assets/...` path used by the application resolves in the build.
+6. Updated the release trail and created `PUBLIC_VISUAL_AUDIT_BUILD238.md` while keeping `AI_HANDOFF.md` and this file as the two canonical entry documents.
+
+## Build 237 completed work
+
+1. Filled the remaining missing image paths used by the image manifest, schema seeds and public pages so every mapped slot now resolves to a concrete asset.
+2. Added a reusable `/assets/images/site/` library of real-image fallback files generated from existing Devil n Dove media and approved packaging references.
+3. Added concrete photo-backed wrappers for previously missing `product-grid`, `engraving-detail` and `material-detail` visual assets.
+4. Preserved the earlier placeholder-path strategy so existing code, database rows and markdown references keep working without route-by-route rewiring.
+5. Updated the image requirements guide and release trail while keeping `AI_HANDOFF.md` and this file as the two authoritative project-entry markdown files.
 
 ## Build 236 completed work
 

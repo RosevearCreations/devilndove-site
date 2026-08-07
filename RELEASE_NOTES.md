@@ -1,3 +1,33 @@
+
+# Build 239 Release Notes
+
+- Completed a real desktop/mobile Chromium visual audit across the 18 most image-heavy public routes.
+- Added route-specific hero, Open Graph and structured-data images under `/assets/images/site/`.
+- Added seven honest local representative fallbacks for remote item photography under `/assets/products/fallbacks/`.
+- Replaced visible placeholder language and unfinished contact/about instructions with final public copy.
+- Added responsive hero/media CSS and representative-fallback badges.
+- Archived superseded Build 236–238 release records and refreshed the two canonical handoff documents.
+
+
+
+# Build 238 Release Notes
+
+- Completed a page-by-page public visual audit on the most image-heavy pages.
+- Replaced representative placeholder usage with route-specific real-image fallbacks on key public pages.
+- Added new representative route media under `/assets/images/site/`.
+- Completed a targeted mobile/desktop CSS drift pass for image-heavy sections.
+- Rechecked that all `/assets/...` references resolve in the build.
+
+
+
+# Build 237 Release Notes
+
+- Added real-image fallback files for the remaining missing image-manifest and schema-referenced site assets.
+- Added concrete wrappers for product-grid, engraving-detail and material-detail visual assets.
+- Extended the representative image library under `/assets/images/site/` while preserving existing placeholder asset paths.
+- Updated image requirements notes and the current release trail.
+
+
 # Build 236 Release Notes
 
 - Polished the reusable soap-ribbon SVG label preview so it better matches the approved Glacial Purple structure.
