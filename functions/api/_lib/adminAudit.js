@@ -120,28 +120,6 @@ export async function captureRuntimeIncident(env, request, payload = {}) {
   const db = getDb(env);
   if (!db) return false;
 
-  try {
-    await db.prepare(`
-      CREATE TABLE IF NOT EXISTS runtime_incidents (
-        runtime_incident_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        incident_scope TEXT,
-        incident_code TEXT,
-        severity TEXT DEFAULT 'warning',
-        endpoint_path TEXT,
-        request_method TEXT,
-        message TEXT,
-        details_json TEXT,
-        related_user_id INTEGER,
-        ip_address TEXT,
-        user_agent TEXT,
-        review_status TEXT DEFAULT 'open',
-        admin_note TEXT,
-        reviewed_by_user_id INTEGER,
-        reviewed_at TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )
-    `).run();
-  } catch {}
 
   try {
     await db.prepare(`
