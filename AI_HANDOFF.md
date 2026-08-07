@@ -1,185 +1,212 @@
-# Devil n Dove AI Handoff — Build 240
+# Devil n Dove AI Handoff — Build 241
 
-This is the first of two canonical current-status files. Read it first for architecture, authority, safety and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for completed work, risks, the twenty completed Build 240 foundations and the next twenty actions. Historical Build Markdown remains evidence only.
+This is the **first of two canonical current project files**. Read this file first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, risks and ordered next work. Historical Build Markdown is evidence only and lives under `docs/archive/build-history/`.
 
+## Build 241 in one paragraph
 
+Build 241 converts the supplied Rosie Dazzlers DAIP large-media concept into Devil n Dove's Creative Asset Intelligence Platform (CAIP). CAIP now accepts intentional raw Creative Project photos/video/audio into a dedicated **private** R2 binding, stores upload/governance/processing state in D1, resumes multipart uploads from recorded parts, creates internal-only immutable raw asset records, plans future proxy/frame/audio/transcript work without claiming a provider ran, and allows only a review request—not an automatic public copy—for promotion. Existing catalog/Content Studio source media remains reference-first and unchanged.
 
-## Build 240 outcome
+## Current system authorities
 
-1. Build 240 is the current D1 migration boundary and adds an Operational Continuity authority rather than another JSON-only planning list.
-2. `/admin/operational-continuity/` exposes twenty workstreams for evidence, idempotency, packaging reservation/formula/lock/prepress, provider/notification reconciliation, phone recovery, assets/media, support, accounting, controlled approvals, local SEO, page audits, fallbacks and mobile operations.
-3. The authenticated API performs bounded reads/writes, creates no request-time schema, audits admin actions, captures sanitized runtime incidents and rejects false success when the Build 240 schema is absent.
-4. The browser has one H1, `noindex,nofollow`, responsive phone/desktop layouts and a static twenty-workstream degraded fallback that labels all live status unknown and disables saving.
-5. Build 240 adds 22 tables, twenty workstream seeds, seven mobile cards, two fallback policies, 36 static public-page audit results and the 45th Startup gate.
-6. Packaging facts remain split correctly: projects/components/versions hold design facts; formula links point to verified source/version/checksum; reservations hold operational quantities; locks and prepress checks hold release evidence.
-7. Provider queue state is not publication/delivery proof. Observable provider IDs/URLs and notification attempt outcomes belong in the new reconciliation tables.
-8. Static public-page audit now passes 36 exposed pages with exactly one H1, title, description, canonical, crawlable internal links, descriptive image alternative text, resolvable local assets and JSON-LD.
-9. Google first-page placement is never guaranteed. Current direction remains people-first content, searcher language in titles/main headings/alt/link text, relevant images, complete Business Profile facts, and measured relevance/distance/prominence observations.
-10. Historical Build records remain under `docs/archive/build-history/`; `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the only cross-project authorities.
+| Concern | Authority |
+|---|---|
+| Product identity, public sellable facts | Product/catalog tables and admin Product Editor |
+| Inventory quantity/lots/movements | Existing inventory tables and operational movement authorities |
+| Orders/payments/refunds | Existing order/payment/refund authorities |
+| Packaging design/content/versions | Labeling & Packaging tables and `PACKAGING_STUDIO.md` |
+| Creative Project process/material/time evidence | Creative Process / Creative Automation specialist tables |
+| Creative media, rights, evidence, story selection | CAIP |
+| Private raw Creative Project media | Build 241 CAIP tables + private R2 object |
+| Deliverable package/output plan | Content Studio |
+| Publication approval/provider reconciliation | Content Release Board / Social Queue / provider-result records |
+| Launch gates | `startup_readiness_items` + history |
+| Operational evidence/idempotency/support/SEO continuity | Build 240 Operational Continuity tables |
+| Cross-project architecture/deployment | **This file** |
+| Current business status/next steps | **`PROJECT_STATUS_AND_ROADMAP.md`** |
 
-## Build 239 outcome
+Mutable business status belongs in D1 whenever a live table exists. JSON/Markdown can be reproducible fixtures, design authority or release evidence, but must not compete with D1 as a second mutable source of truth.
 
-1. Completed a real Chromium route-by-route visual audit at 1440×1000 desktop and 390×844 mobile across the 18 most image-heavy public routes.
-2. Added route-specific hero and social-preview images, intrinsic image dimensions, responsive 4:3 framing and mobile stacking without introducing additional H1 headings.
-3. Added local representative fallbacks for all seven R2 item-photo records. The original item image remains first choice; a visible “Representative preview” badge appears only when the remote item photo fails.
-4. Replaced public-facing placeholder language on contact, about, service, gallery, shop and gift pages with final customer-facing copy.
-5. Updated Open Graph, Twitter image and parseable page structured data to use relevant crawlable `/assets/` images instead of a generic logo where appropriate.
-6. Consolidated superseded Build 236–238 release records into `docs/archive/build-history/`. `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the two canonical current files.
-7. At the Build 239 release, no schema was added and Build 234 remained the boundary; Build 240 now supersedes that historical boundary.
-8. Live Cloudflare Functions, provider and physical-product evidence still require deployed-environment testing; local static-server API 404 responses are not treated as production failures.
+## Build 241 CAIP architecture
 
-## Build 235 outcome
+### Existing media path
 
-1. Creative Automation now calculates seven stage-readiness results on the server from the existing specialist authorities. Each stage returns explicit checks, expected facts, actual counts, correction guidance and whether an intentional Not applicable review is allowed.
-2. A human master review remains mandatory. Computed readiness can expose disagreement as `needs_source_evidence`; it cannot silently approve rights, costs, facts, publication or provider results.
-3. The master page now provides one responsive work queue prioritizing blocked, overdue, due-soon and unassigned workflows before ordinary active work.
-4. Each linked project can export an authenticated JSON evidence packet or an accessible print-ready HTML packet containing project/timeline/material, inventory, CAIP, content, review, publication, result and profitability evidence already stored in specialist tables.
-5. Publication readiness now reads the authoritative `content_status` field rather than the nonexistent `publication_status` field, preventing a real approved/published record from being counted as absent.
-6. The browser adds readiness checklists, eight operational metrics, safe authenticated Blob exports, retry/fallback copy and phone/desktop layouts. The admin route remains `noindex,nofollow` and has one H1.
-7. Build 235 was code-only. At that release the Build 234 numbered/current-pass migration was the schema boundary; Build 240 now supersedes it.
-8. Forty-seven superseded Build guides/validation files were moved from the repository root to `docs/archive/build-history/`. `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the only current cross-project authorities; specialist playbooks retain narrow authority.
-9. Release checks now understand the historical archive, and `scripts/build235_creative_readiness_test.mjs` proves source-readiness, queue ordering, publication counting, evidence export, responsive UI and the retained Build 234 schema boundary.
-10. Build 235 does not claim production/provider/physical success. Live Cloudflare, payment, concurrency, email, media-rights, printing/laser and paid/refund evidence remain Startup gates.
+Existing product/catalog/Content Studio media stays reference-first. CAIP may preserve source identity, fingerprint, rights state, technical observations, evidence and recommendations, but does not reorder, overwrite or delete those source records.
 
-## Retained Build 234 outcome
+### New raw-media path
 
-1. Labeling & Packaging is the only active packaging editor. The selected `packaging_templates` row now determines renderer and saved `package_type`; stale project data can no longer turn a soap template into a generic rectangle.
-2. The Glacial Purple soap renderer follows the owner-supplied visual: permanent Rosevear/Devil n Dove, website, Canadian-origin, small-batch, claim and weight elements; a botanical purple rose; centred product hierarchy; English/French panels; rear seal; and editable SVG text.
-3. Five packaging directions are checksum-registered: soap specification, PDF guide, master SVG, approved soap visual and wedding candle-top sample. `PACKAGING_REFERENCE_BASELINE.md` defines their scopes.
-4. Five system templates were added: 4-inch and 3.5-inch wedding candle tops, 3-inch general candle top, 4-inch round maker/coaster mark and 2×1.5-inch oval product label.
-5. Candle-top names/main wording, two dates, occasion, top/bottom arcs and artwork remain editable and centred. Users can change millimetre dimensions, shape, renderer profile, bleed/safe margin and save a D1 custom template for repeat work.
-6. SVG export embeds artwork data so a downloaded repeat-job master does not depend on a website-relative image path. PNG/WebP/JPG remain preview formats; printer/laser acceptance and physical proof remain required.
-7. Creative Automation exposes guarded permanent deletion for unused accidental project shells. It permits the automatic output blueprint and ordinary initial product link, preserves the real product, blocks meaningful timeline/inventory/evidence/content/cost/review work and requires `DELETE <project_key>`.
-8. Packaging Studio, Creative Automation, Creative Process and Startup Readiness execute no request-time `CREATE TABLE` or schema initializer. Schema/seed installation belongs to migrations, reducing Pages Worker CPU/memory pressure.
-9. Startup Readiness now has exactly 44 gates. `candle_top_template_proof` provides twelve detailed measurement, custom-template, export, laser/material proof, correction and archive steps.
-10. Build 234 adds migration `database_build234_packaging_templates_creative_cleanup.sql`, identical current-pass SQL and ledger key `build234_packaging_templates_creative_cleanup`. It upserts system templates, five reference records and all 44 canonical gate definitions without overwriting operator status/evidence.
-11. Generated text-free packaging art and prompts/checksums are documented in `GENERATED_VISUAL_ASSET_REGISTER.md`. It cannot supply formula, bilingual, legal, customer or product-proof facts.
-12. Admin navigation now presents one Labeling & Packaging entry; the old Soap Label route remains a compatibility pointer.
-13. Responsive preview CSS distinguishes wide soap wraps from round candle tops, pairs source references safely and stacks destructive controls on phones.
-14. Build 234 retains the Build 231 autosave, Build 232 archived-product removal and Build 233 bounded-login/session-retention repairs.
-15. Public SEO direction is unchanged: one H1 per exposed page, clear title/main-heading hierarchy, truthful local language, accurate structured data and rights-cleared media. Admin routes remain `noindex,nofollow`.
+```text
+Creative Project
+      ↓
+CAIP Private Raw Media Intake
+      ↓
+D1: session/file/part/governance state
+      +
+CAIP_PRIVATE_MEDIA_BUCKET: binary raw original
+      ↓
+verified internal-only CAIP asset
+      ↓
+planned proxy / thumbnail / frame / audio / transcript work
+      ↓
+CAIP evidence/story selection
+      ↓
+Content Studio / Release Board review
+      ↓
+rights + consent + privacy approval
+      ↓
+approved public media/provider
+```
 
-## Retained Build 233 outcome
+### R2 bindings
 
-1. Startup Readiness preserves all 42 Build 228 gates and adds `missing_launch_images` as a distinct Critical blocker. Exactly 43 gates are expected.
-2. The Startup browser rejects HTML, empty, malformed or incomplete API success responses and renders the full built-in 43-gate guide. It never turns a service failure into “No readiness items match these filters.” Browser-only changes are visibly Unsynced.
-3. `/admin/prelaunch/` shows the seven separate prelaunch/release stages. `PRELAUNCH_PROCESS_PLAYBOOKS.md` gives click-by-click tests, correction, evidence and pass rules.
-4. `/admin/creative-automation/` is the master Creative Automation Studio. It combines Creative Process, materials/cost, CAIP, Content Studio, channel approvals, Release Board and measure/repurpose stages without deleting specialist features or duplicating their source facts.
-5. Build 229 adds only `packaging_reference_sources`; existing Creative Process, packaging, inventory, CAIP, Content Studio, publication, social, catalog and analytics tables remain authoritative for their facts.
-6. New and changed admin layouts stack on mobile, contain table overflow, preserve touch targets and expose direct specialist/fallback paths.
-7. Deployment Preflight now blocks a current D1 migration containing explicit `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK`, and requires the numbered/current migration files to be identical.
-8. The exact supplied packaging specification, guide PDF and master SVG are retained with SHA-256 values and exposed in Labeling & Packaging; `PACKAGING_REFERENCE_BASELINE.md` documents their collective authority and dimensional conflict.
-9. Public SEO policy remains: one H1 per exposed page, clear titles/descriptions/canonical/visible facts, truthful local language and approved media. Admin routes are `noindex,nofollow`.
-10. `/admin/image-manifest/` is now the mutable visual-status authority. It seeds 20 requirements and stores owner, status, rights, public-use, final URL, alternative text, phone/desktop review and append-only history in D1.
-11. The manifest API rejects incomplete approvals, audits saves and records runtime incidents. Its browser fallback shows all 20 requirements as visibly Unsynced and read-only instead of implying an empty or complete result.
-12. Three responsive editorial illustrations now enrich the homepage, general handmade-jewelry guide and gift-card page. Prompts, intended roles, dimensions and hashes are preserved in `GENERATED_VISUAL_ASSET_REGISTER.md`.
-13. Generated art never satisfies a real-product, process, condition, packaging or local-business photo requirement and must not enter Product/Offer structured data or launch-product galleries.
-14. Changed public pages keep one H1, truthful editorial disclosure, intrinsic image dimensions and responsive phone/desktop sources; the manifest stacks safely with touch-sized actions.
-15. Product Draft autosave now carries an explicit autosave intent so create/update routes omit approval/content/social preparation and repetitive update/media audits while retaining deliberate Save/Update audits and automation.
-16. Unapproved products exit social automation before schema/settings inspection, and unchanged image rows are not rewritten on text-only autosaves.
-17. Autosave allows one request in flight, queues the newest edit, stores a browser recovery copy before the request and clears it only after the matching server save succeeds.
-18. Product reload, autosave and update use one safe response parser. A Cloudflare HTML/1102 page becomes a short retryable message; raw HTML/CSS and `JSON.parse` exceptions are never shown to the operator.
-19. `/api/admin/product-detail` now uses one core product read plus three bounded optional editor reads, performs no request-time schema introspection, returns at most seven images and identifies its JSON as `editor_compact_v1`.
-20. Build 231 remained code-only and established the current product load/autosave recovery baseline.
-21. `/api/admin/delete-product` no longer enumerates every D1 table and foreign key during each correction preflight; it checks a bounded registry of protected business/history relationships and returns `bounded_registry_v1`.
-22. Archive status alone does not block an unused product from permanent removal. Ordinary `product_media_change_audit` and product review rows are product-owned cleanup data; orders, customer, accounting, packaging, creative-project, recall and other retained history still block deletion.
-23. Reviewed inventory releases/physical returns, product-owned cleanup, preserved-media/soap-record detachment and final product deletion run in one D1 batch so a failure rolls the operation back together.
-24. Correction, table-row deletion and the Draft & Archive Cleanup centre all use the shared safe API parser; Cloudflare HTML and malformed responses cannot collapse into the unhelpful “Could not load product correction details” message.
-25. Build 232 was code-only. At that historical release, Build 230 was the current D1 boundary; Build 234 now supersedes the current-pass file.
-26. `/api/auth/login` validates its request before D1, uses the indexed normalized email lookup, omits request-time schema discovery and returns `auth_login_bounded_v1` after one user read plus one atomic session/last-login batch.
-27. Login no longer rereads the session it just created. The new token and timestamps are already authoritative inputs to the successful response.
-28. Normal GET `/api/auth/login` is binding-only and performs no D1 query; the older table/column diagnostic remains available only through the deliberate `?diagnostic=full` owner procedure.
-29. `/api/auth/me` now performs one indexed `session_token` lookup, returns only the fields the UI consumes and identifies the result as `auth_session_bounded_v1`. A temporary 5xx, Cloudflare 1102, offline or malformed response no longer clears browser credentials; only a real 401/403 authentication decision clears them, and degraded verification is visibly labelled.
-30. Build 233 remains code-only and adds a mocked two-operation login/query-budget, temporary-503 retention, real-401 clearing and safe-response regression.
-31. Pages Functions compile into one Worker, so the former 1.1 MB/897-row Amazon reference array and its top-level Maps affected unrelated routes. Build 233 keeps that private payload compressed by area and expands it only after an authenticated inventory request; login, session, product detail, autosave and product removal no longer allocate it during Worker startup.
+- `PRODUCT_MEDIA_BUCKET` — existing approved/public product/media path.
+- `CAIP_PRIVATE_MEDIA_BUCKET` — new Build 241 private raw-media binding. It must not have public `r2.dev` or a public custom domain enabled.
 
-## Data authority
+The private binding is intentionally commented in `wrangler.toml`; create/bind the real bucket in Cloudflare before binary intake can pass production Startup evidence.
 
-- Startup status/history: D1 `startup_readiness_items` and `startup_readiness_history` at `/admin/startup-readiness/`.
-- Startup instruction source: `STARTUP_ITEMS` in `functions/api/admin/startup-readiness.js`; generate `STARTUP_GO_LIVE_GUIDE.md`, sync the browser fallback, then sync the 44 definitions into the Build 234 migration. Runtime requests do not seed or create tables.
-- Creative project/process/material/output facts: existing Creative Process tables.
-- Media rights/evidence/intelligence: CAIP records and referenced source media; CAIP never invents consent.
-- Content packages/channel deliverables: Content Studio records.
-- Public release state/history: Content Release Board records.
-- Master creative ownership/stage reviews: three `creative_automation_*` tables only. Build 235 computes readiness from bounded reads of specialist authorities and writes no duplicate readiness facts.
-- Product/order/payment/refund/inventory/accounting facts: their existing D1 transaction/ledger records.
-- Packaging: `packaging_projects`, normalized soap rows, `packaging_components`, versions, exports and print tests; `PACKAGING_STUDIO.md` is the human specification.
-- Packaging sources: `packaging_reference_sources` and `PACKAGING_REFERENCE_BASELINE.md`; the adopted files remain unchanged at their registered repository paths.
-- Issued client documents: immutable `customer_documents.source_snapshot_json`; corrections use void/new document, never history rewriting.
-- Static templates/public read-only defaults may remain JSON. Mutable business status, evidence, money, stock, approvals and audit history belong in D1.
-- Image requirements/status/history: D1 `image_manifest_items` and `image_manifest_history`; `IMAGES_REQUIRED.md` is the human capture standard and `GENERATED_VISUAL_ASSET_REGISTER.md` is generated-asset provenance.
-- Operational continuity/workstream status: D1 `operational_workstreams`; live proof uses `production_evidence_cases` and append-only `production_evidence_events`.
-- Duplicate-sensitive operations: D1 `operation_idempotency_claims`; a duplicate key must return the existing safe reference rather than repeat the effect.
-- Packaging operational/release facts: D1 `packaging_inventory_reservations`, lines, `packaging_formula_source_links`, `packaging_release_locks` and `packaging_prepress_checks`.
-- Provider/message evidence: D1 `provider_result_reconciliations` and `notification_delivery_attempts`; queue state alone is not success.
-- Mobile/asset/media/support/close/SEO/fallback facts: the corresponding Build 240 tables; mutable status belongs in D1, not Markdown or static JSON.
+### Private object keys
 
-## Current operating routes
+Build 241 uses generated project/file IDs rather than customer/personal names:
 
-- `/admin/startup-readiness/` — 45 launch gates and D1 evidence, including distinct missing-image, candle-top-proof and Operational Continuity blockers.
-- `/admin/operational-continuity/` — twenty workstreams, production evidence, idempotency, packaging continuity, provider/message reconciliation, phone recovery, support/accounting/SEO queues and route fallbacks.
-- `/admin/image-manifest/` — 20 seeded static/dynamic image requirements, rights/public/device approvals, evidence and history.
-- `/admin/prelaunch/` — separate process map.
-- `/admin/deployment-preflight/`, `/admin/post-deploy-smoke-tests/`, `/admin/deploy-readiness/`, `/admin/go-live-execution/`, `/admin/live-ops-followthrough/` — standalone release stages.
-- `/admin/creative-automation/` — master creative workflow, computed readiness, priority work queue and authenticated project evidence exports.
-- `/admin/creative-process/`, `/admin/creative-assets/`, `/admin/content-studio/`, `/admin/content-publications/`, `/admin/social-publishing/` — specialist creative authorities retained.
-- `/admin/packaging-studio/` — whole-business soap/candle/round/general labels, reusable custom templates, packaging BOM/cost, previews, versions, embedded-artwork exports and print tests.
-- `/admin/customer-documents/` — invoices, receipts, packing slips, credit notes and refund confirmations.
-- `/admin/orders/`, `/admin/accounting/`, `/admin/inventory-operations/` — operational transaction authorities.
+```text
+projects/{creative_project_id}/raw/photos/{file_key}-{sanitized_filename}
+projects/{creative_project_id}/raw/video/{file_key}-{sanitized_filename}
+projects/{creative_project_id}/raw/audio/{file_key}-{sanitized_filename}
+```
 
-## Current database boundary — Build 240
+The original filename remains metadata. Completed `raw/*` originals are immutable through the intake control. Transformations must create new proxy/extracted/derived/export objects.
 
-Back up D1 and confirm prior ledger key `build234_packaging_templates_creative_cleanup`. Apply exactly one:
+### Current upload transport
 
-- `database_build240_operational_evidence_continuity.sql`
-- `database_upgrade_current_pass.sql` (byte-identical copy)
+Build 241 implements authenticated same-origin Worker-streamed R2 multipart uploads with:
 
-The Build 240 migration creates the operational continuity tables, seeds twenty workstreams, seven phone cards, two fallback policies, 36 static public-page audits and the 45th Startup definition, then records ledger key `build240_operational_evidence_continuity`. It contains no explicit `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK`. The same block is synchronized into `database_schema.sql`, `database_full_schema.sql` and `database_store_schema.sql` by `node scripts/sync-build240-aggregate-schema.mjs`.
+- 32 MiB default part size;
+- two-part conservative parallelism;
+- D1 part ranges/status/ETags/attempts;
+- interrupted upload recovery;
+- exact Content-Length validation;
+- 256 MiB maximum on the Worker-streamed fallback route;
+- automatic part-size growth when needed to stay within the 10,000-part R2 ceiling.
 
-After applying, confirm 20 active workstreams, 36 Build 240 page audits, 45 active Startup gates and one Build 240 ledger row. Deploy the complete package and hard refresh to service-worker shell v18. Runtime routes never create Build 240 schema.
+After a full browser close, the owner may need to reselect the same local file because a website cannot silently regain local-file access. Server/R2 part state remains available.
 
-## Retained Build 233 database boundary
+The **preferred future** architecture is short-lived direct browser→R2 S3 multipart authorization. That adapter is not implemented yet and must not be presented as live.
 
-Build 233 added no D1 table, column, seed or ledger row. At that historical release, its current-pass file was byte-identical to the numbered Build 230 migration. Build 234 has now replaced `database_upgrade_current_pass.sql`; use `database_build230_visual_image_manifest.sql` by its numbered name only when repairing an environment whose `build230_visual_image_manifest` ledger key is absent.
+### Processing boundary
 
-That Build 230 migration adds `image_manifest_items`, `image_manifest_history`, 20 active requirements, three generated-asset provenance rows and ledger key `build230_visual_image_manifest`. It preserves operator-editable evidence on repeat execution and contains no explicit SQL transaction statements. Do not add `BEGIN TRANSACTION` or `SAVEPOINT`; D1/Durable Object code must use `state.storage.transaction()` or `transactionSync()` when a JavaScript transaction is required.
+On verified private upload CAIP creates planned work such as metadata, thumbnail, proxy video, frame extraction, audio extraction and transcription. Provider key remains `not_configured` until a real adapter exists. A planned row is not generated media or AI analysis.
 
-At the Build 233 historical point, aggregate schemas ended with Build 230; Build 234 later superseded that point and Build 240 is now current. Older synchronizers intentionally stop so they cannot erase the current block.
+### Public-promotion boundary
 
-## Error/fallback rules
+Build 241 can create a `needs_review` promotion request that snapshots rights, consent and privacy. It creates no public object and no public URL. A future executor must re-check current governance immediately before any public copy/publish action.
 
-- An unavailable API is Blocked/Unavailable, never Passed.
-- Browser fallback may preserve instructions or a visibly unsynced draft; it cannot represent server evidence.
-- Payment, refund, publish, inventory, accounting, approval and document actions require an observable authoritative result.
-- Runtime incidents must be sanitized and include scope/code/severity plus non-secret request/user context.
-- Master creative failure must leave specialist workspaces reachable.
-- Startup failure must show all built-in gates and a retry path.
-- Image-manifest failure must show 20 read-only fallback requirements, an Unsynced warning and retry; saving is disabled and no fallback status is presented as approved.
-- Authentication credentials are cleared only after an explicit 401/403 decision or deliberate logout. A 5xx, Worker 1102, network/offline or malformed upstream response retains the existing session and reports degraded verification without claiming the server validated it.
-- Large optional reference datasets must not be allocated at module top level in Pages Functions. Keep the Amazon rows private, compressed and demand-loaded; do not move purchase/order identifiers into a publicly served JSON file.
+Detailed authority: `docs/creative-asset-intelligence-platform/16_Private_Raw_Media_Intake.md`.
 
-## SEO/local/mobile rules
+## Build 241 schema boundary
 
-- Exactly one H1 on each exposed HTML page; do not create multiple equally prominent title-like headings.
-- Use natural buyer language in title, H1, introduction, product facts, alt text and internal links. Avoid location/keyword stuffing.
-- Keep canonical, Product/Offer, LocalBusiness/Organization and visible facts consistent; placeholders never enter Product schema, Open Graph or launch galleries.
-- Put accurate, high-quality images near relevant visible text, preserve equivalent mobile/desktop content and alt text, and use multiple real high-resolution product views where useful; never keyword-stuff alternative text.
-- Maintain accurate Business Profile name/category/contact/hours/service area/photos and real review practices. First-page placement cannot be guaranteed because local results also depend on distance and prominence.
-- Test phone, tablet, laptop and wide desktop; keyboard order/focus, touch targets, overflow, dialogs and slow-image fallback are release checks.
+For an **existing production D1**:
 
-## Deploy sequence
+1. Back up D1 / record a recovery point.
+2. Confirm prior ledger key `build240_operational_evidence_continuity` exists. Build 241 is incremental and assumes Build 240 foundations.
+3. Apply **one** of:
+   - `database_build241_caip_large_media_intake.sql`; or
+   - byte-identical `database_upgrade_current_pass.sql`.
+4. Do not apply both.
+5. Confirm ledger key `build241_caip_large_media_intake`.
+6. Confirm 21 active operational workstreams and 46 active Startup gates.
 
-1. Run the complete Build 240 static/regression suite against the exact folder/archive.
-2. Record a D1 recovery point and verify earlier migration ledger keys.
-3. Apply `database_build240_operational_evidence_continuity.sql` or identical `database_upgrade_current_pass.sql` once; never both.
-4. Deploy the complete Build 240 archive, retain rollback details and hard refresh until service-worker shell v18 is active.
-5. Run Post-Deploy Smoke Tests on production and confirm all 45 Startup gates.
-6. Open Operational Continuity; verify twenty workstreams, evidence creation, duplicate-key handling, packaging continuity, provider/message records, mobile recovery, asset/media checks, support/accounting/SEO queues and honest fallback.
-7. Re-run bounded login, product autosave/recovery, protected product removal, packaging/creative, payment/refund, email and restore procedures.
-8. Confirm public pages retain exactly one H1, current metadata/structured data, crawlable links, relevant images, no missing assets and phone/desktop containment.
-9. Save only sanitized expected/actual evidence and observable provider/transaction references.
-10. Make a separate Deploy Readiness decision; execute Go-Live only after Ready and continue Live Ops reconciliation.
+Build 241 adds/owns:
 
-## Not claimed complete
+- `caip_media_intake_settings`
+- `caip_media_upload_sessions`
+- `caip_media_upload_files`
+- `caip_media_upload_parts`
+- `caip_media_processing_jobs`
+- `caip_media_public_promotion_requests`
 
-Local code cannot supply production credentials, physical stock/label proof, legal/tax approval, real provider permission, customer email delivery or paid/refund evidence. Those remain Startup gates. Google ranking cannot be guaranteed; monitor Search Console, Business Profile and real local/customer evidence.
+The migration also idempotently ensures the shared `media_assets` dependency exists for fresh/scoped aggregate paths, seeds CAIP provider profiles, adds workstream `caip_large_media_intake`, and adds Startup gate `caip_private_large_media_intake`.
+
+All three aggregate schema files are synchronized through `scripts/sync-build241-aggregate-schema.mjs`. CAIP runtime routes **verify** schema; they do not create tables/indexes at request time.
+
+## Primary routes
+
+- `/admin/creative-automation/` — master seven-stage orchestration.
+- `/admin/creative-process/` — process/material/time specialist authority.
+- `/admin/creative-assets/` — CAIP asset/evidence/private-media intake authority.
+- `/admin/content-studio/` — deliverable packages.
+- `/admin/content-publications/` — publication/release board.
+- `/admin/packaging-studio/` — whole-business labels and packaging.
+- `/admin/operational-continuity/` — production evidence/idempotency/fallback/operations centre.
+- `/admin/startup-readiness/` — 46 launch gates.
+- `/admin/image-manifest/` — mutable visual requirements/evidence authority.
+
+Admin routes remain `noindex,nofollow` and must have one H1.
+
+## Error-handling rules
+
+1. No request-time schema installation.
+2. Missing D1/R2/provider dependencies return structured actionable JSON rather than HTML/blank responses.
+3. Browser fallbacks must say **Unsynced/Unavailable/Unknown** and disable writes; never infer success from an empty response.
+4. Runtime failures use `runtime_incidents` with sanitized details; never record passwords, tokens, cookies, raw binary bodies or unnecessary personal information.
+5. Upload part failures preserve completed part state and expose retry/resume.
+6. Private bucket absence leaves metadata safe and reports that binary upload cannot begin.
+7. Temporary 5xx/auth verification errors do not automatically destroy a locally retained valid session.
+8. Destructive operations remain bounded, explicit, auditable and reversible where business history requires reversal rather than deletion.
+
+## SEO/local-search guardrails
+
+Every public pass should verify:
+
+- exactly one H1 per exposed/indexable page;
+- distinctive concise title and meta description;
+- canonical URL;
+- crawlable descriptive internal links;
+- descriptive alt text and resolvable representative images;
+- visible facts consistent with structured data;
+- phone and desktop content parity/readability;
+- truthful Southern Ontario/local service wording only where relevant;
+- no generated/editorial image masquerading as an exact product or real-project proof;
+- no promise of first-page placement.
+
+Local visibility is improved through relevance, accurate Business Profile/service facts, useful local pages, real reviews/prominence and measurement. Distance is not controllable, and first-page ranking cannot be guaranteed.
+
+Build 241 static audit: 36 public indexable pages, 36 passed, zero warnings/failures; `/assets/` reference audit has zero missing files.
+
+## Mobile/desktop rules
+
+- Use responsive grids and `min-width:0` on contained panels.
+- Avoid document-level horizontal overflow; wide data tables get local scroll containers.
+- Touch actions should be at least comfortably tappable; important phone actions stack full width.
+- CAIP batch intake shows per-file progress, retry, pause/resume and explicit offline/reselection guidance.
+- Image/card layouts must retain readable aspect ratios and not push primary content below oversized static sections.
+- Service-worker shell v19 is current; admin/API/auth routes remain network/no-store oriented rather than static-cache authorities.
+
+## Packaging retained authority
+
+Labeling & Packaging remains the whole-business editor. Five adopted packaging source directions and reusable soap/candle/round/label templates remain retained. Physical formula/INCI/bilingual, dimensions, laser/material, print/wrap and regulatory proof remain live Startup work; a screen preview is not physical acceptance.
+
+## Documentation authority
+
+### Read first
+
+1. `AI_HANDOFF.md`
+2. `PROJECT_STATUS_AND_ROADMAP.md`
+
+### Scoped specialist documents
+
+Use specialist guides only for their named concern: CAIP, Packaging, Startup/Prelaunch, Cloudflare, SEO, Social Publishing, image requirements, database reference and similar operations.
+
+### Historical evidence
+
+Build-specific validation/changed-file records older than the current Build pair belong under `docs/archive/build-history/`. Historical prose cannot override current architecture or roadmap.
+
+## Safe deployment order
+
+1. Run local Build 241 regressions, public SEO audit, asset audit, predeploy sanity, deployment preflight and final blocker checks.
+2. Generate/checksum the exact ZIP.
+3. Back up D1 and confirm `build240_operational_evidence_continuity`.
+4. Apply Build 241 migration once.
+5. Create/bind `CAIP_PRIVATE_MEDIA_BUCKET` before attempting private binary intake.
+6. Deploy the complete package and hard refresh to service-worker shell v19.
+7. Run Post-Deploy Smoke Tests and confirm all 46 Startup gates load.
+8. Run the dedicated CAIP private-media gate with real interruption/recovery evidence.
+9. Keep payments, auth, email, packaging/laser, concurrency, restore and real-image launch gates open until separately proven.

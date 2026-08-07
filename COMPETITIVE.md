@@ -1432,3 +1432,21 @@ SEO choices remain evidence-based: one clear visible H1, useful title/meta, desc
 ## Build 239 current visual-competition direction
 
 The public pages now lead with relevant workshop, jewelry, soap, candle, engraving, pickup, gift-card or vintage imagery instead of repeating one generic placeholder. This follows the current competitive pattern of showing the product or process near the offer, keeping custom-order actions visible, and retaining honest language when an image is representative rather than the exact item. The live-browser pass also preserved one clear main heading, phone-first navigation and concise local Southern Ontario context.
+
+## Build 241 competitive/current workflow check — August 2026
+
+Build 241 rechecked the new CAIP private-media direction against current public media-workflow patterns rather than treating the supplied DAIP design as an isolated internal feature.
+
+- Frame.io V4 exposes project-scoped drag/drop uploads, centralized upload progress, pause/resume/cancel behavior, broad video/image/audio support, large-file handling and generated playback proxies while retaining originals. Devil n Dove CAIP now mirrors the useful operating ideas—project-scoped intake, progress/recovery, immutable originals, planned proxies/thumbnails and review boundaries—without claiming Frame.io feature parity or copying its product model.
+- Frame.io Camera to Cloud reinforces the value of connecting captured media directly to the correct project and using proxies for review/creation. CAIP's future mobile/camera path should therefore preserve project IDs, raw/proxy separation and immediate metadata registration.
+- Cloudflare R2 currently documents multipart upload as the appropriate path for large files where resumability/parallelism matter, with up to 10,000 parts and large-object support. Build 241's current Worker-streamed multipart path is deliberately conservative; short-lived direct browser-to-R2 S3 signing remains the higher-value next transport improvement.
+- R2 presigned URLs are temporary bearer-style permissions and browser use requires deliberate CORS/content-type restrictions. CAIP must never expose long-lived R2 API credentials to the browser.
+
+Current references:
+- https://help.frame.io/en/articles/9101026-uploading-your-media
+- https://help.frame.io/en/articles/9090654-getting-started-how-do-i-upload-media
+- https://help.frame.io/en/articles/8896457-c2c-getting-started-with-camera-to-cloud
+- https://developers.cloudflare.com/r2/objects/upload-objects/
+- https://developers.cloudflare.com/r2/api/s3/presigned-urls/
+
+The competitive direction is therefore **private originals → resumable intake → proxy/extracted evidence → review/governance → approved derivatives/public promotion**, with Devil n Dove's advantage being the direct connection between project evidence, materials/cost, lessons learned, product creation and Content Studio rather than media review alone.

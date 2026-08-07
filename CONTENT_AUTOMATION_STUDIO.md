@@ -1,4 +1,21 @@
-# Content Automation Studio — Build 230 specialist-stage pointer
+# Content Automation Studio — Build 241 specialist-stage pointer
+
+## Build 241 CAIP raw-media relationship
+
+Content Studio remains the deliverable/package authority. Build 241 CAIP may now own new private raw Creative Project media as immutable R2 originals, while existing Content Studio/catalog media remains reference-first. Content Studio must consume only reviewed CAIP evidence/selected derivatives or promotion results; it does not become the raw binary upload store. A CAIP processing job marked `planned` is not a usable rendered/transcribed deliverable, and a public-promotion request is not publication.
+
+The intended path is:
+
+```text
+Creative Project raw media
+→ CAIP private intake / evidence / reviewed derivatives
+→ Content Studio package and channel drafts
+→ Release Board / provider review
+→ verified public result
+```
+
+See `docs/creative-asset-intelligence-platform/16_Private_Raw_Media_Intake.md`.
+
 
 Content Automation Studio is preserved in full as stages 4–5 of the master process at `/admin/creative-automation/`. It remains the authority for source-linked packages and deliverable drafts; the master stores only owner/stage/evidence orchestration. Creative Process remains the process/material authority, CAIP remains the asset/rights/evidence authority, Content Release Board remains the public-release authority, and Social Publishing remains the reviewed provider handoff. See `CREATIVE_AUTOMATION_STUDIO.md` for the current end-to-end workflow. Everything below is retained specialist/historical detail and cannot override the two canonical handoff files.
 
@@ -61,7 +78,7 @@ A CAIP error is non-blocking. It is recorded as a warning and cannot undo produc
 
 ## Honest current boundary
 
-The system does not yet render MP4s, generate thumbnail files, use an AI model, transcribe recordings, upload to platforms, retrieve metrics, create derivatives, or use signed private R2 transfers. Those future adapters must follow the CAIP contract and be separately verified.
+Build 241 can now ingest private raw media through multipart R2 and plan proxy/thumbnail/frame/audio/transcript work, but it still does not claim those processors, AI analysis, automatic derivatives, direct S3-presigned multipart, external publishing, or provider metrics are implemented. Those adapters must follow the CAIP contract and be separately verified.
 
 For detailed CAIP architecture, source controls, storage, governance, provider rules, APIs, operations, migration safety, and acceptance criteria, use `docs/creative-asset-intelligence-platform/README.md`.
 

@@ -1,4 +1,4 @@
-# Devil n Dove Creative Automation Studio — Build 235
+# Devil n Dove Creative Automation Studio — Build 241
 
 Creative Automation is the master operating view for a Creative Process project. It coordinates ownership, deadlines, seven human-reviewed stages and evidence without copying or replacing specialist facts.
 
@@ -8,7 +8,7 @@ Creative Automation is the master operating view for a Creative Process project.
 |---|---|---|
 | 1. Creative process | Creative Process Engine | Saved project summary plus factual timeline event |
 | 2. Materials, inventory and cost | Material reviews, inventory posts/reversals, profitability | Reviewed material state and documented cost/profitability evidence; deliberate Not applicable allowed when no material applies |
-| 3. Assets, rights and evidence | CAIP and evidence selections | Selected evidence plus CAIP mirror/rights review |
+| 3. Assets, rights and evidence | CAIP, private raw media and evidence selections | Selected evidence plus CAIP mirror/rights review; private raw uploads remain immutable/internal until reviewed promotion |
 | 4. Content package | Content handoff and Content Studio project | Source-linked handoff/project and deliverable plan |
 | 5. Channel drafts and approvals | Content deliverables and Social Publishing | Intended deliverables approved or deliberately excluded; queue status is never publication proof |
 | 6. Public release | Content Release Board/publication history | Approved or published `content_status` plus observable release evidence |
@@ -21,6 +21,11 @@ The master tables remain orchestration only:
 - `creative_automation_events` — append-only workflow/review history.
 
 Computed readiness is returned from bounded reads of specialist tables. It is not stored as a competing business fact.
+
+
+## Build 241 CAIP private-media stage extension
+
+Stage 3 now includes an intentional private raw-media intake path in addition to existing reference-only catalog/Content Studio sources. Operators can batch image/video/audio files into `CAIP_PRIVATE_MEDIA_BUCKET`, resume multipart parts, review governance, inspect the internal-only CAIP asset, and request reviewed public promotion. Completed raw originals cannot be overwritten/deleted through the intake control. Planned proxy/frame/audio/transcript jobs are not completion proof. See `docs/creative-asset-intelligence-platform/16_Private_Raw_Media_Intake.md`.
 
 ## Work queue
 
@@ -53,7 +58,7 @@ Permanent deletion remains limited to untouched accidental project shells after 
 
 ## Next improvements
 
-1. Camera-first mobile evidence upload with R2 rights, derivative and explicit offline recovery.
+1. Extend Build 241 CAIP Private Raw Media Intake into camera-first mobile capture with explicit offline/file-reselection recovery.
 2. Observable provider-result reconciliation for Meta and future channels.
 3. Delivery/retry-backed notifications for blocked, overdue and failed approval work.
 4. Reviewed analytics snapshots and experiment comparison without inferred performance.

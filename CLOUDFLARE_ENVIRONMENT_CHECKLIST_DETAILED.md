@@ -5,10 +5,10 @@
 Build 240 adds no new secret. It requires the existing D1 binding used by admin APIs and the complete static `/assets/` tree.
 
 1. Back up production D1.
-2. Apply `database_build240_operational_evidence_continuity.sql` or identical current-pass SQL exactly once.
-3. Confirm ledger key `build240_operational_evidence_continuity` and 45 Startup definitions.
+2. Confirm `build240_operational_evidence_continuity`, then apply `database_build241_caip_large_media_intake.sql` or identical current-pass SQL exactly once.
+3. Confirm ledger keys `build240_operational_evidence_continuity` and `build241_caip_large_media_intake`, plus 46 Startup definitions.
 4. Deploy the complete archive; do not omit `assets/`, `functions/`, `public/`, aggregate schemas or migration files.
-5. Hard refresh until service worker `devilndove-shell-v18` controls the page.
+5. Hard refresh until service worker `devilndove-shell-v19` controls the page.
 6. Verify `/api/admin/operational-continuity` while authenticated and confirm unauthenticated requests return structured 401 responses.
 7. Temporarily test a missing-schema/degraded response in a non-production fixture: the UI must show unknown status, disable writes and retain static workstream guidance.
 8. Check Functions logs for sanitized incidents, CPU/memory outcomes and no HTML success bodies.
@@ -996,3 +996,30 @@ After the environment variables/bindings are saved and the site is redeployed, o
 ## Build 194 alignment
 
 This is a supporting reference. Start with `PROJECT_STATUS_AND_ROADMAP.md` and `AI_HANDOFF.md` for current decisions; preserve this document for specialist history and handoff detail.
+
+## Build 241 — CAIP private raw-media bucket
+
+Build 241 adds a new **optional until configured, required for CAIP binary intake** R2 binding:
+
+```text
+CAIP_PRIVATE_MEDIA_BUCKET
+```
+
+Recommended setup:
+
+1. Cloudflare Dashboard → R2 → create a dedicated bucket such as `devilndove-caip-media`.
+2. Leave `r2.dev` public access disabled and do not attach a public custom domain to this raw-media bucket.
+3. Cloudflare Pages → Devil n Dove project → Settings → Bindings → add R2 binding `CAIP_PRIVATE_MEDIA_BUCKET` pointing to that private bucket in Production (and a safe preview bucket if desired).
+4. Keep the existing `PRODUCT_MEDIA_BUCKET` binding for approved public/product media. Do not repoint it to the raw-media bucket.
+5. Back up D1 and apply `database_build241_caip_large_media_intake.sql` or the identical `database_upgrade_current_pass.sql` once.
+6. Redeploy, open `/admin/creative-assets/`, and confirm CAIP reports the private binding as available before starting binary uploads.
+7. Complete the `caip_private_large_media_intake` Startup gate, including interrupted multipart recovery, authenticated secure review, privacy/rights/consent review, phone/desktop checks, and proof that requesting public promotion creates no public copy.
+
+The current Build 241 data path is an authenticated same-origin Worker-streamed multipart fallback with 32 MiB default parts. The preferred future path is short-lived direct S3 multipart authorization so multi-gigabyte bytes travel browser→R2. Do not create S3 credentials or CORS rules until that future adapter is implemented and reviewed.
+
+Official references:
+
+- R2 uploads: https://developers.cloudflare.com/r2/objects/upload-objects/
+- Workers multipart usage: https://developers.cloudflare.com/r2/api/workers/workers-multipart-usage/
+- R2 public bucket controls: https://developers.cloudflare.com/r2/buckets/public-buckets/
+- R2 presigned URLs: https://developers.cloudflare.com/r2/api/s3/presigned-urls/
