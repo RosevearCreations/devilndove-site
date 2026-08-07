@@ -39,4 +39,4 @@ Never copy passwords, request bodies, cookies, `Authorization` headers, bearer t
 
 ## Prohibited response
 
-Do not apply a schema migration based on a generic browser `500` or Cloudflare `503`. The table listing already confirms the current schema, and Build 233 is code-only. Repair only the exact fault proven by the structured Function response or matching Cloudflare invocation. Do not raise plan limits as a substitute for the bounded-path proof.
+Do not apply a schema migration based on a generic browser `500` or Cloudflare `503`. The table listing must be compared with the current Build 240 schema boundary; Build 233 itself was code-only. Repair only the exact fault proven by the structured Function response or matching Cloudflare invocation. Do not raise plan limits as a substitute for the bounded-path proof.

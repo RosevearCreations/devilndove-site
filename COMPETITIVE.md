@@ -1,3 +1,18 @@
+# Build 240 competitive direction — evidence-led local visibility and operational trust
+
+Build 240 retains the current custom-maker patterns already reviewed in this file and turns them into measurable operations rather than additional marketing claims.
+
+1. Keep clear custom-request, reviewed-proof, making and pickup/shipping steps visible on relevant pages.
+2. Use searcher language naturally in titles, the single H1, opening copy, descriptive links and useful image alternative text.
+3. Keep real workshop identity, material/dimension/care/availability facts, contact/policy clarity and approved product/process photography visible near the offer.
+4. Record page/query/location outcomes in D1 `local_seo_observation_snapshots`; change content from Search Console, Business Profile, review and conversion evidence rather than guessed rank movement.
+5. Keep provider results, notification delivery, product media roles, packaging proof and customer support observable. Operational trust is a competitive advantage only when the evidence is real.
+6. Never guarantee local first-page placement. Continue improving accurate relevance and prominence while recognizing that distance is not controlled by the website.
+
+Build 240 also adds `public_page_audit_results` and a reproducible 36-page audit, so one-H1, metadata, canonical, crawlable links, image/alt/assets and structured-data checks are part of every release rather than an occasional cleanup.
+
+---
+
 # Build 230 competitive direction — visible image operations and local clarity
 
 ## Build 235 current competitive check — 2026-08-05

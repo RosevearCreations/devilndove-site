@@ -1,6 +1,20 @@
-# Cloudflare Environment Checklist — Devil n Dove (Build 235)
+# Cloudflare Environment Checklist — Devil n Dove (Build 240)
 
-## Build 235 Creative readiness, queue and export check
+## Build 240 deployment boundary
+
+Build 240 adds no new secret. It requires the existing D1 binding used by admin APIs and the complete static `/assets/` tree.
+
+1. Back up production D1.
+2. Apply `database_build240_operational_evidence_continuity.sql` or identical current-pass SQL exactly once.
+3. Confirm ledger key `build240_operational_evidence_continuity` and 45 Startup definitions.
+4. Deploy the complete archive; do not omit `assets/`, `functions/`, `public/`, aggregate schemas or migration files.
+5. Hard refresh until service worker `devilndove-shell-v18` controls the page.
+6. Verify `/api/admin/operational-continuity` while authenticated and confirm unauthenticated requests return structured 401 responses.
+7. Temporarily test a missing-schema/degraded response in a non-production fixture: the UI must show unknown status, disable writes and retain static workstream guidance.
+8. Check Functions logs for sanitized incidents, CPU/memory outcomes and no HTML success bodies.
+9. Run the 45-gate Startup, public-page, login, product, packaging, creative, payment, email and restore procedures.
+
+## Retained historical Build 235 Creative readiness, queue and export check
 
 Build 235 adds no environment variable and no D1 migration. Deploy the complete archive, hard refresh to `devilndove-shell-v16`, then:
 
@@ -14,11 +28,11 @@ Build 235 adds no environment variable and no D1 migration. Deploy the complete 
 8. In Functions Metrics/Logs, filter `/api/admin/creative-automation`; record invocation status/CPU/wall time for load and both exports. Any repeated 1102, exceeded CPU/memory, malformed/HTML success or cross-project leakage keeps the relevant Startup gate open.
 
 
-_Last updated: Build 234 bounded hot routes, template-driven soap/candle packaging, guarded Creative duplicate cleanup, retained login/product repairs, Build 230 visual manifest, 44-gate Startup system and retained read-only Meta credential tests._
+_Historical note: Build 234 bounded hot routes, template-driven soap/candle packaging, guarded Creative duplicate cleanup, retained login/product repairs, Build 230 visual manifest, 44-gate Startup system and retained read-only Meta credential tests._
 
-## Build 234 packaging/Startup migration and route check
+## Retained historical Build 234 packaging/Startup migration and route check
 
-Back up D1 and confirm ledger keys `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply `database_build234_packaging_templates_creative_cleanup.sql` or the identical `database_upgrade_current_pass.sql`, not both. Confirm ledger key `build234_packaging_templates_creative_cleanup`, five active packaging reference rows, the five new system template keys and 44 active Startup rows. Packaging Studio, Startup Readiness, Creative Automation and Creative Process must not execute request-time `CREATE TABLE` or bulk Startup seeding. Deploy the whole package, activate `devilndove-shell-v15`, then run `BUILD234_VALIDATION.md` and the production evidence gates. Do not store customer names/designs, token values or physical-proof evidence in variable documentation.
+Back up D1 and confirm ledger keys `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply `database_build234_packaging_templates_creative_cleanup.sql` or the identical `database_upgrade_current_pass.sql`, not both. Confirm ledger key `build234_packaging_templates_creative_cleanup`, five active packaging reference rows, the five new system template keys and 44 active Startup rows. Packaging Studio, Startup Readiness, Creative Automation and Creative Process must not execute request-time `CREATE TABLE` or bulk Startup seeding. Deploy the whole package, activate `devilndove-shell-v15`, then run `docs/archive/build-history/BUILD234_VALIDATION.md` and the production evidence gates. Do not store customer names/designs, token values or physical-proof evidence in variable documentation.
 
 This checklist explains **exactly where to add each setting in Cloudflare** and **where to find or create each value**.
 

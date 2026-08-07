@@ -1,7 +1,21 @@
-# Devil n Dove AI Handoff — Build 239
+# Devil n Dove AI Handoff — Build 240
 
-This is the first of two canonical current-status files. Read it first for architecture, authority, safety and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for completed work, risks and ordered next steps. Historical Build Markdown remains evidence only.
+This is the first of two canonical current-status files. Read it first for architecture, authority, safety and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for completed work, risks, the twenty completed Build 240 foundations and the next twenty actions. Historical Build Markdown remains evidence only.
 
+
+
+## Build 240 outcome
+
+1. Build 240 is the current D1 migration boundary and adds an Operational Continuity authority rather than another JSON-only planning list.
+2. `/admin/operational-continuity/` exposes twenty workstreams for evidence, idempotency, packaging reservation/formula/lock/prepress, provider/notification reconciliation, phone recovery, assets/media, support, accounting, controlled approvals, local SEO, page audits, fallbacks and mobile operations.
+3. The authenticated API performs bounded reads/writes, creates no request-time schema, audits admin actions, captures sanitized runtime incidents and rejects false success when the Build 240 schema is absent.
+4. The browser has one H1, `noindex,nofollow`, responsive phone/desktop layouts and a static twenty-workstream degraded fallback that labels all live status unknown and disables saving.
+5. Build 240 adds 22 tables, twenty workstream seeds, seven mobile cards, two fallback policies, 36 static public-page audit results and the 45th Startup gate.
+6. Packaging facts remain split correctly: projects/components/versions hold design facts; formula links point to verified source/version/checksum; reservations hold operational quantities; locks and prepress checks hold release evidence.
+7. Provider queue state is not publication/delivery proof. Observable provider IDs/URLs and notification attempt outcomes belong in the new reconciliation tables.
+8. Static public-page audit now passes 36 exposed pages with exactly one H1, title, description, canonical, crawlable internal links, descriptive image alternative text, resolvable local assets and JSON-LD.
+9. Google first-page placement is never guaranteed. Current direction remains people-first content, searcher language in titles/main headings/alt/link text, relevant images, complete Business Profile facts, and measured relevance/distance/prominence observations.
+10. Historical Build records remain under `docs/archive/build-history/`; `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the only cross-project authorities.
 
 ## Build 239 outcome
 
@@ -11,7 +25,7 @@ This is the first of two canonical current-status files. Read it first for archi
 4. Replaced public-facing placeholder language on contact, about, service, gallery, shop and gift pages with final customer-facing copy.
 5. Updated Open Graph, Twitter image and parseable page structured data to use relevant crawlable `/assets/` images instead of a generic logo where appropriate.
 6. Consolidated superseded Build 236–238 release records into `docs/archive/build-history/`. `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the two canonical current files.
-7. Build 239 is code-and-assets only. Build 234 remains the current D1 migration boundary.
+7. At the Build 239 release, no schema was added and Build 234 remained the boundary; Build 240 now supersedes that historical boundary.
 8. Live Cloudflare Functions, provider and physical-product evidence still require deployed-environment testing; local static-server API 404 responses are not treated as production failures.
 
 ## Build 235 outcome
@@ -22,7 +36,7 @@ This is the first of two canonical current-status files. Read it first for archi
 4. Each linked project can export an authenticated JSON evidence packet or an accessible print-ready HTML packet containing project/timeline/material, inventory, CAIP, content, review, publication, result and profitability evidence already stored in specialist tables.
 5. Publication readiness now reads the authoritative `content_status` field rather than the nonexistent `publication_status` field, preventing a real approved/published record from being counted as absent.
 6. The browser adds readiness checklists, eight operational metrics, safe authenticated Blob exports, retry/fallback copy and phone/desktop layouts. The admin route remains `noindex,nofollow` and has one H1.
-7. Build 235 is code-only. It adds no D1 table, column, seed or ledger row; the Build 234 numbered/current-pass migration remains the current schema boundary.
+7. Build 235 was code-only. At that release the Build 234 numbered/current-pass migration was the schema boundary; Build 240 now supersedes it.
 8. Forty-seven superseded Build guides/validation files were moved from the repository root to `docs/archive/build-history/`. `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the only current cross-project authorities; specialist playbooks retain narrow authority.
 9. Release checks now understand the historical archive, and `scripts/build235_creative_readiness_test.mjs` proves source-readiness, queue ordering, publication counting, evidence export, responsive UI and the retained Build 234 schema boundary.
 10. Build 235 does not claim production/provider/physical success. Live Cloudflare, payment, concurrency, email, media-rights, printing/laser and paid/refund evidence remain Startup gates.
@@ -94,10 +108,16 @@ This is the first of two canonical current-status files. Read it first for archi
 - Issued client documents: immutable `customer_documents.source_snapshot_json`; corrections use void/new document, never history rewriting.
 - Static templates/public read-only defaults may remain JSON. Mutable business status, evidence, money, stock, approvals and audit history belong in D1.
 - Image requirements/status/history: D1 `image_manifest_items` and `image_manifest_history`; `IMAGES_REQUIRED.md` is the human capture standard and `GENERATED_VISUAL_ASSET_REGISTER.md` is generated-asset provenance.
+- Operational continuity/workstream status: D1 `operational_workstreams`; live proof uses `production_evidence_cases` and append-only `production_evidence_events`.
+- Duplicate-sensitive operations: D1 `operation_idempotency_claims`; a duplicate key must return the existing safe reference rather than repeat the effect.
+- Packaging operational/release facts: D1 `packaging_inventory_reservations`, lines, `packaging_formula_source_links`, `packaging_release_locks` and `packaging_prepress_checks`.
+- Provider/message evidence: D1 `provider_result_reconciliations` and `notification_delivery_attempts`; queue state alone is not success.
+- Mobile/asset/media/support/close/SEO/fallback facts: the corresponding Build 240 tables; mutable status belongs in D1, not Markdown or static JSON.
 
 ## Current operating routes
 
-- `/admin/startup-readiness/` — 44 launch gates and D1 evidence, including distinct missing-image and candle-top-proof blockers.
+- `/admin/startup-readiness/` — 45 launch gates and D1 evidence, including distinct missing-image, candle-top-proof and Operational Continuity blockers.
+- `/admin/operational-continuity/` — twenty workstreams, production evidence, idempotency, packaging continuity, provider/message reconciliation, phone recovery, support/accounting/SEO queues and route fallbacks.
 - `/admin/image-manifest/` — 20 seeded static/dynamic image requirements, rights/public/device approvals, evidence and history.
 - `/admin/prelaunch/` — separate process map.
 - `/admin/deployment-preflight/`, `/admin/post-deploy-smoke-tests/`, `/admin/deploy-readiness/`, `/admin/go-live-execution/`, `/admin/live-ops-followthrough/` — standalone release stages.
@@ -107,14 +127,16 @@ This is the first of two canonical current-status files. Read it first for archi
 - `/admin/customer-documents/` — invoices, receipts, packing slips, credit notes and refund confirmations.
 - `/admin/orders/`, `/admin/accounting/`, `/admin/inventory-operations/` — operational transaction authorities.
 
-## Current database boundary — Build 234 schema, Build 235 code-only
+## Current database boundary — Build 240
 
-Back up D1 and confirm `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply exactly one:
+Back up D1 and confirm prior ledger key `build234_packaging_templates_creative_cleanup`. Apply exactly one:
 
-- `database_build234_packaging_templates_creative_cleanup.sql`
+- `database_build240_operational_evidence_continuity.sql`
 - `database_upgrade_current_pass.sql` (byte-identical copy)
 
-The migration upserts five packaging templates, five adopted reference rows and 44 Startup definitions while preserving mutable readiness status/evidence. It adds ledger key `build234_packaging_templates_creative_cleanup` and contains no explicit `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK`. Aggregate schemas contain the same block. Run `node scripts/sync-build234-startup-seed.mjs` after changing the API gate definition, then `node scripts/sync-build234-aggregate-schema.mjs`.
+The Build 240 migration creates the operational continuity tables, seeds twenty workstreams, seven phone cards, two fallback policies, 36 static public-page audits and the 45th Startup definition, then records ledger key `build240_operational_evidence_continuity`. It contains no explicit `BEGIN`, `COMMIT`, `SAVEPOINT`, `RELEASE` or `ROLLBACK`. The same block is synchronized into `database_schema.sql`, `database_full_schema.sql` and `database_store_schema.sql` by `node scripts/sync-build240-aggregate-schema.mjs`.
+
+After applying, confirm 20 active workstreams, 36 Build 240 page audits, 45 active Startup gates and one Build 240 ledger row. Deploy the complete package and hard refresh to service-worker shell v18. Runtime routes never create Build 240 schema.
 
 ## Retained Build 233 database boundary
 
@@ -122,7 +144,7 @@ Build 233 added no D1 table, column, seed or ledger row. At that historical rele
 
 That Build 230 migration adds `image_manifest_items`, `image_manifest_history`, 20 active requirements, three generated-asset provenance rows and ledger key `build230_visual_image_manifest`. It preserves operator-editable evidence on repeat execution and contains no explicit SQL transaction statements. Do not add `BEGIN TRANSACTION` or `SAVEPOINT`; D1/Durable Object code must use `state.storage.transaction()` or `transactionSync()` when a JavaScript transaction is required.
 
-Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `database_store_schema.sql` retain Builds 229 and 230 and now end with Build 234. Older synchronizers intentionally stop so they cannot erase the current block.
+At the Build 233 historical point, aggregate schemas ended with Build 230; Build 234 later superseded that point and Build 240 is now current. Older synchronizers intentionally stop so they cannot erase the current block.
 
 ## Error/fallback rules
 
@@ -147,16 +169,16 @@ Aggregate schema files `database_schema.sql`, `database_full_schema.sql` and `da
 
 ## Deploy sequence
 
-1. Run the complete Build 235 Deployment Preflight and regression suite against the exact folder/archive.
-2. Record a D1 recovery point. If the `build234_packaging_templates_creative_cleanup` ledger key is absent, apply exactly one Build 234 numbered/current-pass migration; otherwise do not reapply it merely for Build 235.
-3. Deploy the complete Build 235 archive and retain previous deployment/rollback details; hard refresh so service-worker shell v16 is active.
-4. Run Post-Deploy Smoke Tests on production.
-5. Confirm all 44 Startup gates load, the image manifest has 20 D1 rows, and degraded fallbacks remain visibly unsynced/read-only.
-6. In Creative Automation, verify the priority queue order with owner-controlled blocked/overdue/unassigned fixtures; open one project and compare every computed check with its specialist authority.
-7. Export the same project as JSON and print-ready HTML. Confirm authentication, safe filenames, one H1/landmarks, complete factual sections and no credential/private-payment leakage.
-8. Save one human stage review with evidence, reload, and confirm computed disagreement is shown rather than overwritten.
-9. Run Build 235 validation plus the retained bounded-login, product autosave, product removal, guarded duplicate cleanup, packaging physical proof, visual-manifest and provider read-only checks.
-10. Make a separate Deploy Readiness decision; execute Go-Live only after Ready; continue Live Ops reconciliation.
+1. Run the complete Build 240 static/regression suite against the exact folder/archive.
+2. Record a D1 recovery point and verify earlier migration ledger keys.
+3. Apply `database_build240_operational_evidence_continuity.sql` or identical `database_upgrade_current_pass.sql` once; never both.
+4. Deploy the complete Build 240 archive, retain rollback details and hard refresh until service-worker shell v18 is active.
+5. Run Post-Deploy Smoke Tests on production and confirm all 45 Startup gates.
+6. Open Operational Continuity; verify twenty workstreams, evidence creation, duplicate-key handling, packaging continuity, provider/message records, mobile recovery, asset/media checks, support/accounting/SEO queues and honest fallback.
+7. Re-run bounded login, product autosave/recovery, protected product removal, packaging/creative, payment/refund, email and restore procedures.
+8. Confirm public pages retain exactly one H1, current metadata/structured data, crawlable links, relevant images, no missing assets and phone/desktop containment.
+9. Save only sanitized expected/actual evidence and observable provider/transaction references.
+10. Make a separate Deploy Readiness decision; execute Go-Live only after Ready and continue Live Ops reconciliation.
 
 ## Not claimed complete
 
