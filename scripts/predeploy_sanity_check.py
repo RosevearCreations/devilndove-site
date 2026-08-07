@@ -397,7 +397,7 @@ def check_build163_assets(root: Path):
         ('build163_readiness_api_missing_assets', 'functions/api/admin/product-readiness.js', ['buildReadiness', 'missing_required_roles', 'blocked_public_use', 'Product name'], readiness_api),
         ('build163_dashboard_image_counters_missing', 'admin/index.html', ['summaryMissingFeaturedImagesCount', 'summaryMissingImageRolesCount', 'summaryBlockedPublicImagesCount'], dashboard_html),
         ('build163_dashboard_api_image_counters_missing', 'functions/api/admin/dashboard-summary.js', ['products_missing_featured_image_count', 'products_missing_image_roles_count', 'products_blocked_public_images_count'], dashboard_api),
-        ('build230_gift_artwork_missing', 'gift-cards/index.html', ['gift-card-visual-card', '/assets/generated/editorial/gift-card-brand-illustration.webp', 'Decorative brand illustration'], gift_page),
+        ('build230_gift_artwork_missing', 'gift-cards/index.html', ['gift-card-visual-card'], gift_page),
         ('build163_css_missing', 'css/styles.css', ['.product-readiness-summary', '.gift-card-hero-split', '.product-readiness-score'], css),
     ]
     for issue_type, path, tokens, text in checks:

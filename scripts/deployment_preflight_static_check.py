@@ -337,10 +337,10 @@ def check_packaging_references(checks: list[dict]) -> None:
 
 def check_markdown_authority(checks: list[dict]) -> None:
     required_markers = {
-        'AI_HANDOFF.md': ['Build 235', 'PROJECT_STATUS_AND_ROADMAP.md', '44 gates', 'auth_login_bounded_v1', 'bounded_registry_v1', 'browser recovery', 'compressed by area'],
-        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 235', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/', 'temporary 5xx', '211,860-byte'],
-        'MARKDOWN_INDEX.md': ['Build 235', 'Two current authorities', 'Historical evidence'],
-        'README.md': ['Build 235', 'database_build234_packaging_templates_creative_cleanup.sql'],
+        'AI_HANDOFF.md': ['Build 239', 'PROJECT_STATUS_AND_ROADMAP.md', '44 gates', 'auth_login_bounded_v1', 'bounded_registry_v1', 'browser recovery', 'compressed by area'],
+        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 239', 'P0 — before production promotion', 'SEO/local-search direction each pass', '/admin/image-manifest/', 'temporary 5xx', '211,860-byte'],
+        'MARKDOWN_INDEX.md': ['Build 239', 'Two current authorities', 'Historical evidence'],
+        'README.md': ['Build 239', 'database_build234_packaging_templates_creative_cleanup.sql'],
         'STARTUP_GO_LIVE_GUIDE.md': ['Build 234', 'This guide contains 44 gates', 'missing_launch_images', 'Measure, save, laser-test, approve, and archive each candle-top template', '/admin/image-manifest/', 'auth_login_bounded_v1'],
         'PACKAGING_REFERENCE_BASELINE.md': ['Build 234', 'Five owner-supplied files', 'Dimensional discrepancy', 'Candle-top direction'],
         'PRELAUNCH_PROCESS_PLAYBOOKS.md': ['Deployment Preflight', 'Deploy Readiness', 'Go-Live Execution'],
@@ -355,7 +355,7 @@ def check_markdown_authority(checks: list[dict]) -> None:
     guide=read(ROOT/'STARTUP_GO_LIVE_GUIDE.md')
     if guide.count('#### Before you begin') != 44:
         missing.append(f'STARTUP_GO_LIVE_GUIDE.md: expected 44 gate sections, found {guide.count("#### Before you begin")}')
-    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 235 canonical authorities, scoped playbooks, computed Creative readiness, evidence export, five packaging references, guarded duplicate cleanup, visual provenance, historical archive policy, and 44 generated Startup sections agree.', 'missing':missing})
+    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 239 canonical authorities, scoped playbooks, computed Creative readiness, evidence export, five packaging references, guarded duplicate cleanup, visual provenance, historical archive policy, and 44 generated Startup sections agree.', 'missing':missing})
 
 def check_schema_files(checks: list[dict]) -> None:
     schema_needles = [
@@ -497,7 +497,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 235','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 239','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')

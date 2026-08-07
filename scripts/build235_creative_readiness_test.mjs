@@ -107,6 +107,6 @@ const client = read('public/js/admin-creative-automation.js');
 for (const token of ['work_queue', 'creativeAutomationExportHtml', "exportPacket('json')", 'creative-automation-check-list']) assert(client.includes(token), `Creative Automation client is missing ${token}.`);
 assert.equal((read('admin/creative-automation/index.html').match(/<h1\b/gi) || []).length, 1, 'Creative Automation page must have exactly one H1.');
 assert(read('css/styles.css').includes('.creative-automation-queue-grid'), 'Responsive queue CSS is missing.');
-assert(read('sw.js').includes("devilndove-shell-v16"), 'Service worker cache was not advanced to shell v16.');
+assert(read('sw.js').includes("devilndove-shell-v17"), 'Service worker cache was not advanced to the retained Build 239 shell v17.');
 
 console.log('Build 235 Creative Automation readiness, queue, evidence export, publication status, responsive UI and evidence packet checks passed.');
