@@ -1,6 +1,18 @@
-# Devil n Dove AI Handoff — Build 235
+# Devil n Dove AI Handoff — Build 239
 
 This is the first of two canonical current-status files. Read it first for architecture, authority, safety and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for completed work, risks and ordered next steps. Historical Build Markdown remains evidence only.
+
+
+## Build 239 outcome
+
+1. Completed a real Chromium route-by-route visual audit at 1440×1000 desktop and 390×844 mobile across the 18 most image-heavy public routes.
+2. Added route-specific hero and social-preview images, intrinsic image dimensions, responsive 4:3 framing and mobile stacking without introducing additional H1 headings.
+3. Added local representative fallbacks for all seven R2 item-photo records. The original item image remains first choice; a visible “Representative preview” badge appears only when the remote item photo fails.
+4. Replaced public-facing placeholder language on contact, about, service, gallery, shop and gift pages with final customer-facing copy.
+5. Updated Open Graph, Twitter image and parseable page structured data to use relevant crawlable `/assets/` images instead of a generic logo where appropriate.
+6. Consolidated superseded Build 236–238 release records into `docs/archive/build-history/`. `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the two canonical current files.
+7. Build 239 is code-and-assets only. Build 234 remains the current D1 migration boundary.
+8. Live Cloudflare Functions, provider and physical-product evidence still require deployed-environment testing; local static-server API 404 responses are not treated as production failures.
 
 ## Build 235 outcome
 

@@ -1413,3 +1413,7 @@ The current implementation keeps the Shop layout aligned with familiar small-mak
 The catalog now supports practical category groupings such as jewelry, Soap, Candles, gifts, workshop-made items, vintage, and other truthful inventory distinctions. Categories should describe what is actually for sale, not manufacture artificial landing pages or claims.
 
 SEO choices remain evidence-based: one clear visible H1, useful title/meta, descriptive product images, and product structured data that matches rendered price, availability, and facts. Mobile and desktop should provide equivalent meaningful content and buying paths. Reference sources used for this direction are Google Search Central guidance on product structured data, title links, image SEO, helpful content, and mobile-first indexing; current independent maker/shop storefront patterns were used only as UI comparison, not copied content.
+
+## Build 239 current visual-competition direction
+
+The public pages now lead with relevant workshop, jewelry, soap, candle, engraving, pickup, gift-card or vintage imagery instead of repeating one generic placeholder. This follows the current competitive pattern of showing the product or process near the offer, keeping custom-order actions visible, and retaining honest language when an image is representative rather than the exact item. The live-browser pass also preserved one clear main heading, phone-first navigation and concise local Southern Ontario context.
