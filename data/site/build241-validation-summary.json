@@ -1,0 +1,37 @@
+{
+  "build_label": "Build 241",
+  "status": "ready_for_deployed_evidence",
+  "schema": {
+    "current_migration": "database_build241_caip_large_media_intake.sql",
+    "current_pass_identical": true,
+    "aggregate_schemas_synchronized": true,
+    "active_operational_workstreams": 21,
+    "active_startup_gates": 46,
+    "startup_metadata_refresh_rows": 46
+  },
+  "caip": {
+    "private_media_tables": 6,
+    "runtime_request_time_ddl": false,
+    "raw_original_policy": "immutable",
+    "public_promotion": "review_only",
+    "private_r2_binding_required": "CAIP_PRIVATE_MEDIA_BUCKET"
+  },
+  "static_validation": {
+    "public_pages_audited": 36,
+    "public_pages_passed": 36,
+    "public_page_warnings": 0,
+    "asset_references": 120,
+    "missing_assets": 0,
+    "predeploy_pages_checked": 109,
+    "predeploy_issues": 0,
+    "deployment_preflight_blockers": 0,
+    "deployment_preflight_warnings": 0,
+    "final_blocker_check": "pass",
+    "dark_theme_regression": "pass"
+  },
+  "production_only_remaining": [
+    "Create and bind private CAIP R2 bucket",
+    "Prove real multipart interruption/resume on production network/device",
+    "Complete remaining auth/payment/email/restore/physical packaging Startup evidence"
+  ]
+}
