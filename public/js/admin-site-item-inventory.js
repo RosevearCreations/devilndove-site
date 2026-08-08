@@ -23,6 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
     el.classList.toggle('is-success', Boolean(message && !isError));
   }
 
+  async function readApiPayload(response, fallbackMessage = 'The server returned an unreadable response.') {
+    const contentType = String(response?.headers?.get?.('content-type') || '').toLowerCase();
+    const ray = String(response?.headers?.get?.('cf-ray') || '').trim();
+    const raw = await response.text();
+    if (contentType.includes('application/json')) {
+      try { return raw ? JSON.parse(raw) : {}; }
+      catch {
+        throw new Error(`${fallbackMessage} HTTP ${response.status}${ray ? ` • Cloudflare Ray ${ray}` : ''}.`);
+      }
+    }
+    const serverHint = raw && !raw.trim().startsWith('<') ? raw.trim().slice(0, 180) : '';
+    throw new Error(`${fallbackMessage} HTTP ${response.status}${ray ? ` • Cloudflare Ray ${ray}` : ''}.${serverHint ? ` ${serverHint}` : ' The server returned HTML instead of JSON.'}`);
+  }
+
   function fmtMoney(cents) {
     return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'CAD' }).format(Number(cents || 0) / 100);
   }
@@ -777,8 +791,8 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         body: JSON.stringify({ action: 'sync_catalog', source_types: sourceTypes })
       });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to sync catalog items.');
+      const data = await readApiPayload(response, 'Inventory sync failed.');
+      if (!response.ok || !data?.ok) throw new Error([data?.error, data?.diagnostic].filter(Boolean).join(' — ') || 'Failed to sync catalog items.');
       setInventorySyncResult(data);
       setMessage(`Synced ${Number(data.synced || 0)} ${sourceTypes.join('/')} inventory items. Inserted ${Number(data.inserted || 0)}, updated ${Number(data.updated || 0)}, failed ${Number(data.failed || 0)}. ${Number(data.with_unit_cost || 0)} have Amazon unit costs.`);
       await loadList();
@@ -797,8 +811,8 @@ document.addEventListener('DOMContentLoaded', () => {
         method: isEditing ? 'PATCH' : 'POST',
         body: JSON.stringify(payload)
       });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save inventory item.');
+      const data = await readApiPayload(response, 'Inventory save failed.');
+      if (!response.ok || !data?.ok) throw new Error([data?.error, data?.diagnostic].filter(Boolean).join(' — ') || 'Failed to save inventory item.');
       if (data?.item) populateFormFromItem(data.item);
       setMessage(isEditing ? 'Inventory item changes saved.' : 'Inventory item added. It remains open here for full editing.');
       await loadList();
