@@ -1,5 +1,5 @@
 // File: /functions/api/admin/site-item-inventory.js
-import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { buildAmazonInventoryNote, extractAmazonInventoryFields, getAmazonInventoryMatch } from "./_amazonInventoryMatches.js";
 import { ensureInventoryCostHistoryTable, recordInventoryCostHistory } from "./_inventoryCostHistory.js";
 
@@ -762,7 +762,24 @@ export async function onRequestPost(context) {
 
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
-  await ensureSiteInventorySchema(db);
+  try {
+    await ensureSiteInventorySchema(db);
+  } catch (error) {
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'inventory',
+      incident_code: 'inventory_schema_check_failed',
+      severity: 'error',
+      message: 'Inventory schema compatibility check failed.',
+      details: { diagnostic: normalizeText(error?.message).slice(0, 240) },
+      related_user_id: adminUser.user_id
+    });
+    return json({
+      ok: false,
+      error: 'Inventory storage is not ready for this write.',
+      code: 'inventory_schema_check_failed',
+      diagnostic: normalizeText(error?.message).slice(0, 240)
+    }, 500);
+  }
 
   let body = {};
   try {
@@ -875,97 +892,119 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: 'source_type, external_key, and item_name are required.' }, 400);
   }
 
-  const insert = await db.prepare(`
-    INSERT INTO site_item_inventory (
-      source_type, external_key, item_name, category, source_url, amazon_url, image_url,
-      on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level, unit_cost_cents,
-      stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
-      supplier_name, supplier_sku, supplier_contact, reorder_notes, preferred_reorder_quantity,
-      is_on_reorder_list, do_not_reorder, do_not_reuse, reuse_status, reservation_notes,
-      is_active, last_counted_at, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).bind(
-    sourceType,
-    externalKey,
-    itemName,
-    normalizeText(body.category) || null,
-    normalizeText(body.source_url) || null,
-    normalizeText(body.amazon_url) || null,
-    normalizeText(body.image_url) || null,
-    ['tool', 'supply'].includes(sourceType) ? Math.max(1, Number(body.on_hand_quantity || 0) || 0) : Number(body.on_hand_quantity || 0),
-    Number(body.reserved_quantity || 0),
-    Number(body.incoming_quantity || 0),
-    Number(body.reorder_level || 0),
-    Number(body.unit_cost_cents || 0),
-    normalizeText(body.stock_unit_label) || 'unit',
-    normalizeText(body.usage_unit_label) || 'unit',
-    Math.max(1, Number(body.usage_units_per_stock_unit || 1) || 1),
-    normalizeText(body.supplier_name) || null,
-    normalizeText(body.supplier_sku) || null,
-    normalizeText(body.supplier_contact) || null,
-    normalizeText(body.reorder_notes) || null,
-    Number(body.preferred_reorder_quantity || 0),
-    Number(body.is_on_reorder_list) === 1 ? 1 : 0,
-    Number(body.do_not_reorder) === 1 ? 1 : 0,
-    Number(body.do_not_reuse) === 1 ? 1 : 0,
-    normalizeText(body.reuse_status) || null,
-    normalizeText(body.reservation_notes) || null,
-    Number(body.is_active) === 0 ? 0 : 1,
-    normalizeText(body.last_counted_at) || null
-  ).run();
+  try {
+    const insert = await db.prepare(`
+      INSERT INTO site_item_inventory (
+        source_type, external_key, item_name, category, source_url, amazon_url, image_url,
+        on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level, unit_cost_cents,
+        stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
+        supplier_name, supplier_sku, supplier_contact, reorder_notes, preferred_reorder_quantity,
+        is_on_reorder_list, do_not_reorder, do_not_reuse, reuse_status, reservation_notes,
+        is_active, last_counted_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(
+      sourceType,
+      externalKey,
+      itemName,
+      normalizeText(body.category) || null,
+      normalizeText(body.source_url) || null,
+      normalizeText(body.amazon_url) || null,
+      normalizeText(body.image_url) || null,
+      ['tool', 'supply'].includes(sourceType) ? Math.max(1, Number(body.on_hand_quantity || 0) || 0) : Number(body.on_hand_quantity || 0),
+      Number(body.reserved_quantity || 0),
+      Number(body.incoming_quantity || 0),
+      Number(body.reorder_level || 0),
+      Number(body.unit_cost_cents || 0),
+      normalizeText(body.stock_unit_label) || 'unit',
+      normalizeText(body.usage_unit_label) || 'unit',
+      Math.max(1, Number(body.usage_units_per_stock_unit || 1) || 1),
+      normalizeText(body.supplier_name) || null,
+      normalizeText(body.supplier_sku) || null,
+      normalizeText(body.supplier_contact) || null,
+      normalizeText(body.reorder_notes) || null,
+      Number(body.preferred_reorder_quantity || 0),
+      Number(body.is_on_reorder_list) === 1 ? 1 : 0,
+      Number(body.do_not_reorder) === 1 ? 1 : 0,
+      Number(body.do_not_reuse) === 1 ? 1 : 0,
+      normalizeText(body.reuse_status) || null,
+      normalizeText(body.reservation_notes) || null,
+      Number(body.is_active) === 0 ? 0 : 1,
+      normalizeText(body.last_counted_at) || null
+    ).run();
 
-  const newId = Number(insert?.meta?.last_row_id || 0);
-  if (Object.prototype.hasOwnProperty.call(body, 'item_description')) {
-    await saveItemDescription(db, newId, body.item_description, adminUser.user_id);
+    const newId = Number(insert?.meta?.last_row_id || 0);
+    if (Object.prototype.hasOwnProperty.call(body, 'item_description')) {
+      await saveItemDescription(db, newId, body.item_description, adminUser.user_id);
+    }
+    const saved = await db.prepare(`
+      SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
+      FROM site_item_inventory sii
+      LEFT JOIN site_inventory_item_descriptions siid
+        ON siid.site_item_inventory_id = sii.site_item_inventory_id
+      WHERE sii.site_item_inventory_id = ?
+      LIMIT 1
+    `).bind(newId).first();
+
+    await recordInventoryCostHistory(db, {
+      site_item_inventory_id: newId,
+      source_type: sourceType,
+      external_key: externalKey,
+      item_name: itemName,
+      previous_unit_cost_cents: 0,
+      new_unit_cost_cents: Number(body.unit_cost_cents || 0),
+      source_kind: 'manual_inventory_create',
+      source_id: `${sourceType}:${externalKey}`,
+      reason_note: normalizeText(body.movement_note) || 'Inventory item created with unit cost.',
+      changed_by_user_id: adminUser.user_id
+    }).catch(() => null);
+
+    await logMovement(db, {
+      site_item_inventory_id: newId,
+      source_type: sourceType,
+      external_key: externalKey,
+      item_name: itemName,
+      movement_type: 'create',
+      quantity_delta: Number(body.on_hand_quantity || 0),
+      previous_on_hand_quantity: 0,
+      new_on_hand_quantity: Number(body.on_hand_quantity || 0),
+      previous_reserved_quantity: 0,
+      new_reserved_quantity: Number(body.reserved_quantity || 0),
+      previous_incoming_quantity: 0,
+      new_incoming_quantity: Number(body.incoming_quantity || 0),
+      note: normalizeText(body.movement_note) || 'Inventory item created.',
+      actor_user_id: adminUser.user_id
+    });
+
+    await auditAdminAction(env, request, adminUser, {
+      action_type: 'inventory_create',
+      target_type: 'inventory_item',
+      target_id: newId,
+      target_key: `${sourceType}:${externalKey}`,
+      details: { item_name: itemName }
+    });
+
+    return json({ ok: true, item: shape(saved || {}) }, 201);
+  } catch (error) {
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'inventory',
+      incident_code: 'inventory_create_failed',
+      severity: 'error',
+      message: 'Manual inventory create failed.',
+      details: {
+        source_type: sourceType,
+        external_key: externalKey,
+        item_name: itemName,
+        diagnostic: normalizeText(error?.message).slice(0, 300)
+      },
+      related_user_id: adminUser.user_id
+    });
+    return json({
+      ok: false,
+      error: 'Failed to save the inventory item.',
+      code: 'inventory_create_failed',
+      diagnostic: normalizeText(error?.message).slice(0, 300)
+    }, 500);
   }
-  const saved = await db.prepare(`
-    SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
-    FROM site_item_inventory sii
-    LEFT JOIN site_inventory_item_descriptions siid
-      ON siid.site_item_inventory_id = sii.site_item_inventory_id
-    WHERE sii.site_item_inventory_id = ?
-    LIMIT 1
-  `).bind(newId).first();
-
-  await recordInventoryCostHistory(db, {
-    site_item_inventory_id: newId,
-    source_type: sourceType,
-    external_key: externalKey,
-    item_name: itemName,
-    previous_unit_cost_cents: 0,
-    new_unit_cost_cents: Number(body.unit_cost_cents || 0),
-    source_kind: 'manual_inventory_create',
-    source_id: `${sourceType}:${externalKey}`,
-    reason_note: normalizeText(body.movement_note) || 'Inventory item created with unit cost.',
-    changed_by_user_id: adminUser.user_id
-  }).catch(() => null);
-
-  await logMovement(db, {
-    site_item_inventory_id: newId,
-    source_type: sourceType,
-    external_key: externalKey,
-    item_name: itemName,
-    movement_type: 'create',
-    quantity_delta: Number(body.on_hand_quantity || 0),
-    previous_on_hand_quantity: 0,
-    new_on_hand_quantity: Number(body.on_hand_quantity || 0),
-    previous_reserved_quantity: 0,
-    new_reserved_quantity: Number(body.reserved_quantity || 0),
-    previous_incoming_quantity: 0,
-    new_incoming_quantity: Number(body.incoming_quantity || 0),
-    note: normalizeText(body.movement_note) || 'Inventory item created.',
-    actor_user_id: adminUser.user_id
-  });
-
-  await auditAdminAction(env, request, adminUser, {
-    action_type: 'inventory_create',
-    target_type: 'inventory_item',
-    target_id: newId,
-    target_key: `${sourceType}:${externalKey}`,
-    details: { item_name: itemName }
-  });
-
-  return json({ ok: true, item: shape(saved || {}) }, 201);
 }
 
 export async function onRequestPatch(context) {
