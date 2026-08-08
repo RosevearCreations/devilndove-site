@@ -1,3 +1,4 @@
+-- Build 242 sync: code-only inventory-create binding-count repair and JSON error boundary; current D1 migration remains Build 241.
 -- Build 233 sync: code-only bounded-login/session-retention repair; current D1 migration remains Build 230.
 -- Build 226 sync: code-only Startup Readiness loading repair; Build 225 tables and 37 seeded gates remain current.
 -- Current cleanup sync 2026-05-10: active schema retained; database_upgrade_current_pass.sql was archived and reset for the next migration batch.

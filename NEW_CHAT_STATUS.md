@@ -1,3 +1,3 @@
-# New Chat Status — Build 241 Pointer
+# New Chat Status — Build 242 Pointer
 
-Start with `AI_HANDOFF.md`, then `PROJECT_STATUS_AND_ROADMAP.md`. Build 241 is the current D1 migration boundary and adds CAIP private raw-media intake. Historical Build Markdown belongs under `docs/archive/build-history/`.
+Start with `AI_HANDOFF.md`, then `PROJECT_STATUS_AND_ROADMAP.md`. Build 242 repairs Site Inventory manual-create writes and the HTML/JSON error boundary. It is code-only; Build 241 remains the current D1 migration boundary.

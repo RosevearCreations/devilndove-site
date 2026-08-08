@@ -1,6 +1,15 @@
-# Devil n Dove Project Status and Roadmap — Build 241
+# Devil n Dove Project Status and Roadmap — Build 242
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture/deployment authority. This file owns current progress, risks and ordered next actions.
+
+## Build 242 completed work — inventory-create production repair
+
+1. Repaired the manual Site Inventory create SQL parameter mismatch that caused the live `/api/admin/site-item-inventory` POST to throw before it could return JSON.
+2. Added an admin-safe JSON error boundary around inventory schema checks and manual inventory creation so future D1/runtime failures return structured JSON rather than a Cloudflare HTML 500 page.
+3. Added runtime incident capture for inventory schema-check and create failures with bounded diagnostics and no credential payloads.
+4. Hardened the Inventory Operations client so a non-JSON/HTML 500 response reports HTTP status and Cloudflare Ray ID instead of surfacing a raw `JSON.parse` exception.
+5. Added `scripts/build242_inventory_create_regression.py` to lock the manual create statement to 27 SQL placeholders and verify the error-contract markers.
+6. Re-synchronized the three aggregate schema files and schema reference. Build 242 is code-only; Build 241 remains the D1 migration boundary.
 
 ## Build 241 completed work — twenty advances
 

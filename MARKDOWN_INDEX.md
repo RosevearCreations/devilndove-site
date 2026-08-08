@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 241
+# Devil n Dove Markdown Index — Build 242
 
 ## Two current authorities
 
@@ -9,8 +9,8 @@ A new AI/chat reads these two first. No other Markdown file overrides them.
 
 ## Current release pair
 
-- `BUILD241_CHANGED_FILES.md`
-- `BUILD241_VALIDATION.md`
+- `BUILD242_CHANGED_FILES.md`
+- `BUILD242_VALIDATION.md`
 
 ## Active specialist playbooks
 
@@ -24,7 +24,7 @@ A new AI/chat reads these two first. No other Markdown file overrides them.
 
 ## Current schema boundary
 
-`database_build241_caip_large_media_intake.sql` is byte-identical to `database_upgrade_current_pass.sql`. It is incremental after Build 240 and is synchronized into all three aggregate schema files.
+Build 242 is code-only. `database_build241_caip_large_media_intake.sql` remains the current D1 migration boundary and is byte-identical to `database_upgrade_current_pass.sql`. The three aggregate schema files are marked/synchronized for Build 242 without introducing a new D1 migration.
 
 ## Compatibility pointers
 

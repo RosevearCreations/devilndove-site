@@ -1,3 +1,4 @@
+-- Build 242 sync: code-only inventory-create binding-count repair and JSON error boundary; current D1 migration remains Build 241.
 -- Build 233 sync: code-only bounded-login/session-retention repair; current D1 migration remains Build 230.
 -- Build 226 sync: code-only Startup Readiness loading repair; Build 225 tables and 37 seeded gates remain current.
 -- IMPORTANT BUILD 221: database_schema.sql is a legacy/core-plus-historical overlay and is not the supported fresh-install file. Use database_full_schema.sql for a new D1 database, or apply numbered migrations to an existing database.

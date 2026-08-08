@@ -1,3 +1,5 @@
+> Build 242 note: no new D1 objects are required for the inventory-create repair. The current migration boundary remains Build 241; all aggregate schema files were re-synchronized and marked for Build 242.
+
 # Database Schema Reference — Build 241
 
 ## Current migration boundary
