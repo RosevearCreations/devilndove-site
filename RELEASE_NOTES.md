@@ -1,3 +1,12 @@
+# Build 242 Release Notes
+
+- Fixed the Site Inventory manual-create SQL bind mismatch that produced a production HTTP 500 after Amazon metadata was loaded and the item was saved.
+- Inventory create/schema failures now return structured JSON and record bounded runtime incidents instead of falling through to Cloudflare HTML errors.
+- Inventory Operations now handles non-JSON error responses safely and surfaces HTTP status plus Cloudflare Ray ID for troubleshooting.
+- Added a Build 242 regression for the 27-value inventory create contract.
+- Build 242 is code-only; Build 241 remains the current D1 migration boundary.
+
+
 # Build 241 Release Notes
 
 - Rewrote the supplied Rosie Dazzlers DAIP large-media design into Devil n Dove CAIP architecture, roles, storage prefixes, privacy and content-output boundaries.
