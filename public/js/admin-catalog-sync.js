@@ -81,8 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         body: JSON.stringify({ item_kinds: itemKinds })
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to sync catalog collections.');
+      const data = await window.DDAuth.readApiJson(response, 'Failed to sync catalog collections.');
       renderSummary(data);
       setMessage(`Catalog sync complete. Upserted ${Number(data.total_upserted || 0)} row(s).`);
       document.dispatchEvent(new CustomEvent('dd:catalog-synced', { detail: data }));

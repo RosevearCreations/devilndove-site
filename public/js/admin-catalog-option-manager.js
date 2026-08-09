@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function splitLines(value) {
     return Array.from(new Set(String(value || '')
       .split(/\n|,/g)
-      .map((entry) => String(entry || '').trim())
+      .map((entry) => String(entry || '').trim().toLowerCase())
       .filter(Boolean)))
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   }
@@ -49,14 +49,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function readJsonResponse(response, fallbackMessage) {
+    if (window.DDAuth?.readApiJson) return window.DDAuth.readApiJson(response, fallbackMessage);
+    const text = await response.text().catch(() => '');
     const contentType = String(response.headers.get('content-type') || '').toLowerCase();
     if (contentType.includes('application/json')) {
-      const data = await response.json();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch { data = null; }
       if (!response.ok || !data?.ok) throw new Error(data?.error || fallbackMessage);
       return data;
     }
-    const text = await response.text().catch(() => '');
-    throw new Error(text ? `${fallbackMessage} Server returned HTML instead of JSON.` : fallbackMessage);
+    throw new Error(text ? `${fallbackMessage} Server returned a non-JSON response.` : fallbackMessage);
   }
 
   function renderTaxClassRows() {
@@ -162,8 +164,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!window.DDAuth?.isLoggedIn()) return;
     try {
       setMessage('Loading dropdown values...');
-      const response = await window.DDAuth.apiFetch('/api/admin/catalog-option-sets');
-      const data = await readJsonResponse(response, 'Failed to load dropdown values.');
+      const data = window.DDAuth.apiJson
+        ? await window.DDAuth.apiJson('/api/admin/catalog-option-sets', {}, { cacheTtlMs: 300000, staleTtlMs: 3600000, retries: 2 })
+        : await readJsonResponse(await window.DDAuth.apiFetch('/api/admin/catalog-option-sets'), 'Failed to load dropdown values.');
       state.option_sets = data.option_sets || state.option_sets;
       state.tax_classes = Array.isArray(data.tax_classes) ? data.tax_classes : [];
       render();

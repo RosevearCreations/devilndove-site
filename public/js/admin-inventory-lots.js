@@ -32,9 +32,10 @@
     render();
     if (!selectedItemId) return;
     try {
-      const response = await DDAuth.apiFetch(`/api/admin/inventory-lots?site_item_inventory_id=${encodeURIComponent(selectedItemId)}`);
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Purchase lots could not load.');
+      const url = `/api/admin/inventory-lots?site_item_inventory_id=${encodeURIComponent(selectedItemId)}`;
+      const data = DDAuth.apiJson
+        ? await DDAuth.apiJson(url, {}, { cacheTtlMs: 15000, staleTtlMs: 120000, retries: 2 })
+        : await DDAuth.readApiJson(await DDAuth.apiFetch(url), 'Purchase lots could not load.');
       detail = data.detail;
       render();
     } catch (error) { msg(error.message, true); }
@@ -163,8 +164,7 @@
 
   async function savePolicy() {
     const response = await DDAuth.apiFetch('/api/admin/inventory-lots', { method: 'POST', body: JSON.stringify({ action: 'save_policy', site_item_inventory_id: selectedItemId, depletion_method: document.getElementById('inventoryLotDepletionMethod')?.value || 'manual', reconcile_status: document.getElementById('inventoryLotReconcileStatus')?.value || 'needs_review' }) });
-    const data = await response.json();
-    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Lot policy could not be saved.');
+    const data = await DDAuth.readApiJson(response, 'Lot policy could not be saved.');
     detail = data.detail; render(); msg(data.message);
   }
 
@@ -176,8 +176,7 @@
       confirmationPhrase = prompt('Type APPLY LOT TOTAL exactly.') || '';
     }
     const response = await DDAuth.apiFetch('/api/admin/inventory-lots', { method: 'POST', body: JSON.stringify({ action: 'reconcile_lot_totals', site_item_inventory_id: selectedItemId, depletion_method: document.getElementById('inventoryLotDepletionMethod')?.value || 'manual', review_note: note, apply_to_main_inventory: apply ? 1 : 0, confirmation_phrase: confirmationPhrase }) });
-    const data = await response.json();
-    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Lot reconciliation could not be recorded.');
+    const data = await DDAuth.readApiJson(response, 'Lot reconciliation could not be recorded.');
     detail = data.detail; render(); msg(data.message);
   }
 
@@ -189,8 +188,7 @@
       try {
         msg('Saving purchase lot…');
         const response = await DDAuth.apiFetch('/api/admin/inventory-lots', { method: 'POST', body: JSON.stringify(values()) });
-        const data = await response.json();
-        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Purchase lot could not be saved.');
+        const data = await DDAuth.readApiJson(response, 'Purchase lot could not be saved.');
         detail = data.detail; render(); msg(data.message);
       } catch (error) { msg(error.message, true); }
     });
@@ -203,8 +201,7 @@
         if (!confirm('Delete this lot record? This does not change the main on-hand count and will mark reconciliation for review.')) return;
         try {
           const response = await DDAuth.apiFetch(`/api/admin/inventory-lots?inventory_purchase_lot_id=${encodeURIComponent(button.dataset.deleteLot)}`, { method: 'DELETE' });
-          const data = await response.json();
-          if (!response.ok || !data?.ok) throw new Error(data?.error || 'Lot could not be deleted.');
+          const data = await DDAuth.readApiJson(response, 'Lot could not be deleted.');
           await load(selectedItemId); msg(data.message);
         } catch (error) { msg(error.message, true); }
       };

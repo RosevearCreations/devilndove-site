@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedLinkIndex: -1,
     selectedAvailableKey: ''
   };
+  let initialLoadStarted = false;
+  let rendered = false;
+  let searchTimer = null;
 
   function escapeHtml(v) {
     return String(v ?? '')
@@ -35,14 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function readJsonResponse(response, fallbackMessage) {
-    const contentType = String(response.headers.get('content-type') || '').toLowerCase();
-    if (contentType.includes('application/json')) {
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || fallbackMessage);
-      return data;
-    }
-    const text = await response.text().catch(() => '');
-    throw new Error(text ? `${fallbackMessage} Server returned HTML instead of JSON.` : fallbackMessage);
+    return window.DDAuth.readApiJson(response, { fallbackMessage });
   }
 
   function describeUsageUnit(item) {
@@ -156,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     document.getElementById('productResourcesProduct')?.addEventListener('change', onProductChange);
-    document.getElementById('productResourcesSearch')?.addEventListener('input', loadData);
+    document.getElementById('productResourcesSearch')?.addEventListener('input', scheduleResourceSearch);
     document.getElementById('productResourcesSaveButton')?.addEventListener('click', saveLinks);
     document.getElementById('productResourcesAvailableSelect')?.addEventListener('change', (event) => {
       state.selectedAvailableKey = String(event.target.value || '');
@@ -301,35 +297,77 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
   }
 
-  async function loadData() {
+  function hydrateLinks() {
+    state.links = state.links.map((x) => {
+      const resource = state.resources.find((r) => r.item_kind === x.resource_kind && r.source_key === x.source_key) || {};
+      return {
+        ...x,
+        resource,
+        name: resource.name || x.source_key,
+        consumption_mode: x.consumption_mode || 'per_unit',
+        lot_size_units: Math.max(1, Number(x.lot_size_units || 1) || 1),
+        quantity_used: Math.max(1, Number(x.quantity_used || 1) || 1)
+      };
+    });
+    ensureValidSelections();
+  }
+
+  async function loadBootstrap() {
+    const productId = Number(state.selectedProductId || 0);
+    const data = await window.DDAuth.apiJson(
+      `/api/admin/product-resource-bootstrap?product_id=${encodeURIComponent(productId)}`,
+      { method: 'GET' },
+      {
+        fallbackMessage: 'Failed to load product link information.',
+        cacheKey: `product-resource-bootstrap:${productId}`,
+        cacheTtlMs: 30000,
+        retries: 2,
+        staleOnError: true
+      }
+    );
+    state.products = Array.isArray(data.products) ? data.products : [];
+    state.links = Array.isArray(data.links) ? data.links : [];
+    renderProducts();
+    return data;
+  }
+
+  async function loadResources() {
+    const q = String(document.getElementById('productResourcesSearch')?.value || '').trim();
+    const data = await window.DDAuth.apiJson(
+      `/api/admin/product-resource-search?q=${encodeURIComponent(q)}&limit=240`,
+      { method: 'GET' },
+      {
+        fallbackMessage: 'Failed to search tools and supplies.',
+        cacheKey: `product-resource-search:${q.toLowerCase()}`,
+        cacheTtlMs: q ? 30000 : 90000,
+        retries: 2,
+        staleOnError: true
+      }
+    );
+    state.resources = Array.isArray(data.resources) ? data.resources : [];
+    return data;
+  }
+
+  async function loadData({ bootstrap = true, resources = true } = {}) {
     if (!window.DDAuth?.isLoggedIn()) return;
     try {
-      const q = document.getElementById('productResourcesSearch')?.value || '';
-      const url = `/api/admin/product-resources?product_id=${encodeURIComponent(state.selectedProductId || 0)}&q=${encodeURIComponent(q)}`;
-      const response = await window.DDAuth.apiFetch(url);
-      const data = await readJsonResponse(response, 'Failed to load product resources.');
-      state.products = Array.isArray(data.products) ? data.products : [];
-      state.resources = Array.isArray(data.resources) ? data.resources : [];
-      const links = Array.isArray(data.links) ? data.links : [];
-      state.links = links.map((x) => {
-        const resource = state.resources.find((r) => r.item_kind === x.resource_kind && r.source_key === x.source_key) || {};
-        return {
-          ...x,
-          resource,
-          name: resource.name || x.source_key,
-          consumption_mode: x.consumption_mode || 'per_unit',
-          lot_size_units: Math.max(1, Number(x.lot_size_units || 1) || 1),
-          quantity_used: Math.max(1, Number(x.quantity_used || 1) || 1)
-        };
-      });
-      ensureValidSelections();
-      renderProducts();
+      const results = await Promise.all([
+        bootstrap ? loadBootstrap() : Promise.resolve(null),
+        resources ? loadResources() : Promise.resolve(null)
+      ]);
+      hydrateLinks();
       renderResources();
       renderLinks();
-      setMessage('');
+      const stale = results.some((data) => data?._response_meta?.stale);
+      setMessage(stale ? 'The server was temporarily busy. Showing the last saved resource list; retry when convenient.' : '', stale);
     } catch (err) {
       setMessage(err.message || 'Failed to load product resources.', true);
     }
+  }
+
+  function scheduleResourceSearch() {
+    if (searchTimer) window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => loadData({ bootstrap: false, resources: true }), 300);
   }
 
   function onProductChange(event) {
@@ -338,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.selectedProductId > 0) url.searchParams.set('product_id', String(state.selectedProductId));
     else url.searchParams.delete('product_id');
     window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
-    loadData();
+    loadData({ bootstrap: true, resources: false });
   }
 
   function onInputChange(event) {
@@ -457,13 +495,26 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await readJsonResponse(response, 'Failed to save product links.');
       setMessage(`Saved ${Number(data.saved_links || 0)} linked items.`);
-      await loadData();
+      await loadData({ bootstrap: true, resources: false });
     } catch (err) {
       setMessage(err.message || 'Failed to save product links.', true);
     }
   }
 
-  document.addEventListener('dd:catalog-options-updated', () => { if (window.DDAuth?.isLoggedIn()) loadData(); });
+  function ensureRendered() {
+    if (rendered) return;
+    render();
+    rendered = true;
+  }
+
+  function startInitialLoad() {
+    ensureRendered();
+    if (initialLoadStarted || !window.DDAuth?.isLoggedIn()) return;
+    initialLoadStarted = true;
+    loadData({ bootstrap: true, resources: true });
+  }
+
+  document.addEventListener('dd:catalog-options-updated', () => { if (window.DDAuth?.isLoggedIn()) loadData({ bootstrap: false, resources: true }); });
   document.addEventListener('dd:product-editor-target', (event) => {
     const productId = Number(event?.detail?.product_id || event?.detail?.product?.product_id || 0);
     if (productId) syncSelectedProduct(productId, { autoLoad: true });
@@ -476,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const productId = Number(event?.detail?.product?.product_id || event?.detail?.product_id || 0);
     if (productId) syncSelectedProduct(productId, { autoLoad: true });
   });
-  document.addEventListener('dd:admin-ready', (event) => { if (!event?.detail?.ok) return; render(); loadData(); });
-  render();
-  if (window.DDAuth?.isLoggedIn()) loadData();
+  document.addEventListener('dd:admin-ready', (event) => { if (event?.detail?.ok) startInitialLoad(); });
+  ensureRendered();
+  if (window.DDAuth?.isLoggedIn()) startInitialLoad();
 });
