@@ -1,4 +1,4 @@
--- Build 242 sync: code-only inventory-create binding-count repair and JSON error boundary; current D1 migration remains Build 241.
+-- Build 243 sync: inventory request-pressure resilience, lower-case controlled classifications, case-duplicate merge and search/identity indexes; current D1 migration is Build 243.
 -- Build 233 sync: code-only bounded-login/session-retention repair; current D1 migration remains Build 230.
 -- Build 226 sync: code-only Startup Readiness loading repair; Build 225 tables and 37 seeded gates remain current.
 -- IMPORTANT BUILD 221: database_schema.sql is a legacy/core-plus-historical overlay and is not the supported fresh-install file. Use database_full_schema.sql for a new D1 database, or apply numbered migrations to an existing database.
@@ -9912,3 +9912,7 @@ ON CONFLICT(item_key) DO UPDATE SET
 INSERT INTO schema_migration_ledger(migration_key,file_name,applied_at,notes)
 VALUES('build241_caip_large_media_intake','database_build241_caip_large_media_intake.sql',CURRENT_TIMESTAMP,'Adds Devil n Dove CAIP private raw-media upload sessions/files/parts, resumable R2 multipart state, internal processing plans, governed public-promotion requests, a CAIP operational workstream and the 46th Startup gate. Raw originals remain private and immutable; public promotion is review/consent gated.')
 ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,notes=excluded.notes;
+
+-- Build 243 scope note: `database_schema.sql` does not define the complete site_item_inventory operational authority.
+-- Apply database_build243_inventory_resilience_case_normalization.sql to an existing production D1 after Build 241;
+-- the complete Build 243 normalization/index block is folded into database_full_schema.sql.
