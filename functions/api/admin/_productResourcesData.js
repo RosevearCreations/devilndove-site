@@ -1,4 +1,4 @@
-// Build 243: lightweight product/resource loaders used by Inventory Operations.
+// Build 244: lightweight D1-authoritative product/resource loaders with fractional usage support.
 // Schema creation belongs to numbered migrations; these helpers perform read-only queries only.
 
 import { normalizeText } from '../_lib/adminAudit.js';
@@ -31,7 +31,7 @@ export function normalizeConsumptionMode(value) {
 export function resourcePreview(resource = {}, link = null) {
   const unitCostCents = money(resource.unit_cost_cents);
   const onHandQuantity = Math.max(0, number(resource.on_hand_quantity, 0));
-  const usageUnitsPerStockUnit = Math.max(1, number(resource.usage_units_per_stock_unit, 1));
+  const usageUnitsPerStockUnit = Math.max(0.001, number(resource.usage_units_per_stock_unit, 1));
   const quantityUsed = Math.max(0, number(link?.quantity_used ?? 1, 1));
   const productsPerLot = Math.max(1, number(link?.lot_size_units ?? 1, 1));
   const consumptionMode = normalizeConsumptionMode(link?.consumption_mode);
@@ -115,14 +115,15 @@ export async function searchResources(db, env, query = '', limit = 240) {
   // active inventory record does not yet exist for the same kind/key.
   const inventoryResult = await db.prepare(`
     SELECT
-      LOWER(TRIM(COALESCE(source_type, 'supply'))) AS item_kind,
-      external_key AS source_key,
-      item_name AS name,
-      image_url,
-      category,
+      LOWER(TRIM(COALESCE(sii.source_type, 'supply'))) AS item_kind,
+      sii.external_key AS source_key,
+      sii.item_name AS name,
+      sii.image_url,
+      sii.category,
       '' AS subcategory,
-      site_item_inventory_id,
-      on_hand_quantity,
+      sii.site_item_inventory_id,
+      0 AS catalog_item_id,
+      sii.on_hand_quantity,
       is_on_reorder_list,
       do_not_reuse,
       unit_cost_cents,
@@ -131,24 +132,28 @@ export async function searchResources(db, env, query = '', limit = 240) {
       usage_units_per_stock_unit,
       amazon_url,
       supplier_sku,
-      supplier_name
-    FROM site_item_inventory
-    WHERE COALESCE(is_active, 1) = 1
-      AND LOWER(TRIM(COALESCE(source_type, ''))) IN ('tool', 'supply')
+      sii.supplier_name,
+      COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
+      COALESCE(siup.minimum_usage_increment, 0.001) AS minimum_usage_increment
+    FROM site_item_inventory sii
+    LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id = sii.site_item_inventory_id
+    WHERE COALESCE(sii.is_active, 1) = 1
+      AND LOWER(TRIM(COALESCE(sii.source_type, ''))) IN ('tool', 'supply')
       AND (
         ? = ''
-        OR LOWER(COALESCE(item_name, '')) LIKE ?
-        OR LOWER(COALESCE(category, '')) LIKE ?
-        OR LOWER(COALESCE(external_key, '')) LIKE ?
-        OR LOWER(COALESCE(amazon_url, '')) LIKE ?
-        OR LOWER(COALESCE(supplier_sku, '')) LIKE ?
+        OR LOWER(COALESCE(sii.item_name, '')) LIKE ?
+        OR LOWER(COALESCE(sii.category, '')) LIKE ?
+        OR LOWER(COALESCE(sii.external_key, '')) LIKE ?
+        OR LOWER(COALESCE(sii.amazon_url, '')) LIKE ?
+        OR LOWER(COALESCE(sii.supplier_sku, '')) LIKE ?
       )
-    ORDER BY LOWER(COALESCE(item_name, '')) ASC, site_item_inventory_id ASC
+    ORDER BY LOWER(COALESCE(sii.item_name, '')) ASC, sii.site_item_inventory_id ASC
     LIMIT ?
   `).bind(q, like, like, like, like, like, safeLimit).all();
 
   const inventory = rows(inventoryResult).map((row) => ({
     item_kind: normalizeText(row.item_kind).toLowerCase() || 'supply',
+    catalog_item_id: Number(row.catalog_item_id || 0),
     source_key: row.source_key || `inventory:${row.site_item_inventory_id}`,
     name: row.name || row.source_key || 'Inventory item',
     image_url: normalizeResourceImageUrl(env, row.image_url || ''),
@@ -161,7 +166,9 @@ export async function searchResources(db, env, query = '', limit = 240) {
     unit_cost_cents: money(row.unit_cost_cents),
     usage_unit_label: normalizeText(row.usage_unit_label).toLowerCase() || 'unit',
     stock_unit_label: normalizeText(row.stock_unit_label).toLowerCase() || 'unit',
-    usage_units_per_stock_unit: Math.max(1, number(row.usage_units_per_stock_unit, 1)),
+    usage_units_per_stock_unit: Math.max(0.001, number(row.usage_units_per_stock_unit, 1)),
+    usage_tracking_mode: normalizeText(row.usage_tracking_mode).toLowerCase() || (normalizeText(row.item_kind).toLowerCase() === 'tool' ? 'reusable' : 'exact'),
+    minimum_usage_increment: Math.max(0.0001, number(row.minimum_usage_increment, 0.001)),
     amazon_url: row.amazon_url || '',
     amazon_asin: amazonAsinFromRow(row),
     amazon_title: '',
@@ -175,7 +182,7 @@ export async function searchResources(db, env, query = '', limit = 240) {
 
   const remaining = safeLimit - inventory.length;
   const catalogResult = await db.prepare(`
-    SELECT ci.item_kind, ci.source_key, ci.name, ci.image_url, ci.amazon_url,
+    SELECT ci.catalog_item_id, ci.item_kind, ci.source_key, ci.name, ci.image_url, ci.amazon_url,
            ci.category, ci.subcategory
     FROM catalog_items ci
     WHERE ci.item_kind IN ('tool', 'supply')
@@ -200,6 +207,7 @@ export async function searchResources(db, env, query = '', limit = 240) {
 
   const catalog = rows(catalogResult).map((row) => ({
     item_kind: normalizeText(row.item_kind).toLowerCase(),
+    catalog_item_id: Number(row.catalog_item_id || 0),
     source_key: row.source_key || '',
     name: row.name || row.source_key || 'Catalog item',
     image_url: normalizeResourceImageUrl(env, row.image_url || ''),
@@ -213,6 +221,8 @@ export async function searchResources(db, env, query = '', limit = 240) {
     usage_unit_label: 'unit',
     stock_unit_label: 'unit',
     usage_units_per_stock_unit: 1,
+    usage_tracking_mode: normalizeText(row.item_kind).toLowerCase() === 'tool' ? 'reusable' : 'exact',
+    minimum_usage_increment: 0.001,
     amazon_url: row.amazon_url || '',
     amazon_asin: amazonAsinFromRow(row),
     amazon_title: '',

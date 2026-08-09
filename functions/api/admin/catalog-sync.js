@@ -1,3 +1,4 @@
+// Build 244: tool/supply catalog authority is migration-owned D1; runtime JSON re-import is disabled.
 import {
   captureRuntimeIncident,
   getAdminUserFromRequest,
@@ -5,7 +6,6 @@ import {
   jsonResponse,
   normalizeText,
 } from "../_lib/adminAudit.js";
-import { buildAmazonInventoryNote, extractAmazonInventoryFields, getAmazonInventoryMatch } from "./_amazonInventoryMatches.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status, { "Cache-Control": "no-store" });
@@ -27,85 +27,6 @@ function buildImageUrl(origin, folder, fileName, rawKey) {
   if (!key) return "";
   const encoded = key.split("/").map((segment) => encodeURIComponent(segment)).join("/");
   return `${origin}/${encoded}`;
-}
-
-async function ensureCatalogItemsTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS catalog_items (
-      catalog_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      item_kind TEXT NOT NULL CHECK (item_kind IN ('tool','supply','creation','other')),
-      source_key TEXT NOT NULL,
-      slug TEXT,
-      name TEXT NOT NULL,
-      brand TEXT,
-      category TEXT,
-      subcategory TEXT,
-      item_type TEXT,
-      short_description TEXT,
-      notes TEXT,
-      image_url TEXT,
-      r2_object_key TEXT,
-      amazon_url TEXT,
-      storage_location TEXT,
-      quantity_on_hand INTEGER NOT NULL DEFAULT 0,
-      reorder_point INTEGER NOT NULL DEFAULT 0,
-      visible_public INTEGER NOT NULL DEFAULT 1,
-      status TEXT NOT NULL DEFAULT 'active',
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      source_record_json TEXT,
-      source_json_path TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(item_kind, source_key)
-    )
-  `).run();
-
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_items_kind ON catalog_items(item_kind)`).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_items_slug ON catalog_items(slug)`).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_items_public_sort ON catalog_items(item_kind, status, visible_public, sort_order, name)`).run();
-}
-
-async function ensureMovieCatalogTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS movie_catalog (
-      movie_catalog_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      upc TEXT NOT NULL UNIQUE,
-      slug TEXT,
-      title TEXT,
-      original_title TEXT,
-      sort_title TEXT,
-      summary TEXT,
-      release_year INTEGER,
-      media_format TEXT,
-      genre TEXT,
-      director_names TEXT,
-      actor_names TEXT,
-      front_image_url TEXT,
-      back_image_url TEXT,
-      runtime_minutes INTEGER,
-      studio_name TEXT,
-      trailer_url TEXT,
-      imdb_id TEXT,
-      alternate_identifier TEXT,
-      metadata_status TEXT NOT NULL DEFAULT 'pending',
-      metadata_source TEXT,
-      estimated_value_low_cents INTEGER,
-      estimated_value_high_cents INTEGER,
-      estimated_value_currency TEXT,
-      rarity_notes TEXT,
-      collection_notes TEXT,
-      value_search_url TEXT,
-      status TEXT NOT NULL DEFAULT 'active',
-      featured_rank INTEGER,
-      source_record_json TEXT,
-      source_json_path TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_movie_catalog_title ON movie_catalog(sort_title, title)`).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_movie_catalog_status ON movie_catalog(status)`).run();
 }
 
 async function fetchJsonFromSite(request, paths) {
@@ -132,121 +53,6 @@ async function fetchJsonFromSite(request, paths) {
   }
 
   return { items: [], source_path: "", tried_paths, warnings };
-}
-
-async function mapToolRow(row, index, sourcePath) {
-  const name = normalizeText(row.item_name_suggested || row.name || row.example_image_file) || `Tool ${index + 1}`;
-  const amazonMatch = await getAmazonInventoryMatch('toolshed', index, name);
-  const amazonFields = extractAmazonInventoryFields(amazonMatch || row, 'tool');
-  const enrichedRow = amazonMatch
-    ? {
-        ...row,
-        amazon_match: amazonMatch,
-        amazon_match_status: amazonFields.amazon_match_status,
-        amazon_match_score: amazonFields.amazon_match_score,
-        amazon_asin: row.amazon_asin || amazonFields.amazon_asin,
-        amazon_url: row.amazon_url || amazonFields.amazon_url,
-        amazon_title: amazonFields.amazon_title,
-        amazon_brand: amazonFields.amazon_brand,
-        amazon_category: amazonFields.amazon_category,
-        seller_name: amazonFields.seller_name,
-        latest_purchase_date: amazonFields.latest_purchase_date,
-        latest_order_id: amazonFields.latest_order_id,
-        latest_purchase_ppu_cad: amazonFields.latest_purchase_ppu_cad,
-        latest_item_net_total_cad: amazonFields.latest_item_net_total_cad,
-        matched_asin_total_quantity: amazonFields.matched_asin_total_quantity,
-        matched_asin_total_net_cad: amazonFields.matched_asin_total_net_cad,
-        unit_cost_cents: amazonFields.unit_cost_cents,
-        stock_unit_label: amazonFields.stock_unit_label,
-        usage_unit_label: amazonFields.usage_unit_label,
-        usage_units_per_stock_unit: amazonFields.usage_units_per_stock_unit
-      }
-    : row;
-  const area = normalizeText(row.primary_area || row.area || "Workshop Basics");
-  const category = normalizeText(row.category || row.tool_category || "Uncategorized");
-  const sourceKey = normalizeText(row.item_group_key_strict || row.r2_object_key || row.example_image_file || `${slugify(name)}-${index + 1}`);
-  const notes = [
-    normalizeText(row.how_we_use || row.notes_public || row.notes),
-    buildAmazonInventoryNote(amazonFields)
-  ].filter(Boolean).join("\n");
-  return {
-    item_kind: "tool",
-    source_key: sourceKey,
-    slug: slugify(name),
-    name,
-    brand: normalizeText(row.brand_guess || row.brand || amazonFields.amazon_brand),
-    category,
-    subcategory: area,
-    item_type: normalizeText(row.tool_type || ""),
-    short_description: [area, category].filter(Boolean).join(" • "),
-    notes,
-    image_url: buildImageUrl("https://assets.devilndove.com", "Toolshed", row.example_image_file || row.image_file, row.r2_object_key),
-    r2_object_key: normalizeText(row.r2_object_key || ["Toolshed", normalizeText(row.example_image_file)].filter(Boolean).join("/")),
-    amazon_url: normalizeText(row.amazon_url || amazonFields.amazon_url || row.amazon_search_url || row.amazon_search),
-    storage_location: [row.location_zone, row.location_shelf, row.location_bin].map(normalizeText).filter(Boolean).join(" / "),
-    quantity_on_hand: Number(row.quantity_owned || 0) || 0,
-    reorder_point: 0,
-    sort_order: index,
-    source_record_json: JSON.stringify(enrichedRow || {}),
-    source_json_path: sourcePath,
-  };
-}
-
-async function mapSupplyRow(row, index, sourcePath) {
-  const name = normalizeText(row.item_name_suggested || row.example_image_file) || `Supply ${index + 1}`;
-  const amazonMatch = await getAmazonInventoryMatch('supplies', index, name);
-  const amazonFields = extractAmazonInventoryFields(amazonMatch || row, 'supply');
-  const enrichedRow = amazonMatch
-    ? {
-        ...row,
-        amazon_match: amazonMatch,
-        amazon_match_status: amazonFields.amazon_match_status,
-        amazon_match_score: amazonFields.amazon_match_score,
-        amazon_asin: row.amazon_asin || amazonFields.amazon_asin,
-        amazon_url: row.amazon_url || amazonFields.amazon_url,
-        amazon_title: amazonFields.amazon_title,
-        amazon_brand: amazonFields.amazon_brand,
-        amazon_category: amazonFields.amazon_category,
-        seller_name: amazonFields.seller_name,
-        latest_purchase_date: amazonFields.latest_purchase_date,
-        latest_order_id: amazonFields.latest_order_id,
-        latest_purchase_ppu_cad: amazonFields.latest_purchase_ppu_cad,
-        latest_item_net_total_cad: amazonFields.latest_item_net_total_cad,
-        matched_asin_total_quantity: amazonFields.matched_asin_total_quantity,
-        matched_asin_total_net_cad: amazonFields.matched_asin_total_net_cad,
-        unit_cost_cents: amazonFields.unit_cost_cents,
-        stock_unit_label: amazonFields.stock_unit_label,
-        usage_unit_label: amazonFields.usage_unit_label,
-        usage_units_per_stock_unit: amazonFields.usage_units_per_stock_unit
-      }
-    : row;
-  const type = normalizeText(row.consumable_type || "Workshop supply");
-  const sourceKey = normalizeText(row.item_group_key_strict || row.r2_object_key || row.example_image_file || `${slugify(name)}-${index + 1}`);
-  const notes = [
-    normalizeText(row.notes),
-    buildAmazonInventoryNote(amazonFields)
-  ].filter(Boolean).join("\n");
-  return {
-    item_kind: "supply",
-    source_key: sourceKey,
-    slug: slugify(name),
-    name,
-    brand: normalizeText(row.brand_guess || row.brand || amazonFields.amazon_brand),
-    category: type,
-    subcategory: normalizeText(row.primary_area || ""),
-    item_type: type,
-    short_description: [type, normalizeText(row.primary_area)].filter(Boolean).join(" • "),
-    notes,
-    image_url: buildImageUrl("https://assets.devilndove.com", "Supplies", row.example_image_file || row.image_file, row.r2_object_key),
-    r2_object_key: normalizeText(row.r2_object_key || ["Supplies", normalizeText(row.example_image_file)].filter(Boolean).join("/")),
-    amazon_url: normalizeText(row.amazon_url || amazonFields.amazon_url || row.amazon_search_url),
-    storage_location: normalizeText(row.storage_location),
-    quantity_on_hand: Number(row.on_hand_qty || 0) || 0,
-    reorder_point: Number(row.reorder_point || 0) || 0,
-    sort_order: index,
-    source_record_json: JSON.stringify(enrichedRow || {}),
-    source_json_path: sourcePath,
-  };
 }
 
 function mapCreationRow(row, index, sourcePath) {
@@ -500,25 +306,10 @@ export async function onRequestPost(context) {
   }
 
   try {
-    await ensureCatalogItemsTable(db);
-    await ensureMovieCatalogTable(db);
-
     const collections = normalizeCollections(body);
     const definitions = {
-      tools: {
-        fetch_paths: ['/data/toolshed/toolshed_items_master.json'],
-        target_table: 'catalog_items',
-        item_kind: 'tool',
-        mapper: mapToolRow,
-        upsert: upsertCatalogRows,
-      },
-      supplies: {
-        fetch_paths: ['/data/supplies/supplies_items_master.json'],
-        target_table: 'catalog_items',
-        item_kind: 'supply',
-        mapper: mapSupplyRow,
-        upsert: upsertCatalogRows,
-      },
+      tools: { target_table: 'catalog_items', item_kind: 'tool', migration_managed: true },
+      supplies: { target_table: 'catalog_items', item_kind: 'supply', migration_managed: true },
       movies: {
         fetch_paths: ['/data/movies/movie_catalog_enriched.v2.json', '/data/movies/movie_catalog_enriched.json'],
         target_table: 'movie_catalog',
@@ -541,6 +332,22 @@ export async function onRequestPost(context) {
     for (const collection of collections) {
       const definition = definitions[collection];
       if (!definition) continue;
+
+      if (definition.migration_managed) {
+        const row = await db.prepare(`SELECT COUNT(*) AS count FROM catalog_items WHERE item_kind=? AND COALESCE(status,'active')!='archived'`).bind(definition.item_kind).first();
+        summary.push({
+          collection,
+          item_kind: definition.item_kind,
+          target_table: definition.target_table,
+          fetched: Number(row?.count || 0),
+          upserted: 0,
+          source_path: 'D1 catalog_items (Build 244 authority)',
+          tried_paths: [],
+          warnings: ['Build 244 migration owns tool/supply catalog authority. Runtime JSON re-import is disabled to prevent D1 from being overwritten by stale legacy classifications.'],
+          write_mode: 'd1_authority_no_runtime_json_import'
+        });
+        continue;
+      }
 
       const fetched = await fetchJsonFromSite(request, definition.fetch_paths);
       const rows = await Promise.all(fetched.items.map((row, index) => definition.mapper(row, index, fetched.source_path || definition.fetch_paths[0])));
