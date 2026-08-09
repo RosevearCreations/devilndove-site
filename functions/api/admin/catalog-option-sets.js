@@ -11,22 +11,7 @@ const OPTION_KEY_MAP = {
   shipping_codes: 'site.catalog.shipping_code_options',
 };
 
-async function ensureTaxClassesTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS tax_classes (
-      tax_class_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT NOT NULL UNIQUE,
-      name TEXT NOT NULL,
-      description TEXT,
-      tax_rate REAL NOT NULL DEFAULT 0,
-      is_active INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-}
-
 async function loadTaxClasses(db) {
-  await ensureTaxClassesTable(db);
   const rows = normalizeResults(await db.prepare(`
     SELECT tax_class_id, code, name, description, tax_rate, is_active, created_at
     FROM tax_classes
@@ -87,8 +72,7 @@ export async function onRequestPost(context) {
   }
 
   if (action === 'save_tax_class') {
-    await ensureTaxClassesTable(db);
-    const taxClassId = Number(body.tax_class_id || 0);
+      const taxClassId = Number(body.tax_class_id || 0);
     const code = normalizeText(body.code).toUpperCase();
     const name = normalizeText(body.name);
     const description = normalizeText(body.description);
@@ -123,8 +107,7 @@ export async function onRequestPost(context) {
   }
 
   if (action === 'delete_tax_class') {
-    await ensureTaxClassesTable(db);
-    const taxClassId = Number(body.tax_class_id || 0);
+      const taxClassId = Number(body.tax_class_id || 0);
     if (!taxClassId) return json({ ok: false, error: 'tax_class_id is required.' }, 400);
     const usage = await db.prepare(`SELECT COUNT(*) AS usage_count FROM products WHERE tax_class_id = ?`).bind(taxClassId).first().catch(() => ({ usage_count: 0 }));
     if (Number(usage?.usage_count || 0) > 0) {

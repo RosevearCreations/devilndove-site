@@ -2,7 +2,7 @@
 // Brief description: Admin review/apply workflow for private Amazon purchase-import staging rows.
 
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import { ensureInventoryCostHistoryTable, recordInventoryCostHistory } from './_inventoryCostHistory.js';
+import { recordInventoryCostHistory } from './_inventoryCostHistory.js';
 
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function json(data, status = 200) { return jsonResponse(data, status); }
@@ -74,7 +74,6 @@ async function ensureAmazonPurchaseReviewSchema(db) {
     if (!cols.has(name)) await db.prepare(sql).run().catch(() => null);
   }
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_amazon_purchase_import_staging_review ON amazon_purchase_import_staging(review_decision, match_status)`).run().catch(() => null);
-  await ensureInventoryCostHistoryTable(db);
 }
 
 async function ensureSiteInventoryBasics(db) {

@@ -2,37 +2,37 @@
 import { normalizeText } from "../_lib/adminAudit.js";
 
 export const DEFAULT_CATEGORY_OPTIONS = [
-  'Rings',
-  'Necklaces',
-  'Bracelets',
-  'Earrings',
-  'Pendants',
-  'CNC Components',
-  '3D Printed Items',
-  'Laser Engraved Items',
-  'Polymer Clay Items',
-  'Home Decor',
-  'Soap',
-  'Candles',
-  'Accessories',
-  'Other'
+  'rings',
+  'necklaces',
+  'bracelets',
+  'earrings',
+  'pendants',
+  'cnc components',
+  '3d printed items',
+  'laser engraved items',
+  'polymer clay items',
+  'home decor',
+  'soap',
+  'candles',
+  'accessories',
+  'other'
 ];
 
 export const DEFAULT_COLOR_OPTIONS = [
-  'Silver',
-  'Gold',
-  'Black',
-  'White',
-  'Red',
-  'Blue',
-  'Green',
-  'Purple',
-  'Pink',
-  'Orange',
-  'Yellow',
-  'Brown',
-  'Clear',
-  'Multicolor'
+  'silver',
+  'gold',
+  'black',
+  'white',
+  'red',
+  'blue',
+  'green',
+  'purple',
+  'pink',
+  'orange',
+  'yellow',
+  'brown',
+  'clear',
+  'multicolor'
 ];
 
 export const DEFAULT_SHIPPING_CODE_OPTIONS = [
@@ -44,7 +44,7 @@ export const DEFAULT_SHIPPING_CODE_OPTIONS = [
 ];
 
 function normalizeArrayValue(value) {
-  return normalizeText(value).replace(/\s+/g, ' ');
+  return normalizeText(value).replace(/\s+/g, ' ').toLowerCase();
 }
 
 export function uniqueSortedOptions(values = []) {

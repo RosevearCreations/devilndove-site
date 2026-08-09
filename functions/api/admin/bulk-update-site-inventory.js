@@ -10,7 +10,7 @@ import {
   auditAdminAction,
   captureRuntimeIncident
 } from "../_lib/adminAudit.js";
-import { ensureInventoryCostHistoryTable, recordInventoryCostHistory } from "./_inventoryCostHistory.js";
+import { recordInventoryCostHistory } from "./_inventoryCostHistory.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -272,7 +272,6 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "Invalid JSON body." }, 400);
   }
 
-  await ensureInventoryCostHistoryTable(db).catch(() => null);
 
   const updates = body && typeof body.updates === "object" ? body.updates : {};
   const selection = buildSelection(body || {});

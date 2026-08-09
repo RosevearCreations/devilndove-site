@@ -8,55 +8,13 @@ function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
-async function getTableColumnSet(db, tableName) {
-  try {
-    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
-    return new Set(normalizeResults(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
-  } catch {
-    return new Set();
-  }
-}
-
 export async function ensureInventoryCostHistoryTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS site_item_inventory_cost_history (
-      site_item_inventory_cost_history_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      site_item_inventory_id INTEGER,
-      source_type TEXT,
-      external_key TEXT,
-      item_name TEXT,
-      previous_unit_cost_cents INTEGER NOT NULL DEFAULT 0,
-      new_unit_cost_cents INTEGER NOT NULL DEFAULT 0,
-      currency TEXT NOT NULL DEFAULT 'CAD',
-      source_kind TEXT NOT NULL DEFAULT 'manual',
-      source_id TEXT,
-      source_reference TEXT,
-      reason_note TEXT,
-      changed_by_user_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE SET NULL
-    )
-  `).run();
-
-  const cols = await getTableColumnSet(db, 'site_item_inventory_cost_history');
-  const migrations = [
-    ['currency', `ALTER TABLE site_item_inventory_cost_history ADD COLUMN currency TEXT NOT NULL DEFAULT 'CAD'`],
-    ['source_kind', `ALTER TABLE site_item_inventory_cost_history ADD COLUMN source_kind TEXT NOT NULL DEFAULT 'manual'`],
-    ['source_id', `ALTER TABLE site_item_inventory_cost_history ADD COLUMN source_id TEXT`],
-    ['source_reference', `ALTER TABLE site_item_inventory_cost_history ADD COLUMN source_reference TEXT`],
-    ['reason_note', `ALTER TABLE site_item_inventory_cost_history ADD COLUMN reason_note TEXT`],
-    ['changed_by_user_id', `ALTER TABLE site_item_inventory_cost_history ADD COLUMN changed_by_user_id INTEGER`]
-  ];
-  for (const [name, sql] of migrations) {
-    if (!cols.has(name)) await db.prepare(sql).run().catch(() => null);
-  }
-
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_item ON site_item_inventory_cost_history(site_item_inventory_id, created_at DESC)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_site_item_inventory_cost_history_source ON site_item_inventory_cost_history(source_kind, source_id)`).run().catch(() => null);
+  // Build 243: compatibility shim only. Numbered D1 migrations own this schema now.
+  await db.prepare(`SELECT site_item_inventory_cost_history_id FROM site_item_inventory_cost_history LIMIT 1`).first();
+  return true;
 }
 
 export async function recordInventoryCostHistory(db, payload = {}) {
-  await ensureInventoryCostHistoryTable(db);
   const previousCost = Math.max(0, Math.round(Number(payload.previous_unit_cost_cents || 0)) || 0);
   const newCost = Math.max(0, Math.round(Number(payload.new_unit_cost_cents || 0)) || 0);
   if (newCost <= 0 || previousCost === newCost) return null;

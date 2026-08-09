@@ -1,6 +1,6 @@
 // Build 221 — lot-level purchase history, reconciliation evidence and depletion preferences.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import { ensureProductOffersSchema, normalizeRows } from '../_lib/productOffers.js';
+import { normalizeRows } from '../_lib/productOffers.js';
 
 function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control': 'no-store' }); }
 function number(value, fallback = 0) { const n = Number(value); return Number.isFinite(n) && n >= 0 ? n : fallback; }
@@ -20,39 +20,7 @@ async function tableExists(db, tableName) {
   return Boolean(row?.name);
 }
 
-async function ensureLotControlSchema(db) {
-  await ensureProductOffersSchema(db);
-  const statements = [
-    `CREATE TABLE IF NOT EXISTS inventory_lot_policies (
-      site_item_inventory_id INTEGER PRIMARY KEY,
-      depletion_method TEXT NOT NULL DEFAULT 'manual',
-      reconcile_status TEXT NOT NULL DEFAULT 'needs_review',
-      last_reconciled_quantity REAL,
-      last_reconciled_at TEXT,
-      updated_by_user_id INTEGER,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS inventory_lot_reconciliations (
-      inventory_lot_reconciliation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      site_item_inventory_id INTEGER NOT NULL,
-      main_on_hand_quantity REAL NOT NULL DEFAULT 0,
-      lot_remaining_quantity REAL NOT NULL DEFAULT 0,
-      discrepancy_quantity REAL NOT NULL DEFAULT 0,
-      applied_to_main_inventory INTEGER NOT NULL DEFAULT 0,
-      previous_on_hand_quantity REAL,
-      new_on_hand_quantity REAL,
-      depletion_method TEXT NOT NULL DEFAULT 'manual',
-      review_note TEXT NOT NULL,
-      reviewed_by_user_id INTEGER,
-      reviewed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_inventory_lot_reconciliations_item ON inventory_lot_reconciliations(site_item_inventory_id, reviewed_at DESC)`
-  ];
-  for (const sql of statements) await db.prepare(sql).run();
-}
-
+// Build 243: inventory-lot schema is migration-owned; requests never create or alter tables.
 async function load(db, itemId) {
   const item = await db.prepare(`SELECT site_item_inventory_id,item_name,source_type,external_key,on_hand_quantity,reserved_quantity,incoming_quantity,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,unit_cost_cents,supplier_name,supplier_sku,amazon_url,source_url FROM site_item_inventory WHERE site_item_inventory_id=?`).bind(itemId).first();
   if (!item) return null;
@@ -96,7 +64,6 @@ async function load(db, itemId) {
 export async function onRequestGet(context) {
   const a = await access(context); if (a.error) return a.error;
   try {
-    await ensureLotControlSchema(a.db);
     const itemId = whole(new URL(context.request.url).searchParams.get('site_item_inventory_id'));
     if (!itemId) return json({ ok: false, error: 'An inventory item is required.' }, 400);
     const detail = await load(a.db, itemId);
@@ -114,7 +81,6 @@ export async function onRequestPost(context) {
   try { body = await context.request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
   const action = text(body.action || 'save_lot', 60).toLowerCase();
   try {
-    await ensureLotControlSchema(a.db);
     const itemId = whole(body.site_item_inventory_id);
     if (!itemId) throw new Error('An inventory item is required.');
 
@@ -185,7 +151,6 @@ export async function onRequestPost(context) {
 export async function onRequestDelete(context) {
   const a = await access(context); if (a.error) return a.error;
   try {
-    await ensureLotControlSchema(a.db);
     const lotId = whole(new URL(context.request.url).searchParams.get('inventory_purchase_lot_id'));
     if (!lotId) return json({ ok: false, error: 'A purchase lot is required.' }, 400);
     const existing = await a.db.prepare(`SELECT * FROM inventory_purchase_lots WHERE inventory_purchase_lot_id=?`).bind(lotId).first();

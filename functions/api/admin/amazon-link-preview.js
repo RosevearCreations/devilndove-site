@@ -127,7 +127,7 @@ export async function onRequestPost(context) {
   const imageUrl = Array.isArray(imageValue) ? imageValue[0] : normalizeText(imageValue);
   const brand = normalizeText(typeof product.brand === 'object' ? product.brand?.name : product.brand).slice(0, 120);
   const sku = normalizeText(product.sku || product.mpn || asin).slice(0, 120);
-  const category = normalizeText(product.category || inferCategory(title, description)).slice(0, 120);
+  const category = normalizeText(product.category || inferCategory(title, description)).toLowerCase().slice(0, 120);
 
   const warnings = [];
   if (!asin) warnings.push('ASIN could not be identified from this URL.');
