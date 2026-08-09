@@ -1,16 +1,16 @@
-# Devil n Dove Markdown Index — Build 242
+# Devil n Dove Markdown Index — Build 243
 
 ## Two current authorities
 
-1. `AI_HANDOFF.md` — architecture, data authority, safety, schema boundary and deployment.
+1. `AI_HANDOFF.md` — architecture, data authority, safety, resilience, schema boundary and deployment.
 2. `PROJECT_STATUS_AND_ROADMAP.md` — completed work, current risks and ordered next steps.
 
 A new AI/chat reads these two first. No other Markdown file overrides them.
 
 ## Current release pair
 
-- `BUILD242_CHANGED_FILES.md`
-- `BUILD242_VALIDATION.md`
+- `BUILD243_CHANGED_FILES.md`
+- `BUILD243_VALIDATION.md`
 
 ## Active specialist playbooks
 
@@ -24,7 +24,7 @@ A new AI/chat reads these two first. No other Markdown file overrides them.
 
 ## Current schema boundary
 
-Build 242 is code-only. `database_build241_caip_large_media_intake.sql` remains the current D1 migration boundary and is byte-identical to `database_upgrade_current_pass.sql`. The three aggregate schema files are marked/synchronized for Build 242 without introducing a new D1 migration.
+Build 243 is the current D1 migration boundary. `database_build243_inventory_resilience_case_normalization.sql` is byte-identical to `database_upgrade_current_pass.sql` and is folded into the complete `database_full_schema.sql`; the legacy/core and scoped store schemas carry explicit Build 243 scope notes because they do not define the complete Site Inventory authority. Build 241 CAIP must already be applied.
 
 ## Compatibility pointers
 

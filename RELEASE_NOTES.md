@@ -1,3 +1,14 @@
+# Build 243 Release Notes
+
+- Reduced Inventory Operations request fan-out with one-shot startup, in-flight GET deduplication, bounded retry/backoff, stale read-only fallback and deferred noncritical admin telemetry.
+- Split Product Resources into lightweight bootstrap/search reads and removed large Amazon registry expansion plus schema probing from normal resource loads.
+- Removed request-time schema DDL/PRAGMA work from Site Inventory, Purchase Lots and Product Stock; migrations now own these schemas and missing dependencies return structured diagnostics.
+- Added browser inventory draft recovery, duplicate-submit protection and consistent non-JSON/Cloudflare HTML error handling with Ray-ID diagnostics across all scripts loaded by Inventory Operations.
+- Normalized controlled product/catalog/inventory classifications and option lists to lower case; Build 243 migration non-destructively combines active case-only inventory identity duplicates and adds identity/search indexes.
+- Corrected light-on-light Inventory Operations buttons and stacked important actions for narrow mobile screens.
+- Build 243 static SEO audit: 36/36 indexable pages passed; `/assets/` audit: 120 references, zero missing; database object case audit: zero mixed-case identifiers.
+- Build 243 is the current D1 migration boundary; `database_build243_inventory_resilience_case_normalization.sql` and `database_upgrade_current_pass.sql` are byte-identical.
+
 # Build 242 Release Notes
 
 - Fixed the Site Inventory manual-create SQL bind mismatch that produced a production HTTP 500 after Amazon metadata was loaded and the item was saved.

@@ -1,6 +1,29 @@
-# Devil n Dove Project Status and Roadmap — Build 242
+# Devil n Dove Project Status and Roadmap — Build 243
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture/deployment authority. This file owns current progress, risks and ordered next actions.
+
+## Build 243 completed work — backend-pressure resilience and lower-case inventory authority
+
+1. Added a shared authenticated JSON transport with in-flight GET deduplication so identical admin reads share one promise instead of multiplying Worker/D1 pressure.
+2. Added bounded automatic retry/backoff for temporary safe-read failures (500/502/503/504/408/429-style conditions) while never auto-retrying writes.
+3. Added short-lived session cache plus stale-on-temporary-error fallback for safe admin reads, with explicit response metadata rather than false success.
+4. Centralized non-JSON/Cloudflare HTML failure handling with HTTP status and Ray-ID diagnostics so the Inventory Operations page no longer surfaces raw `JSON.parse` errors.
+5. Deduplicated cached/authenticated `dd:admin-ready` emissions so cached auth plus `/auth/me` verification does not start the same admin loaders twice.
+6. Split the former heavy Product Resources GET into lightweight product/link bootstrap and bounded resource-search endpoints.
+7. Removed the 1,200-row private Amazon registry expansion from normal Product Resources reads; Amazon matching is now invoked only by the explicit Amazon workflow that needs it.
+8. Debounced Product Resources search and made product/link refreshes targeted instead of reloading the complete resource universe.
+9. Made Site Inventory startup one-shot, independent and concurrent-safe; seed options and inventory rows no longer recursively trigger each other.
+10. Added browser draft persistence for a new/edited inventory item so a temporary Cloudflare/D1 outage does not discard an Amazon/manual inventory form.
+11. Disabled Save during an active inventory write and retained the draft on failure, preventing accidental duplicate submits during a slow/503 period.
+12. Removed request-time table/index/ALTER/PRAGMA work from routine Site Inventory, Purchase Lots and Product Stock routes; current migrations now own those schemas.
+13. Deferred noncritical admin route-usage telemetry and stopped admin pages from loading public social-feed and automatic visitor tracking during critical startup.
+14. Hardened every script loaded by `/admin/inventory-operations/` to use the shared JSON/error boundary instead of direct `response.json()` parsing.
+15. Added a structured Site Inventory runtime boundary and migration-required response so a genuine schema mismatch is distinguishable from a temporary backend-pressure failure.
+16. Normalized controlled product/catalog/inventory classifications and catalog-option values to lower case on write/read paths to stop `Rings`/`rings`-style duplicates.
+17. Added Build 243 D1 cleanup that non-destructively merges active inventory identities differing only by `source_type` case, preserving duplicate IDs as inactive history rows.
+18. Added a case-insensitive active inventory identity index plus bounded inventory/catalog/product search indexes to keep growing inventory reads predictable.
+19. Added high-contrast Inventory Operations buttons plus phone-width full-row action controls to correct light-on-light action text and mobile crowding.
+20. Added Build 243 resilience/case audits, synchronized the current-pass plus all three schema files according to their supported scopes, and promoted Build 243 to the current D1 migration boundary. Static public SEO audit remains 36/36 passed with zero missing local `/assets/` references (120 references checked).
 
 ## Build 242 completed work — inventory-create production repair
 
@@ -42,61 +65,57 @@ Build 241 adds one CAIP workstream rather than duplicating these authorities, br
 
 ## Current position
 
-Devil n Dove now has broad foundations for storefront/catalog, inventory, orders/payments/refunds, packaging, Creative Process, CAIP, Content Studio, publication governance, visual evidence, SEO operations, launch control and accounting/support continuity.
+Devil n Dove now has broad storefront/catalog, inventory, orders/payments/refunds, packaging, Creative Process, CAIP, Content Studio, publication governance, visual evidence, SEO operations, launch control and accounting/support continuity foundations.
 
-CAIP is materially stronger: it can now be the private project-footage intake/evidence authority instead of only referencing existing catalog media. However, Build 241 local code cannot prove the real Cloudflare private bucket, interruption recovery over real home/mobile networks, provider processing, public promotion, payments, email, auth, or physical packaging. Those remain evidence gates.
+Build 243 specifically changes the production-read posture: Inventory Operations no longer assumes every component may independently reload heavyweight catalog data or repair schema during a request. Critical admin reads are deduplicated/bounded, temporary 503 responses can back off to a clearly marked stale browser copy, user-entered inventory data has a local recovery draft, and mutable classifications have one lower-case canonical policy.
 
-Status remains **production-evidence and controlled-opening preparation**, with CAIP large-media intake ready for deployed binding/testing.
+Status remains **production-evidence and controlled-opening preparation**. Build 243 should materially reduce self-inflicted Worker/D1 pressure, but only deployed Cloudflare observability can prove whether any remaining 503 originates from Worker CPU/memory, D1 overload, networking or another route.
 
 ## Known gaps and risks
 
-- `CAIP_PRIVATE_MEDIA_BUCKET` is not automatically created by the repository; production binary intake remains blocked until it is deliberately created/bound and kept private.
-- Current media transport is Worker-streamed multipart. Direct browser→R2 S3 multipart is the preferred future large-video path but is not implemented.
-- Browser-local file handles cannot be silently restored after a full browser close; resume can require reselecting the same file.
-- Metadata fingerprinting warns of duplicates but is not yet a full memory-bounded content SHA-256 strategy for multi-gigabyte files.
-- Proxy video, thumbnails, frame/audio extraction, transcription and AI/story analysis are planned job records only until providers are implemented and verified.
-- Public-promotion request is intentionally review-only; no Build 241 executor copies private raw media into the public bucket.
-- Completed raw originals currently have no destructive retention worker. Legal/privacy retention/deletion policy must be designed before automated deletion exists.
-- Payment webhook signature/duplicate/refund/exact-once stock evidence remains open.
-- Final-unit/component concurrency remains open.
-- Transactional email delivery/retry remains open.
-- Login/session production verification remains open where Startup evidence has not been completed.
-- Soap formula/INCI/bilingual and physical print/wrap proof remain open per launch product.
-- Candle-top dimensions/material/laser proof remains open per real blank/template.
-- Generated/representative imagery cannot replace exact product/project evidence where the manifest requires real photography.
+- Build 243 requires a production D1 backup and one migration run after Build 241; deploying code that assumes current inventory columns before the migration can produce `migration_required` responses.
+- The case cleanup intentionally normalizes controlled classifications only. Human-facing names, supplier data, URLs, ASIN/SKUs, order numbers, currencies and notes remain case-preserving.
+- Request deduplication/backoff lowers application-created pressure but cannot remove Cloudflare platform limits; capture Ray IDs and Workers/D1 observability for any remaining 503 cluster.
+- Stale-browser fallback is read-only continuity evidence, not database truth; writes still require a live successful JSON response.
+- The broader repository still contains historical routes with request-time schema helpers outside the Inventory Operations critical path; retire them incrementally as those areas are touched.
+- `CAIP_PRIVATE_MEDIA_BUCKET` must be created/bound and kept private before raw-media production evidence can close.
+- Direct browser→R2 multipart signing, proxy/thumbnail/frame/transcript providers and reviewed public-promotion execution remain future CAIP work.
+- Payment webhook exact-once/refund/concurrency, transactional email, restore rehearsal and production login/session evidence remain open.
+- Soap formula/INCI/bilingual and physical print/wrap proof, plus candle-top dimensions/material/laser proof, remain product-specific launch evidence.
+- Exact product photography remains required where a launch/evidence role calls for the real item; representative imagery cannot close that gate. Mutable exact-image evidence remains managed through `/admin/image-manifest/`.
 - First-page local Google placement cannot be guaranteed; relevance, distance and prominence must be measured rather than promised.
 
-## Next 20 steps after Build 241
+## Next 20 steps after Build 243
 
-### P0 — production evidence / controlled-opening blockers
+### P0 — deploy, prove and measure the resilience repair
 
-1. Back up D1, confirm ledger key `build240_operational_evidence_continuity`, apply Build 241 once, and verify `build241_caip_large_media_intake`, 21 workstreams and 46 Startup gates.
-2. Create the real private R2 bucket, bind it as `CAIP_PRIVATE_MEDIA_BUCKET` in Production, and prove no public `r2.dev`/custom-domain access exists.
-3. Run the full `caip_private_large_media_intake` gate with at least one real image and large MOV/MP4, including deliberate network interruption and resume.
-4. Verify private CAIP secure-review grants against the new private bucket: admin ownership, expiry, view cap, revoke, no-store and no public access.
-5. Complete the production login/session fourteen-step evidence run and correlate 5xx/CPU/memory outcomes with Cloudflare logs.
-6. Complete Product Editor autosave/reload/browser-recovery production proof and confirm temporary 5xx never becomes destructive false state.
-7. Prove Stripe signed webhook handling, duplicate delivery rejection and exact-once order/payment/inventory settlement.
-8. Prove final-unit and component-set concurrency with simultaneous owner-controlled sessions.
-9. Complete failed/abandoned/cancelled and partial/full refund evidence with stock, tax, fee, credit note and refund confirmation reconciliation.
-10. Complete transactional order/receipt/refund/fulfilment email delivery, provider ID, retry and failure diagnostics.
-11. Complete D1/R2/deployment/configuration restore rehearsal, including one CAIP private-media recovery check.
-12. Complete each launch soap formula/INCI/bilingual/metric quantity/address/contact review and measured print/wrap proof.
-13. Complete each launch candle-top/round measurement, reusable template, self-contained export, material settings and physical laser/print proof.
-14. Finish exact launch-product/item photography in `/admin/image-manifest/`; keep representative/generated media out of exact product proof roles.
-15. Complete a paid fulfilment and a separate refund recovery with non-secret retained evidence.
+1. Back up production D1, confirm `build241_caip_large_media_intake`, apply `database_build243_inventory_resilience_case_normalization.sql` once, and verify ledger key `build243_inventory_resilience_case_normalization`.
+2. Run a post-migration duplicate audit on `site_item_inventory` and catalog option sets; confirm active case-only duplicates are gone and inactive merge-history rows remain traceable.
+3. Deploy Build 243, hard refresh, and run Inventory Operations from cold load while capturing the Network panel; confirm one bootstrap/resource search and one inventory list rather than repeated startup storms.
+4. Repeat Amazon URL → metadata → manual inventory save for several items, including a deliberately interrupted/failed request, and verify the browser draft survives.
+5. Use Cloudflare Workers/D1 observability during a sustained inventory-entry session; correlate any 5xx with Ray ID and distinguish Worker CPU/memory, D1 overload and application exceptions.
+6. Add an Operational Continuity metric/view for endpoint duration, retry count, stale-fallback usage and 5xx frequency on the highest-value admin APIs.
+7. Add server-side pagination/cursoring to Site Inventory and Product Resources before row counts make even bounded 300–600 item reads unnecessarily large.
+8. Add an explicit lightweight Inventory Operations bootstrap endpoint only if measured traces show remaining independent reference-data calls are still a material cost.
+9. Remove request-time schema installers from Amazon import/review and the next most-used admin routes, moving their prerequisites into a numbered migration plus migration-required fallback.
+10. Add case-insensitive duplicate prevention to supplier/catalog import and bulk-update paths before data reaches `site_item_inventory`.
 
-### P1 — CAIP/media and operational stabilization
+### P1 — inventory quality, CAIP and production evidence
 
-16. Add a memory-bounded client fingerprint/checksum path suitable for large files and reconcile duplicate candidates without destructive auto-deduplication.
-17. Build the short-lived direct browser→private-R2 S3 multipart signing/CORS adapter; retain the Worker-streamed path as a fallback and compare reliability/cost.
-18. Add orphan/stale multipart reconciliation for unfinished sessions, including explicit expiry/abort evidence without touching completed immutable originals.
-19. Implement the first real processing adapter—prefer proxy video + thumbnail/frame extraction—with idempotency, retries, cost caps, verified checksums/metadata and honest provider results.
-20. Implement public-promotion execution only after current rights/consent/privacy revalidation; copy only an approved derivative/public candidate, record the public object/provider ID/URL, and hand it to Release Board rather than silently publishing.
+11. Add a D1-backed website-media-library intake that catalogs `PRODUCT_MEDIA_BUCKET/uploads/website-library/`, thumbnails it and lets an admin assign page/product/gallery roles without manual URLs.
+12. Add optional duplicate-image fingerprinting/metadata checks for the public media library, keeping exact product evidence separate from representative media.
+13. Complete production login/session evidence while deliberately exercising temporary 503 behavior and confirming a valid cached session is not destructively cleared.
+14. Create/verify the private CAIP R2 binding and run the real image + large MOV/MP4 interrupted/resumed upload gate.
+15. Build the short-lived direct browser→private-R2 multipart signing/CORS adapter while retaining Worker-streamed multipart as a bounded fallback.
+16. Implement the first real CAIP processing adapter—thumbnail + proxy/frame extraction—with idempotency, retries, checksums, cost caps and honest provider-result records.
+17. Prove Stripe signed webhook, duplicate-delivery rejection and exact-once order/payment/inventory settlement, including partial/full refund reconciliation.
+18. Complete transactional order/receipt/refund/fulfilment email provider delivery, retry and failure evidence.
+19. Finish exact launch-product photography plus soap label/print and candle-top/laser physical proofs required by Startup Readiness.
+20. Run D1/R2/config restore rehearsal and one paid fulfilment plus separate refund recovery, retaining non-secret evidence before widening launch traffic.
 
 ## After those twenty
 
-Prioritize transcription/timecode evidence, reviewed scene/story analysis, mobile camera-first project capture, derivative generation, Content Studio auto-packaging, provider publication/result reconciliation, project storage/processing cost, retention/archive manifests and progressively richer automated content—without weakening evidence, rights or review boundaries.
+Prioritize transcription/timecodes, reviewed scene/story analysis, mobile camera-first project capture, Content Studio auto-packaging, public-promotion execution with rights revalidation, provider publication/result reconciliation, project storage/processing cost, retention/archive manifests, deeper accounting automation and progressively richer automated content without weakening evidence or review boundaries.
 
 ## SEO/local-search direction each pass
 

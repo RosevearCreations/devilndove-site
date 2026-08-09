@@ -1,10 +1,10 @@
-# Devil n Dove Startup and Go-Live Guide — Build 241
+# Devil n Dove Startup and Go-Live Guide — Build 243
 
 This is the human-readable operating copy of all 46 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
 
 ## Operating rules
 
-1. Back up D1 and confirm ledger keys `build229_packaging_reference_authority` and `build230_visual_image_manifest`. Apply `database_build241_caip_large_media_intake.sql` or the identical `database_upgrade_current_pass.sql`, not both, after confirming ledger key `build240_operational_evidence_continuity`.
+1. Back up D1 and confirm the prerequisite ledger key `build241_caip_large_media_intake`. Apply `database_build243_inventory_resilience_case_normalization.sql` or the identical `database_upgrade_current_pass.sql`, not both. Confirm `build243_inventory_resilience_case_normalization` before deploying Build 243 code.
 2. Use owner-controlled test records and real Production bindings only where the gate explicitly requires a production test.
 3. Never paste secrets, passwords, access tokens, full payment data, or private customer information into gate evidence.
 4. A failed numbered step keeps the gate Failed or Blocked until the correction procedure and full retest succeed.
@@ -18,7 +18,7 @@ This is the human-readable operating copy of all 46 database-backed gates in `/a
 ### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
 
 **Inside the application:** `/admin/deployment-preflight/`  
-**External location:** Build 241 archive, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**External location:** Build 243 release records, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
 **Production test:** No live binding is required, but deployed verification may still be appropriate.
 
 #### Before you begin
@@ -28,11 +28,11 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 #### Test steps
 
 1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, Build 241 CAIP large-media regression, aggregate-schema, repeated-current-migration, Startup 46-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, Build 241 CAIP large-media regression, Build 242 inventory-create regression, Build 243 resilience/case/public/asset audits, aggregate-schema, repeated-current-migration, Startup 46-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
 3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
 4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest, Labeling & Packaging, Creative Automation and three public image bands.
-5. Confirm database_upgrade_current_pass.sql remains identical to database_build241_caip_large_media_intake.sql and the Build 241 migration contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
-6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 241 consistently while naming Build 241 as the current D1 migration.
+5. Confirm database_upgrade_current_pass.sql remains identical to database_build243_inventory_resilience_case_normalization.sql and the Build 243 migration contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 243 consistently while naming Build 243 as the current D1 migration.
 7. Confirm the five adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
 8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
 9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
